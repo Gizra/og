@@ -30,7 +30,9 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('delete group administrator'));
     $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
     $items[] = array('path' => 'og/access_denied', 'type' => MENU_CALLBACK, 'callback' => 'og_access_denied', 'title' => t('groups'), 'access' => TRUE);
-    $items[] = array('path' => 'og/albums', 'callback' => 'og_albums_page', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => TRUE);
+    $items[] = array('path' => 'og/albums', 'callback' => 'og_albums_page', 'title' => t('albums'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
+    $items[] = array('path' => 'og/albums/form', 'callback' => 'og_albums_form', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => user_access('create images'));
+    $items[] = array('path' => 'og/albums/validate', 'callback' => 'og_albums_validate', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => user_access('create images'));
     $items[] = array('path' => 'admin/og/updatedb', 'type' => MENU_CALLBACK, 'callback' => '_og_updatedb', 'title' => t('update db'), 'access' => user_access('administer organic groups'));
   }
   else {
@@ -118,7 +120,7 @@ function og_delete_admin($gid, $uid) {
 
 function og_remove_node($gid, $nid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-    $node = node_load(array('nid' => $nid));
+      $node = node_load(array('nid' => $nid));
     if ($_POST['op']['og_confirm']) {
       og_delete_folksonomy($node);
       $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_group'";
@@ -423,15 +425,15 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
               }
             }
           }
-          $vis = variable_get('og_visibility', 0);
-          switch ($vis) {
-            // case 2 is handled in og_nodeapi('validate')
-            case 1: // visible in and out of group
-              $node->og_public = 1;
-              break;
-            case 0: // visible only in group
-              $node->og_public = 0;
-              break;
+        $vis = variable_get('og_visibility', 0);
+        switch ($vis) {
+          // case 2 is handled in og_nodeapi('validate')
+          case 1: // visible in and out of group
+            $node->og_public = 1;
+            break;
+          case 0: // visible only in group
+            $node->og_public = 0;
+            break;
           }
         }
         // if a post isn't in any groups. it must be public as far as og goes
@@ -495,7 +497,6 @@ function og_nodeapi_form($node) {
     }
 
     $output .= form_checkboxes(t('Audience'), 'og_groups', $groups, $options, t('Show this post in these groups.'), NULL, $required);
-
     return $output;
   }
 }
@@ -690,21 +691,102 @@ function og_albums_page($gid, $str_tags) {
     $node = node_load(array('nid' => $gid));
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
     $result = folksonomy_select_nodes($tags, $operator, 'image', 'og_group_'. $node->nid);
-    // add 'create album' link if available and permitted. a bit messy for now.
+    // append 'create album' link if available and permitted. a bit messy for now.
     if (user_access('create images') && module_exist('folksonomy') && user_access('access bulk upload')) {
       global $user;
       $subs = og_get_subscriptions($user->uid);
       if ($subs[$node->nid]['grant_view']) {
-        $links[] = l(t('add to this album'), 'bu/standard', array(), "edit[og_groups][]=$node->nid&edit[bu_tags]=$str_tags");
+        $links[] = l(t('add to this album'), 'og/albums/form', array(), "edit[og_groups][]=$node->nid&edit[og_tags]=$str_tags");
       }
     }
-    $output = theme('item_list', $links);
+    $output = theme('links', $links);
     $output .= taxonomy_render_nodes($result);
     print theme('page', $output, $title, $bc);
   }
   else {
     drupal_not_found();
   }
+}
+
+function og_albums_form() {
+  $edit = $_REQUEST['edit'];
+  $output = form_textfield(t('Album Title'), 'og_tags', $edit['og_tags'], 100, 255);
+  // TODO: output 100 form fields but show/hide the remaining 90 only if user clicks a button. requires a touch of javascript
+  // change n below to show more or less file upload fields
+  $n = 15;
+  for ($i=1; $i <= $n; $i++) {
+    $output .= form_file(t('Photo'). $i, "photo$i", 100);
+  }
+  global $user;
+  $edit = array_merge(array('type' => 'image', 'uid' => $user->uid), $edit);
+  $output .= og_nodeapi(array2object($edit), 'form post');
+  $output .= form_button(t('Submit'));
+  print theme('page', form($output, 'post', url('og/albums/validate'), array("enctype" => "multipart/form-data")));
+}
+
+function og_albums_validate() {
+  $edit = $_REQUEST['edit'];
+  $uploads = $_FILES['edit']['name'];
+  foreach ($uploads as $field => $filename) {
+    if ($filename) {
+      $node = new stdClass();
+      $node->title = $filename;
+      global $user;
+      $node->uid = $user->uid;
+      $tag = array('name' => $edit['og_tags']);
+      if ($edit['og_groups']) {
+        $node->og_groups = $edit['og_groups'];
+        foreach ($node->og_groups as $group) {
+          $node->folksonomy['og_group_'. $group] = $tag;
+        }
+      }
+      $node->og_public = $edit['og_public'];
+      $node->type = 'image';
+
+      // TODO: in HEAD, use node_submit() instead of node_save() and simplify this greatly
+      // Validate for normal users:
+      $node->uid = $user->uid ? $user->uid : 0;
+      // Force defaults in case people modify the form:
+      $node->status = variable_get("node_status_$node->type", 1);
+      $node->promote = variable_get("node_promote_$node->type", 1);
+      $node->moderate = variable_get("node_moderate_$node->type", 0);
+      $node->sticky = variable_get("node_sticky_$node->type", 0);
+      $node->revision = variable_get("node_revision_$node->type", 0);
+      unset($node->created);
+       // the line below needs some work before transforming into node_submit(). maybe move up before calling node_submit()
+      image_validate($node, $field);
+      node_invoke_nodeapi($node, 'validate');
+      $node->validated = TRUE;
+
+      if ($error = form_get_errors()) {
+        $errors[] = $error;
+        unset($error);
+      }
+      else {
+        $nodes[] = $node;
+      }
+    }
+  }
+  if ($errors) {
+    og_albums_form();
+  }
+  else {
+    $links = og_albums_save($nodes);
+    drupal_set_message(t('album saved.'));
+    $gid = $edit['og_groups'][0];
+    $dest = "og/albums/$gid/$tag[name]";
+    drupal_goto($dest);
+  }
+}
+
+function og_albums_save($nodes) {
+  global $user;
+
+  foreach ($nodes as $node) {
+    $nid = node_save($node);
+    $links[] = $nid ? l($node->title, "node/$nid") : t('failed to save %title', array('title' => $node->title));
+  }
+  return $links;
 }
 
 function og_block_albums() {
@@ -817,7 +899,7 @@ function og_create_links($group) {
   }
   // append 'create album' link if available. a bit messy for now.
   if (user_access('create images') && module_exist('folksonomy') && user_access('access bulk upload')) {
-    $links[] = l(t('create album'), 'bu/standard', array(), "edit[og_groups][]=$group->nid");
+    $links[] = l(t('create album'), 'og/albums/form', array(), "edit[og_groups][]=$group->nid");
   }
   return $links ? $links : array();
 }
