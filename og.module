@@ -288,10 +288,7 @@ function og_list_groups_page() {
     // get all the group nodes. we have to break this list into two steps in case user is not a member of the group and post is public
     $result = db_query("SELECT DISTINCT(n.nid), n.status FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE na.gid = $node->nid AND na.realm = 'og_group' AND n.status=1 AND n.type != 'og' ORDER BY n.created DESC");
     if (!db_num_rows($result)) {
-      if (og_create_links($node)) {
-        $create = ' '. l(t('Create post'), 'node/add');
-      }
-      drupal_set_message(t('No posts yet in this group.'). $create);
+      drupal_set_message(t('No posts yet in this group.'));
     }
     else {
       while ($onenode = db_fetch_array($result)) {
