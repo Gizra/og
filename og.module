@@ -735,6 +735,11 @@ function og_albums_form() {
 function og_albums_validate() {
   $edit = $_REQUEST['edit'];
   $uploads = $_FILES['edit']['name'];
+  if (!$edit['og_tags']) {
+    $msg = t('You must specify an album title.');
+    form_set_error('og_tags', $msg);
+    $errors[] = $msg;
+  }
   foreach ($uploads as $field => $filename) {
     if ($filename) {
       $node = new stdClass();
