@@ -13,6 +13,7 @@ INSTALLATION
 - On the admin/settings page, set 'Default 403 (access denied) page' to 'og/access_denied'
 - On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers' and 'Group albums' block. If you use the 'group albums' block, you must have folksonomy, and the new image.module enabled and configured. See for http://cvs.drupal.org/viewcvs/contrib/contributions/sandbox/walkah/image/ for image.module
 - Grant permissions as needed on the admin/user/configure/permision page
+- If you are using album.module to provide personal image albums, then you must omit the 'image' node type on your settings page. Note that group photo albums will be group specific regardless of this setting.
 - Begin creating groups, subscribing to those groups, and posting into those groups. SUbscribe from the Group Block.
 
 NOTES
