@@ -198,7 +198,7 @@ function og_access($op, $node) {
 }
 
 function og_list_users_sql($min_grant = 1) {
-  return "SELECT u.uid, u.name, na.* FROM {node_access} na INNER JOIN users u ON na.gid = u.uid AND na.nid = %d WHERE u.status > 0 AND realm = 'og_uid' AND grant_view >= $min_grant ORDER BY u.name ASC";
+  return "SELECT u.uid, u.name, na.* FROM {node_access} na INNER JOIN {users} u ON na.gid = u.uid AND na.nid = %d WHERE u.status > 0 AND realm = 'og_uid' AND grant_view >= $min_grant ORDER BY u.name ASC";
 }
 
 function og_list_users_page($gid) {
@@ -251,10 +251,10 @@ function og_list_groups_page() {
   global $user;
 
   if (variable_get('og_selective_listed', 0)) {
-    $result = pager_query('SELECT DISTINCT(n.nid), n.title, n.body, n.uid, u.name FROM {node} n INNER JOIN users u ON n.uid = u.uid WHERE n.status=1 AND n.type = \'og\' ORDER BY n.nid DESC',50);
+    $result = pager_query('SELECT DISTINCT(n.nid), n.title, n.body, n.uid, u.name FROM {node} n INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND n.type = \'og\' ORDER BY n.nid DESC',50);
   }
   else {
-    $result = pager_query('SELECT DISTINCT(n.nid), n.title, n.body, n.uid, u.name FROM {node} n '. node_access_join_sql(). ' INNER JOIN users u ON n.uid = u.uid WHERE '. node_access_where_sql(). " AND n.status=1 AND n.type = 'og' ORDER BY n.nid DESC",50);
+    $result = pager_query('SELECT DISTINCT(n.nid), n.title, n.body, n.uid, u.name FROM {node} n '. node_access_join_sql(). ' INNER JOIN {users} u ON n.uid = u.uid WHERE '. node_access_where_sql(). " AND n.status=1 AND n.type = 'og' ORDER BY n.nid DESC",50);
   }
   $header = array(t("Title"), t('Subscribers'), t("Owner"), t('Description'));
   $subscriptions = og_get_subscriptions($user->uid);
@@ -536,14 +536,14 @@ function _og_update_db($enable) {
     // We use the delete statement to avoid inserting a duplicate entry into the database.
     // Without the DELETE query, this can happen when a site admin has already enabled the modules
     // from the settings page and goes back to it and resaves the enabled setting.
-    db_query('REPLACE INTO node_access VALUES (0, 0, \'all\', 1, 0, 0)');
+    db_query('REPLACE INTO {node_access} VALUES (0, 0, \'all\', 1, 0, 0)');
     drupal_set_message(t('Organic groups access control has been disabled. You may now disable the module on the <em>%modules</em> page', array('%modules' => l(t('admin/modules'), 'admin/modules'))));
   }
   else { // the module was just enabled or re-enabled; provide default view access to everyone for nodes that were created
          // between the previous disabling of the module and the current enabling of the module;
          // nodes that were created during a previous enabled period are left-alone.
          // Permissions for those nodes will be the same as when the module was previously enabled.
-    db_query('DELETE from node_access where nid=0 AND gid=0 AND realm=\'all\' AND grant_view=1 AND grant_update=0 AND grant_delete=0');
+    db_query('DELETE from {node_access} WHERE nid=0 AND gid=0 AND realm=\'all\' AND grant_view=1 AND grant_update=0 AND grant_delete=0');
 
     // Assign universal grant to all non-group nodes which don't already have any grants from this module
     $result = db_query("SELECT n.nid FROM {node} n LEFT JOIN {node_access} na ON n.nid = na.nid AND realm LIKE '%og%' WHERE n.type != 'og' AND ISNULL(na.gid)");
@@ -665,8 +665,6 @@ function og_link($type, $node = 0, $main) {
 
   if ($node->og_groups) {
     if ($mygroups = og_get_subscriptions($user->uid)) {
-      // dprint_r($node->og_groups);
-      // dprint_r($mygroups);
       foreach ($mygroups as $key => $grp) {
         if ($grp['grant_update'] && in_array($key, $node->og_groups)) {
           $links[] = l(t('remove from group'), "og/remove_node/$key/$node->nid", array(), "dest=node/$key");
