@@ -22,8 +22,7 @@ NOTES
 ----------------
 - 'Administer nodes' permission is required for changing the Manager of a group
 - 'Administer nodes' enables viewing of all nodes regardless of private/public status
-- All subscriber management happens on the 'user list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), unsubscribing users and promoting
-users into group admins.
+- All subscriber management happens on the 'user list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), unsubscribing users and promoting users into group admins.
 - If you decide to stop using this module, you will have to remove all records from the node_access table which reference the og_group and og_uid realms and also insert the inital records which grants universal read access to all nodes.
 
 
@@ -32,8 +31,7 @@ THEMES
 You may wish to stylize nodes which have properties assigned by this module.
 --- public vs. private posts are denoted by $node->og_public
 --- group assignments (if any) are to be found in $node->og_groups. this is an array of nids. the group names are in $node->og_groups_names. 
---- you may wish to omit the node author and time if $node->type == 'og'. also consider not showing the node links
-these items slightly clutter the group page.
+--- you may wish to omit the node author and time if $node->type == 'og'. also consider not showing the node links these items slightly clutter the group page.
 
 TODO
 ----------------

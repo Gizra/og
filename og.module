@@ -324,7 +324,7 @@ function og_form(&$node, &$param) {
   if (function_exists('taxonomy_node_form')) {
     $output .= implode('', taxonomy_node_form('og', $node));
   }
-  $output .= form_textarea(t('Description'), 'body', $node->body, 60, 20, '', NULL, TRUE);
+  $output .= form_textfield(t('Description'), 'body', $node->body, 70, 150, '', NULL, TRUE);
   if (isset($_POST['edit']['og_selective'])) {
     $selective = $_POST['edit']['og_selective'];
   }
@@ -431,8 +431,10 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 
 function og_nodeapi_form($node) {
   $edit = $_REQUEST['edit'];
-  if ($node->type != 'og') {
-
+  if ($node->type == 'og' || in_array($node->type, variable_get('og_omitted', array()))) {
+    return form_hidden('og_public', 1);
+  }
+  else {
     $required = variable_get('og_audience_required', 0);
     $subs = og_get_subscriptions($node->uid);
     foreach ($subs as $key => $val) {
@@ -471,9 +473,6 @@ function og_nodeapi_form($node) {
     $output .= form_checkboxes(t('Audience'), 'og_groups', $groups, $options, t('Show this post in these groups.'), NULL, $required);
 
     return $output;
-  }
-  else {
-    return form_hidden('og_public', 1);
   }
 }
 
@@ -645,6 +644,7 @@ function og_block($op = 'list', $delta = 0) {
   if ($op == 'list') {
     $blocks[0]['info'] = t('Group details');
     $blocks[1]['info'] = t('Group albums');
+    $blocks[2]['info'] = t('Group subscribers');
     return $blocks;
   }
   else {
@@ -653,6 +653,8 @@ function og_block($op = 'list', $delta = 0) {
         return og_block_details();
       case 1:
         return og_block_albums();
+      case 2:
+        return og_block_subscribers();
     }
   }
 }
@@ -664,7 +666,12 @@ function og_albums_page($gid, $str_tags) {
     $node = node_load(array('nid' => $gid));
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
     $result = folksonomy_select_nodes($tags, $operator, 'image', 'og_group_'. $node->nid);
-    $output = taxonomy_render_nodes($result);
+    // append 'create album' link if available. a bit messy for now.
+    if (user_access('create image') && module_exist('folksonomy') && module_exist('bu')) {
+      $links[] = l(t('add to this album'), 'bu/standard', array(), "edit[og_groups][]=$node->nid&edit[bu_tags]=$str_tags");
+    }
+    $output = theme('item_list', $links);
+    $output .= taxonomy_render_nodes($result);
     print theme('page', $output, $title, $bc);
   }
   else {
@@ -683,6 +690,29 @@ function og_block_albums() {
       $block['content'] = theme('item_list', $links);
       $block['subject'] = t('Albums');
       return $block;
+    }
+  }
+}
+
+function og_block_subscribers() {
+  global $user;
+  if ($node = og_is_group()) {
+    $subscriptions = og_get_subscriptions($user->uid);
+    if (in_array($node->nid, array_keys($subscriptions))) {
+      $sql = og_list_users_sql(0);
+      $result = db_query_range($sql, $node->nid, 0, 15);
+      while ($row = db_fetch_object($result)) {
+        $links[] = format_name($row);
+      }
+      if ($links) {
+        if (count($links) > 1) {
+          array_pop($links);
+          $append = '<div class="more-link">'. l(t('more'), "og/users/$node->nid", array('title' => t('View all subscribers.'))) .'</div>';;
+        }
+        $block['content'] = theme('item_list', $links). $append;
+        $block['subject'] = t('Recent subscribers');
+        return $block;
+      }
     }
   }
 }
@@ -748,7 +778,8 @@ function og_block_details() {
 function og_create_links($group) {
   foreach (node_list() as $type) {
     // image is filtered out here because we expect images to be added from within albums
-    if (!in_array($type, array('og', 'image')) && node_access('create', $type)) {
+    $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
+    if (!in_array($type, $exempt) && node_access('create', $type)) {
       $name = node_invoke($type, 'node_name');
       $links[] = l(t('create %type', array('%type' => $name)), "node/add/$type", array('title' => t('Add a new %s in this group.', array('%s' => $name))), "edit[og_groups][]=$group->nid");
     }
@@ -783,6 +814,14 @@ function og_settings() {
   $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group'));
   $options = array(t('optional'), t('required'));
   $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group.'));
+  unset($options);
+  foreach (node_list() as $type) {
+    // we exclude image becuase those will usually be added from within an album
+    if (!in_array($type, array('image', 'og'))) {
+      $options[$type] = module_invoke($type, 'node_name');
+    }
+  }
+  $output .= form_select(t('Content Types'), 'og_omitted', variable_get('og_omitted', array()), $options, t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), 0, TRUE);
   $output .= form_checkbox(t('Initialize Access Control'), 'og_enabled', 1, variable_get('og_enabled', 0), t('Perform the queries necessary to enable or disable groups access control. You should perform this only once.'));
   return $output;
 }
