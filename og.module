@@ -38,7 +38,7 @@ function og_menu($may_cache) {
       foreach ($subs as $key => $sub) {
         $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => $key, 'access' => TRUE);
         $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
-        $items[] = array('path' => "og/albums/$key", 'callback' => 'og_albums_page', 'title' => t('album'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
+        $items[] = array('path' => "og/albums/$key", 'callback' => 'og_albums_page', 'title' => t('album'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => TRUE);
       }
     }
 
@@ -118,7 +118,8 @@ function og_delete_admin($gid, $uid) {
 
 function og_remove_node($gid, $nid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-    // $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_uid', -1, 0, 0)";
+    $node = node_load(array('nid' => $nid));
+    og_delete_folksonomy($node);
     $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_group'";
     db_query($sql, $nid, $gid);
     drupal_set_message(t('Post removed from group.'));
@@ -126,6 +127,13 @@ function og_remove_node($gid, $nid) {
   }
   else {
     drupal_access_denied();
+  }
+}
+
+function og_delete_folksonomy($node) {
+  foreach ($node->og_groups as $gid) {
+    $realm = "og_group_$gid";
+    module_invoke('folksonomy', 'delete', array('realm' => $realm, 'id' => $node->nid));
   }
 }
 
@@ -409,6 +417,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'delete':
+      og_delete_folksonomy($node);
       og_delete_permissions($node);
       break;
     case 'insert':
@@ -665,15 +674,16 @@ function og_albums_page($gid, $str_tags) {
 
 function og_block_albums() {
   if ($node = og_is_group()) {
-    $sql = "SELECT name FROM {folksonomy} WHERE realm = 'og_group_$node->nid' ORDER BY id DESC";
+    $sql = "SELECT DISTINCT(name) FROM {folksonomy} WHERE realm = 'og_group_$node->nid' ORDER BY id DESC";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
       $links[] = l($row->name, "og/albums/$node->nid/$row->name");
     }
-    $output = theme('item_list', $links);
-    $block['content'] = $output;
-    $block['subject'] = t('Albums');
-    return $block;
+    if ($links) {
+      $block['content'] = theme('item_list', $links);
+      $block['subject'] = t('Albums');
+      return $block;
+    }
   }
 }
 
@@ -744,7 +754,7 @@ function og_create_links($group) {
     }
   }
   // append 'create album' link if available. a bit messy for now.
-  if (user_access('create image') && module_exist('folksonomy') && module_exist('bu') && module_exist('album')) {
+  if (user_access('create image') && module_exist('folksonomy') && module_exist('bu')) {
     $links[] = l(t('create album'), 'bu/standard', array(), "edit[og_groups][]=$group->nid");
   }
   return $links ? $links : array();
