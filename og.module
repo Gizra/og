@@ -31,6 +31,7 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('delete group administrator'));
     $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
     $items[] = array('path' => 'og/access_denied', 'type' => MENU_CALLBACK, 'callback' => 'og_access_denied', 'title' => t('groups'), 'access' => TRUE);
+    $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     $items[] = array('path' => 'og/albums', 'callback' => 'og_albums_page', 'title' => t('albums'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     $items[] = array('path' => 'og/albums/form', 'callback' => 'og_albums_form', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => user_access('create images'));
     $items[] = array('path' => 'og/albums/validate', 'callback' => 'og_albums_validate', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => user_access('create images'));
@@ -326,6 +327,10 @@ function og_list_groups_page() {
   print theme('page', $output);
 }
 
+function og_get_home_nodes_sql() {
+  return "SELECT DISTINCT(n.nid), n.status FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE na.gid = %d AND na.realm = 'og_group' AND n.status=1 AND n.type NOT IN ('og', 'image') ORDER BY n.created DESC";
+}
+
 //  when you view a group, you really see some facts about the group in a block and then a list of nodes affiliated with that group
 function og_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($teaser || !$page) {
@@ -334,7 +339,8 @@ function og_view(&$node, $teaser = FALSE, $page = FALSE) {
   else {
     // get all the group nodes. we have to break this list into two steps in case user is not a member of the group and post is public
     // TODO: perhaps we can use db_rewrite_sql() to simplify this query. The problem is that we *must* join against node_access, even for admin users.
-    $result = db_query("SELECT DISTINCT(n.nid), n.status FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE na.gid = $node->nid AND na.realm = 'og_group' AND n.status=1 AND n.type NOT IN ('og', 'image') ORDER BY n.created DESC");
+    $sql = og_get_home_nodes_sql();
+    $result = db_query($sql, $node->nid);
     if (!db_num_rows($result)) {
       drupal_set_message(t('No posts yet in this group.'));
     }
@@ -351,8 +357,9 @@ function og_view(&$node, $teaser = FALSE, $page = FALSE) {
     }
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'));
     drupal_set_breadcrumb($bc);
-  }
-  $node->body = $output. $nodes;
+  }                                    
+  $icon = theme('xml_icon', url("og/feed/$node->nid"));
+  $node->body = $output. $nodes. $icon;
   return $node;
 }
 
@@ -360,7 +367,7 @@ function og_form(&$node, &$param) {
   if (function_exists('taxonomy_node_form')) {
     $output .= implode('', taxonomy_node_form('og', $node));
   }
-  $output .= form_textfield(t('Description'), 'body', $node->body, 70, 150, '', NULL, TRUE);
+  $output .= form_textfield(t('Description'), 'og_description', $node->og_description, 70, 150, '', NULL, TRUE);
   if (isset($_POST['edit']['og_selective'])) {
     $selective = $_POST['edit']['og_selective'];
   }
@@ -404,19 +411,19 @@ function og_node_name($node) {
 }
 
 function og_load($node) {
-  $sql = 'SELECT selective AS og_selective FROM {og} WHERE nid = %d';
+  $sql = 'SELECT selective AS og_selective, description AS og_description, image AS og_image FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
   return db_fetch_object($result);
 }
 
 function og_insert($node) {
-  $sql = 'INSERT INTO {og} (nid, selective) VALUES (%d, %d)';
-  db_query($sql, $node->nid, $node->og_selective);
+  $sql = "INSERT INTO {og} (nid, selective, description, image) VALUES (%d, %d, '%s', '%s')";
+  db_query($sql, $node->nid, $node->og_selective, $node->og_description, $node->og_image);
 }
 
 function og_update($node) {
-  $sql = 'UPDATE {og} SET selective=%d WHERE nid=%d';
-  db_query($sql, $node->og_selective, $node->nid);
+  $sql = "UPDATE {og} SET selective=%d, image='%s', description='%s' WHERE nid=%d";
+  db_query($sql, $node->og_selective, $node->og_image, $node->og_description, $node->nid);
 }
 
 /**
@@ -714,6 +721,35 @@ function og_block($op = 'list', $delta = 0) {
   }
 }
 
+function og_feed($gid) {
+  $group = (object) array('nid' => $gid);
+  if (node_access('view', $cond)) {
+    $sql = og_get_home_nodes_sql();
+    $result = db_query($sql, $gid); 
+    while ($onenode = db_fetch_array($result)) {
+      // make sure user can view each node
+      if (node_access('view', $onenode)) {
+        $nodes[] = $onenode['nid'];
+      }
+    }
+    if ($nodes) {  
+      $sql = 'SELECT nid FROM {node} WHERE nid IN (%s)';
+      $result = db_query($sql, implode(', ', $nodes));
+      $node = node_load(array('nid' => $gid));
+      $channel['title'] = $node->title;
+      $channel['link'] = url("node/$gid", NULL, NULL, TRUE);
+      $channel['description'] = $node->og_description;
+      node_feed($result, $channel); 
+    }
+    else {
+      die('no posts in this group');
+    }               
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
 function og_albums_page($gid, $str_tags, $operator = 'or') {
   if (strstr($str_tags, ',')) {
     $tags = explode(',', $str_tags);
@@ -884,7 +920,7 @@ function og_block_details() {
   global $user;
 
   if ($node = og_is_group()) {
-    $output = '<div id="og_description">'. $node->body. '</div><br />';
+    $output = '<div id="og_description">'. $node->og_description. '</div><br />';
     if ($_POST['op'] != t('Preview')) {
       $result = db_query(og_list_users_sql(0), $node->nid);
       $cntall = db_num_rows($result);
