@@ -20,7 +20,7 @@ function og_menu($may_cache) {
 
   if ($may_cache) {
     $items[] = array('path' => 'node/add/og', 'title' => t('group'), 'access' => user_access('create groups'));
-    $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => TRUE);
+    $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => user_access('access content'));
     $access = $user->uid; // login is required
     $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => $access, 'title' => t('subscribe to group'));
     $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('unsubscribe from group'));
@@ -400,19 +400,25 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'validate':
-      if ($node->type != 'og' && !in_array($node->type, variable_get('og_omitted', array()))) {
-        if (variable_get('og_audience_required', 0) && empty($node->og_groups) && $_POST) {
-          form_set_error('og_groups', t('You must select an audience in order to post.'));
+      if ($node->type != 'og') {
+        if (!in_array($node->type, variable_get('og_omitted', array()))) {
+          if (variable_get('og_audience_required', 0) && empty($node->og_groups) && $_POST) {
+            form_set_error('og_groups', t('You must select an audience in order to post.'));
+          }
+          $vis = variable_get('og_visibility', 0);
+          switch ($vis) {
+            // case 2 is handled in og_nodeapi('validate')
+            case 1: // visible in and out of group
+              $node->og_public = 1;
+              break;
+            case 0: // visible only in group
+              $node->og_public = 0;
+              break;
+          }
         }
-        $vis = variable_get('og_visibility', 0);
-        switch ($vis) {
-          // case 2 is handled in og_nodeapi('validate')
-          case 1: // visible in and out of group
-            $node->og_public = 1;
-            break;
-          case 0: // visible only in group
-            $node->og_public = 0;
-            break;
+        // if a post isn't in any groups. it must be public as far as og goes
+        if (empty($node->og_groups)) {
+          $node->og_public = 1;
         }
       }
       break;
@@ -681,7 +687,7 @@ function og_albums_page($gid, $str_tags) {
 
 function og_block_albums() {
   if ($node = og_is_group()) {
-    $sql = "SELECT DISTINCT(name) FROM {folksonomy} WHERE realm = 'og_group_$node->nid' ORDER BY id DESC";
+    $sql = "SELECT f.name FROM {folksonomy} f INNER JOIN {node} n ON f.id = n.nid ". node_access_join_sql(). " WHERE ". node_access_where_sql(). " AND f.realm = 'og_group_$node->nid' GROUP BY f.name ORDER BY id DESC";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
       $links[] = l($row->name, "og/albums/$node->nid/$row->name");
