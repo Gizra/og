@@ -22,7 +22,7 @@ function og_menu($may_cache) {
   if ($may_cache) {
     // anon users should be able to get to the subscribe page
     $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('subscribe to group'));
-
+    $items[] = array('path' => 'og/image', 'callback' => 'og_image', 'title' => t('group image (large)'), 'weight' => 4, 'access' => user_access('access content'), 'type' => MENU_CALLBACK);
     $items[] = array('path' => 'node/add/og', 'title' => t('group'), 'access' => user_access('create groups'));
     $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => user_access('access content'));
     $access = $user->uid; // login is required
@@ -61,8 +61,7 @@ function og_menu($may_cache) {
       _og_update_db($_POST['edit']['og_enabled']);
     }
     
-    // uncomment and rename og_init() after http://drupal.org/node/19590 is committed
-    // og_theme();
+    og_theme();
 
     //stash path so that its available if we have a 403. see http://drupal.org/node/13621
     $_GET['q_original'] = $_GET['q'];
@@ -75,9 +74,17 @@ function og_perm() {
   return array('create groups', 'administer organic groups');
 }
 
-// TODO: this breaks the bootstrap. will move to og_menu() after http://drupal.org/node/19590 is accepted
-// override theme based on what group is being displayed (if any). be smart about selecting the 'active' group for ambigous urls like node/$nid
-function og_init() {
+/**
+ * override theme based on what group is being displayed (if any). 
+ * be smart about selecting the 'active' group for ambigous urls like node/$nid
+ * 
+ *
+ * @param 
+ *   none
+ * @return
+ *   none
+ */
+function og_theme() {
   global $custom_theme;  
   $group_node = NULL; // a node object containing the 'active' group for this request
   
@@ -128,6 +135,16 @@ function og_nodeview($gid) {
   drupal_goto("node/$gid");
 }
 
+/**
+ * Admins may broadcast email to all their subscribers
+ *                                    
+ * 
+ *
+ * @param $gid
+ *   the nid of a group.
+ * @return
+ *   none
+ */
 function og_email($gid) {
   $node = node_load(array('nid' => $gid));
   drupal_set_title(t('Send email to %group', array('%group' => $node->title)));
@@ -551,6 +568,20 @@ function og_form(&$node, &$param) {
   }
   $output .= form_checkbox(t('Selective'), 'og_selective', 1, $selective, t('Check this box if new subscription requests require manual approval. Otherwise, they will be automatically approved.'));
   
+  // group image
+  if (module_exist('image')) {
+    if (is_array($node->images)) {
+      foreach ($node->images as $label => $image) {
+        $output .= form_hidden('images]['.$label, $image);
+      }
+    }
+    if ($node->images['thumbnail']) {
+      $output.= form_item(t('Thumbnail'), image_display($node, 'thumbnail'));
+    }                                                                                                  
+    $output .= form_file(t('Image'), 'image', 50, t('Click "Browse..." to select an image to upload.'));
+    $param['options'] = array("enctype" => "multipart/form-data",  "name" => "image_forms");
+  }
+  
   $allthemes = list_themes();
   // list only active themes
   foreach ($allthemes as $key => $theme) {
@@ -610,9 +641,23 @@ function og_get_node_groups($node) {
   }
 }
 
-// comments are not allowed on group nodes, since we don;t have any nice way to present them
+function og_image($gid) {
+  $node = node_load(array('nid' => $gid));
+  $request = ($_GET['size']) ? $_GET['size'] : 'preview';
+  $output = image_display($node, $request);
+  print theme('page', $output);
+}
+
+/**
+ * Implementation of hook_validate
+ */
 function og_validate(&$node) {
-  $node->comment = 0;
+  // comments are not allowed on group nodes, since we don't have any nice way to present them
+  $node->comment = 0;  
+  
+  if (module_exist('image')) {
+    image_validate($node, 'image');
+  }
 }
 
 function og_node_name($node) {
@@ -620,19 +665,30 @@ function og_node_name($node) {
 }
 
 function og_load($node) {
-  $sql = 'SELECT selective AS og_selective, description AS og_description, image AS og_image, theme AS og_theme FROM {og} WHERE nid = %d';
+  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
+  module_invoke('image', 'load', $node);
   return db_fetch_object($result);
 }
 
 function og_insert($node) {
-  $sql = "INSERT INTO {og} (nid, theme, selective, description, image) VALUES (%d, '%s', %d, '%s', '%s')";
-  db_query($sql, $node->nid, $node->og_theme, $node->og_selective, $node->og_description, $node->og_image);
+  $sql = "INSERT INTO {og} (nid, theme, selective, description) VALUES (%d, '%s', %d, '%s')";
+  db_query($sql, $node->nid, $node->og_theme, $node->og_selective, $node->og_description);
 }
 
 function og_update($node) {
-  $sql = "UPDATE {og} SET theme='%s', selective=%d, image='%s', description='%s' WHERE nid=%d";
-  db_query($sql, $node->og_theme, $node->og_selective, $node->og_image, $node->og_description, $node->nid);
+  foreach ($node->images as $label => $image) {
+    $old_path = db_result(db_query("SELECT filepath FROM {files} WHERE filename='%s' AND nid=%d", $label, $node->nid));
+    // This is a new image.
+    if ($old_path != $image) {
+      file_delete(file_create_path($old_path));
+      db_query("DELETE FROM {files} WHERE filename='%s' AND nid=%d", $label, $node->nid);
+      _image_insert($node->nid, $label, file_create_path($image));
+    }
+  }                                                                                                                    
+  
+  $sql = "UPDATE {og} SET theme='%s', selective=%d, description='%s' WHERE nid=%d";
+  db_query($sql, $node->og_theme, $node->og_selective, $node->og_description, $node->nid);
 }
 
 /**
@@ -1110,7 +1166,7 @@ function og_block_details() {
 
   if ($gid = $_SESSION['og_last']->nid) {
     $node = node_load(array('nid' => $gid));
-    $output = '<div id="og_description">'. $node->og_description. '</div><br />';
+    $output .= '<div id="og_description">'. $node->og_description. '</div><br />';
     if ($_POST['op'] != t('Preview')) {
       $result = db_query(og_list_users_sql(0), $node->nid);
       $cntall = db_num_rows($result);
@@ -1157,6 +1213,7 @@ function og_block_details() {
       $output .= theme('item_list', $links);
     }
     $block['content'] = $output;
+    $block['content'] .= l(image_display($node, 'thumbnail'), "og/image/$gid");
     $block['subject'] = $node->title;
     return $block;
   }

@@ -2,7 +2,7 @@ DESCRIPTION
 --------------------------
 Enable users to create and manage their own 'groups'. Each group can have subscribers, and maintains a a group page where subscribers can post into. groups may be selective or not. Selective groups require approval in order to become a member.
 
-Support for group photo albums is available. See the 'admin/block' step below.
+Support for group photo albums is available. Groups may choose their own theme. groups have RSS feeds, and so on.
 
 INSTALLATION
 ---------------
@@ -14,7 +14,7 @@ INSTALLATION
 - On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers' and 'Group albums' block. If you use the 'group albums' block, you must have folksonomy, and the new image.module enabled and configured. See for http://cvs.drupal.org/viewcvs/contrib/contributions/sandbox/walkah/image/ for image.module
 - Grant permissions as needed on the admin/user/configure/permision page
 - If you are using album.module to provide personal image albums, then you must omit the 'image' node type on your settings page. Note that group photo albums will be group specific regardless of this setting.
-- Begin creating groups, subscribing to those groups, and posting into those groups. SUbscribe from the Group Block.
+- Begin creating groups, subscribing to those groups, and posting into those groups. Subscribe from the Group Block.
 
 NOTES
 ----------------
@@ -34,5 +34,4 @@ You may wish to stylize nodes which have properties assigned by this module.
 TODO
 ----------------
 - optional 'permanent deny' for posts in groups and subscriber requests
-- email notifications for pending group subscriptions, request approved, request denied
 - move 'initialize access control' to its own form with proper instructions
