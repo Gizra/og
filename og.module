@@ -70,7 +70,14 @@ function og_approve($gid, $uid) {
     $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, %d, 'og_uid', 1)";
     db_query($sql, $gid, $uid);
     drupal_set_message(t('Subscription request approved.'));
-    drupal_goto();
+    $node = node_load(array('nid' => $gid));
+    $subj = t("Subscription request approved for '%title'", array('%title' => $node->title));
+    $body = t('You may now post messages in this group located at %url', array('%url' => url("node/$node->nid", NULL, NULL, TRUE)));
+    $from = variable_get('site_mail', ini_get('sendmail_from'));
+    $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
+    $account = user_load(array('uid' => $uid));
+    user_mail($account->mail, $subj, $body, $headers); 
+    drupal_goto("node/$gid");
   }
   else {
     drupal_access_denied();
@@ -82,7 +89,13 @@ function og_deny($gid, $uid) {
     $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_uid'";
     db_query($sql, $gid, $uid);
     drupal_set_message(t('Subscription request denied.'));
-    drupal_goto();
+    $subj = t('Subscription request denied for %title', array('title' => $node->title));
+    $body = t('Sorry, your subscription request was denied.');
+    $from = variable_get('site_mail', ini_get('sendmail_from'));
+    $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
+    $account = user_load(array('uid' => $uid));
+    user_mail($account->mail, $subj, $body, $headers);
+    drupal_goto("node/$gid");
   }
   else {
     drupal_access_denied();
@@ -145,19 +158,22 @@ function og_delete_folksonomy($node) {
 }
 
 function og_subscribe($gid, $uid = NULL) {
-  global $user;
   if (is_null($uid)) {
-    $uid = $user->uid;
+    global $user;
+    $account = $user;
   }
-  if ($uid != $user->uid && !node_access('update', array('nid' => $gid, 'status' => 1))) {
+  else {
+    $account = user_load(array('uid' => $account->uid));
+  }
+  if ($account->uid != $user->uid && !node_access('update', array('nid' => $gid, 'status' => 1))) {
     // only admins can subscribe another person
     drupal_access_denied();
   }
 
   $names = array('nid', 'realm', 'gid', 'grant_view', 'grant_update');
-  $values = array($gid, "'og_uid'", $uid);
+  $values = array($gid, "'og_uid'", $account->uid);
 
-  // selective groups must approve in all members
+  // selective groups must approve all members
   // if you can't view/edit/delete, you are *requesting* membership in the group
   // if you can view, you are a member
   // if you can edit, you are an admin
@@ -165,6 +181,16 @@ function og_subscribe($gid, $uid = NULL) {
   if ($node->og_selective) {
     $values[] = 0;
     $values[] = 0;
+    $sql = og_list_users_sql(1);
+    $res = db_query($sql, $node->nid);
+    while ($row = db_fetch_object($res)) {
+      $admins[] = $row->mail ? $row->mail : NULL;
+    }                                           
+    $subj = t("Subscription request for '%group' from '%name'", array('%group' => $node->title, '%name' => $account->name));
+    $body = t('You may approve or deny this request at %url', array('%url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
+    $from = variable_get('site_mail', ini_get('sendmail_from'));
+    $headers = "From: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
+    user_mail(implode(', ', $admins), $subj, $body, $headers);
     drupal_set_message(t('Subscription request awaits approval by an administrator.'));
   }
   else {
@@ -174,7 +200,7 @@ function og_subscribe($gid, $uid = NULL) {
   }
   $sql = 'REPLACE INTO {node_access} ('. implode(',', $names). ') VALUES ('. implode(',', $values). ')';
   db_query($sql);
-  drupal_goto();
+  drupal_goto("node/$node->nid");
 }
 
 function og_unsubscribe($gid, $uid = NULL) {
@@ -190,11 +216,11 @@ function og_unsubscribe($gid, $uid = NULL) {
   $sql = "DELETE FROM {node_access}  WHERE gid = %d AND nid = %d AND realm = 'og_uid'";
   db_query($sql, $uid, $gid);
   drupal_set_message(t('User unsubscribed from group.'));
-  drupal_goto();
+  drupal_goto("node/$gid");
 }
 
 function og_get_subscriptions($uid) {
-  static $subscriptions = array(), $options = array();
+  static $subscriptions = array();
 
   if (!isset($subscriptions[$uid])) {
     $sql = "SELECT na.*, n.title FROM {node_access} na INNER JOIN {node} n ON na.nid = n.nid WHERE gid = %d AND realm = 'og_uid' AND grant_view = 1";
@@ -221,7 +247,7 @@ function og_access($op, $node) {
 }
 
 function og_list_users_sql($min_grant = 1) {
-  return "SELECT u.uid, u.name, na.* FROM {node_access} na INNER JOIN {users} u ON na.gid = u.uid AND na.nid = %d WHERE u.status > 0 AND realm = 'og_uid' AND grant_view >= $min_grant ORDER BY u.name ASC";
+  return "SELECT u.uid, u.name, u.mail, na.* FROM {node_access} na INNER JOIN {users} u ON na.gid = u.uid AND na.nid = %d WHERE u.status > 0 AND realm = 'og_uid' AND grant_view >= $min_grant ORDER BY u.name ASC";
 }
 
 function og_list_users_page($gid) {
@@ -504,7 +530,7 @@ function og_nodeapi_form($node) {
   }
 }
 
-function og_user($op, &$edit, &$account, $category) {
+function og_user($op, &$edit, &$account, $category = NULL) {
   global $user;
 
   switch ($op) {
@@ -957,7 +983,7 @@ function og_settings() {
   $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group.'));
   unset($options);
   foreach (node_list() as $type) {
-    $options[$type] = module_invoke(node_get_module_name($type), 'node_name');
+    $options[$type] = module_invoke(node_get_module_name($type), 'node_name', array());
   }
   unset($options['og']);
   $output .= form_select(t('Omitted content types'), 'og_omitted', variable_get('og_omitted', array()), $options, t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), 0, TRUE);
