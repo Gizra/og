@@ -38,6 +38,7 @@ function og_menu($may_cache) {
       foreach ($subs as $key => $sub) {
         $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => $key, 'access' => TRUE);
         $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
+        $items[] = array('path' => "og/albums/$key", 'callback' => 'og_albums_page', 'title' => t('album'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
       }
     }
 
@@ -250,7 +251,7 @@ function og_list_users_page($gid) {
     $rows[$i][] = array('data' => $pager, 'colspan' => 2);
   }
   $output = theme('table', $header, $rows);
-  $bc = array(t('Home'), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
+  $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
   print theme('page', $output, t('Subscribers'), $bc);
 }
 
@@ -289,7 +290,7 @@ function og_view(&$node, $teaser = FALSE, $page = FALSE) {
   }
   else {
     // get all the group nodes. we have to break this list into two steps in case user is not a member of the group and post is public
-    $result = db_query("SELECT DISTINCT(n.nid), n.status FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE na.gid = $node->nid AND na.realm = 'og_group' AND n.status=1 AND n.type != 'og' ORDER BY n.created DESC");
+    $result = db_query("SELECT DISTINCT(n.nid), n.status FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE na.gid = $node->nid AND na.realm = 'og_group' AND n.status=1 AND n.type NOT IN ('og', 'image') ORDER BY n.created DESC");
     if (!db_num_rows($result)) {
       drupal_set_message(t('No posts yet in this group.'));
     }
@@ -598,11 +599,14 @@ function _og_update_db($enable) {
 // called to determine whether or not to show group block
 // called during a 403 page and we show appropriate msg if no posts are accessible
 function og_is_group() {
-  // these are the 2 pages when we want the block to appear
+  // these are the 3 pages when we want the blocks to appear
   if (arg(0) == 'node' && is_numeric(arg(1)) && !arg(2)) {
     $nid = arg(1);
   }
   elseif (arg(0) == 'og' && arg(1) == 'users') {
+    $nid = arg(2);
+  }
+  elseif (arg(0) == 'og' && arg(1) == 'albums') {
     $nid = arg(2);
   }
 
@@ -631,10 +635,45 @@ function og_access_denied() {
 function og_block($op = 'list', $delta = 0) {
   if ($op == 'list') {
     $blocks[0]['info'] = t('Group details');
+    $blocks[1]['info'] = t('Group albums');
     return $blocks;
   }
   else {
-    return og_block_details();
+    switch ($delta) {
+      case 0:
+        return og_block_details();
+      case 1:
+        return og_block_albums();
+    }
+  }
+}
+
+function og_albums_page($gid, $str_tags) {
+  list($operator, $tags) = folksonomy_parse_request($str_tags);
+  if ($tags) {
+    $title = str_replace(array(',', '+'), ', ', $str_tags);
+    $node = node_load(array('nid' => $gid));
+    $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
+    $result = folksonomy_select_nodes($tags, $operator, 'image', 'og_group_'. $node->nid);
+    $output = taxonomy_render_nodes($result);
+    print theme('page', $output, $title, $bc);
+  }
+  else {
+    drupal_not_found();
+  }
+}
+
+function og_block_albums() {
+  if ($node = og_is_group()) {
+    $sql = "SELECT name FROM {folksonomy} WHERE realm = 'og_group_$node->nid' ORDER BY id DESC";
+    $result = db_query($sql);
+    while ($row = db_fetch_object($result)) {
+      $links[] = l($row->name, "og/albums/$node->nid/$row->name");
+    }
+    $output = theme('item_list', $links);
+    $block['content'] = $output;
+    $block['subject'] = t('Albums');
+    return $block;
   }
 }
 
@@ -698,10 +737,15 @@ function og_block_details() {
 // $group is an object containing the group node
 function og_create_links($group) {
   foreach (node_list() as $type) {
-    if (node_access('create', $type) && $type != 'og') {
+    // image is filtered out here because we expect images to be added from within albums
+    if (!in_array($type, array('og', 'image')) && node_access('create', $type)) {
       $name = node_invoke($type, 'node_name');
       $links[] = l(t('create %type', array('%type' => $name)), "node/add/$type", array('title' => t('Add a new %s in this group.', array('%s' => $name))), "edit[og_groups][]=$group->nid");
     }
+  }
+  // append 'create album' link if available. a bit messy for now.
+  if (user_access('create image') && module_exist('folksonomy') && module_exist('bu') && module_exist('album')) {
+    $links[] = l(t('create album'), 'bu/standard', array(), "edit[og_groups][]=$group->nid");
   }
   return $links ? $links : array();
 }

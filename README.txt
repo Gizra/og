@@ -4,6 +4,8 @@ Enable users to create and manage their own 'groups'. Each group can have subscr
 a group page where subscribers can post into. groups may be selective or not. Selective groups
 require approval in order to become a member.
 
+Preliminary support for group albums is available. see 'admin/block' step below.
+
 INSTALLATION
 ---------------
 - Activate the module as usual
@@ -12,7 +14,7 @@ INSTALLATION
 so don't do this just for fun.
 - On the administer/content/configure/defaults workflow page, disable commenting for nodes of type 'group'
 - On the admin/settings page, set 'Default 403 (access denied) page' to 'og/access_denied'
-- On the admin/block page, enable the 'Group details' with a low 'weight' value
+- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group albums' block. If you use this, you must have folksonomy, bulk upload, and the new image.module enabled and configured.
 - Grant permissions as needed on the admin/user/configure/permision page
 - Begin creating groups, subscribing to those groups, and posting into those groups
 
