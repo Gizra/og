@@ -51,7 +51,7 @@ function og_menu($may_cache) {
     
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(array('nid' => arg(1)));
-      if ($node->nid) {
+      if ($node->type == 'og') {
         $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'og_email', 'callback arguments' => arg(1), 'access' => node_access('view', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);               
       }
     }
