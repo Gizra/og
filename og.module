@@ -677,13 +677,15 @@ function og_insert($node) {
 }
 
 function og_update($node) {
-  foreach ($node->images as $label => $image) {
-    $old_path = db_result(db_query("SELECT filepath FROM {files} WHERE filename='%s' AND nid=%d", $label, $node->nid));
-    // This is a new image.
-    if ($old_path != $image) {
-      file_delete(file_create_path($old_path));
-      db_query("DELETE FROM {files} WHERE filename='%s' AND nid=%d", $label, $node->nid);
-      _image_insert($node->nid, $label, file_create_path($image));
+  if ($node->images) {
+    foreach ($node->images as $label => $image) {
+      $old_path = db_result(db_query("SELECT filepath FROM {files} WHERE filename='%s' AND nid=%d", $label, $node->nid));
+      // This is a new image.
+      if ($old_path != $image) {
+        file_delete(file_create_path($old_path));
+        db_query("DELETE FROM {files} WHERE filename='%s' AND nid=%d", $label, $node->nid);
+        _image_insert($node->nid, $label, file_create_path($image));
+      }
     }
   }                                                                                                                    
   
@@ -1213,7 +1215,7 @@ function og_block_details() {
       $output .= theme('item_list', $links);
     }
     $block['content'] = $output;
-    $block['content'] .= l(image_display($node, 'thumbnail'), "og/image/$gid");
+    $block['content'] .= module_exist('image') ? l(image_display($node, 'thumbnail'), "og/image/$gid") : '';
     $block['subject'] = $node->title;
     return $block;
   }

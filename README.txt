@@ -11,7 +11,8 @@ INSTALLATION
 - Visit the admin/settings/og page and 'initialize access control'. Set other preferences as desired. Submit the page. This initialization fundamentally changes your drupal site, so don't do this just for fun.
 - On the administer/content/configure/defaults workflow page, disable commenting for nodes of type 'group'
 - On the admin/settings page, set 'Default 403 (access denied) page' to 'og/access_denied'
-- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers' and 'Group albums' block. If you use the 'group albums' block, you must have folksonomy, and the new image.module enabled and configured. See for http://cvs.drupal.org/viewcvs/contrib/contributions/sandbox/walkah/image/ for image.module
+- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers' and 'Group albums' block. If you use the 'group albums' block, you must have folksonomy, and the new image.module enabled and configured. See for http://cvs.drupal.org/viewcvs/contrib/contributions/sandbox/walkah/image/ for image.module.
+- If you want each group to optionally show its own image in the Group Details block, you must have image.module enabled.
 - Grant permissions as needed on the admin/user/configure/permision page
 - If you are using album.module to provide personal image albums, then you must omit the 'image' node type on your settings page. Note that group photo albums will be group specific regardless of this setting.
 - Begin creating groups, subscribing to those groups, and posting into those groups. Subscribe from the Group Block.
