@@ -912,9 +912,13 @@ function og_create_links($group) {
       $links[] = l(t('create %type', array('%type' => $name)), "node/add/$type", array('title' => t('Add a new %s in this group.', array('%s' => $name))), "edit[og_groups][]=$group->nid");
     }
   }
-  // append 'create album' link if available. a bit messy for now.
+  // append 'create album' link if available.
   if (user_access('create images') && module_exist('folksonomy')) {
-    $links[] = l(t('create album'), 'og/albums/form', array(), "edit[og_groups][]=$group->nid");
+    $sql = "SELECT DISTINCT(name) FROM {folksonomy} WHERE realm = 'og_group_$group->nid'";
+    $unlimited = variable_get('og_album_unlimited', TRUE);
+    if ($unlimited || db_num_rows(db_query($sql)) == 0) {
+      $links[] = l(t('create album'), 'og/albums/form', array(), "edit[og_groups][]=$group->nid");
+    }
   }
   return $links ? $links : array();
 }
@@ -937,6 +941,7 @@ function og_link($type, $node = 0, $main) {
 
 function og_settings() {
   $output = form_textarea(t('Explanation or submission guidelines'), 'og_help', variable_get('og_help', ''), 70, 5, t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
+  $output .= form_checkbox(t('Unlimited albums'), 'og_album_unlimited', 1, variable_get('og_album_unlimited', TRUE), t('If you want to limit your groups to a single album, uncheck this box.'));
   $output .= form_checkbox(t('List selective groups'), 'og_selective_listed', 1, variable_get('og_selective_listed', 0), t('Selective groups appear in the %s. Selective groups require new subscription requests to be manually approved.', array('%s' => l('list of groups page', 'og'))));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
   $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group'));
