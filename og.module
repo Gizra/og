@@ -411,7 +411,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'validate':
       if ($node->type != 'og') {
-        if (!in_array($node->type, variable_get('og_omitted', array()))) {
+        // 'og/album/validate' is a special case. We want the audience validation even if 'image' node type is omitted
+        // Used for album module galleries
+        if (!in_array($node->type, variable_get('og_omitted', array())) || substr_count($_GET['q'], 'og/album/validate')) {
           if (variable_get('og_audience_required', 0) && empty($node->og_groups) && $_POST) {
             form_set_error('og_groups', t('You must select an audience in order to post.'));
           }
@@ -427,7 +429,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           }
         $vis = variable_get('og_visibility', 0);
         switch ($vis) {
-          // case 2 is handled in og_nodeapi('validate')
           case 1: // visible in and out of group
             $node->og_public = 1;
             break;
@@ -457,7 +458,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 
 function og_nodeapi_form($node) {
   $edit = $_REQUEST['edit'];
-  if ($node->type == 'og' || in_array($node->type, variable_get('og_omitted', array()))) {
+  // 'og/albums/form' is a special case. We want the audience selection and 'public' checkbox even if 'image' node type is omitted
+  // Used for album module galleries
+  if ( substr_count($_GET['q'], 'og/albums/form') == 0 && ( $node->type == 'og' || ( in_array($node->type, variable_get('og_omitted', array()))))) {
     return form_hidden('og_public', 1);
   }
   else {
@@ -697,9 +700,9 @@ function og_albums_page($gid, $str_tags) {
       $subs = og_get_subscriptions($user->uid);
       if ($subs[$node->nid]['grant_view']) {
         $links[] = l(t('add to this album'), 'og/albums/form', array(), "edit[og_groups][]=$node->nid&edit[og_tags]=$str_tags");
+        $output .= theme('links', $links);
       }
     }
-    $output = theme('links', $links);
     $output .= taxonomy_render_nodes($result);
     print theme('page', $output, $title, $bc);
   }
@@ -791,10 +794,12 @@ function og_albums_save($nodes) {
 
 function og_block_albums() {
   if ($node = og_is_group()) {
-    $sql = "SELECT f.name FROM {folksonomy} f INNER JOIN {node} n ON f.id = n.nid ". node_access_join_sql(). " WHERE ". node_access_where_sql(). " AND f.realm = 'og_group_$node->nid' GROUP BY f.name ORDER BY id DESC";
+    $sql = "SELECT f.name AS fname, COUNT(f.name) AS fcount, u.name, u.uid FROM {folksonomy} f INNER JOIN {node} n ON f.id = n.nid INNER JOIN {users} u ON n.uid = u.uid ". node_access_join_sql(). " WHERE ". node_access_where_sql(). " AND f.realm = 'og_group_$node->nid' GROUP BY f.name ORDER BY id DESC";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
-      $links[] = l($row->name, "og/albums/$node->nid/$row->name");
+      $submitter = t('submitted by %name. ', array('%name' => $row->name));
+      $count = format_plural($row->fcount, '1 image', '%count images');
+      $links[] = l($row->fname, "og/albums/$node->nid/$row->fname", array('title' => $submitter. ' '. $count));
     }
     if ($links) {
       $block['content'] = theme('item_list', $links);
@@ -929,11 +934,9 @@ function og_settings() {
   $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group.'));
   unset($options);
   foreach (node_list() as $type) {
-    // we exclude image becuase those will usually be added from within an album
-    if (!in_array($type, array('image', 'og'))) {
-      $options[$type] = module_invoke($type, 'node_name');
-    }
+    $options[$type] = module_invoke($type, 'node_name');
   }
+  unset($options['og']);
   $output .= form_select(t('Omitted content types'), 'og_omitted', variable_get('og_omitted', array()), $options, t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), 0, TRUE);
   $output .= form_checkbox(t('Initialize access control'), 'og_enabled', 1, variable_get('og_enabled', 0), t('Perform the queries necessary to enable or disable groups access control. You should perform this only once.'));
   return $output;
