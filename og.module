@@ -300,9 +300,9 @@ function og_view(&$node, $teaser = FALSE, $page = FALSE) {
           $nodes .= node_view(node_load($onenode), FALSE, FALSE);
         }
       }
-    }
-    if (!$nodes) {
-      drupal_set_message(t('There are no public posts in this group.'));
+      if (!$nodes) {
+        drupal_set_message(t('There are no public posts in this group.'));
+      }
     }
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'));
     drupal_set_breadcrumb($bc);
@@ -365,8 +365,8 @@ function og_load($node) {
 }
 
 function og_insert($node) {
-  $sql = 'INSERT INTO {og} (selective) VALUES (%d) WHERE nid=%d';
-  db_query($sql, $node->og_selective, $node->nid);
+  $sql = 'INSERT INTO {og} (nid, selective) VALUES (%d, %d)';
+  db_query($sql, $node->nid, $node->og_selective);
 }
 
 function og_update($node) {
@@ -405,8 +405,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
             $node->og_public = 0;
             break;
         }
-        break;
       }
+      break;
     case 'delete':
       og_delete_permissions($node);
       break;
