@@ -34,19 +34,20 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
     $items[] = array('path' => 'og/access_denied', 'type' => MENU_CALLBACK, 'callback' => 'og_access_denied', 'title' => t('groups'), 'access' => TRUE);
     $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
-    $items[] = array('path' => 'og/invite', 'callback' => 'og_invite', 'title' => t('send invitation'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     $items[] = array('path' => 'og/albums', 'callback' => 'og_albums_page', 'title' => t('albums'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     $items[] = array('path' => 'og/albums/form', 'callback' => 'og_albums_form', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => user_access('create images'));
     $items[] = array('path' => 'og/albums/validate', 'callback' => 'og_albums_validate', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => user_access('create images'));
     $items[] = array('path' => 'admin/og/updatedb', 'type' => MENU_CALLBACK, 'callback' => '_og_updatedb', 'title' => t('update db'), 'access' => user_access('administer organic groups'));
   }
   else {
-    $subs = og_get_subscriptions($user->uid);
-    if (is_array($subs)) {
-      foreach ($subs as $key => $sub) {
-        $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => $key, 'access' => TRUE);
-        $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
-      }
+    // we have to perform a load in order to assure that the $user->og_groups bits are present.
+    $user = user_load(array('uid' => $user->uid));
+    
+    foreach ($user->og_groups as $key => $sub) {
+      $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => $key, 'access' => TRUE);
+      $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
+      $items[] = array('path' => 'og/manage', 'callback' => 'og_manage', 'title' => t('manage subscription'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
+      $items[] = array('path' => 'og/invite', 'callback' => 'og_invite', 'title' => t('send invitation'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     }
 
     if (arg(0) == 'node' && is_numeric(arg(1))) {
@@ -138,12 +139,8 @@ function og_nodeview($gid) {
 /**
  * Admins may broadcast email to all their subscribers
  *                                    
- * 
- *
  * @param $gid
  *   the nid of a group.
- * @return
- *   none
  */
 function og_email($gid) {
   $node = node_load(array('nid' => $gid));
@@ -190,6 +187,30 @@ function og_email_form($gid) {
   $form .= form_textarea(t('Body'), 'body', $edit['body'], 90, 5, t('Enter a body for your email.'), NULL, TRUE);
   $form .= form_button(t('Send email'));
   return form($form);
+}
+
+function og_manage($gid) {
+  global $user;
+  
+  if ($edit = $_POST['edit']) {
+    $sql = "DELETE FROM {og_uid} WHERE nid=%d AND uid=%d";
+    db_query($sql, $gid, $user->uid);
+    $sql = "INSERT INTO {og_uid} (mail_type, nid, uid) VALUES (%d, %d, %d)";
+    db_query($sql, $edit['mail_type'], $gid, $user->uid);
+    drupal_set_message(t('Subscription saved.'));
+  }
+  
+  $group = node_load(array('nid' => $gid));
+  // group owner can't unsubscribe'
+  if ($group->uid != $user->uid) {
+    $output .= form_item(t('Goodbye'), l(t('Unsubscribe from this group'), "og/unsubscribe/$gid"), NULL, 'destination=og');
+  }
+  $output .= form_radios('Email notification', "mail_type", $edit["mail_type"] ? $edit["mail_type"] : $user->og_groups[$gid]['mail_type'], array(t('disabled'), t('enabled')), t('Do you want to receive an email each time a message is posted to this group?'));
+  $output .= form_button(t('Submit'));                                                                                                                                                                                                       
+  $output = form($output);   
+  $bc = array(l(t('home'), ''), l(t('groups'), 'og'), l($group->title, "node/$gid"));
+  drupal_set_breadcrumb($bc);
+  print theme('page', $output);
 }
 
 function og_approve($gid, $uid) {
@@ -407,14 +428,19 @@ function og_unsubscribe($gid, $uid = NULL) {
   drupal_goto("node/$gid");
 }
 
+// TODO: caching is likely not needed here anymore. harmless though.
+// since a user's subscriptions are loaded into $user object, this function is only occassionally useful to get group subs for users other than the current user
+// even then, it often makes sense to call user_load() instead of this function.
+// load all subscriptions for a given user
 function og_get_subscriptions($uid) {
   static $subscriptions = array();
 
   if (!isset($subscriptions[$uid])) {
-    $sql = "SELECT na.*, n.title FROM {node_access} na INNER JOIN {node} n ON na.nid = n.nid WHERE gid = %d AND realm = 'og_uid' AND grant_view = 1";
+    $sql = "SELECT na.*, n.title, ou.mail_type FROM {node_access} na INNER JOIN {node} n ON na.nid = n.nid LEFT JOIN {og_uid} ou ON n.nid=ou.nid WHERE gid = %d AND realm = 'og_uid' AND grant_view = 1";
     $result = db_query($sql, $uid);
     while ($row = db_fetch_object($result)) {
       $subscriptions[$uid][$row->nid]['title'] = $row->title;
+      $subscriptions[$uid][$row->nid]['mail_type'] = $row->mail_type;
       $subscriptions[$uid][$row->nid]['grant_view'] = $row->grant_view;
       $subscriptions[$uid][$row->nid]['grant_update'] = $row->grant_update;
       $subscriptions[$uid][$row->nid]['grant_delete'] = $row->grant_delete;
@@ -460,17 +486,17 @@ function og_list_users_page($gid) {
         $rows[$i][] = format_name($account);
         if ($access) {
           if ($account->grant_view) {
-            $rows[$i][] = l(t('unsubscribe'), "og/unsubscribe/$gid/$account->uid", array(), "dest=og/users/$gid");
+            $rows[$i][] = l(t('unsubscribe'), "og/unsubscribe/$gid/$account->uid", array(), "destination=og/users/$gid");
             if ($account->grant_update) {
-              $rows[$i][] = l(t('admin: remove'), "og/delete_admin/$gid/$account->uid", array(), 'dest='. $_GET['q']);
+              $rows[$i][] = l(t('admin: remove'), "og/delete_admin/$gid/$account->uid", array(), 'destination='. $_GET['q']);
             }
             else {
-              $rows[$i][] = l(t('admin: create'), "og/create_admin/$gid/$account->uid", array(), 'dest='. $_GET['q']);
+              $rows[$i][] = l(t('admin: create'), "og/create_admin/$gid/$account->uid", array(), 'destination='. $_GET['q']);
             }
           }
           else {
-            $rows[$i][] = l(t('approve'), "og/approve/$gid/$account->uid", array(), "dest=og/users/$gid");
-            $rows[$i][] = l(t('deny'), "og/deny/$gid/$account->uid", array(), "dest=og/users/$gid");
+            $rows[$i][] = l(t('approve'), "og/approve/$gid/$account->uid", array(), "destination=og/users/$gid");
+            $rows[$i][] = l(t('deny'), "og/deny/$gid/$account->uid", array(), "destination=og/users/$gid");
           }
         }
         $i++;
@@ -496,13 +522,12 @@ function og_list_groups_page() {
     $result = pager_query(db_rewrite_sql('SELECT n.nid, n.title, n.body, n.uid, u.name FROM {node} n INNER JOIN {users} u ON n.uid = u.uid INNER JOIN {og} og ON n.nid = og.nid WHERE og.selective = 0 AND n.type = \'og\' ORDER BY n.nid DESC'), 50);
   }
   $header = array(t("Title"), t('Subscribers'), t("Owner"), t('Description'));
-  $subscriptions = og_get_subscriptions($user->uid);
 
   while ($node = db_fetch_object($result)) {
     $cnt = db_num_rows(db_query(og_list_users_sql(), $node->nid));
     $rows[] = array(
       array("data" => l($node->title, "node/$node->nid")),
-      array("data" => in_array($node->nid, array_keys($subscriptions)) ? l($cnt, "og/users/$node->nid") : $cnt),
+      array("data" => in_array($node->nid, array_keys($user->og_groups)) ? l($cnt, "og/users/$node->nid") : $cnt),
       array("data" => format_name($node)),
       array("data" => check_output($node->body)),
     );
@@ -710,6 +735,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'validate':
+      global $user;
+      
       if ($node->type != 'og') {
         // 'og/album/validate' is a special case. We want the audience validation even if 'image' node type is omitted
         // Used for album module galleries
@@ -719,10 +746,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           }
           else {
             if (is_array($node->og_groups)) {
-              $subs = og_get_subscriptions($node->uid);
               foreach($node->og_groups as $gid) {
-                if (!in_array($gid, array_keys($subs))) {
-                  form_set_error('og_groups', t('%name must be a subscriber in order to post into %group', array('%name' => $node->name, '%group' => $subs[$gid]['title'])));
+                if (!in_array($gid, array_keys($user->og_groups))) {
+                  form_set_error('og_groups', t('%name must be a subscriber in order to post into %group', array('%name' => $node->name, '%group' => $$user->og_groups[$gid]['title'])));
                 }
               }
             }
@@ -748,6 +774,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       og_delete_permissions($node);
       break;
     case 'insert':
+      og_save_permissions($node);
+      og_mail($node);
+      break;
     case 'update':
       og_save_permissions($node);
       break;
@@ -804,20 +833,68 @@ function og_nodeapi_form($node) {
   }
 }
 
+
+/**
+ * Send this node via email to all email subscribers. Called from og_nodeapi()
+ *
+ * @param $node
+ *   the node which was just added or updated
+ * @return
+ *   none
+ */
+function og_mail($node) {
+  if ($node->og_groups) {
+    $url = url("node/$node->nid", NULL, NULL, TRUE);
+    $author = user_load(array('uid' => $node->uid));
+    $sitemail = variable_get("site_mail", ini_get("sendmail_from"));
+    $headers = "From: $sitemail\nReply-to: $sitemail\nX-Mailer: Drupal\nReturn-path: $sitemail\nErrors-to: $sitemail";
+    $title = strtoupper($node->title);
+    //get email subscribers
+    $groups = implode(', ', $node->og_groups);
+    $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {node} n ON ou.nid=n.nid WHERE ou.nid IN ($groups) AND ou.mail_type=1";
+    $result = db_query($sql);
+    while ($row = db_fetch_object($result)) {
+      $subj = "[$row->group_name] ". t('%author added \'%title\' at %site', array('%author' => $author->name, '%title' => $title, '%site' => variable_get('site_name', drupal)));
+      $txt = "$title by $author->name\n$url\n\n";
+      $txt .= $node->read_more ? t('EXCERPT') : t('FULL POST');
+      $txt .= "\n". $node->teaser;
+      $txt .= "\n\n-----------------------\n";
+      $txt .= t("You are subscribed to the group '%group_name' at '%site'. To manage your subscription, visit %group_url", array('%group_name' => $row->group_name, '%site' => variable_get('site_name', drupal), '%group_url' => url("og/manage/$row->gid", NULL, NULL, TRUE)));
+      $subject = "[]";
+      user_mail($row->mail, $subj, $txt, $headers);
+    }
+  }  
+}
+
 function og_user($op, &$edit, &$account, $category = NULL) {
   global $user;
 
   switch ($op) {
+    case load:
+        $account->og_groups = og_get_subscriptions($account->uid);
+      break;    
     case 'view':
       if ($account->uid == $user->uid || user_access('administer organic groups')) {
-        if ($subs = og_get_subscriptions($account->uid)) {
-          foreach ($subs as $key => $val) {
+        if ($account->og_groups) {
+          foreach ($account->og_groups as $key => $val) {
             $links[] = l($val['title'], "node/$key");
           }
           return array(t('Groups') => theme('node_list', $links));
         }
       }
       break;
+    case 'form':
+      # if ($category == 'account') {
+#         foreach ($account->og_groups as $key => $val) {
+#           $radio = form_radios('', "og_type_$key", $edit["og_type_$key"] ? $edit["og_type_$key"] : $val['mail_type'], array(t('web only'), t('email and web')));
+#           $rows[] = array(l($val['title'], "node/$key"), $radio);
+#         }
+#         if ($rows) {
+#           $output = theme('table', $header, $rows);
+#           return array(array('title' => t('Groups'), 'data' => $output, 'weight' => 0)); 
+#         }
+#       }  
+#       break;
   }
 }
 
@@ -1012,8 +1089,7 @@ function og_albums_page($gid, $str_tags, $operator = 'or') {
     // append 'create album' link if available and permitted. a bit messy for now.
     if (user_access('create images') && module_exist('folksonomy')) {
       global $user;
-      $subs = og_get_subscriptions($user->uid);
-      if ($subs[$node->nid]['grant_view']) {
+      if ($user->og_groups[$node->nid]['grant_view']) {
         $links[] = l(t('add to this album'), 'og/albums/form', array(), "edit[og_groups][]=$node->nid&edit[og_tags]=". urlencode($str_tags));
         $output .= theme('links', $links);
       }
@@ -1139,8 +1215,7 @@ function og_block_albums() {
 function og_block_subscribers() {
   global $user;
   if ($gid = $_SESSION['og_last']->nid) {
-    $subscriptions = og_get_subscriptions($user->uid);
-    if (in_array($gid, array_keys($subscriptions))) {
+    if (in_array($gid, array_keys($user->og_groups))) {
       $sql = og_list_users_sql(0);
       $result = db_query_range($sql, $gid, 0, 15);
       while ($row = db_fetch_object($result)) {
@@ -1194,14 +1269,11 @@ function og_block_details() {
         $links[] = $txt;
         $links[] = t('age: %age', array('%age' => format_interval(time()-$node->created, 2)));
         $links[] = t('manager: %name', array('%name' => format_name($node)));
-        // don't allow manager to unsubscribe
-        if ($user->uid != $node->uid) {
-          $links[] = l(t('unsubscribe'), "og/unsubscribe/$node->nid", array(), 'dest=og');
-        }
+        $links[] = l(t('manage subscription'), "og/manage/$node->nid");
       }
       elseif ($subscription == 'requested') {
         $links[] = t('Your subscription request awaits approval.');
-        $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'dest=og');
+        $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'destination=og');
       }
       elseif ($user->uid) {
         if ($node->og_selective) {
@@ -1210,7 +1282,7 @@ function og_block_details() {
         else {
           $txt = t('subscribe');
         }
-        $links[] = l($txt, "og/subscribe/$node->nid", array(), "dest=node/$node->nid");
+        $links[] = l($txt, "og/subscribe/$node->nid", array(), "destination=node/$node->nid");
       }
       $output .= theme('item_list', $links);
     }
@@ -1247,15 +1319,15 @@ function og_link($type, $node = 0, $main) {
 
   if ($gid = $_SESSION['og_last']->nid) {
     if ($type == 'node' && $node->type != 'og' && node_access('update', array('nid' => $gid, 'status' => 1))) {
-      $links[] = l(t('remove from group'), "og/remove_node/$gid/$node->nid", array(), "dest=node/$gid");
+      $links[] = l(t('remove from group'), "og/remove_node/$gid/$node->nid", array(), "destination=node/$gid");
     }
   }
   
   # if ($node->og_groups) {
-#     if ($mygroups = og_get_subscriptions($user->uid)) {
+#     if ($mygroups = $user->og_groups) {
 #       foreach ($mygroups as $key => $grp) {
 #         if ($grp['grant_update'] && in_array($key, $node->og_groups)) {
-#           $links[] = l(t('remove from group'), "og/remove_node/$key/$node->nid", array('title' => $grp['title']), "dest=node/$key");
+#           $links[] = l(t('remove from group'), "og/remove_node/$key/$node->nid", array('title' => $grp['title']), "destination=node/$key");
 #           break;
 #         }
 #       }
