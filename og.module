@@ -22,13 +22,13 @@ function og_menu($may_cache) {
   if ($may_cache) {
     // anon users should be able to get to the subscribe page
     $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('subscribe to group'));
-    
+
     $items[] = array('path' => 'node/add/og', 'title' => t('group'), 'access' => user_access('create groups'));
     $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => user_access('access content'));
     $access = $user->uid; // login is required
     $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('unsubscribe from group'));
     $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('approve subscription request'));
-    $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('deny subscription request'));    
+    $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('deny subscription request'));
     $items[] = array('path' => 'og/create_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_create_admin', 'access' => $access, 'title' => t('create group administrator'));
     $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('delete group administrator'));
     $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
@@ -48,11 +48,11 @@ function og_menu($may_cache) {
         $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
       }
     }
-    
+
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(array('nid' => arg(1)));
       if ($node->type == 'og') {
-        $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'og_email', 'callback arguments' => arg(1), 'access' => node_access('view', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);               
+        $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'og_email', 'callback arguments' => arg(1), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
       }
     }
 
@@ -76,7 +76,7 @@ function og_nodeview($gid) {
   drupal_goto("node/$gid");
 }
 
-function og_email($gid) { 
+function og_email($gid) {
   $node = node_load(array('nid' => $gid));
   drupal_set_title(t('Send email to %group', array('%group' => $node->title)));
   if ($edit = $_POST['edit']) {
@@ -99,7 +99,7 @@ function og_email($gid) {
          $emails[] = $row->mail;
       }
       foreach ($emails as $mail) {
-        user_mail(trim($mail), $edit['subject'], $msg, $headers);  
+        user_mail(trim($mail), $edit['subject'], $msg, $headers);
       }
       drupal_set_message(t('%count emails sent.', array('%count' => count($emails))));
       drupal_goto("node/$gid");
@@ -110,7 +110,7 @@ function og_email($gid) {
   }
   else {
     print theme('page', og_email_form($gid));
-  }  
+  }
 }
 
 function og_email_form($gid) {
@@ -135,7 +135,7 @@ function og_approve($gid, $uid) {
     $from = variable_get('site_mail', ini_get('sendmail_from'));
     $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
     $account = user_load(array('uid' => $uid));
-    user_mail($account->mail, $subj, $body, $headers); 
+    user_mail($account->mail, $subj, $body, $headers);
     drupal_goto("node/$gid");
   }
   else {
@@ -248,7 +248,7 @@ function og_invite($gid) {
       global $user;
       $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from";
       foreach ($emails as $mail) {
-        user_mail(trim($mail), $subj, $body, $headers);  
+        user_mail(trim($mail), $subj, $body, $headers);
       }
       drupal_set_message(t('%count invitations sent.', array('%count' => count($emails))));
       print theme('page', og_invite_form($gid));
@@ -259,7 +259,7 @@ function og_invite($gid) {
   }
   else {
     print theme('page', og_invite_form($gid));
-  }  
+  }
 }
 
 function og_invite_form($gid) {
@@ -275,7 +275,7 @@ function og_subscribe($gid, $uid = NULL) {
   if (is_null($uid)) {
     global $user;
     if ($user->uid) {
-      $account = $user;  
+      $account = $user;
     }
     else {
       drupal_set_message(t('In order to subscribe to this group, you must login or register a new account. After you have successfully done so, you will need to follow the <em>subscribe</em> link again.'));
@@ -305,7 +305,7 @@ function og_subscribe($gid, $uid = NULL) {
     $res = db_query($sql, $node->nid);
     while ($row = db_fetch_object($res)) {
       $admins[] = $row->mail ? $row->mail : NULL;
-    }                                           
+    }
     $subj = t("Subscription request for '%group' from '%name'", array('%group' => $node->title, '%name' => $account->name));
     $body = t('You may approve or deny this request at %url', array('%url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
     $from = variable_get('site_mail', ini_get('sendmail_from'));
@@ -476,7 +476,7 @@ function og_view(&$node, $teaser = FALSE, $page = FALSE) {
     }
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'));
     drupal_set_breadcrumb($bc);
-  }                                    
+  }
   $icon = theme('xml_icon', url("og/feed/$node->nid"));
   $node->body = $output. $nodes. $icon;
   return $node;
@@ -672,7 +672,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
       break;
   }
 }
-                                        
+
 /**
  * In the 'og_uid' realm, the gid is a uid. This is used to determine a whether a user
  * is a member of a group, and what his permissions are in that group (view/update/delete). When a
@@ -853,25 +853,25 @@ function og_feed($gid) {
   $group = (object) array('nid' => $gid);
   if (node_access('view', $cond)) {
     $sql = og_get_home_nodes_sql();
-    $result = db_query($sql, $gid); 
+    $result = db_query($sql, $gid);
     while ($onenode = db_fetch_array($result)) {
       // make sure user can view each node
       if (node_access('view', $onenode)) {
         $nodes[] = $onenode['nid'];
       }
     }
-    if ($nodes) {  
+    if ($nodes) {
       $sql = 'SELECT nid FROM {node} WHERE nid IN (%s)';
       $result = db_query($sql, implode(', ', $nodes));
       $node = node_load(array('nid' => $gid));
       $channel['title'] = $node->title;
       $channel['link'] = url("node/$gid", NULL, NULL, TRUE);
       $channel['description'] = $node->og_description;
-      node_feed($result, $channel); 
+      node_feed($result, $channel);
     }
     else {
       die('no posts in this group');
-    }               
+    }
   }
   else {
     drupal_access_denied();
