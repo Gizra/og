@@ -456,7 +456,7 @@ function og_nodeapi_form($node) {
         else {
           $public = 1;
         }
-        $output .= form_checkbox(t('Public'), 'og_public', 1, $public, t('Show this post to everyone or only to members of the groups above.'));
+        $output .= form_checkbox(t('Public'), 'og_public', 1, $public, t('Show this post to everyone or only to members of the groups below.'));
         break;
     }
 
@@ -702,7 +702,11 @@ function og_block_subscribers() {
       $sql = og_list_users_sql(0);
       $result = db_query_range($sql, $node->nid, 0, 15);
       while ($row = db_fetch_object($result)) {
-        $links[] = format_name($row);
+        $link = format_name($row);
+        if (!$row->grant_view) {
+          $link .= theme_mark();
+        }
+        $links[] = $link;
       }
       if ($links) {
         if (count($links) > 14) {
