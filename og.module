@@ -89,9 +89,9 @@ function og_theme() {
   global $custom_theme;  
   $group_node = NULL; // a node object containing the 'active' group for this request
   
-  $pages = array('users', 'albums', 'feed', 'invite', 'remove_node');  
+  $pages = array('users', 'albums', 'feed', 'invite', 'remove_node', 'manage');  
   if (arg(0) == ('og' && in_array(arg(1), $pages)) || arg(0) == 'node' && is_numeric(arg(1))) {
-    $group_node = og_set_theme(arg(1));
+    $group_node = og_set_theme(arg(2));
   }
   elseif (arg(0) == 'node' && arg(1) == 'add' && $gid = $_REQUEST['edit']['og_groups'][0]) {
     $group_node = node_load(array('nid' => $gid));
