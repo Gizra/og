@@ -36,3 +36,4 @@ TODO
 ----------------
 - optional 'permanent deny' for posts in groups and subscriber requests
 - email notifications for pending group subscriptions, request approved, request denied
+- move 'initialize access control' to its own form with proper instructions

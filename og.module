@@ -20,7 +20,7 @@ function og_menu($may_cache) {
 
   if ($may_cache) {
     $items[] = array('path' => 'node/add/og', 'title' => t('group'), 'access' => user_access('create groups'));
-    $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'access' => user_access('access groups'), 'weight' => 5);
+    $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => TRUE);
     $access = $user->uid; // login is required
     $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => $access, 'title' => t('subscribe to group'));
     $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('unsubscribe from group'));
@@ -36,20 +36,25 @@ function og_menu($may_cache) {
     $subs = og_get_subscriptions($user->uid);
     if (is_array($subs)) {
       foreach ($subs as $key => $sub) {
-        $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'access' => user_access('access groups'), 'callback arguments' => $key);
-        $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'access' => user_access('access groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK);
+        $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => $key, 'access' => TRUE);
+        $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
       }
     }
 
+    // handle 'initialize' checkbox from the settings page. should this checkbox to own page, off of settings page. move this code withit.
     if (isset($_POST['edit']['og_enabled']) && user_access('administer organic groups')) {
       _og_update_db($_POST['edit']['og_enabled']);
     }
+
+    //stash path so that its available if we have a 403. see http://drupal.org/node/13621
+    $_GET['q_original'] = $_GET['q'];
+
   }
   return $items;
 }
 
 function og_perm() {
-  return array('access groups', 'create groups', 'administer organic groups');
+  return array('create groups', 'administer organic groups');
 }
 
 function og_nodeview($gid) {
@@ -567,14 +572,24 @@ function _og_update_db($enable) {
   }
 }
 
+// called to determine whether or not to show group block
+// called during a 403 page and we show appropriate msg if no posts are accessible
 function og_is_group() {
-  // we don't use arg() because it has to work under a 403 page
-  // index.php exists for non clean urls on IIS
-  $uri = str_replace(array('?q=', 'index.php'), '', request_uri());
-  $args = explode('/', $uri);
-  $index = array_search('node', $args);
-  if (!empty($index) && is_numeric($args[$index+1]) && empty($args[$index+2])) {
-    $node = node_load(array('nid' => $args[$index+1]));
+  // adjust path if we are in a 403
+  if ($_GET['q'] == drupal_get_normal_path(variable_get('site_403', ''))) {
+    $_GET['q'] = $_GET['q_original']; // see og_menu(!$may_cache)
+  }
+
+  // these are the 2 pages when we want the block to appear
+  if (arg(0) == 'node' && is_numeric(arg(1)) && !arg(2)) {
+    $nid = arg(1);
+  }
+  elseif (arg(0) == 'og' && arg(1) == 'users') {
+    $nid = arg(2);
+  }
+
+  if ($nid) {
+    $node = node_load(array('nid' => $nid));
     if ($node->type == 'og') {
       $node->og_msg = t('There are no public posts in this group.');
       return $node;
@@ -600,9 +615,7 @@ function og_block($op = 'list', $delta = 0) {
     return $blocks;
   }
   else {
-    if (user_access('access groups')) {
-      return og_block_details();
-    }
+    return og_block_details();
   }
 }
 
@@ -630,11 +643,6 @@ function og_block_details() {
         }
       }
       if ($subscription == 'active') {
-        /*$type = variable_get('og_default_type', 'blog');
-        $typename = module_invoke($type, 'node_name');
-        if (node_access('create', array('type' => $type))) {
-          $links[] = l(t('create %typename', array('%typename' => $typename)), "node/add/$type", array('title' => t('Create a %typename post targeted at this group.', array('%typename' => $typename))), "edit[og_groups][]=$node->nid");
-        }*/
         $links = og_create_links($node);
         $txt = format_plural($cntall-$cntpending, '1 subscriber', '%count subscribers');
         $txt = l($txt, "og/users/$node->nid");
@@ -697,22 +705,6 @@ function og_settings() {
   $options = array(t('optional'), t('required'));
   $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group.'));
   $output .= form_checkbox(t('Initialize Access Control'), 'og_enabled', 1, variable_get('og_enabled', 0), t('Perform the queries necessary to enable or disable groups access control. You should perform this only once.'));
-  /*$types = array();
-  foreach (module_list() as $module) {
-    if ($name = module_hook($module, 'node_name')) {
-      $module_types = module_invoke($module, 'node_types');
-      if ($module_types) {
-        foreach ($module_types as $type) {
-          $types[$type] = $name;
-        }
-      }
-      else {
-        $types[$module] = $module;
-      }
-    }
-  }
-  unset($types['og']);
-  $output .= form_select(t('Default node type'), 'og_default_type', variable_get('og_default_type', 'blog'), $types, t('Which node type do you want users to create when they click the <strong>create</strong> link in the <strong>group details</strong> block'));*/
   return $output;
 }
 
