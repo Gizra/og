@@ -724,6 +724,11 @@ function og_albums_form() {
   $edit = array_merge(array('type' => 'image', 'uid' => $user->uid), $edit);
   $output .= og_nodeapi(array2object($edit), 'form post');
   $output .= form_button(t('Submit'));
+  if ($gid = $edit['og_groups'][0]) {
+    $node = node_load(array('nid' => $gid));
+    $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
+    drupal_set_breadcrumb($bc);
+  }
   print theme('page', form($output, 'post', url('og/albums/validate'), array("enctype" => "multipart/form-data")));
 }
 
