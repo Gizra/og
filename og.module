@@ -1,0 +1,714 @@
+<?php
+
+function og_help($section) {
+  $output = "";
+
+  switch ($section) {
+    case 'admin/help#og':
+      break;
+    case 'admin/modules#description':
+      return t("Organic groups");
+    case 'node/add/og':
+      return variable_get('og_help', '');
+    case 'node/add#og':
+      return t("A group provides home page for like minded users. There they post articles about their shared interest.");
+  }
+}
+
+function og_menu($may_cache) {
+  global $user;
+
+  if ($may_cache) {
+    $items[] = array('path' => 'node/add/og', 'title' => t('group'), 'access' => user_access('create groups'));
+    $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'access' => user_access('access groups'));
+    $access = $user->uid; // login is required
+    $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => $access, 'title' => t('subscribe to group'));
+    $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('unsubscribe from group'));
+    $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('approve subscription request'));
+    $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('deny subscription request'));
+    $items[] = array('path' => 'og/create_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_create_admin', 'access' => $access, 'title' => t('create group administrator'));
+    $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('delete group administrator'));
+    $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
+    $items[] = array('path' => 'og/access_denied', 'type' => MENU_CALLBACK, 'callback' => 'og_access_denied', 'title' => t('groups'));
+    $items[] = array('path' => 'admin/og/updatedb', 'type' => MENU_CALLBACK, 'callback' => '_og_updatedb', 'title' => t('update db'), 'access' => user_access('administer organic groups'));
+  }
+  else {
+    $subs = og_get_subscriptions($user->uid);
+    if (is_array($subs)) {
+      foreach ($subs as $key => $sub) {
+        $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'access' => user_access('access groups'), 'callback arguments' => $key);
+        $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'access' => user_access('access groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK);
+      }
+    }
+  }
+  return $items;
+}
+
+function og_perm() {
+  return array('access groups', 'create groups', 'administer organic groups');
+}
+
+function og_nodeview($gid) {
+  drupal_goto("node/$gid");
+}
+
+function og_dest() {
+  if ($dest = $_REQUEST['dest']) {
+    drupal_goto($dest);
+   }
+}
+
+function og_approve($gid, $uid) {
+  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
+    $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, %d, 'og_uid', 1)";
+    db_query($sql, $gid, $uid);
+    drupal_set_message(t('Subscription request approved.'));
+    og_dest();
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
+function og_deny($gid, $uid) {
+  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
+    $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_uid'";
+    db_query($sql, $gid, $uid);
+    drupal_set_message(t('Subscription request denied.'));
+    og_dest();
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
+function og_create_admin($gid, $uid) {
+  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
+    $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', 1, 1)";
+    db_query($sql, $gid, $uid);
+    drupal_set_message(t('User was promoted to <em> group administrator</a>'));
+    og_dest();
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
+function og_delete_admin($gid, $uid) {
+  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
+    $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', 1, 0)";
+    db_query($sql, $gid, $uid);
+    drupal_set_message(t('User is no longer a group administrator'));
+    og_dest();
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
+function og_remove_node($gid, $nid) {
+  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
+    // $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_uid', -1, 0, 0)";
+    $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_group'";
+    db_query($sql, $nid, $gid);
+    drupal_set_message(t('Post removed from group.'));
+    og_dest();
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
+function og_subscribe($gid, $uid = NULL) {
+  global $user;
+  if (is_null($uid)) {
+    $uid = $user->uid;
+  }
+  if ($uid != $user->uid && !node_access('update', array('nid' => $gid, 'status' => 1))) {
+    // only admins can subscribe another person
+    drupal_access_denied();
+  }
+
+  $names = array('nid', 'realm', 'gid', 'grant_view', 'grant_update');
+  $values = array($gid, "'og_uid'", $uid);
+
+  // selective groups must approve in all members
+  // if you can't view/edit/delete, you are *requesting* membership in the group
+  // if you can view, you are a member
+  // if you can edit, you are an admin
+  $node = node_load(array('nid' => $gid));
+  if ($node->og_public) {
+    $values[] = 1;
+    $values[] = 0;
+    drupal_set_message(t('User subscribed to group.'));
+  }
+  else {
+    $values[] = 0;
+    $values[] = 0;
+    drupal_set_message(t('Subscription request awaits approval by an administrator.'));
+  }
+  $sql = 'REPLACE INTO {node_access} ('. implode(',', $names). ') VALUES ('. implode(',', $values). ')';
+  db_query($sql);
+  og_dest();
+}
+
+function og_unsubscribe($gid, $uid = NULL) {
+  global $user;
+  if (is_null($uid)) {
+    $uid = $user->uid;
+  }
+  if ($uid != $user->uid && !node_access('update', array('nid' => $gid, 'status' => 1))) {
+    // only admins can unsubscribe another person
+    drupal_access_denied();
+  }
+
+  $sql = "DELETE FROM {node_access}  WHERE gid = %d AND nid = %d AND realm = 'og_uid'";
+  db_query($sql, $uid, $gid);
+  drupal_set_message(t('User unsubscribed from group.'));
+  og_dest();
+}
+
+/// $brief gives you an array suitable for a select box
+// non brief gives you all the grants for each group
+function og_get_subscriptions($uid) {
+  static $subscriptions = array(), $options = array();
+
+  if (!isset($subscriptions[$uid])) {
+    $sql = "SELECT na.*, n.title FROM {node_access} na INNER JOIN {node} n ON na.nid = n.nid WHERE gid = %d AND realm = 'og_uid' AND grant_view = 1";
+    $result = db_query($sql, $uid);
+    while ($row = db_fetch_object($result)) {
+      $subscriptions[$uid][$row->nid]['title'] = $row->title;
+      $subscriptions[$uid][$row->nid]['grant_view'] = $row->grant_view;
+      $subscriptions[$uid][$row->nid]['grant_update'] = $row->grant_update;
+      $subscriptions[$uid][$row->nid]['grant_delete'] = $row->grant_delete;
+    }
+  }
+  return $subscriptions[$uid] ? $subscriptions[$uid] : array();
+}
+
+/**
+ * Implementation of hook_access().
+ */
+function og_access($op, $node) {
+  global $user;
+
+  if ($op == 'create') {
+    return user_access('create groups') && $user->uid;
+  }
+}
+
+function og_list_users_sql($min_grant = 1) {
+  return "SELECT u.uid, u.name, na.* FROM {node_access} na INNER JOIN users u ON na.gid = u.uid AND na.nid = %d WHERE u.status > 0 AND realm = 'og_uid' AND grant_view >= $min_grant ORDER BY u.name ASC";
+}
+
+function og_list_users_page($gid) {
+  $sql = og_list_users_sql(0);
+  $result = pager_query($sql, 500, 0, NULL, $gid);
+  $header[] = t("Name");
+  $access = node_access('update', array('nid' => $gid, 'status' => 1));
+  if ($access) {
+    $header[] = array('data' => t('Operations'), 'colspan' => 2);
+  }
+  // prepend the group owner
+  $node = node_load(array('nid' => $gid));
+  $i=0;
+  $rows[$i][] = format_name($node). '&nbsp;<em>'. t('manager'). '</em>';
+  if ($access) {
+    $rows[$i][] = l(t('edit group'), "node/$gid/edit");
+    $rows[$i][] = '&nbsp;';
+  }
+  $i++;
+  while ($account = db_fetch_object($result)) {
+      if ($account->uid != $node->uid) {
+        $rows[$i][] = format_name($account);
+        if ($access) {
+          if ($account->grant_view) {
+            $rows[$i][] = l(t('unsubscribe'), "og/unsubscribe/$gid/$account->uid", array(), "dest=og/users/$gid");
+            if ($account->grant_update) {
+              $rows[$i][] = l(t('admin: remove'), "og/delete_admin/$gid/$account->uid", array(), 'dest='. $_GET['q']);
+            }
+            else {
+              $rows[$i][] = l(t('admin: create'), "og/create_admin/$gid/$account->uid", array(), 'dest='. $_GET['q']);
+            }
+          }
+          else {
+            $rows[$i][] = l(t('approve'), "og/approve/$gid/$account->uid", array(), "dest=og/users/$gid");
+            $rows[$i][] = l(t('deny'), "og/deny/$gid/$account->uid", array(), "dest=og/users/$gid");
+          }
+        }
+        $i++;
+      }
+  }
+  if ($pager = theme('pager', NULL, 500)) {
+    $rows[$i][] = array('data' => $pager, 'colspan' => 2);
+  }
+  $output = theme('table', $header, $rows);
+  $bc = array(t('Home'), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
+  print theme('page', $output, t('Subscribers'), $bc);
+}
+
+function og_list_groups_page() {
+  global $user;
+
+  if (variable_get('og_selective_listed', 0)) {
+    $result = pager_query('SELECT DISTINCT(n.nid), n.title, n.body, n.uid, u.name FROM {node} n INNER JOIN users u ON n.uid = u.uid WHERE n.status=1 AND n.type = \'og\' ORDER BY n.nid DESC',50);
+  }
+  else {
+    $result = pager_query('SELECT DISTINCT(n.nid), n.title, n.body, n.uid, u.name FROM {node} n '. node_access_join_sql(). ' INNER JOIN users u ON n.uid = u.uid WHERE '. node_access_where_sql(). " AND n.status=1 AND n.type = 'og' ORDER BY n.nid DESC",50);
+  }
+  $header = array(t("Title"), t('Subscribers'), t("Owner"), t('Description'));
+  $subscriptions = og_get_subscriptions($user->uid);
+
+  while ($node = db_fetch_object($result)) {
+    $cnt = db_num_rows(db_query(og_list_users_sql(), $node->nid));
+    $rows[] = array(
+      array("data" => l($node->title, "node/$node->nid")),
+      array("data" => in_array($node->nid, array_keys($subscriptions)) ? l($cnt, "og/users/$node->nid") : $cnt),
+      array("data" => format_name($node)),
+      array("data" => check_output($node->body)),
+    );
+  }
+  if (!$rows) {
+    $rows[] = array(array('data' => t('No groups'), 'colspan' => 4));
+  }
+  $output = theme('table', $header, $rows). theme('pager', NULL, 50);
+  print theme('page', $output);
+}
+
+//  when you view a group, you really see some facts about the group and then a list of nodes affiliated with that group
+function og_view(&$node, $teaser = FALSE, $page = FALSE) {
+  if ($teaser || !$page) {
+    $node = node_prepare($node, $teaser);
+  }
+  else {
+    $result = pager_query('SELECT DISTINCT(n.nid) FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE '. node_access_where_sql(). " AND (na.gid = $node->nid) AND na.realm = 'og_group' AND n.status=1 AND n.type != 'og' ORDER BY n.created DESC", variable_get('default_nodes_main', 10));
+    while ($onenode = db_fetch_array($result)) {
+      $nodes .= node_view(node_load($onenode), FALSE, FALSE);
+    }
+    $nodes .= theme('pager', NULL, variable_get('default_nodes_main', 10));
+    if (!$nodes) {
+      drupal_set_message(t('No posts yet in this group. %pt', array('%pt' => l(t('Create post'), 'node/add'))));
+    }
+    $bc = array(l(t('Home'), ''), l(t('groups'), 'og'));
+    drupal_set_breadcrumb($bc);
+  }
+  $node->body = $output. $nodes;
+  return $node;
+}
+
+function og_form(&$node, &$param) {
+  if (function_exists('taxonomy_node_form')) {
+    $output .= implode('', taxonomy_node_form('og', $node));
+  }
+  $output .= form_textarea(t('Description'), 'body', $node->body, 60, 20, '', NULL, TRUE);
+  if (isset($_POST['edit']['og_grant_view'])) {
+    $grant_view = $_POST['edit']['og_grant_view'];
+  }
+  elseif ($node->nid) {
+    $grant_view = $node->og_public;
+  }
+  else {
+    $grant_view = 1;
+  }
+  $output .= form_checkbox(t('Auto-accept'), 'og_grant_view', 1, $grant_view, t('Check this box if new subscription requests should be automatically accepted.'));
+  $output .= filter_form('format', $node->format);
+  return $output;
+}
+
+function og_node_load_public($node) {
+  $sql = "SELECT grant_view FROM {node_access} WHERE nid = %d AND gid=0 AND realm='og_group'";
+  $gv = db_result(db_query($sql, $node->nid));
+  $node->og_public = $gv;
+  return $node;
+}
+
+// returns all the group affiliations for a given node
+function og_get_node_groups($node) {
+  if ($node->type != 'og') {
+    $sql = "SELECT gid FROM {node_access} WHERE nid = %d AND realm='og_group' AND gid != 0";
+    $result = db_query($sql, $node->nid);
+    while ($row = db_fetch_object($result)) {
+      $groups[] = $row->gid;
+    }
+    return $groups ? $groups : array();
+  }
+}
+
+function og_validate(&$node) {
+  $node->comment = 0;
+}
+
+function og_node_name($node) {
+  return t('group');
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+*/
+function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+  switch ($op) {
+    case 'load':
+      $node = og_node_load_public($node);
+      if ($grps = og_get_node_groups($node)) {
+        $node->og_groups = $grps;
+      }
+      break;
+    case 'validate':
+      if ($node->type != 'og' && variable_get('og_audience_required', 0) && isset($node->og_groups) && empty($node->og_groups)) {
+        form_set_error('og_groups', t('You must select an audience in order to post.'));
+      }
+      break;
+    case 'delete':
+      og_delete_permissions($node);
+      break;
+    case 'insert':
+    case 'update':
+      og_save_permissions($node);
+      break;
+    case 'form post':
+      return og_nodeapi_form($node);
+  }
+}
+
+function og_nodeapi_form($node) {
+  $edit = $_REQUEST['edit'];
+  if ($node->type != 'og') {
+
+    $required = variable_get('og_audience_required', 0);
+    $subs = og_get_subscriptions($node->uid);
+    foreach ($subs as $key => $val) {
+      $options[$key] = $val['title'];
+    }
+    if (!$options && $required) {
+      drupal_set_message(t('You must subscribe to a group before posting.'), 'error');
+    }
+
+    $vis = variable_get('og_visibility', 0);
+    switch ($vis) {
+      case 2: //user decides how public the post is
+        if (isset($edit['og_public'])) {
+          $public = $edit['og_public'];
+        }
+        elseif ($node->nid) {
+          $public = $node->og_public;
+        }
+        else {
+          $public = 1;
+        }
+        $output .= form_checkbox(t('Public'), 'og_public', 1, $public, t('Show this post to everyone or only to members of the groups above.'));
+        break;
+      case 1: // visible in and out of group
+        $output .= form_hidden('og_public', 1);
+        break;
+      case 0: // visible only in group
+        $output .= form_hidden('og_public', 0);
+        break;
+    }
+
+    if (isset($edit['og_groups'])) {
+      $groups = $edit['og_groups'];
+    }
+    elseif ($node->nid) {
+      $groups = $node->og_groups;
+    }
+    else {
+      $groups = array();
+    }
+
+    $output .= form_checkboxes(t('Audience'), 'og_groups', $groups, $options, t('Show this post in these groups.'), NULL, $required);
+
+    return $output;
+  }
+  else {
+    return form_hidden('og_public', 1);
+  }
+}
+
+function og_user($op, &$edit, &$account, $category) {
+  global $user;
+
+  switch ($op) {
+    case 'view':
+      if ($account->uid == $user->uid || user_access('administer organic groups')) {
+        if ($subs = og_get_subscriptions($account->uid)) {
+          foreach ($subs as $key => $val) {
+            $links[] = l($val['title'], "node/$key");
+          }
+          return array('Groups' => theme('node_list', $links));
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * In the 'og_uid' realm, the gid is a uid. This is used to determine a whether a user
+ * is a member of a group, and what his permissions are in that group (view/update/delete). When a
+ * user has permissions of 0,0,0 he is considered to be 'applying' for access to a private group
+ *
+ * In the 'og_group' realm, the gid is a nid of a group. This is used
+ * to store which nodes should show up in which groups. Further, the 'grant_view'
+ * permission determines whether a group is selective (i.e. private) or not.
+ *
+**/
+function og_node_grants($account, $op) {
+  $grants['og_uid'][] = $account->uid;
+  $grants['og_group'][] = 0;
+
+  // get subscriptions
+  if ($subscriptions = og_get_subscriptions($account->uid)) {
+    foreach ($subscriptions as $key => $val) {
+      if ($val["grant_$op"]) {
+        $grants['og_group'][] = $key;
+      }
+    }
+  }
+  return $grants ? $grants : array();
+}
+
+function og_save_permissions(&$node) {
+  global $user;
+
+  $sql = "DELETE FROM {node_access} WHERE realm = 'og_group' AND nid = %d";
+  db_query($sql, $node->nid);
+
+  if ($node->type != 'og') {
+    // put the post into each selected group
+    if (is_array($node->og_groups)) {
+      foreach($node->og_groups as $gid) {
+        $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, %d, 'og_group', 1)";
+        db_query($sql, $node->nid, $gid);
+      }
+    }
+
+    // if the public checkbox was selected, give a universal grant for this node
+    if ($node->og_public) {
+      $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_group', 1)";
+      db_query($sql, $node->nid);
+    }
+  }
+  else {
+    // for a group: if the 'grant_view' checkbox was checked, give a universal grant
+    // dprint_r($node);
+    if ($node->og_grant_view) {
+      $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_group', 1)";
+      db_query($sql, $node->nid);
+    }
+
+    // make sure the node owner is a full powered subscriber
+    $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_uid', 1, 1, 1)";
+    db_query($sql, $node->nid, $node->uid);
+  }
+}
+
+function og_delete_permissions(&$node) {
+  // delete all existing grants for this module
+  $sql = "DELETE FROM {node_access} WHERE realm = '%s' AND nid = $node->nid";
+  $realms = array('og_group', 'og_uid');
+  foreach ($realms as $realm) {
+    db_query($sql, $realm);
+  }
+}
+
+/**
+ * Update the node_access table when a user enables/disables the module in the
+ * settings page.  Because Drupal does not, at this
+ * time, provide hooks that run automatically upon the enabling/disabling of a
+ * module in the admin/modules page, we must force the site-admin to explicitly
+ * enable/disable a module on the settings page, in
+ * addition to enabling/disabling the module in the admin/modules page.
+ *
+ * Here, if the user is enabling the module, we make sure the default entry in
+ * the node_access table is deleted and walk through all the nodes in the node_table
+ * and grant all view access as is the default case when this module is not
+ * enabled.  We only do this for nodes whose permissions haven't been set before by
+ * this module.  It is possible that a site-admin may have previously enabled the
+ * module before disabling it.  Upon re-enabling, we want to account for the old
+ * permissions set by the module by not re-inserting entries for them.
+ *
+ * Disabling the module simply requires re-inserting the default entry back into
+ * the node access table to give 'view' perms to everyone for everything:
+ * (0, 0, 'all', 1, 0, 0)
+ */
+function _og_update_db($enable) {
+  if (!$enable) {
+    // We use the delete statement to avoid inserting a duplicate entry into the database.
+    // Without the DELETE query, this can happen when a site admin has already enabled the modules
+    // from the settings page and goes back to it and resaves the enabled setting.
+    db_query('REPLACE INTO node_access VALUES (0, 0, \'all\', 1, 0, 0)');
+    drupal_set_message(t('Organic groups access control has been disabled. You may now disable the module on the <em>%modules</em> page', array('%modules' => l(t('admin/modules'), 'admin/modules'))));
+  }
+  else { // the module was just enabled or re-enabled; provide default view access to everyone for nodes that were created
+         // between the previous disabling of the module and the current enabling of the module;
+         // nodes that were created during a previous enabled period are left-alone.
+         // Permissions for those nodes will be the same as when the module was previously enabled.
+    db_query('DELETE from node_access where nid=0 AND gid=0 AND realm=\'all\' AND grant_view=1 AND grant_update=0 AND grant_delete=0');
+
+    // Assign universal grant to all non-group nodes which don't already have any grants from this module
+    $result = db_query("SELECT n.nid FROM {node} n LEFT JOIN {node_access} na ON n.nid = na.nid AND realm LIKE '%og%' WHERE n.type != 'og' AND ISNULL(na.gid)");
+    while ($row = db_fetch_object($result)) {
+      $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_group', 1)";
+      db_query($sql, $row->nid);
+    }
+    drupal_set_message(t('Organic groups access control enabled.'));
+  }
+}
+
+// we don't use arg() because it has to work under a 403 page
+function og_is_group() {
+  $uri = str_replace('?q=', '', request_uri());
+  $args = explode('/', $uri);
+  $index = array_search('node', $args);
+  if (!empty($index) && is_numeric($args[$index+1]) && empty($args[$index+2])) {
+    $node = node_load(array('nid' => $args[$index+1]));
+    if ($node->type == 'og') {
+      $node->og_msg = t('There are no public posts in this group.');
+      return $node;
+    }
+  }
+}
+
+function og_access_denied() {
+  $node = og_is_group();
+  if (!$node) {
+    $node->og_msg = message_access();
+    $node->title = t('Access denied');
+  }
+  print theme('page', $node->og_msg, $node->title);
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function og_block($op = 'list', $delta = 0) {
+  if ($op == 'list') {
+    $blocks[0]['info'] = t('Group details');
+    return $blocks;
+  }
+  else {
+    if (user_access('access groups')) {
+      return og_block_details();
+    }
+  }
+}
+
+function og_block_details() {
+  global $user;
+
+  if ($node = og_is_group()) {
+    $output = '<div id="og_description">'. $node->body. '</div><br />';
+    if ($_POST['op'] != t('Preview')) {
+      $subscribed = FALSE;
+      $result = db_query(og_list_users_sql(0), $node->nid);
+      $cntall = db_num_rows($result);
+      $cntpending = 0;
+      while ($row = db_fetch_object($result)) {
+        if ($row->grant_view == 0) {
+          $cntpending++;
+        }
+        if ($row->uid == $user->uid) {
+          if ($row->grant_view) {
+            $subscription = 'active';
+          }
+          else {
+            $subscription = 'requested';
+          }
+        }
+      }
+      if ($subscription == 'active') {
+        /*$type = variable_get('og_default_type', 'blog');
+        $typename = module_invoke($type, 'node_name');
+        if (node_access('create', array('type' => $type))) {
+          $links[] = l(t('create %typename', array('%typename' => $typename)), "node/add/$type", array('title' => t('Create a %typename post targeted at this group.', array('%typename' => $typename))), "edit[og_groups][]=$node->nid");
+        }*/
+        $links = og_create_links($node);
+        $txt = format_plural($cntall-$cntpending, '1 subscriber', '%count subscribers');
+        $txt = l($txt, "og/users/$node->nid");
+        $txt .= $cntpending ? " ($cntpending)" : '';
+        $links[] = $txt;
+        $links[] = t('age: %age', array('%age' => format_interval(time()-$node->created, 2)));
+        $links[] = t('manager: %name', array('%name' => format_name($node)));
+        // don't allow manager to unsubscribe
+        if ($user->uid != $node->uid) {
+          $links[] = l(t('unsubscribe'), "og/unsubscribe/$node->nid", array(), 'dest=og');
+        }
+      }
+      elseif ($subscription == 'requested') {
+        $links[] = t('Your subscription request awaits approval.');
+        $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'dest=og');
+      }
+      else {
+        $links[] = l(t('subscribe'), "og/subscribe/$node->nid", array(), "dest=node/$node->nid");
+      }
+      $output .= theme('item_list', $links);
+    }
+    $block['content'] = $output;
+    $block['subject'] = $node->title;
+    return $block;
+  }
+}
+
+// $group is an object containing the group node
+function og_create_links($group) {
+  foreach (node_list() as $type) {
+    if (node_access('create', $type) && $type != 'og') {
+      $name = node_invoke($type, 'node_name');
+      $links[] = l(t('create %type', array('%type' => $name)), "node/add/$type", array('title' => t('Add a new %s in this group.', array('%s' => $name))), "edit[og_groups][]=$group->nid");
+    }
+  }
+  return $links ? $links : array();
+}
+
+function og_link($type, $node = 0, $main) {
+  global $user;
+
+  if ($node->og_groups) {
+    if ($mygroups = og_get_subscriptions($user->uid)) {
+      // dprint_r($node->og_groups);
+      // dprint_r($mygroups);
+      foreach ($mygroups as $key => $grp) {
+        if ($grp['grant_update'] && in_array($key, $node->og_groups)) {
+          $links[] = l(t('remove from group'), "og/remove_node/$key/$node->nid", array(), "dest=node/$key");
+          break;
+        }
+      }
+    }
+  }
+  return $links ? $links : array();
+}
+
+function og_settings() {
+  $output = form_textarea(t('Explanation or submission guidelines'), 'og_help', variable_get('og_help', ''), 70, 5, t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
+  $output .= form_checkbox(t('List Selective Groups'), 'og_selective_listed', 1, variable_get('og_selective_listed', 0), t('Selective groups appear in the %s. Selective groups require new subscription requests to be manually approved.', array('%s' => l('list of groups page', 'og'))));
+  $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
+  $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given posts should be when it is affiliated with a group'));
+  $options = array(t('optional'), t('required'));
+  $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group.'));
+  $output .= form_checkbox(t('Initialize Access Control'), 'og_enabled', 1, variable_get('og_enabled', 0), t('Perform the queries necessary to enable or disable groups access control. You should perform this only once.'));
+  /*$types = array();
+  foreach (module_list() as $module) {
+    if ($name = module_hook($module, 'node_name')) {
+      $module_types = module_invoke($module, 'node_types');
+      if ($module_types) {
+        foreach ($module_types as $type) {
+          $types[$type] = $name;
+        }
+      }
+      else {
+        $types[$module] = $module;
+      }
+    }
+  }
+  unset($types['og']);
+  $output .= form_select(t('Default node type'), 'og_default_type', variable_get('og_default_type', 'blog'), $types, t('Which node type do you want users to create when they click the <strong>create</strong> link in the <strong>group details</strong> block'));*/
+  return $output;
+}
+
+function og_init() {
+  if (isset($_POST['edit']['og_enabled']) && user_access('administer organic groups')) {
+    _og_update_db($_POST['edit']['og_enabled']);
+  }
+}
+
+?>
