@@ -9,7 +9,7 @@ INSTALLATION
 - Activate the module as usual
 - Install the .sql table as usual
 - Visit the admin/settings/og page and 'initialize access control'. Set other preferences as desired. Submit the page. This initialization fundamentally changes your drupal site,
-so don't do this just for fun
+so don't do this just for fun.
 - On the administer/content/configure/defaults workflow page, disable commenting for nodes of type 'group'
 - On the admin/settings page, set 'Default 403 (access denied) page' to 'og/access_denied'
 - On the admin/block page, enable the 'Group details' with a low 'weight' value
@@ -20,9 +20,9 @@ NOTES
 ----------------
 - 'Administer nodes' permission is required for changing the Manager of a group
 - 'Administer nodes' enables viewing of all nodes regardless of private/public status
-- All subscriber management happens on the 'user list' page which is linked from the group Block (while viewing a group page).
-This includes approving subscription requests (for selective groups), unsubscribing users and promoting
+- All subscriber management happens on the 'user list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), unsubscribing users and promoting
 users into group admins.
+- If you decide to stop using this module, you will have to remove all records from the node_access table which reference the og_group and og_uid realms and also insert the inital records which grants universal read access to all nodes.
 
 
 THEMES
