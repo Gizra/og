@@ -20,10 +20,12 @@ function og_menu($may_cache) {
   global $user;
 
   if ($may_cache) {
+    // anon users should be able to get to the subscribe page
+    $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('subscribe to group'));
+    
     $items[] = array('path' => 'node/add/og', 'title' => t('group'), 'access' => user_access('create groups'));
     $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => user_access('access content'));
     $access = $user->uid; // login is required
-    $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => $access, 'title' => t('subscribe to group'));
     $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('unsubscribe from group'));
     $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('approve subscription request'));
     $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('deny subscription request'));
@@ -32,6 +34,7 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
     $items[] = array('path' => 'og/access_denied', 'type' => MENU_CALLBACK, 'callback' => 'og_access_denied', 'title' => t('groups'), 'access' => TRUE);
     $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
+    $items[] = array('path' => 'og/invite', 'callback' => 'og_invite', 'title' => t('send invitation'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     $items[] = array('path' => 'og/albums', 'callback' => 'og_albums_page', 'title' => t('albums'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     $items[] = array('path' => 'og/albums/form', 'callback' => 'og_albums_form', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => user_access('create images'));
     $items[] = array('path' => 'og/albums/validate', 'callback' => 'og_albums_validate', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => user_access('create images'));
@@ -158,10 +161,71 @@ function og_delete_folksonomy($node) {
   }
 }
 
+function og_invite($gid) {
+  $max = variable_get('og_invite_max', 10);
+  if ($edit = $_POST['edit']) {
+    $emails = explode(',', $edit['mails']);
+    if (count($emails) > $max) {
+      form_set_error('mails', t("You may not specify more than $max email addresses."));
+      $err = TRUE;
+    }
+    else {
+      foreach ($emails as $email) {
+        if (!valid_email_address(trim($email))) {
+          $bad[] = $email;
+        }
+      }
+      if ($bad) {
+        form_set_error('mails', t('invalid email address: '). implode(' ', $bad));
+        $err = TRUE;
+      }
+    }
+    if (!$err) {
+      $node = node_load(array('nid' => $gid));
+      $subj = t('Invitation to join the group "%group" at %site', array('%group' => $node->title, '%site' => variable_get('site_name', 'drupal')));
+      $body = t("Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n\n", array('%group' => $node->title));
+      $body .= strtoupper($node->title). "\n";
+      $body .= $node->og_description. "\n";
+      $body .= t('Subscribe: %url', array('%url' => url("og/subscribe/$gid", NULL, NULL, TRUE)));
+      $body .= $edit['pmessage'] ? "\n\n ----------------------------\n". $edit['pmessage']. "\n--------------------------------" : '';
+      global $user;
+      $from = $user->mail;
+      global $user;
+      $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from";
+      foreach ($emails as $mail) {
+        user_mail(trim($mail), $subj, $body, $headers);  
+      }
+      drupal_set_message(t('%count invitations sent.', array('%count' => count($emails))));
+      print theme('page', og_invite_form($gid));
+    }
+    else {
+      print theme('page', og_invite_form($gid));
+    }
+  }
+  else {
+    print theme('page', og_invite_form($gid));
+  }  
+}
+
+function og_invite_form($gid) {
+  $edit = $_POST['edit'];
+  $max = variable_get('og_invite_max', 10);
+  $form .= form_textfield(t('Email addresses'), 'mails', $edit['mails'], 90, 250, t("Enter up to $max email addresses. Separate multiple addresses by commas. Each will receive an invitation message from you."), NULL, TRUE);
+  $form .= form_textarea(t('Personal message'), 'pmessage', $edit['pmessage'], 90, 5, t('Optional. Enter a message which will become part of the invitation email'));
+  $form .= form_button(t('Send invitation'));
+  return form($form);
+}
+
 function og_subscribe($gid, $uid = NULL) {
   if (is_null($uid)) {
     global $user;
-    $account = $user;
+    if ($user->uid) {
+      $account = $user;  
+    }
+    else {
+      drupal_set_message(t('In order to subscribe to this group, you must login or register a new account. After you have successfully done so, you will need to follow the <em>subscribe</em> link again.'));
+      drupal_goto('user');
+    }
   }
   else {
     $account = user_load(array('uid' => $account->uid));
@@ -676,6 +740,12 @@ function og_is_group() {
     $nid = arg(2);
   }
   elseif (arg(0) == 'og' && arg(1) == 'albums') {
+    $nid = arg(2);
+  }
+  elseif (arg(0) == 'og' && arg(1) == 'feed') {
+    $nid = arg(2);
+  }
+  elseif (arg(0) == 'og' && arg(1) == 'invite') {
     $nid = arg(2);
   }
 

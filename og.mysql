@@ -1,5 +1,7 @@
 CREATE TABLE `og` (
   `nid` int(11) NOT NULL default '0',
   `selective` int(11) NOT NULL default '0',
+  `description` varchar(255) NULL default '0',
+  `image` varchar(255) NULL default '0',
   PRIMARY KEY  (`nid`)
 ) TYPE=MyISAM; 
