@@ -392,7 +392,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'validate':
       if ($node->type != 'og') {
-        if (variable_get('og_audience_required', 0) && isset($node->og_groups) && empty($node->og_groups)) {
+        if (variable_get('og_audience_required', 0) && empty($node->og_groups)) {
           form_set_error('og_groups', t('You must select an audience in order to post.'));
         }
         $vis = variable_get('og_visibility', 0);
