@@ -7,6 +7,7 @@ require approval in order to become a member.
 INSTALLATION
 ---------------
 - Activate the module as usual
+- Install the .sql table as usual
 - Visit the admin/settings/og page and 'initialize access control'. Set other preferences as desired. Submit the page. This initialization fundamentally changes your drupal site,
 so don't do this just for fun
 - On the administer/content/configure/defaults workflow page, disable commenting for nodes of type 'group'

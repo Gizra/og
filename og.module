@@ -146,15 +146,15 @@ function og_subscribe($gid, $uid = NULL) {
   // if you can view, you are a member
   // if you can edit, you are an admin
   $node = node_load(array('nid' => $gid));
-  if ($node->og_public) {
-    $values[] = 1;
-    $values[] = 0;
-    drupal_set_message(t('User subscribed to group.'));
-  }
-  else {
+  if ($node->og_selective) {
     $values[] = 0;
     $values[] = 0;
     drupal_set_message(t('Subscription request awaits approval by an administrator.'));
+  }
+  else {
+    $values[] = 1;
+    $values[] = 0;
+    drupal_set_message(t('User subscribed to group.'));
   }
   $sql = 'REPLACE INTO {node_access} ('. implode(',', $names). ') VALUES ('. implode(',', $values). ')';
   db_query($sql);
@@ -177,8 +177,6 @@ function og_unsubscribe($gid, $uid = NULL) {
   og_dest();
 }
 
-/// $brief gives you an array suitable for a select box
-// non brief gives you all the grants for each group
 function og_get_subscriptions($uid) {
   static $subscriptions = array(), $options = array();
 
@@ -263,7 +261,7 @@ function og_list_groups_page() {
     $result = pager_query('SELECT DISTINCT(n.nid), n.title, n.body, n.uid, u.name FROM {node} n INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND n.type = \'og\' ORDER BY n.nid DESC',50);
   }
   else {
-    $result = pager_query('SELECT DISTINCT(n.nid), n.title, n.body, n.uid, u.name FROM {node} n '. node_access_join_sql(). ' INNER JOIN {users} u ON n.uid = u.uid WHERE '. node_access_where_sql(). " AND n.status=1 AND n.type = 'og' ORDER BY n.nid DESC",50);
+    $result = pager_query('SELECT DISTINCT(n.nid), n.title, n.body, n.uid, u.name FROM {node} n '. node_access_join_sql(). ' INNER JOIN {users} u ON n.uid = u.uid INNER JOIN {og} ON n.nid = og.nid WHERE '. node_access_where_sql(). " AND og.selective = 0 AND n.status=1 AND n.type = 'og' ORDER BY n.nid DESC",50);
   }
   $header = array(t("Title"), t('Subscribers'), t("Owner"), t('Description'));
   $subscriptions = og_get_subscriptions($user->uid);
@@ -285,7 +283,7 @@ function og_list_groups_page() {
 }
 
 //  when you view a group, you really see some facts about the group and then a list of nodes affiliated with that group
-  function og_view(&$node, $teaser = FALSE, $page = FALSE) {
+function og_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($teaser || !$page) {
     $node = node_prepare($node, $teaser);
   }
@@ -318,16 +316,16 @@ function og_form(&$node, &$param) {
     $output .= implode('', taxonomy_node_form('og', $node));
   }
   $output .= form_textarea(t('Description'), 'body', $node->body, 60, 20, '', NULL, TRUE);
-  if (isset($_POST['edit']['og_grant_view'])) {
-    $grant_view = $_POST['edit']['og_grant_view'];
+  if (isset($_POST['edit']['og_selective'])) {
+    $selective = $_POST['edit']['og_selective'];
   }
   elseif ($node->nid) {
-    $grant_view = $node->og_public;
+    $selective = $node->og_selective;
   }
   else {
-    $grant_view = 1;
+    $selective = 1;
   }
-  $output .= form_checkbox(t('Auto-accept'), 'og_grant_view', 1, $grant_view, t('Check this box if new subscription requests should be automatically accepted.'));
+  $output .= form_checkbox(t('Selective'), 'og_selective', 1, $selective, t('Check this box if new subscription requests require manual approval. Otherwise, they will be automatically approved.'));
   $output .= filter_form('format', $node->format);
   return $output;
 }
@@ -351,12 +349,29 @@ function og_get_node_groups($node) {
   }
 }
 
+// comments are not allowed on group nodes, since we don;t have any nice way to present them
 function og_validate(&$node) {
   $node->comment = 0;
 }
 
 function og_node_name($node) {
   return t('group');
+}
+
+function og_load($node) {
+  $sql = 'SELECT selective AS og_selective FROM {og} WHERE nid = %d';
+  $result = db_query($sql, $node->nid);
+  return db_fetch_object($result);
+}
+
+function og_insert($node) {
+  $sql = 'INSERT INTO {og} (selective) VALUES (%d) WHERE nid=%d';
+  db_query($sql, $node->og_selective, $node->nid);
+}
+
+function og_update($node) {
+  $sql = 'UPDATE {og} SET selective=%d WHERE nid=%d';
+  db_query($sql, $node->og_selective, $node->nid);
 }
 
 /**
@@ -366,7 +381,9 @@ function og_node_name($node) {
 function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'load':
-      $node = og_node_load_public($node);
+      if ($node->type != 'og') {
+        $node = og_node_load_public($node);
+      }
       if ($grps = og_get_node_groups($node)) {
         // TODO: Refactor so we don't need 2 arrays.
         $node->og_groups = array_keys($grps);
@@ -374,10 +391,22 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'validate':
-      if ($node->type != 'og' && variable_get('og_audience_required', 0) && isset($node->og_groups) && empty($node->og_groups)) {
-        form_set_error('og_groups', t('You must select an audience in order to post.'));
+      if ($node->type != 'og') {
+        if (variable_get('og_audience_required', 0) && isset($node->og_groups) && empty($node->og_groups)) {
+          form_set_error('og_groups', t('You must select an audience in order to post.'));
+        }
+        $vis = variable_get('og_visibility', 0);
+        switch ($vis) {
+          // case 2 is handled in og_nodeapi('validate')
+          case 1: // visible in and out of group
+            $node->og_public = 1;
+            break;
+          case 0: // visible only in group
+            $node->og_public = 0;
+            break;
+        }
+        break;
       }
-      break;
     case 'delete':
       og_delete_permissions($node);
       break;
@@ -416,12 +445,6 @@ function og_nodeapi_form($node) {
           $public = 1;
         }
         $output .= form_checkbox(t('Public'), 'og_public', 1, $public, t('Show this post to everyone or only to members of the groups above.'));
-        break;
-      case 1: // visible in and out of group
-        $output .= form_hidden('og_public', 1);
-        break;
-      case 0: // visible only in group
-        $output .= form_hidden('og_public', 0);
         break;
     }
 
@@ -508,12 +531,10 @@ function og_save_permissions(&$node) {
     }
   }
   else {
-    // for a group: if the 'grant_view' checkbox was checked, give a universal grant
+    // all groups are publically viewable (though their posts may not be)
     // dprint_r($node);
-    if ($node->og_grant_view) {
-      $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_group', 1)";
-      db_query($sql, $node->nid);
-    }
+    $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_group', 1)";
+    db_query($sql, $node->nid);
 
     // make sure the node owner is a full powered subscriber
     $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_uid', 1, 1, 1)";
@@ -658,7 +679,13 @@ function og_block_details() {
         $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'dest=og');
       }
       elseif ($user->uid) {
-        $links[] = l(t('subscribe'), "og/subscribe/$node->nid", array(), "dest=node/$node->nid");
+        if ($node->og_selective) {
+          $txt = t('request subscription');
+        }
+        else {
+          $txt = t('subscribe');
+        }
+        $links[] = l($txt, "og/subscribe/$node->nid", array(), "dest=node/$node->nid");
       }
       $output .= theme('item_list', $links);
     }
@@ -686,7 +713,7 @@ function og_link($type, $node = 0, $main) {
     if ($mygroups = og_get_subscriptions($user->uid)) {
       foreach ($mygroups as $key => $grp) {
         if ($grp['grant_update'] && in_array($key, $node->og_groups)) {
-          $links[] = l(t('remove from group'), "og/remove_node/$key/$node->nid", array(), "dest=node/$key");
+          $links[] = l(t('remove from group'), "og/remove_node/$key/$node->nid", array('title' => $grp['title']), "dest=node/$key");
           break;
         }
       }
