@@ -705,7 +705,7 @@ function og_block_subscribers() {
         $links[] = format_name($row);
       }
       if ($links) {
-        if (count($links) > 1) {
+        if (count($links) > 14) {
           array_pop($links);
           $append = '<div class="more-link">'. l(t('more'), "og/users/$node->nid", array('title' => t('View all subscribers.'))) .'</div>';;
         }
