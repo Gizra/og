@@ -913,7 +913,7 @@ function og_create_links($group) {
     }
   }
   // append 'create album' link if available. a bit messy for now.
-  if (user_access('create images') && module_exist('folksonomy') && user_access('access bulk upload')) {
+  if (user_access('create images') && module_exist('folksonomy')) {
     $links[] = l(t('create album'), 'og/albums/form', array(), "edit[og_groups][]=$group->nid");
   }
   return $links ? $links : array();
