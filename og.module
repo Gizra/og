@@ -136,9 +136,11 @@ function og_remove_node($gid, $nid) {
 }
 
 function og_delete_folksonomy($node) {
-  foreach ($node->og_groups as $gid) {
-    $realm = "og_group_$gid";
-    module_invoke('folksonomy', 'delete', array('realm' => $realm, 'id' => $node->nid));
+  if ($node->og_groups) {
+    foreach ($node->og_groups as $gid) {
+      $realm = "og_group_$gid";
+      module_invoke('folksonomy', 'delete', array('realm' => $realm, 'id' => $node->nid));
+    }
   }
 }
 
@@ -305,7 +307,7 @@ function og_view(&$node, $teaser = FALSE, $page = FALSE) {
   }
   else {
     // get all the group nodes. we have to break this list into two steps in case user is not a member of the group and post is public
-    // TODO: perhaps we can use db_rewrite_sql() to simplify this query
+    // TODO: perhaps we can use db_rewrite_sql() to simplify this query. The problem is that we *must* join against node_access, even for admin users.
     $result = db_query("SELECT DISTINCT(n.nid), n.status FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE na.gid = $node->nid AND na.realm = 'og_group' AND n.status=1 AND n.type NOT IN ('og', 'image') ORDER BY n.created DESC");
     if (!db_num_rows($result)) {
       drupal_set_message(t('No posts yet in this group.'));
@@ -810,7 +812,7 @@ function og_albums_save($nodes) {
 
 function og_block_albums() {
   if ($node = og_is_group()) {
-    $sql = "SELECT n.nid, f.name AS fname, COUNT(f.name) AS fcount, u.name, u.uid FROM {folksonomy} f INNER JOIN {node} n ON f.id = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE f.realm = 'og_group_$node->nid' GROUP BY f.name ORDER BY id DESC");
+    $sql = "SELECT n.nid, f.name AS fname, COUNT(f.name) AS fcount, u.name, u.uid FROM {folksonomy} f INNER JOIN {node} n ON f.id = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE f.realm = 'og_group_$node->nid' GROUP BY f.name ORDER BY id DESC";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
       $submitter = t('submitted by %name. ', array('%name' => $row->name));
@@ -955,7 +957,7 @@ function og_settings() {
   $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group.'));
   unset($options);
   foreach (node_list() as $type) {
-    $options[$type] = module_invoke($type, 'node_name');
+    $options[$type] = module_invoke(node_get_module_name($type), 'node_name');
   }
   unset($options['og']);
   $output .= form_select(t('Omitted content types'), 'og_omitted', variable_get('og_omitted', array()), $options, t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), 0, TRUE);
