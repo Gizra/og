@@ -28,7 +28,7 @@ THEMES
 ------------------
 You may wish to stylize nodes which have properties assigned by this module.
 --- public vs. private posts are denoted by $node->og_public
---- group assignments (if any) are to be found in $node->og_groups. this is an array of nids.
+--- group assignments (if any) are to be found in $node->og_groups. this is an array of nids. the group names are in $node->og_groups_names. 
 --- you may wish to omit the node author and time if $node->type == 'og'. also consider not showing the node links
 these items slightly clutter the group page.
 

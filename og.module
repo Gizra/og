@@ -339,13 +339,13 @@ function og_node_load_public($node) {
   return $node;
 }
 
-// returns all the group affiliations for a given node
+// returns all the group affiliations for a given node.
 function og_get_node_groups($node) {
   if ($node->type != 'og') {
-    $sql = "SELECT gid FROM {node_access} WHERE nid = %d AND realm='og_group' AND gid != 0";
+    $sql = "SELECT na.gid, n.title FROM {node_access} na INNER JOIN {node} n ON na.gid = n.nid WHERE na.nid = %d AND na.realm='og_group' AND na.gid != 0";
     $result = db_query($sql, $node->nid);
     while ($row = db_fetch_object($result)) {
-      $groups[] = $row->gid;
+      $groups[$row->gid] = $row->title;
     }
     return $groups ? $groups : array();
   }
@@ -368,7 +368,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'load':
       $node = og_node_load_public($node);
       if ($grps = og_get_node_groups($node)) {
-        $node->og_groups = $grps;
+        // TODO: Refactor so we don't need 2 arrays.
+        $node->og_groups = array_keys($grps);
+        $node->og_groups_names = array_values($grps);
       }
       break;
     case 'validate':
@@ -501,7 +503,7 @@ function og_save_permissions(&$node) {
 
     // if the public checkbox was selected, give a universal grant for this node
     if ($node->og_public) {
-      $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_group', 1)";
+      $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_group', 1)";
       db_query($sql, $node->nid);
     }
   }
