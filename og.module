@@ -119,11 +119,19 @@ function og_delete_admin($gid, $uid) {
 function og_remove_node($gid, $nid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
     $node = node_load(array('nid' => $nid));
-    og_delete_folksonomy($node);
-    $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_group'";
-    db_query($sql, $nid, $gid);
-    drupal_set_message(t('Post removed from group.'));
-    og_dest();
+    if ($_POST['op']['og_confirm']) {
+      og_delete_folksonomy($node);
+      $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_group'";
+      db_query($sql, $nid, $gid);
+      drupal_set_message(t('Post removed from group.'));
+      og_dest();
+    }
+    else {
+      $output = form_item(t('Confirmation'), t('Remove %title from this group.', array('%title' => '<em>'. $node->title. '</em>')));
+      $output .= form_hidden('og_confirm', 1);
+      $output .= form_button(t('Remove'));
+      print theme('page', form($output));
+    }
   }
   else {
     drupal_access_denied();
@@ -672,9 +680,13 @@ function og_albums_page($gid, $str_tags) {
     $node = node_load(array('nid' => $gid));
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
     $result = folksonomy_select_nodes($tags, $operator, 'image', 'og_group_'. $node->nid);
-    // append 'create album' link if available. a bit messy for now.
+    // add 'create album' link if available and permitted. a bit messy for now.
     if (user_access('create images') && module_exist('folksonomy') && user_access('access bulk upload')) {
-      $links[] = l(t('add to this album'), 'bu/standard', array(), "edit[og_groups][]=$node->nid&edit[bu_tags]=$str_tags");
+      global $user;
+      $subs = og_get_subscriptions($user->uid);
+      if ($subs[$node->nid]['grant_view']) {
+        $links[] = l(t('add to this album'), 'bu/standard', array(), "edit[og_groups][]=$node->nid&edit[bu_tags]=$str_tags");
+      }
     }
     $output = theme('item_list', $links);
     $output .= taxonomy_render_nodes($result);
@@ -733,7 +745,6 @@ function og_block_details() {
   if ($node = og_is_group()) {
     $output = '<div id="og_description">'. $node->body. '</div><br />';
     if ($_POST['op'] != t('Preview')) {
-      $subscribed = FALSE;
       $result = db_query(og_list_users_sql(0), $node->nid);
       $cntall = db_num_rows($result);
       $cntpending = 0;
