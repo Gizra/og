@@ -305,7 +305,7 @@ function og_view(&$node, $teaser = FALSE, $page = FALSE) {
     else {
       while ($onenode = db_fetch_array($result)) {
         // make sure user can view each node
-        if (node_access('view', $node)) {
+        if (node_access('view', $onenode)) {
           $nodes .= node_view(node_load($onenode), TRUE, FALSE);
         }
       }
