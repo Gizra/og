@@ -1,0 +1,5 @@
+CREATE TABLE `og` (
+  `nid` int(11) NOT NULL default '0',
+  `selective` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`nid`)
+) TYPE=MyISAM; 
