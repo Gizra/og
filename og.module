@@ -575,11 +575,6 @@ function _og_update_db($enable) {
 // called to determine whether or not to show group block
 // called during a 403 page and we show appropriate msg if no posts are accessible
 function og_is_group() {
-  // adjust path if we are in a 403
-  if ($_GET['q'] == drupal_get_normal_path(variable_get('site_403', ''))) {
-    $_GET['q'] = $_GET['q_original']; // see og_menu(!$may_cache)
-  }
-
   // these are the 2 pages when we want the block to appear
   if (arg(0) == 'node' && is_numeric(arg(1)) && !arg(2)) {
     $nid = arg(1);
@@ -598,6 +593,9 @@ function og_is_group() {
 }
 
 function og_access_denied() {
+  if ($_GET['q'] == drupal_get_normal_path(variable_get('site_403', ''))) {
+    $_GET['q'] = $_GET['q_original']; // see og_menu(!$may_cache)
+  }
   $node = og_is_group();
   if (!$node) {
     $node->og_msg = message_access();
