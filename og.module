@@ -29,7 +29,8 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/create_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_create_admin', 'access' => $access, 'title' => t('create group administrator'));
     $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('delete group administrator'));
     $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
-    $items[] = array('path' => 'og/access_denied', 'type' => MENU_CALLBACK, 'callback' => 'og_access_denied', 'title' => t('groups'));
+    $items[] = array('path' => 'og/access_denied', 'type' => MENU_CALLBACK, 'callback' => 'og_access_denied', 'title' => t('groups'), 'access' => TRUE);
+    $items[] = array('path' => 'og/albums', 'callback' => 'og_albums_page', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => TRUE);
     $items[] = array('path' => 'admin/og/updatedb', 'type' => MENU_CALLBACK, 'callback' => '_og_updatedb', 'title' => t('update db'), 'access' => user_access('administer organic groups'));
   }
   else {
@@ -38,7 +39,6 @@ function og_menu($may_cache) {
       foreach ($subs as $key => $sub) {
         $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => $key, 'access' => TRUE);
         $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
-        $items[] = array('path' => "og/albums/$key", 'callback' => 'og_albums_page', 'title' => t('album'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => TRUE);
       }
     }
 
@@ -440,7 +440,7 @@ function og_nodeapi_form($node) {
     foreach ($subs as $key => $val) {
       $options[$key] = $val['title'];
     }
-    if (!$options && $required) {
+    if (!$options && $required && $_POST) {
       drupal_set_message(t('You must subscribe to a group before posting.'), 'error');
     }
 
@@ -813,7 +813,7 @@ function og_link($type, $node = 0, $main) {
 
 function og_settings() {
   $output = form_textarea(t('Explanation or submission guidelines'), 'og_help', variable_get('og_help', ''), 70, 5, t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
-  $output .= form_checkbox(t('List Selective Groups'), 'og_selective_listed', 1, variable_get('og_selective_listed', 0), t('Selective groups appear in the %s. Selective groups require new subscription requests to be manually approved.', array('%s' => l('list of groups page', 'og'))));
+  $output .= form_checkbox(t('List selective groups'), 'og_selective_listed', 1, variable_get('og_selective_listed', 0), t('Selective groups appear in the %s. Selective groups require new subscription requests to be manually approved.', array('%s' => l('list of groups page', 'og'))));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
   $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group'));
   $options = array(t('optional'), t('required'));
@@ -825,8 +825,8 @@ function og_settings() {
       $options[$type] = module_invoke($type, 'node_name');
     }
   }
-  $output .= form_select(t('Content Types'), 'og_omitted', variable_get('og_omitted', array()), $options, t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), 0, TRUE);
-  $output .= form_checkbox(t('Initialize Access Control'), 'og_enabled', 1, variable_get('og_enabled', 0), t('Perform the queries necessary to enable or disable groups access control. You should perform this only once.'));
+  $output .= form_select(t('Omitted content types'), 'og_omitted', variable_get('og_omitted', array()), $options, t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), 0, TRUE);
+  $output .= form_checkbox(t('Initialize access control'), 'og_enabled', 1, variable_get('og_enabled', 0), t('Perform the queries necessary to enable or disable groups access control. You should perform this only once.'));
   return $output;
 }
 
