@@ -20,7 +20,7 @@ function og_menu($may_cache) {
 
   if ($may_cache) {
     $items[] = array('path' => 'node/add/og', 'title' => t('group'), 'access' => user_access('create groups'));
-    $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'access' => user_access('access groups'));
+    $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'access' => user_access('access groups'), 'weight' => 5);
     $access = $user->uid; // login is required
     $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => $access, 'title' => t('subscribe to group'));
     $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('unsubscribe from group'));
@@ -39,6 +39,10 @@ function og_menu($may_cache) {
         $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'access' => user_access('access groups'), 'callback arguments' => $key);
         $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('groups'), 'access' => user_access('access groups'), 'callback arguments' => $key, 'type' => MENU_CALLBACK);
       }
+    }
+
+    if (isset($_POST['edit']['og_enabled']) && user_access('administer organic groups')) {
+      _og_update_db($_POST['edit']['og_enabled']);
     }
   }
   return $items;
@@ -86,7 +90,7 @@ function og_create_admin($gid, $uid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
     $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', 1, 1)";
     db_query($sql, $gid, $uid);
-    drupal_set_message(t('User was promoted to <em> group administrator</a>'));
+    drupal_set_message(t('User was promoted to <em> group administrator</em>'));
     og_dest();
   }
   else {
@@ -276,18 +280,29 @@ function og_list_groups_page() {
 }
 
 //  when you view a group, you really see some facts about the group and then a list of nodes affiliated with that group
-function og_view(&$node, $teaser = FALSE, $page = FALSE) {
+  function og_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($teaser || !$page) {
     $node = node_prepare($node, $teaser);
   }
   else {
-    $result = pager_query('SELECT DISTINCT(n.nid) FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE '. node_access_where_sql(). " AND (na.gid = $node->nid) AND na.realm = 'og_group' AND n.status=1 AND n.type != 'og' ORDER BY n.created DESC", variable_get('default_nodes_main', 10));
-    while ($onenode = db_fetch_array($result)) {
-      $nodes .= node_view(node_load($onenode), FALSE, FALSE);
+    // get all the group nodes. we have to break this list into two steps in case user is not a member of the group and post is public
+    $result = db_query("SELECT DISTINCT(n.nid), n.status FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE na.gid = $node->nid AND na.realm = 'og_group' AND n.status=1 AND n.type != 'og' ORDER BY n.created DESC");
+    if (!db_num_rows($result)) {
+      if (og_create_links($node)) {
+        $create = ' '. l(t('Create post'), 'node/add');
+      }
+      drupal_set_message(t('No posts yet in this group.'). $create);
     }
-    $nodes .= theme('pager', NULL, variable_get('default_nodes_main', 10));
+    else {
+      while ($onenode = db_fetch_array($result)) {
+        // make sure user can view each node
+        if (node_access('view', $node)) {
+          $nodes .= node_view(node_load($onenode), FALSE, FALSE);
+        }
+      }
+    }
     if (!$nodes) {
-      drupal_set_message(t('No posts yet in this group. %pt', array('%pt' => l(t('Create post'), 'node/add'))));
+      drupal_set_message(t('There are no public posts in this group.'));
     }
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'));
     drupal_set_breadcrumb($bc);
@@ -449,7 +464,7 @@ function og_user($op, &$edit, &$account, $category) {
  *
  * In the 'og_group' realm, the gid is a nid of a group. This is used
  * to store which nodes should show up in which groups. Further, the 'grant_view'
- * permission determines whether a group is selective (i.e. private) or not.
+ * permission determines whether a group is selective (i.e. private) or not (for 'og' nodes).
  *
 **/
 function og_node_grants($account, $op) {
@@ -555,9 +570,10 @@ function _og_update_db($enable) {
   }
 }
 
-// we don't use arg() because it has to work under a 403 page
 function og_is_group() {
-  $uri = str_replace('?q=', '', request_uri());
+  // we don't use arg() because it has to work under a 403 page
+  // index.php exists for non clean urls on IIS
+  $uri = str_replace(array('?q=', 'index.php'), '', request_uri());
   $args = explode('/', $uri);
   $index = array_search('node', $args);
   if (!empty($index) && is_numeric($args[$index+1]) && empty($args[$index+2])) {
@@ -638,7 +654,7 @@ function og_block_details() {
         $links[] = t('Your subscription request awaits approval.');
         $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'dest=og');
       }
-      else {
+      elseif ($user->uid) {
         $links[] = l(t('subscribe'), "og/subscribe/$node->nid", array(), "dest=node/$node->nid");
       }
       $output .= theme('item_list', $links);
@@ -680,7 +696,7 @@ function og_settings() {
   $output = form_textarea(t('Explanation or submission guidelines'), 'og_help', variable_get('og_help', ''), 70, 5, t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
   $output .= form_checkbox(t('List Selective Groups'), 'og_selective_listed', 1, variable_get('og_selective_listed', 0), t('Selective groups appear in the %s. Selective groups require new subscription requests to be manually approved.', array('%s' => l('list of groups page', 'og'))));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
-  $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given posts should be when it is affiliated with a group'));
+  $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group'));
   $options = array(t('optional'), t('required'));
   $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group.'));
   $output .= form_checkbox(t('Initialize Access Control'), 'og_enabled', 1, variable_get('og_enabled', 0), t('Perform the queries necessary to enable or disable groups access control. You should perform this only once.'));
@@ -701,12 +717,6 @@ function og_settings() {
   unset($types['og']);
   $output .= form_select(t('Default node type'), 'og_default_type', variable_get('og_default_type', 'blog'), $types, t('Which node type do you want users to create when they click the <strong>create</strong> link in the <strong>group details</strong> block'));*/
   return $output;
-}
-
-function og_init() {
-  if (isset($_POST['edit']['og_enabled']) && user_access('administer organic groups')) {
-    _og_update_db($_POST['edit']['og_enabled']);
-  }
 }
 
 ?>

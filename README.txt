@@ -7,9 +7,8 @@ require approval in order to become a member.
 INSTALLATION
 ---------------
 - Activate the module as usual
-- Visit the admin/settings/og page and 'initialize access control'. This fundamentally changes your drupal site,
+- Visit the admin/settings/og page and 'initialize access control'. Set other preferences as desired. Submit the page. This initialization fundamentally changes your drupal site,
 so don't do this just for fun
-- Set other preference on admin/settings/og as desired
 - On the administer/content/configure/defaults workflow page, disable commenting for nodes of type 'group'
 - On the admin/settings page, set 'Default 403 (access denied) page' to 'og/access_denied'
 - On the admin/block page, enable the 'Group details' with a low 'weight' value
