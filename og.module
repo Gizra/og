@@ -413,6 +413,16 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           if (variable_get('og_audience_required', 0) && empty($node->og_groups) && $_POST) {
             form_set_error('og_groups', t('You must select an audience in order to post.'));
           }
+          else {
+            if (is_array($node->og_groups)) {
+              $subs = og_get_subscriptions($node->uid);
+              foreach($node->og_groups as $gid) {
+                if (!in_array($gid, array_keys($subs))) {
+                  form_set_error('og_groups', t('%name must be a subscriber in order to post into %group', array('%name' => $node->name, '%group' => $subs[$gid]['title'])));
+                }
+              }
+            }
+          }
           $vis = variable_get('og_visibility', 0);
           switch ($vis) {
             // case 2 is handled in og_nodeapi('validate')
@@ -500,7 +510,7 @@ function og_user($op, &$edit, &$account, $category) {
           foreach ($subs as $key => $val) {
             $links[] = l($val['title'], "node/$key");
           }
-          return array('Groups' => theme('node_list', $links));
+          return array(t('Groups') => theme('node_list', $links));
         }
       }
       break;
