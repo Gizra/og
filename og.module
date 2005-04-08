@@ -53,10 +53,10 @@ function og_menu($may_cache) {
     $user = user_load(array('uid' => $user->uid));
     
     foreach ($user->og_groups as $key => $sub) {
-      $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => $key, 'access' => TRUE);
-      $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('list'), 'callback arguments' => $key, 'type' => MENU_CALLBACK, 'access' => TRUE);
-      $items[] = array('path' => "og/users/$key/list", 'callback' => 'og_list_users_page', 'title' => t('list'), 'callback arguments' => $key, 'type' => MENU_DEFAULT_LOCAL_TASK, 'access' => TRUE, 'weight' => -10);
-      $items[] = array('path' => "og/users/$key/add/", 'callback' => 'og_add_users_page', 'title' => t('add subscribers'), 'callback arguments' => $key, 'type' => MENU_LOCAL_TASK, 'access' => TRUE);
+      $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => array($key), 'access' => TRUE);
+      $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('subscriber management'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => TRUE);
+      $items[] = array('path' => "og/users/$key/list", 'callback' => 'og_list_users_page', 'title' => t('list'), 'callback arguments' => array($key), 'type' => MENU_DEFAULT_LOCAL_TASK, 'access' => TRUE);
+      $items[] = array('path' => "og/users/$key/add", 'callback' => 'og_add_users_page', 'title' => t('add subscribers'), 'callback arguments' => array($key), 'type' => MENU_LOCAL_TASK, 'access' => TRUE, 'weight' => 5);
       $items[] = array('path' => 'og/manage', 'callback' => 'og_manage', 'title' => t('manage subscription'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
       $items[] = array('path' => 'og/invite', 'callback' => 'og_invite', 'title' => t('send invitation'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     }
@@ -482,16 +482,35 @@ function og_list_users_sql($min_grant = 1) {
 
 function og_add_users_page($gid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-    if ($edit = $_POST) {
-      // validate
-      if (!$err) {
-        //add em all  
+    if ($edit = $_POST['edit']) {
+      $names = explode(',', $edit['og_names']);
+      foreach ($names as $name) {
+        $account = user_load(array('name' => trim($name)));
+        if ($account->uid) {
+          $accounts[] = $account;
+          $uids[] = $account->uid;
+        }
+        else {
+          $bad[] = $name;
+          $err = TRUE;
+        } 
+      }
+      if (!$err && $accounts) {
+        // safest option is to do a select, filter existing subscribers, then insert
+        foreach ($accounts as $account) {
+          $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, %d, 'og_uid', 1)";
+          db_query($sql, $gid, $account->uid);                                                                         
+        }
+        drupal_set_message(t('%count added to the group', array('%count' => format_plural(count($accounts), '1 user', '%count users'))));
+      }
+      else {
+        form_set_error('og_names', t('Unrecognized %names: ', array('%names' => format_plural(count($bad), 'name', 'names'))). implode(', ', $bad));
       }
     }
-    $output = form_textarea(t('List of users'), 'og_users', $edit['og_users'], 70, 5, t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.'));
+    
+    $output = form_textarea(t('List of users'), 'og_names', $edit['og_names'], 70, 5, t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.'));
     $output .= form_submit(t('Submit'));
     $output = form($output);
-    drupal_set_message(t('this form doesn\'t work yet'), 'error');
     print theme('page', $output);
   }
   else {
@@ -500,6 +519,7 @@ function og_add_users_page($gid) {
 }
 
 function og_list_users_page($gid) {
+  
   $sql = og_list_users_sql(0);
   $result = pager_query($sql, 500, 0, NULL, $gid);
   $header[] = t("Name");
