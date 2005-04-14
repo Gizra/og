@@ -595,7 +595,7 @@ function og_list_groups_page() {
 }
 
 function og_get_home_nodes_sql() {
-  return "SELECT DISTINCT(n.nid), n.status FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE na.gid = %d AND na.realm = 'og_group' AND n.status=1 AND n.type NOT IN ('og', 'image') ORDER BY n.created DESC";
+  return "SELECT DISTINCT(n.nid), n.status FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE na.gid = %d AND na.realm = 'og_group' AND n.status=1 AND n.type NOT IN ('og', 'image') ORDER BY n.sticky DESC, n.created DESC";
 }
 
 //  when you view a group, you really see some facts about the group in a block and then a list of nodes affiliated with that group
@@ -1093,7 +1093,7 @@ function og_block($op = 'list', $delta = 0) {
   elseif ($op == 'view') {
     switch ($delta) {
       case 0:
-        return og_BLOCK_DETails();
+        return og_block_details();
       case 1:
         return og_block_albums();
       case 2:
@@ -1253,7 +1253,7 @@ function og_albums_save($nodes) {
 }
 
 function og_block_albums() {
-  if ($gid = $_SESSION['og_last']->nid) {
+  if (module_exist('album') && module_exist('folksonomy') && $gid = $_SESSION['og_last']->nid) {
     $sql = "SELECT n.nid, f.name AS fname, COUNT(f.name) AS fcount, u.name, u.uid FROM {folksonomy} f INNER JOIN {node} n ON f.id = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE f.realm = 'og_group_$nid' GROUP BY f.name ORDER BY id DESC";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
