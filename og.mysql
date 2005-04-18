@@ -2,14 +2,14 @@ CREATE TABLE `og` (
   `nid` int(11) NOT NULL,
   `selective` int(11) NOT NULL default '0',
   `description` varchar(255) NULL,
-  `image` varchar(255) NULL, 
-  `theme` varchar(255) NULL, 
+  `image` varchar(255) NULL,
+  `theme` varchar(255) NULL,
   PRIMARY KEY  (`nid`)
-) TYPE=MyISAM; 
+) TYPE=MyISAM;
 
 CREATE TABLE `og_uid` (
   `nid` int(11) NOT NULL,
   `uid` int(11) NOT NULL,
-  `mail_type` int(11) NULL,, 
+  `mail_type` int(11) NULL,
   PRIMARY KEY  (`nid`, uid)
-) TYPE=MyISAM; 
+) TYPE=MyISAM;
