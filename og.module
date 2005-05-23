@@ -1118,15 +1118,12 @@ function og_block($op = 'list', $delta = 0) {
 }
 
 function og_feed($gid) {
-  $group = (object) array('nid' => $gid);
-  if (node_access('view', $cond)) {
+  $group = (object) array('nid' => $gid, 'status' => 1);
+  if (node_access('view', $group)) {
     $sql = og_get_home_nodes_sql();
-    $result = db_query($sql, $gid);
+    $result = db_query(db_rewrite_sql($sql), $gid);
     while ($onenode = db_fetch_array($result)) {
-      // make sure user can view each node
-      if (node_access('view', $onenode)) {
-        $nodes[] = $onenode['nid'];
-      }
+      $nodes[] = $onenode['nid'];
     }
     if ($nodes) {
       $sql = 'SELECT nid FROM {node} WHERE nid IN (%s)';
@@ -1450,7 +1447,7 @@ function theme_og_list_generic($gid, $type, $mode) {
   $sql = og_get_home_nodes_sql($type);
   $num = $mode == 'brief' ? variable_get('og_max_posts', 10) : 50;
   $i++; // multiple pagers on a page need a unique integer
-  $result = pager_query($sql, $num, $i, NULL, $gid);
+  $result = pager_query(db_rewrite_sql($sql), $num, $i, NULL, $gid);
   while ($row = db_fetch_object($result)) {
     $rows[] = array(l($row->title, "node/$row->nid"), format_name($row), $row->comment_count, format_date($row->created, 'small'));
   }
