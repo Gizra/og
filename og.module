@@ -12,8 +12,6 @@ function og_help($section) {
       break;
     case 'admin/modules#description':
       return t("Organic groups");
-    case 'node/add/og':
-      return variable_get('og_help', '');
     case 'node/add#og':
       return t("A group provides home page for like minded users. There they post articles about their shared interest.");
     case strstr($section, 'admin/block/configure/og'):
@@ -118,6 +116,9 @@ function og_theme() {
   elseif (arg(0) == 'node' && arg(1) == 'add' && $gid = $_REQUEST['edit']['og_groups'][0]) {
     $group_node = node_load(array('nid' => $gid));
     $custom_theme = $group_node->og_theme;
+  }
+  elseif (arg(0) == 'comment' && is_numeric(arg(2))) {
+    $og_node = og_set_theme(arg(2));
   }
   $_SESSION['og_last'] = $group_node;
 }
@@ -1358,11 +1359,11 @@ function og_block_details() {
       $links[] = t('Your subscription request awaits approval.');
       $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'destination=og');
     }
-    elseif ($user->uid) {
-      if ($node->og_selective) {
+    elseif ($user->uid && $node->og_selective < OG_INVITE_ONLY) {
+      if ($node->og_selective == OG_MODERATED) {
         $txt = t('request subscription');
       }
-      else {
+      elseif ($node->og_selective == OG_OPEN) {
         $txt = t('subscribe');
       }
       $links[] = l($txt, "og/subscribe/$node->nid", array(), "destination=node/$node->nid");
