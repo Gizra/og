@@ -205,7 +205,7 @@ function og_email($gid) {
 
 function og_email_form($gid) {
   $edit = $_POST['edit'];
-  $result = db_query(og_list_users_sql(), $gid);
+  $result = db_query(og_list_users_sql(1), $gid);
   drupal_set_message(t('Your email will be sent to %count in this group. Please use this feature sparingly.', array('%count' => format_plural(db_num_rows($result), l('1 subscriber', "og/users/$gid"), l('all %count subscribers', "og/users/$gid")))));
   $form .= form_textfield(t('Subject'), 'subject', $edit['subject'], 70, 250, t("Enter a subject for your email."), NULL, TRUE);
   $form .= form_textarea(t('Body'), 'body', $edit['body'], 90, 5, t('Enter a body for your email.'), NULL, TRUE);
@@ -414,7 +414,7 @@ function og_subscribe($gid, $uid = NULL) {
   if ($node->og_selective) {
     $values[] = 0;
     $values[] = 0;
-    $sql = og_list_users_sql(1);
+    $sql = og_list_users_sql(1, 1);
     $res = db_query($sql, $node->nid);
     while ($row = db_fetch_object($res)) {
       $admins[] = $row->mail ? $row->mail : NULL;
@@ -484,8 +484,8 @@ function og_access($op, $node) {
   }
 }
 
-function og_list_users_sql($min_grant = 1) {
-  return "SELECT u.uid, u.name, u.mail, u.picture, na.* FROM {node_access} na INNER JOIN {users} u ON na.gid = u.uid AND na.nid = %d WHERE u.status > 0 AND realm = 'og_uid' AND grant_view >= $min_grant ORDER BY u.name ASC";
+function og_list_users_sql($min_grant_view = 1, $min_grant_update = 0) {
+  return "SELECT u.uid, u.name, u.mail, u.picture, na.* FROM {node_access} na INNER JOIN {users} u ON na.gid = u.uid AND na.nid = %d WHERE u.status > 0 AND realm = 'og_uid' AND grant_view >= $min_grant_view AND grant_update >= $min_grant_update ORDER BY u.name ASC";
 }
 
 function og_add_users_page($gid) {
@@ -602,7 +602,7 @@ function og_list_groups_page() {
   print theme('page', $output);
 }
 
-// str_types is a list of types which should be selected out. if not provided, we return all but a couple
+// str_types is a list of types which should be selected. if not provided, we return all but a couple
 function og_get_home_nodes_sql($str_types = NULL) {
   if ($str_types) {
     $str_types = db_escape_string($str_types);
@@ -612,7 +612,7 @@ function og_get_home_nodes_sql($str_types = NULL) {
     $where = "n.type NOT IN ('og', 'image')";
   }
 
-  return "SELECT DISTINCT(n.nid), n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid INNER JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE na.gid = %d AND na.realm = 'og_group' AND n.status=1 AND $where ORDER BY n.sticky DESC, n.created DESC";
+  return "SELECT DISTINCT(n.nid), n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n INNER JOIN {node_access} og_na ON n.nid = og_na.nid INNER JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og_na.gid = %d AND og_na.realm = 'og_group' AND n.status=1 AND $where ORDER BY n.sticky DESC, n.created DESC";
 }
 
 //  when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group. Each of these lists is
@@ -1436,8 +1436,9 @@ function og_settings() {
 function og_list_og($gid, $type, $mode = 'all') {
   $output = theme(node_get_module_name($type). '_list_og', $gid, $mode);
   if (!$output) {
-    return theme('og_list_generic', $gid, $type, $mode);
+    $output = theme('og_list_generic', $gid, $type, $mode);
   }
+  return $output;
 }
 
 // you may theme this function, or even theme each node type listing separately
