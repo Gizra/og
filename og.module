@@ -325,48 +325,54 @@ function og_delete_folksonomy($node) {
 }
 
 function og_invite($gid) {
-  $max = variable_get('og_email_max', 10);
-  if ($edit = $_POST['edit']) {
-    $emails = explode(',', $edit['mails']);
-    if (count($emails) > $max) {
-      form_set_error('mails', t("You may not specify more than $max email addresses."));
-      $err = TRUE;
-    }
-    else {
-      foreach ($emails as $email) {
-        if (!valid_email_address(trim($email))) {
-          $bad[] = $email;
-        }
-      }
-      if ($bad) {
-        form_set_error('mails', t('invalid email address: '). implode(' ', $bad));
+  $node = node_load(array('nid' => $gid));
+  if ($node->og_selective < OG_INVITE_ONLY || node_access('update', $node)) {
+    $max = variable_get('og_email_max', 10);
+    if ($edit = $_POST['edit']) {
+      $emails = explode(',', $edit['mails']);
+      if (count($emails) > $max) {
+        form_set_error('mails', t("You may not specify more than $max email addresses."));
         $err = TRUE;
       }
-    }
-    if (!$err) {
-      $node = node_load(array('nid' => $gid));
-      $subj = t('Invitation to join the group "%group" at %site', array('%group' => $node->title, '%site' => variable_get('site_name', 'drupal')));
-      $body = t("Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n\n", array('%group' => $node->title));
-      $body .= $node->title. "\n";
-      $body .= $node->og_description. "\n";
-      $body .= t('Subscribe: %url', array('%url' => url("og/subscribe/$gid", NULL, NULL, TRUE)));
-      $body .= $edit['pmessage'] ? "\n\n ----------------------------\n". $edit['pmessage']. "\n--------------------------------" : '';
-      global $user;
-      $from = $user->mail;
-      global $user;
-      $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from";
-      foreach ($emails as $mail) {
-        user_mail(trim($mail), $subj, $body, $headers);
+      else {
+        foreach ($emails as $email) {
+          if (!valid_email_address(trim($email))) {
+            $bad[] = $email;
+          }
+        }
+        if ($bad) {
+          form_set_error('mails', t('invalid email address: '). implode(' ', $bad));
+          $err = TRUE;
+        }
       }
-      drupal_set_message(t('%count invitations sent.', array('%count' => count($emails))));
-      print theme('page', og_invite_form($gid));
+      if (!$err) {
+        $node = node_load(array('nid' => $gid));
+        $subj = t('Invitation to join the group "%group" at %site', array('%group' => $node->title, '%site' => variable_get('site_name', 'drupal')));
+        $body = t("Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n\n", array('%group' => $node->title));
+        $body .= $node->title. "\n";
+        $body .= $node->og_description. "\n";
+        $body .= t('Subscribe: %url', array('%url' => url("og/subscribe/$gid", NULL, NULL, TRUE)));
+        $body .= $edit['pmessage'] ? "\n\n ----------------------------\n". $edit['pmessage']. "\n--------------------------------" : '';
+        global $user;
+        $from = $user->mail;
+        global $user;
+        $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from";
+        foreach ($emails as $mail) {
+          user_mail(trim($mail), $subj, $body, $headers);
+        }
+        drupal_set_message(t('%count invitations sent.', array('%count' => count($emails))));
+        print theme('page', og_invite_form($gid));
+      }
+      else {
+        print theme('page', og_invite_form($gid));
+      }
     }
     else {
       print theme('page', og_invite_form($gid));
     }
   }
   else {
-    print theme('page', og_invite_form($gid));
+    drupal_access_denied();
   }
 }
 
@@ -1368,7 +1374,7 @@ function og_block_details() {
     $block['content'] = $output;
     // display group image.
     $block['content'] .= $node->images ? image_display($node, 'thumbnail') : '';
-    $block['subject'] = $node->title;
+    $block['subject'] = l($node->title, "node/$node->nid");
     return $block;
   }
 }
