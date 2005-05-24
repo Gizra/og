@@ -347,7 +347,7 @@ function og_invite($gid) {
       $node = node_load(array('nid' => $gid));
       $subj = t('Invitation to join the group "%group" at %site', array('%group' => $node->title, '%site' => variable_get('site_name', 'drupal')));
       $body = t("Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n\n", array('%group' => $node->title));
-      $body .= strtoupper($node->title). "\n";
+      $body .= $node->title. "\n";
       $body .= $node->og_description. "\n";
       $body .= t('Subscribe: %url', array('%url' => url("og/subscribe/$gid", NULL, NULL, TRUE)));
       $body .= $edit['pmessage'] ? "\n\n ----------------------------\n". $edit['pmessage']. "\n--------------------------------" : '';
@@ -938,7 +938,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
   global $user;
 
   switch ($op) {
-    case load:
+    case 'load':
         $account->og_groups = og_get_subscriptions($account->uid);
       break;
     case 'view':
