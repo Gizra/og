@@ -17,7 +17,7 @@ function og_help($section) {
     case strstr($section, 'admin/block/configure/og'):
       return t('Group blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
     case 'admin/settings/og':
-      return t('In order to let group admins determine their own group theme, you must enable mutliple themes using %page. To enable admins to upload a group image, you must activate and configure image.module (see Contributions repository)', array('%page' => l(t('theme configuration page'), 'admin/theme')));
+      return t('In order to let group admins determine their own group theme, you must enable mutliple themes using %page. To enable admins to upload a group image, you must activate and configure image.module (see Contributions repository). It is strongly recommended that you back up your database before changing these options! Specifically, your node_access table will be altered.', array('%page' => l(t('theme configuration page'), 'admin/theme')));
 
   }
 }
@@ -63,11 +63,6 @@ function og_menu($may_cache) {
       if ($node->type == 'og') {
         $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'og_email', 'callback arguments' => arg(1), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
       }
-    }
-
-    // handle 'initialize' checkbox from the settings page. TODO: this sucks
-    if (isset($_POST['edit']['og_enabled']) && user_access('administer organic groups')) {
-      _og_update_db($_POST['edit']['og_enabled']);
     }
 
     og_theme();
@@ -1411,7 +1406,31 @@ function og_link($type, $node = 0, $main) {
 }
 
 function og_settings() {
-  $output = form_textarea(t('Explanation or submission guidelines'), 'og_help', variable_get('og_help', ''), 70, 5, t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
+  $op = $_POST['op'];
+  drupal_set_title(t('Organic groups configuration'));
+  $status = t('disabled');
+  $btn_text = t('Enable');
+  if (variable_get('og_enabled', 1)) {
+    $status = t('enabled');
+    $btn_text = t('Disable');
+  }
+  $group = t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />';
+  $group .= form_button($btn_text). '<br />';
+  $output = form_group(t('Module status'), $group, t('After enabling this module via the module settings page or before disabling this module, use the above button to restore default permissions.'));
+
+  if ($op) {
+    if ($op == t('Enable')) {
+     _og_update_db(TRUE);
+      variable_set('og_enabled', 1);
+    }
+    elseif ($op == t('Disable')) {
+       _og_update_db(FALSE);
+       variable_set('og_enabled', 0);
+    }
+    drupal_goto('admin/settings/og');
+  }
+
+  $output .= form_textarea(t('Explanation or submission guidelines'), 'og_help', variable_get('og_help', ''), 70, 5, t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
   $output .= form_checkbox(t('Unlimited albums'), 'og_album_unlimited', 1, variable_get('og_album_unlimited', TRUE), t('If you want to limit your groups to a single album, uncheck this box.'));
   $output .= form_checkbox(t('List moderated groups'), 'og_selective_listed', 1, variable_get('og_selective_listed', 0), t('Moderated groups appear in the %s. Moderated groups require new subscription requests to be manually approved. Invite only groups never appear in the list.', array('%s' => l('list of groups page', 'og'))));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
