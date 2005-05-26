@@ -625,11 +625,17 @@ function og_view(&$node, $teaser = FALSE, $page = FALSE) {
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'));
     drupal_set_breadcrumb($bc);
     $output ='';
-    foreach (node_list() as $type) {
+    $mode = 'all';
+
+    if (!$types[] = $_GET['ntype']) {
+      $types = node_list();
+      $mode = 'brief';
+    }
+    foreach ($types as $type) {
       // image is filtered out here because we expect images to be added from within albums
       $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
       if (!in_array($type, $exempt)) {
-        if ($table = og_list_og($node->nid, $type, 'brief')) {
+        if ($table = og_list_og($node->nid, $type, $mode)) {
           $output .= form_group(node_invoke($type, 'node_name'), $table);
         }
       }
@@ -1291,7 +1297,7 @@ function og_block_subscribers() {
       while ($row = db_fetch_object($result)) {
         //showing member pictures
         if (variable_get('og_member_pics', 1)) {
-           $link = theme('user_picture', $row). l("$row->name","user/$row->uid");
+           $link = theme('user_picture', $row). format_name($row);
         }
         else {
           $link = format_name($row);
@@ -1471,13 +1477,13 @@ function theme_og_list_generic($gid, $type, $mode) {
 
   $header = array(t('Title'), t('Author'), t('Replies'), t('Created'));
   $sql = og_get_home_nodes_sql($type);
-  $num = $mode == 'brief' ? variable_get('og_max_posts', 10) : 50;
+  $num = $mode == 'brief' ? variable_get('og_max_posts', 10) : 100;
   $i++; // multiple pagers on a page need a unique integer
   $result = pager_query(db_rewrite_sql($sql), $num, $i, NULL, $gid);
   while ($row = db_fetch_object($result)) {
     $rows[] = array(l($row->title, "node/$row->nid"), format_name($row), $row->comment_count, format_date($row->created, 'small'));
   }
-  if ($pager = theme('pager', NULL, $num, $i)) {
+  if ($pager = theme('pager', NULL, $num, $i, array('ntype' => $type))) {
     $rows[] = array(array('data' => $pager, 'colspan' => '4'));
   }
   return $rows ? theme('table', $header, $rows) : NULL;
