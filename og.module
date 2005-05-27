@@ -6,6 +6,11 @@ define ('OG_OPEN', '0');
 define ('OG_MODERATED', 1);
 define ('OG_INVITE_ONLY', 2);
 
+// visibility states for nodes within groups. admin chooses in og_settings()
+define(OG_VISIBLE_GROUPONLY, 0);
+define(OG_VISIBLE_BOTH, 1);
+define(OG_VISIBLE_CHOOSE, 2);
+
 function og_help($section) {
   switch ($section) {
     case 'admin/help#og':
@@ -833,10 +838,10 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           }
         $vis = variable_get('og_visibility', 0);
         switch ($vis) {
-          case 1: // visible in and out of group
+          case OG_VISIBLE_BOTH:
             $node->og_public = 1;
             break;
-          case 0: // visible only in group
+          case OG_VISIBLE_GROUPONLY:
             $node->og_public = 0;
             break;
           }
@@ -880,9 +885,15 @@ function og_nodeapi_form($node) {
       drupal_set_message(t('You must subscribe to a group before posting.'), 'error');
     }
 
-    $vis = variable_get('og_visibility', 0);
+    if (user_access('administer organic groups')) {
+      $vis = OG_VISIBLE_CHOOSE;
+      drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are always shown.', array('%author' => theme('placeholder', t('Author')))));
+    }
+    else {
+      $vis = variable_get('og_visibility', 0);
+    }
     switch ($vis) {
-      case 2: //user decides how public the post is
+      case OG_VISIBLE_CHOOSE: //user decides how public the post is
         if (isset($edit['og_public'])) {
           $public = $edit['og_public'];
         }
@@ -892,7 +903,7 @@ function og_nodeapi_form($node) {
         else {
           $public = 1;
         }
-        $output .= form_checkbox(t('Public'), 'og_public', 1, $public, t('Show this post to everyone or only to members of the groups below.'));
+        $output .= form_checkbox(t('Public'), 'og_public', 1, $public, t('Show this post to everyone or only to members of the checked selected below.'));
         break;
     }
 
@@ -1430,7 +1441,7 @@ function og_settings() {
   $output .= form_checkbox(t('Unlimited albums'), 'og_album_unlimited', 1, variable_get('og_album_unlimited', TRUE), t('If you want to limit your groups to a single album, uncheck this box.'));
   $output .= form_checkbox(t('List moderated groups'), 'og_selective_listed', 1, variable_get('og_selective_listed', 0), t('Moderated groups appear in the %s. Moderated groups require new subscription requests to be manually approved. Invite only groups never appear in the list.', array('%s' => l('list of groups page', 'og'))));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
-  $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group'));
+  $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub.', array('%pub' => theme('placeholder', t('Public')))));
   $output .= form_textfield(t('Maximum posts on group home page'),'og_max_posts',variable_get('og_max_posts', 10), 3, 2, t("How many posts of a given type should display on the group home page."));
   // TODO: move this to block config? Will be used elsewhere?
   $output .= form_checkbox( t('Show member pictures'), 'og_member_pics', 1, variable_get('og_member_pics', 1), t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in %user.', array('%user' => l(t('User configuration'), 'admin/user/configure'))));
