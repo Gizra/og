@@ -11,7 +11,6 @@ INSTALLATION
 - Visit the admin/settings/og page and click the button to enable access control.
 - Set other preferences on admin/settings/og as desired.
 - On the admin/node/configure/types page, disable commenting and attachments for nodes of type 'group'
-- On the admin/settings page, set 'Default 403 (access denied) page' to 'og/access_denied'
 - On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers' and 'Group albums' block. If you use the 'group albums' block, you must have folksonomy, and image.module enabled and configured.
 - If you want each group to optionally show its own image in the Group Details block, you must have image.module enabled. See http://drupal.org/project/image
 - Grant permissions as needed on the admin/access page

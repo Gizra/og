@@ -38,7 +38,6 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/create_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_create_admin', 'access' => $access, 'title' => t('create group administrator'));
     $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('delete group administrator'));
     $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
-    $items[] = array('path' => 'og/access_denied', 'type' => MENU_CALLBACK, 'callback' => 'og_access_denied', 'title' => t('groups'), 'access' => TRUE);
     $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     $items[] = array('path' => 'og/albums', 'callback' => 'og_albums_page', 'title' => t('albums'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     $items[] = array('path' => 'og/albums/form', 'callback' => 'og_albums_form', 'title' => t('album'), 'type' => MENU_CALLBACK, 'access' => user_access('create images'));
@@ -1088,20 +1087,6 @@ function _og_update_db($enable) {
   }
 }
 
-// we want to show a friendly message to all who visit a group page, even if they can't see any posts.
-function og_access_denied() {
-  if (!$group_node = $_SESSION['og_last']) {
-    $output = message_access();
-    $title = t('Access denied');
-  }
-  else {
-    $output = t('There are no public posts in this group.');
-    $title = $group_node->title;
-  }
-  drupal_set_title($node->title);
-  print theme('page', $output);
-}
-
 /**
  * Implementation of hook_block().
  */
@@ -1457,7 +1442,6 @@ function og_settings() {
   }
   unset($options['og']);
   $output .= form_select(t('Omitted content types'), 'og_omitted', variable_get('og_omitted', array()), $options, t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), 0, TRUE);
-  $output .= form_checkbox(t('Initialize access control'), 'og_enabled', 1, variable_get('og_enabled', 0), t('Perform the queries necessary to enable or disable groups access control. You should perform this only once.'));
   return $output;
 }
 
