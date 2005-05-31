@@ -7,12 +7,9 @@ define ('OG_MODERATED', 1);
 define ('OG_INVITE_ONLY', 2);
 
 // visibility states for nodes within groups. admin chooses in og_settings()
-define(OG_VISIBLE_GROUPONLY, 0);
-define(OG_VISIBLE_BOTH, 1);
-define(OG_VISIBLE_CHOOSE, 2);
-
-// register group states
-define ('OG_REGISTER', '0');
+define('OG_VISIBLE_GROUPONLY', 0);
+define('OG_VISIBLE_BOTH', 1);
+define('OG_VISIBLE_CHOOSE', 2);
 
 function og_help($section) {
   switch ($section) {
@@ -108,7 +105,11 @@ function og_theme() {
   $group_node = NULL; // a node object containing the 'active' group for this request
 
   $pages = array('users', 'albums', 'feed', 'invite', 'remove_node', 'manage', 'all');
-  if (arg(0) == 'og' && in_array(arg(1), $pages)) {
+  if (arg(0) == 'og' && arg(1) == 'albums' && arg(2) == 'form' && $gid = $_REQUEST['edit']['og_groups'][0]) {
+    $group_node = node_load(array('nid' => $gid));
+    $custom_theme = $group_node->og_theme;
+  }
+  elseif (arg(0) == 'og' && in_array(arg(1), $pages)) {
     $group_node = og_set_theme(arg(2));
   }
   elseif (arg(0) == 'node' && is_numeric(arg(1))) {
@@ -607,7 +608,7 @@ function og_list_groups_page() {
     $include[] = OG_MODERATED;
   }
   $include = implode(',', $include);
-  $result = pager_query(db_rewrite_sql("SELECT n.nid, n.title, n.body, n.uid, u.name, og.description FROM {og} INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og.selective IN ($include) AND n.status=1 ORDER BY n.nid DESC"), 50);
+  $result = pager_query(db_rewrite_sql("SELECT n.nid, n.title, n.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og.selective IN ($include) AND n.status=1 ORDER BY n.nid DESC"), 50);
   $header = array(t("Title"), t('Subscribers'), t("Owner"), t('Description'));
 
   while ($node = db_fetch_object($result)) {
@@ -636,7 +637,7 @@ function og_get_home_nodes_sql($str_types = NULL) {
     $where = "n.type NOT IN ('og', 'image')";
   }
 
-  return "SELECT DISTINCT(n.nid), n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n INNER JOIN {node_access} og_na ON n.nid = og_na.nid INNER JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og_na.gid = %d AND og_na.realm = 'og_group' AND n.status=1 AND $where ORDER BY n.sticky DESC, n.created DESC";
+  return "SELECT DISTINCT(n.nid), n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n INNER JOIN {node_access} og_na ON n.nid = og_na.nid INNER JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og_na.gid = %d AND og_na.realm = 'og_group' AND n.status=1 AND $where ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
 }
 
 //  when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group. Each of these lists is
@@ -697,7 +698,7 @@ function og_form(&$node, &$param) {
     $register = $node->og_register;
   }
   else {
-    $register = OG_REGISTER;
+    $register = 0;
   }
   // TODO: discuss the implication of the directory here, or make that a different option.
   $output .= form_radios(t('Selective'), 'og_selective', $selective, array(t('open - subscription requests are accepted immediately'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.')), t('How subscription requests be handled in this group?'));
@@ -1527,7 +1528,7 @@ function theme_og_list_generic($gid, $type, $mode) {
 
   $header = array(t('Title'), t('Author'), t('Replies'), t('Created'));
   $sql = og_get_home_nodes_sql($type);
-  $num = $mode == 'brief' ? variable_get('og_max_posts', 10) : 100;
+  $num = $mode == 'brief' ? variable_get('og_max_posts', 10) : 50;
   $i++; // multiple pagers on a page need a unique integer
   $result = pager_query(db_rewrite_sql($sql), $num, $i, NULL, $gid);
   while ($row = db_fetch_object($result)) {
