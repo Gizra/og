@@ -69,15 +69,6 @@ function og_menu($may_cache) {
     }
 
     og_theme();
-    /* When each node section on the group home page has dedicated details page
-    $gid = $_REQUEST['edit']['og_groups'][0];
-    foreach (node_list() as $type) {
-      // image is filtered out here because we expect images to be added from within albums
-      $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
-      if (!in_array($type, $exempt)) {
-        $items[] = array('path' => "og/all/$gid/$type", 'callback' => 'og_all', 'type' => MENU_CALLBACK, 'callback arguments' => array($gid, $type), 'title' => t("all $type posts"), 'access' => user_access('access content'));
-      }
-    }*/
 
     //stash path so that its available if we have a 403. see http://drupal.org/node/13621
     $_GET['q_original'] = $_GET['q'];
