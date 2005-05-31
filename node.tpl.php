@@ -17,12 +17,15 @@
             $og_links[] = l($node->og_groups_names[$ind], 'node/', $node->og_groups[$ind]);
           }
           $og_links = theme('links', $og_links);
-  ?>
-  <div class="groups"><?php print t('groups'). ': '.  $og_links ?></div>
-  <div class="terms"><?php print t('categories'). ': '. $terms ?></div>
-  <?php } ?>
+          print '<div class="groups">';
+          print t('groups'). ': '.  $og_links. '</div>';
+   } ?>
+  <?php if ($terms) {
+          print '<div class="terms">';
+          print t('categories'). ': '. $terms.  '</div>';
+        }
 
-<?php if ($links): ?>
+        if ($links): ?>
 
     <?php if ($picture): ?>
       <br class='clear' />
