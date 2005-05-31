@@ -11,6 +11,9 @@ define(OG_VISIBLE_GROUPONLY, 0);
 define(OG_VISIBLE_BOTH, 1);
 define(OG_VISIBLE_CHOOSE, 2);
 
+// register group states
+define ('OG_REGISTER', '0');
+
 function og_help($section) {
   switch ($section) {
     case 'admin/help#og':
@@ -389,8 +392,8 @@ function og_invite_form($gid) {
 }
 
 function og_subscribe($gid, $uid = NULL) {
+  global $user;
   if (is_null($uid)) {
-    global $user;
     if ($user->uid) {
       $account = $user;
     }
@@ -400,13 +403,28 @@ function og_subscribe($gid, $uid = NULL) {
     }
   }
   else {
-    $account = user_load(array('uid' => $account->uid));
+    $account = user_load(array('uid' => $uid));
   }
   if ($account->uid != $user->uid && !node_access('update', array('nid' => $gid, 'status' => 1))) {
     // only admins can subscribe another person
     drupal_access_denied();
   }
+  $return = og_subscribe_user($gid, $account);
+  if ($return == 'approved') {
+    drupal_set_message(t('Subscription request awaits approval by an administrator.'));
+  }
+  else if ($return == 'subscribed') {
+    drupal_set_message(t('User subscribed to group,'));
+  }
+  drupal_goto("node/$gid");
+}
 
+/**
+ * subscribe given user to given group. no access control since this is an API function
+ *
+ * @return string 'approval' or 'subscribed' depending on the group's configuration.
+ **/
+function og_subscribe_user($gid, $account) {
   $names = array('nid', 'realm', 'gid', 'grant_view', 'grant_update');
   $values = array($gid, "'og_uid'", $account->uid);
 
@@ -428,16 +446,16 @@ function og_subscribe($gid, $uid = NULL) {
     $from = variable_get('site_mail', ini_get('sendmail_from'));
     $headers = "From: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
     user_mail(implode(', ', $admins), $subj, $body, $headers);
-    drupal_set_message(t('Subscription request awaits approval by an administrator.'));
+    $return_value = 'approval';
   }
   else {
     $values[] = 1;
     $values[] = 0;
-    drupal_set_message(t('User subscribed to group.'));
+    $return_value = 'subscribed';
   }
   $sql = 'REPLACE INTO {node_access} ('. implode(',', $names). ') VALUES ('. implode(',', $values). ')';
   db_query($sql);
-  drupal_goto("node/$gid");
+  return $return_value;
 }
 
 function og_unsubscribe($gid, $uid = NULL) {
@@ -456,7 +474,6 @@ function og_unsubscribe($gid, $uid = NULL) {
   drupal_goto("node/$gid");
 }
 
-// TODO: caching is likely not needed here anymore. harmless though.
 // since a user's subscriptions are loaded into $user object, this function is only occassionally useful to get group subs for users other than the current user
 // even then, it often makes sense to call user_load() instead of this function.
 // load all subscriptions for a given user
@@ -473,8 +490,11 @@ function og_get_subscriptions($uid) {
       $subscriptions[$uid][$row->nid]['grant_update'] = $row->grant_update;
       $subscriptions[$uid][$row->nid]['grant_delete'] = $row->grant_delete;
     }
+    if (!$subscriptions[$uid]) {
+      $subscriptions[$uid] = array();
+    }
   }
-  return $subscriptions[$uid] ? $subscriptions[$uid] : array();
+  return $subscriptions[$uid];
 }
 
 /**
@@ -670,8 +690,18 @@ function og_form(&$node, &$param) {
   else {
     $selective = OG_OPEN;
   }
+  if (isset($edit['og_register'])) {
+    $register = $edit['og_register'];
+  }
+  elseif ($node->nid) {
+    $register = $node->og_register;
+  }
+  else {
+    $register = OG_REGISTER;
+  }
   // TODO: discuss the implication of the directory here, or make that a different option.
   $output .= form_radios(t('Selective'), 'og_selective', $selective, array(t('open - subscription requests are accepted immediately'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.')), t('How subscription requests be handled in this group?'));
+  $output .= form_radios(t('Register'), 'og_register', $register, array(t('no'), t('yes')), t('Should this group be available for subscription during registration?. If checked, a corrosponding checkbox will be added to the registration form.'));
 
   // group image
   if (module_exist('image')) {
@@ -770,9 +800,9 @@ function og_node_name($node) {
 }
 
 function og_load(&$node) {
-  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme FROM {og} WHERE nid = %d';
+  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, register AS og_register FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
-  $node = (object) array_merge($node, db_fetch_object($result));
+  $node = (object) array_merge((array)$node, db_fetch_array($result));
   // module_invoke does not pass references and image_load() requires this
   if (function_exists('image_load')) {
     image_load($node);
@@ -780,8 +810,8 @@ function og_load(&$node) {
 }
 
 function og_insert($node) {
-  $sql = "INSERT INTO {og} (nid, theme, selective, description) VALUES (%d, '%s', %d, '%s')";
-  db_query($sql, $node->nid, $node->og_theme, $node->og_selective, $node->og_description);
+  $sql = "INSERT INTO {og} (nid, theme, selective, description, register) VALUES (%d, '%s', %d, '%s', %d)";
+  db_query($sql, $node->nid, $node->og_theme, $node->og_selective, $node->og_description, $node->og_register);
 }
 
 function og_update($node) {
@@ -797,8 +827,8 @@ function og_update($node) {
     }
   }
 
-  $sql = "UPDATE {og} SET theme='%s', selective=%d, description='%s' WHERE nid=%d";
-  db_query($sql, $node->og_theme, $node->og_selective, $node->og_description, $node->nid);
+  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s' WHERE nid = %d";
+  db_query($sql, $node->og_theme, $node->og_selective, $node->og_register, $node->og_description, $node->nid);
 }
 
 /**
@@ -958,6 +988,31 @@ function og_user($op, &$edit, &$account, $category = NULL) {
   global $user;
 
   switch ($op) {
+    case 'register':
+      $options = array();
+      $values = array();
+      $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type = 'og' AND o.register = 1"));
+      while ($group = db_fetch_object($result)) {
+        $options[$group->nid] = t('Subscribe to %name', array('%name' => theme('placeholder', $group->title)));
+        $values[$group->nid] = in_array($group->nid, (array) $edit['og_register']) ? $group->nid : 0;
+        if ($group->selective) {
+          $options[$group->nid] .= ' '. theme('placeholder', t('(approval needed)')); 
+        }
+      }
+      if (count($options)) {
+        return array(array('title' => t('Groups'), 'data' => form_checkboxes('', 'og_register', $values, $options)));
+      }
+      break;
+    case 'insert':
+      if (($_GET['q'] == 'user/register') ? 1 : 0) {
+        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type = 'og' AND n.status = 1 AND o.register = 1"));
+        while ($group = db_fetch_object($result)) {
+          if (in_array($group->nid, $edit['og_register'])) {
+            og_subscribe_user($group->nid, $account);
+          }
+        }
+      }
+      break;
     case 'load':
         $account->og_groups = og_get_subscriptions($account->uid);
       break;
