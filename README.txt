@@ -1,20 +1,20 @@
 DESCRIPTION
 --------------------------
-Enable users to create and manage their own 'groups'. Each group can have subscribers, and maintains a group page where subscribers can post into. groups may be selective or not. Selective groups require approval in order to become a member.
+Enable users to create and manage their own 'groups'. Each group can have subscribers, and maintains a
+group page where subscribers can post into. Membership to groups may be open, moderated, or invitation only.
 
-Support for group photo albums is available. Groups may choose their own theme. groups have RSS feeds, and so on.
+Support for group photo albums is available. Groups may choose their own theme. Groups have RSS feeds, and so on.
 
 INSTALLATION
 ---------------
 - Activate the module as usual
-- Install the .sql table as usual
+- Run the SQL setup script as usual
 - Visit the admin/settings/og page and click the button to enable access control.
 - Set other preferences on admin/settings/og as desired.
 - On the admin/node/configure/types page, disable commenting and attachments for nodes of type 'group'
 - On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers' and 'Group albums' block. If you use the 'group albums' block, you must have folksonomy, and image.module enabled and configured.
 - If you want each group to optionally show its own image in the Group Details block, you must have image.module enabled. See http://drupal.org/project/image
 - Grant permissions as needed on the admin/access page
-- If you are using album.module to provide personal image albums, then you should omit the 'image' node type on your admin/settings/og page. Note that group photo albums will be group specific regardless of this setting.
 - Begin creating groups, subscribing to those groups, and posting into those groups. The subscribe link appears in the Group block, for non invite-only groups.
 
 NOTES
@@ -23,6 +23,7 @@ NOTES
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status
 - All subscriber management happens on the 'user list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), subscribing/unsubscribing users and promoting users into group admins.
 - If you decide to stop using this module, click the 'disable' button on the admin/settings/og page. If you ever decide to re-enable, all your prior subscriptions and group settings are preserved.
+- If you are using album.module to provide personal image albums, then you should omit the 'image' node type on your admin/settings/og page. Note that group photo albums will be group specific regardless of this setting.
 
 
 THEMES
@@ -33,7 +34,13 @@ You may wish to stylize nodes which have properties assigned by this module.
 --- you may wish to omit the node author and time if $node->type == 'og'. also consider not showing node links for these nodes since they slightly clutter the group home page.
 --- provided in this package are two template files for the phptemplate engine. One stylizes group nodes and suggested above and the other stylizes all other nodes as suggested above. These can be starting points for your customization of look and feel of the central area of the group home page.
 
-TODO
+TODO/BUGS/FEATURE REQUESTS
 ----------------
 - see http://drupal.org/project/issues/og
-- optional 'permanent deny' subscriber requests
+
+CREDITS
+----------------------------
+Authored by Moshe Weitzman <weitzman AT tejasa DOT com>
+Contributors: Mir Nazim
+Sponsored by Broadband Mechanics - http://www.broadbandmechanics.com/
+Sponsored by Finnish Broadcasting Company - http://www.yle.fi/fbc/
