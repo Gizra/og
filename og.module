@@ -70,9 +70,8 @@ function og_menu($may_cache) {
 
     og_theme();
 
-    //stash path so that its available if we have a 403. see http://drupal.org/node/13621
-    $_GET['q_original'] = $_GET['q'];
-
+    // stash path so that its available if we have a 403. see http://drupal.org/node/13621
+    // $_GET['q_original'] = $_GET['q'];
   }
   return $items;
 }
@@ -1517,7 +1516,7 @@ function og_list_og($gid, $type, $mode = 'all') {
 function theme_og_list_generic($gid, $type, $mode) {
   static $i;
 
-  $header = array(t('Title'), t('Author'), t('Replies'), t('Created'));
+  $header = array(t('Title'), t('Author'), t('Replies'), t('Last reply'));
   $sql = og_get_home_nodes_sql($type);
   $num = $mode == 'brief' ? variable_get('og_max_posts', 10) : 50;
   $i++; // multiple pagers on a page need a unique integer
