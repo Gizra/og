@@ -1315,7 +1315,7 @@ function og_albums_save($nodes) {
 
 function og_block_albums() {
   if (module_exist('album') && module_exist('folksonomy') && $gid = $_SESSION['og_last']->nid) {
-    $sql = "SELECT n.nid, f.name AS fname, COUNT(f.name) AS fcount, u.name, u.uid FROM {folksonomy} f INNER JOIN {node} n ON f.id = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE f.realm = 'og_group_$nid' GROUP BY f.name ORDER BY id DESC";
+    $sql = "SELECT n.nid, f.name AS fname, COUNT(f.name) AS fcount, u.name, u.uid FROM {folksonomy} f INNER JOIN {node} n ON f.id = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE f.realm = 'og_group_$gid' GROUP BY f.name ORDER BY id DESC";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
       $submitter = t('submitted by %name. ', array('%name' => $row->name));
