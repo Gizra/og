@@ -12,13 +12,18 @@ INSTALLATION
 - Visit the admin/settings/og page and click the button to enable access control.
 - Set other preferences on admin/settings/og as desired.
 - On the admin/node/configure/types page, disable commenting and attachments for nodes of type 'group'
-- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers' and 'Group albums' block. If you use the 'group albums' block, you must have folksonomy, and image.module enabled and configured.
-- If you want each group to optionally show its own image in the Group Details block, you must have image.module enabled. See http://drupal.org/project/image
+- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers' and 'Group albums' block.
+If you use the 'group albums' block, you must have folksonomy, and image.module enabled and configured.
+- If you want each group to optionally show its own image in the Group Details block, you must
+have image.module enabled. See http://drupal.org/project/image
 - Grant permissions as needed on the admin/access page
 - Begin creating groups, subscribing to those groups, and posting into those groups. The subscribe link appears in the Group block, for non invite-only groups.
 
 NOTES
 ----------------
+- Drupal has poor support for running more than one node_access type module at one. That means that you can't run og with
+taxonomy_access, nodeperm_by_role, nodeaccess, or any other node access control module. This is a core Drupal issue, not an og issue. Developers - feel free
+to propose a soultion for this. See http://drupal.org/node/23193
 - 'Administer nodes' permission is required for changing the Manager of a group
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status
 - All subscriber management happens on the 'user list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), subscribing/unsubscribing users and promoting users into group admins.

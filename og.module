@@ -64,7 +64,7 @@ function og_menu($may_cache) {
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(array('nid' => arg(1)));
       if ($node->type == 'og') {
-        $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'og_email', 'callback arguments' => arg(1), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
+        $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'og_email', 'callback arguments' => array(arg(1)), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
       }
     }
 
@@ -987,7 +987,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
         $options[$group->nid] = t('Subscribe to %name', array('%name' => theme('placeholder', $group->title)));
         $values[$group->nid] = in_array($group->nid, (array) $edit['og_register']) ? $group->nid : 0;
         if ($group->selective) {
-          $options[$group->nid] .= ' '. theme('placeholder', t('(approval needed)')); 
+          $options[$group->nid] .= ' '. theme('placeholder', t('(approval needed)'));
         }
       }
       if (count($options)) {
