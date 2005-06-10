@@ -998,7 +998,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
       if (($_GET['q'] == 'user/register') ? 1 : 0) {
         $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type = 'og' AND n.status = 1 AND o.register = 1"));
         while ($group = db_fetch_object($result)) {
-          if (in_array($group->nid, $edit['og_register'])) {
+          if (in_array($group->nid, (array) $edit['og_register'])) {
             og_subscribe_user($group->nid, $account);
           }
         }
