@@ -872,14 +872,13 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
               case OG_VISIBLE_GROUPONLY:
                 $node->og_public = 0;
                 break;
-              }
             }
           }
-          // if a post isn't in any groups. it must be public as far as og goes
-          if (empty($node->og_groups)) {
-            $node->og_public = 1;
-          }
-
+        }
+        // if a post isn't in any groups. it must be public
+        if (empty($node->og_groups)) {
+          $node->og_public = 1;
+        }
       }
       break;
     case 'delete':
