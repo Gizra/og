@@ -14,7 +14,7 @@
 
   <?php if ($node->og_groups) {
           for ($ind=0; $ind < count($node->og_groups); $ind++) {
-            $og_links[] = l($node->og_groups_names[$ind], 'node/', $node->og_groups[$ind]);
+            $og_links[] = l($node->og_groups_names[$ind], 'node/'. $node->og_groups[$ind]);
           }
           $og_links = theme('links', $og_links);
           print '<div class="groups">';
