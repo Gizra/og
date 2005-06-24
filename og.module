@@ -633,7 +633,7 @@ function og_get_home_nodes_sql($str_types = NULL) {
 // when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group.
 // each of these lists is presented by default in a table, although that can be changed by the theme
 function og_view(&$node, $teaser = FALSE, $page = FALSE) {
-  return theme_og_view($node, $teaser, $page);  
+  return theme_og_view($node, $teaser, $page);
 }
 
 // if you want a totally different group home page, you may redefine this function in your theme
@@ -879,7 +879,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           if (empty($node->og_groups)) {
             $node->og_public = 1;
           }
-          
+
       }
       break;
     case 'delete':
@@ -1017,6 +1017,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
         $account->og_groups = og_get_subscriptions($account->uid);
       break;
     case 'view':
+      // only show to self and admins
       if ($account->uid == $user->uid || user_access('administer organic groups')) {
         if ($account->og_groups) {
           foreach ($account->og_groups as $key => $val) {
@@ -1025,19 +1026,6 @@ function og_user($op, &$edit, &$account, $category = NULL) {
           return array(t('Groups') => form_item('', theme('item_list', $links), t('your group subscriptions are here for your convenience. they do not appear on the public profile page.')));
         }
       }
-
-      #// commented out because I feel that one's group subscriptions are private information. We need better support from core to let users choose to show select profile bits.
-      # if ($category == 'account') {
-#         foreach ($account->og_groups as $key => $val) {
-#           $radio = form_radios('', "og_type_$key", $edit["og_type_$key"] ? $edit["og_type_$key"] : $val['mail_type'], array(t('web only'), t('email and web')));
-#           $rows[] = array(l($val['title'], "node/$key"), $radio);
-#         }
-#         if ($rows) {
-#           $output = theme('table', $header, $rows);
-#           return array(array('title' => t('Groups'), 'data' => $output, 'weight' => 0));
-#         }
-#       }
-#       break;
       break;
   }
 }
@@ -1472,7 +1460,7 @@ function og_settings() {
   drupal_set_title(t('Organic groups configuration'));
   $status = t('disabled');
   $btn_text = t('Enable');
-  if (variable_get('og_enabled', 1)) {
+  if (variable_get('og_enabled', 0)) {
     $status = t('enabled');
     $btn_text = t('Disable');
   }
@@ -1496,12 +1484,12 @@ function og_settings() {
   $output .= form_checkbox(t('Unlimited albums'), 'og_album_unlimited', 1, variable_get('og_album_unlimited', TRUE), t('If you want to limit your groups to a single album, uncheck this box.'));
   $output .= form_checkbox(t('List moderated groups'), 'og_selective_listed', 1, variable_get('og_selective_listed', 0), t('Moderated groups appear in the %s. Moderated groups require new subscription requests to be manually approved. Invite only groups never appear in the list.', array('%s' => l('list of groups page', 'og'))));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
-  $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub.', array('%pub' => theme('placeholder', t('Public')))));
+  $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))));
   $output .= form_textfield(t('Maximum posts on group home page'),'og_max_posts',variable_get('og_max_posts', 10), 3, 2, t("How many posts of a given type should display on the group home page."));
   // TODO: move this to block config? Will be used elsewhere?
   $output .= form_checkbox( t('Show member pictures'), 'og_member_pics', 1, variable_get('og_member_pics', 1), t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in %user.', array('%user' => l(t('User configuration'), 'admin/user/configure'))));
   $options = array(t('optional'), t('required'));
-  $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group.'));
+  $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
   unset($options);
   foreach (node_list() as $type) {
     $options[$type] = module_invoke(node_get_module_name($type), 'node_name', array());
