@@ -12,7 +12,7 @@ INSTALLATION
 - Visit the admin/settings/og page and click the button to enable access control.
 - Set other preferences on admin/settings/og as desired.
 - On the admin/node/configure/types page, disable commenting and attachments for nodes of type 'group'
-- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers' and 'Group albums' block.
+- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers', 'New groups, 'My groups', and 'Group albums' block.
 If you use the 'group albums' block, you must have folksonomy, and image.module enabled and configured.
 - If you want each group to optionally show its own image in the Group Details block, you must
 have image.module enabled. See http://drupal.org/project/image
@@ -26,7 +26,7 @@ taxonomy_access, nodeperm_by_role, nodeaccess, or any other node access control 
 to propose a soultion for this. See http://drupal.org/node/23193
 - 'Administer nodes' permission is required for changing the Manager of a group
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status
-- All subscriber management happens on the 'user list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), subscribing/unsubscribing users and promoting users into group admins.
+- All subscriber management happens on the 'subscriber list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), subscribing/unsubscribing users and promoting users into group admins.
 - If you decide to stop using this module, click the 'disable' button on the admin/settings/og page. If you ever decide to re-enable, all your prior subscriptions and group settings are preserved.
 - If you are using album.module to provide personal image albums, then you should omit the 'image' node type on your admin/settings/og page. Note that group photo albums will be group specific regardless of this setting.
 
@@ -45,7 +45,7 @@ TODO/BUGS/FEATURE REQUESTS
 
 CREDITS
 ----------------------------
-Authored by Moshe Weitzman <weitzman AT tejasa DOT com>
+Authored and maintained by Moshe Weitzman <weitzman AT tejasa DOT com>
 Contributors: Mir Nazim, Gerhard Killesreiter
 Sponsored by Broadband Mechanics - http://www.broadbandmechanics.com/
 Sponsored by Finnish Broadcasting Company - http://www.yle.fi/fbc/

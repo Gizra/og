@@ -1,12 +1,12 @@
 <?php
 // $Id$
 
-// Selective groups states
+// Selective groups states. chosen by the group admin
 define ('OG_OPEN', 0);
 define ('OG_MODERATED', 1);
 define ('OG_INVITE_ONLY', 2);
 
-// visibility states for nodes within groups. admin chooses in og_settings()
+// visibility states for nodes within groups. site admin chooses in og_settings()
 define('OG_VISIBLE_GROUPONLY', 0);
 define('OG_VISIBLE_BOTH', 1);
 define('OG_VISIBLE_CHOOSE', 2);
@@ -593,12 +593,7 @@ function og_list_users_page($gid) {
 function og_list_groups_page() {
   global $user;
 
-  $include = array(OG_OPEN);
-  if (variable_get('og_selective_listed', 0)) {
-    $include[] = OG_MODERATED;
-  }
-  $include = implode(',', $include);
-  $result = pager_query(db_rewrite_sql("SELECT n.nid, n.title, n.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og.selective IN ($include) AND n.status=1 ORDER BY n.nid DESC"), 50);
+  $result = pager_query(db_rewrite_sql("SELECT n.nid, n.title, n.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC"), 50);
   $header = array(t("Title"), t('Subscribers'), t("Owner"), t('Description'));
 
   while ($node = db_fetch_object($result)) {
@@ -687,6 +682,7 @@ function og_form(&$node, &$param) {
   else {
     $selective = OG_OPEN;
   }
+  
   if (isset($edit['og_register'])) {
     $register = $edit['og_register'];
   }
@@ -696,9 +692,20 @@ function og_form(&$node, &$param) {
   else {
     $register = 0;
   }
-  // TODO: discuss the implication of the directory here, or make that a different option.
-  $output .= form_radios(t('Selective'), 'og_selective', $selective, array(t('open - subscription requests are accepted immediately'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.')), t('How subscription requests be handled in this group?'));
-  $output .= form_radios(t('Register'), 'og_register', $register, array(t('no'), t('yes')), t('Should this group be available for subscription during registration?. If checked, a corrosponding checkbox will be added to the registration form.'));
+  
+  if (isset($edit['og_directory'])) {
+    $directory = $edit['og_directory'];
+  }
+  elseif ($node->nid) {
+    $directory = $node->og_directory;
+  }
+  else {
+    $directory = 1;
+  }
+
+  $output .= form_radios(t('Subscription requests'), 'og_selective', $selective, array(t('open - subscription requests are accepted immediately'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.')), t('How should subscription requests be handled in this group?'));
+  $output .= form_checkbox(t('registration form'), 'og_register', 1, $register, t('Should this group be available for subscription during registration?. If checked, a corrosponding checkbox will be added to the registration form.'));
+  $output .= form_checkbox(t('list in groups directory'), 'og_directory', 1, $directory, t('Should this group be available for subscription during registration?. If checked, a corrosponding checkbox will be added to the registration form.'));
 
   // group image
   if (module_exist('image')) {
@@ -736,12 +743,12 @@ function og_form(&$node, &$param) {
       $row[] = $field;
 
       // Reset to follow site default theme if user selects the site default
-      # if ($key == variable_get('theme_default', 'bluemarine')) {
-#         $key = '';
-#         if ($node->og_theme == variable_get('theme_default', 'bluemarine')) {
-#           $node->og_theme = '';
-#         }
-#       }
+      if ($key == variable_get('theme_default', 'bluemarine')) {
+        $key = '';
+        if ($node->og_theme == variable_get('theme_default', 'bluemarine')) {
+          $node->og_theme = '';
+        }
+      }
 
       // Selected column.
       $row[] = array('data' => form_radio('', 'og_theme', $key, ($node->og_theme == $key) ? 1 : 0), 'align' => 'center');
@@ -749,11 +756,13 @@ function og_form(&$node, &$param) {
       $rows[] = $row;
     }
     $header = array(t('Screenshot'), t('Name'), t('Selected'));
-    $output .= form_item('', theme('table', $header, $rows), t('Select a theme for your group.'));
+    $output .= form_item(t('Group theme'), theme('table', $header, $rows), t('Select a theme for your group.'));
+    
   }
   return $output;
 }
 
+// set og_public property for given node
 function og_node_load_public($node) {
   $sql = "SELECT grant_view FROM {node_access} WHERE nid = %d AND gid=0 AND realm='og_group'";
   $gv = db_result(db_query($sql, $node->nid));
@@ -786,6 +795,11 @@ function og_image($gid) {
 function og_validate(&$node) {
   // comments are not allowed on group nodes, since we don't have any nice way to present them
   $node->comment = 0;
+  
+  // Reset to follow site default theme if user selects the site default
+  if ($node->og_theme == variable_get('theme_default', 'bluemarine')) {
+    $node->og_theme = NULL;
+  }
 
   if (module_exist('image')) {
     image_validate($node, 'image');
@@ -797,7 +811,7 @@ function og_node_name($node) {
 }
 
 function og_load(&$node) {
-  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, register AS og_register FROM {og} WHERE nid = %d';
+  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, register AS og_register, directory AS og_directory FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, db_fetch_array($result));
   // module_invoke does not pass references and image_load() requires this
@@ -807,8 +821,8 @@ function og_load(&$node) {
 }
 
 function og_insert($node) {
-  $sql = "INSERT INTO {og} (nid, theme, selective, description, register) VALUES (%d, '%s', %d, '%s', %d)";
-  db_query($sql, $node->nid, $node->og_theme, $node->og_selective, $node->og_description, $node->og_register);
+  $sql = "INSERT INTO {og} (nid, theme, selective, description, register, directory) VALUES (%d, '%s', %d, '%s', %d, %d)";
+  db_query($sql, $node->nid, $node->og_theme, $node->og_selective, $node->og_description, $node->og_register, $node->og_directory);
 }
 
 function og_update($node) {
@@ -823,9 +837,9 @@ function og_update($node) {
       }
     }
   }
-
-  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s' WHERE nid = %d";
-  db_query($sql, $node->og_theme, $node->og_selective, $node->og_register, $node->og_description, $node->nid);
+  
+  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', directory = %d WHERE nid = %d";
+  db_query($sql, $node->og_theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_directory, $node->nid);
 }
 
 /**
@@ -1035,9 +1049,8 @@ function og_user($op, &$edit, &$account, $category = NULL) {
  * user has permissions of 0,0,0 he is considered to be 'applying' for access to a private group
  *
  * In the 'og_group' realm, the gid is a nid of a group. This is used
- * to store which nodes should show up in which groups. Further, the 'grant_view'
- * permission determines whether a group is selective (i.e. private) or not (for 'og' nodes).
- *
+ * to store which nodes should show up in which groups. When applied to an og node, this record is
+ * always 1 but you can set it to 0 in order to have a completely private group.
 **/
 function og_node_grants($account, $op) {
   $grants['og_uid'][] = $account->uid;
@@ -1076,9 +1089,9 @@ function og_save_permissions(&$node) {
     }
   }
   else {
-    // invite only groups are not publically accessible. others are publically accessible, although their posts may not be
-    $grant_view = $node->og_selective == OG_INVITE_ONLY ? 0 : 1;
-    $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_group', $grant_view)";
+    // all groups are publically accessible, although their posts may not be
+    // if you really want a hidden group, you should go to node_access table and delete the record which is inserted here.
+    $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_group', 1)";
     db_query($sql, $node->nid);
 
     // make sure the node owner is a full powered subscriber
@@ -1105,7 +1118,7 @@ function og_delete_permissions(&$node) {
  * addition to enabling/disabling the module in the admin/modules page.
  *
  * Here, if the user is enabling the module, we make sure the default entry in
- * the node_access table is deleted and walk through all the nodes in the node_table
+ * the node_access table is deleted and walk through all the nodes in the node table
  * and grant all view access as is the default case when this module is not
  * enabled.  We only do this for nodes whose permissions haven't been set before by
  * this module.  It is possible that a site-admin may have previously enabled the
@@ -1137,28 +1150,6 @@ function _og_update_db($enable) {
       db_query($sql, $row->nid);
     }
     drupal_set_message(t('Organic groups access control enabled.'));
-  }
-}
-
-/**
- * Implementation of hook_block().
- */
-function og_block($op = 'list', $delta = 0) {
-  if ($op == 'list') {
-    $blocks[0]['info'] = t('Group details');
-    $blocks[1]['info'] = t('Group albums');
-    $blocks[2]['info'] = t('Group subscribers');
-    return $blocks;
-  }
-  elseif ($op == 'view') {
-    switch ($delta) {
-      case 0:
-        return og_block_details();
-      case 1:
-        return og_block_albums();
-      case 2:
-        return og_block_subscribers();
-    }
   }
 }
 
@@ -1309,6 +1300,76 @@ function og_albums_save($nodes) {
   // return $links;
 }
 
+/**
+ * Implementation of hook_block().
+ */
+function og_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks[0]['info'] = t('Group details');
+    $blocks[1]['info'] = t('Group albums');
+    $blocks[2]['info'] = t('Group subscribers');
+    $blocks[3]['info'] = t('New groups');
+    $blocks[4]['info'] = t('My groups');
+    return $blocks;
+  }
+  elseif ($op == 'view') {
+    switch ($delta) {
+      case 0:
+        return og_block_details();
+      case 1:
+        return og_block_albums();
+      case 2:
+        return og_block_subscribers();
+      case 3:
+        return og_block_new();
+      case 4:
+        return og_block_my();
+    }
+  }
+  else if ($op == 'configure') {
+    switch ($delta) {
+      case 2:
+      case 3:
+        return form_textfield(t('Maximum number of items to show'), 'og_block_cnt', $edit['og_block_cnt'] ? $edit['og_block_cnt'] : variable_get("og_block_cnt_$delta", 10), 5, 255, '');
+    }
+  }
+  else if ($op == 'save') {
+    switch ($delta) {
+      case 2:
+      case 3:
+        if (isset($edit['og_block_cnt'])) {
+          variable_set("og_block_cnt_$delta", $edit['og_block_cnt']);
+        }
+        break;
+    }
+  }
+}
+
+function og_block_my() {
+  global $user;
+  foreach ($user->og_groups as $key => $val) {
+    $items[] = l($val['title'], "node/$key");
+  }
+  $block['subject'] = t('My groups');
+  $block['content'] = theme('item_list', $items);
+  return $block;
+}
+
+function og_block_new() {
+  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type = 'og' AND n.status = 1";
+  $cnt = db_result(db_query(db_rewrite_sql($sql)));
+  $max = variable_get('og_block_new_cnt', 10);
+  $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type = 'og' AND og.directory=1 ORDER BY nid DESC";
+  $result = db_query_range(db_rewrite_sql($sql), 0, $max);
+  $output = node_title_list($result);
+  if ($cnt > $max) {
+    $output .= '<div class="more-link">'. l(t('more'), 'og', array('title' => t('Browse the newest groups.'))) .'</div>';
+  }
+  $block['subject'] = t('New groups');
+  $block['content'] = $output;
+  return $block;
+}
+
 function og_block_albums() {
   if (module_exist('image') && module_exist('folksonomy') && $gid = $_SESSION['og_last']->nid) {
     $sql = "SELECT n.nid, f.name AS fname, COUNT(f.name) AS fcount, u.name, u.uid FROM {folksonomy} f INNER JOIN {node} n ON f.id = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE f.realm = 'og_group_$gid' GROUP BY f.name ORDER BY id DESC";
@@ -1330,8 +1391,9 @@ function og_block_subscribers() {
   global $user;
   if ($gid = $_SESSION['og_last']->nid) {
     if (in_array($gid, array_keys($user->og_groups))) {
+      $max = variable_get('og_block_subscribers_cnt', 10);
       $sql = og_list_users_sql(0);
-      $result = db_query_range($sql, $gid, 0, 15);
+      $result = db_query_range($sql, $gid, 0, $max);
       while ($row = db_fetch_object($result)) {
         //showing member pictures
         if (variable_get('og_member_pics', 1)) {
@@ -1347,7 +1409,7 @@ function og_block_subscribers() {
       }
 
       if ($links) {
-        if (count($links) > 14) {
+        if (count($links) > $max-1) {
           array_pop($links);
           $append = '<div class="more-link">'. l(t('more'), "og/users/$gid", array('title' => t('View all subscribers.'))) .'</div>';;
         }

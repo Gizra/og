@@ -4,6 +4,7 @@ CREATE TABLE `og` (
   `description` varchar(255) NULL,
   `image` varchar(255) NULL,
   `theme` varchar(255) NULL,
+  `directory` int(11) NOT NULL default '1',
   PRIMARY KEY  (`nid`)
 ) TYPE=MyISAM;
 
