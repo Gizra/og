@@ -660,7 +660,9 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
     if (!$output) {
       drupal_set_message(t('No posts in this group.'));
     }
-    $icon = theme('xml_icon', url("og/feed/$node->nid"));
+    $url = url("og/feed/$node->nid");
+    $icon = theme('xml_icon', $url);
+    drupal_set_html_head("<link rel=\"alternate\" href=\"$url\" title=\"$node->title RSS feed\" type=\"application/rss+xml\" />");
     $node->body = $output. $icon;
   }
   return $node;
