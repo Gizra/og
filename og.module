@@ -706,7 +706,7 @@ function og_form(&$node, &$param) {
   }
 
   $output .= form_radios(t('Subscription requests'), 'og_selective', $selective, array(t('open - subscription requests are accepted immediately'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.')), t('How should subscription requests be handled in this group?'));
-  $output .= form_checkbox(t('registration form'), 'og_register', 1, $register, t('Should this group be available for subscription during registration?. If checked, a corrosponding checkbox will be added to the registration form.'));
+  $output .= form_checkbox(t('registration form'), 'og_register', 1, $register, t('Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form.'));
   $output .= form_checkbox(t('list in groups directory'), 'og_directory', 1, $directory, t('Should this group be available for subscription during registration?. If checked, a corrosponding checkbox will be added to the registration form.'));
 
   // group image
