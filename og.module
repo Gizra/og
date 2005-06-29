@@ -993,12 +993,53 @@ function og_mail($node) {
       $subj = "[$row->group_name] ". t('%author added \'%title\' at %site', array('%author' => $author->name, '%title' => $title, '%site' => variable_get('site_name', drupal)));
       $txt = "'$node->title' by $author->name\n$url\n\n";
       $txt .= $node->read_more ? t('EXCERPT') : t('FULL POST');
-      $txt .= "\n". $node->teaser;
+      $txt .= "\n". og_mail_output($node->teaser, 1, $node->format);
       $txt .= "\n\n-----------------------\n";
       $txt .= t("You are subscribed to the group '%group_name' at '%site'. To manage your subscription, visit %group_url", array('%group_name' => $row->group_name, '%site' => variable_get('site_name', drupal), '%group_url' => url("og/manage/$row->gid", NULL, NULL, TRUE)));
       $subject = "[]";
       user_mail($row->mail, $subj, $txt, $headers);
     }
+  }
+}
+
+// 2 functions blatantly ripped from mail.inc in project.module package
+function og_mail_urls($url = 0) {
+  static $urls = array();
+  if ($url) {
+    $urls[] = strpos($url, '://') ? $url : url($url, NULL, NULL, 1);
+    return count($urls);
+  }
+  return $urls;
+}
+
+function og_mail_output(&$body, $html = 1, $format = FILTER_FORMAT_DEFAULT) {
+  static $i = 0;
+
+  if ($html) {
+    $pattern = '@(<a href="(.+?)">(.+?)</a>)@ei';
+    $body = preg_replace($pattern, "'\\3 ['. og_mail_urls('\\2') .']'", $body);
+    $urls = og_mail_urls();
+    if (count($urls)) {
+      $body .= "\n";
+      for ($max = count($urls); $i < $max; $i++) {
+        $body .= '['. ($i + 1) .'] '. $urls[$i] ."\n";
+      }
+    }
+
+    $body = check_output($body, $format);
+    $body = preg_replace('!</?blockquote>!i', '"', $body);
+    $body = preg_replace('!</?(em|i)>!i', '/', $body);
+    $body = preg_replace('!</?(b|strong)>!i', '*', $body);
+    $body = preg_replace("@<br />(?!\n)@i", "\n", $body);
+    $body = preg_replace("@</p>(?!\n\n)@i", "\n\n", $body);
+    $body = preg_replace("@<li>@i", "* ", $body);
+    $body = preg_replace("@</li>\n?@i", "\n", $body);
+    $body = strip_tags($body);
+    $body = decode_entities($body);
+    $body = wordwrap($body, 72);
+  }
+  else {
+    $body = decode_entities($body);
   }
 }
 
