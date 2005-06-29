@@ -990,7 +990,7 @@ function og_mail($node) {
     $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {node} n ON ou.nid=n.nid WHERE ou.nid IN ($groups) AND ou.mail_type=1";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
-      $subj = "[$row->group_name] ". t('%author added \'%title\' at %site', array('%author' => $author->name, '%title' => $title, '%site' => variable_get('site_name', drupal)));
+      $subj = "[$row->group_name] ". t('%author added \'%title\' at %site', array('%author' => $author->name, '%title' => $node->title, '%site' => variable_get('site_name', drupal)));
       $txt = "'$node->title' by $author->name\n$url\n\n";
       $txt .= $node->read_more ? t('EXCERPT') : t('FULL POST');
       $txt .= "\n". og_mail_output($node->teaser, 1, $node->format);
