@@ -20,9 +20,9 @@ function og_help($section) {
     case 'node/add#og':
       return t("A group provides home page for like minded users. There they post articles about their shared interest.");
     case strstr($section, 'admin/block/configure/og'):
-      return t('Group blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
+      return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
     case 'admin/settings/og':
-      return t('In order to let group admins determine their own group theme, you must enable mutliple themes using %page. To enable admins to upload a group image, you must activate and configure image.module (see Contributions repository). It is strongly recommended that you back up your database before changing these options! Specifically, your node_access table will be altered.', array('%page' => l(t('theme configuration page'), 'admin/theme')));
+      return t('In order to let group admins determine their own group theme, you must enable mutliple themes using %page. To enable admins to upload a group image, you must activate and configure image.module (see Contributions repository).', array('%page' => l(t('theme configuration page'), 'admin/theme')));
 
   }
 }
@@ -459,8 +459,11 @@ function og_unsubscribe($gid, $uid = NULL) {
     drupal_access_denied();
   }
 
-  $sql = "DELETE FROM {node_access}  WHERE gid = %d AND nid = %d AND realm = 'og_uid'";
+  $sql = "DELETE FROM {node_access} WHERE gid = %d AND nid = %d AND realm = 'og_uid'";
   db_query($sql, $uid, $gid);
+  $sql = "DELETE FROM {og_uid} WHERE nid=%d AND uid=%d";
+  db_query($sql, $gid, $uid);
+
   drupal_set_message(t('User unsubscribed from group.'));
   drupal_goto("node/$gid");
 }
@@ -684,7 +687,7 @@ function og_form(&$node, &$param) {
   else {
     $selective = OG_OPEN;
   }
-  
+
   if (isset($edit['og_register'])) {
     $register = $edit['og_register'];
   }
@@ -694,7 +697,7 @@ function og_form(&$node, &$param) {
   else {
     $register = 0;
   }
-  
+
   if (isset($edit['og_directory'])) {
     $directory = $edit['og_directory'];
   }
@@ -707,7 +710,7 @@ function og_form(&$node, &$param) {
 
   $output .= form_radios(t('Subscription requests'), 'og_selective', $selective, array(t('open - subscription requests are accepted immediately'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.')), t('How should subscription requests be handled in this group?'));
   $output .= form_checkbox(t('registration form'), 'og_register', 1, $register, t('Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form.'));
-  $output .= form_checkbox(t('list in groups directory'), 'og_directory', 1, $directory, t('Should this group be available for subscription during registration?. If checked, a corrosponding checkbox will be added to the registration form.'));
+  $output .= form_checkbox(t('list in groups directory'), 'og_directory', 1, $directory, t('Should this group appear on the %page', array('%page' => l('list of groups page','og'))));
 
   // group image
   if (module_exist('image')) {
@@ -759,7 +762,7 @@ function og_form(&$node, &$param) {
     }
     $header = array(t('Screenshot'), t('Name'), t('Selected'));
     $output .= form_item(t('Group theme'), theme('table', $header, $rows), t('Select a theme for your group.'));
-    
+
   }
   return $output;
 }
@@ -797,7 +800,7 @@ function og_image($gid) {
 function og_validate(&$node) {
   // comments are not allowed on group nodes, since we don't have any nice way to present them
   $node->comment = 0;
-  
+
   // Reset to follow site default theme if user selects the site default
   if ($node->og_theme == variable_get('theme_default', 'bluemarine')) {
     $node->og_theme = NULL;
@@ -839,7 +842,7 @@ function og_update($node) {
       }
     }
   }
-  
+
   $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', directory = %d WHERE nid = %d";
   db_query($sql, $node->og_theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_directory, $node->nid);
 }
@@ -1047,7 +1050,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
 
 /**
  * In the 'og_uid' realm, the gid is a uid. This is used to determine a whether a user
- * is a member of a group, and what his permissions are in that group (view/update/delete). When a
+ * is a member of a group, and what his permissions are in that group (view/update/delete of the 'group' node). When a
  * user has permissions of 0,0,0 he is considered to be 'applying' for access to a private group
  *
  * In the 'og_group' realm, the gid is a nid of a group. This is used
@@ -1352,24 +1355,28 @@ function og_block_my() {
   foreach ($user->og_groups as $key => $val) {
     $items[] = l($val['title'], "node/$key");
   }
-  $block['subject'] = t('My groups');
-  $block['content'] = theme('item_list', $items);
-  return $block;
+  if ($items) {
+    $block['subject'] = t('My groups');
+    $block['content'] = theme('item_list', $items);
+    return $block;
+  }
 }
 
 function og_block_new() {
   $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type = 'og' AND n.status = 1";
   $cnt = db_result(db_query(db_rewrite_sql($sql)));
-  $max = variable_get('og_block_new_cnt', 10);
-  $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type = 'og' AND og.directory=1 ORDER BY nid DESC";
-  $result = db_query_range(db_rewrite_sql($sql), 0, $max);
-  $output = node_title_list($result);
-  if ($cnt > $max) {
-    $output .= '<div class="more-link">'. l(t('more'), 'og', array('title' => t('Browse the newest groups.'))) .'</div>';
+  if ($cnt > 0) {
+    $max = variable_get('og_block_new_cnt', 10);
+    $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type = 'og' AND og.directory=1 ORDER BY nid DESC";
+    $result = db_query_range(db_rewrite_sql($sql), 0, $max);
+    $output = node_title_list($result);
+    if ($cnt > $max) {
+      $output .= '<div class="more-link">'. l(t('more'), 'og', array('title' => t('Browse the newest groups.'))) .'</div>';
+    }
+    $block['subject'] = t('New groups');
+    $block['content'] = $output;
+    return $block;
   }
-  $block['subject'] = t('New groups');
-  $block['content'] = $output;
-  return $block;
 }
 
 function og_block_albums() {
@@ -1545,7 +1552,6 @@ function og_settings() {
 
   $output .= form_textarea(t('Explanation or submission guidelines'), 'og_help', variable_get('og_help', ''), 70, 5, t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
   $output .= form_checkbox(t('Unlimited albums'), 'og_album_unlimited', 1, variable_get('og_album_unlimited', TRUE), t('If you want to limit your groups to a single album, uncheck this box.'));
-  $output .= form_checkbox(t('List moderated groups'), 'og_selective_listed', 1, variable_get('og_selective_listed', 0), t('Moderated groups appear in the %s. Moderated groups require new subscription requests to be manually approved. Invite only groups never appear in the list.', array('%s' => l('list of groups page', 'og'))));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
   $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))));
   $output .= form_textfield(t('Maximum posts on group home page'),'og_max_posts',variable_get('og_max_posts', 10), 3, 2, t("How many posts of a given type should display on the group home page."));
