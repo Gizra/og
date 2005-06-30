@@ -53,7 +53,7 @@ function og_menu($may_cache) {
     $user = user_load(array('uid' => $user->uid));
 
     foreach ($user->og_groups as $key => $sub) {
-      $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => array($key), 'access' => TRUE);
+      $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => array($key), 'access' => TRUE, 'type' => MENU_CALLBACK);
       $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('subscriber management'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => TRUE);
       $items[] = array('path' => "og/users/$key/list", 'callback' => 'og_list_users_page', 'title' => t('list'), 'callback arguments' => array($key), 'type' => MENU_DEFAULT_LOCAL_TASK, 'access' => TRUE);
       $items[] = array('path' => "og/users/$key/add", 'callback' => 'og_add_users_page', 'title' => t('add subscribers'), 'callback arguments' => array($key), 'type' => MENU_LOCAL_TASK, 'access' => TRUE, 'weight' => 5);
@@ -69,9 +69,6 @@ function og_menu($may_cache) {
     }
 
     og_theme();
-
-    // stash path so that its available if we have a 403. see http://drupal.org/node/13621
-    // $_GET['q_original'] = $_GET['q'];
   }
   return $items;
 }
