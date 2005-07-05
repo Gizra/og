@@ -325,7 +325,7 @@ function og_invite($gid) {
     if ($edit = $_POST['edit']) {
       $emails = explode(',', $edit['mails']);
       if (count($emails) > $max) {
-        form_set_error('mails', t("You may not specify more than $max email addresses."));
+        form_set_error('mails', t("You may not specify more than %max email addresses.", array('%max' => $max)));
         $err = TRUE;
       }
       else {
@@ -373,7 +373,7 @@ function og_invite($gid) {
 function og_invite_form($gid) {
   $edit = $_POST['edit'];
   $max = variable_get('og_email_max', 10);
-  $form .= form_textfield(t('Email addresses'), 'mails', $edit['mails'], 90, 250, t("Enter up to $max email addresses. Separate multiple addresses by commas. Each will receive an invitation message from you."), NULL, TRUE);
+  $form .= form_textfield(t('Email addresses'), 'mails', $edit['mails'], 90, 250, t("Enter up to %max email addresses. Separate multiple addresses by commas. Each will receive an invitation message from you.", array('%max' => $max)), NULL, TRUE);
   $form .= form_textarea(t('Personal message'), 'pmessage', $edit['pmessage'], 90, 5, t('Optional. Enter a message which will become part of the invitation email'));
   $form .= form_button(t('Send invitation'));
   return form($form);
@@ -628,11 +628,12 @@ function og_get_home_nodes_sql($str_types = NULL) {
 // when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group.
 // each of these lists is presented by default in a table, although that can be changed by the theme
 function og_view(&$node, $teaser = FALSE, $page = FALSE) {
-  return theme_og_view($node, $teaser, $page);
+  $node = theme('og_view', $node, $teaser, $page);
+  return $node;
 }
 
 // if you want a totally different group home page, you may redefine this function in your theme
-// if you just want to change the presentation of current page, redefine theme_og_list_generic()
+// if you just want to change the presentation of a group home page section, redefine theme_og_list_generic()
 function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($teaser || !$page) {
     $node = node_prepare($node, $teaser);
@@ -1390,10 +1391,10 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
 
 function og_block_my() {
   global $user;
-  foreach ($user->og_groups as $key => $val) {
-    $items[] = l($val['title'], "node/$key");
-  }
-  if ($items) {
+  if ($user->og_groups) {
+    foreach ($user->og_groups as $key => $val) {
+      $items[] = l($val['title'], "node/$key");
+    }
     $block['subject'] = t('My groups');
     $block['content'] = theme('item_list', $items);
     return $block;
@@ -1598,7 +1599,7 @@ function og_settings() {
   $options = array(t('optional'), t('required'));
   $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
   unset($options);
-  foreach (node_list() as $type) {
+  foreach (node_list() as   $type) {
     $options[$type] = module_invoke(node_get_module_name($type), 'node_name', array());
   }
   unset($options['og']);
