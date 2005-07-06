@@ -603,7 +603,7 @@ function og_list_groups_page() {
       array("data" => l($node->title, "node/$node->nid")),
       array("data" => in_array($node->nid, array_keys($user->og_groups)) ? l($cnt, "og/users/$node->nid") : $cnt),
       array("data" => format_name($node)),
-      array("data" => check_output($node->description)),
+      array("data" => check_plain($node->description)),
     );
   }
   if (!$rows) {
@@ -637,6 +637,7 @@ function og_view(&$node, $teaser = FALSE, $page = FALSE) {
 // if you just want to change the presentation of a group home page section, redefine theme_og_list_generic()
 function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($teaser || !$page) {
+    $node->teaser = $node->og_description;
     $node = node_prepare($node, $teaser);
   }
   else {
@@ -1491,7 +1492,7 @@ function og_block_details() {
         }
       }
     }
-    $output = "<div id=\"og-description\">$node->og_description</div><br />";
+    $output = "<div id=\"og-description\">". check_plain($node->og_description). "</div><br />";
     if ($subscription == 'active') {
       $links = og_create_links($node);
       if ($node->og_selective < OG_INVITE_ONLY) {
