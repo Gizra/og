@@ -819,7 +819,7 @@ function og_load(&$node) {
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, db_fetch_array($result));
   // module_invoke does not pass references and image_load() requires this
-  if (function_exists('image_load')) {
+  if ($node->og_image && function_exists('image_load')) {
     image_load($node);
   }
 }
