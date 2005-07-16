@@ -137,10 +137,12 @@ function og_set_theme($nid) {
           $custom_theme = $group_node->og_theme;
         }
     }
-    $bc[] = l(t('home'), '');
-    $bc[] = l(t('groups'), 'og');
-    $bc[] = l($group_node->title, "node/$group_node->nid");
-    drupal_set_breadcrumb($bc);
+    // we know everything we need to know here to determine the node breadcrumb
+    // instead of reproducing this logic elsewhere, save in a GLOBAL and set_breadcrumb() in og_nodeapi('view')
+    $GLOBALS['og_node_bc'][] = l(t('home'), '');
+    $GLOBALS['og_node_bc'][] = l(t('groups'), 'og');
+    $GLOBALS['og_node_bc'][] = l($group_node->title, "node/$group_node->nid");
+    
     return $group_node;
   }
 }
@@ -853,6 +855,11 @@ function og_update($node) {
 */
 function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
+    case 'view':
+      if ($bc = $GLOBALS['og_node_bc']) {
+        drupal_set_breadcrumb($bc);
+      }
+      break;
     case 'load':
       if ($node->type != 'og') {
         $node = og_node_load_public($node);
