@@ -652,7 +652,7 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
       $types = node_list();
       $mode = 'brief';
     }
-    foreach ($types as $type) {
+    foreach ($types as $type => $val) {
       // image is filtered out here because we expect images to be added from within albums
       $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
       if (!in_array($type, $exempt)) {
@@ -1033,7 +1033,7 @@ function og_mail_output(&$body, $html = 1, $format = FILTER_FORMAT_DEFAULT) {
       }
     }
 
-    $body = check_output($body, $format);
+    $body = check_output($body, $format, FALSE);
     $body = preg_replace('!</?blockquote>!i', '"', $body);
     $body = preg_replace('!</?(em|i)>!i', '/', $body);
     $body = preg_replace('!</?(b|strong)>!i', '*', $body);
@@ -1543,11 +1543,10 @@ function og_block_details() {
 
 // $group is an object containing the group node
 function og_create_links($group) {
-  foreach (node_list() as $type) {
+  foreach (node_list() as $type => $name) {
     // image is filtered out here because we expect images to be added from within albums
     $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
     if (!in_array($type, $exempt) && node_access('create', $type)) {
-      $name = node_invoke($type, 'node_name', array());
       $links[] = l(t('create %type', array('%type' => $name)), "node/add/$type", array('title' => t('Add a new %s in this group.', array('%s' => $name))), "edit[og_groups][]=$group->nid");
     }
   }
@@ -1608,8 +1607,8 @@ function og_settings() {
   $options = array(t('optional'), t('required'));
   $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
   unset($options);
-  foreach (node_list() as   $type) {
-    $options[$type] = module_invoke(node_get_module_name($type), 'node_name', array());
+  foreach (node_list() as $type => $name) {
+    $options[$type] = t($name);
   }
   unset($options['og']);
   $output .= form_select(t('Omitted content types'), 'og_omitted', variable_get('og_omitted', array()), $options, t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), 0, TRUE);
