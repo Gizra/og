@@ -62,7 +62,7 @@ function og_menu($may_cache) {
     }
 
     if (arg(0) == 'node' && is_numeric(arg(1))) {
-      $node = node_load(array('nid' => arg(1)));
+      $node = node_load('nid' => arg(1));
       if ($node->type == 'og') {
         $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'og_email', 'callback arguments' => array(arg(1)), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
       }
@@ -93,7 +93,7 @@ function og_theme() {
 
   $pages = array('users', 'albums', 'feed', 'invite', 'remove_node', 'manage', 'all');
   if (arg(0) == 'og' && arg(1) == 'albums' && arg(2) == 'form' && $gid = $_REQUEST['edit']['og_groups'][0]) {
-    $group_node = node_load(array('nid' => $gid));
+    $group_node = node_load('nid' => $gid);
     $custom_theme = $group_node->og_theme;
   }
   elseif (arg(0) == 'og' && in_array(arg(1), $pages)) {
@@ -103,7 +103,7 @@ function og_theme() {
     $group_node = og_set_theme(arg(1));
   }
   elseif (arg(0) == 'node' && arg(1) == 'add' && $gid = $_REQUEST['edit']['og_groups'][0]) {
-    $group_node = node_load(array('nid' => $gid));
+    $group_node = node_load('nid' => $gid);
     $custom_theme = $group_node->og_theme;
   }
   elseif (arg(0) == 'comment' && is_numeric(arg(2))) {
@@ -114,7 +114,7 @@ function og_theme() {
 
 function og_set_theme($nid) {
   global $custom_theme;
-  $node = node_load(array('nid' => $nid));
+  $node = node_load('nid' => $nid);
   if ($node->type == 'og') {
     $custom_theme = $node->og_theme;
     return $node;
@@ -124,16 +124,16 @@ function og_set_theme($nid) {
       case 0:
         return NULL;
       case 1:
-        $group_node = node_load(array('nid' => $node->og_groups[0]));
+        $group_node = node_load('nid' => $node->og_groups[0]);
         $custom_theme = $group_node->og_theme;
       default:
         // node is in multiple groups. preference goes to the group we showed on the prior page view (if any)
         if (in_array($_SESSION['og_last']->nid, $node->og_groups)) {
-          $group_node = node_load(array('nid' => $_SESSION['og_last']->nid));
+          $group_node = node_load('nid' => $_SESSION['og_last']->nid);
           $custom_theme = $group_node->og_theme;
         }
         else {
-          $group_node = node_load(array('nid' => $node->og_groups[0]));
+          $group_node = node_load('nid' => $node->og_groups[0]);
           $custom_theme = $group_node->og_theme;
         }
     }
@@ -158,7 +158,7 @@ function og_nodeview($gid) {
  *   the nid of a group.
  */
 function og_email($gid) {
-  $node = node_load(array('nid' => $gid));
+  $node = node_load('nid' => $gid);
   drupal_set_title(t('Send email to %group', array('%group' => $node->title)));
   if ($edit = $_POST['edit']) {
     if (!$edit['body']) {
@@ -216,7 +216,7 @@ function og_manage($gid) {
     drupal_set_message(t('Subscription saved.'));
   }
 
-  $group = node_load(array('nid' => $gid));
+  $group = node_load('nid' => $gid);
   // group owner can't unsubscribe
   if ($group->uid != $user->uid) {
     $output .= form_item(t('Goodbye'), l(t('Unsubscribe from this group'), "og/unsubscribe/$gid"), NULL, 'destination=og');
@@ -234,7 +234,7 @@ function og_approve($gid, $uid) {
     $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, %d, 'og_uid', 1)";
     db_query($sql, $gid, $uid);
     drupal_set_message(t('Subscription request approved.'));
-    $node = node_load(array('nid' => $gid));
+    $node = node_load('nid' => $gid);
     $subj = t("Subscription request approved for '%title'", array('%title' => $node->title));
     $body = t('You may now post messages in this group located at %url', array('%url' => url("node/$node->nid", NULL, NULL, TRUE)));
     $from = variable_get('site_mail', ini_get('sendmail_from'));
@@ -292,7 +292,7 @@ function og_delete_admin($gid, $uid) {
 
 function og_remove_node($gid, $nid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-      $node = node_load(array('nid' => $nid));
+      $node = node_load('nid' => $nid));
     if ($_POST['op']['og_confirm']) {
       og_delete_folksonomy($node);
       $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_group'";
@@ -322,7 +322,7 @@ function og_delete_folksonomy($node) {
 }
 
 function og_invite($gid) {
-  $node = node_load(array('nid' => $gid));
+  $node = node_load('nid' => $gid);
   if ($node->og_selective < OG_INVITE_ONLY || node_access('update', $node)) {
     $max = variable_get('og_email_max', 10);
     if ($edit = $_POST['edit']) {
@@ -343,7 +343,7 @@ function og_invite($gid) {
         }
       }
       if (!$err) {
-        $node = node_load(array('nid' => $gid));
+        $node = node_load('nid' => $gid);
         $subj = t('Invitation to join the group "%group" at %site', array('%group' => $node->title, '%site' => variable_get('site_name', 'drupal')));
         $body = t("Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n\n", array('%group' => $node->title));
         $body .= $node->title. "\n";
@@ -423,7 +423,7 @@ function og_subscribe_user($gid, $account) {
   // if you can't view/edit/delete, you are *requesting* membership in the group
   // if you can view, you are a member
   // if you can edit, you are an admin
-  $node = node_load(array('nid' => $gid));
+  $node = node_load('nid' => $gid);
   if ($node->og_selective) {
     $values[] = 0;
     $values[] = 0;
@@ -554,7 +554,7 @@ function og_list_users_page($gid) {
     $header[] = array('data' => t('Operations'), 'colspan' => 2);
   }
   // prepend the group owner
-  $node = node_load(array('nid' => $gid));
+  $node = node_load( => $gid);
   $i=0;
   $rows[$i][] = format_name($node). '&nbsp;<em>'. t('manager'). '</em>';
   if ($access) {
@@ -790,7 +790,7 @@ function og_get_node_groups($node) {
 }
 
 function og_image($gid) {
-  $node = node_load(array('nid' => $gid));
+  $node = node_load('nid' => $gid);
   $request = ($_GET['size']) ? $_GET['size'] : 'preview';
   $output = image_display($node, $request);
   print theme('page', $output);
@@ -1217,7 +1217,7 @@ function og_feed($gid) {
     if ($nodes) {
       $sql = 'SELECT nid FROM {node} WHERE nid IN (%s)';
       $result = db_query($sql, implode(', ', $nodes));
-      $node = node_load(array('nid' => $gid));
+      $node = node_load('nid' => $gid);
       $channel['title'] = $node->title;
       $channel['link'] = url("node/$gid", NULL, NULL, TRUE);
       $channel['description'] = $node->og_description;
@@ -1241,7 +1241,7 @@ function og_albums_page($gid, $str_tags, $operator = 'or') {
   }
   if ($tags) {
     $title = str_replace(array(',', '+'), ', ', $str_tags);
-    $node = node_load(array('nid' => $gid));
+    $node = node_load('nid' => $gid);
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
     $result = folksonomy_select_nodes($tags, $operator, 'image', 'og_group_'. $node->nid);
     // append 'create album' link if available and permitted.
@@ -1276,7 +1276,7 @@ function og_albums_form() {
   $output .= og_nodeapi(array2object($edit), 'form post');
   $output .= form_button(t('Submit'));
   if ($gid = $edit['og_groups'][0]) {
-    $node = node_load(array('nid' => $gid));
+    $node = node_load('nid' => $gid);
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
     drupal_set_breadcrumb($bc);
   }
@@ -1482,7 +1482,7 @@ function og_block_details() {
   global $user;
 
   if ($gid = $_SESSION['og_last']->nid) {
-    $node = node_load(array('nid' => $gid));
+    $node = node_load('nid' => $gid);
     $result = db_query(og_list_users_sql(0), $node->nid);
     $cntall = db_num_rows($result);
     $cntpending = 0;
