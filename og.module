@@ -1033,7 +1033,7 @@ function og_mail_output(&$body, $html = 1, $format = FILTER_FORMAT_DEFAULT) {
       }
     }
 
-    $body = check_output($body, $format, FALSE);
+    $body = check_markup($body, $format, FALSE);
     $body = preg_replace('!</?blockquote>!i', '"', $body);
     $body = preg_replace('!</?(em|i)>!i', '/', $body);
     $body = preg_replace('!</?(b|strong)>!i', '*', $body);
