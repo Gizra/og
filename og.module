@@ -556,7 +556,7 @@ function og_list_users_page($gid) {
   // prepend the group owner
   $node = node_load($gid);
   $i=0;
-  $rows[$i][] = theme('format_name', $node). '&nbsp;<em>'. t('manager'). '</em>';
+  $rows[$i][] = theme('username', $node). '&nbsp;<em>'. t('manager'). '</em>';
   if ($access) {
     $rows[$i][] = l(t('edit group'), "node/$gid/edit");
     $rows[$i][] = '&nbsp;';
@@ -564,7 +564,7 @@ function og_list_users_page($gid) {
   $i++;
   while ($account = db_fetch_object($result)) {
       if ($account->uid != $node->uid) {
-        $rows[$i][] = theme('format_name', $account);
+        $rows[$i][] = theme('username', $account);
         if ($access) {
           if ($account->grant_view) {
             $rows[$i][] = l(t('unsubscribe'), "og/unsubscribe/$gid/$account->uid", array(), "destination=og/users/$gid");
@@ -604,7 +604,7 @@ function og_list_groups_page() {
     $rows[] = array(
       array("data" => l($node->title, "node/$node->nid")),
       array("data" => in_array($node->nid, array_keys($user->og_groups)) ? l($cnt, "og/users/$node->nid") : $cnt),
-      array("data" => theme('format_name', $node)),
+      array("data" => theme('username', $node)),
       array("data" => check_plain($node->description)),
     );
   }
@@ -1454,10 +1454,10 @@ function og_block_subscribers() {
       while ($row = db_fetch_object($result)) {
         //showing member pictures
         if (variable_get('og_member_pics', 1)) {
-           $link = theme('user_picture', $row). theme('format_name', $row);
+           $link = theme('user_picture', $row). theme('username', $row);
         }
         else {
-          $link = theme('format_name', $row);
+          $link = theme('username', $row);
         }
         if (!$row->grant_view) {
           $link .= theme_mark();
@@ -1511,10 +1511,10 @@ function og_block_details() {
       $links[] = $txt;
       $links[] = t('age: %age', array('%age' => format_interval(time()-$node->created, 2)));
       if (variable_get('og_member_pics',1)) {
-        $links[] = t('group manager: '). theme('user_picture',$node). theme('format_name', $node);
+        $links[] = t('group manager: '). theme('user_picture',$node). theme('username', $node);
       }
       else {
-       $links[] =  t('group manager: '). theme('format_name', $node);
+       $links[] =  t('group manager: '). theme('username', $node);
       }
       $links[] = l(t('my subscription'), "og/manage/$node->nid");
     }
@@ -1635,7 +1635,7 @@ function theme_og_list_generic($gid, $type, $mode) {
   $i++; // multiple pagers on a page need a unique integer
   $result = pager_query(db_rewrite_sql($sql), $num, $i, NULL, $gid);
   while ($row = db_fetch_object($result)) {
-    $rows[] = array(l($row->title, "node/$row->nid"), theme('format_name', $row), $row->comment_count, format_date($row->created, 'small'));
+    $rows[] = array(l($row->title, "node/$row->nid"), theme('username', $row), $row->comment_count, format_date($row->created, 'small'));
   }
   if ($pager = theme('pager', NULL, $num, $i, array('ntype' => $type))) {
     $rows[] = array(array('data' => $pager, 'colspan' => '4'));
