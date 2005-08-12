@@ -229,10 +229,29 @@ function og_manage($gid) {
   print theme('page', $output);
 }
 
+/**
+ * Low level functions for managing subscriptions
+ *
+ * @param $gid node ID of a group
+ * @param $uid user ID of user
+ * @param $approved if the user is an approved member
+ * @param $admin whether to make the user an admin
+ */
+function og_create_subscription($gid, $uid, $approved = 1, $admin = 0){
+  $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', 1, %d)";
+  db_query($sql, $gid, $uid, $admin);
+}
+
+function og_delete_subscription($gid, $uid){
+  $sql = "DELETE FROM {node_access} WHERE nid = %d AND gid = %d AND realm = 'og_uid'";
+  db_query($sql, $gid, $uid);
+  $sql = "DELETE FROM {og_uid} WHERE nid = %d AND uid = %d";
+  db_query($sql, $gid, $uid);
+}
+
 function og_approve($gid, $uid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-    $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, %d, 'og_uid', 1)";
-    db_query($sql, $gid, $uid);
+    og_create_subscription($gid, $uid);
     drupal_set_message(t('Subscription request approved.'));
     $node = node_load($gid);
     $subj = t("Subscription request approved for '%title'", array('%title' => $node->title));
@@ -250,8 +269,7 @@ function og_approve($gid, $uid) {
 
 function og_deny($gid, $uid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-    $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_uid'";
-    db_query($sql, $gid, $uid);
+    og_delete_subscription($gid, $uid);
     drupal_set_message(t('Subscription request denied.'));
     $subj = t('Subscription request denied for %title', array('title' => $node->title));
     $body = t('Sorry, your subscription request was denied.');
@@ -268,8 +286,7 @@ function og_deny($gid, $uid) {
 
 function og_create_admin($gid, $uid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-    $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', 1, 1)";
-    db_query($sql, $gid, $uid);
+    og_create_subscription($gid, $uid, 1, 1);
     drupal_set_message(t('User was promoted to <em> group administrator</em>'));
     drupal_goto("node/$gid");
   }
@@ -280,8 +297,7 @@ function og_create_admin($gid, $uid) {
 
 function og_delete_admin($gid, $uid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-    $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', 1, 0)";
-    db_query($sql, $gid, $uid);
+    og_create_subscription($gid, $uid);
     drupal_set_message(t('User is no longer a group administrator'));
     drupal_goto("node/$gid");
   }
@@ -416,17 +432,13 @@ function og_subscribe($gid, $uid = NULL) {
  * @return string 'approval' or 'subscribed' depending on the group's configuration.
  **/
 function og_subscribe_user($gid, $account) {
-  $names = array('nid', 'realm', 'gid', 'grant_view', 'grant_update');
-  $values = array($gid, "'og_uid'", $account->uid);
-
   // moderated groups must approve all members (selective=1)
   // if you can't view/edit/delete, you are *requesting* membership in the group
   // if you can view, you are a member
   // if you can edit, you are an admin
   $node = node_load($gid);
   if ($node->og_selective) {
-    $values[] = 0;
-    $values[] = 0;
+    og_create_subscription($gid, $account->uid, 0);
     $sql = og_list_users_sql(1, 1);
     $res = db_query($sql, $node->nid);
     while ($row = db_fetch_object($res)) {
@@ -440,12 +452,10 @@ function og_subscribe_user($gid, $account) {
     $return_value = 'approval';
   }
   else {
-    $values[] = 1;
-    $values[] = 0;
+    og_create_subscription($gid, $account->uid);
     $return_value = 'subscribed';
   }
-  $sql = 'REPLACE INTO {node_access} ('. implode(',', $names). ') VALUES ('. implode(',', $values). ')';
-  db_query($sql);
+
   return $return_value;
 }
 
@@ -459,10 +469,7 @@ function og_unsubscribe($gid, $uid = NULL) {
     drupal_access_denied();
   }
 
-  $sql = "DELETE FROM {node_access} WHERE gid = %d AND nid = %d AND realm = 'og_uid'";
-  db_query($sql, $uid, $gid);
-  $sql = "DELETE FROM {og_uid} WHERE nid=%d AND uid=%d";
-  db_query($sql, $gid, $uid);
+  og_delete_subscription($gid, $uid);
 
   drupal_set_message(t('User unsubscribed from group.'));
   drupal_goto("node/$gid");
@@ -524,8 +531,7 @@ function og_add_users_page($gid) {
       if (!$err && $accounts) {
         // safest option is to do a select, filter existing subscribers, then insert
         foreach ($accounts as $account) {
-          $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, %d, 'og_uid', 1)";
-          db_query($sql, $gid, $account->uid);
+          og_create_subscription($gid, $account->uid);
         }
         drupal_set_message(t('%count added to the group', array('%count' => format_plural(count($accounts), '1 user', '%count users'))));
       }
