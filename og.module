@@ -240,6 +240,7 @@ function og_manage($gid) {
 function og_create_subscription($gid, $uid, $approved = 1, $admin = 0){
   $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', 1, %d)";
   db_query($sql, $gid, $uid, $admin);
+  module_invoke_all('og', 'user create', $gid, $uid, $approved, $admin);
 }
 
 function og_delete_subscription($gid, $uid){
@@ -247,6 +248,7 @@ function og_delete_subscription($gid, $uid){
   db_query($sql, $gid, $uid);
   $sql = "DELETE FROM {og_uid} WHERE nid = %d AND uid = %d";
   db_query($sql, $gid, $uid);
+  module_invoke_all('og', 'user delete', $gid, $uid);
 }
 
 function og_approve($gid, $uid) {
