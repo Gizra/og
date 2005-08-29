@@ -52,13 +52,15 @@ function og_menu($may_cache) {
     // we have to perform a load in order to assure that the $user->og_groups bits are present.
     $user = user_load(array('uid' => $user->uid));
 
+    // these are considered members only pages even for public groups
     foreach ($user->og_groups as $key => $sub) {
-      $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => array($key), 'access' => TRUE, 'type' => MENU_CALLBACK);
       $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('subscriber management'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => TRUE);
       $items[] = array('path' => "og/users/$key/list", 'callback' => 'og_list_users_page', 'title' => t('list'), 'callback arguments' => array($key), 'type' => MENU_DEFAULT_LOCAL_TASK, 'access' => TRUE);
       $items[] = array('path' => "og/users/$key/add", 'callback' => 'og_add_users_page', 'title' => t('add subscribers'), 'callback arguments' => array($key), 'type' => MENU_LOCAL_TASK, 'access' => TRUE, 'weight' => 5);
       $items[] = array('path' => "og/manage/$key", 'callback' => 'og_manage', 'title' => t('manage subscription'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
       $items[] = array('path' => "og/invite/$key", 'callback' => 'og_invite', 'title' => t('send invitation'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
+      // silly page that just redirects to the group page
+      $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => array($key), 'access' => TRUE, 'type' => MENU_CALLBACK);
     }
 
     if (arg(0) == 'node' && is_numeric(arg(1))) {
@@ -1319,11 +1321,12 @@ function og_albums_validate() {
       // Validate for normal users:
       $node->uid = $user->uid ? $user->uid : 0;
       // Force defaults in case people modify the form:
-      $node->status = variable_get("node_status_$node->type", 1);
-      $node->promote = variable_get("node_promote_$node->type", 1);
-      $node->moderate = variable_get("node_moderate_$node->type", 0);
-      $node->sticky = variable_get("node_sticky_$node->type", 0);
-      $node->revision = variable_get("node_revision_$node->type", 0);
+      $node_options = variable_get('node_options_'. $node->type, array('status', 'promote'));
+      $node->status = in_array('status', $node_options);
+      $node->moderate = in_array('moderate', $node_options);
+      $node->promote = in_array('promote', $node_options);
+      $node->sticky = in_array('sticky', $node_options);
+      $node->revision = in_array('revision', $node_options);
       unset($node->created);
        // the line below needs some work before transforming into node_submit(). maybe move up before calling node_submit()
       image_validate($node, $field);
