@@ -911,7 +911,10 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
             }
           }
         }
-        // if a post isn't in any groups. it must be public
+        // if a post isn't in any groups. it must be public. this assumption is the heart of the problem
+        // running multiple node permission modules at same time. ideally, all node permission modules could
+        // communicate and only make the node public if no permission module objected (i.e. 'deny')
+        // this problem needs solving in core drupal
         if (empty($node->og_groups)) {
           $node->og_public = 1;
         }
