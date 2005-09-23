@@ -606,7 +606,7 @@ function og_list_users_page($gid) {
 function og_list_groups_page() {
   global $user;
 
-  $result = pager_query(db_rewrite_sql("SELECT n.nid, n.title, n.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC"), 50);
+  $result = pager_query(db_rewrite_sql("SELECT n.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC"), 50);
   $header = array(t("Title"), t('Subscribers'), t("Owner"), t('Description'));
 
   while ($node = db_fetch_object($result)) {
@@ -659,7 +659,7 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
     $mode = 'all';
 
     if (!$types[] = $_GET['ntype']) {
-      $types = node_list();
+      $types = node_get_types();
       $mode = 'brief';
     }
     foreach ($types as $type => $val) {
@@ -823,8 +823,8 @@ function og_validate(&$node) {
   }
 }
 
-function og_node_name($node) {
-  return t('group');
+function og_node_info() {
+  return array('og' => array('name' => t('group'), 'base' => 'og'));
 }
 
 function og_load(&$node) {
@@ -1557,7 +1557,7 @@ function og_block_details() {
 
 // $group is an object containing the group node
 function og_create_links($group) {
-  foreach (node_list() as $type => $name) {
+  foreach (node_get_types() as $type => $name) {
     // image is filtered out here because we expect images to be added from within albums
     $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
     if (!in_array($type, $exempt) && node_access('create', $type)) {
@@ -1621,7 +1621,7 @@ function og_settings() {
   $options = array(t('optional'), t('required'));
   $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
   unset($options);
-  foreach (node_list() as $type => $name) {
+  foreach (node_get_types() as $type => $name) {
     $options[$type] = t($name);
   }
   unset($options['og']);
@@ -1632,7 +1632,7 @@ function og_settings() {
 // try to get the theme's preferred way to show each type's node listing. if not specified, show the generic node listing (which is also themeable)
 // $mode can be 'brief' or 'all'
 function og_list_og($gid, $type, $mode = 'all') {
-  $output = theme(node_get_module_name($type). '_list_og', $gid, $mode);
+  $output = theme(node_get_base($type). '_list_og', $gid, $mode);
   if (!$output) {
     $output = theme('og_list_generic', $gid, $type, $mode);
   }
