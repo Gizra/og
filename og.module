@@ -685,6 +685,7 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
 }
 
 function og_form(&$node, &$param) {
+  $output = form_textfield(t('Name'), 'title', $node->title, 60, 128, NULL, NULL, TRUE);
   $edit = $_POST['edit'];
   if (function_exists('taxonomy_node_form')) {
     $output .= implode('', taxonomy_node_form('og', $node));
@@ -811,6 +812,8 @@ function og_image($gid) {
  * Implementation of hook_validate
  */
 function og_validate(&$node) {
+  node_validate_title($node);
+
   // comments are not allowed on group nodes, since we don't have any nice way to present them
   $node->comment = 0;
 
