@@ -1223,26 +1223,19 @@ function _og_update_db($enable) {
   }
 }
 
+/**
+ * Menu callback
+ */
 function og_feed($gid) {
   $group = (object) array('nid' => $gid, 'status' => 1);
   if (node_access('view', $group)) {
+    $group = node_load($gid);
     $sql = og_get_home_nodes_sql();
-    $result = db_query(db_rewrite_sql($sql), $gid);
-    while ($onenode = db_fetch_array($result)) {
-      $nodes[] = $onenode['nid'];
-    }
-    if ($nodes) {
-      $sql = 'SELECT nid FROM {node} WHERE nid IN (%s)';
-      $result = db_query($sql, implode(', ', $nodes));
-      $node = node_load($gid);
-      $channel['title'] = $node->title;
-      $channel['link'] = url("node/$gid", NULL, NULL, TRUE);
-      $channel['description'] = $node->og_description;
-      node_feed($result, $channel);
-    }
-    else {
-      die('no posts in this group');
-    }
+    $nodes = db_query_range(db_rewrite_sql($sql), $gid, 0, variable_get('feed_default_items', 10));
+    $channel['title'] = $group->title;
+    $channel['link'] = url("node/$gid", NULL, NULL, TRUE);
+    $channel['description'] = $group->og_description;
+    node_feed($result, $channel);
   }
   else {
     drupal_access_denied();
