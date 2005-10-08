@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OG 4.6\n"
 "POT-Creation-Date: 2005-07-05 09:56-0400\n"
-"PO-Revision-Date: 2005-10-08 23:37+0200\n"
+"PO-Revision-Date: 2005-10-09 01:19+0200\n"
 "Last-Translator: Gerhard Killesreiter <gerhard@killesreiter.de>\n"
 "Language-Team: DE <EMAIL@ADDRESS>\n"
 "MIME-Version: 1.0\n"
@@ -200,7 +200,7 @@ msgstr "Antrag auf Mitgliedschaft für '%title' bestätigt."
 
 #: c:\Contributions\modules\og\og.module:236
 msgid "You may now post messages in this group located at %url"
-msgstr ""
+msgstr "Sie dürfen nun Beiträge für die Gruppe, die sich bei %url befindet, verfassen."
 
 #: c:\Contributions\modules\og\og.module:252
 msgid "Subscription request denied."
@@ -212,7 +212,7 @@ msgstr "Antrag auf Mitgliedschaft für '%title' abgelehnt."
 
 #: c:\Contributions\modules\og\og.module:254
 msgid "Sorry, your subscription request was denied."
-msgstr ""
+msgstr "Ihr Antrag auf Mitgliederschaft wurde leider abgelehnt."
 
 #: c:\Contributions\modules\og\og.module:270
 msgid "User was promoted to <em> group administrator</em>"
@@ -220,7 +220,7 @@ msgstr "Benutzer wurde zum <em>Gruppenadministrator</em> hochgestuft."
 
 #: c:\Contributions\modules\og\og.module:282
 msgid "User is no longer a group administrator"
-msgstr "Der Benutzer kein Gruppen-Administrator mehr"
+msgstr "Der Benutzer ist kein Gruppen-Administrator mehr"
 
 #: c:\Contributions\modules\og\og.module:297
 msgid "Post removed from group."
@@ -256,7 +256,7 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:348
 msgid "Subscribe: %url"
-msgstr ""
+msgstr "Anmelden: %url"
 
 #: c:\Contributions\modules\og\og.module:357
 msgid "%count invitations sent."
@@ -392,39 +392,39 @@ msgstr "Anträge auf Mitgliedschaft"
 
 #: c:\Contributions\modules\og\og.module:708
 msgid "open - subscription requests are accepted immediately"
-msgstr ""
+msgstr "offen - Mitgliedschaftsanträge weren automatisch akzeptiert."
 
 #: c:\Contributions\modules\og\og.module:708
 msgid "moderated - subscription requests must be approved."
-msgstr ""
+msgstr "moderiert - Mitgliedschaftsanträge müssen erst von einem Moderator genehmigt werden."
 
 #: c:\Contributions\modules\og\og.module:708
 msgid "invite only - subscriptions must be created by an administrator."
-msgstr ""
+msgstr "Auf Einladung - Mitgliedschaften müssen von einem Moderator erteilt werden."
 
 #: c:\Contributions\modules\og\og.module:708
 msgid "How should subscription requests be handled in this group?"
-msgstr ""
+msgstr "Wie sollen Mitgliedschaftsanträge in dieser Gruppe behandelt werden?"
 
 #: c:\Contributions\modules\og\og.module:709
 msgid "registration form"
-msgstr ""
+msgstr "Registrierungsformular"
 
 #: c:\Contributions\modules\og\og.module:709
 msgid "Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form."
-msgstr ""
+msgstr "Soll diese Gruppe auf dem Registrierungsformular zur Anmeldung angeboten werden? Falls ausgewählt, wird eine entsprechende Auswahl angeboten."
 
 #: c:\Contributions\modules\og\og.module:710
 msgid "list in groups directory"
-msgstr ""
+msgstr "Im Gruppenverzeichnis führen"
 
 #: c:\Contributions\modules\og\og.module:710
 msgid "Should this group appear on the %page"
-msgstr ""
+msgstr "Soll diese Gruppe auf der %page erscheinen?"
 
 #: c:\Contributions\modules\og\og.module:720
 msgid "Thumbnail"
-msgstr ""
+msgstr "Vorschaubild"
 
 #: c:\Contributions\modules\og\og.module:722
 msgid "Image"
@@ -460,7 +460,7 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:871
 msgid "You must select an audience in order to post."
-msgstr ""
+msgstr "Sie müssen eine Gruppenauswahl treffen, um den Beitrag abzuschicken."
 
 #: c:\Contributions\modules\og\og.module:877
 msgid "%name must be a subscriber in order to post into %group"
@@ -468,7 +468,7 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:930
 msgid "You must subscribe to a group before posting."
-msgstr ""
+msgstr "Sie müssen Mitglied einer Gruppe sein, um einen Beitrag verfassen zu dürfen."
 
 #: c:\Contributions\modules\og\og.module:935
 msgid "Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author's subscriptions are always shown."
@@ -488,7 +488,7 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:965
 msgid "Audience"
-msgstr ""
+msgstr "Zielgruppe"
 
 #: c:\Contributions\modules\og\og.module:965
 msgid "Show this post in these groups."
@@ -572,7 +572,7 @@ msgstr "Gruppenmitglieder"
 
 #: c:\Contributions\modules\og\og.module:1354;1414
 msgid "New groups"
-msgstr ""
+msgstr "Neue Gruppen"
 
 #: c:\Contributions\modules\og\og.module:1355;1397
 msgid "My groups"
@@ -688,7 +688,7 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:1592
 msgid "Unlimited albums"
-msgstr ""
+msgstr "Unbeschränkte Zahl von Photoalben"
 
 #: c:\Contributions\modules\og\og.module:1592
 msgid "If you want to limit your groups to a single album, uncheck this box."
@@ -696,7 +696,7 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:1593
 msgid "Visible only within the targeted groups"
-msgstr ""
+msgstr "Nur in den ausgewählten Gruppen sichtbar."
 
 #: c:\Contributions\modules\og\og.module:1593
 msgid "Visible within the targeted groups and on other pages"
@@ -708,7 +708,7 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:1594
 msgid "Visibility of posts"
-msgstr ""
+msgstr "Sichtbarkeit der Beiträge"
 
 #: c:\Contributions\modules\og\og.module:1594
 msgid "Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting."
@@ -716,11 +716,11 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:1595
 msgid "Maximum posts on group home page"
-msgstr ""
+msgstr "Maximale Anzahl von Nachrichten auf einer Gruppenseite"
 
 #: c:\Contributions\modules\og\og.module:1595
 msgid "How many posts of a given type should display on the group home page."
-msgstr ""
+msgstr "Wieviele Beiträge eines gegebenen Typs sollen auf einer Gruppenseite angezeigt werden sollen."
 
 #: c:\Contributions\modules\og\og.module:1597
 msgid "Show member pictures"
@@ -736,7 +736,7 @@ msgstr "Benutzereinstellungen"
 
 #: c:\Contributions\modules\og\og.module:1598
 msgid "optional"
-msgstr ""
+msgstr "optional"
 
 #: c:\Contributions\modules\og\og.module:1598
 msgid "required"
@@ -744,7 +744,7 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:1599
 msgid "Audience required"
-msgstr ""
+msgstr "Festlegung einer Zielgruppe gefordert"
 
 #: c:\Contributions\modules\og\og.module:1599
 msgid "Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited."
@@ -752,7 +752,7 @@ msgstr ""
 
 #: c:\Contributions\modules\og\og.module:1605
 msgid "Omitted content types"
-msgstr ""
+msgstr "Ausgelassene Beitragstypen"
 
 #: c:\Contributions\modules\og\og.module:1605
 msgid "Select any node types which should <em>not</em> participate in the Audience targetting system."
@@ -788,7 +788,7 @@ msgstr[1] "%count Bilder"
 msgid "1 subscriber"
 msgid_plural "%count subscribers"
 msgstr[0] "1 Mitglied"
-msgstr[1] "$count Mitglieder"
+msgstr[1] "%count Mitglieder"
 
 #: c:\Contributions\modules\og\og.module:77
 msgid "create groups"
