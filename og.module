@@ -242,6 +242,8 @@ function og_manage($gid) {
 function og_create_subscription($gid, $uid, $approved = 1, $admin = 0){
   $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', 1, %d)";
   db_query($sql, $gid, $uid, $admin);
+  $sql = "REPLACE INTO {og_uid} (nid, uid, is_active, is_admin) VALUES (%d, %d, %d, %d)";
+  db_query($sql, $gid, $uid, $approved, $admin);
   module_invoke_all('og', 'user create', $gid, $uid, $approved, $admin);
 }
 
@@ -494,7 +496,7 @@ function og_get_subscriptions($uid) {
   static $subscriptions = array();
 
   if (!isset($subscriptions[$uid])) {
-    $sql = "SELECT na.*, n.title, ou.mail_type FROM {node_access} na INNER JOIN {node} n ON na.nid = n.nid LEFT JOIN {og_uid} ou ON n.nid=ou.nid WHERE gid = %d AND realm = 'og_uid' AND grant_view = 1";
+    $sql = "SELECT na.*, n.title, ou.mail_type FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid INNER JOIN {node_access} na ON na.gid = ou.uid WHERE ou.uid = %d AND na.realm = 'og_uid'";
     $result = db_query($sql, $uid);
     while ($row = db_fetch_object($result)) {
       $subscriptions[$uid][$row->nid]['title'] = $row->title;
@@ -1145,8 +1147,6 @@ function og_node_grants($account, $op) {
 }
 
 function og_save_permissions(&$node) {
-  global $user;
-
   $sql = "DELETE FROM {node_access} WHERE realm = 'og_group' AND nid = %d";
   db_query($sql, $node->nid);
 
@@ -1174,6 +1174,9 @@ function og_save_permissions(&$node) {
     // make sure the node owner is a full powered subscriber
     $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_uid', 1, 1, 1)";
     db_query($sql, $node->nid, $node->uid);
+
+    // make sure the node owner is a full powered subscriber
+    og_create_subscription($node->nid, $node->uid, 1, 1);
   }
 }
 
