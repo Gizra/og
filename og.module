@@ -645,7 +645,8 @@ function og_get_home_nodes_sql($str_types = NULL) {
     $where = "n.type NOT IN ('og', 'image')";
   }
 
-  return "SELECT DISTINCT(n.nid), n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n INNER JOIN {node_access} og_na ON n.nid = og_na.nid INNER JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og_na.gid = %d AND og_na.realm = 'og_group' AND n.status=1 AND $where ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
+  // we LEFT JOIN to node_comment_stats in case comment.module is disabled.
+  return "SELECT DISTINCT(n.nid), n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n INNER JOIN {node_access} og_na ON n.nid = og_na.nid LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og_na.gid = %d AND og_na.realm = 'og_group' AND n.status=1 AND $where ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
 }
 
 // when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group.
