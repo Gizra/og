@@ -162,73 +162,73 @@ function og_nodeview($gid) {
 function og_email($gid) {
   $node = node_load($gid);
   drupal_set_title(t('Send email to %group', array('%group' => $node->title)));
-  if ($edit = $_POST['edit']) {
-    if (!$edit['body']) {
-      form_set_error('body', t("Your email body may not be blank"));
-      $err = TRUE;
-    }
-    if (!$edit['subject']) {
-      form_set_error('subject', t('Your email subject may not be blank'));
-      $err = TRUE;
-    }
-    if (!$err) {
-      $msg = $edit['body']. t("\n\n--------------------------------\nThis message was sent by an administrator in the '%group' group at %site. To visit this group, browse to %url1. To unsubscribe from this group, visit %url2", array('%group' => $node->title, '%site' => variable_get('site_name', drupal), '%url1' => url("node/$node->nid", NULL, NULL, TRUE), '%url2' => url("og/unsubscribe/$node->nid", NULL, NULL, TRUE)));
-      global $user;
-      $from = $user->mail;
-      $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from";
-      $sql = og_list_users_sql(1);
-      $result = db_query($sql, $gid);
-      while ($row = db_fetch_object($result)) {
-         $emails[] = $row->mail;
-      }
-      foreach ($emails as $mail) {
-        user_mail(trim($mail), $edit['subject'], $msg, $headers);
-      }
-      drupal_set_message(t('%count emails sent.', array('%count' => count($emails))));
-      drupal_goto("node/$gid");
-    }
-    else {
-      print theme('page', og_email_form($gid));
-    }
-  }
-  else {
-    print theme('page', og_email_form($gid));
-  }
+
+  return drupal_get_form('og_email_form', og_email_form($gid));//print theme('page', drupal_get_form('og_email_form', og_email_form($gid)));
 }
 
 function og_email_form($gid) {
-  $edit = $_POST['edit'];
   $result = db_query(og_list_users_sql(1), $gid);
   $txt = format_plural(db_num_rows($result), '1 subscriber', 'all %count subscribers');
   drupal_set_message(t('Your email will be sent to %count in this group. Please use this feature sparingly.', array('%count' => l($txt, "og/users/$gid"))));
-  $form .= form_textfield(t('Subject'), 'subject', $edit['subject'], 70, 250, t("Enter a subject for your email."), NULL, TRUE);
-  $form .= form_textarea(t('Body'), 'body', $edit['body'], 90, 5, t('Enter a body for your email.'), NULL, TRUE);
-  $form .= form_button(t('Send email'));
-  return form($form);
+
+  $form['subject'] = array('#type' => 'textfield', '#title' => t('Subject'), '#size' => 70, '#maxlength' => 250, '#description' => t("Enter a subject for your email."), '#required' => true);
+  $form['body'] = array('#type' => 'textarea', '#title' => t('Body'), '#rows' => 5, '#cols' => 90, '#description' => t('Enter a body for your email.'), '#required' => true);
+  $form['send'] = array('#type' => 'submit', '#value' => t('Send email'));
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+  return $form;//drupal_get_form('og_email_form', $form);//form($form);
+}
+
+function og_email_form_validate($form_id, $form_values) {
+  if (trim($form_values['body']) == '') {
+    form_set_error('body', t("Your email body may not be blank"));
+  }
+  if (trim($form_values['subject']) == '') {
+    form_set_error('subject', t('Your email subject may not be blank'));
+  }
+}
+
+function og_email_form_execute($form_id, $form_values) {
+  $msg = $form_values['body']. t("\n\n--------------------------------\nThis message was sent by an administrator in the '%group' group at %site. To visit this group, browse to %url1. To unsubscribe from this group, visit %url2", array('%group' => $node->title, '%site' => variable_get('site_name', drupal), '%url1' => url("node/$node->nid", NULL, NULL, TRUE), '%url2' => url("og/unsubscribe/$node->nid", NULL, NULL, TRUE)));
+  global $user;
+  $from = $user->mail;
+  $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from";
+  $sql = og_list_users_sql(1);
+  $result = db_query($sql, $form_values['gid']);
+  while ($row = db_fetch_object($result)) {
+     $emails[] = $row->mail;
+  }
+  foreach ($emails as $mail) {
+    user_mail(trim($mail), $form_values['subject'], $msg, $headers);
+  }
+  drupal_set_message(t('%count emails sent.', array('%count' => count($emails))));
+  drupal_goto("node/{$form_values[gid]}");
 }
 
 function og_manage($gid) {
   global $user;
 
-  if ($edit = $_POST['edit']) {
-    $sql = "DELETE FROM {og_uid} WHERE nid=%d AND uid=%d";
-    db_query($sql, $gid, $user->uid);
-    $sql = "INSERT INTO {og_uid} (mail_type, nid, uid) VALUES (%d, %d, %d)";
-    db_query($sql, $edit['mail_type'], $gid, $user->uid);
-    drupal_set_message(t('Subscription saved.'));
-  }
-
   $group = node_load($gid);
   // group owner can't unsubscribe
   if ($group->og_selective != OG_CLOSED && $group->uid != $user->uid) {
-    $output .= form_item(t('Goodbye'), l(t('Unsubscribe from this group'), "og/unsubscribe/$gid"), NULL, 'destination=og');
+    $form['unsubscribe'] = array('#type' => 'markup', '#title' => t('Goodbye'), '#value' => l(t('Unsubscribe from this group'), "og/unsubscribe/$gid", NULL, 'destination=og'));
   }
-  $output .= form_radios('Email notification', "mail_type", $edit["mail_type"] ? $edit["mail_type"] : $user->og_groups[$gid]['mail_type'], array(t('disabled'), t('enabled')), t('Do you want to receive an email each time a message is posted to this group?'));
-  $output .= form_button(t('Submit'));
-  $output = form($output);
+  $form['mail_type'] = array('#type' => 'radios', '#default_value' => $user->og_groups[$gid]['mail_type'], '#options' => array(t('disabled'), t('enabled')), '#description' => t('Do you want to receive an email each time a message is posted to this group?'));
+  $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+  $output = drupal_get_form('og_manage_form', $form);
   $bc = array(l(t('home'), ''), l(t('groups'), 'og'), l($group->title, "node/$gid"));
   drupal_set_breadcrumb($bc);
   print theme('page', $output);
+}
+
+function og_manage_form_execute($form_id, $form_values) {
+  global $user;
+  
+  $sql = "DELETE FROM {og_uid} WHERE nid=%d AND uid=%d";
+  db_query($sql, $form_values['gid'], $user->uid);
+  $sql = "INSERT INTO {og_uid} (mail_type, nid, uid) VALUES (%d, %d, %d)";
+  db_query($sql, $form_values['mail_type'], $form_values['gid'], $user->uid);
+  drupal_set_message(t('Subscription saved.'));
 }
 
 /**
@@ -315,23 +315,27 @@ function og_delete_admin($gid, $uid) {
 function og_remove_node($gid, $nid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
       $node = node_load($nid);
-    if ($_POST['op']['og_confirm']) {
-      og_delete_taxonomy_tags($node);
-      $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_group'";
-      db_query($sql, $nid, $gid);
-      drupal_set_message(t('Post removed from group.'));
-      drupal_goto("node/$gid");
+      $form['confirm'] = array('#type' => 'markup', '#title' => t('Confirmation'), '#value' => t('Remove %title from this group.', array('%title' => '<em>'. $node->title. '</em>')));
+      $form['og_confirm'] = array('#type' => 'value', '#value' => 1);
+      $form['op'] = array('#type' => 'submit', '#value' => t('Remove'));
+      $form['nid'] = array('#type' => 'value', '#value' => $nid);
+      $form['gid'] = array('#type' => 'value', '#value' => $gid);
+      return drupal_get_form('og_remove_node', $form);
     }
-    else {
-      $output = form_item(t('Confirmation'), t('Remove %title from this group.', array('%title' => '<em>'. $node->title. '</em>')));
-      $output .= form_hidden('og_confirm', 1);
-      $output .= form_button(t('Remove'));
-      print theme('page', form($output));
-    }
-  }
   else {
     drupal_access_denied();
   }
+}
+
+function og_remove_node_execute($form_id, $form_values) {
+  $node = node_load($form_values['nid']);
+  if ($form_values['og_confirm']) {
+    og_delete_taxonomy_tags($node);
+    $sql = "DELETE FROM {node_access} WHERE nid=%d AND gid=%d AND realm='og_group'";
+    db_query($sql, $form_values['nid'], $form_values['gid']);
+    drupal_set_message(t('Post removed from group.'));
+    drupal_goto("node/{$form_values['gid']}");
+  }  
 }
 
 /**
@@ -355,48 +359,7 @@ function og_invite($gid) {
   $node = node_load($gid);
   if ($node->og_selective < OG_INVITE_ONLY || node_access('update', $node)) {
     $max = variable_get('og_email_max', 10);
-    if ($edit = $_POST['edit']) {
-      $emails = explode(',', $edit['mails']);
-      if (count($emails) > $max) {
-        form_set_error('mails', t("You may not specify more than %max email addresses.", array('%max' => $max)));
-        $err = TRUE;
-      }
-      else {
-        foreach ($emails as $email) {
-          if (!valid_email_address(trim($email))) {
-            $bad[] = $email;
-          }
-        }
-        if ($bad) {
-          form_set_error('mails', t('invalid email address: '). implode(' ', $bad));
-          $err = TRUE;
-        }
-      }
-      if (!$err) {
-        $node = node_load($gid);
-        $subj = t('Invitation to join the group "%group" at %site', array('%group' => $node->title, '%site' => variable_get('site_name', 'drupal')));
-        $body = t("Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n\n", array('%group' => $node->title));
-        $body .= $node->title. "\n";
-        $body .= $node->og_description. "\n";
-        $body .= t('Subscribe: %url', array('%url' => url("og/subscribe/$gid", NULL, NULL, TRUE)));
-        $body .= $edit['pmessage'] ? "\n\n ----------------------------\n". $edit['pmessage']. "\n--------------------------------" : '';
-        global $user;
-        $from = $user->mail;
-        global $user;
-        $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from";
-        foreach ($emails as $mail) {
-          user_mail(trim($mail), $subj, $body, $headers);
-        }
-        drupal_set_message(t('%count invitations sent.', array('%count' => count($emails))));
-        print theme('page', og_invite_form($gid));
-      }
-      else {
-        print theme('page', og_invite_form($gid));
-      }
-    }
-    else {
-      print theme('page', og_invite_form($gid));
-    }
+    return drupal_get_form('og_invite_form', og_invite_form($gid));
   }
   else {
     drupal_access_denied();
@@ -406,10 +369,50 @@ function og_invite($gid) {
 function og_invite_form($gid) {
   $edit = $_POST['edit'];
   $max = variable_get('og_email_max', 10);
-  $form .= form_textfield(t('Email addresses'), 'mails', $edit['mails'], 90, 250, t("Enter up to %max email addresses. Separate multiple addresses by commas. Each will receive an invitation message from you.", array('%max' => $max)), NULL, TRUE);
-  $form .= form_textarea(t('Personal message'), 'pmessage', $edit['pmessage'], 90, 5, t('Optional. Enter a message which will become part of the invitation email'));
-  $form .= form_button(t('Send invitation'));
-  return form($form);
+  
+  $form['mails'] = array('#type' => 'textfield', '#title' => t('Email addresses'), '#size' => 90, '#maxlength' => 250, '#description' => t("Enter up to %max email addresses. Separate multiple addresses by commas. Each will receive an invitation message from you.", array('%max' => $max)));
+  $form['pmessage'] = array('#type' => 'textarea', '#title' => t('Personal message'), '#size' => 90, '#maxlength' => 250, '#description' => t('Optional. Enter a message which will become part of the invitation email'));
+  $form['op'] = array('#type' => 'submit', '#value' => t('Send invitation'));
+  $form['gid'] = array ('#type' => 'value', '#value' => $gid);
+
+  return $form;//form($form);
+}
+
+function og_invite_form_validate($form_id, $form_values) {
+  $max = variable_get('og_email_max', 10);
+
+  $emails = explode(',', $form_values['mails']);
+  if (count($emails) > $max) {
+    form_set_error('mails', t("You may not specify more than %max email addresses.", array('%max' => $max)));
+  }
+  else {
+    foreach ($emails as $email) {
+      if (!valid_email_address(trim($email))) {
+        $bad[] = $email;
+      }
+    }
+    if ($bad) {
+      form_set_error('mails', t('invalid email address: '). implode(' ', $bad));
+    }
+  }
+}
+
+function og_invite_form_execute($form_id, $form_values) {
+  $node = node_load($form_values['gid']);
+  $subj = t('Invitation to join the group "%group" at %site', array('%group' => $node->title, '%site' => variable_get('site_name', 'drupal')));
+  $body = t("Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n\n", array('%group' => $node->title));
+  $body .= $node->title. "\n";
+  $body .= $node->og_description. "\n";
+  $body .= t('Subscribe: %url', array('%url' => url("og/subscribe/$gid", NULL, NULL, TRUE)));
+  $body .= $form_values['pmessage'] ? "\n\n ----------------------------\n". $form_values['pmessage']. "\n--------------------------------" : '';
+  global $user;
+  $from = $user->mail;
+  $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from";
+  $emails = explode(',', $form_values['mails']);  
+  foreach ($emails as $mail) {
+    user_mail(trim($mail), $subj, $body, $headers);
+  }
+  drupal_set_message(t('%count invitations sent.', array('%count' => count($emails))));
 }
 
 function og_subscribe($gid, $uid = NULL) {
@@ -496,7 +499,7 @@ function og_get_subscriptions($uid) {
   static $subscriptions = array();
 
   if (!isset($subscriptions[$uid])) {
-    $sql = "SELECT na.*, n.title, ou.mail_type FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid INNER JOIN {node_access} na ON na.gid = ou.uid WHERE ou.uid = %d AND na.realm = 'og_uid'";
+    $sql = "SELECT na.*, n.title, ou.mail_type FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid INNER JOIN {node_access} na ON na.gid = ou.uid AND na.nid = n.nid WHERE ou.uid = %d AND na.realm = 'og_uid'";
     $result = db_query($sql, $uid);
     while ($row = db_fetch_object($result)) {
       $subscriptions[$uid][$row->nid]['title'] = $row->title;
@@ -529,39 +532,48 @@ function og_list_users_sql($min_grant_view = 1, $min_grant_update = 0) {
 
 function og_add_users_page($gid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-    if ($edit = $_POST['edit']) {
-      $names = explode(',', $edit['og_names']);
-      foreach ($names as $name) {
-        $account = user_load(array('name' => trim($name)));
-        if ($account->uid) {
-          $accounts[] = $account;
-          $uids[] = $account->uid;
-        }
-        else {
-          $bad[] = $name;
-          $err = TRUE;
-        }
-      }
-      if (!$err && $accounts) {
-        // safest option is to do a select, filter existing subscribers, then insert
-        foreach ($accounts as $account) {
-          og_create_subscription($gid, $account->uid);
-        }
-        drupal_set_message(t('%count added to the group', array('%count' => format_plural(count($accounts), '1 user', '%count users'))));
-      }
-      else {
-        form_set_error('og_names', t('Unrecognized %names: ', array('%names' => format_plural(count($bad), 'name', 'names'))). implode(', ', $bad));
-      }
-    }
-
-    $output = form_textarea(t('List of users'), 'og_names', $edit['og_names'], 70, 5, t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.'));
-    $output .= form_submit(t('Submit'));
-    $output = form($output);
+    $form['og_names'] = array('#type' => 'textarea', '#title' => t('List of users'), '#rows' => 5, '#cols' => 70, '#description' => t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.'));
+    $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
+    $form['gid'] = array('#type' => 'value', '#value' => $gid);
+    $output = drupal_get_form('og_add_users', $form);
     print theme('page', $output);
   }
   else {
     drupal_access_denied();
   }
+}
+
+function og_add_users_validate($form_id, $form_values) {
+  $names = explode(',', $form_values['og_names']);
+  foreach ($names as $name) {
+    $account = user_load(array('name' => trim($name)));
+    if ($account->uid) {
+      $accounts[] = $account;
+      $uids[] = $account->uid;
+    }
+    else {
+      $bad[] = $name;
+      $err = TRUE;
+    }
+  }
+  if ($err) {
+    form_set_error('og_names', t('Unrecognized %names: ', array('%names' => format_plural(count($bad), 'name', 'names'))). implode(', ', $bad));
+  }
+}
+
+function og_add_users_execute($form_id, $form_values) {
+  // safest option is to do a select, filter existing subscribers, then insert
+  $names = explode(',', $form_values['og_names']);
+  foreach ($names as $name) {
+    $account = user_load(array('name' => trim($name)));
+    if ($account->uid) {
+      $accounts[] = $account;
+    }
+  }
+  foreach ($accounts as $account) {
+    og_create_subscription($form_values['gid'], $account->uid);
+  }
+  drupal_set_message(t('%count added to the group', array('%count' => format_plural(count($accounts), '1 user', '%count users'))));
 }
 
 function og_list_users_page($gid) {
@@ -616,7 +628,7 @@ function og_list_users_page($gid) {
 function og_list_groups_page() {
   global $user;
 
-  $result = pager_query(db_rewrite_sql("SELECT n.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC"), 50);
+  $result = pager_query(db_rewrite_sql("SELECT nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC", 'og', 'nid'), 50);
   $header = array(t("Title"), t('Subscribers'), t("Owner"), t('Description'));
 
   while ($node = db_fetch_object($result)) {
@@ -694,14 +706,13 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
   return $node;
 }
 
-function og_form(&$node, &$param) {
-  $output = form_textfield(t('Name'), 'title', $node->title, 60, 128, NULL, NULL, TRUE);
+function og_form(&$node) {//, &$param) {
+  $form['title'] = array('#type' => 'textfield', '#title' => t('Name'), '#weight' => 0, '#default_value' => $node->title, '#size' => 60, '#maxlength' => 128, '#required' => true);
   $edit = $_POST['edit'];
-  if (function_exists('taxonomy_node_form')) {
-    $output .= implode('', taxonomy_node_form('og', $node));
-  }
-  $output .= form_textfield(t('Description'), 'og_description', $node->og_description, 70, 150, '', NULL, TRUE);
-  // $output .= filter_form('format', $node->format);
+//  if (function_exists('taxonomy_node_form')) {
+//    $output .= implode('', taxonomy_node_form('og', $node));
+//  }
+  $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true);
   if (isset($edit['og_selective'])) {
     $selective = $edit['og_selective'];
   }
@@ -732,24 +743,31 @@ function og_form(&$node, &$param) {
     $directory = 1;
   }
 
-  $output .= form_radios(t('Subscription requests'), 'og_selective', $selective, array(t('open - subscription requests are accepted immediately.'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.'), t('closed - subscriptions are fully administered by an administrator.')), t('How should subscription requests be handled in this group? When you select <em>closed<em>, users will not be able to subscribe <strong>and</strong> unsubscribe.'));
-  $output .= form_checkbox(t('registration form'), 'og_register', 1, $register, t('Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form.'));
-  $output .= form_checkbox(t('list in groups directory'), 'og_directory', 1, $directory, t('Should this group appear on the %page', array('%page' => l(t('list of groups page'),'og'))));
+  $form['og_selective'] = array('#type' => 'radios', '#title' => t('Subscription requests'), '#default_value' => $selective, '#options' => array(t('open - subscription requests are accepted immediately.'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.'), t('closed - subscriptions are fully administered by an administrator.')), '#description' => t('How should subscription requests be handled in this group? When you select <em>closed</em>, users will not be able to subscribe <strong>and</strong> unsubscribe.'));
+  $form['og_register'] = array('#type' => 'checkbox', '#title' => t('registration form'), '#default_value' => $register, '#description' =>t('Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form.'));
+  $form['og_directory'] = array('#type' => 'checkbox', '#title' => t('list in groups directory'),  '#default_value' => $directory, '#description' => t('Should this group appear on the %page', array('%page' => l(t('list of groups page'),'og'))));
 
   // group image
+  // NOT WORKING YET!!!
+/*
   if (module_exist('image')) {
     if (is_array($node->images)) {
+      $form['images'] = array('#tree' => true);
       foreach ($node->images as $label => $image) {
-        $output .= form_hidden('images]['.$label, $image);
+        $form['images'][$label] = array('#type' => 'value', '#value' => $image);
+        //$output .= form_hidden('images]['.$label, $image);
       }
     }
     if ($node->images['thumbnail']) {
-      $output.= form_item(t('Thumbnail'), image_display($node, 'thumbnail'));
+      $form['thumbanil'] = array('#type' => 'markup', '#value' => image_display($node, 'thumbnail'), '#title' => t('Thumbnail'));
+      //$output.= form_item(t('Thumbnail'), image_display($node, 'thumbnail'));
     }
-    $output .= form_file(t('Image'), 'image', 50, t('Click "Browse..." to select an image to upload.'));
-    $param['options'] = array("enctype" => "multipart/form-data",  "name" => "image_forms");
+    $form['image'] = array('#type' => 'file', '#size' => 50, '#title' => t('Image'), '#decription' => t('Click "Browse..." to select an image to upload.'));
+    //$output .= form_file(t('Image'), 'image', 50, t('Click "Browse..." to select an image to upload.'));
+    $form['#attributes'] = array('enctype' => 'multipart/form-data');
+//    $param['options'] = array("enctype" => "multipart/form-data",  "name" => "image_forms");
   }
-
+*/
   $allthemes = list_themes();
   // list only active themes
   foreach ($allthemes as $key => $theme) {
@@ -757,37 +775,45 @@ function og_form(&$node, &$param) {
       $themes[$key] = $theme;
     }
   }
+  ksort($themes);
 
   if (count($themes) > 1) {
-    $rows = array();
     foreach ($themes as $key => $value) {
-      $row = array();
-
-      // Screenshot column.
-      $screenshot = dirname($value->filename) .'/screenshot.png';
-      $row[] = file_exists($screenshot) ? theme('image', $screenshot, t('Screenshot for %theme theme', array('%theme' => $value->name)), '', 'class="screenshot"', false) : t('no screenshot');
-
-      // Information field.
-      $field = '<strong>'. $value->name .'</strong>';
-      $row[] = $field;
-
-      // Reset to follow site default theme if user selects the site default
       if ($key == variable_get('theme_default', 'bluemarine')) {
         $key = '';
         if ($node->og_theme == variable_get('theme_default', 'bluemarine')) {
           $node->og_theme = '';
         }
       }
-
+      // Screenshot column.
+      $screenshot = dirname($value->filename) .'/screenshot.png';
+      $form['themes'][$key]['screenshot'] = array('#type' => 'markup', '#value' =>file_exists($screenshot) ? theme('image', $screenshot, t('Screenshot for %theme theme', array('%theme' => $value->name)), '', 'class="screenshot"', false) : t('no screenshot'));
+      // Information field.
+      $field = '<strong>'. $value->name .'</strong>';
+      $form['themes'][$key]['name'] = array('#type' => 'markup', '#value' => $field);
+      // Reset to follow site default theme if user selects the site default
       // Selected column.
-      $row[] = array('data' => form_radio('', 'og_theme', $key, ($node->og_theme == $key) ? 1 : 0), 'align' => 'center');
-
-      $rows[] = $row;
+      $options[$key] = '';
     }
+    $form['og_theme'] = array('#type' => 'radios', '#options' => $options, '#default_value' => $node->og_theme);
     $header = array(t('Screenshot'), t('Name'), t('Selected'));
-    $output .= form_item(t('Group theme'), theme('table', $header, $rows), t('Select a theme for your group.'));
-
   }
+  return $form;
+}
+
+function theme_og_node_form($form) {
+  $buttons = form_render($form['preview']) . form_render($form['submit']) . form_render($form['delete']);
+  foreach (element_children($form[og_theme]) as $key) {
+    $row = array();
+    $row[] = form_render($form['themes'][$key]['screenshot']);
+    $row[] = form_render($form['themes'][$key]['name']);
+    $row[] = array('data' => form_render($form['og_theme'][$key]), 'align' => 'center');
+    $rows[] = $row;
+  }
+  
+  $header = array(t('Screenshot'), t('Name'), t('Selected'));
+  $table = theme('table', $header, $rows);
+  $output = form_render($form) . $table . $buttons;
   return $output;
 }
 
@@ -896,7 +922,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'validate':
       global $user;
-
+      
       if ($node->type != 'og') {
         // 'og/album/validate' is a special case. We want the audience validation even if 'image' node type is omitted
         // Used for album module galleries
@@ -906,9 +932,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           }
           else {
             if (is_array($node->og_groups)) {
-              foreach($node->og_groups as $gid) {
-                if (!in_array($gid, array_keys($user->og_groups))) {
-                  form_set_error('og_groups', t('%name must be a subscriber in order to post into %group', array('%name' => $node->name, '%group' => $$user->og_groups[$gid]['title'])));
+              foreach($node->og_groups as $gid => $checked) {
+                if ($checked && !in_array($gid, array_keys($user->og_groups))) {
+                  form_set_error('og_groups', t('%name must be a subscriber in order to post into %group', array('%name' => $user->name, '%group' => $user->og_groups[$gid]['title'])));
                 }
               }
             }
@@ -945,7 +971,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'update':
       og_save_permissions($node);
       break;
-    case 'form post':
+    case 'form':
       return og_nodeapi_form($node);
   }
 }
@@ -955,7 +981,7 @@ function og_nodeapi_form($node) {
   // 'og/albums/form' is a special case. We want the audience selection and 'public' checkbox even if 'image' node type is omitted
   // Used for album module galleries
   if ( substr_count($_GET['q'], 'og/albums/form') == 0 && ( $node->type == 'og' || ( in_array($node->type, variable_get('og_omitted', array()))))) {
-    return form_hidden('og_public', 1);
+    return array('og_public' => array('#type' => 'value', '#value' => 1));
   }
   else {
     $required = variable_get('og_audience_required', 0);
@@ -985,7 +1011,7 @@ function og_nodeapi_form($node) {
         else {
           $public = 1;
         }
-        $output .= form_checkbox(t('Public'), 'og_public', 1, $public, t('Show this post to everyone or only to members of the checked selected below.'));
+        $form['og_nodeapi']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#description' => t('Show this post to everyone or only to members of the checked selected below.'), '#default_value' => $public, '#weight' => 0);
         break;
     }
 
@@ -998,9 +1024,11 @@ function og_nodeapi_form($node) {
     else {
       $groups = array();
     }
-
-    $output .= form_checkboxes(t('Audience'), 'og_groups', $groups, $options, t('Show this post in these groups.'), NULL, $required);
-    return $output;
+    
+    if (count($options)) {
+      $form['og_nodeapi']['og_groups'] = array('#type' => 'checkboxes', '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' => t('Show this post in these groups.'), '#default_value' => $groups, '#weight' => 1); //
+    }
+    return $form;
   }
 }
 
@@ -1093,18 +1121,20 @@ function og_user($op, &$edit, &$account, $category = NULL) {
         }
       }
       if (count($options)) {
-        return array(array('title' => t('Groups'), 'data' => form_checkboxes('', 'og_register', $values, $options)));
-      }
+        $form['og_register'] = array('#type' => 'fieldset', '#title' => t('Groups'));
+        $form['og_register']['og_register'] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => $values);
+        return $form;
+        }
       break;
     case 'insert':
-      if (($_GET['q'] == 'user/register') ? 1 : 0) {
         $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type = 'og' AND n.status = 1 AND o.register = 1"));
         while ($group = db_fetch_object($result)) {
-          if (in_array($group->nid, (array) $edit['og_register'])) {
+          if (in_array($group->nid, array_keys((array) $edit['og_register']))) {
+                  watchdog('user_d', 'blah');
             og_subscribe_user($group->nid, $account);
           }
         }
-      }
+      
       break;
     case 'load':
         $account->og_groups = og_get_subscriptions($account->uid);
@@ -1116,7 +1146,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
           foreach ($account->og_groups as $key => $val) {
             $links[] = l($val['title'], "node/$key");
           }
-          return array(t('Groups') => form_item('', theme('item_list', $links), t('your group subscriptions are here for your convenience. they do not appear on the public profile page.')));
+          return array(t('Groups') => array('#value' => theme('item_list', $links), '#description' => t('your group subscriptions are here for your convenience. they do not appear on the public profile page.')));
         }
       }
       break;
@@ -1154,9 +1184,11 @@ function og_save_permissions(&$node) {
   if ($node->type != 'og') {
     // put the post into each selected group
     if (is_array($node->og_groups)) {
-      foreach($node->og_groups as $gid) {
-        $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, %d, 'og_group', 1)";
-        db_query($sql, $node->nid, $gid);
+      foreach($node->og_groups as $gid => $checked) {
+        if ($checked) {
+          $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, %d, 'og_group', 1)";
+          db_query($sql, $node->nid, $gid);
+        }
       }
     }
 
@@ -1282,7 +1314,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     switch ($delta) {
       case 2:
       case 3:
-        return form_textfield(t('Maximum number of items to show'), 'og_block_cnt', $edit['og_block_cnt'] ? $edit['og_block_cnt'] : variable_get("og_block_cnt_$delta", 10), 5, 255, '');
+        return array('og_block_cnt' => array('#type' => 'textfield', '#title' => t('Maximum number of items to show'), '#default_value' => variable_get("og_block_cnt_$delta", 10), '#size' => 5, '#maxlength' => 255));    
     }
   }
   else if ($op == 'save') {
@@ -1455,37 +1487,36 @@ function og_settings() {
     $status = t('enabled');
     $btn_text = t('Disable');
   }
-  $group = t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />';
-  $group .= form_button($btn_text). '<br />';
-  $output = form_group(t('Module status'), $group, t('After enabling this module via the module settings page or before disabling this module, use the above button to restore default permissions.'));
+  $form['og_settings']['og_module_status'] = array('#type' => 'fieldset', '#title' => t('Module status'), '#description' => t('After enabling this module via the module settings page or before disabling this module, use the above button to restore default permissions.'));
+  $form['og_settings']['og_module_status']['module_status'] = array('#type' => 'button', '#value' => $btn_text, '#prefix' => t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />');
 
-  if ($op) {
-    if ($op == t('Enable')) {
-     _og_update_db(TRUE);
-      variable_set('og_enabled', 1);
-    }
-    elseif ($op == t('Disable')) {
-       _og_update_db(FALSE);
-       variable_set('og_enabled', 0);
-    }
+  if ($op == t('Enable')) {
+   _og_update_db(TRUE);
+    variable_set('og_enabled', 1);
     drupal_goto('admin/settings/og');
   }
-
-  $output .= form_textarea(t('Explanation or submission guidelines'), 'og_help', variable_get('og_help', ''), 70, 5, t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
+  elseif ($op == t('Disable')) {
+     _og_update_db(FALSE);
+     variable_set('og_enabled', 0);
+    drupal_goto('admin/settings/og');
+  }
+  
+  
+  $form['og_settings']['og_help'] = array('#type' => 'textarea', '#default_value' => variable_get('og_help', ''), '#cols' => 70, '#rows' =>5, '#title' => t('Explanation or submission guidelines'), '#description' => t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
-  $output .= form_radios(t('Visibility of posts'), 'og_visibility', variable_get('og_visibility', 0), $options, t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))));
-  $output .= form_textfield(t('Maximum posts on group home page'),'og_max_posts',variable_get('og_max_posts', 10), 3, 2, t("How many posts of a given type should display on the group home page."));
+  $form['og_settings']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))), '#options' => $options);
+  $form['og_settings']['og_max_posts'] = array('#type' => 'textfield', '#title' => t('Maximum posts on group home page'), '#size' => 3, '#maxlength' => 2, '#default_value' => variable_get('og_max_posts', 10), '#description' => t("How many posts of a given type should display on the group home page."), );
   // TODO: move this to block config? Will be used elsewhere?
-  $output .= form_checkbox( t('Show member pictures'), 'og_member_pics', 1, variable_get('og_member_pics', 1), t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in %user.', array('%user' => l(t('User configuration'), 'admin/user/configure'))));
+  $form['og_settings']['og_member_pics'] = array('#type' => 'checkbox', '#value' => 1, '#default_value' => variable_get('og_member_pics', 1), '#description' => t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in %user.', array('%user' => l(t('User configuration'), 'admin/user/configure'))));
   $options = array(t('optional'), t('required'));
-  $output .= form_radios(t('Audience required'), 'og_audience_required', variable_get('og_audience_required', 0), $options, t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
+  $form['og_settings']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', 0), '#options' => $options, '#description' => t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
   unset($options);
   foreach (node_get_types() as $type => $name) {
     $options[$type] = t($name);
   }
   unset($options['og']);
-  $output .= form_select(t('Omitted content types'), 'og_omitted', variable_get('og_omitted', array()), $options, t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), 0, TRUE);
-  return $output;
+  $form['og_settings']['og_omitted'] = array('#type' => 'select', '#title' => t('Omitted content types'), '#default_value' => variable_get('og_omitted', array()), '#options' => $options, '#description' => t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), '#multiple' => true);
+  return $form;
 }
 
 /**
@@ -1582,7 +1613,7 @@ function theme_og_list_generic($gid, $type, $mode) {
   if ($pager = theme('pager', NULL, $num, $i, array('ntype' => $type))) {
     $rows[] = array(array('data' => $pager, 'colspan' => '4'));
   }
-  return $rows ? form_group(node_invoke($type, 'node_name'), theme('table', $header, $rows)) : NULL;
+  return $rows ? '<fieldset><legend>' . node_invoke($type, 'node_name') . '</legend>'  . theme('table', $header, $rows) . '</fieldset>' : NULL;
 }
 
 ?>
