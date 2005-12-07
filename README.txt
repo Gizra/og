@@ -23,12 +23,11 @@ NOTES
 ----------------
 - Drupal has poor support for running more than one node_access type module at one. That means that you can't run og with
 taxonomy_access, nodeperm_by_role, nodeaccess, or any other node access control module. This is a core Drupal issue, not an og issue. Developers - feel free
-to propose a soultion for this. See http://drupal.org/node/23193
+to propose a solution for this. See http://drupal.org/node/23193
 - 'Administer nodes' permission is required for changing the Manager of a group
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status
 - All subscriber management happens on the 'subscriber list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), subscribing/unsubscribing users and promoting users into group admins.
 - If you decide to stop using this module, click the 'disable' button on the admin/settings/og page. If you ever decide to re-enable, all your prior subscriptions and group settings are preserved.
-- If you are using album.module to provide personal image albums, then you should omit the 'image' node type on your admin/settings/og page. Note that group photo albums will be group specific regardless of this setting.
 
 
 THEMES

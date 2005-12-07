@@ -23,7 +23,7 @@ function og_help($section) {
     case strstr($section, 'admin/block/configure/og'):
       return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
     case 'admin/settings/og':
-      return t('In order to let group admins determine their own group theme, you must enable mutliple themes using %page. To enable admins to upload a group image, you must activate and configure image.module (see Contributions repository).', array('%page' => l(t('theme configuration page'), 'admin/theme')));
+      return t('In order to let group admins determine their own group theme, you must enable mutliple themes using %page. To enable admins to upload a group image, you must activate and configure image.module (see Contributions repository).', array('%page' => l(t('theme configuration page'), 'admin/themes')));
 
   }
 }
@@ -187,7 +187,7 @@ function og_email_form_validate($form_id, $form_values) {
   }
 }
 
-function og_email_form_execute($form_id, $form_values) {
+function og_email_form_submit($form_id, $form_values) {
   $msg = $form_values['body']. t("\n\n--------------------------------\nThis message was sent by an administrator in the '%group' group at %site. To visit this group, browse to %url1. To unsubscribe from this group, visit %url2", array('%group' => $node->title, '%site' => variable_get('site_name', drupal), '%url1' => url("node/$node->nid", NULL, NULL, TRUE), '%url2' => url("og/unsubscribe/$node->nid", NULL, NULL, TRUE)));
   global $user;
   $from = $user->mail;
@@ -208,11 +208,12 @@ function og_manage($gid) {
   global $user;
 
   $group = node_load($gid);
-  // group owner can't unsubscribe
+  // group manager can't unsubscribe
   if ($group->og_selective != OG_CLOSED && $group->uid != $user->uid) {
-    $form['unsubscribe'] = array('#type' => 'markup', '#title' => t('Goodbye'), '#value' => l(t('Unsubscribe from this group'), "og/unsubscribe/$gid", NULL, 'destination=og'));
+    $links[] = l(t('Unsubscribe from this group'), "og/unsubscribe/$gid", NULL, 'destination=og');
+    $form['unsubscribe'] = array('#type' => 'markup', '#title' => t('Goodbye'), '#value' => theme('item_list', $links, t('Actions')));
   }
-  $form['mail_type'] = array('#type' => 'radios', '#default_value' => $user->og_groups[$gid]['mail_type'], '#options' => array(t('disabled'), t('enabled')), '#description' => t('Do you want to receive an email each time a message is posted to this group?'));
+  $form['mail_type'] = array('#type' => 'radios', '#title' => t('Email notification'), '#default_value' => $user->og_groups[$gid]['mail_type'], '#options' => array(1 => t('enabled'), 0 => t('disabled')), '#description' => t('Do you want to receive an email each time a message is posted to this group?'));
   $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
   $form['gid'] = array('#type' => 'value', '#value' => $gid);
   $output = drupal_get_form('og_manage_form', $form);
@@ -221,7 +222,7 @@ function og_manage($gid) {
   print theme('page', $output);
 }
 
-function og_manage_form_execute($form_id, $form_values) {
+function og_manage_form_submit($form_id, $form_values) {
   global $user;
   
   $sql = "DELETE FROM {og_uid} WHERE nid=%d AND uid=%d";
@@ -327,7 +328,7 @@ function og_remove_node($gid, $nid) {
   }
 }
 
-function og_remove_node_execute($form_id, $form_values) {
+function og_remove_node_submit($form_id, $form_values) {
   $node = node_load($form_values['nid']);
   if ($form_values['og_confirm']) {
     og_delete_taxonomy_tags($node);
@@ -397,7 +398,7 @@ function og_invite_form_validate($form_id, $form_values) {
   }
 }
 
-function og_invite_form_execute($form_id, $form_values) {
+function og_invite_form_submit($form_id, $form_values) {
   $node = node_load($form_values['gid']);
   $subj = t('Invitation to join the group "%group" at %site', array('%group' => $node->title, '%site' => variable_get('site_name', 'drupal')));
   $body = t("Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n\n", array('%group' => $node->title));
@@ -412,7 +413,7 @@ function og_invite_form_execute($form_id, $form_values) {
   foreach ($emails as $mail) {
     user_mail(trim($mail), $subj, $body, $headers);
   }
-  drupal_set_message(t('%count invitations sent.', array('%count' => count($emails))));
+  drupal_set_message(format_plural(count($emails), '%count invitations sent.', '%count invitations sent.'));
 }
 
 function og_subscribe($gid, $uid = NULL) {
@@ -488,7 +489,7 @@ function og_unsubscribe($gid, $uid = NULL) {
 
   og_delete_subscription($gid, $uid);
 
-  drupal_set_message(t('User unsubscribed from group.'));
+  drupal_set_message(t('Unsubscribed from group.'));
   drupal_goto("node/$gid");
 }
 
@@ -561,7 +562,7 @@ function og_add_users_validate($form_id, $form_values) {
   }
 }
 
-function og_add_users_execute($form_id, $form_values) {
+function og_add_users_submit($form_id, $form_values) {
   // safest option is to do a select, filter existing subscribers, then insert
   $names = explode(',', $form_values['og_names']);
   foreach ($names as $name) {
@@ -585,7 +586,7 @@ function og_list_users_page($gid) {
   if ($access) {
     $header[] = array('data' => t('Operations'), 'colspan' => 2);
   }
-  // prepend the group owner
+  // prepend the group manager
   $node = node_load($gid);
   $i=0;
   $rows[$i][] = theme('username', $node). '&nbsp;<em>'. t('manager'). '</em>';
@@ -629,7 +630,7 @@ function og_list_groups_page() {
   global $user;
 
   $result = pager_query(db_rewrite_sql("SELECT nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC", 'og', 'nid'), 50);
-  $header = array(t("Title"), t('Subscribers'), t("Owner"), t('Description'));
+  $header = array(t("Title"), t('Subscribers'), t("Manager"), t('Description'));
 
   while ($node = db_fetch_object($result)) {
     $cnt = db_num_rows(db_query(og_list_users_sql(), $node->nid));
@@ -743,7 +744,7 @@ function og_form(&$node) {//, &$param) {
     $directory = 1;
   }
 
-  $form['og_selective'] = array('#type' => 'radios', '#title' => t('Subscription requests'), '#default_value' => $selective, '#options' => array(t('open - subscription requests are accepted immediately.'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.'), t('closed - subscriptions are fully administered by an administrator.')), '#description' => t('How should subscription requests be handled in this group? When you select <em>closed</em>, users will not be able to subscribe <strong>and</strong> unsubscribe.'));
+  $form['og_selective'] = array('#type' => 'radios', '#title' => t('Subscription requests'), '#default_value' => $selective, '#options' => array(t('open - subscription requests are accepted immediately.'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.'), t('closed - subscriptions are fully administered by an administrator.')), '#description' => t('How should subscription requests be handled in this group? When you select <em>closed</em>, users will not be able to subscribe <strong>nor</strong> unsubscribe.'));
   $form['og_register'] = array('#type' => 'checkbox', '#title' => t('registration form'), '#default_value' => $register, '#description' =>t('Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form.'));
   $form['og_directory'] = array('#type' => 'checkbox', '#title' => t('list in groups directory'),  '#default_value' => $directory, '#description' => t('Should this group appear on the %page', array('%page' => l(t('list of groups page'),'og'))));
 
@@ -871,6 +872,7 @@ function og_load(&$node) {
   $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, register AS og_register, directory AS og_directory FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, db_fetch_array($result));
+  $node->comment=0; // we don't use comments on og nodes
   // module_invoke does not pass references and image_load() requires this
   if (function_exists('image_load')) {
     image_load($node);
@@ -1613,7 +1615,7 @@ function theme_og_list_generic($gid, $type, $mode) {
   if ($pager = theme('pager', NULL, $num, $i, array('ntype' => $type))) {
     $rows[] = array(array('data' => $pager, 'colspan' => '4'));
   }
-  return $rows ? '<fieldset><legend>' . node_invoke($type, 'node_name') . '</legend>'  . theme('table', $header, $rows) . '</fieldset>' : NULL;
+  return $rows ? '<fieldset><legend>' . node_get_name($type) . '</legend>'  . theme('table', $header, $rows) . '</fieldset>' : NULL;
 }
 
 ?>
