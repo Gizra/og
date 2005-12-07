@@ -978,12 +978,20 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   }
 }
 
-function og_nodeapi_form($node) {
+function og_form_alter($form_id, &$form) {
+  if (!$form['#attributes']['id'] == 'node-form') {
+    return;
+  }
+  else {
+    $node = $form['#node'];
+  }
+  // dprint_r($node);die();
+  
   $edit = $_REQUEST['edit'];
   // 'og/albums/form' is a special case. We want the audience selection and 'public' checkbox even if 'image' node type is omitted
   // Used for album module galleries
   if ( substr_count($_GET['q'], 'og/albums/form') == 0 && ( $node->type == 'og' || ( in_array($node->type, variable_get('og_omitted', array()))))) {
-    return array('og_public' => array('#type' => 'value', '#value' => 1));
+    $form['og_public'] = array('#type' => 'value', '#value' => 1);
   }
   else {
     $required = variable_get('og_audience_required', 0);
@@ -997,7 +1005,10 @@ function og_nodeapi_form($node) {
 
     if (user_access('administer organic groups')) {
       $vis = OG_VISIBLE_CHOOSE;
-      drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are always shown.', array('%author' => theme('placeholder', t('Author')))));
+      // only show this message when *editing* a nodes
+      if ($node->nid) {
+        drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are shown in the audience field.', array('%author' => theme('placeholder', t('Author')))));
+      }
     }
     else {
       $vis = variable_get('og_visibility', 0);
@@ -1030,7 +1041,6 @@ function og_nodeapi_form($node) {
     if (count($options)) {
       $form['og_nodeapi']['og_groups'] = array('#type' => 'checkboxes', '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' => t('Show this post in these groups.'), '#default_value' => $groups, '#weight' => 1); //
     }
-    return $form;
   }
 }
 
