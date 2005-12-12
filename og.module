@@ -710,9 +710,7 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
 function og_form(&$node) {//, &$param) {
   $form['title'] = array('#type' => 'textfield', '#title' => t('Name'), '#weight' => 0, '#default_value' => $node->title, '#size' => 60, '#maxlength' => 128, '#required' => true);
   $edit = $_POST['edit'];
-//  if (function_exists('taxonomy_node_form')) {
-//    $output .= implode('', taxonomy_node_form('og', $node));
-//  }
+  
   $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true);
   if (isset($edit['og_selective'])) {
     $selective = $edit['og_selective'];
@@ -935,25 +933,16 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           else {
             if (is_array($node->og_groups)) {
               foreach($node->og_groups as $gid => $checked) {
-                if ($checked && !in_array($gid, array_keys($user->og_groups))) {
+                // this prevents non members from posting inot a group. i think this is unneeded with form API but have no time to verify
+                // if true, anyone is welcome to remove this check. the question is: are VALUES of checkboxes element restricted to the defined options?
+                if (!user_access('administer nodes') && $checked && !in_array($gid, array_keys($user->og_groups))) {
                   form_set_error('og_groups', t('%name must be a subscriber in order to post into %group', array('%name' => $user->name, '%group' => $user->og_groups[$gid]['title'])));
                 }
               }
             }
           }
-          if (!user_access('administer organic groups')) {
-            $vis = variable_get('og_visibility', 0);
-            switch ($vis) {
-              case OG_VISIBLE_BOTH:
-                $node->og_public = 1;
-                break;
-              case OG_VISIBLE_GROUPONLY:
-                $node->og_public = 0;
-                break;
-            }
-          }
         }
-        // if a post isn't in any groups. it must be public. this assumption is the heart of the problem
+        // if a post isn't in any groups. it must be public. this assumption is the heart of the problem with
         // running multiple node permission modules at same time. ideally, all node permission modules could
         // communicate and only make the node public if no permission module objected (i.e. 'deny')
         // this problem needs solving in core drupal
@@ -979,18 +968,19 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 }
 
 function og_form_alter($form_id, &$form) {
-  if (!$form['#attributes']['id'] == 'node-form') {
+  if ($form['#attributes']['id'] != 'node-form') {
     return;
   }
   else {
     $node = $form['#node'];
   }
   
+  global $user;
   $edit = $_REQUEST['edit'];
   // 'og/albums/form' is a special case. We want the audience selection and 'public' checkbox even if 'image' node type is omitted
   // Used for album module galleries
   if ( substr_count($_GET['q'], 'og/albums/form') == 0 && ( $node->type == 'og' || ( in_array($node->type, variable_get('og_omitted', array()))))) {
-    $form['og_public'] = array('#type' => 'value', '#value' => 1);
+    $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 1);
   }
   else {
     $required = variable_get('og_audience_required', 0);
@@ -1001,11 +991,11 @@ function og_form_alter($form_id, &$form) {
     if (!$options && $required && $_POST) {
       drupal_set_message(t('You must subscribe to a group before posting.'), 'error');
     }
-
+    
     if (user_access('administer organic groups')) {
       $vis = OG_VISIBLE_CHOOSE;
-      // only show this message when *editing* a nodes
-      if ($node->nid) {
+      // only show this message when *editing* another user's nodes
+      if ($node->nid && $node->uid != $user->uid) {
         drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are shown in the audience field.', array('%author' => theme('placeholder', t('Author')))));
       }
     }
@@ -1013,17 +1003,14 @@ function og_form_alter($form_id, &$form) {
       $vis = variable_get('og_visibility', 0);
     }
     switch ($vis) {
+      case OG_VISIBLE_BOTH:
+        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 1);
+        break;
+      case OG_VISIBLE_GROUPONLY:
+        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 0);
+        break;
       case OG_VISIBLE_CHOOSE: //user decides how public the post is
-        if (isset($edit['og_public'])) {
-          $public = $edit['og_public'];
-        }
-        elseif ($node->nid) {
-          $public = $node->og_public;
-        }
-        else {
-          $public = 1;
-        }
-        $form['og_nodeapi']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#description' => t('Show this post to everyone or only to members of the checked selected below.'), '#default_value' => $public, '#weight' => 0);
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone or only to members of the checked selected below.')); // should be a pref and/or follow admin's last choice
         break;
     }
 
@@ -1038,7 +1025,12 @@ function og_form_alter($form_id, &$form) {
     }
     
     if (count($options)) {
-      $form['og_nodeapi']['og_groups'] = array('#type' => 'checkboxes', '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' => t('Show this post in these groups.'), '#default_value' => $groups, '#weight' => 1); //
+      $form['og_nodeapi']['visible']['og_groups'] = array('#type' => 'checkboxes', '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' => t('Show this post in these groups.'), '#default_value' => $groups);
+    }
+    
+    if (count($form['og_nodeapi']['visible']) > 1) {
+      $form['og_nodeapi']['#type'] = 'fieldset';
+      $form['og_nodeapi']['#title'] = t('Groups');
     }
   }
 }
