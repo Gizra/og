@@ -1,7 +1,0 @@
-Changes from version 4.6
-
-
-- removed folksonomy support
-+ added support for free tagging
-- removed support for group albums
-+ added og_album module in contrib/og_album

@@ -10,7 +10,8 @@ define ('OG_CLOSED', 3);
 // visibility states for nodes within groups. site admin chooses in og_settings()
 define('OG_VISIBLE_GROUPONLY', 0);
 define('OG_VISIBLE_BOTH', 1);
-define('OG_VISIBLE_CHOOSE', 2);
+define('OG_VISIBLE_CHOOSE_PUBLIC', 2);
+define('OG_VISIBLE_CHOOSE_PRIVATE', 3);
 
 function og_help($section) {
   switch ($section) {
@@ -24,7 +25,6 @@ function og_help($section) {
       return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
     case 'admin/settings/og':
       return t('In order to let group admins determine their own group theme, you must enable mutliple themes using %page. To enable admins to upload a group image, you must activate and configure image.module (see Contributions repository).', array('%page' => l(t('theme configuration page'), 'admin/themes')));
-
   }
 }
 
@@ -679,19 +679,36 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
   else {
     $bc = array(l(t('Home'), ''), l(t('groups'), 'og'));
     drupal_set_breadcrumb($bc);
+    drupal_add_link(array(
+                        'rel' => 'alternate',
+                        'type' => 'application/rss+xml',
+                        'title' => $node->title. t(' RSS feed'),
+                        'href' => url("og/feed/$node->nid")));
     $output ='';
-    $mode = 'all';
 
-    if (!$types[] = $_GET['ntype']) {
-      $types = node_get_types();
-      $mode = 'brief';
+    // 2 views. 'segregate each content type' or 'a river of news'
+    if (variable_get('og_home_page_presentation', 'gbct') == 'ron') {
+      $sql = og_get_home_nodes_sql();
+      $num = variable_get('og_max_posts', 10);
+      $result = pager_query(db_rewrite_sql($sql), $num, 0, NULL, $node->nid);
+      while ($onenode = db_fetch_object($result)) {
+        $output .= node_view(node_load($onenode->nid), TRUE, FALSE);
+      }
+      $output .= theme('pager', NULL, $num);
     }
-    foreach ($types as $type => $val) {
-      // image is filtered out here because we expect images to be added from within albums
-      $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
-      if (!in_array($type, $exempt)) {
-        if ($table = og_list_og($node->nid, $type, $mode)) {
-          $output .= $table;
+    else {
+      $mode = 'all';
+      if (!$types[] = $_GET['ntype']) {
+        $types = node_get_types();
+        $mode = 'brief';
+      }
+      foreach ($types as $type => $val) {
+        // image is filtered out here because we expect images to be added from within albums
+        $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
+        if (!in_array($type, $exempt)) {
+          if ($table = og_list_og($node->nid, $type, $mode)) {
+            $output .= $table;
+          }
         }
       }
     }
@@ -699,10 +716,8 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
     if (!$output) {
       drupal_set_message(t('No posts in this group.'));
     }
-    $url = url("og/feed/$node->nid");
     $icon = theme('xml_icon', $url);
-    drupal_set_html_head("<link rel=\"alternate\" href=\"$url\" title=\"$node->title RSS feed\" type=\"application/rss+xml\" />");
-    $node->body = $output. $icon;
+    $node->body .= $output. $icon;
   }
   return $node;
 }
@@ -711,7 +726,10 @@ function og_form(&$node) {//, &$param) {
   $form['title'] = array('#type' => 'textfield', '#title' => t('Name'), '#weight' => 0, '#default_value' => $node->title, '#size' => 60, '#maxlength' => 128, '#required' => true);
   $edit = $_POST['edit'];
   
-  $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true);
+  $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true, '#description' => t('A brief description for the group details block and the group directory.'));
+  $form['body'] = array('#type' => 'textarea', '#title' => t('Welcome message'), '#default_value' => $node->body, '#rows' => 10, '#required' => FALSE, '#description' => t('This HTML is shown by default at the top of the group home page.'));
+  $form['format'] = filter_form($node->format);
+
   if (isset($edit['og_selective'])) {
     $selective = $edit['og_selective'];
   }
@@ -774,9 +792,9 @@ function og_form(&$node) {//, &$param) {
       $themes[$key] = $theme;
     }
   }
-  ksort($themes);
 
   if (count($themes) > 1) {
+    ksort($themes);
     foreach ($themes as $key => $value) {
       if ($key == variable_get('theme_default', 'bluemarine')) {
         $key = '';
@@ -795,7 +813,6 @@ function og_form(&$node) {//, &$param) {
       $options[$key] = '';
     }
     $form['og_theme'] = array('#type' => 'radios', '#options' => $options, '#default_value' => $node->og_theme);
-    $header = array(t('Screenshot'), t('Name'), t('Selected'));
   }
   return $form;
 }
@@ -803,15 +820,16 @@ function og_form(&$node) {//, &$param) {
 function theme_og_node_form($form) {
   $buttons = form_render($form['preview']) . form_render($form['submit']) . form_render($form['delete']);
   foreach (element_children($form[og_theme]) as $key) {
-    $row = array();
     $row[] = form_render($form['themes'][$key]['screenshot']);
     $row[] = form_render($form['themes'][$key]['name']);
     $row[] = array('data' => form_render($form['og_theme'][$key]), 'align' => 'center');
     $rows[] = $row;
+    unset($row);
   }
-  
-  $header = array(t('Screenshot'), t('Name'), t('Selected'));
-  $table = theme('table', $header, $rows);
+  if (count($rows) > 1) {
+    $header = array(t('Screenshot'), t('Name'), t('Selected'));
+    $table = theme('table', $header, $rows);
+  }
   $output = form_render($form) . $table . $buttons;
   return $output;
 }
@@ -921,34 +939,22 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'validate':
-      global $user;
-      
       if ($node->type != 'og') {
         // 'og/album/validate' is a special case. We want the audience validation even if 'image' node type is omitted
-        // Used for album module galleries
         if (!in_array($node->type, variable_get('og_omitted', array())) || substr_count($_GET['q'], 'og/album/validate')) {
           if (variable_get('og_audience_required', 0) && empty($node->og_groups) && $_POST) {
             form_set_error('og_groups', t('You must select an audience in order to post.'));
           }
-          else {
-            if (is_array($node->og_groups)) {
-              foreach($node->og_groups as $gid => $checked) {
-                // this prevents non members from posting inot a group. i think this is unneeded with form API but have no time to verify
-                // if true, anyone is welcome to remove this check. the question is: are VALUES of checkboxes element restricted to the defined options?
-                if (!user_access('administer nodes') && $checked && !in_array($gid, array_keys($user->og_groups))) {
-                  form_set_error('og_groups', t('%name must be a subscriber in order to post into %group', array('%name' => $user->name, '%group' => $user->og_groups[$gid]['title'])));
-                }
-              }
-            }
-          }
         }
-        // if a post isn't in any groups. it must be public. this assumption is the heart of the problem with
-        // running multiple node permission modules at same time. ideally, all node permission modules could
-        // communicate and only make the node public if no permission module objected (i.e. 'deny')
-        // this problem needs solving in core drupal
-        if (empty($node->og_groups)) {
-          $node->og_public = 1;
-        }
+      }
+      break;
+    case 'execute':
+      // if a post isn't in any groups. it must be public. this assumption is the heart of the problem with
+      // running multiple node permission modules at same time. ideally, all node permission modules could
+      // communicate and only make the node public if no permission module objected (i.e. 'deny')
+      // this problem needs solving in core drupal
+      if (empty($node->og_groups)) {
+        $node->og_public = 1;
       }
       break;
     case 'delete':
@@ -993,7 +999,7 @@ function og_form_alter($form_id, &$form) {
     }
     
     if (user_access('administer organic groups')) {
-      $vis = OG_VISIBLE_CHOOSE;
+      $vis = OG_VISIBLE_CHOOSE_PRIVATE;
       // only show this message when *editing* another user's nodes
       if ($node->nid && $node->uid != $user->uid) {
         drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are shown in the audience field.', array('%author' => theme('placeholder', t('Author')))));
@@ -1009,8 +1015,13 @@ function og_form_alter($form_id, &$form) {
       case OG_VISIBLE_GROUPONLY:
         $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 0);
         break;
-      case OG_VISIBLE_CHOOSE: //user decides how public the post is
+      
+      //user decides how public the post is. the only difference between these two checkboxes is the default value
+      case OG_VISIBLE_CHOOSE_PUBLIC:
         $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone or only to members of the checked selected below.')); // should be a pref and/or follow admin's last choice
+        break;
+      case OG_VISIBLE_CHOOSE_PRIVATE:
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone or only to members of the checked selected below.')); // should be a pref and/or follow admin's last choice
         break;
     }
 
@@ -1459,7 +1470,7 @@ function og_block_details() {
 }
 
 // $group is an object containing the group node
-function og_create_links($group) {
+function og_og_create_links($group) {
   foreach (node_get_types() as $type => $name) {
     // image is filtered out here because we expect images to be added from within albums
     $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
@@ -1484,13 +1495,17 @@ function og_link($type, $node = 0, $main) {
 function og_settings() {
   $op = $_POST['op'];
   drupal_set_title(t('Organic groups configuration'));
-  $status = t('disabled');
-  $btn_text = t('Enable');
   if (variable_get('og_enabled', 0)) {
     $status = t('enabled');
     $btn_text = t('Disable');
+    $description = t('Before disabling this module, use the above button to restore default permissions.');
   }
-  $form['og_settings']['og_module_status'] = array('#type' => 'fieldset', '#title' => t('Module status'), '#description' => t('After enabling this module via the module settings page or before disabling this module, use the above button to restore default permissions.'));
+  else {
+    $status = t('disabled');
+    $btn_text = t('Enable');
+    $description = t('You usually want to enable acess control with this module. The button above will delete one record in your node_access table and thus enable node permissions on your site. You may revert by clicking the same button again.');
+  }
+  $form['og_settings']['og_module_status'] = array('#type' => 'fieldset', '#title' => t('Module status'), '#description' => $description);
   $form['og_settings']['og_module_status']['module_status'] = array('#type' => 'button', '#value' => $btn_text, '#prefix' => t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />');
 
   if ($op == t('Enable')) {
@@ -1504,21 +1519,25 @@ function og_settings() {
     drupal_goto('admin/settings/og');
   }
   
-  
-  $form['og_settings']['og_help'] = array('#type' => 'textarea', '#default_value' => variable_get('og_help', ''), '#cols' => 70, '#rows' =>5, '#title' => t('Explanation or submission guidelines'), '#description' => t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
-  $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility to be determined by the author/editor using a checkbox on the posting form'));
-  $form['og_settings']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))), '#options' => $options);
-  $form['og_settings']['og_max_posts'] = array('#type' => 'textfield', '#title' => t('Maximum posts on group home page'), '#size' => 3, '#maxlength' => 2, '#default_value' => variable_get('og_max_posts', 10), '#description' => t("How many posts of a given type should display on the group home page."), );
-  // TODO: move this to block config? Will be used elsewhere?
-  $form['og_settings']['og_member_pics'] = array('#type' => 'checkbox', '#value' => 1, '#default_value' => variable_get('og_member_pics', 1), '#description' => t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in %user.', array('%user' => l(t('User configuration'), 'admin/user/configure'))));
+  $form['og_settings']['node_form'] = array('#type' => 'fieldset', '#title' => t('Node authoring form'));
+  $form['og_settings']['node_form']['og_help'] = array('#type' => 'textarea', '#default_value' => variable_get('og_help', ''), '#cols' => 70, '#rows' =>5, '#title' => t('Explanation or submission guidelines'), '#description' => t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
+  $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pub.', array('%pub' => theme('placeholder', t('Public')))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pri.', array('%pri' => theme('placeholder', t('Private')))));  
+  $form['og_settings']['node_form']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))), '#options' => $options);
   $options = array(t('optional'), t('required'));
-  $form['og_settings']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', 0), '#options' => $options, '#description' => t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
+  $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', FALSE), '#options' => $options, '#description' => t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
   unset($options);
   foreach (node_get_types() as $type => $name) {
     $options[$type] = t($name);
   }
   unset($options['og']);
-  $form['og_settings']['og_omitted'] = array('#type' => 'select', '#title' => t('Omitted content types'), '#default_value' => variable_get('og_omitted', array()), '#options' => $options, '#description' => t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), '#multiple' => true);
+  $form['og_settings']['node_form']['og_omitted'] = array('#type' => 'select', '#title' => t('Omitted content types'), '#default_value' => variable_get('og_omitted', array()), '#options' => $options, '#description' => t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), '#multiple' => true);
+  
+  $form['og_settings']['home'] = array('#type' => 'fieldset', '#title' => t('Group home page'));
+  $options = array('ron' => t('River of News'), 'gbct' => t('Group by content type'));
+  $form['og_settings']['home']['og_home_page_presentation'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_presentation', 'gbct'), '#description' => t('If neither of these presentations suits you, you may override in the theme layer.'));
+  $form['og_settings']['home']['og_max_posts'] = array('#type' => 'textfield', '#title' => t('Maximum posts on group home page'), '#size' => 3, '#maxlength' => 2, '#default_value' => variable_get('og_max_posts', 10), '#description' => t("If using River of News display, indicate the number of posts on home page. If grouping posts by content type, indicate number of posts per type."), );
+  // TODO: move this to block config? Will be used elsewhere?
+  $form['og_settings']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#value' => 1, '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in %user.', array('%user' => l(t('User configuration'), 'admin/user/configure'))));
   return $form;
 }
 
