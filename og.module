@@ -82,8 +82,8 @@ function og_perm() {
 /**
  * override theme based on what group is being displayed (if any).
  * be smart about selecting the 'active' group for ambigous urls like node/$nid
- *
- *
+ * sets a $_SESSION variable for current group
+ * 
  * @param
  *   none
  * @return
@@ -109,10 +109,28 @@ function og_theme() {
     $custom_theme = $group_node->og_theme;
   }
   elseif (arg(0) == 'comment' && is_numeric(arg(2))) {
-    $og_node = og_set_theme(arg(2));
+    $group_node = og_set_theme(arg(2));
   }
   $_SESSION['og_last'] = $group_node;
+  // TODO: delete this once I'm sure I won't use it. Using above $_SESSION var instead
+  // og_set_group_context($group_node);
 }
+
+// useful for determining if current page is in a group context
+// maintains the whole group node for page views that happen in a group context. Group context is set by og_theme()
+// analogous to drupal_set_breadcrumb
+/*function og_set_group_context($group_node = NULL) {
+  static $stored_group_node;
+
+  if (!is_null($group_node)) {
+    $stored_group_node = $group_node;
+  }
+  return $stored_group_node;
+}
+
+function og_get_group_context() {
+  return og_set_group_context();
+}*/
 
 function og_set_theme($nid) {
   global $custom_theme;
@@ -138,13 +156,7 @@ function og_set_theme($nid) {
           $group_node = node_load($node->og_groups[0]);
           $custom_theme = $group_node->og_theme;
         }
-    }
-    // we know everything we need to know here to determine the node breadcrumb
-    // instead of reproducing this logic elsewhere, save in a GLOBAL and set_breadcrumb() in og_nodeapi('view')
-    $GLOBALS['og_node_bc'][] = l(t('home'), '');
-    $GLOBALS['og_node_bc'][] = l(t('groups'), 'og');
-    $GLOBALS['og_node_bc'][] = l($group_node->title, "node/$group_node->nid");
-    
+    } 
     return $group_node;
   }
 }
@@ -337,23 +349,6 @@ function og_remove_node_submit($form_id, $form_values) {
     drupal_set_message(t('Post removed from group.'));
     drupal_goto("node/{$form_values['gid']}");
   }  
-}
-
-/**
- * Delete the tags that belong
- */
-function og_delete_taxonomy_tags($node) {
-  if ($node->og_groups) {
-    foreach ($node->og_groups as $gid) {
-      // Delete all nid-tid relations for the current node n
-      $result = db_query("SELECT t.tid FROM {vocabulary} v INNER JOIN {term_data} t ON v.vid = t.vid WHERE v.module = '%s'", "og_group_$gid");
-      $tids = array();
-      while ($vocabulary = db_fetch_object($result)) {
-        $tids[] = $vocabulary->tid;
-      }
-      db_query('DELETE FROM {term_node} WHERE nid = %d AND tid IN (%s)', $node->nid, implode(',', $tids));
-    }
-  }
 }
 
 function og_invite($gid) {
@@ -649,6 +644,7 @@ function og_list_groups_page() {
 }
 
 // str_types is a list of types which should be selected. if not provided, we return all but a couple
+// filtering for a given gid is done by passign a a special $arg to db_rewrite_sql()
 function og_get_home_nodes_sql($str_types = NULL) {
   if ($str_types) {
     $str_types = db_escape_string($str_types);
@@ -659,7 +655,25 @@ function og_get_home_nodes_sql($str_types = NULL) {
   }
 
   // we LEFT JOIN to node_comment_stats in case comment.module is disabled.
-  return "SELECT DISTINCT(n.nid), n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n INNER JOIN {node_access} og_na ON n.nid = og_na.nid LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE og_na.gid = %d AND og_na.realm = 'og_group' AND n.status=1 AND $where ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
+  return "SELECT n.nid, n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND $where ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
+}
+
+/**
+ * Implementation of hook_db_rewrite_sql
+ * 
+ * You must pass $args with element 'og_nid' => $nid in order to have your query filtered by this function
+ * 
+ * @return array 
+ */
+function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
+  if (is_numeric($args['og_nid'])) {
+    // we only add this JOIN for node admins because db_rewrite_sql() adds it for everyone else
+    if (user_access('administer nodes')) {
+      $query['join'] = 'INNER JOIN {node_access} na ON n.nid = na.nid'; 
+    }
+    $query['where'] = 'na.gid = '. $args['og_nid']. " AND na.realm = 'og_group'";
+    return $query;
+  }
 }
 
 // when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group.
@@ -684,13 +698,13 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
                         'type' => 'application/rss+xml',
                         'title' => $node->title. t(' RSS feed'),
                         'href' => url("og/feed/$node->nid")));
-    $output ='';
+    $output = '';
 
     // 2 views. 'segregate each content type' or 'a river of news'
     if (variable_get('og_home_page_presentation', 'gbct') == 'ron') {
       $sql = og_get_home_nodes_sql();
       $num = variable_get('og_max_posts', 10);
-      $result = pager_query(db_rewrite_sql($sql), $num, 0, NULL, $node->nid);
+      $result = pager_query(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $node->nid)), $num);
       while ($onenode = db_fetch_object($result)) {
         $output .= node_view(node_load($onenode->nid), TRUE, FALSE);
       }
@@ -722,6 +736,11 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
   return $node;
 }
 
+/**
+ * Implementation of hook_form()
+ *
+ * @param object $node
+ */
 function og_form(&$node) {//, &$param) {
   $form['title'] = array('#type' => 'textfield', '#title' => t('Name'), '#weight' => 0, '#default_value' => $node->title, '#size' => 60, '#maxlength' => 128, '#required' => true);
   $edit = $_POST['edit'];
@@ -924,7 +943,14 @@ function og_update($node) {
 function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'view':
-      if ($bc = $GLOBALS['og_node_bc']) {
+      // splice group info into breadcrumb
+      if ($gid = $_SESSION['og_last']->nid) {
+        $group_node = node_load($gid);
+        $bc = drupal_get_breadcrumb($newbc);
+        unset($bc[0]);
+        array_unshift($bc, l($group_node->title, "node/$group_node->nid"));
+        // array_unshift($bc, l(t('groups'), 'og')); uncomment this if you *want* a link to group directory
+        array_unshift($bc, l(t('home'), ''));
         drupal_set_breadcrumb($bc);
       }
       break;
@@ -958,8 +984,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'delete':
-      og_delete_taxonomy_tags($node);
-      og_delete_permissions($node);
+      og_delete_grants($node);
       break;
     case 'insert':
       og_save_permissions($node);
@@ -968,8 +993,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'update':
       og_save_permissions($node);
       break;
-    case 'form':
-      return og_nodeapi_form($node);
   }
 }
 
@@ -1018,10 +1041,10 @@ function og_form_alter($form_id, &$form) {
       
       //user decides how public the post is. the only difference between these two checkboxes is the default value
       case OG_VISIBLE_CHOOSE_PUBLIC:
-        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone or only to members of the checked selected below.')); // should be a pref and/or follow admin's last choice
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone or only to members of the groups checked below.'));
         break;
       case OG_VISIBLE_CHOOSE_PRIVATE:
-        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone or only to members of the checked selected below.')); // should be a pref and/or follow admin's last choice
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone or only to members of the groups checked below.'));
         break;
     }
 
@@ -1227,7 +1250,7 @@ function og_save_permissions(&$node) {
   }
 }
 
-function og_delete_permissions(&$node) {
+function og_delete_grants(&$node) {
   // delete all existing grants for this module
   $sql = "DELETE FROM {node_access} WHERE realm = '%s' AND nid = $node->nid";
   $realms = array('og_group', 'og_uid');
@@ -1288,7 +1311,7 @@ function og_feed($gid) {
   if (node_access('view', $group)) {
     $group = node_load($gid);
     $sql = og_get_home_nodes_sql();
-    $nodes = db_query_range(db_rewrite_sql($sql), $gid, 0, variable_get('feed_default_items', 10));
+    $nodes = db_query_range(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $gid)), 0, variable_get('feed_default_items', 10));
     $channel['title'] = $group->title;
     $channel['link'] = url("node/$gid", NULL, NULL, TRUE);
     $channel['description'] = $group->og_description;
@@ -1462,8 +1485,8 @@ function og_block_details() {
     $output .= theme('item_list', $links);
 
     $block['content'] = $output;
-    // display group image.
-    $block['content'] .= $node->images ? image_display($node, 'thumbnail') : '';
+    // TODO: display group image when they are working again.
+    // $block['content'] .= $node->images ? image_display($node, 'thumbnail') : '';
     $block['subject'] = l($node->title, "node/$node->nid");
     return $block;
   }
@@ -1541,75 +1564,6 @@ function og_settings() {
   return $form;
 }
 
-/**
- * Finds all nodes that match selected taxonomy conditions.
- *
- * @param $tags
- *   An array of tags to match.
- * @param $operator
- *   How to interpret multiple IDs in the array. Can be "or" or "and".
- * @param $types
- *   Am array. Restrict results to the node types given.
- * @param $vocabularies
- *   An array. Restrict results to be attached to vocabularies that have the given module assignment.
- * @param $realms
- *   An array. Restrict results to nodes that have the given node_access realms.
- * @param $pager
- *   Whether the nodes are to be used with a pager (the case on most Drupal
- *   pages) or not (in an XML feed, for example).
- * @return
- *   A resource identifier pointing to the query results.
- */
-function og_select_nodes($tags, $operator, $types = array(), $vocabularies = array(), $realms = array(), $pager = TRUE) {
-  $where = array();
-  $safe_tags = array();
-  foreach ($tags as $tag) {
-    $safe_tags[] = db_escape_string($tag);
-  }
-  if (count($safe_tags)) {
-    $str_tags = implode("','", $safe_tags);
-    $where[] = "d.name IN ('$str_tags')";
-  }
-  $safe_types = array();
-  foreach ($types as $type) {
-    $safe_types[] = db_escape_string($type);
-  }
-  if (count($safe_types)) {
-    $str_types = implode("','", $safe_types);
-    $where[] = "n.type IN ('$str_types')";
-  }
-  $safe_vocabularies = array();
-  foreach ($vocabularies as $vocabulary) {
-    $safe_vocabularies[] = db_escape_string($vocabulary);
-  }
-  if (count($safe_vocabularies)) {
-    $str_vocabularies = implode("','", $safe_vocabularies);
-    $where[] = "v.module IN ('$str_vocabularies')";
-  }
-  $safe_realms = array();
-  foreach ($realms as $realm) {
-    $safe_realms[] = db_escape_string($realm);
-  }
-  if (count($safe_realms)) {
-    $str_realms = implode("','", $safe_realms);
-    $where[] = "na.realm IN ('$str_realms')";
-  }
-  $wheres = implode(' AND ', $where);
-  if ($operator == 'or') {
-    $sql = "SELECT n.nid, n.sticky, n.created FROM {node} n INNER JOIN {term_node} t ON n.nid = t.tid INNER JOIN {term_data} d ON d.tid = t.tid INNER JOIN {vocabulary} v ON v.tid = d.vid WHERE $wheres AND n.status = 1 ORDER BY n.sticky DESC, n.created DESC";
-  }
-  else {
-    $sql = "SELECT n.nid, n.sticky, n.created FROM {node} n INNER JOIN {term_node} t ON n.nid = t.tid INNER JOIN {term_data} d ON d.tid = t.tid INNER JOIN {vocabulary} v ON v.tid = d.vid WHERE $wheres AND n.status = 1 GROUP BY n.nid HAVING COUNT(d.tid) = ". count($str_tags) ." ORDER BY n.sticky DESC, n.created DESC";
-  }
-  if ($pager) {
-    $result = pager_query(db_rewrite_sql($sql), variable_get('default_nodes_main', 10) , 0, NULL);
-  }
-  else {
-    $result = db_query_range(db_rewrite_sql($sql), 0, 15);
-  }
-  return $result;
-}
-
 // try to get the theme's preferred way to show each type's node listing. if not specified, show the generic node listing (which is also themeable)
 // $mode can be 'brief' or 'all'
 function og_list_og($gid, $type, $mode = 'all') {
@@ -1628,7 +1582,7 @@ function theme_og_list_generic($gid, $type, $mode) {
   $sql = og_get_home_nodes_sql($type);
   $num = $mode == 'brief' ? variable_get('og_max_posts', 10) : 50;
   $i++; // multiple pagers on a page need a unique integer
-  $result = pager_query(db_rewrite_sql($sql), $num, $i, NULL, $gid);
+  $result = pager_query(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $gid)), $num, $i);
   while ($row = db_fetch_object($result)) {
     $rows[] = array(l($row->title, "node/$row->nid"), theme('username', $row), $row->comment_count, format_date($row->created, 'small'));
   }
