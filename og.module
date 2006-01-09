@@ -667,8 +667,8 @@ function og_get_home_nodes_sql($str_types = NULL) {
  */
 function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
   if (is_numeric($args['og_nid'])) {
-    // we only add this JOIN for node admins because db_rewrite_sql() adds it for everyone else
-    if (user_access('administer nodes')) {
+    // we add this JOIN for node admins because db_rewrite_sql() adds it for everyone else
+    if (!strpos($sql, 'JOIN {node_access}')) {
       $query['join'] = 'INNER JOIN {node_access} na ON n.nid = na.nid'; 
     }
     $query['where'] = 'na.gid = '. $args['og_nid']. " AND na.realm = 'og_group'";
@@ -944,12 +944,17 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'view':
       // splice group info into breadcrumb
-      if ($gid = $_SESSION['og_last']->nid) {
+      if ($_SESSION['og_last']->nid && $page && $node->og_groups) {
+        $gid = $_SESSION['og_last']->nid;
         $group_node = node_load($gid);
         $bc = drupal_get_breadcrumb($newbc);
         unset($bc[0]);
+        // get rid of link to all forums. it breaks you out of group world
+        if ($bc[1] == l(t('forums'), 'forum')) {
+          unset($bc[1]);
+        }
         array_unshift($bc, l($group_node->title, "node/$group_node->nid"));
-        // array_unshift($bc, l(t('groups'), 'og')); uncomment this if you *want* a link to group directory
+        array_unshift($bc, l(t('groups'), 'og')); // uncomment this if you *want* a link to group directory
         array_unshift($bc, l(t('home'), ''));
         drupal_set_breadcrumb($bc);
       }
