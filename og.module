@@ -253,8 +253,8 @@ function og_manage_form_submit($form_id, $form_values) {
  * @param $admin whether to make the user an admin
  */
 function og_create_subscription($gid, $uid, $approved = 1, $admin = 0){
-  $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', 1, %d)";
-  db_query($sql, $gid, $uid, $admin);
+  $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update) VALUES (%d, %d, 'og_uid', %d, %d)";
+  db_query($sql, $gid, $uid, $approved, $admin);
   $sql = "REPLACE INTO {og_uid} (nid, uid, is_active, is_admin) VALUES (%d, %d, %d, %d)";
   db_query($sql, $gid, $uid, $approved, $admin);
   module_invoke_all('og', 'user create', $gid, $uid, $approved, $admin);
@@ -430,7 +430,7 @@ function og_subscribe($gid, $uid = NULL) {
     drupal_access_denied();
   }
   $return = og_subscribe_user($gid, $account);
-  if ($return == 'approved') {
+  if ($return == 'approval') {
     drupal_set_message(t('Subscription request awaits approval by an administrator.'));
   }
   else if ($return == 'subscribed') {
@@ -458,7 +458,8 @@ function og_subscribe_user($gid, $account) {
       $admins[] = $row->mail ? $row->mail : NULL;
     }
     $subj = t("Subscription request for '%group' from '%name'", array('%group' => $node->title, '%name' => $account->name));
-    $body = t('You may approve or deny this request at %url', array('%url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
+    $body = t('To instantly approve this request, visit %url. ', array('%url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
+    $body .= t('You may deny this request or manage subscribers at %url', array('%url' => url("og/users/$node->nid", NULL, NULL, TRUE)));
     $from = variable_get('site_mail', ini_get('sendmail_from'));
     $headers = "From: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
     user_mail(implode(', ', $admins), $subj, $body, $headers);
