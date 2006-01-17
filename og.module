@@ -625,7 +625,7 @@ function og_list_users_page($gid) {
 function og_list_groups_page() {
   global $user;
 
-  $result = pager_query(db_rewrite_sql("SELECT nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC", 'og', 'nid'), 50);
+  $result = pager_query(db_rewrite_sql("SELECT n.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC", 'og', 'nid'), 50);
   $header = array(t("Title"), t('Subscribers'), t("Manager"), t('Description'));
 
   while ($node = db_fetch_object($result)) {
