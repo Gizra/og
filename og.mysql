@@ -17,7 +17,7 @@ CREATE TABLE `og_uid` (
 ALTER TABLE `og` ADD `register` int(1) NOT NULL default '0';
 ALTER TABLE `og` ADD `directory` int(11) NOT NULL default '1';
 
-# changes to make put user subscriptions in og_uid table.
+-- changes to make put user subscriptions in og_uid table.
 ALTER TABLE `og_uid` ADD `og_role` int(1) NOT NULL default '0';
 ALTER TABLE `og_uid` ADD `is_active` int(1) default '0';
 ALTER TABLE `og_uid` ADD `is_admin` int(1) default '0';
