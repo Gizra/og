@@ -94,11 +94,7 @@ function og_theme() {
   $group_node = NULL; // a node object containing the 'active' group for this request
 
   $pages = array('users', 'albums', 'feed', 'invite', 'remove_node', 'manage', 'all');
-  if (arg(0) == 'og' && arg(1) == 'albums' && arg(2) == 'form' && $gid = $_REQUEST['edit']['og_groups'][0]) {
-    $group_node = node_load($gid);
-    $custom_theme = $group_node->og_theme;
-  }
-  elseif (arg(0) == 'og' && in_array(arg(1), $pages)) {
+  if (arg(0) == 'og' && in_array(arg(1), $pages)) {
     $group_node = og_set_theme(arg(2));
   }
   elseif (arg(0) == 'node' && is_numeric(arg(1))) {
@@ -112,14 +108,20 @@ function og_theme() {
     $group_node = og_set_theme(arg(2));
   }
   $_SESSION['og_last'] = $group_node;
-  // TODO: delete this once I'm sure I won't use it. Using above $_SESSION var instead
-  // og_set_group_context($group_node);
+  og_set_group_context($group_node);
 }
 
-// useful for determining if current page is in a group context
-// maintains the whole group node for page views that happen in a group context. Group context is set by og_theme()
-// analogous to drupal_set_breadcrumb
-/*function og_set_group_context($group_node = NULL) {
+/**
+ * API function for getting the group context (if any) for the current request. Used
+ * for things like setting current theme and breadcrumbs. This context is set during og_theme()
+ *
+ * @return $node object
+ */
+function og_get_group_context() {
+  return og_set_group_context();
+}
+
+function og_set_group_context($group_node = NULL) {
   static $stored_group_node;
 
   if (!is_null($group_node)) {
@@ -127,10 +129,6 @@ function og_theme() {
   }
   return $stored_group_node;
 }
-
-function og_get_group_context() {
-  return og_set_group_context();
-}*/
 
 function og_set_theme($nid) {
   global $custom_theme;
@@ -939,9 +937,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'view':
       // splice group info into breadcrumb
-      if ($_SESSION['og_last']->nid && $page && $node->og_groups) {
-        $gid = $_SESSION['og_last']->nid;
-        $group_node = node_load($gid);
+      $group_node = og_get_group_context();
+      if ($group_node && $page && $node->og_groups) {
         $bc = drupal_get_breadcrumb($newbc);
         unset($bc[0]);
         // get rid of link to all forums. it breaks you out of group world
@@ -1396,7 +1393,8 @@ function og_block_new() {
 
 function og_block_subscribers() {
   global $user;
-  if ($gid = $_SESSION['og_last']->nid) {
+  if ($group_node = og_get_group_context()) {
+    $gid = $group_node->nid;
     if (in_array($gid, array_keys($user->og_groups))) {
       $max = variable_get('og_block_subscribers_cnt', 10);
       $sql = og_list_users_sql(0);
@@ -1431,8 +1429,7 @@ function og_block_subscribers() {
 function og_block_details() {
   global $user;
 
-  if ($gid = $_SESSION['og_last']->nid) {
-    $node = node_load($gid);
+  if ($node = og_get_group_context()) {
     $result = db_query(og_list_users_sql(0), $node->nid);
     $cntall = db_num_rows($result);
     $cntpending = 0;
@@ -1494,8 +1491,7 @@ function og_block_details() {
 // $group is an object containing the group node
 function og_og_create_links($group) {
   foreach (node_get_types() as $type => $name) {
-    // image is filtered out here because we expect images to be added from within albums
-    $exempt = array_merge(array('og', 'image'), variable_get('og_omitted', array()));
+    $exempt = array_merge(array('og'), variable_get('og_omitted', array()));
     if (!in_array($type, $exempt) && node_access('create', $type)) {
       $links[] = l(t('create %type', array('%type' => $name)), "node/add/$type", array('title' => t('Add a new %s in this group.', array('%s' => $name))), "edit[og_groups][]=$group->nid");
     }
@@ -1506,9 +1502,9 @@ function og_og_create_links($group) {
 function og_link($type, $node = 0, $main) {
   global $user;
 
-  if ($gid = $_SESSION['og_last']->nid) {
-    if ($type == 'node' && $node->type != 'og' && node_access('update', array('nid' => $gid, 'status' => 1))) {
-      $links[] = l(t('remove from group'), "og/remove_node/$gid/$node->nid", array(), "destination=node/$gid");
+  if ($group_node = og_get_group_context()) {
+    if ($type == 'node' && $node->type != 'og' && node_access('update', $group_node)) {
+      $links[] = l(t('remove from group'), "og/remove_node/$group_node->nid/$node->nid", array(), "destination=node/$group_node->nid");
     }
   }
   return $links ? $links : array();
@@ -1559,7 +1555,7 @@ function og_settings() {
   $form['og_settings']['home']['og_home_page_presentation'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_presentation', 'gbct'), '#description' => t('If neither of these presentations suits you, you may override in the theme layer.'));
   $form['og_settings']['home']['og_max_posts'] = array('#type' => 'textfield', '#title' => t('Maximum posts on group home page'), '#size' => 3, '#maxlength' => 2, '#default_value' => variable_get('og_max_posts', 10), '#description' => t("If using River of News display, indicate the number of posts on home page. If grouping posts by content type, indicate number of posts per type."), );
   // TODO: move this to block config? Will be used elsewhere?
-  $form['og_settings']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#value' => 1, '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in %user.', array('%user' => l(t('User configuration'), 'admin/user/configure'))));
+  $form['og_settings']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#value' => 1, '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in %user.', array('%user' => l(t('User configuration'), 'admin/settings/user'))));
   return $form;
 }
 
@@ -1590,5 +1586,3 @@ function theme_og_list_generic($gid, $type, $mode) {
   }
   return $rows ? '<fieldset><legend>' . node_get_name($type) . '</legend>'  . theme('table', $header, $rows) . '</fieldset>' : NULL;
 }
-
-?>
