@@ -100,6 +100,10 @@ function og_theme() {
   elseif (arg(0) == 'node' && is_numeric(arg(1))) {
     $group_node = og_set_theme(arg(1));
   }
+  elseif (arg(0) == 'node' && arg(1) == 'add' && arg(2) == 'book' && arg(3) == 'parent') {
+    $group_node = og_set_theme(arg(4));
+    $_REQUEST['edit']['og_groups'][] = $group_node->nid; // checks the right box on node form
+  }
   elseif (arg(0) == 'node' && arg(1) == 'add' && $gid = $_REQUEST['edit']['og_groups'][0]) {
     $group_node = node_load($gid);
     $custom_theme = $group_node->og_theme;
@@ -1065,6 +1069,18 @@ function og_form_alter($form_id, &$form) {
   }
 }
 
+// used by og_book to determine the public state of an autocreated node
+function og_get_visibility_default() {
+  $vis = variable_get('og_visibility', 0);
+  switch ($vis) {
+    case OG_VISIBLE_GROUPONLY:
+    case OG_VISIBLE_CHOOSE_PRIVATE:
+      return 0;
+    case OG_VISIBLE_BOTH:
+    case OG_VISIBLE_CHOOSE_PUBLIC:
+      return 1;
+  }
+}
 
 /**
  * Send this node via email to all email subscribers. Called from og_nodeapi()
