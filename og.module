@@ -665,8 +665,8 @@ function og_get_home_nodes_sql($str_types = NULL) {
  */
 function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
   if (is_numeric($args['og_nid'])) {
-    // we add this JOIN for node admins because db_rewrite_sql() adds it for everyone else
-    if (user_access('administer nodes')) {
+    // we add this JOIN for node admins and when node access is disabled because node_rewrite_sql() adds it for everyone else
+    if (user_access('administer nodes') || node_access_view_all_nodes()) {
       $query['join'] = 'INNER JOIN {node_access} na ON n.nid = na.nid'; 
     }
     $query['where'] = 'na.gid = '. $args['og_nid']. " AND na.realm = 'og_group'";
