@@ -974,7 +974,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         }
       }
       break;
-    case 'execute':
+    case 'submit':
       // if a post isn't in any groups. it must be public. this assumption is the heart of the problem with
       // running multiple node permission modules at same time. ideally, all node permission modules could
       // communicate and only make the node public if no permission module objected (i.e. 'deny')
