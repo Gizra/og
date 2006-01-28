@@ -492,7 +492,7 @@ function og_get_subscriptions($uid) {
   static $subscriptions = array();
 
   if (!isset($subscriptions[$uid])) {
-    $sql = "SELECT n.title, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d";
+    $sql = "SELECT n.title, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d ORDER BY n.title";
     $result = db_query($sql, $uid);
     while ($row = db_fetch_array($result)) {
       $subscriptions[$uid][$row['nid']] = $row;
