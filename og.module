@@ -1162,7 +1162,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
     case 'register':
       $options = array();
       $values = array();
-      $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type = 'og' AND o.register = 1"));
+      $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type = 'og' AND o.register = 1 ORDER BY n.title"));
       while ($group = db_fetch_object($result)) {
         $options[$group->nid] = t('Subscribe to %name', array('%name' => theme('placeholder', $group->title)));
         $values[$group->nid] = in_array($group->nid, (array) $edit['og_register']) ? $group->nid : 0;
