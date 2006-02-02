@@ -1463,7 +1463,7 @@ function og_block_details() {
         }
       }
     }
-    $output = "<div id=\"og-description\">". check_plain($node->og_description). "</div><br />";
+    $output = "<div id=\"og-description\">". check_plain($node->og_description). "</div>";
     if ($subscription == 'active') {
       $links = module_invoke_all('og_create_links', $node);
       if ($node->og_selective < OG_INVITE_ONLY) {
