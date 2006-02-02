@@ -498,8 +498,8 @@ function og_get_subscriptions($uid) {
     while ($row = db_fetch_array($result)) {
       $subscriptions[$uid][$row['nid']] = $row;
     }
-  
-  if (!$subscriptions[$uid]) {
+
+    if (!$subscriptions[$uid]) {
       $subscriptions[$uid] = array();
     }
   }
@@ -1193,9 +1193,9 @@ function og_user($op, &$edit, &$account, $category = NULL) {
       if ($account->uid == $user->uid || user_access('administer organic groups')) {
         if ($account->og_groups) {
           foreach ($account->og_groups as $key => $val) {
-            $links[] = l($val['title'], "node/$key");
+            $links[] = l($val['title'], "node/$key") . theme('og_format_subscriber_status', $val);
           }
-          return array(t('Groups') => array(array('value' => theme('item_list', $links), 'description' => t('your group subscriptions are here for your convenience. they do not appear on the public profile page.'))));
+          return array(t('Groups') => array(array('value' => theme('item_list', $links), 'description' => t('Your group subscriptions are here for your convenience. They do not appear on the public profile page.'))));
         }
       }
       break;
@@ -1602,4 +1602,10 @@ function theme_og_list_generic($gid, $type, $mode) {
     $rows[] = array(array('data' => $pager, 'colspan' => '4'));
   }
   return $rows ? '<fieldset><legend>' . node_get_name($type) . '</legend>'  . theme('table', $header, $rows) . '</fieldset>' : NULL;
+}
+
+function theme_og_format_subscriber_status($group) {
+  if (!$group['is_active']) {
+    return ' '. t('(pending approval)');
+  }
 }
