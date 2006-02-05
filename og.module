@@ -289,7 +289,7 @@ function og_deny($gid, $uid) {
     $node = node_load($gid);
     og_delete_subscription($gid, $uid);
     drupal_set_message(t('Subscription request denied.'));
-    $subj = t('Subscription request denied for %title', array('title' => $node->title));
+    $subj = t('Subscription request denied for %title', array('%title' => $node->title));
     $body = t('Sorry, your subscription request was denied.');
     $from = variable_get('site_mail', ini_get('sendmail_from'));
     $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
