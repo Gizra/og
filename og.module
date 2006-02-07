@@ -1594,6 +1594,7 @@ function theme_og_list_generic($gid, $type, $mode) {
   return $rows ? '<fieldset><legend>' . node_get_name($type) . '</legend>'  . theme('table', $header, $rows) . '</fieldset>' : NULL;
 }
 
+// TODO: maybe use a custom theme('mark') here?
 function theme_og_format_subscriber_status($group) {
   if (!$group['is_active']) {
     return ' '. t('(pending approval)');
