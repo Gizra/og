@@ -730,7 +730,10 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
     }
     $url = url("og/feed/$node->nid");
     $icon = theme('xml_icon', $url);
-    $node->body = '<div id="mission">'. $node->body. '</div>'. $output. $icon;
+    if ($node->body) {
+      $node->body = '<div id="mission">'. $node->body. '</div>';
+    }
+    $node->body .= $output. $icon;
   }
   return $node;
 }
