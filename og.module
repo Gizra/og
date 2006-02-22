@@ -861,7 +861,7 @@ function theme_og_node_form($form) {
 function og_node_load_public($node) {
   $sql = "SELECT grant_view FROM {node_access} WHERE nid = %d AND gid=0 AND realm='og_all'";
   $gv = db_result(db_query($sql, $node->nid));
-  $node->og_public = $gv;
+  $node->og_public = $gv ? 1 : 0;
   return $node;
 }
 
@@ -1209,11 +1209,11 @@ function og_user($op, &$edit, &$account, $category = NULL) {
 }
 
 /**
-  * In the 'og_subscriber' realm, the gid is usually the nid of a group. This is used
-  * to store which nodes should show up in which groups. When applied to an og node, grant_view is
-  * always 1 but you can set it to 0 in order to have a completely private group homepage.
-  * In the og_public realm, the gid is always 0 but the grant_view column holds the parent group. This is needed so
-  * that public nodes appear on the group home page for non subscribers
+ * In the 'og_subscriber' realm, the gid is usually the nid of a group. This is used
+ * to store which nodes should show up in which groups. When applied to an og node, grant_view is
+ * always 1 but you can set it to 0 in order to have a completely private group homepage.
+ * In the og_public realm, the gid is always 0 but the grant_view column holds the parent group. This is needed so
+ * that public nodes appear on the group home page for non subscribers. The og_all realm is used to denote a public node.
 **/
 function og_node_grants($account, $op) {
   if ($op == 'view') {
