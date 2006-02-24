@@ -387,9 +387,9 @@ function og_invite_form_validate($form_id, $form_values) {
         $valid_emails[] = $email;
       }
       else {
-        $user = user_load(array('name' => check_plain($email)));
-        if ($user->mail) {
-          $valid_emails[] = $user->mail;
+        $invitee = user_load(array('name' => check_plain($email)));
+        if ($invitee->mail) {
+          $valid_emails[] = $invitee->mail;
         }
         else {
           $bad[] = $email;
