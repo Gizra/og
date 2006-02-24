@@ -364,7 +364,7 @@ function og_invite_form($gid) {
   $edit = $_POST['edit'];
   $max = variable_get('og_email_max', 10);
   
-  $form['mails'] = array('#type' => 'textfield', '#title' => t('Email addresses'), '#size' => 90, '#maxlength' => 250, '#description' => t("Enter up to %max email addresses. Separate multiple addresses by commas. Each will receive an invitation message from you.", array('%max' => $max)));
+  $form['mails'] = array('#type' => 'textfield', '#title' => t('Email addresses or usernames'), '#size' => 90, '#maxlength' => 250, '#description' => t("Enter up to %max email addresses or usernames. Separate multiple addresses by commas. Each will receive an invitation message from you.", array('%max' => $max)));
   $form['pmessage'] = array('#type' => 'textarea', '#title' => t('Personal message'), '#size' => 90, '#maxlength' => 250, '#description' => t('Optional. Enter a message which will become part of the invitation email'));
   $form['op'] = array('#type' => 'submit', '#value' => t('Send invitation'));
   $form['gid'] = array ('#type' => 'value', '#value' => $gid);
@@ -377,16 +377,27 @@ function og_invite_form_validate($form_id, $form_values) {
 
   $emails = explode(',', $form_values['mails']);
   if (count($emails) > $max) {
-    form_set_error('mails', t("You may not specify more than %max email addresses.", array('%max' => $max)));
+    form_set_error('mails', t("You may not specify more than %max email addresses or usernames.", array('%max' => $max)));
   }
   else {
+    $valid_emails = array();
+    $bad = array();
     foreach ($emails as $email) {
-      if (!valid_email_address(trim($email))) {
-        $bad[] = $email;
+      if (valid_email_address(trim($email))) {
+        $valid_emails[] = $email;
+      }
+      else {
+        $user = user_load(array('name' => check_plain($email)));
+        if ($user->mail) {
+          $valid_emails[] = $user->mail;
+        }
+        else {
+          $bad[] = $email;
+        }
       }
     }
-    if ($bad) {
-      form_set_error('mails', t('invalid email address: '). implode(' ', $bad));
+    if (count($bad)) {
+      form_set_error('mails', t('invalid email address or username: '). implode(' ', $bad));
     }
   }
 }
@@ -404,6 +415,10 @@ function og_invite_form_submit($form_id, $form_values) {
   $headers = "From: $from\nReply-to: $from\nX-Mailer: Drupal\nReturn-path: $from";
   $emails = explode(',', $form_values['mails']);  
   foreach ($emails as $mail) {
+    if (!valid_email_address($mail)) {
+      $user = user_load(array('name' => check_plain(trim($mail))));
+      $mail = $user->mail;
+    }
     user_mail(trim($mail), $subj, $body, $headers);
   }
   drupal_set_message(format_plural(count($emails), '%count invitations sent.', '%count invitations sent.'));
