@@ -416,8 +416,8 @@ function og_invite_form_submit($form_id, $form_values) {
   $emails = explode(',', $form_values['mails']);  
   foreach ($emails as $mail) {
     if (!valid_email_address($mail)) {
-      $user = user_load(array('name' => check_plain(trim($mail))));
-      $mail = $user->mail;
+      $invitee = user_load(array('name' => check_plain(trim($mail))));
+      $mail = $invitee->mail;
     }
     user_mail(trim($mail), $subj, $body, $headers);
   }
