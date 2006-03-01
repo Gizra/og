@@ -373,7 +373,7 @@ function og_invite_form($gid) {
   return $form;//form($form);
 }
 
-function og_invite_form_validate($form_id, $form_values) {
+function og_invite_form_validate($form_id, $form_values, $form) {
   $max = variable_get('og_email_max', 10);
 
   $mails = $form_values['mails'];
@@ -408,13 +408,13 @@ function og_invite_form_validate($form_id, $form_values) {
     }
     else {
       // Store valid e-mails so we don't have to go through that looping again on submit
-      $form_values['valid_emails']['#ref'] = $valid_emails;
+      $form['valid_emails']['#ref'] = $valid_emails;
     }
   }
 }
 
 function og_invite_form_submit($form_id, $form_values) {
-  $emails = $form_values['valid_emails']['#ref'];
+  $emails = $form_values['valid_emails'];
   $node = node_load($form_values['gid']);
   $subj = t('Invitation to join the group "%group" at %site', array('%group' => $node->title, '%site' => variable_get('site_name', 'drupal')));
   $body = t("Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n\n", array('%group' => $node->title));
@@ -1569,7 +1569,7 @@ function og_settings() {
   else {
     $status = t('disabled');
     $btn_text = t('Enable');
-    $description = t('You usually want to enable acess control with this module. The button above will delete one record in your node_access table and thus enable node permissions on your site. You may revert by clicking the same button again.');
+    $description = t('You usually want to enable access control with this module. The button above will delete one record in your node_access table and thus enable node permissions on your site. You may revert by clicking the same button again.');
   }
   $form['og_settings']['og_module_status'] = array('#type' => 'fieldset', '#title' => t('Module status'), '#description' => $description);
   $form['og_settings']['og_module_status']['module_status'] = array('#type' => 'button', '#value' => $btn_text, '#prefix' => t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />');
