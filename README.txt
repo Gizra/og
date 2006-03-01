@@ -8,14 +8,10 @@ Support for group photo albums is available. Groups may choose their own theme. 
 INSTALLATION
 ---------------
 - Activate the module as usual
-- Run the SQL setup script as usual
 - Visit the admin/settings/og page and click the button to enable access control.
 - Set other preferences on admin/settings/og as desired.
-- On the admin/node/configure/types page, disable commenting and attachments for nodes of type 'group'
-- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers', 'New groups, 'My groups', and 'Group albums' block.
-If you use the 'group albums' block, you must have folksonomy, and image.module enabled and configured.
-- If you want each group to optionally show its own image in the Group Details block, you must
-have image.module enabled. See http://drupal.org/project/image
+- On the admin/settings/content-types/og page, disable commenting and attachments for nodes of type 'group'
+- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group subscribers', 'New groups, 'My groups' blocks.
 - Grant permissions as needed on the admin/access page
 - Begin creating groups, subscribing to those groups, and posting into those groups. The subscribe link appears in the Group block, for non invite-only groups.
 
