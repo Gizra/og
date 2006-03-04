@@ -248,7 +248,7 @@ function og_manage_form_submit($form_id, $form_values) {
  * @param $gid node ID of a group
  * @param $uid user ID of user
  * @param $args an array with details of this subscription. Possible array keys are:
-     is_approved, is_admin, mail_type
+     is_active, is_admin, mail_type
  */
 function og_save_subscription($gid, $uid, $args = array()) {
   $sql = "SELECT COUNT(*) FROM {og_uid} WHERE nid = %d AND uid = %d";
