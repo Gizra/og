@@ -21,6 +21,10 @@ while ($row = db_fetch_object($result)) {
   db_queryd($sql, $row->nid, $row->nid);
 }
 
+// mar 9,2006. the following update and og.module require changing index on on node_access table. it is believed to be harmless.
+$sql = "ALTER TABLE `node_access` DROP PRIMARY KEY, ADD INDEX `nid_gid_realm` ( `nid` , `gid` , `realm`)";
+db_query($sql);
+
 // feb 19, 2006
 // add a row for each combination of public node and group. needed to make public nodes show up in group homepage for non subscribers
 $sql = "SELECT DISTINCT(nid) as nid FROM {node_access} WHERE realm = 'og_group' AND gid = 0" ;

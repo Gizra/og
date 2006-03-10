@@ -21,4 +21,7 @@
       PRIMARY KEY  (nid, uid)
     ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
 
+	$sql = "ALTER TABLE `node_access` DROP PRIMARY KEY, ADD INDEX `nid_gid_realm` ( `nid` , `gid` , `realm`)";
+	db_query($sql);
+
   }
