@@ -6,6 +6,7 @@
       description varchar(255) NULL,
       image varchar(255) NULL,
       theme varchar(255) NULL,
+      website varchar(255) NOT NULL default '',
       register int(1) NOT NULL default 0,
       directory int(1) NOT NULL default 0,
       PRIMARY KEY  (nid)
@@ -21,7 +22,7 @@
       PRIMARY KEY  (nid, uid)
     ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
 
-	$sql = "ALTER TABLE `node_access` DROP PRIMARY KEY, ADD INDEX `nid_gid_realm` ( `nid` , `gid` , `realm`)";
+	$sql = "ALTER TABLE {node_access} DROP PRIMARY KEY, ADD INDEX `nid_gid_realm` ( `nid` , `gid` , `realm`)";
 	db_query($sql);
 
   }

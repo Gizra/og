@@ -49,3 +49,7 @@ db_queryd($sql);
 // these records are no longer used. we've migrated them to new grant scheme
 $sql = "DELETE FROM {node_access} WHERE realm = 'og_group'";
 db_queryd($sql);
+
+// Add external link field
+$sql = "ALTER TABLE {og} ADD website varchar(255) NOT NULL default ''";
+db_queryd($sql);
