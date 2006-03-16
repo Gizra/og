@@ -51,5 +51,5 @@ $sql = "DELETE FROM {node_access} WHERE realm = 'og_group'";
 db_queryd($sql);
 
 // Add external link field
-$sql = "ALTER TABLE {og} ADD website varchar(255) NOT NULL default ''";
+$sql = "ALTER TABLE {og} ADD website varchar(255) NULL";
 db_queryd($sql);

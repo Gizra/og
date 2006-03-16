@@ -6,7 +6,7 @@
       description varchar(255) NULL,
       image varchar(255) NULL,
       theme varchar(255) NULL,
-      website varchar(255) NOT NULL default '',
+      website varchar(255) NULL,
       register int(1) NOT NULL default 0,
       directory int(1) NOT NULL default 0,
       PRIMARY KEY  (nid)
