@@ -1081,10 +1081,6 @@ function og_form_alter($form_id, &$form) {
     foreach ($subs as $key => $val) {
       $options[$key] = $val['title'];
     }
-    // TODO: move to form validate?
-    if (!$options && $required && $_POST) {
-      drupal_set_message(t('You must subscribe to a group before posting.'), 'error');
-    }
     
     if (user_access('administer organic groups')) {
       $vis = OG_VISIBLE_CHOOSE_PRIVATE;
@@ -1092,6 +1088,10 @@ function og_form_alter($form_id, &$form) {
       if ($node->nid && $node->uid != $user->uid) {
         drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are shown in the audience field.', array('%author' => theme('placeholder', t('Author')))));
       }
+    }
+    elseif (!count($subs)) {
+      // don't show checkbox if no subscriptions. must be public.
+      $vis = OG_VISIBLE_BOTH;
     }
     else {
       $vis = variable_get('og_visibility', 0);
@@ -1114,6 +1114,7 @@ function og_form_alter($form_id, &$form) {
     }
 
     if (isset($edit['og_groups'])) {
+      // populate field from the querystring if sent
       $groups = $edit['og_groups'];
     }
     elseif ($node->nid) {
@@ -1123,7 +1124,7 @@ function og_form_alter($form_id, &$form) {
       $groups = array();
     }
     
-    if (count($options)) {
+    if (count($subs)) {
       $form['og_nodeapi']['visible']['og_groups'] = array('#type' => 'checkboxes', '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' => t('Show this post in these groups.'), '#default_value' => $groups);
     }
     
