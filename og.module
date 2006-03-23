@@ -1045,6 +1045,10 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'delete':
       og_delete_grants($node);
+      $sql = "DELETE FROM {og} WHERE nid = %d";
+      db_query($sql, $node->nid);
+      $sql = "DELETE FROM {og_uid} WHERE nid = %d";
+      db_query($sql, $node->nid);
       break;
     case 'insert':
       og_save_permissions($node);
@@ -1604,6 +1608,7 @@ function og_settings() {
   $form['og_settings']['og_module_status'] = array('#type' => 'fieldset', '#title' => t('Module status'), '#description' => $description);
   $form['og_settings']['og_module_status']['module_status'] = array('#type' => 'button', '#value' => $btn_text, '#prefix' => t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />');
 
+  // TODO: I attempted to move this into custom submit handler but then the regular system save halder was not getting called with proper args
   if ($op == t('Enable')) {
     _og_update_db(TRUE);
     variable_set('og_enabled', 1);
