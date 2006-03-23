@@ -1437,6 +1437,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     switch ($delta) {
       case 2:
       case 3:
+      case 4:
         return array('og_block_cnt' => array('#type' => 'textfield', '#title' => t('Maximum number of items to show'), '#default_value' => variable_get("og_block_cnt_$delta", 10), '#size' => 5, '#maxlength' => 255));    
     }
   }
@@ -1444,6 +1445,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     switch ($delta) {
       case 2:
       case 3:
+      case 4:
         if (isset($edit['og_block_cnt'])) {
           variable_set("og_block_cnt_$delta", $edit['og_block_cnt']);
         }
@@ -1455,11 +1457,20 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
 function og_block_my() {
   global $user;
   if ($user->og_groups) {
+    $max = variable_get('og_block_cnt_4', 10);
     foreach ($user->og_groups as $key => $val) {
       $items[] = l($val['title'], "node/$key");
     }
+    $count = count($items);
+    if ($count > $max) {
+      $output .= theme('item_list', array_slice($items, 0, $max));
+      $output .= '<div class="more-link">'. l(t('more'), 'og', array('title' => t('Browse the newest groups.'))) .'</div>';
+    }
+    else {
+      $output .= theme('item_list', $items);
+    }
     $block['subject'] = t('My groups');
-    $block['content'] = theme('item_list', $items);
+    $block['content'] = $output;
     return $block;
   }
 }
@@ -1468,7 +1479,7 @@ function og_block_new() {
   $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type = 'og' AND n.status = 1";
   $cnt = db_result(db_query(db_rewrite_sql($sql)));
   if ($cnt > 0) {
-    $max = variable_get('og_block_new_cnt', 10);
+    $max = variable_get('og_block_cnt_3', 10);
     $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type = 'og' AND og.directory=1 ORDER BY nid DESC";
     $result = db_query_range(db_rewrite_sql($sql), 0, $max);
     $output = node_title_list($result);
@@ -1486,7 +1497,7 @@ function og_block_subscribers() {
   if ($group_node = og_get_group_context()) {
     $gid = $group_node->nid;
     if (in_array($gid, array_keys($user->og_groups))) {
-      $max = variable_get('og_block_subscribers_cnt', 10);
+      $max = variable_get('og_block_cnt_2', 10);
       $sql = og_list_users_sql(0);
       $result = db_query_range($sql, $gid, 0, $max);
       while ($row = db_fetch_object($result)) {
@@ -1563,7 +1574,10 @@ function og_block_details() {
       $links[] = t('Your subscription request awaits approval.');
       $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'destination=og');
     }
-    elseif ($user->uid && $node->og_selective < OG_INVITE_ONLY) {
+    elseif (!$user->uid) {
+      $links[] = t('You must login/register in order to contribute to this group.');
+    }    
+    elseif ($node->og_selective < OG_INVITE_ONLY) {
       if ($node->og_selective == OG_MODERATED) {
         $txt = t('request subscription');
       }
