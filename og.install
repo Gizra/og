@@ -1,28 +1,31 @@
 <?php
   function og_install() {
-    db_query("CREATE TABLE {og} (
-      nid int(11) NOT NULL,
-      selective int(11) NOT NULL default '0',
-      description varchar(255) NULL,
-      image varchar(255) NULL,
-      theme varchar(255) NULL,
-      website varchar(255) NULL,
-      register int(1) NOT NULL default 0,
-      directory int(1) NOT NULL default 0,
-      PRIMARY KEY  (nid)
-    ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-
-    db_query("CREATE TABLE {og_uid} (
-      nid int(11) NOT NULL,
-      og_role int(1) NOT NULL DEFAULT 0,
-      is_active int(1) NOT NULL DEFAULT 0,
-      is_admin int(1) NOT NULL DEFAULT 0,
-      uid int(11) NOT NULL,
-      mail_type int(11) NULL,
-      PRIMARY KEY  (nid, uid)
-    ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-
-	$sql = "ALTER TABLE {node_access} DROP PRIMARY KEY, ADD INDEX `nid_gid_realm` ( `nid` , `gid` , `realm`)";
-	db_query($sql);
-
+    switch ($GLOBALS['db_type']) {
+      case 'mysql':
+      case 'mysqli':
+        db_query("CREATE TABLE {og} (
+          nid int(11) NOT NULL,
+          selective int(11) NOT NULL default '0',
+          description varchar(255) NULL,
+          image varchar(255) NULL,
+          theme varchar(255) NULL,
+          website varchar(255) NULL,
+          register int(1) NOT NULL default 0,
+          directory int(1) NOT NULL default 0,
+          PRIMARY KEY  (nid)
+        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+    
+        db_query("CREATE TABLE {og_uid} (
+          nid int(11) NOT NULL,
+          og_role int(1) NOT NULL DEFAULT 0,
+          is_active int(1) NOT NULL DEFAULT 0,
+          is_admin int(1) NOT NULL DEFAULT 0,
+          uid int(11) NOT NULL,
+          mail_type int(11) NULL,
+          PRIMARY KEY  (nid, uid)
+        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+  
+        $sql = "ALTER TABLE {node_access} DROP PRIMARY KEY, ADD INDEX `nid_gid_realm` ( `nid` , `gid` , `realm`)";
+        db_query($sql);
+    }
   }
