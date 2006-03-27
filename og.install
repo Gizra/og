@@ -32,14 +32,28 @@ function og_install() {
   }
 }
 
-/**
- * Updates
- */
+// move subscriber data to own table from node_access
 function og_update_1() {
-  return _system_update_utf8(array('og', 'og_uid'));
+  db_query("ALTER TABLE {og_uid} ADD `og_role` int(1) NOT NULL default '0'");
+  db_query("ALTER TABLE {og_uid} ADD `is_active` int(1) default '0'");
+  db_query("ALTER TABLE {og_uid} ADD `is_admin` int(1) default '0'");
+
+  $result = db_query("SELECT * FROM {node_access} WHERE realm = 'og_uid'");
+  while ($object = db_fetch_object($result)) {
+    $sql = "REPLACE INTO {og_uid} (nid, uid, og_role, is_admin, is_active) VALUES (%d, %d, %d, %d, %d)";
+    db_query($sql, $object->nid, $object->gid, ($object->grant_view + $object->grant_update), $object->grant_update, $object->grant_view);
+  }
+  $sql = "DELETE FROM {node_access} WHERE realm = 'og_uid'";
+  db_query($sql);
+
+  return array();
 }
 
 function og_update_2() {
+  return _system_update_utf8(array('og', 'og_uid'));
+}
+
+function og_update_3() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
@@ -67,7 +81,7 @@ function og_update_2() {
  * mar 9,2006. 
  * unfortunately, we need duplicates so we change primary key to regular INDEX.
  */
-function og_update_3() {
+function og_update_4() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
@@ -81,7 +95,7 @@ function og_update_3() {
  * add a row for each combination of public node and group. needed to 
  * make public nodes show up in group homepage for non subscribers
  */
-function og_update_4() {
+function og_update_5() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
@@ -111,7 +125,7 @@ function og_update_4() {
   return array();
 }
 
-function og_update_5() {
+function og_update_6() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
@@ -119,3 +133,8 @@ function og_update_5() {
   }
   return $ret ? $ret : array();
 }
+
+
+//from now on, let's use update_sql() and db_add_column() and all the 4.7 goodness
+
+
