@@ -1,31 +1,121 @@
 <?php
-  function og_install() {
-    switch ($GLOBALS['db_type']) {
-      case 'mysql':
-      case 'mysqli':
-        db_query("CREATE TABLE {og} (
-          nid int(11) NOT NULL,
-          selective int(11) NOT NULL default '0',
-          description varchar(255) NULL,
-          image varchar(255) NULL,
-          theme varchar(255) NULL,
-          website varchar(255) NULL,
-          register int(1) NOT NULL default 0,
-          directory int(1) NOT NULL default 0,
-          PRIMARY KEY  (nid)
-        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-    
-        db_query("CREATE TABLE {og_uid} (
-          nid int(11) NOT NULL,
-          og_role int(1) NOT NULL DEFAULT 0,
-          is_active int(1) NOT NULL DEFAULT 0,
-          is_admin int(1) NOT NULL DEFAULT 0,
-          uid int(11) NOT NULL,
-          mail_type int(11) NULL,
-          PRIMARY KEY  (nid, uid)
-        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+// $Id$
+
+function og_install() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      db_query("CREATE TABLE {og} (
+        nid int(11) NOT NULL,
+        selective int(11) NOT NULL default '0',
+        description varchar(255) NULL,
+        image varchar(255) NULL,
+        theme varchar(255) NULL,
+        website varchar(255) NULL,
+        register int(1) NOT NULL default 0,
+        directory int(1) NOT NULL default 0,
+        PRIMARY KEY  (nid)
+      ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
   
-        $sql = "ALTER TABLE {node_access} DROP PRIMARY KEY, ADD INDEX `nid_gid_realm` ( `nid` , `gid` , `realm`)";
-        db_query($sql);
-    }
+      db_query("CREATE TABLE {og_uid} (
+        nid int(11) NOT NULL,
+        og_role int(1) NOT NULL DEFAULT 0,
+        is_active int(1) NOT NULL DEFAULT 0,
+        is_admin int(1) NOT NULL DEFAULT 0,
+        uid int(11) NOT NULL,
+        mail_type int(11) NULL,
+        PRIMARY KEY  (nid, uid)
+      ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+
+      $sql = "ALTER TABLE {node_access} DROP PRIMARY KEY, ADD INDEX `nid_gid_realm` ( `nid` , `gid` , `realm`)";
+      db_query($sql);
   }
+}
+
+/**
+ * Updates
+ */
+function og_update_1() {
+  return _system_update_utf8(array('og', 'og_uid'));
+}
+
+function og_update_2() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $sql = "DELETE FROM {node_access} WHERE realm = 'og_uid'";
+      db_query($sql);
+
+      $sql = "SELECT DISTINCT(n.nid) FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE type != 'og' AND na.realm = 'og_group'";
+      $result = db_query($sql);
+      while ($row = db_fetch_object($result)) {
+        $sql = "UPDATE {node_access} SET grant_view=1, grant_update=1, grant_delete=1 WHERE realm = 'og_group' AND nid = %d AND gid != 0";
+        db_query($sql, $row->nid);
+      }
+
+      $sql = "SELECT nid FROM {node} WHERE type = 'og'";
+      $result = db_query($sql);
+      while ($row = db_fetch_object($result)) {
+        $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_group', 1, 1, 0)";
+        db_query($sql, $row->nid, $row->nid);
+      }
+  }
+  return array();
+}
+
+/**
+ * mar 9,2006. 
+ * unfortunately, we need duplicates so we change primary key to regular INDEX.
+ */
+function og_update_3() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql('ALTER TABLE {node_access} DROP PRIMARY KEY, ADD INDEX nid_gid_realm (nid, gid, realm)');
+  }
+  return $ret ? $ret : array();
+}
+
+/**
+ * feb 19, 2006
+ * add a row for each combination of public node and group. needed to 
+ * make public nodes show up in group homepage for non subscribers
+ */
+function og_update_4() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $sql = "SELECT DISTINCT(nid) as nid FROM {node_access} WHERE realm = 'og_group' AND gid = 0" ;
+      $result = db_query($sql);
+      while ($row = db_fetch_object($result)) {
+        $sql = "SELECT gid FROM {node_access} WHERE nid = %d AND realm = 'og_group' AND gid != 0" ;
+        $result2 = db_query($sql, $row->nid);
+        while ($row2 = db_fetch_object($result2)) {  
+          $sql = "REPLACE INTO {node_access} (nid, realm, gid, grant_view) VALUES (%d, 'og_public', 0, %d)";
+          db_query($sql, $row->nid, $row2->gid); 
+        }
+      }
+
+      // change all former public node grants to 'og_all' realm
+      $sql = "UPDATE {node_access} SET realm = 'og_all' WHERE realm = 'og_group' AND gid = 0 AND grant_view = 1";
+      db_query($sql);
+
+      // change all nodes in groups to new 'og_subscriber' realm
+      $sql = "UPDATE {node_access} SET realm = 'og_subscriber' WHERE realm = 'og_group' AND gid != 0";
+      db_query($sql);
+
+      // these records are no longer used. we've migrated them to new grant scheme
+      $sql = "DELETE FROM {node_access} WHERE realm = 'og_group'";
+      db_query($sql);
+  }
+  return array();
+}
+
+function og_update_5() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql('ALTER TABLE {og} ADD website varchar(255) NULL AFTER theme');
+  }
+  return $ret ? $ret : array();
+}
