@@ -1607,33 +1607,33 @@ function og_og_create_links($group) {
   return $links ? $links : array();
 }
 
+function og_settings_submit($form_id, $form_values) {
+  if ($form_values['module_action'] == t('Enable')) {
+    _og_update_db(TRUE);
+    variable_set('og_enabled', 1);
+  }
+  elseif ($form_values['module_action'] == t('Disable')) {
+    _og_update_db(FALSE);
+    variable_set('og_enabled', 0);
+  } 
+}
+
 function og_settings() {
-  $op = $_POST['op'];
+  $form['#submit']['og_settings_submit'] = array(); // custom submit handler
   drupal_set_title(t('Organic groups configuration'));
   if (variable_get('og_enabled', 0)) {
     $status = t('enabled');
     $btn_text = t('Disable');
-    $description = t('Before disabling this module, use the above button to restore default permissions.');
+    $description = t('Before disabling this module, use the button below to restore default permissions.');
   }
   else {
     $status = t('disabled');
     $btn_text = t('Enable');
-    $description = t('You usually want to enable access control with this module. The button above will delete one record in your node_access table and thus enable node permissions on your site. You may revert by clicking the same button again.');
+    $description = t('You usually want to enable access control with this module. The button below will delete one record in your node_access table and thus enable node permissions on your site. You may revert by clicking the same button again.');
   }
   $form['og_settings']['og_module_status'] = array('#type' => 'fieldset', '#title' => t('Module status'), '#description' => $description);
-  $form['og_settings']['og_module_status']['module_status'] = array('#type' => 'button', '#value' => $btn_text, '#prefix' => t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />');
+  $form['og_settings']['og_module_status']['module_action'] = array('#type' => 'submit', '#value' => $btn_text, '#prefix' => t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />');
 
-  // TODO: I attempted to move this into custom submit handler but then the regular system save halder was not getting called with proper args
-  if ($op == t('Enable')) {
-    _og_update_db(TRUE);
-    variable_set('og_enabled', 1);
-    drupal_goto('admin/settings/og');
-  }
-  elseif ($op == t('Disable')) {
-    _og_update_db(FALSE);
-    variable_set('og_enabled', 0);
-    drupal_goto('admin/settings/og');
-  }
   
   $form['og_settings']['node_form'] = array('#type' => 'fieldset', '#title' => t('Node authoring form'));
   $form['og_settings']['node_form']['og_help'] = array('#type' => 'textarea', '#default_value' => variable_get('og_help', ''), '#cols' => 70, '#rows' =>5, '#title' => t('Explanation or submission guidelines'), '#description' => t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
