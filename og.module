@@ -1607,18 +1607,19 @@ function og_og_create_links($group) {
 }
 
 function og_settings_submit($form_id, $form_values) {
-  if ($form_values['module_action'] == t('Enable')) {
+  if ($_POST['op'] == t('Enable')) {
     _og_update_db(TRUE);
     variable_set('og_enabled', 1);
   }
-  elseif ($form_values['module_action'] == t('Disable')) {
+  elseif ($_POST['op'] == t('Disable')) {
     _og_update_db(FALSE);
     variable_set('og_enabled', 0);
-  } 
+  }
 }
 
 function og_settings() {
   $form['#submit']['og_settings_submit'] = array(); // custom submit handler
+  $form['#submit']['system_settings_form_submit'] = array(); // form.inc never calls the $callback if a submit handler is defined
   drupal_set_title(t('Organic groups configuration'));
   if (variable_get('og_enabled', 0)) {
     $status = t('enabled');
