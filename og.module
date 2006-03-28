@@ -104,7 +104,7 @@ function og_theme() {
     $group_node = og_set_theme(arg(4));
     $_REQUEST['edit']['og_groups'][] = $group_node->nid; // checks the right box on node form
   }
-  elseif (arg(0) == 'node' && arg(1) == 'add' && $gid = $_REQUEST['edit']['og_groups'][0]) {
+  elseif (arg(0) == 'node' && arg(1) == 'add' && $gid = intval($_REQUEST['edit']['og_groups'][0])) {
     $group_node = node_load($gid);
     $custom_theme = $group_node->og_theme;
   }
@@ -136,7 +136,7 @@ function og_set_group_context($group_node = NULL) {
 
 function og_set_theme($nid) {
   global $custom_theme;
-  $node = node_load($nid);
+  $node = node_load(intval($nid));
   if ($node->type == 'og') {
     $custom_theme = $node->og_theme;
     return $node;
@@ -934,7 +934,6 @@ function og_image($gid) {
  * Implementation of hook_validate
  */
 function og_validate(&$node) {
-  node_validate_title($node);
 
   // comments are not allowed on group nodes, since we don't have any nice way to present them
   $node->comment = 0;

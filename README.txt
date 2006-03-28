@@ -41,6 +41,6 @@ TODO/BUGS/FEATURE REQUESTS
 CREDITS
 ----------------------------
 Authored and maintained by Moshe Weitzman <weitzman AT tejasa DOT com>
-Contributors: Mir Nazim, Gerhard Killesreiter
+Contributors: Mir Nazim, Gerhard Killesreiter, Angie Byron
 Sponsored by Broadband Mechanics - http://www.broadbandmechanics.com/
 Sponsored by Finnish Broadcasting Company - http://www.yle.fi/fbc/
