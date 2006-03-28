@@ -1,9 +1,8 @@
 DESCRIPTION
 --------------------------
-Enable users to create and manage their own 'groups'. Each group can have subscribers, and maintains a
-group page where subscribers can post into. Membership to groups may be open, moderated, or invitation only.
+Enable users to create and manage their own 'groups'. Each group can have subscribers, and maintains a group page where subscribers can post into. Membership to groups may be open, moderated, or invitation only.
 
-Support for group photo albums is available. Groups may choose their own theme. Groups have RSS feeds, and so on.
+Groups may choose their own theme. Groups have RSS feeds, and so on.
 
 INSTALLATION
 ---------------
