@@ -331,7 +331,7 @@ function og_create_admin($gid, $uid) {
 function og_delete_admin($gid, $uid) {
   if (node_access('update', array('nid' => $gid, 'status' => 1))) {
     og_save_subscription($gid, $uid, array('is_admin' => 0));
-    drupal_set_message(t('User is no longer a group administrator'));
+    drupal_set_message(t('User is no longer a %ga', array('%ga' => theme('placeholder', t('group administrator')))));
     drupal_goto("node/$gid");
   }
   else {
@@ -552,7 +552,7 @@ function og_access($op, $node) {
     return user_access('create groups') && $user->uid;
   }
   
-  if ($node->uid == $user->uid && ($op == 'update' || $op == 'delete')) {
+  if ($user->uid && $node->uid == $user->uid && ($op == 'update' || $op == 'delete')) {
     return TRUE;
   }
 }
