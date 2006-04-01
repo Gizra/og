@@ -282,10 +282,10 @@ function og_delete_subscription($gid, $uid){
 }
 
 function og_approve($gid, $uid) {
-  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
+  $node = node_load($gid);
+    if (node_access('update', $node)) {
     og_save_subscription($gid, $uid, array('is_active' => 1));
     drupal_set_message(t('Subscription request approved.'));
-    $node = node_load($gid);
     $subj = t("Subscription request approved for '%title'", array('%title' => $node->title));
     $body = t('You may now post messages in this group located at %url', array('%url' => url("node/$node->nid", NULL, NULL, TRUE)));
     $from = variable_get('site_mail', ini_get('sendmail_from'));
@@ -300,8 +300,8 @@ function og_approve($gid, $uid) {
 }
 
 function og_deny($gid, $uid) {
-  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-    $node = node_load($gid);
+  $node = node_load($gid);
+  if (node_access('update', $node)) {
     og_delete_subscription($gid, $uid);
     drupal_set_message(t('Subscription request denied.'));
     $subj = t('Subscription request denied for %title', array('%title' => $node->title));
@@ -318,7 +318,8 @@ function og_deny($gid, $uid) {
 }
 
 function og_create_admin($gid, $uid) {
-  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
+  $node = node_load($gid);
+  if (node_access('update',$node)) {
     og_save_subscription($gid, $uid, array('is_admin' => 1));
     drupal_set_message(t('User was promoted to %ga', array('%ga' => theme('placeholder', t('group administrator')))));
     drupal_goto("node/$gid");
@@ -329,7 +330,8 @@ function og_create_admin($gid, $uid) {
 }
 
 function og_delete_admin($gid, $uid) {
-  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
+  $node = node_load($gid);
+  if (node_access('update', $node)) {
     og_save_subscription($gid, $uid, array('is_admin' => 0));
     drupal_set_message(t('User is no longer a %ga', array('%ga' => theme('placeholder', t('group administrator')))));
     drupal_goto("node/$gid");
@@ -340,15 +342,15 @@ function og_delete_admin($gid, $uid) {
 }
 
 function og_remove_node($gid, $nid) {
-  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
-      $node = node_load($nid);
-      $form['confirm'] = array('#type' => 'markup', '#title' => t('Confirmation'), '#value' => t('Remove %title from this group.', array('%title' => theme('placeholder', $node->title))));
-      $form['og_confirm'] = array('#type' => 'value', '#value' => 1);
-      $form['op'] = array('#type' => 'submit', '#value' => t('Remove'));
-      $form['nid'] = array('#type' => 'value', '#value' => $nid);
-      $form['gid'] = array('#type' => 'value', '#value' => $gid);
-      return drupal_get_form('og_remove_node', $form);
-    }
+  if (node_access('update', node_load($gid))) {
+    $node = node_load($nid);
+    $form['confirm'] = array('#type' => 'markup', '#title' => t('Confirmation'), '#value' => t('Remove %title from this group.', array('%title' => theme('placeholder', $node->title))));
+    $form['og_confirm'] = array('#type' => 'value', '#value' => 1);
+    $form['op'] = array('#type' => 'submit', '#value' => t('Remove'));
+    $form['nid'] = array('#type' => 'value', '#value' => $nid);
+    $form['gid'] = array('#type' => 'value', '#value' => $gid);
+    return drupal_get_form('og_remove_node', $form);
+  }
   else {
     drupal_access_denied();
   }
@@ -460,7 +462,8 @@ function og_subscribe($gid, $uid = NULL) {
   else {
     $account = user_load(array('uid' => $uid));
   }
-  if ($account->uid != $user->uid && !node_access('update', array($gid, 'status' => 1))) {
+  $node = node_load($nid);
+  if ($account->uid != $user->uid && !node_access('update', $node)) {
     // only admins can subscribe another person
     drupal_access_denied();
   }
@@ -513,7 +516,8 @@ function og_unsubscribe($gid, $uid = NULL) {
   if (is_null($uid)) {
     $uid = $user->uid;
   }
-  if ($uid != $user->uid && !node_access('update', array('nid' => $gid, 'status' => 1))) {
+  $node = node_load($nid);
+  if ($uid != $user->uid && !node_access('update', $node)) {
     // only admins can unsubscribe another person
     drupal_access_denied();
   }
@@ -562,7 +566,7 @@ function og_list_users_sql($min_is_active = 1, $min_is_admin = 0) {
 }
 
 function og_add_users_page($gid) {
-  if (node_access('update', array('nid' => $gid, 'status' => 1))) {
+  if (node_access('update', node_load($gid))) {
     $form['og_names'] = array('#type' => 'textarea', 
                               '#title' => t('List of users'), 
                               '#rows' => 5, 
@@ -614,12 +618,12 @@ function og_add_users_submit($form_id, $form_values) {
 
 function og_list_users_page($gid) {
   $header[] = t("Name");
-  $access = node_access('update', array('nid' => $gid, 'status' => 1));
+  $node = node_load($gid);
+  $access = node_access('update', $node);
   if ($access) {
     $header[] = array('data' => t('Operations'), 'colspan' => 2);
   }
   // prepend the group manager
-  $node = node_load($gid);
   $i=0;
   $rows[$i][] = theme('username', $node). '&nbsp;<em>'. t('manager'). '</em>';
   if ($access) {
@@ -683,15 +687,23 @@ function og_list_groups_page() {
   print theme('page', $output);
 }
 
-// str_types is a list of types which should be selected. if not provided, we return all og nodes
-// filtering for a given gid is done by passign a a special $arg to db_rewrite_sql()
+// $str_types is one type or an array of types which should be selected.
+// if not provided, we return all non-og-type nodes
+// filtering for a given gid is done by passing a a special $arg to db_rewrite_sql()
 function og_get_home_nodes_sql($str_types = NULL) {
   if ($str_types) {
-    $str_types = db_escape_string($str_types);
-    $where = " n.type IN ('$str_types')";
+    if (is_array($str_types)) {
+      foreach ($str_types as $key => $value) {
+          $str_types_esc[$key] = "'" . db_escape_string($value) . "'";
+      }
+      $where = " n.type IN (" . implode(',', $str_types_esc) . ")";
+    } else {
+      $str_types = db_escape_string($str_types);
+      $where = " n.type = '$str_types'";
+    }
   }
   else {
-    $where = "n.type NOT IN ('og')";
+    $where = "n.type != 'og'";
   }
 
   // we LEFT JOIN to node_comment_stats in case comment.module is disabled.
@@ -1392,9 +1404,8 @@ function _og_update_db($enable) {
  * Menu callback
  */
 function og_feed($gid) {
-  $group = (object) array('nid' => $gid, 'status' => 1);
+  $group = node_load($gid);
   if (node_access('view', $group)) {
-    $group = node_load($gid);
     $sql = og_get_home_nodes_sql();
     $result = db_query_range(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $gid)), 0, variable_get('feed_default_items', 10));
     $channel['title'] = $group->title;
