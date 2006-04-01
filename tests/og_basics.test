@@ -1,0 +1,59 @@
+<?php
+
+class OgBasicsTest extends DrupalTestCase {
+  function get_info() {
+    return array('name' => t('Basic og test'), 'desc' => t('Tests basic og functionality... etc ...') , 'group' => 'og tests');
+  }
+  
+  function addOg($selective = 1) {
+    $edit = array();
+    $edit['title']    = '!SimpleTest test group node! ' . $this->randomName(10);
+    $edit['og_description'] = '!SimpleTest og description' . $this->randomName(10);
+    $edit['body']     = '!SimpleTest test group welcome message! ' . $this->randomName(32) . ' ' . $this->randomName(32);
+    $edit['og_selective'] = $selective;
+
+    $url = url('node/add/og', NULL, NULL, TRUE);
+    $ret = $this->_browser->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    foreach ($edit as $field_name => $field_value) {
+      $ret = $this->_browser->setFieldByName("edit[$field_name]", $field_value);
+      $this->assertTrue($ret, " [browser] Setting edit[$field_name]=\"$field_value\"");
+    }
+    $this->_browser->setFieldByName('edit[og_theme]', ''); // May not be present, so no error catching
+    
+    $ret = $this->_browser->clickSubmit(t('Submit'));
+//    $ret = $this->_browser->clickSubmitByName('op');
+    $this->assertTrue($ret, ' [browser] POST by click on ' . t('Submit'));
+    $this->_content = $this->_browser->getContent();
+
+    //die(var_dump($this->_browser->_page));
+    $this->assertWantedText(t('Your %post was created.', array ('%post' => 'group')), 'Group created');
+
+    $node = node_load(array('title' => $edit['title']));
+    $this->assertNotNull($node, 'Group found in database. %s');
+    $this->_cleanupGroups[] = $node->nid;
+  }
+  
+  function tearDown() {
+    while (sizeof($this->_cleanupGroups) > 0) {
+      $gid = array_pop($this->_cleanupGroups);
+      node_delete($gid);
+    }
+  }
+  
+  function testAddOg() {
+    $web_user = $this->drupalCreateUserRolePerm(array('access content', 'create pages', 'create groups'));
+    $this->drupalLoginUser($web_user);
+
+    $this->addOg(OG_OPEN);
+    //$this->joinUser();
+    
+    $this->addOg(OG_CLOSED);
+    /* Lets test again if someone can enter the group */
+
+    $this->addOg(OG_INVITE_ONLY);
+    /* Lets test if someone can enter the group */
+
+    $this->addOg(OG_MODERATED);
+  }
+}
