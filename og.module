@@ -1702,3 +1702,14 @@ function theme_og_format_subscriber_status($group) {
     return ' '. t('(pending approval)');
   }
 }
+
+
+
+/**
+ * Implementation of hook_simpletest().
+ */
+function og_simpletest() {
+	$dir = drupal_get_path('module', 'og'). '/tests';
+	$tests = file_scan_directory($dir, '\.test');
+  return array_keys($tests);
+}
