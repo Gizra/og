@@ -462,7 +462,7 @@ function og_subscribe($gid, $uid = NULL) {
   else {
     $account = user_load(array('uid' => $uid));
   }
-  $node = node_load($nid);
+  $node = node_load($gid);
   if ($account->uid != $user->uid && !node_access('update', $node)) {
     // only admins can subscribe another person
     drupal_access_denied();
