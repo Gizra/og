@@ -32,6 +32,8 @@ class OgBasicsTest extends DrupalTestCase {
     $node = node_load(array('title' => $edit['title']));
     $this->assertNotNull($node, 'Group found in database. %s');
     $this->_cleanupGroups[] = $node->nid;
+    
+    return $node->nid;
   }
   
   function tearDown() {
@@ -39,21 +41,65 @@ class OgBasicsTest extends DrupalTestCase {
       $gid = array_pop($this->_cleanupGroups);
       node_delete($gid);
     }
+    parent::tearDown();
   }
   
   function testAddOg() {
     $web_user = $this->drupalCreateUserRolePerm(array('access content', 'create pages', 'create groups'));
     $this->drupalLoginUser($web_user);
-
-    $this->addOg(OG_OPEN);
-    //$this->joinUser();
+    $gid = $this->addOg(OG_OPEN);
     
-    $this->addOg(OG_CLOSED);
-    /* Lets test again if someone can enter the group */
+    $b = $this->_browser;
+    $this->_browser = new SimpleBrowser();
 
-    $this->addOg(OG_INVITE_ONLY);
-    /* Lets test if someone can enter the group */
+    
+    $join_user = $this->drupalCreateUserRolePerm(array('access content'));
+    $this->drupalLoginUser($join_user);
+    
+    /* Test subscribing a new user */
+    $url = url('og/subscribe/' . $gid, NULL, NULL, TRUE);
+    $ret = $this->_browser->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assertWantedText(t('User subscribed to group'), 'User subscribed to group - text found.');
+    $this->assertNoUnwantedText(t('Page not found'), 'page not not found.');
 
-    $this->addOg(OG_MODERATED);
+    /* Find user in list */
+    $url = url('og/users/' . $gid, NULL, NULL, TRUE);
+    $ret = $b->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assert(new TextExpectation($join_user->name),
+                    $b->getContentAsText(), $message);
+    
+    /** @TODO: Test Posting etc... */
+    
+    /* Test subscribing a new user */
+    $url = url('og/unsubscribe/' . $gid, NULL, NULL, TRUE);
+    $ret = $this->_browser->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assertWantedText(t('User unsubscribed from group.'), 'User unsubscribed to group - text found.');
+    $this->assertNoUnwantedText(t('Page not found'), 'page not not found.');
+
+    $this->_browser = $b;
+    
+    /* Find user in list */
+    $url = url('og/users/' . $gid, NULL, NULL, TRUE);
+    $ret = $b->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assertNoUnwantedText($join_user->name, 'User name not found.');
+
+    $gid = $this->addOg(OG_CLOSED);
+    
+    $b = $this->_browser;
+    $this->_browser = new SimpleBrowser();
+    
+
+    $this->_browser = $b;
+    $gid = $this->addOg(OG_INVITE_ONLY);
+    $b = $this->_browser;
+    $this->_browser = new SimpleBrowser();
+    
+
+    $this->_browser = $b;
+    $gid = $this->addOg(OG_MODERATED);
   }
 }
