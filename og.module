@@ -83,7 +83,7 @@ function og_perm() {
  * override theme based on what group is being displayed (if any).
  * be smart about selecting the 'active' group for ambigous urls like node/$nid
  * sets a $_SESSION variable for current group
- * 
+ *
  * @param
  *   none
  * @return
@@ -158,7 +158,7 @@ function og_set_theme($nid) {
           $group_node = node_load($node->og_groups[0]);
           $custom_theme = $group_node->og_theme;
         }
-    } 
+    }
     return $group_node;
   }
 }
@@ -363,7 +363,7 @@ function og_remove_node_submit($form_id, $form_values) {
     db_query($sql, $form_values['nid'], $form_values['gid']);
     drupal_set_message(t('%title removed from group.', array('%title' => theme('placeholder', $node->title))));
     drupal_goto("node/{$form_values['gid']}");
-  }  
+  }
 }
 
 function og_invite($gid) {
@@ -380,7 +380,7 @@ function og_invite($gid) {
 function og_invite_form($gid) {
   $edit = $_POST['edit'];
   $max = variable_get('og_email_max', 10);
-  
+
   $form['mails'] = array('#type' => 'textarea', '#title' => t('Email addresses or usernames'),  '#description' => t('Enter up to %max email addresses or usernames. Separate multiple addresses by commas or new lines. Each will receive an invitation message from you.', array('%max' => $max)));
   $form['pmessage'] = array('#type' => 'textarea', '#title' => t('Personal message'), '#description' => t('Optional. Enter a message which will become part of the invitation email'));
   $form['op'] = array('#type' => 'submit', '#value' => t('Send invitation'));
@@ -555,7 +555,7 @@ function og_access($op, $node) {
   if ($op == 'create') {
     return user_access('create groups') && $user->uid;
   }
-  
+
   if ($user->uid && $node->uid == $user->uid && ($op == 'update' || $op == 'delete')) {
     return TRUE;
   }
@@ -567,10 +567,10 @@ function og_list_users_sql($min_is_active = 1, $min_is_admin = 0) {
 
 function og_add_users_page($gid) {
   if (node_access('update', node_load($gid))) {
-    $form['og_names'] = array('#type' => 'textarea', 
-                              '#title' => t('List of users'), 
-                              '#rows' => 5, 
-                              '#cols' => 70, 
+    $form['og_names'] = array('#type' => 'textarea',
+                              '#title' => t('List of users'),
+                              '#rows' => 5,
+                              '#cols' => 70,
                               '#description' => t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.')
                               );
     $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
@@ -712,16 +712,16 @@ function og_get_home_nodes_sql($str_types = NULL) {
 
 /**
  * Implementation of hook_db_rewrite_sql
- * 
+ *
  * You must pass $args with element 'og_nid' => $nid in order to have your query filtered by this function
- * 
- * @return array 
+ *
+ * @return array
  */
 function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
   if (is_numeric($args['og_nid'])) {
     // we add this JOIN for node admins and when node access is disabled because node_rewrite_sql() adds it for everyone else
     if (user_access('administer nodes') || node_access_view_all_nodes()) {
-      $query['join'] = 'INNER JOIN {node_access} na ON n.nid = na.nid'; 
+      $query['join'] = 'INNER JOIN {node_access} na ON n.nid = na.nid';
     }
     $where[] = '(na.gid = '. $args['og_nid']. " AND na.realm = 'og_subscriber')"; // private nodes
     $where[] = '(na.grant_view = '. $args['og_nid']. " AND na.realm = 'og_public')"; // public nodes
@@ -805,7 +805,7 @@ function theme_og_view(&$node, $teaser = FALSE, $page = FALSE) {
 function og_form(&$node) {//, &$param) {
   $form['title'] = array('#type' => 'textfield', '#title' => t('Name'), '#weight' => 0, '#default_value' => $node->title, '#size' => 60, '#maxlength' => 128, '#required' => true);
   $edit = $_POST['edit'];
-  
+
   $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true, '#description' => t('A brief description for the group details block and the group directory.'));
   $form['body'] = array('#type' => 'textarea', '#title' => t('Welcome message'), '#default_value' => $node->body, '#rows' => 10, '#required' => FALSE, '#description' => t('This message is shown by default at the top of the group home page.'));
   $form['format'] = filter_form($node->format);
@@ -961,7 +961,7 @@ function og_validate(&$node) {
       form_set_error('og_website', t('Please enter a valid URL for group website, such as  http://www.example.com/'));
     }
   }
-  
+
   if (module_exist('image')) {
     image_validate($node, 'image');
   }
@@ -1078,7 +1078,7 @@ function og_form_alter($form_id, &$form) {
   if (!strpos($form_id, 'node_form')) {
     return;
   }
-  
+
   global $user;
   $node = $form['#node'];
   $edit = $_REQUEST['edit'];
@@ -1092,7 +1092,7 @@ function og_form_alter($form_id, &$form) {
     foreach ($subs as $key => $val) {
       $options[$key] = $val['title'];
     }
-    
+
     if (user_access('administer organic groups')) {
       $vis = OG_VISIBLE_CHOOSE_PRIVATE;
       // only show this message when *editing* another user's nodes
@@ -1114,7 +1114,7 @@ function og_form_alter($form_id, &$form) {
       case OG_VISIBLE_GROUPONLY:
         $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 0);
         break;
-      
+
       //user decides how public the post is. the only difference between these two checkboxes is the default value
       case OG_VISIBLE_CHOOSE_PUBLIC:
         $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone or only to members of the groups checked below.'));
@@ -1134,11 +1134,11 @@ function og_form_alter($form_id, &$form) {
     else {
       $groups = array();
     }
-    
+
     if (count($subs)) {
       $form['og_nodeapi']['visible']['og_groups'] = array('#type' => 'checkboxes', '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' => t('Show this post in these groups.'), '#default_value' => $groups);
     }
-    
+
     if (count($form['og_nodeapi']['visible']) > 1) {
       $form['og_nodeapi']['#type'] = 'fieldset';
       $form['og_nodeapi']['#title'] = t('Groups');
@@ -1259,7 +1259,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
             og_subscribe_user($group->nid, $account);
           }
         }
-      
+
       break;
     case 'load':
         $account->og_groups = og_get_subscriptions($account->uid);
@@ -1311,7 +1311,7 @@ function og_save_permissions(&$node) {
 
   if ($node->type != 'og') {
     // put the post into each selected group. we need a separate row for public and private nodes.
-    // for public nodes, the grant_view column indicates which group the node belongs to. The gid=0 always. Needed to get 
+    // for public nodes, the grant_view column indicates which group the node belongs to. The gid=0 always. Needed to get
     // public nodes to display on the home page for non subscribers
     // we INSERT a broad grant here but og_node_grants() only issues it selectively for a given operation
     if (is_array($node->og_groups)) {
@@ -1319,10 +1319,10 @@ function og_save_permissions(&$node) {
         if ($checked) {
           $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_subscriber', 1, 1, 1)";
           db_query($sql, $node->nid, $gid);
-          
+
           if ($node->og_public) {
             $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_public', %d)";
-            db_query($sql, $node->nid, $gid);  
+            db_query($sql, $node->nid, $gid);
           }
         }
       }
@@ -1339,8 +1339,8 @@ function og_save_permissions(&$node) {
     // if you really want an inaccessible group homepage, you should go to node_access table and delete the record which is inserted here.
     $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_all', 1)";
     db_query($sql, $node->nid);
-    
-    // we INSERT a broad grant here but only og_node_grants() only issues it selectively 
+
+    // we INSERT a broad grant here but only og_node_grants() only issues it selectively
     $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_subscriber', 1, 1, 0)";
     db_query($sql, $node->nid, $node->nid);
 
@@ -1448,7 +1448,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
       case 2:
       case 3:
       case 4:
-        return array('og_block_cnt' => array('#type' => 'textfield', '#title' => t('Maximum number of items to show'), '#default_value' => variable_get("og_block_cnt_$delta", 10), '#size' => 5, '#maxlength' => 255));    
+        return array('og_block_cnt' => array('#type' => 'textfield', '#title' => t('Maximum number of items to show'), '#default_value' => variable_get("og_block_cnt_$delta", 10), '#size' => 5, '#maxlength' => 255));
     }
   }
   else if ($op == 'save') {
@@ -1586,7 +1586,7 @@ function og_block_details() {
     }
     elseif (!$user->uid) {
       $links[] = t('You must login/register in order to contribute to this group.');
-    }    
+    }
     elseif ($node->og_selective < OG_INVITE_ONLY) {
       if ($node->og_selective == OG_MODERATED) {
         $txt = t('request subscription');
@@ -1645,10 +1645,10 @@ function og_settings() {
   $form['og_settings']['og_module_status'] = array('#type' => 'fieldset', '#title' => t('Module status'), '#description' => $description);
   $form['og_settings']['og_module_status']['module_action'] = array('#type' => 'submit', '#value' => $btn_text, '#prefix' => t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />');
 
-  
+
   $form['og_settings']['node_form'] = array('#type' => 'fieldset', '#title' => t('Node authoring form'));
   $form['og_settings']['node_form']['og_help'] = array('#type' => 'textarea', '#default_value' => variable_get('og_help', ''), '#cols' => 70, '#rows' =>5, '#title' => t('Explanation or submission guidelines'), '#description' => t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
-  $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pub.', array('%pub' => theme('placeholder', t('Public')))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pri.', array('%pri' => theme('placeholder', t('Private')))));  
+  $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pub.', array('%pub' => theme('placeholder', t('Public')))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pri.', array('%pri' => theme('placeholder', t('Private')))));
   $form['og_settings']['node_form']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))), '#options' => $options);
   $options = array(t('optional'), t('required'));
   $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', FALSE), '#options' => $options, '#description' => t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
@@ -1658,7 +1658,7 @@ function og_settings() {
   }
   unset($options['og']);
   $form['og_settings']['node_form']['og_omitted'] = array('#type' => 'select', '#title' => t('Omitted content types'), '#default_value' => variable_get('og_omitted', array()), '#options' => $options, '#description' => t('Select any node types which should <em>not</em> participate in the Audience targetting system.'), '#multiple' => true);
-  
+
   $form['og_settings']['home'] = array('#type' => 'fieldset', '#title' => t('Group home page'));
   $options = array('ron' => t('River of News'), 'gbct' => t('Group by content type'));
   $form['og_settings']['home']['og_home_page_presentation'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_presentation', 'gbct'), '#description' => t('If neither of these presentations suits you, you may override in the theme layer.'));
@@ -1704,12 +1704,11 @@ function theme_og_format_subscriber_status($group) {
 }
 
 
-
 /**
  * Implementation of hook_simpletest().
  */
 function og_simpletest() {
-	$dir = drupal_get_path('module', 'og'). '/tests';
-	$tests = file_scan_directory($dir, '\.test');
+  $dir = drupal_get_path('module', 'og'). '/tests';
+  $tests = file_scan_directory($dir, '\.test');
   return array_keys($tests);
 }
