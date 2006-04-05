@@ -707,7 +707,7 @@ function og_get_home_nodes_sql($str_types = NULL) {
   }
 
   // we LEFT JOIN to node_comment_stats in case comment.module is disabled.
-  return "SELECT n.nid, n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND $where ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
+  return "SELECT DISTINCT n.nid, n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND $where ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
 }
 
 /**
