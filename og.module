@@ -504,6 +504,7 @@ function og_subscribe_user($gid, $account) {
     $return_value = 'approval';
   }
   else {
+    drupal_set_message(t('Subscribed to the %group group', array('%group' => theme('placeholder', $node->title))));
     og_save_subscription($gid, $account->uid, array('is_active' => 1));
     $return_value = 'subscribed';
   }
