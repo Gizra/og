@@ -24,7 +24,7 @@ function og_help($section) {
     case strstr($section, 'admin/block/configure/og'):
       return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
     case 'admin/settings/og':
-      return t('In order to let group admins determine their own group theme, you must enable mutliple themes using %page. To enable admins to upload a group image, you must activate and configure image.module (see Contributions repository).', array('%page' => l(t('theme configuration page'), 'admin/themes')));
+      return t('In order to let group admins determine their own group theme, you must enable multiple themes using %page.', array('%page' => l(t('theme configuration page'), 'admin/themes')));
   }
 }
 
@@ -36,7 +36,6 @@ function og_menu($may_cache) {
   if ($may_cache) {
     // anon users should be able to get to the subscribe page
     $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('subscribe to group'));
-    $items[] = array('path' => 'og/image', 'callback' => 'og_image', 'title' => t('group image (large)'), 'weight' => 4, 'access' => user_access('access content'), 'type' => MENU_CALLBACK);
     $items[] = array('path' => 'node/add/og', 'title' => t('group'), 'access' => user_access('create groups'));
     $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => user_access('access content'));
     $access = $user->uid; // login is required
@@ -846,27 +845,6 @@ function og_form(&$node) {//, &$param) {
   $form['og_register'] = array('#type' => 'checkbox', '#title' => t('registration form'), '#default_value' => $register, '#description' =>t('Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form.'));
   $form['og_directory'] = array('#type' => 'checkbox', '#title' => t('list in groups directory'),  '#default_value' => $directory, '#description' => t('Should this group appear on the %page', array('%page' => l(t('list of groups page'),'og'))));
 
-  // group image
-  // NOT WORKING YET!!!
-/*
-  if (module_exist('image')) {
-    if (is_array($node->images)) {
-      $form['images'] = array('#tree' => true);
-      foreach ($node->images as $label => $image) {
-        $form['images'][$label] = array('#type' => 'value', '#value' => $image);
-        //$output .= form_hidden('images]['.$label, $image);
-      }
-    }
-    if ($node->images['thumbnail']) {
-      $form['thumbanil'] = array('#type' => 'markup', '#value' => image_display($node, 'thumbnail'), '#title' => t('Thumbnail'));
-      //$output.= form_item(t('Thumbnail'), image_display($node, 'thumbnail'));
-    }
-    $form['image'] = array('#type' => 'file', '#size' => 50, '#title' => t('Image'), '#decription' => t('Click "Browse..." to select an image to upload.'));
-    //$output .= form_file(t('Image'), 'image', 50, t('Click "Browse..." to select an image to upload.'));
-    $form['#attributes'] = array('enctype' => 'multipart/form-data');
-//    $param['options'] = array("enctype" => "multipart/form-data",  "name" => "image_forms");
-  }
-*/
   $allthemes = list_themes();
   // list only active themes
   foreach ($allthemes as $key => $theme) {
@@ -936,13 +914,6 @@ function og_get_node_groups($node) {
   }
 }
 
-function og_image($gid) {
-  $node = node_load($gid);
-  $request = ($_GET['size']) ? $_GET['size'] : 'preview';
-  $output = image_display($node, $request);
-  print theme('page', $output);
-}
-
 /**
  * Implementation of hook_validate
  */
@@ -963,9 +934,6 @@ function og_validate(&$node) {
     }
   }
 
-  if (module_exist('image')) {
-    image_validate($node, 'image');
-  }
 }
 
 function og_node_info() {
@@ -977,10 +945,6 @@ function og_load(&$node) {
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, db_fetch_array($result));
   $node->comment=0; // we don't use comments on og nodes
-  // module_invoke does not pass references and image_load() requires this
-  if (function_exists('image_load')) {
-    image_load($node);
-  }
 }
 
 function og_insert($node) {
@@ -989,18 +953,6 @@ function og_insert($node) {
 }
 
 function og_update($node) {
-  /*if ($node->images) {
-    foreach ($node->images as $label => $image) {
-      $old_path = db_result(db_query("SELECT filepath FROM {files} WHERE filename='%s' AND nid=%d", $label, $node->nid));
-      // This is a new image.
-      if ($old_path != $image) {
-        file_delete(file_create_path($old_path));
-        db_query("DELETE FROM {files} WHERE filename='%s' AND nid=%d", $label, $node->nid);
-        _image_insert($node->nid, $label, file_create_path($image));
-      }
-    }
-  }*/
-
   $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', website = '%s', directory = %d WHERE nid = %d";
   db_query($sql, $node->og_theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_website, $node->og_directory, $node->nid);
 }
@@ -1600,8 +1552,6 @@ function og_block_details() {
     $output .= theme('item_list', $links);
 
     $block['content'] = $output;
-    // TODO: display group image when they are working again.
-    // $block['content'] .= $node->images ? image_display($node, 'thumbnail') : '';
     $block['subject'] = l($node->title, "node/$node->nid");
     return $block;
   }
