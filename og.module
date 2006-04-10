@@ -479,11 +479,8 @@ function og_subscribe($gid, $uid = NULL) {
     drupal_access_denied();
   }
   $return = og_subscribe_user($gid, $account);
-  if ($return == 'approval') {
-    drupal_set_message(t('Subscription request awaits approval by an administrator.'));
-  }
-  else if ($return == 'subscribed') {
-    drupal_set_message(t('User subscribed to group'));
+  if (!empty($return['message'])) {
+      drupal_set_message($return['message']);
   }
   drupal_goto("node/$gid");
 }
@@ -491,7 +488,7 @@ function og_subscribe($gid, $uid = NULL) {
 /**
  * subscribe given user to given group. no access control since this is an API function
  *
- * @return string 'approval' or 'subscribed' depending on the group's configuration.
+ * @return string 'approval', 'subscribed' or 'rejected' depending on the group's configuration.
  **/
 function og_subscribe_user($gid, $account) {
   // moderated groups must approve all members (selective=1)
@@ -499,27 +496,36 @@ function og_subscribe_user($gid, $account) {
   // if you can view, you are a member
   // if you can edit, you are an admin
   $node = node_load($gid);
-  if ($node->og_selective) {
-    og_save_subscription($gid, $account->uid, array('is_active' => 0));
-    $sql = og_list_users_sql(1, 1);
-    $res = db_query($sql, $node->nid);
-    while ($row = db_fetch_object($res)) {
-      $admins[] = $row->mail ? $row->mail : NULL;
-    }
-    $subj = t("Subscription request for '%group' from '%name'", array('%group' => $node->title, '%name' => $account->name));
-    $body = t('To instantly approve this request, visit %url. ', array('%url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
-    $body .= t('You may deny this request or manage subscribers at %url', array('%url' => url("og/users/$node->nid", NULL, NULL, TRUE)));
-    $from = variable_get('site_mail', ini_get('sendmail_from'));
-    $headers = "From: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
-    user_mail(implode(', ', $admins), $subj, $body, $headers);
-    $return_value = 'approval';
-  }
-  else {
-    drupal_set_message(t('Subscribed to the %group group', array('%group' => theme('placeholder', $node->title))));
-    og_save_subscription($gid, $account->uid, array('is_active' => 1));
-    $return_value = 'subscribed';
-  }
+  switch ($node->og_selective) {
+    case OG_MODERATED:
+      og_save_subscription($gid, $account->uid, array('is_active' => 0));
+      $sql = og_list_users_sql(1, 1);
+      $res = db_query($sql, $node->nid);
+      while ($row = db_fetch_object($res)) {
+        $admins[] = $row->mail ? $row->mail : NULL;
+      }
+      $subj = t("Subscription request for '%group' from '%name'", array('%group' => $node->title, '%name' => $account->name));
+      $body = t('To instantly approve this request, visit %url. ', array('%url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
+      $body .= t('You may deny this request or manage subscribers at %url', array('%url' => url("og/users/$node->nid", NULL, NULL, TRUE)));
+      $from = variable_get('site_mail', ini_get('sendmail_from'));
+      $headers = "From: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
+      user_mail(implode(', ', $admins), $subj, $body, $headers);
+      $return_value = array('type' => 'approval',
+                            'message' => t('Subscription request to the %group group awaits approval by an administrator.'),
+                                           array('%group' => theme('placeholder', $node->title)));
 
+      break;
+    case OG_OPEN:
+      og_save_subscription($gid, $account->uid, array('is_active' => 1));
+      $return_value = array('type' => 'subscribed',
+                            'message' => t('Subscribed to the %group group', array('%group' => theme('placeholder', $node->title))));
+      break;
+    case OG_CLOSED:
+    case OG_INVITE_ONLY:
+      $return_value = array('type' => 'rejected',
+                            'message' => t('Subscription request to the %group group was rejected, only group administrators can add users to this group.'),
+                                           array('%group' => theme('placeholder', $node->title)));
+  }
   return $return_value;
 }
 
@@ -533,7 +539,11 @@ function og_unsubscribe($gid, $uid = NULL) {
     // only admins can unsubscribe another person
     drupal_access_denied();
   }
-
+  if ($node->og_selective == OG_CLOSED || $node->uid == $uid){
+    // You are not supposed to unsubscribe from a closed group
+    // So are group adminstrators, such a link should never be generated
+    drupal_access_denied();
+  }
   og_delete_subscription($gid, $uid);
   drupal_set_message(t('User unsubscribed from group.'));
   drupal_goto("node/$gid");
@@ -1221,7 +1231,10 @@ function og_user($op, &$edit, &$account, $category = NULL) {
         $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type = 'og' AND n.status = 1 AND o.register = 1"));
         while ($group = db_fetch_object($result)) {
           if ($edit['og_register'][$group->nid]) {
-            og_subscribe_user($group->nid, $account);
+            $return = og_subscribe_user($group->nid, $account);
+            if (!empty($return['message'])) {
+              drupal_set_message($return['message']);
+            }
           }
         }
 
