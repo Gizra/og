@@ -5,12 +5,12 @@ class OgBasicsTest extends DrupalTestCase {
     return array('name' => t('Basic og test'), 'desc' => t('Tests basic og functionality... etc ...') , 'group' => 'og tests');
   }
   
-  function addOg($selective = 1) {
+  function addOg($selective = OG_OPEN) {
     $edit = array();
     $edit['title']    = '!SimpleTest test group node! ' . $this->randomName(10);
     $edit['og_description'] = '!SimpleTest og description' . $this->randomName(10);
     $edit['body']     = '!SimpleTest test group welcome message! ' . $this->randomName(32) . ' ' . $this->randomName(32);
-    $edit['og_selective'] = $selective;
+    $edit['og_selective'] = (string)$selective;
 
     $url = url('node/add/og', NULL, NULL, TRUE);
     $ret = $this->_browser->get($url);
@@ -48,6 +48,7 @@ class OgBasicsTest extends DrupalTestCase {
     $web_user = $this->drupalCreateUserRolePerm(array('access content', 'create pages', 'create groups'));
     $this->drupalLoginUser($web_user);
     $gid = $this->addOg(OG_OPEN);
+    $node = node_load($gid);
     
     $b = $this->_browser;
     $this->_browser = new SimpleBrowser();
@@ -60,7 +61,9 @@ class OgBasicsTest extends DrupalTestCase {
     $url = url('og/subscribe/' . $gid, NULL, NULL, TRUE);
     $ret = $this->_browser->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertWantedText(t('User subscribed to group'), 'User subscribed to group - text found.');
+    // No theme, "Text" only
+    $this->assertWantedText(t('Subscribed to the %group group', array('%group' => $node->title)),
+                            'User subscribed to group - text found.');
     $this->assertNoUnwantedText(t('Page not found'), 'page not not found.');
 
     /* Find user in list */
@@ -72,7 +75,7 @@ class OgBasicsTest extends DrupalTestCase {
     
     /** @TODO: Test Posting etc... */
     
-    /* Test subscribing a new user */
+    // Test subscribing a new user 
     $url = url('og/unsubscribe/' . $gid, NULL, NULL, TRUE);
     $ret = $this->_browser->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
@@ -81,19 +84,43 @@ class OgBasicsTest extends DrupalTestCase {
 
     $this->_browser = $b;
     
-    /* Find user in list */
+    // Find user in list */
     $url = url('og/users/' . $gid, NULL, NULL, TRUE);
     $ret = $b->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
     $this->assertNoUnwantedText($join_user->name, 'User name not found.');
 
+    // CLOSED GROUP ************************************************************
     $gid = $this->addOg(OG_CLOSED);
-    
+
+    $node = node_load($gid);
+   
     $b = $this->_browser;
     $this->_browser = new SimpleBrowser();
+    $this->drupalLoginUser($join_user);
+
+    // Test subscribing a new user 
+    $url = url('og/subscribe/' . $gid, NULL, NULL, TRUE);
+    $ret = $this->_browser->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assertNoUnwantedText(t('Subscribed to the %group group', array('%group' => $node->title)),
+                                'User subscribed to group - text not found.');
+
+    $this->assertNoUnwantedText(t('Page not found'), 'page not not found.');
     
+    $this->assertWantedText(t('Subscription request to the %group group was rejected, only group administrators can add users to this group.',
+                                           array('%group' => $node->title)), 'Rjected text found.');
+    // Find user in list 
+    $url = url('og/users/' . $gid, NULL, NULL, TRUE);
+    $ret = $b->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assert(new NoTextExpectation($join_user->name),
+                    $b->getContentAsText(), 'Username not found');
+
 
     $this->_browser = $b;
+    
+    /* INVITE ONLY GROUP ********************************************************/
     $gid = $this->addOg(OG_INVITE_ONLY);
     $b = $this->_browser;
     $this->_browser = new SimpleBrowser();
