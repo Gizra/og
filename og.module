@@ -511,8 +511,8 @@ function og_subscribe_user($gid, $account) {
       $headers = "From: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
       user_mail(implode(', ', $admins), $subj, $body, $headers);
       $return_value = array('type' => 'approval',
-                            'message' => t('Subscription request to the %group group awaits approval by an administrator.'),
-                                           array('%group' => theme('placeholder', $node->title)));
+                            'message' => t('Subscription request to the %group group awaits approval by an administrator.',
+                                           array('%group' => theme('placeholder', $node->title))));
 
       break;
     case OG_OPEN:
@@ -523,8 +523,8 @@ function og_subscribe_user($gid, $account) {
     case OG_CLOSED:
     case OG_INVITE_ONLY:
       $return_value = array('type' => 'rejected',
-                            'message' => t('Subscription request to the %group group was rejected, only group administrators can add users to this group.'),
-                                           array('%group' => theme('placeholder', $node->title)));
+                            'message' => t('Subscription request to the %group group was rejected, only group administrators can add users to this group.',
+                                           array('%group' => theme('placeholder', $node->title))));
   }
   return $return_value;
 }
