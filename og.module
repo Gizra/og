@@ -213,7 +213,7 @@ function og_email_form_validate($form_id, $form_values) {
 }
 
 function og_email_form_submit($form_id, $form_values) {
-  $node = node->load($form_values[gid]);
+  $node = node_load($form_values[gid]);
   $msg = $form_values['body']. t("\n\n--------------------------------\nThis message was sent by an administrator in the '%group' group at %site. To visit this group, browse to %url1. To unsubscribe from this group, visit %url2", array('%group' => $node->title, '%site' => variable_get('site_name', drupal), '%url1' => url("node/$node->nid", NULL, NULL, TRUE), '%url2' => url("og/unsubscribe/$node->nid", NULL, NULL, TRUE)));
   global $user;
   $from = $user->mail;
