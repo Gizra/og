@@ -1,0 +1,66 @@
+<?php
+// $Id$
+/**
+ * Implementation of hook_help().
+ */
+function og_basic_help($section) {
+  switch ($section) {
+    case 'node/add#og':
+      return t('A group provides a home page for like minded users. There they post articles about their shared interest.');
+    case 'admin/modules#description':
+      return t('Basic group node for Organic groups');
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function og_basic_menu($may_cache) {
+  $items = array();
+
+  if ($may_cache) {
+    $items[] = array('path' => 'node/add/og', 'title' => t('group'), 'access' => user_access('create groups'));
+  }
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_node_info().
+ * Note that our nodes are type=og instead of type=og_basic. This is a legacy convenience to when og did n ot support external
+ * node types. This will help contributed modules catch up without much pain.
+ */
+function og_basic_node_info() {
+  return array('og' => array('name' => t('group'), 'base' => 'og_basic'));
+}
+
+/**
+ * Implementation of hook_access().
+ */
+function og_basic_access($op, $node) {
+  global $user;
+  if ($op == 'create') {
+    return user_access('create groups') && $user->uid;
+  }
+  
+  if ($user->uid && $node->uid == $user->uid && ($op == 'update' || $op == 'delete')) {
+    return TRUE;
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function og_basic_perm() {
+  return array('create groups');
+}
+
+/**
+ * Implementation of hook_form().
+ */
+function og_basic_form(&$node) {
+  $form['title'] = array('#type' => 'textfield', '#title' => t('Name'), '#weight' => 0, '#default_value' => $node->title, '#size' => 60, '#maxlength' => 128, '#required' => true);
+  $form['body_filter']['body'] = array('#type' => 'textarea', '#title' => t('Welcome message'), '#default_value' => $node->body, '#rows' => 10, '#required' => FALSE, '#description' => t('This message is shown by default at the top of the group home page.'));
+  $form['body_filter']['format'] = filter_form($node->format);
+  return $form;
+}

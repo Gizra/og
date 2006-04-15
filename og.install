@@ -32,6 +32,9 @@ function og_install() {
       
       $sql = "ALTER TABLE {node_access} CHANGE grant_view grant_view int(11) unsigned NOT NULL default '0'";
       db_query($sql);
+
+      $sql = "UPDATE {system} SET status = 1 WHERE name = 'og_basic'";
+      db_query($sql);
   }
 }
 
@@ -150,4 +153,13 @@ function og_update_7() {
 
 //from now on, let's use update_sql() and db_add_column() and all the 4.7 goodness
 
+// Enable og_basic.module by default.
+function og_update_8() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql("UPDATE {system} SET status = 1 WHERE name = 'og_basic'");
+  }
+  return $ret ? $ret : array();
+}
 
