@@ -168,12 +168,13 @@ class OgBasicsTest extends DrupalTestCase {
     
     $this->assertWantedText(t('Subscription request to the %group group awaits approval by an administrator.',
                                            array('%group' => $node->title)), 'Approval text found.');
-    // Find user in list  ||Inactive users _ARE_ listed
-    /*$url = url('og/users/' . $gid, NULL, NULL, TRUE);
+    // Find user in list, Inactive users _ARE_ listed
+    $url = url('og/users/' . $gid, NULL, NULL, TRUE);
     $ret = $b->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
-    $this->assert(new NoTextExpectation($join_user->name),
-                    $b->getContentAsText(), 'Username not found');*/
+    $this->assert(new TextExpectation($join_user->name),
+                    $b->getContentAsText(), 'Username found');
+    
     
   }
 }
