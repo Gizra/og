@@ -437,7 +437,7 @@ function og_invite_form_validate($form_id, $form_values, $form) {
     }
     else {
       // Store valid e-mails so we don't have to go through that looping again on submit
-      $form['valid_emails']['#ref'] = $valid_emails;
+      form_set_value($form['valid_emails'], $valid_emails);
     }
   }
 }
