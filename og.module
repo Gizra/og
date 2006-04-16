@@ -13,6 +13,18 @@ define('OG_VISIBLE_BOTH', 1);
 define('OG_VISIBLE_CHOOSE_PUBLIC', 2);
 define('OG_VISIBLE_CHOOSE_PRIVATE', 3);
 
+// site admin chooses in og_settings() whether group creator can put his group on the registration form
+define('OG_REGISTRATION_NEVER', 0);
+define('OG_REGISTRATION_ALWAYS', 1);
+define('OG_REGISTRATION_CHOOSE_TRUE', 2);
+define('OG_REGISTRATION_CHOOSE_FALSE', 3);
+
+// site admin chooses in og_settings() whether group creator can put his group in the Groups directory
+define('OG_DIRECTORY_NEVER', 0);
+define('OG_DIRECTORY_ALWAYS', 1);
+define('OG_DIRECTORY_CHOOSE_TRUE', 2);
+define('OG_DIRECTORY_CHOOSE_FALSE', 3);
+
 function og_help($section) {
   switch ($section) {
     case 'admin/help#og':
@@ -817,45 +829,66 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
  *
  * @param object $node
  */
-function og_node_form(&$node) {
+function og_node_form($node) {
   $edit = $_POST['edit'];
 
   $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true, '#description' => t('A brief description for the group details block and the group directory.'));
   $form['og_website'] = array('#type' => 'textfield', '#title' => t('Group website'), '#default_value' => $node->og_website, '#description' => t('If your group has its own website, enter the address here.'));
 
-  if (isset($edit['og_selective'])) {
-    $selective = $edit['og_selective'];
-  }
-  elseif ($node->nid) {
-    $selective = $node->og_selective;
+  if ($node->nid) {
+    $default = $node->og_selective;
   }
   else {
-    $selective = OG_OPEN;
+    $default = OG_OPEN;
   }
+  $form['og_selective'] = array('#type' => 'radios', '#title' => t('Subscription requests'), '#default_value' => $default, '#options' => array(t('open - subscription requests are accepted immediately.'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.'), t('closed - subscriptions are fully administered by an administrator.')), '#description' => t('How should subscription requests be handled in this group? When you select <em>closed</em>, users will not be able to subscribe <strong>nor</strong> unsubscribe.'));
 
-  if (isset($edit['og_register'])) {
-    $register = $edit['og_register'];
-  }
-  elseif ($node->nid) {
-    $register = $node->og_register;
+  // registration checkbox
+  if (user_access('administer nodes')) {
+    $visibility = OG_REGISTRATION_CHOOSE_FALSE;  
   }
   else {
-    $register = 0;
+    $visibility = variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE);  
   }
+  $default = FALSE;
+  switch ($visibility) {
+    case OG_REGISTRATION_NONE:
+      $form['og_register'] = array('#type' => 'value', '#value' => 0);
+      break;
+    case OG_REGISTRATION_BOTH:
+      $form['og_register'] = array('#type' => 'value', '#value' => 1);
+      break;
+    case OG_REGISTRATION_CHOOSE_TRUE:
+      $default = TRUE;
+      // fall through
+    case OG_REGISTRATION_CHOOSE_FALSE:
+      $form['og_register'] = array('#type' => 'checkbox', '#title' => t('registration form'), '#default_value' => $node->nid ? $node->og_registration : $default, '#description' =>t('Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form.'));
+      break;    
+  }
+  
 
-  if (isset($edit['og_directory'])) {
-    $directory = $edit['og_directory'];
-  }
-  elseif ($node->nid) {
-    $directory = $node->og_directory;
+  // directory checkbox  
+  if (user_access('administer nodes')) {
+    $visibility = OG_DIRECTORY_CHOOSE_TRUE;  
   }
   else {
-    $directory = 1;
+    $visibility = variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_FALSE);  
   }
-
-  $form['og_selective'] = array('#type' => 'radios', '#title' => t('Subscription requests'), '#default_value' => $selective, '#options' => array(t('open - subscription requests are accepted immediately.'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.'), t('closed - subscriptions are fully administered by an administrator.')), '#description' => t('How should subscription requests be handled in this group? When you select <em>closed</em>, users will not be able to subscribe <strong>nor</strong> unsubscribe.'));
-  $form['og_register'] = array('#type' => 'checkbox', '#title' => t('registration form'), '#default_value' => $register, '#description' =>t('Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form.'));
-  $form['og_directory'] = array('#type' => 'checkbox', '#title' => t('list in groups directory'),  '#default_value' => $directory, '#description' => t('Should this group appear on the %page', array('%page' => l(t('list of groups page'),'og'))));
+  $default = FALSE;
+  switch ($visibility) {
+    case OG_DIRECTORY_NONE:
+      $form['og_directory'] = array('#type' => 'value', '#value' => 0);
+      break;
+    case OG_DIRECTORY_BOTH:
+      $form['og_directory'] = array('#type' => 'value', '#value' => 1);
+      break;
+    case OG_DIRECTORY_CHOOSE_TRUE:
+      $default = TRUE;
+      // fall through
+    case OG_DIRECTORY_CHOOSE_FALSE:
+      $form['og_directory'] = array('#type' => 'checkbox', '#title' => t('list in groups directory'),  '#default_value' => $node->nid ? $node->og_directory : $default, '#description' => t('Should this group appear on the %page?', array('%page' => l(t('list of groups page'),'og'))));
+      break;    
+  }
   
   $form['og_theme'] = system_theme_select_form(t('Selecting a different theme will change the look and feel of the group.'), $edit['theme'], 2);;
   return $form;
@@ -1582,6 +1615,23 @@ function og_settings() {
   $form['og_settings']['node_form']['og_help'] = array('#type' => 'textarea', '#default_value' => variable_get('og_help', ''), '#cols' => 70, '#rows' =>5, '#title' => t('Explanation or submission guidelines'), '#description' => t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pub.', array('%pub' => theme('placeholder', t('Public')))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pri.', array('%pri' => theme('placeholder', t('Private')))));
   $form['og_settings']['node_form']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))), '#options' => $options);
+  
+  // groups directory visibility
+  $options = array(t('New groups don\'t appear in the groups directory. Administrators control the directory exclusively.'),
+              t('New groups always appear in the groups directory.'),
+              t('Group creator chooses whether her group appears in the directory. Defaults to %in.', array('%in' => theme('placeholder', t('in directory')))),
+              t('Group creator chooses whether her group appears in the directory. Defaults to %out.', array('%out' => theme('placeholder', t('not in directory')))),
+            );
+  $form['og_settings']['node_form']['og_visibility_directory'] = array('#type' => 'radios', '#title' => t('Groups directory control'), '#default_value' => variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_TRUE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => theme('placeholder', t('groups directory')))), '#options' => $options);
+  
+  // groups registration visibility
+  $options = array(t('New groups don\'t appear in on the registration form. Administrators control the form exclusively.'),
+              t('New groups always appear on the registration form.'),
+              t('Group creator chooses whether her group appears on the registration form. Defaults to %in.', array('%in' => theme('placeholder', t('on form')))),
+              t('Group creator chooses whether her group appears on the registration form. Defaults to %out.', array('%out' => theme('placeholder', t('not on form')))),
+            );
+    $form['og_settings']['node_form']['og_visibility_registration'] = array('#type' => 'radios', '#title' => t('Registration form control'), '#default_value' => variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => theme('placeholder', t('registration form')))), '#options' => $options);  
+
   $options = array(t('optional'), t('required'));
   $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', FALSE), '#options' => $options, '#description' => t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
   unset($options);
