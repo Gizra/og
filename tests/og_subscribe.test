@@ -12,6 +12,7 @@ class OgSubscribe extends OgTestCase {
     $gid = $this->addOg(OG_OPEN);
     $node = node_load($gid);
     
+    // $b will be the "admin browser, sometimes backed up in _browser, sometimes used explictly"
     $b = $this->_browser;
     $this->_browser = new SimpleBrowser();
 
@@ -130,13 +131,54 @@ class OgSubscribe extends OgTestCase {
     
     $this->assertWantedText(t('Subscription request to the %group group awaits approval by an administrator.',
                                            array('%group' => $node->title)), 'Approval text found.');
+
     // Find user in list, Inactive users _ARE_ listed
+    $this->_browser = $b; // Switch back to admin view
     $url = url('og/users/' . $gid, NULL, NULL, TRUE);
-    $ret = $b->get($url);
+    $this->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
-    $this->assert(new TextExpectation($join_user->name),
-                    $b->getContentAsText(), 'Username found');
+    $this->assertWantedText($join_user->name, 'Username found');
     
+    $this->clickLink(t('deny'));
+
+    $this->assertWantedText(t('Subscription request denied.'), 'Denied text found.');
     
+
+    $url = url('og/users/' . $gid, NULL, NULL, TRUE);
+    $this->get($url);
+    $this->assertNoUnwantedText($join_user->name, 'Username not found');
+
+    // Now try this again
+    $this->_browser = new SimpleBrowser();
+
+    $this->drupalLoginUser($join_user);
+
+    // Test subscribing a new user 
+    $url = url('og/subscribe/' . $gid, NULL, NULL, TRUE);
+    $ret = $this->_browser->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assertNoUnwantedText(t('Subscribed to the %group group', array('%group' => $node->title)),
+                                'User subscribed to group - text not found.');
+
+    $this->assertNoUnwantedText(t('Page not found'), 'page not not found.');
+    
+    $this->assertWantedText(t('Subscription request to the %group group awaits approval by an administrator.',
+                                           array('%group' => $node->title)), 'Approval text found.');
+
+    // Find user in list, Inactive users _ARE_ listed
+    $this->_browser = $b; // Switch back to admin view
+    $url = url('og/users/' . $gid, NULL, NULL, TRUE);
+    $ret = $this->_browser->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assertWantedText($join_user->name, 'Username found');
+    
+    $this->clickLink(t('approve'));
+
+    $this->assertWantedText(t('Subscription request approved.'), 'Approved text found.');
+    
+    $url = url('og/users/' . $gid, NULL, NULL, TRUE);
+    $ret = $this->_browser->get($url);
+    $this->assertTrue($ret, " [browser] GET $url");
+    $this->assertWantedText($join_user->name, 'Username found again');
   }
 }
