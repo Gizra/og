@@ -16,9 +16,9 @@ INSTALLATION
 
 NOTES
 ----------------
-- This module actually supports group nodes coming from custom modules, not just og_basic. That means that you can have custom fields for your groups and even several different kinds of groups. Specify the group types at admin/settings/og and also remember to disable attachments and comments for each type.
+- This module now also supports designating any type of node to be a group, not just og_basic.This node type should be defined by a custom module or via Content Contruction Kit (CCK). Since all nodes of this type are treated as groups, you will usually not want to designate the standard page, story, or book node types as groups. The capacity to make custom node types groups means that you can have custom fields for your groups and even several different kinds of groups. Specify the group types at admin/settings/og and also remember to disable attachments and comments for each type.
 - Drupal has poor support for running more than one node_access type module at one. That means that you can't run og with
-taxonomy_access, nodeperm_by_role, nodeaccess, or any other node access control module. The plan for fixing this is for og to use the na_arbitrator module (currently ikn contrin - patches welcome)
+taxonomy_access, nodeperm_by_role, nodeaccess, or any other node access control module. The plan for fixing this is for og to use the na_arbitrator module (currently in contrib - patches welcome)
 - 'Administer nodes' permission is required for changing the Manager of a group
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status
 - All subscriber management happens on the 'subscriber list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), subscribing/unsubscribing users and promoting users into group admins.
