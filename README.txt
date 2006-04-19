@@ -2,11 +2,11 @@ DESCRIPTION
 --------------------------
 Enable users to create and manage their own 'groups'. Each group can have subscribers, and maintains a group page where subscribers can post into. Membership to groups may be open, moderated, or invitation only.
 
-Groups may choose their own theme. Groups have RSS feeds, and so on.
+Groups may choose their own theme and language. Groups have RSS feeds, and so on.
 
 INSTALLATION
 ---------------
-- Activate the og and og_basic modules as usual.
+- Activate the og AND og_basic modules as usual.
 - Visit the admin/settings/og page and click the button to enable access control.
 - Set other preferences on admin/settings/og as desired.
 - On the admin/settings/content-types/og page, disable commenting and attachments for nodes of type 'group'

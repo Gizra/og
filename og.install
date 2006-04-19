@@ -151,14 +151,18 @@ function og_update_7() {
 }
 
 
-//from now on, let's use update_sql() and db_add_column() and all the 4.7 goodness
-
 // Enable og_basic.module by default.
 function og_update_8() {
+  // do nothing. it turns out you can't easily enable a module here because its row does not exist yet in system table.
+  return array();
+}
+
+// Group language
+function og_update_9() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("UPDATE {system} SET status = 1 WHERE name = 'og_basic'");
+      $ret = update_sql("ALTER TABLE {og} ADD language varchar(12) NOT NULL default ''");
   }
   return $ret ? $ret : array();
 }

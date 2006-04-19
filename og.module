@@ -77,10 +77,48 @@ function og_menu($may_cache) {
         $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'og_email', 'callback arguments' => array(arg(1)), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
       }
     }
-
-    og_theme();
   }
   return $items;
+}
+
+function og_init() {
+  // only bother when we are not serving a cached page. check for which functon that only exists afterwards
+  if (function_exists('module_init')) {
+    og_theme();
+  }
+}
+
+/**
+ * Magic function which can return a language code. called from locale_initialize() in common.inc
+ * Like locale_initialize(), but includes a check for group language and sets accordingly.
+ * Priority goes: user => group => site default
+ *
+ * @return language code
+ **/
+function i18n_get_lang() {
+  global $user;
+    
+  if (function_exists('locale')) {
+    $languages = locale_supported_languages();
+    $languages = $languages['name'];
+  }
+  else {
+    // Ensure the locale/language is correctly returned, even without locale.module.
+    // Useful for e.g. XML/HTML 'lang' attributes.
+    $languages = array('en' => 'English');
+  }
+  
+  if ($user->uid && isset($languages[$user->language])) {
+    return $user->language;
+  }
+  elseif ($group_node = og_get_group_context()) {
+    if ($group_node->og_language && isset($languages[$group_node->og_language])) {
+      return $group_node->og_language;
+    }
+  }
+  else {
+    return key($languages);
+  }
 }
 
 /**
@@ -122,6 +160,7 @@ function og_theme() {
   elseif (arg(0) == 'comment' && is_numeric(arg(2))) {
     $group_node = og_set_theme(arg(2));
   }
+  
   $_SESSION['og_last'] = $group_node;
   og_set_group_context($group_node);
 }
@@ -818,7 +857,7 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
   }
   
   if ($node->body) {
-    $node->body = '<div id="mission">'. $node->body. '</div>';
+    $node->body = '<div id="og-mission" class="mission">'. $node->body. '</div>';
   }
   $node->body .= $output. $icon;
   return $node;
@@ -890,6 +929,19 @@ function og_node_form($node) {
       break;    
   }
   
+  // language
+  if (module_exist('locale') && $languages = locale_supported_languages()) {
+    if (count($languages['name']) > 1) {
+      $languages['name'] = array_map('check_plain', $languages['name']);
+      $form['locale']['og_language'] = array('#type' => 'radios',
+        '#title' => t('Language'),
+        '#default_value' => $node->og_language,
+        '#options' => $languages['name'],
+        '#description' => t('Selecting a different locale will change the interface language of the group. Users who have chosen a preferred language always see their chosen language.'),
+      );
+    }
+  }
+  
   $form['og_theme'] = system_theme_select_form(t('Selecting a different theme will change the look and feel of the group.'), $edit['theme'], 2);;
   return $form;
 }
@@ -944,20 +996,20 @@ function og_submit_group(&$node) {
 }
 
 function og_load_group(&$node) {
-  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, website AS og_website, register AS og_register, directory AS og_directory FROM {og} WHERE nid = %d';
+  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, website AS og_website, register AS og_register, directory AS og_directory, language AS og_language FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, db_fetch_array($result));
   $node->comment = COMMENT_NODE_DISABLED; // we don't use comments on og nodes
 }
 
 function og_insert_group($node) {
-  $sql = "INSERT INTO {og} (nid, theme, selective, description, website, register, directory) VALUES (%d, '%s', %d, '%s', '%s', %d, %d)";
-  db_query($sql, $node->nid, $node->theme, $node->og_selective, $node->og_description, $node->og_website, $node->og_register, $node->og_directory);
+  $sql = "INSERT INTO {og} (nid, theme, selective, description, website, register, directory, language) VALUES (%d, '%s', %d, '%s', '%s', %d, %d, '%s')";
+  db_query($sql, $node->nid, $node->theme, $node->og_selective, $node->og_description, $node->og_website, $node->og_register, $node->og_directory, $node->og_language);
 }
 
 function og_update_group($node) {
-  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', website = '%s', directory = %d WHERE nid = %d";
-  db_query($sql, $node->theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_website, $node->og_directory, $node->nid);
+  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', website = '%s', directory = %d, language = '%s' WHERE nid = %d";
+  db_query($sql, $node->theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_website, $node->og_directory, $node->og_language, $node->nid);
 }
 
 /**
@@ -1204,7 +1256,7 @@ function og_user($op, &$edit, &$account, $category = NULL) {
       $values = array();
       $result = db_query(db_rewrite_sql('SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ('. str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND o.register = 1 ORDER BY n.title'), variable_get('og_node_types', array('og')));
       while ($group = db_fetch_object($result)) {
-        $options[$group->nid] = t('Subscribe to %name', array('%name' => theme('placeholder', $group->title)));
+        $options[$group->nid] = t('Subscribe to %name.', array('%name' => theme('placeholder', $group->title)));
         $values[$group->nid] = in_array($group->nid, (array) $edit['og_register']) ? $group->nid : 0;
         if ($group->selective) {
           $options[$group->nid] .= ' '. theme('placeholder', t('(approval needed)'));
