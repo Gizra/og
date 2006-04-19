@@ -1061,11 +1061,13 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'prepare':
       // only show this message when *editing* another user's nodes
       global $user;
-      if ($node->nid && $node->uid != $user->uid) {
+      if ($node->nid && $node->uid != $user->uid && !in_array($node->type, variable_get('og_node_types', array('og')))) {
         drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are shown in the audience field.', array('%author' => theme('placeholder', t('Author')))));
       }
       
-      $node->comment = COMMENT_NODE_DISABLED; // TODO: this line doesn't appear to do anything. supposed to properly set comment radio for new nodes
+      if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+        $node->comment = COMMENT_NODE_DISABLED;
+      }
       break;
     case 'delete':
       og_delete_grants($node);
