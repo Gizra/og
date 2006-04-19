@@ -1197,8 +1197,8 @@ function og_mail($node) {
     while ($row = db_fetch_object($result)) {
       $subj = "[$row->group_name] ". t('%author added \'%title\' at %site', array('%author' => $author->name, '%title' => $node->title, '%site' => variable_get('site_name', drupal)));
       $txt = "'$node->title' by $author->name\n$url\n\n";
-      $txt .= $node->readmore ? t('EXCERPT') : t('FULL POST');
-      $txt .= "\n". og_mail_output(node_prepare($node, TRUE), 1);
+      $node = node_prepare($node, FALSE);
+      $txt .= "\n". og_mail_output($node->body);
       $txt .= "\n\n-----------------------\n";
       $txt .= t("You are subscribed to the group '%group_name' at '%site'. To manage your subscription, visit %group_url", array('%group_name' => $row->group_name, '%site' => variable_get('site_name', drupal), '%group_url' => url("og/manage/$row->gid", NULL, NULL, TRUE)));
       $subject = "[]";
@@ -1219,7 +1219,7 @@ function og_mail_urls($url = 0) {
 
 // takes filtered HTML as input and transforms for email
 // modified from project.module 
-function og_mail_output(&$body, $html = 1) {
+function og_mail_output($body, $html = TRUE) {
   static $i = 0;
 
   if ($html) {
@@ -1247,6 +1247,7 @@ function og_mail_output(&$body, $html = 1) {
   else {
     $body = decode_entities($body);
   }
+  return $body;
 }
 
 function og_user($op, &$edit, &$account, $category = NULL) {
