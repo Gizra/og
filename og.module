@@ -1081,7 +1081,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_insert_group($node);
       }
       og_save_permissions($node);
-      og_mail($node);
+      if (!module_exist('og2list')) {
+        og_mail($node);
+      }
       break;
     case 'update':
       if (in_array($node->type, variable_get('og_node_types', array('og')))) {
