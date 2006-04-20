@@ -162,7 +162,7 @@ function og_update_9() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
-      $ret = update_sql("ALTER TABLE {og} ADD language varchar(12) NOT NULL default ''");
+      $ret[] = update_sql("ALTER TABLE {og} ADD language varchar(12) NOT NULL default ''");
   }
   return $ret ? $ret : array();
 }
