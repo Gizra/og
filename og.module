@@ -833,7 +833,7 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
       else {
         $types[$ntype] = $ntype;
       }
-      $exempt = array_merge(array('og'), variable_get('og_omitted', array()));
+      $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
       foreach ($types as $type => $val) {
         if (!in_array($type, $exempt)) {
           if ($table = og_list_og($node->nid, $type, $mode)) {
