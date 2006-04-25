@@ -22,7 +22,6 @@ class OgTestCase extends DrupalTestCase {
     $this->assertTrue($ret, ' [browser] POST by click on ' . t('Submit'));
     $this->_content = $this->_browser->getContent();
 
-    //die(var_dump($this->_browser->_page));
     $this->assertWantedText(t('Your %post was created.', array ('%post' => 'group')), 'Group created');
 
     $node = node_load(array('title' => $edit['title']));
