@@ -480,7 +480,7 @@ msgid "Public"
 msgstr ""
 
 #: c:\Contributions\modules\og\og.module:951
-msgid "Show this post to everyone or only to members of the checked selected below."
+msgid "Show this post to everyone or only to members of the groups checked below."
 msgstr ""
 
 #: c:\Contributions\modules\og\og.module:965
