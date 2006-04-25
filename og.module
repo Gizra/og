@@ -239,7 +239,7 @@ function og_email($gid) {
   $node = node_load($gid);
   drupal_set_title(t('Send email to %group', array('%group' => $node->title)));
 
-  return drupal_get_form('og_email_form', og_email_form($gid));//print theme('page', drupal_get_form('og_email_form', og_email_form($gid)));
+  return drupal_get_form('og_email_form', og_email_form($gid));
 }
 
 function og_email_form($gid) {
@@ -284,9 +284,21 @@ function og_email_form_submit($form_id, $form_values) {
 function og_manage($gid) {
   global $user;
 
+  // warn users who can't receive mail anyway
+  if ($txt = user_validate_mail($user->mail)) {
+    drupal_set_message($txt, 'error');
+    return '';
+  }
+  
   $group = node_load($gid);
   // group manager can't unsubscribe
-  if ($group->og_selective != OG_CLOSED && $group->uid != $user->uid) {
+  if ($group->og_selective == OG_CLOSED) {
+    drupal_set_message(t('You may not unsubscribe from this group because it is a %closed group. You should request unsubscription from a group administrator.', array('%closed' => t('closed'))));
+  }
+  elseif ($group->uid == $user->uid) {
+    drupal_set_message(t('You may not unsubscribe from this group because you are its owner. A site administrator can assign ownership to another user and then you can unsubscribe.'));
+  }
+  else {
     $links[] = l(t('Unsubscribe from this group'), "og/unsubscribe/$gid", NULL, 'destination=og');
     $form['unsubscribe'] = array('#type' => 'markup', '#title' => t('Goodbye'), '#value' => theme('item_list', $links, t('Actions')));
   }
@@ -296,7 +308,7 @@ function og_manage($gid) {
   $output = drupal_get_form('og_manage_form', $form);
   $bc = array(l(t('home'), ''), l(t('groups'), 'og'), l($group->title, "node/$gid"));
   drupal_set_breadcrumb($bc);
-  print theme('page', $output);
+  return $output;
 }
 
 function og_manage_form_submit($form_id, $form_values) {
@@ -636,7 +648,7 @@ function og_add_users_page($gid) {
     $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
     $form['gid'] = array('#type' => 'value', '#value' => $gid);
     $output = drupal_get_form('og_add_users', $form);
-    print theme('page', $output);
+    return $output;
   }
   else {
     drupal_access_denied();
@@ -722,7 +734,7 @@ function og_list_users_page($gid) {
   $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
   drupal_set_breadcrumb($bc);
   drupal_set_title(t('Subscribers'));
-  print theme('page', $output);
+  return $output;
 }
 
 function og_list_groups_page() {
@@ -744,13 +756,21 @@ function og_list_groups_page() {
     $rows[] = array(array('data' => t('No groups'), 'colspan' => 4));
   }
   $output = theme('table', $header, $rows). theme('pager', NULL, 50);
-  print theme('page', $output);
+  return $output;
 }
 
-// $str_types is one type or an array of types which should be selected.
-// if not provided, we return all non-og-type nodes
-// filtering for a given gid is done by passing a a special $arg to db_rewrite_sql()
-function og_get_home_nodes_sql($str_types = NULL) {
+/**
+ * Get SQL that returns nodes on a group home page
+ * Filtering for a given group is done by passing an $arg to db_rewrite_sql(), not here.
+ *
+ * @param $str_types
+ *   array containing node types that should be returned   
+ * @param $distinct_field
+ *   specify which field should be DISTINCT().    
+ * @return string 
+ *   SQL fragment
+ **/
+function og_get_home_nodes_sql($str_types = NULL, $group_by = NULL) {
   if ($str_types) {
     if (is_array($str_types)) {
       foreach ($str_types as $key => $value) {
@@ -765,9 +785,9 @@ function og_get_home_nodes_sql($str_types = NULL) {
   else {
     $where = "n.type NOT IN ('" . implode("','", variable_get('og_node_types', array('og'))) . "')";
   }
-
+  
   // we LEFT JOIN to node_comment_stats in case comment.module is disabled.
-  return "SELECT DISTINCT n.nid, n.title, n.uid, u.name, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND $where ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
+  return "SELECT n.nid, n.title, n.uid, u.name, u.picture, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND $where $group_by ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
 }
 
 /**
@@ -869,6 +889,8 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
  * @param object $node
  */
 function og_node_form($node) {
+  global $user;
+  
   $edit = $_POST['edit'];
 
   $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true, '#description' => t('A brief description for the group details block and the group directory.'));
@@ -1061,9 +1083,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'prepare':
       // only show this message when *editing* another user's nodes
       global $user;
-      if ($node->nid && $node->uid != $user->uid && !in_array($node->type, variable_get('og_node_types', array('og')))) {
-        drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are shown in the audience field.', array('%author' => theme('placeholder', t('Author')))));
-      }
       
       if (in_array($node->type, variable_get('og_node_types', array('og')))) {
         $node->comment = COMMENT_NODE_DISABLED;
@@ -1082,7 +1101,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       og_save_permissions($node);
       if (!module_exist('og2list')) {
-        og_mail($node);
+        og_mail(node_get_name($node), $node);
       }
       break;
     case 'update':
@@ -1114,6 +1133,11 @@ function og_form_alter($form_id, &$form) {
     $subs = og_get_subscriptions($node->uid);
     foreach ($subs as $key => $val) {
       $options[$key] = $val['title'];
+    }
+    
+    // TODO: this behavior is not ideal in some curcumstances. We might disable those checkboxes where admin is not a subscriber
+    if ($node->nid && $node->uid != $user->uid && !in_array($node->type, variable_get('og_node_types', array('og')))) {
+          drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are shown in the audience field.', array('%author' => theme('placeholder', t('Author')))));
     }
 
     if (user_access('administer organic groups')) {
@@ -1178,38 +1202,66 @@ function og_get_visibility_default() {
   }
 }
 
+
+function og_comment($comment, $op) {
+  switch ($op) {
+    case 'insert':
+      $node = node_load($comment['nid']);
+      $comment['og_groups'] = $node->og_groups;
+      og_mail('comment', (object)$comment);
+      break;
+  }  
+}
+
 /**
- * Send this node via email to all email subscribers. Called from og_nodeapi()
+ * Send this node/comment via email to all email subscribers. Called from og_nodeapi() and og_comment()
  *
- * @param $node
- *   the node which was just added or updated
+ * @param $type
+ *   the object type: node or comment
+ * @param $obj
+ *   the node or comment which was just added. if comment, the $og_groups element should be copied from parent node
  * @return
  *   none
  */
-function og_mail($node) {
-  if ($node->og_groups) {
-    $url = url("node/$node->nid", NULL, NULL, TRUE);
-    $author = user_load(array('uid' => $node->uid));
+function og_mail($type, $obj) {
+  if ($obj->og_groups) {
+    // prepare the body
+    if ($type == 'comment') {
+      $url = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
+      $obj->name -> $obj->uid ? $obj->registered_name : $obj->name;
+      $obj->title = $obj->subject;
+      $obj->body = check_markup($obj->comment, $comment->format, FALSE);
+      $originalurl = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
+      $replyurl = url("comment/reply/$obj->nid/$obj->cid", NULL, NULL, TRUE);
+    }
+    else {
+      $url = url("node/$obj->nid", NULL, NULL, TRUE);
+      $obj->name = user_load(array('uid' => $obj->uid))->name;
+      $obj = node_prepare($obj, FALSE);
+      $replyurl = url("comment/reply/$obj->nid", NULL, 'comment-form', TRUE);
+      $originalurl = url("node/$obj->nid", NULL, NULL, TRUE);
+    }
+    
     $sitemail = variable_get("site_mail", ini_get("sendmail_from"));
-    $headers = "From: $sitemail\nReply-to: $sitemail\nX-Mailer: Drupal\nReturn-path: $sitemail\nErrors-to: $sitemail";
+    $headers = "From: $sitemail\nReply-to: $sitemail\nX-Mailer: Drupal, og.module\nReturn-path: $sitemail\nErrors-to: $sitemail";
     //get email subscribers
-    $groups = implode(', ', $node->og_groups);
+    $groups = implode(', ', $obj->og_groups);
     $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {node} n ON ou.nid=n.nid WHERE ou.nid IN ($groups) AND ou.mail_type=1";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
-      $subj = "[$row->group_name] ". t('%author added \'%title\' at %site', array('%author' => $author->name, '%title' => $node->title, '%site' => variable_get('site_name', drupal)));
-      $txt = "'$node->title' by $author->name\n$url\n\n";
-      $node = node_prepare($node, FALSE);
-      $txt .= "\n". og_mail_output($node->body);
+      $subj = "[$row->group_name: $type] ". t('%author added \'%title\' at %site', array('%author' => $obj->name, '%title' => $obj->title, '%site' => variable_get('site_name', drupal)));
+      $txt = "'$obj->title' by $obj->name\n";
+      $txt .= t('View original: '). $originalurl. "\n";
+      $txt .= t('Post reply: '). $replyurl. "\n";
+      $txt .= "\n". og_mail_output($obj->body);
       $txt .= "\n\n-----------------------\n";
       $txt .= t("You are subscribed to the group '%group_name' at '%site'. To manage your subscription, visit %group_url", array('%group_name' => $row->group_name, '%site' => variable_get('site_name', drupal), '%group_url' => url("og/manage/$row->gid", NULL, NULL, TRUE)));
-      $subject = "[]";
       user_mail($row->mail, $subj, $txt, $headers);
     }
   }
 }
 
-// 2 functions blatantly ripped from mail.inc in project.module package
+// 2 functions ripped from mail.inc in project.module package
 function og_mail_urls($url = 0) {
   static $urls = array();
   if ($url) {
@@ -1450,7 +1502,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
   if ($op == 'list') {
     $blocks[0]['info'] = t('Group details');
     // $blocks[1] used to be the album block. We do not change the numbers to not confuse people who update.
-    $blocks[2]['info'] = t('Group subscribers');
+    $blocks[2]['info'] = t('Group authors');
     $blocks[3]['info'] = t('New groups');
     $blocks[4]['info'] = t('My groups');
     return $blocks;
@@ -1530,22 +1582,23 @@ function og_block_subscribers() {
   global $user;
   if ($group_node = og_get_group_context()) {
     $gid = $group_node->nid;
+    // only members can see subscriber list
     if (in_array($gid, array_keys($user->og_groups))) {
       $max = variable_get('og_block_cnt_2', 10);
-      $sql = og_list_users_sql(0);
-      $result = db_query_range($sql, $gid, 0, $max);
+      $sql = og_get_home_nodes_sql(NULL, 'GROUP BY n.uid');
+      $result = db_query_range(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $gid)), 0, $max);
       while ($row = db_fetch_object($result)) {
         //showing member pictures
-        if (variable_get('og_member_pics', 1)) {
+        if (variable_get('og_member_pics', TRUE)) {
            $link = theme('user_picture', $row). theme('username', $row);
         }
         else {
           $link = theme('username', $row);
         }
-        if (!$row->grant_view) {
-          // TODO: define a default implementation for this and document themeability using phpdoc
-          $link .= theme('mark', OG_ADMIN);
-        }
+        // if (!$row->grant_view) {
+//           // TODO: define a default implementation for this and document themeability using phpdoc
+//           $link .= theme('mark', OG_ADMIN);
+//         }
         $links[] = $link;
       }
 
@@ -1555,7 +1608,7 @@ function og_block_subscribers() {
           $append = '<div class="more-link">'. l(t('more'), "og/users/$gid", array('title' => t('View all subscribers.'))) .'</div>';;
         }
         $block['content'] = theme('item_list', $links). $append;
-        $block['subject'] = t('Recent subscribers');
+        $block['subject'] = t('Recent authors');
         return $block;
       }
     }
