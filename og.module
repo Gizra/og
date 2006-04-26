@@ -57,8 +57,7 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
   }
   else {
-    // we have to perform a load in order to assure that the $user->og_groups bits are present.
-    $user = user_load(array('uid' => $user->uid));
+    // we get a NOTICE if doing this from within og_theme() so I do it here for now.
     $_SESSION['og_last'] = og_get_group_context();
 
     // these are considered members only pages even for public groups
@@ -85,6 +84,9 @@ function og_menu($may_cache) {
 function og_init() {
   // only bother when we are not serving a cached page. check for which functon that only exists afterwards
   if (function_exists('drupal_set_content')) {
+    // we have to perform a load in order to assure that the $user->og_groups bits are present.
+    global $user;
+    $user = user_load(array('uid' => $user->uid));
     og_theme();
   }
 }
