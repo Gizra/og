@@ -59,6 +59,7 @@ function og_menu($may_cache) {
   else {
     // we have to perform a load in order to assure that the $user->og_groups bits are present.
     $user = user_load(array('uid' => $user->uid));
+    $_SESSION['og_last'] = og_get_group_context();
 
     // these are considered members only pages even for public groups
     foreach ($user->og_groups as $key => $sub) {
@@ -83,7 +84,7 @@ function og_menu($may_cache) {
 
 function og_init() {
   // only bother when we are not serving a cached page. check for which functon that only exists afterwards
-  if (function_exists('module_init')) {
+  if (function_exists('drupal_set_content')) {
     og_theme();
   }
 }
@@ -129,9 +130,8 @@ function og_perm() {
 }
 
 /**
- * override theme based on what group is being displayed (if any).
- * be smart about selecting the 'active' group for ambigous urls like node/$nid
- * sets a $_SESSION variable for current group
+ * Override theme based on what group is being displayed (if any).
+ * Be smart about selecting the 'active' group for ambigous urls like node/$nid
  *
  * @param
  *   none
@@ -161,7 +161,6 @@ function og_theme() {
     $group_node = og_set_theme(arg(2));
   }
   
-  $_SESSION['og_last'] = $group_node;
   og_set_group_context($group_node);
 }
 
@@ -1185,6 +1184,7 @@ function og_form_alter($form_id, &$form) {
     if (count($form['og_nodeapi']['visible']) > 1) {
       $form['og_nodeapi']['#type'] = 'fieldset';
       $form['og_nodeapi']['#title'] = t('Groups');
+      $form['og_nodeapi']['#collapsed'] = isset($edit['og_groups']) ? TRUE : FALSE; //TODO: not working
     }
   }
 }
