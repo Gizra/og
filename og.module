@@ -1161,12 +1161,12 @@ function og_form_alter($form_id, &$form) {
         $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 0);
         break;
 
-      //user decides how public the post is. the only difference between these two checkboxes is the default value
+      //user decides how public the post is.
       case OG_VISIBLE_CHOOSE_PUBLIC:
-        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone or only to members of the groups checked below.'));
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked below. Only uncheck this box if truly needed.'));
         break;
       case OG_VISIBLE_CHOOSE_PRIVATE:
-        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone or only to members of the groups checked below.'));
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked below. Only check this box if truly needed.'));
         break;
     }
 
@@ -1232,7 +1232,7 @@ function og_mail($type, $obj) {
     // prepare the body
     if ($type == 'comment') {
       $url = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
-      $obj->name = $obj->uid ? $obj->registered_name : $obj->name;
+      $obj->name = $obj->name; // not working: $obj->uid ? $obj->registered_name : $obj->name;
       $obj->title = $obj->subject;
       $obj->body = check_markup($obj->comment, $comment->format, FALSE);
       $originalurl = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
@@ -1254,6 +1254,7 @@ function og_mail($type, $obj) {
     $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {node} n ON ou.nid=n.nid WHERE ou.nid IN ($groups) AND ou.mail_type=1";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
+      // see http://www.ietf.org/rfc/rfc2369.txt. UTF8 OK? $headers .= "\nX-List_ID: "; 
       $subj = "[$row->group_name: $type] ". t('%author added \'%title\' at %site', array('%author' => $obj->name, '%title' => $obj->title, '%site' => variable_get('site_name', drupal)));
       $txt = "'$obj->title' by $obj->name\n";
       $txt .= t('View original: '). $originalurl. "\n";
