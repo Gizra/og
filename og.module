@@ -1141,16 +1141,18 @@ function og_form_alter($form_id, &$form) {
           drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are shown in the audience field.', array('%author' => theme('placeholder', t('Author')))));
     }
 
-    if (user_access('administer organic groups')) {
-      $vis = OG_VISIBLE_CHOOSE_PRIVATE;
+    // get the visibility for normal users
+    $vis = variable_get('og_visibility', 0);
+    
+    // override visibility for og admins and when author only has 1 group
+    if (user_access('administer organic groups') && $vis < 2) {
+      $vis = $vis == OG_VISIBLE_GROUPONLY ? OG_VISIBLE_CHOOSE_PRIVATE : OG_VISIBLE_CHOOSE_PUBLIC;
     }
     elseif (!count($subs)) {
       // don't show checkbox if no subscriptions. must be public.
       $vis = OG_VISIBLE_BOTH;
     }
-    else {
-      $vis = variable_get('og_visibility', 0);
-    }
+    
     switch ($vis) {
       case OG_VISIBLE_BOTH:
         $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 1);
