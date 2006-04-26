@@ -733,7 +733,7 @@ function og_list_users_page($gid) {
   $output = theme('table', $header, $rows);
   $bc = array(l(t('Home'), ''), l(t('groups'), 'og'), l($node->title, "node/$node->nid"));
   drupal_set_breadcrumb($bc);
-  drupal_set_title(t('Subscribers'));
+  drupal_set_title(t('Subscribers'). ': '. l($node->title, "node/$node->nid"));
   return $output;
 }
 
@@ -1228,7 +1228,7 @@ function og_mail($type, $obj) {
     // prepare the body
     if ($type == 'comment') {
       $url = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
-      $obj->name -> $obj->uid ? $obj->registered_name : $obj->name;
+      $obj->name = $obj->uid ? $obj->registered_name : $obj->name;
       $obj->title = $obj->subject;
       $obj->body = check_markup($obj->comment, $comment->format, FALSE);
       $originalurl = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
@@ -1236,7 +1236,8 @@ function og_mail($type, $obj) {
     }
     else {
       $url = url("node/$obj->nid", NULL, NULL, TRUE);
-      $obj->name = user_load(array('uid' => $obj->uid))->name;
+      $account = user_load(array('uid' => $obj->uid));
+      $obj->name = $account->name;
       $obj = node_prepare($obj, FALSE);
       $replyurl = url("comment/reply/$obj->nid", NULL, 'comment-form', TRUE);
       $originalurl = url("node/$obj->nid", NULL, NULL, TRUE);
@@ -1676,7 +1677,7 @@ function og_block_details() {
     $output .= theme('item_list', $links);
 
     $block['content'] = $output;
-    $block['subject'] = l($node->title, "node/$node->nid");
+    $block['subject'] = $node->title;
     return $block;
   }
 }
