@@ -121,9 +121,10 @@ function i18n_get_lang() {
       return $group_node->og_language;
     }
   }
-  else {
-    return key($languages);
-  }
+  
+  // no matches. return default language
+  return key($languages);
+  
 }
 
 /**
@@ -891,7 +892,7 @@ function theme_og_mission($html) {
 }
 
 /**
- * Implementation of hook_form()
+ * Adds standard fields for any node named as a group node
  *
  * @param object $node
  */
