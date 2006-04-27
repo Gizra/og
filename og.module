@@ -47,6 +47,7 @@ function og_menu($may_cache) {
     // anon users should be able to get to the subscribe page
     $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('subscribe to group'));
     $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => user_access('access content'));
+    
     $access = $user->uid; // login is required
     $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('unsubscribe from group'));
     $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('approve subscription request'));
@@ -71,6 +72,7 @@ function og_menu($may_cache) {
       $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => array($key), 'access' => TRUE, 'type' => MENU_CALLBACK);
     }
 
+    // email tab
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(arg(1));
       if (in_array($node->type, variable_get('og_node_types', array('og')))) {
@@ -252,7 +254,7 @@ function og_email_form($gid) {
   $form['body'] = array('#type' => 'textarea', '#title' => t('Body'), '#rows' => 5, '#cols' => 90, '#description' => t('Enter a body for your email.'), '#required' => true);
   $form['send'] = array('#type' => 'submit', '#value' => t('Send email'));
   $form['gid'] = array('#type' => 'value', '#value' => $gid);
-  return $form;//drupal_get_form('og_email_form', $form);//form($form);
+  return $form;
 }
 
 function og_email_form_validate($form_id, $form_values) {
@@ -878,10 +880,14 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
   }
   
   if ($node->body) {
-    $node->body = '<div id="og-mission" class="mission">'. $node->body. '</div>';
+    $node->body = theme('og_mission', $node->body);
   }
   $node->body .= $output. $icon;
   return $node;
+}
+
+function theme_og_mission($html) {
+  return '<div id="og-mission" class="mission">'. $html. '</div>';
 }
 
 /**
@@ -1651,13 +1657,9 @@ function og_block_details() {
       $txt = l($txt, "og/users/$node->nid");
       $txt .= $cntpending ? " ($cntpending)" : '';
       $links[] = $txt;
-      $links[] = t('age: %age', array('%age' => format_interval(time()-$node->created, 2)));
-      if (variable_get('og_member_pics',1)) {
-        $links[] = t('group manager: '). theme('user_picture',$node). theme('username', $node);
-      }
-      else {
-       $links[] =  t('group manager: '). theme('username', $node);
-      }
+      // this is pretty pointless info IMO. uncomment it if you wish.
+      // $links[] = t('age: %age', array('%age' => format_interval(time()-$node->created, 2)));
+      $links[] =  t('manager: '). theme('username', $node);
       $links[] = l(t('my subscription'), "og/manage/$node->nid");
       if (isset($node->og_website) && !empty($node->og_website)) {
         $links[] = l(t('website'), $node->og_website);

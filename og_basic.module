@@ -27,7 +27,7 @@ function og_basic_menu($may_cache) {
 
 /**
  * Implementation of hook_node_info().
- * Note that our nodes are type=og instead of type=og_basic. This is a legacy convenience to when og did n ot support external
+ * Note that our nodes are type=og instead of type=og_basic. This is a legacy convenience to when og did not support external
  * node types. This will help contributed modules catch up without much pain.
  */
 function og_basic_node_info() {
@@ -42,7 +42,7 @@ function og_basic_access($op, $node) {
   if ($op == 'create') {
     return user_access('create groups') && $user->uid;
   }
-  
+
   if ($user->uid && $node->uid == $user->uid && ($op == 'update' || $op == 'delete')) {
     return TRUE;
   }
