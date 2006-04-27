@@ -65,14 +65,16 @@ function og_menu($may_cache) {
     foreach ($user->og_groups as $key => $sub) {
       $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('subscriber management'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => TRUE);
       $items[] = array('path' => "og/users/$key/list", 'callback' => 'og_list_users_page', 'title' => t('list'), 'callback arguments' => array($key), 'type' => MENU_DEFAULT_LOCAL_TASK, 'access' => TRUE);
-      $items[] = array('path' => "og/users/$key/add", 'callback' => 'og_add_users_page', 'title' => t('add subscribers'), 'callback arguments' => array($key), 'type' => MENU_LOCAL_TASK, 'access' => TRUE, 'weight' => 5);
       $items[] = array('path' => "og/manage/$key", 'callback' => 'og_manage', 'title' => t('manage subscription'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
       $items[] = array('path' => "og/invite/$key", 'callback' => 'og_invite', 'title' => t('send invitation'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
+      // group admin only
+      $items[] = array('path' => "og/users/$key/add", 'callback' => 'og_add_users_page', 'title' => t('add subscribers'), 'callback arguments' => array($key), 'type' => MENU_LOCAL_TASK, 'access' => node_access('update', array('nid' => $key, 'status' => 1)), 'weight' => 5);
+
       // silly page that just redirects to the group page
       $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => array($key), 'access' => TRUE, 'type' => MENU_CALLBACK);
     }
 
-    // email tab
+    // email tab on group node
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(arg(1));
       if (in_array($node->type, variable_get('og_node_types', array('og')))) {
@@ -642,21 +644,16 @@ function og_list_users_sql($min_is_active = 1, $min_is_admin = 0) {
 }
 
 function og_add_users_page($gid) {
-  if (node_access('update', node_load($gid))) {
-    $form['og_names'] = array('#type' => 'textarea',
-                              '#title' => t('List of users'),
-                              '#rows' => 5,
-                              '#cols' => 70,
-                              '#description' => t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.')
-                              );
-    $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
-    $form['gid'] = array('#type' => 'value', '#value' => $gid);
-    $output = drupal_get_form('og_add_users', $form);
-    return $output;
-  }
-  else {
-    drupal_access_denied();
-  }
+  $form['og_names'] = array('#type' => 'textarea',
+                            '#title' => t('List of users'),
+                            '#rows' => 5,
+                            '#cols' => 70,
+                            '#description' => t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.')
+                            );
+  $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+  $output = drupal_get_form('og_add_users', $form);
+  return $output;
 }
 
 function og_add_users_validate($form_id, $form_values) {
