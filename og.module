@@ -49,6 +49,7 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => user_access('access content'));
     
     $access = $user->uid; // login is required
+    $items[] = array('path' => 'og/user', 'type' => MENU_CALLBACK, 'callback' => 'og_list_groups_page', 'callback arguments' => array($user->uid), 'access' => $access, 'title' => t('my groups'));
     $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('unsubscribe from group'));
     $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('approve subscription request'));
     $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('deny subscription request'));
@@ -738,10 +739,17 @@ function og_list_users_page($gid) {
   return $output;
 }
 
-function og_list_groups_page() {
+function og_list_groups_page($uid = NULL) {
   global $user;
 
-  $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC", 'og', 'nid'), 50);
+  if (!$uid) {
+    // Retrieve all groups
+    $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC", 'og', 'nid'), 50);
+  }
+  else {
+    // Retrieve only current user's group
+    $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid INNER JOIN {og_uid} ou ON ou.uid = u.uid WHERE og.nid IN (". implode(',', array_keys($user->og_groups)) .") ORDER BY n.nid DESC", 'og', 'nid'), 50);
+  }
   $header = array(t('Title'), t('Subscribers'), t('Manager'), t('Description'));
 
   while ($node = db_fetch_object($result)) {
@@ -1564,7 +1572,7 @@ function og_block_my() {
     $count = count($items);
     if ($count > $max) {
       $output .= theme('item_list', array_slice($items, 0, $max));
-      $output .= '<div class="more-link">'. l(t('more'), 'og', array('title' => t('Browse the newest groups.'))) .'</div>';
+      $output .= '<div class="more-link">'. l(t('more'), 'og/user', array('title' => t('Browse all of my groups.'))) .'</div>';
     }
     else {
       $output .= theme('item_list', $items);
