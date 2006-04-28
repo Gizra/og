@@ -1106,7 +1106,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       og_save_permissions($node);
       if (!module_exist('og2list')) {
-        og_mail(node_get_name($node), $node);
+        if ($node->status) {
+          og_mail(node_get_name($node), $node);
+        }
       }
       break;
     case 'update':
@@ -1214,9 +1216,11 @@ function og_get_visibility_default() {
 function og_comment($comment, $op) {
   switch ($op) {
     case 'insert':
-      $node = node_load($comment['nid']);
-      $comment['og_groups'] = $node->og_groups;
-      og_mail('comment', (object)$comment);
+      if ($comment['status'] == COMMENT_PUBLISHED) {
+        $node = node_load($comment['nid']);
+        $comment['og_groups'] = $node->og_groups;
+        og_mail('comment', (object)$comment);
+      }
       break;
   }  
 }
