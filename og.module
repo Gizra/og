@@ -1066,7 +1066,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         array_unshift($bc, l($group_node->title, "node/$group_node->nid"));
         array_unshift($bc, l(t('groups'), 'og')); // comment this out if you *don't* want a link to group directory
         array_unshift($bc, l(t('home'), ''));
-        // drupal_set_breadcrumb($bc);
+        drupal_set_breadcrumb($bc);
       }
       if (in_array($node->type, variable_get('og_node_types', array('og')))) {
         og_view_group($node, $teaser, $page);
