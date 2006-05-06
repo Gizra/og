@@ -1058,7 +1058,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       $group_node = og_get_group_context();
       if ($group_node && $page && $node->og_groups) {
         $bc = drupal_get_breadcrumb($newbc);
-        dprint_r($bc);
         unset($bc[0]);
         // get rid of link to all forums. it breaks you out of group world
         if ($bc[1] == l(t('forums'), 'forum')) {
