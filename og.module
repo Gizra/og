@@ -1528,6 +1528,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     $blocks[2]['info'] = t('Group authors');
     $blocks[3]['info'] = t('New groups');
     $blocks[4]['info'] = t('My groups');
+    $blocks[5]['info'] = t('Group notifications');
     return $blocks;
   }
   elseif ($op == 'view') {
@@ -1540,6 +1541,9 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
         return og_block_new();
       case 4:
         return og_block_my();
+      case 5:
+        return og_block_notifications();
+
     }
   }
   else if ($op == 'configure') {
@@ -1560,6 +1564,22 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
         }
         break;
     }
+  }
+}
+
+function og_block_notifications() {
+  if ($groupnode = og_get_group_context()) {
+    $content = t('This group offers a %groupfeed and an %email.', array('%groupfeed' => l(t('RSS feed'), 'og/feed/'. $groupnode->nid), '%email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
+    if (module_exist('viewfeed') && module_exist('og_views')) {
+      $content .= t(' Or subscribe to these personalized, sitewide feeds:');
+      $links[] = t('my unread: '). theme('links', array(l('feed', 'viewfeed/og_unread'), l('page', 'og_unread')));
+      $links[] = t('my groups: '). theme('links', array(l('feed', 'viewfeed/og_tracker'), l('page', 'og_tracker')));
+      $links[] = t('all posts: '). theme('links', array(l('feed', 'viewfeed/tracker'), l('page', 'tracker')));
+      $content .= theme('item_list', $links);
+    }
+    $block['content'] = $content;
+    $block['subject'] = t('Group notifications');
+    return $block;
   }
 }
 
