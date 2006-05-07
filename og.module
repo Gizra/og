@@ -1132,13 +1132,23 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 }
 
 function og_form_alter($form_id, &$form) {
-  global $user;
   $node = $form['#node'];
-  $edit = $_REQUEST['edit'];
   
   if (!strpos($form_id, 'node_form') || in_array($node->type, variable_get('og_omitted', array()))) {
     return;
   }
+  og_form_add_og_audience($form_id, $form);
+}
+
+/**
+ * Helper method to add OG audience fields to a given form. This is
+ * lives in a separate method from og_form_alter() so it can be shared
+ * by other OG contrib modules.
+ */
+function og_form_add_og_audience($form_id, &$form) {
+  global $user;
+  $edit = $_REQUEST['edit'];
+  $node = $form['#node'];
 
   if (in_array($node->type, variable_get('og_node_types', array('og')))) {
     $form = array_merge($form, og_node_form($node));
