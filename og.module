@@ -1804,18 +1804,18 @@ function og_settings() {
   foreach (node_get_types() as $type => $name) {
     $options[$type] = t($name);
   }
-
-  $form['og_settings']['node_form']['og_node_types'] = array('#type' => 'select', '#title' => t('Organic Group content types'), '#default_value' => variable_get('og_node_types', array('og')), '#options' => $options, '#description' => t("Select the node types which act as group nodes. Usually select %group.", array('%group' => theme('placeholder', 'group'))), '#multiple' => TRUE);
-
+  $og_node_type_options = $options;   // save this for og_node_types
   // hide node types which are already serving as a group node
   foreach (variable_get('og_node_types', array('og')) as $val) {
     unset($options[$val]);
   }
-  $form['og_settings']['node_form']['og_omitted'] = array('#type' => 'select', '#title' => t('Omitted content types'), '#default_value' => variable_get('og_omitted', array()), '#options' => $options, '#description' => t('Select any node types which should <em>not</em> participate in the Audience targetting system. Node types which you selected above will be automatically excluded.'), '#multiple' => TRUE);
+  $form['og_settings']['node_form']['og_omitted'] = array('#type' => 'select', '#title' => t('Omitted content types'), '#default_value' => variable_get('og_omitted', array()), '#options' => $options, '#description' => t('Select any node types which should <em>not</em> participate in the Audience targetting system. Node types which are designated as group home page node types (see below) will be automatically excluded.'), '#multiple' => TRUE);
+
   $form['og_settings']['home'] = array('#type' => 'fieldset', '#title' => t('Group home page'));
   $options = array('ron' => t('River of News'), 'gbct' => t('Group by content type'));
   $form['og_settings']['home']['og_home_page_presentation'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_presentation', 'gbct'), '#description' => t('If neither of these presentations suits you, you may override in the theme layer.'));
   $form['og_settings']['home']['og_max_posts'] = array('#type' => 'textfield', '#title' => t('Maximum posts on group home page'), '#size' => 3, '#maxlength' => 2, '#default_value' => variable_get('og_max_posts', 10), '#description' => t("If using River of News display, indicate the number of posts on home page. If grouping posts by content type, indicate number of posts per type."), );
+  $form['og_settings']['home']['og_node_types'] = array('#type' => 'select', '#title' => t('Group home page node types'), '#default_value' => variable_get('og_node_types', array('og')), '#options' => $og_node_type_options, '#description' => t("Select the node types which act as group home pages. Usually %group is the best choice.", array('%group' => theme('placeholder', 'group'))), '#multiple' => TRUE);
   // TODO: move this to block config? Will be used elsewhere?
   $form['og_settings']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#value' => 1, '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in %user.', array('%user' => l(t('User configuration'), 'admin/settings/user'))));
   return $form;
