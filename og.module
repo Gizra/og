@@ -981,7 +981,7 @@ function og_node_form($node) {
     }
   }
   
-  $form['og_theme'] = system_theme_select_form(t('Selecting a different theme will change the look and feel of the group.'), $edit['theme'], 2);;
+  $form['og_theme'] = system_theme_select_form(t('Selecting a different theme will change the look and feel of the group.'), $edit['theme'] ? $edit['theme'] : $node->og_theme, 2);;
   return $form;
 }
 
