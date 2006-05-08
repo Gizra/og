@@ -954,10 +954,10 @@ function og_node_form($node) {
   }
   $default = FALSE;
   switch ($visibility) {
-    case OG_DIRECTORY_NONE:
+    case OG_DIRECTORY_NEVER:
       $form['og_directory'] = array('#type' => 'value', '#value' => 0);
       break;
-    case OG_DIRECTORY_BOTH:
+    case OG_DIRECTORY_ALWAYS:
       $form['og_directory'] = array('#type' => 'value', '#value' => 1);
       break;
     case OG_DIRECTORY_CHOOSE_TRUE:
