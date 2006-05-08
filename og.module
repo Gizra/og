@@ -78,7 +78,7 @@ function og_menu($may_cache) {
     // email tab on group node
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(arg(1));
-      if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+      if (og_is_group_type($node->type)) {
         $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'og_email', 'callback arguments' => array(arg(1)), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
       }
     }
@@ -94,6 +94,10 @@ function og_init() {
     $user = user_load(array('uid' => $user->uid));
     og_theme();
   }
+}
+
+function og_is_group_type($type) {
+  return in_array($type, variable_get('og_node_types', array('og')));
 }
 
 /**
@@ -194,7 +198,7 @@ function og_set_group_context($group_node = NULL) {
 function og_set_theme($nid) {
   global $custom_theme, $user;
   $node = node_load(intval($nid));
-  if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+  if (og_is_group_type($node->type)) {
     $custom_theme = $node->og_theme;
     return $node;
   }
@@ -991,7 +995,7 @@ function og_node_load_public($node) {
 
 // returns all the group affiliations for a given node.
 function og_get_node_groups($node) {
-  if (!in_array($node->type, variable_get('og_node_types', array('og')))) {
+  if (!og_is_group_type($node->type)) {
     $sql = "SELECT na.gid, n.title FROM {node_access} na INNER JOIN {node} n ON na.gid = n.nid WHERE na.nid = %d AND na.realm='og_subscriber' AND na.gid != 0";
     $result = db_query($sql, $node->nid);
     while ($row = db_fetch_object($result)) {
@@ -1020,7 +1024,7 @@ function og_submit_group(&$node) {
   }
   
   // comments are not allowed on group nodes, since we don't have any nice way to present them
-  if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+  if (og_is_group_type($node->type)) {
     $node->comment = COMMENT_NODE_DISABLED;
   }
 
@@ -1068,12 +1072,12 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         array_unshift($bc, l(t('home'), ''));
         drupal_set_breadcrumb($bc);
       }
-      if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+      if (og_is_group_type($node->type)) {
         og_view_group($node, $teaser, $page);
       }
       break;
     case 'load':
-      if (!in_array($node->type, variable_get('og_node_types', array('og')))) {
+      if (!og_is_group_type($node->type)) {
         $node = og_node_load_public($node);
       }
       else {
@@ -1086,7 +1090,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'validate':
-      if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+      if (og_is_group_type($node->type)) {
         og_validate_group($node);
       }
       break;
@@ -1097,7 +1101,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       // only show this message when *editing* another user's nodes
       global $user;
       
-      if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+      if (og_is_group_type($node->type)) {
         $node->comment = COMMENT_NODE_DISABLED;
       }
       break;
@@ -1109,7 +1113,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       db_query($sql, $node->nid);
       break;
     case 'insert':
-      if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+      if (og_is_group_type($node->type)) {
         og_insert_group($node);
       }
       og_save_permissions($node);
@@ -1120,7 +1124,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'update':
-      if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+      if (og_is_group_type($node->type)) {
         og_update_group($node);
       }
       og_save_permissions($node);
@@ -1150,7 +1154,7 @@ function og_form_add_og_audience($form_id, &$form) {
   $edit = $_REQUEST['edit'];
   $node = $form['#node'];
 
-  if (in_array($node->type, variable_get('og_node_types', array('og')))) {
+  if (og_is_group_type($node->type)) {
     $form = array_merge($form, og_node_form($node));
   }
   else {
@@ -1161,7 +1165,7 @@ function og_form_add_og_audience($form_id, &$form) {
     }
     
     // TODO: this behavior is not ideal in some curcumstances. We might disable those checkboxes where admin is not a subscriber
-    if ($node->nid && $node->uid != $user->uid && !in_array($node->type, variable_get('og_node_types', array('og')))) {
+    if ($node->nid && $node->uid != $user->uid && !og_is_group_type($node->type)) {
           // i think this is displaying during unwanted times
           // drupal_set_message(t('Admins: If you want to assign this post to a group whose checkbox does not appear below, you must first change the %author. The author\'s subscriptions are shown in the audience field.', array('%author' => theme('placeholder', t('Author')))));
     }
@@ -1418,7 +1422,7 @@ function og_save_permissions(&$node) {
   $sql = "DELETE FROM {node_access} WHERE realm LIKE '%s' AND nid = %d";
   db_query($sql, 'og_%', $node->nid);
 
-  if (!in_array($node->type, variable_get('og_node_types', array('og')))) {
+  if (!og_is_group_type($node->type)) {
     // put the post into each selected group. we need a separate row for public and private nodes.
     // for public nodes, the grant_view column indicates which group the node belongs to. The gid=0 always. Needed to get
     // public nodes to display on the home page for non subscribers
