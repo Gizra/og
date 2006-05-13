@@ -577,17 +577,20 @@ function og_subscribe_user($gid, $account) {
       $sql = og_list_users_sql(1, 1);
       $res = db_query($sql, $node->nid);
       while ($row = db_fetch_object($res)) {
-        $admins[] = $row->mail ? $row->mail : NULL;
+        if ($row->mail) {
+          $admins[] = $row->mail;
+        }
       }
-      $subj = t("Subscription request for '%group' from '%name'", array('%group' => $node->title, '%name' => $account->name));
-      $body = t('To instantly approve this request, visit %url. ', array('%url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
-      $body .= t('You may deny this request or manage subscribers at %url', array('%url' => url("og/users/$node->nid", NULL, NULL, TRUE)));
-      $from = variable_get('site_mail', ini_get('sendmail_from'));
-      $headers = "From: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
-      user_mail(implode(', ', $admins), $subj, $body, $headers);
+      if ($admins) {
+        $subj = t("Subscription request for '%group' from '%name'", array('%group' => $node->title, '%name' => $account->name));
+        $body = t('To instantly approve this request, visit %url. ', array('%url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
+        $body .= t('You may deny this request or manage subscribers at %url', array('%url' => url("og/users/$node->nid", NULL, NULL, TRUE)));
+        $from = variable_get('site_mail', ini_get('sendmail_from'));
+        $headers = "From: $from\nX-Mailer: Drupal\nReturn-path: $from\nErrors-to: $from";
+        user_mail(implode(', ', $admins), $subj, $body, $headers);
+      }
       $return_value = array('type' => 'approval',
-                            'message' => t('Subscription request to the %group group awaits approval by an administrator.',
-                                           array('%group' => theme('placeholder', $node->title))));
+                            'message' => t('Subscription request to the %group group awaits approval by an administrator.', array('%group' => theme('placeholder', $node->title))));
 
       break;
     case OG_OPEN:
@@ -598,8 +601,7 @@ function og_subscribe_user($gid, $account) {
     case OG_CLOSED:
     case OG_INVITE_ONLY:
       $return_value = array('type' => 'rejected',
-                            'message' => t('Subscription request to the %group group was rejected, only group administrators can add users to this group.',
-                                           array('%group' => theme('placeholder', $node->title))));
+                            'message' => t('Subscription request to the %group group was rejected, only group administrators can add users to this group.', array('%group' => theme('placeholder', $node->title))));
   }
   return $return_value;
 }
@@ -1119,6 +1121,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       og_save_permissions($node);
       if (!module_exist('og2list')) {
         if ($node->status) {
+          $node->msgid = "$node->nid-0". og_msgid_server();
           og_mail(node_get_name($node), $node);
         }
       }
@@ -1133,6 +1136,15 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       // TODO: add group info
       break;
   }
+}
+
+function og_msgid_server() {
+  global $base_url;
+  $at = '@'. $_SERVER['SERVER_NAME'];
+  if ($dir = str_replace("/", ".", substr(strchr(str_replace("http://", "", $base_url), "/"), 1))) {
+    $at .= ".$dir";
+  }
+  return strtolower($at);
 }
 
 function og_form_alter($form_id, &$form) {
@@ -1242,6 +1254,15 @@ function og_comment($comment, $op) {
       if ($comment['status'] == COMMENT_PUBLISHED) {
         $node = node_load($comment['nid']);
         $comment['og_groups'] = $node->og_groups;
+        $comment['msgid'] = $comment['nid']. '-'. $comment['cid']. og_msgid_server();
+        $reply = $comment['nid']. '-';
+        if ($comment['pid']) {
+          $reply .= $comment['pid'];
+        }
+        else {
+          $reply .= '0';
+        }
+        $comment['in_reply_to'] .= $reply. og_msgid_server();
         og_mail('comment', (object)$comment);
       }
       break;
@@ -1279,10 +1300,13 @@ function og_mail($type, $obj) {
     }
     
     $sitemail = variable_get("site_mail", ini_get("sendmail_from"));
-    $headers = "From: $sitemail\nReply-to: $sitemail\nX-Mailer: Drupal, og.module\nReturn-path: $sitemail\nErrors-to: $sitemail";
+    $headers = 'From: '. mime_header_encode($obj->name). "<$sitemail>\nReply-to: $sitemail\nX-Mailer: Drupal, og.module\nReturn-path: $sitemail\nPrecedence: list\nMessage-Id: $obj->msgid";
+    if ($obj->in_reply_to) {
+      $headers .= "\nIn-Reply_To: $obj->in_reply_to\nReferences: $obj->in_reply_to";
+    }
     //get email subscribers
     $groups = implode(', ', $obj->og_groups);
-    $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {node} n ON ou.nid=n.nid WHERE ou.nid IN ($groups) AND ou.mail_type=1";
+    $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {node} n ON ou.nid=n.nid WHERE ou.nid IN ($groups) AND ou.mail_type=1";
     $result = db_query($sql);
     while ($row = db_fetch_object($result)) {
       // see http://www.ietf.org/rfc/rfc2369.txt. UTF8 OK? $headers .= "\nX-List_ID: "; 
@@ -1293,7 +1317,14 @@ function og_mail($type, $obj) {
       $txt .= "\n". og_mail_output($obj->body);
       $txt .= "\n\n-----------------------\n";
       $txt .= t("You are subscribed to the group '%group_name' at '%site'. To manage your subscription, visit %group_url", array('%group_name' => $row->group_name, '%site' => variable_get('site_name', drupal), '%group_url' => url("og/manage/$row->gid", NULL, NULL, TRUE)));
-      user_mail($row->mail, $subj, $txt, $headers);
+      
+      $unsubscribe = url("og/manage/$row->gid", NULL, NULL, TRUE);
+      $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
+      $owner = mime_header_encode($row->group_owner);
+      $group_home = url("node/$row->gid", NULL, NULL, TRUE);
+      $group_name = mime_header_encode($row->group_name);
+      $groupheaders = $headers. "\nList-Id: $group_name <$group_home>\nList-Unsubscribe: <$unsubscribe>\nList-Owner: $owner <$ownerurl>\nList-Archive: <$group_home>";
+      user_mail($row->mail, $subj, $txt, $groupheaders);
     }
   }
 }
@@ -1586,8 +1617,8 @@ function og_block_notifications() {
     $content = t('This group offers a %groupfeed and an %email.', array('%groupfeed' => l(t('RSS feed'), 'og/feed/'. $groupnode->nid), '%email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
     if (module_exist('viewfeed') && module_exist('og_views')) {
       $content .= t(' Or subscribe to these personalized, sitewide feeds:');
-      $links[] = t('my unread: '). theme('links', array(l('feed', 'viewfeed/og_unread'), l('page', 'og_unread')));
-      $links[] = t('my groups: '). theme('links', array(l('feed', 'viewfeed/og_tracker'), l('page', 'og_tracker')));
+      $links[] = t('my unread: '). theme('links', array(l('feed', 'viewfeed/og_unread'), l('page', 'group/og_unread')));
+      $links[] = t('my groups: '). theme('links', array(l('feed', 'viewfeed/og_tracker'), l('page', 'group/og_tracker')));
       $links[] = t('all posts: '). theme('links', array(l('feed', 'viewfeed/tracker'), l('page', 'tracker')));
       $content .= theme('item_list', $links);
     }
