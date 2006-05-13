@@ -1140,9 +1140,11 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 
 function og_msgid_server() {
   global $base_url;
-  $at = '@'. $_SERVER['SERVER_NAME'];
   if ($dir = str_replace("/", ".", substr(strchr(str_replace("http://", "", $base_url), "/"), 1))) {
-    $at .= ".$dir";
+    $at = "@$dir.". $_SERVER['SERVER_NAME'];
+  }
+  else {
+    $at = '@'. $_SERVER['SERVER_NAME'];
   }
   return strtolower($at);
 }
@@ -1300,9 +1302,9 @@ function og_mail($type, $obj) {
     }
     
     $sitemail = variable_get("site_mail", ini_get("sendmail_from"));
-    $headers = 'From: '. mime_header_encode($obj->name). "<$sitemail>\nReply-to: $sitemail\nX-Mailer: Drupal, og.module\nReturn-path: $sitemail\nPrecedence: list\nMessage-Id: $obj->msgid";
+    $headers = 'From: '. mime_header_encode($obj->name). " <$sitemail>\nReply-to: $sitemail\nX-Mailer: Drupal, og.module\nReturn-path: $sitemail\nPrecedence: list\nMessage-Id: <$obj->msgid>";
     if ($obj->in_reply_to) {
-      $headers .= "\nIn-Reply_To: $obj->in_reply_to\nReferences: $obj->in_reply_to";
+      $headers .= "\nIn-Reply_To: <$obj->in_reply_to>\nReferences: <$obj->in_reply_to>";
     }
     //get email subscribers
     $groups = implode(', ', $obj->og_groups);
