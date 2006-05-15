@@ -737,7 +737,7 @@ function og_list_users_page($gid) {
   return $output;
 }
 
-function og_list_groups_page($uid = NULL) {
+function og_list_groups_page($uid = NULL, $format = 'html') {
   global $user;
 
   if (!$uid) {
@@ -748,6 +748,17 @@ function og_list_groups_page($uid = NULL) {
     // Retrieve only current user's group
     $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid INNER JOIN {og_uid} ou ON ou.uid = u.uid WHERE og.nid IN (". implode(',', array_keys($user->og_groups)) .") ORDER BY n.nid DESC", 'og', 'nid'), 50);
   }
+  if ($format == 'opml') {
+    og_list_groups_page_opml($result); 
+  }
+  else {
+    return og_list_groups_page_html($result); 
+  }
+}
+
+function og_list_groups_page_html($result) {
+  global $user;
+  
   $header = array(t('Title'), t('Subscribers'), t('Manager'), t('Description'));
 
   while ($node = db_fetch_object($result)) {
@@ -762,9 +773,32 @@ function og_list_groups_page($uid = NULL) {
   if (!$rows) {
     $rows[] = array(array('data' => t('No groups'), 'colspan' => 4));
   }
-  $output = theme('table', $header, $rows). theme('pager', NULL, 50);
-  return $output;
+  else {
+    drupal_set_message(t('An %opml listing RSS feeds from your subscribed groups.', array('%opml' => l(t('OPML file'), 'og/user/opml'))), 'help');
+  }
+  return theme('table', $header, $rows). theme('pager', NULL, 50);
 }
+
+function og_list_groups_page_opml($result) {
+  $output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+  $output .= "<opml version=\"1.1\">\n";
+  $output .= "<head>\n";
+  $output .= '<title>'. check_plain(variable_get('site_name', 'Drupal')) ."</title>\n";
+  $output .= '<dateModified>'. gmdate('r') ."</dateModified>\n";
+  $output .= "</head>\n";
+  $output .= "<body>\n";
+
+  while ($feed = db_fetch_object($result)) {
+    $output .= '<outline text="'. check_plain($feed->title) .'" xmlUrl="'. url("node/$feed->nid/feed", NULL, NULL, TRUE) ."\" />\n";
+  }
+
+  $output .= "</body>\n";
+  $output .= "</opml>\n";
+
+  drupal_set_header('Content-Type: text/xml; charset=utf-8');
+  print $output;
+}
+
 
 /**
  * Get SQL that returns nodes on a group home page
@@ -1634,11 +1668,23 @@ function og_block_my() {
     else {
       $output .= theme('item_list', $items);
     }
+    $url = url("og/user/opml");
+    $output .= theme('opml_icon', $url);
     $block['subject'] = t('My groups');
     $block['content'] = $output;
     return $block;
   }
 }
+
+/**
+ * Return code that emits an XML icon. TODO: this belongs in theme.inc
+ */
+function theme_opml_icon($url) {
+  if ($image = theme('image', drupal_get_path('module', 'og'). '/opml.gif', t('OPML file'), t('OPML file'))) {
+    return '<a href="'. check_url($url) .'" class="opml-icon">'. $image. '</a>';
+  }
+}
+
 
 function og_block_new() {
   $sql = 'SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type IN ('. str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND n.status = 1';
