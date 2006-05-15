@@ -826,7 +826,6 @@ function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
 }
 
 // when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group.
-// each of these lists is presented by default in a table, although that can be changed by the theme
 function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
   $node = theme('og_view', $node, $teaser, $page);
   return $node;
@@ -1374,7 +1373,7 @@ function og_mail_output($body, $html = TRUE) {
   return $body;
 }
 
-function og_user($op, &$edit, &$account, $category = NULL) {
+function og_user($op, $edit, &$account, $category = NULL) {
   global $user;
 
   switch ($op) {
@@ -1396,16 +1395,18 @@ function og_user($op, &$edit, &$account, $category = NULL) {
         }
       break;
     case 'insert':
-      $result = db_query(db_rewrite_sql('SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ('. str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND n.status = 1 AND o.register = 1'), variable_get('og_node_types', array('og')));
-      while ($group = db_fetch_object($result)) {
-        if ($edit['og_register'][$group->nid]) {
-          $return = og_subscribe_user($group->nid, $account);
-          if (!empty($return['message'])) {
-            drupal_set_message($return['message']);
+      if (is_array($edit['og_register'])) {
+        $edit['og_register'] = array_filter($edit['og_register']);
+        $result = db_query(db_rewrite_sql('SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ('. str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND n.status = 1 AND o.register = 1'), variable_get('og_node_types', array('og')));
+        while ($group = db_fetch_object($result)) {
+          if ($edit['og_register'][$group->nid]) {
+            $return = og_subscribe_user($group->nid, $account);
+            if (!empty($return['message'])) {
+              drupal_set_message($return['message']);
+            }
           }
-        }
+        }  
       }
-
       break;
     case 'load':
         $account->og_groups = og_get_subscriptions($account->uid);
