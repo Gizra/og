@@ -621,12 +621,12 @@ function og_unsubscribe($gid, $uid = NULL) {
 // since a user's subscriptions are loaded into $user object, this function is only occassionally useful to get group subs for users other than the current user
 // even then, it often makes sense to call user_load() instead of this function.
 // load all subscriptions for a given user
-function og_get_subscriptions($uid) {
+function og_get_subscriptions($uid, $min_is_active = 1) {
   static $subscriptions = array();
 
   if (!isset($subscriptions[$uid])) {
-    $sql = "SELECT n.title, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d ORDER BY n.title";
-    $result = db_query($sql, $uid);
+    $sql = "SELECT n.title, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d AND ou.is_active >= %d ORDER BY n.title";
+    $result = db_query($sql, $uid, $min_is_active);
     while ($row = db_fetch_array($result)) {
       $subscriptions[$uid][$row['nid']] = $row;
     }
@@ -1463,7 +1463,7 @@ function og_node_grants($account, $op) {
   // get subscriptions
   if ($subscriptions = og_get_subscriptions($account->uid)) {
     foreach ($subscriptions as $key => $val) {
-      if ($op == 'view' && $val['is_active']) {
+      if ($op == 'view') {
         $grants['og_subscriber'][] = $key;
       }
       if (($op == 'update' || $op == 'delete') && $val['is_admin']) {
