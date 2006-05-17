@@ -6,7 +6,7 @@ Groups may choose their own theme and language. Groups have RSS feeds, and so on
 
 INSTALLATION
 ---------------
-- Activate the og AND og_basic modules as usual.
+- Activate the og AND og_basic modules as usual. Activate Views.module in order to build custom listings of groups of nodes within groups.
 - Visit the admin/settings/og page and click the button to enable access control.
 - Set other preferences on admin/settings/og as desired.
 - On the admin/settings/content-types/og page, disable commenting and attachments for nodes of type 'group'

@@ -58,7 +58,7 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
     $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
   }
-  else {
+  else {    
     // we get a NOTICE if doing this from within og_theme() so I do it here for now.
     $_SESSION['og_last'] = og_get_group_context();
 
@@ -93,6 +93,10 @@ function og_init() {
     global $user;
     $user = user_load(array('uid' => $user->uid));
     og_theme();
+    
+    if (module_exist('views')) {
+      include drupal_get_path('module', 'og'). '/og_views.inc';
+    }
   }
 }
 
