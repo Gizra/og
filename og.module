@@ -903,7 +903,7 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
       }
     }
     $url = url("og/feed/$node->nid");
-    $icon = theme('xml_icon', $url);
+    $node->og_xml_icon = theme('xml_icon', $url);
     
     if (!$output) {
       global $user;
@@ -915,11 +915,14 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
       }
     }
   }
+  // save the homepage nodes in an array element for use by themes if desired
+  $node->homepage_nodes = $output;
   
   if ($node->body) {
-    $node->body = theme('og_mission', $node);
+    // save the mission in an array element for use by themes if desired
+    $node->og_mission = theme('og_mission', $node);
   }
-  $node->body .= $output. $icon;
+  $node->body .= $output. $node->og_xml_icon;
   return $node;
 }
 
