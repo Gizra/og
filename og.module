@@ -1874,7 +1874,7 @@ function og_settings() {
     $form['og_settings']['node_form']['og_visibility_registration'] = array('#type' => 'radios', '#title' => t('Registration form control'), '#default_value' => variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => theme('placeholder', t('registration form')))), '#options' => $options);  
 
   $options = array(t('optional'), t('required'));
-  $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', FALSE), '#options' => $options, '#description' => t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting has affect existing posts when they are edited.'));
+  $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', FALSE), '#options' => $options, '#description' => t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting will affect existing posts when they are edited.'));
   unset($options);
   foreach (node_get_types() as $type => $name) {
     $options[$type] = t($name);
