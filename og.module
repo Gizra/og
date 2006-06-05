@@ -1263,7 +1263,8 @@ function og_form_add_og_audience($form_id, &$form) {
     if (count($form['og_nodeapi']['visible']) > 1) {
       $form['og_nodeapi']['#type'] = 'fieldset';
       $form['og_nodeapi']['#title'] = t('Groups');
-      $form['og_nodeapi']['#collapsed'] = isset($edit['og_groups']) ? TRUE : FALSE; //TODO: not working
+      $form['og_nodeapi']['#collapsible'] = TRUE;
+      $form['og_nodeapi']['#collapsed'] = isset($edit['og_groups']) ? TRUE : FALSE;
     }
   }
 }
