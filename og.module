@@ -58,7 +58,7 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'og_remove_node', 'access' => $access, 'title' => t('remove post from group'));
     $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
   }
-  else {    
+  else {
     // we get a NOTICE if doing this from within og_theme() so I do it here for now.
     $_SESSION['og_last'] = og_get_group_context();
 
@@ -85,14 +85,19 @@ function og_menu($may_cache) {
   }
   return $items;
 }
-
+/**
+ * This processing cannot happen later in the request because
+ * - menu items will be in default language if we wait until og_menu(!$may_cache). bad for locale feature
+ * - views_init() is used for gathering all the table and argument definitions and such. so our module has to load before that.
+ */
 function og_init() {
   // only bother when we are not serving a cached page. check for which functon that only exists afterwards
-  if (function_exists('drupal_set_content')) {
+  if (function_exists('drupal_set_content')) {    
     // we have to perform a load in order to assure that the $user->og_groups bits are present.
     global $user;
     $user = user_load(array('uid' => $user->uid));
     og_theme();
+    og_set_locale();
     
     if (module_exist('views')) {
       include drupal_get_path('module', 'og'). '/og_views.inc';
@@ -100,20 +105,22 @@ function og_init() {
   }
 }
 
+/**
+ * API function for determining whether a given node type has been designated by admin to behave as a group node (i.e. a container)
+ *
+ * @param string $type
+ * @return boolean
+ */
 function og_is_group_type($type) {
   return in_array($type, variable_get('og_node_types', array('og')));
 }
 
 /**
- * Magic function which can return a language code. called from locale_initialize() in common.inc
  * Like locale_initialize(), but includes a check for group language and sets accordingly.
  * Priority goes: user => group => site default
- * TODO: play nicely with i18n which also defines this function. If you are an i18n developer, please contact Moshe
- *
- * @return language code
  **/
-function i18n_get_lang() {
-  global $user;
+function og_set_locale() {
+  global $user, $locale;
     
   if (function_exists('locale')) {
     $languages = locale_supported_languages();
@@ -124,19 +131,15 @@ function i18n_get_lang() {
     // Useful for e.g. XML/HTML 'lang' attributes.
     $languages = array('en' => 'English');
   }
-  
+
   if ($user->uid && isset($languages[$user->language])) {
-    return $user->language;
+    // do nothing. user specified language has priority
   }
   elseif ($group_node = og_get_group_context()) {
     if ($group_node->og_language && isset($languages[$group_node->og_language])) {
-      return $group_node->og_language;
+      $locale = $group_node->og_language;
     }
   }
-  
-  // no matches. return default language
-  return key($languages);
-  
 }
 
 /**
@@ -926,7 +929,7 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
     // save the mission in an array element for use by themes if desired
     $node->og_mission = theme('og_mission', $node);
   }
-  $node->body .= $output. $node->og_xml_icon;
+  $node->body = $node->og_mission. $output. $node->og_xml_icon;
   return $node;
 }
 
