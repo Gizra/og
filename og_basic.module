@@ -59,7 +59,7 @@ function og_basic_perm() {
  * Implementation of hook_form().
  */
 function og_basic_form(&$node) {
-  $form['title'] = array('#type' => 'textfield', '#title' => t('Name'), '#weight' => 0, '#default_value' => $node->title, '#size' => 60, '#maxlength' => 128, '#required' => true);
+  $form['title'] = array('#type' => 'textfield', '#title' => t('Name'), '#weight' => -5, '#default_value' => $node->title, '#size' => 60, '#maxlength' => 128, '#required' => true);
   $form['body_filter']['body'] = array('#type' => 'textarea', '#title' => t('Welcome message'), '#default_value' => $node->body, '#rows' => 10, '#required' => FALSE, '#description' => t('This message is shown by default at the top of the group home page.'));
   $form['body_filter']['format'] = filter_form($node->format);
   return $form;
