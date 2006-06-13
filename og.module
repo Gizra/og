@@ -780,8 +780,8 @@ function og_list_groups_page_html($result) {
   if (!$rows) {
     $rows[] = array(array('data' => t('No groups'), 'colspan' => 4));
   }
-  else {
-    drupal_set_message(t('An %opml listing RSS feeds from your subscribed groups.', array('%opml' => l(t('OPML file'), 'og/user/opml'))), 'help');
+  elseif (!empty($user->og_groups)) {
+    drupal_set_message(t('You may also view an <a href="%opml">OPML file</a> listing RSS feeds from your subscribed groups.', array('%opml' => url('og/user/opml'))), 'help');
   }
   return theme('table', $header, $rows). theme('pager', NULL, 50);
 }
@@ -1627,7 +1627,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
 
     }
   }
-  else if ($op == 'configure') {
+  elseif ($op == 'configure') {
     switch ($delta) {
       case 2:
       case 3:
@@ -1635,7 +1635,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
         return array('og_block_cnt' => array('#type' => 'textfield', '#title' => t('Maximum number of items to show'), '#default_value' => variable_get("og_block_cnt_$delta", 10), '#size' => 5, '#maxlength' => 255));
     }
   }
-  else if ($op == 'save') {
+  elseif ($op == 'save') {
     switch ($delta) {
       case 2:
       case 3:
