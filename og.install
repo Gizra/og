@@ -25,6 +25,8 @@ function og_install() {
         is_admin int(1) NOT NULL DEFAULT 0,
         uid int(11) NOT NULL,
         mail_type int(11) NULL,
+	created int(11) NULL DEFAULT 0,
+	changed int(11) NULL DEFAULT 0,
         PRIMARY KEY  (nid, uid)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
 
@@ -168,3 +170,13 @@ function og_update_9() {
   return $ret ? $ret : array();
 }
 
+// Created and Updated dates
+function og_update_10() {
+  switch ($GLOBALS['db_type']) { 
+    case 'mysql': 
+    case 'mysqli': 
+      $ret[] = update_sql("ALTER TABLE {og_uid} ADD created int(11) NULL DEFAULT 0");
+      $ret[] = update_sql("ALTER TABLE {og_uid} ADD changed int(11) NULL DEFAULT 0");
+  } 
+  return $ret ? $ret : array();
+}

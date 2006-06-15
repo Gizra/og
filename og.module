@@ -333,24 +333,27 @@ function og_manage_form_submit($form_id, $form_values) {
  * @param $gid node ID of a group
  * @param $uid user ID of user
  * @param $args an array with details of this subscription. Possible array keys are:
-     is_active, is_admin, mail_type
+     is_active, is_admin, mail_type, created
  */
 function og_save_subscription($gid, $uid, $args = array()) {
   $sql = "SELECT COUNT(*) FROM {og_uid} WHERE nid = %d AND uid = %d";
   $cnt = db_result(db_query($sql, $gid, $uid));
+  $time = time();
   if ($cnt == 0) {
     // this pattern borrowed from user_save()
-    $fields = array('nid', 'uid');
-    $values = array($gid, $uid);
+    $fields = array('nid', 'uid', 'created', 'changed');
+    $values = array($gid, $uid, $args['created'] ? $args['created'] : $time, $time);
+    unset($args['created']);
     foreach ($args as $key => $value) {
       $fields[] = db_escape_string($key);
       $values[] = $value;
       $s[] = "'%s'";
     }
-    db_query('INSERT INTO {og_uid} ('. implode(', ', $fields). ') VALUES (%d, %d, '. implode(', ', $s). ')', $values);
+    db_query('INSERT INTO {og_uid} ('. implode(', ', $fields). ') VALUES (%d, %d, %d, %d, '. implode(', ', $s). ')', $values);
     module_invoke_all('og', 'user insert', $gid, $uid, $args);
   }
   else {
+    $cond[] = 'changed = '. $time;
     foreach ($args as $key => $value) {
       $cond[] = db_escape_string($key)." = '". db_escape_string($value). "'";
     }
