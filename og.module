@@ -874,8 +874,9 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
     $node->teaser = $node->og_description;
   }
   else {
-    $bc = array(l(t('Home'), ''), l(t('groups'), 'og'));
-    drupal_set_breadcrumb($bc);
+    $bc[] = array('path' => "og", 'title' => t('groups'));
+    $bc[] = array('path' => "node/$node->nid", 'title' => $node->title);
+    menu_set_location($bc);
     drupal_add_link(array(
                         'rel' => 'alternate',
                         'type' => 'application/rss+xml',
@@ -1104,19 +1105,12 @@ function og_update_group($node) {
 function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'view':
-      // splice group info into breadcrumb. TOOD: use menu_set_location() instead?
       $group_node = og_get_group_context();
       if ($group_node && $page && $node->og_groups) {
-        $bc = drupal_get_breadcrumb($newbc);
-        unset($bc[0]);
-        // get rid of link to all forums. it breaks you out of group world
-        if ($bc[1] == l(t('forums'), 'forum')) {
-          unset($bc[1]);
-        }
-        array_unshift($bc, l($group_node->title, "node/$group_node->nid"));
-        array_unshift($bc, l(t('groups'), 'og')); // comment this out if you *don't* want a link to group directory
-        array_unshift($bc, l(t('home'), ''));
-        drupal_set_breadcrumb($bc);
+        $bc[] = array('path' => "og", 'title' => t('groups'));
+        $bc[] = array('path' => "node/$group_node->nid", 'title' => $group_node->title);
+        $bc[] = array('path' => "node/$node->nid", 'title' => $node->title);
+        menu_set_location($bc);
       }
       if (og_is_group_type($node->type)) {
         og_view_group($node, $teaser, $page);
