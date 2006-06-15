@@ -1069,6 +1069,12 @@ function og_submit_group(&$node) {
   if ($node->og_theme == variable_get('theme_default', 'bluemarine')) {
     $node->og_theme = NULL;
   }
+  
+  // Normalize og_groups array
+  if (is_array($node->og_groups)) {
+    $node->og_groups = array_filter($node->og_groups);
+    $node->og_groups = array_keys($node->og_groups);
+  }
 }
 
 function og_load_group(&$node) {
@@ -1495,15 +1501,13 @@ function og_save_permissions(&$node) {
     // public nodes to display on the home page for non subscribers
     // we INSERT a broad grant here but og_node_grants() only issues it selectively for a given operation
     if (is_array($node->og_groups)) {
-      foreach ($node->og_groups as $gid => $checked) {
-        if ($checked) {
-          $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_subscriber', 1, 1, 1)";
+      foreach ($node->og_groups as $gid) {
+        $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_subscriber', 1, 1, 1)";
+        db_query($sql, $node->nid, $gid);
+        
+        if ($node->og_public) {
+          $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_public', %d)";
           db_query($sql, $node->nid, $gid);
-
-          if ($node->og_public) {
-            $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_public', %d)";
-            db_query($sql, $node->nid, $gid);
-          }
         }
       }
     }
