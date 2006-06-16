@@ -34,6 +34,15 @@ You may wish to stylize nodes which have properties assigned by this module.
 --- theme('mark', OG_ADMIN) may be customized so that admins are denoted differently
 --- provided in this package are two template files for the phptemplate engine. One stylizes group nodes and suggested above and the other stylizes all other nodes as suggested above. These can be starting points for your customization of look and feel of the central area of the group home page.
 
+INTEGRATION
+---------------------
+- This function exposes an API for retrieving and managing subscriptions via direct PHP functions and via XMLRPC.
+- This module works well with pathauto.module and views.module
+
+UNIT TESTING
+----------------------
+This module comes with a suite of unit tests. Please help build more of them. See http://drupal.org/simpletest
+
 TODO/BUGS/FEATURE REQUESTS
 ----------------
 - see http://drupal.org/project/issues/og
@@ -41,7 +50,7 @@ TODO/BUGS/FEATURE REQUESTS
 CREDITS
 ----------------------------
 Authored and maintained by Moshe Weitzman <weitzman AT tejasa DOT com>
-Contributors: Mir Nazim, Gerhard Killesreiter, Angie Byron
+Contributors: Mir Nazim, Gerhard Killesreiter, Angie Byron, Derek Wright
 Sponsored by Bryght - http://www.bryght.com
 Sponsored by Broadband Mechanics - http://www.broadbandmechanics.com/
 Sponsored by Finnish Broadcasting Company - http://www.yle.fi/fbc/

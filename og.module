@@ -1969,3 +1969,23 @@ function og_xmlrpc() {
       t('Retrieve the group subscriptions for a given user.')),
     );
 }
+
+/*
+* Implementation of hook_pathauto_node()
+*/
+function og_pathauto_node($op, $node=NULL) {
+  switch ($op) {
+    case 'placeholders':
+      $placeholders = array();
+      $placeholders[t('[ogname]')] = t('The name of the organic group this post belongs to.');
+      return $placeholders;
+    case 'values':
+      $results = array();
+      // just use the first group found. anyone have a better idea for this?
+      $name = $node->og_groups_names[0];
+      $results[t('[ogname]')] = pathauto_cleanstring($name);
+      return $results;
+    default:
+      break;
+  }
+}
