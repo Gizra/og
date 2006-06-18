@@ -257,8 +257,8 @@ function og_nodeview($gid) {
 function og_email($gid) {
   $node = node_load($gid);
   drupal_set_title(t('Send email to %group', array('%group' => $node->title)));
-
-  return drupal_get_form('og_email_form', og_email_form($gid));
+  $form = og_email_form($gid);
+  return drupal_get_form('og_email_form', $form);
 }
 
 function og_email_form($gid) {
@@ -458,7 +458,8 @@ function og_invite($gid) {
   $node = node_load($gid);
   if ($node->og_selective < OG_INVITE_ONLY || node_access('update', $node)) {
     $max = variable_get('og_email_max', 10);
-    return drupal_get_form('og_invite_form', og_invite_form($gid));
+    $form = og_invite_form($gid);
+    return drupal_get_form('og_invite_form', $form);
   }
   else {
     drupal_access_denied();
