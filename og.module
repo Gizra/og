@@ -865,7 +865,6 @@ function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
 // when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group.
 function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
   $node = theme('og_view', $node, $teaser, $page);
-  return $node;
 }
 
 // if you want a totally different group home page, you may redefine this function in your theme
