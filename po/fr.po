@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Drupal 4.7 fr-FR\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2006-06-10 13:04+0100\n"
+"PO-Revision-Date: 2006-06-21 09:30+0100\n"
 "Last-Translator: Jean-Louis Réthoré <jl.rethore@gmail.com>\n"
 "Language-Team: Drupal Français\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr "Groupes"
 
 # c:\Contributions\modules\og\og.module:21
 msgid "A group provides home page for like minded users. There they post articles about their shared interest."
-msgstr "Un groupe fournit une page d'accueil pour des utilisateurs proches. Ils soumettent des articles sur cette page à propos de leur centre d'intérêt commun."
+msgstr "Un groupe fournit une page d'accueil pour des utilisateurs proches, où ils publient des articles sur leurs intérêts partagés."
 
 # c:\Contributions\modules\og\og.module:23
 msgid "Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages."
@@ -27,7 +27,7 @@ msgstr "Les blocs spécifiques aux groupes sont visibles uniquement sur les page
 
 # c:\Contributions\modules\og\og.module:25
 msgid "In order to let group admins determine their own group theme, you must enable mutliple themes using %page. To enable admins to upload a group image, you must activate and configure image.module (see Contributions repository)."
-msgstr "Afin de laisser les gestionnaires de groupes choisir leur propre thème, vous devez activer plusieurs thèmes sur %page. Pour permettre aux gestionnaires de transférer une image de groupe, vous devez activer et configurer image.module (voir l'annuaire des Contributions)."
+msgstr "Pour laisser les gestionnaires de groupe choisir leur propre thème pour leur groupe, vous devez activer plusieurs thèmes sur %page. Pour permettre aux gestionnaires de transférer une image de groupe, vous devez activer et configurer image.module (voir l'annuaire des contributions)."
 
 # c:\Contributions\modules\og\og.module:25
 msgid "theme configuration page"
@@ -187,7 +187,7 @@ msgstr "activé"
 
 # c:\Contributions\modules\og\og.module:221
 msgid "Do you want to receive an email each time a message is posted to this group?"
-msgstr "Oulez-vous recevoir un e-mail à chaque fois qu'un message est publié dans ce groupe ?"
+msgstr "Voulez-vous recevoir un e-mail à chaque fois qu'un message est publié dans ce groupe ?"
 
 # c:\Contributions\modules\og\og.module:222;535;1267
 msgid "Submit"
@@ -258,7 +258,7 @@ msgid ""
 "Hi. I'm a member of '%group' and I welcome you to join this group as well. Please see the link and message below.\n"
 "\n"
 msgstr ""
-"Salut. Je suis un membre de '%group' et je t'invite à rejoindre toi aussi ce groupe. Regarde le lien et le message ci-dessous.\n"
+"Salut. Je suis un membre de '%group' et je t'invite à le rejoindre également. Regarde le lien et le message ci-dessous.\n"
 "\n"
 
 # c:\Contributions\modules\og\og.module:348
@@ -283,7 +283,7 @@ msgstr "Message personnel"
 
 # c:\Contributions\modules\og\og.module:377
 msgid "Optional. Enter a message which will become part of the invitation email"
-msgstr "Optionnel. Entrez un message qui fera partie de l'e-mail d'invitation"
+msgstr "Facultatif. Entrez un message qui sera dans l'e-mail d'invitation"
 
 # c:\Contributions\modules\og\og.module:378
 msgid "Send invitation"
@@ -291,7 +291,7 @@ msgstr "Envoyer l'invitation"
 
 # c:\Contributions\modules\og\og.module:389
 msgid "In order to subscribe to this group, you must login or register a new account. After you have successfully done so, you will need to follow the <em>subscribe</em> link again."
-msgstr "Afin de vous abonner à ce groupe, vous devez vous connecter ou créer un compte. Après avoir fait cela, vous devrez suivre le lien <em>s'abonner</em> à nouveau."
+msgstr "Pour vous abonner à ce groupe, vous devez vous connecter ou créer un compte. Après avoir fait cela, vous devrez cliquer sur le lien <em>s'abonner</em> à nouveau."
 
 # c:\Contributions\modules\og\og.module:402
 msgid "Subscription request awaits approval by an administrator."
@@ -399,7 +399,7 @@ msgstr "Demandes d'abonnement"
 
 # c:\Contributions\modules\og\og.module:708
 msgid "open - subscription requests are accepted immediately"
-msgstr "ouvert - les demandes d'abonnement sont acceptée immédiatement"
+msgstr "ouvert - les demandes d'abonnement sont acceptées immédiatement."
 
 # c:\Contributions\modules\og\og.module:708
 msgid "moderated - subscription requests must be approved."
