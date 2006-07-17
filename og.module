@@ -1292,7 +1292,7 @@ function og_get_visibility_default() {
 function og_comment($comment, $op) {
   switch ($op) {
     case 'insert':
-      if ($comment['status'] == COMMENT_PUBLISHED) {
+      if ($comment['status'] == COMMENT_PUBLISHED && !module_exist('og2list')) {
         $node = node_load($comment['nid']);
         $comment['og_groups'] = $node->og_groups;
         $comment['msgid'] = $comment['nid']. '-'. $comment['cid']. og_msgid_server();
