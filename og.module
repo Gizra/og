@@ -25,6 +25,12 @@ define('OG_DIRECTORY_ALWAYS', 1);
 define('OG_DIRECTORY_CHOOSE_TRUE', 2);
 define('OG_DIRECTORY_CHOOSE_FALSE', 3);
 
+// site admin chooses in og_settings() whether group creator can default user's group notification flag
+define('OG_NOTIFICATION_NEVER', 0);
+define('OG_NOTIFICATION_ALWAYS', 1);
+define('OG_NOTIFICATION_CHOOSE_TRUE', 2);
+define('OG_NOTIFICATION_CHOOSE_FALSE', 3);
+
 function og_help($section) {
   switch ($section) {
     case 'admin/help#og':
@@ -1009,6 +1015,33 @@ function og_node_form($node) {
       break;    
   }
   
+  // group email notifications
+  if (user_access('administer nodes')) {
+    $visibility = OG_NOTIFICATION_CHOOSE_FALSE;  
+  }
+  else {
+    $visibility = variable_get('og_visibility_notification', OG_NOTIFICATION_NEVER);  
+  }
+  $default = FALSE;
+  switch ($visibility) {
+    case OG_NOTIFICATION_NEVER:
+      $form['og_notification'] = array('#type' => 'value', '#value' => 0);
+      break;
+    case OG_NOTIFICATION_ALWAYS:
+      $form['og_notification'] = array('#type' => 'value', '#value' => 1);
+      break;
+    case OG_NOTIFICATION_CHOOSE_TRUE:
+      $default = TRUE;
+      // fall through
+    case OG_NOTIFICATION_CHOOSE_FALSE:
+      $form['og_notification'] = array(
+      '#type' => 'checkbox', 
+      '#title' => t('subscribe to email notifications'),  
+      '#default_value' => $node->nid ? $node->og_notification : $default, 
+      '#description' => t('Should subscribers to this group be automatically notified via email of new posts and comments? Users may always change this setting on their %mysubscription page.', array('%mysubscription' => t('My subscription'))));
+      break;    
+  }
+  
   // language
   if (module_exist('locale') && $languages = locale_supported_languages()) {
     if (count($languages['name']) > 1) {
@@ -1082,20 +1115,20 @@ function og_submit_group(&$node) {
 }
 
 function og_load_group(&$node) {
-  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, website AS og_website, register AS og_register, directory AS og_directory, language AS og_language FROM {og} WHERE nid = %d';
+  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, website AS og_website, register AS og_register, directory AS og_directory, notification AS og_notification, language AS og_language FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, db_fetch_array($result));
   $node->comment = COMMENT_NODE_DISABLED; // we don't use comments on og nodes
 }
 
 function og_insert_group($node) {
-  $sql = "INSERT INTO {og} (nid, theme, selective, description, website, register, directory, language) VALUES (%d, '%s', %d, '%s', '%s', %d, %d, '%s')";
-  db_query($sql, $node->nid, $node->theme, $node->og_selective, $node->og_description, $node->og_website, $node->og_register, $node->og_directory, $node->og_language);
+  $sql = "INSERT INTO {og} (nid, theme, selective, description, website, register, directory, notification, language) VALUES (%d, '%s', %d, '%s', '%s', %d, %d, %d, '%s')";
+  db_query($sql, $node->nid, $node->theme, $node->og_selective, $node->og_description, $node->og_website, $node->og_register, $node->og_directory, $node->og_notification, $node->og_language);
 }
 
 function og_update_group($node) {
-  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', website = '%s', directory = %d, language = '%s' WHERE nid = %d";
-  db_query($sql, $node->theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_website, $node->og_directory, $node->og_language, $node->nid);
+  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', website = '%s', directory = %d, notification = %d, language = '%s' WHERE nid = %d";
+  db_query($sql, $node->theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_website, $node->og_directory, $node->og_notification, $node->og_language, $node->nid);
 }
 
 /**
@@ -1138,9 +1171,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_submit_group($node);
       break;
     case 'prepare':
-      // only show this message when *editing* another user's nodes
-      global $user;
-      
       if (og_is_group_type($node->type)) {
         $node->comment = COMMENT_NODE_DISABLED;
       }
@@ -1857,18 +1887,14 @@ function og_settings() {
   $form['og_settings']['og_module_status']['module_action'] = array('#type' => 'submit', '#value' => $btn_text, '#prefix' => t('Organic groups access control is currently') . ' ' . theme('placeholder', $status). '.<br />');
 
 
-  $form['og_settings']['node_form'] = array('#type' => 'fieldset', '#title' => t('Node authoring form'));
-  $form['og_settings']['node_form']['og_help'] = array('#type' => 'textarea', '#default_value' => variable_get('og_help', ''), '#cols' => 70, '#rows' =>5, '#title' => t('Explanation or submission guidelines'), '#description' => t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
-  $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pub.', array('%pub' => theme('placeholder', t('Public')))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pri.', array('%pri' => theme('placeholder', t('Private')))));
-  $form['og_settings']['node_form']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))), '#options' => $options);
-  
+  $form['og_settings']['group_details'] = array('#type' => 'fieldset', '#title' => t('Group details'));
   // groups directory visibility
   $options = array(t('New groups don\'t appear in the groups directory. Administrators control the directory exclusively.'),
               t('New groups always appear in the groups directory.'),
               t('Group creator chooses whether her group appears in the directory. Defaults to %in.', array('%in' => theme('placeholder', t('in directory')))),
               t('Group creator chooses whether her group appears in the directory. Defaults to %out.', array('%out' => theme('placeholder', t('not in directory')))),
             );
-  $form['og_settings']['node_form']['og_visibility_directory'] = array('#type' => 'radios', '#title' => t('Groups directory control'), '#default_value' => variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_TRUE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => theme('placeholder', t('groups directory')))), '#options' => $options);
+  $form['og_settings']['group_details']['og_visibility_directory'] = array('#type' => 'radios', '#title' => t('Groups directory control'), '#default_value' => variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_TRUE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => theme('placeholder', t('groups directory')))), '#options' => $options);
   
   // groups registration visibility
   $options = array(t('New groups don\'t appear in on the registration form. Administrators control the form exclusively.'),
@@ -1876,7 +1902,20 @@ function og_settings() {
               t('Group creator chooses whether her group appears on the registration form. Defaults to %in.', array('%in' => theme('placeholder', t('on form')))),
               t('Group creator chooses whether her group appears on the registration form. Defaults to %out.', array('%out' => theme('placeholder', t('not on form')))),
             );
-    $form['og_settings']['node_form']['og_visibility_registration'] = array('#type' => 'radios', '#title' => t('Registration form control'), '#default_value' => variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => theme('placeholder', t('registration form')))), '#options' => $options);  
+    $form['og_settings']['group_details']['og_visibility_registration'] = array('#type' => 'radios', '#title' => t('Registration form control'), '#default_value' => variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => theme('placeholder', t('registration form')))), '#options' => $options);
+    
+    // email subscriptions visibility
+  $options = array(t('New group members are never subscribed to email notifications by default. Users may choose to enable this for themselves on their my subscription page.'),
+              t('New group members are always subscribed to email notifications by default.'),
+              t('Group creator chooses whether her members are automatically subscribed to email notifications. Defaults to %in.', array('%in' => theme('placeholder', t('yes notification')))),
+              t('Group creator chooses whether her members are automatically subscribed to email notifications. Defaults to %out.', array('%out' => theme('placeholder', t('no notification')))),
+            );
+  $form['og_settings']['group_details']['og_visibility_notification'] = array('#type' => 'radios', '#title' => t('Group email notifications'), '#default_value' => variable_get('og_visibility_notification', OG_NOTIFICATION_NEVER), '#description' =>t('Should new subscribers to a group automatically be notified via email when new content is posted to the group? Note that changing this setting has no effect on existing subscriptions.', array('%dir' => theme('placeholder', t('groups directory')))), '#options' => $options);
+  
+  $form['og_settings']['node_form'] = array('#type' => 'fieldset', '#title' => t('Node authoring form'));
+  $form['og_settings']['node_form']['og_help'] = array('#type' => 'textarea', '#default_value' => variable_get('og_help', ''), '#cols' => 70, '#rows' =>5, '#title' => t('Explanation or submission guidelines'), '#description' => t('This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users.'));
+  $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pub.', array('%pub' => theme('placeholder', t('Public')))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to %pri.', array('%pri' => theme('placeholder', t('Private')))));
+  $form['og_settings']['node_form']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post %pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%pub' => theme('placeholder', t('Public')))), '#options' => $options);  
 
   $options = array(t('optional'), t('required'));
   $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', FALSE), '#options' => $options, '#description' => t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting will affect existing posts when they are edited.'));

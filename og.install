@@ -14,6 +14,7 @@ function og_install() {
         website varchar(255) NULL,
         register int(1) NOT NULL default 0,
         directory int(1) NOT NULL default 0,
+        notification int(1) NOT NULL default 0,
         language varchar(12) NOT NULL default '',
         PRIMARY KEY  (nid)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
@@ -177,6 +178,16 @@ function og_update_10() {
     case 'mysqli': 
       $ret[] = update_sql("ALTER TABLE {og_uid} ADD created int(11) NULL DEFAULT 0");
       $ret[] = update_sql("ALTER TABLE {og_uid} ADD changed int(11) NULL DEFAULT 0");
+  } 
+  return $ret ? $ret : array();
+}
+
+// notification flag for a group
+function og_update_11() {
+  switch ($GLOBALS['db_type']) { 
+    case 'mysql': 
+    case 'mysqli': 
+      $ret[] = update_sql("ALTER TABLE {og} ADD notification int(1) NOT NULL default 0");
   } 
   return $ret ? $ret : array();
 }
