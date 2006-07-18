@@ -1117,7 +1117,7 @@ function og_submit_group(&$node) {
 function og_load_group(&$node) {
   $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, website AS og_website, register AS og_register, directory AS og_directory, notification AS og_notification, language AS og_language FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
-  $node = (object) array_merge((array)$node, db_fetch_array($result));
+  $node = (object) array_merge((array)$node, (array)db_fetch_array($result));
   $node->comment = COMMENT_NODE_DISABLED; // we don't use comments on og nodes
 }
 
@@ -1186,7 +1186,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       if (og_is_group_type($node->type)) {
         og_insert_group($node);
       }
-      og_save_permissions($node);
+      if (variable_get('og_enabled', 0)) {
+        og_save_permissions($node);
+      }
       if (!module_exist('og2list')) {
         if ($node->status) {
           $node->msgid = "$node->nid-0". og_msgid_server();
@@ -1198,7 +1200,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       if (og_is_group_type($node->type)) {
         og_update_group($node);
       }
-      og_save_permissions($node);
+      if (variable_get('og_enabled', 0)) {
+        og_save_permissions($node);
+      }
       break;
     case 'search result':
       // TODO: add group info
