@@ -1524,7 +1524,7 @@ function og_save_permissions(&$node) {
 
   if (!og_is_group_type($node->type)) {
     // put the post into each selected group. we need a separate row for public and private nodes.
-    // for public nodes, the grant_view column indicates which group the node belongs to. The gid=0 always. Needed to get
+    // for public nodes, the grant_view column indicaOGtes which group the node belongs to. The gid=0 always. Needed to get
     // public nodes to display on the home page for non subscribers
     // we INSERT a broad grant here but og_node_grants() only issues it selectively for a given operation
     if (is_array($node->og_groups)) {
@@ -1682,11 +1682,11 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
 function og_block_notifications() {
   if ($groupnode = og_get_group_context()) {
     $content = t('This group offers a %groupfeed and an %email.', array('%groupfeed' => l(t('RSS feed'), 'og/feed/'. $groupnode->nid), '%email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
-    if (module_exist('viewfeed') && module_exist('og_views')) {
+    if (module_exist('views')) {
       $content .= t(' Or subscribe to these personalized, sitewide feeds:');
-      $links[] = t('my unread: '). theme('links', array(l('feed', 'viewfeed/og_unread'), l('page', 'group/og_unread')));
-      $links[] = t('my groups: '). theme('links', array(l('feed', 'viewfeed/og_tracker'), l('page', 'group/og_tracker')));
-      $links[] = t('all posts: '). theme('links', array(l('feed', 'viewfeed/tracker'), l('page', 'tracker')));
+      $links[] = t('my unread: '). theme('links', array(l('feed', 'group/myunread/feed'), l('page', 'group/og_unread')));
+      $links[] = t('my groups: '). theme('links', array(l('feed', 'group/mytracker/feed'), l('page', 'group/og_tracker')));
+      $links[] = t('all posts: '). theme('links', array(l('feed', 'group/tracker/feed'), l('page', 'groups/tracker')));
       $content .= theme('item_list', $links);
     }
     $block['content'] = $content;
