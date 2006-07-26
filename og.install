@@ -39,18 +39,97 @@ function og_install() {
 
       $sql = "UPDATE {system} SET status = 1 WHERE name = 'og_basic'";
       db_query($sql);
+    break;
+    case 'pgsql':
+      db_query("CREATE TABLE {og} (
+        nid numeric(11) NOT NULL,
+        selective numeric(11) NOT NULL default 0,
+        description varchar(255) NULL,
+        image varchar(255) NULL,
+        theme varchar(255) NULL,
+        website varchar(255) NULL,
+        register numeric(1) NOT NULL default 0,
+        directory numeric(1) NOT NULL default 0,
+        notification numeric(1) NOT NULL default 0,
+        language varchar(12) NOT NULL default '',
+        PRIMARY KEY  (nid)
+      );");
+
+      db_query("CREATE TABLE {og_uid} (
+        nid numeric(11) NOT NULL,
+        og_role numeric(1) NOT NULL DEFAULT 0,
+        is_active numeric(1) NOT NULL DEFAULT 0,
+        is_admin numeric(1) NOT NULL DEFAULT 0,
+        uid numeric(11) NOT NULL,
+        mail_type numeric(11) NULL,
+	created numeric(11) NULL DEFAULT 0,
+	changed numeric(11) NULL DEFAULT 0,
+        PRIMARY KEY  (nid, uid)
+      );");
+
+      $sql = "ALTER TABLE {node_access} ".
+        "DROP CONSTRAINT {node_access}_pkey;";
+      db_query($sql);
+
+      $sql = "CREATE INDEX nid_gid_realm ON {node_access} (nid, gid, realm);";
+      db_query($sql);
+
+      $sql = "ALTER TABLE {node_access} ".
+          "ALTER COLUMN grant_view TYPE numeric(11), ".
+          "ALTER COLUMN grant_view SET NOT NULL, ".
+          "ALTER COLUMN grant_view SET DEFAULT '0';";
+      db_query($sql);
+
+      $sql = "UPDATE {system} SET status = 1 WHERE name = 'og_basic'";
+      db_query($sql);
+
+      break;
+  }
+}
+
+// 2006-05-31 PFM: deletes row if present in the table.  The first parameter
+// is a table, the next two are arrays of fields and values
+// respectively.  Two values are supported.
+function og_deleteifpresent_2keys($sTable, $aField, $aReplace, $aValue) {
+  $sqlExist = "select count(*) as nCount ".
+      "from ".$sTable." where " .
+      $aField[0] . " = " . $aReplace[0] . " and ".
+      $aField[1] . " = " . $aReplace[1];
+  $resExist = db_query($sqlExist, $aValue[0], $aValue[1]);
+  $objExist = db_fetch_object($resExist);
+  if($objExist->nCount > 0) {
+    // found.  delete before inserting below.
+    $sqlExist = "delete from ".$sTable." where ".$aField[0]." = ".$aReplace[0]." and ".$aField[1]." = ".$aReplace[1];
+    db_query($sql, $aValue[0], $aValue[1]);
   }
 }
 
 // move subscriber data to own table from node_access
 function og_update_1() {
-  db_query("ALTER TABLE {og_uid} ADD `og_role` int(1) NOT NULL default '0'");
-  db_query("ALTER TABLE {og_uid} ADD `is_active` int(1) default '0'");
-  db_query("ALTER TABLE {og_uid} ADD `is_admin` int(1) default '0'");
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      db_query("ALTER TABLE {og_uid} ADD `og_role` int(1) NOT NULL default '0'");
+      db_query("ALTER TABLE {og_uid} ADD `is_active` int(1) default '0'");
+      db_query("ALTER TABLE {og_uid} ADD `is_admin` int(1) default '0'");
+    break;
+    case 'pgsql':
+      db_query("ALTER TABLE {og_uid} ADD `og_role` numeric(1) NOT NULL default 0");
+      db_query("ALTER TABLE {og_uid} ADD `is_active` numeric(1) default 0");
+      db_query("ALTER TABLE {og_uid} ADD `is_admin` numeric(1) default 0");
+      break;
+  }
 
   $result = db_query("SELECT * FROM {node_access} WHERE realm = 'og_uid'");
   while ($object = db_fetch_object($result)) {
-    $sql = "REPLACE INTO {og_uid} (nid, uid, og_role, is_admin, is_active) VALUES (%d, %d, %d, %d, %d)";
+    og_deleteifpresent(
+      'og_uid',
+      array('nid','gid'),
+      array('%d','%d'),
+      array($object->nid,$object->gid));
+
+    // insert new row.
+    $sql = "INSERT INTO {og_uid} (nid, uid, og_role, is_admin, is_active) VALUES (%d, %d, %d, %d, %d)";
     db_query($sql, $object->nid, $object->gid, ($object->grant_view + $object->grant_update), $object->grant_update, $object->grant_view);
   }
   $sql = "DELETE FROM {node_access} WHERE realm = 'og_uid'";
@@ -67,6 +146,7 @@ function og_update_3() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
+    case 'pgsql':
       $sql = "DELETE FROM {node_access} WHERE realm = 'og_uid'";
       db_query($sql);
 
@@ -80,7 +160,9 @@ function og_update_3() {
       $sql = "SELECT nid FROM {node} WHERE type = 'og'";
       $result = db_query($sql);
       while ($row = db_fetch_object($result)) {
-        $sql = "REPLACE INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_group', 1, 1, 0)";
+        og_deleteifpresent_2keys('node_access',array('nid','gid'), array('%d','%d'), array($object->nid,$object->gid));
+
+        $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_group', 1, 1, 0)";
         db_query($sql, $row->nid, $row->nid);
       }
   }
@@ -109,15 +191,16 @@ function og_update_5() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
+    case 'pgsql':
       $sql = "SELECT DISTINCT(nid) as nid FROM {node_access} WHERE realm = 'og_group' AND gid = 0" ;
       $result = db_query($sql);
       while ($row = db_fetch_object($result)) {
         $sql = "SELECT gid FROM {node_access} WHERE nid = %d AND realm = 'og_group' AND gid != 0" ;
         $result2 = db_query($sql, $row->nid);
         while ($row2 = db_fetch_object($result2)) {  
-          $sql = "REPLACE INTO {node_access} (nid, realm, gid, grant_view) VALUES (%d, 'og_public', 0, %d)";
-          db_query($sql, $row->nid, $row2->gid); 
-        }
+          og_deleteifpresent_2keys('node_access', array('nid','gid'), array('%d','%d'), array($row->nid,$row->gid));
+          $sql = "INSERT INTO {node_access} (nid, realm, gid, grant_view) VALUES (%d, 'og_public', 0, %d)";
+          db_query($sql, $row->nid, $row2->gid);        }
       }
 
       // change all former public node grants to 'og_all' realm
@@ -150,6 +233,13 @@ function og_update_7() {
     case 'mysql':
     case 'mysqli':
       $ret[] = update_sql("ALTER TABLE {node_access} CHANGE grant_view grant_view int(11) unsigned NOT NULL default '0'");
+    break;
+    case 'pgsql':
+      $ret[] = update_sql("ALTER TABLE {node_access} ".
+      "ALTER COLUMN grant_view TYPE numeric(11), ".
+      "ALTER COLUMN grant_view SET NOT NULL, ".
+      "ALTER COLUMN grant_view SET DEFAULT 0;");
+    break;
   }
   return $ret ? $ret : array();
 }
@@ -166,6 +256,7 @@ function og_update_9() {
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
+    case 'pgsql':
       $ret[] = update_sql("ALTER TABLE {og} ADD language varchar(12) NOT NULL default ''");
   }
   return $ret ? $ret : array();
@@ -178,6 +269,11 @@ function og_update_10() {
     case 'mysqli': 
       $ret[] = update_sql("ALTER TABLE {og_uid} ADD created int(11) NULL DEFAULT 0");
       $ret[] = update_sql("ALTER TABLE {og_uid} ADD changed int(11) NULL DEFAULT 0");
+    break;
+    case 'pgsql':
+      $ret[] = update_sql("ALTER TABLE {og_uid} ADD COLUMN created numeric(11) NULL DEFAULT 0");
+      $ret[] = update_sql("ALTER TABLE {og_uid} ADD COLUMN changed numeric(11) NULL DEFAULT 0");
+    break;
   } 
   return $ret ? $ret : array();
 }
@@ -188,6 +284,10 @@ function og_update_11() {
     case 'mysql': 
     case 'mysqli': 
       $ret[] = update_sql("ALTER TABLE {og} ADD notification int(1) NOT NULL default 0");
+    break;
+    case 'pgsql':
+      $ret[] = update_sql("ALTER TABLE {og} ADD COLUMN notification numeric(1) NOT NULL default 0");
+    break;
   } 
   return $ret ? $ret : array();
 }

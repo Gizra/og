@@ -761,11 +761,11 @@ function og_list_groups_page($uid = NULL, $format = 'html') {
 
   if (!$uid) {
     // Retrieve all groups
-    $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY n.nid DESC", 'og', 'nid'), 50);
+    $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY og.nid DESC", 'og', 'nid'), 50);
   }
   else {
     // Retrieve only current user's group
-    $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid INNER JOIN {og_uid} ou ON ou.uid = u.uid WHERE og.nid IN (". implode(',', array_keys($user->og_groups)) .") ORDER BY n.nid DESC", 'og', 'nid'), 50);
+    $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid INNER JOIN {og_uid} ou ON ou.uid = u.uid WHERE og.nid IN (". implode(',', array_keys($user->og_groups)) .") ORDER BY og.nid DESC", 'og', 'nid'), 50);
   }
   if ($format == 'opml') {
     og_list_groups_page_opml($result); 
@@ -845,9 +845,9 @@ function og_get_home_nodes_sql($str_types = NULL, $group_by = NULL) {
   else {
     $where = "n.type NOT IN ('" . implode("','", variable_get('og_node_types', array('og'))) . "')";
   }
-  
+
   // we LEFT JOIN to node_comment_stats in case comment.module is disabled.
-  return "SELECT n.nid, n.title, n.uid, u.name, u.picture, n.created, l.comment_count, l.last_comment_timestamp FROM {node} n LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND $where $group_by ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
+  return "SELECT n.nid, n.title, n.uid, u.name, u.picture, n.created, n.sticky, l.comment_count, l.last_comment_timestamp FROM {node} n LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND $where $group_by ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
 }
 
 /**
@@ -1595,20 +1595,35 @@ function og_delete_grants(&$node) {
  */
 function _og_update_db($enable) {
   if (!$enable) {
-    // We use the delete statement to avoid inserting a duplicate entry into the database.
-    // Without the DELETE query, this can happen when a site admin has already enabled the modules
-    // from the settings page and goes back to it and resaves the enabled setting.
-    db_query('REPLACE INTO {node_access} VALUES (0, 0, \'all\', 1, 0, 0)');
+    // We use the delete statement to avoid inserting a duplicate entry
+    // into the database. Without the DELETE query, this can happen
+    // when a site admin has already enabled the modules from the
+    // settings page and goes back to it and resaves the enabled setting.
+    switch ($GLOBALS['db_type']) {
+      case 'mysql':
+      case 'mysqli':
+        db_query('REPLACE INTO {node_access} VALUES (0, 0, \'all\', 1, 0, 0)');
+      break;
+      case 'pgsql':
+        $result = db_query("UPDATE {node_access} SET nid=0, gid=0, realm='all', grant_view=1, grant_update=0, grant_delete=0 WHERE nid=0 AND gid=0 and realm='all'");
+        if (!db_num_rows($result)) {
+          db_query('INSERT INTO {node_access} VALUES (0, 0, \'all\', 1, 0, 0)');
+        }
+      break;
+    }    
     drupal_set_message(t('Organic groups access control has been disabled. You may now disable the module on the <em>%modules</em> page', array('%modules' => l(t('admin/modules'), 'admin/modules'))));
   }
-  else { // the module was just enabled or re-enabled; provide default view access to everyone for nodes that were created
-         // between the previous disabling of the module and the current enabling of the module;
-         // nodes that were created during a previous enabled period are left-alone.
-         // Permissions for those nodes will be the same as when the module was previously enabled.
+  else {
+    // The module was just enabled or re-enabled; provide default view
+    // access to everyone for nodes that were created between the previous
+    // disabling of the module and the current enabling of the module;
+    // nodes that were created during a previous enabled period are
+    // left-alone. Permissions for those nodes will be the same as when
+    // the module was previously enabled. 
     db_query('DELETE from {node_access} WHERE nid=0 AND gid=0 AND realm=\'all\' AND grant_view=1 AND grant_update=0 AND grant_delete=0');
 
     // Assign universal grant to all non-group nodes which don't already have any grants from this module
-    $result = db_query("SELECT n.nid FROM {node} n LEFT JOIN {node_access} na ON n.nid = na.nid AND realm LIKE '%og%' WHERE n.type NOT IN (". str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND ISNULL(na.gid)', variable_get('og_node_types', array('og')));
+    $result = db_query("SELECT n.nid, na.gid FROM {node} n LEFT JOIN {node_access} na ON n.nid = na.nid AND realm LIKE '%og%' WHERE n.type NOT IN (". str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND na.gid IS NULL', variable_get('og_node_types', array('og')));
     while ($row = db_fetch_object($result)) {
       $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view) VALUES (%d, 0, 'og_all', 1)";
       db_query($sql, $row->nid);
@@ -1643,7 +1658,11 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
   if ($op == 'list') {
     $blocks[0]['info'] = t('Group details');
     // $blocks[1] used to be the album block. We do not change the numbers to not confuse people who update.
-    $blocks[2]['info'] = t('Group authors');
+    if ($GLOBALS['db_type'] != 'pgsql') {
+      // Until we resolve pgsql-specific problems with GROUP BY in the
+      // query used to generate this block, we're just disabling it.
+      $blocks[2]['info'] = t('Group authors');
+    }
     $blocks[3]['info'] = t('New groups');
     $blocks[4]['info'] = t('My groups');
     $blocks[5]['info'] = t('Group notifications');
@@ -1654,7 +1673,9 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
       case 0:
         return og_block_details();
       case 2:
-        return og_block_subscribers();
+        if ($GLOBALS['db_type'] != 'pgsql') {
+          return og_block_subscribers();
+        }
       case 3:
         return og_block_new();
       case 4:
