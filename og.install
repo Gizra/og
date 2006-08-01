@@ -122,7 +122,7 @@ function og_update_1() {
 
   $result = db_query("SELECT * FROM {node_access} WHERE realm = 'og_uid'");
   while ($object = db_fetch_object($result)) {
-    og_deleteifpresent(
+    og_deleteifpresent_2keys(
       'og_uid',
       array('nid','gid'),
       array('%d','%d'),
