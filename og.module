@@ -306,17 +306,22 @@ function og_manage($gid) {
   }
   
   $group = node_load($gid);
-  // group manager can't unsubscribe
-  if ($group->og_selective == OG_CLOSED) {
-    drupal_set_message(t('You may not unsubscribe from this group because it is a %closed group. You should request unsubscription from a group administrator.', array('%closed' => t('closed'))));
+
+  // avoid double messages on POST
+  if (!$_POST) {
+    // group manager can't unsubscribe
+    if ($group->og_selective == OG_CLOSED) {
+      drupal_set_message(t('You may not unsubscribe from this group because it is a %closed group. You should request unsubscription from a group administrator.', array('%closed' => t('closed'))));
+    }
+    elseif ($group->uid == $user->uid) {
+      drupal_set_message(t('You may not unsubscribe from this group because you are its owner. A site administrator can assign ownership to another user and then you can unsubscribe.'));
+    }
+    else {
+      $links[] = l(t('Unsubscribe from this group'), "og/unsubscribe/$gid", NULL, 'destination=og');
+      $form['unsubscribe'] = array('#type' => 'markup', '#title' => t('Goodbye'), '#value' => theme('item_list', $links, t('Actions')));
+    }
   }
-  elseif ($group->uid == $user->uid) {
-    drupal_set_message(t('You may not unsubscribe from this group because you are its owner. A site administrator can assign ownership to another user and then you can unsubscribe.'));
-  }
-  else {
-    $links[] = l(t('Unsubscribe from this group'), "og/unsubscribe/$gid", NULL, 'destination=og');
-    $form['unsubscribe'] = array('#type' => 'markup', '#title' => t('Goodbye'), '#value' => theme('item_list', $links, t('Actions')));
-  }
+
   $form['mail_type'] = array('#type' => 'radios', '#title' => t('Email notification'), '#default_value' => $user->og_groups[$gid]['mail_type'], '#options' => array(1 => t('enabled'), 0 => t('disabled')), '#description' => t('Do you want to receive an email each time a message is posted to this group?'));
   $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
   $form['gid'] = array('#type' => 'value', '#value' => $gid);
