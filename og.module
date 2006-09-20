@@ -1075,13 +1075,14 @@ function og_node_load_public($node) {
 
 // returns all the group affiliations for a given node.
 function og_get_node_groups($node) {
+  $groups = array();
   if (!og_is_group_type($node->type)) {
     $sql = "SELECT na.gid, n.title FROM {node_access} na INNER JOIN {node} n ON na.gid = n.nid WHERE na.nid = %d AND na.realm='og_subscriber' AND na.gid != 0";
     $result = db_query($sql, $node->nid);
     while ($row = db_fetch_object($result)) {
       $groups[$row->gid] = $row->title;
     }
-    return $groups ? $groups : array();
+    return $groups;
   }
 }
 
@@ -1228,12 +1229,13 @@ function og_msgid_server() {
 }
 
 function og_form_alter($form_id, &$form) {
-  $node = $form['#node'];
-  
-  if (!strpos($form_id, 'node_form') || in_array($node->type, variable_get('og_omitted', array()))) {
-    return;
-  }
-  og_form_add_og_audience($form_id, $form);
+  // Add audience selection to node forms
+  if (strpos($form_id, 'node_form')) {
+    $node = $form['#node'];
+    if (!in_array($node->type, variable_get('og_omitted', array()))) {
+      og_form_add_og_audience($form_id, $form);
+    }
+  }  
 }
 
 /**
@@ -1870,9 +1872,8 @@ function og_block_details() {
     else {
       $links[] = t('This is a %closed group. The group administrators add/remove subscribers as needed.', array('%closed' => theme('placeholder', t('closed'))));
     }
-    $output .= theme('item_list', $links);
 
-    $block['content'] = $output;
+    $block['content'] = theme('item_list', $links);
     $block['subject'] = $node->title;
     return $block;
   }
@@ -1990,6 +1991,7 @@ function theme_og_list_generic($gid, $type, $mode) {
   $num = $mode == 'brief' ? variable_get('og_max_posts', 10) : 50;
   $i++; // multiple pagers on a page need a unique integer
   $result = pager_query(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $gid)), $num, $i);
+  $rows = array();
   while ($row = db_fetch_object($result)) {
     $rows[] = array(l($row->title, "node/$row->nid"), theme('username', $row), $row->comment_count, format_date($row->created, 'small'));
   }
