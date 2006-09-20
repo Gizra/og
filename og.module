@@ -1218,7 +1218,25 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'search result':
       // TODO: add group info
       break;
+    case 'rss item':
+      if ($node->og_groups) {
+        return og_nodeapi_rss_item($node);
+      }
+      break;
   }
+}
+
+function og_nodeapi_rss_item(&$node) {
+  foreach ($node->og_groups as $cnt => $gid) {
+    $append[] = l($node->og_groups_names[$cnt], "node/$gid", NULL, NULL, NULL, TRUE); 
+    $ret[] = array('key'   => 'group',
+                   'value' => check_plain($node->og_groups_names[$cnt]),
+                   'attributes' => array('domain' => url('node/'. $gid, NULL, NULL, NULL, TRUE)));
+  }
+  // to get these modifications to work on 4.7, one needs to patch as per http://drupal.org/node/41703
+  $node->body .= '<div class="rss_groups">'. theme('links', $append). '</div>';
+  $node->teaser .= '<div class="rss_groups">'. theme('links', $append). '</div>';
+  return $ret;
 }
 
 function og_msgid_server() {
