@@ -1486,7 +1486,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
       $values = array();
       $result = db_query(db_rewrite_sql('SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ('. str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND o.register = 1 ORDER BY n.title'), variable_get('og_node_types', array('og')));
       while ($group = db_fetch_object($result)) {
-        $options[$group->nid] = t('Subscribe to %name.', array('%name' => theme('placeholder', $group->title)));
+        $options[$group->nid] = '<span class="og-registration-'.$group->nid.'">'.t('Subscribe to %name.', array('%name' => theme('placeholder', $group->title))).'<span>';
         $values[$group->nid] = in_array($group->nid, (array) $edit['og_register']) ? $group->nid : 0;
         if ($group->selective) {
           $options[$group->nid] .= ' '. theme('placeholder', t('(approval needed)'));
