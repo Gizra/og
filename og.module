@@ -661,8 +661,8 @@ function og_get_subscriptions($uid, $min_is_active = 1) {
   return $subscriptions[$uid];
 }
 
-function og_list_users_sql($min_is_active = 1, $min_is_admin = 0) {
-  return "SELECT u.uid, u.name, u.mail, u.picture, ou.* FROM {og_uid} ou INNER JOIN {users} u ON ou.uid = u.uid WHERE ou.nid = %d AND u.status > 0 AND is_active >= $min_is_active AND is_admin >= $min_is_admin ORDER BY u.name ASC";
+function og_list_users_sql($min_is_active = 1, $min_is_admin = 0, $orderby='u.name ASC') {
+  return "SELECT u.uid, u.name, u.mail, u.picture, ou.* FROM {og_uid} ou INNER JOIN {users} u ON ou.uid = u.uid WHERE ou.nid = %d AND u.status > 0 AND ou.is_active >= $min_is_active AND ou.is_admin >= $min_is_admin ORDER BY $orderby";
 }
 
 function og_add_users_page($gid) {
@@ -727,11 +727,15 @@ function og_list_users_page($gid) {
   }
   $i++;
 
-  $sql = og_list_users_sql(0);
+  $sql = og_list_users_sql(0,0,'ou.is_admin DESC, ou.is_active ASC, u.name ASC');
+  /* list group admins first, pending subscribers second, regular subscribers last.  Alphabetize within each of these catergories */
   $result = pager_query($sql, 500, 0, NULL, $gid);
   while ($account = db_fetch_object($result)) {
       if ($account->uid != $node->uid) {
-        $rows[$i][] = theme('username', $account);
+        $username = theme('username', $account);
+        if  (!$account->is_active)  { $username .= '&nbsp;<em>'.t('(approval needed)'). '</em>'; }
+        elseif ($account->is_admin) { $username .= '&nbsp;<em>'.t('manager'). '</em>'; }
+        $rows[$i][] = $username;
         if ($access) {
           if ($account->is_active) {
             $rows[$i][] = l(t('unsubscribe'), "og/unsubscribe/$gid/$account->uid", array(), "destination=og/users/$gid");
