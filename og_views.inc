@@ -19,32 +19,42 @@ function og_views_tables() {
       ),
       'fields' => array(
         'description' => array(
-          'name' => 'Og: Group Description',
+          'name' => 'Og: Group: Description',
         ),
         'website' => array(
-          'name' => 'Og: Group Website',
+          'name' => 'Og: Group: Website',
           'handler' => 'og_handler_field_website',
         ),
         'count' => array(
-          'name' => 'Og: Subscriber Count',
+          'name' => 'Og: Group: Subscriber Count',
           'handler' => 'og_handler_field_count',
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
         'selective' => array(
-          'name' => 'Og: Selective',
+          'name' => 'Og: Group: Selective',
         ),
         'subscribe' => array(
-          'name' => 'Og: Subscribe Link',
+          'name' => 'Og: Group: Subscribe Link',
           'handler' => 'og_handler_field_subscribe',
           'addlfields' => array('selective'),
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
+        'notification' => array(
+          'name' => 'Og: Group: Notification',
+          'handler' => 'og_handler_field_yesempty',
+          'help' => t('Displays <em>yes</em> if group automatically sends email notifications to subscribers')
+        ),
+        'language' => array(
+          'name' => 'Og: Group: Language',
+          'help' => t('Displays the language selected for a given group'),
+        ),
+        
       ),
       'filters' => array(
         'directory' => array(
-          'name' => "Og: List in directory",
+          'name' => "Og: Group: List in directory",
           'operator' => array('=' => 'Equals'),
           'list' => 'views_handler_operator_yesno',
           'list-type' => 'select',
@@ -52,28 +62,31 @@ function og_views_tables() {
         )
       )
     ),
-    'og_node' => array(
-      'name' => 'node_access',
+    'og_ancestry' => array(
+      'name' => 'og_ancestry',
       'join' => array(
         'left' => array(
           'table' => 'node',
           'field' => 'nid',
-          ),
+        ),
         'right' => array(
           'field' => 'nid',
-          ),
-         'extra' => array(
-            'realm' => 'og_subscriber',
-            'gid != node.nid' => NULL,
-          ),
         ),
       ),
+      'fields' => array(  
+        'is_public' => array(
+          'name' => 'Og: Public',
+          'handler' => 'og_handler_field_yesempty',
+          'help' => t('Displays <em>yes</em> if post is public according to OG.'),
+        )  
+      ),
+    ),
     'og_node_data' => array(
       'name' => 'node',
       'join' => array(
         'left' => array(
-          'table' => 'og_node',
-          'field' => 'gid',
+          'table' => 'og_ancestry',
+          'field' => 'group_nid',
           ),
         'right' => array(
           'field' => 'nid',
@@ -158,19 +171,6 @@ function og_views_tables() {
         ),
       ),            
     ),
-    'node_access' => array(
-      'name' => 'node_access',
-      'join' => array(
-        'left' => array(
-          'table' => 'node',
-          'field' => 'nid',
-          ),
-        'right' => array(
-          'table' => 'node_access',
-          'field' => 'nid',
-                   )
-        )
-    )
   );
 }
 
@@ -191,18 +191,9 @@ function og_views_arguments() {
 function og_handler_argument_gid($op, &$query, $argtype, $arg = '') {
   switch ($op) {
     case 'filter':
-      $prefix = 'na';
-      // we add this JOIN for node admins and when node access is disabled because node_rewrite_sql() adds it for everyone else
-      if (user_access('administer nodes') || node_access_view_all_nodes()) {
-        $query->ensure_table('node_access');
-        $prefix = 'node_access';
-        // $query->set_count_field('nid'); // views doesn't do a distinct unless a field is specified here
-      }
-      $where[] = "($prefix.gid = %d AND $prefix.realm = 'og_subscriber')";
-      $where[] = "($prefix.grant_view = %d AND $prefix.realm = 'og_public')";
-      $where = implode(' OR ', $where);
-      $query->add_where($where, $arg, $arg);
-      $query->add_where("$prefix.nid IS NOT NULL"); // counteract the fact that views doesn't do inner joins yet
+      // TODO: maybe there is a nicer syntax for this?
+      $query->ensure_table('og_ancestry');
+      $query->add_where('og_ancestry.group_nid = %d', $arg);
       break;
     case 'title':
       return db_result(db_query_range('SELECT title FROM {node} WHERE nid = %d', $query, 0, 1));;
