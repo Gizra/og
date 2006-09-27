@@ -612,7 +612,7 @@ function og_subscribe_user($gid, $account) {
         }
       }
       if ($admins) {
-        $subj = t("Subscription request for '@group' from '@name <@email>'", array('@group' => $node->title, '@name' => $account->name, '@email' => $account->mail));
+        $subj = t("Subscription request for '@group' from '@name'", array('@group' => $node->title, '@name' => $account->name));
         $body = t('To instantly approve this request, visit !url. ', array('!url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
         $body .= t('You may deny this request or manage subscribers at !url', array('!url' => url("og/users/$node->nid", NULL, NULL, TRUE)));
         $from = variable_get('site_mail', ini_get('sendmail_from'));
