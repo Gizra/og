@@ -1719,28 +1719,33 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
 }
 
 function og_block_notifications() {
+  global $user;
+  
   if ($groupnode = og_get_group_context()) {
-    $content = t('This group offers a !groupfeed and an !email.', array('!groupfeed' => l(t('RSS feed'), 'og/feed/'. $groupnode->nid), '!email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
-    if (module_exists('views') && module_exists('views_rss')) {
-      // NOTE: See og.css for styling specific to these lists
-      $content .= t(' Or subscribe to these personalized, sitewide feeds:');
-      $inline = array('class' => 'links inline');      
-      $l1[] = array('title' => t('feed'), 'href' => 'group/myunread/feed');
-      $l1[] = array('title' => t('page'), 'href' => 'group/myunread');
-      $links['my_unread'] = t('my unread: '). theme('links', $l1, $inline);
+    // only members can see this block
+    if (in_array($groupnode->nid, array_keys($user->og_groups))) {
+      $content = t('This group offers a !groupfeed and an !email.', array('!groupfeed' => l(t('RSS feed'), 'og/feed/'. $groupnode->nid), '!email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
+      if (module_exists('views') && module_exists('views_rss')) {
+        // NOTE: See og.css for styling specific to these lists
+        $content .= t(' Or subscribe to these personalized, sitewide feeds:');
+        $inline = array('class' => 'links inline');      
+        $l1[] = array('title' => t('feed'), 'href' => 'group/myunread/feed');
+        $l1[] = array('title' => t('page'), 'href' => 'group/myunread');
+        $links['my_unread'] = t('my unread: '). theme('links', $l1, $inline);
       
-      $l2[] = array('title' => t('feed'), 'href' => 'group/og_tracker/feed');
-      $l2[] = array('title' => t('page'), 'href' => 'group/og_tracker');
-      $links['my_group'] = t('my group: '). theme('links', $l2, $inline);
+        $l2[] = array('title' => t('feed'), 'href' => 'group/og_tracker/feed');
+        $l2[] = array('title' => t('page'), 'href' => 'group/og_tracker');
+        $links['my_group'] = t('my group: '). theme('links', $l2, $inline);
       
-      $l3[] = array('title' => t('feed'), 'href' => 'group/tracker/feed');
-      $l3[] = array('title' => t('page'), 'href' => 'group/tracker');
-      $links['all_posts'] = array('data' => t('all posts: '). theme('links', $l3, $inline));
-      $content .= theme('item_list', $links);
+        $l3[] = array('title' => t('feed'), 'href' => 'group/tracker/feed');
+        $l3[] = array('title' => t('page'), 'href' => 'group/tracker');
+        $links['all_posts'] = array('data' => t('all posts: '). theme('links', $l3, $inline));
+        $content .= theme('item_list', $links);
+      }
+      $block['content'] = $content;
+      $block['subject'] = t('Group notifications');
+      return $block;
     }
-    $block['content'] = $content;
-    $block['subject'] = t('Group notifications');
-    return $block;
   }
 }
 
