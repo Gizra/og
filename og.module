@@ -1428,13 +1428,13 @@ function og_mail($type, $obj) {
     $result = db_query($sql, OG_NOTIFICATION_NEVER, OG_NOTIFICATION_ALWAYS);
     while ($row = db_fetch_object($result)) {
       // see http://www.ietf.org/rfc/rfc2369.txt. UTF8 OK? $headers .= "\nX-List_ID: "; 
-      $subj = "[$row->group_name: $type] ". t('%title at %site', array('%title' => $node->title, '%site' => variable_get('site_name', drupal)));
+      $subj = "[$row->group_name: $type] ". t('@title at @site', array('@title' => $node->title, '@site' => variable_get('site_name', drupal)));
       $txt = "'$obj->title' by $obj->name\n";
       $txt .= t('View original: '). $originalurl. "\n";
       $txt .= t('Post reply: '). $replyurl. "\n";
       $txt .= "\n". og_mail_output($obj->body);
       $txt .= "\n\n-----------------------\n";
-      $txt .= t("You are subscribed to the group '!group_name' at '!site'. To manage your subscription, visit !group_url", array('!group_name' => $row->group_name, '!site' => variable_get('site_name', drupal), '!group_url' => url("og/manage/$row->gid", NULL, NULL, TRUE)));
+      $txt .= t("You are subscribed to the group '@group_name' at '@site'. To manage your subscription, visit !group_url", array('@group_name' => $row->group_name, '@site' => variable_get('site_name', drupal), '!group_url' => url("og/manage/$row->gid", NULL, NULL, TRUE)));
       
       $unsubscribe = url("og/manage/$row->gid", NULL, NULL, TRUE);
       $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
