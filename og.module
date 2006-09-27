@@ -277,7 +277,7 @@ function og_nodeview($gid) {
 
 function og_email_form_submit($form_id, $form_values) {
   $node = node_load($form_values[gid]);
-  $msg = $form_values['body']. t("\n\n--------------------------------\nThis message was sent by an administrator in the '%group' group at %site. To visit this group, browse to %url1. To unsubscribe from this group, visit %url2", array('%group' => $node->title, '%site' => variable_get('site_name', drupal), '%url1' => url("node/$node->nid", NULL, NULL, TRUE), '%url2' => url("og/unsubscribe/$node->nid", NULL, NULL, TRUE)));
+  $msg = $form_values['body']. t("\n\n--------------------------------\nThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url1. To unsubscribe from this group, visit !url2", array('@group' => $node->title, '@site' => variable_get('site_name', drupal), '!url1' => url("node/$node->nid", NULL, NULL, TRUE), '!url2' => url("og/unsubscribe/$node->nid", NULL, NULL, TRUE)));
   global $user;
   $from = $user->mail;
   $sql = og_list_users_sql(1);
@@ -405,8 +405,8 @@ function og_approve($gid, $uid) {
     if (node_access('update', $node)) {
     og_save_subscription($gid, $uid, array('is_active' => 1));
     drupal_set_message(t('Subscription request approved.'));
-    $subj = t("Subscription request approved for '%title'", array('%title' => $node->title));
-    $body = t('You may now post messages in this group located at %url', array('%url' => url("node/$node->nid", NULL, NULL, TRUE)));
+    $subj = t("Subscription request approved for '@title'", array('@title' => $node->title));
+    $body = t('You may now post messages in this group located at !url', array('!url' => url("node/$node->nid", NULL, NULL, TRUE)));
     $from = variable_get('site_mail', ini_get('sendmail_from'));
     $account = user_load(array('uid' => $uid));
     drupal_mail('og_approve', $account->mail, $subj, $body, $from);
@@ -422,7 +422,7 @@ function og_deny($gid, $uid) {
   if (node_access('update', $node)) {
     og_delete_subscription($gid, $uid);
     drupal_set_message(t('Subscription request denied.'));
-    $subj = t('Subscription request denied for %title', array('%title' => $node->title));
+    $subj = t('Subscription request denied for @title', array('@title' => $node->title));
     $body = t('Sorry, your subscription request was denied.');
     $from = variable_get('site_mail', ini_get('sendmail_from'));
     $headers = array('X-Mailer' => 'Drupal - og_deny');
@@ -612,9 +612,9 @@ function og_subscribe_user($gid, $account) {
         }
       }
       if ($admins) {
-        $subj = t("Subscription request for '%group' from '%name'", array('%group' => $node->title, '%name' => $account->name));
-        $body = t('To instantly approve this request, visit %url. ', array('%url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
-        $body .= t('You may deny this request or manage subscribers at %url', array('%url' => url("og/users/$node->nid", NULL, NULL, TRUE)));
+        $subj = t("Subscription request for '@group' from '@name'", array('@group' => $node->title, '@name' => $account->name));
+        $body = t('To instantly approve this request, visit !url. ', array('!url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
+        $body .= t('You may deny this request or manage subscribers at !url', array('!url' => url("og/users/$node->nid", NULL, NULL, TRUE)));
         $from = variable_get('site_mail', ini_get('sendmail_from'));
         drupal_mail(implode(', ', $admins), $subj, $body, $from);
       }
