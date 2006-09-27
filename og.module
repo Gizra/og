@@ -612,14 +612,14 @@ function og_subscribe_user($gid, $account) {
         }
       }
       if ($admins) {
-        $subj = t("Subscription request for '@group' from '@name'", array('@group' => $node->title, '@name' => $account->name));
+        $subj = t("Subscription request for '@group' from '@name <@email>'", array('@group' => $node->title, '@name' => $account->name, '@email' => $account->mail));
         $body = t('To instantly approve this request, visit !url. ', array('!url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE)));
         $body .= t('You may deny this request or manage subscribers at !url', array('!url' => url("og/users/$node->nid", NULL, NULL, TRUE)));
         $from = variable_get('site_mail', ini_get('sendmail_from'));
-        drupal_mail(implode(', ', $admins), $subj, $body, $from);
+        drupal_mail('og_subscription_request', implode(', ', $admins), $subj, $body, $from);
       }
       $return_value = array('type' => 'approval',
-                            'message' => t('Subscription request to the @group group awaits approval by an administrator.', array('@group' => $node->title)));
+                            'message' => t('Subscription request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
 
       break;
     case OG_OPEN:
