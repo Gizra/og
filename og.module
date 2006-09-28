@@ -1384,6 +1384,7 @@ function og_comment($comment, $op) {
   }  
 }
 
+
 /**
  * Send this node/comment via email to all email subscribers. Called from og_nodeapi() and og_comment()
  * TODO: this mail feature is a bit messy. rethink.
@@ -1411,12 +1412,14 @@ function og_mail($type, $obj) {
       $account = user_load(array('uid' => $obj->uid));
       $obj->name = $account->name;
       $obj = node_prepare($obj, FALSE);
+      // fills body with CCK fields, event fields, etc. instead of "n/a"
+      $obj->body = og_node_view($obj);
       $replyurl = url("comment/reply/$obj->nid", NULL, 'comment-form', TRUE);
       $originalurl = url("node/$obj->nid", NULL, NULL, TRUE);
     }
     
     $sitemail = variable_get("site_mail", ini_get("sendmail_from"));
-    $headers = array('From' => $obj->name. " <$sitemail>", 'X-Mailer' => 'Drupal - og_mail', 'Return-path' => $sitemail, 'Errors-to' => $sitemail, 'Precedence' => 'list', 'Message-Id' => "<$obj->msgid>");
+    $headers = array('X-Mailer' => 'Drupal - og_mail', 'Precedence' => 'list', 'Message-Id' => "<$obj->msgid>");
     if ($obj->in_reply_to) {
       $headers['In-Reply-To'] =  "<$obj->in_reply_to>";
     }
@@ -1440,9 +1443,38 @@ function og_mail($type, $obj) {
       $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
       $group_home = url("node/$row->gid", NULL, NULL, TRUE);
       $groupheaders = $headers + array('List-Id' => "$row->group_name <$group_home>", 'List-Unsubscribe' => "<$unsubscribe>", 'List-Owner' => "$row->group_owner <$ownerurl>", "List-Archive" => "<$group_home>");
-      drupal_mail('og_mail', $row->mail, $subj, $txt, NULL, $groupheaders);
+      drupal_mail('og_mail', 'From' => $obj->name. " <$sitemail>", $subj, $txt, NULL, $groupheaders);
     }
   }
+}
+
+/**
+ * Same as node_view but without calling theme('node')
+ * This is needed to get the proper teaser for nodes (e.g.Event, Location, CCK node types)
+ */
+function og_node_view($node) {
+  $node = (object)$node;
+
+  // Remove the delimiter (if any) that separates the teaser from the body.
+  // TODO: this strips legitimate uses of '<!--break-->' also.
+  $node->body = str_replace('<!--break-->', '', $node->body);
+
+  if ($node->log != '' && !$teaser && $node->moderate) {
+    $node->body .= '<div class="log"><div class="title">'. t('Log') .':</div>'. filter_xss($node->log) .'</div>';
+  }
+
+  // The 'view' hook can be implemented to overwrite the default function
+  // to display nodes.
+  if (node_hook($node, 'view')) {
+    node_invoke($node, 'view', $teaser, $page);
+  }
+  else {
+    $node = node_prepare($node, $teaser);
+  }
+  // Allow modules to change $node->body before viewing.
+  node_invoke_nodeapi($node, 'view', $teaser, $page);
+  
+  return $node->teaser;
 }
 
 // 2 functions ripped from mail.inc in project.module package
@@ -1475,9 +1507,17 @@ function og_mail_output($body, $html = TRUE) {
     $body = preg_replace('!</?(em|i)>!i', '/', $body);
     $body = preg_replace('!</?(b|strong)>!i', '*', $body);
     $body = preg_replace("@<br />(?!\n)@i", "\n", $body);
-    $body = preg_replace("@</p>(?!\n\n)@i", "\n\n", $body);
-    $body = preg_replace("@<li>@i", "* ", $body);
-    $body = preg_replace("@</li>\n?@i", "\n", $body);
+    $body = preg_replace("@</p.*>(?!\n\n)@i", "\n\n", $body);
+    $body = preg_replace("@</h1>(?!\n\n)@i", " #\n", $body);
+    $body = preg_replace("@</h2>(?!\n\n)@i", " ##\n", $body);
+    $body = preg_replace("@</h3>(?!\n\n)@i", " ###\n", $body);
+    $body = preg_replace("@</h4>(?!\n\n)@i", " ####\n", $body);
+    $body = preg_replace("@<h1.*>@i", "\n\n# ", $body);
+    $body = preg_replace("@<h2.*>@i", "\n\n## ", $body);
+    $body = preg_replace("@<h3.*>@i", "\n\n### ", $body);
+    $body = preg_replace("@<h4.*>@i", "\n\n#### ", $body);
+    $body = preg_replace("@<li.*>@i", "* ", $body);
+    $body = preg_replace("@</(li|dd)>\n?@i", "\n", $body);
     $body = strip_tags($body);
     $body = decode_entities($body);
     $body = wordwrap($body, 72);
