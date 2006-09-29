@@ -907,11 +907,7 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
     $bc[] = array('path' => "og", 'title' => t('groups'));
     $bc[] = array('path' => "node/$node->nid", 'title' => $node->title);
     menu_set_location($bc);
-    drupal_add_link(array(
-                        'rel' => 'alternate',
-                        'type' => 'application/rss+xml',
-                        'title' => $node->title. t(' RSS feed'),
-                        'href' => url("og/feed/$node->nid")));
+    drupal_add_feed(url("og/feed/$node->nid"), $node->title. t(' RSS feed'));
     // save the mission in an array element for use by themes if desired
     // $node->content['og_mission'] = array(
 //       '#type' => 'item',
@@ -951,8 +947,6 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
         }
       }
     }
-    $url = url("og/feed/$node->nid");
-    $node->content['og_xml_icon'] = array('#value' => theme('xml_icon', $url), '#weight' => 9);
     
     if (!$node->content['tables']) {
       global $user;
