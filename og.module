@@ -495,7 +495,6 @@ function og_invite_page($gid) {
 }
 
 function og_invite_form($gid) {
-  $edit = $_POST['edit'];
   $max = variable_get('og_email_max', 10);
 
   $form['mails'] = array('#type' => 'textarea', '#title' => t('Email addresses or usernames'),  '#description' => t('Enter up to %max email addresses or usernames. Separate multiple addresses by commas or new lines. Each person will receive an invitation message from you.', array('%max' => $max)));
@@ -504,7 +503,7 @@ function og_invite_form($gid) {
   $form['gid'] = array ('#type' => 'value', '#value' => $gid);
   $form['valid_emails'] = array('#type' => 'value', '#value' => array());
 
-  return $form;//form($form);
+  return $form;
 }
 
 function og_invite_form_validate($form_id, $form_values, $form) {
@@ -1950,11 +1949,11 @@ function og_og_create_links($group) {
   return $links ? $links : array();
 }
 
-function og_settings_submit($form_id, $form_values, $action = NULL) {
-  if ($action == 'enable' || $_POST['op'] == t('Enable')) {
+function og_settings_submit($form_id, $form_values) {
+  if ($form_values['op'] == t('Enable')) {
     variable_set('og_enabled', 1);
   }
-  elseif ($action == 'disable' || $_POST['op'] == t('Disable')) {
+  elseif ($form_values['op'] == t('Disable')) {
     variable_set('og_enabled', 0);
   }
   node_access_rebuild_submit();

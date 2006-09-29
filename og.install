@@ -415,5 +415,5 @@ function og_migrate_type_basic_14() {
 // An implementation of hook_disable
 // Causes a node_access rebuild
 function og_disable() {
-  og_settings_submit(NULL, NULL, 'disable');
+  og_settings_submit(NULL, array('op' => t('Disable')));
 }
