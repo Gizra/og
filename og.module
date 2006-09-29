@@ -1443,7 +1443,7 @@ function og_mail($type, $obj) {
       $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
       $group_home = url("node/$row->gid", NULL, NULL, TRUE);
       $groupheaders = $headers + array('List-Id' => "$row->group_name <$group_home>", 'List-Unsubscribe' => "<$unsubscribe>", 'List-Owner' => "$row->group_owner <$ownerurl>", "List-Archive" => "<$group_home>");
-      drupal_mail('og_mail', 'From' => $obj->name. " <$sitemail>", $subj, $txt, NULL, $groupheaders);
+      drupal_mail('og_mail', $obj->name. " <$sitemail>", $subj, $txt, NULL, $groupheaders);
     }
   }
 }
