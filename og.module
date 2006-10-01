@@ -1551,6 +1551,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
                          OG_NOTIFICATION_ALWAYS =>  t('Always send email notifications'),
                          OG_NOTIFICATION_SELECTIVE =>   t('Selectively send email notification based on the checkbox for each of my group\'s <em>My Subscription</em> page'),
                           );
+                         
         $form['og_settings']['og_email'] = array('#type' => 'radios', 
                                             '#title' => t('Email notifications'), 
                                             '#options' => $options, 
@@ -1989,8 +1990,8 @@ function og_admin_settings() {
   $form['og_settings']['group_details']['og_visibility_registration'] = array('#type' => 'radios', '#title' => t('Registration form control'), '#default_value' => variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => t('registration form'))), '#options' => $options);
     
   // email notifications default
-  $options = array(OG_NOTIFICATIONS_SELECTIVE => t('New registrants are not subscribed to group email notifications by default. A user may choose to enable this from her profile page or her my subscriptions page.'),
-              OG_NOTIFICATIONS_ALWAYS => t('New registrants are subscribed to group email notifications by default. A user may choose to disable this from her profile page.'),
+  $options = array(OG_NOTIFICATION_SELECTIVE => t('New registrants are not subscribed to group email notifications by default. A user may choose to enable this from her profile page or her my subscriptions page.'),
+              OG_NOTIFICATION_ALWAYS => t('New registrants are subscribed to group email notifications by default. A user may choose to disable this from her profile page.'),
               );
   $form['og_settings']['group_details']['og_notification'] = array('#type' => 'radios', '#title' => t('Group email notifications'), '#default_value' => variable_get('og_notification', OG_NOTIFICATION_ALWAYS), '#description' =>t('Should new registrants automatically be notified via email when new content is posted to their subscribed group? Note that changing this setting has no effect on existing subscriptions.'), '#options' => $options);
   
