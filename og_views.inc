@@ -309,25 +309,25 @@ function og_views_default_views() {
 // OG_UNREAD VIEW
   $view = new stdClass();
   $view->name = 'og_unread';
-  $view->description = 'Shows unread posts in subscribed groups.';
+  $view->description = t('Shows unread posts in subscribed groups.');
   $view->access = array (
   0 => '2',
 );
   $view->view_args_php = '';
   $view->page = TRUE;
-  $view->page_title = 'unread posts in my groups';
+  $view->page_title = t('unread posts in my groups');
   $view->page_header = '';
   $view->page_header_format = '1';
   $view->page_footer = '';
   $view->page_footer_format = '1';
-  $view->page_empty = 'There are no new posts in your subscribed groups.';
+  $view->page_empty = t('There are no new posts in your subscribed groups.');
   $view->page_empty_format = '1';
   $view->page_type = 'table';
   $view->url = 'group/myunread';
   $view->use_pager = TRUE;
   $view->nodes_per_page = '25';
   $view->menu = TRUE;
-  $view->menu_title = 'my unread';
+  $view->menu_title = t('my unread');
   $view->menu_tab = TRUE;
   $view->menu_tab_default = TRUE;
   $view->menu_weight = '';
@@ -347,39 +347,39 @@ function og_views_default_views() {
     array (
       'tablename' => 'og_node_data',
       'field' => 'title',
-      'label' => 'Group',
+      'label' => T('Group'),
       'sortable' => '1',
     ),
     array (
       'tablename' => 'node',
       'field' => 'type',
-      'label' => 'Type',
+      'label' => t('Type'),
       'sortable' => '1',
     ),
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => 'Title',
+      'label' => t('Title'),
       'handler' => 'views_handler_field_nodelink_with_mark',
       'sortable' => '1',
     ),
     array (
       'tablename' => 'users',
       'field' => 'name',
-      'label' => 'Author',
+      'label' => t('Author'),
       'sortable' => '1',
     ),
     array (
       'tablename' => 'node_comment_statistics',
       'field' => 'comment_count',
-      'label' => 'Replies',
+      'label' => t('Replies'),
       'handler' => 'views_handler_comments_with_new',
       'sortable' => '1',
     ),
     array (
       'tablename' => 'node_comment_statistics',
       'field' => 'last_comment_timestamp',
-      'label' => 'Last Post',
+      'label' => t('Last Post'),
       'handler' => 'views_handler_field_since',
       'sortable' => '1',
       'defaultsort' => 'DESC',
