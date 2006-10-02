@@ -403,15 +403,22 @@ function og_delete_subscription($gid, $uid){
 
 function og_approve($gid, $uid) {
   $node = node_load($gid);
-    if (node_access('update', $node)) {
-    og_save_subscription($gid, $uid, array('is_active' => 1));
-    drupal_set_message(t('Subscription request approved.'));
-    $subj = t("Subscription request approved for '@title'", array('@title' => $node->title));
-    $body = t('You may now post messages in this group located at !url', array('!url' => url("node/$node->nid", NULL, NULL, TRUE)));
-    $from = variable_get('site_mail', ini_get('sendmail_from'));
-    $account = user_load(array('uid' => $uid));
-    drupal_mail('og_approve', $account->mail, $subj, $body, $from);
-    drupal_goto("node/$gid");
+  if (node_access('update', $node)) {
+    $account = user_load(array('uid' => (int)$uid));
+    if (in_array($gid, array_keys($account->og_groups))) {
+      drupal_set_message(t("!name already approved to group %group", array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
+      return '';
+    }
+    else {
+      og_save_subscription($gid, $uid, array('is_active' => 1));
+      drupal_set_message(t('Subscription request approved.'));
+      $subj = t("Subscription request approved for '@title'", array('@title' => $node->title));
+      $body = t('You may now post messages in this group located at !url', array('!url' => url("node/$node->nid", NULL, NULL, TRUE)));
+      $from = variable_get('site_mail', ini_get('sendmail_from'));
+      $account = user_load(array('uid' => $uid));
+      drupal_mail('og_approve', $account->mail, $subj, $body, $from);
+      drupal_goto("node/$gid");
+    }
   }
   else {
     drupal_access_denied();
