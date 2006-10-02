@@ -508,6 +508,7 @@ function og_invite_form($gid) {
 }
 
 function og_invite_form_validate($form_id, $form_values, $form) {
+  global $user;
   $max = variable_get('og_email_max', 10);
 
   $mails = $form_values['mails'];
@@ -515,6 +516,9 @@ function og_invite_form_validate($form_id, $form_values, $form) {
   $emails = explode(',', $mails);
   if (count($emails) > $max) {
     form_set_error('mails', t("You may not specify more than %max email addresses or usernames.", array('%max' => $max)));
+  }
+  elseif (in_array($user->mail, $emails)) {
+    form_set_error('mails', t("You may not invite yourself - @self", array('@self' => $user->mail)));
   }
   else {
     $valid_emails = array();
