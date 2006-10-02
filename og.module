@@ -337,10 +337,10 @@ function og_manage_form($group) {
       $submit = TRUE;
       break;
     case OG_NOTIFICATION_ALWAYS:
-      $form['mail_type'] = array('#type' => 'item', '#title' => t('Email notification'), '#value' => t('Your !prof is configured to: <em>Always receive email notifications</em>.', array('!prof' => l('personal profile', "user/$user->uid/edit")))); 
+      $form['mail_type'] = array('#type' => 'item', '#title' => t('Email notification'), '#value' => t('Your !prof is configured to: <em>Always receive email notifications</em>.', array('!prof' => l(t('personal profile'), "user/$user->uid/edit")))); 
       break;
     case OG_NOTIFICATION_NEVER:
-      $form['mail_type'] = array('#type' => 'item', '#title' => t('Email notification'), '#value' => t('Your !prof is configured to: <em>Never receive email notifications</em>.', array('!prof' => l('personal profile', "user/$user->uid/edit")))); 
+      $form['mail_type'] = array('#type' => 'item', '#title' => t('Email notification'), '#value' => t('Your !prof is configured to: <em>Never receive email notifications</em>.', array('!prof' => l(t('personal profile'), "user/$user->uid/edit")))); 
       break;
   }
   if ($submit) {
