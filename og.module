@@ -1360,8 +1360,8 @@ function og_form_add_og_audience($form_id, &$form) {
         $titles[] = $subs[$gid]['title'];
         $item_value = implode(', ', $titles);
       }
-      $form['og_nodeapi']['visible']['og_groups'] = array('#type' => 'item', '#title' => t('Audience'), '#value' => $item_value);
-      $form['og_nodeapi']['invisible']['og_groups'] = array('#type' => 'value', '#value' => $groups);
+      $form['og_nodeapi']['visible']['og_groups_visible'] = array('#type' => 'item', '#title' => t('Audience'), '#value' => $item_value);
+      $form['og_nodeapi']['invisible']['og_groups'] = array('#type' => 'value', '#value' => drupal_map_assoc($groups));
     }
   }
   elseif (count($subs)) {
