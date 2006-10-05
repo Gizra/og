@@ -1,2 +1,3 @@
 name = Organic groups
 description = "Enable users to create and manage their own 'groups'"
+package = "Organic groups"
