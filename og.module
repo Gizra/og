@@ -330,11 +330,7 @@ function og_manage_form($group) {
       drupal_set_message(t('You may not unsubscribe from this group because you are its owner. A site administrator can assign ownership to another user and then you may unsubscribe.'));
     }
     else {
-      $links[] = array('unsubscribe' => array(
-        'title' => t('Unsubscribe from this group'), 
-        'href' => "og/unsubscribe/$group->nid", 
-        'query' => 'destination=og'
-      ));
+      $links[] = l(t('Unsubscribe from this group'), "og/unsubscribe/$group->nid", NULL, 'destination=og');
       $form['unsubscribe'] = array('#type' => 'item', '#title' => t('Goodbye'), '#value' => theme('item_list', $links, t('Actions')));
     }
   }
@@ -1677,7 +1673,9 @@ function og_user($op, $edit, &$account, $category = NULL) {
       $account->og_groups = og_get_subscriptions($account->uid);
 
       $result = db_query("SELECT og_email FROM {og_uid_global} WHERE uid = %d", $account->uid);
-      return db_fetch_array($result);
+      if (db_num_rows($result)) {
+        $account->og_email = db_result($result);
+      }
     case 'view':
       // only show list of groups to self and admins
       if ($account->uid == $user->uid || user_access('administer organic groups')) {
