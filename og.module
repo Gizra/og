@@ -1587,21 +1587,21 @@ function _og_user_mail_text($messageid, $variables = array()) {
   else {
     switch ($messageid) {
       case 'og_new_node_subject':
-        return t("@group: @username added a @type @title at @site", $variables);
+        return t("@group: @username added a @type '@title' at @site", $variables);
       case 'og_new_node_body':
-        return t("@title by @username\n\n@body\n\nView original: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed to the group @group at @site.\nTo manage your subscription, visit !group_url", $variables);    
+        return t("'@title' by @username\n\n@body\n\nView original: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed to the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables);    
       case 'og_admin_email_body':
         return t("@body\n\n--\nThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe", $variables);
       case 'og_approve_user_subject':
-        return t("Subscription request approved for @title", $variables);
+        return t("Subscription request approved for '@title'", $variables);
       case 'og_approve_user_body':
         return t("You many now post messages in this group located at !group_url", $variables);
       case 'og_deny_user_subject':
-        return t("Subscription request denied for @title", $variables);
+        return t("Subscription request denied for '@title'", $variables);
       case 'og_deny_user_body':
         return t("Sorry, your subscription request was denied.", $variables);
       case 'og_invite_user_subject':
-        return t("Invitation to join the group @group at @site", $variables);
+        return t("Invitation to join the group '@group' at @site", $variables);
       case 'og_invite_user_body':
         return t("Hi. I'm a member of '@group' and I welcome you to join this group as well. Please see the link and message below.\n\n@group\n@description\nSubscribe: !group_url\n@body", $variables);
       case 'og_request_user_subject':
