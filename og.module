@@ -1184,7 +1184,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       else {
         // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
-        if (variable_get('og_audience_required', FALSE) && !user_access('admnister organic groups')) {
+        if ((!in_array($node->type, variable_get('og_omitted', array())) && variable_get('og_audience_required', FALSE) && !user_access('administer organic groups')) {
           if (!isset($node->og_groups)) {
             form_set_error('title', t('You must !join before posting on this web site.', array('!join' => l(t('join a group'), 'og'))));
           }
