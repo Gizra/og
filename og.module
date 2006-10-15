@@ -1587,9 +1587,9 @@ function _og_user_mail_text($messageid, $variables = array()) {
   else {
     switch ($messageid) {
       case 'og_new_node_subject':
-        return t("@group: @username added a @type '@title' at @site", $variables);
+        return t("@group: '@title' at @site", $variables);
       case 'og_new_node_body':
-        return t("'@title' by @username\n\n@body\n\nView original: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed to the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables);    
+        return t("@type '@title' by @username\n\n@body\n\nView original: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed to the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables);    
       case 'og_admin_email_body':
         return t("@body\n\n--\nThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe", $variables);
       case 'og_approve_user_subject':
