@@ -1184,7 +1184,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       else {
         // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
-        if ((!in_array($node->type, variable_get('og_omitted', array())) && variable_get('og_audience_required', FALSE) && !user_access('administer organic groups')) {
+        if (!in_array($node->type, variable_get('og_omitted', array())) && variable_get('og_audience_required', FALSE) && !user_access('administer organic groups')) {
           if (!isset($node->og_groups)) {
             form_set_error('title', t('You must !join before posting on this web site.', array('!join' => l(t('join a group'), 'og'))));
           }
@@ -1395,6 +1395,7 @@ function og_comment($comment, $op) {
       if ($comment['status'] == COMMENT_PUBLISHED && !module_exists('og2list')) {
         $node = node_load($comment['nid']);
         $comment['og_groups'] = $node->og_groups;
+        $comment['title'] = $node->title;
         $comment['msgid'] = $comment['nid']. '-'. $comment['cid']. og_msgid_server();
         $reply = $comment['nid']. '-';
         if ($comment['pid']) {
@@ -1435,7 +1436,6 @@ function og_mail($type, $obj) {
       else {
         $obj->name = variable_get('anonymous', 'Anonymous');
       }
-      $obj->title = $obj->subject;
       $obj->body = check_markup($obj->comment, $comment->format, FALSE);
       $originalurl = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
       $replyurl = url("comment/reply/$obj->nid/$obj->cid", NULL, NULL, TRUE);
@@ -1443,6 +1443,7 @@ function og_mail($type, $obj) {
     else {
       $account = user_load(array('uid' => $obj->uid));
       $obj->name = $account->name;
+      $obj->subject = $obj->title;
       $obj = node_prepare($obj, FALSE);
       // fills body with CCK fields, event fields, etc. instead of "n/a"
       $obj->body = og_node_view($obj);
@@ -1462,6 +1463,7 @@ function og_mail($type, $obj) {
       '!content_url' => $originalurl,
       '!reply_url' => $replyurl,
       '@title' => trim($obj->title),
+      '@subject' => trim($obj->subject),
       '@body' => trim(og_mail_output($obj->body)),
       '@username' => $obj->name
     );
@@ -1589,7 +1591,7 @@ function _og_user_mail_text($messageid, $variables = array()) {
       case 'og_new_node_subject':
         return t("@group: '@title' at @site", $variables);
       case 'og_new_node_body':
-        return t("@type '@title' by @username\n\n@body\n\nView original: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed to the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables);    
+        return t("@type '@subject' by @username\n\n@body\n\nView original: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed to the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables);    
       case 'og_admin_email_body':
         return t("@body\n\n--\nThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe", $variables);
       case 'og_approve_user_subject':
@@ -2116,8 +2118,8 @@ function og_admin_settings() {
   $form['og_settings']['home']['og_node_types'] = array('#type' => 'select', '#title' => t('Group home page node types'), '#default_value' => variable_get('og_node_types', array('og')), '#options' => $og_node_type_options, '#required' => TRUE, '#description' => t("<b>Required</b>. Select the node types which act as group home pages. Usually, you will want to !create called <em>group</em> for this purpose.", array('!create' => l(t('create a simple node type'), 'admin/content/types'))), '#multiple' => TRUE);
 
   $form['og_settings']['email'] = array('#type' => 'fieldset', '#title' => t('Email settings'), '#collapsible' => TRUE, '#collapsed' => TRUE);
-  $form['og_settings']['email']['og_new_node_subject'] = array('#type' => 'textfield', '#title' => t('New content subject'), '#description' => 'Subject of email for new content. Available variables: %group, %group_url, %type, %site, %content_url, %reply_url, %title, %body, %username', '#default_value' => _og_user_mail_text('og_new_node_subject'));
-  $form['og_settings']['email']['og_new_node_body'] = array('#type' => 'textarea', '#title' => t('New content body'), '#rows' => 10, '#description' => 'Body of email for new content. Available variables: %group, %group_url, %type, %site, %content_url, %reply_url, %title, %body, %username', '#default_value' => _og_user_mail_text('og_new_node_body'));
+  $form['og_settings']['email']['og_new_node_subject'] = array('#type' => 'textfield', '#title' => t('New content subject'), '#description' => 'Subject of email for new content. Available variables: %group, %group_url, %type, %site, %content_url, %reply_url, %title, %subject, %body, %username. %subject contains the comment title in the case of a comment but the node title in the case of a new post. %title is always the node title.', '#default_value' => _og_user_mail_text('og_new_node_subject'));
+  $form['og_settings']['email']['og_new_node_body'] = array('#type' => 'textarea', '#title' => t('New content body'), '#rows' => 10, '#description' => 'Body of email for new content. Available variables: %group, %group_url, %type, %site, %content_url, %reply_url, %title, %subject, %body, %username. %subject contains the comment title in the case of a comment but the node title in the case of a new post. %title is always the node title.', '#default_value' => _og_user_mail_text('og_new_node_body'));
   $form['og_settings']['email']['og_admin_email_body'] = array('#type' => 'textarea', '#title' => t('Group admin email body'), '#rows' => 10, '#description' => 'The body of the email sent to users from the group admin. Available variables: %group, %body, %site, %url_group, %url_unsubscribe', '#default_value' => _og_user_mail_text('og_admin_email_body'));
   $form['og_settings']['email']['og_approve_user_subject'] = array('#type' => 'textfield', '#title' => t('User approved email subject'), '#description' => 'The subject of the email sent to new approved users. Available variables: %group_url, %title', '#default_value' => _og_user_mail_text('og_approve_user_subject'));
   $form['og_settings']['email']['og_approve_user_body'] = array('#type' => 'textarea', '#title' => t('User approved email body'), '#rows' => 10, '#description' => 'The body of the email sent to new approved users. Available variables: %group_url, %title', '#default_value' => _og_user_mail_text('og_approve_user_body'));   
