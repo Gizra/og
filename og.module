@@ -359,7 +359,7 @@ function og_manage_form($group) {
 function og_manage_form_submit($form_id, $form_values) {
   global $user;
   $passed_values = $form_values;
-  unset($passed_values['gid'], $passed_values['op'], $passed_values['form_id']);
+  unset($passed_values['gid'], $passed_values['op'], $passed_values['form_id'], $passed_values['form_token']);
   og_save_subscription($form_values['gid'], $user->uid, $passed_values);
   drupal_set_message(t('Subscription saved.'));
 }
