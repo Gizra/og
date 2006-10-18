@@ -42,6 +42,11 @@ class OgPost extends OgTestCase {
     
     $this->assertWantedText($edit['title'], 'Group node title found.');
     
+    $node = node_load(array('title' => $edit['title']));
+    $this->assertNotNull($node, 'Node found in database. %s');
+    
+    node_delete($node->nid);
+    
     node_delete($gid);
   }
 }
