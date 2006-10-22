@@ -677,9 +677,9 @@ function og_unsubscribe($gid, $uid = NULL) {
     // only admins can unsubscribe another person
     drupal_access_denied();
   }
-  if ($node->og_selective == OG_CLOSED || $node->uid == $uid){
-    // You are not supposed to unsubscribe from a closed group
-    // So are group adminstrators, such a link should never be generated
+  if (($node->og_selective == OG_CLOSED && !node_access('update', $node)) || $node->uid == $uid){
+    // Regular users may not unsubscribe from a closed group
+    // Group manager may never unsubscribe (TODO: fix), such a link should never be generated
     drupal_access_denied();
   }
   og_delete_subscription($gid, $uid);
