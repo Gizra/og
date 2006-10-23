@@ -611,12 +611,35 @@ function og_subscribe($gid, $uid = NULL) {
     // only admins can subscribe another person
     drupal_access_denied();
   }
-  $return = og_subscribe_user($gid, $account);
+  else {
+    return drupal_get_form('og_confirm_subscribe', $gid, $node, $account);
+  }
+}
+
+/**
+ * Confirm og subscription form
+ */
+function og_confirm_subscribe($gid, $node, $account) {
+ $form['gid'] = array('#type' => 'value', '#value' => $gid);
+ $form['account'] = array('#type' => 'value', '#value' => $account);
+
+ return confirm_form($form, 
+                t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
+                'node/'. $node->nid, ' ',
+                t('Subscribe'), t('Cancel'));
+}
+
+/**
+ * Confirm og subscription submit handler
+ */
+function og_confirm_subscribe_submit($form_id, $form_values) {
+  $return = og_subscribe_user($form_values['gid'], $form_values['account']);
   if (!empty($return['message'])) {
       drupal_set_message($return['message']);
   }
-  drupal_goto("node/$gid");
-}
+  return "node/$gid";
+} 
+
 
 /**
  * subscribe given user to given group. no access control since this is an API function
@@ -682,10 +705,31 @@ function og_unsubscribe($gid, $uid = NULL) {
     // Group manager may never unsubscribe (TODO: fix), such a link should never be generated
     drupal_access_denied();
   }
-  og_delete_subscription($gid, $uid);
-  drupal_set_message(t('User unsubscribed from group.'));
-  drupal_goto("node/$gid");
+  else {
+    return drupal_get_form('og_confirm_unsubscribe', $gid, $node, $uid);
+  }
 }
+
+/**
+ * Confirm og unsubscription form
+ */
+function og_confirm_unsubscribe($gid, $node, $uid) {
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+  $form['uid'] = array('#type' => 'value', '#value' => $uid);
+  return confirm_form($form, 
+               t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $node->title)),
+               'og/manage/'. $node->nid, ' ', t('Unsubscribe'), t('Cancel'));
+}
+
+/**
+ * Confirm og unsubscription submit handler
+ */
+function og_confirm_unsubscribe_submit($form_id, $form_values) {
+  og_delete_subscription($form_values['gid'], $form_values['uid']);
+  drupal_set_message(t('User unsubscribed from group.'));
+  return "node/$gid";
+}
+
 
 // since a user's subscriptions are loaded into $user object, this function is only occassionally useful to get group subs for users other than the current user
 // even then, it often makes sense to call user_load() instead of this function.
