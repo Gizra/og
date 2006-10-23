@@ -2103,11 +2103,13 @@ function og_og_create_links($group) {
 function og_settings_submit($form_id, $form_values) {
   if ($form_values['op'] == t('Enable')) {
     variable_set('og_enabled', 1);
-    node_access_rebuild_submit();
+    node_access_rebuild();
+    drupal_set_message(t('The node access table has been rebuilt.'));
   }
   elseif ($form_values['op'] == t('Disable')) {
     variable_set('og_enabled', 0);
-    node_access_rebuild_submit();
+    node_access_rebuild();
+    drupal_set_message(t('The node access table has been rebuilt.'));
   }
 }
 
