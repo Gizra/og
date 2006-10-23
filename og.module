@@ -45,20 +45,20 @@ function og_menu($may_cache) {
 
   if ($may_cache) {
     // anon users should be able to get to the subscribe page
-    $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('subscribe to group'));
-    $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('groups'), 'weight' => 3, 'access' => user_access('access content'));
+    $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('Subscribe to group'));
+    $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('Groups'), 'weight' => 3, 'access' => user_access('access content'));
     
     $access = $user->uid; // login is required
-    $items[] = array('path' => 'og/user', 'type' => MENU_CALLBACK, 'callback' => 'og_list_groups_page', 'callback arguments' => array($user->uid), 'access' => $access, 'title' => t('my groups'));
-    $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('unsubscribe from group'));
-    $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('approve subscription request'));
-    $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('deny subscription request'));
-    $items[] = array('path' => 'og/create_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_create_admin', 'access' => $access, 'title' => t('create group administrator'));
-    $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('delete group administrator'));
-    $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'drupal_get_form', 'callback arguments' => array('og_remove_node'), 'access' => $access, 'title' => t('remove post from group'));
-    $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
+    $items[] = array('path' => 'og/user', 'type' => MENU_CALLBACK, 'callback' => 'og_list_groups_page', 'callback arguments' => array($user->uid), 'access' => $access, 'title' => t('My groups'));
+    $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('Unsubscribe from group'));
+    $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('Approve subscription request'));
+    $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('Deny subscription request'));
+    $items[] = array('path' => 'og/create_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_create_admin', 'access' => $access, 'title' => t('Create group administrator'));
+    $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('Delete group administrator'));
+    $items[] = array('path' => 'og/remove_node', 'type' => MENU_CALLBACK, 'callback' => 'drupal_get_form', 'callback arguments' => array('og_remove_node'), 'access' => $access, 'title' => t('Remove post from group'));
+    $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('Group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     
-    $items[] = array('path' => 'admin/settings/og', 'callback' => 'drupal_get_form', 'callback arguments' => array('og_admin_settings'), 'title' => t('organic groups configuration'));
+    $items[] = array('path' => 'admin/settings/og', 'callback' => 'drupal_get_form', 'callback arguments' => array('og_admin_settings'), 'title' => t('Organic groups configuration'));
   }
   else {
     drupal_add_css(drupal_get_path('module', 'og'). '/og.css');
@@ -68,12 +68,12 @@ function og_menu($may_cache) {
 
     // these are considered members only pages even for public groups
     foreach ($user->og_groups as $key => $sub) {
-      $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('subscriber management'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => TRUE);
-      $items[] = array('path' => "og/users/$key/list", 'callback' => 'og_list_users_page', 'title' => t('list'), 'callback arguments' => array($key), 'type' => MENU_DEFAULT_LOCAL_TASK, 'access' => TRUE);
-      $items[] = array('path' => "og/manage/$key", 'callback' => 'og_manage', 'title' => t('manage subscription'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
-      $items[] = array('path' => "og/invite/$key", 'callback' => 'og_invite_page', 'title' => t('send invitation'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
+      $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('Subscriber management'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => TRUE);
+      $items[] = array('path' => "og/users/$key/list", 'callback' => 'og_list_users_page', 'title' => t('List'), 'callback arguments' => array($key), 'type' => MENU_DEFAULT_LOCAL_TASK, 'access' => TRUE);
+      $items[] = array('path' => "og/manage/$key", 'callback' => 'og_manage', 'title' => t('Manage subscription'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
+      $items[] = array('path' => "og/invite/$key", 'callback' => 'og_invite_page', 'title' => t('Send invitation'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
       // group admin only
-      $items[] = array('path' => "og/users/$key/add", 'callback' => 'drupal_get_form', 'title' => t('add subscribers'), 'callback arguments' => array(og_add_users, $key), 'type' => MENU_LOCAL_TASK, 'access' => node_access('update', array('nid' => $key, 'status' => 1)), 'weight' => 5);
+      $items[] = array('path' => "og/users/$key/add", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array(og_add_users, $key), 'type' => MENU_LOCAL_TASK, 'access' => node_access('update', array('nid' => $key, 'status' => 1)), 'weight' => 5);
 
       // silly page that just redirects to the group page
       $items[] = array('path' => "og/view/$key", 'callback' => 'og_nodeview', 'title' => $sub['title'], 'callback arguments' => array($key), 'access' => TRUE, 'type' => MENU_CALLBACK);
@@ -83,7 +83,7 @@ function og_menu($may_cache) {
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(arg(1));
       if (og_is_group_type($node->type)) {
-        $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('email'), 'callback' => 'drupal_get_form', 'callback arguments' => array('og_email_form', arg(1)), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
+        $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('E-mail'), 'callback' => 'drupal_get_form', 'callback arguments' => array('og_email_form', arg(1)), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
       }
     }
   }
