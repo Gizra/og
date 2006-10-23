@@ -1032,11 +1032,16 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
     if (!$node->content['tables']) {
       global $user;
       if (in_array($node->nid, array_keys($user->og_groups))) {
-        drupal_set_message(t('No posts in this group.'));
+        $msg = t('No posts in this group.');
       }
       else {
-        drupal_set_message(t('No public posts in this group. Consider subscribing to this group in order to view its posts.'));
+        $msg = t('No public posts in this group.');
+        // TOOD: hide this from pending subscribers too
+        if ($node->og_selective < OG_INVITE_ONLY) {
+          $msg .= ' '. t('Consider subscribing to this group in order to view its posts.')
+        }
       }
+      drupal_set_message($msg);
     }
   }
   
@@ -1325,6 +1330,15 @@ function og_form_alter($form_id, &$form) {
       $form = array_merge($form, og_group_form($node));
     }
     elseif (!in_array($node->type, variable_get('og_omitted', array()))) {
+      if (!$node->nid) {
+        if ($group_node = og_get_group_context()) {
+          $bc[] = array('path' => 'og', 'title' => t('Groups'));
+          $bc[] = array('path' => "node/$group_node->nid", 'title' => $group_node->title);
+          $bc[] = array('path' => "node/add/$node->type", 'title' => t('Create foo')); //TODO fix title
+          // TODO: not working for unknown reason
+          // menu_set_location($bc);
+        }
+      } 
       og_form_add_og_audience($form_id, $form);
     }
   }  
