@@ -1674,9 +1674,9 @@ function og_user($op, $edit, &$account, $category = NULL) {
       if (count($options)) {
         $form['og_register'] = array('#type' => 'fieldset', '#title' => t('Groups'));
         $form['og_register']['og_register'] = array('#type' => 'checkboxes', '#options' => $options);
-        return $form;
-        }
-      break;
+      }
+      $form['og_email'] = array('#type' => 'value', '#value' => variable_get('og_notification', OG_NOTIFICATION_ALWAYS));
+      return $form;
     case 'form':
       if ($category == 'account') {
         $form['og_settings'] = array(
@@ -1692,7 +1692,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
         $form['og_settings']['og_email'] = array('#type' => 'radios', 
                                             '#title' => t('Email notifications'), 
                                             '#options' => $options, 
-                                            '#default_value' => isset($account->og_email) ? $account->og_email : 2,
+                                            '#default_value' => isset($account->og_email) ? $account->og_email : variable_get('og_notification', 2),
                                             '#description' => t('When posts are submitted into your subscribed groups, you may be notified via email.'),
                                             );
         return $form;
@@ -1709,7 +1709,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
       }
       
       $sql = 'INSERT INTO {og_uid_global} (uid, og_email) VALUES (%d, %d)';
-      db_query($sql, $account->uid, $account->og_email);
+      db_query($sql, $account->uid, $edit['og_email']);
       $account->og_email = NULL;
       break;
     case 'update':
