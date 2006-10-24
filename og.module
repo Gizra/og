@@ -1009,7 +1009,7 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
         $msg = t('No public posts in this group.');
         // TOOD: hide this from pending subscribers too
         if ($node->og_selective < OG_INVITE_ONLY) {
-          $msg .= ' '. t('Consider subscribing to this group in order to view its posts.')
+          $msg .= ' '. t('Consider subscribing to this group in order to view its posts.');
         }
       }
       drupal_set_message($msg);
