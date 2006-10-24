@@ -23,6 +23,13 @@ class OgPost extends OgTestCase {
     $url = url("og/subscribe/$gid");
     $ret = $this->get($url, FALSE, FALSE, TRUE);
     $this->assertTrue($ret, " [browser] GET $url");
+    
+    $this->assertWantedRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
+                            "Confirmation text found.");
+    $this->clickSubmit("Subscribe");
+
+    $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
+
     $this->assertWantedRaw(t('Subscribed to the @group', array('@group' => $node->title)),
                                 'User subscribed to group - text not found.');
     
