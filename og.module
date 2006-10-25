@@ -1425,7 +1425,10 @@ function og_form_add_og_audience($form_id, &$form) {
   }
   elseif (count($subs)) {
     // show checkboxes
-    $form['og_nodeapi']['visible']['og_groups'] = array('#type' => 'checkboxes', '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'), '#default_value' => $groups);
+    $form['og_nodeapi']['visible']['og_groups'] = array('#type' => 'checkboxes', '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'), '#default_value' => $groups, '#required' => $required);
+  }
+  else if ($required) {
+    form_set_error('title', t('You must !join before posting a %type.', array('!join' => l(t('join a group'), 'og'), '%type' => node_get_types('name', $node->type))));
   }
   
   if (count($form['og_nodeapi']['visible']) > 1) {
@@ -2128,9 +2131,9 @@ function og_admin_settings() {
   else {
     $status = t('disabled');
     $btn_text = t('Enable');
-    $description = t('You usually want to enable access control with this module. The button below will delete one record in your node_access table and thus enable node permissions on your site. You may revert by clicking the same button again.');
+    $description = t('Enable access control if you want to author any content that is restricted to group members. The button below will delete one record in your node_access table (if needed) and thus enable node permissions on your site. You may revert by clicking the same button again. If you switch back and forth, your node permissions are preserved.');
   }
-  $form['og_settings']['og_module_status'] = array('#type' => 'fieldset', '#title' => t('Module status'), '#description' => $description, '#collapsible' => TRUE, '#collapsed' => TRUE);
+  $form['og_settings']['og_module_status'] = array('#type' => 'fieldset', '#title' => t('Access control'), '#description' => $description, '#collapsible' => TRUE, '#collapsed' => TRUE);
   $form['og_settings']['og_module_status']['module_action'] = array('#type' => 'submit', '#value' => $btn_text, '#prefix' => '<p>'. t('Organic groups access control is currently %status.', array('%status' => $status)). '</p>');
 
 
