@@ -57,7 +57,15 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('Delete group administrator'));
     $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('Group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     
-    $items[] = array('path' => 'admin/settings/og', 'callback' => 'drupal_get_form', 'callback arguments' => array('og_admin_settings'), 'title' => t('Organic groups configuration'));
+    $items[] = array('path' => 'admin/og/og', 'callback' => 'drupal_get_form', 'callback arguments' => array('og_admin_settings'), 'title' => t('Organic groups configuration'), 'description' => t('Configure the main Organic groups module (og)'), 'weight' => -5,);
+    $items[] = array(
+      'path' => 'admin/og', 
+      'title' => t('Organic groups'),
+      'description' => t('Administer the suite of Organic groups modules.'),
+      'position' => 'right',
+      'weight' => -5,
+      'callback' => 'system_admin_menu_block_page',
+      'access' => user_access('administer site configuration'));
   }
   else {
     drupal_add_css(drupal_get_path('module', 'og'). '/og.css');
