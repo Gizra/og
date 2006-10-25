@@ -445,7 +445,6 @@ function og_deny($gid, $uid) {
     );
     
     $from = variable_get('site_mail', ini_get('sendmail_from'));
-    $headers = array('X-Mailer' => 'Drupal - og_deny');
     $account = user_load(array('uid' => $uid));
     drupal_mail('og_deny', $account->mail, _og_user_mail_text('og_deny_user_subject', $variables), _og_user_mail_text('og_deny_user_body', $variables), $from);
     drupal_goto("node/$gid");
@@ -458,8 +457,18 @@ function og_deny($gid, $uid) {
 function og_create_admin($gid, $uid) {
   $node = node_load($gid);
   if (node_access('update',$node)) {
+    $account = user_load(array('uid' => $uid));
     og_save_subscription($gid, $uid, array('is_admin' => 1));
-    drupal_set_message(t('User was promoted to %ga', array('%ga' => t('group administrator'))));
+    drupal_set_message(t('%name was promoted to %ga', array('%name' => $account->name, '%ga' => t('group administrator'))));
+    
+    $variables = array(
+      '@group' => $node->title,
+      '!group_url' => url("node/$node->nid", NULL, NULL, TRUE),
+      '@username' => $account->name
+    );
+    
+    $from = variable_get('site_mail', ini_get('sendmail_from'));
+    drupal_mail('og_new_admin', $account->mail, _og_user_mail_text('og_new_admin_subject', $variables), _og_user_mail_text('og_new_admin_body', $variables), $from);
     drupal_goto("node/$gid");
   }
   else {
@@ -1234,6 +1243,17 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_insert_group($node);
         // make sure the node owner is a full powered subscriber
         og_save_subscription($node->nid, $node->uid, array('is_active' => 1, 'is_admin' => 1));
+           
+        $account = user_load(array('uid' => $node->uid));
+        $variables = array(
+          '@group' => $node->title,
+          '!group_url' => url("node/$node->nid", NULL, NULL, TRUE),
+          '@username' => $account->name
+        );
+
+        // alert the user that they are now the admin of the group  
+        $from = variable_get('site_mail', ini_get('sendmail_from'));
+        drupal_mail('og_new_admin', $account->mail, _og_user_mail_text('og_new_admin_subject', $variables), _og_user_mail_text('og_new_admin_body', $variables), $from);      
       }
       elseif (!og_is_omitted_type($node->type)) {
         og_save_ancestry($node);
@@ -1643,6 +1663,10 @@ function _og_user_mail_text($messageid, $variables = array()) {
         return t("Subscription request for '@group' from '@username'", $variables);        
       case 'og_request_user_body':
         return t("To instantly approve this request, visit !approve_url\n\nYou may deny this request or manage subscribers at !group_url", $variables);       
+      case 'og_new_admin_subject':
+        return t("You are now an administrator for the group '@group'", $variables);        
+      case 'og_new_admin_body':
+        return t("@username, you are now an administrator for the group '@group'.\n\nYou can administer this group by logging in here:\n !group_url", $variables);       
     }
   }
 }
@@ -2163,6 +2187,8 @@ function og_admin_settings() {
   $form['og_settings']['email']['og_invite_user_body'] = array('#type' => 'textarea', '#title' => t('Invite user email body'), '#rows' => 10, '#description' => 'The body of the email sent to users invited to join a group. Available variables: %group, %site, %description, %group_url, %body', '#default_value' => _og_user_mail_text('og_invite_user_body'));   
   $form['og_settings']['email']['og_request_user_subject'] = array('#type' => 'textfield', '#title' => t('Request user email subject'), '#description' => 'The subject of the email sent to a user\'s request to join a group. Available variables: %group, %username, %approve_url, %group_url', '#default_value' => _og_user_mail_text('og_request_user_subject'));
   $form['og_settings']['email']['og_request_user_body'] = array('#type' => 'textarea', '#title' => t('Request user email body'), '#rows' => 10, '#description' => 'The body of the email sent to a user\'s request to join a group. Available variables: %group, %username, %approve_url, %group_url', '#default_value' => _og_user_mail_text('og_request_user_body'));
+  $form['og_settings']['email']['og_new_admin_subject'] = array('#type' => 'textfield', '#title' => t('New admin user email subject'), '#description' => 'The subject of the email sent to a new admin for a group. Available variables: %group, %username, %group_url', '#default_value' => _og_user_mail_text('og_new_admin_subject'));
+  $form['og_settings']['email']['og_new_admin_body'] = array('#type' => 'textarea', '#title' => t('New admin user email body'), '#rows' => 10, '#description' => 'The body of the email sent to a new admin for a group. Available variables: %group, %username, %group_url', '#default_value' => _og_user_mail_text('og_new_admin_body'));
 
   // TODO: move this to block config? Will be used elsewhere?
   $form['og_settings']['pictures'] = array('#type' => 'fieldset', '#title' => t('Member pictures'), '#collapsible' => TRUE, '#collapsed' => TRUE);
