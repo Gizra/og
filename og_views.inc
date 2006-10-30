@@ -73,30 +73,14 @@ function og_views_tables() {
           'field' => 'nid',
         ),
       ),
-      'fields' => array(  
-        'is_public' => array(
-          'name' => 'Og: Public',
-          'handler' => 'og_handler_field_yesempty',
-          'help' => t('Displays <em>yes</em> if post is public according to OG.'),
-        ),
-        // 'group_nid' => array(
-//           'name' => 'Og: Group',
-//           'handler' => 'og_handler_field_yesempty',
-//           'help' => t('Displays <em>yes</em> if post is public according to OG.'),
-//         ),  
-      ),
-    // ),
-    // 'og_ancestry_group' => array(
-    //   'name' => 'og_ancestry',
-    //   'join' => array(
-    //     'left' => array(
-    //       'table' => 'node',
-    //       'field' => 'nid',
-    //     ),
-    //     'right' => array(
-    //       'field' => 'group_nid',
-    //     ),
-    //   ),
+      'filters' => array(
+        'gid' => array(
+          'name' => 'Og: Post in specified group',
+          'operator' => array('=' => 'Equals'),
+          'field' => 'group_nid',
+          'help' => t('Filter for a given organic group. <em>Value</em> should be a numeric nid.'),   
+        )  
+      ),    
       'fields' => array(  
         'is_public' => array(
           'name' => 'Og: Public',
@@ -203,7 +187,7 @@ function og_views_arguments() {
     'gid' => array(
       'name' => t("Og: Group nid"), 
       'handler' => 'og_handler_argument_gid',
-      'help' => t('This argument filters for a given organic group'),
+      'help' => t('Filter for a given organic group'),
       )
     );
   return $args;
@@ -435,7 +419,58 @@ function og_views_default_views() {
   $view->exposed_filter = array();
   $view->requires = array(og_node_data, node, users, node_comment_statistics, og_uid_node, history);
   $views[$view->name] = $view;
-
+  
+  
+  $view = new stdClass();
+  $view->name = 'og_ghp_ron';
+  $view->description = 'OG: Group home page - River of news. Default';
+  $view->access = array ();
+  $view->view_args_php = '';
+  $view->sort = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'sticky',
+      'sortorder' => 'DESC',
+      'options' => '',
+    ),
+    array (
+      'tablename' => 'node',
+      'field' => 'created',
+      'sortorder' => 'DESC',
+      'options' => '',
+    ),
+  );
+  $view->argument = array (
+    array (
+      'type' => 'gid',
+      'argdefault' => '1',
+      'title' => '%1',
+      'options' => '',
+      'wildcard' => '',
+      'wildcard_substitution' => '',
+    ),
+    array (
+      'type' => 'rss_feed',
+      'argdefault' => '2',
+      'title' => '',
+      'options' => '',
+      'wildcard' => '',
+      'wildcard_substitution' => '',
+    ),
+  );
+  $view->filter = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'status',
+      'operator' => '=',
+      'options' => '',
+      'value' => '1',
+    ),
+  );
+  $view->exposed_filter = array ();
+  $view->requires = array(node);
+  $views[$view->name] = $view;
+  
   return $views;
 }
 

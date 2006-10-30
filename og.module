@@ -813,7 +813,7 @@ function og_list_users_page($gid) {
       if ($account->uid != $node->uid) {
         $username = theme('username', $account);
         if  (!$account->is_active)  { $username .= '&nbsp;<em>'.t('(approval needed)'). '</em>'; }
-        elseif ($account->is_admin) { $username .= '&nbsp;<em>'.t('manager'). '</em>'; }
+        elseif ($account->is_admin) { $username .= '&nbsp;<em>'.t('administrator'). '</em>'; }
         $rows[$i][] = $username;
         if ($access) {
           if ($account->is_active) {
@@ -911,60 +911,9 @@ function og_list_groups_page_opml($result) {
 }
 
 
-/**
- * Get SQL that returns nodes on a group home page
- * Filtering for a given group is done by passing an $arg to db_rewrite_sql(), not here.
- *
- * @param $str_types
- *   array containing node types that should be returned   
- * @param $distinct_field
- *   specify which field should be DISTINCT().    
- * @return string 
- *   SQL fragment
- **/
-function og_get_home_nodes_sql($str_types = NULL, $group_by = NULL) {
-  if ($str_types) {
-    if (is_array($str_types)) {
-      foreach ($str_types as $key => $value) {
-          $str_types_esc[$key] = "'" . db_escape_string($value) . "'";
-      }
-      $where = " n.type IN (" . implode(',', $str_types_esc) . ")";
-    } else {
-      $str_types = db_escape_string($str_types);
-      $where = " n.type = '$str_types'";
-    }
-  }
-  else {
-    $where = "n.type NOT IN ('" . implode("','", variable_get('og_node_types', array('og'))) . "')";
-  }
-
-  // we LEFT JOIN to node_comment_stats in case comment.module is disabled.
-  return "SELECT n.nid, n.title, n.uid, u.name, u.picture, n.created, n.sticky, l.comment_count, l.last_comment_timestamp FROM {node} n LEFT JOIN {node_comment_statistics} l ON n.nid = l.nid INNER JOIN {users} u ON n.uid = u.uid WHERE n.status=1 AND $where $group_by ORDER BY n.sticky DESC, l.last_comment_timestamp DESC";
-}
-
-/**
- * Implementation of hook_db_rewrite_sql
- *
- * You must pass $args with element 'og_nid' => $nid in order to have your query filtered by this function
- *
- * @return array
- */
-function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
-  if (isset($args['og_nid']) && is_numeric($args['og_nid'])) {
-    $query['join'] = 'INNER JOIN {og_ancestry} oga ON n.nid = oga.nid';
-    $query['where'] =  'oga.group_nid = '. $args['og_nid'];
-    return $query;
-  }
-}
-
 // when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group.
+// the node list is provided by the View of your choice (see admin/og/og)
 function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
-  $node = theme('og_view', $node, $teaser, $page);
-}
-
-// if you want a totally different group home page, you may redefine this function in your theme
-// if you just want to change the presentation of a group home page section, redefine theme_og_list_generic()
-function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
   if ($teaser || !$page) {
     $node->content['og_description'] = array(
       '#type' => 'item',
@@ -976,68 +925,46 @@ function theme_og_view($node, $teaser = FALSE, $page = FALSE) {
     $bc[] = array('path' => "og", 'title' => t('groups'));
     $bc[] = array('path' => "node/$node->nid", 'title' => $node->title);
     menu_set_location($bc);
-    drupal_add_feed(url("og/feed/$node->nid"), $node->title. t(' RSS feed'));
-    // save the mission in an array element for use by themes if desired
-    // $node->content['og_mission'] = array(
-//       '#type' => 'item',
-//       '#title' => t('Mission'),
-//       '#value' => theme('og_mission', $node)
-//     );
 
-    // 2 views. 'segregate each content type' or 'a river of news'
-    if (variable_get('og_home_page_presentation', 'gbct') == 'ron') {
-      $sql = og_get_home_nodes_sql();
-      $num = variable_get('og_max_posts', 10);
-      $result = pager_query(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $node->nid)), $num);
-      while ($onenode = db_fetch_object($result)) {
-        $nodes .= node_view(node_load($onenode->nid), TRUE, FALSE);
-      }
-
-      $node->content['nodes'] = array('#value' => $nodes, '#weight' => 5);
-      $node->content['pager'] = array('#value' => theme('pager', NULL, $num), '#weight' => 7);
+    unset($node->content['body']);
+    $node->content['og_mission'] = array('#value' => theme('og_mission', $node), '#weight' => -3);
+    $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
+    $view->url = 'node';
+    $view->page_type = 'teaser';
+    $args[] = $node->nid;
+    if (arg(2) == 'feed') {
+      $view->description = $node->og_description;
+      $args[] = 'feed';
     }
-    else {
-      $mode = 'all';
-      $ntype = $_GET['ntype'];
-      if (!isset($ntype)) {
-        $types = node_get_types();
-        $mode = 'brief';
-      }
-      else {
-        $types[$ntype] = $ntype;
-      }
-      $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
-      foreach ($types as $type) {
-        if (!in_array($type->type, $exempt)) {
-          if ($table = og_list_og($node->nid, $type->type, $mode)) {
-            $i++;
-            $node->content['tables'][$type->type] = array('#value' => $table, '#weight' => $i);
-          }
-        }
-      }
+    $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
+    if ($GLOBALS['current_view']->num_rows) {
+      $node->content['view'] = array('#value' => $built);
     }
-    
-    if (!$node->content['tables']) {
-      global $user;
-      if (in_array($node->nid, array_keys($user->og_groups))) {
-        $msg = t('No posts in this group.');
-      }
-      else {
-        $msg = t('No public posts in this group.');
-        // TOOD: hide this from pending subscribers too
-        if ($node->og_selective < OG_INVITE_ONLY) {
-          $msg .= ' '. t('Consider subscribing to this group in order to view its posts.');
-        }
-      }
-      drupal_set_message($msg);
+    elseif (!$view->page_empty) {
+      // use this default empty text unless overridden by View (which is a usually not a good idea. this text is kinda smart)
+      og_home_empty($node);
     }
   }
+}
+
+function og_home_empty($node) {
+  global $user;
   
-  return $node;
+  if (in_array($node->nid, array_keys($user->og_groups))) {
+    $msg = t('No posts in this group.');
+  }
+  else {
+    $msg = t('No public posts in this group.');
+    // TODO: hide this from pending subscribers too
+    if ($node->og_selective < OG_INVITE_ONLY) {
+      $msg .= ' '. t('Consider subscribing to this group in order to view its posts.');
+    }
+  }
+  drupal_set_message($msg);
 }
 
 function theme_og_mission($node) {
-  return '<div id="og-mission" class="mission">'. $node->body. '</div>';
+  return '<div id="mission" class="og-mission">'. $node->body. '</div>';
 }
 
 /**
@@ -1133,7 +1060,7 @@ function og_group_form($node) {
 function og_get_node_groups($node) {
   $groups = array();
   if (!og_is_group_type($node->type)) {
-    $sql = "SELECT oga.group_nid, n.title FROM {og_ancestry} oga INNER JOIN {node} n ON oga.nid = n.nid WHERE oga.nid = %d";
+    $sql = "SELECT oga.group_nid, n.title FROM {og_ancestry} oga INNER JOIN {node} n ON oga.group_nid = n.nid WHERE oga.nid = %d";
     $result = db_query($sql, $node->nid);
     while ($row = db_fetch_object($result)) {
       $groups[$row->group_nid] = $row->title;
@@ -1291,7 +1218,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'rss item':
       if ($node->og_groups) {
-        return og_nodeapi_rss_item($node);
+        og_nodeapi_rss_item($node);
+        return $node;
       }
       break;
   }
@@ -1834,21 +1762,12 @@ function og_is_omitted_type($type) {
 
 
 /**
- * Menu callback
+ * Menu callback. Handle old feed urls with permanent redirect. Hopefully rss readers respect that.
+ * Don't bother with the overhead of drupal_goto()
  */
 function og_feed($gid) {
-  $group = node_load($gid);
-  if (node_access('view', $group)) {
-    $sql = og_get_home_nodes_sql();
-    $result = db_query_range(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $gid)), 0, variable_get('feed_default_items', 10));
-    $channel['title'] = $group->title;
-    $channel['link'] = url("node/$gid", NULL, NULL, TRUE);
-    $channel['description'] = $group->og_description;
-    node_feed($result, $channel);
-  }
-  else {
-    drupal_access_denied();
-  }
+  header("HTTP/1.1 301 Moved Permanently");
+  header('Location: '. url("node/$gid/feed", NULL, NULL, TRUE));
 }
 
 
@@ -1859,11 +1778,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
   if ($op == 'list') {
     $blocks[0]['info'] = t('Group details');
     // $blocks[1] used to be the album block. We do not change the numbers to not confuse people who update.
-    if ($GLOBALS['db_type'] != 'pgsql') {
-      // Until we resolve pgsql-specific problems with GROUP BY in the
-      // query used to generate this block, we're just disabling it.
-      $blocks[2]['info'] = t('Group authors');
-    }
+    $blocks[2]['info'] = t('Group subscribers');
     $blocks[3]['info'] = t('New groups');
     $blocks[4]['info'] = t('My groups');
     $blocks[5]['info'] = t('Group notifications');
@@ -1920,7 +1835,7 @@ function og_block_notifications() {
   if ($groupnode = og_get_group_context()) {
     // only members can see this block
     if (in_array($groupnode->nid, array_keys($user->og_groups))) {
-      $content = t('This group offers a !groupfeed and an !email.', array('!groupfeed' => l(t('RSS feed'), 'og/feed/'. $groupnode->nid), '!email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
+      $content = t('This group offers a !groupfeed and an !email.', array('!groupfeed' => l(t('RSS feed'), "node/$groupnode->nid/feed"), '!email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
       if (module_exists('views') && module_exists('views_rss')) {
         // NOTE: See og.css for styling specific to these lists
         $content .= t(' Or subscribe to these personalized, sitewide feeds:');
@@ -2002,8 +1917,8 @@ function og_block_subscribers() {
     // only members can see subscriber list
     if (in_array($gid, array_keys($user->og_groups))) {
       $max = variable_get('og_block_cnt_2', 10);
-      $sql = og_get_home_nodes_sql(NULL, 'GROUP BY n.uid');
-      $result = db_query_range(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $gid)), 0, $max);
+      $sql = "SELECT u.* FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid ORDER BY ogu.created DESC";
+      $result = db_query_range($sql, 0, $max);
       while ($row = db_fetch_object($result)) {
         //showing member pictures
         if (variable_get('og_member_pics', TRUE)) {
@@ -2025,7 +1940,7 @@ function og_block_subscribers() {
           $append = '<div class="more-link">'. l(t('more'), "og/users/$gid", array('title' => t('View all subscribers.'))) .'</div>';;
         }
         $block['content'] = theme('item_list', $links). $append;
-        $block['subject'] = t('Recent authors');
+        $block['subject'] = t('Recently joined');
         return $block;
       }
     }
@@ -2055,7 +1970,7 @@ function og_block_details() {
     if ($subscription == 'active') {
       $links = module_invoke_all('og_create_links', $node);
       if ($node->og_selective < OG_INVITE_ONLY) {
-        $links[] = l(t('invite friend'), "og/invite/$node->nid");
+        $links[] = l(t('Invite friend'), "og/invite/$node->nid");
       }
       $txt = format_plural($cntall-$cntpending, '1 subscriber', '@count subscribers');
       $txt = l($txt, "og/users/$node->nid");
@@ -2063,8 +1978,8 @@ function og_block_details() {
       $links[] = $txt;
       // this is pretty pointless info IMO. uncomment it if you wish.
       // $links[] = t('age: %age', array('%age' => format_interval(time()-$node->created, 2)));
-      $links[] =  t('manager: '). theme('username', $node);
-      $links[] = l(t('my subscription'), "og/manage/$node->nid");
+      $links[] =  t('Manager: '). theme('username', $node);
+      $links[] = l(t('My subscription'), "og/manage/$node->nid");
       if (isset($node->og_website) && !empty($node->og_website)) {
         $links[] = l(t('website'), $node->og_website);
       }
@@ -2100,7 +2015,7 @@ function og_og_create_links($group) {
   foreach (node_get_types() as $type) {
     $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
     if (!in_array($type->type, $exempt) && node_access('create', $type->type)) {
-      $links[] = l(t('create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "edit[og_groups][]=$group->nid");
+      $links[] = l(t('Create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "edit[og_groups][]=$group->nid");
     }
   }
   return $links ? $links : array();
@@ -2181,9 +2096,8 @@ function og_admin_settings() {
   $form['og_settings']['node_form']['og_omitted'] = array('#type' => 'select', '#title' => t('Omitted content types'), '#default_value' => variable_get('og_omitted', array()), '#options' => $options, '#description' => t('Select any node types which should <em>not</em> participate in the Audience targetting system. Node types which are designated as group home page node types (see below) will be automatically excluded.'), '#multiple' => TRUE);
 
   $form['og_settings']['home'] = array('#type' => 'fieldset', '#title' => t('Group home page'), '#collapsible' => TRUE, '#collapsed' => TRUE);
-  $options = array('ron' => t('River of News'), 'gbct' => t('Group by content type'));
-  $form['og_settings']['home']['og_home_page_presentation'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_presentation', 'gbct'), '#description' => t('If neither of these presentations suits you, you may override in the theme layer.'));
-  $form['og_settings']['home']['og_max_posts'] = array('#type' => 'textfield', '#title' => t('Maximum posts on group home page'), '#size' => 3, '#maxlength' => 2, '#default_value' => variable_get('og_max_posts', 10), '#description' => t("If using River of News display, indicate the number of posts on home page. If grouping posts by content type, indicate number of posts per type."), );
+  $options = og_get_available_views();
+  $form['og_settings']['home']['og_home_page_view'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'), '#description' => t('Pick a View for your group home page. The View determines the layout of your home page. You may alter the presentation using usual the !theme. Also see the Theme section of the OG README file.', array('!theme' => l(t('usual Views themeing techniques'), 'http://drupal.org/node/42597'))));
   $form['og_settings']['home']['og_node_types'] = array('#type' => 'select', '#title' => t('Group home page node types'), '#default_value' => variable_get('og_node_types', array('og')), '#options' => $og_node_type_options, '#required' => TRUE, '#description' => t("<b>Required</b>. Select the node types which act as group home pages. Usually, you will want to !create called <em>group</em> for this purpose.", array('!create' => l(t('create a simple node type'), 'admin/content/types'))), '#multiple' => TRUE);
 
   $form['og_settings']['email'] = array('#type' => 'fieldset', '#title' => t('Email settings'), '#collapsible' => TRUE, '#collapsed' => TRUE);
@@ -2207,33 +2121,27 @@ function og_admin_settings() {
   return system_settings_form($form);
 }
 
-// try to get the theme's preferred way to show each type's node listing. if not specified, show the generic node listing (which is also themeable)
-// $mode can be 'brief' or 'all'
-function og_list_og($gid, $type, $mode = 'all') {
-  $output = theme(node_get_types('type', $type). '_list_og', $gid, $mode);
-  if (!$output) {
-    $output = theme('og_list_generic', $gid, $type, $mode);
+// TODO: move this to new API function in Views where I can influence the WHERE clause.
+function og_get_available_views() {
+  $result = db_query("SELECT name, description FROM {view_view} WHERE name LIKE 'og_ghp_%'");
+  while ($view = db_fetch_object($result)) {
+    $views[$view->name] =  check_plain("$view->description ($view->name)");
   }
-  return $output;
-}
-
-// you may theme this function, or even theme each node type listing separately
-function theme_og_list_generic($gid, $type, $mode) {
-  static $i;
-
-  $header = array(t('Title'), t('Author'), t('Replies'), t('Last reply'));
-  $sql = og_get_home_nodes_sql($type);
-  $num = $mode == 'brief' ? variable_get('og_max_posts', 10) : 50;
-  $i++; // multiple pagers on a page need a unique integer
-  $result = pager_query(db_rewrite_sql($sql, 'n', 'nid', array('og_nid' => $gid)), $num, $i);
-  $rows = array();
-  while ($row = db_fetch_object($result)) {
-    $rows[] = array(l($row->title, "node/$row->nid"), theme('username', $row), $row->comment_count, format_date($row->created, 'small'));
+  
+  views_load_cache(); // the function below was not loaded without this call
+  $default_views = _views_get_default_views();
+  $views_status = variable_get('views_defaults', array());
+  foreach ($default_views as $view) {
+    // filter this list to simplify for admins. 
+    if (substr($view->name, 0, 6) == 'og_ghp_') {
+      if (!$views[$view->name] && 
+        ($views_status[$view->name] == 'enabled' || (!$views_status[$view->name] && !$view->disabled))) {
+        $views[$view->name] = check_plain("$view->description ($view->name)");
+      }
+    }
   }
-  if ($pager = theme('pager', NULL, $num, $i, array('ntype' => $type))) {
-    $rows[] = array(array('data' => $pager, 'colspan' => '4'));
-  }
-  return $rows ? '<fieldset><legend>' . node_get_types('name', $type) . '</legend>'  . theme('table', $header, $rows) . '</fieldset>' : NULL;
+  ksort($views);
+  return $views;
 }
 
 // TODO: maybe use a custom theme('mark') here?
@@ -2300,5 +2208,20 @@ function og_pathauto_node($op, $node=NULL) {
       return $results;
     default:
       break;
+  }
+}
+
+/**
+ * Implementation of hook_db_rewrite_sql. Used by other modules to filter nodes to a given group
+ *
+ * You must pass $args with element 'og_nid' => $nid in order to have your query filtered by this function
+ *
+ * @return array
+ */
+function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
+  if (isset($args['og_nid']) && is_numeric($args['og_nid'])) {
+    $query['join'] = 'INNER JOIN {og_ancestry} oga ON n.nid = oga.nid';
+    $query['where'] =  'oga.group_nid = '. $args['og_nid'];
+    return $query;
   }
 }
