@@ -2133,7 +2133,7 @@ function og_get_available_views() {
   $views_status = variable_get('views_defaults', array());
   foreach ($default_views as $view) {
     // filter this list to simplify for admins. 
-    if (substr($view->name, 0, 6) == 'og_ghp_') {
+    if (substr($view->name, 0, 7) == 'og_ghp_') {
       if (!$views[$view->name] && 
         ($views_status[$view->name] == 'enabled' || (!$views_status[$view->name] && !$view->disabled))) {
         $views[$view->name] = check_plain("$view->description ($view->name)");
