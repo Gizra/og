@@ -900,7 +900,7 @@ function og_list_groups_page_opml($result) {
   $output .= "<body>\n";
 
   while ($feed = db_fetch_object($result)) {
-    $output .= '<outline text="'. check_plain($feed->title) .'" xmlUrl="'. url("node/$feed->nid/feed", NULL, NULL, TRUE) ."\" />\n";
+    $output .= '<outline text="'. check_plain($feed->title) .'" xmlUrl="'. url("og/feed/$feed->nid", NULL, NULL, TRUE) ."\" />\n";
   }
 
   $output .= "</body>\n";
