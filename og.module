@@ -850,7 +850,7 @@ function og_list_groups_page($uid = NULL, $format = 'html') {
   global $user;
   
   // workaround for the fact that anon users are served the 'og' manu item when they request a page like og/manage/x or og/user/x
-  if ($uid != NULL && !is_int($uid)) {
+  if ($uid != NULL && arg(2) != 'opml' && !is_int($uid)) {
     drupal_access_denied();
   }
 
