@@ -1683,6 +1683,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
       if (db_num_rows($result)) {
         $account->og_email = db_result($result);
       }
+      break;
     case 'view':
       // only show list of groups to self and admins
       if ($account->uid == $user->uid || user_access('administer organic groups')) {
