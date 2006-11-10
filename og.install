@@ -415,6 +415,7 @@ function og_migrate_type_basic_14() {
 function og_update_15() {
   variable_del('og_max_posts');
   variable_del('og_home_page_presentation');
+  return array();
 }
 
 // An implementation of hook_disable
