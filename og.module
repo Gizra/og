@@ -1224,24 +1224,20 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'rss item':
       if ($node->og_groups) {
-        og_nodeapi_rss_item($node);
-        return $node;
+        foreach ($node->og_groups as $cnt => $gid) {
+          // TODO: should be absolute link. core bug.
+          $append['og_links'] = array('title' => $node->og_groups_names[$cnt], 'href' => "node/$gid");
+          $ret[] = array('key'   => 'group',
+                         'value' => check_plain($node->og_groups_names[$cnt]),
+                         'attributes' => array('domain' => url('node/'. $gid, NULL, NULL, TRUE)));
+        }
+        // to get these modifications to work on 4.7, one needs to patch as per http://drupal.org/node/41703
+        $node->body .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
+        $node->teaser .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
+        return $ret;
       }
       break;
   }
-}
-
-function og_nodeapi_rss_item(&$node) {
-  foreach ($node->og_groups as $cnt => $gid) {
-    // TODO: should be absolute link. core bug.
-    $append['og_links'] = array('title' => $node->og_groups_names[$cnt], 'href' => "node/$gid");
-    $ret[] = array('key'   => 'group',
-                   'value' => check_plain($node->og_groups_names[$cnt]),
-                   'attributes' => array('domain' => url('node/'. $gid, NULL, NULL, NULL, TRUE)));
-  }
-  // to get these modifications to work on 4.7, one needs to patch as per http://drupal.org/node/41703
-  $node->body .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
-  $node->teaser .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
 }
 
 function og_msgid_server() {
