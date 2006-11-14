@@ -3,8 +3,13 @@
 /**
  * Implementation of the hook_views_tables()
  */
-
+ 
 function og_views_tables() {
+  $types = variable_get('og_node_types', array('og'));
+  foreach ($types as $type) {
+    $type_options[$type] = node_get_types('name', $type);
+  }
+  
   return array(
     'og' => array(
       'name' => 'og',
@@ -60,7 +65,7 @@ function og_views_tables() {
           'list-type' => 'select',
           'help' => t('Admin specifies whether or not a group appears in the public listings.'),
         )
-      )
+      ),
     ),
     'og_ancestry' => array(
       'name' => 'og_ancestry',
@@ -179,7 +184,41 @@ function og_views_tables() {
         ),
       ),            
     ),
-  );
+    // pseudotable for adding filter on node table and eventually more
+    'og_views' => array(
+      'name' => 'node',
+      'join' => array(
+        'left' => array(
+          'table' => 'node',
+          'field' => 'nid',
+          ),
+        'right' => array(
+          'field' => 'nid',
+        )
+      ),
+      // here's a filter that is limited to og content types to be used for exposed filters that should not contain other values
+     'filters' => array(
+        'og_type_selector' => array(
+          'field' => 'type_selector',
+          'name' => t('OG: type (selector)'),
+          'list' => $type_options,
+          'list-type' => 'list',
+          'operator' => 'views_handler_operator_or',
+          'value-type' => 'array',
+          'help' => t('A node type selector that is limited to og-enabled node types. Use as exposed filter that only contains og node types.'),
+        ),
+        'og_type' => array(
+          'field' => 'type',
+          'name' => t('OG: type'),
+          'operator' => array('=' => t('Is')),
+          'list' => array('a group node'),
+          'list-type' => 'select',
+          'handler' => 'og_handler_filter_og_type',
+          'help' => t('Restrict to node types which have been designated behave as groups.'),
+        ),
+      ),
+    ),
+  );  
 }
 
 function og_views_arguments() {
@@ -471,6 +510,234 @@ function og_views_default_views() {
   $view->requires = array(node);
   $views[$view->name] = $view;
   
+  // og/my
+  $view = new stdClass();
+  $view->name = 'og_my';
+  $view->description = 'List user\'s subscribed groups and provide link to manage subscription';
+  $view->access = array (
+  0 => '2',
+);
+  $view->view_args_php = '';
+  $view->page = TRUE;
+  $view->page_title = 'my groups';
+  $view->page_header = 'You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="/og/user/opml">OPML feed containing feeds from all your subscribed groups</a>.';
+  $view->page_header_format = '1';
+  $view->page_footer = '<?php
+
+  $url = url("og/user/opml");
+  return theme(\'opml_icon\', $url);
+
+?>';
+  $view->page_footer_format = '2';
+  $view->page_empty = 'No subscribed groups';
+  $view->page_empty_format = '1';
+  $view->page_type = 'table';
+  $view->url = 'og/my';
+  $view->use_pager = TRUE;
+  $view->nodes_per_page = '50';
+  $view->menu = TRUE;
+  $view->menu_title = '';
+  $view->menu_tab = TRUE;
+  $view->menu_tab_default = FALSE;
+  $view->menu_tab_weight = '0';
+  $view->block = TRUE;
+  $view->block_title = 'my groups';
+  $view->block_header = '';
+  $view->block_header_format = '1';
+  $view->block_footer = '<?php
+
+  $url = url("og/user/opml");
+  return theme(\'opml_icon\', $url);
+
+?>';
+  $view->block_footer_format = '2';
+  $view->block_empty = '';
+  $view->block_empty_format = '1';
+  $view->block_type = 'list';
+  $view->nodes_per_block = '40';
+  $view->block_more = TRUE;
+  $view->block_use_page_header = FALSE;
+  $view->block_use_page_footer = FALSE;
+  $view->block_use_page_empty = FALSE;
+  $view->sort = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'title',
+      'sortorder' => 'ASC',
+      'options' => '',
+    ),
+  );
+  $view->argument = array (
+  );
+  $view->field = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'title',
+      'label' => 'Title',
+      'handler' => 'views_handler_field_nodelink',
+      'options' => 'link',
+    ),
+    array (
+      'tablename' => 'users',
+      'field' => 'name',
+      'label' => 'Manager',
+    ),
+    array (
+      'tablename' => 'og',
+      'field' => 'count',
+      'label' => 'Subscribers',
+    ),
+    array (
+      'tablename' => 'og_uid',
+      'field' => 'mail_type',
+      'label' => 'Email',
+    ),
+    array (
+      'tablename' => 'og_uid',
+      'field' => 'managelink',
+      'label' => 'Manage',
+    ),
+  );
+  $view->filter = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'status',
+      'operator' => '=',
+      'options' => '',
+      'value' => '\'1\'',
+    ),
+    array (
+      'tablename' => 'og_uid',
+      'field' => 'currentuidsimple',
+      'operator' => '=',
+      'options' => '',
+      'value' => '\'***CURRENT_USER***\'',
+    ),
+    array (
+      'tablename' => 'og_views',
+      'field' => 'og_type',
+      'operator' => '=',
+      'options' => '',
+      'value' => '\'0\'',
+    ),
+  );
+  $view->exposed_filter = array (
+  );
+  $view->requires = array(node, users, og, og_uid, og_views);
+  $views[$view->name] = $view;
+  
+  // og
+  $view = new stdClass();
+  $view->name = 'og';
+  $view->description = 'groups directory';
+  $view->access = array (
+);
+  $view->view_args_php = '';
+  $view->page = TRUE;
+  $view->page_title = 'Groups directory';
+  $view->page_header = '';
+  $view->page_header_format = '2';
+  $view->page_footer = '';
+  $view->page_footer_format = '1';
+  $view->page_empty = 'No groups';
+  $view->page_empty_format = '1';
+  $view->page_type = 'table';
+  $view->url = 'og/all';
+  $view->use_pager = TRUE;
+  $view->nodes_per_page = '90';
+  $view->menu = TRUE;
+  $view->menu_title = 'groups';
+  $view->menu_tab = TRUE;
+  $view->menu_tab_default = TRUE;
+  $view->menu_tab_weight = '-5';
+  $view->sort = array (
+  );
+  $view->argument = array (
+    array (
+      'type' => 'rss_feed',
+      'argdefault' => '2',
+      'title' => '',
+      'options' => '',
+      'wildcard' => '',
+      'wildcard_substitution' => '',
+    ),
+  );
+  $view->field = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'title',
+      'label' => 'Title',
+      'handler' => 'views_handler_field_nodelink',
+      'sortable' => '1',
+      'options' => 'link',
+    ),
+    array (
+      'tablename' => 'users',
+      'field' => 'name',
+      'label' => 'Manager',
+    ),
+    array (
+      'tablename' => 'og',
+      'field' => 'count',
+      'label' => 'Subscribers',
+    ),
+    array (
+      'tablename' => 'og',
+      'field' => 'description',
+      'label' => 'Description',
+    ),
+    array (
+      'tablename' => 'og',
+      'field' => 'subscribe',
+      'label' => 'Subscribe',
+    ),
+  );
+  $view->filter = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'status',
+      'operator' => '=',
+      'options' => '',
+      'value' => '1',
+    ),
+    array (
+      'tablename' => 'og',
+      'field' => 'directory',
+      'operator' => '=',
+      'options' => '',
+      'value' => '1',
+    ),
+    array (
+      'tablename' => 'node',
+      'field' => 'title',
+      'operator' => 'contains',
+      'options' => '',
+      'value' => '\'\'',
+    ),
+    array (
+      'tablename' => 'og_views',
+      'field' => 'og_type',
+      'operator' => '=',
+      'options' => '',
+      'value' => '0',
+    ),
+  );
+  $view->exposed_filter = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'title',
+      'label' => 'Title',
+      'optional' => '1',
+      'is_default' => '0',
+      'operator' => '1',
+      'single' => '0',
+    ),
+  );
+  $view->requires = array(node, users, og, og_views);
+  $views[$view->name] = $view;
+  
+  
+  
   return $views;
 }
 
@@ -516,9 +783,13 @@ function og_handler_field_nodelink($fieldinfo, $fielddata, $value, $data) {
 }
 
 function og_handler_field_managelink($fieldinfo, $fielddata, $value, $data) {
-  return l(t('my subscription'), "og/manage/$data->nid");
+  return l(t('my subscription'), "og/manage/$data->nid", NULL, drupal_get_destination());
 }
 
 function og_handler_field_yesempty($fieldinfo, $fielddata, $value, $data) {
   return $value ? t('yes') : '';
+}
+
+function og_handler_filter_og_type($op, $filter, $filterinfo, &$query) {
+  $query->add_where("node.type IN ('%s')", implode(', ', variable_get('og_node_types', array('og'))));
 }

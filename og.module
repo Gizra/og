@@ -96,10 +96,9 @@ function og_menu($may_cache) {
 /**
  * This processing cannot happen later in the request because
  * - menu items will be in default language if we wait until og_menu(!$may_cache). bad for locale feature
- * - views_init() is used for gathering all the table and argument definitions and such. so our module has to load before that.
  */
 function og_init() {
-  // only bother when we are not serving a cached page. check for which functon that only exists afterwards
+  // only bother when we are not serving a cached page. check for which function that only exists afterwards
   if (function_exists('drupal_set_content')) {    
     // we have to perform a load in order to assure that the $user->og_groups bits are present.
     global $user;
@@ -108,7 +107,7 @@ function og_init() {
     og_set_locale();
     
     if (module_exists('views')) {
-      include drupal_get_path('module', 'og'). '/og_views.inc';
+      require './'. drupal_get_path('module', 'og'). '/og_views.inc';
     }
   }
 }
@@ -938,6 +937,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
     $view->url = 'node';
     $view->page_type = 'teaser';
     $args[] = $node->nid;
+    // TODO: use own callback for feeds
     if (arg(2) == 'feed') {
       $view->description = $node->og_description;
       $args[] = 'feed';
