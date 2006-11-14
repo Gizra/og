@@ -494,7 +494,8 @@ function og_create_admin($gid, $uid) {
     $variables = array(
       '@group' => $node->title,
       '!group_url' => url("node/$node->nid", NULL, NULL, TRUE),
-      '@username' => $account->name
+      '@username' => $account->name,
+      '!invite_url' => url("og/invite/$node->nid", NULL, NULL, TRUE)
     );
     
     $from = variable_get('site_mail', ini_get('sendmail_from'));
@@ -1163,7 +1164,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         $variables = array(
           '@group' => $node->title,
           '!group_url' => url("node/$node->nid", NULL, NULL, TRUE),
-          '@username' => $account->name
+          '@username' => $account->name,
+          '!invite_url' => url("og/invite/$node->nid", NULL, NULL, TRUE)
         );
 
         // alert the user that they are now the admin of the group  
@@ -2086,7 +2088,7 @@ function og_admin_settings() {
   $form['og_settings']['email']['og_request_user_subject'] = array('#type' => 'textfield', '#title' => t('Request user email subject'), '#description' => 'The subject of the email sent to a user\'s request to join a group. Available variables: %group, %username, %approve_url, %group_url', '#default_value' => _og_user_mail_text('og_request_user_subject'));
   $form['og_settings']['email']['og_request_user_body'] = array('#type' => 'textarea', '#title' => t('Request user email body'), '#rows' => 10, '#description' => 'The body of the email sent to a user\'s request to join a group. Available variables: %group, %username, %approve_url, %group_url', '#default_value' => _og_user_mail_text('og_request_user_body'));
   $form['og_settings']['email']['og_new_admin_subject'] = array('#type' => 'textfield', '#title' => t('New admin user email subject'), '#description' => 'The subject of the email sent to a new admin for a group. Available variables: %group, %username, %group_url', '#default_value' => _og_user_mail_text('og_new_admin_subject'));
-  $form['og_settings']['email']['og_new_admin_body'] = array('#type' => 'textarea', '#title' => t('New admin user email body'), '#rows' => 10, '#description' => 'The body of the email sent to a new admin for a group. Available variables: %group, %username, %group_url', '#default_value' => _og_user_mail_text('og_new_admin_body'));
+  $form['og_settings']['email']['og_new_admin_body'] = array('#type' => 'textarea', '#title' => t('New admin user email body'), '#rows' => 10, '#description' => 'The body of the email sent to a new admin for a group. Available variables: %group, %username, %group_url, %invite_url', '#default_value' => _og_user_mail_text('og_new_admin_body'));
 
   // TODO: move this to block config? Will be used elsewhere?
   $form['og_settings']['pictures'] = array('#type' => 'fieldset', '#title' => t('Member pictures'), '#collapsible' => TRUE, '#collapsed' => TRUE);
