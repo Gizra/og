@@ -49,7 +49,7 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('Groups'), 'weight' => 3, 'access' => user_access('access content'));
     
     $access = $user->uid; // login is required
-    $items[] = array('path' => 'og/user', 'type' => MENU_CALLBACK, 'callback' => 'og_list_groups_page', 'callback arguments' => array($user->uid), 'access' => $access, 'title' => t('My groups'));
+    $items[] = array('path' => 'og/opml', 'type' => MENU_CALLBACK, 'callback' => 'og_opml', 'access' => $access, 'title' => t('OPML'));
     $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('Unsubscribe from group'));
     $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('Approve subscription request'));
     $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('Deny subscription request'));
@@ -57,7 +57,10 @@ function og_menu($may_cache) {
     $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('Delete group administrator'));
     $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('Group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
     
-    $items[] = array('path' => 'admin/og/og', 'callback' => 'drupal_get_form', 'callback arguments' => array('og_admin_settings'), 'title' => t('Organic groups configuration'), 'description' => t('Configure the main Organic groups module (og)'), 'weight' => -5,);
+    // members only
+    $items[] = array('path' => "og/invite", 'callback' => 'og_menu_check', 'title' => t('Send invitation'), 'callback arguments' => array('og_invite_page'), 'type' => MENU_CALLBACK, 'access' => $access);
+    $items[] = array('path' => "og/manage", 'callback' => 'og_menu_check', 'title' => t('Manage subscription'), 'callback arguments' => array('og_manage'), 'type' => MENU_CALLBACK, 'access' => $access);
+    
     $items[] = array(
       'path' => 'admin/og', 
       'title' => t('Organic groups'),
@@ -65,7 +68,9 @@ function og_menu($may_cache) {
       'position' => 'right',
       'weight' => -5,
       'callback' => 'system_admin_menu_block_page',
-      'access' => user_access('administer site configuration'));
+      'access' => user_access('administer site configuration')
+      );
+    $items[] = array('path' => 'admin/og/og', 'callback' => 'drupal_get_form', 'callback arguments' => array('og_admin_settings'), 'title' => t('Organic groups configuration'), 'description' => t('Configure the main Organic groups module (og)'), 'weight' => -5,);
   }
   else {
     drupal_add_css(drupal_get_path('module', 'og'). '/og.css');
@@ -73,16 +78,16 @@ function og_menu($may_cache) {
     // we get a NOTICE if doing this from within og_theme() so I do it here for now.
     $_SESSION['og_last'] = og_get_group_context();
 
-    // these are considered members only pages even for public groups
-    foreach ($user->og_groups as $key => $sub) {
-      $items[] = array('path' => "og/users/$key", 'callback' => 'og_list_users_page', 'title' => t('Subscriber management'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => TRUE);
-      $items[] = array('path' => "og/users/$key/list", 'callback' => 'og_list_users_page', 'title' => t('List'), 'callback arguments' => array($key), 'type' => MENU_DEFAULT_LOCAL_TASK, 'access' => TRUE);
-      $items[] = array('path' => "og/manage/$key", 'callback' => 'og_manage', 'title' => t('Manage subscription'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
-      $items[] = array('path' => "og/invite/$key", 'callback' => 'og_invite_page', 'title' => t('Send invitation'), 'callback arguments' => array($key), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
+    //subscribers page and its 'add subscribers' tab
+    $gid = arg(2);
+    if (arg(0) == 'og' && arg(1) == 'users' && is_numeric($gid)) {
+      $items[] = array('path' => "og/users/$gid", 'callback' => 'og_menu_check', 'title' => t('Subscribers'), 'callback arguments' => array('og_list_users_page', $gid), 'type' => MENU_CALLBACK, 'access' => $access);
+      $items[] = array('path' => "og/users/$gid/list", 'title' => t('List'), 'type' => MENU_DEFAULT_LOCAL_TASK);
       // group admin only
-      $items[] = array('path' => "og/users/$key/add", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array(og_add_users, $key), 'type' => MENU_LOCAL_TASK, 'access' => node_access('update', array('nid' => $key, 'status' => 1)), 'weight' => 5);
+      $node = node_load($gid);
+      $items[] = array('path' => "og/users/$gid/add", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array('og_add_users', $gid), 'type' => MENU_LOCAL_TASK, 'weight' => 5, 'access' => node_access('update', $node));
     }
-
+    
     // email tab on group node
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(arg(1));
@@ -93,6 +98,24 @@ function og_menu($may_cache) {
   }
   return $items;
 }
+
+// check for membership and then pass along to the real menu callback
+// arguments must be in this order: function, $gid, <extra params required by function>
+// we used to register these menu items dynamically for each subscribed group but non subscribers were falling through and getting /og callback
+function og_menu_check() {
+  global $user;
+
+  $args = func_get_args();
+  $function = array_shift($args);
+  // TODO: Possibly allow site admins that are non subscribers
+  if (in_array($args[0], array_keys($user->og_groups))) {
+    return call_user_func_array($function, $args);
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
 /**
  * This processing cannot happen later in the request because
  * - menu items will be in default language if we wait until og_menu(!$may_cache). bad for locale feature
@@ -844,58 +867,8 @@ function og_list_users_page($gid) {
   return $output;
 }
 
-// TODO: use Views here
-function og_list_groups_page($uid = NULL, $format = 'html') {
-  global $user;
-  
-  // workaround for the fact that anon users are served the 'og' manu item when they request a page like og/manage/x or og/user/x
-  if ($uid != NULL && arg(2) != 'opml' && !is_int($uid)) {
-    drupal_access_denied();
-  }
-
-  if (!$uid) {
-    // Retrieve all groups
-    $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY og.nid DESC", 'og', 'nid'), 50);
-  }
-  else {
-    // Retrieve only current user's group
-    $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid INNER JOIN {og_uid} ou ON ou.uid = u.uid WHERE og.nid IN (". implode(',', array_keys($user->og_groups)) .") ORDER BY og.nid DESC", 'og', 'nid'), 50);
-  }
-  if ($format == 'opml') {
-    og_list_groups_page_opml($result); 
-  }
-  else {
-    return og_list_groups_page_html($result); 
-  }
-}
-
-function og_list_groups_page_html($result) {
-  global $user;
-  
-  $header = array(t('Title'), t('Subscribers'), t('Manager'), t('Description'));
-
-  while ($node = db_fetch_object($result)) {
-    $cnt = db_num_rows(db_query(og_list_users_sql(), $node->nid));
-    $rows[] = array(
-      array("data" => l($node->title, "node/$node->nid")),
-      array("data" => in_array($node->nid, array_keys($user->og_groups)) ? l($cnt, "og/users/$node->nid") : $cnt),
-      array("data" => theme('username', $node)),
-      array("data" => check_plain($node->description)),
-    );
-  }
-  if (!$rows) {
-    $rows[] = array(array('data' => t('No groups'), 'colspan' => 4));
-  }
-  elseif (!empty($user->og_groups)) {
-    drupal_set_message(t('You may also view an !opml listing RSS feeds from your subscribed groups.', array('!opml' => l(t('OPML file'), 'og/user/opml'))), 'help');
-    $url = url("og/user/opml");
-    $opml_icon = theme('opml_icon', $url);
-  }
-  
-  return theme('table', $header, $rows). theme('pager', NULL, 50). $opml_icon;
-}
-
-function og_list_groups_page_opml($result) {
+// TODO: use Views
+function og_opml() {
   $output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
   $output .= "<opml version=\"1.1\">\n";
   $output .= "<head>\n";
@@ -904,8 +877,9 @@ function og_list_groups_page_opml($result) {
   $output .= "</head>\n";
   $output .= "<body>\n";
 
+  $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY og.nid DESC", 'og', 'nid'), 50);
   while ($feed = db_fetch_object($result)) {
-    $output .= '<outline text="'. check_plain($feed->title) .'" xmlUrl="'. url("og/feed/$feed->nid", NULL, NULL, TRUE) ."\" />\n";
+    $output .= '<outline text="'. check_plain($feed->title) .'" xmlUrl="'. url("node/$feed->nid/feed", NULL, NULL, TRUE) ."\" />\n";
   }
 
   $output .= "</body>\n";
@@ -1847,8 +1821,8 @@ function og_block_notifications() {
         $l1[] = array('title' => t('page'), 'href' => 'group/myunread');
         $links['my_unread'] = t('my unread: '). theme('links', $l1, $inline);
       
-        $l2[] = array('title' => t('feed'), 'href' => 'group/og_tracker/feed');
-        $l2[] = array('title' => t('page'), 'href' => 'group/og_tracker');
+        $l2[] = array('title' => t('feed'), 'href' => 'group/mytracker/feed');
+        $l2[] = array('title' => t('page'), 'href' => 'group/mytracker');
         $links['my_group'] = t('my group: '). theme('links', $l2, $inline);
       
         $l3[] = array('title' => t('feed'), 'href' => 'group/tracker/feed');
@@ -1878,7 +1852,7 @@ function og_block_my() {
     else {
       $output .= theme('item_list', $items);
     }
-    $url = url("og/user/opml");
+    $url = url("og/opml");
     $output .= theme('opml_icon', $url);
     $block['subject'] = t('My groups');
     $block['content'] = $output;

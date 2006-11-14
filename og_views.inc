@@ -520,11 +520,11 @@ function og_views_default_views() {
   $view->view_args_php = '';
   $view->page = TRUE;
   $view->page_title = 'my groups';
-  $view->page_header = 'You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="/og/user/opml">OPML feed containing feeds from all your subscribed groups</a>.';
+  $view->page_header = 'You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="/og/opml">OPML feed containing feeds from all your subscribed groups</a>.';
   $view->page_header_format = '1';
   $view->page_footer = '<?php
 
-  $url = url("og/user/opml");
+  $url = url("og/opml");
   return theme(\'opml_icon\', $url);
 
 ?>';
@@ -546,7 +546,7 @@ function og_views_default_views() {
   $view->block_header_format = '1';
   $view->block_footer = '<?php
 
-  $url = url("og/user/opml");
+  $url = url("og/opml");
   return theme(\'opml_icon\', $url);
 
 ?>';
@@ -604,14 +604,14 @@ function og_views_default_views() {
       'field' => 'status',
       'operator' => '=',
       'options' => '',
-      'value' => '\'1\'',
+      'value' => '1',
     ),
     array (
       'tablename' => 'og_uid',
       'field' => 'currentuidsimple',
       'operator' => '=',
       'options' => '',
-      'value' => '\'***CURRENT_USER***\'',
+      'value' => '***CURRENT_USER***',
     ),
     array (
       'tablename' => 'og_views',
