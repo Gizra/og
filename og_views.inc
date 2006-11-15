@@ -257,7 +257,7 @@ function og_views_default_views() {
   $view->access = array('2');
   $view->view_args_php = '';
   $view->page = TRUE;
-  $view->page_title = t('recent posts in my groups');
+  $view->page_title = t('Recent posts in my groups');
   $view->page_header = '';
   $view->page_header_format = '1';
   $view->page_footer = '';
@@ -362,7 +362,7 @@ function og_views_default_views() {
 );
   $view->view_args_php = '';
   $view->page = TRUE;
-  $view->page_title = t('unread posts in my groups');
+  $view->page_title = t('Unread posts in my groups');
   $view->page_header = '';
   $view->page_header_format = '1';
   $view->page_footer = '';
@@ -519,7 +519,7 @@ function og_views_default_views() {
 );
   $view->view_args_php = '';
   $view->page = TRUE;
-  $view->page_title = 'my groups';
+  $view->page_title = 'My groups';
   $view->page_header = 'You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="/og/opml">OPML feed containing feeds from all your subscribed groups</a>.';
   $view->page_header_format = '1';
   $view->page_footer = '<?php
@@ -541,7 +541,7 @@ function og_views_default_views() {
   $view->menu_tab_default = FALSE;
   $view->menu_tab_weight = '0';
   $view->block = TRUE;
-  $view->block_title = 'my groups';
+  $view->block_title = 'My groups';
   $view->block_header = '';
   $view->block_header_format = '1';
   $view->block_footer = '<?php

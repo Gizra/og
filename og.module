@@ -1759,7 +1759,8 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     // $blocks[1] used to be the album block. We do not change the numbers to not confuse people who update.
     $blocks[2]['info'] = t('Group subscribers');
     $blocks[3]['info'] = t('New groups');
-    $blocks[4]['info'] = t('My groups');
+    // Now provided by og_views. Please don't reuse this number 4
+    // $blocks[4]['info'] = t('My groups');
     $blocks[5]['info'] = t('Group notifications');
     
     // Auto-enable the group blocks for fresh installations.
@@ -1775,23 +1776,17 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
       case 0:
         return og_block_details();
       case 2:
-        if ($GLOBALS['db_type'] != 'pgsql') {
-          return og_block_subscribers();
-        }
+        return og_block_subscribers();
       case 3:
         return og_block_new();
-      case 4:
-        return og_block_my();
       case 5:
         return og_block_notifications();
-
     }
   }
   elseif ($op == 'configure') {
     switch ($delta) {
       case 2:
       case 3:
-      case 4:
         return array('og_block_cnt' => array('#type' => 'textfield', '#title' => t('Maximum number of items to show'), '#default_value' => variable_get("og_block_cnt_$delta", 10), '#size' => 5, '#maxlength' => 255));
     }
   }
@@ -1799,7 +1794,6 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     switch ($delta) {
       case 2:
       case 3:
-      case 4:
         if (isset($edit['og_block_cnt'])) {
           variable_set("og_block_cnt_$delta", $edit['og_block_cnt']);
         }
@@ -1836,29 +1830,6 @@ function og_block_notifications() {
       $block['subject'] = t('Group notifications');
       return $block;
     }
-  }
-}
-
-function og_block_my() {
-  global $user;
-  if ($user->og_groups) {
-    $max = variable_get('og_block_cnt_4', 10);
-    foreach ($user->og_groups as $key => $val) {
-      $items[] = l($val['title'], "node/$key");
-    }
-    $count = count($items);
-    if ($count > $max) {
-      $output .= theme('item_list', array_slice($items, 0, $max));
-      $output .= '<div class="more-link">'. l(t('more'), 'og/user', array('title' => t('Browse all of my groups.'))) .'</div>';
-    }
-    else {
-      $output .= theme('item_list', $items);
-    }
-    $url = url("og/opml");
-    $output .= theme('opml_icon', $url);
-    $block['subject'] = t('My groups');
-    $block['content'] = $output;
-    return $block;
   }
 }
 
