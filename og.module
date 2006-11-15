@@ -274,11 +274,6 @@ function og_set_theme($nid) {
   }
 }
 
-function og_nodeview($gid) {
-  drupal_goto("node/$gid");
-}
-
-
 /**
  * Admins may broadcast email to all their subscribers
  *
