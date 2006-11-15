@@ -1404,7 +1404,11 @@ function og_get_visibility_default() {
 
 function og_comment($comment, $op) {
   switch ($op) {
+    case 'publish':
+      $comment = (array) $comment;
+      // fall through
     case 'insert':
+      // would prefer that these are sent with some delay to prevent give author time to correct typos. where is my cron based send?
       if ($comment['status'] == COMMENT_PUBLISHED && !module_exists('og2list')) {
         $node = node_load($comment['nid']);
         $comment['og_groups'] = $node->og_groups;
