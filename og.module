@@ -337,7 +337,7 @@ function og_manage($gid) {
   }
   
   $group = node_load($gid);
-  $bc[] = array('path' => "og", 'title' => t('groups'));
+  $bc[] = array('path' => "og", 'title' => t('Groups'));
   $bc[] = array('path' => "node/$gid", 'title' => $group->title);
   $bc[]  = array('path' => "sd", 'title' => 'sdf'); // no idea why this is needed
   menu_set_location($bc);
