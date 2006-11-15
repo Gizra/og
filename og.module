@@ -486,38 +486,86 @@ function og_deny($gid, $uid) {
 
 function og_create_admin($gid, $uid) {
   $node = node_load($gid);
-  if (node_access('update',$node)) {
+  if (node_access('update', $node)) {
     $account = user_load(array('uid' => $uid));
-    og_save_subscription($gid, $uid, array('is_admin' => 1));
-    drupal_set_message(t('%name was promoted to %ga', array('%name' => $account->name, '%ga' => t('group administrator'))));
-    
-    $variables = array(
-      '@group' => $node->title,
-      '!group_url' => url("node/$node->nid", NULL, NULL, TRUE),
-      '@username' => $account->name,
-      '!invite_url' => url("og/invite/$node->nid", NULL, NULL, TRUE)
-    );
-    
-    $from = variable_get('site_mail', ini_get('sendmail_from'));
-    drupal_mail('og_new_admin', $account->mail, _og_user_mail_text('og_new_admin_subject', $variables), _og_user_mail_text('og_new_admin_body', $variables), $from);
-    drupal_goto("node/$gid");
+    return drupal_get_form('og_create_admin_confirm', $gid, $node, $account);
   }
   else {
     drupal_access_denied();
   }
 }
 
+/**
+ * OG create admin form
+ */
+function og_create_admin_confirm($gid, $node, $account) {
+  $form['node'] = array('#type' => 'value', '#value' => $node);
+  $form['account'] = array('#type' => 'value', '#value' => $account);
+  return confirm_form($form, 
+           t('Are you sure you want to make %name a group administrator for the group %title?', array('%name' => $account->name, '%title' => $node->title)),
+           "og/users/$gid", 
+           ' ',
+           t('Confirm'), 
+           t('Cancel'));
+}
+
+/**
+ * Confirm og create admin form
+ */
+function og_create_admin_confirm_submit($form_id, $form_values) {
+  $account = $form_values['account'];
+  $node = $form_values['node'];
+  
+  og_save_subscription($node->nid, $account->uid, array('is_admin' => 1));
+  drupal_set_message(t('%name was promoted to %ga', array('%name' => $account->name, '%ga' => t('group administrator'))));
+  
+  $variables = array(
+    '%group' => $node->title,
+    '%group_url' => url("node/$node->nid", NULL, NULL, TRUE),
+    '%username' => $account->name
+  );
+  
+  $from = variable_get('site_mail', ini_get('sendmail_from'));
+  drupal_mail('og_new_admin', $account->mail, _og_user_mail_text('og_new_admin_subject', $variables), _og_user_mail_text('og_new_admin_body', $variables), $from);
+  return "og/users/$node->nid";
+}
+
 function og_delete_admin($gid, $uid) {
   $node = node_load($gid);
   if (node_access('update', $node)) {
-    og_save_subscription($gid, $uid, array('is_admin' => 0));
-    drupal_set_message(t('User is no longer a %ga', array('%ga' => t('group administrator'))));
-    drupal_goto("node/$gid");
+    $account = user_load(array('uid' => $uid));
+    return drupal_get_form('og_remove_admin_confirm', $gid, $node, $account);
   }
   else {
     drupal_access_denied();
   }
 }
+
+/**
+ * OG remove admin form
+ */
+function og_remove_admin_confirm($gid, $node, $account) {
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+  $form['account'] = array('#type' => 'value', '#value' => $account);
+  return confirm_form($form, 
+                 t('Are you sure you want to remove %name as a group administrator for the group %title?', array('%name' => $account->name, '%title' => $node->title)),
+                 "og/users/$gid",
+                 ' ', 
+                 t('Remove'), 
+                 t('Cancel'));
+}
+
+/**
+ * Confirm og remove admin form
+ */
+function og_remove_admin_confirm_submit($form_id, $form_values) {
+  $account = $form_values['account'];
+  $gid = $form_values['gid'];
+  og_save_subscription($gid, $account->uid, array('is_admin' => 0));
+  drupal_set_message(t('%name is no longer a %ga', array('%name' => $account->name, '%ga' => t('group administrator'))));
+  return "og/users/$gid";
+}
+
 
 function og_invite_page($gid) {
   $node = node_load($gid);
