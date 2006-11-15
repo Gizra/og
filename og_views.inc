@@ -269,7 +269,7 @@ function og_views_default_views() {
   $view->use_pager = TRUE;
   $view->nodes_per_page = '25';
   $view->menu = TRUE;
-  $view->menu_title = t('my recent');
+  $view->menu_title = t('My recent');
   $view->menu_tab = TRUE;
   $view->menu_tab_default = FALSE;
   $view->menu_weight = '';
@@ -394,7 +394,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'og_node_data',
       'field' => 'title',
-      'label' => T('Group'),
+      'label' => t('Group'),
       'sortable' => '1',
     ),
     array (
