@@ -1084,13 +1084,18 @@ function og_group_form($node) {
 function og_get_node_groups($node) {
   $groups = array();
   if (!og_is_group_type($node->type)) {
-    $sql = "SELECT oga.group_nid, n.title FROM {og_ancestry} oga INNER JOIN {node} n ON oga.group_nid = n.nid WHERE oga.nid = %d";
-    $result = db_query($sql, $node->nid);
+    $result = og_get_node_groups_result($node->nid);
     while ($row = db_fetch_object($result)) {
       $groups[$row->group_nid] = $row->title;
     }
     return $groups;
   }
+}
+
+// just the query for the get_node_groups function. is reused in og_views.inc
+function og_get_node_groups_result($nid) {
+  $sql = "SELECT oga.group_nid, n.title FROM {og_ancestry} oga INNER JOIN {node} n ON oga.group_nid = n.nid WHERE oga.nid = %d";
+  return db_query($sql, $nid);
 }
 
 function og_validate_group(&$node) {
