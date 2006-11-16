@@ -40,7 +40,7 @@ function og_install() {
         nid int(11) NOT NULL,
         group_nid int(11) NOT NULL,
         is_public int(1) NOT NULL,
-        PRIMARY KEY  (nid),
+        KEY  (nid),
         KEY  (group_nid)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
     break;
@@ -349,7 +349,7 @@ function og_update_14() {
           nid int(11) NOT NULL,
           group_nid int(11) NOT NULL,
           is_public int(1) NULL,
-          PRIMARY KEY  (nid),
+          KEY  (nid),
           KEY  (group_nid)
         ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
       break;
