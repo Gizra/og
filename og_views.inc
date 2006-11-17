@@ -109,8 +109,7 @@ function og_views_tables() {
         'title' => array(
           'name' => t('Og: Group names'),
           'handler' => 'og_handler_field_nodelink',
-          'sortable' => true,
-          'addlfields' => array('nid'),
+          'notafield' => TRUE,
           'help' => t('Display links to any groups that are affiliated with a post.'),
         ),
       ),
@@ -252,7 +251,7 @@ function og_handler_argument_gid($op, &$query, $argtype, $arg = '') {
  */
 function og_views_default_views() {
   $view = new stdClass();
-  $view->name = 'og_tracker';
+  $view->name = 'og_mytracker';
   $view->description = t('Shows all activity in subscribed groups.');
   $view->access = array('2');
   $view->view_args_php = '';
@@ -374,7 +373,7 @@ function og_views_default_views() {
   $view->use_pager = TRUE;
   $view->nodes_per_page = '25';
   $view->menu = TRUE;
-  $view->menu_title = t('my unread');
+  $view->menu_title = t('My unread');
   $view->menu_tab = TRUE;
   $view->menu_tab_default = TRUE;
   $view->menu_weight = '';
@@ -460,6 +459,7 @@ function og_views_default_views() {
   $views[$view->name] = $view;
   
   
+  // Group home page: river of news
   $view = new stdClass();
   $view->name = 'og_ghp_ron';
   $view->description = 'OG: Group home page - River of news. Default';
@@ -626,7 +626,7 @@ function og_views_default_views() {
   $view->requires = array(node, users, og, og_uid, og_views);
   $views[$view->name] = $view;
   
-  // og
+  // og view
   $view = new stdClass();
   $view->name = 'og';
   $view->description = 'groups directory';
@@ -736,6 +736,105 @@ function og_views_default_views() {
   $view->requires = array(node, users, og, og_views);
   $views[$view->name] = $view;
   
+  // og_tracker
+  $view = new stdClass();
+  $view->name = 'og_tracker';
+  $view->description = 'Shows active posts across the whole site';
+  $view->access = array (
+);
+  $view->view_args_php = '';
+  $view->page = TRUE;
+  $view->page_title = 'Recent posts across whole site';
+  $view->page_header = '';
+  $view->page_header_format = '1';
+  $view->page_footer = '';
+  $view->page_footer_format = '1';
+  $view->page_empty = '';
+  $view->page_empty_format = '1';
+  $view->page_type = 'table';
+  $view->url = 'group/tracker';
+  $view->use_pager = TRUE;
+  $view->nodes_per_page = '25';
+  $view->menu = TRUE;
+  $view->menu_title = 'Recent posts';
+  $view->menu_tab = TRUE;
+  $view->menu_tab_default = FALSE;
+  $view->menu_tab_weight = '5';
+  $view->sort = array (
+    array (
+      'tablename' => 'node_comment_statistics',
+      'field' => 'last_comment_timestamp',
+      'sortorder' => 'DESC',
+      'options' => 'normal',
+    ),
+  );
+  $view->argument = array (
+    array (
+      'type' => 'uid',
+      'argdefault' => '2',
+      'title' => 'recent posts for %1',
+      'options' => '',
+      'wildcard' => '',
+      'wildcard_substitution' => '',
+    ),
+    array (
+      'type' => 'rss_feed',
+      'argdefault' => '2',
+      'title' => '',
+      'options' => '',
+      'wildcard' => '',
+      'wildcard_substitution' => '',
+    ),
+  );
+  $view->field = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'type',
+      'label' => 'Type',
+    ),
+    array (
+      'tablename' => 'node',
+      'field' => 'title',
+      'label' => 'Title',
+      'handler' => 'views_handler_field_nodelink_with_mark',
+      'options' => 'link',
+    ),
+    array (
+      'tablename' => 'users',
+      'field' => 'name',
+      'label' => 'Author',
+    ),
+    array (
+      'tablename' => 'node_comment_statistics',
+      'field' => 'comment_count',
+      'label' => 'Replies',
+      'handler' => 'views_handler_comments_with_new',
+    ),
+    array (
+      'tablename' => 'og_node_data',
+      'field' => 'title',
+      'label' => 'Groups',
+    ),
+    array (
+      'tablename' => 'node_comment_statistics',
+      'field' => 'last_comment_timestamp',
+      'label' => 'Last Post',
+      'handler' => 'views_handler_field_since',
+    ),
+  );
+  $view->filter = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'status',
+      'operator' => '=',
+      'options' => '',
+      'value' => '1',
+    ),
+  );
+  $view->exposed_filter = array (
+  );
+  $view->requires = array(node_comment_statistics, node, users, og_node_data);
+  $views[$view->name] = $view;
   
   
   return $views;
