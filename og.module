@@ -107,8 +107,7 @@ function og_menu_check() {
 
   $args = func_get_args();
   $function = array_shift($args);
-  // TODO: Possibly allow site admins that are non subscribers
-  if (in_array($args[0], array_keys($user->og_groups))) {
+  if (user_access('administer nodes') || in_array($args[0], array_keys($user->og_groups))) {
     return call_user_func_array($function, $args);
   }
   else {
@@ -772,8 +771,9 @@ function og_unsubscribe($gid, $uid = NULL) {
 function og_confirm_unsubscribe($gid, $node, $uid) {
   $form['gid'] = array('#type' => 'value', '#value' => $gid);
   $form['uid'] = array('#type' => 'value', '#value' => $uid);
+  $account = user_load(array('uid' => $uid));
   return confirm_form($form, 
-               t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $node->title)),
+               t('Are you sure you want to unsubscribe !name from the group %title?', array('!name' => theme('username', $account), '%title' => $node->title)),
                'og/manage/'. $node->nid, ' ', t('Unsubscribe'), t('Cancel'));
 }
 
@@ -865,11 +865,7 @@ function og_list_users_page($gid) {
   }
   // prepend the group manager
   $i=0;
-  $rows[$i][] = theme('username', $node). '&nbsp;<em>'. t('manager'). '</em>';
-  if ($access) {
-    $rows[$i][] = l(t('edit group'), "node/$gid/edit");
-    $rows[$i][] = '&nbsp;';
-  }
+  $rows[$i][] = array('data' => theme('username', $node). '&nbsp;<em>'. t('manager'). '</em>', 'colspan' => 3);
   $i++;
 
   $sql = og_list_users_sql(0,0,'ou.is_admin DESC, ou.is_active ASC, u.name ASC');
@@ -1976,7 +1972,7 @@ function og_block_details() {
         }
       }
     }
-    if ($subscription == 'active') {
+    if ($subscription == 'active' || user_access('administer nodes')) {
       $links = module_invoke_all('og_create_links', $node);
       if ($node->og_selective < OG_INVITE_ONLY) {
         $links[] = l(t('Invite friend'), "og/invite/$node->nid");
@@ -1985,10 +1981,8 @@ function og_block_details() {
       $txt = l($txt, "og/users/$node->nid");
       $txt .= $cntpending ? " ($cntpending)" : '';
       $links[] = $txt;
-      // this is pretty pointless info IMO. uncomment it if you wish.
-      // $links[] = t('age: %age', array('%age' => format_interval(time()-$node->created, 2)));
       $links[] =  t('Manager: '). theme('username', $node);
-      $links[] = l(t('My subscription'), "og/manage/$node->nid");
+      $links[] = isset($subscription) ? l(t('My subscription'), "og/manage/$node->nid") : og_subscribe_link($node);
       if (isset($node->og_website) && !empty($node->og_website)) {
         $links[] = l(t('website'), $node->og_website);
       }
@@ -2001,13 +1995,7 @@ function og_block_details() {
       $links[] = t('You must login/register in order to contribute to this group.');
     }
     elseif ($node->og_selective < OG_INVITE_ONLY) {
-      if ($node->og_selective == OG_MODERATED) {
-        $txt = t('request subscription');
-      }
-      elseif ($node->og_selective == OG_OPEN) {
-        $txt = t('subscribe');
-      }
-      $links[] = l($txt, "og/subscribe/$node->nid", array(), "destination=node/$node->nid");
+      $links[] = og_subscribe_link($node);
     }
     else {
       $links[] = t('This is a @closed group. The group administrators add/remove subscribers as needed.', array('@closed' => t('closed')));
@@ -2017,6 +2005,16 @@ function og_block_details() {
     $block['subject'] = $node->title;
     return $block;
   }
+}
+
+function og_subscribe_link($node) {
+  if ($node->og_selective == OG_MODERATED) {
+    $txt = t('Request subscription');
+  }
+  elseif ($node->og_selective == OG_OPEN) {
+    $txt = t('Subscribe');
+  }
+  return l($txt, "og/subscribe/$node->nid", array(), "destination=node/$node->nid");
 }
 
 // $group is an object containing the group node
