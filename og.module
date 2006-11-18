@@ -1291,7 +1291,64 @@ function og_form_alter($form_id, &$form) {
       } 
       og_form_add_og_audience($form_id, $form);
     }
+  }
+  
+  if ($form_id == 'node_delete_confirm') {
+    og_node_delete_form($form);
   }  
+}
+
+// form_alter() the node_delete form
+function og_node_delete_form(&$form) {
+  $node = node_load($form['nid']['#value']);
+  if (og_is_group_type($node->type)) {
+    $options[] = t('Do nothing.');
+    $options[] = t('Delete all group posts which don\'t also belong to another group.');
+    if (user_access('administer nodes')) {
+      $options[] = t('Move all group posts to the group listed below.');
+    }
+    $form['verb'] = array('#type' => 'radios', '#title' => t('Group posts'), '#options' => $options, '#weight' => 0, '#description' => t('In addition to deleting this group, you may choose how to disposition the posts within it.'));
+    if (user_access('administer nodes')) {
+      $options = og_all_groups_options();
+      unset($options[$form['nid']['#value']]);
+      $form['target'] = array('#type' => 'select', '#title' => t('Target group'), '#options' => $options, '#weight' => 0, '#description' => t('If you chose <b>Move all group posts</b> above, specify a destination group.'));
+      // register a submit handler
+      $form['#submit']['og_node_delete_confirm_submit'] = array();
+    }
+    $form['actions']['submit']['#value'] = t('Delete group');
+  }
+}
+
+// submit handler for node delete form. handles deletes to group nodes
+function og_node_delete_confirm_submit($form_id, $form_values) {
+  if ($form_values['verb'] == 1 || $form_values['verb'] == 2) {
+    $view = views_get_view('og_ghp_ron');
+    $info = views_build_view('items', $view, array($form_values['nid']));
+    foreach ($info['items'] as $item) {
+      $node = node_load($item->nid);
+      if ($form_values['verb'] == 2) {
+        unset($node->og_groups[$form_values['nid']]);
+        $node->og_groups[] = $form_values['target'];
+        node_save($node);
+        return 'node/'. $form_values['target']; 
+      }
+      else {
+        if (count($node->og_groups) < 2) {
+          node_delete($item->nid); 
+        }
+      }
+    }
+  }
+}
+
+// return an array containing all groups. suitable for a form item
+function og_all_groups_options() {
+  $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type IN ('%s') AND n.status = 1 ORDER BY n.title ASC";
+  $result = db_query($sql, implode(', ', variable_get('og_node_types', array('og'))));
+  while ($row = db_fetch_object($result)) {
+    $options[$row->nid] = $row->title;
+  }
+  return $options ? $options : array();
 }
 
 /**
@@ -1306,11 +1363,7 @@ function og_form_add_og_audience($form_id, &$form) {
   $required = variable_get('og_audience_required', 0);
   // determine the list of groups that are shown. node admins see all of them
   if (user_access('administer nodes')) {
-    $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type IN ('%s') AND n.status = 1 ORDER BY n.title ASC";
-    $result = db_query($sql, implode(', ', variable_get('og_node_types', array('og'))));
-    while ($row = db_fetch_object($result)) {
-      $options[$row->nid] = $row->title;
-    }
+    $options = og_all_groups_options();
   }
   else {
     $subs = og_get_subscriptions($node->uid);
