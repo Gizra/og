@@ -1307,11 +1307,20 @@ function og_form_add_og_audience($form_id, &$form) {
   global $user;
   $edit = $_GET['edit'];
   $node = $form['#node'];
-
   $required = variable_get('og_audience_required', 0);
-  $subs = og_get_subscriptions($node->uid);
-  foreach ($subs as $key => $val) {
-    $options[$key] = $val['title'];
+  // determine the list of groups that are shown. node admins see all of them
+  if (user_access('administer nodes')) {
+    $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type IN ('%s') AND n.status = 1 ORDER BY n.title ASC";
+    $result = db_query($sql, implode(', ', variable_get('og_node_types', array('og'))));
+    while ($row = db_fetch_object($result)) {
+      $options[$row->nid] = $row->title;
+    }
+  }
+  else {
+    $subs = og_get_subscriptions($node->uid);
+    foreach ($subs as $key => $val) {
+      $options[$key] = $val['title'];
+    }
   }
 
   // get the visibility for normal users
@@ -1346,14 +1355,14 @@ function og_form_add_og_audience($form_id, &$form) {
   // show read only item if we are non-admin, and in simple mode (i.e. non-checkboxes) and at least one group is in querystring
   $simple = !user_access('administer organic groups') && !variable_get('og_audience_checkboxes', TRUE) && isset($edit['og_groups']);
   
-  // determine value of audience checkboxes
+  // determine value of audience multi-select
   if (isset($edit['og_groups'])) {
     // populate field from the querystring if sent
     $groups = $edit['og_groups'];
     // filter out any groups where author is not a member. we cannot rely on fapi to do this when in simple mode. 
-    $groups = array_intersect($edit['og_groups'], array_keys($subs));
+    $groups = array_intersect($edit['og_groups'], array_keys($options));
   }
-  elseif (count($subs) == 1 && $required) {
+  elseif (count($options) == 1 && $required) {
     $gids = array_keys($subs);
     $gid = $gids[0];
     $groups = array($gid);
@@ -1368,7 +1377,7 @@ function og_form_add_og_audience($form_id, &$form) {
   }
 
   if ($simple) {
-    // 'simple' mode. no checkboxes.
+    // 'simple' mode. read only.
     if (count($groups)) {
       foreach ($groups as $gid) {
         $titles[] = $subs[$gid]['title'];
@@ -1378,9 +1387,10 @@ function og_form_add_og_audience($form_id, &$form) {
       $form['og_nodeapi']['invisible']['og_groups'] = array('#type' => 'value', '#value' => drupal_map_assoc($groups));
     }
   }
-  elseif (count($subs)) {
-    // show checkboxes
-    $form['og_nodeapi']['visible']['og_groups'] = array('#type' => 'checkboxes', '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'), '#default_value' => $groups, '#required' => $required);
+  elseif ($cnt = count($options)) {
+    // show multi-select. if less than 20 choices, use checkboxes.
+    $type = $cnt >= 20 ? 'select' : 'checkboxes';
+    $form['og_nodeapi']['visible']['og_groups'] = array('#type' => $type, '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'), '#default_value' => $groups, '#required' => $required, '#multiple' => TRUE);
   }
   else if ($required) {
     form_set_error('title', t('You must !join before posting a %type.', array('!join' => l(t('join a group'), 'og'), '%type' => node_get_types('name', $node->type))));
