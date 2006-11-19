@@ -677,7 +677,9 @@ function og_subscribe($gid, $uid = NULL) {
 function og_confirm_subscribe($gid, $node, $account) {
  $form['gid'] = array('#type' => 'value', '#value' => $gid);
  $form['account'] = array('#type' => 'value', '#value' => $account);
-
+ if ($node->og_selective == OG_MODERATED) {
+   $form['request'] = array('#type' => 'textarea', '#title' => t('Additional details'), '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your subscription request.'));
+ }
  return confirm_form($form, 
                 t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
                 'node/'. $node->nid, ' ',
@@ -688,7 +690,7 @@ function og_confirm_subscribe($gid, $node, $account) {
  * Confirm og subscription submit handler
  */
 function og_confirm_subscribe_submit($form_id, $form_values) {
-  $return = og_subscribe_user($form_values['gid'], $form_values['account']);
+  $return = og_subscribe_user($form_values['gid'], $form_values['account'], $form_values['request']);
   if (!empty($return['message'])) {
       drupal_set_message($return['message']);
   }
@@ -701,15 +703,12 @@ function og_confirm_subscribe_submit($form_id, $form_values) {
  *
  * @return string 'approval', 'subscribed' or 'rejected' depending on the group's configuration.
  **/
-function og_subscribe_user($gid, $account) {
+function og_subscribe_user($gid, $account, $request = NULL) {
   // moderated groups must approve all members (selective=1)
-  // if you can't view/edit/delete, you are *requesting* membership in the group
-  // if you can view, you are a member
-  // if you can edit, you are an admin
   $node = node_load($gid);
   switch ($node->og_selective) {
     case OG_MODERATED:
-      og_save_subscription($gid, $account->uid, array('is_active' => 0));
+      // og_save_subscription($gid, $account->uid, array('is_active' => 0));
       $sql = og_list_users_sql(1, 1);
       $res = db_query($sql, $node->nid);
       while ($row = db_fetch_object($res)) {
@@ -726,7 +725,11 @@ function og_subscribe_user($gid, $account) {
         );
         
         $from = variable_get('site_mail', ini_get('sendmail_from'));
-        drupal_mail('og_subscription_request', implode(', ', $admins), _og_user_mail_text('og_request_user_subject', $variables), _og_user_mail_text('og_request_user_body', $variables), $from);
+        // prepend user's request text with standard cruft. should be a mail variable but thats a bit annoying
+        if ($request) {
+          $request = t("\n\nPersonal message from @name:\n------------------\n\n@request", array('@name' => $account->name, '@request' => $request)). $request;
+        }
+        drupal_mail('og_subscription_request', implode(', ', $admins), _og_user_mail_text('og_request_user_subject', $variables), _og_user_mail_text('og_request_user_body', $variables). $request, $from);
       }
       $return_value = array('type' => 'approval',
                             'message' => t('Subscription request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
@@ -1691,7 +1694,7 @@ function _og_user_mail_text($messageid, $variables = array()) {
       case 'og_request_user_subject':
         return t("Subscription request for '@group' from '@username'", $variables);        
       case 'og_request_user_body':
-        return t("To instantly approve this request, visit !approve_url\n\nYou may deny this request or manage subscribers at !group_url", $variables);       
+        return t("To instantly approve this request, visit !approve_url.\nYou may deny this request or manage subscribers at !group_url. !request", $variables);       
       case 'og_new_admin_subject':
         return t("You are now an administrator for the group '@group'", $variables);        
       case 'og_new_admin_body':
