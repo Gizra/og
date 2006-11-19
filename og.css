@@ -1,0 +1,7 @@
+#block-og-5 div.item-list ul { padding: 0; margin: 0;  }
+#block-og-5 div.item-list ul ul li {margin:0}
+
+/*used in node.tpl.php*/
+.groups .links  {
+  display: inline;
+}

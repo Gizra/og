@@ -1,0 +1,59 @@
+<?php
+
+class OgPost extends OgTestCase {
+  function get_info() {
+    return array('name'  => t('Og posting test'),
+                 'desc'  => t('Tests to post a page to an og.'),
+                 'group' => 'og tests');
+  }
+  
+  function testOgPost() {
+    $og_type = $this->addNodeType();
+    $admin_user = $this->drupalCreateUserRolePerm(array('access content', 'create groups', "create $og_type content", "edit $og_type content"));
+
+    $this->drupalLoginUser($admin_user);
+    $gid = $this->addOg($og_type, OG_OPEN);
+    $node = node_load($gid);
+    
+    /* Prepare a user to do the stuff */
+    $this->_browser = new SimpleBrowser();
+    $web_user = $this->drupalCreateUserRolePerm(array('access content', "create page content"));
+    $this->drupalLoginUser($web_user);
+    
+    $url = url("og/subscribe/$gid");
+    $ret = $this->get($url, FALSE, FALSE, TRUE);
+    $this->assertTrue($ret, " [browser] GET $url");
+    
+    $this->assertWantedRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
+                            "Confirmation text found.");
+    $this->clickSubmit("Subscribe");
+
+    $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
+
+    $this->assertWantedRaw(t('Subscribed to the @group', array('@group' => $node->title)),
+                                'User subscribed to group - text not found.');
+    
+    $edit = array();
+    $edit['title']          = '!SimpleTest og test node! ' . $this->randomName(10);
+    $edit['body']           = '!SimpleTest og test body! ' . $this->randomName(32) . ' ' . $this->randomName(32);
+    //$edit['og_public']      = true;
+    $edit['og_groups[' . $gid . ']'] = true;
+    
+    $this->drupalPostRequest("node/add/page", $edit, 'Submit');
+    
+    $this->assertWantedRaw(t('Your %post has been created.', array ('%post' => "page")), 'post created');
+    
+    $url = url("node/$gid");
+    $ret = $this->get($url, FALSE, FALSE, TRUE);
+    $this->assertTrue($ret, " [browser] GET $url");
+    
+    $this->assertWantedText($edit['title'], 'Group node title found.');
+    
+    $node = node_load(array('title' => $edit['title']));
+    $this->assertNotNull($node, 'Node found in database. %s');
+    
+    node_delete($node->nid);
+    
+    node_delete($gid);
+  }
+}
