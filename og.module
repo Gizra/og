@@ -1197,6 +1197,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'delete':
+      $sql = "DELETE FROM {og} WHERE nid = %d";
+      db_query($sql, $node->nid);
       $sql = "DELETE FROM {og_ancestry} WHERE nid = %d";
       db_query($sql, $node->nid);
       $sql = "DELETE FROM {og_uid} WHERE nid = %d";
