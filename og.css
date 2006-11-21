@@ -5,3 +5,23 @@
 .groups .links  {
   display: inline;
 }
+
+table.og-picture-grid {
+  width: 100%;
+}
+
+table.og-picture-grid td {
+  text-align: center;
+  width: 20%;
+  padding-bottom: 10px;
+}
+
+td.og-picture-grid-item {
+  text-align: center;
+  vertical-align: bottom;
+}
+
+td.og-picture-grid-item .group-role {
+  font-style: italic;
+}
+
