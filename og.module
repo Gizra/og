@@ -83,7 +83,7 @@ function og_menu($may_cache) {
     if (arg(0) == 'og' && arg(1) == 'users' && is_numeric($gid)) {
       $items[] = array('path' => "og/users/$gid", 'callback' => 'og_menu_check', 'title' => t('Subscribers'), 'callback arguments' => array('og_list_users_page', $gid), 'type' => MENU_CALLBACK, 'access' => $access);
       $items[] = array('path' => "og/users/$gid/list", 'title' => t('List'), 'type' => MENU_DEFAULT_LOCAL_TASK);
-      if (variable_get('og_member_pics', TRUE)) {
+      if (og_is_picture()) {
         $items[] = array('path' => "og/users/$gid/faces", 'title' => t('Faces'), 'callback' => 'og_menu_check', 'callback arguments' => array('og_list_users_faces_page', $gid), 'type' => MENU_LOCAL_TASK);
       }
       // group admin only
@@ -2025,9 +2025,9 @@ function og_block_subscribers() {
       $sql = "SELECT DISTINCT(u.uid), u.* FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid ORDER BY ogu.created DESC";
       $result = db_query_range($sql, 0, $max);
       while ($row = db_fetch_object($result)) {
-        //showing member pictures
-        if (variable_get('og_member_pics', TRUE)) {
-           $link = theme('user_picture', $row). theme('username', $row);
+        if (og_is_picture()) {
+          //showing member pictures
+          $link = theme('user_picture', $row). theme('username', $row);
         }
         else {
           $link = theme('username', $row);
@@ -2074,7 +2074,7 @@ function og_block_details() {
         $links[] = l(t('Invite friend'), "og/invite/$node->nid");
       }
       $txt = format_plural($cntall-$cntpending, '1 subscriber', '@count subscribers');
-      $txt = variable_get('og_member_pics', TRUE) ? l($txt, "og/users/$node->nid/faces") : l($txt, "og/users/$node->nid");
+      $txt = og_is_picture() ? l($txt, "og/users/$node->nid/faces") : l($txt, "og/users/$node->nid");
       $txt .= $cntpending ? " ($cntpending)" : '';
       $links[] = $txt;
       $links[] =  t('Manager: '). theme('username', $node);
@@ -2218,10 +2218,13 @@ function og_admin_settings() {
   $form['og_settings']['email']['og_new_admin_subject'] = array('#type' => 'textfield', '#title' => t('New admin user email subject'), '#description' => 'The subject of the email sent to a new admin for a group. Available variables: %group, %username, %group_url', '#default_value' => _og_user_mail_text('og_new_admin_subject'));
   $form['og_settings']['email']['og_new_admin_body'] = array('#type' => 'textarea', '#title' => t('New admin user email body'), '#rows' => 10, '#description' => 'The body of the email sent to a new admin for a group. Available variables: %group, %username, %group_url, %invite_url', '#default_value' => _og_user_mail_text('og_new_admin_body'));
 
-  // TODO: move this to block config? Will be used elsewhere?
   $form['og_settings']['pictures'] = array('#type' => 'fieldset', '#title' => t('Member pictures'), '#collapsible' => TRUE, '#collapsed' => TRUE);
-  $form['og_settings']['pictures']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#value' => 1, '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in !user.', array('!user' => l(t('User configuration'), 'admin/settings/user'))));
+  $form['og_settings']['pictures']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in !user.', array('!user' => l(t('User configuration'), 'admin/settings/user'))));
   return system_settings_form($form);
+}
+
+function og_is_picture() {
+  return variable_get('user_pictures', 0) && variable_get('og_member_pics', TRUE);
 }
 
 // TODO: move this to new API function in Views where I can influence the WHERE clause.
