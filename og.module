@@ -83,6 +83,9 @@ function og_menu($may_cache) {
     if (arg(0) == 'og' && arg(1) == 'users' && is_numeric($gid)) {
       $items[] = array('path' => "og/users/$gid", 'callback' => 'og_menu_check', 'title' => t('Subscribers'), 'callback arguments' => array('og_list_users_page', $gid), 'type' => MENU_CALLBACK, 'access' => $access);
       $items[] = array('path' => "og/users/$gid/list", 'title' => t('List'), 'type' => MENU_DEFAULT_LOCAL_TASK);
+      if (variable_get('og_member_pics', TRUE)) {
+        $items[] = array('path' => "og/users/$gid/faces", 'title' => t('Faces'), 'callback' => 'og_menu_check', 'callback arguments' => array('og_list_users_faces_page', $gid), 'type' => MENU_LOCAL_TASK);
+      }
       // group admin only
       $node = node_load($gid);
       $items[] = array('path' => "og/users/$gid/add", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array('og_add_users', $gid), 'type' => MENU_LOCAL_TASK, 'weight' => 5, 'access' => node_access('update', $node));
@@ -860,7 +863,6 @@ function og_add_users_submit($form_id, $form_values) {
 }
 
 function og_list_users_page($gid) {
-  $header[] = t("Name");
   $node = node_load($gid);
   $access = node_access('update', $node);
   if ($access) {
@@ -901,6 +903,7 @@ function og_list_users_page($gid) {
   if ($pager = theme('pager', NULL, 500)) {
     $rows[$i][] = array('data' => $pager, 'colspan' => 2);
   }
+  $header = array();
   $output = theme('table', $header, $rows);
   $bc[] = array('path' => "og", 'title' => t('groups'));
   $bc[] = array('path' => "node/$gid", 'title' => $node->title);
@@ -909,6 +912,41 @@ function og_list_users_page($gid) {
   drupal_set_title(t('Subscribers'). ': '. l($node->title, "node/$node->nid"));
   return $output;
 }
+
+function og_list_users_faces_page($gid) {
+  $sql = og_list_users_sql(0,0,'ou.is_admin DESC, u.picture DESC, u.name ASC');
+  /* list group admins first, pending subscribers second, regular subscribers last.  Alphabetize within each of these catergories */
+  $result = pager_query($sql, 100, 0, NULL, $gid);
+  return theme('og_picture_grid', $result);
+}
+
+// from views_bonus: grid.inc
+function theme_og_picture_grid($result) {
+  $content = '<table class="og-picture-grid">';
+  $count = 0;
+  $total = count($users);
+  while ($user = db_fetch_object($result)) {
+    $item = '';
+    if ($count % 5 == 0) { 
+      $content .= '<tr>'; 
+    }
+    $picture = theme('user_picture', $user);
+    $name = theme('username', $user);
+    $group_role = $user->is_admin ? t('admin') : '&nbsp;';
+    $content .= "<td class=\"og-picture-grid-item\">$picture<div class=\"clear name\">$name</div><div class=\"clear group-role\">$group_role</div></td>\n"; 
+
+    $count++;
+    if ($count % 5 == 0 || $count == $total) {
+      $content .= '</tr>';
+    }
+  }
+  $content .= '</table>';
+  
+  if ($content) {
+    return $content;
+  }
+}
+
 
 // TODO: use Views
 function og_opml() {
@@ -2036,7 +2074,7 @@ function og_block_details() {
         $links[] = l(t('Invite friend'), "og/invite/$node->nid");
       }
       $txt = format_plural($cntall-$cntpending, '1 subscriber', '@count subscribers');
-      $txt = l($txt, "og/users/$node->nid");
+      $txt = variable_get('og_member_pics', TRUE) ? l($txt, "og/users/$node->nid/faces") : l($txt, "og/users/$node->nid");
       $txt .= $cntpending ? " ($cntpending)" : '';
       $links[] = $txt;
       $links[] =  t('Manager: '). theme('username', $node);
