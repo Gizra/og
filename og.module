@@ -429,7 +429,7 @@ function og_save_subscription($gid, $uid, $args = array()) {
 function og_delete_subscription($gid, $uid){
   $sql = "DELETE FROM {og_uid} WHERE nid = %d AND uid = %d";
   db_query($sql, $gid, $uid);
-  module_invoke_all('og', 'user delete', $gid, $uid);
+  module_invoke_all('og', 'user delete', $gid, $uid, array());
 }
 
 function og_approve($gid, $uid) {
