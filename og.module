@@ -1054,12 +1054,14 @@ function og_group_form($node) {
   $form['og_selective'] = array('#type' => 'radios', '#title' => t('Subscription requests'), '#default_value' => $default, '#options' => array(t('open - subscription requests are accepted immediately.'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.'), t('closed - subscriptions are fully administered by an administrator.')), '#description' => t('How should subscription requests be handled in this group? When you select <em>closed</em>, users will not be able to subscribe <strong>or</strong> unsubscribe.'));
 
   // registration checkbox
+  // get the visibility for normal users
+  $visibility = variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE);
+  
+  // admin can always choose - get right default
   if (user_access('administer nodes')) {
-    $visibility = OG_REGISTRATION_CHOOSE_FALSE;  
+    $visibility = in_array($visibility, array(OG_REGISTRATION_NEVER, OG_REGISTRATION_CHOOSE_FALSE)) ? OG_REGISTRATION_CHOOSE_FALSE  : OG_REGISTRATION_CHOOSE_TRUE;  
   }
-  else {
-    $visibility = variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE);  
-  }
+  
   $default = FALSE;
   switch ($visibility) {
     case OG_REGISTRATION_NEVER:
@@ -1078,12 +1080,13 @@ function og_group_form($node) {
   
 
   // directory checkbox  
+  $visibility = variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_FALSE);  
+  
+  // override for admins - get right default
   if (user_access('administer nodes')) {
-    $visibility = OG_DIRECTORY_CHOOSE_TRUE;  
+    $visibility = in_array($visibility, array(OG_DIRECTORY_NEVER, OG_DIRECTORY_CHOOSE_FALSE)) ? OG_DIRECTORY_CHOOSE_FALSE  : OG_DIRECTORY_CHOOSE_TRUE;  
   }
-  else {
-    $visibility = variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_FALSE);  
-  }
+
   $default = FALSE;
   switch ($visibility) {
     case OG_DIRECTORY_NEVER:
