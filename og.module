@@ -697,12 +697,13 @@ function og_confirm_subscribe_submit($form_id, $form_values) {
   if (!empty($return['message'])) {
       drupal_set_message($return['message']);
   }
-  return "node/$gid";
+  return 'node/'. $form_values['gid'];
 } 
 
 
 /**
- * subscribe given user to given group. no access control since this is an API function
+ * Create a new subscription for a given user to given group and send proper email. Edits to subscriptions should 
+ * go through og_save_subscription(). No access control since this is an API function.
  *
  * @return string 'approval', 'subscribed' or 'rejected' depending on the group's configuration.
  **/
