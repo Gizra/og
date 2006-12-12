@@ -1223,7 +1223,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       else {
         // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
-        if (!in_array($node->type, variable_get('og_omitted', array())) && variable_get('og_audience_required', FALSE) && !user_access('administer organic groups')) {
+        if (!in_array($node->type, variable_get('og_omitted', array())) && variable_get('og_audience_required', FALSE) && !user_access('administer nodes')) {
           if (!isset($node->og_groups)) {
             form_set_error('title', t('You must !join before posting on this web site.', array('!join' => l(t('join a group'), 'og'))));
           }
@@ -1405,9 +1405,11 @@ function og_all_groups_options() {
  */
 function og_form_add_og_audience($form_id, &$form) {
   global $user;
-  $edit = $_GET['edit'];
+  if ($_SERVER["REQUEST_METHOD"] == 'GET') {
+    $gids = $_GET['gids'];
+  };
   $node = $form['#node'];
-  $required = variable_get('og_audience_required', 0);
+  $required = variable_get('og_audience_required', 0) && !user_access('administer nodes');
   // determine the list of groups that are shown. node admins see all of them
   if (user_access('administer nodes')) {
     $options = og_all_groups_options();
@@ -1449,21 +1451,23 @@ function og_form_add_og_audience($form_id, &$form) {
   }
 
   // show read only item if we are non-admin, and in simple mode (i.e. non-checkboxes) and at least one group is in querystring
-  $simple = !user_access('administer organic groups') && !variable_get('og_audience_checkboxes', TRUE) && isset($edit['og_groups']);
+  $simple = !user_access('administer organic groups') && !variable_get('og_audience_checkboxes', TRUE) && count($gids);
   
   // determine value of audience multi-select
-  if (isset($edit['og_groups'])) {
-    // populate field from the querystring if sent
-    $groups = $edit['og_groups'];
-    // filter out any groups where author is not a member. we cannot rely on fapi to do this when in simple mode. 
-    $groups = array_intersect($edit['og_groups'], array_keys($options));
-  }
-  elseif (count($options) == 1 && $required) {
+  if (count($options) == 1 && $required) {
     $gids = array_keys($subs);
     $gid = $gids[0];
     $groups = array($gid);
     // also show read only mode if user has 1 subscription and we are in required mode
     $simple = TRUE;
+  }
+  elseif ($gids) {
+   // populate field from the querystring if sent
+   $groups = $gids;
+   if (!user_access('administer nodes')) {
+     // filter out any groups where author is not a member. we cannot rely on fapi to do this when in simple mode. 
+     $groups = array_intersect($gids, array_keys($subs));
+   }
   }
   elseif ($node->nid || $node->og_groups) {
     $groups = $node->og_groups;
@@ -1496,7 +1500,7 @@ function og_form_add_og_audience($form_id, &$form) {
     $form['og_nodeapi']['#type'] = 'fieldset';
     $form['og_nodeapi']['#title'] = t('Groups');
     $form['og_nodeapi']['#collapsible'] = TRUE;
-    $form['og_nodeapi']['#collapsed'] = isset($edit['og_groups']) ? TRUE : FALSE;
+    $form['og_nodeapi']['#collapsed'] = $gids ? TRUE : FALSE;
   }
 }
 
@@ -2122,7 +2126,7 @@ function og_og_create_links($group) {
   foreach (node_get_types() as $type) {
     $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
     if (!in_array($type->type, $exempt) && node_access('create', $type->type)) {
-      $links[] = l(t('Create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "edit[og_groups][]=$group->nid");
+      $links[] = l(t('Create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "gids[]=$group->nid");
     }
   }
   return $links ? $links : array();
@@ -2189,7 +2193,7 @@ function og_admin_settings() {
   $form['og_settings']['node_form']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('@pub' => t('Public'))), '#options' => $options);  
 
   $options = array(t('optional'), t('required'));
-  $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', FALSE), '#options' => $options, '#description' => t('Do you require that all posts be affiliated with a group? If so, new users will be unable to complete a post until they join a group. Note that changing this setting will affect existing posts when they are edited.'));
+  $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', FALSE), '#options' => $options, '#description' => t('Do you require that all (non administrator) posts be affiliated with a group? Note that changing this setting will affect existing posts when they are edited.'));
   unset($options);
   $types = node_get_types();
   foreach ($types as $type) {
