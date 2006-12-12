@@ -881,7 +881,7 @@ function og_handler_field_nodelink($fieldinfo, $fielddata, $value, $data) {
   // we have to query to get all the groups into a single element
   $result = og_get_node_groups_result($data->nid);
   while ($row = db_fetch_object($result)) {
-    $links[] = l($row->title, $row->group_nid);
+    $links[] = l($row->title, "node/$row->group_nid");
   }
   if ($links) {
     return implode(', ', $links);
