@@ -568,6 +568,14 @@ function og_views_default_views() {
     ),
   );
   $view->argument = array (
+    array (
+      'type' => 'rss_feed',
+      'argdefault' => '2',
+      'title' => '',
+      'options' => '',
+      'wildcard' => '',
+      'wildcard_substitution' => '',
+    ),
   );
   $view->field = array (
     array (
