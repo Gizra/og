@@ -335,75 +335,49 @@ function og_update_13() {
 
 // use the new na_arbitrator way of writing to node_access table
 function og_update_14() {
-  // multi-part update. see http://drupal.org/node/51220
-  if (!isset($_SESSION['og_update_14_nid'])) {
-     watchdog('og', time(). ' begin og_update_14');
-    // These variables keep track of our progress
-    $_SESSION['og_update_14_nid'] = 1;
-    $_SESSION['og_update_14_max'] = db_result(db_query('SELECT MAX(nid) FROM {node}'));
+  switch ($GLOBALS['db_type']) { 
+    case 'mysql': 
+    case 'mysqli': 
+      $ret[] = update_sql("CREATE TABLE {og_ancestry} (
+        nid int(11) NOT NULL,
+        group_nid int(11) NOT NULL,
+        is_public int(1) NULL,
+        KEY  (nid),
+        KEY  (group_nid)
+      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
+    break;
+    case 'pgsql':
+      db_query("CREATE TABLE {og_ancestry} (
+        nid numeric(11) NOT NULL,
+        group_nid numeric(11) NOT NULL,
+        is_public numeric(1) NOT NULL,
+        PRIMARY KEY (nid)
+      ) /*!40100 DEFAULT CHARACTER SET utf8 */;
+      CREATE INDEX group_nid_idx ON group_nid (numeric);
+      ");
+    break;
+  }
+  og_migrate_type_basic_14();
   
-    switch ($GLOBALS['db_type']) { 
-      case 'mysql': 
-      case 'mysqli': 
-        $ret[] = update_sql("CREATE TABLE {og_ancestry} (
-          nid int(11) NOT NULL,
-          group_nid int(11) NOT NULL,
-          is_public int(1) NULL,
-          KEY  (nid),
-          KEY  (group_nid)
-        ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
-      break;
-      case 'pgsql':
-        db_query("CREATE TABLE {og_ancestry} (
-          nid numeric(11) NOT NULL,
-          group_nid numeric(11) NOT NULL,
-          is_public numeric(1) NOT NULL,
-          PRIMARY KEY (nid)
-        ) /*!40100 DEFAULT CHARACTER SET utf8 */;
-        CREATE INDEX group_nid_idx ON group_nid (numeric);
-        ");
-      break;
-    }
-    og_migrate_type_basic_14();
-  }
+  // populate og_ancestry.
+  $result = db_query_temporary(
+    "SELECT na.nid, na.gid, IF(MIN(na.realm) = 'og_all', 1, 0) AS is_public 
+     FROM {node_access} na INNER JOIN {node} n ON na.nid=n.nid 
+     WHERE realm IN ('og_all', 'og_subscriber') AND n.type NOT IN ('%s') GROUP BY na.nid, na.gid ORDER BY nid ASC", 
+       implode(', ', variable_get('og_node_types', array('og'))), 'og_migrate');
+  $sql = "INSERT INTO {og_ancestry} (nid, group_nid, is_public) SELECT nid, gid, is_public FROM {og_migrate}";
+  db_query($sql);
   
-  $sql = "INSERT INTO {og_ancestry} (nid, group_nid, is_public) VALUES (%d, %d, %d);";
-  $result = db_query_range(
-    "SELECT n.type, na.nid, na.gid, na.realm FROM {node_access} na INNER JOIN {node} n ON na.nid=n.nid WHERE realm IN ('og_all', 'og_subscriber') AND n.type NOT IN ('%s') ORDER BY nid ASC", 
-    implode(', ', variable_get('og_node_types', array('og'))), 
-    $_SESSION['og_update_14_nid'], 100);
-  while ($row = db_fetch_object($result)) {   
-    // migrate to ancestry table
-    $is_public = 0; // set default
-    
-    if ($row->realm == 'og_all') {
-      $is_public = 1;
-    }
-    else {
-      $group_nid = $row->gid;
-    }
-    db_query($sql, $row->nid, $group_nid, $is_public);
-    $_SESSION['og_update_14_nid'] = $row->nid;
-  }
-  
-  // See if we are done with ancestry insert
-  if ($_SESSION['og_update_14_nid'] < $_SESSION['og_update_14_max']) {
-     // Not done yet. Return the progress.
-     return array('#finished' => $_SESSION['og_update_14_nid'] / 2*$_SESSION['og_update_14_max']); // multiple by 2 because of later rebuild
-  }
-  else {
-    // Done. Clean up and indicate we're finished.
-    unset($_SESSION['og_update_14_nid'], $_SESSION['og_update_14_max']);
-    // rebuild takes care of writing new access records
-    // too bad this part can't be performed over multiple updates
-    node_access_rebuild_submit();
-    return array('#finished' => 1);
-  }
+  // rebuild takes care of writing new access records
+  // too bad this part can't be performed over multiple updates
+  node_access_rebuild();
+  return array();
 }
 
 // Create a user managed node type which replaces the deprecated og_basic module
 // helper function for og_update_14
 function og_migrate_type_basic_14() {
+  // TODO: maybe og_basic never exists because we don't ship with it?
   if (module_exists('og_basic')) {
     $info = array('type' => 'og', 'name' => 'group', 'module' => 'node', 'has_title' => 1, 'title_label' => 'Group name', 'has_body' => 1, 'body_label' => 'Welcome message', 'description' => 'A group provides a home page for like minded users. There they post articles about their shared interest.', 'help' => '', 'min_word_count' => 0, 'custom' => 1, 'modified' => 1, 'locked' => 0, 'orig_type' => 'og');
     node_type_save((object)$info);

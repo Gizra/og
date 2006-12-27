@@ -1,6 +1,8 @@
 <?php
 // $Id$
 
+require dirname(__FILE__). '/og_views.inc';
+
 // Selective groups states. chosen by the group admin
 define ('OG_OPEN', 0);
 define ('OG_MODERATED', 1);
@@ -120,20 +122,17 @@ function og_menu_check() {
 
 /**
  * This processing cannot happen later in the request because
- * - menu items will be in default language if we wait until og_menu(!$may_cache). bad for locale feature
+ * - menu items will be in default language if we wait until og_menu(!$may_cache).
  */
 function og_init() {
   // only bother when we are not serving a cached page. check for which function that only exists afterwards
   if (function_exists('drupal_set_content')) {    
     // we have to perform a load in order to assure that the $user->og_groups bits are present.
+    
     global $user;
     $user = user_load(array('uid' => $user->uid));
     og_theme();
     og_set_locale();
-    
-    if (module_exists('views')) {
-      require './'. drupal_get_path('module', 'og'). '/og_views.inc';
-    }
   }
 }
 
@@ -336,7 +335,6 @@ function og_manage($gid) {
   $group = node_load($gid);
   $bc[] = array('path' => "og", 'title' => t('Groups'));
   $bc[] = array('path' => "node/$gid", 'title' => $group->title);
-  $bc[]  = array('path' => "sd", 'title' => 'sdf'); // no idea why this is needed
   menu_set_location($bc);
   
   return drupal_get_form('og_manage_form', $group);
@@ -356,7 +354,7 @@ function og_manage_form($group) {
     }
     else {
       $links[] = l(t('Unsubscribe from this group'), "og/unsubscribe/$group->nid", NULL, 'destination=og');
-      $form['unsubscribe'] = array('#type' => 'item', '#title' => t('Goodbye'), '#value' => theme('item_list', $links, t('Actions')));
+      $form['unsubscribe'] = array('#type' => 'markup', '#value' => theme('item_list', $links, t('Actions')));
     }
   }
 
@@ -912,9 +910,8 @@ function og_list_users_page($gid) {
   }
   $header = array();
   $output = theme('table', $header, $rows);
-  $bc[] = array('path' => "og", 'title' => t('groups'));
+  $bc[] = array('path' => "og", 'title' => t('Groups'));
   $bc[] = array('path' => "node/$gid", 'title' => $node->title);
-  $bc[]  = array('path' => "sd", 'title' => 'sdf'); // no idea why this is needed
   menu_set_location($bc);
   drupal_set_title(t('Subscribers'). ': '. l($node->title, "node/$node->nid"));
   return $output;
@@ -989,7 +986,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
       );
   }
   else {
-    $bc[] = array('path' => "og", 'title' => t('groups'));
+    $bc[] = array('path' => "og", 'title' => t('Groups'));
     $bc[] = array('path' => "node/$node->nid", 'title' => $node->title);
     menu_set_location($bc);
 
@@ -1201,7 +1198,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       
       if ($group_node && $page && $node->og_groups) {
         // set breadcrumb and title on non group nodes
-        $bc[] = array('path' => "og", 'title' => t('groups'));
+        $bc[] = array('path' => "og", 'title' => t('Groups'));
         $bc[] = array('path' => "node/$group_node->nid", 'title' => $group_node->title);
         $bc[] = array('path' => "node/$node->nid", 'title' => $node->title);
         menu_set_location($bc);
@@ -1881,8 +1878,9 @@ function og_save_ancestry($node) {
 }
 
 function og_node_access_records($node) {
-  // don't write records if og access control is disabled or the node type is omitted
-  if (og_is_omitted_type($node->type) || !variable_get('og_enabled', FALSE)) {
+  // don't write records if og access control is disabled or the node type is omitted or node is a group
+  // if you want group nodes to be protected too, perhaps write a complementary node_access module. lets discuss.
+  if (og_is_omitted_type($node->type) || !variable_get('og_enabled', FALSE) || og_is_group_type($node->type)) {
     return;
   }
   
@@ -2083,6 +2081,7 @@ function og_block_details() {
         }
       }
     }
+
     if ($subscription == 'active' || user_access('administer nodes')) {
       $links = module_invoke_all('og_create_links', $node);
       if ($node->og_selective < OG_INVITE_ONLY) {
