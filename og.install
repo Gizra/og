@@ -377,12 +377,11 @@ function og_update_14() {
 // Create a user managed node type which replaces the deprecated og_basic module
 // helper function for og_update_14
 function og_migrate_type_basic_14() {
-  // TODO: maybe og_basic never exists because we don't ship with it?
-  if (module_exists('og_basic')) {
+  if (og_is_group_type('og')) {
     $info = array('type' => 'og', 'name' => 'group', 'module' => 'node', 'has_title' => 1, 'title_label' => 'Group name', 'has_body' => 1, 'body_label' => 'Welcome message', 'description' => 'A group provides a home page for like minded users. There they post articles about their shared interest.', 'help' => '', 'min_word_count' => 0, 'custom' => 1, 'modified' => 1, 'locked' => 0, 'orig_type' => 'og');
     node_type_save((object)$info);
-    db_query("DELETE FROM {node_type} WHERE module = '%s'", 'og_basic');
     module_disable('og_basic');
+    node_types_rebuild();
   }
 }
 
