@@ -122,7 +122,7 @@ function og_menu_check() {
 
 /**
  * This processing cannot happen later in the request because
- * - menu items will be in default language if we wait until og_menu(!$may_cache).
+ * - menu items will be in default language if we wait until og_menu(!$may_cache). bad for locale feature
  */
 function og_init() {
   // only bother when we are not serving a cached page. check for which function that only exists afterwards
@@ -130,6 +130,7 @@ function og_init() {
     // we have to perform a load in order to assure that the $user->og_groups bits are present.
     
     global $user;
+    // drupal_load('module', 'user'); // assure user.module is present.
     $user = user_load(array('uid' => $user->uid));
     og_theme();
     og_set_locale();
@@ -227,8 +228,8 @@ function og_get_group_context() {
 
 function og_set_group_context($group_node = NULL) {
   static $stored_group_node;
-
-  if (!is_null($group_node)) {
+  // something (contrib module?) was passing TRUE here so we avoid it too by checking with is_object. 
+  if (is_object($group_node)) {
     $stored_group_node = $group_node;
   }
   return $stored_group_node;
