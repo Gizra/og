@@ -540,25 +540,7 @@ function og_views_default_views() {
   $view->menu_tab = TRUE;
   $view->menu_tab_default = FALSE;
   $view->menu_tab_weight = '0';
-  $view->block = TRUE;
-  $view->block_title = 'My groups';
-  $view->block_header = '';
-  $view->block_header_format = '1';
-  $view->block_footer = '<?php
-
-  $url = url("og/opml");
-  return theme(\'opml_icon\', $url);
-
-?>';
-  $view->block_footer_format = '2';
-  $view->block_empty = '';
-  $view->block_empty_format = '1';
-  $view->block_type = 'list';
-  $view->nodes_per_block = '40';
-  $view->block_more = TRUE;
-  $view->block_use_page_header = FALSE;
-  $view->block_use_page_footer = FALSE;
-  $view->block_use_page_empty = FALSE;
+  $view->block = FALSE;
   $view->sort = array (
     array (
       'tablename' => 'node',
