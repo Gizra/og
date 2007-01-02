@@ -1616,7 +1616,8 @@ function og_mail($type, $obj) {
    // og_email can be NULL when you enable og on an existing site.
     $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
             FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid LEFT JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
-            WHERE ou.nid IN ($groups) AND (
+            WHERE u.mail != '' AND
+              ou.nid IN ($groups) AND (
               (oug.og_email IS NULL AND ou.mail_type=1) OR
               (oug.og_email = %d AND ou.mail_type=1) OR
               (oug.og_email = %d)
