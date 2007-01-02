@@ -938,7 +938,12 @@ function theme_og_picture_grid($result) {
     $picture = theme('user_picture', $user);
     $name = theme('username', $user);
     $group_role = $user->is_admin ? t('admin') : '&nbsp;';
-    $content .= "<td class=\"og-picture-grid-item\">$picture<div class=\"og-name\">$name</div><div class=\"group-role\">$group_role</div></td>\n"; 
+    $content .= "<td class=\"og-picture-grid-item\">$picture<div class=\"og-name\">$name</div>";
+    if ($user->is_admin) {
+      $txt = t('admin');
+      $content .= "<div class=\"group-role\">$txt</div>"; 
+    }
+    $content .= "</td>\n";
 
     $count++;
     if ($count % 5 == 0 || $count == $total) {
