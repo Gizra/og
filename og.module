@@ -968,9 +968,9 @@ function og_opml() {
   $output .= "</head>\n";
   $output .= "<body>\n";
 
-  $result = pager_query(db_rewrite_sql("SELECT og.nid, n.title, r.body, n.uid, u.name, og.description FROM {og} og INNER JOIN {node} n ON og.nid = n.nid INNER JOIN {node_revisions} r ON r.vid = n.vid INNER JOIN {users} u ON n.uid = u.uid WHERE og.directory=1 AND n.status=1 ORDER BY og.nid DESC", 'og', 'nid'), 50);
-  while ($feed = db_fetch_object($result)) {
-    $output .= '<outline text="'. check_plain($feed->title) .'" xmlUrl="'. url("node/$feed->nid/feed", NULL, NULL, TRUE) ."\" />\n";
+  global $user;
+  foreach ($user->og_groups as $gid => $group) {
+    $output .= '<outline text="'. check_plain($group->title) .'" xmlUrl="'. url("node/$gid/feed", NULL, NULL, TRUE) ."\" />\n";    
   }
 
   $output .= "</body>\n";
