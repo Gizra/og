@@ -1,8 +1,6 @@
 <?php
 // $Id$
 
-require dirname(__FILE__). '/og_views.inc';
-
 // Selective groups states. chosen by the group admin
 define ('OG_OPEN', 0);
 define ('OG_MODERATED', 1);
@@ -128,10 +126,11 @@ function og_init() {
   // only bother when we are not serving a cached page. check for which function that only exists afterwards
   if (function_exists('drupal_set_content')) {    
     // we have to perform a load in order to assure that the $user->og_groups bits are present.
-    
     global $user;
     // drupal_load('module', 'user'); // assure user.module is present.
     $user = user_load(array('uid' => $user->uid));
+    
+    require dirname(__FILE__). '/og_views.inc';
     og_theme();
     og_set_locale();
   }
