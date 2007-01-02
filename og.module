@@ -1815,9 +1815,11 @@ function og_user($op, $edit, &$account, $category = NULL) {
       $account->og_email = NULL;
       break;
     case 'update':
-      $sql = 'UPDATE {og_uid_global} SET og_email=%d WHERE uid=%d';
-      db_query($sql, $edit['og_email'], $account->uid);
-      $account->og_email = NULL;
+      if (isset($edit['og_email'])) {
+        $sql = 'UPDATE {og_uid_global} SET og_email=%d WHERE uid=%d';
+        db_query($sql, $edit['og_email'], $account->uid);
+        $account->og_email = NULL;
+      }
       break;
     case 'delete':
       // user delete doesn't exist, but it should and will one day.
