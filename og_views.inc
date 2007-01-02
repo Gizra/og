@@ -520,7 +520,7 @@ function og_views_default_views() {
   $view->view_args_php = '';
   $view->page = TRUE;
   $view->page_title = 'My groups';
-  $view->page_header = 'You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="/og/opml">OPML feed containing feeds from all your subscribed groups</a>.';
+  $view->page_header = 'You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="/og/opml" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.';
   $view->page_header_format = '1';
   $view->page_footer = '<?php
 
@@ -862,7 +862,7 @@ function og_handler_field_subscribe($fieldinfo, $fielddata, $value, $data) {
       case OG_INVITE_ONLY:
         return '<em>'. t('Invite only'). '</em>';
       default:
-        return l(t('subscribe'), "og/subscribe/$data->nid", array(), drupal_get_destination());  
+        return l(t('subscribe'), "og/subscribe/$data->nid", array('rel' => 'nofollow'), drupal_get_destination());  
     }
   }
 }
