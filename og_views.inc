@@ -81,7 +81,7 @@ function og_views_tables() {
       'filters' => array(
         'gid' => array(
           'name' => 'Og: Post in specified group',
-          'operator' => array('=' => 'Equals'),
+          'operator' => 'views_handler_operator_eqneq',
           'field' => 'group_nid',
           'help' => t('Filter for a given organic group. <em>Value</em> should be a numeric nid.'),   
         ),
