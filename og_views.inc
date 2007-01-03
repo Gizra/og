@@ -49,7 +49,7 @@ function og_views_tables() {
         'notification' => array(
           'name' => 'Og: Group: Notification',
           'handler' => 'og_handler_field_yesempty',
-          'help' => t('Displays <em>yes</em> if group automatically sends email notifications to subscribers')
+          'help' => t('Displays <em>yes</em> if group automatically sends email notifications to subscribers'),
         ),
         'language' => array(
           'name' => 'Og: Group: Language',
@@ -84,7 +84,17 @@ function og_views_tables() {
           'operator' => array('=' => 'Equals'),
           'field' => 'group_nid',
           'help' => t('Filter for a given organic group. <em>Value</em> should be a numeric nid.'),   
-        )  
+        ),
+        'gtype' => array(
+          'name' => 'Og: Post in specified group type',
+          'list' => variable_get('og_node_types', array('og')),
+          'list-type' => 'list',
+          'operator' => 'views_handler_operator_or',
+          'value-type' => 'array',
+          'field' => 'group_nid',
+          'handler' => 'og_handler_filter_post_og_type',
+          'help' => t('Filter for a given organic group type.'),
+        ),
       ),    
       'fields' => array(  
         'is_public' => array(
@@ -890,4 +900,12 @@ function og_handler_filter_og_type($op, $filter, $filterinfo, &$query) {
   $types = variable_get('og_node_types', array('og'));
   $in = implode(', ', array_fill(0, count($types), "'%s'"));
   $query->add_where("node.type IN ($in)", $types);
+}
+
+function og_handler_filter_post_og_type($op, $filter, $filterinfo, &$query) {
+  $query->ensure_table('og_ancestry');
+  $query->add_table('og_node_data');
+  $types = $filter['value'];
+  $placeholders = array_fill(0, count($types), "'%s'");
+  $query->add_where("og_node_data.type IN (". implode(", ", $placeholders) .")", $types);
 }
