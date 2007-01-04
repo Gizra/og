@@ -204,7 +204,7 @@ function og_theme() {
     $group_node = og_set_theme(arg(4));
     $_REQUEST['edit']['og_groups'][] = $group_node->nid; // checks the right box on node form
   }
-  elseif (arg(0) == 'node' && arg(1) == 'add' && isset($_REQUEST['edit']['og_groups'])) {
+  elseif (arg(0) == 'node' && arg(1) == 'add' && isset($_REQUEST['gids'])) {
     $gid = intval(current($_REQUEST['edit']['og_groups']));
     $group_node = node_load($gid);
     $custom_theme = $group_node->og_theme;
