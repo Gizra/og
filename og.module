@@ -1635,6 +1635,7 @@ function og_mail($type, $obj) {
     // set email variables
     $variables = array(
       '@site' => variable_get('site_name', 'drupal'), 
+      '!read_more' => $obj->readmore ? t('Read more') : t('View original'),
       '!content_url' => $originalurl,
       '!reply_url' => $replyurl,
       '@title' => trim($obj->title),
@@ -1767,7 +1768,7 @@ function _og_user_mail_text($messageid, $variables = array()) {
       case 'og_new_node_subject':
         return t("@group: '@title' at @site", $variables);
       case 'og_new_node_body':
-        return t("@type '@subject' by @username\n\n@body\n\nView original: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed to the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables);    
+        return t("@type '@subject' by @username\n\n@body\n\n!read_more: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed to the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables);    
       case 'og_admin_email_body':
         return t("@body\n\n--\nThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe", $variables);
       case 'og_approve_user_subject':
