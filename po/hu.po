@@ -1,0 +1,1497 @@
+# #-#-#-#-#  general.po (general)  #-#-#-#-#
+# translation of general.po to Hungarian
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  node.tpl.php,v 1.4 2005/06/24 05:12:20 weitzman
+#  og.module,v 1.260 2006/10/22 15:05:24 weitzman
+#  og_views.inc,v 1.5 2006/10/05 17:32:15 weitzman
+#  og.install,v 1.18 2006/09/29 01:38:02 weitzman
+#
+# Fehér János <feher.janos@mindworks.hu>, 2007.
+# #-#-#-#-#  og-module.po (og-module)  #-#-#-#-#
+# translation of og-module.po to Hungarian
+# Copyright Drupal.hu Fordítási Csapat <forditas [at] drupal.hu>
+# Generated from file: og.module,v 1.260 2006/10/22 15:05:24 weitzman
+#
+# Fehér János <feher.janos@mindworks.hu>, 2007.
+# János Fehér <feher.janos@mindworks.hu>, 2007.
+# #-#-#-#-#  og_views-inc.po (og_views-inc)  #-#-#-#-#
+# translation of og_views-inc.po to Hungarian
+# Copyright Drupal.hu Fordítási Csapat <forditas [at] drupal.hu>
+# Generated from file: og_views.inc,v 1.5 2006/10/05 17:32:15 weitzman
+#
+# Fehér János <feher.janos@mindworks.hu>, 2007.
+#, fuzzy
+msgid ""
+msgstr ""
+"#-#-#-#-#  general.po (general)  #-#-#-#-#\n"
+"Project-Id-Version: general\n"
+"POT-Creation-Date: 2006-10-22 11:29-0400\n"
+"PO-Revision-Date: 2007-01-13 20:49+0100\n"
+"Last-Translator: János Fehér <feher.janos@mindworks.hu>\n"
+"Language-Team: Drupal.hu Fordítási Csapat <forditas [at] drupal.hu>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: KBabel 1.11.4\n"
+"#-#-#-#-#  og-module.po (og-module)  #-#-#-#-#\n"
+"Project-Id-Version: og-module\n"
+"POT-Creation-Date: 2006-10-22 11:29-0400\n"
+"PO-Revision-Date: 2007-01-14 13:19+0100\n"
+"Last-Translator: Fehér János <feher.janos@mindworks.hu>\n"
+"Language-Team: Hungarian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: KBabel 1.11.4\n"
+"#-#-#-#-#  og_views-inc.po (og_views-inc)  #-#-#-#-#\n"
+"Project-Id-Version: og_views-inc\n"
+"POT-Creation-Date: 2006-10-22 11:29-0400\n"
+"PO-Revision-Date: 2007-01-14 13:20+0100\n"
+"Last-Translator: Fehér János <feher.janos@mindworks.hu>\n"
+"Language-Team: Hungarian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: KBabel 1.11.4\n"
+
+#: node.tpl.php:21 og.module:49;314;806;940;1159
+msgid "groups"
+msgstr "csoportok"
+
+#: og_views.inc:281;386 og.module:834;2153
+msgid "Title"
+msgstr "Cím"
+
+#: og_views.inc:288;393 og.module:2153
+msgid "Author"
+msgstr "Szerző"
+
+#: og_views.inc:294;399 og.module:2153
+msgid "Replies"
+msgstr "Válaszok"
+
+#: og_views.inc:474 og.module:602;2017
+msgid "subscribe"
+msgstr "feliratkozás"
+
+#: og_views.inc:484 og.module:2000
+msgid "my subscription"
+msgstr "feliratkozásaim"
+
+#: og.module:353;721 tests/og_testcase.php:20;22
+msgid "Submit"
+msgstr "Beküldés"
+
+#: og.module:2047;2059 og.install:418
+msgid "Disable"
+msgstr "Letíltva"
+
+#: og.module:0 og.install:340
+msgid "og"
+msgstr "ÖCs"
+
+#: node.tpl.php:25
+msgid "categories"
+msgstr "kategóriák"
+
+#: og_xmlrpc.inc:13
+msgid "unrecognized user ID: %uid"
+msgstr "kategorizálatlan felhasználó ID: %uid"
+
+#: og_xmlrpc.inc:17;37;52
+msgid "Wrong username or password."
+msgstr "Hibás felhasználói név vagy jelszó."
+
+#: og_xmlrpc.inc:33
+msgid "User is not a member of the specified group"
+msgstr "A felhasználó nem tagja a megadott csoportnak"
+
+#: og_xmlrpc.inc:48
+msgid "User is not allowed to retrieve subscriptions for another user."
+msgstr ""
+"Felhasználó számára nem engedélyezett egy másik felhasználó "
+"feliratkozásainak lekérdezése."
+
+#: og.install:90
+msgid ""
+"Organic groups module enabled. Please see the included readme.txt file for "
+"further installation instructions."
+msgstr ""
+"Az Öntevékeny Csoportok modul engedélyezve lett. A readme.txt fájlban "
+"további telepítési útmtatásokat talál."
+
+#: tests/og_testcase.php:25
+msgid "Your %post was created."
+msgstr "A beküldés létrehozva: %post."
+
+#: og.module:36
+msgid ""
+"Group specific blocks are only visible on group pages and not on systemwide "
+"pages like the home page or admin pages."
+msgstr ""
+"A csoportspecifikus blokkok csak a csoport oldalain láthatóak, a webhely "
+"többi részén - például az adminisztrációs oldalakon vagy a címlapon - nem."
+
+#: og.module:38
+msgid ""
+"In order to let group admins determine their own group theme, you must "
+"enable multiple themes using !page."
+msgstr ""
+"Ahhoz, hogy a csoport adminisztrátorok meghatározhassák egy adott csoport "
+"sminkjét, a !page oldalon több sminket kell engedélyezni."
+
+#: og.module:38
+msgid "theme configuration page"
+msgstr "smink beállítások oldala"
+
+#: og.module:48
+msgid "subscribe to group"
+msgstr "feliratkozás a csoportra"
+
+#: og.module:52
+msgid "my groups"
+msgstr "csoportjaim"
+
+#: og.module:53
+msgid "unsubscribe from group"
+msgstr "leiratkozás csoportról"
+
+#: og.module:54
+msgid "approve subscription request"
+msgstr "feliratkozási kérelem elfogadása"
+
+#: og.module:55
+msgid "deny subscription request"
+msgstr "feliratkozási kérelem elutasítása"
+
+#: og.module:56
+msgid "create group administrator"
+msgstr "csoport adminisztrátor létrehozása"
+
+#: og.module:57
+msgid "delete group administrator"
+msgstr "csoport adminisztrátor törlése"
+
+#: og.module:58
+msgid "remove post from group"
+msgstr "tartalom eltávolítása a csoportból"
+
+#: og.module:59
+msgid "group feed"
+msgstr "csoport csatorna"
+
+#: og.module:61
+msgid "organic groups configuration"
+msgstr "öntevékeny csoportok beállításai"
+
+#: og.module:71
+msgid "subscriber management"
+msgstr "feliratkozások kezelése"
+
+#: og.module:72
+msgid "list"
+msgstr "lista"
+
+#: og.module:73
+msgid "manage subscription"
+msgstr "feliratkozás kezelése"
+
+#: og.module:74
+msgid "send invitation"
+msgstr "meghívó küldése"
+
+#: og.module:76
+msgid "add subscribers"
+msgstr "feliratkozás hozzáadása"
+
+#: og.module:86
+msgid "email"
+msgstr "email"
+
+#: og.module:264
+msgid "Send email to %group"
+msgstr "Email küldése ennek a csoportnak: %group"
+
+#: og.module:269
+msgid ""
+"Your email will be sent to !count in this group. Please use this feature "
+"sparingly."
+msgstr ""
+"Az email ebben a csoport !count példányban lett kézbesítve. Ezt a "
+"szolgáltatást csak indokolt esetben célszerű használni."
+
+#: og.module:272
+msgid "Subject"
+msgstr "Téma"
+
+#: og.module:272
+msgid "Enter a subject for your email."
+msgstr "A levél tárgyát meg kell adni."
+
+#: og.module:273
+msgid "Body"
+msgstr "Törzs"
+
+#: og.module:273
+msgid "Enter a body for your email."
+msgstr "Az email törzsét meg kell adni."
+
+#: og.module:274
+msgid "Send email"
+msgstr "Email küldése"
+
+#: og.module:314
+msgid "home"
+msgstr "címlap"
+
+#: og.module:327
+msgid ""
+"You may not unsubscribe from this group because it is a %closed group. You "
+"should request unsubscription from a group administrator."
+msgstr ""
+"Nem lehet leiratkozni erről a csoportról, mert %closed. Ezt csak a csoport "
+"adminisztrátora tudja megtenni."
+
+#: og.module:327;2022
+msgid "closed"
+msgstr "lezárt"
+
+#: og.module:330
+msgid ""
+"You may not unsubscribe from this group because you are its owner. A site "
+"administrator can assign ownership to another user and then you may "
+"unsubscribe."
+msgstr ""
+"A csoport tulajdonosa nem iratkozhat le. Ezt csak azután lehet megtenni, "
+"miután a webhely adminisztrátora átruházta a tulajdonjogot más felhasználóra."
+
+#: og.module:333
+msgid "Unsubscribe from this group"
+msgstr "Leiratkozás erről a csoportról"
+
+#: og.module:334
+msgid "Goodbye"
+msgstr "Viszont látásra"
+
+#: og.module:334
+msgid "Actions"
+msgstr "Műveletek"
+
+#: og.module:342;346;349
+msgid "Email notification"
+msgstr "Email értesítés"
+
+#: og.module:342;2058
+msgid "enabled"
+msgstr "Engedélyezve"
+
+#: og.module:342;2063
+msgid "disabled"
+msgstr "tiltva"
+
+#: og.module:342
+msgid ""
+"Do you want to receive an email each time a message is posted to this group?"
+msgstr "Email küldése a csoportban létrejött minden üzenet létrejötte után?"
+
+#: og.module:346
+msgid ""
+"Your !prof is configured to: <em>Always receive email notifications</em>."
+msgstr "!prof jelenlegi állapota: <em>Email értesítések küldése</em>."
+
+#: og.module:346;349
+msgid "personal profile"
+msgstr "személyes profil"
+
+#: og.module:349
+msgid ""
+"Your !prof is configured to: <em>Never receive email notifications</em>."
+msgstr "!prof jelenlegi állapota: <em>Email értesítések tiltása</em>."
+
+#: og.module:364
+msgid "Subscription saved."
+msgstr "A feliratkozás elmentve."
+
+#: og.module:415
+msgid "!name already approved to group %group"
+msgstr ""
+
+#: og.module:420
+msgid "Subscription request approved."
+msgstr "A feliratkozási kérelem elfogadva."
+
+#: og.module:442
+msgid "Subscription request denied."
+msgstr "A feliratkozási kérelem elutasítva."
+
+#: og.module:464
+msgid "User was promoted to %ga"
+msgstr "Felhasználó jelölése erre: %ga"
+
+#: og.module:464;476
+msgid "group administrator"
+msgstr "csoport adminisztrátor"
+
+#: og.module:476
+msgid "User is no longer a %ga"
+msgstr "A felhasználó már nem %ga"
+
+#: og.module:487
+msgid "Confirmation"
+msgstr "Megerősítés"
+
+#: og.module:487
+msgid "Remove %title from this group."
+msgstr "Az alábbi eltávolítása a csoportból: %title"
+
+#: og.module:489
+#, fuzzy
+msgid "Remove"
+msgstr "Eltávolít"
+
+#: og.module:504
+msgid "%title removed from group."
+msgstr "Az alábbi eltávolítva a csoportból: %title ."
+
+#: og.module:522
+msgid "Email addresses or usernames"
+msgstr "Email címek és felhasználónevek"
+
+#: og.module:522
+#, fuzzy
+msgid ""
+"Enter up to %max email addresses or usernames. Separate multiple addresses "
+"by commas or new lines. Each person will receive an invitation message from "
+"you."
+msgstr "fel email címek címek - új üzenet."
+
+#: og.module:523
+msgid "Personal message"
+msgstr "Személyes üzenet"
+
+#: og.module:523
+#, fuzzy
+msgid ""
+"Optional. Enter a message which will become part of the invitation email."
+msgstr "Nem szükséges üzenet email."
+
+#: og.module:524
+msgid "Send invitation"
+msgstr "Meghívó küldése"
+
+#: og.module:539
+#, fuzzy
+msgid "You may not specify more than %max email addresses or usernames."
+msgstr "tovább email címek."
+
+#: og.module:542
+msgid "You may not invite yourself - @self"
+msgstr ""
+
+#: og.module:566
+msgid "invalid email address or username: "
+msgstr "érvénytelen email cím vagy felhasználónév: "
+
+#: og.module:602
+#, fuzzy
+msgid ""
+"In order to subscribe to this group, you must login or register a new "
+"account. After you have successfully done so, you will need to follow the %"
+"subscribe link again."
+msgstr "rendelés új."
+
+#: og.module:654
+#, fuzzy
+msgid ""
+"Subscription request to the %group group awaits approval by an administrator."
+msgstr "-."
+
+#: og.module:660
+msgid "Subscribed to the @group"
+msgstr "Feliratkozva az alábbi csoportra: @group"
+
+#: og.module:665
+#, fuzzy
+msgid ""
+"Subscription request to the @group group was rejected, only group "
+"administrators can add users to this group."
+msgstr "hozzáad."
+
+#: og.module:686
+msgid "User unsubscribed from group."
+msgstr "A felhasználó leiratkozott a csoportról."
+
+#: og.module:716
+msgid "List of users"
+msgstr "Felhasználók listája"
+
+#: og.module:719
+#, fuzzy
+msgid ""
+"Add one or more usernames in order to associate users with this group. "
+"Multiple usernames should be separated by a comma."
+msgstr "Hozzáad tovább rendelés Többszörös -."
+
+#: og.module:740
+msgid "Unrecognized %names: "
+msgstr ""
+
+#: og.module:760
+msgid "Name"
+msgstr "Név"
+
+#: og.module:764
+msgid "Operations"
+msgstr "Műveletek"
+
+#: og.module:768;782
+msgid "manager"
+msgstr "kezelő"
+
+#: og.module:770
+msgid "edit group"
+msgstr "csoport szerkesztése"
+
+#: og.module:781;1627
+msgid "(approval needed)"
+msgstr "(elfogadás szükséges)"
+
+#: og.module:786
+msgid "unsubscribe"
+msgstr "leiratkozás"
+
+#: og.module:788
+msgid "admin: remove"
+msgstr "admin: törlés"
+
+#: og.module:791
+msgid "admin: create"
+msgstr "admin: létrehozás"
+
+#: og.module:795
+msgid "approve"
+msgstr "elfogadás"
+
+#: og.module:796
+msgid "deny"
+msgstr "tiltott"
+
+#: og.module:806
+msgid "Home"
+msgstr "Címlap"
+
+#: og.module:808;834
+msgid "Subscribers"
+msgstr "Feliratkozások"
+
+#: og.module:834
+msgid "Manager"
+msgstr "Kezelő"
+
+#: og.module:834;935;1016
+msgid "Description"
+msgstr "Leírás"
+
+#: og.module:846
+msgid "No groups"
+msgstr "Nincs csoport"
+
+#: og.module:849
+#, fuzzy
+msgid ""
+"You may also view an !opml listing RSS feeds from your subscribed groups."
+msgstr "megtekintés RSS csoportok."
+
+#: og.module:849;1908;1908
+msgid "OPML file"
+msgstr "OPML fájl"
+
+#: og.module:943
+msgid " RSS feed"
+msgstr "RSS csatorna"
+
+#: og.module:987
+msgid "No posts in this group."
+msgstr "Nincs tartalom ebben a csoportban."
+
+#: og.module:990
+#, fuzzy
+msgid ""
+"No public posts in this group. Consider subscribing to this group in order "
+"to view its posts."
+msgstr "Nem rendelés megtekintés."
+
+#: og.module:1016
+#, fuzzy
+msgid ""
+"A brief description for the group details block and the group directory."
+msgstr "leírás részletek blokk és könyvtár."
+
+#: og.module:1017
+msgid "Group website"
+msgstr "Csoport webhelye"
+
+#: og.module:1017
+msgid "If your group has its own website, enter the address here."
+msgstr ""
+"Ha a csoport rendelkezik saját webhellyel, akkor itt lehet a címét megadni."
+
+#: og.module:1025
+msgid "Subscription requests"
+msgstr "Feliratkozási kérelem"
+
+#: og.module:1025
+#, fuzzy
+msgid "open - subscription requests are accepted immediately."
+msgstr "nyitott."
+
+#: og.module:1025
+msgid "moderated - subscription requests must be approved."
+msgstr ""
+
+#: og.module:1025
+#, fuzzy
+msgid "invite only - subscriptions must be created by an administrator."
+msgstr "feliratkozások létrehozva -."
+
+#: og.module:1025
+#, fuzzy
+msgid "closed - subscriptions are fully administered by an administrator."
+msgstr "lezárt feliratkozások -."
+
+#: og.module:1025
+#, fuzzy
+msgid ""
+"How should subscription requests be handled in this group? When you select "
+"<em>closed</em>, users will not be able to subscribe <strong>or</strong> "
+"unsubscribe."
+msgstr "lista<em> lezárt</em><strong></strong>."
+
+#: og.module:1046;2086
+msgid "registration form"
+msgstr "regisztrációs űrlap"
+
+#: og.module:1046
+#, fuzzy
+msgid ""
+"Should this group be available for subscription during registration?. If "
+"checked, a corresponding checkbox will be added to the registration form."
+msgstr "jelölőnégyzet űrlap."
+
+#: og.module:1070
+#, fuzzy
+msgid "list in groups directory"
+msgstr "listázás csoportok könyvtár"
+
+#: og.module:1070
+msgid "Should this group appear on the !page?"
+msgstr "Jelenjen meg ez a csoport az alábbi oldalon: !page ?"
+
+#: og.module:1070
+msgid "list of groups page"
+msgstr "csoportoldalak listája"
+
+#: og.module:1079
+msgid "Language"
+msgstr "Nyelv"
+
+#: og.module:1082
+#, fuzzy
+msgid ""
+"Selecting a different locale will change the interface language of the "
+"group. Users who have chosen a preferred language always see their chosen "
+"language."
+msgstr "nyelv Felhasználók."
+
+#: og.module:1087
+#, fuzzy
+msgid "Selecting a different theme will change the look and feel of the group."
+msgstr "smink és."
+
+#: og.module:1108
+#, fuzzy
+msgid ""
+"Please enter a valid URL for group website, such as  http://www.example.com/"
+msgstr "URL webhelyhttp://www.example.com/"
+
+#: og.module:1189
+msgid "You must !join before posting on this web site."
+msgstr ""
+
+#: og.module:1189
+msgid "join a group"
+msgstr "csatlakozás egy csoporthoz"
+
+#: og.module:1323;1326;2097;2098
+msgid "Public"
+msgstr "Nyilvános"
+
+#: og.module:1323
+#, fuzzy
+msgid ""
+"Show this post to everyone, or only to subscribers of the groups checked "
+"below. Only uncheck this box if truly needed."
+msgstr "beküldés csoportok."
+
+#: og.module:1326
+#, fuzzy
+msgid ""
+"Show this post to everyone, or only to subscribers of the groups checked "
+"below. Only check this box if truly needed."
+msgstr "beküldés csoportok."
+
+#: og.module:1361;1367
+msgid "Audience"
+msgstr "Olvasók"
+
+#: og.module:1372;1631;1698
+msgid "Groups"
+msgstr "Csoportok"
+
+#: og.module:1511
+msgid "Log"
+msgstr "Napló"
+
+#: og.module:1592
+#, fuzzy
+msgid "@group: '@title' at @site"
+msgstr "megnevezés"
+
+#: og.module:1594
+#, fuzzy
+msgid ""
+"@type '@subject' by @username\n"
+"\n"
+"@body\n"
+"\n"
+"View original: !content_url\n"
+"Post reply: !reply_url\n"
+"\n"
+"--\n"
+"You are subscribed to the group '@group' at @site.\n"
+"To manage your subscription, visit !group_url"
+msgstr "típus - felhasználónévn@body tartalom válasz válasz"
+
+#: og.module:1596
+#, fuzzy
+msgid ""
+"@body\n"
+"\n"
+"--\n"
+"This message was sent by an administrator in the '@group' group at @site. To "
+"visit this group, browse to !url_group. To unsubscribe from this group, "
+"visit !url_unsubscribe"
+msgstr "üzenet - Címzett Címzett"
+
+#: og.module:1598
+#, fuzzy
+msgid "Subscription request approved for '@title'"
+msgstr "megnevezés"
+
+#: og.module:1600
+#, fuzzy
+msgid "You many now post messages in this group located at !group_url"
+msgstr "beküldés"
+
+#: og.module:1602
+#, fuzzy
+msgid "Subscription request denied for '@title'"
+msgstr "megnevezés"
+
+#: og.module:1604
+msgid "Sorry, your subscription request was denied."
+msgstr "Sajnos a feliratkozási kérelem el lett utasítva."
+
+#: og.module:1606
+msgid "Invitation to join the group '@group' at @site"
+msgstr ""
+
+#: og.module:1608
+#, fuzzy
+msgid ""
+"Hi. I'm a member of '@group' and I welcome you to join this group as well. "
+"Please see the link and message below.\n"
+"\n"
+"@group\n"
+"@description\n"
+"Subscribe: !group_url\n"
+"@body"
+msgstr "és és üzenetn@groupn@descriptionn@body"
+
+#: og.module:1610
+#, fuzzy
+msgid "Subscription request for '@group' from '@username'"
+msgstr "felhasználónév"
+
+#: og.module:1612
+#, fuzzy
+msgid ""
+"To instantly approve this request, visit !approve_url\n"
+"\n"
+"You may deny this request or manage subscribers at !group_url"
+msgstr "Címzett tiltott"
+
+#: og.module:1625
+msgid "Subscribe to @name."
+msgstr "Feliratkozás az alábbi csoportra: @name ."
+
+#: og.module:1640
+msgid "Organic groups settings"
+msgstr "Öntevékeny Csoportok beállításai"
+
+#: og.module:1643
+#, fuzzy
+msgid ""
+"Never send email notifications. Useful when tracking activity via RSS feed "
+"instead."
+msgstr "Soha email RSS csatorna."
+
+#: og.module:1644
+msgid "Always send email notifications"
+msgstr "Email értesítések küldése"
+
+#: og.module:1645
+#, fuzzy
+msgid ""
+"Selectively send email notification based on the checkbox for each of my "
+"group's <em>My Subscription</em> page"
+msgstr "email jelölőnégyzet<em></em>"
+
+#: og.module:1649
+msgid "Email notifications"
+msgstr "Email értesítések"
+
+#: og.module:1652
+#, fuzzy
+msgid ""
+"When posts are submitted into your subscribed groups, you may be notified "
+"via email."
+msgstr "csoportok email."
+
+#: og.module:1793;2071
+msgid "Group details"
+msgstr "Csoport részletei"
+
+#: og.module:1798
+msgid "Group authors"
+msgstr "Csoport szerzői"
+
+#: og.module:1800;1925
+msgid "New groups"
+msgstr "Új csoportok"
+
+#: og.module:1801;1898
+msgid "My groups"
+msgstr "Csoportjaim"
+
+#: og.module:1802;1875
+msgid "Group notifications"
+msgstr "Csoport értesítések"
+
+#: og.module:1834
+msgid "Maximum number of items to show"
+msgstr "A megjelenítendő elemek maximális száma"
+
+#: og.module:1856
+#, fuzzy
+msgid "This group offers a !groupfeed and an !email."
+msgstr "és email."
+
+#: og.module:1856
+msgid "RSS feed"
+msgstr "RSS csatorna"
+
+#: og.module:1856
+msgid "email subscription"
+msgstr "email feliratkozás"
+
+#: og.module:1859
+msgid " Or subscribe to these personalized, sitewide feeds:"
+msgstr ""
+
+#: og.module:1861;1865;1869
+msgid "feed"
+msgstr "csatorna"
+
+#: og.module:1862;1866;1870
+msgid "page"
+msgstr "oldal"
+
+#: og.module:1863
+msgid "my unread: "
+msgstr ""
+
+#: og.module:1867
+msgid "my group: "
+msgstr "csoportom:"
+
+#: og.module:1871
+msgid "all posts: "
+msgstr "összes tartalom:"
+
+#: og.module:1891;1923;1958
+msgid "more"
+msgstr "továb"
+
+#: og.module:1891
+msgid "Browse all of my groups."
+msgstr "Csoportjaim böngészése."
+
+#: og.module:1923
+msgid "Browse the newest groups."
+msgstr "Új csoportok böngészése."
+
+#: og.module:1958
+msgid "View all subscribers."
+msgstr "Összes feliratkozó megtekintése."
+
+#: og.module:1961
+msgid "Recent authors"
+msgstr "Legújabb szerzők"
+
+#: og.module:1991
+msgid "invite friend"
+msgstr "ismerős meghívása"
+
+#: og.module:1999
+msgid "manager: "
+msgstr "kezelő: "
+
+#: og.module:2002
+msgid "website"
+msgstr "webhely"
+
+#: og.module:2006
+msgid "Your subscription request awaits approval."
+msgstr "A feliratkozási kérelem elfogadásra vár."
+
+#: og.module:2007
+msgid "delete request"
+msgstr "igénylés törlése"
+
+#: og.module:2010
+#, fuzzy
+msgid "You must login/register in order to contribute to this group."
+msgstr "rendelés."
+
+#: og.module:2014
+msgid "request subscription"
+msgstr "feliratkozás igénylése"
+
+#: og.module:2022
+#, fuzzy
+msgid ""
+"This is a @closed group. The group administrators add/remove subscribers as "
+"needed."
+msgstr "is lezárt hozzáad eltávolítás."
+
+#: og.module:2036
+msgid "create !type"
+msgstr "!type létrehozása"
+
+#: og.module:2036
+#, fuzzy
+msgid "Add a new !s in this group."
+msgstr "Hozzáad új."
+
+#: og.module:2043;2064
+msgid "Enable"
+msgstr "Engedélyezés"
+
+#: og.module:2056
+msgid "Organic groups configuration"
+msgstr "Öntevékeny Csoportok beállítása"
+
+#: og.module:2060
+#, fuzzy
+msgid ""
+"Before disabling this module, use the button below to restore default "
+"permissions."
+msgstr "modul alapértelmezés."
+
+#: og.module:2065
+#, fuzzy
+msgid ""
+"You usually want to enable access control with this module. The button below "
+"will delete one record in your node_access table and thus enable node "
+"permissions on your site. You may revert by clicking the same button again."
+msgstr ""
+"engedélyezés modul törlés tartalom Tábla és engedélyezés tartalom "
+"visszaállítás -."
+
+#: og.module:2067
+msgid "Module status"
+msgstr "Modul állapot"
+
+#: og.module:2068
+#, fuzzy
+msgid "Organic groups access control is currently %status."
+msgstr "csoportok is állapot."
+
+#: og.module:2073
+#, fuzzy
+msgid ""
+"New groups don't appear in the groups directory. Administrators control the "
+"directory exclusively."
+msgstr "csoportok csoportok könyvtár könyvtár."
+
+#: og.module:2074
+#, fuzzy
+msgid "New groups always appear in the groups directory."
+msgstr "csoportok csoportok könyvtár."
+
+#: og.module:2075
+#, fuzzy
+msgid ""
+"Group creator chooses whether her group appears in the directory. Defaults "
+"to %in."
+msgstr "könyvtár."
+
+#: og.module:2075
+msgid "in directory"
+msgstr "könyvtárban"
+
+#: og.module:2076
+#, fuzzy
+msgid ""
+"Group creator chooses whether her group appears in the directory. Defaults "
+"to %out."
+msgstr "könyvtár."
+
+#: og.module:2076
+msgid "not in directory"
+msgstr "nincs könyvtárban"
+
+#: og.module:2078
+#, fuzzy
+msgid "Groups directory control"
+msgstr "könyvtár"
+
+#: og.module:2078;2086
+#, fuzzy
+msgid ""
+"OG admins always see the checkbox for adding a group to the %dir. Note that "
+"changing this setting has no effect on existing posts. Re-save those posts "
+"to acquire this new setting."
+msgstr "jelölőnégyzet új."
+
+#: og.module:2078
+msgid "groups directory"
+msgstr "csoportok könyvtár"
+
+#: og.module:2081
+#, fuzzy
+msgid ""
+"New groups don't appear in on the registration form. Administrators control "
+"the form exclusively."
+msgstr "csoportok űrlap űrlap."
+
+#: og.module:2082
+#, fuzzy
+msgid "New groups always appear on the registration form."
+msgstr "csoportok űrlap."
+
+#: og.module:2083
+#, fuzzy
+msgid ""
+"Group creator chooses whether her group appears on the registration form. "
+"Defaults to %in."
+msgstr "űrlap."
+
+#: og.module:2083
+msgid "on form"
+msgstr "űrlapon"
+
+#: og.module:2084
+#, fuzzy
+msgid ""
+"Group creator chooses whether her group appears on the registration form. "
+"Defaults to %out."
+msgstr "űrlap."
+
+#: og.module:2084
+msgid "not on form"
+msgstr "nincs az űrlapon"
+
+#: og.module:2086
+msgid "Registration form control"
+msgstr "Regisztrációs űrlap vezérlés"
+
+#: og.module:2089
+#, fuzzy
+msgid ""
+"New registrants are not subscribed to group email notifications by default. "
+"A user may choose to enable this from her profile page or her my "
+"subscriptions page."
+msgstr "email - alapértelmezés felhasználó engedélyezés profil feliratkozások."
+
+#: og.module:2090
+#, fuzzy
+msgid ""
+"New registrants are subscribed to group email notifications by default. A "
+"user may choose to disable this from her profile page."
+msgstr "email - alapértelmezés felhasználó tiltás profil."
+
+#: og.module:2092
+msgid "Group email notifications"
+msgstr "Csoport email értesítések"
+
+#: og.module:2092
+#, fuzzy
+msgid ""
+"Should new registrants automatically be notified via email when new content "
+"is posted to their subscribed group? Note that changing this setting has no "
+"effect on existing subscriptions."
+msgstr "új email új tartalom is feliratkozások."
+
+#: og.module:2094
+msgid "Node authoring form"
+msgstr "Tartalom létrehozása űrlap"
+
+#: og.module:2095
+msgid "Explanation or submission guidelines"
+msgstr "Magyarázat vagy beküldési irányelvek"
+
+#: og.module:2095
+#, fuzzy
+msgid ""
+"This text will be displayed at the top of the group submission form.  It is "
+"useful for helping or instructing your users."
+msgstr "űrlap It is."
+
+#: og.module:2096
+msgid "Audience checkboxes"
+msgstr "Olvasói jelölőnégyzetek"
+
+#: og.module:2096
+#, fuzzy
+msgid ""
+"Show each subscribed group as a checkbox in the Audience section. This "
+"enables user to place her post into multiple groups. If unchecked, simplify "
+"the user interface by omitting the checkboxes and assuming user wants to "
+"post into the current group. Group administrators always see checkboxes."
+msgstr ""
+"jelölőnégyzet felhasználó beküldés csoportok felhasználó - jelölőnégyzetek "
+"és felhasználó beküldés jelölőnégyzetek."
+
+#: og.module:2097
+msgid "Visible only within the targeted groups"
+msgstr "Csak a megadott csoportokban látható"
+
+#: og.module:2097
+#, fuzzy
+msgid "Visible within the targeted groups and on other pages"
+msgstr "Látható csoportok és"
+
+#: og.module:2097;2097
+#, fuzzy
+msgid ""
+"Visibility chosen by author/editor using a checkbox on the posting form. "
+msgstr "Látási viszonyok - jelölőnégyzet űrlap "
+
+#: og.module:2097
+msgid "Checkbox defaults to @pub."
+msgstr ""
+
+#: og.module:2097
+msgid "Checkbox defaults to @pri."
+msgstr ""
+
+#: og.module:2097
+msgid "Private"
+msgstr ""
+
+#: og.module:2098
+msgid "Visibility of posts"
+msgstr "Tartalmak láthatósága"
+
+#: og.module:2098
+#, fuzzy
+msgid ""
+"Determine how broadly available a given post should be when it is affiliated "
+"with a group. OG admins always see the checkbox for making a post @pub. Note "
+"that changing this setting has no effect on existing posts. Re-save those "
+"posts to acquire this new setting."
+msgstr "beküldés is jelölőnégyzet beküldés új."
+
+#: og.module:2100
+msgid "optional"
+msgstr ""
+
+#: og.module:2100
+msgid "required"
+msgstr "szükséges"
+
+#: og.module:2101
+msgid "Audience required"
+msgstr ""
+
+#: og.module:2101
+#, fuzzy
+msgid ""
+"Do you require that all posts be affiliated with a group? If so, new users "
+"will be unable to complete a post until they join a group. Note that "
+"changing this setting will affect existing posts when they are edited."
+msgstr "új beküldés."
+
+#: og.module:2112
+#, fuzzy
+msgid "Omitted content types"
+msgstr "tartalom"
+
+#: og.module:2112
+#, fuzzy
+msgid ""
+"Select any node types which should <em>not</em> participate in the Audience "
+"targetting system. Node types which are designated as group home page node "
+"types (see below) will be automatically excluded."
+msgstr "Lista tartalom<em></em> rendszer Tartalom tartalom."
+
+#: og.module:2114
+msgid "Group home page"
+msgstr "Csoport honlap"
+
+#: og.module:2115
+msgid "River of News"
+msgstr ""
+
+#: og.module:2115
+#, fuzzy
+msgid "Group by content type"
+msgstr "- tartalom típus"
+
+#: og.module:2116
+msgid "Presentation style"
+msgstr "Megjelenítési stílus"
+
+#: og.module:2116
+#, fuzzy
+msgid ""
+"If neither of these presentations suits you, you may override in the theme "
+"layer."
+msgstr "smink."
+
+#: og.module:2117
+msgid "Maximum posts on group home page"
+msgstr ""
+
+#: og.module:2117
+#, fuzzy
+msgid ""
+"If using River of News display, indicate the number of posts on home page. "
+"If grouping posts by content type, indicate number of posts per type."
+msgstr "- tartalom típus típus."
+
+#: og.module:2118
+#, fuzzy
+msgid "Group home page node types"
+msgstr "tartalom"
+
+#: og.module:2118
+#, fuzzy
+msgid ""
+"<b>Required</b>. Select the node types which act as group home pages. "
+"Usually, you will want to !create called <em>group</em> for this purpose."
+msgstr "<b> Szükséges</b> Lista tartalom<em></em>."
+
+#: og.module:2118
+#, fuzzy
+msgid "create a simple node type"
+msgstr "tartalom típus"
+
+#: og.module:2120
+#, fuzzy
+msgid "Email settings"
+msgstr "Email beállítások"
+
+#: og.module:2121
+#, fuzzy
+msgid "New content subject"
+msgstr "tartalom"
+
+#: og.module:2122
+#, fuzzy
+msgid "New content body"
+msgstr "tartalom"
+
+#: og.module:2123
+#, fuzzy
+msgid "Group admin email body"
+msgstr "email"
+
+#: og.module:2124
+#, fuzzy
+msgid "User approved email subject"
+msgstr "Felhasználó email"
+
+#: og.module:2125
+#, fuzzy
+msgid "User approved email body"
+msgstr "Felhasználó email"
+
+#: og.module:2126
+#, fuzzy
+msgid "User denied email subject"
+msgstr "Felhasználó email"
+
+#: og.module:2127
+#, fuzzy
+msgid "User denied email body"
+msgstr "Felhasználó email"
+
+#: og.module:2128
+#, fuzzy
+msgid "Invite user email subject"
+msgstr "felhasználó email"
+
+#: og.module:2129
+#, fuzzy
+msgid "Invite user email body"
+msgstr "felhasználó email"
+
+#: og.module:2130
+#, fuzzy
+msgid "Request user email subject"
+msgstr "felhasználó email"
+
+#: og.module:2131
+#, fuzzy
+msgid "Request user email body"
+msgstr "felhasználó email"
+
+#: og.module:2134;2135
+msgid "Member pictures"
+msgstr ""
+
+#: og.module:2135
+#, fuzzy
+msgid ""
+"Should member pictures be shown in the group subscribers and group details "
+"blocks? You must also enable pictures in !user."
+msgstr "és részletek engedélyezés felhasználó."
+
+#: og.module:2135
+#, fuzzy
+msgid "User configuration"
+msgstr "Felhasználó"
+
+#: og.module:2153
+#, fuzzy
+msgid "Last reply"
+msgstr "Utolsó válasz"
+
+#: og.module:2171
+msgid "(pending approval)"
+msgstr ""
+
+#: og.module:2195
+#, fuzzy
+msgid "Subscribe a user to a group"
+msgstr "Feliratkozás felhasználó"
+
+#: og.module:2200
+msgid "All subscribers for a given group."
+msgstr ""
+
+#: og.module:2205
+#, fuzzy
+msgid "Retrieve the group subscriptions for a given user."
+msgstr "feliratkozások felhasználó."
+
+#: og.module:2216;2228
+msgid "[ogname]"
+msgstr ""
+
+#: og.module:2216
+#, fuzzy
+msgid "The name of the organic group this post belongs to."
+msgstr "beküldés."
+
+#: og.module:267
+msgid "the sole subscriber"
+msgid_plural "all @count subscribers"
+msgstr[0] ""
+msgstr[1] ""
+
+#: og.module:300
+msgid "1 email sent."
+msgid_plural "@count emails sent"
+msgstr[0] "1 email el lett küldve"
+msgstr[1] "@count email el lett küldve"
+
+#: og.module:592
+msgid "1 invitation sent."
+msgid_plural "@count invitations sent."
+msgstr[0] "1 meghívó el lett küldve"
+msgstr[1] "@count meghívó el lett küldve"
+
+#: og.module:740
+msgid "name"
+msgid_plural "names"
+msgstr[0] ""
+msgstr[1] ""
+
+#: og.module:756
+msgid "1 user added to the group"
+msgid_plural "@count users added to the group"
+msgstr[0] "1 felhasználó hozzá lett adva a csoporthoz"
+msgstr[1] "@count felhasználó hozzá lett adva a csoporthoz"
+
+#: og.module:1367
+#, fuzzy
+msgid "Show this post in this group."
+msgid_plural "Show this post in these groups."
+msgstr[0] "beküldés."
+msgstr[1] "beküldés."
+
+#: og.module:1993
+msgid "1 subscriber"
+msgid_plural "@count subscribers"
+msgstr[0] "1 feliratkozás"
+msgstr[1] "@count feliratkozás"
+
+#: og.module:153
+#, fuzzy
+msgid "administer organic groups"
+msgstr "csoportok"
+
+#: og_views.inc:47
+#, fuzzy
+msgid ""
+"Displays <em>yes</em> if group automatically sends email notifications to "
+"subscribers"
+msgstr "<em></em> email"
+
+#: og_views.inc:51
+msgid "Displays the language selected for a given group"
+msgstr ""
+
+#: og_views.inc:61
+msgid "Admin specifies whether or not a group appears in the public listings."
+msgstr ""
+
+#: og_views.inc:80;104
+#, fuzzy
+msgid "Displays <em>yes</em> if post is public according to OG."
+msgstr "<em></em> beküldés is."
+
+#: og_views.inc:121
+msgid "Og: Group Name"
+msgstr "ÖCs: Csoport név"
+
+#: og_views.inc:125
+#, fuzzy
+msgid "Display the title of the first group a node belongs to."
+msgstr "megnevezés tartalom."
+
+#: og_views.inc:145
+msgid "Og: Subscription email"
+msgstr "ÖCs: feliratkozás email"
+
+#: og_views.inc:148
+#, fuzzy
+msgid "Does subscriber receive email notifications for a group."
+msgstr "email."
+
+#: og_views.inc:165
+#, fuzzy
+msgid "Og: Group in User Subbed Groups"
+msgstr "Felhasználó"
+
+#: og_views.inc:169
+#, fuzzy
+msgid "Groups are filtered to where current user is a member ."
+msgstr "&nbsp; felhasználó is."
+
+#: og_views.inc:190
+#, fuzzy
+msgid "Og: Post in User Subbed Groups"
+msgstr "Tartalom Felhasználó"
+
+#: og_views.inc:194
+#, fuzzy
+msgid "Posts are filtered to groups that current user is a member of."
+msgstr "Hozzászólások csoportok felhasználó is."
+
+#: og_views.inc:204
+msgid "Og: Group nid"
+msgstr ""
+
+#: og_views.inc:206
+msgid "This argument filters for a given organic group"
+msgstr ""
+
+#: og_views.inc:233
+#, fuzzy
+msgid "Shows all activity in subscribed groups."
+msgstr "csoportok."
+
+#: og_views.inc:237
+#, fuzzy
+msgid "recent posts in my groups"
+msgstr "csoportok"
+
+#: og_views.inc:242
+#, fuzzy
+msgid "There are no posts in your subscribed groups."
+msgstr "csoportok."
+
+#: og_views.inc:249
+msgid "my recent"
+msgstr ""
+
+#: og_views.inc:269
+msgid "Group"
+msgstr ""
+
+#: og_views.inc:275;380
+#, fuzzy
+msgid "Type"
+msgstr "Típus"
+
+#: og_views.inc:301;406
+#, fuzzy
+msgid "Last Post"
+msgstr "Tartalom"
+
+#: og_views.inc:336
+#, fuzzy
+msgid "Shows unread posts in subscribed groups."
+msgstr "csoportok."
+
+#: og_views.inc:342
+#, fuzzy
+msgid "unread posts in my groups"
+msgstr "csoportok"
+
+#: og_views.inc:347
+#, fuzzy
+msgid "There are no new posts in your subscribed groups."
+msgstr "új csoportok."
+
+#: og_views.inc:354
+msgid "my unread"
+msgstr ""
+
+#: og_views.inc:458
+#, fuzzy
+msgid "external website"
+msgstr "webhely"
+
+#: og_views.inc:470
+#, fuzzy
+msgid "Closed"
+msgstr "Lezárt"
+
+#: og_views.inc:472
+msgid "Invite only"
+msgstr ""
+
+#: og_views.inc:488
+msgid "yes"
+msgstr ""
