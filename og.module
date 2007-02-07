@@ -1382,28 +1382,39 @@ function og_form_alter($form_id, &$form) {
   }
   
   if ($form_id == 'node_delete_confirm') {
-    og_node_delete_form($form);
+    $node = node_load($form['nid']['#value']);
+    if (og_is_group_type($node->type)) {
+      og_node_delete_group_form($form);
+    }
+    else {
+      og_node_delete_nongroup_form($form);
+    }
   }  
 }
 
-// form_alter() the node_delete form
+// form_alter() the node_delete form for a group
 function og_node_delete_form(&$form) {
-  $node = node_load($form['nid']['#value']);
-  if (og_is_group_type($node->type)) {
-    $options[] = t('Do nothing.');
-    $options[] = t('Delete all group posts which don\'t also belong to another group.');
-    if (user_access('administer nodes')) {
-      $options[] = t('Move all group posts to the group listed below.');
-    }
-    $form['verb'] = array('#type' => 'radios', '#title' => t('Group posts'), '#options' => $options, '#weight' => 0, '#description' => t('In addition to deleting this group, you may choose how to disposition the posts within it.'));
-    if (user_access('administer nodes')) {
-      $options = og_all_groups_options();
-      unset($options[$form['nid']['#value']]);
-      $form['target'] = array('#type' => 'select', '#title' => t('Target group'), '#options' => $options, '#weight' => 0, '#description' => t('If you chose <b>Move all group posts</b> above, specify a destination group.'));
-      // register a submit handler
-      $form['#submit']['og_node_delete_confirm_submit'] = array();
-    }
-    $form['actions']['submit']['#value'] = t('Delete group');
+  $options[] = t('Do nothing.');
+  $options[] = t('Delete all group posts which don\'t also belong to another group.');
+  if (user_access('administer nodes')) {
+    $options[] = t('Move all group posts to the group listed below.');
+  }
+  $form['verb'] = array('#type' => 'radios', '#title' => t('Group posts'), '#options' => $options, '#weight' => 0, '#description' => t('In addition to deleting this group, you may choose how to disposition the posts within it.'));
+  if (user_access('administer nodes')) {
+    $options = og_all_groups_options();
+    unset($options[$form['nid']['#value']]);
+    $form['target'] = array('#type' => 'select', '#title' => t('Target group'), '#options' => $options, '#weight' => 0, '#description' => t('If you chose <b>Move all group posts</b> above, specify a destination group.'));
+    // register a submit handler
+    $form['#submit']['og_node_delete_confirm_submit'] = array();
+  }
+  $form['actions']['submit']['#value'] = t('Delete group');
+}
+
+// form_alter() the node_delete form for a non-group
+// redirect back to group home page after a delete
+function og_node_delete_nongroup_form(&$form) {
+  if ($groupnode = og_get_group_context()) {
+    $form['#redirect'] = "node/$groupnode->nid";
   }
 }
 
@@ -2139,6 +2150,7 @@ function og_block_details() {
       if (isset($node->og_website) && !empty($node->og_website)) {
         $links[] = l(t('website'), $node->og_website);
       }
+      $post = drupal_get_form('og_search_form', $node);
     }
     elseif ($subscription == 'requested') {
       $links[] = t('Your subscription request awaits approval.');
@@ -2154,7 +2166,7 @@ function og_block_details() {
       $links[] = t('This is a @closed group. The group administrators add/remove subscribers as needed.', array('@closed' => t('closed')));
     }
 
-    $block['content'] = theme('item_list', $links);
+    $block['content'] = theme('item_list', $links). $post;
     $block['subject'] = $node->title;
     return $block;
   }
@@ -2180,6 +2192,24 @@ function og_og_create_links($group) {
   }
   return $links ? $links : array();
 }
+
+function og_search_form($group) {
+  $form['filter0'] = array(
+    '#type' => 'textfield',
+    '#title' => '',
+    '#description' => '',
+    '#size' => 19,
+    '#maxlength' => 255,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit', 
+    '#value' => t('Search'),
+  );
+  $form['#process'] = array('views_filters_process' => array());
+  $form['#method'] = 'GET';
+  $form['#action'] = url("og/search/$group->nid");
+  return $form;
+} 
 
 function og_settings_submit($form_id, $form_values) {
   if ($form_values['op'] == t('Enable')) {

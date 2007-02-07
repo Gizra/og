@@ -836,7 +836,74 @@ function og_views_default_views() {
   $view->requires = array(node_comment_statistics, node, users, og_node_data);
   $views[$view->name] = $view;
   
-  
+  // in group search - og_search
+  $view = new stdClass();
+  $view->name = 'og_search';
+  $view->description = 'Search within a particular group';
+  $view->access = array (
+);
+  $view->view_args_php = '';
+  $view->page = TRUE;
+  $view->page_title = 'Search';
+  $view->page_header = '';
+  $view->page_header_format = '1';
+  $view->page_footer = '';
+  $view->page_footer_format = '1';
+  $view->page_empty = 'No posts found.';
+  $view->page_empty_format = '1';
+  $view->page_type = 'teaser';
+  $view->url = 'og/search';
+  $view->use_pager = TRUE;
+  $view->nodes_per_page = '50';
+  $view->sort = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'created',
+      'sortorder' => 'DESC',
+      'options' => 'normal',
+    ),
+  );
+  $view->argument = array (
+    array (
+      'type' => 'gid',
+      'argdefault' => '1',
+      'title' => 'Search results for %1',
+      'options' => '',
+      'wildcard' => '',
+      'wildcard_substitution' => '',
+    ),
+  );
+  $view->field = array (
+  );
+  $view->filter = array (
+    array (
+      'tablename' => 'temp_search_results',
+      'field' => 'word',
+      'operator' => '=',
+      'options' => '',
+      'value' => '',
+    ),
+    array (
+      'tablename' => 'node',
+      'field' => 'status',
+      'operator' => '=',
+      'options' => '',
+      'value' => '1',
+    ),
+  );
+  $view->exposed_filter = array (
+    array (
+      'tablename' => 'temp_search_results',
+      'field' => 'word',
+      'label' => 'Enter keyword',
+      'optional' => '1',
+      'is_default' => '0',
+      'operator' => '1',
+      'single' => '1',
+    ),
+  );
+  $view->requires = array(node, temp_search_results);
+  $views[$view->name] = $view;
   return $views;
 }
 
