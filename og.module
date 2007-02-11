@@ -2150,7 +2150,9 @@ function og_block_details() {
       if (isset($node->og_website) && !empty($node->og_website)) {
         $links[] = l(t('website'), $node->og_website);
       }
-      $post = drupal_get_form('og_search_form', $node);
+      if (module_exists('search') && user_access('search content')) {
+        $post = drupal_get_form('og_search_form', $node);
+      }
     }
     elseif ($subscription == 'requested') {
       $links[] = t('Your subscription request awaits approval.');
