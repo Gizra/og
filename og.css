@@ -25,3 +25,9 @@ td.og-picture-grid-item .group-role {
   font-style: italic;
 }
 
+/*tighter search button on group details block*/
+block-og-0 .form-item {
+  margin-bottom: .4em;
+}
+
+
