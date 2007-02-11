@@ -1393,7 +1393,7 @@ function og_form_alter($form_id, &$form) {
 }
 
 // form_alter() the node_delete form for a group
-function og_node_delete_form(&$form) {
+function og_node_delete_group_form(&$form) {
   $options[] = t('Do nothing.');
   $options[] = t('Delete all group posts which don\'t also belong to another group.');
   if (user_access('administer nodes')) {
