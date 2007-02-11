@@ -1403,7 +1403,7 @@ function og_node_delete_group_form(&$form) {
   if (user_access('administer nodes')) {
     $options = og_all_groups_options();
     unset($options[$form['nid']['#value']]);
-    $form['target'] = array('#type' => 'select', '#title' => t('Target group'), '#options' => $options, '#weight' => 0, '#description' => t('If you chose <b>Move all group posts</b> above, specify a destination group.'));
+    $form['target'] = array('#type' => 'select', '#title' => t('Target group'), '#default_value' => 0, '#options' => $options, '#weight' => 0, '#description' => t('If you chose <b>Move all group posts</b> above, specify a destination group.'));
     // register a submit handler
     $form['#submit']['og_node_delete_confirm_submit'] = array();
   }
