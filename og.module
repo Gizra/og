@@ -1489,7 +1489,7 @@ function og_form_add_og_audience($form_id, &$form) {
   if (user_access('administer organic groups') && $vis < 2) {
     $vis = $vis == OG_VISIBLE_GROUPONLY ? OG_VISIBLE_CHOOSE_PRIVATE : OG_VISIBLE_CHOOSE_PUBLIC;
   }
-  elseif (!count($subs)) {
+  elseif (!count($options)) {
     // don't show checkbox if no subscriptions. must be public.
     $vis = OG_VISIBLE_BOTH;
   }
