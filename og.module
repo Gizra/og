@@ -1057,14 +1057,18 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
 function og_home_empty($node) {
   global $user;
   
+  $dest = drupal_get_destination();
   if (in_array($node->nid, array_keys($user->og_groups))) {
     $msg = t('No posts in this group.');
   }
   else {
     $msg = t('No public posts in this group.');
+    if (!$user->uid) {
+      $msg .= ' '. t('You must <a href="!register">register</a> or <a href="!login">login</a> and become a subscriber in order to post messages, and view any private posts.', array('!register' => url("user/register", $dest), '!login' => url("user/login", $dest)));
+    }
     // TODO: hide this from pending subscribers too
-    if ($node->og_selective < OG_INVITE_ONLY) {
-      $msg .= ' '. t('Consider subscribing to this group in order to view its posts.');
+    elseif ($node->og_selective < OG_INVITE_ONLY) {
+      $msg .= ' '. t('Consider <a href="!url">subscribing to this group</a> in order to view its posts.', array('!url' => url("og/subscribe/$node->nid", $dest)));
     }
   }
   drupal_set_message($msg);
@@ -2163,7 +2167,8 @@ function og_block_details() {
       $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'destination=og');
     }
     elseif (!$user->uid) {
-      $links[] = t('You must login/register in order to contribute to this group.');
+      $dest = drupal_get_destination();
+      $links[] = t('You must <a href="!register">register</a>/<a href="!login">login</a> in order to post into this group.', array('!register' => url("user/register", $dest), '!login' => url("user/login", $dest)));
     }
     elseif ($node->og_selective < OG_INVITE_ONLY) {
       $links[] = og_subscribe_link($node);
