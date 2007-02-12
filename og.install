@@ -76,13 +76,14 @@ function og_install() {
         PRIMARY KEY (uid)
       );");
       
-      db_query("CREATE TABLE {og_ancestry} (
-        nid numeric(11) NOT NULL,
-        group_nid numeric(11) NOT NULL,
-        is_public numeric(1) NOT NULL,
-        PRIMARY KEY  (nid),
+      db_query("
+      CREATE TABLE {og_ancestry} (
+       nid numeric(11) NOT NULL,
+       group_nid numeric(11) NOT NULL,
+       is_public numeric(1) NOT NULL,
+       PRIMARY KEY  (nid)
       );
-      CREATE INDEX group_nid_idx ON group_nid (numeric);
+      CREATE INDEX {og_ancestry}_nid_idx ON {og_ancestry}(group_nid);
       ");
       break;
   }
