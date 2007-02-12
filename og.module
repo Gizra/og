@@ -443,6 +443,10 @@ function og_approve($gid, $uid) {
   $node = node_load($gid);
   if (node_access('update', $node)) {
     $account = user_load(array('uid' => (int)$uid));
+    if ($account === FALSE) {
+     drupal_set_message(t("User approval failed, user not longer available on website."), 'error');
+     return '';
+    }
     if (in_array($gid, array_keys($account->og_groups))) {
       drupal_set_message(t("!name already approved to group %group", array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
       return '';
@@ -1460,7 +1464,7 @@ function og_form_add_og_audience($form_id, &$form) {
   global $user;
   if ($_SERVER["REQUEST_METHOD"] == 'GET') {
     $gids = $_GET['gids'];
-  };
+  }
   $node = $form['#node'];
   $required = variable_get('og_audience_required', 0) && !user_access('administer nodes');
   // determine the list of groups that are shown. node admins see all of them
@@ -1508,10 +1512,10 @@ function og_form_add_og_audience($form_id, &$form) {
   
   // determine value of audience multi-select
   if (count($options) == 1 && $required) {
-    $gids = array_keys($subs);
+    $gids = array_keys($options);
     $gid = $gids[0];
     $groups = array($gid);
-    // also show read only mode if user has 1 subscription and we are in required mode
+    // also show read only mode if user has 1 option and we are in required mode
     $simple = TRUE;
   }
   elseif ($gids) {
@@ -1519,7 +1523,7 @@ function og_form_add_og_audience($form_id, &$form) {
    $groups = $gids;
    if (!user_access('administer nodes')) {
      // filter out any groups where author is not a member. we cannot rely on fapi to do this when in simple mode. 
-     $groups = array_intersect($gids, array_keys($subs));
+     $groups = array_intersect($gids, array_keys($options));
    }
   }
   elseif ($node->nid || $node->og_groups) {
@@ -1533,7 +1537,7 @@ function og_form_add_og_audience($form_id, &$form) {
     // 'simple' mode. read only.
     if (count($groups)) {
       foreach ($groups as $gid) {
-        $titles[] = $subs[$gid]['title'];
+        $titles[] = $options[$gid]['title'];
         $item_value = implode(', ', $titles);
       }
       $form['og_nodeapi']['visible']['og_groups_visible'] = array('#type' => 'item', '#title' => t('Audience'), '#value' => $item_value);
