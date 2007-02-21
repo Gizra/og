@@ -1035,22 +1035,26 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
     unset($node->content['body']);
     $node->content['og_mission'] = array('#value' => theme('og_mission', $node), '#weight' => -3);
     $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
-    $view->url = 'node';
-    $view->page_type = 'teaser';
-    $args[] = $node->nid;
-    // TODO: use own callback for feeds
-    if (arg(2) == 'feed') {
-      $view->description = $node->og_description;
-      $args[] = 'feed';
+    if ($view->disabled) {
+      // do nothing. assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
     }
-    $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
-    if ($GLOBALS['current_view']->num_rows) {
-      $node->content['view'] = array('#value' => $built);
-    }
-    elseif (!$view->page_empty) {
-      // use this default empty text unless overridden by View (which is a usually not a good idea. this text is kinda smart)
-      og_home_empty($node);
-    }
+    else {
+      $view->url = 'node';
+      $args[] = $node->nid;
+      // TODO: use own callback for feeds
+      if (arg(2) == 'feed') {
+        $view->description = $node->og_description;
+        $args[] = 'feed';
+      }
+      $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
+      if ($GLOBALS['current_view']->num_rows) {
+        $node->content['view'] = array('#value' => $built);
+      }
+      elseif (!$view->page_empty) {
+        // use this default empty text unless overridden by View (which is a usually not a good idea. this text is smart)
+        og_home_empty($node);
+      }
+    } 
   }
 }
 
@@ -1451,8 +1455,10 @@ function og_node_delete_confirm_submit($form_id, $form_values) {
 
 // return an array containing all groups. suitable for a form item
 function og_all_groups_options() {
-  $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type IN ('%s') AND n.status = 1 ORDER BY n.title ASC";
-  $result = db_query($sql, implode(', ', variable_get('og_node_types', array('og'))));
+  $types = variable_get('og_node_types', array('og'));
+  $in = implode(', ', array_fill(0, count($types), "'%s'"));
+  $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type IN ($in) AND n.status = 1 ORDER BY n.title ASC";
+  $result = db_query($sql, $types);
   while ($row = db_fetch_object($result)) {
     $options[$row->nid] = $row->title;
   }
