@@ -2341,6 +2341,7 @@ function og_is_picture() {
 
 // TODO: move this to new API function in Views where I can influence the WHERE clause.
 function og_get_available_views() {
+  $views = array();
   $result = db_query("SELECT name, description FROM {view_view} WHERE name LIKE 'og_ghp_%'");
   while ($view = db_fetch_object($result)) {
     $views[$view->name] =  check_plain("$view->description ($view->name)");
