@@ -1455,8 +1455,7 @@ function og_node_delete_confirm_submit($form_id, $form_values) {
 
 // return an array containing all groups. suitable for a form item
 function og_all_groups_options() {
-  $types = variable_get('og_node_types', array('og'));
-  $in = implode(', ', array_fill(0, count($types), "'%s'"));
+  list($types, $in) = og_get_sql_args();
   $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type IN ($in) AND n.status = 1 ORDER BY n.title ASC";
   $result = db_query($sql, $types);
   while ($row = db_fetch_object($result)) {
@@ -1820,6 +1819,13 @@ function _og_user_mail_text($messageid, $variables = array()) {
   }
 }
 
+// helper function for queries that need all group types
+function og_get_sql_args() {
+  $types = variable_get('og_node_types', array('og'));
+  $in = implode(', ', array_fill(0, count($types), "'%s'"));
+  return array($types, $in);
+}
+
 function og_user($op, $edit, &$account, $category = NULL) {
   global $user;
 
@@ -1827,7 +1833,8 @@ function og_user($op, $edit, &$account, $category = NULL) {
     case 'register':
       $options = array();
       // perhaps this should be a View
-      $result = db_query(db_rewrite_sql('SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ('. str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND n.status = 1 AND o.register = 1 ORDER BY n.title'), variable_get('og_node_types', array('og')));
+      list($types, $in) = og_get_sql_args();
+      $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ($in) AND n.status = 1 AND o.register = 1 ORDER BY n.title"), $types);
       while ($group = db_fetch_object($result)) {
         $options[$group->nid] = '<span class="og-registration-'.$group->nid.'">'. t('Subscribe to @name.', array('@name' => $group->title)). "</span>\n";
         if ($group->selective) {
@@ -2080,12 +2087,13 @@ function theme_opml_icon($url) {
 
 
 function og_block_new() {
-  $sql = 'SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type IN ('. str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND n.status = 1';
-  $cnt = db_result(db_query(db_rewrite_sql($sql), variable_get('og_node_types', array('og'))));
+  list($types, $in) = og_get_sql_args();
+  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type IN ($in) AND n.status = 1";
+  $cnt = db_result(db_query(db_rewrite_sql($sql), $types));
   if ($cnt > 0) {
     $max = variable_get('og_block_cnt_3', 10);
-    $sql = 'SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type IN ('. str_pad('', count(variable_get('og_node_types', array('og'))) * 5 - 1, "'%s',") .') AND og.directory=1 ORDER BY nid DESC';
-    $result = db_query_range(db_rewrite_sql($sql), variable_get('og_node_types', array('og')), 0, $max);
+    $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type IN ($in) AND og.directory=1 ORDER BY nid DESC";
+    $result = db_query_range(db_rewrite_sql($sql), $types, 0, $max);
     $output = node_title_list($result);
     if ($cnt > $max) {
       $output .= '<div class="more-link">'. l(t('more'), 'og', array('title' => t('Browse the newest groups.'))) .'</div>';

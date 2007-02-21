@@ -965,8 +965,7 @@ function og_handler_field_yesempty($fieldinfo, $fielddata, $value, $data) {
 }
 
 function og_handler_filter_og_type($op, $filter, $filterinfo, &$query) {
-  $types = variable_get('og_node_types', array('og'));
-  $in = implode(', ', array_fill(0, count($types), "'%s'"));
+  list($types, $in) = og_get__sql_args();
   $query->add_where("node.type IN ($in)", $types);
 }
 
