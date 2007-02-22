@@ -1039,7 +1039,8 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
     unset($node->content['body']);
     $node->content['og_mission'] = array('#value' => theme('og_mission', $node), '#weight' => -3);
     $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
-    if ($view->disabled) {
+    $views_available = variable_get('views_defaults', array());
+    if ($views_available[$view->name] == "disabled") { 
       // do nothing. assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
     }
     else {
