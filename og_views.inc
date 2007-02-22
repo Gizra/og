@@ -310,7 +310,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => t('Title'),
+      'label' => t('Group'),
       'handler' => 'views_handler_field_nodelink_with_mark',
       'sortable' => '1',
     ),
@@ -415,7 +415,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => t('Title'),
+      'label' => t('Group'),
       'handler' => 'views_handler_field_nodelink_with_mark',
       'sortable' => '1',
     ),
@@ -531,7 +531,7 @@ function og_views_default_views() {
   $view->view_args_php = '';
   $view->page = TRUE;
   $view->page_title = t('My groups');
-  $view->page_header = t('You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="/og/opml" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.');
+  $view->page_header = t('You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="!url" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.', array('!url' => url('og/opml')));
   $view->page_header_format = '1';
   $view->page_footer = '<?php
 
@@ -574,7 +574,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => t('Title'),
+      'label' => t('Group'),
       'handler' => 'views_handler_field_nodelink',
       'options' => 'link',
     ),
@@ -667,7 +667,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => t('Title'),
+      'label' => t('Group'),
       'handler' => 'views_handler_field_nodelink',
       'sortable' => '1',
       'options' => 'link',
@@ -727,7 +727,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => t('Title'),
+      'label' => t('Search for a group by name'),
       'optional' => '1',
       'is_default' => '0',
       'operator' => '1',
@@ -773,7 +773,7 @@ function og_views_default_views() {
     array (
       'type' => 'uid',
       'argdefault' => '2',
-      'title' => t('recent posts for %1'),
+      'title' => t('Recent posts for %1'),
       'options' => '',
       'wildcard' => '',
       'wildcard_substitution' => '',
@@ -796,7 +796,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => t('Title'),
+      'label' => t('Group'),
       'handler' => 'views_handler_field_nodelink_with_mark',
       'options' => 'link',
     ),
