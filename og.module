@@ -997,7 +997,7 @@ function og_opml() {
 }
 
 function og_page_activity() {
-  $sql = "SELECT oga.group_nid, node_group_nid.title, node_group_nid.uid, u.name, COUNT(*) as ncount, MAX(n.created) as ncreated, SUM(ncs.comment_count) as ccount, MAX(last_comment_timestamp) AS lct FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid LEFT JOIN {node_comment_statistics} ncs ON n.nid = ncs.nid INNER JOIN {node} node_group_nid ON oga.group_nid = node_group_nid.nid INNER JOIN {users} u ON node_group_nid.uid = u.uid WHERE n.status = 1 GROUP BY group_nid";
+  $sql = "SELECT oga.group_nid, node_group_nid.title, node_group_nid.uid, u.name, COUNT(*) as ncount, MAX(n.created) as ncreated, SUM(ncs.comment_count) as ccount, MAX(last_comment_timestamp) AS lct FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid LEFT JOIN {node_comment_statistics} ncs ON n.nid = ncs.nid INNER JOIN {node} node_group_nid ON oga.group_nid = node_group_nid.nid INNER JOIN {users} u ON node_group_nid.uid = u.uid WHERE n.status = 1 GROUP BY oga.group_nid, node_group_nid.title, node_group_nid.uid, u.name";
   $header = array(
     array('data' => t('Title'), 'field' => 'node_group_nid.title'),
     array('data' => t('Manager'), 'field' => 'u.name'),
