@@ -24,42 +24,42 @@ function og_views_tables() {
       ),
       'fields' => array(
         'description' => array(
-          'name' => 'Og: Group: Description',
+          'name' => t('Og: Group: Description'),
         ),
         'website' => array(
-          'name' => 'Og: Group: Website',
+          'name' => t('Og: Group: Website'),
           'handler' => 'og_handler_field_website',
         ),
         'count' => array(
-          'name' => 'Og: Group: Subscriber Count',
+          'name' => t('Og: Group: Subscriber Count'),
           'handler' => 'og_handler_field_count',
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
         'selective' => array(
-          'name' => 'Og: Group: Selective',
+          'name' => t('Og: Group: Selective'),
         ),
         'subscribe' => array(
-          'name' => 'Og: Group: Subscribe Link',
+          'name' => t('Og: Group: Subscribe Link'),
           'handler' => 'og_handler_field_subscribe',
           'addlfields' => array('selective'),
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
         'notification' => array(
-          'name' => 'Og: Group: Notification',
+          'name' => t('Og: Group: Notification'),
           'handler' => 'og_handler_field_yesempty',
           'help' => t('Displays <em>yes</em> if group automatically sends email notifications to subscribers'),
         ),
         'language' => array(
-          'name' => 'Og: Group: Language',
+          'name' => t('Og: Group: Language'),
           'help' => t('Displays the language selected for a given group'),
         ),
         
       ),
       'filters' => array(
         'directory' => array(
-          'name' => "Og: Group: List in directory",
+          'name' => t('Og: Group: List in directory'),
           'operator' => array('=' => 'Equals'),
           'list' => 'views_handler_operator_yesno',
           'list-type' => 'select',
@@ -80,13 +80,13 @@ function og_views_tables() {
       ),
       'filters' => array(
         'gid' => array(
-          'name' => 'Og: Post in specified group',
+          'name' => t('Og: Post in specified group'),
           'operator' => 'views_handler_operator_eqneq',
           'field' => 'group_nid',
           'help' => t('Filter for a given organic group. <em>Value</em> should be a numeric nid.'),   
         ),
         'gtype' => array(
-          'name' => 'Og: Post in specified group type',
+          'name' => t('Og: Post in specified group type'),
           'list' => variable_get('og_node_types', array('og')),
           'list-type' => 'list',
           'operator' => 'views_handler_operator_or',
@@ -98,7 +98,7 @@ function og_views_tables() {
       ),    
       'fields' => array(  
         'is_public' => array(
-          'name' => 'Og: Public',
+          'name' => t('Og: Public'),
           'handler' => 'og_handler_field_yesempty',
           'help' => t('Displays <em>yes</em> if post is public according to OG.'),
         )  
@@ -146,13 +146,13 @@ function og_views_tables() {
           'help' => t('Does subscriber receive email notifications for a group.'),
         ),
         'managelink' => array(
-          'name' => 'Og: Manage subscription link',
+          'name' => t('Og: Manage subscription link'),
           'handler' => 'og_handler_field_managelink',
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
         'is_admin' => array(
-          'name' => 'Og: Is subscriber an admin in a group',
+          'name' => t('Og: Is subscriber an admin in a group'),
           'handler' => 'og_handler_field_yesempty',
           'sortable' => FALSE,
         ),
@@ -524,14 +524,14 @@ function og_views_default_views() {
   // og/my
   $view = new stdClass();
   $view->name = 'og_my';
-  $view->description = 'List user\'s subscribed groups and provide link to manage subscription';
+  $view->description = t('List user\'s subscribed groups and provide link to manage subscription');
   $view->access = array (
   0 => '2',
 );
   $view->view_args_php = '';
   $view->page = TRUE;
-  $view->page_title = 'My groups';
-  $view->page_header = 'You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="/og/opml" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.';
+  $view->page_title = t('My groups');
+  $view->page_header = t('You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="/og/opml" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.');
   $view->page_header_format = '1';
   $view->page_footer = '<?php
 
@@ -540,7 +540,7 @@ function og_views_default_views() {
 
 ?>';
   $view->page_footer_format = '2';
-  $view->page_empty = 'No subscribed groups';
+  $view->page_empty = t('No subscribed groups');
   $view->page_empty_format = '1';
   $view->page_type = 'table';
   $view->url = 'og/my';
@@ -574,29 +574,29 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => 'Title',
+      'label' => t('Title'),
       'handler' => 'views_handler_field_nodelink',
       'options' => 'link',
     ),
     array (
       'tablename' => 'users',
       'field' => 'name',
-      'label' => 'Manager',
+      'label' => t('Manager'),
     ),
     array (
       'tablename' => 'og',
       'field' => 'count',
-      'label' => 'Subscribers',
+      'label' => t('Subscribers'),
     ),
     array (
       'tablename' => 'og_uid',
       'field' => 'mail_type',
-      'label' => 'Email',
+      'label' => t('Email'),
     ),
     array (
       'tablename' => 'og_uid',
       'field' => 'managelink',
-      'label' => 'Manage',
+      'label' => t('Manage'),
     ),
   );
   $view->filter = array (
@@ -630,24 +630,24 @@ function og_views_default_views() {
   // og view
   $view = new stdClass();
   $view->name = 'og';
-  $view->description = 'groups directory';
+  $view->description = t('groups directory');
   $view->access = array (
 );
   $view->view_args_php = '';
   $view->page = TRUE;
-  $view->page_title = 'Groups directory';
+  $view->page_title = t('Groups directory');
   $view->page_header = '';
   $view->page_header_format = '2';
   $view->page_footer = '';
   $view->page_footer_format = '1';
-  $view->page_empty = 'No groups';
+  $view->page_empty = t('No groups');
   $view->page_empty_format = '1';
   $view->page_type = 'table';
   $view->url = 'og/all';
   $view->use_pager = TRUE;
   $view->nodes_per_page = '90';
   $view->menu = TRUE;
-  $view->menu_title = 'Groups';
+  $view->menu_title = t('Groups');
   $view->menu_tab = TRUE;
   $view->menu_tab_default = TRUE;
   $view->menu_tab_weight = '-5';
@@ -667,7 +667,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => 'Title',
+      'label' => t('Title'),
       'handler' => 'views_handler_field_nodelink',
       'sortable' => '1',
       'options' => 'link',
@@ -675,22 +675,22 @@ function og_views_default_views() {
     array (
       'tablename' => 'users',
       'field' => 'name',
-      'label' => 'Manager',
+      'label' => t('Manager'),
     ),
     array (
       'tablename' => 'og',
       'field' => 'count',
-      'label' => 'Subscribers',
+      'label' => t('Subscribers'),
     ),
     array (
       'tablename' => 'og',
       'field' => 'description',
-      'label' => 'Description',
+      'label' => t('Description'),
     ),
     array (
       'tablename' => 'og',
       'field' => 'subscribe',
-      'label' => 'Subscribe',
+      'label' => t('Subscribe'),
     ),
   );
   $view->filter = array (
@@ -727,7 +727,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => 'Title',
+      'label' => t('Title'),
       'optional' => '1',
       'is_default' => '0',
       'operator' => '1',
@@ -740,12 +740,12 @@ function og_views_default_views() {
   // og_tracker
   $view = new stdClass();
   $view->name = 'og_tracker';
-  $view->description = 'Shows active posts across the whole site';
+  $view->description = t('Shows active posts across the whole site');
   $view->access = array (
 );
   $view->view_args_php = '';
   $view->page = TRUE;
-  $view->page_title = 'Recent posts across whole site';
+  $view->page_title = t('Recent posts across whole site');
   $view->page_header = '';
   $view->page_header_format = '1';
   $view->page_footer = '';
@@ -757,7 +757,7 @@ function og_views_default_views() {
   $view->use_pager = TRUE;
   $view->nodes_per_page = '25';
   $view->menu = TRUE;
-  $view->menu_title = 'Recent posts';
+  $view->menu_title = t('Recent posts');
   $view->menu_tab = TRUE;
   $view->menu_tab_default = FALSE;
   $view->menu_tab_weight = '5';
@@ -773,7 +773,7 @@ function og_views_default_views() {
     array (
       'type' => 'uid',
       'argdefault' => '2',
-      'title' => 'recent posts for %1',
+      'title' => t('recent posts for %1'),
       'options' => '',
       'wildcard' => '',
       'wildcard_substitution' => '',
@@ -791,35 +791,35 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'type',
-      'label' => 'Type',
+      'label' => t('Type'),
     ),
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => 'Title',
+      'label' => t('Title'),
       'handler' => 'views_handler_field_nodelink_with_mark',
       'options' => 'link',
     ),
     array (
       'tablename' => 'users',
       'field' => 'name',
-      'label' => 'Author',
+      'label' => t('Author'),
     ),
     array (
       'tablename' => 'node_comment_statistics',
       'field' => 'comment_count',
-      'label' => 'Replies',
+      'label' => t('Replies'),
       'handler' => 'views_handler_comments_with_new',
     ),
     array (
       'tablename' => 'og_node_data',
       'field' => 'title',
-      'label' => 'Groups',
+      'label' => t('Groups'),
     ),
     array (
       'tablename' => 'node_comment_statistics',
       'field' => 'last_comment_timestamp',
-      'label' => 'Last Post',
+      'label' => t('Last Post'),
       'handler' => 'views_handler_field_since',
     ),
   );
