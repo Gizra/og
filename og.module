@@ -1478,6 +1478,7 @@ function og_form_add_og_audience($form_id, &$form) {
   if ($_SERVER["REQUEST_METHOD"] == 'GET') {
     $gids = $_GET['gids'];
   }
+  
   $node = $form['#node'];
   $required = variable_get('og_audience_required', 0) && !user_access('administer nodes');
   // determine the list of groups that are shown. node admins see all of them
@@ -1550,7 +1551,7 @@ function og_form_add_og_audience($form_id, &$form) {
     // 'simple' mode. read only.
     if (count($groups)) {
       foreach ($groups as $gid) {
-        $titles[] = $options[$gid]['title'];
+        $titles[] = $options[$gid];
         $item_value = implode(', ', $titles);
       }
       $form['og_nodeapi']['visible']['og_groups_visible'] = array('#type' => 'item', '#title' => t('Audience'), '#value' => $item_value);
@@ -1560,7 +1561,15 @@ function og_form_add_og_audience($form_id, &$form) {
   elseif ($cnt = count($options)) {
     // show multi-select. if less than 20 choices, use checkboxes.
     $type = $cnt >= 20 ? 'select' : 'checkboxes';
-    $form['og_nodeapi']['visible']['og_groups'] = array('#type' => $type, '#title' => t('Audience'), '#options' => $options, '#required' => $required, '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'), '#default_value' => $groups, '#required' => $required, '#multiple' => TRUE);
+    $form['og_nodeapi']['visible']['og_groups'] = array(
+      '#type' => $type, 
+      '#title' => t('Audience'), 
+      '#options' => $options, 
+      '#required' => $required, 
+      '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'),
+      '#default_value' => $groups, 
+      '#required' => $required, 
+      '#multiple' => TRUE);
   }
   else if ($required) {
     form_set_error('title', t('You must !join before posting a %type.', array('!join' => l(t('join a group'), 'og'), '%type' => node_get_types('name', $node->type))));
