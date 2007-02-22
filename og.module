@@ -136,8 +136,12 @@ function og_init() {
   if (function_exists('drupal_set_content')) {    
     // we have to perform a load in order to assure that the $user->og_groups bits are present.
     global $user;
-    // drupal_load('module', 'user'); // assure user.module is present.
-    $user = user_load(array('uid' => $user->uid));
+    if ($user->uid) {
+      $user = user_load(array('uid' => $user->uid));
+    }
+    else {
+      $user->og_groups = array();
+    }
     
     require dirname(__FILE__). '/og_views.inc';
     og_theme();
