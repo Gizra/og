@@ -1264,7 +1264,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'load':
       if (!og_is_group_type($node->type)) {
-        $node->og_public = db_result(db_query_range("SELECT is_public FROM {og_ancestry} WHERE nid = %d", $node->nid, 0, 1));
+        $public = db_result(db_query_range("SELECT is_public FROM {og_ancestry} WHERE nid = %d", $node->nid, 0, 1));
+        $node->og_public = $public ? TRUE : FALSE;
       }
       else {
         og_load_group($node);
