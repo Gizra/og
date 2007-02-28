@@ -1263,17 +1263,17 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'load':
-      if (!og_is_group_type($node->type)) {
-        $public = db_result(db_query_range("SELECT is_public FROM {og_ancestry} WHERE nid = %d", $node->nid, 0, 1));
-        $node->og_public = $public ? TRUE : FALSE;
-      }
-      else {
+      if (og_is_group_type($node->type)) {
         og_load_group($node);
       }
+      
       if ($grps = og_get_node_groups($node)) {
         // TODO: Refactor so we don't need 2 arrays.
         $node->og_groups = array_keys($grps);
         $node->og_groups_names = array_values($grps);
+        
+        $public = db_result(db_query_range("SELECT is_public FROM {og_ancestry} WHERE nid = %d", $node->nid, 0, 1));
+        $node->og_public = $public ? TRUE : FALSE;
       }
       break;
     case 'validate':
@@ -1293,6 +1293,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_submit_group($node);
       break;
     case 'prepare':
+      // TODO: some people don't like forcing comments to disabled for groups.
       if (og_is_group_type($node->type)) {
         $node->comment = COMMENT_NODE_DISABLED;
       }
@@ -1519,10 +1520,10 @@ function og_form_add_og_audience($form_id, &$form) {
 
     //user decides how public the post is.
     case OG_VISIBLE_CHOOSE_PUBLIC:
-      $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked below. Only uncheck this box if truly needed.'));
+      $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
       break;
     case OG_VISIBLE_CHOOSE_PRIVATE:
-      $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked below. Only check this box if truly needed.'));
+      $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
       break;
   }
 
@@ -1568,11 +1569,13 @@ function og_form_add_og_audience($form_id, &$form) {
     }
   }
   elseif ($cnt = count($options)) {
+    drupal_add_js(drupal_get_path('module', 'og'). '/og.js');
     // show multi-select. if less than 20 choices, use checkboxes.
     $type = $cnt >= 20 ? 'select' : 'checkboxes';
     $form['og_nodeapi']['visible']['og_groups'] = array(
       '#type' => $type, 
       '#title' => t('Audience'), 
+      '#attributes' => array('class' => 'og-audience'),
       '#options' => $options, 
       '#required' => $required, 
       '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'),
@@ -1976,7 +1979,7 @@ function og_save_ancestry($node) {
 
 function og_node_access_records($node) {
   // don't write records if og access control is disabled or the node type is omitted or node is a group
-  // if you want group nodes to be protected too, perhaps write a complementary node_access module. lets discuss.
+  // if you want group nodes to be protected too, see http://drupal.org/node/83005
   if (og_is_omitted_type($node->type) || !variable_get('og_enabled', FALSE) || og_is_group_type($node->type)) {
     return;
   }
@@ -1990,11 +1993,6 @@ function og_node_access_records($node) {
   
   if ($node->og_public) {
     $grants[] = array('realm' => 'og_public', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
-  }
-  
-  // propose a deny for non public nodes whose type matters to og and aren't in a group
-  if (!count($grants)) {
-    $grants[] = array('priority' => 10, 'realm' => 'og_public', 'gid' => 0, 'grant_view' => 0, 'grant_update' => 0, 'grant_delete' => 0);
   }
 
   return $grants;
