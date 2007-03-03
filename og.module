@@ -2131,8 +2131,8 @@ function og_block_subscribers() {
     // only members can see subscriber list
     if (in_array($gid, array_keys($user->og_groups))) {
       $max = variable_get('og_block_cnt_2', 10);
-      $sql = "SELECT DISTINCT(u.uid), u.* FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid ORDER BY ogu.created DESC";
-      $result = db_query_range($sql, 0, $max);
+      $sql = "SELECT DISTINCT(u.uid), u.* FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.nid = %d ORDER BY ogu.created DESC";
+      $result = db_query_range($sql, $gid, 0, $max);
       while ($row = db_fetch_object($result)) {
         if (og_is_picture()) {
           //showing member pictures
@@ -2147,7 +2147,10 @@ function og_block_subscribers() {
       if ($links) {
         if (count($links) > $max-1) {
           array_pop($links);
-          $append = '<div class="more-link">'. l(t('more'), "og/users/$gid", array('title' => t('View all subscribers.'))) .'</div>';;
+          $txt = t('more');
+          $title = array('title' => t('View all subscribers.'));
+          $more = og_is_picture() ? l($txt, "og/users/$gid/faces", $title) : l($txt, "og/users/$gid", $title);
+          $append = "<div class=\"more-link\">$more</div>";
         }
         $block['content'] = theme('item_list', $links). $append;
         $block['subject'] = t('Recently joined');
