@@ -19,6 +19,7 @@ Drupal.ogAttach = function() {
       $('#edit-og-public').attr("disabled", "disabled");
     }
   })
+  $('.og-audience').click();
 }
 
 if (Drupal.jsEnabled) {
