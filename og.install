@@ -394,7 +394,9 @@ function og_update_15() {
 
 function og_update_16() {
   // we are no longer denying access to nodes without groups. see http://drupal.org/node/107289
-  node_access_rebuild();
+  if (variable_get('og_enabled', 0)) {
+    node_access_rebuild();
+  }
   return array();
 }
 
