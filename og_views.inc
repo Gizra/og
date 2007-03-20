@@ -517,6 +517,8 @@ function og_views_default_views() {
       'value' => '1',
     ),
   );
+  $view->use_pager = TRUE;
+  $view->nodes_per_page = '50';
   $view->exposed_filter = array ();
   $view->requires = array(node);
   $views[$view->name] = $view;
