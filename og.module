@@ -986,7 +986,7 @@ function og_opml() {
 
   global $user;
   foreach ($user->og_groups as $gid => $group) {
-    $output .= '<outline text="'. check_plain($group->title) .'" xmlUrl="'. url("node/$gid/feed", NULL, NULL, TRUE) ."\" />\n";    
+    $output .= '<outline text="'. check_plain($group['title']) .'" xmlUrl="'. url("node/$gid/feed", NULL, NULL, TRUE) ."\" />\n";    
   }
 
   $output .= "</body>\n";
