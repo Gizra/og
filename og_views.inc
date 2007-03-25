@@ -81,8 +81,7 @@ function og_views_tables() {
       'filters' => array(
         'gid' => array(
           'name' => t('Og: Post in specified group'),
-          'operator' => 'views_handler_operator_eqneq',
-          'field' => 'group_nid',
+          'handler' => 'og_handler_filter_gid',
           'help' => t('Filter for a given organic group. <em>Value</em> should be a numeric nid.'),   
         ),
         'gtype' => array(
@@ -95,6 +94,14 @@ function og_views_tables() {
           'handler' => 'og_handler_filter_post_og_type',
           'help' => t('Filter for a given organic group type.'),
         ),
+        'picg' => array(
+          'name' => t('OG: Posts in current group'),
+          'help' => t('Posts in current group. Useful for blocks where determining context is hard.'),
+          'operator' => 'views_handler_operator_eqneq',
+          'list' => 'views_handler_filter_groupcurrent',
+          'list-type' => 'select',
+          'handler' => 'og_handler_filter_picg',
+        )
       ),    
       'fields' => array(  
         'is_public' => array(
@@ -209,7 +216,7 @@ function og_views_tables() {
      'filters' => array(
         'og_type_selector' => array(
           'field' => 'type_selector',
-          'name' => t('OG: type (selector)'),
+          'name' => t('OG: node type (selector)'),
           'list' => $type_options,
           'list-type' => 'list',
           'operator' => 'views_handler_operator_or',
@@ -246,10 +253,22 @@ function og_views_arguments() {
  */
 function og_handler_argument_gid($op, &$query, $argtype, $arg = '') {
   switch ($op) {
+    case 'summary':
+      $query->ensure_table('og_ancestry');
+      $query->ensure_table('og_node_data');
+      $query->add_field('title', 'og_node_data');
+      $query->add_field('group_nid', 'og_ancestry');
+      $fieldinfo['field'] = "og_node_data.nid";
+      return $fieldinfo;
+    case 'link':
+      $name = ($query->title ? $query->title : t('Unaffiliated'));
+      return l($name, "$arg/" . intval($query->group_nid));
     case 'filter':
-      // TODO: maybe there is a nicer syntax for this?
       $query->ensure_table('og_ancestry');
       $query->add_where('og_ancestry.group_nid = %d', $arg);
+      
+      $node = node_load((int)$arg);
+      og_set_group_context($node);
       break;
     case 'title':
       return db_result(db_query_range('SELECT title FROM {node} WHERE nid = %d', $query, 0, 1));;
@@ -907,6 +926,80 @@ function og_views_default_views() {
   );
   $view->requires = array(node, temp_search_results);
   $views[$view->name] = $view;
+  
+  // group comments_recent. add a filter to comments_recent from views_comment.inc. also remove a Field: timestamp
+  $view = new stdClass();
+  $view->name = 'og_comments_recent';
+  $view->description = 'Display recent comments block in a group';
+  $view->access = array (
+);
+  $view->view_args_php = '';
+  $view->block = TRUE;
+  $view->block_title = 'Recent comments';
+  $view->block_header = '';
+  $view->block_header_format = '1';
+  $view->block_footer = '';
+  $view->block_footer_format = '1';
+  $view->block_empty = '';
+  $view->block_empty_format = '1';
+  $view->block_type = 'list';
+  $view->nodes_per_block = '10';
+  $view->block_more = FALSE;
+  $view->block_use_page_header = FALSE;
+  $view->block_use_page_footer = FALSE;
+  $view->block_use_page_empty = FALSE;
+  $view->sort = array (
+    array (
+      'tablename' => 'comments',
+      'field' => 'timestamp',
+      'sortorder' => 'DESC',
+      'options' => 'normal',
+    ),
+  );
+  $view->argument = array (
+  );
+  $view->field = array (
+    array (
+      'tablename' => 'comments',
+      'field' => 'subject',
+      'label' => '',
+      'handler' => 'views_handler_field_commentlink',
+      'options' => 'link',
+    ),
+    array (
+      'tablename' => 'comments',
+      'field' => 'name',
+      'label' => '',
+    ),
+  );
+  $view->filter = array (
+    array (
+      'tablename' => 'node_comment_statistics',
+      'field' => 'comment_count',
+      'operator' => '>=',
+      'options' => '',
+      'value' => '1',
+    ),
+    array (
+      'tablename' => 'comments',
+      'field' => 'status',
+      'operator' => '=',
+      'options' => '',
+      'value' => COMMENT_PUBLISHED,
+    ),
+    array (
+      'tablename' => 'og_ancestry',
+      'field' => 'picg',
+      'operator' => '=',
+      'options' => '',
+      'value' => '***CURRENT_GID***',
+    ),
+  );
+  $view->exposed_filter = array (
+  );
+  $view->requires = array(comments, node_comment_statistics, og_ancestry);
+  $views[$view->name] = $view;
+    
   return $views;
 }
 
@@ -966,6 +1059,14 @@ function og_handler_field_yesempty($fieldinfo, $fielddata, $value, $data) {
   return $value ? t('yes') : '';
 }
 
+function og_handler_filter_gid($op, $filter, $filterinfo, &$query) {
+  $query->ensure_table('og_ancestry');
+  $query->add_where("og_ancestry.group_nid = %d", $filter['value']);
+  
+  $node = node_load($filter['value']);
+  og_set_group_context($node);
+}
+
 function og_handler_filter_og_type($op, $filter, $filterinfo, &$query) {
   list($types, $in) = og_get_sql_args();
   $query->add_where("node.type IN ($in)", $types);
@@ -977,4 +1078,29 @@ function og_handler_filter_post_og_type($op, $filter, $filterinfo, &$query) {
   $types = $filter['value'];
   $placeholders = array_fill(0, count($types), "'%s'");
   $query->add_where("og_node_data.type IN (". implode(", ", $placeholders) .")", $types);
+}
+
+/**
+ * Lovely filter handler which restricts posts to the current group. Useful for group related blocks.
+ *
+ * @return void
+ **/
+function og_handler_filter_picg($op, $filter, $filterinfo, &$query) {
+  $query->ensure_table('og_ancestry');
+  $query->add_where("og_ancestry.group_nid = ***CURRENT_GID***");
+}
+
+/*
+ * Simple array for current group.
+ */
+function views_handler_filter_groupcurrent() {
+  return array('***CURRENT_GID***' => t('Current group'));
+}
+
+/**
+ * Allow replacement of current group so we can cache these queries.
+ */
+function og_views_query_substitutions($view) {
+  $groupnode = og_get_group_context();
+  return array('***CURRENT_GID***' => $groupnode ? $groupnode->nid : 0);
 }
