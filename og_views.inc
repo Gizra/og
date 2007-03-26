@@ -101,7 +101,14 @@ function og_views_tables() {
           'list' => 'views_handler_filter_groupcurrent',
           'list-type' => 'select',
           'handler' => 'og_handler_filter_picg',
-        )
+        ),
+        'is_public' => array(
+          'name' => t('OG: Public'),
+          'help' => t('Posts marked as Public, which are viewable by non group members as well.'),
+          'operator' => array('=' => 'Is'),
+          'list' => 'views_handler_operator_yesno',
+          'list-type' => 'select',
+        ),
       ),    
       'fields' => array(  
         'is_public' => array(
