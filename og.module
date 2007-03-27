@@ -828,7 +828,7 @@ function og_get_subscriptions($uid, $min_is_active = 1) {
       $subscriptions[$uid][$row['nid']] = $row;
     }
 
-    if (!$subscriptions[$uid]) {
+    if (!isset($subscriptions[$uid])) {
       $subscriptions[$uid] = array();
     }
   }
