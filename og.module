@@ -1387,7 +1387,7 @@ function og_msgid_server() {
 
 function og_form_alter($form_id, &$form) {
   // Add audience selection to node forms
-  if (strpos($form_id, 'node_form')) {
+  if (isset($form['#node']) && $form_id == $form['#node']->type .'_node_form') {
     $node = $form['#node'];
     if (og_is_group_type($node->type)) {
       $form = array_merge($form, og_group_form($node));
