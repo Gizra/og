@@ -2033,6 +2033,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     // Now provided by og_views. Please don't reuse this number 4
     // $blocks[4]['info'] = t('My groups');
     $blocks[5]['info'] = t('Group notifications');
+    $blocks[6]['info'] = t('Group Network');
     
     // Auto-enable the group blocks for fresh installations.
     $blocks[0]['status'] = 1;
@@ -2052,6 +2053,8 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
         return og_block_new();
       case 5:
         return og_block_notifications();
+      case 6:
+        return og_block_users_network();
     }
   }
   elseif ($op == 'configure') {
@@ -2131,6 +2134,21 @@ function og_block_new() {
   }
 }
 
+function og_block_users_network() {
+  global $user;
+  if ($user->uid && count($user->og_groups)) {
+    $max = variable_get('og_block_cnt_2', 10);
+    $placeholders = array_fill(0, count($user->og_groups), "'%s'");
+    $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". implode(", ", $placeholders) .") GROUP BY ogu.uid, u.name, u.picture ORDER BY ogu.created DESC";
+    $args = array_keys($user->og_groups);
+    array_unshift($args, $user->uid);
+    $result = db_query_range($sql, $args, 0, $max);
+    $block['content'] = og_user_title_list($result, NULL, FALSE);
+    $block['subject'] = t('My Network');
+    return $block;
+  }
+}
+
 function og_block_subscribers() {
   global $user;
   if ($group_node = og_get_group_context()) {
@@ -2140,30 +2158,38 @@ function og_block_subscribers() {
       $max = variable_get('og_block_cnt_2', 10);
       $sql = "SELECT DISTINCT(u.uid), u.* FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.nid = %d ORDER BY ogu.created DESC";
       $result = db_query_range($sql, $gid, 0, $max);
-      while ($row = db_fetch_object($result)) {
-        if (og_is_picture()) {
-          //showing member pictures
-          $link = theme('user_picture', $row). theme('username', $row);
-        }
-        else {
-          $link = theme('username', $row);
-        }
-        $links[] = $link;
-      }
+      $block['content'] = og_user_title_list($result, $gid);
+      $block['subject'] = t('Recently joined');
+      return $block;
+    }
+  }
+}
 
-      if ($links) {
-        if (count($links) > $max-1) {
-          array_pop($links);
-          $txt = t('more');
-          $title = array('title' => t('View all subscribers.'));
-          $more = og_is_picture() ? l($txt, "og/users/$gid/faces", $title) : l($txt, "og/users/$gid", $title);
-          $append = "<div class=\"more-link\">$more</div>";
-        }
-        $block['content'] = theme('item_list', $links). $append;
-        $block['subject'] = t('Recently joined');
-        return $block;
+// shows users. analogous to node_title_list()
+function og_user_title_list($result, $gid = NULL, $show_more = TRUE) {
+  while ($row = db_fetch_object($result)) {
+    if (og_is_picture()) {
+      //showing member pictures
+      $link = theme('user_picture', $row). theme('username', $row);
+    }
+    else {
+      $link = theme('username', $row);
+    }
+    $links[] = $link;
+  }
+
+  if ($links) {
+    $max = variable_get('og_block_cnt_2', 10);
+    if (count($links) > $max-1) {
+      array_pop($links);
+      $txt = t('more');
+      $title = array('title' => t('View all subscribers.'));
+      if ($show_more) {
+        $more = og_is_picture() ? l($txt, "og/users/$gid/faces", $title) : l($txt, "og/users/$gid", $title);
+        $append = "<div class=\"more-link\">$more</div>";
       }
     }
+    return theme('item_list', $links). $append;
   }
 }
 
