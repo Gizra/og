@@ -671,7 +671,7 @@ function og_views_default_views() {
   $view->page_empty = t('No groups');
   $view->page_empty_format = '1';
   $view->page_type = 'table';
-  $view->url = 'og/all';
+  $view->url = 'og';
   $view->use_pager = TRUE;
   $view->nodes_per_page = '90';
   $view->menu = TRUE;
