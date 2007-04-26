@@ -2278,7 +2278,7 @@ function og_og_create_links($group) {
   foreach (node_get_types() as $type) {
     $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
     // we used to check for node_access(create) but then node admins would get a false positive and see node types that they could not create
-    if (!in_array($type->type, $exempt) && module_invoke(node_get_base($type), 'access', 'create', $type)) {
+    if (!in_array($type->type, $exempt) && module_invoke(node_get_types('module', $type), 'access', 'create', $type)) {
       $links[] = l(t('Create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "gids[]=$group->nid");
     }
   }
