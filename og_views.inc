@@ -559,7 +559,7 @@ function og_views_default_views() {
   $view->view_args_php = '';
   $view->page = TRUE;
   $view->page_title = t('My groups');
-  $view->page_header = t('You may edit your all your email subscription using this convenient page. Also, you might be interested in an <a href="!url" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.', array('!url' => url('og/opml')));
+  $view->page_header = t('You may edit all your email subscriptions using this convenient page. Also, you might be interested in an <a href="!url" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.', array('!url' => url('og/opml')));
   $view->page_header_format = '1';
   $view->page_footer = '<?php
 
