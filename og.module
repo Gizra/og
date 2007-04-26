@@ -2194,63 +2194,73 @@ function og_user_title_list($result, $gid = NULL, $show_more = TRUE) {
 }
 
 function og_block_details() {
-  global $user;
-
+  // only display group details if we have a group context
   if ($node = og_get_group_context()) {
-    $result = db_query(og_list_users_sql(0), $node->nid);
-    $cntall = db_num_rows($result);
-    $cntpending = 0;
-    while ($row = db_fetch_object($result)) {
-      if ($row->is_active == 0) {
-        $cntpending++;
-      }
-      if ($row->uid == $user->uid) {
-        if ($row->is_active) {
-          $subscription = 'active';
-        }
-        else {
-          $subscription = 'requested';
-        }
-      }
+    // allow other og-enabled node types to provide their own block details
+    $block = module_invoke($node->type,'og_block_details',$node);
+    if (!$block) {
+      $block = og_og_block_details($node);
     }
-
-    if ($subscription == 'active' || user_access('administer nodes')) {
-      $links = module_invoke_all('og_create_links', $node);
-      if ($node->og_selective < OG_INVITE_ONLY) {
-        $links[] = l(t('Invite friend'), "og/invite/$node->nid");
-      }
-      $txt = format_plural($cntall-$cntpending, '1 subscriber', '@count subscribers');
-      $txt = og_is_picture() ? l($txt, "og/users/$node->nid/faces") : l($txt, "og/users/$node->nid");
-      $txt .= $cntpending ? " ($cntpending)" : '';
-      $links[] = $txt;
-      $links[] =  t('Manager: '). theme('username', $node);
-      $links[] = isset($subscription) ? l(t('My subscription'), "og/manage/$node->nid") : og_subscribe_link($node);
-      if (isset($node->og_website) && !empty($node->og_website)) {
-        $links[] = l(t('website'), $node->og_website);
-      }
-      if (module_exists('search') && user_access('search content')) {
-        $post = drupal_get_form('og_search_form', $node);
-      }
-    }
-    elseif ($subscription == 'requested') {
-      $links[] = t('Your subscription request awaits approval.');
-      $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'destination=og');
-    }
-    elseif (!$user->uid) {
-      $dest = drupal_get_destination();
-      $links[] = t('You must <a href="!register">register</a>/<a href="!login">login</a> in order to post into this group.', array('!register' => url("user/register", $dest), '!login' => url("user/login", $dest)));
-    }
-    elseif ($node->og_selective < OG_INVITE_ONLY) {
-      $links[] = og_subscribe_link($node);
-    }
-    else {
-      $links[] = t('This is a @closed group. The group administrators add/remove subscribers as needed.', array('@closed' => t('closed')));
-    }
-
-    $block['content'] = theme('item_list', $links). $post;
-    $block['subject'] = $node->title;
     return $block;
   }
+}
+
+function og_og_block_details($node) {
+  global $user;
+
+  $result = db_query(og_list_users_sql(0), $node->nid);
+  $cntall = db_num_rows($result);
+  $cntpending = 0;
+  while ($row = db_fetch_object($result)) {
+    if ($row->is_active == 0) {
+      $cntpending++;
+    }
+    if ($row->uid == $user->uid) {
+      if ($row->is_active) {
+        $subscription = 'active';
+      }
+      else {
+        $subscription = 'requested';
+      }
+    }
+  }
+
+  if ($subscription == 'active' || user_access('administer nodes')) {
+    $links = module_invoke_all('og_create_links', $node);
+    if ($node->og_selective < OG_INVITE_ONLY) {
+      $links[] = l(t('Invite friend'), "og/invite/$node->nid");
+    }
+    $txt = format_plural($cntall-$cntpending, '1 subscriber', '@count subscribers');
+    $txt = og_is_picture() ? l($txt, "og/users/$node->nid/faces") : l($txt, "og/users/$node->nid");
+    $txt .= $cntpending ? " ($cntpending)" : '';
+    $links[] = $txt;
+    $links[] =  t('Manager: '). theme('username', $node);
+    $links[] = isset($subscription) ? l(t('My subscription'), "og/manage/$node->nid") : og_subscribe_link($node);
+    if (isset($node->og_website) && !empty($node->og_website)) {
+      $links[] = l(t('website'), $node->og_website);
+    }
+    if (module_exists('search') && user_access('search content')) {
+      $post = drupal_get_form('og_search_form', $node);
+    }
+  }
+  elseif ($subscription == 'requested') {
+    $links[] = t('Your subscription request awaits approval.');
+    $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'destination=og');
+  }
+  elseif (!$user->uid) {
+    $dest = drupal_get_destination();
+    $links[] = t('You must <a href="!register">register</a>/<a href="!login">login</a> in order to post into this group.', array('!register' => url("user/register", $dest), '!login' => url("user/login", $dest)));
+  }
+  elseif ($node->og_selective < OG_INVITE_ONLY) {
+    $links[] = og_subscribe_link($node);
+  }
+  else {
+    $links[] = t('This is a @closed group. The group administrators add/remove subscribers as needed.', array('@closed' => t('closed')));
+  }
+
+  $block['content'] = theme('item_list', $links). $post;
+  $block['subject'] = $node->title;
+  return $block;
 }
 
 function og_subscribe_link($node) {
