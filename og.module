@@ -2512,3 +2512,18 @@ function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
     return $query;
   }
 }
+
+// A hook from replies.module. Return TRUE if og is handling the notification to a given recipient on a given reply
+function og_replies_mine($comment, $recipient) {
+  $node = node_load($comment->nid);
+  // check each group that this node is in
+  foreach ((array)$node->og_groups as $gid) {
+    // check if recipient is an active member
+    if (isset($recipient->og_groups[$gid]) && $recipient->og_groups[$gid]['is_active']) {
+      // check if user is already getting this group notification
+      if ($recipient->og_email || $recipient->og_groups[$gid]['mail_type']) {
+        return TRUE;
+      }
+    }
+  }
+}
