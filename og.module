@@ -1051,10 +1051,10 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
         $args[] = 'feed';
       }
       $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
-      if ($GLOBALS['current_view']->num_rows) {
+      if ($GLOBALS['current_view']->num_rows || $view->page_empty) {
         $node->content['view'] = array('#value' => $built);
       }
-      elseif (!$view->page_empty) {
+      else {
         // use this default empty text unless overridden by View (which is a usually not a good idea. this text is smart)
         og_home_empty($node);
       }
