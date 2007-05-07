@@ -118,7 +118,7 @@ function og_menu_check() {
   $args = func_get_args();
   $function = array_shift($args);
   $groups = array_keys($user->og_groups);
-  if (user_access('administer nodes') || isset($groups[$args[0]])) {
+  if (user_access('administer nodes') || in_array($args[0], $groups)) {
     return call_user_func_array($function, $args);
   }
   else {
