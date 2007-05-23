@@ -400,6 +400,15 @@ function og_update_16() {
   return array();
 }
 
+function og_update_17() {
+  // we are once again putting group nodes into the node access system. see http://drupal.org/node/128306
+  if (variable_get('og_enabled', 0)) {
+    node_access_rebuild();
+  }
+  return array();
+}
+
+
 // An implementation of hook_disable
 // Causes a node_access rebuild
 function og_disable() {
