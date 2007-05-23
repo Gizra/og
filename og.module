@@ -671,7 +671,7 @@ function og_subscribe($gid, $uid = NULL) {
       $account = $user;
     }
     else {
-      drupal_set_message(t('In order to subscribe to this group, you must login or register a new account. After you have successfully done so, you will need to follow the %subscribe link again.', array('%subscribe' => t('subscribe'))));
+      drupal_set_message(t('In order to subscribe to this group, you must login or register a new account. After you have successfully done so, you will need to follow the <em>subscribe</em> link again.'));
       drupal_goto('user');
     }
   }
@@ -679,6 +679,10 @@ function og_subscribe($gid, $uid = NULL) {
     $account = user_load(array('uid' => $uid));
   }
   $node = node_load($gid);
+   if (!node_access('view', $node)) {
+     // if you can't view the group, you can't subscribe either. group homepages can be private with some custom coding.
+     drupal_access_denied();
+   }
   
   // only admins can subscribe another person
   if ($account->uid != $user->uid && !node_access('update', $node)) {
@@ -2194,7 +2198,7 @@ function og_user_title_list($result, $gid = NULL, $show_more = TRUE) {
 
 function og_block_details() {
   // only display group details if we have a group context
-  if ($node = og_get_group_context()) {
+  if (($node = og_get_group_context()) && node_access('view', $node)) {
     // allow other og-enabled node types to provide their own block details
     $block = module_invoke($node->type,'og_block_details',$node);
     if (!$block) {
