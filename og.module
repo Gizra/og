@@ -95,7 +95,7 @@ function og_menu($may_cache) {
       }
       // group admin only
       $node = node_load($gid);
-      $items[] = array('path' => "og/users/$gid/add", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array('og_add_users', $gid), 'type' => MENU_LOCAL_TASK, 'weight' => 5, 'access' => node_access('update', $node));
+      $items[] = array('path' => "og/users/$gid/add_user", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array('og_add_users', $gid), 'type' => MENU_LOCAL_TASK, 'weight' => 5, 'access' => node_access('update', $node));
     }
     
     // email tab on group node
