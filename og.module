@@ -1996,18 +1996,23 @@ function og_save_ancestry($node) {
 
 function og_node_access_records($node) {
   // don't write records if og access control is disabled or the node type is omitted or node is a group
-  // if you want group nodes to be protected too, see http://drupal.org/node/83005
-  if (og_is_omitted_type($node->type) || !variable_get('og_enabled', FALSE) || og_is_group_type($node->type)) {
+  if (og_is_omitted_type($node->type) || !variable_get('og_enabled', FALSE)) {
     return;
   }
   
-  if (is_array($node->og_groups)) {
+  if (og_is_group_type($node->type)) {
+    // this grant allows group admins to manage stuff
+    $grants[] = array('realm' => 'og_subscriber', 'gid' => $node->nid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
+  }
+  elseif (is_array($node->og_groups)) {
+    // applies to non group nodes
     foreach ($node->og_groups as $gid) {
       // we write a broad grant here but og_node_grants() only issues it selectively.
       $grants[] = array('realm' => 'og_subscriber', 'gid' => $gid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
     }
   }
   
+  // this grant now gets set on group nodes as well as regular nodes
   if ($node->og_public) {
     $grants[] = array('realm' => 'og_public', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
   }
