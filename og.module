@@ -770,8 +770,14 @@ function og_subscribe_user($gid, $account, $request = NULL) {
       break;
     case OG_CLOSED:
     case OG_INVITE_ONLY:
-      $return_value = array('type' => 'rejected',
+      // admins can subscribe users to these groups, but others can't.
+      if (node_access('update', $node)) {
+        og_save_subscription($gid, $account->uid, array('is_active' => 1));
+      }
+      else {
+        $return_value = array('type' => 'rejected',
                             'message' => t('Subscription request to the @group group was rejected, only group administrators can add users to this group.', array('@group' => $node->title)));
+      }
   }
   return $return_value;
 }
