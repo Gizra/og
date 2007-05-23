@@ -222,7 +222,7 @@ function og_views_tables() {
       // here's a filter that is limited to og content types to be used for exposed filters that should not contain other values
      'filters' => array(
         'og_type_selector' => array(
-          'field' => 'type_selector',
+          'field' => 'type',
           'name' => t('OG: node type (selector)'),
           'list' => $type_options,
           'list-type' => 'list',
