@@ -1721,7 +1721,7 @@ function og_mail($type, $obj) {
               (oug.og_email IS NULL AND ou.mail_type=1) OR
               (oug.og_email = %d AND ou.mail_type=1) OR
               (oug.og_email = %d)
-            )";
+              ) AND u.status = 1";
     $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
     while ($row = db_fetch_object($result)) {
       // append these group specific variables
@@ -2289,8 +2289,8 @@ function og_subscribe_link($node) {
 
 // $group is an object containing the group node
 function og_og_create_links($group) {
+  $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
   foreach (node_get_types() as $type) {
-    $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
     // we used to check for node_access(create) but then node admins would get a false positive and see node types that they could not create
     if (!in_array($type->type, $exempt) && module_invoke(node_get_types('module', $type), 'access', 'create', $type)) {
       $links[] = l(t('Create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "gids[]=$group->nid");
