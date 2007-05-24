@@ -1721,7 +1721,7 @@ function og_mail($type, $obj) {
               (oug.og_email IS NULL AND ou.mail_type=1) OR
               (oug.og_email = %d AND ou.mail_type=1) OR
               (oug.og_email = %d)
-            )";
+              ) AND u.status = 1";
     $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
     while ($row = db_fetch_object($result)) {
       // append these group specific variables
