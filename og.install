@@ -406,6 +406,13 @@ function og_update_17() {
   return array();
 }
 
+function og_update_18() {
+  // woops. got it a bit wrong last time
+  if (variable_get('og_enabled', 0)) {
+    node_access_rebuild();
+  }
+  return array();
+}
 
 // An implementation of hook_disable
 // Causes a node_access rebuild
