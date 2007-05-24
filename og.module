@@ -42,13 +42,13 @@ function og_help($section) {
 function og_menu($may_cache) {
   global $user;
   $items = array();
+  $access = $user->uid; // login is required
 
   if ($may_cache) {
     // anon users should be able to get to the subscribe page
     $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('Subscribe to group'));
     $items[] = array('path' => 'og', 'callback' => 'og_list_groups_page', 'title' => t('Groups'), 'weight' => 3, 'access' => user_access('access content'));
     
-    $access = $user->uid; // login is required
     $items[] = array('path' => 'og/opml', 'type' => MENU_CALLBACK, 'callback' => 'og_opml', 'access' => $access, 'title' => t('OPML'));
     $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('Unsubscribe from group'));
     $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('Approve subscription request'));
@@ -96,7 +96,7 @@ function og_menu($may_cache) {
       }
       // group admin only
       $node = node_load($gid);
-      $items[] = array('path' => "og/users/$gid/add", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array('og_add_users', $gid), 'type' => MENU_LOCAL_TASK, 'weight' => 5, 'access' => node_access('update', $node));
+      $items[] = array('path' => "og/users/$gid/add_user", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array('og_add_users', $gid), 'type' => MENU_LOCAL_TASK, 'weight' => 5, 'access' => node_access('update', $node));
     }
     
     // email tab on group node
@@ -119,7 +119,7 @@ function og_menu_check() {
   $args = func_get_args();
   $function = array_shift($args);
   $groups = array_keys($user->og_groups);
-  if (user_access('administer nodes') || isset($args[0], $groups)) {
+  if (user_access('administer nodes') || in_array($args[0], $groups)) {
     return call_user_func_array($function, $args);
   }
   else {
@@ -672,7 +672,7 @@ function og_subscribe($gid, $uid = NULL) {
       $account = $user;
     }
     else {
-      drupal_set_message(t('In order to subscribe to this group, you must login or register a new account. After you have successfully done so, you will need to follow the %subscribe link again.', array('%subscribe' => t('subscribe'))));
+      drupal_set_message(t('In order to subscribe to this group, you must login or register a new account. After you have successfully done so, you will need to follow the <em>subscribe</em> link again.'));
       drupal_goto('user');
     }
   }
@@ -680,6 +680,10 @@ function og_subscribe($gid, $uid = NULL) {
     $account = user_load(array('uid' => $uid));
   }
   $node = node_load($gid);
+   if (!node_access('view', $node)) {
+     // if you can't view the group, you can't subscribe either. group homepages can be private with some custom coding.
+     drupal_access_denied();
+   }
   
   // only admins can subscribe another person
   if ($account->uid != $user->uid && !node_access('update', $node)) {
@@ -767,8 +771,14 @@ function og_subscribe_user($gid, $account, $request = NULL) {
       break;
     case OG_CLOSED:
     case OG_INVITE_ONLY:
-      $return_value = array('type' => 'rejected',
+      // admins can subscribe users to these groups, but others can't.
+      if (node_access('update', $node)) {
+        og_save_subscription($gid, $account->uid, array('is_active' => 1));
+      }
+      else {
+        $return_value = array('type' => 'rejected',
                             'message' => t('Subscription request to the @group group was rejected, only group administrators can add users to this group.', array('@group' => $node->title)));
+      }
   }
   return $return_value;
 }
@@ -828,7 +838,7 @@ function og_get_subscriptions($uid, $min_is_active = 1) {
       $subscriptions[$uid][$row['nid']] = $row;
     }
 
-    if (!$subscriptions[$uid]) {
+    if (!isset($subscriptions[$uid])) {
       $subscriptions[$uid] = array();
     }
   }
@@ -1052,10 +1062,10 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
         $args[] = 'feed';
       }
       $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
-      if ($GLOBALS['current_view']->num_rows) {
+      if ($GLOBALS['current_view']->num_rows || $view->page_empty) {
         $node->content['view'] = array('#value' => $built);
       }
-      elseif (!$view->page_empty) {
+      else {
         // use this default empty text unless overridden by View (which is a usually not a good idea. this text is smart)
         og_home_empty($node);
       }
@@ -1381,7 +1391,7 @@ function og_msgid_server() {
 
 function og_form_alter($form_id, &$form) {
   // Add audience selection to node forms
-  if (strpos($form_id, 'node_form')) {
+  if (isset($form['#node']) && $form_id == $form['#node']->type .'_node_form') {
     $node = $form['#node'];
     if (og_is_group_type($node->type)) {
       $form = array_merge($form, og_group_form($node));
@@ -1704,7 +1714,7 @@ function og_mail($type, $obj) {
               (oug.og_email IS NULL AND ou.mail_type=1) OR
               (oug.og_email = %d AND ou.mail_type=1) OR
               (oug.og_email = %d)
-            )";
+              ) AND u.status = 1";
     $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
     while ($row = db_fetch_object($result)) {
       // append these group specific variables
@@ -1979,18 +1989,23 @@ function og_save_ancestry($node) {
 
 function og_node_access_records($node) {
   // don't write records if og access control is disabled or the node type is omitted or node is a group
-  // if you want group nodes to be protected too, see http://drupal.org/node/83005
-  if (og_is_omitted_type($node->type) || !variable_get('og_enabled', FALSE) || og_is_group_type($node->type)) {
+  if (og_is_omitted_type($node->type) || !variable_get('og_enabled', FALSE)) {
     return;
   }
   
-  if (is_array($node->og_groups)) {
+  if (og_is_group_type($node->type)) {
+    // this grant allows group admins to manage stuff
+    $grants[] = array('realm' => 'og_subscriber', 'gid' => $node->nid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
+  }
+  elseif (is_array($node->og_groups)) {
+    // applies to non group nodes
     foreach ($node->og_groups as $gid) {
       // we write a broad grant here but og_node_grants() only issues it selectively.
       $grants[] = array('realm' => 'og_subscriber', 'gid' => $gid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
     }
   }
   
+  // this grant now gets set on group nodes as well as regular nodes
   if ($node->og_public) {
     $grants[] = array('realm' => 'og_public', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
   }
@@ -2161,6 +2176,18 @@ function og_block_subscribers() {
 }
 
 function og_block_details() {
+  // only display group details if we have a group context
+  if (($node = og_get_group_context()) && node_access('view', $node)) {
+    // allow other og-enabled node types to provide their own block details
+    $block = module_invoke($node->type,'og_block_details',$node);
+    if (!$block) {
+      $block = og_og_block_details($node);
+    }
+    return $block;
+  }
+}
+
+function og_og_block_details($node) {
   global $user;
 
   if ($node = og_get_group_context()) {
@@ -2232,9 +2259,10 @@ function og_subscribe_link($node) {
 
 // $group is an object containing the group node
 function og_og_create_links($group) {
+  $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
   foreach (node_get_types() as $type) {
-    $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
-    if (!in_array($type->type, $exempt) && node_access('create', $type->type)) {
+    // we used to check for node_access(create) but then node admins would get a false positive and see node types that they could not create
+    if (!in_array($type->type, $exempt) && module_invoke(node_get_types('module', $type), 'access', 'create', $type)) {
       $links[] = l(t('Create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "gids[]=$group->nid");
     }
   }
