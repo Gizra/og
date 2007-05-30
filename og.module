@@ -2283,7 +2283,7 @@ function og_search_form($group) {
     '#value' => t('Search'),
   );
   $form['#process'] = array('views_filters_process' => array());
-  $form['#method'] = 'GET';
+  $form['#method'] = 'get';
   $form['#action'] = url("og/search/$group->nid");
   return $form;
 } 
