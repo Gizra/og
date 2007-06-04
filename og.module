@@ -2008,14 +2008,14 @@ function og_node_access_records($node) {
   }
   elseif (is_array($node->og_groups)) {
     // applies to non group nodes
+    if ($node->og_public) {
+      $grants[] = array('realm' => 'og_public', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
+    }
+    
     foreach ($node->og_groups as $gid) {
       // we write a broad grant here but og_node_grants() only issues it selectively.
       $grants[] = array('realm' => 'og_subscriber', 'gid' => $gid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
     }
-  }
-  
-  if ($node->og_public) {
-    $grants[] = array('realm' => 'og_public', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
   }
 
   return $grants;
