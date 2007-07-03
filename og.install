@@ -10,7 +10,6 @@ function og_install() {
         selective int(11) NOT NULL default '0',
         description varchar(255) NULL,
         theme varchar(255) NULL,
-        website varchar(255) NULL,
         register int(1) NOT NULL default 0,
         directory int(1) NOT NULL default 0,
         notification int(1) NOT NULL default 0,
@@ -87,14 +86,8 @@ function og_install() {
       ");
       break;
   }
-  drupal_set_message(t('Organic groups module enabled. Please see the included readme.txt file for further installation instructions.'));
-}
-
-/**
- * Implementation of hook_enable().
- */
-function og_enable() {
   _block_rehash(); // enable standard og blocks
+  drupal_set_message(t('Organic groups module enabled. Please see the included readme.txt file for further installation instructions.'));
 }
 
 // 2006-05-31 PFM: deletes row if present in the table.  The first parameter

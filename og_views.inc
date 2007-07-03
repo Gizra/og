@@ -26,10 +26,6 @@ function og_views_tables() {
         'description' => array(
           'name' => t('Og: Group: Description'),
         ),
-        'website' => array(
-          'name' => t('Og: Group: Website'),
-          'handler' => 'og_handler_field_website',
-        ),
         'count' => array(
           'name' => t('Og: Group: Subscriber Count'),
           'handler' => 'og_handler_field_count',
@@ -1043,15 +1039,6 @@ function og_handler_field_count($fieldinfo, $fielddata, $value, $data) {
 
   $cnt = db_num_rows(db_query(og_list_users_sql(), $data->nid));
   return in_array($data->nid, array_keys($user->og_groups)) ? l($cnt, "og/users/$data->nid") : $cnt;
-}
-
-/**
- * Views handler to display the external website field
- */
-function og_handler_field_website($fieldinfo, $fielddata, $value, $data) {
-  if ($value) {
-    return l(t('external website'), $value);
-  }
 }
 
 /**
