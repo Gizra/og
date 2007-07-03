@@ -10,7 +10,6 @@ function og_install() {
         selective int(11) NOT NULL default '0',
         description varchar(255) NULL,
         theme varchar(255) NULL,
-        website varchar(255) NULL,
         register int(1) NOT NULL default 0,
         directory int(1) NOT NULL default 0,
         notification int(1) NOT NULL default 0,

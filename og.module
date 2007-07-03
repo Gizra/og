@@ -1111,7 +1111,6 @@ function og_group_form($node) {
   $form['og_public'] = array('#type' => 'value', '#value' => TRUE);
   
   $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true, '#description' => t('A brief description for the group details block and the group directory.'), '#weight' => -4);
-  $form['og_website'] = array('#type' => 'textfield', '#title' => t('Group website'), '#default_value' => $node->og_website, '#description' => t('If your group has its own website, enter the address here.'));
 
   if ($node->nid) {
     $default = $node->og_selective;
@@ -1207,15 +1206,6 @@ function og_get_node_groups_result($nid) {
   return db_query(db_rewrite_sql($sql, 'oga', 'group_nid'), $nid);
 }
 
-function og_validate_group(&$node) {
-  // Ensure valid URL was entered for website
-  if (isset($node->og_website) && !empty($node->og_website)) {
-    if (!valid_url($node->og_website, TRUE)) {
-      form_set_error('og_website', t('Please enter a valid URL for group website, such as  http://www.example.com/'));
-    }
-  }
-}
-
 function og_submit_group(&$node) {
   // comments are not allowed on group nodes, since we don't have any nice way to present them
   if (og_is_group_type($node->type)) {
@@ -1235,20 +1225,20 @@ function og_submit_group(&$node) {
 }
 
 function og_load_group(&$node) {
-  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, website AS og_website, register AS og_register, directory AS og_directory, notification AS og_notification, language AS og_language FROM {og} WHERE nid = %d';
+  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, register AS og_register, directory AS og_directory, notification AS og_notification, language AS og_language FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, (array)db_fetch_array($result));
   $node->comment = COMMENT_NODE_DISABLED; // we don't use comments on og nodes. technically not needed since we set this on node submit
 }
 
 function og_insert_group($node) {
-  $sql = "INSERT INTO {og} (nid, theme, selective, description, website, register, directory, notification, language) VALUES (%d, '%s', %d, '%s', '%s', %d, %d, %d, '%s')";
-  db_query($sql, $node->nid, $node->theme, $node->og_selective, $node->og_description, $node->og_website, $node->og_register, $node->og_directory, $node->og_notification, $node->og_language);
+  $sql = "INSERT INTO {og} (nid, theme, selective, description, register, directory, notification, language) VALUES (%d, '%s', %d, '%s', %d, %d, %d, '%s')";
+  db_query($sql, $node->nid, $node->theme, $node->og_selective, $node->og_description, $node->og_register, $node->og_directory, $node->og_notification, $node->og_language);
 }
 
 function og_update_group($node) {
-  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', website = '%s', directory = %d, notification = %d, language = '%s' WHERE nid = %d";
-  db_query($sql, $node->theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_website, $node->og_directory, $node->og_notification, $node->og_language, $node->nid);
+  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', directory = %d, notification = %d, language = '%s' WHERE nid = %d";
+  db_query($sql, $node->theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_directory, $node->og_notification, $node->og_language, $node->nid);
 }
 
 // returns TRUE if node type should generate email notifications when posted to a group.
@@ -1293,7 +1283,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'validate':
       if (og_is_group_type($node->type)) {
-        og_validate_group($node);
+        // none
       }
       else {
         // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
@@ -1343,12 +1333,15 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_save_ancestry($node);
       }
       
-      // TODO: move this to cron to help give time to fix typos, and help scaling. create new module
-      // implementing an SMTP library that uses cron.
       if (!module_exists('og2list')) {
-        if ($node->status && og_node_type_notify($node->type)) {
-          $node->msgid = "$node->nid-0". og_msgid_server();
-          og_mail(node_get_types('name', $node), $node);
+        if ($node->status && og_node_type_notify($node->type) && $node->og_groups) {
+          if (module_exists('job_queue')) {
+            $description = t('OG: notify group subscribers about node %nid - !link', array('%nid' => $node->nid, '!link' => l($node->title, "node/$node->nid")));
+            job_queue_add('og_mail', $description, array('node', $node->nid));
+          }
+          else {
+            og_mail('node', $node->nid);
+          }
         }
       }
       break;
@@ -1632,21 +1625,17 @@ function og_comment($comment, $op) {
       $comment = (array) $comment;
       // fall through
     case 'insert':
-      // would prefer that these are sent with some delay to prevent give author time to correct typos. where is my cron based send?
       if ($comment['status'] == COMMENT_PUBLISHED && !module_exists('og2list')) {
         $node = node_load($comment['nid']);
-        $comment['og_groups'] = $node->og_groups;
-        $comment['title'] = $node->title;
-        $comment['msgid'] = $comment['nid']. '-'. $comment['cid']. og_msgid_server();
-        $reply = $comment['nid']. '-';
-        if ($comment['pid']) {
-          $reply .= $comment['pid'];
+        if ($node->og_groups) {
+          if (module_exists('job_queue')) {
+            $description = t('OG: notify group subscribers about comment %id on !link', array('%id' => $comment['cid'], '!link' => l($node->title, "node/$node->nid", NULL, NULL, 'comment-'. $comment['cid'])));
+            job_queue_add('og_mail', $description, array('comment', $comment['cid']));
+          }
+          else {
+            og_mail('comment', $comment['cid']);
+          }
         }
-        else {
-          $reply .= '0';
-        }
-        $comment['in_reply_to'] .= $reply. og_msgid_server();
-        og_mail('comment', (object)$comment);
       }
       break;
   }  
@@ -1654,88 +1643,105 @@ function og_comment($comment, $op) {
 
 
 /**
- * Send this node/comment via email to all email subscribers. Called from og_nodeapi() and og_comment()
- * TODO: this mail feature is a bit messy. rethink.
+ * Send this node/comment via email to all email subscribers. Called from og_nodeapi() and og_comment().
+ * Sometimes called from during cron if job_queue.module is enabled (recommended).
+ * TODO: this function is a bit messy. rethink.
  *
  * @param $type
  *   the object type: node or comment
- * @param $obj
- *   the node or comment which was just added. if comment, the $og_groups element should be copied from parent node
+ * @param $id
+ *   the id of the node or comment which was just added.
  * @return
  *   none
  */
-function og_mail($type, $obj) {
-  if ($obj->og_groups) {
-    // prepare the body
-    if ($type == 'comment') {
-      // registered user
-      if ($obj->uid) {
-        $account = user_load(array('uid' => $obj->uid));
-        $obj->name = $account->name;
-      }
-      // anonymous user
-      else {
-        $obj->name = variable_get('anonymous', 'Anonymous');
-      }
-      $obj->body = check_markup($obj->comment, $comment->format, FALSE);
-      $originalurl = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
-      $replyurl = url("comment/reply/$obj->nid/$obj->cid", NULL, NULL, TRUE);
-    }
-    else {
+function og_mail($type, $id) {
+  if ($type == 'comment') {
+    $obj = _comment_load($id);
+    // registered user
+    if ($obj->uid) {
       $account = user_load(array('uid' => $obj->uid));
       $obj->name = $account->name;
-      $obj->subject = $obj->title;
-      $obj = node_prepare($obj, FALSE);
-      // fills body with CCK fields, event fields, etc. instead of "n/a"
-      $obj->body = og_node_view($obj);
-      $originalurl = url("node/$obj->nid", NULL, NULL, TRUE);
-      $replyurl = url("comment/reply/$obj->nid", NULL, 'comment-form', TRUE);
     }
-    
-    $sitemail = variable_get("site_mail", ini_get("sendmail_from"));
-    $headers = array('X-Mailer' => 'Drupal - og_mail', 'Precedence' => 'list', 'Message-Id' => "<$obj->msgid>");
-    if ($obj->in_reply_to) {
-      $headers['In-Reply-To'] =  "<$obj->in_reply_to>";
+    // anonymous user
+    else {
+      $obj->name = variable_get('anonymous', 'Anonymous');
     }
+    $obj->body = check_markup($obj->comment, $obj->format, FALSE);
+    $originalurl = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
+    $replyurl = url("comment/reply/$obj->nid/$obj->cid", NULL, NULL, TRUE);
+    $node = node_load($obj->nid);
+    $obj->og_groups = $node->og_groups;
+    $obj->title = $node->title;
+    $obj->msgid = $obj->nid. '-'. $obj->cid. og_msgid_server();
+    $reply = $obj->nid. '-';
+    if ($obj->pid) {
+      $reply .= $obj->pid;
+    }
+    else {
+      $reply .= '0';
+    }
+    $obj->in_reply_to .= $reply. og_msgid_server();
+    $type_friendly = 'comment';
+  }
+  else {
+    $obj = node_load($id);
+    $account = user_load(array('uid' => $obj->uid));
+    $obj->name = $account->name;
+    $obj->subject = $obj->title;
+    $obj = node_prepare($obj, FALSE);
+    // fills body with CCK fields, event fields, etc. instead of "n/a"
+    $obj->body = og_node_view($obj);
+    $obj->msgid = $node->nid. '-0'. og_msgid_server();
+    $originalurl = url("node/$obj->nid", NULL, NULL, TRUE);
+    $replyurl = url("comment/reply/$obj->nid", NULL, 'comment-form', TRUE);
+    $type_friendly = node_get_types('name', $node);
+  }
+  
+  $sitemail = variable_get("site_mail", ini_get("sendmail_from"));
+  $headers = array('X-Mailer' => 'Drupal - og_mail', 'Precedence' => 'list', 'Message-Id' => "<$obj->msgid>");
+  if ($obj->in_reply_to) {
+    $headers['In-Reply-To'] =  "<$obj->in_reply_to>";
+  }
 
-    // set email variables
-    $variables = array(
-      '@site' => variable_get('site_name', 'drupal'), 
-      '!read_more' => $obj->readmore ? t('Read more') : t('View original'),
-      '!content_url' => $originalurl,
-      '!reply_url' => $replyurl,
-      '@title' => trim($obj->title),
-      '@subject' => trim($obj->subject),
-      '@body' => trim(og_mail_output($obj->body)),
-      '@username' => $obj->name
-    );
-    
-    // send email to selective subscribers and global subscribers
-    $groups = implode(', ', $obj->og_groups);
-    // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 3 positive statements about og_email field
-   // og_email can be NULL when you enable og on an existing site.
-    $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
-            FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid LEFT JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
-            WHERE u.mail != '' AND
-              ou.nid IN ($groups) AND (
-              (oug.og_email IS NULL AND ou.mail_type=1) OR
-              (oug.og_email = %d AND ou.mail_type=1) OR
-              (oug.og_email = %d)
-              ) AND u.status = 1";
-    $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
-    while ($row = db_fetch_object($result)) {
-      // append these group specific variables
-      $variables['@group'] = $row->group_name;
-      $variables['!group_url'] = url("og/manage/$row->gid", NULL, NULL, TRUE);
-      $variables['@type'] = $type;
+  // set email variables
+  $variables = array(
+    '@site' => variable_get('site_name', 'drupal'), 
+    '!read_more' => $obj->readmore ? t('Read more') : t('View original'),
+    '!content_url' => $originalurl,
+    '!reply_url' => $replyurl,
+    '@title' => trim($obj->title),
+    '@subject' => trim($obj->subject),
+    '@body' => trim(og_mail_output($obj->body)),
+    '@username' => $obj->name
+  );
+  
+  // send email to selective subscribers and global subscribers
+  $groups = implode(', ', $obj->og_groups);
+  // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 3 positive statements about og_email field
+ // og_email can be NULL when you enable og on an existing site.
+  $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
+          FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid LEFT JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
+          WHERE u.mail != '' AND
+            ou.nid IN ($groups) AND (
+            (oug.og_email IS NULL AND ou.mail_type=1) OR
+            (oug.og_email = %d AND ou.mail_type=1) OR
+            (oug.og_email = %d)
+            ) AND u.status = 1";
+  $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
+  while ($row = db_fetch_object($result)) {
+    // TODO: add node_access('view') call here in case node is moderated or other.
+    // Hopefully D6 will avert need to imporesonate.
+    // Append these group specific variables.
+    $variables['@group'] = $row->group_name;
+    $variables['!group_url'] = url("og/manage/$row->gid", NULL, NULL, TRUE);
+    $variables['@type'] = $type_friendly;
 
-      // see http://www.ietf.org/rfc/rfc2369.txt. UTF8 OK? $headers .= "\nX-List_ID: ";      
-      $unsubscribe = url("og/manage/$row->gid", NULL, NULL, TRUE);
-      $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
-      $group_home = url("node/$row->gid", NULL, NULL, TRUE);
-      $groupheaders = $headers + array('List-Id' => "$row->group_name <$group_home>", 'List-Unsubscribe' => "<$unsubscribe>", 'List-Owner' => "$row->group_owner <$ownerurl>", "List-Archive" => "<$group_home>");
-      drupal_mail('og_mail', $row->mail, _og_user_mail_text('og_new_node_subject', $variables), _og_user_mail_text('og_new_node_body', $variables), $obj->name. " <$sitemail>", $groupheaders);
-    }
+    // see http://www.ietf.org/rfc/rfc2369.txt. UTF8 OK?
+    $unsubscribe = url("og/manage/$row->gid", NULL, NULL, TRUE);
+    $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
+    $group_home = url("node/$row->gid", NULL, NULL, TRUE);
+    $groupheaders = $headers + array('List-Id' => "$row->group_name <$group_home>", 'List-Unsubscribe' => "<$unsubscribe>", 'List-Owner' => "$row->group_owner <$ownerurl>", "List-Archive" => "<$group_home>");
+    drupal_mail('og_mail', $row->mail, _og_user_mail_text('og_new_node_subject', $variables), _og_user_mail_text('og_new_node_body', $variables), $obj->name. " <$sitemail>", $groupheaders);
   }
 }
 
@@ -2251,9 +2257,6 @@ function og_og_block_details($node) {
     $links[] = $txt;
     $links[] =  t('Manager: '). theme('username', $node);
     $links[] = isset($subscription) ? l(t('My subscription'), "og/manage/$node->nid") : og_subscribe_link($node);
-    if (isset($node->og_website) && !empty($node->og_website)) {
-      $links[] = l(t('website'), $node->og_website);
-    }
     if (module_exists('search') && user_access('search content')) {
       $post = drupal_get_form('og_search_form', $node);
     }
@@ -2542,4 +2545,33 @@ function og_replies_mine($comment, $recipient) {
       }
     }
   }
+}
+
+function og_requirements($phase) {
+  $requirements = array();
+  // Ensure translations don't break at install time
+  $t = get_t();
+  if ($phase == 'runtime') {
+    if (!module_exists('job_queue')) {
+      $requirements['og_modules']  = array(
+        'title' => $t('Organic groups modules'),
+        'value' => $t('Organic groups works best when !job_queue.module is enabled. See the Integration section of the !readme.', array('!job_queue' => l('job_queue.module', 'http://drupal.org/project/job_queue'), '!readme' => og_readme())),
+        'severity' => REQUIREMENT_INFO
+      );
+    }
+    
+    if (!variable_get('og_enabled', FALSE)) {
+      $requirements['og_access'] = array(
+        'title' => $t('Organic groups access control'),
+        'value' => $t('Organic groups access control is disabled. See the !settings', array('!settings' => l($t('settings page'), 'admin/og/og'))),
+        'severity' => REQUIREMENT_INFO
+      );
+    }
+  }
+  
+  return $requirements;
+}
+
+function og_readme() {
+  return l('README file', drupal_get_path('module', 'og'). '/README.txt');
 }
