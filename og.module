@@ -2177,7 +2177,7 @@ function og_block_subscribers() {
     // only members can see subscriber list
     if (in_array($gid, array_keys($user->og_groups))) {
       $max = variable_get('og_block_cnt_2', 10);
-      $sql = "SELECT DISTINCT(u.uid), u.* FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.nid = %d ORDER BY ogu.created DESC";
+      $sql = "SELECT DISTINCT(u.uid), u.* FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.nid = %d AND u.status = 1 ORDER BY ogu.created DESC";
       $result = db_query_range($sql, $gid, 0, $max);
       $block['content'] = og_user_title_list($result, $gid);
       $block['subject'] = t('Recently joined');
