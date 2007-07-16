@@ -1,0 +1,1574 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  node.tpl.php,v 1.5 2006/10/30 04:41:42 weitzman
+#  og_views.inc,v 1.32 2007/05/23 19:19:05 weitzman
+#  og.module,v 1.365 2007/06/04 03:11:15 weitzman
+#  og.install,v 1.30 2007/06/04 03:36:36 weitzman
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Organic groups\n"
+"POT-Creation-Date: 2007-06-23 09:24+0200\n"
+"PO-Revision-Date: 2007-07-15 14:05+0100\n"
+"Last-Translator: Robert Zelnik <rzelnik@vsieti.sk>\n"
+"Language-Team: Slovak <team@drupal.sk>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\\n\n"
+"X-Poedit-Language: Slovak\n"
+"X-Poedit-Country: SLOVAKIA\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: node.tpl.php:17
+#: og_views.inc:678;845
+#: og.module:348;939;1044;1271;1407;1609;1887;1956
+msgid "Groups"
+msgstr "Skupiny"
+
+#: og_views.inc:27
+msgid "Og: Group: Description"
+msgstr "Og: Skupina: Popis"
+
+#: og_views.inc:30
+msgid "Og: Group: Website"
+msgstr "Og: Skupina: Webstránka"
+
+#: og_views.inc:34
+msgid "Og: Group: Subscriber Count"
+msgstr "Og: Skupina: Konto účastníka"
+
+#: og_views.inc:40
+msgid "Og: Group: Selective"
+msgstr "Og: Skupina: Voliteľné"
+
+#: og_views.inc:43
+msgid "Og: Group: Subscribe Link"
+msgstr "Og: Skupina: Odkaz na prihlásenie"
+
+#: og_views.inc:50
+msgid "Og: Group: Notification"
+msgstr "Og: Skupina: Upozornenie"
+
+#: og_views.inc:52
+msgid "Displays <em>yes</em> if group automatically sends email notifications to subscribers"
+msgstr "Zobrazí <em>áno</em>, ak skupina automaticky posiela upozornenia prihláseným"
+
+#: og_views.inc:55
+msgid "Og: Group: Language"
+msgstr "Og: Skupina: Jazyk"
+
+#: og_views.inc:56
+msgid "Displays the language selected for a given group"
+msgstr "Zobrazí zvolený jazyk pre danú skupinu"
+
+#: og_views.inc:62
+msgid "Og: Group: List in directory"
+msgstr "Og: Skupina: Zobraziť v adresári"
+
+#: og_views.inc:66
+msgid "Admin specifies whether or not a group appears in the public listings."
+msgstr "Admin určuje, či sa skupina má alebo nemá zobraziť vo verejne dostupných zoznamoch."
+
+#: og_views.inc:83
+msgid "Og: Post in specified group"
+msgstr "Og: Vložiť do určenej skupiny"
+
+#: og_views.inc:85
+msgid "Filter for a given organic group. <em>Value</em> should be a numeric nid."
+msgstr "Filter pre danú organickú skupinu. <em>Hodnotou</em> by malo byť numerické nid."
+
+#: og_views.inc:88
+msgid "Og: Post in specified group type"
+msgstr "Og: Vložiť do určeného typu skupiny"
+
+#: og_views.inc:95
+msgid "Filter for a given organic group type."
+msgstr "Filter pre daný typ organickej skupiny."
+
+#: og_views.inc:98
+msgid "OG: Posts in current group"
+msgstr "OG: Príspevky v aktuálnej skupine"
+
+# determinovať kontext
+#: og_views.inc:99
+#, fuzzy
+msgid "Posts in current group. Useful for blocks where determining context is hard."
+msgstr "Príspevky v aktuálnej skupine. Užitočné pre bloky, v ktorých je ťažké determinovať kontext."
+
+#: og_views.inc:106
+msgid "OG: Public"
+msgstr "OG: Verejné"
+
+#: og_views.inc:107
+msgid "Posts marked as Public, which are viewable by non group members as well."
+msgstr "Príspevky označené ako verejné sú zobraziteľné aj pre nečlenov skupiny."
+
+#: og_views.inc:115
+msgid "Og: Public"
+msgstr "Og: Verejné"
+
+# krkolomná formulácia
+#: og_views.inc:117
+#, fuzzy
+msgid "Displays <em>yes</em> if post is public according to OG."
+msgstr "Zobrazí <áno>, ak je príspevok verejný vo vzťahu k s OG."
+
+#: og_views.inc:134
+msgid "Og: Group names"
+msgstr "Og: Názvy skupín"
+
+#: og_views.inc:137
+msgid "Display links to any groups that are affiliated with a post."
+msgstr "Zobrazí odkazy na skupiny, ktoré majú spojitosť s príspevkom."
+
+# alebo e-mail prihlásenia?
+#: og_views.inc:157
+#, fuzzy
+msgid "Og: Subscription email"
+msgstr "Og: E-mail pre prihlásenie"
+
+#: og_views.inc:160
+msgid "Does subscriber receive email notifications for a group."
+msgstr "Má prihlásený dostávať e-mailové upozornenia skupiny?"
+
+#: og_views.inc:163
+msgid "Og: Manage subscription link"
+msgstr "Og: Spravovať odkaz prihlásenia"
+
+#: og_views.inc:169
+msgid "Og: Is subscriber an admin in a group"
+msgstr "Og: Je prihlásený adminom v skupine"
+
+# alebo používateľmi vnorené skupiny?
+#: og_views.inc:177
+#, fuzzy
+msgid "Og: Group in User Subbed Groups"
+msgstr "Og: Skupina vo vnorených skupinách používateľa"
+
+#: og_views.inc:181
+msgid "Groups are filtered to where current user is a member ."
+msgstr "Zobrazujú sa tie skupiny, v ktorých sa nachádza aktuálny používateľ."
+
+#: og_views.inc:202
+msgid "Og: Post in User Subbed Groups"
+msgstr "Og: Príspevok vo vnorených skupinách používateľa"
+
+#: og_views.inc:206
+msgid "Posts are filtered to groups that current user is a member of."
+msgstr "Príspevky sú filtrované do skupín, ktorých je aktuálny užívateľ členom."
+
+#: og_views.inc:226
+msgid "OG: node type (selector)"
+msgstr "OG: typ uzlu (prepínač)"
+
+#: og_views.inc:231
+#, fuzzy
+msgid "A node type selector that is limited to og-enabled node types. Use as exposed filter that only contains og node types."
+msgstr "Prepínač typu uzlov, ktorý je obmedzený na typy uzlov, ktoré sú povolené pre OG. Použite ho ako viditeľný filter, ktorý obsahuje iba uzly typu og."
+
+#: og_views.inc:235
+msgid "OG: type"
+msgstr "OG: typ"
+
+#: og_views.inc:236
+msgid "Is"
+msgstr "Je"
+
+# nejasná formulácia
+#: og_views.inc:240
+#, fuzzy
+msgid "Restrict to node types which have been designated behave as groups."
+msgstr "Obmedziť na typy uzlov, ktoré boli označené, aby sa javili ako skupiny."
+
+#: og_views.inc:250
+#, fuzzy
+msgid "Og: Group nid"
+msgstr "Og: nid skupiny"
+
+#: og_views.inc:252
+msgid "Filter for a given organic group"
+msgstr "Filter danej organickej skupiny"
+
+#: og_views.inc:271
+msgid "Unaffiliated"
+msgstr "Nepričlenený"
+
+#: og_views.inc:291
+msgid "Shows all activity in subscribed groups."
+msgstr "Zobraziť všetku aktivitu v prihlásených skupinách."
+
+#: og_views.inc:295
+msgid "Recent posts in my groups"
+msgstr "Najnovšie príspevky v mojej skupine"
+
+#: og_views.inc:300
+msgid "There are no posts in your subscribed groups."
+msgstr "Vo vašich prihlásených skupinách nie sú žiadne príspevky."
+
+#: og_views.inc:307
+msgid "My recent"
+msgstr "Moje najnovšie"
+
+#: og_views.inc:327;339;432;444;605;698;827
+msgid "Group"
+msgstr "Skupina"
+
+#: og_views.inc:333;438;822
+msgid "Type"
+msgstr "Typ"
+
+#: og_views.inc:346;451;834
+msgid "Author"
+msgstr "Autor"
+
+#: og_views.inc:352;457;839
+msgid "Replies"
+msgstr "Odpovede"
+
+#: og_views.inc:359;464;850
+msgid "Last Post"
+msgstr "Posledný príspevok"
+
+#: og_views.inc:394
+msgid "Shows unread posts in subscribed groups."
+msgstr "Zobrazuje neprečítané príspevky v prihlásených skupinách."
+
+#: og_views.inc:400
+msgid "Unread posts in my groups"
+msgstr "Neprečítané príspevky v mojej skupine"
+
+#: og_views.inc:405
+msgid "There are no new posts in your subscribed groups."
+msgstr "Vo vašich prihlásených skupinách nie sú nové príspevky."
+
+#: og_views.inc:412
+msgid "My unread"
+msgstr "Moje neprečítané"
+
+#: og_views.inc:555
+msgid "List user's subscribed groups and provide link to manage subscription"
+msgstr "Zobraziť používateľove prihlásené skupiny a poskytnúť odkaz pre spravovanie prihlásenia"
+
+#: og_views.inc:561
+msgid "My groups"
+msgstr "Moje skupiny"
+
+# kŕmenie?
+#: og_views.inc:562
+#, fuzzy
+msgid "You may edit all your email subscriptions using this convenient page. Also, you might be interested in an <a href=\"!url\" rel=\"nofollow\">OPML feed containing feeds from all your subscribed groups</a>."
+msgstr "Táto stránka vám umožní upraviť vaše e-mailové prihlásenia. Taktiež by vás mohlo zaujímať <a href=\"!url\" rel=\"nofollow\">OPML kŕmenie obsahujúce kŕmenia zo všetkých vašich prihlásených skupín</a>."
+
+#: og_views.inc:571
+msgid "No subscribed groups"
+msgstr "Žiadne prihlásené skupiny"
+
+#: og_views.inc:612;706
+#: og.module:1012
+msgid "Manager"
+msgstr "Správca"
+
+#: og_views.inc:617;711
+#: og.module:91;942
+msgid "Subscribers"
+msgstr "Prihlásení"
+
+#: og_views.inc:622
+msgid "Email"
+msgstr "E-mail"
+
+#: og_views.inc:627
+msgid "Manage"
+msgstr "Spravovať"
+
+#: og_views.inc:661
+#: og.module:2359
+msgid "groups directory"
+msgstr "adresár skupín"
+
+#: og_views.inc:666
+msgid "Groups directory"
+msgstr "Adresár skupín"
+
+#: og_views.inc:671
+msgid "No groups"
+msgstr "Žiadne skupiny"
+
+#: og_views.inc:716
+#: og.module:1039;1113
+msgid "Description"
+msgstr "Popis"
+
+#: og_views.inc:721
+#: og.module:713;2286
+msgid "Subscribe"
+msgstr "Prihlásiť"
+
+#: og_views.inc:758
+msgid "Search for a group by name"
+msgstr "Hľadať skupinu podľa názvu"
+
+#: og_views.inc:771
+msgid "Shows active posts across the whole site"
+msgstr "Zobraziť aktívne príspevky z celého webu"
+
+#: og_views.inc:776
+msgid "Recent posts across whole site"
+msgstr "Najnovšie príspevky z celého webu"
+
+#: og_views.inc:788
+msgid "Recent posts"
+msgstr "Najnovšie príspevky"
+
+#: og_views.inc:804
+msgid "Recent posts for %1"
+msgstr "Najnovšie príspevky pre %1"
+
+#: og_views.inc:1029
+msgid "external website"
+msgstr "externá webstránka"
+
+#: og_views.inc:1041
+msgid "Closed"
+msgstr "Zatvorené"
+
+#: og_views.inc:1043
+msgid "Invite only"
+msgstr "Iba pre pozvaných"
+
+#: og_views.inc:1045
+msgid "subscribe"
+msgstr "prihlásiť"
+
+#: og_views.inc:1062
+msgid "my subscription"
+msgstr "moje prihlásenia"
+
+#: og_views.inc:1066
+msgid "yes"
+msgstr "áno"
+
+#: og_views.inc:1104
+msgid "Current group"
+msgstr "Aktuálna skupina"
+
+#: og_xmlrpc.inc:13
+msgid "unrecognized user ID: %uid"
+msgstr "nerozpoznané ID používateľa: %uid"
+
+#: og_xmlrpc.inc:17;37;52
+msgid "Wrong username or password."
+msgstr "Neplatné používateľské meno alebo heslo."
+
+#: og_xmlrpc.inc:33
+msgid "User is not a member of the specified group"
+msgstr "Používateľ nie je členom určenej skupiny"
+
+#: og_xmlrpc.inc:48
+msgid "User is not allowed to retrieve subscriptions for another user."
+msgstr "Používateľ nie je oprávnený odoberať prihlásenia pre iného užívateľa."
+
+#: og.module:36
+msgid "Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages."
+msgstr "Zoskupiť určité bloky, ktoré sú viditeľné na stránkach skupín a nie na všeobecných stránkach ako napr. domovská stránka alebo administrátorské stránky."
+
+#: og.module:38
+msgid "In order to let group admins determine their own group theme, you must enable multiple themes using !page."
+msgstr "Ak majú mať administrátori skupín možnosť určiť si vlastnú tému vzhľadu pre určitú skupinu, je treba povoliť viac tém na stránke !page."
+
+#: og.module:38
+msgid "theme configuration page"
+msgstr "strana konfigurácie témy"
+
+#: og.module:49
+msgid "Subscribe to group"
+msgstr "Prihlásiť do skupiny"
+
+#: og.module:51
+msgid "OPML"
+msgstr "OPML"
+
+#: og.module:52
+msgid "Unsubscribe from group"
+msgstr "Odhlásiť zo skupiny"
+
+#: og.module:53
+msgid "Approve subscription request"
+msgstr "Povoliť požiadavku na prihlásenie"
+
+#: og.module:54
+msgid "Deny subscription request"
+msgstr "Odmietnuť požiadavku na prihlásenie"
+
+#: og.module:55
+msgid "Create group administrator"
+msgstr "Vytvoriť správcu skupiny"
+
+#: og.module:56
+msgid "Delete group administrator"
+msgstr "Zmazať správcu skupiny"
+
+#: og.module:57
+msgid "Group feed"
+msgstr "Kŕmenie skupiny"
+
+#: og.module:60;596
+msgid "Send invitation"
+msgstr "Poslať pozvánku"
+
+#: og.module:61
+msgid "Manage subscription"
+msgstr "Spravovať prihlásenie"
+
+#: og.module:65
+msgid "Group activity"
+msgstr "Aktivita skupiny"
+
+#: og.module:73
+msgid "Organic groups"
+msgstr "Organické skupiny"
+
+#: og.module:74
+msgid "Administer the suite of Organic groups modules."
+msgstr "Spravovať zostavu modulov Organické skupiny."
+
+#: og.module:80;2337
+msgid "Organic groups configuration"
+msgstr "Konfigurácia organických skupín"
+
+#: og.module:80
+msgid "Configure the main Organic groups module (og)"
+msgstr "Konfigurovať hlavný modul Organické skupiny (og)"
+
+#: og.module:92
+msgid "List"
+msgstr "Zoznam"
+
+#: og.module:94
+msgid "Faces"
+msgstr "Tváre"
+
+#: og.module:98
+msgid "Add subscribers"
+msgstr "Pridať prihlásených"
+
+#: og.module:105
+msgid "E-mail"
+msgstr "E-mail"
+
+#: og.module:298
+msgid "Send email to %group"
+msgstr "Poslať e-mail skupine %group"
+
+#: og.module:303
+msgid "Your email will be sent to !count in this group. Please use this feature sparingly."
+msgstr "Váš e-mail bude odoslaný ďalším členom skupiny (!count). Prosím využívajte túto možnosť striedmo."
+
+#: og.module:306
+msgid "Subject"
+msgstr "Predmet"
+
+#: og.module:306
+msgid "Enter a subject for your email."
+msgstr "Vložte predmet vášho e-mailu."
+
+#: og.module:307
+msgid "Body"
+msgstr "Telo"
+
+#: og.module:307
+msgid "Enter a body for your email."
+msgstr "Vložte telo vášho e-mailu."
+
+#: og.module:308
+msgid "Send email"
+msgstr "Poslať e-mail"
+
+#: og.module:362
+msgid "You may not unsubscribe from this group because it is a %closed group. You should request unsubscription from a group administrator."
+msgstr "Nemôžete sa odhlásiť z tejto skupiny, pretože sa jedná o %closed skupinu. Mali by ste požiadať správcu skupiny o odhlásenie."
+
+#: og.module:362;2273
+msgid "closed"
+msgstr "uzavreté"
+
+#: og.module:365
+msgid "You may not unsubscribe from this group because you are its owner. A site administrator can assign ownership to another user and then you may unsubscribe."
+msgstr "Nemôžete sa odhlásiť z tejto skupiny, keďže ste jej vlastník. Administrátor webu môže priradiť vlastníctvo inému používateľovi a potom sa budete môcť odhlásiť."
+
+#: og.module:368
+msgid "Unsubscribe from this group"
+msgstr "Odhlásiť z tejto skupiny"
+
+#: og.module:369
+msgid "Actions"
+msgstr "Počiny"
+
+#: og.module:377;381;384
+msgid "Email notification"
+msgstr "E-mailové"
+
+#: og.module:377;2339
+msgid "enabled"
+msgstr "povolené"
+
+#: og.module:377;2344
+msgid "disabled"
+msgstr "zakázané"
+
+#: og.module:377
+msgid "Do you want to receive an email each time a message is posted to this group?"
+msgstr "Chcete dostávať e-mail zakaždým, keď bude do tejto skupiny vložený príspevok?"
+
+#: og.module:381
+msgid "Your !prof is configured to: <em>Always receive email notifications</em>."
+msgstr "Váš !prof je nastavený na: <em>Vždy dostávať e-mailové upozornenia</em>."
+
+#: og.module:381;384
+msgid "personal profile"
+msgstr "osobný profil"
+
+#: og.module:384
+msgid "Your !prof is configured to: <em>Never receive email notifications</em>."
+msgstr "Váš !prof je nastavený na: <em>Nikdy nedostávať e-mailové upozornenia</em>."
+
+#: og.module:388;858
+msgid "Submit"
+msgstr "Potvrdiť"
+
+#: og.module:399
+msgid "Subscription saved."
+msgstr "Prihlásenie uložené."
+
+#: og.module:450
+msgid "User approval failed, user not longer available on website."
+msgstr "Schválenie používateľa zlyhalo, používateľ nie je na stránke dostupný."
+
+#: og.module:454
+msgid "!name already approved to group %group"
+msgstr "!name už má povolený prístup do skupiny %grou"
+
+#: og.module:459
+msgid "Subscription request approved."
+msgstr "Požiadavka na prihlásenie odsúhlasená."
+
+#: og.module:481
+msgid "Subscription request denied."
+msgstr "Požiadavka na prihlásenie odmietnutá."
+
+#: og.module:516
+msgid "Are you sure you want to make %name a group administrator for the group %title?"
+msgstr "Skutočne chcete, aby sa používateľ %name stal skupinovým administrátorom pre skupinu %title?"
+
+#: og.module:519
+msgid "Confirm"
+msgstr "Potvrdiť"
+
+#: og.module:520;566;713;814
+msgid "Cancel"
+msgstr "Zrušiť"
+
+#: og.module:531
+msgid "%name was promoted to %ga"
+msgstr "%name bol podporený do %ga"
+
+#: og.module:531;576
+msgid "group administrator"
+msgstr "administrátor skupiny"
+
+#: og.module:562
+msgid "Are you sure you want to remove %name as a group administrator for the group %title?"
+msgstr "Skutočne chcete odstrániť účet %name ako správcu skupiny %title?"
+
+#: og.module:565
+msgid "Remove"
+msgstr "Odstrániť"
+
+#: og.module:576
+msgid "%name is no longer a %ga"
+msgstr "%name už nie je %ga"
+
+#: og.module:594
+msgid "Email addresses or usernames"
+msgstr "E-mailové adresy a používateľské mená"
+
+#: og.module:594
+msgid "Enter up to %max email addresses or usernames. Separate multiple addresses by commas or new lines. Each person will receive an invitation message from you."
+msgstr "Vložte najviac %max e-mailových adries alebo používateľských mien. Oddeľte jednotlivé adresy čiarkami alebo novými riadkami. Každá osoba od vás obdrží pozvánku."
+
+#: og.module:595
+msgid "Personal message"
+msgstr "Osobná správa"
+
+#: og.module:595
+msgid "Optional. Enter a message which will become part of the invitation email."
+msgstr "Voliteľné. Vložte správu, ktorá sa stane súčasťou pozývacieho e-mailu."
+
+#: og.module:611
+msgid "You may not specify more than %max email addresses or usernames."
+msgstr "Nemôžete určiť viac ako %max e-mailových adries alebo používateľských mien."
+
+#: og.module:614
+msgid "You may not invite yourself - @self"
+msgstr "Nemôžete pozvať samého seba - @self"
+
+#: og.module:638
+msgid "invalid email address or username: "
+msgstr "neplatná e-mailová adresa alebo používateľské meno:"
+
+#: og.module:674
+msgid "In order to subscribe to this group, you must login or register a new account. After you have successfully done so, you will need to follow the <em>subscribe</em> link again."
+msgstr "Ak sa chcete prihlásiť do tejto skupiny, musíte sa prihlásiť alebo si vytvoriť účet. Po úspešnom prihlásení alebo zaregistrovaní bude potrebné znova navštíviť odkaz <en>prihlásiť</em>."
+
+#: og.module:693
+msgid "@user is already subscribed to the group @group"
+msgstr "@user už je prihlásený do skupiny @group"
+
+#: og.module:708
+msgid "Additional details"
+msgstr "ďalšie podrobnosti"
+
+#: og.module:708
+msgid "Add any detail which will help an administrator decide whether to approve or deny your subscription request."
+msgstr "Vložte podrobnosti, ktoré pomôžu administrátorovi rozhodnúť sa, či vám má schváliť alebo odmietnuť vašu požiadavku na pripojenie."
+
+#: og.module:711
+msgid "Are you sure you want to join the group %title?"
+msgstr "Skutočne sa chcete prihlásiť do skupiny %title?"
+
+#: og.module:758
+msgid ""
+"\n"
+"\n"
+"Personal message from @name:\n"
+"------------------\n"
+"\n"
+"@request"
+msgstr ""
+"\n"
+"\n"
+"Osobný odkaz od používateľa @name:\n"
+"------------------\n"
+"\n"
+"@request"
+
+#: og.module:763
+msgid "Subscription request to the %group group awaits approval by an administrator."
+msgstr "Požiadavka na prihlásenie do skupiny %group čaká na odsúhlasenie administrátorom."
+
+#: og.module:769
+msgid "Subscribed to the @group"
+msgstr "Používateľ prihlásený do skupiny @group"
+
+#: og.module:779
+msgid "Subscription request to the @group group was rejected, only group administrators can add users to this group."
+msgstr "Požiadavka na prihlásenie do skupiny @group bola odmietnutá, iba administrátori skupiny môžu pridávať používateľov do tejto skupiny."
+
+#: og.module:813
+msgid "Are you sure you want to unsubscribe !name from the group %title?"
+msgstr "Skutočne chcete odhlásiť používateľa !name zo skupiny %title?"
+
+#: og.module:814
+msgid "Unsubscribe"
+msgstr "Odhlásiť"
+
+#: og.module:822
+msgid "User unsubscribed from group."
+msgstr "Používateľ bol odhlásený zo skupiny."
+
+#: og.module:853
+msgid "List of users"
+msgstr "Zoznam používateľov"
+
+#: og.module:856
+msgid "Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma."
+msgstr "Vložte jedno alebo viac používateľských mien, ktoré majú byť pridružené k tejto skupine. Viaceré používateľské mená by mali byť oddelené čiarkou."
+
+#: og.module:877
+msgid "Unrecognized %names: "
+msgstr "Nerozoznané %names: "
+
+#: og.module:900
+msgid "Operations"
+msgstr "Operácia"
+
+#: og.module:904
+msgid "manager"
+msgstr "manažér"
+
+#: og.module:913;1883
+msgid "(approval needed)"
+msgstr "(vyžaduje sa schválenie)"
+
+#: og.module:914
+msgid "administrator"
+msgstr "administrátor"
+
+#: og.module:918
+msgid "unsubscribe"
+msgstr "odhlásiť"
+
+#: og.module:920
+msgid "admin: remove"
+msgstr "admin: odstrániť"
+
+#: og.module:923
+msgid "admin: create"
+msgstr "admin: vytvoriť"
+
+#: og.module:927
+msgid "approve"
+msgstr "povoliť"
+
+#: og.module:928
+msgid "deny"
+msgstr "odmietnuť"
+
+#: og.module:965;968
+msgid "admin"
+msgstr "admin"
+
+#: og.module:1011
+msgid "Title"
+msgstr "Názov"
+
+#: og.module:1013
+msgid "Node cnt"
+msgstr "Počet uzlov"
+
+#: og.module:1014
+msgid "Comment cnt"
+msgstr "Počet komentárov"
+
+#: og.module:1015
+msgid "Age"
+msgstr "Vek"
+
+#: og.module:1016
+msgid "Last comment"
+msgstr "Posledný komentár"
+
+#: og.module:1080
+msgid "No posts in this group."
+msgstr "Žiadne príspevky v tejto skupine."
+
+#: og.module:1083
+msgid "No public posts in this group."
+msgstr "Žiadne verejné príspevky v tejto skupine."
+
+#: og.module:1085
+msgid "You must <a href=\"!register\">register</a> or <a href=\"!login\">login</a> and become a subscriber in order to post messages, and view any private posts."
+msgstr "Musíte sa <a href=\"!register\">zaregistrovať</a> alebo <a href=\"!login\">prihlásiť</a> a stať sa účastníkom, aby ste mohli posielať správy alebo zobrazovať súkromné príspevky."
+
+#: og.module:1089
+msgid "Consider <a href=\"!url\">subscribing to this group</a> in order to view its posts."
+msgstr "Zvážte <a href=\"!url\">pripojenie k tejto skupine</a>, ak chcete zobrazovať jej príspevky."
+
+#: og.module:1113
+msgid "A brief description for the group details block and the group directory."
+msgstr "Stručný popis pre blok podrobností skupiny a pre adresár skupín."
+
+#: og.module:1114
+msgid "Group website"
+msgstr "Webstránka skupiny"
+
+#: og.module:1114
+msgid "If your group has its own website, enter the address here."
+msgstr "Ak vaša skupina má vlastnú webstránku, vložte sem jej adresu."
+
+#: og.module:1122
+msgid "Subscription requests"
+msgstr "Požiadavky na prihlásenie"
+
+#: og.module:1122
+msgid "open - subscription requests are accepted immediately."
+msgstr "otvorená - požiadavky na pripojenie sú prijaté okamžite."
+
+#: og.module:1122
+msgid "moderated - subscription requests must be approved."
+msgstr "moderovaná - požiadavky na pripojenie musia byť schválené."
+
+#: og.module:1122
+msgid "invite only - subscriptions must be created by an administrator."
+msgstr "iba pre pozvaných - prihlášky musia byť vytvorené administrátorom."
+
+#: og.module:1122
+msgid "closed - subscriptions are fully administered by an administrator."
+msgstr "uzavretá - prihlášky sú plne spravované administrátorom."
+
+#: og.module:1122
+msgid "How should subscription requests be handled in this group? When you select <em>closed</em>, users will not be able to subscribe <strong>or</strong> unsubscribe."
+msgstr "Ako majú byť v tejto skupine vybavené požiadavky na pripojenie? Ak vyberiete <em>uzavreté</em>, používatelia sa nebudú môcť pripojiť <strong>alebo</strong> odpojiť."
+
+#: og.module:1145;2367
+msgid "registration form"
+msgstr "registračný formulár"
+
+# checkbox
+#: og.module:1145
+#, fuzzy
+msgid "Should this group be available for subscription during registration?. If checked, a corresponding checkbox will be added to the registration form."
+msgstr "Má byť táto skupina dostupná pre pripojenie počas registrácie? Ak je toto zaškrtnuté, do registračného formulára bude pridaný zodpovedajúci checkbox."
+
+#: og.module:1170
+msgid "list in groups directory"
+msgstr "zobraziť v adresári skupín"
+
+#: og.module:1170
+msgid "Should this group appear on the !page?"
+msgstr "Má sa táto skupina objaviť na !page?"
+
+#: og.module:1170
+msgid "list of groups page"
+msgstr "stránka zoznamu skupín"
+
+#: og.module:1179
+msgid "Language"
+msgstr "Jazyk"
+
+#: og.module:1182
+msgid "Selecting a different locale will change the interface language of the group. Users who have chosen a preferred language always see their chosen language."
+msgstr "Voľba inej lokalizácie zmení jazyk rozhrania tejto skupiny. Používatelia, ktorí majú zvolený preferovaný jazyk, uvidia vždy nimi zvolený jazyk."
+
+#: og.module:1187
+msgid "Selecting a different theme will change the look and feel of the group."
+msgstr "Voľba inej témy zmení vzhľad tejto skupiny."
+
+#: og.module:1214
+msgid "Please enter a valid URL for group website, such as  http://www.example.com/"
+msgstr "Vložte prosím platné URL pre webstránku skupiny, napr. http://www.priklad.sk/"
+
+#: og.module:1302
+msgid "You must !join before posting on this web site."
+msgstr "Musíte sa !join, ak chcete prispievať na túto webstránku."
+
+#: og.module:1302;1604
+msgid "join a group"
+msgstr "pripojiť sa ku skupine"
+
+#: og.module:1409
+msgid "Create foo"
+msgstr "Vytvoriť oné"
+
+#: og.module:1433
+msgid "Do nothing."
+msgstr "Nič nevykonať."
+
+#: og.module:1434
+msgid "Delete all group posts which don't also belong to another group."
+msgstr "Zmazať všetky príspevky, ktoré neprináležia aj inej skupine."
+
+#: og.module:1436
+msgid "Move all group posts to the group listed below."
+msgstr "Presunúť všetky príspevky do skupiny zobrazenej nižšie."
+
+#: og.module:1438
+msgid "Group posts"
+msgstr "Príspevky skupiny"
+
+#: og.module:1438
+msgid "In addition to deleting this group, you may choose how to disposition the posts within it."
+msgstr "Pri zmazaní tejto skupiny získate navyše možnosť vybrať si spôsob dostupnosti jej príspevkov."
+
+#: og.module:1442
+msgid "Target group"
+msgstr "Zamerať sa na skupinu"
+
+#: og.module:1442
+msgid "If you chose <b>Move all group posts</b> above, specify a destination group."
+msgstr "Ak si vyberiete <b>Presunúť všetky príspevky skupiny</b>, určite cieľovú skupinu."
+
+#: og.module:1446
+msgid "Delete group"
+msgstr "Vymazať skupinu"
+
+#: og.module:1540;1543;2378;2379
+msgid "Public"
+msgstr "Verejné"
+
+#: og.module:1540;1543
+msgid "Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>."
+msgstr "Zobraziť tento príspevok každému, alebo iba účastníkom skupín označených vyššie. Príspevky, ktoré neprináležia žiadnej skupine, sú vždy <em>Verejné</em>."
+
+#: og.module:1580;1594
+msgid "Audience"
+msgstr "Obecenstvo"
+
+#: og.module:1604
+msgid "You must !join before posting a %type."
+msgstr "Musíte sa !prihlásiť predtým než vložíte príspevok typu %type."
+
+#: og.module:1704
+msgid "Read more"
+msgstr "Čítať ďalej"
+
+#: og.module:1704
+msgid "View original"
+msgstr "Zobraziť originál"
+
+#: og.module:1754
+msgid "Log"
+msgstr "Záznam"
+
+#: og.module:1835
+msgid "@group: '@title' at @site"
+msgstr "@group: '@title' na stránkach @site"
+
+#: og.module:1837
+msgid ""
+"@type '@subject' by @username\n"
+"\n"
+"@body\n"
+"\n"
+"!read_more: !content_url\n"
+"Post reply: !reply_url\n"
+"\n"
+"--\n"
+"You are subscribed to the group '@group' at @site.\n"
+"To manage your subscription, visit !group_url"
+msgstr ""
+"@type '@subject' vložil @username\n"
+"\n"
+"@body\n"
+"\n"
+"!read_more: !content_url\n"
+"Vložiť odpoveď: !reply_url\n"
+"\n"
+"--\n"
+"Pripojili ste sa do skupiny '@group' na stránke @site.\n"
+"To manage your subscription, visit !group_url"
+
+#: og.module:1839
+msgid ""
+"@body\n"
+"\n"
+"--\n"
+"This message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe"
+msgstr ""
+"@body\n"
+"\n"
+"--\n"
+"Túto správu zaslal administrátor skupiny '@group' na stránkach @site. Ak chcete navštíviť túto skupinu, prezrite si !url_group. Ak sa chcete odpojiť z tejto skupiny, navštívte !url_unsubscibeThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe"
+
+#: og.module:1841
+msgid "Subscription request approved for '@title'"
+msgstr "Požiadavka na pripojenie pre '@title' schválená"
+
+#: og.module:1843
+msgid "You may now post messages in this group located at !group_url"
+msgstr "Teraz môžete posielať správy do tejto skupiny umiestnenej na !group_url"
+
+#: og.module:1845
+msgid "Subscription request denied for '@title'"
+msgstr "Požiadavka na pripojenie pre '@title' zamietnutá"
+
+#: og.module:1847
+msgid "Sorry, your subscription request was denied."
+msgstr "Žiaľ vaša požiadavka na pripojenie bola zamietnutá."
+
+#: og.module:1849
+msgid "Invitation to join the group '@group' at @site"
+msgstr "Pozvánka na pripojenie sa do skupiny '@group' na stránke @site"
+
+#: og.module:1851
+msgid ""
+"Hi. I'm a member of '@group' and I welcome you to join this group as well. Please see the link and message below.\n"
+"\n"
+"@group\n"
+"@description\n"
+"Subscribe: !group_url\n"
+"@body"
+msgstr ""
+"Ahoj. Som členom skupiny '@group' a pozývam ťa pridať sa tiež. Prosím pozri si odkaz a správu uvedeńú nižšie.\n"
+"\n"
+"@group\n"
+"@description\n"
+"Pripojiť: !group_url\n"
+"@body"
+
+#: og.module:1853
+msgid "Subscription request for '@group' from '@username'"
+msgstr "Požiadavka na pripojenie pre skupinu '@group' od používateľa '@username'"
+
+#: og.module:1855
+msgid ""
+"To instantly approve this request, visit !approve_url.\n"
+"You may deny this request or manage subscribers at !group_url. !request"
+msgstr ""
+"Pre okamžité schválenie tejto požiadavky navštívte !approve_url.\n"
+"Môžete túto požiadavku zamietnuť alebo môžete spravovať účastníkov na adrese !group_url. "
+
+#: og.module:1857
+msgid "You are now an administrator for the group '@group'"
+msgstr "Ste administrátorom skupiny '@group'"
+
+#: og.module:1859
+msgid ""
+"@username, you are now an administrator for the group '@group'.\n"
+"\n"
+"You can administer this group by logging in here:\n"
+" !group_url"
+msgstr ""
+"@username, ste administrátorom skupiny '@group'.\n"
+"\n"
+"Môžete spravovať túto skupinu, ak sa prihlásite tu:\n"
+" !group_url"
+
+#: og.module:1881
+msgid "Subscribe to @name."
+msgstr "Pripojiť do @name."
+
+#: og.module:1895
+msgid "Organic groups settings"
+msgstr "Nastavenia organických skupín"
+
+#: og.module:1898
+msgid "Never send email notifications. Useful when tracking activity via RSS feed instead."
+msgstr "Nikdy neposielať e-mailové upozornenia. Užitočné, keď sa aktivita sleduje cez RSS kŕmenie."
+
+#: og.module:1899
+msgid "Always send email notifications"
+msgstr "Vždy posielať e-mailové upozornenia"
+
+# checkbox
+#: og.module:1900
+msgid "Selectively send email notification based on the checkbox for each of my group's <em>My Subscription</em> page"
+msgstr "Voliteľne zasiela e-mailové upozornenia na základe checkboxu na každej stránke <em>Moja prihláška</em> pre každú skupinu"
+
+#: og.module:1904
+msgid "Email notifications"
+msgstr "E-mailové upozornenia"
+
+#: og.module:1907
+msgid "When posts are submitted into your subscribed groups, you may be notified via email."
+msgstr "Ak sú do skupín, do ktorých ste pripojení, podané príspevky, budete upozornení e-mailom."
+
+#: og.module:2044;2352
+msgid "Group details"
+msgstr "Podrobnosti skupiny"
+
+#: og.module:2046
+msgid "Group subscribers"
+msgstr "Členovia skupiny"
+
+#: og.module:2047;2146
+msgid "New groups"
+msgstr "Nové skupiny"
+
+#: og.module:2050;2119
+msgid "Group notifications"
+msgstr "Upozornenia skupiny"
+
+#: og.module:2051
+msgid "Group Network"
+msgstr "Sieť skupiny"
+
+#: og.module:2079
+msgid "Maximum number of items to show"
+msgstr "Maximálny počet položiek na zobrazenie"
+
+#: og.module:2100
+msgid "This group offers a !groupfeed and an !email."
+msgstr "Táto skupina ponúka !groupfeed a !email."
+
+#: og.module:2100
+msgid "RSS feed"
+msgstr "RSS kŕmenie"
+
+#: og.module:2100
+msgid "email subscription"
+msgstr "e-mailové prihlásenie"
+
+# kŕmenie?
+#: og.module:2103
+#, fuzzy
+msgid " Or subscribe to these personalized, sitewide feeds:"
+msgstr "Alebo sa pripojte k týmto personalizovaným kŕmeniam platným pre celú webstránku."
+
+#: og.module:2105;2109;2113
+msgid "feed"
+msgstr "kŕmenie"
+
+#: og.module:2106;2110;2114
+msgid "page"
+msgstr "strana"
+
+#: og.module:2107
+msgid "my unread: "
+msgstr "moje neprečítané:"
+
+#: og.module:2111
+msgid "my group: "
+msgstr "moja skupina:"
+
+#: og.module:2115
+msgid "all posts: "
+msgstr "všetky príspevky:"
+
+#: og.module:2129;2129
+msgid "OPML file"
+msgstr "OPML súbor"
+
+#: og.module:2144;2200
+msgid "more"
+msgstr "ďalej"
+
+#: og.module:2144
+msgid "Browse the newest groups."
+msgstr "Prezerať najnovšie skupiny."
+
+#: og.module:2162
+msgid "My Network"
+msgstr "Moja sieť"
+
+#: og.module:2177
+msgid "Recently joined"
+msgstr "Čerstvo pripojení"
+
+#: og.module:2201
+msgid "View all subscribers."
+msgstr "Zobratiť všetkých účastníkov."
+
+#: og.module:2246
+msgid "Invite friend"
+msgstr "Pozvať priateľa"
+
+#: og.module:2252
+msgid "Manager: "
+msgstr "Správca:"
+
+#: og.module:2253
+msgid "My subscription"
+msgstr "Moje prihlásenie"
+
+#: og.module:2255
+msgid "website"
+msgstr "webstránka"
+
+#: og.module:2262
+msgid "Your subscription request awaits approval."
+msgstr "Vaša prihláška čaká na schválenie."
+
+#: og.module:2263
+msgid "delete request"
+msgstr "vymazať požiadavku"
+
+#: og.module:2267
+msgid "You must <a href=\"!register\">register</a>/<a href=\"!login\">login</a> in order to post into this group."
+msgstr "Musíte sa <a href=\"!register\">registrovať</a>/<a href=\"!login\">prihlásiť</a>, ak chcete prispievať do tejto skupiny."
+
+#: og.module:2273
+msgid "This is a @closed group. The group administrators add/remove subscribers as needed."
+msgstr "Toto je @closed skupina. Administrátori skupiny pridávajú/odstraňujú účastníkov podľa potreby."
+
+#: og.module:2283
+msgid "Request subscription"
+msgstr "Vyžiadať prihlásenie"
+
+#: og.module:2297
+msgid "Create !type"
+msgstr "Vytvoriť !type"
+
+#: og.module:2297
+msgid "Add a new !s in this group."
+msgstr "Pridať nové !s do tejto skupiny."
+
+#: og.module:2313
+msgid "Search"
+msgstr "Hľadať"
+
+#: og.module:2322;2345
+msgid "Enable"
+msgstr "Povoliť"
+
+#: og.module:2325;2330
+msgid "The node access table has been rebuilt."
+msgstr "Tabuľka prístupu k uzlom bola obnovená."
+
+#: og.module:2327;2340
+#: og.install:429
+msgid "Disable"
+msgstr "Zakázať"
+
+#: og.module:2341
+msgid "Before disabling this module, use the button below to restore default permissions."
+msgstr "Pred deaktivovaním tohto modulu použite tlačidlo umiesnené nižšie na obnovenie predvolených oprávnení."
+
+#: og.module:2346
+msgid "Enable access control if you want to author any content that is restricted to group members. The button below will delete one record in your node_access table (if needed) and thus enable node permissions on your site. You may revert by clicking the same button again. If you switch back and forth, your node permissions are preserved."
+msgstr "Povoľte riadenie prístupu, ak chcete autorizovať akýkoľvek obsah, ktorý je vyhradený pre členov skupiny. Nižšie umiestnené tlačidlo zmaže jeden záznam vo vašej tabuľke node_access (ak je to potrebné) a teda aktivuje oprávnenia uzlu na vašej webstránke. Toto môžete vrátiť kliknutím na to isté tlačidlo znova. Ak sa prepnete späť a von, vaše oprávnenia uzla budú zachované."
+
+#: og.module:2348
+msgid "Access control"
+msgstr "Kontrola prístupu"
+
+#: og.module:2349
+msgid "Organic groups access control is currently %status."
+msgstr "Riadenie prístupu organických skupín je v súčasnosti %status."
+
+#: og.module:2354
+msgid "New groups don't appear in the groups directory. Administrators control the directory exclusively."
+msgstr "Nové skupiny sa nezobrazujú v adresári skupín. Zoznam spravujú výhradne administrátori."
+
+#: og.module:2355
+msgid "New groups always appear in the groups directory."
+msgstr "Nové skupiny sa vždy zobrazia v adresári skupín."
+
+#: og.module:2356
+msgid "Group creator chooses whether her group appears in the directory. Defaults to %in."
+msgstr "Zakladateľ skupiny určuje, či sa jeho skupina zobrazí v adresári. Predvolené je %in."
+
+#: og.module:2356
+msgid "in directory"
+msgstr "v adresári"
+
+#: og.module:2357
+msgid "Group creator chooses whether her group appears in the directory. Defaults to %out."
+msgstr "Zakladateľ skupiny určuje, či jeho sa skupina zobrazí v adresári. Predvolené je %out."
+
+#: og.module:2357
+msgid "not in directory"
+msgstr "nenachádza sa v adresári"
+
+#: og.module:2359
+msgid "Groups directory control"
+msgstr "Správa adresára skupín"
+
+#: og.module:2359;2367
+msgid "OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting."
+msgstr "Adminovia OG vidia checkbox na pridávanie skupiny do %dir. Berte na vedomie, že zmena tohto nastavenia nemá vplyv na jestvujúce príspevky. Ak chcete zachovať nastavena, uložte znova tieto príspevky."
+
+#: og.module:2362
+msgid "New groups don't appear in on the registration form. Administrators control the form exclusively."
+msgstr "Nové skupiny sa nezobrazia v registračnom formulári.  Iba administrátori majú právo ovládať formulár."
+
+#: og.module:2363
+msgid "New groups always appear on the registration form."
+msgstr "Nové skupiny sa vždy zobrazia v registračnom formulári."
+
+#: og.module:2364
+msgid "Group creator chooses whether her group appears on the registration form. Defaults to %in."
+msgstr "Zakladatelia skupín určujú, či sa má skupina zobraziť v registračnom formulári. Predvolené je %in."
+
+#: og.module:2364
+msgid "on form"
+msgstr "vo formulári"
+
+#: og.module:2365
+msgid "Group creator chooses whether her group appears on the registration form. Defaults to %out."
+msgstr "Zakladateľ skupiny určuje, či sa jeho skupina zobrazí v registračnom formulári. Prevolené je %out."
+
+#: og.module:2365
+msgid "not on form"
+msgstr "nie je vo formulári"
+
+#: og.module:2367
+msgid "Registration form control"
+msgstr "Ovládanie registračného formulára"
+
+# nie sú predvolene pripojení???
+#: og.module:2370
+#, fuzzy
+msgid "New registrants are not subscribed to group email notifications by default. A user may choose to enable this from her profile page or her my subscriptions page."
+msgstr "Novo registrovaní nie sú predvolene pripojení k e-mailovým upozorneniam. Používateľ si ich môže aktivovať vo svojom profile alebo na stránke Moje pripojenia."
+
+# sú predvolene pripojení???
+#: og.module:2371
+#, fuzzy
+msgid "New registrants are subscribed to group email notifications by default. A user may choose to disable this from her profile page."
+msgstr "Novo registrovaní sú predvolene pripojení k e-mailovým upozorneniam. Používateľ si ich môže deaktivovať vo svojom profile alebo na stránke Moje pripojenia."
+
+#: og.module:2373
+msgid "Group email notifications"
+msgstr "E-mailové upozornenia skupiny"
+
+#: og.module:2373
+msgid "Should new registrants automatically be notified via email when new content is posted to their subscribed group? Note that changing this setting has no effect on existing subscriptions."
+msgstr "Majú byť novo registrovaní automaticky upozornení cez e-mail, keď je vložený nový obsah do skupiny, do ktorej sú prihlásení? Berte na vedomie, že zmena týchto nastavení neovplyvní jestvujúce pripojenia."
+
+#: og.module:2375
+msgid "Node authoring form"
+msgstr "Formulár autorizovania uzla"
+
+# návod ku vkladaniu??
+#: og.module:2376
+#, fuzzy
+msgid "Explanation or submission guidelines"
+msgstr "Vysvetlenie alebo návod ku vkladaniu"
+
+# vkladací formulár?
+#: og.module:2376
+#, fuzzy
+msgid "This text will be displayed at the top of the group submission form.  It is useful for helping or instructing your users."
+msgstr "Tento text bude zobrazený na vrchu vkladacieho formulára skupiny. Je užitočné pomôcť a usmerniť vašich používateľov."
+
+# checkbox?
+#: og.module:2377
+#, fuzzy
+msgid "Audience checkboxes"
+msgstr "Checkboxy obecenstva"
+
+#: og.module:2377
+#, fuzzy
+msgid "Show each subscribed group as a checkbox in the Audience section. This enables user to place her post into multiple groups. If unchecked, simplify the user interface by omitting the checkboxes and assuming user wants to post into the current group. Group administrators always see checkboxes."
+msgstr "Zobraziť každú pripojenú skupinu ako checkbox v oddieli Obecenstvo. Toto umožní používateľovi umiestniť svoj príspevok do viacerých skupín. Ak to nie je zaškrtnuté, používateľské rozhranie je zjednodušené tým, že sú vynechané checkboxy a je predpoklad, že používateľ chce vkladať svoje príspevky do aktuálnej skupiny. Administrátorom skupín sa checkboxy vždy zobrazujú."
+
+#: og.module:2378
+msgid "Visible only within the targeted groups"
+msgstr "Viditeľné iba vo vybraných skupinách"
+
+#: og.module:2378
+msgid "Visible within the targeted groups and on other pages"
+msgstr "Viditeľné vo vybraných skupinách a na iných stránkach"
+
+#: og.module:2378;2378
+#, fuzzy
+msgid "Visibility chosen by author/editor using a checkbox on the posting form. "
+msgstr "Viditeľnosť určuje autor/editor použitím checkboxu vo formulári príspevku."
+
+#: og.module:2378
+#, fuzzy
+msgid "Checkbox defaults to @pub."
+msgstr "Checkbox predvolený na @pub."
+
+#: og.module:2378
+msgid "Checkbox defaults to @pri."
+msgstr "Checkbox predvolený na @pri."
+
+#: og.module:2378
+msgid "Private"
+msgstr "Súkromné"
+
+#: og.module:2379
+msgid "Visibility of posts"
+msgstr "Viditeľnosť príspevkov"
+
+#: og.module:2379
+msgid "Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting."
+msgstr "Určte, ako široko má byť dostupný daný príspevok, ak je pričlenený k skupine. OG adminovom sa checkbox zobrazuje vždy, aby mohli vytvárať príspevky @pub. Berte na vedomie, že zmena tohto nastavenia nemá vplyv už jestvujúce príspevky. Ak chcete zachovať nastavena, uložte znova tieto príspevky."
+
+#: og.module:2381
+msgid "optional"
+msgstr "voliteľné"
+
+#: og.module:2381
+msgid "required"
+msgstr "požadované"
+
+#: og.module:2382
+msgid "Audience required"
+msgstr "Obecenstvo požadované"
+
+# berte na vedomie - vypustiť?
+#: og.module:2382
+msgid "Do you require that all (non administrator) posts be affiliated with a group? Note that changing this setting will affect existing posts when they are edited."
+msgstr "Požadujete, aby všetky (nie administrátorove) príspevky boli pričlenené k skupine? Berte na vedomie, že zmena tohto nastavenia ovplyvní jestvujúce príspevky až keď budú upravené."
+
+#: og.module:2394
+msgid "Omitted content types"
+msgstr "Vypustené typy obsahu"
+
+#: og.module:2394
+msgid "Select any node types which should <em>not</em> participate in the Audience targetting system. Node types which are designated as group home page node types (see below) will be automatically excluded."
+msgstr "Vyberte, aké typy uzlov sa <em>nemajú</em> podieľať na Systéme zasiahnutia obecenstva. Typy uzlov, ktoré sú navrhnuté ako domovské stránky (viď nižšie), budú automaticky vynechané."
+
+#: og.module:2396
+msgid "Group home page"
+msgstr "Domovská stránka skupiny"
+
+#: og.module:2398
+msgid "Presentation style"
+msgstr "Štýl predstavenia"
+
+#: og.module:2398
+#, fuzzy
+msgid "Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your home page. You may alter the presentation using usual the !theme. Also see the Theme section of the OG README file."
+msgstr "Vyberte si Pohľad pre domovskú stránku vašej skupiny. Vyhovujúce sú Iba Pohľady, ktorých názvy začínajú na <strong>og_php_</strong>. Pohľad určuje rozvrh vašej domovskej stránky. Môžete zmeniť prezentáciu použitím !theme. Pozrite si tiež oddiel Téma v súbore OG README."
+
+#: og.module:2398
+msgid "usual Views themeing techniques"
+msgstr "obvyklé techniky vytvárania tém pre Views"
+
+#: og.module:2399
+msgid "Group home page node types"
+msgstr "Typy uzlov pre domovskú stránku skupiny"
+
+# create? vytvoriť?
+#: og.module:2399
+#, fuzzy
+msgid "<b>Required</b>. Select the node types which act as group home pages. Usually, you will want to !create called <em>group</em> for this purpose."
+msgstr "<b>Povinné</b>. Vyberte typy uzlov, ktoré budú slúžiť ako domovské stránky skupiny. Obvykle budete chcieť pre tento účel !create takzvané <em>skupiny</em>."
+
+#: og.module:2399
+msgid "create a simple node type"
+msgstr "vytvoriť jednoduchý typ uzlu"
+
+#: og.module:2401
+msgid "Email settings"
+msgstr "Nastavenia e-mailu"
+
+#: og.module:2402
+msgid "Omitted node types for email notifications"
+msgstr "Vypustené typy uzlov pre e-mailové upozornenia"
+
+#: og.module:2402
+msgid "Select any node types which should <b>not</b> generate email notifications when they are posted into a group."
+msgstr "Zvoľte typ obsahu, ktorý <em>nemá</em> generovať e-mailové upozornenia, ak je vložený do skupiny."
+
+#: og.module:2403
+msgid "New content subject"
+msgstr "Nový predmet obsahu"
+
+#: og.module:2404
+msgid "New content body"
+msgstr "Nové telo obsahu"
+
+#: og.module:2405
+msgid "Group admin email body"
+msgstr "Telo e-mailu Admin skupiny"
+
+#: og.module:2406
+msgid "User approved email subject"
+msgstr "Predmet e-mailu Používateľ schválený"
+
+#: og.module:2407
+msgid "User approved email body"
+msgstr "Telo e-mailu Používateľ schválený"
+
+#: og.module:2408
+msgid "User denied email subject"
+msgstr "Predmet e-mailu Používateľ zamietnutý"
+
+#: og.module:2409
+msgid "User denied email body"
+msgstr "Telo e-mailu Používateľ zamietnutý"
+
+#: og.module:2410
+msgid "Invite user email subject"
+msgstr "Predmet e-mailu Pozvať používateľa"
+
+#: og.module:2411
+msgid "Invite user email body"
+msgstr "Telo e-mailu Pozvať používateľa"
+
+#: og.module:2412
+msgid "Request user email subject"
+msgstr "Predmet e-mailu Požiadať používateľa"
+
+#: og.module:2413
+msgid "Request user email body"
+msgstr "Telo e-mailu Požiadať používateľa"
+
+#: og.module:2414
+msgid "New admin user email subject"
+msgstr "Predmet e-mailu Nový admin"
+
+#: og.module:2415
+msgid "New admin user email body"
+msgstr "Telo e-mailu Nový admin"
+
+#: og.module:2417;2418
+msgid "Member pictures"
+msgstr "Obrázky členov"
+
+#: og.module:2418
+msgid "Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in !user."
+msgstr "Majú byť obrázky členov zobrazené v bloku účastníkov skupiny a podrobností skupiny? Je treba tiež aktivovať obrázky"
+
+#: og.module:2418
+msgid "User configuration"
+msgstr "Konfigurácia používateľa"
+
+#: og.module:2453
+msgid "(pending approval)"
+msgstr "(čakajúce schválenie)"
+
+#: og.module:2477
+msgid "Subscribe a user to a group"
+msgstr "Prihlásiť používateľa do skupiny"
+
+#: og.module:2482
+msgid "All subscribers for a given group."
+msgstr "Všetci členovia danej skupiny."
+
+#: og.module:2487
+msgid "Retrieve the group subscriptions for a given user."
+msgstr "Získať pripojenia do skupín pre daného používateľa."
+
+#: og.module:2498;2510
+msgid "[ogname]"
+msgstr "[ogname]"
+
+#: og.module:2498
+msgid "The name of the organic group this post belongs to."
+msgstr "Názov organickej skupiny, ktorej prináleží tento príspevok."
+
+#: og.module:301
+msgid "the sole subscriber"
+msgid_plural "all @count subscribers"
+msgstr[0] "jediný prihlásený"
+msgstr[1] "@count prihlásení"
+msgstr[2] "@count prihlásených"
+
+#: og.module:334
+msgid "1 email sent."
+msgid_plural "@count emails sent"
+msgstr[0] "1 e-mail odoslaný."
+msgstr[1] "@count e-maily odoslané."
+msgstr[2] "@count e-mailov odoslaných."
+
+#: og.module:664
+msgid "1 invitation sent."
+msgid_plural "@count invitations sent."
+msgstr[0] "1 pozvánka odoslaná"
+msgstr[1] "@count pozvánky odoslané"
+msgstr[2] "@count pozvánok odoslaných"
+
+#: og.module:877
+msgid "name"
+msgid_plural "names"
+msgstr[0] "meno"
+msgstr[1] "mená"
+msgstr[2] ""
+
+#: og.module:893
+msgid "1 user added to the group"
+msgid_plural "@count users added to the group"
+msgstr[0] "1 používateľ pridaný do skupiny"
+msgstr[1] "@count používatelia pridaní do skupiny"
+msgstr[2] "@count používateľov pridaných do skupiny"
+
+#: og.module:1598
+msgid "Show this post in this group."
+msgid_plural "Show this post in these groups."
+msgstr[0] "Zobraziť tento príspevok v tejto skupine."
+msgstr[1] "Zobraziť tento príspevok v týchto skupinách."
+msgstr[2] "Zobraziť tento príspevok v týchto skupinách."
+
+#: og.module:2248
+msgid "1 subscriber"
+msgid_plural "@count subscribers"
+msgstr[0] "1 prihlásený"
+msgstr[1] "@count prihlásení"
+msgstr[2] "@count prihlásených"
+
+#: og.module:192
+msgid "administer organic groups"
+msgstr "spravovať organické skupiny"
+
+#: og.module:0
+msgid "og"
+msgstr "og"
+
+#: og.install:90
+msgid "Organic groups module enabled. Please see the included readme.txt file for further installation instructions."
+msgstr "Modul organických skupín aktivovaný. Pozrite si prosím súbor readme.txt ..."
+
+#: tests/og_testcase.php:17
+msgid "Your %post has been created."
+msgstr "Váš príspevok %post bol vytvorený."
+
