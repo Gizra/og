@@ -1120,5 +1120,6 @@ function views_handler_filter_groupcurrent() {
  */
 function og_views_query_substitutions($view) {
   $groupnode = og_get_group_context();
-  return array('***CURRENT_GID***' => $groupnode ? $groupnode->nid : 0);
+  // return -1 instead of 0 to avoid matching all posts without a group
+  return array('***CURRENT_GID***' => $groupnode ? $groupnode->nid : -1);
 }
