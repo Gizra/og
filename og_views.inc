@@ -76,9 +76,18 @@ function og_views_tables() {
       ),
       'filters' => array(
         'gid' => array(
-          'name' => t('Og: Post in specified group'),
+          'name' => t('Og: Post in specified group (by number)'),
           'handler' => 'og_handler_filter_gid',
-          'help' => t('Filter for a given organic group. <em>Value</em> should be a numeric nid.'),   
+          'operator' => array('=' => 'Is'),
+          'help' => t('Filter for posts in specified organic groups. <em>Value</em> should be a one or more node ids (i.e. integers), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context (if View is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id.'),
+        ),
+        'group_name_like' => array(
+          // this filter does not set any context because i am delegating filtering to built
+          // in views like handler. i can't easily learn which groups matched later.
+          'name' => t('Og: Post in specified groups (by name)'),
+          'handler' => 'og_handler_filter_group_name_like',
+          'operator' => 'views_handler_operator_like',
+          'help' => t('Filter for posts in any organic group whose name matches the string or substring entered.'),   
         ),
         'gtype' => array(
           'name' => t('Og: Post in specified group type'),
@@ -92,7 +101,7 @@ function og_views_tables() {
         ),
         'picg' => array(
           'name' => t('OG: Posts in current group'),
-          'help' => t('Posts in current group. Useful for blocks where determining context is hard.'),
+          'help' => t('Posts in current group. Useful for blocks where determining context is hard. If page is not in any group context, no nodes are listed and thus a block would not appear.'),
           'operator' => 'views_handler_operator_eqneq',
           'list' => 'views_handler_filter_groupcurrent',
           'list-type' => 'select',
@@ -243,39 +252,93 @@ function og_views_tables() {
 function og_views_arguments() {
   $args = array(
     'gid' => array(
-      'name' => t("Og: Group nid"), 
+      'name' => t("Og: Group nid(s)"), 
       'handler' => 'og_handler_argument_gid',
-      'help' => t('Filter for a given organic group'),
+      'help' => t('Filter for the one or more organic groups. Groups should be specified as a comma or plus delimited list of node ids, like taxonomy URLs. '),
+    ),
+    'name' => array(
+      'name' => t("Og: Group name"), 
+      'handler' => 'og_handler_argument_group_name_like',
+      'option' => array(
+        '#type' => 'select',
+        '#options' => 'views_handler_operator_like',
+      ),
+      'help' => t('Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</e> field to specify how to match the supplied name.'),
       )
     );
   return $args;
 }
 
 /*
- * Custom argument for filtering by an og.
+ * Custom argument for filtering by one or more group nids.
  */
 function og_handler_argument_gid($op, &$query, $argtype, $arg = '') {
   switch ($op) {
     case 'summary':
-      $query->ensure_table('og_ancestry');
-      $query->ensure_table('og_node_data');
-      $query->add_field('title', 'og_node_data');
-      $query->add_field('group_nid', 'og_ancestry');
-      $fieldinfo['field'] = "og_node_data.nid";
+      og_handler_summary($fieldinfo, $query);
       return $fieldinfo;
     case 'link':
-      $name = ($query->title ? $query->title : t('Unaffiliated'));
-      return l($name, "$arg/" . intval($query->group_nid));
+      if ($name = $query->title) {
+        return l($name, "$arg/". intval($query->group_nid));
+      }
+      else {
+        // return l(t('Unaffiliated'), "$arg/-1-1"); // just signifies 'no group'
+        return t('All posts');
+      }
     case 'filter':
-      $query->ensure_table('og_ancestry');
-      $query->add_where('og_ancestry.group_nid = %d', $arg);
-      
-      $node = node_load((int)$arg);
-      og_set_group_context($node);
+      og_views_break_phrase($arg, $query);
       break;
     case 'title':
       return db_result(db_query_range('SELECT title FROM {node} WHERE nid = %d', $query, 0, 1));;
   }
+}
+
+/*
+ * Custom argument for filtering by group name. Delegates much work to views_handler_filter_like()
+ */
+function og_handler_argument_group_name_like($op, &$query, $argtype, $arg = '') {
+  switch ($op) {
+    case 'summary':
+      og_handler_summary($fieldinfo, $query); 
+      return $fieldinfo;
+    case 'link':
+      if ($name = $query->title) {
+        return l($name, "$arg/$name");
+      }
+      else {
+        // return l(t('Unaffiliated'), "$arg/-1-1"); // just signifies 'no group'
+        return t('All posts');
+      }
+      break;
+    case 'filter':
+      $query->ensure_table('og_node_data');
+      $filterinfo['table'] = 'og_node_data';
+      $filterinfo['field'] = 'title';
+      $filter = array('value' => $arg, 'operator' => $argtype['options']);
+      views_handler_filter_like('handler', $filter, $filterinfo, &$query);
+      break;
+    case 'title':
+      return db_result(db_query_range('SELECT title FROM {node} WHERE nid = %d', $query, 0, 1));;
+  }
+}
+
+// not currently in use. should work though.
+// helper function. restrict to unaffiliated posts.
+// function og_handler_unaffiliated(&$query) {
+//   list($types, $in) = og_get_sql_args();
+//   $query->add_where("node.type NOT IN ($in)", $types);
+//   
+//   $query->ensure_table('og_ancestry');
+//   $query->add_where('og_ancestry.group_nid IS NULL');
+// }
+
+// helper function.
+function og_handler_summary(&$fieldinfo, &$query) {
+  $query->ensure_table('og_ancestry');
+  $query->ensure_table('og_node_data');
+  $query->add_field('title', 'og_node_data');
+  $query->add_field('group_nid', 'og_ancestry');
+  $fieldinfo['field'] = "og_node_data.nid";
 }
 
 /**
@@ -1078,11 +1141,7 @@ function og_handler_field_yesempty($fieldinfo, $fielddata, $value, $data) {
 }
 
 function og_handler_filter_gid($op, $filter, $filterinfo, &$query) {
-  $query->ensure_table('og_ancestry');
-  $query->add_where("og_ancestry.group_nid = %d", $filter['value']);
-  
-  $node = node_load($filter['value']);
-  og_set_group_context($node);
+  og_views_break_phrase($filter['value'], $query);
 }
 
 function og_handler_filter_og_type($op, $filter, $filterinfo, &$query) {
@@ -1115,6 +1174,13 @@ function views_handler_filter_groupcurrent() {
   return array('***CURRENT_GID***' => t('Current group'));
 }
 
+function og_handler_filter_group_name_like($op, $filter, $filterinfo, &$query) {
+  $query->ensure_table('og_node_data');
+  $filterinfo['table'] = 'og_node_data';
+  $filterinfo['field'] = 'title';
+  views_handler_filter_like($op, $filter, $filterinfo, &$query);
+}
+
 /**
  * Allow replacement of current group so we can cache these queries.
  */
@@ -1122,4 +1188,34 @@ function og_views_query_substitutions($view) {
   $groupnode = og_get_group_context();
   // return -1 instead of 0 to avoid matching all posts without a group
   return array('***CURRENT_GID***' => $groupnode ? $groupnode->nid : -1);
+}
+
+/**
+ * Helper function for filter and argument which accepts + or , delimited integers like taxonomy urls.
+ * Performs modifications on $query object. A wrapper around views_break_phrase().
+ * 
+ * @return void
+ **/
+function og_views_break_phrase($string, &$query) {
+  list($and_or, $gids) = _views_break_phrase($string);
+  $and_or = strtoupper($and_or);
+  // analogous to taxonomy AND/OR query. see views_taxonomy.inc
+  
+  if ($and_or == 'OR') {
+      $query->ensure_table('og_ancestry');
+      $cond = array_fill(0, count($gids), "og_ancestry.group_nid = %d");
+      $query->add_where(implode(" $and_or ", $cond), $gids);
+  }
+  else {
+    foreach ($gids as $gid) {
+      $num = $query->add_table('og_ancestry');
+      $tablename = $query->get_table_name('og_ancestry', $num);
+      $query->add_where("$tablename.group_nid = %d", $gid);
+    }
+  }
+  
+  if ($GLOBALS['current_view']->build_type == 'page') {
+    $node = node_load($gids[0]);
+    og_set_group_context($node);
+  }
 }
