@@ -1333,7 +1333,16 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_save_ancestry($node);
       }
       
-      if (!module_exists('og2list')) {
+      $skip_notification = FALSE; 
+      // Any module that returns TRUE from its hook_og_notify($node) will prevent sending notifications.
+      // og2list uses this to send its own notifications for groups with a mailing list.
+      foreach(module_implements('og_notify') as $module) {
+        if (module_invoke($module,'og_notify',$node)) {
+          $skip_notification = TRUE;
+          break;
+        }
+      }
+      if (!$skip_notification && $node->status && og_node_type_notify($node->type)) {
         if ($node->status && og_node_type_notify($node->type) && $node->og_groups) {
           if (module_exists('job_queue')) {
             $description = t('OG: notify group subscribers about node %nid - !link', array('%nid' => $node->nid, '!link' => l($node->title, "node/$node->nid")));
@@ -1625,8 +1634,18 @@ function og_comment($comment, $op) {
       $comment = (array) $comment;
       // fall through
     case 'insert':
-      if ($comment['status'] == COMMENT_PUBLISHED && !module_exists('og2list')) {
-        $node = node_load($comment['nid']);
+      $skip_notification = FALSE; 
+      // Any module that returns true from its hook_og_notify($node) will prevent sending notifications.
+      // og2list uses this to send its own notifications instead for mailing list content.
+      $node = node_load($comment['nid']);
+
+      foreach(module_implements('og_notify') as $module) {
+        if (module_invoke($module, 'og_notify', $node)) {
+          $skip_notification = TRUE;
+          break;
+        }
+      }
+      if ($comment['status'] == COMMENT_PUBLISHED && !$skip_notification) {
         if ($node->og_groups) {
           if (module_exists('job_queue')) {
             $description = t('OG: notify group subscribers about comment %id on !link', array('%id' => $comment['cid'], '!link' => l($node->title, "node/$node->nid", NULL, NULL, 'comment-'. $comment['cid'])));
