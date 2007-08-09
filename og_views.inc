@@ -1154,7 +1154,15 @@ function og_handler_filter_post_og_type($op, $filter, $filterinfo, &$query) {
   $query->add_table('og_node_data');
   $types = $filter['value'];
   $placeholders = array_fill(0, count($types), "'%s'");
-  $query->add_where("og_node_data.type IN (". implode(", ", $placeholders) .")", $types);
+  
+  // If we don't want to list posts assiciated with groups of this type then
+  // we need to both exclude them and also include unaffiliated posts.
+  if ($filter['operator'] == 'NOR') {
+  	$not = 'NOT';
+    $ornull = ' OR (og_node_data.type IS NULL)';
+  }
+  
+  $query->add_where("(og_node_data.type ". $not ." IN (". implode(", ", $placeholders) ."))". $ornull, $types);
 }
 
 /**
