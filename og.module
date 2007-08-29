@@ -1456,26 +1456,40 @@ function og_node_delete_nongroup_form(&$form) {
   }
 }
 
+// return all node ids belonging to a group.
+// if you are retrieving for displaying, you should a line like below instead of this function:
+// $info = views_build_view('items', $view, array($group_nid));
+function og_group_child_nids($group_nid) {
+  $result = db_query('SELECT oga.nid FROM {og_ancestry} oga WHERE oga.group_nid = %d', $group_nid);
+  $child_nids = array();
+  while ($row = db_fetch_object($result)) {
+    $child_nids[] = $row->nid;
+  }
+  return $child_nids;
+}
+
 // submit handler for node delete form. handles deletes to group nodes
 function og_node_delete_confirm_submit($form_id, $form_values) {
-  if ($form_values['verb'] == 1 || $form_values['verb'] == 2) {
-    $view = views_get_view('og_ghp_ron');
-    $info = views_build_view('items', $view, array($form_values['nid']));
-    foreach ($info['items'] as $item) {
-      $node = node_load($item->nid);
-      if ($form_values['verb'] == 2) {
-        unset($node->og_groups[$form_values['nid']]);
-        $node->og_groups[] = $form_values['target'];
-        node_save($node);
-        return 'node/'. $form_values['target']; 
-      }
-      else {
-        // we use 1 here since the group node is already gone by now.
-        if (count($node->og_groups) < 1) {
-          node_delete($item->nid); 
-        }
-      }
+  $deleted_group_nid = $form_values['nid'];
+  $target_group_nid = $form_values['target'];
+  $move_children = $form_values['verb'] == 2;
+  $delete_orphans = $form_values['verb'] == 1;
+  foreach (og_group_child_nids($deleted_group_nid) as $child_nid) {
+    $node = node_load($child_nid);
+    unset($node->og_groups[$deleted_group_nid]);
+    if ($move_children) {
+      // there is an array_unique() in og_save_ancestry which giards against duplicates so don't worry here.
+      $node->og_groups[] = $target_group_nid;
     }
+    if ($delete_orphans && count($node->og_groups) == 0) {
+      node_delete($node->nid);
+    }
+    else {
+      node_save($node);
+    }
+  }
+  if ($move_children) {
+    return 'node/'. $target_group_nid;
   }
 }
 
@@ -2011,6 +2025,7 @@ function og_save_ancestry($node) {
     $sql = "DELETE FROM {og_ancestry} WHERE nid = %d";
     db_query($sql, $node->nid);
     if (is_array($node->og_groups)) {
+      $node->og_groups = array_unique($node->og_groups);
       foreach ($node->og_groups as $gid) {
         $sql = "INSERT INTO {og_ancestry} (nid, group_nid, is_public) VALUES (%d, %d, %d)";
         db_query($sql, $node->nid, $gid, $node->og_public);
