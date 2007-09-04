@@ -29,7 +29,7 @@ Drupal.ogAttach = function() {
 	      $('#edit-og-public').attr("disabled", "disabled");
 	  }				
 	}
-}
+};
 
 if (Drupal.jsEnabled) {
   $(document).ready(Drupal.ogAttach);
