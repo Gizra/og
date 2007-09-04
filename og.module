@@ -2290,7 +2290,10 @@ function og_og_block_details($node) {
     $txt .= $cntpending ? " ($cntpending)" : '';
     $links[] = $txt;
     $links[] =  t('Manager: '). theme('username', $node);
-    $links[] = isset($subscription) ? l(t('My subscription'), "og/manage/$node->nid") : og_subscribe_link($node);
+    $subscribe = isset($subscription) ? l(t('My subscription'), "og/manage/$node->nid") : og_subscribe_link($node);
+    if(isset($subscribe)) {
+      $links[] = $subscribe;
+    }
     if (module_exists('search') && user_access('search content')) {
       $post = drupal_get_form('og_search_form', $node);
     }
@@ -2322,7 +2325,8 @@ function og_subscribe_link($node) {
   elseif ($node->og_selective == OG_OPEN) {
     $txt = t('Subscribe');
   }
-  return l($txt, "og/subscribe/$node->nid", array(), "destination=node/$node->nid");
+  if(isset($txt))
+    return l($txt, "og/subscribe/$node->nid", array(), "destination=node/$node->nid");
 }
 
 // $group is an object containing the group node
