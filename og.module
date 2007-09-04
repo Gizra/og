@@ -947,7 +947,9 @@ function og_list_users_faces_page($gid) {
   $sql = og_list_users_sql(0,0,'ou.is_admin DESC, u.picture DESC, u.name ASC');
   /* list group admins first, pending subscribers second, regular subscribers last.  Alphabetize within each of these catergories */
   $result = pager_query($sql, 100, 0, NULL, $gid);
-  return theme('og_picture_grid', $result);
+  $output = theme('og_picture_grid', $result);
+  $output .= theme('pager', NULL, 100);
+  return $output;
 }
 
 // from views_bonus: grid.inc
