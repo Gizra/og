@@ -56,11 +56,22 @@ function og_views_tables() {
       'filters' => array(
         'directory' => array(
           'name' => t('Og: Group: List in directory'),
-          'operator' => array('=' => 'Equals'),
+          'operator' => array('=' => 'Is'),
           'list' => 'views_handler_operator_yesno',
           'list-type' => 'select',
           'help' => t('Admin specifies whether or not a group appears in the public listings.'),
-        )
+        ),
+        'selective' => array(
+          'name' => t('Og: Group: Selective'),
+          'operator' => 'views_handler_operator_or',
+          'value' => array(
+            '#type' => 'select',
+            '#multiple' => TRUE,
+            '#options' => array(OG_OPEN => t('Open'), OG_MODERATED => t('Moderated'), OG_INVITE_ONLY => t('Invite Only'), OG_CLOSED => t('Closed')),
+          ),
+          'value-type' => 'array',
+          'help' => t('The group preference which determines how subscriptions requests are handled (moderated, invite only, etc.).'),
+        ),
       ),
     ),
     'og_ancestry' => array(
