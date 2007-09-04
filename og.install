@@ -421,3 +421,17 @@ function og_update_18() {
 function og_disable() {
   og_settings_submit(NULL, array('op' => t('Disable')));
 }
+
+function og_uninstall() {
+  // Drop database table
+  db_query('DROP TABLE {og}');
+  db_query('DROP TABLE {og_uid}');
+  db_query('DROP TABLE {og_uid_global}');
+  db_query('DROP TABLE {og_ancestry}');
+
+  // Delete variables
+  $variables = array('og_member_pics', 'og_help', 'og_block_cnt_2', 'og_block_cnt_3', 'og_enabled', 'og_audience_checkboxes', 'og_visibility', 'og_omitted', 'og_audience_required', 'og_omitted_email_node_types', 'og_visibility_directory', 'og_visibility_registration', 'og_home_page_view', 'og_email_max', 'og_node_types');
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
+}
