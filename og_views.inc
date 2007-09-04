@@ -64,13 +64,9 @@ function og_views_tables() {
         'selective' => array(
           'name' => t('Og: Group: Selective'),
           'operator' => 'views_handler_operator_or',
-          'value' => array(
-            '#type' => 'select',
-            '#multiple' => TRUE,
-            '#options' => array(OG_OPEN => t('Open'), OG_MODERATED => t('Moderated'), OG_INVITE_ONLY => t('Invite Only'), OG_CLOSED => t('Closed')),
-          ),
-          'value-type' => 'array',
-          'help' => t('The group preference which determines how subscriptions requests are handled (moderated, invite only, etc.).'),
+          'list-type' => 'list',
+          'list' => array(OG_OPEN => t('Open'), OG_MODERATED => t('Moderated'), OG_INVITE_ONLY => t('Invite Only'), OG_CLOSED => t('Closed')),
+          'help' => t('The group preference which determines how subscriptions requests are managed (moderated, invite only, etc.).'),
         ),
       ),
     ),
@@ -121,9 +117,11 @@ function og_views_tables() {
         'is_public' => array(
           'name' => t('OG: Public'),
           'help' => t('Posts marked as Public, which are viewable by non group members as well.'),
-          'operator' => array('=' => 'Is'),
+          'operator' => array('=' => t('Is')),
           'list' => 'views_handler_operator_yesno',
           'list-type' => 'select',
+          'field' => 'is_public',
+          'handler' => 'og_handler_filter_public',
         ),
       ),    
       'fields' => array(  
@@ -1129,6 +1127,16 @@ function og_handler_field_subscribe($fieldinfo, $fielddata, $value, $data) {
       default:
         return l(t('subscribe'), "og/subscribe/$data->nid", array('rel' => 'nofollow'), drupal_get_destination());  
     }
+  }
+}
+
+function og_handler_filter_public($op, $filter, $filterinfo, &$query) {
+  $query->ensure_table('og_ancestry');
+  if($filter['value']) {
+    $query->add_where('(og_ancestry.is_public IS NULL OR og_ancestry.is_public = 1)');
+  }
+  else {
+    $query->add_where('og_ancestry.is_public = 0');
   }
 }
 
