@@ -294,6 +294,11 @@ function og_handler_argument_gid($op, &$query, $argtype, $arg = '') {
         // return l(t('Unaffiliated'), "$arg/-1-1"); // just signifies 'no group'
         return t('All posts');
       }
+      break;
+    case 'sort':
+      // no luck using add_orderby method.
+      $query->orderby[] = ' num_nodes '. $argtype;
+      break;
     case 'filter':
       og_views_break_phrase($arg, $query);
       break;
@@ -318,6 +323,10 @@ function og_handler_argument_group_name_like($op, &$query, $argtype, $arg = '') 
         // return l(t('Unaffiliated'), "$arg/-1-1"); // just signifies 'no group'
         return t('All posts');
       }
+      break;
+    case 'sort':
+      // no luck using add_orderby method.
+      $query->orderby[] = ' num_nodes '. $argtype;
       break;
     case 'filter':
       $query->ensure_table('og_node_data');
@@ -347,7 +356,7 @@ function og_handler_summary(&$fieldinfo, &$query) {
   $query->ensure_table('og_node_data');
   $query->add_field('title', 'og_node_data');
   $query->add_field('group_nid', 'og_ancestry');
-  $fieldinfo['field'] = "og_node_data.nid";
+  $fieldinfo['field'] = 'og_node_data.nid'; //og_node_data.nid";
 }
 
 /**
