@@ -32,6 +32,19 @@ function og_views_tables() {
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
+        'post_count' => array(
+          'name' => t('Og: Group: Post Count'),
+          'handler' => 'og_handler_post_count',
+          'sortable' => FALSE,
+          'notafield' => TRUE,
+          // TODO: help wanted. restrict to specified node types.
+          // 'option' => array(
+          //              '#type' => 'select',
+          //              '#options' => node_get_types('names'),
+          //              '#multiple' => TRUE,
+          //              // TODO: '#default_value' => array_keys(node_get_types('names')),
+          // ),
+        ),
         'selective' => array(
           'name' => t('Og: Group: Selective'),
         ),
@@ -1120,6 +1133,16 @@ function og_handler_field_count($fieldinfo, $fielddata, $value, $data) {
 
   $cnt = db_num_rows(db_query(og_list_users_sql(), $data->nid));
   return in_array($data->nid, array_keys($user->og_groups)) ? l($cnt, "og/users/$data->nid") : $cnt;
+}
+
+/**
+ * Views handler to display the number of posts in the group
+ */
+function og_handler_post_count($fieldinfo, $fielddata, $value, $data) {
+  global $user;
+
+  $cnt = db_result(db_query(db_rewrite_sql('SELECT COUNT(*) FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid WHERE n.status = 1 AND oga.group_nid = %d'), $data->nid));
+  return $cnt;
 }
 
 /**
