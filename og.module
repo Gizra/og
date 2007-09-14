@@ -1350,7 +1350,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
             job_queue_add('og_mail', $description, array('node', $node->nid));
           }
           else {
-            og_mail('node', $node->nid);
+            og_mail('node', $node);
           }
         }
       }
@@ -1667,7 +1667,7 @@ function og_comment($comment, $op) {
             job_queue_add('og_mail', $description, array('comment', $comment['cid']));
           }
           else {
-            og_mail('comment', $comment['cid']);
+            og_mail('comment', (object)$comment);
           }
         }
       }
@@ -1684,13 +1684,15 @@ function og_comment($comment, $op) {
  * @param $type
  *   the object type: node or comment
  * @param $id
- *   the id of the node or comment which was just added.
+ *   a node or comment object. if a non object is supplied, a load() operation is performed.
  * @return
  *   none
  */
 function og_mail($type, $id) {
   if ($type == 'comment') {
-    $obj = _comment_load($id);
+    if (!is_object($id)) {
+      $obj = _comment_load($id);
+    }
     // registered user
     if ($obj->uid) {
       $account = user_load(array('uid' => $obj->uid));
@@ -1718,7 +1720,9 @@ function og_mail($type, $id) {
     $type_friendly = 'comment';
   }
   else {
-    $obj = node_load($id);
+    if (!is_object($id)) {
+      $obj = node_load($id);
+    }
     $account = user_load(array('uid' => $obj->uid));
     $obj->name = $account->name;
     $obj->subject = $obj->title;
