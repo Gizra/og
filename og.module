@@ -829,18 +829,18 @@ function og_confirm_unsubscribe_submit($form_id, $form_values) {
 function og_get_subscriptions($uid, $min_is_active = 1) {
   static $subscriptions = array();
 
-  if (!isset($subscriptions[$uid])) {
+  if (!isset($subscriptions[$uid][$min_is_active])) {
     $sql = "SELECT n.title, n.type, n.status, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d AND ou.is_active >= %d ORDER BY n.title";
     $result = db_query($sql, $uid, $min_is_active);
     while ($row = db_fetch_array($result)) {
-      $subscriptions[$uid][$row['nid']] = $row;
+      $subscriptions[$uid][$min_is_active][$row['nid']] = $row;
     }
 
-    if (!isset($subscriptions[$uid])) {
-      $subscriptions[$uid] = array();
+    if (!isset($subscriptions[$uid][$min_is_active])) {
+      $subscriptions[$uid][$min_is_active] = array();
     }
   }
-  return $subscriptions[$uid];
+  return $subscriptions[$uid][$min_is_active];
 }
 
 function og_list_users_sql($min_is_active = 1, $min_is_admin = 0, $orderby='u.name ASC') {
