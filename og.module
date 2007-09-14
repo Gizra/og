@@ -2401,7 +2401,7 @@ function og_admin_settings() {
   $form['og_settings']['group_details']['og_visibility_directory'] = array('#type' => 'radios', '#title' => t('Groups directory control'), '#default_value' => variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_TRUE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => t('groups directory'))), '#options' => $options);
   
   // groups registration visibility
-  $options = array(t('New groups don\'t appear in on the registration form. Administrators control the form exclusively.'),
+  $options = array(t('New groups don\'t appear on the registration form. Administrators control the form exclusively.'),
               t('New groups always appear on the registration form.'),
               t('Group creator chooses whether her group appears on the registration form. Defaults to %in.', array('%in' => t('on form'))),
               t('Group creator chooses whether her group appears on the registration form. Defaults to %out.', array('%out' => t('not on form'))),

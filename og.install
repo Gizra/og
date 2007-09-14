@@ -86,8 +86,10 @@ function og_install() {
       ");
       break;
   }
+  
   _block_rehash(); // enable standard og blocks
-  drupal_set_message(t('Organic groups module enabled. Please see the included readme.txt file for further installation instructions.'));
+  drupal_set_message(t('Organic groups module enabled. Please see the included <a href="!readme">readme file</a> for further installation instructions.', array('!readme' => url(drupal_get_path('module', 'og'). '/README.txt'))));
+  
 }
 
 // 2006-05-31 PFM: deletes row if present in the table.  The first parameter
