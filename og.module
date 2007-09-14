@@ -1749,33 +1749,35 @@ function og_mail($type, $id) {
     '@username' => $obj->name
   );
   
-  // send email to selective subscribers and global subscribers
-  $groups = implode(', ', $obj->og_groups);
-  // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 3 positive statements about og_email field
- // og_email can be NULL when you enable og on an existing site.
-  $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
-          FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid LEFT JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
-          WHERE u.mail != '' AND
-            ou.nid IN ($groups) AND (
-            (oug.og_email IS NULL AND ou.mail_type=1) OR
-            (oug.og_email = %d AND ou.mail_type=1) OR
-            (oug.og_email = %d)
-            ) AND u.status = 1";
-  $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
-  while ($row = db_fetch_object($result)) {
-    // TODO: add node_access('view') call here in case node is moderated or other.
-    // Hopefully D6 will avert need to imporesonate.
-    // Append these group specific variables.
-    $variables['@group'] = $row->group_name;
-    $variables['!group_url'] = url("og/manage/$row->gid", NULL, NULL, TRUE);
-    $variables['@type'] = $type_friendly;
+  // Send email to selective subscribers and global subscribers.
+  // We use if() here in case node/comment no longer has any groups (i.e. this function can be called from cron).
+  if ($groups = implode(', ', $obj->og_groups)) {
+    // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 3 positive statements about og_email field
+    // og_email can be NULL when you enable og on an existing site.
+    $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
+            FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid LEFT JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
+            WHERE u.mail != '' AND
+              ou.nid IN ($groups) AND (
+              (oug.og_email IS NULL AND ou.mail_type=1) OR
+              (oug.og_email = %d AND ou.mail_type=1) OR
+              (oug.og_email = %d)
+              ) AND u.status = 1";
+    $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
+    while ($row = db_fetch_object($result)) {
+      // TODO: add node_access('view') call here in case node is moderated or other.
+      // Hopefully D6 will avert need to imporesonate.
+      // Append these group specific variables.
+      $variables['@group'] = $row->group_name;
+      $variables['!group_url'] = url("og/manage/$row->gid", NULL, NULL, TRUE);
+      $variables['@type'] = $type_friendly;
 
-    // see http://www.ietf.org/rfc/rfc2369.txt. UTF8 OK?
-    $unsubscribe = url("og/manage/$row->gid", NULL, NULL, TRUE);
-    $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
-    $group_home = url("node/$row->gid", NULL, NULL, TRUE);
-    $groupheaders = $headers + array('List-Id' => "$row->group_name <$group_home>", 'List-Unsubscribe' => "<$unsubscribe>", 'List-Owner' => "$row->group_owner <$ownerurl>", "List-Archive" => "<$group_home>");
-    drupal_mail('og_mail', $row->mail, _og_user_mail_text('og_new_node_subject', $variables), _og_user_mail_text('og_new_node_body', $variables), $obj->name. " <$sitemail>", $groupheaders);
+      // see http://www.ietf.org/rfc/rfc2369.txt. UTF8 OK?
+      $unsubscribe = url("og/manage/$row->gid", NULL, NULL, TRUE);
+      $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
+      $group_home = url("node/$row->gid", NULL, NULL, TRUE);
+      $groupheaders = $headers + array('List-Id' => "$row->group_name <$group_home>", 'List-Unsubscribe' => "<$unsubscribe>", 'List-Owner' => "$row->group_owner <$ownerurl>", "List-Archive" => "<$group_home>");
+      drupal_mail('og_mail', $row->mail, _og_user_mail_text('og_new_node_subject', $variables), _og_user_mail_text('og_new_node_body', $variables), $obj->name. " <$sitemail>", $groupheaders);
+    }
   }
 }
 
