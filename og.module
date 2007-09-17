@@ -2569,7 +2569,7 @@ function og_token_list($type = 'all') {
   if ($type == 'node' || $type == 'all') {
     $tokens['node']['ogname']          = t("Title of top group");
     $tokens['node']['ogname-raw']      = t("Unfiltered title of top group. WARNING - raw user input.");
-    $tokens['node']['group-id']        = t("ID of top group");
+    $tokens['node']['og-id']        = t("ID of top group");
     return $tokens;
   }
 }
@@ -2577,23 +2577,24 @@ function og_token_list($type = 'all') {
 /**
  * Implementation of hook_token_values() for og specific tokens
  */
-function og_token_values($type, $object = NULL) {
+function og_token_values($type, &$object = NULL) {
   switch ($type) {
     case 'node':
+      $node = node_load($object->nid);
       if (is_array($node->og_groups) && count($node->og_groups) > 0) {
-        foreach ($node->og_groups as $group) {
+        foreach ($node->og_groups as $i => $group) {
           if ($group) {
-            $values['group'] = check_plain($node->og_groups_names[$group]);
-            $values['group'-raw] = $node->og_groups_names[$group];
-            $values['group-id'] = $group;
+            $values['ogname'] = check_plain($node->og_groups_names[$i]);
+            $values['ogname-raw'] = $node->og_groups_names[$i];
+            $values['og-id'] = $group;
             break;
           }
         }
       } 
       else {
-        $values['group'] = '';
-        $values['group-raw'] = '';
-        $values['group-id'] = '';
+        $values['ogname'] = '';
+        $values['ogname-raw'] = '';
+        $values['og-id'] = '';
       }
       
       break;
