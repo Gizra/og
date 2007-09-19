@@ -754,7 +754,7 @@ function og_subscribe_user($gid, $account, $request = NULL) {
         $from = variable_get('site_mail', ini_get('sendmail_from'));
         // prepend user's request text with standard cruft. should be a mail variable but thats a bit annoying
         if ($request) {
-          $request = t("\n\nPersonal message from @name:\n------------------\n\n@request", array('@name' => $account->name, '@request' => $request)). $request;
+          $request = t("\n\nPersonal message from @name:\n------------------\n\n@request", array('@name' => $account->name, '@request' => $request));
         }
         drupal_mail('og_subscription_request', implode(', ', $admins), _og_user_mail_text('og_request_user_subject', $variables), _og_user_mail_text('og_request_user_body', $variables). $request, $from);
       }
