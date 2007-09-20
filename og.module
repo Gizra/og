@@ -1688,10 +1688,10 @@ function og_comment($comment, $op) {
  * @return
  *   none
  */
-function og_mail($type, $id) {
+function og_mail($type, $obj) {
   if ($type == 'comment') {
-    if (!is_object($id)) {
-      $obj = _comment_load($id);
+    if (!is_object($obj)) {
+      $obj = _comment_load($obj);
     }
     // registered user
     if ($obj->uid) {
@@ -1720,8 +1720,8 @@ function og_mail($type, $id) {
     $type_friendly = 'comment';
   }
   else {
-    if (!is_object($id)) {
-      $obj = node_load($id);
+    if (!is_object($obj)) {
+      $obj = node_load($obj);
     }
     $account = user_load(array('uid' => $obj->uid));
     $obj->name = $account->name;
