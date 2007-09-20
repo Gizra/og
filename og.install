@@ -418,6 +418,7 @@ function og_update_18() {
 
 function og_update_19() {
   og_populate_uid_global_table();
+  return array('Populated og_uid_global table');
 }
 
 // end updates //
