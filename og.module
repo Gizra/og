@@ -32,7 +32,7 @@ define('OG_NOTIFICATION_SELECTIVE', 2);
 
 function og_help($section) {
   switch ($section) {
-    case strlen(section) && strstr($section, 'admin/build/block/configure/og'):
+    case !empty($section) && strstr($section, 'admin/build/block/configure/og'):
       return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
     case 'admin/settings/og':
       return t('In order to let group admins determine their own group theme, you must enable multiple themes using !page.', array('!page' => l(t('theme configuration page'), 'admin/build/themes')));
@@ -1757,19 +1757,17 @@ function og_mail($type, $id) {
   // We use if() here in case node/comment no longer has any groups (i.e. this function can be called from cron).
   if ($groups = implode(', ', $obj->og_groups)) {
     // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 3 positive statements about og_email field
-    // og_email can be NULL when you enable og on an existing site.
     $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
-            FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid LEFT JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
+            FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
             WHERE u.mail != '' AND
               ou.nid IN ($groups) AND (
-              (oug.og_email IS NULL AND ou.mail_type=1) OR
               (oug.og_email = %d AND ou.mail_type=1) OR
               (oug.og_email = %d)
               ) AND u.status = 1";
     $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
     while ($row = db_fetch_object($result)) {
       // TODO: add node_access('view') call here in case node is moderated or other.
-      // Hopefully D6 will avert need to imporesonate.
+      // Hopefully D6 will avert need to impersonate.
       // Append these group specific variables.
       $variables['@group'] = $row->group_name;
       $variables['!group_url'] = url("og/manage/$row->gid", NULL, NULL, TRUE);

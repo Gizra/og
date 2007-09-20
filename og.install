@@ -34,7 +34,6 @@ function og_install() {
         og_email int(11) NOT NULL DEFAULT 2,
         PRIMARY KEY  (uid)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
-      
       db_query("CREATE TABLE {og_ancestry} (
         nid int(11) NOT NULL,
         group_nid int(11) NOT NULL,
@@ -415,6 +414,28 @@ function og_update_18() {
     node_access_rebuild();
   }
   return array();
+}
+
+function og_update_19() {
+  og_populate_uid_global_table();
+}
+
+// end updates //
+
+function og_enable() {
+  og_populate_uid_global_table();
+}
+
+// need to populate og_uid_global for existing users on enable
+// this is called from update 13 & 19 & og_enable. 
+// TODO: conditionally use subquery
+function og_populate_uid_global_table() {
+  $sql = 'SELECT u.uid FROM {users} u LEFT JOIN {og_uid_global} oug ON u.uid=oug.uid WHERE u.uid > 0 AND oug.og_email IS NULL';
+  $result = db_query($sql);
+  while ($row = db_fetch_object($result)) {
+    $sql = "INSERT INTO {og_uid_global} (uid, og_email) VALUES (%d, %d)";
+    db_query($sql, $row->uid, OG_NOTIFICATION_SELECTIVE);
+  }
 }
 
 
