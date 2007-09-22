@@ -1729,10 +1729,10 @@ function og_mail($type, $obj) {
     $obj = node_prepare($obj, FALSE);
     // fills body with CCK fields, event fields, etc. instead of "n/a"
     $obj->body = og_node_view($obj);
-    $obj->msgid = $node->nid. '-0'. og_msgid_server();
+    $obj->msgid = $obj->nid. '-0'. og_msgid_server();
     $originalurl = url("node/$obj->nid", NULL, NULL, TRUE);
     $replyurl = url("comment/reply/$obj->nid", NULL, 'comment-form', TRUE);
-    $type_friendly = node_get_types('name', $node);
+    $type_friendly = node_get_types('name', $obj);
   }
   
   $sitemail = variable_get("site_mail", ini_get("sendmail_from"));
@@ -1778,7 +1778,7 @@ function og_mail($type, $obj) {
       $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
       $group_home = url("node/$row->gid", NULL, NULL, TRUE);
       $groupheaders = $headers + array('List-Id' => "$row->group_name <$group_home>", 'List-Unsubscribe' => "<$unsubscribe>", 'List-Owner' => "$row->group_owner <$ownerurl>", "List-Archive" => "<$group_home>");
-      drupal_mail('og_mail', $row->mail, _og_user_mail_text('og_new_node_subject', $variables), _og_user_mail_text('og_new_node_body', $variables), $obj->name. " <$sitemail>", $groupheaders);
+      drupal_mail('og_mail', $row->mail, _og_user_mail_text('og_new_node_subject', $variables), _og_user_mail_text('og_new_node_body', $variables), mime_header_encode($obj->name). " <$sitemail>", $groupheaders);
     }
   }
 }
