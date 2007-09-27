@@ -107,7 +107,7 @@ function og_views_tables() {
           'name' => t('Og: Post in specified groups (by name)'),
           'handler' => 'og_handler_filter_group_name_like',
           'operator' => 'views_handler_operator_like',
-          'help' => t('Filter for posts in any organic group whose name matches the string or substring entered.'),   
+          'help' => t('Filter for posts in specified organic groups. Value should be a one or more group names (partial name is supported), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context is <strong>not</strong> be set the the first specified group (unfortunately, you must use <em>Og: Post in specified group (by number)</em> for that).'),   
         ),
         'gtype' => array(
           'name' => t('Og: Post in specified group type'),
@@ -1266,14 +1266,14 @@ function og_views_break_phrase($string, &$query) {
       $query->add_where(implode(" $and_or ", $cond), $gids);
   }
   else {
-    foreach ($gids as $gid) {
+    foreach ((array)$gids as $gid) {
       $num = $query->add_table('og_ancestry');
       $tablename = $query->get_table_name('og_ancestry', $num);
       $query->add_where("$tablename.group_nid = %d", $gid);
     }
   }
   
-  if ($GLOBALS['current_view']->build_type == 'page') {
+  if ($GLOBALS['current_view']->build_type == 'page' && is_numeric($gids[0])) {
     $node = node_load($gids[0]);
     og_set_group_context($node);
   }
