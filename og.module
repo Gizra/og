@@ -1756,14 +1756,16 @@ function og_mail($type, $obj) {
   // Send email to selective subscribers and global subscribers.
   // We use if() here in case node/comment no longer has any groups (i.e. this function can be called from cron).
   if ($groups = implode(', ', $obj->og_groups)) {
-    // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 3 positive statements about og_email field
-    $sql = "SELECT DISTINCT(u.mail) as mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
+    // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 2 positive statements about og_email field
+    $sql = "SELECT u.mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
             FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
             WHERE u.mail != '' AND
               ou.nid IN ($groups) AND (
               (oug.og_email = %d AND ou.mail_type=1) OR
               (oug.og_email = %d)
-              ) AND u.status = 1";
+              ) AND u.status = 1 
+              GROUP BY u.mail
+              ";
     $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
     while ($row = db_fetch_object($result)) {
       // TODO: add node_access('view') call here in case node is moderated or other.
