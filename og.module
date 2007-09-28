@@ -1757,17 +1757,24 @@ function og_mail($type, $obj) {
   // We use if() here in case node/comment no longer has any groups (i.e. this function can be called from cron).
   if ($groups = implode(', ', $obj->og_groups)) {
     // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 2 positive statements about og_email field
+    // ORDER BY favors newer groups to help them get ramped up. Thus, they are perceived as active.
     $sql = "SELECT u.mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
             FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
-            WHERE u.mail != '' AND
-              ou.nid IN ($groups) AND (
+            WHERE ou.nid IN ($groups) AND (
               (oug.og_email = %d AND ou.mail_type=1) OR
               (oug.og_email = %d)
-              ) AND u.status = 1 
-              GROUP BY u.mail
+              ) AND u.status = 1 AND u.mail != '' 
+              ORDER by u.mail DESC, n.created DESC
               ";
     $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
+    $last_mail = '';
     while ($row = db_fetch_object($result)) {
+      // only notify each user once. we used to do this with GROUP BY but got very hard to assure that all the selected fields came from same record.
+      if ($row->mail == $last_mail) {
+        continue;
+      }
+      $last_mail = $row->mail;
+      
       // TODO: add node_access('view') call here in case node is moderated or other.
       // Hopefully D6 will avert need to impersonate.
       // Append these group specific variables.
@@ -1775,7 +1782,6 @@ function og_mail($type, $obj) {
       $variables['!group_url'] = url("og/manage/$row->gid", NULL, NULL, TRUE);
       $variables['@type'] = $type_friendly;
 
-      // see http://www.ietf.org/rfc/rfc2369.txt. UTF8 OK?
       $unsubscribe = url("og/manage/$row->gid", NULL, NULL, TRUE);
       $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
       $group_home = url("node/$row->gid", NULL, NULL, TRUE);
