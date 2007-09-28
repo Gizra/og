@@ -2608,7 +2608,7 @@ function og_token_values($type, &$object = NULL) {
 }
 
 /**
- * Implementation of hook_db_rewrite_sql. Used by other modules to filter nodes to a given group
+ * An implementation of hook_db_rewrite_sql(). Used by other modules to filter nodes to a given group
  *
  * You must pass $args with element 'og_nid' => $nid in order to have your query filtered by this function
  *
@@ -2619,6 +2619,33 @@ function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
     $query['join'] = 'INNER JOIN {og_ancestry} oga ON n.nid = oga.nid';
     $query['where'] =  'oga.group_nid = '. $args['og_nid'];
     return $query;
+  }
+}
+
+
+/**
+ * An implementation of hook_node_type. Automatically update admin preferences when node type is renamed or removed.
+ */
+function og_node_type($op, $info) {
+  $node_type_variables = array('og_omitted_email_node_types', 'og_omitted', 'og_node_types');
+  foreach ($node_type_variables as $variable) {
+    $values = variable_get($variable, array());
+    switch ($op) {
+      case 'delete':
+        if (in_array($info->old_type, $values)) {
+          unset($values[array_search($info->old_type, $values)]);
+          variable_set($variable, $values);
+        }
+        break;
+      case 'update':
+        if (!empty($info->old_type) && $info->old_type != $info->type) {
+          if (in_array($info->old_type, $values)) {
+            $values[array_search($info->old_type, $values)] = $info->type;
+            variable_set($variable, $values);
+          }
+        }
+        break;
+    }
   }
 }
 
