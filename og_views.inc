@@ -349,7 +349,7 @@ function og_handler_argument_group_name_like($op, &$query, $argtype, $arg = '') 
       views_handler_filter_like('handler', $filter, $filterinfo, $query);
       break;
     case 'title':
-      return db_result(db_query_range('SELECT title FROM {node} WHERE nid = %d', $query, 0, 1));;
+      return check_plain($query);
   }
 }
 
