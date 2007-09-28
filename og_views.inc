@@ -342,7 +342,6 @@ function og_handler_argument_group_name_like($op, &$query, $argtype, $arg = '') 
       $query->orderby[] = ' num_nodes '. $argtype;
       break;
     case 'filter':
-      $query->ensure_table('og_node_data');
       $filterinfo['table'] = 'og_node_data';
       $filterinfo['field'] = 'title';
       $filter = array('value' => $arg, 'operator' => $argtype['options']);
