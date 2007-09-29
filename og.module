@@ -1841,7 +1841,7 @@ function og_mail_output($body, $html = TRUE) {
   static $i = 0;
 
   if ($html) {
-    $pattern = '@(<a href="(.+?)">(.+?)</a>)@ei';
+    $pattern = '@<a +([^ >]+ )*?href *= *"([^>"]+?)"[^>]*>([^<]+?)</a>@ei';
     $body = preg_replace($pattern, "'\\3 ['. og_mail_urls('\\2') .']'", $body);
     $urls = og_mail_urls();
     if (count($urls)) {
