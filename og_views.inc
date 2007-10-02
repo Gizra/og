@@ -1182,11 +1182,13 @@ function og_handler_post_count_new($fieldinfo, $fielddata, $value, $data) {
   global $user;
 
   $cnt = db_result(db_query(db_rewrite_sql('SELECT COUNT(*) FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid LEFT JOIN history h ON n.nid=h.nid AND h.uid = %d WHERE n.status = 1 AND oga.group_nid = %d AND h.timestamp IS NULL AND n.created > %d'), $user->uid, $data->nid, NODE_NEW_LIMIT));
-  if ($fielddata['options'] == 'normal') {
-    return $cnt;
-  }
-  else {
-    return $cnt. theme('mark', MARK_NEW);
+  if ($cnt) {
+    if ($fielddata['options'] == 'normal') {
+      return $cnt;
+    }
+    else {
+      return $cnt. theme('mark', MARK_NEW);
+    }
   }
 }
 
