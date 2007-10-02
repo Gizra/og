@@ -6,6 +6,7 @@
  
 function og_views_tables() {
   $types = variable_get('og_node_types', array('og'));
+  $languages = module_invoke('locale', 'supported_languages', FALSE, TRUE);
   foreach ($types as $type) {
     $type_options[$type] = node_get_types('name', $type);
   }
@@ -99,6 +100,18 @@ function og_views_tables() {
           'list-type' => 'list',
           'list' => array(OG_OPEN => t('Open'), OG_MODERATED => t('Moderated'), OG_INVITE_ONLY => t('Invite Only'), OG_CLOSED => t('Closed')),
           'help' => t('The group preference which determines how subscriptions requests are managed (moderated, invite only, etc.).'),
+        ),
+        'language' => array(
+          'name' => t('Og: Group: Language'),
+          'operator' => 'views_handler_operator_andor',
+          'option' => 'string',
+          'value-type' => 'array',
+          'value' => array(
+            '#type' => 'select',
+            '#options' => $languages['name'],
+            '#multiple' => TRUE,
+          ),
+          'help' => t('Restrict groups to specific languages.'),
         ),
       ),
     ),
@@ -1157,8 +1170,9 @@ function og_handler_field_count($fieldinfo, $fielddata, $value, $data) {
 function og_handler_field_language($fieldinfo, $fielddata, $value, $data) {
   global $locale;
   $languages = module_invoke('locale', 'supported_languages', FALSE, TRUE);
-  if ($languages[$value]) {
-    return $languages[$value];
+  // the default language is always first.
+  if ($languages['name'][$value] && $value != key($languages['name'])){
+    return $languages['name'][$value];
   }
 }
 
