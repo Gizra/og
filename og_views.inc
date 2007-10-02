@@ -29,6 +29,7 @@ function og_views_tables() {
         'count' => array(
           'name' => t('Og: Group: Subscriber Count'),
           'handler' => 'og_handler_field_count',
+          'help' => t('Number of subscribers for a group. Excludes subscriptions which are pending approval.'),
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
@@ -37,14 +38,29 @@ function og_views_tables() {
           'handler' => 'og_handler_post_count',
           'sortable' => FALSE,
           'notafield' => TRUE,
-          // TODO: help wanted. restrict to specified node types.
-          // 'option' => array(
-          //              '#type' => 'select',
-          //              '#options' => node_get_types('names'),
-          //              '#multiple' => TRUE,
-          //              // TODO: '#default_value' => array_keys(node_get_types('names')),
-          // ),
+          'help' => t('Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown.'),
+          'option' => array(
+            '#type' => 'select',
+            '#options' => array_merge(array('all' => t('All')), node_get_types('names')),
+            '#default_value' => 'all',
+            // View will not save with #multiple, for some reason. Help.
+            // '#multiple' => TRUE,
+          ),
         ),
+        'post_count_new' => array(
+          'name' => t('Og: Group: Post Count *New*'),
+          'handler' => 'og_handler_post_count_new',
+          'sortable' => FALSE,
+          'notafield' => TRUE,
+          'help' => t('Number of new posts in a group for the current user. The <em>new</em> indicator may be optionally appended using the <em>Option</em> dropdown.'),
+          'option' => array(
+             '#type' => 'select',
+             '#options' => array(
+               'normal' => 'Normal',
+               'withmark' => 'With new mark'
+              ),
+          ),
+        ),  
         'selective' => array(
           'name' => t('Og: Group: Selective'),
         ),
@@ -54,6 +70,7 @@ function og_views_tables() {
           'addlfields' => array('selective'),
           'sortable' => FALSE,
           'notafield' => TRUE,
+          'help' => t('Displays a links for subscribing to a group when a user is not already a member.'),
         ),
         'notification' => array(
           'name' => t('Og: Group: Notification'),
@@ -62,7 +79,9 @@ function og_views_tables() {
         ),
         'language' => array(
           'name' => t('Og: Group: Language'),
-          'help' => t('Displays the language selected for a given group'),
+          'handler' => 'og_handler_field_language',
+          'sortable' => TRUE,
+          'help' => t('Displays the language selected for a given group.'),
         ),
         
       ),
@@ -301,7 +320,7 @@ function og_handler_argument_gid($op, &$query, $argtype, $arg = '') {
       return $fieldinfo;
     case 'link':
       if ($name = $query->title) {
-        return l($name, "$arg/". intval($query->group_nid));
+        return l($name, "node/". intval($query->group_nid));
       }
       else {
         // return l(t('Unaffiliated'), "$arg/-1-1"); // just signifies 'no group'
@@ -330,7 +349,7 @@ function og_handler_argument_group_name_like($op, &$query, $argtype, $arg = '') 
       return $fieldinfo;
     case 'link':
       if ($name = $query->title) {
-        return l($name, "$arg/$name");
+        return l($name, "node/$query->group_nid");
       }
       else {
         // return l(t('Unaffiliated'), "$arg/-1-1"); // just signifies 'no group'
@@ -1135,14 +1154,40 @@ function og_handler_field_count($fieldinfo, $fielddata, $value, $data) {
   return in_array($data->nid, array_keys($user->og_groups)) ? l($cnt, "og/users/$data->nid") : $cnt;
 }
 
+function og_handler_field_language($fieldinfo, $fielddata, $value, $data) {
+  global $locale;
+  $languages = module_invoke('locale', 'supported_languages', FALSE, TRUE);
+  if ($languages[$value]) {
+    return $languages[$value];
+  }
+}
+
 /**
  * Views handler to display the number of posts in the group
  */
 function og_handler_post_count($fieldinfo, $fielddata, $value, $data) {
+  $where = '';
+  if ($fielddata['options'] != 'all') {
+    $where = " AND n.type = '%s'";
+  };
+  // the $where at end is harmless even when not used.
+  $cnt = db_result(db_query(db_rewrite_sql("SELECT COUNT(*) FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid WHERE n.status = 1 AND oga.group_nid = %d $where"), $data->nid, $fielddata['options'] ));
+  return $cnt;
+}
+
+/**
+ * Views handler to display the number of *new* posts in the group
+ */
+function og_handler_post_count_new($fieldinfo, $fielddata, $value, $data) {
   global $user;
 
-  $cnt = db_result(db_query(db_rewrite_sql('SELECT COUNT(*) FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid WHERE n.status = 1 AND oga.group_nid = %d'), $data->nid));
-  return $cnt;
+  $cnt = db_result(db_query(db_rewrite_sql('SELECT COUNT(*) FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid LEFT JOIN history h ON n.nid=h.nid AND h.uid = %d WHERE n.status = 1 AND oga.group_nid = %d AND h.timestamp IS NULL AND n.created > %d'), $user->uid, $data->nid, NODE_NEW_LIMIT));
+  if ($fielddata['options'] == 'normal') {
+    return $cnt;
+  }
+  else {
+    return $cnt. theme('mark', MARK_NEW);
+  }
 }
 
 /**
