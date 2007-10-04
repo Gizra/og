@@ -1343,15 +1343,13 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           break;
         }
       }
-      if (!$skip_notification && $node->status && og_node_type_notify($node->type)) {
-        if ($node->status && og_node_type_notify($node->type) && $node->og_groups) {
-          if (module_exists('job_queue')) {
-            $description = t('OG: notify group subscribers about node %nid - !link', array('%nid' => $node->nid, '!link' => l($node->title, "node/$node->nid")));
-            job_queue_add('og_mail', $description, array('node', $node->nid));
-          }
-          else {
-            og_mail('node', $node);
-          }
+      if (!$skip_notification && $node->status && og_node_type_notify($node->type) && !og_is_omitted_type($node->type) && $node->og_groups) {
+        if (module_exists('job_queue')) {
+          $description = t('OG: notify group subscribers about node %nid - !link', array('%nid' => $node->nid, '!link' => l($node->title, "node/$node->nid")));
+          job_queue_add('og_mail', $description, array('node', $node->nid));
+        }
+        else {
+          og_mail('node', $node);
         }
       }
       break;
@@ -1660,15 +1658,14 @@ function og_comment($comment, $op) {
           break;
         }
       }
-      if ($comment['status'] == COMMENT_PUBLISHED && !$skip_notification) {
-        if ($node->og_groups) {
-          if (module_exists('job_queue')) {
-            $description = t('OG: notify group subscribers about comment %id on !link', array('%id' => $comment['cid'], '!link' => l($node->title, "node/$node->nid", NULL, NULL, 'comment-'. $comment['cid'])));
-            job_queue_add('og_mail', $description, array('comment', $comment['cid']));
-          }
-          else {
-            og_mail('comment', (object)$comment);
-          }
+      // remove the perm check after 5.3 is released.
+      if ($comment['status'] == COMMENT_PUBLISHED && !$skip_notification && !og_is_omitted_type($node->type) && og_node_type_notify($node->type) && user_access('post comments without approval')) {
+        if (module_exists('job_queue')) {
+          $description = t('OG: notify group subscribers about comment %id on !link', array('%id' => $comment['cid'], '!link' => l($node->title, "node/$node->nid", NULL, NULL, 'comment-'. $comment['cid'])));
+          job_queue_add('og_mail', $description, array('comment', $comment['cid']));
+        }
+        else {
+          og_mail('comment', (object)$comment);
         }
       }
       break;
