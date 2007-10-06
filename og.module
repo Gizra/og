@@ -1735,13 +1735,21 @@ function og_mail($type, $obj) {
     $type_friendly = node_get_types('name', $obj);
   }
   
-  $sitemail = variable_get("site_mail", ini_get("sendmail_from"));
+  // set email from variables
+  $variables = array(
+    '@user_mail' => $account->mail ? $account->mail : variable_get("site_mail", ini_get("sendmail_from")),
+    '@user_name' => mime_header_encode($obj->name),
+    '@site_mail' => variable_get("site_mail", ini_get("sendmail_from")),
+    '@site_name' => mime_header_encode(variable_get("site_name", 'Drupal')),
+  );
+  $from_mail = strtr(variable_get("og_email_notification_pattern", '@user_name  <@site_mail>'), $variables); 
+
   $headers = array('X-Mailer' => 'Drupal - og_mail', 'Precedence' => 'list', 'Message-Id' => "<$obj->msgid>");
   if ($obj->in_reply_to) {
     $headers['In-Reply-To'] =  "<$obj->in_reply_to>";
   }
 
-  // set email variables
+  // set email body variables
   $variables = array(
     '@site' => variable_get('site_name', 'drupal'), 
     '!read_more' => $obj->readmore ? t('Read more') : t('View original'),
@@ -1791,7 +1799,7 @@ function og_mail($type, $obj) {
         'List-Owner' => mime_header_encode($row->group_owner). " <$ownerurl>", 
         "List-Archive" => "<$group_home>"
       );
-      drupal_mail('og_mail', $row->mail, _og_user_mail_text('og_new_node_subject', $variables), _og_user_mail_text('og_new_node_body', $variables), mime_header_encode($obj->name). " <$sitemail>", $groupheaders);
+      drupal_mail('og_mail', $row->mail, _og_user_mail_text('og_new_node_subject', $variables), _og_user_mail_text('og_new_node_body', $variables), $from_mail, $groupheaders);
     }
   }
 }
@@ -2459,6 +2467,13 @@ function og_admin_settings() {
 
   $form['og_settings']['email'] = array('#type' => 'fieldset', '#title' => t('Email settings'), '#collapsible' => TRUE, '#collapsed' => TRUE);
   $form['og_settings']['email']['og_omitted_email_node_types'] = array('#type' => 'select', '#title' => t('Omitted node types for email notifications'), '#default_value' => variable_get('og_omitted_email_node_types', array()), '#options' => $non_group_type_options, '#description' => t("Select any node types which should <b>not</b> generate email notifications when they are posted into a group."), '#multiple' => TRUE);
+
+  $form['og_settings']['email']['og_email_notification_pattern'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Format of From: field'),
+    '#default_value' => variable_get("og_email_notification_pattern", '@user_name  <@site_mail>'),
+    '#description' => t('Specify the format of the "From:" field on outgoing notifications. Available variables: @user_mail, @user_name, @site_mail, @site_name. Note that the @user_mail token reveals the author\'s email address. If the admin email examples above appear blank, you need to set your site email in the Site Configuration panel.'),
+  );
   $form['og_settings']['email']['og_new_node_subject'] = array('#type' => 'textfield', '#title' => t('New content subject'), '#description' => 'Subject of email for new content. Available variables: @group, !group_url, @type, @site, !content_url, !reply_url, @title, @subject, @body, @username. %subject contains the comment title in the case of a comment but the node title in the case of a new post. @title is always the node title.', '#default_value' => _og_user_mail_text('og_new_node_subject'));
   $form['og_settings']['email']['og_new_node_body'] = array('#type' => 'textarea', '#title' => t('New content body'), '#rows' => 10, '#description' => 'Body of email for new content. Available variables: @group, !group_url, @type, @site, !content_url, !reply_url, @title, @subject, @body, @username. @subject contains the comment title in the case of a comment but the node title in the case of a new post. %title is always the node title.', '#default_value' => _og_user_mail_text('og_new_node_body'));
   $form['og_settings']['email']['og_admin_email_body'] = array('#type' => 'textarea', '#title' => t('Group admin email body'), '#rows' => 10, '#description' => 'The body of the email sent to users from the group admin. Available variables: @group, @body, @site, !url_group, !url_unsubscribe', '#default_value' => _og_user_mail_text('og_admin_email_body'));
