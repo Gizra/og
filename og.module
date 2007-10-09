@@ -1287,7 +1287,11 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'validate':
       if (og_is_group_type($node->type)) {
-        // none
+        // Email address is required for contacting the Manager
+        $account = user_load(array('uid' => $node->uid));
+        if (empty($account->mail)) {
+          form_set_error('name', t('The group manager, %name, must have an email address in his <a href="!profile">profile</a>.', array('%name' => $account->name, '!profile' => url("user/$node->uid/edit"))));
+        }
       }
       else {
         // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
@@ -1296,6 +1300,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
             form_set_error('title', t('You must !join before posting on this web site.', array('!join' => l(t('join a group'), 'og'))));
           }
         }
+        
       }
       break;
     case 'submit':
