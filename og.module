@@ -1409,6 +1409,15 @@ function og_form_alter($form_id, &$form) {
     $node = $form['#node'];
     if (og_is_group_type($node->type)) {
       $form = array_merge($form, og_group_form($node));
+      
+      // Don't trample on custom label.
+      if ($form['body_filter']['body']['#title'] = t('Body')) {
+        $form['body_filter']['body']['#title'] = t('Welcome message');
+        $form['body_filter']['body']['#description'] = t('A welcome greeting for your group home page. Consider listing the group objectives.');
+      }
+      
+      $form['author']['name']['#title'] = t('Group manager');
+      $form['options']['sticky']['#title'] = t('Sticky at top of group home page and other lists');
     }
     elseif (!in_array($node->type, variable_get('og_omitted', array()))) {
       if (!$node->nid) {
