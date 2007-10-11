@@ -1676,7 +1676,7 @@ function og_comment($comment, $op) {
         }
       }
       // remove the perm check after 5.3 is released.
-      if ($comment['status'] == COMMENT_PUBLISHED && !$skip_notification && !og_is_omitted_type($node->type) && og_node_type_notify($node->type) && user_access('post comments without approval')) {
+      if ($comment['status'] == COMMENT_PUBLISHED && !$skip_notification && !og_is_omitted_type($node->type) && og_node_type_notify($node->type) && user_access('post comments without approval') && isset($node->og_groups) && !empty($node->og_groups)) {
         if (module_exists('job_queue')) {
           $description = t('OG: notify group subscribers about comment %id on !link', array('%id' => $comment['cid'], '!link' => l($node->title, "node/$node->nid", NULL, NULL, 'comment-'. $comment['cid'])));
           job_queue_add('og_mail', $description, array('comment', $comment['cid']));
@@ -1712,7 +1712,6 @@ function og_mail($type, $obj) {
       $account = user_load(array('uid' => $obj->uid));
       $obj->name = $account->name;
     }
-    // anonymous user
     else {
       $obj->name = variable_get('anonymous', 'Anonymous');
     }
@@ -1777,7 +1776,7 @@ function og_mail($type, $obj) {
   
   // Send email to selective subscribers and global subscribers.
   // We use if() here in case node/comment no longer has any groups (i.e. this function can be called from cron).
-  if (is_array($obj->og_groups)) {
+  if (is_array($obj->og_groups) && !empty($obj->og_groups)) {
     $groups = implode(', ', $obj->og_groups);
     // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 2 positive statements about og_email field
     // ORDER BY favors newer groups to help them get ramped up. Thus, they are perceived as active.
