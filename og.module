@@ -1548,33 +1548,35 @@ function og_form_add_og_audience($form_id, &$form) {
     }
   }
 
-  // get the visibility for normal users
-  $vis = variable_get('og_visibility', 0);
-  
-  // override visibility for og admins and when author only has 1 group
-  if (user_access('administer organic groups') && $vis < 2) {
-    $vis = $vis == OG_VISIBLE_GROUPONLY ? OG_VISIBLE_CHOOSE_PRIVATE : OG_VISIBLE_CHOOSE_PUBLIC;
-  }
-  elseif (!count($options)) {
-    // don't show checkbox if no subscriptions. must be public.
-    $vis = OG_VISIBLE_BOTH;
-  }
-  
-  switch ($vis) {
-    case OG_VISIBLE_BOTH:
-      $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 1);
-      break;
-    case OG_VISIBLE_GROUPONLY:
-      $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 0);
-      break;
+  if (variable_get('og_enabled', FALSE)) {
+    // get the visibility for normal users
+    $vis = variable_get('og_visibility', 0);
 
-    //user decides how public the post is.
-    case OG_VISIBLE_CHOOSE_PUBLIC:
-      $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
-      break;
-    case OG_VISIBLE_CHOOSE_PRIVATE:
-      $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
-      break;
+    // override visibility for og admins and when author only has 1 group
+    if (user_access('administer organic groups') && $vis < 2) {
+      $vis = $vis == OG_VISIBLE_GROUPONLY ? OG_VISIBLE_CHOOSE_PRIVATE : OG_VISIBLE_CHOOSE_PUBLIC;
+    }
+    elseif (!count($options)) {
+      // don't show checkbox if no subscriptions. must be public.
+      $vis = OG_VISIBLE_BOTH;
+    }
+
+    switch ($vis) {
+      case OG_VISIBLE_BOTH:
+        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 1);
+        break;
+      case OG_VISIBLE_GROUPONLY:
+        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 0);
+        break;
+
+      //user decides how public the post is.
+      case OG_VISIBLE_CHOOSE_PUBLIC:
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
+        break;
+      case OG_VISIBLE_CHOOSE_PRIVATE:
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
+        break;
+    }
   }
 
   // show read only item if we are non-admin, and in simple mode (i.e. non-checkboxes) and at least one group is in querystring
@@ -2704,6 +2706,16 @@ function og_requirements($phase) {
   // Ensure translations don't break at install time
   $t = get_t();
   if ($phase == 'runtime') {
+    $og_types = variable_get('og_node_types', array('og'));
+    $all_types = array_keys(node_get_types('types'));
+    if (!count(array_intersect($og_types, $all_types))) {
+          $requirements['og_group_types']  = array(
+            'title' => $t('Organic groups group type'),
+            'value' => $t('You have no node types which are acting as groups. See the Integration section of the !readme.', array('!readme' => og_readme())),
+            'severity' => REQUIREMENT_WARNING
+          );
+        }
+    
     if (!module_exists('job_queue')) {
       $requirements['og_modules']  = array(
         'title' => $t('Organic groups modules'),
@@ -2725,5 +2737,6 @@ function og_requirements($phase) {
 }
 
 function og_readme() {
+  // this link only works right on clean urls. help wanted.
   return l('README file', drupal_get_path('module', 'og'). '/README.txt');
 }
