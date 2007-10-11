@@ -1069,6 +1069,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
         // use this default empty text unless overridden by View (which is a usually not a good idea. this text is smart)
         og_home_empty($node);
       }
+      drupal_set_title(filter_xss_admin(views_get_title($view, 'page')));
     } 
   }
 }
