@@ -1038,7 +1038,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
     $node->content['og_description'] = array(
       '#type' => 'item',
       '#title' => t('Description'),
-      '#value' => $node->og_description
+      '#value' => $node->og_description,
       );
   }
   else {
@@ -1094,7 +1094,7 @@ function og_home_empty($node) {
 }
 
 function theme_og_mission($node) {
-  return '<div id="mission" class="og-mission">'. $node->body. '</div>';
+  return !empty($node->body) ? '<div id="mission" class="og-mission">'. $node->body. '</div>' : '';
 }
 
 /**
@@ -1412,8 +1412,8 @@ function og_form_alter($form_id, &$form) {
       
       // Don't trample on custom label.
       if ($form['body_filter']['body']['#title'] = t('Body')) {
-        $form['body_filter']['body']['#title'] = t('Welcome message');
-        $form['body_filter']['body']['#description'] = t('A welcome greeting for your group home page. Consider listing the group objectives.');
+        $form['body_filter']['body']['#title'] = t('Mission statement');
+        $form['body_filter']['body']['#description'] = t('A welcome greeting for your group home page. Consider listing the group objectives and mission.');
       }
       
       $form['author']['name']['#title'] = t('Group manager');
