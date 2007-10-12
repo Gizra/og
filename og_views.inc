@@ -1311,6 +1311,15 @@ function og_views_query_substitutions($view) {
 }
 
 /**
+ * An implementation of hook_view_url_tokens.
+ */
+function og_views_url_tokens() {
+  return array(
+    '$group' => 'og_url_group',
+  );
+}
+
+/**
  * Helper function for filter and argument which accepts + or , delimited integers like taxonomy urls.
  * Performs modifications on $query object. A wrapper around views_break_phrase().
  * 
