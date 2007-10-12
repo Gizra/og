@@ -1444,7 +1444,12 @@ function og_form_alter($form_id, &$form) {
     else {
       og_node_delete_nongroup_form($form);
     }
-  }  
+  }
+
+  if ($form_id == 'views_edit_view') {
+    $form['page-info']['url']['#description'] .= t("<p>To display a View as a tab on your Organic Groups group home pages, set the url to 'node/\$group/custom' (where <em>custom</em> is whatever you wish). Then open Page >> Menu and check <em>Provide Menu</em> and <em>Provide Menu as Tab</em>; also make the first argument in the View be the <em>OG: Group nid</em> argument. The <em>\$group</em> path element is a placeholder for the group nid and it ensures that the tab <strong>only</strong> appears on OG group nodes.</p>");
+  }
+
 }
 
 // form_alter() the node_delete form for a group
@@ -2739,4 +2744,28 @@ function og_requirements($phase) {
 function og_readme() {
   // this link only works right on clean urls. help wanted.
   return l('README file', drupal_get_path('module', 'og'). '/README.txt');
+}
+
+/**
+ * Default Views URL tokens
+ */
+function og_views_url_tokens() {
+  return array(
+    '$group' => 'og_url_group',
+  );
+}
+
+/**
+ * Handle '$group' in a URL.
+ */
+function og_url_group($token, $argument, $arg) {
+  global $user;
+  if (!is_numeric($arg)) {
+    return FALSE;
+  }
+  $node = node_load($arg);
+  if (og_is_group_type($node->type)) {
+    return TRUE;
+  }
+  return FALSE;
 }
