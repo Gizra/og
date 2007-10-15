@@ -10,20 +10,20 @@ INSTALLATION
 - Enable the og module. 
 - Visit the admin/og/og page. If you want to protect some posts so that only certain users may view them, then click the button to enable access control.
 - On admin/og/og, see the 'Group home page node types' field at bottom. You usually want to create a new node type via admin/content/types page and then select that node type here. See the first item in NOTES below. 
-- Set other preferences on admin/og/og as desired. It may take some experimenting before you arrive at a configuration weil suited to your needs.
-- On the admin/content/types/og page, disable comments and attachments for node types which are designated as groups
+- Set other preferences on admin/og/og as desired. It may take some experimenting before you arrive at a configuration well suited to your needs.
+- On the admin/content/types page, disable comments and attachments for node types which are designated as groups. Click the edit link beside those types.
 - On the admin/build/themes/settings pages, in 'Display post information on' section, uncheck each node type which has been designated as a group.
-- On the admin/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group authors', 'Group notifications', 'New groups, 'My groups' blocks.
-- Grant permissions as needed on the admin/access page 
+- On the admin/build/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group authors', 'Group notifications', 'New groups, 'My groups' blocks.
+- Grant permissions as needed on the admin/user/access page 
 - Begin creating groups, subscribing to those groups, and posting into those groups. The subscribe link appears in the Group details block, for non invite-only groups.
-- Consider enabling the following modules which work well with OG: Pathauto, Locale. After your install is working nicely, consider enabling og add-on modules like og_mandatory_group, og_vocab, etc.
+- Consider enabling the following modules which work well with OG: Pathauto, Locale, Job queue. After your install is working nicely, consider enabling og add-on modules like og_mandatory_group, og_vocab, etc. Many are listed at http://drupal.org/project/Modules/category/90.
 
 NOTES
 ----------------
 - This module supports designating any type of node to be a group. This node type should be defined by a custom module or via the admin/content/types page. When defining your type, you usually want the title label to be 'Group name' and the body label to be 'Welcome message'. Since all nodes of this type are treated as groups, you will usually not want to designate the standard page, story, or book node types as groups. The capacity to make custom node types groups means that you can have custom fields for your groups and even several different kinds of groups. Specify the group types at bottom of admin/og/og and also remember to disable attachments and comments for each type. Lastly, you should not create nodes *before* setting up the node type as a group. If you do do that, you have to re-save each node of that type so it acquires its group settings.
 - There are a few handy tabs at the path 'group'. You might want to add a link in your navigation to that url. Each tab also provides a useful RSS feed.
-- 'Administer nodes' permission is required for changing the Manager of a group
-- 'Administer nodes' permission enables viewing of all nodes regardless of private/public status
+- 'Administer nodes' permission is required for changing the Manager of a group (do so by changing the posts' Author.)
+- 'Administer nodes' permission enables viewing of all nodes regardless of private/public status.
 - All subscriber management happens on the 'subscriber list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), subscribing/unsubscribing users and promoting users into group admins.
 - If you decide to stop using this module, just disable it as usual. If you ever decide to re-enable, all your prior group information will be restored.
 
