@@ -413,7 +413,6 @@ function og_save_subscription($gid, $uid, $args = array()) {
   if ($cnt == 0) {
     // this pattern borrowed from user_save()
     $fields = array('nid', 'uid', 'created', 'changed');
-    $group = node_load($gid);
     $values = array($gid, $uid, $args['created'] ? $args['created'] : $time, $time);
     unset($args['created']);
     foreach ($args as $key => $value) {
