@@ -1411,7 +1411,7 @@ function og_form_alter($form_id, &$form) {
       $form = array_merge($form, og_group_form($node));
       
       // Don't trample on custom label.
-      if ($form['body_filter']['body']['#title'] = t('Body')) {
+      if ($form['body_filter']['body']['#title'] == t('Body')) {
         $form['body_filter']['body']['#title'] = t('Mission statement');
         $form['body_filter']['body']['#description'] = t('A welcome greeting for your group home page. Consider listing the group objectives and mission.');
       }
