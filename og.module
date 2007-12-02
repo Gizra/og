@@ -2311,31 +2311,13 @@ function og_block_details() {
 function og_og_block_details($node) {
   global $user;
 
-  $result = db_query(og_list_users_sql(0), $node->nid);
-  $cntall = db_num_rows($result);
-  $cntpending = 0;
-  while ($row = db_fetch_object($result)) {
-    if ($row->is_active == 0) {
-      $cntpending++;
-    }
-    if ($row->uid == $user->uid) {
-      if ($row->is_active) {
-        $subscription = 'active';
-      }
-      else {
-        $subscription = 'requested';
-      }
-    }
-  }
+  list($txt, $subscription) = og_subscriber_count_link($node);
 
   if ($subscription == 'active' || user_access('administer nodes')) {
     $links = module_invoke_all('og_create_links', $node);
     if ($node->og_selective < OG_INVITE_ONLY) {
       $links[] = l(t('Invite friend'), "og/invite/$node->nid");
     }
-    $txt = format_plural($cntall-$cntpending, '1 subscriber', '@count subscribers');
-    $txt = og_is_picture() ? l($txt, "og/users/$node->nid/faces") : l($txt, "og/users/$node->nid");
-    $txt .= $cntpending ? " ($cntpending)" : '';
     $links[] = $txt;
     $links[] =  t('Manager: '). theme('username', $node);
     $subscribe = isset($subscription) ? l(t('My subscription'), "og/manage/$node->nid") : og_subscribe_link($node);
@@ -2364,6 +2346,36 @@ function og_og_block_details($node) {
   $block['content'] = theme('item_list', $links). $post;
   $block['subject'] = $node->title;
   return $block;
+}
+
+/**
+ * Determine the number of active and pending subscribers and the current user's subscription state.
+ * 
+ * @return array
+ *   An array containing two strings. One for the number of subscribers and abother containing 'active' or 'requested'
+ */
+ function og_subscriber_count_link($node) {
+  global $user;
+  $result = db_query(og_list_users_sql(0), $node->nid);
+  $cntall = db_num_rows($result);
+  $cntpending = 0;
+  while ($row = db_fetch_object($result)) {
+    if ($row->is_active == 0) {
+      $cntpending++;
+    }
+    if ($row->uid == $user->uid) {
+      if ($row->is_active) {
+        $subscription = 'active';
+      }
+      else {
+        $subscription = 'requested';
+      }
+    }
+  }
+  $txt = format_plural($cntall-$cntpending, '1 subscriber', '@count subscribers');
+  $txt = og_is_picture() ? l($txt, "og/users/$node->nid/faces") : l($txt, "og/users/$node->nid");
+  $txt .= $cntpending ? " ($cntpending)" : '';
+  return array($txt, $subscription);
 }
 
 function og_subscribe_link($node) {
