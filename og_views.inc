@@ -25,17 +25,17 @@ function og_views_tables() {
       ),
       'fields' => array(
         'description' => array(
-          'name' => t('Og: Group: Description'),
+          'name' => t('OG: Group: Description'),
         ),
         'count' => array(
-          'name' => t('Og: Group: Subscriber Count'),
+          'name' => t('OG: Group: Subscriber Count'),
           'handler' => 'og_handler_field_count',
           'help' => t('Number of subscribers for a group. Excludes subscriptions which are pending approval.'),
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
         'post_count' => array(
-          'name' => t('Og: Group: Post Count'),
+          'name' => t('OG: Group: Post Count'),
           'handler' => 'og_handler_post_count',
           'sortable' => FALSE,
           'notafield' => TRUE,
@@ -49,7 +49,7 @@ function og_views_tables() {
           ),
         ),
         'post_count_new' => array(
-          'name' => t('Og: Group: Post Count *New*'),
+          'name' => t('OG: Group: Post Count *New*'),
           'handler' => 'og_handler_post_count_new',
           'sortable' => FALSE,
           'notafield' => TRUE,
@@ -63,10 +63,10 @@ function og_views_tables() {
           ),
         ),  
         'selective' => array(
-          'name' => t('Og: Group: Selective'),
+          'name' => t('OG: Group: Selective'),
         ),
         'subscribe' => array(
-          'name' => t('Og: Group: Subscribe Link'),
+          'name' => t('OG: Group: Subscribe Link'),
           'handler' => 'og_handler_field_subscribe',
           'addlfields' => array('selective'),
           'sortable' => FALSE,
@@ -74,12 +74,12 @@ function og_views_tables() {
           'help' => t('Displays a links for subscribing to a group when a user is not already a member.'),
         ),
         'notification' => array(
-          'name' => t('Og: Group: Notification'),
+          'name' => t('OG: Group: Notification'),
           'handler' => 'og_handler_field_yesempty',
           'help' => t('Displays <em>yes</em> if group automatically sends email notifications to subscribers'),
         ),
         'language' => array(
-          'name' => t('Og: Group: Language'),
+          'name' => t('OG: Group: Language'),
           'handler' => 'og_handler_field_language',
           'sortable' => TRUE,
           'help' => t('Displays the language selected for a given group.'),
@@ -88,21 +88,21 @@ function og_views_tables() {
       ),
       'filters' => array(
         'directory' => array(
-          'name' => t('Og: Group: List in directory'),
+          'name' => t('OG: Group: List in directory'),
           'operator' => array('=' => 'Is'),
           'list' => 'views_handler_operator_yesno',
           'list-type' => 'select',
           'help' => t('Admin specifies whether or not a group appears in the public listings.'),
         ),
         'selective' => array(
-          'name' => t('Og: Group: Selective'),
+          'name' => t('OG: Group: Selective'),
           'operator' => 'views_handler_operator_or',
           'list-type' => 'list',
           'list' => array(OG_OPEN => t('Open'), OG_MODERATED => t('Moderated'), OG_INVITE_ONLY => t('Invite Only'), OG_CLOSED => t('Closed')),
           'help' => t('The group preference which determines how subscriptions requests are managed (moderated, invite only, etc.).'),
         ),
         'language' => array(
-          'name' => t('Og: Group: Language'),
+          'name' => t('OG: Group: Language'),
           'operator' => 'views_handler_operator_andor',
           'option' => 'string',
           'value-type' => 'array',
@@ -128,7 +128,7 @@ function og_views_tables() {
       ),
       'filters' => array(
         'gid' => array(
-          'name' => t('Og: Post in specified group (by number)'),
+          'name' => t('OG: Post in specified group (by number)'),
           'handler' => 'og_handler_filter_gid',
           'operator' => array('=' => 'Is'),
           'help' => t('Filter for posts in specified organic groups. <em>Value</em> should be a one or more node ids (i.e. integers), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context (if View is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id.'),
@@ -136,13 +136,13 @@ function og_views_tables() {
         'group_name_like' => array(
           // this filter does not set any context because i am delegating filtering to built
           // in views like handler. i can't easily learn which groups matched later.
-          'name' => t('Og: Post in specified groups (by name)'),
+          'name' => t('OG: Post in specified groups (by name)'),
           'handler' => 'og_handler_filter_group_name_like',
           'operator' => 'views_handler_operator_like',
-          'help' => t('Filter for posts in specified organic groups. Value should be a one or more group names (partial name is supported), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context is <strong>not</strong> be set the the first specified group (unfortunately, you must use <em>Og: Post in specified group (by number)</em> for that).'),   
+          'help' => t('Filter for posts in specified organic groups. Value should be a one or more group names (partial name is supported), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context is <strong>not</strong> be set the the first specified group (unfortunately, you must use <em>OG: Post in specified group (by number)</em> for that).'),   
         ),
         'gtype' => array(
-          'name' => t('Og: Post in specified group type'),
+          'name' => t('OG: Post in specified group type'),
           'list' => variable_get('og_node_types', array('og')),
           'list-type' => 'list',
           'operator' => 'views_handler_operator_or',
@@ -171,7 +171,7 @@ function og_views_tables() {
       ),    
       'fields' => array(  
         'is_public' => array(
-          'name' => t('Og: Public'),
+          'name' => t('OG: Public'),
           'handler' => 'og_handler_field_yesempty',
           'help' => t('Displays <em>yes</em> if post is public according to OG.'),
         )  
@@ -190,7 +190,7 @@ function og_views_tables() {
       ),
       'fields' => array(
         'title' => array(
-          'name' => t('Og: Group names'),
+          'name' => t('OG: Group names'),
           'handler' => 'og_handler_field_nodelink',
           'notafield' => TRUE,
           'help' => t('Display links to any groups that are affiliated with a post.'),
@@ -213,19 +213,19 @@ function og_views_tables() {
       ),
       'fields' => array(
         'mail_type' => array(
-          'name' => t('Og: Subscription email'),
+          'name' => t('OG: Subscription email'),
           'handler' => 'og_handler_field_yesempty',
           'sortable' => false,
           'help' => t('Does subscriber receive email notifications for a group.'),
         ),
         'managelink' => array(
-          'name' => t('Og: Manage subscription link'),
+          'name' => t('OG: Manage subscription link'),
           'handler' => 'og_handler_field_managelink',
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
         'is_admin' => array(
-          'name' => t('Og: Is subscriber an admin in a group'),
+          'name' => t('OG: Is subscriber an admin in a group'),
           'handler' => 'og_handler_field_yesempty',
           'sortable' => FALSE,
         ),
@@ -233,7 +233,7 @@ function og_views_tables() {
       'filters' => array(
         'currentuidsimple' => array(
           'field' => 'uid',
-          'name' => t('Og: Group in User Subbed Groups'),
+          'name' => t('OG: Group in User Subbed Groups'),
           'operator' => 'views_handler_operator_eqneq',
           'list' => 'views_handler_filter_usercurrent',
           'list-type' => 'select',
@@ -258,7 +258,7 @@ function og_views_tables() {
       'filters' => array(
         'currentuid' => array(
           'field' => 'uid',
-          'name' => t('Og: Post in User Subbed Groups'),
+          'name' => t('OG: Post in User Subbed Groups'),
           'operator' => 'views_handler_operator_eqneq',
           'list' => 'views_handler_filter_usercurrent',
           'list-type' => 'select',
@@ -306,12 +306,12 @@ function og_views_tables() {
 function og_views_arguments() {
   $args = array(
     'gid' => array(
-      'name' => t("Og: Group nid(s)"), 
+      'name' => t("OG: Group nid(s)"), 
       'handler' => 'og_handler_argument_gid',
       'help' => t('Filter for the one or more organic groups. Groups should be specified as a comma or plus delimited list of node ids, like taxonomy URLs. '),
     ),
     'name' => array(
-      'name' => t("Og: Group name"), 
+      'name' => t("OG: Group name"), 
       'handler' => 'og_handler_argument_group_name_like',
       'option' => array(
         '#type' => 'select',
