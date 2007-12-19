@@ -2439,7 +2439,7 @@ function og_admin_settings() {
   if (variable_get('og_enabled', 0)) {
     $status = t('enabled');
     $btn_text = t('Disable');
-    $description = t('Before disabling this module, use the button below to restore default permissions.');
+    $description = t('Usually, you want access control enabled. Much functionality is unavailable without it.');
   }
   else {
     $status = t('disabled');
@@ -2474,7 +2474,7 @@ function og_admin_settings() {
   $form['og_settings']['group_details']['og_notification'] = array('#type' => 'radios', '#title' => t('Group email notifications'), '#default_value' => variable_get('og_notification', OG_NOTIFICATION_ALWAYS), '#description' =>t('Should new registrants automatically be notified via email when new content is posted to their subscribed group? Note that changing this setting has no effect on existing subscriptions.'), '#options' => $options);
   
   $form['og_settings']['node_form'] = array('#type' => 'fieldset', '#title' => t('Node authoring form'), '#collapsible' => TRUE, '#collapsed' => TRUE);
-  $form['og_settings']['node_form']['og_audience_checkboxes'] = array('#type' => 'checkbox', '#title' => t('Audience checkboxes'), '#default_value' => variable_get('og_audience_checkboxes', TRUE), '#description' => t('Show each subscribed group as a checkbox in the Audience section. This enables user to place her post into multiple groups. If unchecked, simplify the user interface by omitting the checkboxes and assuming user wants to post into the current group. Group administrators always see checkboxes.'));
+  $form['og_settings']['node_form']['og_audience_checkboxes'] = array('#type' => 'checkbox', '#title' => t('Audience checkboxes'), '#default_value' => variable_get('og_audience_checkboxes', TRUE), '#description' => t('Show each subscribed group as a checkbox in the Audience section. This enables user to place her post into multiple groups. If unchecked, simplify the user interface by omitting the checkboxes and assuming user wants to post into the current group. This simplification only applies to new nodes, and not to edits of existing nodes. Group administrators always see checkboxes.'));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pub.', array('@pub' => t('Public'))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pri.', array('@pri' => t('Private'))));
   $form['og_settings']['node_form']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('@pub' => t('Public'))), '#options' => $options);  
 
@@ -2495,7 +2495,7 @@ function og_admin_settings() {
 
   $form['og_settings']['home'] = array('#type' => 'fieldset', '#title' => t('Group home page'), '#collapsible' => TRUE, '#collapsed' => TRUE);
   $options = og_get_available_views();
-  $form['og_settings']['home']['og_home_page_view'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'), '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your home page. You may alter the presentation using usual the !theme. Also see the Theme section of the OG README file.', array('!theme' => l(t('usual Views themeing techniques'), 'http://drupal.org/node/42597'))));
+  $form['og_settings']['home']['og_home_page_view'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'), '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your home page. You may alter the presentation using usual the !theme. Also see the Theme section of the <a href="!README">README file</a>.', array('!README' => url(drupal_get_path('module', 'og'). '/README.txt'), '!theme' => l(t('usual Views themeing techniques'), 'http://drupal.org/node/42597'))));
   $form['og_settings']['home']['og_node_types'] = array('#type' => 'select', '#title' => t('Group home page node types'), '#default_value' => variable_get('og_node_types', array('og')), '#options' => $all_node_type_options, '#required' => TRUE, '#description' => t("<b>Required</b>. Select the node types which act as group home pages. Usually, you will want to !create called <em>group</em> for this purpose.", array('!create' => l(t('create a simple node type'), 'admin/content/types'))), '#multiple' => TRUE);
 
   $form['og_settings']['email'] = array('#type' => 'fieldset', '#title' => t('Email settings'), '#collapsible' => TRUE, '#collapsed' => TRUE);
@@ -2522,7 +2522,7 @@ function og_admin_settings() {
   $form['og_settings']['email']['og_new_admin_body'] = array('#type' => 'textarea', '#title' => t('New admin user email body'), '#rows' => 10, '#description' => 'The body of the email sent to a new admin for a group. Available variables: @group, @username, !group_url, !invite_url', '#default_value' => _og_user_mail_text('og_new_admin_body'));
 
   $form['og_settings']['pictures'] = array('#type' => 'fieldset', '#title' => t('Member pictures'), '#collapsible' => TRUE, '#collapsed' => TRUE);
-  $form['og_settings']['pictures']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown in the group subscribers and group details blocks? You must also enable pictures in !user.', array('!user' => l(t('User configuration'), 'admin/user/settings'))));
+  $form['og_settings']['pictures']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown on the subscribers page, the group subscribers block, and group details block? You must also enable pictures in !user.', array('!user' => l(t('User configuration'), 'admin/user/settings'))));
   return system_settings_form($form);
 }
 

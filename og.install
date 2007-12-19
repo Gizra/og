@@ -87,7 +87,7 @@ function og_install() {
   }
   
   _block_rehash(); // enable standard og blocks
-  drupal_set_message(t('Organic groups module enabled. Please see the included <a href="!readme">readme file</a> for further installation instructions.', array('!readme' => url(drupal_get_path('module', 'og'). '/README.txt'))));
+  drupal_set_message(t('Organic groups module enabled. Please see the included <a href="!readme">README file</a> for further installation instructions.', array('!readme' => url(drupal_get_path('module', 'og'). '/README.txt'))));
   
 }
 
