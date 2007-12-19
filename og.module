@@ -2500,7 +2500,7 @@ function og_admin_settings() {
 
   $form['og_settings']['home'] = array('#type' => 'fieldset', '#title' => t('Group home page'), '#collapsible' => TRUE, '#collapsed' => TRUE);
   $options = og_get_available_views();
-  $form['og_settings']['home']['og_home_page_view'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'), '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your home page. You may alter the presentation using usual the !theme. Also see the Theme section of the <a href="!README">README file</a>.', array('!README' => url(drupal_get_path('module', 'og'). '/README.txt'), '!theme' => l(t('usual Views themeing techniques'), 'http://drupal.org/node/42597'))));
+  $form['og_settings']['home']['og_home_page_view'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'), '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your home page. You may alter the presentation using usual the !theme. Also see the Theme section of the !README.', array('!README' => og_readme(), '!theme' => l(t('usual Views themeing techniques'), 'http://drupal.org/node/42597'))));
   $form['og_settings']['home']['og_node_types'] = array('#type' => 'select', '#title' => t('Group home page node types'), '#default_value' => variable_get('og_node_types', array('og')), '#options' => $all_node_type_options, '#required' => TRUE, '#description' => t("<b>Required</b>. Select the node types which act as group home pages. Usually, you will want to !create called <em>group</em> for this purpose.", array('!create' => l(t('create a simple node type'), 'admin/content/types'))), '#multiple' => TRUE);
 
   $form['og_settings']['email'] = array('#type' => 'fieldset', '#title' => t('Email settings'), '#collapsible' => TRUE, '#collapsed' => TRUE);
@@ -2758,7 +2758,7 @@ function og_requirements($phase) {
 }
 
 function og_readme() {
-  // this link only works right on clean urls. help wanted.
+  // this link only works right on clean urls. help wanted. see http://drupal.org/node/199724
   return l('README file', drupal_get_path('module', 'og'). '/README.txt');
 }
 
