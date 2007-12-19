@@ -220,7 +220,12 @@ function og_theme() {
     $group_node = node_load($gid);
     $custom_theme = $group_node->og_theme;
   }
+  elseif (arg(0) == 'comment' && in_array(arg(1), array('edit', 'delete')) && is_numeric(arg(2))) {
+    $nid = db_result(db_query('SELECT nid FROM {comments} WHERE cid = %d', arg(2)));
+    $group_node = og_set_theme($nid);
+  }
   elseif (arg(0) == 'comment' && is_numeric(arg(2))) {
+    // comment/reply/cid/nid URL pattern. 
     $group_node = og_set_theme(arg(2));
   }
 
