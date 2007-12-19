@@ -87,6 +87,10 @@ function og_install() {
   }
   
   _block_rehash(); // enable standard og blocks
+  
+
+  // Need og_readme() function.
+  drupal_load('module', 'og');
   drupal_set_message(t('Organic groups module enabled. Please see the included !README file for further installation instructions.', array('!README' => og_readme())));
   
 }
