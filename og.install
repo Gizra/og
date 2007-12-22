@@ -86,7 +86,10 @@ function og_install() {
       break;
   }
   
-  _block_rehash(); // enable standard og blocks
+  // enable standard og blocks. for custom profiles, block may not be included yet.
+  if (function_exists('block_rehash')) {
+    _block_rehash();
+  }
   
 
   // Need og_readme() function.
