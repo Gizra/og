@@ -2247,7 +2247,7 @@ function og_block_users_network() {
   if ($user->uid && count($user->og_groups)) {
     $max = variable_get('og_block_cnt_2', 10);
     $placeholders = array_fill(0, count($user->og_groups), "'%s'");
-    $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". implode(", ", $placeholders) .") GROUP BY ogu.uid, u.name, u.picture ORDER BY ogu.created DESC";
+    $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". implode(", ", $placeholders) .") GROUP BY ogu.uid, u.name, u.picture, ogu.created ORDER BY ogu.created DESC";
     $args = array_keys($user->og_groups);
     array_unshift($args, $user->uid);
     $result = db_query_range($sql, $args, 0, $max);
