@@ -509,7 +509,7 @@ function og_views_default_views() {
   );
   $view->exposed_filter = array (
   );
-  $view->requires = array(og_node_data, node, users, node_comment_statistics, og_uid_node);
+  $view->requires = array(og_node_data, node, users, og_uid_node);
   $views[$view->name] = $view;
 
 // OG_UNREAD VIEW
