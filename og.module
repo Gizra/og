@@ -2758,8 +2758,11 @@ function og_requirements($phase) {
 }
 
 function og_readme() {
-  // this link only works right on clean urls. help wanted. see http://drupal.org/node/199724
-  return l('README file', drupal_get_path('module', 'og'). '/README.txt');
+  global $base_path;
+  // this link has to work when clean urls are disabled and drupal in subdir.
+  $href = drupal_get_path('module', 'og'). '/README.txt';
+  $link = "<a href=\"$base_path$href\">". t('README file'). '</a>';
+  return $link;
 }
 
 /**
