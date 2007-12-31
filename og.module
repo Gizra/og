@@ -13,6 +13,12 @@ define('OG_VISIBLE_BOTH', 1);
 define('OG_VISIBLE_CHOOSE_PUBLIC', 2);
 define('OG_VISIBLE_CHOOSE_PRIVATE', 3);
 
+// visibility states for private groups. site admin chooses in og_settings()
+define('OG_PRIVATE_GROUPS_NEVER', 0);
+define('OG_PRIVATE_GROUPS_ALWAYS', 1);
+define('OG_PRIVATE_GROUPS_CHOOSE_TRUE', 2);
+define('OG_PRIVATE_GROUPS_CHOOSE_FALSE', 3);
+
 // site admin chooses in og_settings() whether group creator can put his group on the registration form
 define('OG_REGISTRATION_NEVER', 0);
 define('OG_REGISTRATION_ALWAYS', 1);
@@ -830,8 +836,12 @@ function og_confirm_unsubscribe_submit($form_id, $form_values) {
 // since a user's subscriptions are loaded into $user object, this function is only occassionally useful to get group subs for users other than the current user
 // even then, it often makes sense to call user_load() instead of this function.
 // load all subscriptions for a given user
-function og_get_subscriptions($uid, $min_is_active = 1) {
+function og_get_subscriptions($uid, $min_is_active = 1, $reset = FALSE) {
   static $subscriptions = array();
+  
+  if ($reset) {
+    unset($subscriptions[$uid]);
+  }
 
   if (!isset($subscriptions[$uid][$min_is_active])) {
     $sql = "SELECT n.title, n.type, n.status, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d AND ou.is_active >= %d ORDER BY n.title";
@@ -1112,11 +1122,8 @@ function og_group_form($node) {
   
   $edit = $_POST['edit'];
 
-  // all group home pages are publically accessible as far as og is concerned. their posts may or may not be.
-  // change this via hook_form_alter() if you want subscriber only group home pages. this may become part of og.module one day
-  $form['og_public'] = array('#type' => 'value', '#value' => TRUE);
-  
   $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true, '#description' => t('A brief description for the group details block and the group directory.'), '#weight' => -4);
+  drupal_add_js(drupal_get_path('module', 'og'). '/og.js');
 
   if ($node->nid) {
     $default = $node->og_selective;
@@ -1124,7 +1131,13 @@ function og_group_form($node) {
   else {
     $default = OG_OPEN;
   }
-  $form['og_selective'] = array('#type' => 'radios', '#title' => t('Subscription requests'), '#default_value' => $default, '#options' => array(t('open - subscription requests are accepted immediately.'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.'), t('closed - subscriptions are fully administered by an administrator.')), '#description' => t('How should subscription requests be handled in this group? When you select <em>closed</em>, users will not be able to subscribe <strong>or</strong> unsubscribe.'));
+  $form['og_selective'] = array(
+    '#type' => 'radios', 
+    '#title' => t('Subscription requests'), 
+    '#required' => TRUE,
+    '#default_value' => $default, 
+    '#options' => array(t('open - subscription requests are accepted immediately.'), t('moderated - subscription requests must be approved.'), t('invite only - subscriptions must be created by an administrator.'), t('closed - subscriptions are fully administered by an administrator.')), 
+    '#description' => t('How should subscription requests be handled in this group? When you select <em>closed</em>, users will not be able to subscribe <strong>or</strong> unsubscribe.'));
 
   // registration checkbox
   // get the visibility for normal users
@@ -1172,8 +1185,45 @@ function og_group_form($node) {
       $default = TRUE;
       // fall through
     case OG_DIRECTORY_CHOOSE_FALSE:
-      $form['og_directory'] = array('#type' => 'checkbox', '#title' => t('list in groups directory'),  '#default_value' => $node->nid ? $node->og_directory : $default, '#description' => t('Should this group appear on the !page?', array('!page' => l(t('list of groups page'),'og'))));
+      $form['og_directory'] = array('#type' => 'checkbox', '#title' => t('list in groups directory'),  '#default_value' => $node->nid ? $node->og_directory : $default, '#description' => t('Should this group appear on the !page?  Disabled if the group is set to <em>private group</em>.', array('!page' => l(t('list of groups page'),'og'))));
       break;    
+  }
+  
+  // private groups
+  $visibility = variable_get('og_private_groups', OG_PRIVATE_GROUPS_CHOOSE_FALSE);
+  // override setting for admins - get right default
+  if (user_access('administer nodes')) {
+    $not = array(OG_PRIVATE_GROUPS_NEVER, OG_PRIVATE_GROUPS_CHOOSE_FALSE);
+    $visibility = in_array($visibility, $not) ? OG_PRIVATE_GROUPS_CHOOSE_FALSE : OG_PRIVATE_GROUPS_CHOOSE_TRUE;
+  }
+
+  $default = FALSE;
+  switch ($visibility) {
+    case OG_PRIVATE_GROUPS_NEVER :
+      $form['og_private'] = array (
+        '#type' => 'value',
+        '#value' => 0 
+      );
+      break;
+    
+    case OG_PRIVATE_GROUPS_ALWAYS :
+      $form['og_private'] = array (
+        '#type' => 'value',
+        '#value' => 1
+      );
+      break;
+
+    case OG_PRIVATE_GROUPS_CHOOSE_TRUE :
+      $default = TRUE;
+      // fall through
+
+    case OG_PRIVATE_GROUPS_CHOOSE_FALSE :
+      $form['og_private'] = array (
+        '#type' => 'checkbox',
+        '#title' => t('private group'), 
+        '#default_value' => $node->nid ? $node->og_private : $default, 
+        '#description' => t('Should this group be visible only by its subscribers?  Disabled if the group is set to <em>List in Directory</em>'));
+        break;
   }
   
   // language
@@ -1234,20 +1284,20 @@ function og_submit_group(&$node) {
 }
 
 function og_load_group(&$node) {
-  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, register AS og_register, directory AS og_directory, notification AS og_notification, language AS og_language FROM {og} WHERE nid = %d';
+  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, register AS og_register, directory AS og_directory, notification AS og_notification, language AS og_language, private AS og_private FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, (array)db_fetch_array($result));
   $node->comment = COMMENT_NODE_DISABLED; // we don't use comments on og nodes. technically not needed since we set this on node submit
 }
 
 function og_insert_group($node) {
-  $sql = "INSERT INTO {og} (nid, theme, selective, description, register, directory, notification, language) VALUES (%d, '%s', %d, '%s', %d, %d, %d, '%s')";
-  db_query($sql, $node->nid, $node->og_theme, $node->og_selective, $node->og_description, $node->og_register, $node->og_directory, $node->og_notification, $node->og_language);
+  $sql = "INSERT INTO {og} (nid, theme, selective, description, register, directory, notification, language, private) VALUES (%d, '%s', %d, '%s', %d, %d, %d, '%s', %d)";
+  db_query($sql, $node->nid, $node->og_theme, $node->og_selective, $node->og_description, $node->og_register, $node->og_directory, $node->og_notification, $node->og_language, $node->og_private);
 }
 
 function og_update_group($node) {
-  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', directory = %d, notification = %d, language = '%s' WHERE nid = %d";
-  db_query($sql, $node->og_theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_directory, $node->og_notification, $node->og_language, $node->nid);
+  $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', directory = %d, notification = %d, language = '%s', private = %d WHERE nid = %d";
+  db_query($sql, $node->og_theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_directory, $node->og_notification, $node->og_language, $node->og_private, $node->nid);
 }
 
 // returns TRUE if node type should generate email notifications when posted to a group.
@@ -1261,6 +1311,8 @@ function og_node_type_notify($type) {
  *
 */
 function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+  global $user;
+  
   switch ($op) {
     case 'view':
       $group_node = og_get_group_context();
@@ -1330,6 +1382,10 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_insert_group($node);
         // make sure the node owner is a full powered subscriber
         og_save_subscription($node->nid, $node->uid, array('is_active' => 1, 'is_admin' => 1));
+        // load new group into $user->og_groups so that author can get redirected to the new group
+        if ($node->uid == $user->uid) {
+          $user->og_groups = og_get_subscriptions($node->uid, 1, TRUE);
+        }
            
         $account = user_load(array('uid' => $node->uid));
         $variables = array(
@@ -1371,6 +1427,10 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_update_group($node);
         // make sure the node owner is a full powered subscriber
         og_save_subscription($node->nid, $node->uid, array('is_active' => 1, 'is_admin' => 1));
+        // load new group into $user->og_groups so that author can get redirected to the new group
+        if ($node->uid == $user->uid) {
+          $user->og_groups = og_get_subscriptions($account->uid, 1, TRUE);
+        }
       }
       elseif (!og_is_omitted_type($node->type)) {
         og_save_ancestry($node);
@@ -1537,6 +1597,7 @@ function og_all_groups_options() {
  */
 function og_form_add_og_audience($form_id, &$form) {
   global $user;
+  // determine the selected groups if fapi doesn't tell us.
   if ($_SERVER["REQUEST_METHOD"] == 'GET') {
     $gids = $_GET['gids'];
   }
@@ -1557,38 +1618,7 @@ function og_form_add_og_audience($form_id, &$form) {
       $options[$key] = $val['title'];
     }
   }
-
-  if (variable_get('og_enabled', FALSE)) {
-    // get the visibility for normal users
-    $vis = variable_get('og_visibility', 0);
-
-    // override visibility for og admins and when author only has 1 group
-    if (user_access('administer organic groups') && $vis < 2) {
-      $vis = $vis == OG_VISIBLE_GROUPONLY ? OG_VISIBLE_CHOOSE_PRIVATE : OG_VISIBLE_CHOOSE_PUBLIC;
-    }
-    elseif (!count($options)) {
-      // don't show checkbox if no subscriptions. must be public.
-      $vis = OG_VISIBLE_BOTH;
-    }
-
-    switch ($vis) {
-      case OG_VISIBLE_BOTH:
-        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 1);
-        break;
-      case OG_VISIBLE_GROUPONLY:
-        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 0);
-        break;
-
-      //user decides how public the post is.
-      case OG_VISIBLE_CHOOSE_PUBLIC:
-        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
-        break;
-      case OG_VISIBLE_CHOOSE_PRIVATE:
-        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
-        break;
-    }
-  }
-
+  
   // show read only item if we are non-admin, and in simple mode (i.e. non-checkboxes) and at least one group is in querystring
   $simple = !user_access('administer organic groups') && !variable_get('og_audience_checkboxes', TRUE) && count($gids);
   
@@ -1615,6 +1645,54 @@ function og_form_add_og_audience($form_id, &$form) {
     $groups = array();
   }
 
+  // don't bother with visibility if access control is disabled. all is public.
+  if (variable_get('og_enabled', FALSE)) {
+    // get the visibility for normal users
+    $vis = variable_get('og_visibility', 0);
+
+    // override visibility for og admins and when author only has 1 group
+    if (user_access('administer organic groups') && $vis < 2) {
+      $vis = $vis == OG_VISIBLE_GROUPONLY ? OG_VISIBLE_CHOOSE_PRIVATE : OG_VISIBLE_CHOOSE_PUBLIC;
+    }
+    elseif (!count($options)) {
+      // don't show checkbox if no subscriptions. must be public.
+      $vis = OG_VISIBLE_BOTH;
+    }
+
+    // If the post is to a private group, visibility must default to one of the private options.
+    // Try not to show checkbox if admin likes to reduce decisions for node authors.
+    $selected_groups = isset($form['#post']['og_groups']) ? array_filter($form['#post']['og_groups']) : $groups;
+    if (count($selected_groups)) {  
+      foreach ($selected_groups as $gid) {
+        $group_node = new stdClass();
+        $group_node->nid = $gid;
+        og_load_group($group_node);
+         if ($group_node->og_private) {
+           $vis = variable_get('og_visibility', 0) == OG_VISIBLE_BOTH ? OG_VISIBLE_GROUPONLY : OG_VISIBLE_CHOOSE_PRIVATE;
+          break;
+        }
+      }
+    } 
+
+    switch ($vis) {
+      case OG_VISIBLE_BOTH:
+        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 1);
+        break;
+      case OG_VISIBLE_GROUPONLY:
+        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 0);
+        break;
+
+      //user decides how public the post is.
+      case OG_VISIBLE_CHOOSE_PUBLIC:
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
+        break;
+      case OG_VISIBLE_CHOOSE_PRIVATE:
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone, or only to subscribers of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
+        break;
+    }
+  }
+
+  // Emit the audience form element.
   if ($simple) {
     // 'simple' mode. read only.
     if (count($groups)) {
@@ -1657,7 +1735,8 @@ function og_form_add_og_audience($form_id, &$form) {
   }
 }
 
-// used by og_book to determine the public state of an autocreated node
+// Used by og_book to determine the public state of an autocreated node.
+// TODO: Does not consider private groups.
 function og_get_visibility_default() {
   $vis = variable_get('og_visibility', 0);
   switch ($vis) {
@@ -2096,8 +2175,15 @@ function og_node_access_records($node) {
   if (og_is_group_type($node->type)) {
     // this grant allows group admins to manage stuff
     $grants[] = array('realm' => 'og_subscriber', 'gid' => $node->nid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
-    // this one lets everyone see group homepage. see 'private groups' issue if you don't want this. we need help.
-    $grants[] = array('realm' => 'og_public', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
+    // If the group is not marked private let everyone view the group homepage.
+    if (!$node->og_private) {
+        $grants[] = array (
+          'realm' => 'og_public',
+          'gid' => 0,
+          'grant_view' => 1,
+          'grant_update' => 0,
+          'grant_delete' => 0 );
+    }
   }
   elseif (is_array($node->og_groups)) {
     // applies to non group nodes
@@ -2247,7 +2333,7 @@ function og_block_users_network() {
   if ($user->uid && count($user->og_groups)) {
     $max = variable_get('og_block_cnt_2', 10);
     $placeholders = array_fill(0, count($user->og_groups), "'%s'");
-    $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". implode(", ", $placeholders) .") GROUP BY ogu.uid, u.name, u.picture, ogu.created ORDER BY ogu.created DESC";
+    $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". implode(", ", $placeholders) .") GROUP BY ogu.uid, u.name, u.picture ORDER BY u.name ASC";
     $args = array_keys($user->og_groups);
     array_unshift($args, $user->uid);
     $result = db_query_range($sql, $args, 0, $max);
@@ -2441,6 +2527,8 @@ function og_admin_settings() {
   $form['#submit']['og_settings_submit'] = array(); // custom submit handler
   $form['#submit']['system_settings_form_submit'] = array(); // form.inc never calls the $callback if a submit handler is defined
   drupal_set_title(t('Organic groups configuration'));
+  drupal_add_js(drupal_get_path('module', 'og'). '/og.js'); // load the form javascript to handle private groups / node visibility conflicts in the og settings form.
+ 
   if (variable_get('og_enabled', 0)) {
     $status = t('enabled');
     $btn_text = t('Disable');
@@ -2472,6 +2560,19 @@ function og_admin_settings() {
             );
   $form['og_settings']['group_details']['og_visibility_registration'] = array('#type' => 'radios', '#title' => t('Registration form control'), '#default_value' => variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE), '#description' =>t('OG admins always see the checkbox for adding a group to the %dir. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('%dir' => t('registration form'))), '#options' => $options);
     
+  // private groups control
+  $options = array(t('New group home pages and default audience are always public.'),
+               t('New group home pages and default audience are always private.'),
+               t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to %yes.', array('%yes' => t('private'))),
+               t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to %no.', array('%no' => t('public'))),
+             );
+  $form['og_settings']['group_details']['og_private_groups'] = array('#type' => 'radios', '#title' => t('Private Groups'), '#default_value' => variable_get('og_private_groups', OG_PRIVATE_GROUPS_CHOOSE_FALSE), 
+                                                                             '#description' =>t('A private group\'s group home page cannot be seen by non-subscribers, and new posts created in the group will default to being private.  This setting controls what private groups options can be used when creating a new group or editing an existing group.  If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here.  '.
+                                                                                                'Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Node authoring form / Visibility of Posts</em> setting on this page.  Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups!  To change those you must edit the groups and their individual content nodes directly.  If the setting you want is disabled here, check the settings under <em>Node authoring form / Visibility of Posts</em> on this page.  You cannot choose to only have private groups if nodes visibility is set to be always public, and vice versa.'
+                                                                                              ),                              
+                                                                              '#options' => $options, 
+                                                                   );
+
   // email notifications default
   $options = array(OG_NOTIFICATION_SELECTIVE => t('New registrants are not subscribed to group email notifications by default. A user may choose to enable this from her profile page or her my subscriptions page.'),
               OG_NOTIFICATION_ALWAYS => t('New registrants are subscribed to group email notifications by default. A user may choose to disable this from her profile page.'),
@@ -2481,7 +2582,7 @@ function og_admin_settings() {
   $form['og_settings']['node_form'] = array('#type' => 'fieldset', '#title' => t('Node authoring form'), '#collapsible' => TRUE, '#collapsed' => TRUE);
   $form['og_settings']['node_form']['og_audience_checkboxes'] = array('#type' => 'checkbox', '#title' => t('Audience checkboxes'), '#default_value' => variable_get('og_audience_checkboxes', TRUE), '#description' => t('Show each subscribed group as a checkbox in the Audience section. This enables user to place her post into multiple groups. If unchecked, simplify the user interface by omitting the checkboxes and assuming user wants to post into the current group. This simplification only applies to new nodes, and not to edits of existing nodes. Group administrators always see checkboxes.'));
   $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pub.', array('@pub' => t('Public'))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pri.', array('@pri' => t('Private'))));
-  $form['og_settings']['node_form']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.', array('@pub' => t('Public'))), '#options' => $options);  
+  $form['og_settings']['node_form']['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.  If the setting you want is disabled here, check the settings under <em>Group details / Private Groups</em> on this page.  You cannot set node visibility to always be public if private groups are set to always on and vice versa.', array('@pub' => t('Public'))), '#options' => $options);  
 
   $options = array(t('optional'), t('required'));
   $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', 0), '#options' => $options, '#description' => t('Do you require that all (non administrator) posts be affiliated with a group? Note that changing this setting will affect existing posts when they are edited.'));
