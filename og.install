@@ -14,6 +14,7 @@ function og_install() {
         directory int(1) NOT NULL default 0,
         notification int(1) NOT NULL default 0,
         language varchar(12) NOT NULL default '',
+        private int(1) NOT NULL default 0,
         PRIMARY KEY  (nid)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
   
@@ -53,6 +54,7 @@ function og_install() {
         directory numeric(1) NOT NULL default 0,
         notification numeric(1) NOT NULL default 0,
         language varchar(12) NOT NULL default '',
+        private numeric(1) NOT NULL default 0,  
         PRIMARY KEY  (nid)
       );");
 
@@ -428,6 +430,18 @@ function og_update_19() {
   return array('Populated og_uid_global table');
 }
 
+function og_update_20() {
+  switch ($GLOBALS['db_type']) {
+  case 'mysql':
+  case 'mysqli':
+    $ret[] = update_sql("ALTER TABLE {og} ADD private int(1) NOT NULL default 0");
+    break;
+  case 'pgsql':
+    $ret[] = update_sql("ALTER TABLE {og} ADD private numeric(1) NOT NULL default 0");
+    break;
+  }
+  return $ret;
+}
 // end updates //
 
 function og_enable() {
