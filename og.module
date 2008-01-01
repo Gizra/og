@@ -1222,7 +1222,7 @@ function og_group_form($node) {
         '#type' => 'checkbox',
         '#title' => t('private group'), 
         '#default_value' => $node->nid ? $node->og_private : $default, 
-        '#description' => t('Should this group be visible only by its subscribers?  Disabled if the group is set to <em>List in Directory</em>'));
+        '#description' => t('Should this group be visible only by its subscribers?  Disabled if the group is set to <em>List in Directory</em> or Subscription requests: open'));
         break;
   }
   
