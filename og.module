@@ -2023,7 +2023,7 @@ function _og_user_mail_text($messageid, $variables = array()) {
       case 'og_request_user_subject':
         return t("Subscription request for '@group' from '@username'", $variables);        
       case 'og_request_user_body':
-        return t("To instantly approve this request, visit !approve_url.\nYou may deny this request or manage subscribers at !group_url. !request", $variables);       
+        return t("To instantly approve this request, visit !approve_url.\nYou may deny this request or manage subscribers at !group_url.", $variables);       
       case 'og_new_admin_subject':
         return t("You are now an administrator for the group '@group'", $variables);        
       case 'og_new_admin_body':
