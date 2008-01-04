@@ -2045,18 +2045,34 @@ function og_user($op, $edit, &$account, $category = NULL) {
   switch ($op) {
     case 'register':
       $options = array();
-      // perhaps this should be a View
       list($types, $in) = og_get_sql_args();
-      $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ($in) AND n.status = 1 AND o.register = 1 ORDER BY n.title"), $types);
+      
+      // if groups are passed on querystring, just use them.
+      if ($gids = $_REQUEST['gids']) {
+        $default_value = 1;
+        foreach ($gids as $gid) {
+          $nids[] = (int)$gid;
+        }
+        $in_nids = implode(', ', array_fill(0, count($nids), "%d"));
+        $sql = "SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ($in) AND n.status = 1 AND n.nid IN ($in_nids) ORDER BY n.title";
+        $result = db_query(db_rewrite_sql($sql), array_merge($types, $nids));
+      }
+      else {      
+        $default_value = 0;
+        // perhaps this should be a View
+        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ($in) AND n.status = 1 AND o.register = 1 ORDER BY n.title"), $types);
+      }
+      
       while ($group = db_fetch_object($result)) {
         $options[$group->nid] = '<span class="og-registration-'.$group->nid.'">'. t('Subscribe to @name.', array('@name' => $group->title)). "</span>\n";
         if ($group->selective) {
           $options[$group->nid] .= ' '. t('(approval needed)');
         }
       }
+      
       if (count($options)) {
         $form['og_register'] = array('#type' => 'fieldset', '#title' => t('Groups'));
-        $form['og_register']['og_register'] = array('#type' => 'checkboxes', '#options' => $options);
+        $form['og_register']['og_register'] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => $default_value);
       }
       return $form;
     case 'form':

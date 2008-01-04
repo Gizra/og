@@ -6,14 +6,13 @@ Groups may choose their own theme and language. Groups have RSS feeds, and so on
 
 INSTALLATION
 ---------------
-- If not already active, enable the Views and Views_RSS modules. These are now prerequisites. 
-- Enable the og module. 
+- Enable the og module. Please make sure og is working well on its own before enabling other OG related modules.
 - Visit the admin/og/og page. If you want to protect some posts so that only certain users may view them, then click the button to enable access control.
 - On admin/og/og, see the 'Group home page node types' field at bottom. You usually want to create a new node type via admin/content/types page and then select that node type here. See the first item in NOTES below. 
 - Set other preferences on admin/og/og as desired. It may take some experimenting before you arrive at a configuration well suited to your needs.
 - On the admin/content/types page, disable comments and attachments for node types which are designated as groups. Click the edit link beside those types.
 - On the admin/build/themes/settings pages, in 'Display post information on' section, uncheck each node type which has been designated as a group.
-- On the admin/build/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the 'Group authors', 'Group notifications', 'New groups, 'My groups' blocks.
+- On the admin/build/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the other 'Group' blocks.
 - Grant permissions as needed on the admin/user/access page 
 - Begin creating groups, subscribing to those groups, and posting into those groups. The subscribe link appears in the Group details block, for non invite-only groups.
 - Consider enabling the following modules which work well with OG: Pathauto, Locale, Job queue. After your install is working nicely, consider enabling og add-on modules like og_mandatory_group, og_vocab, etc. Many are listed at http://drupal.org/project/Modules/category/90.
@@ -26,6 +25,7 @@ NOTES
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status.
 - All subscriber management happens on the 'subscriber list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), subscribing/unsubscribing users and promoting users into group admins.
 - If you decide to stop using this module, just disable it as usual. If you ever decide to re-enable, all your prior group information will be restored.
+- You may craft your own URLs which produce useful behavior. For example, user/register?gids[]=4 will add a checked checkbox for to the user's registration page for subscribing to group nid=4. This feature overrides the usual preference for groups to always appear during registration.
 
 UPGRADING FROM 4.7 TO 5.0
 -----------------
@@ -49,7 +49,7 @@ INTEGRATION
 
 UNIT TESTING
 ----------------------
-This module comes with a suite of unit tests. Please help build more of them. See http://drupal.org/simpletest
+This module comes with a suite of unit tests. Please help update and build more of them. See http://drupal.org/simpletest
 
 TODO/BUGS/FEATURE REQUESTS
 ----------------
@@ -58,7 +58,7 @@ TODO/BUGS/FEATURE REQUESTS
 CREDITS
 ----------------------------
 Authored and maintained by Moshe Weitzman <weitzman AT tejasa DOT com>
-Contributors: Gerhard Killesreiter, Angie Byron, Derek Wright, Thomas Ilsche, Ted Serbinski
+Contributors: Gerhard Killesreiter, Angie Byron, Derek Wright, Thomas Ilsche, Ted Serbinski, damien_vancouver
 Sponsored by Bryght - http://www.bryght.com
 Sponsored by Broadband Mechanics - http://www.broadbandmechanics.com/
 Sponsored by Finnish Broadcasting Company - http://www.yle.fi/fbc/
