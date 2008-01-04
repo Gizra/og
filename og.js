@@ -62,7 +62,7 @@ Drupal.ogAttach = function() {
    */
   $("#edit-og-private").click(function() { 
     if ($("#edit-og-private:checked").val()) {
-      $("#edit-og-directory").attr('disabled','disabled');
+      $("#edit-og-directory").removeAttr("checked").attr('disabled','disabled');
     }
     else {
       $("#edit-og-directory").removeAttr('disabled');
