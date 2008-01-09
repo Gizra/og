@@ -2076,7 +2076,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
       }
       return $form;
     case 'form':
-      if ($category == 'account') {
+      if ($category == 'account' && !empty($account->og_groups)) {
         $form['og_settings'] = array(
           '#type' => 'fieldset',
           '#title' => t('Organic groups settings'),
