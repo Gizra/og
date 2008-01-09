@@ -123,16 +123,16 @@ msgstr "Mandar un correo a %group"
 
 #: og.module:272
 msgid "the sole subscriber"
-msgid_plural "all %count subscribers"
+msgid_plural "all @count subscribers"
 msgstr[0] "el único suscriptor"
-msgstr[1] "todos los %count suscriptores"
+msgstr[1] "todos los @count suscriptores"
 
 #: og.module:273
 msgid ""
-"Your email will be sent to %count in this group. Please use this feature "
+"Your email will be sent to @count in this group. Please use this feature "
 "sparingly."
 msgstr ""
-"Su correo será enviado a %count en este grupo. Por favor utilice esta función con cuidado."
+"Su correo será enviado a @count en este grupo. Por favor utilice esta función con cuidado."
 
 #: og.module:275
 msgid "Enter a subject for your email."
@@ -163,8 +163,8 @@ msgstr ""
 "url2"
 
 #: og.module:296
-msgid "%count emails sent."
-msgstr "%count correos enviados."
+msgid "@count emails sent."
+msgstr "@count correos enviados."
 
 #: og.module:312
 msgid ""
@@ -316,10 +316,10 @@ msgid "Subscribe: %url"
 msgstr "Suscribirse: %url"
 
 #: og.module:545
-msgid "%count invitations sent."
-msgid_plural "%count invitations sent."
-msgstr[0] "%count invitación enviada."
-msgstr[1] "%count invitaciones enviadas."
+msgid "@count invitations sent."
+msgid_plural "@count invitations sent."
+msgstr[0] "@count invitación enviada."
+msgstr[1] "@count invitaciones enviadas."
 
 #: og.module:555
 msgid ""
@@ -387,8 +387,8 @@ msgstr[0] "nombre"
 msgstr[1] "nombres"
 
 #: og.module:707
-msgid "%count added to the group"
-msgstr "%count ha sido agregado al grupo"
+msgid "@count added to the group"
+msgstr "@count ha sido agregado al grupo"
 
 #: og.module:719
 msgid "manager"
@@ -669,9 +669,9 @@ msgstr "invitar a un amigo"
 
 #: og.module:1838
 msgid "1 subscriber"
-msgid_plural "%count subscribers"
-msgstr[0] "%count suscriptor"
-msgstr[1] "%count suscriptores"
+msgid_plural "@count subscribers"
+msgstr[0] "@count suscriptor"
+msgstr[1] "@count suscriptores"
 
 #: og.module:1844
 msgid "manager: "
