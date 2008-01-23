@@ -2896,3 +2896,16 @@ function og_url_group($token, $argument, $arg) {
   }
   return FALSE;
 }
+
+/**
+* Implementation of hook_node_access_explain
+*/
+function og_node_access_explain($row) {
+  if ($row->realm == 'og_public') {
+    return t('All users may view this node.', array('@op' => $op));
+  }
+  elseif ($row->realm == 'og_subscriber') {
+    $node = node_load((int)$row->gid);
+    return t('Subscribers of !group_n may view this node.', array('@op' => $op, '!group_n' => l($node->title, "node/$row->gid")));
+  }
+}
