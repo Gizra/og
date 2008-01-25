@@ -101,14 +101,14 @@ function og_menu($may_cache) {
       }
       // group admin only
       $node = node_load($gid);
-      $items[] = array('path' => "og/users/$gid/add_user", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array('og_add_users', $gid), 'type' => MENU_LOCAL_TASK, 'weight' => 5, 'access' => node_access('update', $node));
+      $items[] = array('path' => "og/users/$gid/add_user", 'callback' => 'drupal_get_form', 'title' => t('Add subscribers'), 'callback arguments' => array('og_add_users', $gid), 'type' => MENU_LOCAL_TASK, 'weight' => 5, 'access' => og_is_node_admin($node));
     }
     
     // email tab on group node
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(arg(1));
       if (og_is_group_type($node->type)) {
-        $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('E-mail'), 'callback' => 'drupal_get_form', 'callback arguments' => array('og_email_form', arg(1)), 'access' => node_access('update', $node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
+        $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('E-mail'), 'callback' => 'drupal_get_form', 'callback arguments' => array('og_email_form', arg(1)), 'access' => og_is_node_admin($node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
       }
     }
   }
@@ -453,7 +453,7 @@ function og_delete_subscription($gid, $uid){
 
 function og_approve($gid, $uid) {
   $node = node_load($gid);
-  if (node_access('update', $node)) {
+  if (og_is_node_admin($node)) {
     $account = user_load(array('uid' => (int)$uid));
     if ($account === FALSE) {
      drupal_set_message(t("User approval failed, user not longer available on website."), 'error');
@@ -485,7 +485,7 @@ function og_approve($gid, $uid) {
 
 function og_deny($gid, $uid) {
   $node = node_load($gid);
-  if (node_access('update', $node)) {
+  if (og_is_node_admin($node)) {
     og_delete_subscription($gid, $uid);
     drupal_set_message(t('Subscription request denied.'));
     
@@ -506,7 +506,7 @@ function og_deny($gid, $uid) {
 
 function og_create_admin($gid, $uid) {
   $node = node_load($gid);
-  if (node_access('update', $node)) {
+  if (og_is_node_admin($node)) {
     $account = user_load(array('uid' => $uid));
     return drupal_get_form('og_create_admin_confirm', $gid, $node, $account);
   }
@@ -552,7 +552,7 @@ function og_create_admin_confirm_submit($form_id, $form_values) {
 
 function og_delete_admin($gid, $uid) {
   $node = node_load($gid);
-  if (node_access('update', $node)) {
+  if (og_is_node_admin($node)) {
     $account = user_load(array('uid' => $uid));
     return drupal_get_form('og_remove_admin_confirm', $gid, $node, $account);
   }
@@ -589,7 +589,7 @@ function og_remove_admin_confirm_submit($form_id, $form_values) {
 
 function og_invite_page($gid) {
   $node = node_load($gid);
-  if ($node->og_selective < OG_INVITE_ONLY || node_access('update', $node)) {
+  if ($node->og_selective < OG_INVITE_ONLY || og_is_node_admin($node)) {
     return drupal_get_form('og_invite_form', $gid);
   }
   else {
@@ -694,7 +694,7 @@ function og_subscribe($gid, $uid = NULL) {
    }
   
   // only admins can subscribe another person
-  if ($account->uid != $user->uid && !node_access('update', $node)) {
+  if ($account->uid != $user->uid && !og_is_node_admin($node)) {
     drupal_access_denied();
   }
   // user is already subscribed to this group, redirect to group homepage
@@ -780,7 +780,7 @@ function og_subscribe_user($gid, $account, $request = NULL) {
     case OG_CLOSED:
     case OG_INVITE_ONLY:
       // admins can subscribe users to these groups, but others can't.
-      if (node_access('update', $node)) {
+      if (og_is_node_admin($node)) {
         og_save_subscription($gid, $account->uid, array('is_active' => 1));
       }
       else {
@@ -797,11 +797,11 @@ function og_unsubscribe($gid, $uid = NULL) {
     $uid = $user->uid;
   }
   $node = node_load($gid);
-  if ($uid != $user->uid && !node_access('update', $node)) {
+  if ($uid != $user->uid && !og_is_node_admin($node)) {
     // only admins can unsubscribe another person
     drupal_access_denied();
   }
-  if (($node->og_selective == OG_CLOSED && !node_access('update', $node)) || $node->uid == $uid){
+  if (($node->og_selective == OG_CLOSED && !og_is_node_admin($node)) || $node->uid == $uid){
     // Regular users may not unsubscribe from a closed group
     // Group manager may never unsubscribe (TODO: fix), such a link should never be generated
     drupal_access_denied();
@@ -866,6 +866,8 @@ function og_add_users($gid) {
                             '#title' => t('List of users'),
                             '#rows' => 5,
                             '#cols' => 70,
+                            // no autocomplete b/c user_autocomplete can't handle commas like taxonomy. pls improve core.
+                            // '#autocomplete_path' => 'user/autocomplete',
                             '#description' => t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.')
                             );
   $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
@@ -908,7 +910,7 @@ function og_add_users_submit($form_id, $form_values) {
 
 function og_list_users_page($gid) {
   $node = node_load($gid);
-  $access = node_access('update', $node);
+  $access = og_is_node_admin($node);
   if ($access) {
     $header[] = array('data' => t('Operations'), 'colspan' => 2);
   }
@@ -2037,6 +2039,13 @@ function og_get_sql_args() {
   $types = variable_get('og_node_types', array('og'));
   $in = implode(', ', array_fill(0, count($types), "'%s'"));
   return array($types, $in);
+}
+
+/*
+ * Determine whether user can act as a group administrator for a given group.
+ */
+function og_is_node_admin($node) {
+  return node_access('update', $node);
 }
 
 function og_user($op, $edit, &$account, $category = NULL) {
