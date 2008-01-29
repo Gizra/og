@@ -1278,11 +1278,15 @@ function og_submit_group(&$node) {
     $node->og_theme = $node->theme;
   }
   
+  // Add the inaccessible groups which did not show in Audience selector
+  $node->og_groups += (array)$node->og_groups_inaccessible;
+  
   // Normalize og_groups array
   if (is_array($node->og_groups)) {
     $node->og_groups = array_filter($node->og_groups);
     $node->og_groups = array_keys($node->og_groups);
   }
+
 }
 
 function og_load_group(&$node) {
@@ -1593,6 +1597,37 @@ function og_all_groups_options() {
 }
 
 /**
+ * Iterate over a set of groups and separate out those that are inaccessible to the current user. 
+ * Don't return groups to which the current user subscribes. Used in og_form_add_og_audience().
+ * 
+ * @return array
+ *   A two element array containing 'accessible' and 'inaccessible' keys.
+ **/
+function og_node_groups_distinguish($groups, $groups_names) {
+  global $user;
+  
+  $current_groups = array('accessible' => array(), 'inaccessible' => array());
+  
+  // TODO the lack on meaningful indices on groups and groups_names arrays is very unfortunate.
+  $placeholders = array_fill(0, count($groups), '%d');
+  $sql = 'SELECT n.nid FROM {node} n WHERE n.nid IN ('. implode(', ', $placeholders). ')';
+  $result = db_query(db_rewrite_sql($sql), $groups);
+  while ($row = db_fetch_object($result)) {
+    $key = array_search($row->nid, $groups);
+    $current_groups['accessible'][$row->nid]['title'] = $groups_names[$key];
+  }
+  foreach ($groups as $group) {
+    if (!in_array($group, array_keys($current_groups['accessible']))) {
+      $current_groups['inaccessible'][$group]['title'] = $groups_names[array_search($group, $groups)];
+    }
+  }
+  
+  // There is no point in returning groups to which the user already subscribes.
+  $current_groups['accessible'] = array_diff_assoc($current_groups['accessible'], $user->og_groups);
+  return $current_groups;
+}
+
+/**
  * Helper method to add OG audience fields to a given form. This is
  * lives in a separate function from og_form_alter() so it can be shared
  * by other OG contrib modules.
@@ -1614,10 +1649,38 @@ function og_form_add_og_audience($form_id, &$form) {
     $options = og_all_groups_options();
   }
   else {
-    $subs = og_get_subscriptions($node->uid);
+    // Show all groups that the user is a member of
+    $subs = og_get_subscriptions($user->uid);
     $options = array();
     foreach ($subs as $key => $val) {
       $options[$key] = $val['title'];
+    }
+    
+    // Classify those groups which the node already has but the author does not.
+    $current_groups = og_node_groups_distinguish($node->og_groups, $node->og_groups_names);
+    
+    // Put inaccessible groups in the $form so that they can persist. See og_submit_group()
+    $form['og_invisible']['og_groups_inaccessible'] = array('#type' => 'value', '#value' => $current_groups['inaccessible']);
+    
+    // Add the accessible groups that they node already belongs to.
+    if ($current_groups['accessible']) {  
+      // Use an optgroup to distinguish between my subscriptions and additional groups in the Audience select. 
+      // There is code below which assumes that $options does not have optgroups but that code is within a $simple check 
+      // So we are OK as long as $simple does not apply to node edits.
+      // NOTE: If you form_alter the audience element, beware that it can sometimes be an optgroup.
+      
+      foreach ($current_groups['accessible'] as $key => $val) {
+        $other[$key] = $val['title'];
+      }
+      
+      $options = array(
+        t('My subscribed groups') => $options,
+        t('Other groups') => $other,
+      );
+      $is_optgroup = TRUE;
+    }
+    else {
+      $is_optgroup = FALSE;
     }
   }
   
@@ -1635,7 +1698,7 @@ function og_form_add_og_audience($form_id, &$form) {
   elseif ($gids) {
    // populate field from the querystring if sent
    $groups = $gids;
-   if (!user_access('administer nodes')) {
+   if (!user_access('administer nodes') && $simple) {
      // filter out any groups where author is not a member. we cannot rely on fapi to do this when in simple mode. 
      $groups = array_intersect($gids, array_keys($options));
    }
@@ -1710,10 +1773,10 @@ function og_form_add_og_audience($form_id, &$form) {
       $form['og_nodeapi']['invisible']['og_groups'] = array('#type' => 'value', '#value' => $assoc_groups);
     }
   }
-  elseif ($cnt = count($options)) {
+  elseif ($cnt = count($options, COUNT_RECURSIVE)) {
     drupal_add_js(drupal_get_path('module', 'og'). '/og.js');
     // show multi-select. if less than 20 choices, use checkboxes.
-    $type = $cnt >= 20 ? 'select' : 'checkboxes';
+    $type = $cnt >= 20 || $is_optgroup ? 'select' : 'checkboxes';
     $form['og_nodeapi']['visible']['og_groups'] = array(
       '#type' => $type, 
       '#title' => t('Audience'), 
