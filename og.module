@@ -1644,18 +1644,32 @@ function og_form_add_og_audience($form_id, &$form) {
   
   $node = $form['#node'];
   $required = variable_get('og_audience_required', 0) && !user_access('administer nodes');
-  // determine the list of groups that are shown. node admins see all of them
+  
+  
+  // Determine the list of groups that are shown.
+  // Start by collecting all groups that the user is a member of.
+  $subs = og_get_subscriptions($user->uid);
+  $options = array();
+  foreach ($subs as $key => $val) {
+    $options[$key] = $val['title'];
+  }
   if (user_access('administer nodes')) {
-    $options = og_all_groups_options();
+    // Node admins see all of groups.
+    $all = og_all_groups_options();
+    $other = array_diff_assoc($all, $options);    
+    // Use an optgroup if admin is not a member of all groups.
+    if ($other) {
+      $options = array(
+        t('My subscribed groups') => $options,
+        t('Other groups') => $other,
+      );
+      $is_optgroup = TRUE;
+    }
+    else {
+      $options = $all;
+    }
   }
   else {
-    // Show all groups that the user is a member of
-    $subs = og_get_subscriptions($user->uid);
-    $options = array();
-    foreach ($subs as $key => $val) {
-      $options[$key] = $val['title'];
-    }
-    
     // Classify those groups which the node already has but the author does not.
     $current_groups = og_node_groups_distinguish($node->og_groups, $node->og_groups_names);
     
