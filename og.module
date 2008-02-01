@@ -1271,15 +1271,16 @@ function og_submit_group(&$node) {
   if (og_is_group_type($node->type)) {
     $node->comment = COMMENT_NODE_DISABLED;
   }
+  else {
+    // Add the inaccessible groups which did not show in Audience selector
+    $node->og_groups += (array)$node->og_groups_inaccessible;
+  }
   
   // Change $node->theme to $node->og_theme so it matches how we node_load(). the node form uses $theme and not og_theme
   // If author chose the default theme, then '' is written to the DB and group will follow any change made by site admin.
   if (isset($node->theme)) {
     $node->og_theme = $node->theme;
   }
-  
-  // Add the inaccessible groups which did not show in Audience selector
-  $node->og_groups += (array)$node->og_groups_inaccessible;
   
   // Normalize og_groups array
   if (is_array($node->og_groups)) {
