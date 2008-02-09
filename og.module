@@ -1271,7 +1271,7 @@ function og_submit_group(&$node) {
   if (og_is_group_type($node->type)) {
     $node->comment = COMMENT_NODE_DISABLED;
   }
-  else {
+  elseif (!empty($node->og_groups)) {
     // Add the inaccessible groups which did not show in Audience selector
     $node->og_groups += (array)$node->og_groups_inaccessible;
   }
