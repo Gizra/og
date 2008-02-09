@@ -1271,11 +1271,10 @@ function og_submit_group(&$node) {
   if (og_is_group_type($node->type)) {
     $node->comment = COMMENT_NODE_DISABLED;
   }
-  elseif (!empty($node->og_groups)) {
+  elseif (!empty($node->og_groups_inaccessible)) {
     // Add the inaccessible groups which did not show in Audience selector
-    $node->og_groups += (array)$node->og_groups_inaccessible;
+    $node->og_groups = (array)$node->og_groups + $node->og_groups_inaccessible;
   }
-  
   // Change $node->theme to $node->og_theme so it matches how we node_load(). the node form uses $theme and not og_theme
   // If author chose the default theme, then '' is written to the DB and group will follow any change made by site admin.
   if (isset($node->theme)) {
@@ -1608,23 +1607,28 @@ function og_node_groups_distinguish($groups, $groups_names) {
   global $user;
   
   $current_groups = array('accessible' => array(), 'inaccessible' => array());
-  
-  // TODO the lack on meaningful indices on groups and groups_names arrays is very unfortunate.
-  $placeholders = array_fill(0, count($groups), '%d');
-  $sql = 'SELECT n.nid FROM {node} n WHERE n.nid IN ('. implode(', ', $placeholders). ')';
-  $result = db_query(db_rewrite_sql($sql), $groups);
-  while ($row = db_fetch_object($result)) {
-    $key = array_search($row->nid, $groups);
-    $current_groups['accessible'][$row->nid]['title'] = $groups_names[$key];
+  if (empty($groups)) {
+    // Do nothing.
   }
-  foreach ($groups as $group) {
-    if (!in_array($group, array_keys($current_groups['accessible']))) {
-      $current_groups['inaccessible'][$group]['title'] = $groups_names[array_search($group, $groups)];
+  else {
+    // TODO the lack on meaningful indices on groups and groups_names arrays is very unfortunate.
+    $placeholders = array_fill(0, count($groups), '%d');
+    $sql = 'SELECT n.nid FROM {node} n WHERE n.nid IN ('. implode(', ', $placeholders). ')';
+    $result = db_query(db_rewrite_sql($sql), $groups);
+    while ($row = db_fetch_object($result)) {
+      $key = array_search($row->nid, $groups);
+      $current_groups['accessible'][$row->nid]['title'] = $groups_names[$key];
     }
+    foreach ($groups as $group) {
+      if (!in_array($group, array_keys($current_groups['accessible']))) {
+        $current_groups['inaccessible'][$group] = $group;
+      }
+    }
+
+    // There is no point in returning groups to which the user already subscribes.
+    $current_groups['accessible'] = array_diff_assoc($current_groups['accessible'], $user->og_groups);
   }
   
-  // There is no point in returning groups to which the user already subscribes.
-  $current_groups['accessible'] = array_diff_assoc($current_groups['accessible'], $user->og_groups);
   return $current_groups;
 }
 
