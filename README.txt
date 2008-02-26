@@ -14,8 +14,8 @@ INSTALLATION
 - On the admin/build/themes/settings pages, in 'Display post information on' section, uncheck each node type which has been designated as a group.
 - On the admin/build/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the other 'Group' blocks.
 - Grant permissions as needed on the admin/user/access page 
-- Begin creating groups, subscribing to those groups, and posting into those groups. The subscribe link appears in the Group details block, for non invite-only groups.
-- Consider enabling the following modules which work well with OG: Pathauto, Locale, Job queue. After your install is working nicely, consider enabling og add-on modules like og_mandatory_group, og_vocab, etc. Many are listed at http://drupal.org/project/Modules/category/90.
+- Begin creating groups (visit the node/add page), subscribing to those groups, and posting into those groups. The subscribe link appears in the Group details block, for non invite-only groups.
+- Consider enabling the following modules which work well with OG: Pathauto, Locale, Job queue. After your install is working nicely, consider enabling og add-on modules like og_mandatory_group, og_vocab, and og_panels. Those are know to work well with OG. Many others of varying quality are listed at http://drupal.org/project/Modules/category/90.
 
 NOTES
 ----------------
