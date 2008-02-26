@@ -1047,8 +1047,15 @@ function og_page_activity() {
   
 }
 
-// when you view a group, you really see some facts about the group in a block and then lists of nodes affiliated with that group.
-// the node list is provided by the View of your choice (see admin/og/og)
+/**
+ * When you view a group, you really see some facts about the group in a block and then 
+ * lists of nodes affiliated with that group. The node list is provided by the View of 
+ * your choice (see admin/og/og). If you use og_panels.module and the group has defined
+ * a default home page, then that page becomes the presentation of the GHP.
+ *
+ * @return void
+ **/
+// 
 function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
   if ($teaser || !$page) {
     $node->content['og_description'] = array(
@@ -1064,28 +1071,39 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
 
     unset($node->content['body']);
     $node->content['og_mission'] = array('#value' => theme('og_mission', $node), '#weight' => -3);
-    $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
-    $views_available = variable_get('views_defaults', array());
-    if ($views_available[$view->name] == "disabled") { 
-      // do nothing. assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
+    
+    if (module_exists('og_panels')) {
+      if ($display = og_panels_get_one_by_nid_default($node->nid)) {
+        if ($display->published) {
+          $node->content['og_panels'] = array('#value' => og_panels_page($display->did, $node));
+        }
+      }
     }
     else {
-      $view->url = 'node';
-      $args[] = $node->nid;
-      // TODO: use own callback for feeds
-      if (arg(2) == 'feed') {
-        $view->description = $node->og_description;
-        $args[] = 'feed';
-      }
-      $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
-      if ($GLOBALS['current_view']->num_rows || $view->page_empty) {
-        $node->content['view'] = array('#value' => $built);
+      // Og_panels did not declare a home page. moving on ...
+      $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
+      $views_available = variable_get('views_defaults', array());
+      if ($views_available[$view->name] == "disabled") { 
+        // Do nothing. Assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
       }
       else {
-        // use this default empty text unless overridden by View (which is a usually not a good idea. this text is smart)
-        og_home_empty($node);
+        $view->url = 'node';
+        $args[] = $node->nid;
+        // TODO: use own callback for feeds
+        if (arg(2) == 'feed') {
+          $view->description = $node->og_description;
+          $args[] = 'feed';
+        }
+        $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
+        if ($GLOBALS['current_view']->num_rows || $view->page_empty) {
+          $node->content['view'] = array('#value' => $built);
+        }
+        else {
+          // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
+          og_home_empty($node);
+        }
+        drupal_set_title(filter_xss_admin(views_get_title($view, 'page')));
       }
-      drupal_set_title(filter_xss_admin(views_get_title($view, 'page')));
     } 
   }
 }

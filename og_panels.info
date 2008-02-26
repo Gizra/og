@@ -1,0 +1,5 @@
+; $Id$
+name = Organic groups panels
+description = "Enable group admins to create panel pages."
+package = "Organic groups"
+dependencies = og panels panels_views

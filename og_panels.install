@@ -1,0 +1,41 @@
+<?php
+// $Id$
+
+function og_panels_install() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      db_query("CREATE TABLE {og_panels} (
+        did int NOT NULL,
+        nid int NOT NULL,
+        published int NOT NULL,
+        page_title varchar(255) NOT NULL,
+        path varchar(100) NOT NULL,
+        default_page int NULL,
+        PRIMARY KEY  (did)
+      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
+  
+      break;
+    case 'pgsql':
+      db_query("CREATE TABLE {og} (
+        did integer NOT NULL,
+        nid integer NOT NULL,
+        published integer NOT NULL,
+        page_title varchar(255) NOT NULL,
+        path varchar(100) NOT NULL,
+        default_page integer NULL,
+        PRIMARY KEY  (did)
+      );");
+      break;
+  }  
+}
+
+function og_panels_uninstall() {
+  db_query('DROP TABLE {og_panels}');
+
+  // Delete variables
+  $variables = array();
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
+}
