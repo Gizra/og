@@ -3,13 +3,10 @@
 
 // TODO: Delete all panels if group is deleted
 
-// TODO
 function og_panels_help($section) {
   switch ($section) {
-    case !empty($section) && strstr($section, 'admin/build/block/configure/og'):
-      // return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
-    case 'admin/settings/og_panels':
-      return t('In order to let group admins determine their own group theme, you must enable multiple themes using !page.', array('!page' => l(t('theme configuration page'), 'admin/build/themes')));
+    case 'admin/help#og_panels':
+      return t('After enabling this module, visit the new Pages tab on any group. There, group admins may create as many pages as desired for their group. The pages may contain any layout that the site offers and admins may arrange many different types of content as desired. Site admins can restrict the types of content that may be added on the <a href="!settings">og_panels settings</a> page. You might want to make some Views available using <a href="!apv">admin/panels/views</a>. Group admins may designate one page as their group home page.', array('!settings' => url('admin/settings/og_panels'), '!apv' => url('admin/panels/views')));
   }
 }
 
