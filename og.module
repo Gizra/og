@@ -1076,34 +1076,34 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
       if ($display = og_panels_get_one_by_nid_default($node->nid)) {
         if ($display->published) {
           $node->content['og_panels'] = array('#value' => og_panels_page($display->did, $node));
+          return;
         }
       }
     }
+
+    // Og_panels did not declare a home page. moving on ...
+    $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
+    $views_available = variable_get('views_defaults', array());
+    if ($views_available[$view->name] == "disabled") { 
+      // Do nothing. Assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
+    }
     else {
-      // Og_panels did not declare a home page. moving on ...
-      $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
-      $views_available = variable_get('views_defaults', array());
-      if ($views_available[$view->name] == "disabled") { 
-        // Do nothing. Assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
+      $view->url = 'node';
+      $args[] = $node->nid;
+      // TODO: use own callback for feeds
+      if (arg(2) == 'feed') {
+        $view->description = $node->og_description;
+        $args[] = 'feed';
+      }
+      $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
+      if ($GLOBALS['current_view']->num_rows || $view->page_empty) {
+        $node->content['view'] = array('#value' => $built);
       }
       else {
-        $view->url = 'node';
-        $args[] = $node->nid;
-        // TODO: use own callback for feeds
-        if (arg(2) == 'feed') {
-          $view->description = $node->og_description;
-          $args[] = 'feed';
-        }
-        $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
-        if ($GLOBALS['current_view']->num_rows || $view->page_empty) {
-          $node->content['view'] = array('#value' => $built);
-        }
-        else {
-          // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
-          og_home_empty($node);
-        }
-        drupal_set_title(filter_xss_admin(views_get_title($view, 'page')));
+        // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
+        og_home_empty($node);
       }
+      drupal_set_title(filter_xss_admin(views_get_title($view, 'page')));
     } 
   }
 }
