@@ -1072,16 +1072,6 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
     unset($node->content['body']);
     $node->content['og_mission'] = array('#value' => theme('og_mission', $node), '#weight' => -3);
     
-    if (module_exists('og_panels')) {
-      if ($display = og_panels_get_one_by_nid_default($node->nid)) {
-        if ($display->published) {
-          $node->content['og_panels'] = array('#value' => og_panels_page($display->did, $node));
-          return;
-        }
-      }
-    }
-
-    // Og_panels did not declare a home page. moving on ...
     $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
     $views_available = variable_get('views_defaults', array());
     if ($views_available[$view->name] == "disabled") { 

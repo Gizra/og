@@ -50,15 +50,26 @@ function og_panels_menu($may_cache) {
         
         $displays = og_panels_get_all($node->nid);
         foreach ($displays as $display) {
-          $items[] = array(
-            'path' => "node/$nid/$display->path",
-            'title' => $display->page_title,
-            'callback' => 'og_panels_page',
-            'callback arguments' => array($display->did, $node),
-            'type' => MENU_LOCAL_TASK,
-            'access' => !$display->default_page && ($display->published || og_is_node_admin($node)),
-            'weight' => -1,
-          );
+          if ($display->default_page && $display->published) {
+            // Hijack the menu handler for this node.
+            $items[] = array(
+              'path' => "node/$nid",
+              'title' => $display->page_title,
+              'callback' => 'og_panels_page',
+              'callback arguments' => array($display->did, $node),
+            );
+          }
+          else {
+            $items[] = array(
+              'path' => "node/$nid/$display->path",
+              'title' => $display->page_title,
+              'callback' => 'og_panels_page',
+              'callback arguments' => array($display->did, $node),
+              'type' => MENU_LOCAL_TASK,
+              'access' => $display->published || og_is_node_admin($node),
+              'weight' => -1,
+            );
+          }
         }
         
         $items[] = array(
@@ -212,10 +223,12 @@ function og_panels_table_submit($form_id, $form_values) {
 
 function og_panels_page($did, $group_node) {
   panels_load_include('plugins');
+  $og_panel = og_panels_get_one_by_display($did);
   $display = panels_load_display($did);  
   $display->context = array('og_panels' => panels_context_create('node', $group_node));
   $output = panels_render_display($display);
-  return $output;
+  // We print instead of return in order to allow blocks to be suppressed.
+  print theme('page', $output, $og_panel->show_blocks);
 }
 
 function og_panels_form($group_node, $did = NULL) {
@@ -240,6 +253,12 @@ function og_panels_form($group_node, $did = NULL) {
     '#disabled' => $display->default_page,
     '#size' => 32,
   );
+  $form['show_blocks'] = array(
+    '#title' => t('Show blocks'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($display->show_blocks) ? $display->show_blocks : TRUE,
+    '#description' => t('If unchecked, the standard group blocks will not be shown unless yo place them into your page content. This gives admin more control over page presentation.'),
+  );
   $form['published'] = array(
     '#type' => 'checkbox',
     '#title' => t('Published'),
@@ -249,7 +268,7 @@ function og_panels_form($group_node, $did = NULL) {
   
   $form['submit'] = array(
     '#type' => 'submit', 
-    '#value' => t('Create page'),
+    '#value' => $did ? t('Update page') : t('Create page'),
   );
   $form['did'] = array('#type' => 'value', '#value' => $did);
   $form['nid'] = array('#type' => 'value', '#value' => $group_node->nid);
@@ -279,8 +298,8 @@ function og_panels_get_one_by_nid_default($nid) {
 
 function og_panels_form_submit($form_id, $form_values) {
   if ($form_values['did']) {
-    $sql = "UPDATE {og_panels} SET page_title='%s', path='%s', published=%d WHERE did = %d";
-    db_query($sql, $form_values['page_title'], $form_values['path'], $form_values['published'], $form_values['did']);
+    $sql = "UPDATE {og_panels} SET page_title='%s', path='%s', published=%d, show_blocks=%d WHERE did = %d";
+    db_query($sql, $form_values['page_title'], $form_values['path'], $form_values['published'], $form_values['show_blocks'], $form_values['did']);
     drupal_set_message(t('Panel page created.'));
   }
   else {
@@ -289,8 +308,8 @@ function og_panels_form_submit($form_id, $form_values) {
     // What layout will we get? Lets see.
     // $display->layout = $node->panels_node['layout'];
     panels_save_display($display);
-    $sql = "INSERT INTO {og_panels} (did, nid, page_title, path, published) VALUES (%d, %d, '%s', '%s', %d)";
-    db_query($sql, $display->did, $form_values['nid'], $form_values['page_title'], $form_values['path'], $form_values['published']);
+    $sql = "INSERT INTO {og_panels} (did, nid, page_title, path, published, show_blocks) VALUES (%d, %d, '%s', '%s', %d, %d)";
+    db_query($sql, $display->did, $form_values['nid'], $form_values['page_title'], $form_values['path'], $form_values['published'], $form_values['show_blocks']);
     drupal_set_message(t('Panel page updated.'));
   }
 }
