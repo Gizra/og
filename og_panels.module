@@ -233,7 +233,13 @@ function og_panels_page($did, $group_node) {
 
 function og_panels_form($group_node, $did = NULL) {
   drupal_set_title($group_node->title);
-  $display = $did ? og_panels_get_one_by_display($did) : new stdClass;
+  if ($did) {
+    $display = og_panels_get_one_by_display($did);
+  }
+  else {
+    $display = new stdClass;
+  }
+  
   $form['page_title'] = array(
     '#title' => t('Page title'),
     '#type' => 'textfield',
@@ -300,7 +306,7 @@ function og_panels_form_submit($form_id, $form_values) {
   if ($form_values['did']) {
     $sql = "UPDATE {og_panels} SET page_title='%s', path='%s', published=%d, show_blocks=%d WHERE did = %d";
     db_query($sql, $form_values['page_title'], $form_values['path'], $form_values['published'], $form_values['show_blocks'], $form_values['did']);
-    drupal_set_message(t('Panel page created.'));
+    drupal_set_message(t('Group page updated.'));
   }
   else {
     // Create a new display and record that.
@@ -310,7 +316,8 @@ function og_panels_form_submit($form_id, $form_values) {
     panels_save_display($display);
     $sql = "INSERT INTO {og_panels} (did, nid, page_title, path, published, show_blocks) VALUES (%d, %d, '%s', '%s', %d, %d)";
     db_query($sql, $display->did, $form_values['nid'], $form_values['page_title'], $form_values['path'], $form_values['published'], $form_values['show_blocks']);
-    drupal_set_message(t('Panel page updated.'));
+    drupal_set_message(t('Group page created.'));
+    return 'node/'. $form_values['nid']. "/og_panels/$display->did/panel_layout";
   }
 }
 
