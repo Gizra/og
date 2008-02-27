@@ -117,6 +117,12 @@ function og_panels_menu($may_cache) {
   return $items;
 }
 
+function og_block_info($module, $delta, &$info) {
+  $info['icon'] = 'icon_core_recentpoll.png';
+  $info['category'] = t('OG blocks');
+}
+
+
 function og_panels_delete_confirm($did, $group_node) {
   $form['did'] = array('#type' => 'value', '#value' => $did);
   $form['nid'] = array('#type' => 'value', '#value' => $group_node->nid);
@@ -325,7 +331,7 @@ function og_panels_set_breadcrumb($section, $group_node = NULL) {
   switch ($section) {
     case 'panel_edit':
       $bc[] = l(t('Home'), '');
-      $bc[] = l($group_node->title, "$node->group_node->nid");
+      $bc[] = l($group_node->title, "node/$group_node->nid");
       $bc[] = l(t('Pages'), "node/$group_node->nid/og_panels");
   }
   drupal_set_breadcrumb($bc);
