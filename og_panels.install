@@ -12,6 +12,7 @@ function og_panels_install() {
         page_title varchar(255) NOT NULL,
         path varchar(100) NOT NULL,
         default_page int NULL,
+        show_blocks int NULL,
         PRIMARY KEY  (did)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
   
@@ -24,6 +25,7 @@ function og_panels_install() {
         page_title varchar(255) NOT NULL,
         path varchar(100) NOT NULL,
         default_page integer NULL,
+        show_blocks integer NULL,
         PRIMARY KEY  (did)
       );");
       break;
