@@ -1,18 +1,22 @@
 <?php
 // $Id$
 
-// TODO: Delete all panels if group is deleted
-
 function og_panels_help($section) {
   switch ($section) {
     case 'admin/help#og_panels':
-      return t('After enabling this module, visit the new Pages tab on any group. There, group admins may create as many pages as desired for their group. The pages may contain any layout that the site offers and admins may arrange many different types of content as desired. Site admins can restrict the types of content that may be added on the <a href="!settings">og_panels settings</a> page. You might want to make some Views available using <a href="!apv">admin/panels/views</a>. Group admins may designate one page as their group home page.', array('!settings' => url('admin/settings/og_panels'), '!apv' => url('admin/panels/views')));
+      return t('After enabling this module, visit the new Pages tab on any group. There, group admins may create as many pages as desired for their group. The pages may contain any layout that the site offers and admins may arrange many different types of content as desired. Site admins can restrict the types of content that may be added on the <a href="!settings">og_panels settings</a> page. You might want to make some Views available using <a href="!apv">admin/panels/views</a>. Group admins may designate one page as their group home page.', array('!settings' => url('admin/og/og_panels'), '!apv' => url('admin/panels/views')));
   }
 }
 
 function og_panels_menu($may_cache) {
   if ($may_cache) {
-    
+    $items[] = array(
+      'path' => 'admin/og/og_panels',
+      'title' => 'Organic groups panels',
+      'description' => 'Configure the content that is available to group admins when creating group pages.',
+      'callback' => 'og_panels_admin_content',
+      'access' => user_access('administer organic groups'),
+    );
   }
   else {
     if (arg(0) == 'node' && is_numeric(arg(1))) {
@@ -114,12 +118,6 @@ function og_panels_menu($may_cache) {
   return $items;
 }
 
-function og_block_info($module, $delta, &$info) {
-  $info['icon'] = 'icon_core_recentpoll.png';
-  $info['category'] = t('OG blocks');
-}
-
-
 function og_panels_delete_confirm($did, $group_node) {
   $form['did'] = array('#type' => 'value', '#value' => $did);
   $form['nid'] = array('#type' => 'value', '#value' => $group_node->nid);
@@ -135,9 +133,6 @@ function og_panels_delete_confirm($did, $group_node) {
   );
 }
 
-/**
- * Execute node deletion
- */
 function og_panels_delete_confirm_submit($form_id, $form_values) {
   og_panels_delete($form_values['did']);
   drupal_set_message(t('%title has been deleted', array('%title' => $form_values['page_title'])));
@@ -158,7 +153,6 @@ function og_panels_overview($group_node) {
 }
 
 function og_panels_table($displays, $group_node) {
-  $description = 'lorem';
   $nid = $group_node->nid;
   foreach ($displays as $display) {
      $item['page_title'] = array('#value' => l($display->page_title, "node/$nid/$display->path"));
@@ -324,6 +318,11 @@ function og_panels_form_submit($form_id, $form_values) {
   }
 }
 
+function og_panels_admin_content() {
+  panels_load_include('common');
+  return drupal_get_form('panels_common_settings', 'og_panels');
+}
+
 function og_panels_set_breadcrumb($section, $group_node = NULL) {
   switch ($section) {
     case 'panel_edit':
@@ -332,6 +331,21 @@ function og_panels_set_breadcrumb($section, $group_node = NULL) {
       $bc[] = l(t('Pages'), "node/$group_node->nid/og_panels");
   }
   drupal_set_breadcrumb($bc);
+}
+
+function og_panels_nodeapi($node, $op) {
+  switch ($op) {
+    case 'delete':
+      $og_panels = og_panels_get_all($node->nid);
+      dsm($og_panels);
+      foreach ($og_panels as $og_panel) {
+        panels_delete_display($og_panel->did);
+      }
+      $sql = "DELETE FROM {og_panels} WHERE nid = %d";
+      db_query($sql, $node->nid);
+      drupal_set_message(t('Organic groups panel pages deleted.'));
+      break;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -367,7 +381,6 @@ function og_panels_edit_content($did, $group_node) {
   $display = panels_load_display($did);
   $display->context = array('og_panels' => panels_context_create('node', $group_node));
   panels_load_include('common');
-  // TODO
   $content_types = panels_common_get_allowed_types('og_panels', $display->context);
 
   // Print this with theme('page') so that blocks are disabled while editing a display.
