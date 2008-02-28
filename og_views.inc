@@ -641,6 +641,7 @@ function og_views_default_views() {
   $view = new stdClass();
   $view->name = 'og_ghp_ron';
   $view->description = 'OG: Group home page - River of news. Default';
+  $view->page = TRUE;
   $view->page_type = 'teaser';
   $view->access = array ();
   $view->view_args_php = '';
