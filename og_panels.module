@@ -5,6 +5,10 @@ function og_panels_help($section) {
   switch ($section) {
     case 'admin/help#og_panels':
       return t('After enabling this module, visit the new Pages tab on any group. There, group admins may create as many pages as desired for their group. The pages may contain any layout that the site offers and admins may arrange many different types of content as desired. Site admins can restrict the types of content that may be added on the <a href="!settings">og_panels settings</a> page. You might want to make some Views available using <a href="!apv">admin/panels/views</a>. Group admins may designate one page as their group home page.', array('!settings' => url('admin/og/og_panels'), '!apv' => url('admin/panels/views')));
+      case (arg(0) == 'node' && arg(2) == 'og_panels'):
+        return t(
+          '<p>Create custom pages for your group. Use custom pages to organize your content in a pretty and informative manner. Your group can group to be a whole website within a web site. Each custom page becomes a tab when viewing your group. One of your custom pages should be designated as your <em>group home page</em>. That page will then display when visitors first arrive at your group.</p>
+          <p>Start by clicking the <a href="!url">Add new page</a> tab. Then you will choose a custom layout for your page. Then you will want to <em>edit content</em> for your custom page.</p>', array('!url' => url('node/'. arg(1). '/og_panels/form')));
   }
 }
 
