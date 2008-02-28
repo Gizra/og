@@ -142,13 +142,17 @@ function og_panels_delete_confirm_submit($form_id, $form_values) {
   drupal_set_message(t('%title has been deleted', array('%title' => $form_values['page_title'])));
 }
 
-
 function og_panels_delete($did) {
   $sql = "DELETE FROM {og_panels} WHERE did = %d";
   db_query($sql, $did);
   panels_delete_display($did);
 }
 
+/**
+ * Menu callback. List the pages for this specified group. Provide helpful operations links.
+ * 
+ * @return string
+ **/
 function og_panels_overview($group_node) {
   drupal_set_title($group_node->title);
   $displays = og_panels_get_all($group_node->nid);
@@ -156,6 +160,11 @@ function og_panels_overview($group_node) {
   return $output;
 }
 
+/**
+ * A form for setting the group homepage. Includes a helpful table of Pages and their operations links.
+ * 
+ * @return $form array
+ **/
 function og_panels_table($displays, $group_node) {
   $nid = $group_node->nid;
   foreach ($displays as $display) {
@@ -193,6 +202,13 @@ function og_panels_table($displays, $group_node) {
   return $form;
 }
 
+/**
+ * Wrangle the $form into a tabular listing of pages.
+ *
+ * @ingroup Themeable functions
+ * 
+ * @return void
+ **/
 function theme_og_panels_table($form) {
   foreach (element_children($form) as $did) {
     if (is_numeric($did)) {
@@ -222,6 +238,11 @@ function og_panels_table_submit($form_id, $form_values) {
   drupal_set_message(t('Updated group home page.'));
 }
 
+/**
+ * A menu callback. Renders an og_panels based upon its display ID.
+ * 
+ * @return void
+ **/
 function og_panels_page($did, $group_node) {
   panels_load_include('plugins');
   $og_panel = og_panels_get_one_by_display($did);
@@ -232,7 +253,12 @@ function og_panels_page($did, $group_node) {
   print theme('page', $output, $og_panel->show_blocks);
 }
 
-function og_panels_form($group_node, $did = NULL) {
+/**
+ * Add/edit an og_panel.
+ * 
+ * @return void
+ **/
+ function og_panels_form($group_node, $did = NULL) {
   drupal_set_title($group_node->title);
   if ($did) {
     $display = og_panels_get_one_by_display($did);
@@ -303,6 +329,11 @@ function og_panels_get_one_by_nid_default($nid) {
   return db_fetch_object($result);
 }
 
+/**
+ * INSERT or UPDATE a new og_panel. If insert, redirect to layout form.
+ * 
+ * @return void
+ **/
 function og_panels_form_submit($form_id, $form_values) {
   if ($form_values['did']) {
     $sql = "UPDATE {og_panels} SET page_title='%s', path='%s', published=%d, show_blocks=%d WHERE did = %d";
@@ -320,11 +351,6 @@ function og_panels_form_submit($form_id, $form_values) {
     drupal_set_message(t('Group page created.'));
     return 'node/'. $form_values['nid']. "/og_panels/$display->did/panel_layout";
   }
-}
-
-function og_panels_admin_content() {
-  panels_load_include('common');
-  return drupal_get_form('panels_common_settings', 'og_panels');
 }
 
 function og_panels_set_breadcrumb($section, $group_node = NULL) {
@@ -391,4 +417,9 @@ function og_panels_edit_content($did, $group_node) {
   // This is important because negative margins in common block layouts (i.e, Garland)
   // messes up the drag & drop.
   print theme('page', panels_edit($display, "node/$group_node->nid/og_panels", $content_types), FALSE);
+}
+
+function og_panels_admin_content() {
+  panels_load_include('common');
+  return drupal_get_form('panels_common_settings', 'og_panels');
 }
