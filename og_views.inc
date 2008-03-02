@@ -28,9 +28,9 @@ function og_views_tables() {
           'name' => t('OG: Group: Description'),
         ),
         'count' => array(
-          'name' => t('OG: Group: Subscriber Count'),
+          'name' => t('OG: Group: Members Count'),
           'handler' => 'og_handler_field_count',
-          'help' => t('Number of subscribers for a group. Excludes subscriptions which are pending approval.'),
+          'help' => t('Number of members for a group. Excludes memberships which are pending approval.'),
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
@@ -69,17 +69,17 @@ function og_views_tables() {
           'name' => t('OG: Group: Selective'),
         ),
         'subscribe' => array(
-          'name' => t('OG: Group: Subscribe Link'),
+          'name' => t('OG: Group: Join Link'),
           'handler' => 'og_handler_field_subscribe',
           'addlfields' => array('selective'),
           'sortable' => FALSE,
           'notafield' => TRUE,
-          'help' => t('Displays a links for subscribing to a group when a user is not already a member.'),
+          'help' => t('Displays a links for joining a group when a user is not already a member.'),
         ),
         'notification' => array(
           'name' => t('OG: Group: Notification'),
           'handler' => 'og_handler_field_yesempty',
-          'help' => t('Displays <em>yes</em> if group automatically sends email notifications to subscribers'),
+          'help' => t('Displays <em>yes</em> if group automatically sends email notifications to members'),
         ),
         'language' => array(
           'name' => t('OG: Group: Language'),
@@ -109,7 +109,7 @@ function og_views_tables() {
           'operator' => 'views_handler_operator_or',
           'list-type' => 'list',
           'list' => array(OG_OPEN => t('Open'), OG_MODERATED => t('Moderated'), OG_INVITE_ONLY => t('Invite Only'), OG_CLOSED => t('Closed')),
-          'help' => t('The group preference which determines how subscriptions requests are managed (moderated, invite only, etc.).'),
+          'help' => t('The group preference which determines how membership requests are managed (moderated, invite only, etc.).'),
         ),
         'language' => array(
           'name' => t('OG: Group: Language'),
@@ -226,16 +226,16 @@ function og_views_tables() {
           'name' => t('OG: Subscription email'),
           'handler' => 'og_handler_field_yesempty',
           'sortable' => false,
-          'help' => t('Does subscriber receive email notifications for a group.'),
+          'help' => t('Does member receive email notifications for a group.'),
         ),
         'managelink' => array(
-          'name' => t('OG: Manage subscription link'),
+          'name' => t('OG: Manage membership link'),
           'handler' => 'og_handler_field_managelink',
           'sortable' => FALSE,
           'notafield' => TRUE,
         ),
         'is_admin' => array(
-          'name' => t('OG: Is subscriber an admin in a group'),
+          'name' => t('OG: Is member an admin in a group'),
           'handler' => 'og_handler_field_yesempty',
           'sortable' => FALSE,
         ),
@@ -243,11 +243,11 @@ function og_views_tables() {
       'filters' => array(
         'currentuidsimple' => array(
           'field' => 'uid',
-          'name' => t('OG: Group in User Subbed Groups'),
+          'name' => t('OG: Group in User\'s Groups'),
           'operator' => 'views_handler_operator_eqneq',
           'list' => 'views_handler_filter_usercurrent',
           'list-type' => 'select',
-          'help' => t('Groups are filtered to where current user is a member .'),
+          'help' => t('Groups are filtered to where current user is a member.'),
         ),
       ),            
     ),
@@ -1229,7 +1229,7 @@ function og_handler_field_subscribe($fieldinfo, $fielddata, $value, $data) {
       case OG_INVITE_ONLY:
         return '<em>'. t('Invite only'). '</em>';
       default:
-        return l(t('subscribe'), "og/subscribe/$data->nid", array('rel' => 'nofollow'), drupal_get_destination());  
+        return l(t('join'), "og/subscribe/$data->nid", array('rel' => 'nofollow'), drupal_get_destination());  
     }
   }
 }
@@ -1256,7 +1256,7 @@ function og_handler_field_nodelink($fieldinfo, $fielddata, $value, $data) {
 }
 
 function og_handler_field_managelink($fieldinfo, $fielddata, $value, $data) {
-  return l(t('my subscription'), "og/manage/$data->nid", NULL, drupal_get_destination());
+  return l(t('my membership'), "og/manage/$data->nid", NULL, drupal_get_destination());
 }
 
 function og_handler_field_yesempty($fieldinfo, $fielddata, $value, $data) {

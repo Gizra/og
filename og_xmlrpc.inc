@@ -45,7 +45,7 @@ function og_xmlrpc_get_user_groups($username, $password, $uid) {
       return og_get_subscriptions($uid);  
     }
     else {
-      return og_xmlrpc_error(t('User is not allowed to retrieve subscriptions for another user.'));
+      return og_xmlrpc_error(t('User is not allowed to retrieve membership information for another user.'));
     }
   }
   else {
