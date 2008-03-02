@@ -1,6 +1,6 @@
 DESCRIPTION
 --------------------------
-Enable users to create and manage their own 'groups'. Each group can have subscribers, and maintains a group page where subscribers can post into. Posts may be placed into multiple groups (i.e. cross-posting) and individual posts may be shared with non-subscribers or not. Membership to groups may be open, closed, moderated, or invitation only. Add-on modules are available for group image galleries, group calendars, group vocabulary, group stores, and so on.
+Enable users to create and manage their own 'groups'. Each group can have members, and maintains a group page where members can post into. Posts may be placed into multiple groups (i.e. cross-posting) and individual posts may be shared with non-members or not. Membership to groups may be open, closed, moderated, or invitation only. Add-on modules are available for group image galleries, group calendars, group vocabulary, group stores, and so on.
 
 Groups may choose their own theme and language. Groups have RSS feeds and email notifications and so on. Group admins may customize the layout and contents of their group home page and add additional custom pages (requires the included OG Panels module).
 
@@ -14,7 +14,7 @@ INSTALLATION
 - On the admin/build/themes/settings pages, in 'Display post information on' section, uncheck each node type which has been designated as a group.
 - On the admin/build/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the other 'Group' blocks.
 - Grant permissions as needed on the admin/user/access page 
-- Begin creating groups (visit the node/add page), subscribing to those groups, and posting into those groups. The subscribe link appears in the Group details block, for non invite-only groups.
+- Begin creating groups (visit the node/add page), joining those groups, and posting into those groups. The join link appears in the Group details block, for non invite-only groups.
 - Consider enabling the following modules which work well with OG: Pathauto, Locale, Job queue. After your install is working nicely, consider enabling og add-on modules like og_mandatory_group, og_vocab, and og_panels. Those are know to work well with OG. Many others of varying quality are listed at http://drupal.org/project/Modules/category/90.
 
 NOTES
@@ -23,7 +23,7 @@ NOTES
 - There are a few handy tabs at the path 'group'. You might want to add a link in your navigation to that url. Each tab also provides a useful RSS feed.
 - 'Administer nodes' permission is required for changing the Manager of a group (do so by changing the posts' Author.)
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status.
-- All subscriber management happens on the 'subscriber list' page which is linked from the group Block (while viewing a group page). This includes approving subscription requests (for selective groups), subscribing/unsubscribing users and promoting users into group admins.
+- All membership management happens on the 'membership list' page which is linked from the group Block (while viewing a group page). This includes approving membership requests (for selective groups), adding/removing users and promoting users into group admins.
 - If you decide to stop using this module, just disable it as usual. If you ever decide to re-enable, all your prior group information will be restored.
 - You may craft your own URLs which produce useful behavior. For example, user/register?gids[]=4 will add a checked checkbox for to the user's registration page for subscribing to group nid=4. This feature overrides the usual preference for groups to always appear during registration.
 
@@ -38,7 +38,7 @@ You may wish to stylize nodes which have properties assigned by this module.
 INTEGRATION
 ---------------------
 - I recommend enabling the job_queue.module. When you do, group email notifications are sent during cron runs, instead of immediately after a post is submitted. This speeds up posting a lot, for big groups. The delay also helps authors fix typos in their posts before the mail is sent.
-- This module exposes an API for retrieving and managing subscriptions via direct PHP functions [og_save_subscription()] and via XMLRPC.
+- This module exposes an API for retrieving and managing membership via direct PHP functions [og_save_subscription()] and via XMLRPC.
 
 UNIT TESTING
 ----------------------
