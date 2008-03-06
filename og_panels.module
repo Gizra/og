@@ -59,9 +59,9 @@ function og_panels_menu($may_cache) {
             // Hijack the menu handler for this node.
             $items[] = array(
               'path' => "node/$nid",
-              'title' => $display->page_title,
+              'title' => $node->title, // doesn't work
               'callback' => 'og_panels_page',
-              'callback arguments' => array($display->did, $node),
+              'callback arguments' => array($display->did, $node, $node->title),
             );
           }
           else {
@@ -243,7 +243,10 @@ function og_panels_table_submit($form_id, $form_values) {
  * 
  * @return void
  **/
-function og_panels_page($did, $group_node) {
+function og_panels_page($did, $group_node, $title = NULL) {
+  if ($title) {
+    drupal_set_title($title);
+  }
   panels_load_include('plugins');
   $og_panel = og_panels_get_one_by_display($did);
   $display = panels_load_display($did);  
