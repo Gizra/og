@@ -1163,7 +1163,88 @@ function og_views_default_views() {
   );
   $view->requires = array(comments, node_comment_statistics, og_ancestry);
   $views[$view->name] = $view;
-    
+  
+  // og_recent_type_term. used for og_panels
+  $view = new stdClass();
+  $view->name = 'og_recent_type_term';
+  $view->description = 'Recent posts for current term filtered by node type and/or taxonomy term';
+  $view->access = array (
+);
+  $view->view_args_php = '';
+  $view->page = TRUE;
+  $view->page_title = '';
+  $view->page_header = '';
+  $view->page_header_format = '1';
+  $view->page_footer = '';
+  $view->page_footer_format = '1';
+  $view->page_empty = '';
+  $view->page_empty_format = '1';
+  $view->page_type = 'list';
+  $view->url = '';
+  $view->use_pager = TRUE;
+  $view->nodes_per_page = '10';
+  $view->sort = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'sticky',
+      'sortorder' => 'DESC',
+      'options' => '',
+    ),
+    array (
+      'tablename' => 'node',
+      'field' => 'created',
+      'sortorder' => 'DESC',
+      'options' => 'normal',
+    ),
+  );
+  $view->argument = array (
+    array (
+      'type' => 'nodetype',
+      'argdefault' => '2',
+      'title' => '%1',
+      'options' => '',
+      'wildcard' => '*',
+      'wildcard_substitution' => 'all',
+    ),
+    array (
+      'type' => 'taxletter',
+      'argdefault' => '2',
+      'title' => '%1 - %2',
+      'options' => '',
+      'wildcard' => '',
+      'wildcard_substitution' => '',
+    ),
+  );
+  $view->field = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'title',
+      'label' => '',
+      'handler' => 'views_handler_field_nodelink_with_mark',
+      'options' => 'link',
+    ),
+  );
+  $view->filter = array (
+    array (
+      'tablename' => 'node',
+      'field' => 'status',
+      'operator' => '=',
+      'options' => '',
+      'value' => '1',
+    ),
+    array (
+      'tablename' => 'og_ancestry',
+      'field' => 'picg',
+      'operator' => '=',
+      'options' => '',
+      'value' => '***CURRENT_GID***',
+    ),
+  );
+  $view->exposed_filter = array (
+  );
+  $view->requires = array(node, og_ancestry);
+  $views[$view->name] = $view;
+      
   return $views;
 }
 
