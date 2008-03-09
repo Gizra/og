@@ -1359,7 +1359,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       if (og_is_group_type($node->type)) {
         // Email address is required for contacting the Manager
         $account = user_load(array('uid' => $node->uid));
-        if (empty($account->mail)) {
+        if ($account->uid > 0 && empty($account->mail)) {
           form_set_error('name', t('The group manager, %name, must have an email address in his <a href="!profile">profile</a>.', array('%name' => $account->name, '!profile' => url("user/$node->uid/edit"))));
         }
       }
