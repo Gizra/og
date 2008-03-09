@@ -1267,11 +1267,10 @@ function og_get_node_groups($node) {
   }
 }
 
-// just the query for the get_node_groups function. is reused in og_views.inc
+// Just the query for the get_node_groups function. Is reused in og_views.inc
 function og_get_node_groups_result($nid) {
-  $sql = "SELECT oga.group_nid, n.title FROM {og_ancestry} oga INNER JOIN {node} n ON oga.group_nid = n.nid WHERE oga.nid = %d";
-  // we use rewrite_sql() in order to avoid disclosing completely private groups (once we support those properly)
-  return db_query(db_rewrite_sql($sql, 'oga', 'group_nid'), $nid);
+  $sql = "SELECT oga.group_nid, n.title FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.group_nid WHERE oga.nid = %d";
+  return db_query(db_rewrite_sql($sql), $nid);
 }
 
 function og_submit_group(&$node) {
