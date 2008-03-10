@@ -1269,8 +1269,9 @@ function og_get_node_groups($node) {
 
 // Just the query for the get_node_groups function. Is reused in og_views.inc
 function og_get_node_groups_result($nid) {
+  // We do not run db_rewrite_sql() here since we need to know about groups that the user cannot access as well (i.e. node edit).
   $sql = "SELECT oga.group_nid, n.title FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.group_nid WHERE oga.nid = %d";
-  return db_query(db_rewrite_sql($sql), $nid);
+  return db_query($sql, $nid);
 }
 
 function og_submit_group(&$node) {
@@ -1349,7 +1350,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       if ($grps = og_get_node_groups($node)) {
         // TODO: Refactor so we don't need 2 arrays.
         $node->og_groups = array_keys($grps);
-        $node->og_groups_names = array_values($grps);
+        $node->og_groups_both = $grps;
         
         $public = db_result(db_query_range("SELECT is_public FROM {og_ancestry} WHERE nid = %d", $node->nid, 0, 1));
         $node->og_public = $public ? TRUE : FALSE;
@@ -1454,12 +1455,12 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       break;
     case 'rss item':
       if ($node->og_groups) {
-        foreach ($node->og_groups as $cnt => $gid) {
+        foreach ($node->og_groups_both as $gid => $title) {
           // TODO: should be absolute link. core bug.
-          $append['og_links'] = array('title' => $node->og_groups_names[$cnt], 'href' => "node/$gid");
+          $append['og_links'] = array('title' => $title, 'href' => "node/$gid");
           $ret[] = array('key'   => 'group',
-                         'value' => check_plain($node->og_groups_names[$cnt]),
-                         'attributes' => array('domain' => url('node/'. $gid, NULL, NULL, TRUE)));
+                         'value' => check_plain($title),
+                         'attributes' => array('domain' => url("node/$gid", NULL, NULL, TRUE)));
         }
         // to get these modifications to work on 4.7, one needs to patch as per http://drupal.org/node/41703
         $node->body .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
@@ -1605,30 +1606,28 @@ function og_all_groups_options() {
 
 /**
  * Iterate over a set of groups and separate out those that are inaccessible to the current user. 
- * Don't return groups of which the current user is a member. Used in og_form_add_og_audience().
+ * Don't return groups of which the current user is a member. Used in og_form_add_og_audience() and node.tpl.php.
  * 
  * @return array
  *   A two element array containing 'accessible' and 'inaccessible' keys.
  **/
-function og_node_groups_distinguish($groups, $groups_names) {
+function og_node_groups_distinguish($groups_names_both) {
   global $user;
   
   $current_groups = array('accessible' => array(), 'inaccessible' => array());
-  if (empty($groups)) {
+  if (empty($groups_names_both)) {
     // Do nothing.
   }
   else {
-    // TODO the lack on meaningful indices on groups and groups_names arrays is very unfortunate.
-    $placeholders = array_fill(0, count($groups), '%d');
+    $placeholders = array_fill(0, count($groups_names_both), '%d');
     $sql = 'SELECT n.nid FROM {node} n WHERE n.nid IN ('. implode(', ', $placeholders). ')';
-    $result = db_query(db_rewrite_sql($sql), $groups);
-    while ($row = db_fetch_object($result)) {
-      $key = array_search($row->nid, $groups);
-      $current_groups['accessible'][$row->nid]['title'] = $groups_names[$key];
+    $result = db_query(db_rewrite_sql($sql), array_keys($groups_names_both));
+    while ($nid = db_result($result)) {
+      $current_groups['accessible'][$nid]['title'] = $groups_names_both[$nid];
     }
-    foreach ($groups as $group) {
-      if (!in_array($group, array_keys($current_groups['accessible']))) {
-        $current_groups['inaccessible'][$group] = $group;
+    foreach ($groups_names_both as $gid => $title) {
+      if (!in_array($gid, array_keys($current_groups['accessible']))) {
+        $current_groups['inaccessible'][$gid] = $gid;
       }
     }
 
@@ -1683,8 +1682,7 @@ function og_form_add_og_audience($form_id, &$form) {
   }
   else {
     // Classify those groups which the node already has but the author does not.
-    $current_groups = og_node_groups_distinguish($node->og_groups, $node->og_groups_names);
-    
+    $current_groups = og_node_groups_distinguish($node->og_groups_both);
     // Put inaccessible groups in the $form so that they can persist. See og_submit_group()
     $form['og_invisible']['og_groups_inaccessible'] = array('#type' => 'value', '#value' => $current_groups['inaccessible']);
     
