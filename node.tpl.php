@@ -10,8 +10,13 @@
   <span class="taxonomy"><?php print $terms?></span>
   <div class="content"><?php print $content?></div>
   <?php if ($node->og_groups && $page) {
-          for ($ind=0; $ind < count($node->og_groups); $ind++) {
-            $og_links['og_'. $node->og_groups[$ind]] = array('title' => $node->og_groups_names[$ind], 'href' => 'node/'. $node->og_groups[$ind]);
+          $current_groups = og_node_groups_distinguish($node->og_groups, $node->og_groups_names);
+          foreach ($node->og_groups_both as $gid => $title) {
+            global $user;
+            // User may only see a group if she is a member or it is accessible.
+            if (isset($user->og_groups[$gid]) || isset($current_groups['accessible'][$gid])) {
+              $og_links['og_'. $gid] = array('title' => $title, 'href' => "node/$gid");
+            }
           }
           $og_links = theme('links', $og_links);
           print '<div class="groups">'. t('Groups'). ': ';
