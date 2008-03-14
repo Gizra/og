@@ -6,6 +6,12 @@
   margin-bottom: .4em;
 }
 
+/*no link on group title in group details block*/
+#block-og-0 h2 a {
+  text-decoration:none;
+}
+
+
 /*used in node.tpl.php*/
 .groups .links  {
   display: inline;
