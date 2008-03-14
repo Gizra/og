@@ -25,7 +25,11 @@ NOTES
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status.
 - All membership management happens on the 'membership list' page which is linked from the group Block (while viewing a group page). This includes approving membership requests (for selective groups), adding/removing users and promoting users into group admins.
 - If you decide to stop using this module, just disable it as usual. If you ever decide to re-enable, all your prior group information will be restored.
+
+DEVELOPERS & SITE BUILDERS
+------------------
 - You may craft your own URLs which produce useful behavior. For example, user/register?gids[]=4 will add a checked checkbox for to the user's registration page for subscribing to group nid=4. This feature overrides the usual preference for groups to always appear during registration.
+- You alter the links in the group details block using hook_og_link_alter($links, $group_node). See bottom of og_og_block_details(). Or you may completely take over this block by defining a og_block_details for each of your custom group node types. See og_block_details().
 
 THEMES
 ------------------

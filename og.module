@@ -2519,35 +2519,40 @@ function og_og_block_details($node) {
   if ($subscription == 'active' || user_access('administer nodes')) {
     $links = module_invoke_all('og_create_links', $node);
     if ($node->og_selective < OG_INVITE_ONLY) {
-      $links[] = l(t('Invite friend'), "og/invite/$node->nid");
+      $links['invite'] = l(t('Invite friend'), "og/invite/$node->nid");
     }
-    $links[] = $txt;
-    $links[] =  t('Manager: '). theme('username', $node);
+    $links['subscribers'] = $txt;
+    $links['manager'] =  t('Manager: '). theme('username', $node);
     $subscribe = isset($subscription) ? l(t('My membership'), "og/manage/$node->nid") : og_subscribe_link($node);
     if(isset($subscribe)) {
-      $links[] = $subscribe;
+      $links['my_membership'] = $subscribe;
     }
     if (module_exists('search') && user_access('search content')) {
       $post = drupal_get_form('og_search_form', $node);
     }
   }
   elseif ($subscription == 'requested') {
-    $links[] = t('Your membership request awaits approval.');
-    $links[] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'destination=og');
+    $links['approval'] = t('Your membership request awaits approval.');
+    $links['delete'] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'destination=og');
   }
   elseif (!$user->uid) {
     $dest = drupal_get_destination();
-    $links[] = t('You must <a href="!register">register</a>/<a href="!login">login</a> in order to post into this group.', array('!register' => url("user/register", $dest), '!login' => url("user/login", $dest)));
+    $links['must_login'] = t('You must <a href="!register">register</a>/<a href="!login">login</a> in order to post into this group.', array('!register' => url("user/register", $dest), '!login' => url("user/login", $dest)));
   }
   elseif ($node->og_selective < OG_INVITE_ONLY) {
-    $links[] = og_subscribe_link($node);
+    $links['subscribe'] = og_subscribe_link($node);
   }
   else {
-    $links[] = t('This is a @closed group. The group administrators add/remove members as needed.', array('@closed' => t('closed')));
+    $links['closed'] = t('This is a @closed group. The group administrators add/remove members as needed.', array('@closed' => t('closed')));
+  }
+  // Modify these links by reference. If you want control of the whole block, see og_block_details().
+  foreach (module_implements('og_link_alter') AS $module) {
+    $function = $module .'_og_link_alter';
+    $function($links, $node);
   }
 
   $block['content'] = theme('item_list', $links). $post;
-  $block['subject'] = $node->title;
+  $block['subject'] = l($node->title, "node/$node->nid");
   return $block;
 }
 
@@ -2598,7 +2603,7 @@ function og_og_create_links($group) {
   foreach (node_get_types() as $type) {
     // we used to check for node_access(create) but then node admins would get a false positive and see node types that they could not create
     if (!in_array($type->type, $exempt) && module_invoke(node_get_types('module', $type), 'access', 'create', $type)) {
-      $links[] = l(t('Create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "gids[]=$group->nid");
+      $links["create_$type->type"] = l(t('Create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "gids[]=$group->nid");
     }
   }
   return $links ? $links : array();
