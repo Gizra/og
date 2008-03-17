@@ -5,7 +5,7 @@ function og_panels_help($section) {
   switch ($section) {
     case 'admin/help#og_panels':
       return t('After enabling this module, visit the new Pages tab on any group. There, group admins may create as many pages as desired for their group. The pages may contain any layout that the site offers and admins may arrange many different types of content as desired. Site admins can restrict the types of content that may be added on the <a href="!settings">og_panels settings</a> page. You might want to make some Views available using <a href="!apv">admin/panels/views</a>. Group admins may designate one page as their group home page.', array('!settings' => url('admin/og/og_panels'), '!apv' => url('admin/panels/views')));
-      case (arg(0) == 'node' && arg(2) == 'og_panels'):
+      case (arg(0) == 'node' && arg(2) == 'og_panels' && !arg(3)):
         return t(
           '<p>Create custom pages for your group. Use custom pages to organize your content in a pretty and informative manner. Your group can group to be a whole website within a web site. Each custom page becomes a tab when viewing your group. One of your custom pages should be designated as your <em>group home page</em>. That page will then display when visitors first arrive at your group.</p>
           <p>Start by clicking the <a href="!url">Add new page</a> tab. Then you will choose a custom layout for your page. Then you will want to <em>edit content</em> for your custom page.</p>', array('!url' => url('node/'. arg(1). '/og_panels/form')));
@@ -113,9 +113,8 @@ function og_panels_menu($may_cache) {
             'callback' => 'drupal_get_form',
             'callback arguments' => array('og_panels_delete_confirm', arg(3), $node),
             'type' => MENU_CALLBACK,
-          );
-          
-        }  
+          ); 
+        }
       }
     }
   }
@@ -167,37 +166,37 @@ function og_panels_overview($group_node) {
  **/
 function og_panels_table($displays, $group_node) {
   $nid = $group_node->nid;
+  $form['#tree'] = TRUE; // #tree must be true in order to separate out the entries in the weight field
   foreach ($displays as $display) {
-     $item['page_title'] = array('#value' => l($display->page_title, "node/$nid/$display->path"));
-     $item['published'] = array('#value' => $display->published ? t('Yes') : t('No'));
-     $item['edit content'] = array('#value' => l(t('edit content'), "node/$nid/og_panels/$display->did/panel_content", array(), drupal_get_destination()));
-     $item['change layout'] = array('#value' => l(t('change layout'), "node/$nid/og_panels/$display->did/panel_layout"));
-     $item['edit layout settings'] = array('#value' => l(t('edit layout settings'), "node/$nid/og_panels/$display->did/panel_settings"));
-     $item['edit page'] = array('#value' => l(t('edit page'), "node/$nid/og_panels/form/$display->did", array(), drupal_get_destination()));
-     $item['delete page'] =  array('#value' => l(t('delete page'), "node/$nid/og_panels/$display->did/delete", array(), drupal_get_destination()));
+    $item['page_title'] = array('#value' => l($display->page_title, "node/$nid/$display->path"));
+    $item['weight'] = array('#type' => 'weight', '#default_value' => $display->weight);
+    $item['edit content'] = array('#value' => l(t('edit content'), "node/$nid/og_panels/$display->did/panel_content", array(), drupal_get_destination()));
+    $item['change layout'] = array('#value' => l(t('change layout'), "node/$nid/og_panels/$display->did/panel_layout"));
+    $item['edit layout settings'] = array('#value' => l(t('edit layout settings'), "node/$nid/og_panels/$display->did/panel_settings"));
+    $item['edit page'] = array('#value' => l(t('edit page'), "node/$nid/og_panels/form/$display->did", array(), drupal_get_destination()));
+    $item['delete page'] =  array('#value' => l(t('delete page'), "node/$nid/og_panels/$display->did/delete", array(), drupal_get_destination()));
      
-      $form[$display->did] = $item;
-       
-      // Store the default_page for later.
-      if ($display->default_page == 1) {
-        $default_page = $display->did;
-      }
-      
-      // Prepare the options for the radios.
-      $options[$display->did] = '';
+    $form['displays'][$display->did] = $item;
+     
+    // Store the default_page for later.
+    if ($display->default_page == 1) {
+      $default_page = $display->did;
+    }
+    // Prepare the options for the radios.
+    $options[$display->did] = '';
   }
-  
-  $form['submit'] = array(
-    '#type' => 'submit', 
-    '#value' => t('Save home page'),
-  );
+   
   $form['default_page'] = array(
     '#type' => 'radios', 
     '#options' => $options, 
     '#required' => TRUE,
     '#default_value' => $default_page,
   );
-  
+  $form['submit'] = array(
+    '#type' => 'submit', 
+    '#value' => t('Save Settings'),
+  );
+
   $form['group_node'] = array('#type' => 'value', '#value' => $group_node);
   return $form;
 }
@@ -210,36 +209,38 @@ function og_panels_table($displays, $group_node) {
  * @return void
  **/
 function theme_og_panels_table($form) {
-  foreach (element_children($form) as $did) {
+  foreach (element_children($form['displays']) as $did) {
     if (is_numeric($did)) {
       $rows[] = array(
         drupal_render($form['default_page'][$did]),
-        drupal_render($form[$did]['page_title']), 
-        drupal_render($form[$did]['published']),
-        drupal_render($form[$did]['edit content']),
-        drupal_render($form[$did]['change layout']), 
-        drupal_render($form[$did]['edit layout settings']), 
-        drupal_render($form[$did]['edit page']),
-        drupal_render($form[$did]['delete page']),
+        drupal_render($form['displays'][$did]['page_title']), 
+        drupal_render($form['displays'][$did]['weight']),
+        drupal_render($form['displays'][$did]['edit content']),
+        drupal_render($form['displays'][$did]['change layout']), 
+        drupal_render($form['displays'][$did]['edit layout settings']), 
+        drupal_render($form['displays'][$did]['edit page']),
+        drupal_render($form['displays'][$did]['delete page']),
       );
     }
   }
   
   $output = drupal_render($form);
-  $header = array(t('Home page'), t('Title'), t('Published'), array('align' => 'center', 'colspan' => 25, 'data' => t('Operations')));
+  $header = array(t('Home page'), t('Title'), t('Weight'), array('align' => 'center', 'colspan' => 5, 'data' => t('Operations')));
   return theme('table', $header, $rows). $output;
 }
 
 function og_panels_table_submit($form_id, $form_values) {
-  $sql = "UPDATE {og_panels} SET default_page = 0 WHERE nid = %d";
-  db_query($sql, $form_values['group_node']->nid);
-  $sql = "UPDATE {og_panels} SET default_page = 1 WHERE did = %d";
-  db_query($sql, $form_values['default_page']);
-  drupal_set_message(t('Updated group home page.'));
+  db_query("UPDATE {og_panels} SET default_page = 0 WHERE nid = %d", $form_values['group_node']->nid);
+  foreach ($form_values['displays'] as $did => $settings) {
+    $default = $did == $form_values['default_page'] ? TRUE : FALSE;
+    $sql = "UPDATE {og_panels} SET weight = %d, default_page = %d WHERE did = %d";
+    db_query($sql, $settings['weight'], $default, $did);
+  }
+  drupal_set_message(t('Updated panels configuration.'));
 }
 
 /**
- * A menu callback. Renders an og_panels based upon its display ID.
+ * A menu callback. Renders an og_panel based upon its display ID.
  * 
  * @return void
  **/
@@ -247,10 +248,8 @@ function og_panels_page($did, $group_node, $title = NULL) {
   if ($title) {
     drupal_set_title($title);
   }
-  panels_load_include('plugins');
   $og_panel = og_panels_get_one_by_display($did);
-  $display = panels_load_display($did);  
-  $display->context = array('og_panels' => panels_context_create('node', $group_node));
+  $display = og_panels_load_display($did, $group_node);
   $output = panels_render_display($display);
   // We print instead of return in order to allow blocks to be suppressed.
   print theme('page', $output, $og_panel->show_blocks);
@@ -261,9 +260,9 @@ function og_panels_page($did, $group_node, $title = NULL) {
  * 
  * @return void
  **/
- function og_panels_form($group_node, $did = NULL) {
+function og_panels_form($group_node, $did = NULL) {
   drupal_set_title($group_node->title);
-  if ($did) {
+  if (!is_null($did)) {
     $display = og_panels_get_one_by_display($did);
   }
   else {
@@ -279,21 +278,27 @@ function og_panels_page($did, $group_node, $title = NULL) {
     '#description' => t('This is the title of the page and of the tab.'),
     '#size' => 32,
   );
-  $form['path'] = array(
+  $form[$display->default_page ? 'path_placeholder' : 'path'] = array(
     '#title' => t('Path'),
     '#type' => 'textfield',
     '#default_value' => $display->default_page ? '' : $display->path,
     '#field_prefix' =>  url("node/$group_node->nid", NULL, NULL, TRUE) . '/',
     '#required' => $display->default_page ? FALSE : TRUE,
-    '#description' => $display->default_page ? t('This page is currently your default home page and has no configurable path.') : '',
+    '#description' => $display->default_page ? t('This page is currently your default group home page and has no configurable path.') : '',
     '#disabled' => $display->default_page,
     '#size' => 32,
   );
+  if ($display->default_page) {
+    $form['path'] = array(
+      '#type' => 'hidden',
+      '#value' => $display->path,
+    );
+  }
   $form['show_blocks'] = array(
     '#title' => t('Show blocks'),
     '#type' => 'checkbox',
     '#default_value' => isset($display->show_blocks) ? $display->show_blocks : TRUE,
-    '#description' => t('If unchecked, the standard group blocks will not be shown unless yo place them into your page content. This gives admin more control over page presentation.'),
+    '#description' => t('If unchecked, the standard group blocks will not be shown unless you place them into your page content. This gives admin more control over page presentation.'),
   );
   $form['published'] = array(
     '#type' => 'checkbox',
@@ -311,25 +316,90 @@ function og_panels_page($did, $group_node, $title = NULL) {
   return $form;
 }
 
-function og_panels_get_all($nid) {
+/**
+ * Return an array of all og_panels attached to the given nid.
+ *
+ * @param int $nid
+ * @return array $rows
+ *   An associative array keyed by the $did of the og_panel
+ */
+function og_panels_get_all($nid) {  
   $sql = "SELECT * FROM {og_panels} WHERE nid = %d";
   $result = db_query($sql, $nid);
   while ($row = db_fetch_object($result)) {
     $rows[$row->did] = $row;
   }
-  return $rows ? $rows : array();
+  if (isset($rows)) {
+    return $rows;
+  }
+  return array();
 }
 
+/**
+ * Load an og_panels object.
+ *
+ * @param int $did
+ * @return object $og_panel
+ */
 function og_panels_get_one_by_display($did) {
   $sql = "SELECT * FROM {og_panels} WHERE did = %d";
   $result = db_query($sql, $did);
   return db_fetch_object($result);
 }
 
+/**
+ * Load the default og_panels object, if any, for the given nid.
+ *
+ * @param int $nid
+ * @return mixed $og_panel
+ *   Either returns the og_panel object, or FALSE if no default panel was found for the nid
+ */
 function og_panels_get_one_by_nid_default($nid) {
   $sql = "SELECT * FROM {og_panels} WHERE nid = %d AND default_page = 1";
   $result = db_query($sql, $nid);
-  return db_fetch_object($result);
+  $og_panel = db_fetch_object($result);
+  return is_object($og_panel) ? $og_panel : FALSE;
+}
+
+/**
+ * Load an og_panel's display information.
+ * 
+ * Loads a panels display object with various parameters, depending on the information passed into the load function. 
+ * 
+ * @param int $did
+ *   The did of the panels display.
+ * @param object $group_node = NULL
+ *   The node object for the group to which the panel is attached.
+ * @param bool $ct = FALSE
+ *   If TRUE, content_types are also loaded into the $display object 
+ * 
+ * @return mixed
+ *   Either returns a display object, or FALSE if no display was found with the parameters provided.
+ */
+function og_panels_load_display($did, $group_node = NULL, $ct = FALSE) {
+  panels_load_include('plugins');
+  $display = panels_load_display($did);
+  if (is_object($group_node)) {
+    $display->context = array('og_panels' => panels_context_create('group', $group_node));
+    if ($ct) {
+      panels_load_include('common');
+      $display->content_types = panels_common_get_allowed_types('og_panels', $display->context);
+    }
+  }
+  return is_object($display) ? $display : FALSE;
+}
+
+function og_panels_form_validate($form_id, $form_values, $form) {
+  $pathblacklist = array('view', 'edit', 'delete', 'outline', 'load', 'render', 'clone');
+  if (in_array($form_values['path'], $pathblacklist)) {
+    form_error($form['path'], t('%path is a reserved system path, and cannot be used for a group page. Please enter another path.', array('%path' => $form_values['path']))); 
+  }
+  else if (preg_match("/[^A-Za-z0-9-]/", $form_values['path'])) {
+    form_error($form['path'], t("Panel paths may only contain alphanumeric characters and dashes."));
+  }
+  else if (db_result(db_query("SELECT path FROM {og_panels} WHERE path = '%s' AND did <> %d AND nid = %d", $form_values['path'], $form_values['did'], $form_values['nid']))) {
+    form_error($form['path'], t("That path is currently in use by another one of your group's pages. Please enter another path."));
+  }
 }
 
 /**
@@ -346,8 +416,6 @@ function og_panels_form_submit($form_id, $form_values) {
   else {
     // Create a new display and record that.
     $display = panels_new_display();
-    // What layout will we get? Lets see.
-    // $display->layout = $node->panels_node['layout'];
     panels_save_display($display);
     $sql = "INSERT INTO {og_panels} (did, nid, page_title, path, published, show_blocks) VALUES (%d, %d, '%s', '%s', %d, %d)";
     db_query($sql, $display->did, $form_values['nid'], $form_values['page_title'], $form_values['path'], $form_values['published'], $form_values['show_blocks']);
@@ -386,43 +454,93 @@ function og_panels_nodeapi($node, $op) {
 
 /**
  * Pass through to the panels layout editor.
+ * 
+ * @param int $did
+ *  the $did of the og_panel to be edited. 
+ * 
+ * @param object $group_node
+ *  the node object to which the og_panel is attached.
  */
 function og_panels_edit_layout($did, $group_node) {
   og_panels_set_breadcrumb('panel_edit', $group_node);
-  panels_load_include('plugins');
-  $display = panels_load_display($did);
-  $display->context = array('og_panels' => panels_context_create('node', $group_node));
+  $display = og_panels_load_display($did, $group_node); // TODO I don't believe that having the context present is necessary for editing the layout.
   return panels_edit_layout($display, t('Save'), "node/$group_node->nid/og_panels");
 }
 
 /**
  * Pass through to the panels layout settings editor.
+ * 
+ * @param int $did
+ *  the $did of the og_panel to be edited. 
+ * 
+ * @param object $group_node
+ *  the node object to which the og_panel is attached.
  */
 function og_panels_edit_layout_settings($did, $group_node) {
   og_panels_set_breadcrumb('panel_edit', $group_node);
-  panels_load_include('plugins');
-  $display = panels_load_display($did);
+  $display = og_panels_load_display($did);
   return panels_edit_layout_settings($display, t('Save'), "node/$group_node->nid/og_panels");
 }
 
 /**
  * Pass through to the panels content editor.
+ * 
+ * @param int $did
+ *  the $did of the og_panel to be edited. 
+ * 
+ * @param object $group_node
+ *  the node object to which the og_panel is attached.
  */
 function og_panels_edit_content($did, $group_node) {
   og_panels_set_breadcrumb('panel_edit', $group_node);
-  panels_load_include('plugins');
-  $display = panels_load_display($did);
-  $display->context = array('og_panels' => panels_context_create('node', $group_node));
-  panels_load_include('common');
-  $content_types = panels_common_get_allowed_types('og_panels', $display->context);
-
+  $display = og_panels_load_display($did, $group_node, TRUE);
   // Print this with theme('page') so that blocks are disabled while editing a display.
   // This is important because negative margins in common block layouts (i.e, Garland)
   // messes up the drag & drop.
-  print theme('page', panels_edit($display, "node/$group_node->nid/og_panels", $content_types), FALSE);
+  print theme('page', panels_edit($display, "node/$group_node->nid/og_panels", $display->content_types), FALSE);
 }
 
 function og_panels_admin_content() {
   panels_load_include('common');
   return drupal_get_form('panels_common_settings', 'og_panels');
 }
+
+/**
+ * Implementation of hook_panels_contexts()
+ * 
+ */
+function og_panels_panels_contexts() {
+  include_once drupal_get_path('module', 'og_panels') .'/includes/groupcontext.inc';
+  $args['group'] = array(
+    'title' => t("Group"),
+    'description' => t('A node object that is flagged as an OG group type.'),
+    'context' => 'og_panels_context_create_group',
+    'settings form' => 'og_panels_context_group_settings_form',
+    'settings form validate' => 'og_panels_context_group_settings_form_validate',
+    'keyword' => 'group',
+    'no ui' => TRUE,
+    'context name' => 'group',
+  );
+  return $args;
+}
+
+/**
+ * Implementation of hook_panels_content_types()
+ *
+ */
+// Ready to begin adding group-specific content - but no content added yet!
+/*function og_panels_panels_content_types() {
+  include_once drupal_get_path('module', 'og_panels') .'/includes/groupcontent.inc';
+  $items['block'] = array(
+    'title' => t('Block'),
+    'content_types' => 'panels_admin_content_types_group',
+    'render callback' => 'panels_content_group',
+    'add callback' => 'panels_admin_add_group',
+    'edit callback' => 'panels_admin_edit_group',
+    'title callback' => 'panels_admin_title_group',
+    'add submit callback' => 'panels_admin_submit_group',
+    'edit submit callback' => 'panels_admin_submit_group',
+    //'validate callback' => 'panels_admin_validate_group',
+  );
+}
+*/
