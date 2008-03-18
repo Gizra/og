@@ -2823,16 +2823,6 @@ function theme_og_format_subscriber_status($group) {
 }
 
 /**
- * Implementation of hook_simpletest().
- */
-function og_simpletest() {
-  $dir = drupal_get_path('module', 'og'). DIRECTORY_SEPARATOR . 'tests';
-  require_once($dir . DIRECTORY_SEPARATOR . 'og_testcase.php');
-  $tests = file_scan_directory($dir, '\.test');
-  return array_keys($tests);
-}
-
-/**
  * Implementation of hook_xmlrpc().
  */
 function og_xmlrpc() {

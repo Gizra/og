@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__FILE__). '/og_testcase.php';
+
 class OgPost extends OgTestCase {
   function get_info() {
     return array('name'  => t('Og posting test'),
