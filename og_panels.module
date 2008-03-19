@@ -32,7 +32,7 @@ function og_panels_menu($may_cache) {
           'title' => t('Pages'),
           'callback' => 'og_panels_overview',
           'callback arguments' => array($node),
-          'access' => og_is_node_admin($node),
+          'access' => og_is_node_admin($node) && user_access('manage OG panels pages'),
           'type' => MENU_LOCAL_TASK,
           'weight' => 8,
         );
@@ -71,7 +71,7 @@ function og_panels_menu($may_cache) {
               'callback' => 'og_panels_page',
               'callback arguments' => array($display->did, $node),
               'type' => MENU_LOCAL_TASK,
-              'access' => $display->published || og_is_node_admin($node),
+              'access' => $display->published || (og_is_node_admin($node) && user_access('manage OG panels pages')),
               'weight' => -1,
             );
           }
@@ -84,8 +84,7 @@ function og_panels_menu($may_cache) {
           'type' => MENU_CALLBACK,
         );
         
-        if (is_numeric(arg(3))) {
-          
+        if (is_numeric(arg(3))) {   
           $items[] = array(
             'path' => "node/$nid/og_panels/". arg(3). '/panel_layout',
             'callback' => 'og_panels_edit_layout',
@@ -119,6 +118,10 @@ function og_panels_menu($may_cache) {
     }
   }
   return $items;
+}
+
+function og_panels_perm() {
+  return array('manage OG panels pages');
 }
 
 function og_panels_delete_confirm($did, $group_node) {
@@ -438,7 +441,6 @@ function og_panels_nodeapi($node, $op) {
   switch ($op) {
     case 'delete':
       $og_panels = og_panels_get_all($node->nid);
-      dsm($og_panels);
       foreach ($og_panels as $og_panel) {
         panels_delete_display($og_panel->did);
       }
@@ -510,7 +512,7 @@ function og_panels_admin_content() {
  * 
  */
 function og_panels_panels_contexts() {
-  include_once drupal_get_path('module', 'og_panels') .'/includes/groupcontext.inc';
+  include_once './'. drupal_get_path('module', 'og_panels') .'/includes/groupcontext.inc';
   $args['group'] = array(
     'title' => t("Group"),
     'description' => t('A node object that is flagged as an OG group type.'),
@@ -526,21 +528,40 @@ function og_panels_panels_contexts() {
 
 /**
  * Implementation of hook_panels_content_types()
- *
  */
-// Ready to begin adding group-specific content - but no content added yet!
-/*function og_panels_panels_content_types() {
-  include_once drupal_get_path('module', 'og_panels') .'/includes/groupcontent.inc';
-  $items['block'] = array(
-    'title' => t('Block'),
-    'content_types' => 'panels_admin_content_types_group',
-    'render callback' => 'panels_content_group',
-    'add callback' => 'panels_admin_add_group',
-    'edit callback' => 'panels_admin_edit_group',
-    'title callback' => 'panels_admin_title_group',
-    'add submit callback' => 'panels_admin_submit_group',
-    'edit submit callback' => 'panels_admin_submit_group',
-    //'validate callback' => 'panels_admin_validate_group',
+function og_panels_panels_content_types() {
+  include_once './'. drupal_get_path('module', 'og_panels') .'/includes/groupcontent.inc';
+  $items['og_mission'] = array(
+    'title' => t('OG mission'),
+    'content_types' => 'og_panels_ct_list_mission',
+    'single' => TRUE, // only provides a single content type
+    'render callback' => 'og_panels_ct_render_callback_mission',
+//      'add callback' => 'og_panels_content_types_add_callback',
+//      'edit callback' => 'og_panels_content_types_edit_callback',
+    'title callback' => 'og_panels_ct_title_callback_mission',
+//    'add submit callback' => 'panels_admin_submit_group',
+//    'edit submit callback' => 'panels_admin_submit_group',
+//    'validate callback' => 'panels_admin_validate_group',
   );
+  $items['og_description'] = array(
+    'title' => t('OG description'),
+    'content_types' => 'og_panels_ct_list_description',
+    'single' => TRUE, // only provides a single content type
+    'render callback' => 'og_panels_ct_render_callback_description',
+    'title callback' => 'og_panels_ct_title_callback_description',
+  );
+  return $items;
 }
-*/
+
+
+// An implementation of hook_panels_block_info. We have to prefix with 'og' and not 'og_panels'.
+function og_panels_block_info($module, $delta, &$info) {
+  // TODO: icon
+  $info['icon'] = 'user-multiple.png';
+  $info['required context'] = new panels_required_context(t('Group'), 'group');
+  $info['path'] = drupal_get_path('module', 'og_panels'). '/';
+  $info['category'] = t('Organic groups');
+}
+
+
+
