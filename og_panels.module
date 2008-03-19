@@ -550,17 +550,44 @@ function og_panels_panels_content_types() {
     'render callback' => 'og_panels_ct_render_callback_description',
     'title callback' => 'og_panels_ct_title_callback_description',
   );
+  
+    $items['og_subscribers'] = array(
+      'title' => t('OG Members'),
+      'content_types' => 'og_panels_ct_list_subscribers',
+      'single' => TRUE, // only provides a single content type
+      'render callback' => 'og_panels_ct_render_callback_subscribers',
+      'add callback' => 'og_panels_content_types_addedit_callback_subscribers',
+      'edit callback' => 'og_panels_content_types_addedit_callback_subscribers',
+      'title callback' => 'og_panels_ct_title_callback_subscribers',
+  //    'add submit callback' => 'panels_admin_submit_group',
+  //    'edit submit callback' => 'panels_admin_submit_group',
+      'add validate callback' => 'og_panels_content_types_validate_callback_subscribers',
+      'edit validate callback' => 'og_panels_content_types_validate_callback_subscribers',
+    );
+    
   return $items;
 }
 
 
 // An implementation of hook_panels_block_info. We have to prefix with 'og' and not 'og_panels'.
 function og_panels_block_info($module, $delta, &$info) {
-  // TODO: icon
-  $info['icon'] = 'user-multiple.png';
-  $info['required context'] = new panels_required_context(t('Group'), 'group');
-  $info['path'] = drupal_get_path('module', 'og_panels'). '/';
-  $info['category'] = t('Organic groups');
+  switch ($delta) {
+    case 2:
+      // Provide alternate versions as content items
+      unset($info);
+      break;
+    case 'default':
+      $info['icon'] = 'user-multiple.png';
+      $info['required context'] = new panels_required_context(t('Group'), 'group');
+      $info['path'] = drupal_get_path('module', 'og_panels'). '/';
+      $info['category'] = t('Organic groups');
+      break;
+  }
+  
+  // These blocks do not need group context.
+  if ($delta == 3 || $delta == 6) {
+    unset($info['required context']);
+  }
 }
 
 

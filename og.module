@@ -2368,16 +2368,16 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
       case 2:
         $items['og_block_cnt'] = array(
           '#type' => 'textfield', 
-          '#title' => t('Maximum number of users to show'), 
+          '#title' => t('Maximum number of members to show'), 
           '#default_value' => variable_get("og_block_cnt_$delta", 10), 
           '#size' => 5, 
         );
         $items['og_block_subscribers_is_admin'] = array(
           '#type' => 'checkboxes', 
           '#title' => t('Group roles'), 
-          '#default_value' => variable_get("og_block_subscribers_is_admin", array(0,1)), 
+          '#default_value' => variable_get("og_block_subscribers_is_admin", array('members', 'admins')), 
           '#options' => array('members' => t('Standard members'), 'admins' => t('Administrators')), 
-          '#description' => t('You may restrict group members to administrators and/or members in the listing.'),
+          '#description' => t('You may specify which types of group members appear in the listing.'),
         );
         return $items;
       case 3:
@@ -2486,29 +2486,42 @@ function og_block_subscribers() {
       $max = variable_get('og_block_cnt_2', 10);
       // Should we show admins, standard users, or both. From block configuration.
       $is_admin = variable_get("og_block_subscribers_is_admin", drupal_map_assoc('members', 'admins'));
-      
-      $placeholders = array_fill(0, count($is_admin), '%d');
-      $placeholders = implode(', ', $placeholders);
-      $sql = "SELECT DISTINCT(u.uid), u.* FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.is_admin IN ($placeholders) AND ogu.nid = %d AND ogu.is_active = 1 AND u.status = 1 ORDER BY ogu.created DESC";
-      if (!empty($is_admin['members'])) {
-        $args[] = 0;
-      }
-      if (!empty($is_admin['admins'])) {
-        $args[] = 1;
-      }
-      $args[] = $gid;
-      $result = db_query_range($sql, $args, 0, $max);
-      $block['content'] = og_user_title_list($result, $gid);
       $block['subject'] = t('Recently joined');
+      $block['content'] = og_block_subscribers_list($gid, $max, $is_admin);
       return $block;
     }
   }
 }
 
+/**
+ * API function for retrieving a list of group members. Used by og and og_panels
+ * 
+ * @return string
+ *   An HTML list.
+ **/
+function og_block_subscribers_list($gid, $max = 10, $is_admin = array('members', 'admin'), $show_more = TRUE, $show_picture = NULL) {
+  $placeholders = array_fill(0, count(array_filter($is_admin)), '%d');
+  $placeholders = implode(', ', $placeholders);
+  $sql = "SELECT DISTINCT(u.uid), u.* FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.is_admin IN ($placeholders) AND ogu.nid = %d AND ogu.is_active = 1 AND u.status = 1 ORDER BY ogu.created DESC";
+  if (!empty($is_admin['members'])) {
+    $args[] = 0;
+  }
+  if (!empty($is_admin['admins'])) {
+    $args[] = 1;
+  }
+  $args[] = $gid;
+  $result = db_query_range($sql, $args, 0, $max);
+  return og_user_title_list($result, $gid, $show_more, $show_picture);
+}
+
 // shows users. analogous to node_title_list()
-function og_user_title_list($result, $gid = NULL, $show_more = TRUE) {
+function og_user_title_list($result, $gid = NULL, $show_more = TRUE, $show_picture = NULL) {
+  if (is_null($show_picture)) {
+    $show_picture = og_is_picture();
+  }
+  
   while ($row = db_fetch_object($result)) {
-    if (og_is_picture()) {
+    if ($show_picture) {
       //showing member pictures
       $link = theme('user_picture', $row). theme('username', $row);
       $links[] = "\n". '<div class="og-picture-wrapper">'. "\n". $link. "\n". '</div>'. "\n";
@@ -2527,7 +2540,7 @@ function og_user_title_list($result, $gid = NULL, $show_more = TRUE) {
       $txt = t('more');
       $title = array('title' => t('View all members.'));
       if ($show_more) {
-        $more = og_is_picture() ? l($txt, "og/users/$gid/faces", $title) : l($txt, "og/users/$gid", $title);
+        $more = $show_picture ? l($txt, "og/users/$gid/faces", $title) : l($txt, "og/users/$gid", $title);
         $append = "<div class=\"more-link\">$more</div>";
       }
     }
