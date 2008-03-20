@@ -1622,8 +1622,8 @@ function og_node_groups_distinguish($groups_names_both) {
     $placeholders = array_fill(0, count($groups_names_both), '%d');
     $sql = 'SELECT n.nid FROM {node} n WHERE n.nid IN ('. implode(', ', $placeholders). ')';
     $result = db_query(db_rewrite_sql($sql), array_keys($groups_names_both));
-    while ($nid = db_result($result)) {
-      $current_groups['accessible'][$nid]['title'] = $groups_names_both[$nid];
+    while ($row = db_fetch_object($result)) {
+      $current_groups['accessible'][$row->nid]['title'] = $groups_names_both[$row->nid];
     }
     foreach ($groups_names_both as $gid => $title) {
       if (!in_array($gid, array_keys($current_groups['accessible']))) {
