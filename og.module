@@ -1070,7 +1070,12 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
     menu_set_location($bc);
 
     unset($node->content['body']);
-    $node->content['og_mission'] = array('#value' => theme('og_mission', $node), '#weight' => -3);
+    $node->content['og_mission'] = array(
+      '#value' => check_markup($node->body, $node->format, FALSE), 
+      '#node' => $node,
+      '#weight' => -3,
+      '#theme' => 'og_mission',
+    );
     
     $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
     $views_available = variable_get('views_defaults', array());
@@ -1118,8 +1123,9 @@ function og_home_empty($node) {
   drupal_set_message($msg);
 }
 
-function theme_og_mission($node) {
-  return !empty($node->body) ? '<div id="mission" class="og-mission">'. $node->body. '</div>' : '';
+// A FAPI theme callback. See og_view_group(). Also called from an og_panels content item.
+function theme_og_mission($form) {
+  return !empty($form['#value']) ? '<div id="mission" class="og-mission">'. $form['#value']. '</div>' : '';
 }
 
 /**
