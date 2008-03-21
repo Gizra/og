@@ -43,7 +43,16 @@ function og_panels_ct_render_callback_mission($conf, $panel_args, $context) {
 
   $block->subject = t('Welcome');
   if ($node) {
-    $block->content = check_markup($node->body, $node->format, FALSE);
+    // This rendering somewhat verbose technique exactly matches og_view_group().
+    $value = check_markup($node->body, $node->format, FALSE);
+    $form['og_mission'] = array(
+      '#theme' => 'og_mission', 
+      '#value' => $value,
+      '#node' => $node,
+      '#weight' => -3,
+    );
+    $block->content = drupal_render($form['og_mission']);
+    
     $block->delta = $node->nid;
   }
   else {
