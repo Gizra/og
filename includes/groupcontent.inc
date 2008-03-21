@@ -48,7 +48,7 @@ function og_panels_ct_render_callback_mission($conf, $panel_args, $context) {
     $form['og_mission'] = array(
       '#theme' => 'og_mission', 
       '#value' => $value,
-      'node' => $node,
+      '#node' => $node,
       '#weight' => -3,
     );
     $block->content = drupal_render($form['og_mission']);
