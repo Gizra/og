@@ -520,7 +520,6 @@ function og_panels_panels_contexts() {
     'settings form' => 'og_panels_context_group_settings_form',
     'settings form validate' => 'og_panels_context_group_settings_form_validate',
     'keyword' => 'group',
-    'no ui' => TRUE,
     'context name' => 'group',
   );
   return $args;
