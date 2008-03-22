@@ -29,37 +29,35 @@ function og_panels_context_create_group($empty, $data = NULL, $conf = FALSE) {
   }
 }
 
-// NOTE: MUCH of what appears below here is irrelevant to og_panels, at least in the immediate term.
-
 function og_panels_context_group_settings_form($conf, $external = FALSE) {
   if ($external) {
     $form['external'] = array(
       '#type' => 'checkbox',
-      '#default_value' => FALSE,
+      '#default_value' => $conf['external'],
       '#title' => t('Require this context from an external source (such as containing panel page)'),
-      '#description' => t('If selected, node selection (below) will be ignored'),
+      '#description' => t('If selected, group selection (below) will be ignored'),
     );
   }
 
 
-  $form['group'] = array(
+  $form['node'] = array(
     '#prefix' => '<div class="no-float">',
     '#suffix' => '</div>',
-    '#title' => t('Enter the name or gid of a group'),
+    '#title' => t('Enter the NID of a group'),
     '#type' => 'textfield',
     '#maxlength' => 512,
-    '#autocomplete_path' => 'panels/node/autocomplete', // FIXME this needs to be replaced with a corresponding autocomplete function, to be implemented in panels.module
+//    '#autocomplete_path' => 'panels/node/autocomplete',
     '#weight'  => -10,
   );
 
-  if (!empty($conf['gid'])) {
-    $info = db_fetch_object(db_query("SELECT * FROM {og} WHERE n.nid = %d", $conf['gid']));
+  if (!empty($conf['nid'])) {
+    $info = db_fetch_object(db_query("SELECT * FROM {node} n WHERE n.nid = %d", $conf['nid']));
     if ($info) {
-      $form['group']['#description'] = t('Currently set to "%title"', array('%title' => $info->title));
+      $form['node']['#description'] = t('Currently set to "%title"', array('%title' => $info->title));
     }
   }
 
-  $form['gid'] = array(
+  $form['nid'] = array(
     '#type' => 'value',
     '#value' => $conf['nid'],
   );
@@ -68,41 +66,44 @@ function og_panels_context_group_settings_form($conf, $external = FALSE) {
 }
 
 /**
- * Validate a group.
+ * Validate a node.
  */
 function og_panels_context_group_settings_form_validate($form, $form_values) {
   // Validate the autocomplete
-  if (empty($form_values['external']) && empty($form_values['gid']) && empty($form_values['group'])) {   
-    form_error($form['group'], t('You must select a group.'));
+  if (empty($form_values['external']) && empty($form_values['nid']) && empty($form_values['node'])) {   
+    form_error($form['node'], t('You must select a node.'));
     return;
   }
 
-  if (empty($form_values['group'])) {
+  if (empty($form_values['node'])) {
     return;
   }
 
-  $gid = $form_values['group'];
+  $nid = $form_values['node'];
   $preg_matches = array();
-  $match = preg_match('/\[gid: (\d+)\]/', $gid, $preg_matches);
+  $match = preg_match('/\[nid: (\d+)\]/', $nid, $preg_matches);
   if (!$match) {
-    $match = preg_match('/^gid: (\d+)/', $gid, $preg_matches);
+    $match = preg_match('/^nid: (\d+)/', $nid, $preg_matches);
   }
 
   if ($match) {
-    $gid = $preg_matches[1];
+    $nid = $preg_matches[1];
   }
-  if (is_numeric($gid)) {
-    $group = db_fetch_object(db_query(db_rewrite_sql("SELECT n.nid FROM {og} n WHERE n.nid = %d"), $gid));
+  if (is_numeric($nid)) {
+    $node = db_fetch_object(db_query(db_rewrite_sql("SELECT n.nid, n.type FROM {node} n WHERE n.nid = %d"), $nid));
   }
   else {
-    $group = db_fetch_object(db_query(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE LOWER(n.description) = LOWER('%s')"), $gid));
+    $node = db_fetch_object(db_query(db_rewrite_sql("SELECT n.nid, n.type FROM {node} n WHERE LOWER(n.title) = LOWER('%s')"), $nid));
   }
 
-  if (!$group) {
-    form_error($form['group'], t('Invalid group selected'));
+  if (!$node) {
+    form_error($form['node'], t('Invalid group selected.'));
+  }
+  elseif (!og_is_group_type($node->type)) {
+    form_error($form['node'], t('Node is of type %type which not a group type.', array('%type' => $node->type)));
   }
   else {
-    form_set_value($form['gid'], $group->nid);
+    form_set_value($form['nid'], $node->nid);
   }
 
 }
