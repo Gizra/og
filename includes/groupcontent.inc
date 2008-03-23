@@ -37,6 +37,18 @@ function og_panels_ct_list_subscribers() {
   return $items;
 }
 
+function og_panels_ct_list_search() {
+  $items['og_search'] = array(
+    'title' => t('Group search'),
+    'icon' => 'user-multiple.png',
+    'path' => drupal_get_path('module', 'og_panels'). '/',
+    'description' => t('Search this group.'),
+    'required context' => new panels_required_context(t('Group'), 'group'),
+    'category' => array(t('Organic groups'), -5),
+  );
+  return $items;
+}
+
 function og_panels_ct_render_callback_mission($conf, $panel_args, $context) {
   $node = isset($context->data) ? drupal_clone($context->data) : NULL;
   $block->module = 'og_panels';
@@ -97,6 +109,25 @@ function og_panels_ct_render_callback_subscribers($conf, $panel_args, $context) 
   return $block;
 }
 
+function og_panels_ct_render_callback_search($conf, $panel_args, $context) {
+  $node = isset($context->data) ? drupal_clone($context->data) : NULL;
+  $block->module = 'og_panels';
+
+  $block->subject = t('Group Search');
+  if ($node) {
+    if (module_exists('search') && user_access('search content')) {
+      $block->content = drupal_get_form('og_search_form', $node);
+    }
+    $block->delta = $node->nid;
+  }
+  else {
+    $block->content = t('Search form goes here.');
+    $block->delta = 'unknown';
+  }
+
+  return $block;
+}
+
 function og_panels_content_types_addedit_callback_subscribers($id, $panel_args, $conf = NULL) {
   $form['num_items'] = array(
     '#type' => 'textfield',
@@ -145,5 +176,9 @@ function og_panels_ct_title_callback_description($conf, $context) {
 
 function og_panels_ct_title_callback_subscribers($conf, $context) {
   return t('Group members');
+}
+
+function og_panels_ct_title_callback_search($conf, $context) {
+  return t('Search');
 }
 

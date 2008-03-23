@@ -558,11 +558,19 @@ function og_panels_panels_content_types() {
       'add callback' => 'og_panels_content_types_addedit_callback_subscribers',
       'edit callback' => 'og_panels_content_types_addedit_callback_subscribers',
       'title callback' => 'og_panels_ct_title_callback_subscribers',
-  //    'add submit callback' => 'panels_admin_submit_group',
-  //    'edit submit callback' => 'panels_admin_submit_group',
       'add validate callback' => 'og_panels_content_types_validate_callback_subscribers',
       'edit validate callback' => 'og_panels_content_types_validate_callback_subscribers',
     );
+    
+    if (module_exists('search')) {
+      $items['og_search'] = array(
+        'title' => t('Group search'),
+        'content_types' => 'og_panels_ct_list_search',
+        'single' => TRUE, // only provides a single content type
+        'render callback' => 'og_panels_ct_render_callback_search',
+        'title callback' => 'og_panels_ct_title_callback_search',
+      );
+    }
     
   return $items;
 }
