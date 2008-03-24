@@ -575,9 +575,9 @@ function og_panels_panels_content_types() {
   return $items;
 }
 
-// An implementation of hook_panels_relationships. We have to prefix with 'og' and not 'og_panels'. 
+// An implementation of hook_panels_relationships.
 function og_panels_panels_relationships() {
-  include_once './'. drupal_get_path('module', 'og') .'/includes/grouprelationships.inc';
+  include_once './'. drupal_get_path('module', 'og_panels') .'/includes/grouprelationships.inc';
   $args['group_from_node'] = array(
     'title' => t("Group from node"),
     'keyword' => 'group',
