@@ -575,6 +575,18 @@ function og_panels_panels_content_types() {
   return $items;
 }
 
+// An implementation of hook_panels_relationships. We have to prefix with 'og' and not 'og_panels'. 
+function og_panels_panels_relationships() {
+  include_once './'. drupal_get_path('module', 'og') .'/includes/grouprelationships.inc';
+  $args['group_from_node'] = array(
+    'title' => t("Group from node"),
+    'keyword' => 'group',
+    'description' => t('Adds a group from a node context; if multiple groups are associated with a node, this will get the "first" group only.'),
+    'required context' => new panels_required_context(t('Node'), 'node'),
+    'context' => 'panels_group_from_node_context',
+  );
+  return $args;
+}
 
 // An implementation of hook_panels_block_info. We have to prefix with 'og' and not 'og_panels'.
 function og_panels_block_info($module, $delta, &$info) {
