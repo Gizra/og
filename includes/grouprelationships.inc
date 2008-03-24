@@ -15,10 +15,7 @@ function panels_group_from_node_context($context = NULL, $conf) {
     return panels_context_create_empty('group', NULL);
   }
 
-  // TODO: Just returns the first group as the context. 
-  if (isset($context->data->og_groups)) {
-    foreach ($context->data->og_groups as $gid) {
-      return panels_context_create('group', node_load($gid));
-    }
+  if ($group = og_get_group_context()) {
+    return panels_context_create('group', $group);
   }
 }
