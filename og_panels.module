@@ -249,12 +249,23 @@ function og_panels_table_submit($form_id, $form_values) {
  * @return void
  **/
 function og_panels_page($did, $group_node, $title = NULL) {
-  $allargs = func_get_args();
-  $args = array_slice($allargs, 3);
+  $og_panel = og_panels_get_one_by_display($did);
+  // Set breadcrumb and title on non group nodes
   if ($title) {
     drupal_set_title($title);
   }
-  $og_panel = og_panels_get_one_by_display($did);
+  $bc[] = l(t('Home'), "");
+  $bc[] = l(t('Groups'), "og");
+  if (!$og_panel->default_page) {
+    $bc[] = l($group_node->title, "node/$group_node->nid");
+  }
+  // $bc[] = array('path' => "node/$og_panel->nid/$og_panel->path", 'title' => $og_panel->page_title);
+  // I tried MSL but it let me down. again.
+  // menu_set_location($bc);
+  drupal_set_breadcrumb($bc);
+  
+  $allargs = func_get_args();
+  $args = array_slice($allargs, 3);
   $display = og_panels_load_display($did, $group_node);
   $display->args = $args;
   $output = panels_render_display($display);
