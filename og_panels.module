@@ -69,7 +69,8 @@ function og_panels_menu($may_cache) {
               'path' => "node/$nid/$display->path",
               'title' => $display->page_title,
               'callback' => 'og_panels_page',
-              'callback arguments' => array($display->did, $node),
+              // have to pass all these args so the args are known in panels_page()
+              'callback arguments' => array($display->did, $node, $display->page_title),
               'type' => MENU_LOCAL_TASK,
               'access' => $display->published || (og_is_node_admin($node) && user_access('manage OG panels pages')),
               'weight' => -1,
@@ -248,11 +249,14 @@ function og_panels_table_submit($form_id, $form_values) {
  * @return void
  **/
 function og_panels_page($did, $group_node, $title = NULL) {
+  $allargs = func_get_args();
+  $args = array_slice($allargs, 3);
   if ($title) {
     drupal_set_title($title);
   }
   $og_panel = og_panels_get_one_by_display($did);
   $display = og_panels_load_display($did, $group_node);
+  $display->args = $args;
   $output = panels_render_display($display);
   // We print instead of return in order to allow blocks to be suppressed.
   print theme('page', $output, $og_panel->show_blocks);
