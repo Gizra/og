@@ -1094,7 +1094,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
       if ($GLOBALS['current_view']->num_rows || $view->page_empty) {
         $node->content['view'] = array('#value' => $built);
       }
-      else {
+      elseif (empty($_POST)) {
         // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
         og_home_empty($node);
       }
