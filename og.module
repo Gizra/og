@@ -691,11 +691,13 @@ function og_subscribe($gid, $uid = NULL) {
    if (!node_access('view', $node)) {
      // if you can't view the group, you can't join it either. group homepages can be private with some custom coding.
      drupal_access_denied();
+     exit();
    }
   
   // only admins can add another member
   if ($account->uid != $user->uid && !og_is_node_admin($node)) {
     drupal_access_denied();
+    exit();
   }
   // user is already a member of this group, redirect to group homepage
   else if (isset($account->og_groups[$node->nid])) {
@@ -800,11 +802,13 @@ function og_unsubscribe($gid, $uid = NULL) {
   if ($uid != $user->uid && !og_is_node_admin($node)) {
     // only admins can remove another member
     drupal_access_denied();
+    exit();
   }
   if (($node->og_selective == OG_CLOSED && !og_is_node_admin($node)) || $node->uid == $uid){
     // Regular users may not leave from a closed group
     // Group manager may never leave (TODO: fix), such a link should never be generated
     drupal_access_denied();
+    exit();
   }
   else {
     return drupal_get_form('og_confirm_unsubscribe', $gid, $node, $uid);
