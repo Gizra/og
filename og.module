@@ -1968,11 +1968,13 @@ function og_mail($type, $obj) {
     // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 2 positive statements about og_email field
     // ORDER BY favors newer groups to help them get ramped up. Thus, they are perceived as active.
     $sql = "SELECT u.mail, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
-            FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid INNER JOIN {og_uid_global} oug ON ou.uid=oug.uid INNER JOIN {node} n ON ou.nid=n.nid 
+            FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid 
+            INNER JOIN {og_uid_global} oug ON ou.uid=oug.uid 
+            INNER JOIN {node} n ON ou.nid=n.nid 
             WHERE ou.nid IN ($groups) AND (
               (oug.og_email = %d AND ou.mail_type=1) OR
               (oug.og_email = %d)
-              ) AND u.status = 1 AND u.mail != '' 
+              ) AND u.status = 1 AND u.mail != '' AND ou.is_active = 1 
               ORDER by u.mail DESC, n.created DESC
               ";
     $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
