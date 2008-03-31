@@ -63,6 +63,14 @@ function og_panels_menu($may_cache) {
               'callback' => 'og_panels_page',
               'callback arguments' => array($display->did, $node, $node->title),
             );
+            /*
+             * Optional. Horrible hack since the tab title is not changeable in D5. Add the following code 
+             * to your theme's template.php in the _phptemplate_variables('page') section.
+             *   if (isset($GLOBALS['og_panels_view_tab_fix'])) {
+             *     $variables['tabs'] = str_replace('>View<', '>'. $GLOBALS['og_panels_view_tab_fix']. '<', $variables['tabs']);
+             *   }
+             */
+            $GLOBALS['og_panels_view_tab_fix'] = check_plain($display->page_title);
           }
           else {
             $items[] = array(
