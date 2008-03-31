@@ -25,7 +25,7 @@ function og_panels_menu($may_cache) {
   else {
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(arg(1));
-      if (og_is_group_type($node->type)) {
+      if (og_is_group_type($node->type) && node_access('view', $node)) {
         $nid = arg(1);
         $items[] = array(
           'path' => "node/$nid/og_panels",
