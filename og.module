@@ -2157,7 +2157,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
       
       // if groups are passed on querystring, just use them.
       if ($gids = $_REQUEST['gids']) {
-        $default_value = 1;
+        $default_value = $gids;
         foreach ($gids as $gid) {
           $nids[] = (int)$gid;
         }
@@ -2166,7 +2166,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
         $result = db_query(db_rewrite_sql($sql), array_merge($types, $nids));
       }
       else {      
-        $default_value = 0;
+        $default_value = array();
         // perhaps this should be a View
         $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ($in) AND n.status = 1 AND o.register = 1 ORDER BY n.title"), $types);
       }
