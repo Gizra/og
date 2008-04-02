@@ -300,7 +300,6 @@ function og_panels_form($group_node, $did = NULL) {
     '#type' => 'textfield',
     '#required' => $display->default_page ? FALSE : TRUE,
     '#default_value' => $display->page_title,
-    '#disabled' => $display->default_page ? TRUE : FALSE,
     '#description' => t('This is the title of the page and of the tab.'),
     '#size' => 32,
   );
