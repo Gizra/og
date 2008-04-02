@@ -688,11 +688,10 @@ function og_subscribe($gid, $uid = NULL) {
     $account = user_load(array('uid' => $uid));
   }
   $node = node_load($gid);
-   if (!node_access('view', $node)) {
-     // if you can't view the group, you can't join it either. group homepages can be private with some custom coding.
-     drupal_access_denied();
-     exit();
-   }
+  if ($node->og_selective >= OG_INVITE_ONLY) {
+    drupal_access_denied();
+    exit();
+  }
   
   // only admins can add another member
   if ($account->uid != $user->uid && !og_is_node_admin($node)) {
