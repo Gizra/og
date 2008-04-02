@@ -34,7 +34,11 @@ table.og-picture-grid td {
   text-align: center;
   width: 20%;
   padding: 7px 0 7px 0;
-  border-bottom: 1px dotted;
+  border-top: #CCCCCC 1px dotted;
+}
+
+table.og-picture-grid td.first {
+  border-top: none;
 }
 
 td.og-picture-grid-item {
