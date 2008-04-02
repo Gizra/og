@@ -146,7 +146,7 @@ function og_panels_ct_render_callback_faces($conf, $panel_args, $context) {
 
   $block->subject = t('Group Faces');
   if ($node) {
-    $block->content = og_list_users_faces_page($node->nid, $conf['row_count']);
+    $block->content = og_list_users_faces_page($node->nid, $conf['column_count'], $conf['row_count'], $conf['pager_id']);
     $block->delta = $node->nid;
   }
   else {
@@ -158,10 +158,22 @@ function og_panels_ct_render_callback_faces($conf, $panel_args, $context) {
 }
 
 function og_panels_content_types_addedit_callback_faces($id, $panel_args, $conf = NULL) {
-  $form['row_count'] = array(
+  $form['column_count'] = array(
     '#type' => 'textfield',
     '#title' => t('Number of pictures per row'),
-    '#default_value' => isset($conf['row_count']) ? $conf['row_count'] : 5,
+    '#default_value' => isset($conf['column_count']) ? $conf['column_count'] : 5,
+    '#size' => 5,
+  );
+  $form['row_count'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum number of rows per page'),
+    '#default_value' => isset($conf['row_count']) ? $conf['row_count'] : 10,
+    '#size' => 5,
+  );
+  $form['pager_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Pager ID'),
+    '#default_value' => isset($conf['pager_id']) ? $conf['pager_id'] : 0,
     '#size' => 5,
   );
   return $form;
@@ -206,8 +218,11 @@ function og_panels_content_types_validate_callback_subscribers($form, $form_valu
 }
 
 function og_panels_content_types_validate_callback_faces($form, $form_values) {
+  if (!is_numeric($form_values['column_count'])) {
+    form_error($form['column_count'], t('Number of pictures per row must be an integer.'));
+  }
   if (!is_numeric($form_values['row_count'])) {
-    form_error($form['row_count'], t('Number of faces must be an integer.'));
+    form_error($form['row_count'], t('Maximum number of rows per page must be an integer.'));
   }
 }
 
