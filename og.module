@@ -375,7 +375,7 @@ function og_manage_form($group) {
       drupal_set_message(t('You may not leave this group because you are its owner. A site administrator can assign ownership to another user and then you may leave.'));
     }
     else {
-      $links[] = l(t('Leave this group'), "og/unsubscribe/$group->nid", NULL, 'destination=og');
+      $links[] = l(t('Leave this group'), "og/unsubscribe/$group->nid");
       $form['unsubscribe'] = array('#type' => 'markup', '#value' => theme('item_list', $links, t('Actions')));
     }
   }
@@ -830,9 +830,16 @@ function og_confirm_unsubscribe($gid, $node, $uid) {
  * Confirm og unsubscription submit handler
  */
 function og_confirm_unsubscribe_submit($form_id, $form_values) {
+  global $user;
+  
   og_delete_subscription($form_values['gid'], $form_values['uid']);
   drupal_set_message(t('User removed from group.'));
-  return "node/$gid";
+  if ($user->uid == $form_values['uid']) {
+    return 'og';
+  }
+  else {
+    return "node/". $form_values['gid'];
+  }
 }
 
 
