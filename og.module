@@ -680,7 +680,7 @@ function og_subscribe($gid, $uid = NULL) {
       $account = $user;
     }
     else {
-      drupal_set_message(t('In order to join this group, you must login or register a new account. After you have successfully done so, you will need to follow the <em>Join</em> link again.'));
+      drupal_set_message(t('In order to join this group, you must login or register a new account. After you have successfully done so, you will need to request membership again.'));
       drupal_goto('user');
     }
   }
@@ -962,8 +962,8 @@ function og_list_users_page($gid) {
 }
 
 function og_list_users_faces_page($gid) {
-  $sql = og_list_users_sql(0,0,'ou.is_admin DESC, u.picture DESC, u.name ASC');
-  /* list group admins first, pending members second, regular members last.  Alphabetize within each of these catergories */
+  $sql = og_list_users_sql(0, 0, 'ou.is_admin DESC, u.picture DESC, u.name ASC');
+  /* list group admins first, pending members second, regular members last.  Alphabetize within each of these categories */
   $result = pager_query($sql, 100, 0, NULL, $gid);
   $output = theme('og_picture_grid', $result);
   $output .= theme('pager', NULL, 100);
@@ -2655,7 +2655,7 @@ function og_subscribe_link($node) {
     $txt = t('Join');
   }
   if(isset($txt))
-    return l($txt, "og/subscribe/$node->nid", array(), "destination=node/$node->nid");
+    return l($txt, "og/subscribe/$node->nid", array('rel' => 'nofollow'), drupal_get_destination());
 }
 
 // $group is an object containing the group node
