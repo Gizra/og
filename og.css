@@ -33,7 +33,8 @@ table.og-picture-grid {
 table.og-picture-grid td {
   text-align: center;
   width: 20%;
-  padding-bottom: 10px;
+  padding: 7px 0 7px 0;
+  border-bottom: 1px dotted;
 }
 
 td.og-picture-grid-item {

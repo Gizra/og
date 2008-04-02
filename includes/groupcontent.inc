@@ -49,6 +49,18 @@ function og_panels_ct_list_search() {
   return $items;
 }
 
+function og_panels_ct_list_faces() {
+  $items['og_faces'] = array(
+    'title' => t('Group Faces'),
+    'icon' => 'user-multiple.png',
+    'path' => drupal_get_path('module', 'og_panels'). '/',
+    'description' => t('Show a grid of user pictures.'),
+    'required context' => new panels_required_context(t('Group'), 'group'),
+    'category' => array(t('Organic groups'), -5),
+  );
+  return $items;
+}
+
 function og_panels_ct_render_callback_mission($conf, $panel_args, $context) {
   $node = isset($context->data) ? drupal_clone($context->data) : NULL;
   $block->module = 'og_panels';
@@ -128,6 +140,33 @@ function og_panels_ct_render_callback_search($conf, $panel_args, $context) {
   return $block;
 }
 
+function og_panels_ct_render_callback_faces($conf, $panel_args, $context) {
+  $node = isset($context->data) ? drupal_clone($context->data) : NULL;
+  $block->module = 'og_panels';
+
+  $block->subject = t('Group Faces');
+  if ($node) {
+    $block->content = og_list_users_faces_page($node->nid, $conf['row_count']);
+    $block->delta = $node->nid;
+  }
+  else {
+    $block->content = t('Faces go here.');
+    $block->delta = 'unknown';
+  }
+
+  return $block;
+}
+
+function og_panels_content_types_addedit_callback_faces($id, $panel_args, $conf = NULL) {
+  $form['row_count'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of pictures per row'),
+    '#default_value' => isset($conf['row_count']) ? $conf['row_count'] : 5,
+    '#size' => 5,
+  );
+  return $form;
+}
+
 function og_panels_content_types_addedit_callback_subscribers($id, $panel_args, $conf = NULL) {
   $form['num_items'] = array(
     '#type' => 'textfield',
@@ -166,6 +205,13 @@ function og_panels_content_types_validate_callback_subscribers($form, $form_valu
   form_set_value($form['og_panels_subscribers_is_admin'], array_filter($form_values['og_panels_subscribers_is_admin']));
 }
 
+function og_panels_content_types_validate_callback_faces($form, $form_values) {
+  if (!is_numeric($form_values['row_count'])) {
+    form_error($form['row_count'], t('Number of faces must be an integer.'));
+  }
+}
+
+
 function og_panels_ct_title_callback_mission($conf, $context) {
   return t('Welcome');
 }
@@ -180,5 +226,9 @@ function og_panels_ct_title_callback_subscribers($conf, $context) {
 
 function og_panels_ct_title_callback_search($conf, $context) {
   return t('Search');
+}
+
+function og_panels_ct_title_callback_faces($conf, $context) {
+  return t('Faces');
 }
 
