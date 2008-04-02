@@ -968,23 +968,23 @@ function og_list_users_page($gid) {
   return $output;
 }
 
-function og_list_users_faces_page($gid) {
+function og_list_users_faces_page($gid, $row_count = 5) {
   $sql = og_list_users_sql(0, 0, 'ou.is_admin DESC, u.picture DESC, u.name ASC');
   /* list group admins first, pending members second, regular members last.  Alphabetize within each of these categories */
-  $result = pager_query($sql, 100, 0, NULL, $gid);
-  $output = theme('og_picture_grid', $result);
-  $output .= theme('pager', NULL, 100);
+  $result = pager_query($sql, 100, "faces_$gid", NULL, $gid);
+  $output = theme('og_picture_grid', $result, $row_count);
+  $output .= theme('pager', "faces_$gid", 100);
   return $output;
 }
 
 // from views_bonus: grid.inc
-function theme_og_picture_grid($result) {
+function theme_og_picture_grid($result, $row_count = 5) {
   $content = '<table class="og-picture-grid">';
   $count = 0;
   $total = count($users);
   while ($user = db_fetch_object($result)) {
     $item = '';
-    if ($count % 5 == 0) { 
+    if ($count % $row_count == 0) { 
       $content .= '<tr>'; 
     }
     $picture = theme('user_picture', $user);
@@ -998,7 +998,7 @@ function theme_og_picture_grid($result) {
     $content .= "</td>\n";
 
     $count++;
-    if ($count % 5 == 0 || $count == $total) {
+    if ($count % $row_count == 0 || $count == $total) {
       $content .= '</tr>';
     }
   }

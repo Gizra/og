@@ -594,6 +594,20 @@ function og_panels_panels_content_types() {
       );
     }
     
+    if (og_is_picture()) {
+      $items['og_faces'] = array(
+        'title' => t('OG Faces'),
+        'content_types' => 'og_panels_ct_list_faces',
+        'single' => TRUE, // only provides a single content type
+        'render callback' => 'og_panels_ct_render_callback_faces',
+        'add callback' => 'og_panels_content_types_addedit_callback_faces',
+        'edit callback' => 'og_panels_content_types_addedit_callback_faces',
+        'title callback' => 'og_panels_ct_title_callback_faces',
+        'add validate callback' => 'og_panels_content_types_validate_callback_faces',
+        'edit validate callback' => 'og_panels_content_types_validate_callback_faces',
+      );
+      
+    }    
   return $items;
 }
 
