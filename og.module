@@ -2509,7 +2509,7 @@ function og_block_subscribers() {
     if (in_array($gid, array_keys($user->og_groups))) {
       $max = variable_get('og_block_cnt_2', 10);
       // Should we show admins, standard users, or both. From block configuration.
-      $is_admin = variable_get("og_block_subscribers_is_admin", drupal_map_assoc('members', 'admins'));
+      $is_admin = variable_get("og_block_subscribers_is_admin", drupal_map_assoc(array('members', 'admins')));
       $block['subject'] = t('Recently joined');
       $block['content'] = og_block_subscribers_list($gid, $max, $is_admin);
       return $block;
