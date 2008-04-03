@@ -1107,7 +1107,8 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
         $args[] = 'feed';
       }
       $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
-      if ($GLOBALS['current_view']->num_rows || $view->page_empty) {
+      // Views will set either total_rows or num_rows depending on whether View has a pager.
+      if ($view->total_rows || $view->num_rows || $view->page_empty) {
         $node->content['view'] = array('#value' => $built);
       }
       elseif (empty($_POST)) {
