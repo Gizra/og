@@ -165,7 +165,7 @@ function og_panels_delete($did) {
  * @return string
  **/
 function og_panels_overview($group_node) {
-  drupal_set_title($group_node->title);
+  drupal_set_title(check_plain($group_node->title));
   $displays = og_panels_get_all($group_node->nid);
   $output = drupal_get_form('og_panels_table', $displays, $group_node);
   return $output;
@@ -260,7 +260,7 @@ function og_panels_page($did, $group_node, $title = NULL) {
   $og_panel = og_panels_get_one_by_display($did);
   // Set breadcrumb and title on non group nodes
   if ($title) {
-    drupal_set_title($title);
+    drupal_set_title(check_plain($title));
   }
   $bc[] = l(t('Home'), "");
   $bc[] = l(t('Groups'), "og");
@@ -287,7 +287,7 @@ function og_panels_page($did, $group_node, $title = NULL) {
  * @return void
  **/
 function og_panels_form($group_node, $did = NULL) {
-  drupal_set_title($group_node->title);
+  drupal_set_title(check_plain($group_node->title));
   if (!is_null($did)) {
     $display = og_panels_get_one_by_display($did);
   }
