@@ -492,7 +492,21 @@ function og_uninstall() {
   db_query('DROP TABLE {og_ancestry}');
 
   // Delete variables
-  $variables = array('og_member_pics', 'og_help', 'og_block_cnt_2', 'og_block_cnt_3', 'og_enabled', 'og_audience_checkboxes', 'og_visibility', 'og_omitted', 'og_audience_required', 'og_omitted_email_node_types', 'og_visibility_directory', 'og_visibility_registration', 'og_home_page_view', 'og_email_max', 'og_node_types');
+  $variables = array(
+    'og_member_pics', 'og_help', 'og_block_cnt_2', 'og_block_cnt_3',
+    'og_enabled', 'og_audience_checkboxes', 'og_visibility', 'og_omitted',
+    'og_audience_required', 'og_omitted_email_node_types',
+    'og_visibility_directory', 'og_visibility_registration',
+    'og_home_page_view', 'og_email_max', 'og_node_types',
+    'og_admin_email_body', 'og_email_notification_pattern',
+    'og_approve_user_body', 'og_approve_user_subject',
+    'og_deny_user_body', 'og_deny_user_subject',
+    'og_invite_user_body', 'og_invite_user_subject',
+    'og_new_admin_body', 'og_new_admin_subject',
+    'og_new_node_body', 'og_new_node_subject',
+    'og_notification', 'og_private_groups',
+    'og_request_user_body', 'og_request_user_subject',
+  );
   foreach ($variables as $variable) {
     variable_del($variable);
   }
