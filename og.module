@@ -1924,7 +1924,10 @@ function og_mail($type, $obj) {
     else {
       $obj->name = variable_get('anonymous', 'Anonymous');
     }
-    $obj->body = check_markup($obj->comment, $obj->format, FALSE);
+    $rendered = check_markup($obj->comment, $obj->format, FALSE);
+    
+    $obj->body = $rendered;
+    $obj->teaser = $rendered;
     $originalurl = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
     $replyurl = url("comment/reply/$obj->nid/$obj->cid", NULL, NULL, TRUE);
     $node = node_load($obj->nid);
@@ -1948,9 +1951,10 @@ function og_mail($type, $obj) {
     $account = user_load(array('uid' => $obj->uid));
     $obj->name = $account->name;
     $obj->subject = $obj->title;
-    $obj = node_prepare($obj, FALSE);
-    // fills body with CCK fields, event fields, etc. instead of "n/a"
-    $obj->body = og_node_view($obj);
+    // These calls to og_node_view() setup the node body and teaser, apply the
+    // appropriate input filters, and handle CCK fields, event fields, etc.
+    $obj->body = og_node_view($obj, FALSE);
+    $obj->teaser = og_node_view($obj, TRUE);
     $obj->msgid = $obj->nid. '-0'. og_msgid_server();
     $originalurl = url("node/$obj->nid", NULL, NULL, TRUE);
     $replyurl = url("comment/reply/$obj->nid", NULL, 'comment-form', TRUE);
@@ -1979,7 +1983,8 @@ function og_mail($type, $obj) {
     '!reply_url' => $replyurl,
     '@title' => trim($obj->title),
     '@subject' => trim($obj->subject),
-    '@body' => trim(og_mail_output($obj->body)),
+    '@node_full' => trim(og_mail_output($obj->body)),
+    '@node_teaser' => trim(og_mail_output($obj->teaser)),
     '@username' => $obj->name
   );
   
@@ -2030,32 +2035,40 @@ function og_mail($type, $obj) {
 }
 
 /**
- * Same as node_view but without calling theme('node')
- * This is needed to get the proper teaser for nodes (e.g.Event, Location, CCK node types)
+ * Similar to node_view() but without calling theme('node').
+ *
+ * This is needed to get the proper body or teaser for nodes (e.g. Event,
+ * Location, CCK node types) and to clean up the body for use in email
+ * notifications.
+ *
+ * @param $node
+ *   The node object you want to view.
+ * @param $teaser
+ *   Boolean to select the teaser or the body of the node.
+ *
+ * @return
+ *   The requested data, filtered and ready for use in an e-mail.
+ *
+ * @see node_view()
+ * @see og_mail()
  */
-function og_node_view($node) {
-  $node = (object)$node;
-
+function og_node_view($node, $teaser = FALSE) {
   // Remove the delimiter (if any) that separates the teaser from the body.
   // TODO: this strips legitimate uses of '<!--break-->' also.
   $node->body = str_replace('<!--break-->', '', $node->body);
 
-  if ($node->log != '' && !$teaser && $node->moderate) {
-    $node->body .= '<div class="log"><div class="title">'. t('Log') .':</div>'. filter_xss($node->log) .'</div>';
-  }
-
   // The 'view' hook can be implemented to overwrite the default function
   // to display nodes.
   if (node_hook($node, 'view')) {
-    node_invoke($node, 'view', $teaser, $page);
+    node_invoke($node, 'view', $teaser, TRUE);
   }
   else {
     $node = node_prepare($node, $teaser);
   }
   // Allow modules to change $node->body before viewing.
-  node_invoke_nodeapi($node, 'view', $teaser, $page);
+  node_invoke_nodeapi($node, 'view', $teaser, TRUE);
   
-  return $node->teaser;
+  return $teaser ? $node->teaser : $node->body;
 }
 
 // 2 functions ripped from mail.inc in project.module package
@@ -2124,7 +2137,7 @@ function _og_user_mail_text($messageid, $variables = array()) {
       case 'og_new_node_subject':
         return t("@group: '@title' at @site", $variables);
       case 'og_new_node_body':
-        return t("@type '@subject' by @username\n\n@body\n\n!read_more: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed from the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables);    
+        return t("@type '@subject' by @username\n\n@node_teaser\n\n!read_more: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed from the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables);    
       case 'og_admin_email_body':
         return t("@body\n\n--\nThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe", $variables);
       case 'og_approve_user_subject':
@@ -2811,8 +2824,8 @@ function og_admin_settings() {
     '#default_value' => variable_get("og_email_notification_pattern", '@user_name  <@site_mail>'),
     '#description' => t('Specify the format of the "From:" field on outgoing notifications. Available variables: @user_mail, @user_name, @site_mail, @site_name. Note that the @user_mail token reveals the author\'s email address. If the admin email examples above appear blank, you need to set your site email in the Site Configuration panel.'),
   );
-  $form['og_settings']['email']['og_new_node_subject'] = array('#type' => 'textfield', '#title' => t('New content subject'), '#description' => 'Subject of email for new content. Available variables: @group, !group_url, @type, @site, !content_url, !reply_url, @title, @subject, @body, @username. %subject contains the comment title in the case of a comment but the node title in the case of a new post. @title is always the node title.', '#default_value' => _og_user_mail_text('og_new_node_subject'));
-  $form['og_settings']['email']['og_new_node_body'] = array('#type' => 'textarea', '#title' => t('New content body'), '#rows' => 10, '#description' => 'Body of email for new content. Available variables: @group, !group_url, @type, @site, !content_url, !reply_url, @title, @subject, @body, @username. @subject contains the comment title in the case of a comment but the node title in the case of a new post. %title is always the node title.', '#default_value' => _og_user_mail_text('og_new_node_body'));
+  $form['og_settings']['email']['og_new_node_subject'] = array('#type' => 'textfield', '#title' => t('New content subject'), '#description' => 'Subject of email for new content. Available variables: @group, !group_url, @type, @site, !content_url, !reply_url, @title, @subject, @node_full, @node_teaser, @username. %subject contains the comment title in the case of a comment but the node title in the case of a new post. @title is always the node title.', '#default_value' => _og_user_mail_text('og_new_node_subject'));
+  $form['og_settings']['email']['og_new_node_body'] = array('#type' => 'textarea', '#title' => t('New content body'), '#rows' => 10, '#description' => 'Body of email for new content. Available variables: @group, !group_url, @type, @site, !content_url, !reply_url, @title, @subject, @node_full, @node_teaser, @username. @subject contains the comment title in the case of a comment but the node title in the case of a new post. %title is always the node title.', '#default_value' => _og_user_mail_text('og_new_node_body'));
   $form['og_settings']['email']['og_admin_email_body'] = array('#type' => 'textarea', '#title' => t('Group admin email body'), '#rows' => 10, '#description' => 'The body of the email sent to users from the group admin. Available variables: @group, @body, @site, !url_group, !url_unsubscribe', '#default_value' => _og_user_mail_text('og_admin_email_body'));
   $form['og_settings']['email']['og_approve_user_subject'] = array('#type' => 'textfield', '#title' => t('User approved email subject'), '#description' => 'The subject of the email sent to new approved members. Available variables: !group_url, @title', '#default_value' => _og_user_mail_text('og_approve_user_subject'));
   $form['og_settings']['email']['og_approve_user_body'] = array('#type' => 'textarea', '#title' => t('User approved email body'), '#rows' => 10, '#description' => 'The body of the email sent to new approved members. Available variables: !group_url, @title', '#default_value' => _og_user_mail_text('og_approve_user_body'));   
