@@ -442,6 +442,23 @@ function og_update_20() {
   }
   return $ret;
 }
+
+/**
+ * Changes '@body' to '@node_teaser' in existing e-mail templates.
+ */ 
+function og_update_5600() {
+  $ret = array();
+  $variables = array('og_new_node_body', 'og_new_node_subject');
+  foreach ($variables as $variable) {
+    $value = variable_get($variable, '');
+    if (!empty($value)) {
+      variable_set($variable, str_replace('@body', '@node_teaser', $value));
+      $ret[] = array('success' => TRUE, 'query' => "Replaced @body with @node_teaser in $variable");
+    }
+  }
+  return $ret;
+}
+
 // end updates //
 
 function og_enable() {
