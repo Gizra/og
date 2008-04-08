@@ -1388,7 +1388,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         }
         
         // Must be authored in the default input format or else admins might not get their admin perms
-        if ($node->format != filter_resolve_format(FILTER_FORMAT_DEFAULT)) {
+        // If Body field is omitted, there may not yet be a $node->format
+        if (isset($node->format) && $node->format != filter_resolve_format(FILTER_FORMAT_DEFAULT)) {
           form_set_error('body', t("You must use the default input format when authoring a group node."));
         }
       }
