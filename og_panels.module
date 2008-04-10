@@ -81,7 +81,7 @@ function og_panels_menu($may_cache) {
               'callback arguments' => array($display->did, $node, $display->page_title),
               'type' => MENU_LOCAL_TASK,
               'access' => $display->published || (og_is_node_admin($node) && user_access('manage OG panels pages')),
-              'weight' => -1,
+              'weight' => $display->weight,
             );
           }
         }
@@ -201,7 +201,6 @@ function og_panels_table($displays, $group_node) {
   $form['default_page'] = array(
     '#type' => 'radios', 
     '#options' => $options, 
-    '#required' => TRUE,
     '#default_value' => $default_page,
   );
   $form['submit'] = array(
@@ -349,7 +348,7 @@ function og_panels_form($group_node, $did = NULL) {
  *   An associative array keyed by the $did of the og_panel
  */
 function og_panels_get_all($nid) {  
-  $sql = "SELECT * FROM {og_panels} WHERE nid = %d";
+  $sql = "SELECT * FROM {og_panels} WHERE nid = %d ORDER BY default_page DESC, weight ASC";
   $result = db_query($sql, $nid);
   while ($row = db_fetch_object($result)) {
     $rows[$row->did] = $row;
