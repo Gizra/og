@@ -63,7 +63,7 @@ function og_panels_menu($may_cache) {
               'callback' => 'og_panels_page',
               'callback arguments' => array($display->did, $node, $node->title),
             );
-            drupal_add_feed(url("node/$nid/feed"), t('@name at @site', array('@name' => $node->title, '@site' => variable_get('site_name', 'drupal'))));
+            
             /*
              * Optional. Horrible hack since the tab title is not changeable in D5. Add the following code 
              * to your theme's template.php in the _phptemplate_variables('page') section.
@@ -271,6 +271,10 @@ function og_panels_page($did, $group_node, $title = NULL) {
   // I tried MSL but it let me down. again.
   // menu_set_location($bc);
   drupal_set_breadcrumb($bc);
+  // Mark node as read and show feed icon for any group panel page (how to do this better?)
+  drupal_add_feed(url("node/$nid/feed"), t('@name at @site', array('@name' => $node->title, '@site' => variable_get('site_name', 'drupal'))));
+  node_tag_new($node->nid);
+  
   
   $allargs = func_get_args();
   $args = array_slice($allargs, 3);
