@@ -55,7 +55,7 @@ function og_panels_menu($may_cache) {
         
         $displays = og_panels_get_all($node->nid);
         foreach ($displays as $display) {
-          if ($display->default_page && $display->published) {
+          if ($display->default_page && $display->published && arg(2) != 'feed') {
             // Hijack the menu handler for this node.
             $items[] = array(
               'path' => "node/$nid",
