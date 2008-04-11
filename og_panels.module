@@ -63,6 +63,7 @@ function og_panels_menu($may_cache) {
               'callback' => 'og_panels_page',
               'callback arguments' => array($display->did, $node, $node->title),
             );
+            drupal_add_feed(url("node/$nid/feed"), t('@name at @site', array('@name' => $node->title, '@site' => variable_get('site_name', 'drupal'))));
             /*
              * Optional. Horrible hack since the tab title is not changeable in D5. Add the following code 
              * to your theme's template.php in the _phptemplate_variables('page') section.
