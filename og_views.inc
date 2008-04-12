@@ -760,7 +760,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'og',
       'field' => 'count',
-      'label' => 'Subscribers',
+      'label' => 'Members',
     ),
     array (
       'tablename' => 'og_uid',
@@ -859,7 +859,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'og',
       'field' => 'count',
-      'label' => 'Subscribers',
+      'label' => 'Members',
     ),
     array (
       'tablename' => 'og',
@@ -869,7 +869,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'og',
       'field' => 'subscribe',
-      'label' => 'Subscribe',
+      'label' => 'Join',
     ),
   );
   $view->filter = array (
