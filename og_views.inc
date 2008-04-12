@@ -760,7 +760,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'og',
       'field' => 'count',
-      'label' => 'Subscribers',
+      'label' => 'Members',
     ),
     array (
       'tablename' => 'og_uid',
@@ -859,7 +859,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'og',
       'field' => 'count',
-      'label' => 'Subscribers',
+      'label' => 'Members',
     ),
     array (
       'tablename' => 'og',
@@ -869,7 +869,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'og',
       'field' => 'subscribe',
-      'label' => 'Subscribe',
+      'label' => 'Join',
     ),
   );
   $view->filter = array (
@@ -1311,7 +1311,7 @@ function og_handler_field_subscribe($fieldinfo, $fielddata, $value, $data) {
       case OG_INVITE_ONLY:
         return '<em>'. t('Invite only'). '</em>';
       default:
-        return l(t('join'), "og/subscribe/$data->nid", array('rel' => 'nofollow'), drupal_get_destination());  
+        return og_subscribe_link($data);
     }
   }
 }
