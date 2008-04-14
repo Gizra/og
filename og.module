@@ -147,8 +147,11 @@ function og_init() {
     else {
       $user->og_groups = array();
     }
-    
+
     require dirname(__FILE__). '/og_views.inc';
+    if (module_exists('workflow_ng')) {
+      require dirname(__FILE__). '/og_workflow_ng.inc';
+    }
     og_theme();
     og_set_locale();
   }
