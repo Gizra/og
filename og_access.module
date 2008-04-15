@@ -1,0 +1,246 @@
+<?php
+// $Id$
+
+// visibility states for private groups. site admin chooses in og_access_settings()
+define('OG_PRIVATE_GROUPS_NEVER', 0);
+define('OG_PRIVATE_GROUPS_ALWAYS', 1);
+define('OG_PRIVATE_GROUPS_CHOOSE_TRUE', 2);
+define('OG_PRIVATE_GROUPS_CHOOSE_FALSE', 3);
+
+// visibility states for nodes within groups. site admin chooses in og_settings()
+define('OG_VISIBLE_GROUPONLY', 0);
+define('OG_VISIBLE_BOTH', 1);
+define('OG_VISIBLE_CHOOSE_PUBLIC', 2);
+define('OG_VISIBLE_CHOOSE_PRIVATE', 3);
+
+/**
+ * Implementation of hook_init().
+ * Rebuilds node access table if og_access_rebuild toggle is true.
+ * @todo  This functionality lives in hook_init() because node_access_rebuild() in og_access.install 
+ * doesn't have the desired effect as on install() og_access.module is not loaded.   
+ * Can this be done better?
+ */
+function og_access_init() {
+  if (variable_get('og_access_rebuild', TRUE)) {
+    node_access_rebuild();
+    variable_set('og_access_rebuild', FALSE);
+    drupal_set_message(t('The node access table has been rebuilt.'));
+  }
+}
+
+function og_access_menu($may_cache) {
+  if ($may_cache) {
+    $items[] = array(
+      'path' => 'admin/og/og_access',
+      'title' => t('Organic Groups Access configuration'),
+      'description' => t('Choose whether new groups should be private or public'),
+      'callback' => 'drupal_get_form',
+      'callback arguments' => array('og_access_settings'),
+    );
+    
+  }
+  return $items;
+}
+
+function og_access_settings() {
+  drupal_add_js(drupal_get_path('module', 'og_access'). '/og_access.js'); // load the form javascript to handle private groups / node visibility conflicts in the og access settings form.
+  
+  $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pub.', array('@pub' => t('Public'))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pri.', array('@pri' => t('Private'))));
+  $form['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.  If the setting you want is disabled here, check the settings under <em>Private Groups</em> setting below.  You cannot set node visibility to always be public if private groups are set to always on and vice versa.', array('@pub' => t('Public'))), '#options' => $options);
+  
+  // private groups control
+  $options = array(t('New group home pages and default audience are always public.'),
+               t('New group home pages and default audience are always private.'),
+               t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to %yes.', array('%yes' => t('private'))),
+               t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to %no.', array('%no' => t('public'))),
+             );
+  $form['og_private_groups'] = array(
+    '#type' => 'radios', 
+    '#title' => t('Private Groups'), 
+    '#options' => $options, 
+    '#default_value' => variable_get('og_private_groups', OG_PRIVATE_GROUPS_CHOOSE_FALSE),    
+    '#description' =>t("<p>A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private.  This setting controls what private groups options can be used when creating a new group or editing an existing group.  If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here.<p><p>Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Node authoring form / Visibility of Posts</em> setting on this page.  Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups!  To change those you must edit the groups and their individual content nodes directly.  If the setting you want is disabled here, check <em>Visibility of Posts</em> above.  You cannot choose to only have private groups if node visibility is set to be always public, and vice versa.</p>"),                              
+  );
+  return system_settings_form($form);
+}
+
+function og_access_alter_group_form(&$form, $node) {
+  // private groups
+  $visibility = variable_get('og_private_groups', OG_PRIVATE_GROUPS_CHOOSE_FALSE);
+  // override setting for admins - get right default
+  if (user_access('administer nodes')) {
+    $not = array(OG_PRIVATE_GROUPS_NEVER, OG_PRIVATE_GROUPS_CHOOSE_FALSE);
+    $visibility = in_array($visibility, $not) ? OG_PRIVATE_GROUPS_CHOOSE_FALSE : OG_PRIVATE_GROUPS_CHOOSE_TRUE;
+  }
+
+  $default = FALSE;
+  switch ($visibility) {
+    case OG_PRIVATE_GROUPS_NEVER :
+      $form['og_private'] = array (
+        '#type' => 'value',
+        '#value' => 0 
+      );
+      break;
+    
+    case OG_PRIVATE_GROUPS_ALWAYS :
+      $form['og_private'] = array (
+        '#type' => 'value',
+        '#value' => 1
+      );
+      break;
+
+    case OG_PRIVATE_GROUPS_CHOOSE_TRUE :
+      $default = TRUE;
+      // fall through
+
+    case OG_PRIVATE_GROUPS_CHOOSE_FALSE :
+      $form['og_private'] = array (
+        '#type' => 'checkbox',
+        '#title' => t('private group'), 
+        '#default_value' => $node->nid ? $node->og_private : $default, 
+        '#description' => t('Should this group be visible only to its members?  Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>'));
+        break;
+  }
+}
+
+// Add public checkbox to node edit form.
+function og_access_alter_nongroup_form(&$form, $node) {
+  global $user;
+  
+  if (!og_is_omitted_type($node->type)) {
+    // get the visibility for normal users
+    $vis = variable_get('og_visibility', 0);
+
+    // override visibility for og admins
+    if (user_access('administer organic groups')) {
+      if ($vis < 2) {
+        $vis = $vis == OG_VISIBLE_GROUPONLY ? OG_VISIBLE_CHOOSE_PRIVATE : OG_VISIBLE_CHOOSE_PUBLIC;
+      }
+    }
+    elseif (!og_get_subscriptions($user->uid)) {
+      // don't show checkbox if no memberships. must be public.
+      $vis = OG_VISIBLE_BOTH;
+    }
+
+    // If the post is to a private group, visibility must default to one of the private options.
+    // Try not to show checkbox if admin likes to reduce decisions for node authors.
+    $groups = isset($form['og_nodeapi']['visible']['og_groups']) ? $form['og_nodeapi']['visible']['og_groups']['#default_value'] : $form['og_nodeapi']['visible']['og_groups']['#default_value'];
+    $selected_groups = isset($form['#post']['og_groups']) ? array_filter($form['#post']['og_groups']) : $groups;
+    if (count($selected_groups)) {  
+      foreach ($selected_groups as $gid) {
+        $group_node = new stdClass();
+        $group_node->nid = $gid;
+        og_load_group($group_node);
+         if ($group_node->og_private) {
+           $vis = variable_get('og_visibility', 0) == OG_VISIBLE_BOTH ? OG_VISIBLE_GROUPONLY : OG_VISIBLE_CHOOSE_PRIVATE;
+          break;
+        }
+      }
+    } 
+
+    switch ($vis) {
+      case OG_VISIBLE_BOTH:
+        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 1);
+        break;
+      case OG_VISIBLE_GROUPONLY:
+        $form['og_nodeapi']['og_public'] = array('#type' => 'value', '#value' => 0);
+        break;
+
+      //user decides how public the post is.
+      case OG_VISIBLE_CHOOSE_PUBLIC:
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 1, '#description' => t('Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
+        break;
+      case OG_VISIBLE_CHOOSE_PRIVATE:
+        $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
+        break;
+    }
+  }
+
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function og_access_form_alter($form_id, &$form) {
+  if (isset($form['#node']) && $form_id == $form['#node']->type .'_node_form') {
+    $node = $form['#node'];
+    if (og_is_group_type($node->type)) {
+      og_access_alter_group_form($form, $node);
+    }
+    else {
+      og_access_alter_nongroup_form($form, $node);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_node_grants().
+ */
+function og_access_node_grants($account, $op) { 
+  if ($op == 'view') {
+    $grants['og_public'][] = 0; // everyone can see a public node
+  }
+
+  // get subscriptions
+  if ($subscriptions = og_get_subscriptions($account->uid)) {
+    foreach ($subscriptions as $key => $val) {
+      if ($op == 'view') {
+        $grants['og_subscriber'][] = $key;
+      }
+      if (($op == 'update' || $op == 'delete') && $val['is_admin']) {
+        $grants['og_subscriber'][] = $key;
+      }
+    }
+  }
+  return $grants ? $grants : array();
+}
+
+/**
+ * Implementation of hook_node_acess_records.
+ */
+function og_access_node_access_records($node) {
+  // don't write records if the node type is omitted or node is a group
+  if (og_is_omitted_type($node->type)) {
+    return;
+  }
+  
+  if (og_is_group_type($node->type)) {
+    // this grant allows group admins to manage stuff
+    $grants[] = array('realm' => 'og_subscriber', 'gid' => $node->nid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
+    // If the group is not marked private let everyone view the group homepage.
+    if (!$node->og_private) {
+        $grants[] = array (
+          'realm' => 'og_public',
+          'gid' => 0,
+          'grant_view' => 1,
+          'grant_update' => 0,
+          'grant_delete' => 0 );
+    }
+  }
+  elseif (is_array($node->og_groups)) {
+    // applies to non group nodes
+    if ($node->og_public) {
+      $grants[] = array('realm' => 'og_public', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
+    }
+    
+    foreach ($node->og_groups as $gid) {
+      // we write a broad grant here but og_node_grants() only issues it selectively.
+      $grants[] = array('realm' => 'og_subscriber', 'gid' => $gid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
+    }
+  }
+
+  return $grants;
+}
+
+/**
+ * Implementation of hook_node_access_explain.
+ */
+function og_access_node_access_explain($row) {
+  if ($row->realm == 'og_public') {
+    return t('All users may view this node.', array('@op' => $op));
+  }
+  elseif ($row->realm == 'og_subscriber') {
+    $node = node_load((int)$row->gid);
+    return t('Subscribers of !group_n may view this node.', array('@op' => $op, '!group_n' => l($node->title, "node/$row->gid")));
+  }
+}
