@@ -45,46 +45,45 @@ function og_install() {
     break;
     case 'pgsql':
       db_query("CREATE TABLE {og} (
-        nid numeric(11) NOT NULL,
-        selective numeric(11) NOT NULL default 0,
+        nid int NOT NULL,
+        selective int NOT NULL default 0,
         description varchar(255) NULL,
         theme varchar(255) NULL,
         website varchar(255) NULL,
-        register numeric(1) NOT NULL default 0,
-        directory numeric(1) NOT NULL default 0,
-        notification numeric(1) NOT NULL default 0,
+        register smallint NOT NULL default 0,
+        directory smallint NOT NULL default 0,
+        notification smallint NOT NULL default 0,
         language varchar(12) NOT NULL default '',
-        private numeric(1) NOT NULL default 0,  
+        private smallint NOT NULL default 0,  
         PRIMARY KEY  (nid)
       );");
 
       db_query("CREATE TABLE {og_uid} (
-        nid numeric(11) NOT NULL,
-        og_role numeric(1) NOT NULL DEFAULT 0,
-        is_active numeric(1) NOT NULL DEFAULT 0,
-        is_admin numeric(1) NOT NULL DEFAULT 0,
-        uid numeric(11) NOT NULL,
-        mail_type numeric(11) NULL,
-	created numeric(11) NULL DEFAULT 0,
-	changed numeric(11) NULL DEFAULT 0,
+        nid int NOT NULL,
+        og_role smallint NOT NULL DEFAULT 0,
+        is_active smallint NOT NULL DEFAULT 0,
+        is_admin smallint NOT NULL DEFAULT 0,
+        uid int NOT NULL,
+        mail_type int NULL,
+	    created int NULL DEFAULT 0,
+	    changed int NULL DEFAULT 0,
         PRIMARY KEY  (nid, uid)
       );");
       
       db_query("CREATE TABLE {og_uid_global} (
-        uid numeric(11) NOT NULL,
-        og_email numeric(11) NULL DEFAULT 2,
+        uid int NOT NULL,
+        og_email int NOT NULL DEFAULT 2,
         PRIMARY KEY (uid)
       );");
       
       db_query("
       CREATE TABLE {og_ancestry} (
-       nid numeric(11) NOT NULL,
-       group_nid numeric(11) NOT NULL,
-       is_public numeric(1) NOT NULL,
-       PRIMARY KEY  (nid)
-      );
-      CREATE INDEX {og_ancestry}_nid_idx ON {og_ancestry}(group_nid);
-      ");
+       nid int NOT NULL,
+       group_nid int NOT NULL,
+       is_public smallint NOT NULL
+      );");
+      db_query("CREATE INDEX {og_ancestry}_nid_idx ON {og_ancestry} (nid);");
+      db_query("CREATE INDEX {og_ancestry}_group_nid_idx ON {og_ancestry} (group_nid);");
       break;
   }
   
@@ -127,9 +126,9 @@ function og_update_1() {
       db_query("ALTER TABLE {og_uid} ADD `is_admin` int(1) default '0'");
     break;
     case 'pgsql':
-      db_query("ALTER TABLE {og_uid} ADD `og_role` numeric(1) NOT NULL default 0");
-      db_query("ALTER TABLE {og_uid} ADD `is_active` numeric(1) default 0");
-      db_query("ALTER TABLE {og_uid} ADD `is_admin` numeric(1) default 0");
+      db_query("ALTER TABLE {og_uid} ADD `og_role` smallint NOT NULL default 0");
+      db_query("ALTER TABLE {og_uid} ADD `is_active` smallint default 0");
+      db_query("ALTER TABLE {og_uid} ADD `is_admin` smallint default 0");
       break;
   }
 
@@ -249,7 +248,7 @@ function og_update_7() {
     break;
     case 'pgsql':
       $ret[] = update_sql("ALTER TABLE {node_access} ".
-      "ALTER COLUMN grant_view TYPE numeric(11), ".
+      "ALTER COLUMN grant_view TYPE int, ".
       "ALTER COLUMN grant_view SET NOT NULL, ".
       "ALTER COLUMN grant_view SET DEFAULT 0;");
     break;
@@ -284,8 +283,8 @@ function og_update_10() {
       $ret[] = update_sql("ALTER TABLE {og_uid} ADD changed int(11) NULL DEFAULT 0");
     break;
     case 'pgsql':
-      $ret[] = update_sql("ALTER TABLE {og_uid} ADD COLUMN created numeric(11) NULL DEFAULT 0");
-      $ret[] = update_sql("ALTER TABLE {og_uid} ADD COLUMN changed numeric(11) NULL DEFAULT 0");
+      $ret[] = update_sql("ALTER TABLE {og_uid} ADD COLUMN created int NULL DEFAULT 0");
+      $ret[] = update_sql("ALTER TABLE {og_uid} ADD COLUMN changed int NULL DEFAULT 0");
     break;
   } 
   return $ret ? $ret : array();
@@ -299,7 +298,7 @@ function og_update_11() {
       $ret[] = update_sql("ALTER TABLE {og} ADD notification int(1) NOT NULL default 0");
     break;
     case 'pgsql':
-      $ret[] = update_sql("ALTER TABLE {og} ADD COLUMN notification numeric(1) NOT NULL default 0");
+      $ret[] = update_sql("ALTER TABLE {og} ADD COLUMN notification smallint NOT NULL default 0");
     break;
   } 
   return $ret ? $ret : array();
@@ -326,8 +325,8 @@ function og_update_13() {
     break;
     case 'pgsql':
       db_query("CREATE TABLE {og_uid_global} (
-        uid numeric(11) NOT NULL,
-        og_email numeric(11) NULL DEFAULT 2,
+        uid int NOT NULL,
+        og_email int NOT NULL DEFAULT 2,
         PRIMARY KEY (uid)
       );");
       break;
@@ -358,13 +357,12 @@ function og_update_14() {
     break;
     case 'pgsql':
       db_query("CREATE TABLE {og_ancestry} (
-        nid numeric(11) NOT NULL,
-        group_nid numeric(11) NOT NULL,
-        is_public numeric(1) NOT NULL,
-        PRIMARY KEY (nid)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */;
-      CREATE INDEX group_nid_idx ON group_nid (numeric);
-      ");
+        nid int NOT NULL,
+        group_nid int NOT NULL,
+        is_public smallint NOT NULL
+      );");
+      db_query("CREATE INDEX {og_ancestry}_nid_idx ON {og_ancestry} (nid);");
+      db_query("CREATE INDEX {og_ancestry}_group_nid_idx ON {og_ancestry} (group_nid);");
     break;
   }
   og_migrate_type_basic_14();
@@ -437,7 +435,7 @@ function og_update_20() {
     $ret[] = update_sql("ALTER TABLE {og} ADD private int(1) NOT NULL default 0");
     break;
   case 'pgsql':
-    $ret[] = update_sql("ALTER TABLE {og} ADD private numeric(1) NOT NULL default 0");
+    $ret[] = update_sql("ALTER TABLE {og} ADD private smallint NOT NULL default 0");
     break;
   }
   return $ret;
