@@ -307,11 +307,13 @@ function og_panels_form($group_node, $did = NULL) {
     '#description' => t('This is the title of the page and of the tab.'),
     '#size' => 32,
   );
+  global $base_url;
+  $field_prefix = "$base_url/node/$group_node->nid/";
   $form[$display->default_page ? 'path_placeholder' : 'path'] = array(
     '#title' => t('Path'),
     '#type' => 'textfield',
     '#default_value' => $display->default_page ? '' : $display->path,
-    '#field_prefix' =>  url("node/$group_node->nid", NULL, NULL, TRUE) . '/',
+    '#field_prefix' =>  $field_prefix,
     '#required' => $display->default_page ? FALSE : TRUE,
     '#description' => $display->default_page ? t('This page is currently your default group home page and has no configurable path.') : '',
     '#disabled' => $display->default_page,
