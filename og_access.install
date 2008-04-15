@@ -1,0 +1,11 @@
+<?php
+// $Id$
+
+function og_access_install() {
+}
+
+function og_access_uninstall() {
+  variable_del('og_access_rebuild');
+  node_access_rebuild();
+  drupal_set_message(t('The node access table has been rebuilt.'));
+}
