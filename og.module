@@ -1147,7 +1147,6 @@ function og_group_form($node) {
   $edit = $_POST['edit'];
 
   $form['og_description'] = array('#type' => 'textfield', '#title' => t('Description'), '#default_value' => $node->og_description, '#size' => 70, '#maxlength' => 150, '#required' => true, '#description' => t('A brief description for the group details block and the group directory.'), '#weight' => -4);
-  drupal_add_js(drupal_get_path('module', 'og'). '/og.js');
 
   if ($node->nid) {
     $default = $node->og_selective;
@@ -1160,7 +1159,7 @@ function og_group_form($node) {
     '#title' => t('Membership requests'), 
     '#required' => TRUE,
     '#default_value' => $default, 
-    '#options' => array(t('open - membership requests are accepted immediately.'), t('moderated - membership requests must be approved.'), t('invite only - membership must be created by an administrator.'), t('closed -membership is fully administered by an administrator.')), 
+    '#options' => array(t('open - membership requests are accepted immediately.'), t('moderated - membership requests must be approved.'), t('invite only - membership must be created by an administrator.'), t('closed - membership is exclusively managed by an administrator.')), 
     '#description' => t('How should membership requests be handled in this group? When you select <em>closed</em>, users will not be able to join <strong>or</strong> leave.'));
 
   // registration checkbox
@@ -1717,6 +1716,11 @@ function og_form_add_og_audience($form_id, &$form) {
   else {
     $groups = array();
   }
+  // This is only used by og_access module right now.
+  $form['og_initial_groups'] = array(
+    '#type' => 'value',
+    '#value' => $groups,
+  );
 
   // Emit the audience form element.
   if ($simple) {
@@ -1735,7 +1739,6 @@ function og_form_add_og_audience($form_id, &$form) {
     }
   }
   elseif ($cnt = count($options, COUNT_RECURSIVE)) {
-    drupal_add_js(drupal_get_path('module', 'og'). '/og.js');
     // show multi-select. if less than 20 choices, use checkboxes.
     $type = $cnt >= 20 || $is_optgroup ? 'select' : 'checkboxes';
     $form['og_nodeapi']['visible']['og_groups'] = array(

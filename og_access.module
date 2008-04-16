@@ -13,21 +13,6 @@ define('OG_VISIBLE_BOTH', 1);
 define('OG_VISIBLE_CHOOSE_PUBLIC', 2);
 define('OG_VISIBLE_CHOOSE_PRIVATE', 3);
 
-/**
- * Implementation of hook_init().
- * Rebuilds node access table if og_access_rebuild toggle is true.
- * @todo  This functionality lives in hook_init() because node_access_rebuild() in og_access.install 
- * doesn't have the desired effect as on install() og_access.module is not loaded.   
- * Can this be done better?
- */
-function og_access_init() {
-  if (variable_get('og_access_rebuild', TRUE)) {
-    node_access_rebuild();
-    variable_set('og_access_rebuild', FALSE);
-    drupal_set_message(t('The node access table has been rebuilt.'));
-  }
-}
-
 function og_access_menu($may_cache) {
   if ($may_cache) {
     $items[] = array(
@@ -122,9 +107,10 @@ function og_access_alter_nongroup_form(&$form, $node) {
       $vis = OG_VISIBLE_BOTH;
     }
 
+    // We are using this form element to communicate $groups from og to og_access.
+    $groups = $form['og_initial_groups']['#value'];
+    
     // If the post is to a private group, visibility must default to one of the private options.
-    // Try not to show checkbox if admin likes to reduce decisions for node authors.
-    $groups = isset($form['og_nodeapi']['visible']['og_groups']) ? $form['og_nodeapi']['visible']['og_groups']['#default_value'] : $form['og_nodeapi']['visible']['og_groups']['#default_value'];
     $selected_groups = isset($form['#post']['og_groups']) ? array_filter($form['#post']['og_groups']) : $groups;
     if (count($selected_groups)) {  
       foreach ($selected_groups as $gid) {
@@ -132,6 +118,7 @@ function og_access_alter_nongroup_form(&$form, $node) {
         $group_node->nid = $gid;
         og_load_group($group_node);
          if ($group_node->og_private) {
+           // Try not to show checkbox if admin likes to reduce decisions for node authors.
            $vis = variable_get('og_visibility', 0) == OG_VISIBLE_BOTH ? OG_VISIBLE_GROUPONLY : OG_VISIBLE_CHOOSE_PRIVATE;
           break;
         }
@@ -163,6 +150,7 @@ function og_access_alter_nongroup_form(&$form, $node) {
  */
 function og_access_form_alter($form_id, &$form) {
   if (isset($form['#node']) && $form_id == $form['#node']->type .'_node_form') {
+    drupal_add_js(drupal_get_path('module', 'og_access'). '/og_access.js');
     $node = $form['#node'];
     if (og_is_group_type($node->type)) {
       og_access_alter_group_form($form, $node);

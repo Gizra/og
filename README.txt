@@ -7,7 +7,7 @@ Groups may choose their own theme and language. Groups have RSS feeds and email 
 INSTALLATION
 ---------------
 - Enable the og module. Please make sure og is working well on its own before enabling other OG related modules.
-- Visit the admin/og/og page. If you want to protect some posts so that only certain users may view them, then click the button to enable access control.
+- Visit the admin/og/og page. If you want to protect some posts so that only certain users may view them, enable the 'Organic Groups access control' module as well.
 - On admin/og/og, see the 'Group home page node types' field at bottom. You usually want to create a new node type via admin/content/types page and then select that node type here. See the first item in NOTES below. 
 - Set other preferences on admin/og/og as desired. It may take some experimenting before you arrive at a configuration well suited to your needs.
 - On the admin/content/types page, disable comments and attachments for node types which are designated as groups. Click the edit link beside those types.
@@ -24,7 +24,7 @@ NOTES
 - 'Administer nodes' permission is required for changing the Manager of a group (do so by changing the posts' Author.)
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status.
 - All membership management happens on the 'membership list' page which is linked from the group Block (while viewing a group page). This includes approving membership requests (for selective groups), adding/removing users and promoting users into group admins.
-- If you decide to stop using this module, just disable it as usual. If you ever decide to re-enable, all your prior group information will be restored.
+- If you decide to stop using this module, just disable it as usual. If you ever decide to re-enable, all your prior group access control information will be restored. If you want to really start fresh, uninstall og and og_access modules.
 
 DEVELOPERS & SITE BUILDERS
 ------------------
