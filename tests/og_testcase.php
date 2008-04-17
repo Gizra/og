@@ -3,6 +3,10 @@
 class OgTestCase extends DrupalTestCase {
   var $_cleanupGroups;
   
+  function get_info() {
+    return array();
+  }
+  
   function addOg($type, $selective = OG_OPEN) {
     
     $edit = array();
@@ -23,6 +27,7 @@ class OgTestCase extends DrupalTestCase {
     return $node->nid;
   }
   
+  // TODO: in D6, there is similar method in drupalTestCase
   function addNodeType() {
     
     $type = new stdClass();

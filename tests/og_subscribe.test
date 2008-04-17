@@ -6,7 +6,7 @@ class OgSubscribe extends OgTestCase {
   function get_info() {
     return array('name'  => t('Og membership test'),
                  'desc'  => t('Tests og membership functionality and asserts correct behavior with all og_selective settings'),
-                 'group' => 'og tests');
+                 'group' => 'Organic groups');
   }
   
   function testAddOg() {
@@ -84,7 +84,6 @@ class OgSubscribe extends OgTestCase {
                                 'User member of group - text not found.');
 
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
-    
     $this->assertWantedRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
                             "Confirmation text found.");
     $this->clickSubmit("Join");
