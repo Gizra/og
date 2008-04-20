@@ -5,10 +5,12 @@
  */
  
 function og_views_tables() {
-  $types = variable_get('og_node_types', array('og'));
   $languages = module_invoke('locale', 'supported_languages', FALSE, TRUE);
-  foreach ($types as $type) {
-    $type_options[$type] = node_get_types('name', $type);
+  foreach (og_get_types('group') as $type) {
+    $group_type_options[$type] = node_get_types('name', $type);
+  }
+  foreach (og_get_types('group_post') as $type) {
+    $group_post_type_options[$type] = node_get_types('name', $type);
   }
   
   return array(
@@ -42,7 +44,7 @@ function og_views_tables() {
           'help' => t('Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown.'),
           'option' => array(
             '#type' => 'select',
-            '#options' => array_merge(array('all' => t('All')), node_get_types('names')),
+            '#options' => array_merge(array('all' => t('All')), $group_post_type_options),
             '#default_value' => 'all',
             // View will not save with #multiple, for some reason. Help.
             // '#multiple' => TRUE,
@@ -66,7 +68,7 @@ function og_views_tables() {
           'name' => t('OG: Group: Selective'),
         ),
         'private' => array(
-          'name' => t('OG: Group: Selective'),
+          'name' => t('OG: Group: Private'),
         ),
         'subscribe' => array(
           'name' => t('OG: Group: Join Link'),
@@ -153,7 +155,7 @@ function og_views_tables() {
         ),
         'gtype' => array(
           'name' => t('OG: Post in specified group type'),
-          'list' => variable_get('og_node_types', array('og')),
+          'list' => $group_type_options,
           'list-type' => 'list',
           'operator' => 'views_handler_operator_or',
           'value-type' => 'array',
@@ -293,7 +295,7 @@ function og_views_tables() {
         'og_type_selector' => array(
           'field' => 'type',
           'name' => t('OG: node type (selector)'),
-          'list' => $type_options,
+          'list' => $group_type_options,
           'list-type' => 'list',
           'operator' => 'views_handler_operator_or',
           'value-type' => 'array',
@@ -474,7 +476,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => 'Group',
+      'label' => 'Title',
       'handler' => 'views_handler_field_nodelink_with_mark',
       'sortable' => '1',
       'options' => 'link',
@@ -519,7 +521,7 @@ function og_views_default_views() {
   );
   $view->exposed_filter = array (
   );
-  $view->requires = array(og_node_data, node, users, og_uid_node);
+  $view->requires = array('og_node_data', 'node', 'users', 'og_uid_node');
   $views[$view->name] = $view;
 
 // OG_UNREAD VIEW
@@ -632,7 +634,7 @@ function og_views_default_views() {
   );
   $view->exposed_filter = array (
   );
-  $view->requires = array(og_node_data, node, users, node_comment_statistics, og_uid_node, history);
+  $view->requires = array('og_node_data', 'node', 'users', 'node_comment_statistics', 'og_uid_node', 'history');
   $views[$view->name] = $view;
 
   
@@ -798,7 +800,7 @@ function og_views_default_views() {
   );
   $view->exposed_filter = array (
   );
-  $view->requires = array(node, users, og, og_uid, og_views);
+  $view->requires = array('node', 'users', 'og', 'og_uid', 'og_views');
   $views[$view->name] = $view;
 
   
@@ -913,7 +915,7 @@ function og_views_default_views() {
       'single' => '0',
     ),
   );
-  $view->requires = array(node, users, og, og_views);
+  $view->requires = array('node', 'users', 'og', 'og_views');
   $views[$view->name] = $view;
   
   
@@ -1018,7 +1020,7 @@ function og_views_default_views() {
   );
   $view->exposed_filter = array (
   );
-  $view->requires = array(node_comment_statistics, node, users, og_node_data);
+  $view->requires = array('node_comment_statistics', 'node', 'users', 'og_node_data');
   $views[$view->name] = $view;
 
   
@@ -1088,7 +1090,7 @@ function og_views_default_views() {
       'single' => '1',
     ),
   );
-  $view->requires = array(node, temp_search_results);
+  $view->requires = array('node', 'temp_search_results');
   $views[$view->name] = $view;
   
   // group comments_recent. add a filter to comments_recent from views_comment.inc. also remove a Field: timestamp
@@ -1161,7 +1163,7 @@ function og_views_default_views() {
   );
   $view->exposed_filter = array (
   );
-  $view->requires = array(comments, node_comment_statistics, og_ancestry);
+  $view->requires = array('comments', 'node_comment_statistics', 'og_ancestry');
   $views[$view->name] = $view;
   
   // og_recent_type_term. used for og_panels
@@ -1242,7 +1244,7 @@ function og_views_default_views() {
   );
   $view->exposed_filter = array (
   );
-  $view->requires = array(node, og_ancestry);
+  $view->requires = array('node', 'og_ancestry');
   $views[$view->name] = $view;
       
   return $views;

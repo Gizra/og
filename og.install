@@ -473,6 +473,33 @@ function og_update_5700() {
   return $ret;
 }
 
+/**
+ * Update variables to new content type system. Also rebuild node_access for new grants system.
+ * 
+ * @return void
+ **/
+ function og_update_5701() {
+   $ret = array();
+   $types = node_get_types();
+   foreach ($types as $type) {
+     if (in_array($type->type, variable_get('og_node_types', array('og')))) {
+       variable_set('og_content_type_usage_'. $type->type, 'group');
+     }
+     elseif (in_array($type->type, variable_get('og_omitted', array('og')))) {
+       variable_set('og_content_type_usage_'. $type->type, 'omitted');
+     }
+     elseif (in_array($type->type, variable_get('og_omitted_email_node_types', array('og')))) {
+      variable_set('og_content_type_usage_'. $type->type, 'group_post_standard_nomail');
+     }
+     else {
+       variable_set('og_content_type_usage_'. $type->type, 'group_post_standard_mail');
+     } 
+   }
+   
+   node_access_rebuild();
+   return $ret;
+ }
+
 // end updates //
 
 function og_enable() {
@@ -501,7 +528,7 @@ function og_uninstall() {
   // Delete variables
   $variables = array(
     'og_member_pics', 'og_help', 'og_block_cnt_2', 'og_block_cnt_3',
-    'og_audience_checkboxes', 'og_omitted',
+    'og_audience_checkboxes', 'og_omitted', 'og_content_type_usage',
     'og_audience_required', 'og_omitted_email_node_types',
     'og_visibility_directory', 'og_visibility_registration',
     'og_home_page_view', 'og_email_max', 'og_node_types',

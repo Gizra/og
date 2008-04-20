@@ -146,16 +146,6 @@ function og_init() {
 }
 
 /**
- * API function for determining whether a given node type has been designated by admin to behave as a group node (i.e. a container)
- *
- * @param string $type
- * @return boolean
- */
-function og_is_group_type($type) {
-  return in_array($type, variable_get('og_node_types', array('og')));
-}
-
-/**
  * Like locale_initialize(), but includes a check for group language and sets accordingly.
  * Priority goes: user => group => site default
  **/
@@ -845,8 +835,12 @@ function og_get_subscriptions($uid, $min_is_active = 1, $reset = FALSE) {
   }
 
   if (!isset($subscriptions[$uid][$min_is_active])) {
-    $sql = "SELECT n.title, n.type, n.status, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d AND ou.is_active >= %d ORDER BY n.title";
-    $result = db_query($sql, $uid, $min_is_active);
+    list($types, $in) = og_get_sql_args();
+    $args = $types;
+    array_unshift($args, $min_is_active);
+    array_unshift($args, $uid);
+    $sql = "SELECT n.title, n.type, n.status, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d AND ou.is_active >= %d AND n.type IN ($in) ORDER BY n.title";
+    $result = db_query($sql, $args);
     while ($row = db_fetch_array($result)) {
       $subscriptions[$uid][$min_is_active][$row['nid']] = $row;
     }
@@ -1291,12 +1285,6 @@ function og_update_group($node) {
   db_query($sql, $node->og_theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_directory, $node->og_notification, $node->og_language, $node->og_private, $node->nid);
 }
 
-// returns TRUE if node type should generate email notifications when posted to a group.
-function og_node_type_notify($type) {
-  $omitted = variable_get('og_omitted_email_node_types', array());
-  return in_array($type, $omitted) ? FALSE : TRUE;
-}
-
 /**
  * Implementation of hook_nodeapi().
  *
@@ -1349,7 +1337,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       else {
         // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
-        if (!in_array($node->type, variable_get('og_omitted', array())) && variable_get('og_audience_required', FALSE) && !user_access('administer nodes')) {
+        if (og_is_group_post_type($node->type) && variable_get('og_audience_required', FALSE) && !user_access('administer nodes')) {
           if (!isset($node->og_groups)) {
             form_set_error('title', t('You must !join before posting on this web site.', array('!join' => l(t('join a group'), 'og'))));
           }
@@ -1396,20 +1384,20 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         $from = variable_get('site_mail', ini_get('sendmail_from'));
         drupal_mail('og_new_admin', $account->mail, _og_user_mail_text('og_new_admin_subject', $variables), _og_user_mail_text('og_new_admin_body', $variables), $from);      
       }
-      elseif (!og_is_omitted_type($node->type)) {
+      else {
         og_save_ancestry($node);
       }
       
       $skip_notification = FALSE; 
       // Any module that returns TRUE from its hook_og_notify($node) will prevent sending notifications.
-      // og2list uses this to send its own notifications for groups with a mailing list.
+      // og2list and og_subscriptions use this to send own notifications.
       foreach(module_implements('og_notify') as $module) {
         if (module_invoke($module,'og_notify',$node)) {
           $skip_notification = TRUE;
           break;
         }
       }
-      if (!$skip_notification && $node->status && og_node_type_notify($node->type) && !og_is_omitted_type($node->type) && $node->og_groups) {
+      if (!$skip_notification && $node->status && og_is_mail_type($node->type) && $node->og_groups) {
         if (module_exists('job_queue')) {
           $description = t('OG: notify group members about node %nid - !link', array('%nid' => $node->nid, '!link' => l($node->title, "node/$node->nid")));
           job_queue_add('og_mail', $description, array('node', $node->nid));
@@ -1429,7 +1417,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           $user->og_groups = og_get_subscriptions($account->uid, 1, TRUE);
         }
       }
-      elseif (!og_is_omitted_type($node->type)) {
+      else {
         og_save_ancestry($node);
       }
       break;
@@ -1481,7 +1469,7 @@ function og_form_alter($form_id, &$form) {
       $form['author']['name']['#title'] = t('Group manager');
       $form['options']['sticky']['#title'] = t('Sticky at top of group home page and other lists');
     }
-    elseif (!in_array($node->type, variable_get('og_omitted', array()))) {
+    elseif (og_is_group_post_type($node->type)) {
       if (!$node->nid) {
         if ($group_node = og_get_group_context()) {
           $bc[] = array('path' => 'og', 'title' => t('Groups'));
@@ -1510,7 +1498,54 @@ function og_form_alter($form_id, &$form) {
   if ($form_id == 'views_edit_view') {
     $form['page-info']['url']['#description'] .= t("<p>To display a View as a tab on your Organic Groups group home pages, set the url to 'node/\$group/custom' (where <em>custom</em> is whatever you wish). Then open Page >> Menu and check <em>Provide Menu</em> and <em>Provide Menu as Tab</em>; also make the first argument in the View be the <em>OG: Group nid(s)</em> argument. The <em>\$group</em> path element is a placeholder for the group nid and it ensures that the tab <strong>only</strong> appears on OG group nodes.</p>");
   }
+  
+  if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
+    $usage = variable_get('og_content_type_usage_'. $form['identity']['type']['#default_value'], 'omitted');
+    // Persist $usage so that we can rebuild node access as needed.
+    $form['old_og_content_type_usage'] = array(
+      '#type' => 'value',
+      '#value' => $usage,
+    );
+    $form['#submit']['og_node_type_form_submit'] = array();
+    $options = og_types_map();
+    $form['workflow']['og_content_type_usage'] = array(
+      '#type' => 'radios',
+      '#title' => t('Organic groups usage'),
+      '#default_value' => $usage,
+      '#options' => $options,
+      '#description' => t('Specify how organic groups should treat nodes of this type. Nodes may behave as a group, as group posts, or may not participate in organic groups at all.'),
+    );
+  }
+}
 
+// Rebuild node access if Usage has changed
+function og_node_type_form_submit($form_id, $form_values) {
+  $type = $form_values['type'];
+  $var = 'og_content_type_usage';
+  $new = $form_values[$var];
+  $old = $form_values['old_'. $var];
+  if ($new != $old) {
+    /**
+     * Rebuild the node access database *for a single content type*.
+     * TODO: older versions of mySQL can't do subselect.
+     */
+      db_query("DELETE FROM {node_access} WHERE nid IN (SELECT nid FROM {node} WHERE type = '%s')", $type);
+      // If not in 'safe mode', increase the maximum execution time:
+      if (!ini_get('safe_mode')) {
+        set_time_limit(240);
+      }
+      $result = db_query("SELECT nid FROM {node} WHERE type = '%s'", $type);
+      while ($node = db_fetch_object($result)) {
+        $loaded_node = node_load($node->nid, NULL, TRUE);
+        // To preserve database integrity, only aquire grants if the node
+        // loads successfully.
+        if (!empty($loaded_node)) {
+          node_access_acquire_grants($loaded_node);
+        }
+      }
+      cache_clear_all();
+      drupal_set_message(t('The node access table was rebuilt for %type posts.', array('%type' => node_get_types('name', $type))));
+  }
 }
 
 // form_alter() the node_delete form for a group
@@ -1782,7 +1817,7 @@ function og_comment($comment, $op) {
         }
       }
       // remove the perm check after 5.3 is released.
-      if ($comment['status'] == COMMENT_PUBLISHED && !$skip_notification && !og_is_omitted_type($node->type) && og_node_type_notify($node->type) && user_access('post comments without approval') && isset($node->og_groups) && !empty($node->og_groups)) {
+      if ($comment['status'] == COMMENT_PUBLISHED && !$skip_notification && og_node_mail_type($node->type) && isset($node->og_groups) && !empty($node->og_groups)) {
         if (module_exists('job_queue')) {
           $description = t('OG: notify group members about comment %id on !link', array('%id' => $comment['cid'], '!link' => l($node->title, "node/$node->nid", NULL, NULL, 'comment-'. $comment['cid'])));
           job_queue_add('og_mail', $description, array('comment', $comment['cid']));
@@ -2063,7 +2098,7 @@ function _og_user_mail_text($messageid, $variables = array()) {
 
 // helper function for queries that need all group types
 function og_get_sql_args() {
-  $types = variable_get('og_node_types', array('og'));
+  $types = og_get_types('group');
   $in = implode(', ', array_fill(0, count($types), "'%s'"));
   return array($types, $in);
 }
@@ -2184,7 +2219,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
 }
 
 function og_save_ancestry($node) {
-  if (!og_is_omitted_type($node->type)) {
+  if (og_is_group_post_type($node->type)) {
     $sql = "DELETE FROM {og_ancestry} WHERE nid = %d";
     db_query($sql, $node->nid);
     if (is_array($node->og_groups)) {
@@ -2197,10 +2232,82 @@ function og_save_ancestry($node) {
   }
 }
 
-function og_is_omitted_type($type) {
-  return in_array($type, variable_get('og_omitted', array()));
+/**
+ * An implementation of hook_node_type. Automatically update admin preferences when node type is renamed or removed.
+ */
+function og_node_type($op, $info) {
+  $values = variable_get($variable, array());
+  switch ($op) {
+    case 'delete':
+      variable_del('og_content_type_usage_'. $info->type);
+      break;
+    case 'update':
+      $usage = variable_get('og_content_type_usage_'. $info->type, 'omitted');
+      variable_set('og_content_type_usage_'. $info->type, $usage);
+      variable_del('og_content_type_usage_'. $info->old_type);
+  }
 }
 
+function og_types_map() {
+  return array(
+    'group' => t('Group node'),
+    'group_post_standard_mail' => t('Standard group post (typically only author may edit). Sends email notifications.'),
+    'group_post_wiki_mail' => t('Wiki group post (any group member may edit). Sends email notifications.'),
+    'group_post_standard_nomail' => t('Standard group post (typically only author may edit). No email notification.'),
+    'group_post_wiki_nomail' => t('Wiki group post (any group member may edit). No email notification.'),
+    'omitted' => t('May not be posted into a group.'),
+  );
+} 
+
+// Return all content types which meet a specified usage.
+function og_get_types($usage) {
+  $types = node_get_types();
+  foreach ($types as $type) {
+    if ($usage == 'group_post') {
+      if (!og_is_omitted_type($type->type) && !og_is_group_type($type->type)) {
+        $return[$usage][] = $type->type;
+      } 
+    }
+    else {
+      $type_usage = variable_get('og_content_type_usage_'. $type->type, 'omitted');
+      $return[$type_usage][] = $type->type;
+    }
+  }
+  return isset($return[$usage]) ? $return[$usage] : array();
+}
+
+// returns TRUE if node type should generate email notifications when posted to a group.
+function og_is_mail_type($type) {
+  $usage = variable_get('og_content_type_usage_'. $type, 'omitted');
+  return strpos($usage, 'mail') && !strpos($usage, 'nomail') ? TRUE : FALSE;
+}
+
+// returns TRUE if node type lets all subscribers edit the node.
+function og_is_wiki_type($type) {
+  $usage = variable_get('og_content_type_usage_'. $type, 'omitted');
+  return strpos($usage, 'wiki') ? TRUE : FALSE;
+}
+
+// returns TRUE if node type can be posted into a group.
+function og_is_group_post_type($type) {
+  $usage = variable_get('og_content_type_usage_'. $type, 'omitted');
+  return strpos($usage, 'group_post') !== FALSE ? TRUE : FALSE;
+}
+
+function og_is_omitted_type($type) {
+  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'omitted' ? TRUE : FALSE;
+}
+
+/**
+ * API function for determining whether a given node type has been designated 
+ * by admin to behave as a group node (i.e. a container).
+ *
+ * @param string $type
+ * @return boolean
+ */
+function og_is_group_type($type) {
+  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'group' ? TRUE : FALSE;
+}
 
 /**
  * Menu callback. Handle old feed urls with permanent redirect. Hopefully rss readers respect that.
@@ -2534,12 +2641,14 @@ function og_subscribe_link($node) {
 
 // $group is an object containing the group node
 function og_og_create_links($group) {
-  $exempt = array_merge(variable_get('og_node_types', array('og')), variable_get('og_omitted', array()));
-  foreach (node_get_types() as $type) {
-    // we used to check for node_access(create) but then node admins would get a false positive and see node types that they could not create
+  $post_types = og_get_types('group_post');
+  $types = node_get_types();
+  foreach ($post_types as $post_type) {
+    // We used to check for node_access(create) but then node admins would get a false positive and see node types that they could not create.
     // When this becomes a proper menu in D6, we get sorting for free
-    if (!in_array($type->type, $exempt) && module_invoke(node_get_types('module', $type), 'access', 'create', $type)) {
-      $links["create_$type->type"] = l(t('Create !type', array('!type' => $type->name)), "node/add/$type->type", array('title' => t('Add a new !s in this group.', array('!s' => $type->name))), "gids[]=$group->nid");
+    $type_name = $types[$post_type]->name;
+    if (module_invoke($types[$post_type]->module, 'access', 'create', $post_type)) {
+      $links["create_$post_type"] = l(t('Create !type', array('!type' => $type_name)), "node/add/$post_type", array('title' => t('Add a new !s in this group.', array('!s' => $type_name))), "gids[]=$group->nid");
     }
   }
   return $links ? $links : array();
@@ -2561,11 +2670,26 @@ function og_search_form($group) {
   $form['#method'] = 'get';
   $form['#action'] = url("og/search/$group->nid");
   return $form;
-} 
-
+}
 function og_admin_settings() {
   drupal_set_title(t('Organic groups configuration'));
 
+  // content types
+  $form['og_settings']['content_types'] = array('#type' => 'fieldset', '#title' => t('Content types'), '#collapsible' => TRUE, '#collapsed' => TRUE);
+  $header = array(t('Type'), t('Usage'), t('Operations'));
+  foreach (node_get_types() as $type) {
+    $type_url_str = str_replace('_', '-', $type->type);
+    $usage = variable_get('og_content_type_usage_'. $type->type, 'omitted');
+    $map = og_types_map();
+    $rows[] = array(
+      $type->name,
+      $map[$usage],
+      l(t('Edit'), "admin/content/types/$type_url_str", array(), drupal_get_destination()),      
+    );
+  }
+  $form['og_settings']['content_types']['table'] = array('#value' => theme('table', $header, $rows));
+
+  
   $form['og_settings']['group_details'] = array('#type' => 'fieldset', '#title' => t('Group details'), '#collapsible' => TRUE, '#collapsed' => TRUE);
   // groups directory visibility
   $options = array(t('New groups don\'t appear in the groups directory. Administrators control the directory exclusively.'),
@@ -2589,31 +2713,22 @@ function og_admin_settings() {
               );
   $form['og_settings']['group_details']['og_notification'] = array('#type' => 'radios', '#title' => t('Group email notifications'), '#default_value' => variable_get('og_notification', OG_NOTIFICATION_ALWAYS), '#description' =>t('Should new members automatically be notified via email when new content is posted to their group? Note that changing this setting has no effect on existing members.'), '#options' => $options);
   
-  $form['og_settings']['node_form'] = array('#type' => 'fieldset', '#title' => t('Node authoring form'), '#collapsible' => TRUE, '#collapsed' => TRUE);
-  $form['og_settings']['node_form']['og_audience_checkboxes'] = array('#type' => 'checkbox', '#title' => t('Audience checkboxes'), '#default_value' => variable_get('og_audience_checkboxes', TRUE), '#description' => t('Show each group that the user is a member of as a checkbox in the Audience section. This enables the member to place her post into multiple groups. If unchecked, simplify the user interface by omitting the checkboxes and assuming user wants to post into the current group. This simplification only applies to new nodes, and not to edits of existing nodes. Group administrators always see checkboxes.'));
+  // audience checkboxes
+  $form['og_settings']['group_details']['og_audience_checkboxes'] = array('#type' => 'checkbox', '#title' => t('Audience checkboxes'), '#default_value' => variable_get('og_audience_checkboxes', TRUE), '#description' => t('Show each group that the user is a member of as a checkbox in the Audience section. This enables the member to place her post into multiple groups. If unchecked, simplify the user interface by omitting the checkboxes and assuming user wants to post into the current group. This simplification only applies to new nodes, and not to edits of existing nodes. Group administrators always see checkboxes.'));
   
+  // audience required
   $options = array(t('optional'), t('required'));
-  $form['og_settings']['node_form']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', 0), '#options' => $options, '#description' => t('Do you require that all (non administrator) posts be affiliated with a group? Note that changing this setting will affect existing posts when they are edited.'));
+  $form['og_settings']['group_details']['og_audience_required'] = array('#type' => 'radios', '#title' => t('Audience required'), '#default_value' => variable_get('og_audience_required', 0), '#options' => $options, '#description' => t('Do you require that all (non administrator) posts be affiliated with a group? Note that changing this setting will affect existing posts when they are edited.'));
   unset($options);
-  $types = node_get_types();
-  foreach ($types as $type) {
-    $options[$type->type] = t($type->name);
-  }
-  $all_node_type_options = $options;   // save this for og_node_types
-  // hide node types which are already serving as a group node
-  foreach (variable_get('og_node_types', array('og')) as $val) {
-    unset($options[$val]);
-  }
-  $non_group_type_options = $options;   // save this for og_node_types
-  $form['og_settings']['node_form']['og_omitted'] = array('#type' => 'select', '#title' => t('Omitted content types'), '#default_value' => variable_get('og_omitted', array()), '#options' => $non_group_type_options, '#description' => t('Select any node types which should <em>not</em> participate in the Audience targetting system. Node types which are designated as group home page node types (see below) will be automatically excluded.'), '#multiple' => TRUE);
 
-  $form['og_settings']['home'] = array('#type' => 'fieldset', '#title' => t('Group home page'), '#collapsible' => TRUE, '#collapsed' => TRUE);
+  // audience home page - Views
   $options = og_get_available_views();
-  $form['og_settings']['home']['og_home_page_view'] = array('#type' => 'radios', '#title' => t('Presentation style'), '#options' => $options, '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'), '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your home page. You may alter the presentation using usual the !theme. Also see the Theme section of the !README.', array('!README' => og_readme(), '!theme' => l(t('usual Views themeing techniques'), 'http://drupal.org/node/42597'))));
-  $form['og_settings']['home']['og_node_types'] = array('#type' => 'select', '#title' => t('Group home page node types'), '#default_value' => variable_get('og_node_types', array('og')), '#options' => $all_node_type_options, '#required' => TRUE, '#description' => t("<b>Required</b>. Select the node types which act as group home pages. Usually, you will want to !create called <em>group</em> for this purpose.", array('!create' => l(t('create a simple node type'), 'admin/content/types'))), '#multiple' => TRUE);
+  $form['og_settings']['group_details']['og_home_page_view'] = array('#type' => 'radios', '#title' => t('Home page presentation'), '#options' => $options, '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'), '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using !theme. Also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module.', array('!README' => og_readme(), '!theme' => l(t('typical Views themeing techniques'), 'http://drupal.org/node/42597'))));
+  
+  // member pictures
+  $form['og_settings']['group_details']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown on the members page, the group members block, and group details block? You must also enable pictures in !user.', array('!user' => l(t('User configuration'), 'admin/user/settings'))));
 
   $form['og_settings']['email'] = array('#type' => 'fieldset', '#title' => t('Email settings'), '#collapsible' => TRUE, '#collapsed' => TRUE);
-  $form['og_settings']['email']['og_omitted_email_node_types'] = array('#type' => 'select', '#title' => t('Omitted node types for email notifications'), '#default_value' => variable_get('og_omitted_email_node_types', array()), '#options' => $non_group_type_options, '#description' => t("Select any node types which should <b>not</b> generate email notifications when they are posted into a group."), '#multiple' => TRUE);
 
   $form['og_settings']['email']['og_email_notification_pattern'] = array(
     '#type' => 'textfield',
@@ -2635,8 +2750,6 @@ function og_admin_settings() {
   $form['og_settings']['email']['og_new_admin_subject'] = array('#type' => 'textfield', '#title' => t('New admin user email subject'), '#description' => 'The subject of the email sent to a new admin for a group. Available variables: @group, @username, !group_url', '#default_value' => _og_user_mail_text('og_new_admin_subject'));
   $form['og_settings']['email']['og_new_admin_body'] = array('#type' => 'textarea', '#title' => t('New admin user email body'), '#rows' => 10, '#description' => 'The body of the email sent to a new admin for a group. Available variables: @group, @username, !group_url, !invite_url', '#default_value' => _og_user_mail_text('og_new_admin_body'));
 
-  $form['og_settings']['pictures'] = array('#type' => 'fieldset', '#title' => t('Member pictures'), '#collapsible' => TRUE, '#collapsed' => TRUE);
-  $form['og_settings']['pictures']['og_member_pics'] = array('#type' => 'checkbox', '#title' => t('Member pictures'), '#default_value' => variable_get('og_member_pics', TRUE), '#description' => t('Should member pictures be shown on the members page, the group members block, and group details block? You must also enable pictures in !user.', array('!user' => l(t('User configuration'), 'admin/user/settings'))));
   return system_settings_form($form);
 }
 
@@ -2779,33 +2892,6 @@ function og_db_rewrite_sql($sql, $primary_table, $primary_field,  $args) {
   }
 }
 
-
-/**
- * An implementation of hook_node_type. Automatically update admin preferences when node type is renamed or removed.
- */
-function og_node_type($op, $info) {
-  $node_type_variables = array('og_omitted_email_node_types', 'og_omitted', 'og_node_types');
-  foreach ($node_type_variables as $variable) {
-    $values = variable_get($variable, array());
-    switch ($op) {
-      case 'delete':
-        if (in_array($info->old_type, $values)) {
-          unset($values[array_search($info->old_type, $values)]);
-          variable_set($variable, $values);
-        }
-        break;
-      case 'update':
-        if (!empty($info->old_type) && $info->old_type != $info->type) {
-          if (in_array($info->old_type, $values)) {
-            $values[array_search($info->old_type, $values)] = $info->type;
-            variable_set($variable, $values);
-          }
-        }
-        break;
-    }
-  }
-}
-
 // A hook from replies.module. Return TRUE if og is handling the notification to a given recipient on a given reply
 function og_replies_mine($comment, $recipient) {
   $node = node_load($comment->nid);
@@ -2826,7 +2912,7 @@ function og_requirements($phase) {
   // Ensure translations don't break at install time
   $t = get_t();
   if ($phase == 'runtime') {
-    $og_types = variable_get('og_node_types', array('og'));
+    $og_types = og_get_types('group');
     $all_types = array_keys(node_get_types('types'));
     if (!count(array_intersect($og_types, $all_types))) {
           $requirements['og_group_types']  = array(
