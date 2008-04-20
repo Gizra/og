@@ -92,7 +92,7 @@ function og_access_alter_group_form(&$form, $node) {
 function og_access_alter_nongroup_form(&$form, $node) {
   global $user;
   
-  if (!og_is_omitted_type($node->type)) {
+  if (og_is_group_post_type($node->type)) {
     // get the visibility for normal users
     $vis = variable_get('og_visibility', 0);
 
@@ -169,22 +169,23 @@ function og_access_node_grants($account, $op) {
     $grants['og_public'][] = 0; // everyone can see a public node
   }
 
-  // get subscriptions
+  // Subscribers get an admin or non-admin grant for each subscription
   if ($subscriptions = og_get_subscriptions($account->uid)) {
     foreach ($subscriptions as $key => $val) {
-      if ($op == 'view') {
-        $grants['og_subscriber'][] = $key;
+      // Admins don't need to receive the subscriber grant since they can perform all operations.
+      if ($val['is_admin']) {
+        $grants['og_admin'][] = $key;
       }
-      if (($op == 'update' || $op == 'delete') && $val['is_admin']) {
+      else {
         $grants['og_subscriber'][] = $key;
       }
     }
   }
-  return $grants ? $grants : array();
+  return isset($grants) ? $grants : array();
 }
 
 /**
- * Implementation of hook_node_acess_records.
+ * Implementation of hook_node_access_records.
  */
 function og_access_node_access_records($node) {
   // don't write records if the node type is omitted or node is a group
@@ -193,9 +194,9 @@ function og_access_node_access_records($node) {
   }
   
   if (og_is_group_type($node->type)) {
-    // this grant allows group admins to manage stuff
+    // This grant allows group admins to manage their group.
     $grants[] = array('realm' => 'og_subscriber', 'gid' => $node->nid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
-    // If the group is not marked private let everyone view the group homepage.
+    // If the group is not marked private, let everyone view the group homepage.
     if (!$node->og_private) {
         $grants[] = array (
           'realm' => 'og_public',
@@ -206,14 +207,17 @@ function og_access_node_access_records($node) {
     }
   }
   elseif (is_array($node->og_groups)) {
-    // applies to non group nodes
+    // Applies to non group nodes.
     if ($node->og_public) {
       $grants[] = array('realm' => 'og_public', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
     }
     
     foreach ($node->og_groups as $gid) {
-      // we write a broad grant here but og_node_grants() only issues it selectively.
-      $grants[] = array('realm' => 'og_subscriber', 'gid' => $gid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
+      // Group administrators get all operations.
+      $grants[] = array('realm' => 'og_admin', 'gid' => $gid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
+      // Normal subscribers just get update operation if node type is a wiki type.
+      $is_wiki = og_is_wiki_type($node->type);
+      $grants[] = array('realm' => 'og_subscriber', 'gid' => $gid, 'grant_view' => 1, 'grant_update' => $is_wiki, 'grant_delete' => 0);
     }
   }
 

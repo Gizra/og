@@ -651,6 +651,3 @@ function og_panels_block_info($module, $delta, &$info) {
     unset($info['required context']);
   }
 }
-
-
-
