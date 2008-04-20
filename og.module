@@ -2249,14 +2249,19 @@ function og_node_type($op, $info) {
 }
 
 function og_types_map() {
-  return array(
+  $usages = array(
     'group' => t('Group node'),
-    'group_post_standard_mail' => t('Standard group post (typically only author may edit). Sends email notifications.'),
-    'group_post_wiki_mail' => t('Wiki group post (any group member may edit). Sends email notifications.'),
-    'group_post_standard_nomail' => t('Standard group post (typically only author may edit). No email notification.'),
-    'group_post_wiki_nomail' => t('Wiki group post (any group member may edit). No email notification.'),
     'omitted' => t('May not be posted into a group.'),
+    'group_post_standard_mail' => t('Standard group post (typically only author may edit). Sends email notifications.'),
+    'group_post_standard_nomail' => t('Standard group post (typically only author may edit). No email notification.'),
   );
+  
+  if (module_exists('og_access')) {
+    $usages['group_post_wiki_mail'] = t('Wiki group post (any group member may edit). Sends email notifications.');
+    $usages['group_post_wiki_nomail'] = t('Wiki group post (any group member may edit). No email notification.');
+  }
+  
+  return $usages;
 } 
 
 // Return all content types which meet a specified usage.
@@ -2584,9 +2589,13 @@ function og_og_block_details($node) {
   elseif ($node->og_selective < OG_INVITE_ONLY) {
     $links['subscribe'] = og_subscribe_link($node);
   }
-  else {
+  elseif ($node->og_selective == OG_INVITE_ONLY) {
+    $links['closed'] = t('This is an @invite group. The group administrators add/remove members as needed.', array('@invite' => t('invite only')));
+  }
+  elseif ($node->og_selective == OG_CLOSED) {
     $links['closed'] = t('This is a @closed group. The group administrators add/remove members as needed.', array('@closed' => t('closed')));
   }
+  
   // Modify these links by reference. If you want control of the whole block, see og_block_details().
   foreach (module_implements('og_link_alter') AS $module) {
     $function = $module .'_og_link_alter';
