@@ -55,9 +55,7 @@ class OgTestCase extends DrupalTestCase {
     
     $this->_cleanupNodeTypes[] = $name;
     
-    $types = variable_get('og_node_types', array());
-    $types[$name] = $name;
-    variable_set('og_node_types', $types);
+    variable_set('og_content_type_usage_'. $name, 'group');
     
     return $name;
   }
@@ -72,10 +70,6 @@ class OgTestCase extends DrupalTestCase {
     include_once './'. drupal_get_path('module', 'node') .'/content_types.inc';
     while (sizeof($this->_cleanupNodeTypes) > 0) {
       $name = array_pop($this->_cleanupNodeTypes);
-      
-      $types = variable_get('og_node_types', array());
-      unset($types[$name]);
-      variable_set('og_node_types', $types);
 
       node_type_delete_confirm_submit(0, array('name' => $name, 'type' => $name));
     }
