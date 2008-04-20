@@ -122,7 +122,6 @@ class OgSubscribe extends OgTestCase {
     $this->clickSubmit("Join");
 
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
-        $this->showSource();
     $this->assertWantedRaw(t('This is an invite only group. The group administrators add/remove members as needed.'), 'Rejected text found.');
 
    // Find user in list 
