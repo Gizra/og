@@ -89,9 +89,7 @@ class OgSubscribe extends OgTestCase {
     $this->clickSubmit("Join");
 
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
-
-    $this->assertWantedRaw(t('Membership request to the @group group was rejected, only group administrators can add users to this group.',
-                                           array('@group' => $node->title)), 'Rejected text found.');
+    $this->assertWantedRaw(t('This is a closed group. The group administrators add/remove members as needed.'), 'Closed/Rejected text found.');
     // Find user in list 
     $url = url('og/users/' . $gid, NULL, NULL, TRUE);
     $ret = $b->get($url);
@@ -124,11 +122,10 @@ class OgSubscribe extends OgTestCase {
     $this->clickSubmit("Join");
 
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
+        $this->showSource();
+    $this->assertWantedRaw(t('This is an invite only group. The group administrators add/remove members as needed.'), 'Rejected text found.');
 
-    $this->assertWantedRaw(t('Membership request to the %group group was rejected, only group administrators can add users to this group.',
-                                           array('%group' => $node->title)), 'Rejected text found.');
-
-                                           // Find user in list 
+   // Find user in list 
     $url = url('og/users/' . $gid, NULL, NULL, TRUE);
     $ret = $b->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
