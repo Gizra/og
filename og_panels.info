@@ -2,4 +2,7 @@
 name = Organic groups panels
 description = "Enable group admins to create panel pages."
 package = "Organic groups"
-dependencies = og panels panels_views
+dependencies[] = og
+dependencies[] = panels
+dependencies[] = panels_views
+core = 6.x

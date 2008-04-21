@@ -52,6 +52,10 @@ TODO/BUGS/FEATURE REQUESTS
 ----------------
 - see http://drupal.org/project/issues/og
 
+UPGRADING FROM 5.0 TO 6.0
+-----------------
+
+
 UPGRADING FROM 4.7 TO 5.0
 -----------------
 - In order to support the new 'as many node access modules as desired' feature of core, much has changed. A full update path to the new database configuration has been provided. However, not every scenario has been tested. Please backup your database before upgrading. Also, please report successes or failures with the update via http://drupal.org/project/issues/og or send email to Moshe Weitzman (see bottom of this file).

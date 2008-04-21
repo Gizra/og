@@ -1,4 +1,5 @@
 name = Organic groups access control
 description = "Enable access control for private posts and private groups."
 package = "Organic groups"
-dependencies = og
+dependencies[] = og
+core = 6.x

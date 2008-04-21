@@ -1,92 +1,198 @@
 <?php
 // $Id$
 
-function og_install() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      db_query("CREATE TABLE {og} (
-        nid int(11) NOT NULL,
-        selective int(11) NOT NULL default '0',
-        description varchar(255) NULL,
-        theme varchar(255) NULL,
-        register int(1) NOT NULL default 0,
-        directory int(1) NOT NULL default 0,
-        notification int(1) NOT NULL default 0,
-        language varchar(12) NOT NULL default '',
-        private int(1) NOT NULL default 0,
-        PRIMARY KEY  (nid)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
-  
-      db_query("CREATE TABLE {og_uid} (
-        nid int(11) NOT NULL,
-        og_role int(1) NOT NULL DEFAULT 0,
-        is_active int(1) NOT NULL DEFAULT 0,
-        is_admin int(1) NOT NULL DEFAULT 0,
-        uid int(11) NOT NULL,
-        mail_type int(11) NULL,
-      	created int(11) NULL DEFAULT 0,
-      	changed int(11) NULL DEFAULT 0,
-        PRIMARY KEY  (nid, uid)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
-      
-      db_query("CREATE TABLE {og_uid_global} (
-        uid int(11) NOT NULL,
-        og_email int(11) NOT NULL DEFAULT 2,
-        PRIMARY KEY  (uid)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
-      db_query("CREATE TABLE {og_ancestry} (
-        nid int(11) NOT NULL,
-        group_nid int(11) NOT NULL,
-        is_public int(1) NOT NULL,
-        KEY  (nid),
-        KEY  (group_nid)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
-    break;
-    case 'pgsql':
-      db_query("CREATE TABLE {og} (
-        nid int NOT NULL,
-        selective int NOT NULL default 0,
-        description varchar(255) NULL,
-        theme varchar(255) NULL,
-        website varchar(255) NULL,
-        register smallint NOT NULL default 0,
-        directory smallint NOT NULL default 0,
-        notification smallint NOT NULL default 0,
-        language varchar(12) NOT NULL default '',
-        private smallint NOT NULL default 0,  
-        PRIMARY KEY  (nid)
-      );");
+/**
+ * TODO: upgrade all update_14+ updates to d6
+ */
 
-      db_query("CREATE TABLE {og_uid} (
-        nid int NOT NULL,
-        og_role smallint NOT NULL DEFAULT 0,
-        is_active smallint NOT NULL DEFAULT 0,
-        is_admin smallint NOT NULL DEFAULT 0,
-        uid int NOT NULL,
-        mail_type int NULL,
-	    created int NULL DEFAULT 0,
-	    changed int NULL DEFAULT 0,
-        PRIMARY KEY  (nid, uid)
-      );");
-      
-      db_query("CREATE TABLE {og_uid_global} (
-        uid int NOT NULL,
-        og_email int NOT NULL DEFAULT 2,
-        PRIMARY KEY (uid)
-      );");
-      
-      db_query("
-      CREATE TABLE {og_ancestry} (
-       nid int NOT NULL,
-       group_nid int NOT NULL,
-       is_public smallint NOT NULL
-      );");
-      db_query("CREATE INDEX {og_ancestry}_nid_idx ON {og_ancestry} (nid);");
-      db_query("CREATE INDEX {og_ancestry}_group_nid_idx ON {og_ancestry} (group_nid);");
-      break;
-  }
-  
+
+/**
+ * Definition of hook_schema();
+ *
+ * TODO: add table and field descriptions
+ */
+function og_schema() {
+  $schema = array();
+
+  $schema['og'] = array(
+    'description'     => '',
+    'fields'          => array(
+      'nid'             => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'selective'       => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+        'default'         => 0,
+      ),
+      'description'     => array(
+        'description'     => '',
+        'type'            => 'varchar',
+        'length'          => 255,
+        'not null'        => FALSE,
+      ),
+      'theme'           => array(
+        'description'     => '',
+        'type'            => 'varchar',
+        'length'          => 255,
+        'not null'        => FALSE,
+      ),
+      'register'        => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'tiny',
+        'not null'        => TRUE,
+        'default'         => 0,
+      ),
+      'directory'       => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'tiny',
+        'not null'        => TRUE,
+        'default'         => 0,
+      ),
+      'notification'    => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'tiny',
+        'not null'        => TRUE,
+        'default'         => 0,
+      ),
+      'language'        => array(
+        'description'     => '',
+        'type'            => 'varchar',
+        'length'          => 12,
+        'not null'        => TRUE,
+        'default'         => '',
+      ),
+      'private'         => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'tiny',
+        'not null'        => TRUE,
+        'default'         => 0,
+      ),
+    ),
+    'primary key'       => array('nid'),
+  );
+
+  $schema['og_uid'] = array(
+    'description'     => '',
+    'fields'          => array(
+      'nid'             => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'og_role'         => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'tiny',
+        'not null'        => TRUE,
+        'default'         => 0,
+      ),
+      'is_active'       => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'tiny',
+        'not null'        => TRUE,
+        'default'         => 0,
+      ),
+      'is_admin'        => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'tiny',
+        'not null'        => TRUE,
+        'default'         => 0,
+      ),
+      'uid'             => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'mail_type'       => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => FALSE,
+      ),
+      'created'         => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => FALSE,
+        'default'         => 0,
+      ),
+      'changed'         => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => FALSE,
+        'default'         => 0,
+      ),
+    ),
+    'primary key'       => array('nid', 'uid'),
+  );
+  $schema['og_uid_global']  = array(
+    'description'     => '',
+    'fields'          => array(
+      'uid'             => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'og_email'        => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+        'default'         => 2,
+      ),
+    ),
+    'primary key'     => array('uid'),
+  );
+  $schema['og_ancestry'] = array(
+    'description'     => '',
+    'fields'          => array(
+      'nid'             => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'group_nid'       => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'is_public'       => array(
+        'description'     => '',
+        'type'            => 'int',
+        'size'            => 'tiny',
+        'not null'        => TRUE,
+      ),
+    ),
+    'indexes'         => array(
+      'nid'             => array('nid'),
+      'group_nid'       => array('group_nid'),
+    ),
+  );
+
+  return $schema;
+}
+
+function og_install() {
+  drupal_install_schema('og');
+
   // enable standard og blocks. for custom profiles, block may not be included yet.
   if (function_exists('block_rehash')) {
     _block_rehash();
@@ -96,252 +202,9 @@ function og_install() {
   // Need og_readme() function.
   drupal_load('module', 'og');
   drupal_set_message(t('Organic groups module enabled. Please see the included !README file for further installation instructions.', array('!README' => og_readme())));
-  
 }
 
-// 2006-05-31 PFM: deletes row if present in the table.  The first parameter
-// is a table, the next two are arrays of fields and values
-// respectively.  Two values are supported.
-function og_deleteifpresent_2keys($sTable, $aField, $aReplace, $aValue) {
-  $sqlExist = "select count(*) as nCount ".
-      "from ".$sTable." where " .
-      $aField[0] . " = " . $aReplace[0] . " and ".
-      $aField[1] . " = " . $aReplace[1];
-  $resExist = db_query($sqlExist, $aValue[0], $aValue[1]);
-  $objExist = db_fetch_object($resExist);
-  if($objExist->nCount > 0) {
-    // found.  delete before inserting below.
-    $sqlExist = "delete from ".$sTable." where ".$aField[0]." = ".$aReplace[0]." and ".$aField[1]." = ".$aReplace[1];
-    db_query($sql, $aValue[0], $aValue[1]);
-  }
-}
-
-// move subscriber data to own table from node_access
-function og_update_1() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      db_query("ALTER TABLE {og_uid} ADD `og_role` int(1) NOT NULL default '0'");
-      db_query("ALTER TABLE {og_uid} ADD `is_active` int(1) default '0'");
-      db_query("ALTER TABLE {og_uid} ADD `is_admin` int(1) default '0'");
-    break;
-    case 'pgsql':
-      db_query("ALTER TABLE {og_uid} ADD `og_role` smallint NOT NULL default 0");
-      db_query("ALTER TABLE {og_uid} ADD `is_active` smallint default 0");
-      db_query("ALTER TABLE {og_uid} ADD `is_admin` smallint default 0");
-      break;
-  }
-
-  $result = db_query("SELECT * FROM {node_access} WHERE realm = 'og_uid'");
-  while ($object = db_fetch_object($result)) {
-    og_deleteifpresent_2keys(
-      'og_uid',
-      array('nid','gid'),
-      array('%d','%d'),
-      array($object->nid,$object->gid));
-
-    // insert new row.
-    $sql = "INSERT INTO {og_uid} (nid, uid, og_role, is_admin, is_active) VALUES (%d, %d, %d, %d, %d)";
-    db_query($sql, $object->nid, $object->gid, ($object->grant_view + $object->grant_update), $object->grant_update, $object->grant_view);
-  }
-  $sql = "DELETE FROM {node_access} WHERE realm = 'og_uid'";
-  db_query($sql);
-
-  return array();
-}
-
-function og_update_2() {
-  return _system_update_utf8(array('og', 'og_uid'));
-}
-
-function og_update_3() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-    case 'pgsql':
-      $sql = "DELETE FROM {node_access} WHERE realm = 'og_uid'";
-      db_query($sql);
-
-      $sql = "SELECT DISTINCT(n.nid) FROM {node} n INNER JOIN {node_access} na ON n.nid = na.nid WHERE type != 'og' AND na.realm = 'og_group'";
-      $result = db_query($sql);
-      while ($row = db_fetch_object($result)) {
-        $sql = "UPDATE {node_access} SET grant_view=1, grant_update=1, grant_delete=1 WHERE realm = 'og_group' AND nid = %d AND gid != 0";
-        db_query($sql, $row->nid);
-      }
-
-      $sql = "SELECT nid FROM {node} WHERE type = 'og'";
-      $result = db_query($sql);
-      while ($row = db_fetch_object($result)) {
-        og_deleteifpresent_2keys('node_access',array('nid','gid'), array('%d','%d'), array($object->nid,$object->gid));
-
-        $sql = "INSERT INTO {node_access} (nid, gid, realm, grant_view, grant_update, grant_delete) VALUES (%d, %d, 'og_group', 1, 1, 0)";
-        db_query($sql, $row->nid, $row->nid);
-      }
-  }
-  return array();
-}
-
-/**
- * mar 9,2006. 
- * unfortunately, we need duplicates so we change primary key to regular INDEX.
- */
-function og_update_4() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql('ALTER TABLE {node_access} DROP PRIMARY KEY, ADD INDEX nid_gid_realm (nid, gid, realm)');
-  }
-  return $ret ? $ret : array();
-}
-
-/**
- * feb 19, 2006
- * add a row for each combination of public node and group. needed to 
- * make public nodes show up in group homepage for non subscribers
- */
-function og_update_5() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-    case 'pgsql':
-      $sql = "SELECT DISTINCT(nid) as nid FROM {node_access} WHERE realm = 'og_group' AND gid = 0" ;
-      $result = db_query($sql);
-      while ($row = db_fetch_object($result)) {
-        $sql = "SELECT gid FROM {node_access} WHERE nid = %d AND realm = 'og_group' AND gid != 0" ;
-        $result2 = db_query($sql, $row->nid);
-        while ($row2 = db_fetch_object($result2)) {  
-          og_deleteifpresent_2keys('node_access', array('nid','gid'), array('%d','%d'), array($row->nid,$row->gid));
-          $sql = "INSERT INTO {node_access} (nid, realm, gid, grant_view) VALUES (%d, 'og_public', 0, %d)";
-          db_query($sql, $row->nid, $row2->gid);        }
-      }
-
-      // change all former public node grants to 'og_all' realm
-      $sql = "UPDATE {node_access} SET realm = 'og_all' WHERE realm = 'og_group' AND gid = 0 AND grant_view = 1";
-      db_query($sql);
-
-      // change all nodes in groups to new 'og_subscriber' realm
-      $sql = "UPDATE {node_access} SET realm = 'og_subscriber' WHERE realm = 'og_group' AND gid != 0";
-      db_query($sql);
-
-      // these records are no longer used. we've migrated them to new grant scheme
-      $sql = "DELETE FROM {node_access} WHERE realm = 'og_group'";
-      db_query($sql);
-  }
-  return array();
-}
-
-function og_update_6() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql('ALTER TABLE {og} ADD website varchar(255) NULL AFTER theme');
-  }
-  return $ret ? $ret : array();
-}
-
-// we store a nid in grant_view column in the og_public realm so we need high numbers
-function og_update_7() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      $ret[] = update_sql("ALTER TABLE {node_access} CHANGE grant_view grant_view int(11) unsigned NOT NULL default '0'");
-    break;
-    case 'pgsql':
-      $ret[] = update_sql("ALTER TABLE {node_access} ".
-      "ALTER COLUMN grant_view TYPE int, ".
-      "ALTER COLUMN grant_view SET NOT NULL, ".
-      "ALTER COLUMN grant_view SET DEFAULT 0;");
-    break;
-  }
-  return $ret ? $ret : array();
-}
-
-
-// Enable og_basic.module by default.
-function og_update_8() {
-  // do nothing. it turns out you can't easily enable a module here because its row does not exist yet in system table.
-  return array();
-}
-
-// Group language
-function og_update_9() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-    case 'pgsql':
-      $ret[] = update_sql("ALTER TABLE {og} ADD language varchar(12) NOT NULL default ''");
-  }
-  return $ret ? $ret : array();
-}
-
-// Created and Updated dates
-function og_update_10() {
-  switch ($GLOBALS['db_type']) { 
-    case 'mysql': 
-    case 'mysqli': 
-      $ret[] = update_sql("ALTER TABLE {og_uid} ADD created int(11) NULL DEFAULT 0");
-      $ret[] = update_sql("ALTER TABLE {og_uid} ADD changed int(11) NULL DEFAULT 0");
-    break;
-    case 'pgsql':
-      $ret[] = update_sql("ALTER TABLE {og_uid} ADD COLUMN created int NULL DEFAULT 0");
-      $ret[] = update_sql("ALTER TABLE {og_uid} ADD COLUMN changed int NULL DEFAULT 0");
-    break;
-  } 
-  return $ret ? $ret : array();
-}
-
-// notification flag for a group
-function og_update_11() {
-  switch ($GLOBALS['db_type']) { 
-    case 'mysql': 
-    case 'mysqli': 
-      $ret[] = update_sql("ALTER TABLE {og} ADD notification int(1) NOT NULL default 0");
-    break;
-    case 'pgsql':
-      $ret[] = update_sql("ALTER TABLE {og} ADD COLUMN notification smallint NOT NULL default 0");
-    break;
-  } 
-  return $ret ? $ret : array();
-}
-
-// remove crufty image field. we now use image_attach.module fom image.module package instead.
-function og_update_12() {
-  // works for mysql and postgres
-  $ret[] = update_sql("ALTER TABLE {og} DROP image");
-  return $ret;
-}
-
-// populate the og_uid_global table. we have to choose selective here for backward compatibility. 
-// to set everyone up for 'always' notifications, run this after the update: UPDATE og_uid_global SET og_email=1
-function og_update_13() {
-  switch ($GLOBALS['db_type']) { 
-    case 'mysql': 
-    case 'mysqli': 
-      db_query("CREATE TABLE {og_uid_global} (
-        uid int(11) NOT NULL,
-        og_email int(11) NOT NULL DEFAULT 2,
-        PRIMARY KEY  (uid)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
-    break;
-    case 'pgsql':
-      db_query("CREATE TABLE {og_uid_global} (
-        uid int NOT NULL,
-        og_email int NOT NULL DEFAULT 2,
-        PRIMARY KEY (uid)
-      );");
-      break;
-  }
-  
-  // works for mysql and postgres
-  $sql = 'SELECT uid FROM {users} WHERE uid > 0';
-  $result = db_query($sql);
-  while ($row = db_fetch_object($result)) {
-    $sql = "INSERT INTO {og_uid_global} (uid, og_email) VALUES (%d, %d)";
-    db_query($sql, $row->uid, OG_NOTIFICATION_SELECTIVE);
-  }
-  return array();
-}
-
+// First 5.x update.
 // use the new na_arbitrator way of writing to node_access table
 function og_update_14() {
   switch ($GLOBALS['db_type']) { 
@@ -524,11 +387,7 @@ function og_populate_uid_global_table() {
 }
 
 function og_uninstall() {
-  // Drop database table
-  db_query('DROP TABLE {og}');
-  db_query('DROP TABLE {og_uid}');
-  db_query('DROP TABLE {og_uid_global}');
-  db_query('DROP TABLE {og_ancestry}');
+  drupal_uninstall_schema('og');
 
   // Delete variables
   $variables = array(

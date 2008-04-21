@@ -1,4 +1,6 @@
 name = Organic groups
 description = "Enable users to create and manage their own 'groups'"
 package = "Organic groups"
-dependencies = views views_rss
+dependencies[] = views
+dependencies[] = views_rss
+core = 6.x

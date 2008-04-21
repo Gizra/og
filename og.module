@@ -24,9 +24,9 @@ define('OG_NOTIFICATION_NEVER', 0);
 define('OG_NOTIFICATION_ALWAYS', 1);
 define('OG_NOTIFICATION_SELECTIVE', 2);
 
-function og_help($section) {
-  switch ($section) {
-    case !empty($section) && strstr($section, 'admin/build/block/configure/og'):
+function og_help($path, $arg) {
+  switch ($path) {
+    case !empty($section) && strstr($path, 'admin/build/block/configure/og'):
       return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
     case 'admin/settings/og':
       return t('In order to let group admins determine their own group theme, you must enable multiple themes using !page.', array('!page' => l(t('theme configuration page'), 'admin/build/themes')));
