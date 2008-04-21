@@ -1624,12 +1624,13 @@ function og_all_groups_options() {
 
 /**
  * Iterate over a set of groups and separate out those that are inaccessible to the current user. 
- * Don't return groups of which the current user is a member. Used in og_form_add_og_audience() and node.tpl.php.
+ * Don't return groups of which the current user is a member, unless $exclude_joined=FALSE
+ * is passed. Used in og_form_add_og_audience() and node.tpl.php.
  * 
  * @return array
  *   A two element array containing 'accessible' and 'inaccessible' keys.
  **/
-function og_node_groups_distinguish($groups_names_both) {
+function og_node_groups_distinguish($groups_names_both, $exclude_joined = TRUE) {
   global $user;
   
   $current_groups = array('accessible' => array(), 'inaccessible' => array());
@@ -1648,9 +1649,10 @@ function og_node_groups_distinguish($groups_names_both) {
         $current_groups['inaccessible'][$gid] = $gid;
       }
     }
-
-    // There is no point in returning groups that the user has already joined.
-    $current_groups['accessible'] = array_diff_assoc($current_groups['accessible'], $user->og_groups);
+    if ($exclude_joined) {
+      // Don't return groups that the user has already joined (default).
+      $current_groups['accessible'] = array_diff_assoc($current_groups['accessible'], $user->og_groups);
+    }
   }
   
   return $current_groups;
