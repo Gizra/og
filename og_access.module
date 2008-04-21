@@ -195,7 +195,7 @@ function og_access_node_access_records($node) {
   
   if (og_is_group_type($node->type)) {
     // This grant allows group admins to manage their group.
-    $grants[] = array('realm' => 'og_subscriber', 'gid' => $node->nid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
+    $grants[] = array('realm' => 'og_admin', 'gid' => $node->nid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
     // If the group is not marked private, let everyone view the group homepage.
     if (!$node->og_private) {
         $grants[] = array (
