@@ -146,7 +146,7 @@ function og_panels_ct_render_callback_faces($conf, $panel_args, $context) {
 
   $block->subject = t('Group Faces');
   if ($node) {
-    $block->content = og_list_users_faces_page($node->nid, $conf['column_count'], $conf['row_count'], $conf['pager_id']);
+    $block->content = og_list_users_faces_page($node, $conf['column_count'], $conf['row_count'], $conf['pager_id']);
     $block->delta = $node->nid;
   }
   else {
