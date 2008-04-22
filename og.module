@@ -33,144 +33,239 @@ function og_help($path, $arg) {
   }
 }
 
-function og_menu($may_cache) {
-  global $user;
-  $items = array();
-  $access = $user->uid; // login is required
-
-  if ($may_cache) {
+function og_menu() {
     // anon users should be able to get to the join page
-    $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('Join group'));
-    
-    $items[] = array('path' => 'og/opml', 'type' => MENU_CALLBACK, 'callback' => 'og_opml', 'access' => $access, 'title' => t('OPML'));
-    $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('Leave group'));
-    $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('Approve membership request'));
-    $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('Deny membership request'));
-    $items[] = array('path' => 'og/create_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_create_admin', 'access' => $access, 'title' => t('Create group administrator'));
-    $items[] = array('path' => 'og/delete_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_delete_admin', 'access' => $access, 'title' => t('Delete group administrator'));
-    $items[] = array('path' => 'og/feed', 'callback' => 'og_feed', 'title' => t('Group feed'), 'type' => MENU_CALLBACK, 'access' => user_access('access content'));
-    
-    // members only
-    $items[] = array('path' => "og/invite", 'callback' => 'og_menu_check', 'title' => t('Send invitation'), 'callback arguments' => array('og_invite_page'), 'type' => MENU_CALLBACK, 'access' => $access);
-    $items[] = array('path' => "og/manage", 'callback' => 'og_menu_check', 'title' => t('Manage membership'), 'callback arguments' => array('og_manage'), 'type' => MENU_CALLBACK, 'access' => $access);
-    
-    $items[] = array(
-      'path' => 'og/activity', 
-      'title' => t('Group activity'), 
-      'callback' => 'og_page_activity',  
-      'access' => user_access('administer organic groups'), 
-      'weight' => 4,
-      'type' => MENU_LOCAL_TASK,
+  $items['og/subscribe'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_subscribe', 
+    'access callback' => TRUE, 
+    'title' => 'Join group'
+  );
+  
+  $items['og/opml'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_opml', 
+    'access callback' => 'user_is_logged_in', 
+    'title' => t('OPML')
+  );
+  $items['og/unsubscribe'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_unsubscribe', 
+    'access callback' => 'user_is_logged_in', 
+    'title' => 'Leave group',
+  );
+  
+  $items['og/approve/%node'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_approve', 
+    'access callback' => 'og_is_group_admin', 
+    'access arguments' => array(2),
+    'title' => 'Approve membership request'
+  ); 
+  $items['og/deny/%node'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_deny', 
+    'access callback' => 'og_is_group_admin', 
+    'access arguments' => array(2),
+    'title' => 'Deny membership request',
+  );
+  $items['og/create_admin/%node'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_create_admin', 
+    'access callback' => 'og_is_group_admin', 
+    'access arguments' => array(2),
+    'title' => 'Create group administrator',
+  );
+  $items['og/delete_admin/%node'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_delete_admin', 
+    'access callback' => 'og_is_group_admin', 
+    'access arguments' => array(2),
+    'title' => 'Delete group administrator',
+  );
+  
+  $items['og/feed'] = array(
+    'page callback' => 'og_feed', 
+    'title' => 'Group feed', 
+    'type' => MENU_CALLBACK, 
+    'access callback' => 'og_is_group_member',
+    'access arguments' => array(2), 
+  );
+  
+  // members only
+  $items['og/invite'] = array(
+    'page callback' => 'og_invite_page',
+    'access callback' => 'og_is_group_member', 
+    'access arguments' => array(2),
+    'title' => t('Send invitation'), 
+    'type' => MENU_CALLBACK, 
+  );
+  $items["og/manage"] = array(
+    'page callback' => 'og_manage',
+    'access callback' => 'og_is_group_member', 
+    'access arguments' => array(2),
+    'title' => t('Manage membership'), 
+    'type' => MENU_CALLBACK, 
     );
-    $items[] = array(
-      'path' => 'admin/og', 
-      'title' => t('Organic groups'),
-      'description' => t('Administer the suite of Organic groups modules.'),
-      'position' => 'right',
-      'weight' => -5,
-      'callback' => 'system_admin_menu_block_page',
-      'access' => user_access('administer site configuration')
-      );
-    $items[] = array('path' => 'admin/og/og', 'callback' => 'drupal_get_form', 'callback arguments' => array('og_admin_settings'), 'title' => t('Organic groups configuration'), 'description' => t('Configure the main Organic groups module (og)'), 'weight' => -5,);
-  }
-  else {
-    drupal_add_css(drupal_get_path('module', 'og'). '/og.css');
-    
-    // we get a NOTICE if doing this from within og_theme() so I do it here for now.
-    $_SESSION['og_last'] = og_get_group_context();
+  
+  $items['og/activity'] = array(
+    'title' => 'Group activity', 
+    'page callback' => 'og_page_activity',  
+    'access arguments' => array('administer organic groups'), 
+    'weight' => 4,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/og'] = array(
+    'title' => 'Organic groups',
+    'description' => 'Administer the suite of Organic groups modules.',
+    'position' => 'right',
+    'weight' => -5,
+    'block callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    );
+  $items['admin/og/og'] = array(
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('og_admin_settings'), 
+    'title' => 'Organic groups configuration', 
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Configure the main Organic groups module (og)', 
+    'weight' => -5,
+  );
 
-    //membership page and its 'add members' tab
-    $gid = arg(2);
-    if (arg(0) == 'og' && arg(1) == 'users' && is_numeric($gid)) {
-      $items[] = array('path' => "og/users/$gid", 'callback' => 'og_menu_check', 'title' => t('Members'), 'callback arguments' => array('og_list_users_page', $gid), 'type' => MENU_CALLBACK, 'access' => $access);
-      $items[] = array('path' => "og/users/$gid/list", 'title' => t('List'), 'type' => MENU_DEFAULT_LOCAL_TASK);
-      if (og_is_picture()) {
-        $items[] = array('path' => "og/users/$gid/faces", 'title' => t('Faces'), 'callback' => 'og_menu_check', 'callback arguments' => array('og_list_users_faces_page', $gid), 'type' => MENU_LOCAL_TASK);
-      }
-      // group admin only
-      $node = node_load($gid);
-      $items[] = array('path' => "og/users/$gid/add_user", 'callback' => 'drupal_get_form', 'title' => t('Add members'), 'callback arguments' => array('og_add_users', $gid), 'type' => MENU_LOCAL_TASK, 'weight' => 5, 'access' => og_is_node_admin($node));
-    }
-    
-    // email tab on group node
-    if (arg(0) == 'node' && is_numeric(arg(1))) {
-      $node = node_load(arg(1));
-      if (og_is_group_type($node->type)) {
-        $items[] = array('path' => 'node/'. arg(1). '/email', 'title' => t('E-mail'), 'callback' => 'drupal_get_form', 'callback arguments' => array('og_email_form', arg(1)), 'access' => og_is_node_admin($node), 'type' => MENU_LOCAL_TASK, 'weight' => 7);
-      }
-    }
-  }
+  //membership page and its 'add members' tab
+  $items['og/users/%node'] = array(
+    'page callback' => 'og_list_users_page',
+    'title' => 'Members', 
+    'page arguments' => array(2), 
+    'type' => MENU_CALLBACK, 
+    'access' => 'og_is_group_member',
+    'access arguments' => array(2),
+  );
+  $items['og/users/%node/list'] = array(
+    'title' => t('List'), 
+    'type' => MENU_DEFAULT_LOCAL_TASK
+  );
+  $items['og/users/%node/faces'] = array(
+    'title' => t('Faces'), 
+    'page callback' => 'og_list_users_faces_page',
+    'page arguments' => array(2),
+    'type' => MENU_LOCAL_TASK,
+    'access callback' => og_menu_access_faces(2),
+  );
+  
+  // group admin only
+  $items['og/users/%node/add_user'] = array(
+    'page callback' => 'drupal_get_form', 
+    'title' => 'Add members', 
+    'page arguments' => array('og_add_users', 2), 
+    'type' => MENU_LOCAL_TASK, 
+    'weight' => 5, 
+    'access callback' => 'og_is_group_admin',
+    'access arguments' => array(2),
+  );
+  
+  // Email tab on group node.
+    $items['node/%node/email'] = array(
+      'title' => 'Send email to %group',
+      'title arguments' => array($group->title), 
+      'page callback' => 'drupal_get_form', 
+      'page arguments' => array('og_email_form', 2), 
+      'access callback' => 'og_is_group_admin', 
+      'access arguments' => array(2),
+      'type' => MENU_LOCAL_TASK, 
+      'weight' => 7
+    );
+
   return $items;
 }
 
-// check for membership and then pass along to the real menu callback
-// arguments must be in this order: function, $gid, <extra params required by function>
-// we used to register these menu items dynamically for each joined group but non members were falling through and getting /og callback
-function og_menu_check() {
-  global $user;
-
-  $args = func_get_args();
-  $function = array_shift($args);
-  $groups = array_keys($user->og_groups);
-  if (user_access('administer nodes') || in_array($args[0], $groups)) {
-    return call_user_func_array($function, $args);
+function og_menu_access_picture($group) {
+  if (og_is_picture() && og_is_group_member($group->gid)) {
+    return TRUE;
   }
   else {
-    drupal_access_denied();
+    return FALSE;
   }
 }
 
 /**
- * This processing cannot happen later in the request because
- * - menu items will be in default language if we wait until og_menu(!$may_cache). bad for locale feature
- */
-function og_init() {
-  // only bother when we are not serving a cached page. check for which function that only exists afterwards
-  if (function_exists('drupal_set_content')) {    
-    // we have to perform a load in order to assure that the $user->og_groups bits are present.
-    global $user;
-    if ($user->uid) {
-      $user = user_load(array('uid' => $user->uid));
-    }
-    else {
-      $user->og_groups = array();
-    }
+ * Access callback. Check current user's membership in a group. Admins always return TRUE.
+ * 
+ **/
+function og_is_group_member($gid) {
+  global $user;
 
-    require dirname(__FILE__). '/og_views.inc';
-    if (module_exists('workflow_ng')) {
-      require dirname(__FILE__). '/og_workflow_ng.inc';
-    }
-    og_theme();
-    og_set_locale();
+  // Allow caller to pass in a full $node. Used by menu items.
+  if (is_object($gid)) {
+    $gid = $gid->gid;
   }
+  
+  $groups = array_keys($user->og_groups);
+  if (user_access('administer nodes') || in_array($gid, $groups)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/*
+ * Determine whether user can act as a group administrator for a given group.
+ */
+function og_is_group_admin($node) {
+  return og_is_group_type($node->type) && node_access('update', $node);
+}
+
+
+function og_init() {
+  // we have to perform a load in order to assure that the $user->og_groups bits are present.
+  global $user;
+  if ($user->uid) {
+    $user = user_load(array('uid' => $user->uid));
+  }
+  else {
+    $user->og_groups = array();
+  }
+  
+  drupal_add_css(drupal_get_path('module', 'og'). '/og.css');
+  // we get a NOTICE if doing this from within og_theme() so I do it here for now.
+  $_SESSION['og_last'] = og_get_group_context();
+
+  require dirname(__FILE__). '/og_views.inc';
+  if (module_exists('workflow_ng')) {
+    require dirname(__FILE__). '/og_workflow_ng.inc';
+  }
+  og_theme();
+  // og_set_locale();
 }
 
 /**
  * Like locale_initialize(), but includes a check for group language and sets accordingly.
  * Priority goes: user => group => site default
+ * TODO: ask Goba
  **/
-function og_set_locale() {
-  global $user, $locale;
-    
-  if (function_exists('locale')) {
-    $languages = locale_supported_languages();
-    $languages = $languages['name'];
-  }
-  else {
-    // Ensure the locale/language is correctly returned, even without locale.module.
-    // Useful for e.g. XML/HTML 'lang' attributes.
-    $languages = array('en' => 'English');
-  }
-
-  if ($user->uid && isset($languages[$user->language])) {
-    // do nothing. user specified language has priority
-  }
-  elseif ($group_node = og_get_group_context()) {
-    if ($group_node->og_language && isset($languages[$group_node->og_language])) {
-      $locale = $group_node->og_language;
-    }
-  }
-}
+// function og_set_locale() {
+//   global $user, $locale;
+//     
+//   if (function_exists('locale')) {
+//     $languages = locale_supported_languages();
+//     $languages = $languages['name'];
+//   }
+//   else {
+//     // Ensure the locale/language is correctly returned, even without locale.module.
+//     // Useful for e.g. XML/HTML 'lang' attributes.
+//     $languages = array('en' => 'English');
+//   }
+// 
+//   if ($user->uid && isset($languages[$user->language])) {
+//     // do nothing. user specified language has priority
+//   }
+//   elseif ($group_node = og_get_group_context()) {
+//     if ($group_node->og_language && isset($languages[$group_node->og_language])) {
+//       $locale = $group_node->og_language;
+//     }
+//   }
+// }
 
 /**
  * Implementation of hook_perm().
@@ -253,8 +348,8 @@ function og_set_theme($nid) {
         $custom_theme = $group_node->og_theme;
         break;
       default:
-        // node is in multiple groups. preference goes to the group we showed on the prior page view (if any),
-        // then to a group the current user is a member of
+        // Node is in multiple groups. Preference goes to the group we showed on the prior page view (if any),
+        // Then to a group the current user is a member of
         if (in_array($_SESSION['og_last']->nid, $node->og_groups)) {
           $group_node = node_load($_SESSION['og_last']->nid);
           $custom_theme = $group_node->og_theme;
@@ -281,28 +376,40 @@ function og_set_theme($nid) {
 /**
  * Admins may broadcast email to all their members
  *
- * @param $gid
- *   the nid of a group.
+ * @param $node
+ *   The group node.
  */
- function og_email_form($gid) {
-  $node = node_load($gid);
-  drupal_set_title(t('Send email to %group', array('%group' => $node->title)));
+ function og_email_form($node) {
   
-  $result = db_query(og_list_users_sql(1), $gid);
+  $result = db_query(og_list_users_sql(1), $node->nid);
   $txt = format_plural(db_num_rows($result), 'the sole member', 'all @count members');
-  if (!$_POST) {
-    drupal_set_message(t('Your email will be sent to !count in this group. Please use this feature sparingly.', array('!count' => l($txt, "og/users/$gid"))));
+  if (empty($_POST)) {
+    drupal_set_message(t('Your email will be sent to !count in this group. Please use this feature sparingly.', array('!count' => l($txt, "og/users/$node->nid"))));
   }
 
-  $form['subject'] = array('#type' => 'textfield', '#title' => t('Subject'), '#size' => 70, '#maxlength' => 250, '#description' => t("Enter a subject for your email."), '#required' => true);
-  $form['body'] = array('#type' => 'textarea', '#title' => t('Body'), '#rows' => 5, '#cols' => 90, '#description' => t('Enter a body for your email.'), '#required' => true);
+  $form['subject'] = array(
+    '#type' => 'textfield', 
+    '#title' => t('Subject'), 
+    '#size' => 70, 
+    '#maxlength' => 250, 
+    '#description' => t("Enter a subject for your email."), 
+    '#required' => TRUE,
+  );
+  $form['body'] = array(
+    '#type' => 'textarea', 
+    '#title' => t('Body'), 
+    '#rows' => 5, 
+    '#cols' => 90, 
+    '#description' => t('Enter a body for your email.'), 
+    '#required' => TRUE
+  );
   $form['send'] = array('#type' => 'submit', '#value' => t('Send email'));
-  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+  $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
   return $form;
 }
 
 function og_email_form_submit($form_id, $form_values) {
-  $node = node_load($form_values[gid]);
+  $node = node_load($form_values['gid']);
 
   $variables = array(
     '@group' => $node->title,
@@ -323,7 +430,7 @@ function og_email_form_submit($form_id, $form_values) {
     drupal_mail('og_mail', trim($mail), $form_values['subject'], _og_user_mail_text('og_admin_email_body', $variables), $from);
   }
   drupal_set_message(format_plural(count($emails), '1 email sent.', '@count emails sent'));
-  drupal_goto("node/{$form_values[gid]}");
+  return "node/{$form_values[gid]}";
 }
 
 function og_manage($gid) {
@@ -338,6 +445,7 @@ function og_manage($gid) {
   $group = node_load($gid);
   $bc[] = array('path' => "og", 'title' => t('Groups'));
   $bc[] = array('path' => "node/$gid", 'title' => $group->title);
+  // TODO: menu_set_location needed?
   menu_set_location($bc);
   
   return drupal_get_form('og_manage_form', $group);
@@ -347,7 +455,7 @@ function og_manage_form($group) {
   global $user;
   
   // avoid double messages on POST
-  if (!$_POST) {
+  if (empty($_POST)) {
     // group manager can't leave
     if ($group->og_selective == OG_CLOSED) {
       drupal_set_message(t('You may not leave this group because it is a %closed group. You should request removal from a group administrator.', array('%closed' => t('closed'))));
@@ -357,7 +465,7 @@ function og_manage_form($group) {
     }
     else {
       $links[] = l(t('Leave this group'), "og/unsubscribe/$group->nid");
-      $form['unsubscribe'] = array('#type' => 'markup', '#value' => theme('item_list', $links, t('Actions')));
+      $form['unsubscribe'] = array('#value' => theme('item_list', $links, t('Actions')));
     }
   }
 
@@ -433,61 +541,49 @@ function og_delete_subscription($gid, $uid){
 }
 
 function og_approve($gid, $uid) {
-  $node = node_load($gid);
-  if (og_is_node_admin($node)) {
-    $account = user_load(array('uid' => (int)$uid));
-    if ($account === FALSE) {
-     drupal_set_message(t("User approval failed, user not longer available on website."), 'error');
-     return '';
-    }
-    if (in_array($gid, array_keys($account->og_groups))) {
-      drupal_set_message(t("!name already approved to group %group", array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
-      return '';
-    }
-    else {
-      og_save_subscription($gid, $uid, array('is_active' => 1));
-      drupal_set_message(t('Membership request approved.'));
-           
-      $variables = array(
-         '@title' => $node->title,
-         '!group_url'=> url("node/$node->nid", NULL, NULL, TRUE)
-      );     
-      
-      $from = variable_get('site_mail', ini_get('sendmail_from'));
-      $account = user_load(array('uid' => $uid));
-      drupal_mail('og_approve', $account->mail, _og_user_mail_text('og_approve_user_subject', $variables), _og_user_mail_text('og_approve_user_body', $variables), $from);
-      drupal_goto("node/$gid");
-    }
+  $account = user_load(array('uid' => (int)$uid));
+  if ($account === FALSE) {
+   drupal_set_message(t("User approval failed, user not longer available on website."), 'error');
+   return '';
+  }
+  if (in_array($node->nid, array_keys($account->og_groups))) {
+    drupal_set_message(t("!name already approved to group %group", array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
+    return '';
   }
   else {
-    drupal_access_denied();
-  }
-}
-
-function og_deny($gid, $uid) {
-  $node = node_load($gid);
-  if (og_is_node_admin($node)) {
-    og_delete_subscription($gid, $uid);
-    drupal_set_message(t('Membership request denied.'));
-    
+    og_save_subscription($node->nid, $uid, array('is_active' => 1));
+    drupal_set_message(t('Membership request approved.'));
+         
     $variables = array(
-      '@title' => $node->title,
-      '!group_url' => url("node/$node->nid", NULL, NULL, TRUE)
-    );
+       '@title' => $node->title,
+       '!group_url'=> url("node/$node->nid", NULL, NULL, TRUE)
+    );     
     
     $from = variable_get('site_mail', ini_get('sendmail_from'));
     $account = user_load(array('uid' => $uid));
-    drupal_mail('og_deny', $account->mail, _og_user_mail_text('og_deny_user_subject', $variables), _og_user_mail_text('og_deny_user_body', $variables), $from);
-    drupal_goto("node/$gid");
+    drupal_mail('og_approve', $account->mail, _og_user_mail_text('og_approve_user_subject', $variables), _og_user_mail_text('og_approve_user_body', $variables), $from);
+    return "node/$node->nid";
   }
-  else {
-    drupal_access_denied();
-  }
+}
+
+function og_deny($node, $uid) {
+  og_delete_subscription($node->nid, $uid);
+  drupal_set_message(t('Membership request denied.'));
+  
+  $variables = array(
+    '@title' => $node->title,
+    '!group_url' => url("node/$node->nid", NULL, NULL, TRUE)
+  );
+  
+  $from = variable_get('site_mail', ini_get('sendmail_from'));
+  $account = user_load(array('uid' => $uid));
+  drupal_mail('og_deny', $account->mail, _og_user_mail_text('og_deny_user_subject', $variables), _og_user_mail_text('og_deny_user_body', $variables), $from);
+  return "node/$node->nid";
 }
 
 function og_create_admin($gid, $uid) {
   $node = node_load($gid);
-  if (og_is_node_admin($node)) {
+  if (og_is_group_admin($node)) {
     $account = user_load(array('uid' => $uid));
     return drupal_get_form('og_create_admin_confirm', $gid, $node, $account);
   }
@@ -533,7 +629,7 @@ function og_create_admin_confirm_submit($form_id, $form_values) {
 
 function og_delete_admin($gid, $uid) {
   $node = node_load($gid);
-  if (og_is_node_admin($node)) {
+  if (og_is_group_admin($node)) {
     $account = user_load(array('uid' => $uid));
     return drupal_get_form('og_remove_admin_confirm', $gid, $node, $account);
   }
@@ -570,7 +666,7 @@ function og_remove_admin_confirm_submit($form_id, $form_values) {
 
 function og_invite_page($gid) {
   $node = node_load($gid);
-  if ($node->og_selective < OG_INVITE_ONLY || og_is_node_admin($node)) {
+  if ($node->og_selective < OG_INVITE_ONLY || og_is_group_admin($node)) {
     return drupal_get_form('og_invite_form', $gid);
   }
   else {
@@ -675,7 +771,7 @@ function og_subscribe($gid, $uid = NULL) {
   }
   
   // only admins can add another member
-  if ($account->uid != $user->uid && !og_is_node_admin($node)) {
+  if ($account->uid != $user->uid && !og_is_group_admin($node)) {
     drupal_access_denied();
     exit();
   }
@@ -762,7 +858,7 @@ function og_subscribe_user($gid, $account, $request = NULL) {
     case OG_CLOSED:
     case OG_INVITE_ONLY:
       // admins can add members to these groups, but others can't.
-      if (og_is_node_admin($node)) {
+      if (og_is_group_admin($node)) {
         og_save_subscription($gid, $account->uid, array('is_active' => 1));
       }
       else {
@@ -779,12 +875,12 @@ function og_unsubscribe($gid, $uid = NULL) {
     $uid = $user->uid;
   }
   $node = node_load($gid);
-  if ($uid != $user->uid && !og_is_node_admin($node)) {
+  if ($uid != $user->uid && !og_is_group_admin($node)) {
     // only admins can remove another member
     drupal_access_denied();
     exit();
   }
-  if (($node->og_selective == OG_CLOSED && !og_is_node_admin($node)) || $node->uid == $uid){
+  if (($node->og_selective == OG_CLOSED && !og_is_group_admin($node)) || $node->uid == $uid){
     // Regular users may not leave from a closed group
     // Group manager may never leave (TODO: fix), such a link should never be generated
     drupal_access_denied();
@@ -856,7 +952,7 @@ function og_list_users_sql($min_is_active = 1, $min_is_admin = 0, $orderby='u.na
   return "SELECT u.uid, u.name, u.mail, u.picture, ou.* FROM {og_uid} ou INNER JOIN {users} u ON ou.uid = u.uid WHERE ou.nid = %d AND u.status > 0 AND ou.is_active >= $min_is_active AND ou.is_admin >= $min_is_admin ORDER BY $orderby";
 }
 
-function og_add_users($gid) {
+function og_add_users($group) {
   $form['og_names'] = array('#type' => 'textarea',
                             '#title' => t('List of users'),
                             '#rows' => 5,
@@ -866,7 +962,7 @@ function og_add_users($gid) {
                             '#description' => t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.')
                             );
   $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
-  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+  $form['gid'] = array('#type' => 'value', '#value' => $$group->nid);
   return $form;
 }
 
@@ -903,9 +999,8 @@ function og_add_users_submit($form_id, $form_values) {
   drupal_set_message(format_plural(count($accounts), '1 user added to the group', '@count users added to the group'));
 }
 
-function og_list_users_page($gid) {
-  $node = node_load($gid);
-  $access = og_is_node_admin($node);
+function og_list_users_page($node) {
+  $access = og_is_group_admin($node);
   if ($access) {
     $header[] = array('data' => t('Operations'), 'colspan' => 2);
   }
@@ -2106,13 +2201,6 @@ function og_get_sql_args() {
   $types = og_get_types('group');
   $in = implode(', ', array_fill(0, count($types), "'%s'"));
   return array($types, $in);
-}
-
-/*
- * Determine whether user can act as a group administrator for a given group.
- */
-function og_is_node_admin($node) {
-  return node_access('update', $node);
 }
 
 function og_user($op, $edit, &$account, $category = NULL) {

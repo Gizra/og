@@ -32,7 +32,7 @@ function og_panels_menu($may_cache) {
           'title' => t('Pages'),
           'callback' => 'og_panels_overview',
           'callback arguments' => array($node),
-          'access' => og_is_node_admin($node) && user_access('manage OG panels pages'),
+          'access' => og_is_group_admin($node) && user_access('manage OG panels pages'),
           'type' => MENU_LOCAL_TASK,
           'weight' => 8,
         );
@@ -81,7 +81,7 @@ function og_panels_menu($may_cache) {
               // have to pass all these args so the args are known in panels_page()
               'callback arguments' => array($display->did, $node, $display->page_title),
               'type' => MENU_LOCAL_TASK,
-              'access' => $display->published || (og_is_node_admin($node) && user_access('manage OG panels pages')),
+              'access' => $display->published || (og_is_group_admin($node) && user_access('manage OG panels pages')),
               'weight' => $display->weight,
             );
           }
