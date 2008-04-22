@@ -836,10 +836,19 @@ function og_get_subscriptions($uid, $min_is_active = 1, $reset = FALSE) {
 
   if (!isset($subscriptions[$uid][$min_is_active])) {
     list($types, $in) = og_get_sql_args();
-    $args = $types;
+    // $types is empty during the update to new content type storage.
+    if (!empty($types)) {
+      $args = $types;
+      $in = "IN ($in)";
+    }
+    else {
+      $args = array();
+      $in = 'IS NULL';
+    }
+    
     array_unshift($args, $min_is_active);
     array_unshift($args, $uid);
-    $sql = "SELECT n.title, n.type, n.status, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d AND ou.is_active >= %d AND n.type IN ($in) ORDER BY n.title";
+    $sql = "SELECT n.title, n.type, n.status, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d AND ou.is_active >= %d AND n.type $in ORDER BY n.title";
     $result = db_query($sql, $args);
     while ($row = db_fetch_array($result)) {
       $subscriptions[$uid][$min_is_active][$row['nid']] = $row;
@@ -2103,8 +2112,12 @@ function _og_user_mail_text($messageid, $variables = array()) {
 
 // helper function for queries that need all group types
 function og_get_sql_args() {
-  $types = og_get_types('group');
-  $in = implode(', ', array_fill(0, count($types), "'%s'"));
+  if ($types = og_get_types('group')) {
+    $in = implode(', ', array_fill(0, count($types), "'%s'"));
+  }
+  else {
+    $in = '';
+  }
   return array($types, $in);
 }
 
