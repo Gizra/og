@@ -836,20 +836,11 @@ function og_get_subscriptions($uid, $min_is_active = 1, $reset = FALSE) {
 
   if (!isset($subscriptions[$uid][$min_is_active])) {
     list($types, $in) = og_get_sql_args();
-    // $types is empty during the update to new content type storage.
-    if (!empty($types)) {
-      $args = $types;
-      $in = "IN ($in)";
-    }
-    else {
-      $args = array();
-      $in = 'IS NULL';
-    }
     
-    array_unshift($args, $min_is_active);
-    array_unshift($args, $uid);
+    array_unshift($types, $min_is_active);
+    array_unshift($types, $uid);
     $sql = "SELECT n.title, n.type, n.status, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d AND ou.is_active >= %d AND n.type $in ORDER BY n.title";
-    $result = db_query($sql, $args);
+    $result = db_query($sql, $types);
     while ($row = db_fetch_array($result)) {
       $subscriptions[$uid][$min_is_active][$row['nid']] = $row;
     }
@@ -1626,7 +1617,7 @@ function og_node_delete_confirm_submit($form_id, $form_values) {
 // return an array containing all groups. suitable for a form item
 function og_all_groups_options() {
   list($types, $in) = og_get_sql_args();
-  $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type IN ($in) AND n.status = 1 ORDER BY n.title ASC";
+  $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type $in AND n.status = 1 ORDER BY n.title ASC";
   $result = db_query($sql, $types);
   while ($row = db_fetch_object($result)) {
     $options[$row->nid] = $row->title;
@@ -2113,11 +2104,12 @@ function _og_user_mail_text($messageid, $variables = array()) {
 // helper function for queries that need all group types
 function og_get_sql_args() {
   if ($types = og_get_types('group')) {
-    $in = implode(', ', array_fill(0, count($types), "'%s'"));
+    $in = 'IN ('. implode(', ', array_fill(0, count($types), "'%s'")). ')';
   }
   else {
-    $in = '';
+    $in = 'IS NULL';
   }
+  
   return array($types, $in);
 }
 
@@ -2143,7 +2135,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
           $nids[] = (int)$gid;
         }
         $in_nids = implode(', ', array_fill(0, count($nids), "%d"));
-        $sql = "SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ($in) AND n.status = 1 AND n.nid IN ($in_nids) ORDER BY n.title";
+        $sql = "SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type $in AND n.status = 1 AND n.nid IN ($in_nids) ORDER BY n.title";
         $result = db_query(db_rewrite_sql($sql), array_merge($types, $nids));
       }
       else {      
@@ -2461,7 +2453,7 @@ function theme_opml_icon($url) {
 
 function og_block_new() {
   list($types, $in) = og_get_sql_args();
-  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type IN ($in) AND n.status = 1";
+  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type $in AND n.status = 1";
   $cnt = db_result(db_query(db_rewrite_sql($sql), $types));
   if ($cnt > 0) {
     $max = variable_get('og_block_cnt_3', 10);
@@ -2702,19 +2694,24 @@ function og_admin_settings() {
   drupal_set_title(t('Organic groups configuration'));
 
   // content types
-  $form['og_settings']['content_types'] = array('#type' => 'fieldset', '#title' => t('Content types'), '#collapsible' => TRUE, '#collapsed' => TRUE);
+  $group_types = og_get_types('group');
+  if (empty($group_types)) {
+    form_set_error('content_types_table', t('You must designate at least one content type to act as a group. <a href="!create">Create a new content type</a> if needed.', array('!create' => url('admin/content/types/add'))));
+  }
+  $form['og_settings']['content_types'] = array('#type' => 'fieldset', '#title' => t('Content types'), '#collapsible' => TRUE, '#collapsed' => !empty($group_types));
   $header = array(t('Type'), t('Usage'), t('Operations'));
+  $map = og_types_map();
   foreach (node_get_types() as $type) {
     $type_url_str = str_replace('_', '-', $type->type);
     $usage = variable_get('og_content_type_usage_'. $type->type, 'omitted');
-    $map = og_types_map();
+    
     $rows[] = array(
       $type->name,
       $map[$usage],
       l(t('Edit'), "admin/content/types/$type_url_str", array(), drupal_get_destination()),      
     );
   }
-  $form['og_settings']['content_types']['table'] = array('#value' => theme('table', $header, $rows));
+  $form['og_settings']['content_types']['content_types_table'] = array('#value' => theme('table', $header, $rows));
 
   
   $form['og_settings']['group_details'] = array('#type' => 'fieldset', '#title' => t('Group details'), '#collapsible' => TRUE, '#collapsed' => TRUE);
@@ -2944,8 +2941,8 @@ function og_requirements($phase) {
     if (!count(array_intersect($og_types, $all_types))) {
           $requirements['og_group_types']  = array(
             'title' => $t('Organic groups group type'),
-            'value' => $t('You have no node types which are acting as groups. See the Integration section of the !readme.', array('!readme' => og_readme())),
-            'severity' => REQUIREMENT_WARNING
+            'value' => $t('You have no node types which are acting as groups. See the Notes section of the !readme and the Content types fieldset at top of <a href="!settings">OG settings</a>.', array('!readme' => og_readme(), '!settings' => url('admin/og/og'))),
+            'severity' => REQUIREMENT_ERROR
           );
         }
     
@@ -2960,7 +2957,7 @@ function og_requirements($phase) {
     if (!module_exists('og_access')) {
       $requirements['og_access'] = array(
         'title' => $t('Organic groups access control'),
-        'value' => $t('Organic groups access control module isdisabled. See the !modules', array('!settings' => l($t('modules page'), 'admin/build/modules'))),
+        'value' => $t('Organic groups access control module is disabled. See the !modules', array('!modules' => l($t('modules page'), 'admin/build/modules'))),
         'severity' => REQUIREMENT_INFO
       );
     }

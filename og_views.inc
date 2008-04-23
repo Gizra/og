@@ -6,6 +6,7 @@
  
 function og_views_tables() {
   $languages = module_invoke('locale', 'supported_languages', FALSE, TRUE);
+  $group_post_type_options = $group_type_options = array();
   foreach (og_get_types('group') as $type) {
     $group_type_options[$type] = node_get_types('name', $type);
   }
@@ -401,7 +402,7 @@ function og_handler_argument_group_name_like($op, &$query, $argtype, $arg = '') 
 // helper function. restrict to unaffiliated posts.
 // function og_handler_unaffiliated(&$query) {
 //   list($types, $in) = og_get_sql_args();
-//   $query->add_where("node.type NOT IN ($in)", $types);
+//   $query->add_where("node.type NOT $in", $types);
 //   
 //   $query->ensure_table('og_ancestry');
 //   $query->add_where('og_ancestry.group_nid IS NULL');
@@ -1353,7 +1354,7 @@ function og_handler_filter_gid($op, $filter, $filterinfo, &$query) {
 
 function og_handler_filter_og_type($op, $filter, $filterinfo, &$query) {
   list($types, $in) = og_get_sql_args();
-  $query->add_where("node.type IN ($in)", $types);
+  $query->add_where("node.type $in", $types);
 }
 
 function og_handler_filter_post_og_type($op, $filter, $filterinfo, &$query) {

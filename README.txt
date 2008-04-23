@@ -8,7 +8,7 @@ INSTALLATION
 ---------------
 - Enable the og module. If you want to protect some posts so that only certain users may view them, enable the 'Organic Groups access control' module as well. Please make sure og is working well on its own before enabling other OG related modules.
 - Visit the admin/og/og page.
-- On admin/og/og, see the conten types table at the top. Click edit beside each type to set its 'usage'. You usually want to create a new node type via admin/content/types page and then designate that node type as a group from here. See the first item in NOTES below. 
+- On admin/og/og, see the content types table at the top. Click edit beside each type to set its 'usage'. You usually want to create a new node type via admin/content/types page and then designate that node type as a group from here. See the first item in NOTES below. 
 - Set other preferences on admin/og/og as desired. It may take some experimenting before you arrive at a configuration well suited to your needs.
 - On the admin/content/types page, disable comments and attachments for node types which are designated as groups. Click the edit link beside those types.
 - On the admin/build/themes/settings pages, in 'Display post information on' section, uncheck each node type which has been designated as a group.
