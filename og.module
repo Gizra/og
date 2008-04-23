@@ -757,7 +757,7 @@ function og_subscribe_user($gid, $account, $request = NULL) {
     case OG_OPEN:
       og_save_subscription($gid, $account->uid, array('is_active' => 1));
       $return_value = array('type' => 'subscribed',
-                            'message' => t('You are now a member of the @group', array('@group' => $node->title)));
+                            'message' => t('You are now a member of the %group', array('%group' => $node->title)));
       break;
     case OG_CLOSED:
     case OG_INVITE_ONLY:
@@ -1183,7 +1183,7 @@ function og_group_form($node) {
   
 
   // directory checkbox  
-  $visibility = variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_FALSE);  
+  $visibility = variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_TRUE);  
   
   // override for admins - get right default
   if (user_access('administer nodes')) {
@@ -2141,11 +2141,11 @@ function og_user($op, $edit, &$account, $category = NULL) {
       else {      
         $default_value = array();
         // perhaps this should be a View
-        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ($in) AND n.status = 1 AND o.register = 1 ORDER BY n.title"), $types);
+        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type $in AND n.status = 1 AND o.register = 1 ORDER BY n.title"), $types);
       }
       
       while ($group = db_fetch_object($result)) {
-        $options[$group->nid] = '<span class="og-registration-'.$group->nid.'">'. t('Join @name.', array('@name' => $group->title)). "</span>\n";
+        $options[$group->nid] = '<span class="og-registration-'.$group->nid.'">'. t('Join %name.', array('%name' => $group->title)). "</span>\n";
         if ($group->selective) {
           $options[$group->nid] .= ' '. t('(approval needed)');
         }
@@ -2457,7 +2457,7 @@ function og_block_new() {
   $cnt = db_result(db_query(db_rewrite_sql($sql), $types));
   if ($cnt > 0) {
     $max = variable_get('og_block_cnt_3', 10);
-    $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type IN ($in) AND og.directory=1 ORDER BY nid DESC";
+    $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type $in AND og.directory=1 ORDER BY nid DESC";
     $result = db_query_range(db_rewrite_sql($sql), $types, 0, $max);
     $output = node_title_list($result);
     if ($cnt > $max) {
@@ -2694,11 +2694,11 @@ function og_admin_settings() {
   drupal_set_title(t('Organic groups configuration'));
 
   // content types
-  $group_types = og_get_types('group');
-  if (empty($group_types)) {
-    form_set_error('content_types_table', t('You must designate at least one content type to act as a group. <a href="!create">Create a new content type</a> if needed.', array('!create' => url('admin/content/types/add'))));
+  $is_configured = count(og_get_types('group')) && count(og_get_types('group_post'));
+  if (!$is_configured) {
+    form_set_error('content_types_table', t('You must designate at least one content type to act as a Group node and another as a Group post. <a href="!create">Create new content type</a> if needed.', array('!create' => url('admin/content/types/add'))));
   }
-  $form['og_settings']['content_types'] = array('#type' => 'fieldset', '#title' => t('Content types'), '#collapsible' => TRUE, '#collapsed' => !empty($group_types));
+  $form['og_settings']['content_types'] = array('#type' => 'fieldset', '#title' => t('Content types'), '#collapsible' => TRUE, '#collapsed' => $is_configured);
   $header = array(t('Type'), t('Usage'), t('Operations'));
   $map = og_types_map();
   foreach (node_get_types() as $type) {

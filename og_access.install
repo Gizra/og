@@ -2,6 +2,15 @@
 // $Id$
 
 /**
+ * An implementation of hook_install().
+ */
+function og_access_install() {
+  // Put this module after OG so it can form_alter as needed.
+  db_query("UPDATE {system} SET weight = 1 WHERE name = 'og_access'");
+}
+
+
+/**
  * Implementation of hook_enable().
  *
  * A node access module needs to force a rebuild of the node access table
