@@ -423,8 +423,8 @@ function og_email_form_submit($form, &$form_state) {
     '@group' => $node->title,
     '@body' => $form_state['values']['body'],
     '@site' => variable_get('site_name', drupal),
-    '!url_group' => url("node/$node->nid", NULL, NULL, TRUE),
-    '!url_unsubscribe' => url("og/unsubscribe/$node->nid", NULL, NULL, TRUE)
+    '!url_group' => url("node/$node->nid", array('absolute' => TRUE)),
+    '!url_unsubscribe' => url("og/unsubscribe/$node->nid", array('absolute' => TRUE))
   );
   
   global $user;
@@ -579,7 +579,7 @@ function og_approve($gid, $uid) {
          
     $variables = array(
        '@title' => $node->title,
-       '!group_url'=> url("node/$node->nid", NULL, NULL, TRUE)
+       '!group_url'=> url("node/$node->nid", array('absolute' => TRUE))
     );     
     
     $from = variable_get('site_mail', ini_get('sendmail_from'));
@@ -595,7 +595,7 @@ function og_deny($node, $uid) {
   
   $variables = array(
     '@title' => $node->title,
-    '!group_url' => url("node/$node->nid", NULL, NULL, TRUE)
+    '!group_url' => url("node/$node->nid", array('absolute' => TRUE))
   );
   
   $from = variable_get('site_mail', ini_get('sendmail_from'));
@@ -635,7 +635,7 @@ function og_create_admin_confirm_submit($form, &$form_state) {
   
   $variables = array(
     '@group' => $node->title,
-    '!group_url' => url("node/$node->nid", NULL, NULL, TRUE),
+    '!group_url' => url("node/$node->nid", array('absolute' => TRUE)),
     '@username' => $account->name
   );
   
@@ -747,7 +747,7 @@ function og_invite_form_submit($form, &$form_state) {
     '@group' => $node->title,
     '@description' => $node->og_description,
     '@site' => variable_get('site_name', 'drupal'),
-    '!group_url' => url("og/subscribe/$node->nid", NULL, NULL, TRUE),
+    '!group_url' => url("og/subscribe/$node->nid", array('absolute' => TRUE)),
     '@body' => $form_state['values']['pmessage'],
   );
   
@@ -845,8 +845,8 @@ function og_subscribe_user($gid, $account, $request = NULL) {
         $variables = array(
           '@group' => $node->title,
           '@username' => $account->name,
-          '!approve_url' => url("og/approve/$node->nid/$account->uid", NULL, NULL, TRUE),
-          '!group_url' => url("og/users/$node->nid", NULL, NULL, TRUE)
+          '!approve_url' => url("og/approve/$node->nid/$account->uid", array('absolute' => TRUE)),
+          '!group_url' => url("og/users/$node->nid", array('absolute' => TRUE))
         );
         
         $from = variable_get('site_mail', ini_get('sendmail_from'));
@@ -1038,17 +1038,17 @@ function og_list_users_page($node) {
         $rows[$i][] = $username;
         if ($access) {
           if ($account->is_active) {
-            $rows[$i][] = l(t('remove'), "og/unsubscribe/$gid/$account->uid", array(), "destination=og/users/$gid");
+            $rows[$i][] = l(t('remove'), "og/unsubscribe/$gid/$account->uid", array('query' => "destination=og/users/$gid"));
             if ($account->is_admin) {
-              $rows[$i][] = l(t('admin: remove'), "og/delete_admin/$gid/$account->uid", array(), 'destination='. $_GET['q']);
+              $rows[$i][] = l(t('admin: remove'), "og/delete_admin/$gid/$account->uid", array('query' => 'destination='. $_GET['q']));
             }
             else {
-              $rows[$i][] = l(t('admin: create'), "og/create_admin/$gid/$account->uid", array(), 'destination='. $_GET['q']);
+              $rows[$i][] = l(t('admin: create'), "og/create_admin/$gid/$account->uid", array('query' => 'destination='. $_GET['q']));
             }
           }
           else {
-            $rows[$i][] = l(t('approve'), "og/approve/$gid/$account->uid", array(), "destination=og/users/$gid");
-            $rows[$i][] = l(t('deny'), "og/deny/$gid/$account->uid", array(), "destination=og/users/$gid");
+            $rows[$i][] = l(t('approve'), "og/approve/$gid/$account->uid", array('query' => "destination=og/users/$gid"));
+            $rows[$i][] = l(t('deny'), "og/deny/$gid/$account->uid", array('query' => "destination=og/users/$gid"));
           }
         }
         $i++;
@@ -1127,7 +1127,7 @@ function og_opml() {
 
   global $user;
   foreach ($user->og_groups as $gid => $group) {
-    $output .= '<outline text="'. check_plain($group['title']) .'" xmlUrl="'. url("node/$gid/feed", NULL, NULL, TRUE) ."\" />\n";    
+    $output .= '<outline text="'. check_plain($group['title']) .'" xmlUrl="'. url("node/$gid/feed", array('absolute' => TRUE)) ."\" />\n";    
   }
 
   $output .= "</body>\n";
@@ -1230,11 +1230,11 @@ function og_home_empty($node) {
   else {
     $msg = t('No public posts in this group.');
     if (!$user->uid) {
-      $msg .= ' '. t('You must <a href="!register">register</a> or <a href="!login">login</a> and become a member in order to post messages, and view any private posts.', array('!register' => url("user/register", $dest), '!login' => url("user/login", $dest)));
+      $msg .= ' '. t('You must <a href="!register">register</a> or <a href="!login">login</a> and become a member in order to post messages, and view any private posts.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest))));
     }
     // TODOL: hide this from pending members too
     elseif ($node->og_selective < OG_INVITE_ONLY) {
-      $msg .= ' '. t('Consider <a href="!url">joining this group</a> in order to view its posts.', array('!url' => url("og/subscribe/$node->nid", $dest)));
+      $msg .= ' '. t('Consider <a href="!url">joining this group</a> in order to view its posts.', array('!url' => url("og/subscribe/$node->nid", array('query' => $dest))));
     }
   }
   drupal_set_message($msg);
@@ -1513,9 +1513,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         $account = user_load(array('uid' => $node->uid));
         $variables = array(
           '@group' => $node->title,
-          '!group_url' => url("node/$node->nid", NULL, NULL, TRUE),
+          '!group_url' => url("node/$node->nid", array('absolute' => TRUE)),
           '@username' => $account->name,
-          '!invite_url' => url("og/invite/$node->nid", NULL, NULL, TRUE)
+          '!invite_url' => url("og/invite/$node->nid", array('absolute' => TRUE))
         );
 
         // Alert the user that they are now the admin of the group.  
@@ -1569,7 +1569,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           $append['og_links'] = array('title' => $title, 'href' => "node/$gid");
           $ret[] = array('key'   => 'group',
                          'value' => check_plain($title),
-                         'attributes' => array('domain' => url("node/$gid", NULL, NULL, TRUE)));
+                         'attributes' => array('domain' => url("node/$gid", array('absolute' => TRUE))));
         }
         // to get these modifications to work on 4.7, one needs to patch as per http://drupal.org/node/41703
         $node->body .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
@@ -1943,7 +1943,7 @@ function og_comment($comment, $op) {
       // remove the perm check after 5.3 is released.
       if ($comment['status'] == COMMENT_PUBLISHED && !$skip_notification && og_is_mail_type($node->type) && isset($node->og_groups) && !empty($node->og_groups)) {
         if (module_exists('job_queue')) {
-          $description = t('OG: notify group members about comment %id on !link', array('%id' => $comment['cid'], '!link' => l($node->title, "node/$node->nid", NULL, NULL, 'comment-'. $comment['cid'])));
+          $description = t('OG: notify group members about comment %id on !link', array('%id' => $comment['cid'], '!link' => l($node->title, "node/$node->nid", array('fragment' => 'comment-'. $comment['cid']))));
           job_queue_add('og_mail', $description, array('comment', $comment['cid']));
         }
         else {
@@ -1985,8 +1985,8 @@ function og_mail($type, $obj) {
     
     $obj->body = $rendered;
     $obj->teaser = $rendered;
-    $originalurl = url("node/$obj->nid", NULL, "comment-$obj->cid", TRUE);
-    $replyurl = url("comment/reply/$obj->nid/$obj->cid", NULL, NULL, TRUE);
+    $originalurl = url("node/$obj->nid", array('fragment' => "comment-$obj->cid", 'absolute' => TRUE));
+    $replyurl = url("comment/reply/$obj->nid/$obj->cid", array('absolute' => TRUE));
     $node = node_load($obj->nid);
     $obj->og_groups = $node->og_groups;
     $obj->title = $node->title;
@@ -2013,8 +2013,8 @@ function og_mail($type, $obj) {
     $obj->body = og_node_view($obj, FALSE);
     $obj->teaser = og_node_view($obj, TRUE);
     $obj->msgid = $obj->nid. '-0'. og_msgid_server();
-    $originalurl = url("node/$obj->nid", NULL, NULL, TRUE);
-    $replyurl = url("comment/reply/$obj->nid", NULL, 'comment-form', TRUE);
+    $originalurl = url("node/$obj->nid", array('absolute' => TRUE));
+    $replyurl = url("comment/reply/$obj->nid", array('fragment' => 'comment-form', 'absolute' => TRUE));
     $type_friendly = node_get_types('name', $obj);
   }
   
@@ -2075,12 +2075,12 @@ function og_mail($type, $obj) {
       if (node_access('view', $obj, user_load($row->uid))) {
         // Append these group specific variables.
         $variables['@group'] = $row->group_name;
-        $variables['!group_url'] = url("og/manage/$row->gid", NULL, NULL, TRUE);
+        $variables['!group_url'] = url("og/manage/$row->gid", array('absolute' => TRUE));
         $variables['@type'] = $type_friendly;
 
-        $unsubscribe = url("og/manage/$row->gid", NULL, NULL, TRUE);
-        $ownerurl = url("user/$row->group_uid", NULL, NULL, TRUE);
-        $group_home = url("node/$row->gid", NULL, NULL, TRUE);
+        $unsubscribe = url("og/manage/$row->gid", array('absolute' => TRUE));
+        $ownerurl = url("user/$row->group_uid", array('absolute' => TRUE));
+        $group_home = url("node/$row->gid", array('absolute' => TRUE));
         $groupheaders = $headers + array(
           'List-Id' => mime_header_encode($row->group_name). " <$group_home>", 
           'List-Unsubscribe' => "<$unsubscribe>", 
@@ -2134,7 +2134,7 @@ function og_node_view($node, $teaser = FALSE) {
 function og_mail_urls($url = 0) {
   static $urls = array();
   if ($url) {
-    $urls[] = strpos($url, '://') ? $url : url($url, NULL, NULL, 1);
+    $urls[] = strpos($url, '://') ? $url : url($url, array('absolute' => TRUE));
     return count($urls);
   }
   return $urls;
@@ -2449,7 +2449,7 @@ function og_is_group_type($type) {
  */
 function og_feed($gid) {
   header("HTTP/1.1 301 Moved Permanently");
-  header('Location: '. url("node/$gid/feed", NULL, NULL, TRUE));
+  header('Location: '. url("node/$gid/feed", array('absolute' => TRUE)));
 }
 
 
@@ -2665,7 +2665,7 @@ function og_user_title_list($result, $gid = NULL, $show_more = TRUE, $show_pictu
       $txt = t('more');
       $title = array('title' => t('View all members.'));
       if ($show_more) {
-        $more = $show_picture ? l($txt, "og/users/$gid/faces", $title) : l($txt, "og/users/$gid", $title);
+        $more = $show_picture ? l($txt, "og/users/$gid/faces", array('attributes' => $title)) : l($txt, "og/users/$gid", array('attributes' => $title));
         $append = "<div class=\"more-link\">$more</div>";
       }
     }
@@ -2697,11 +2697,11 @@ function og_block_details() {
     }
     elseif ($subscription == 'requested') {
       $links['approval'] = t('Your membership request awaits approval.');
-      $links['delete'] = l(t('delete request'), "og/unsubscribe/$node->nid", array(), 'destination=og');
+      $links['delete'] = l(t('delete request'), "og/unsubscribe/$node->nid", array('query' => 'destination=og'));
     }
     elseif (!$user->uid) {
       $dest = drupal_get_destination();
-      $links['must_login'] = t('You must <a href="!register">register</a>/<a href="!login">login</a> in order to post into this group.', array('!register' => url("user/register", $dest), '!login' => url("user/login", $dest)));
+      $links['must_login'] = t('You must <a href="!register">register</a>/<a href="!login">login</a> in order to post into this group.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest))));
     }
     elseif ($node->og_selective < OG_INVITE_ONLY) {
       $links['subscribe'] = og_subscribe_link($node);
@@ -2760,7 +2760,7 @@ function og_subscribe_link($node) {
     $txt = t('Join');
   }
   if(isset($txt))
-    return l($txt, "og/subscribe/$node->nid", array('rel' => 'nofollow'), drupal_get_destination());
+    return l($txt, "og/subscribe/$node->nid", array('attributes' => array('rel' => 'nofollow'), 'query' => drupal_get_destination()));
 }
 
 // $group is an object containing a group node.
@@ -2818,7 +2818,7 @@ function og_admin_settings() {
     $rows[] = array(
       $type->name,
       $map[$usage],
-      l(t('Edit'), "admin/content/types/$type_url_str", array(), drupal_get_destination()),      
+      l(t('Edit'), "admin/content/types/$type_url_str", array('query' => drupal_get_destination())),      
     );
   }
   $form['og_settings']['content_types']['content_types_table'] = array('#value' => theme('table', $header, $rows));

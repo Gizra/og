@@ -1341,7 +1341,7 @@ function og_handler_field_nodelink($fieldinfo, $fielddata, $value, $data) {
 }
 
 function og_handler_field_managelink($fieldinfo, $fielddata, $value, $data) {
-  return l(t('my membership'), "og/manage/$data->nid", NULL, drupal_get_destination());
+  return l(t('my membership'), "og/manage/$data->nid", array('query' => drupal_get_destination()));
 }
 
 function og_handler_field_yesempty($fieldinfo, $fielddata, $value, $data) {
