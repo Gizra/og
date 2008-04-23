@@ -693,6 +693,8 @@ function og_invite_form($node) {
   return $form;
 }
 
+
+// TODOL Use #element_validate as per http://drupal.org/node/144132#element-validate
 function og_invite_form_validate($form, &$form_state) {
   global $user;
   $max = variable_get('og_email_max', 10);
@@ -732,13 +734,13 @@ function og_invite_form_validate($form, &$form_state) {
     }
     else {
       // Store valid e-mails so we don't have to go through that looping again on submit
-      form_set_value($form['valid_emails'], $valid_emails);
+      $form_state['valid_emails'] = $valid_emails;
     }
   }
 }
 
 function og_invite_form_submit($form, &$form_state) {
-  $emails = $form_state['values']['valid_emails'];
+  $emails = $form_state['valid_emails'];
   $node = node_load($form_state['values']);
 
   $variables = array(
@@ -981,6 +983,7 @@ function og_add_users($group) {
   return $form;
 }
 
+// TODOL Use #element_validate as per http://drupal.org/node/144132#element-validate
 function og_add_users_validate($form, $form_state) {
   $names = explode(',', $form_state['values']['og_names']);
   foreach ($names as $name) {
@@ -1351,7 +1354,7 @@ function og_group_form($node) {
     }
   }
   
-  // TODOH: FAPI is a bit awkward here
+  // TODOH: FAPI is a bit awkward here. See http://drupal.org/node/144132#comment-643920?
   if ($theme_form = system_theme_select_form(t('Selecting a different theme will change the look and feel of the group.'), $edit['theme'] ? $edit['theme'] : $node->og_theme, 2)) {
     $theme_form['themes']['#weight'] = 8;
     $form += $theme_form;
@@ -1780,7 +1783,7 @@ function og_node_groups_distinguish($groups_names_both, $exclude_joined = TRUE) 
  * lives in a separate function from og_form_alter() so it can be shared
  * by other OG contrib modules.
  */
- // TODOH: update FAPI
+ // TODOH: update FAPI. See http://drupal.org/node/144132#comment-643920
 function og_form_add_og_audience(&$form, $form_state) {
   global $user;
   // determine the selected groups if fapi doesn't tell us.
