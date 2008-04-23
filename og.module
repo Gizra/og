@@ -383,6 +383,7 @@ function og_set_theme($nid) {
 /**
  * Admins may broadcast email to all their members
  *
+ * @ingroup forms
  * @param $node
  *   The group node.
  */
@@ -415,12 +416,12 @@ function og_set_theme($nid) {
   return $form;
 }
 
-function og_email_form_submit($form_id, $form_values) {
-  $node = node_load($form_values['gid']);
+function og_email_form_submit($form, &$form_state) {
+  $node = node_load($form_state['values']['gid']);
 
   $variables = array(
     '@group' => $node->title,
-    '@body' => $form_values['body'],
+    '@body' => $form_state['values']['body'],
     '@site' => variable_get('site_name', drupal),
     '!url_group' => url("node/$node->nid", NULL, NULL, TRUE),
     '!url_unsubscribe' => url("og/unsubscribe/$node->nid", NULL, NULL, TRUE)
@@ -429,15 +430,15 @@ function og_email_form_submit($form_id, $form_values) {
   global $user;
   $from = $user->mail;
   $sql = og_list_users_sql(1);
-  $result = db_query($sql, $form_values['gid']);
+  $result = db_query($sql, $form_state['values']['gid']);
   while ($row = db_fetch_object($result)) {
      $emails[] = $row->mail;
   }
   foreach ($emails as $mail) {
-    drupal_mail('og_mail', trim($mail), $form_values['subject'], _og_user_mail_text('og_admin_email_body', $variables), $from);
+    drupal_mail('og_mail', trim($mail), $form_state['values']['subject'], _og_user_mail_text('og_admin_email_body', $variables), $from);
   }
   drupal_set_message(format_plural(count($emails), '1 email sent.', '@count emails sent'));
-  return "node/{$form_values[gid]}";
+  $form_state['redirect'] = "node/{$form_state['values'][gid]}";
 }
 
 function og_manage($gid) {
@@ -476,6 +477,7 @@ function og_manage_form($group) {
     }
   }
 
+  $submit_button = FALSE;
   switch ($user->og_email) {
     // og_email can be NULL when you enable og on an existing site.
     case NULL:
@@ -487,7 +489,7 @@ function og_manage_form($group) {
         '#options' => array(1 => t('enabled'), 0 => t('disabled')), 
         '#description' => t('Do you want to receive an email each time a message is posted to this group?')
       );
-      $submit = TRUE;
+      $submit_button = TRUE;
       break;
     case OG_NOTIFICATION_ALWAYS:
       $form['mail_type'] = array(
@@ -504,16 +506,16 @@ function og_manage_form($group) {
       ); 
       break;
   }
-  if ($submit) {
+  if ($submit_button) {
     $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
   }
   $form['gid'] = array('#type' => 'value', '#value' => $group->nid);
   return $form;
 }
 
-function og_manage_form_submit($form_id, $form_values) {
+function og_manage_form_submit($form, &$form_state) {
   global $user;
-  $passed_values = $form_values;
+  $passed_values = $form_state['values'];
   unset($passed_values['gid'], $passed_values['op'], $passed_values['form_id'], $passed_values['form_token']);
   og_save_subscription($form_values['gid'], $user->uid, $passed_values);
   drupal_set_message(t('Membership saved.'));
@@ -624,9 +626,9 @@ function og_create_admin_confirm($node, $account) {
 /**
  * Confirm og create admin form
  */
-function og_create_admin_confirm_submit($form_id, $form_values) {
-  $account = $form_values['account'];
-  $node = $form_values['node'];
+function og_create_admin_confirm_submit($form, &$form_state) {
+  $account = $form_state['values']['account'];
+  $node = $form_state['values']['node'];
   
   og_save_subscription($node->nid, $account->uid, array('is_admin' => 1));
   drupal_set_message(t('%name was promoted to %ga', array('%name' => $account->name, '%ga' => t('group administrator'))));
@@ -664,9 +666,9 @@ function og_remove_admin_confirm($node, $account) {
 /**
  * Confirm og remove admin form
  */
-function og_remove_admin_confirm_submit($form_id, $form_values) {
-  $account = $form_values['account'];
-  $gid = $form_values['gid'];
+function og_remove_admin_confirm_submit($form, &$form_state) {
+  $account = $form_state['values']['account'];
+  $gid = $form_state['values']['gid'];
   og_save_subscription($gid, $account->uid, array('is_admin' => 0));
   drupal_set_message(t('%name is no longer a %ga', array('%name' => $account->name, '%ga' => t('group administrator'))));
   return "og/users/$gid";
@@ -691,11 +693,11 @@ function og_invite_form($node) {
   return $form;
 }
 
-function og_invite_form_validate($form_id, $form_values, $form) {
+function og_invite_form_validate($form, &$form_state) {
   global $user;
   $max = variable_get('og_email_max', 10);
 
-  $mails = $form_values['mails'];
+  $mails = $form_state['values']['mails'];
   $mails = str_replace("\n", ',', $mails);
   $emails = explode(',', $mails);
   if (count($emails) > $max) {
@@ -735,16 +737,16 @@ function og_invite_form_validate($form_id, $form_values, $form) {
   }
 }
 
-function og_invite_form_submit($form_id, $form_values) {
-  $emails = $form_values['valid_emails'];
-  $node = node_load($form_values['gid']);
+function og_invite_form_submit($form, &$form_state) {
+  $emails = $form_state['values']['valid_emails'];
+  $node = node_load($form_state['values']);
 
   $variables = array(
     '@group' => $node->title,
     '@description' => $node->og_description,
     '@site' => variable_get('site_name', 'drupal'),
     '!group_url' => url("og/subscribe/$node->nid", NULL, NULL, TRUE),
-    '@body' => $form_values['pmessage']
+    '@body' => $form_state['values']['pmessage'],
   );
   
   global $user;
@@ -755,6 +757,7 @@ function og_invite_form_submit($form_id, $form_values) {
   drupal_set_message(format_plural(count($emails), '1 invitation sent.', '@count invitations sent.'));
 }
 
+// TODOH move access control to menu
 function og_subscribe($gid, $uid = NULL) {
   global $user;
   if (is_null($uid)) {
@@ -808,12 +811,12 @@ function og_confirm_subscribe($gid, $node, $account) {
 /**
  * Confirm og membership submit handler
  */
-function og_confirm_subscribe_submit($form_id, $form_values) {
+function og_confirm_subscribe_submit($form, &$form_state) {
   $return = og_subscribe_user($form_values['gid'], $form_values['account'], $form_values['request']);
   if (!empty($return['message'])) {
       drupal_set_message($return['message']);
   }
-  return 'node/'. $form_values['gid'];
+  $form_state['redirect'] = 'node/'. $form_state['values']['gid'];
 } 
 
 
@@ -912,20 +915,18 @@ function og_confirm_unsubscribe($gid, $node, $uid) {
 /**
  * Confirm og unsubscription submit handler
  */
-function og_confirm_unsubscribe_submit($form_id, $form_values) {
+function og_confirm_unsubscribe_submit($form, &$form_state) {
   global $user;
   
-  og_delete_subscription($form_values['gid'], $form_values['uid']);
+  og_delete_subscription($form_state['values']['gid'], $form_state['values']['uid']);
   drupal_set_message(t('User removed from group.'));
-  if ($user->uid == $form_values['uid']) {
+  if ($user->uid == $form_state['values']['uid']) {
     return 'og';
   }
   else {
-    return "node/". $form_values['gid'];
+    $form_state['redirect'] = "node/". $form_state['values']['gid'];
   }
 }
-
-
 
 /**
  * Load all memberships for a given user. 
@@ -945,20 +946,11 @@ function og_get_subscriptions($uid, $min_is_active = 1, $reset = FALSE) {
 
   if (!isset($subscriptions[$uid][$min_is_active])) {
     list($types, $in) = og_get_sql_args();
-    // $types is empty during the update to new content type storage.
-    if (!empty($types)) {
-      $args = $types;
-      $in = "IN ($in)";
-    }
-    else {
-      $args = array();
-      $in = 'IS NULL';
-    }
     
-    array_unshift($args, $min_is_active);
-    array_unshift($args, $uid);
+    array_unshift($types, $min_is_active);
+    array_unshift($types, $uid);
     $sql = "SELECT n.title, n.type, n.status, ou.* FROM {og_uid} ou INNER JOIN {node} n ON ou.nid = n.nid WHERE ou.uid = %d AND ou.is_active >= %d AND n.type $in ORDER BY n.title";
-    $result = db_query($sql, $args);
+    $result = db_query($sql, $types);
     while ($row = db_fetch_array($result)) {
       $subscriptions[$uid][$min_is_active][$row['nid']] = $row;
     }
@@ -989,8 +981,8 @@ function og_add_users($group) {
   return $form;
 }
 
-function og_add_users_validate($form_id, $form_values) {
-  $names = explode(',', $form_values['og_names']);
+function og_add_users_validate($form, $form_state) {
+  $names = explode(',', $form_state['values']['og_names']);
   foreach ($names as $name) {
     $account = user_load(array('name' => trim($name)));
     if ($account->uid) {
@@ -1007,9 +999,9 @@ function og_add_users_validate($form_id, $form_values) {
   }
 }
 
-function og_add_users_submit($form_id, $form_values) {
+function og_add_users_submit($form, &$form_state) {
   // Safest option is to do a select, filter existing members, then insert.
-  $names = explode(',', $form_values['og_names']);
+  $names = explode(',', $form_state['values']['og_names']);
   foreach ($names as $name) {
     $account = user_load(array('name' => trim($name)));
     if ($account->uid) {
@@ -1017,7 +1009,7 @@ function og_add_users_submit($form_id, $form_values) {
     }
   }
   foreach ($accounts as $account) {
-    og_save_subscription($form_values['gid'], $account->uid, array('is_active' => 1));
+    og_save_subscription($form_state['values']['gid'], $account->uid, array('is_active' => 1));
   }
   drupal_set_message(format_plural(count($accounts), '1 user added to the group', '@count users added to the group'));
 }
@@ -1081,7 +1073,8 @@ function og_list_users_faces_page($node, $column_count = 5, $row_count = 10, $pa
   return $output;
 }
 
-// from views_bonus: grid.inc
+// From views_bonus: grid.inc.
+// TODOL: use Views
 function theme_og_picture_grid($result, $column_count = 5) {
   $content = '<table class="og-picture-grid">';
   $count = 0;
@@ -1250,7 +1243,7 @@ function theme_og_mission($form) {
 }
 
 /**
- * Adds standard fields for any node configured to be a group node
+ * Adds standard fields for any node configured to be a group node.
  *
  * @param object $node
  */
@@ -1358,7 +1351,7 @@ function og_group_form($node) {
     }
   }
   
-  // TODO: fapi is a bit awkward here
+  // TODOH: FAPI is a bit awkward here
   if ($theme_form = system_theme_select_form(t('Selecting a different theme will change the look and feel of the group.'), $edit['theme'] ? $edit['theme'] : $node->og_theme, 2)) {
     $theme_form['themes']['#weight'] = 8;
     $form += $theme_form;
@@ -1386,12 +1379,7 @@ function og_get_node_groups_result($nid) {
 }
 
 function og_pre_save_group(&$node) {
-  // TODOL: Move this to the node form or delete it.
-  // Comments are not allowed on group nodes, since we don't have any nice way to present them
-  if (og_is_group_type($node->type)) {
-    $node->comment = COMMENT_NODE_DISABLED;
-  }
-  elseif (!empty($node->og_groups_inaccessible)) {
+  if (!empty($node->og_groups_inaccessible)) {
     // Add the inaccessible groups which did not show in Audience selector
     $node->og_groups = (array)$node->og_groups + $node->og_groups_inaccessible;
   }
@@ -1413,7 +1401,6 @@ function og_load_group(&$node) {
   $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, register AS og_register, directory AS og_directory, notification AS og_notification, language AS og_language, private AS og_private FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, (array)db_fetch_array($result));
-  $node->comment = COMMENT_NODE_DISABLED; // we don't use comments on og nodes. technically not needed since we set this on node submit
 }
 
 function og_insert_group($node) {
@@ -1745,7 +1732,7 @@ function og_node_delete_confirm_submit($form_id, $form_values) {
 // Return an array containing all groups. suitable for a form item
 function og_all_groups_options() {
   list($types, $in) = og_get_sql_args();
-  $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type IN ($in) AND n.status = 1 ORDER BY n.title ASC";
+  $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type $in AND n.status = 1 ORDER BY n.title ASC";
   $result = db_query($sql, $types);
   while ($row = db_fetch_object($result)) {
     $options[$row->nid] = $row->title;
@@ -2234,13 +2221,13 @@ function _og_user_mail_text($messageid, $variables = array()) {
   }
 }
 
-// helper function for queries that need all group types
+// Helper function for queries that need all group types.
 function og_get_sql_args() {
   if ($types = og_get_types('group')) {
-    $in = db_placeholders($types, "varchar");
+    $in = 'IN ('. db_placeholders($types, "varchar"). ')';
   }
   else {
-    $in = '';
+    $in = 'IS NULL';
   }
   return array($types, $in);
 }
@@ -2259,8 +2246,8 @@ function og_user($op, $edit, &$account, $category = NULL) {
         foreach ($gids as $gid) {
           $nids[] = (int)$gid;
         }
-        $in_nids = implode(', ', array_fill(0, count($nids), "%d"));
-        $sql = "SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type IN ($in) AND n.status = 1 AND n.nid IN ($in_nids) ORDER BY n.title";
+        $in_nids = db_placeholders($nids);
+        $sql = "SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type $in AND n.status = 1 AND n.nid IN ($in_nids) ORDER BY n.title";
         $result = db_query(db_rewrite_sql($sql), array_merge($types, $nids));
       }
       else {      
@@ -2583,7 +2570,7 @@ function theme_opml_icon($url) {
 
 function og_block_new() {
   list($types, $in) = og_get_sql_args();
-  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type IN ($in) AND n.status = 1";
+  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type $in AND n.status = 1";
   $cnt = db_result(db_query(db_rewrite_sql($sql), $types));
   if ($cnt > 0) {
     $max = variable_get('og_block_cnt_3', 10);
@@ -2814,24 +2801,28 @@ function og_search_form($group) {
 // TODOH: move to an admin.inc. remove og_settings in every array item
 function og_admin_settings() {
   // content types
+  $group_types = og_get_types('group');
+  if (empty($group_types)) {
+    form_set_error('content_types_table', t('You must designate at least one content type to act as a group. <a href="!create">Create a new content type</a> if needed.', array('!create' => url('admin/content/types/add'))));
+  }
   $form['og_settings']['content_types'] = array(
     '#type' => 'fieldset', 
     '#title' => t('Content types'), 
     '#collapsible' => TRUE, 
-    '#collapsed' => TRUE
+    '#collapsed' => !empty($group_types)
   );
+  $map = og_types_map();
   $header = array(t('Type'), t('Usage'), t('Operations'));
   foreach (node_get_types() as $type) {
     $type_url_str = str_replace('_', '-', $type->type);
     $usage = variable_get('og_content_type_usage_'. $type->type, 'omitted');
-    $map = og_types_map();
     $rows[] = array(
       $type->name,
       $map[$usage],
       l(t('Edit'), "admin/content/types/$type_url_str", array(), drupal_get_destination()),      
     );
   }
-  $form['og_settings']['content_types']['table'] = array('#value' => theme('table', $header, $rows));
+  $form['og_settings']['content_types']['content_types_table'] = array('#value' => theme('table', $header, $rows));
 
   
   $form['og_settings']['group_details'] = array(
@@ -3065,8 +3056,8 @@ function og_requirements($phase) {
     if (!count(array_intersect($og_types, $all_types))) {
           $requirements['og_group_types']  = array(
             'title' => $t('Organic groups group type'),
-            'value' => $t('You have no node types which are acting as groups. See the Integration section of the !readme.', array('!readme' => og_readme())),
-            'severity' => REQUIREMENT_WARNING
+            'value' => $t('You have no node types which are acting as groups. See the Notes section of the !readme and the Content types fieldset at top of <a href="!settings">OG settings</a>.', array('!readme' => og_readme(), '!settings' => url('admin/og/og'))),
+            'severity' => REQUIREMENT_ERROR,
           );
         }
     
