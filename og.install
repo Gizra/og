@@ -346,27 +346,37 @@ function og_update_5700() {
  * 
  * @return void
  **/
- function og_update_5701() {
-   $ret = array();
-   $types = node_get_types();
-   foreach ($types as $type) {
-     if (in_array($type->type, variable_get('og_node_types', array('og')))) {
-       variable_set('og_content_type_usage_'. $type->type, 'group');
-     }
-     elseif (in_array($type->type, variable_get('og_omitted', array('og')))) {
-       variable_set('og_content_type_usage_'. $type->type, 'omitted');
-     }
-     elseif (in_array($type->type, variable_get('og_omitted_email_node_types', array('og')))) {
-      variable_set('og_content_type_usage_'. $type->type, 'group_post_standard_nomail');
-     }
-     else {
-       variable_set('og_content_type_usage_'. $type->type, 'group_post_standard_mail');
-     } 
-   }
-   
-   node_access_rebuild();
-   return $ret;
- }
+function og_update_5701() {
+  $ret = array();
+  $types = node_get_types();
+  foreach ($types as $type) {
+    if (in_array($type->type, variable_get('og_node_types', array('og')))) {
+      variable_set('og_content_type_usage_'. $type->type, 'group');
+    }
+    elseif (in_array($type->type, variable_get('og_omitted', array('og')))) {
+      variable_set('og_content_type_usage_'. $type->type, 'omitted');
+    }
+    elseif (in_array($type->type, variable_get('og_omitted_email_node_types', array('og')))) {
+     variable_set('og_content_type_usage_'. $type->type, 'group_post_standard_nomail');
+    }
+    else {
+      variable_set('og_content_type_usage_'. $type->type, 'group_post_standard_mail');
+    } 
+  }
+ 
+ node_access_rebuild();
+ return $ret;
+}
+
+function og_update_6000() {
+  $ret = array();
+  // Fix how we append the custom request text from a group join request.
+  $name = 'og_request_user_body';
+  if ($txt = variable_get($name, FALSE)) {
+    $txt .= "\n\nPersonal message from @username:\n------------------\n\n@request";
+    variable_set($name, $txt);
+  }
+}
 
 // end updates //
 

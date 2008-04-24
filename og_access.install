@@ -9,51 +9,6 @@ function og_access_install() {
   db_query("UPDATE {system} SET weight = 1 WHERE name = 'og_access'");
 }
 
-
-/**
- * Implementation of hook_enable().
- *
- * A node access module needs to force a rebuild of the node access table
- * when it is enabled to ensure that things are set up.
- */
-function og_access_enable() {
-  node_access_rebuild();
-  drupal_set_message(t('The node access table has been rebuilt.'));
-}
-
-/**
- * Implementation of hook_disable().
- *
- * A node access module needs to force a rebuild of the node access table
- * when it is disabled to ensure that its entries are removed from the table.
- */
-function og_access_disable() {
-  // This dodginess is fixed in core D6. Basically, we can't rebuild because we are still enabled.
-  if (count(module_implements('node_grants')) == 1) {
-    // Not using any other node_access modules. add the default grant.
-    db_query("DELETE FROM {node_access}");
-    db_query("INSERT INTO {node_access} VALUES (0, 0, 'all', 1, 0, 0)");
-    cache_clear_all();
-  }
-  else {
-    og_access_disabling(TRUE);
-    node_access_rebuild();
-  }
-  drupal_set_message(t('The node access table has been rebuilt.'));
-}
-
-/**
- * Simple function to make sure we don't respond with grants when disabling
- * ourselves.
- */
-function og_access_disabling($set = NULL) {
-  static $disabling = false;
-  if ($set !== NULL) {
-    $disabling = $set;
-  }
-  return $disabling;
-}
-
 function og_access_uninstall() {
   // Delete variables
   $variables = array('og_private_groups', 'og_visibility');
