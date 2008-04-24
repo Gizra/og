@@ -2344,7 +2344,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     // Now provided by og_views. Please don't reuse this number 4
     // $blocks[4]['info'] = t('My groups');
     $blocks[5]['info'] = t('Group notifications');
-    $blocks[6]['info'] = t('Group Network');
+    $blocks[6]['info'] = t('Group network');
     
     // Auto-enable the group blocks for fresh installations.
     $blocks[0]['status'] = 1;
