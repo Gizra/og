@@ -437,7 +437,7 @@ function og_approve($gid, $uid) {
   if (og_is_node_admin($node)) {
     $account = user_load(array('uid' => (int)$uid));
     if ($account === FALSE) {
-     drupal_set_message(t("User approval failed, user not longer available on website."), 'error');
+     drupal_set_message(t("User approval failed, user no longer available on website."), 'error');
      return '';
     }
     if (in_array($gid, array_keys($account->og_groups))) {
