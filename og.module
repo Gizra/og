@@ -25,11 +25,15 @@ define('OG_NOTIFICATION_ALWAYS', 1);
 define('OG_NOTIFICATION_SELECTIVE', 2);
 
 function og_help($path, $arg) {
-  switch ($path) {
-    case !empty($section) && strstr($path, 'admin/build/block/configure/og'):
-      return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
-    case 'admin/settings/og':
-      return t('In order to let group admins determine their own group theme, you must enable multiple themes using !page.', array('!page' => l(t('theme configuration page'), 'admin/build/themes')));
+  if ($path) {
+    switch ($path) {
+      case ($arg[4] == 'og'):
+        return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
+        break;
+      case 'admin/settings/og':
+        return t('In order to let group admins determine their own group theme, you must enable multiple themes using !page.', array('!page' => l(t('theme configuration page'), 'admin/build/themes')));
+        break;
+    }
   }
 }
 
@@ -48,10 +52,12 @@ function og_menu() {
     'access callback' => 'user_is_logged_in', 
     'title' => t('OPML')
   );
-  $items['og/unsubscribe'] = array(
+  $items['og/unsubscribe/%node/%user'] = array(
     'type' => MENU_CALLBACK, 
-    'page callback' => 'og_unsubscribe', 
-    'access callback' => 'user_is_logged_in', 
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('og_confirm_unsubscribe', 2, 3),
+    'access callback' => 'og_menu_access_unsubscribe', 
+    'access arguments' => array(2, 3),
     'title' => 'Leave group',
   );
   
@@ -69,16 +75,18 @@ function og_menu() {
     'access arguments' => array(2),
     'title' => 'Deny membership request',
   );
-  $items['og/create_admin/%node'] = array(
+  $items['og/create_admin/%node/%user'] = array(
     'type' => MENU_CALLBACK, 
-    'page callback' => 'og_create_admin', 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_create_admin_confirm', 2, 3), 
     'access callback' => 'og_is_group_admin', 
     'access arguments' => array(2),
     'title' => 'Create group administrator',
   );
-  $items['og/delete_admin/%node'] = array(
+  $items['og/delete_admin/%node/%user'] = array(
     'type' => MENU_CALLBACK, 
-    'page callback' => 'og_delete_admin', 
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('og_remove_admin_confirm', 2, 3),
     'access callback' => 'og_is_group_admin', 
     'access arguments' => array(2),
     'title' => 'Delete group administrator',
@@ -92,7 +100,7 @@ function og_menu() {
     'access arguments' => array(2), 
   );
   
-  // members only
+  // members only and can't be invite or closed
   $items['og/invite/%node'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_invite_form', 2),
@@ -101,13 +109,14 @@ function og_menu() {
     'title' => t('Send invitation'), 
     'type' => MENU_CALLBACK, 
   );
-  $items["og/manage"] = array(
+  $items["og/manage/%node"] = array(
     'page callback' => 'og_manage',
+    'page arguments' => array(2),
     'access callback' => 'og_is_group_member', 
-    'access arguments' => array(2),
+    'access arguments' => array(arg(2)),
     'title' => t('Manage membership'), 
     'type' => MENU_CALLBACK, 
-    );
+  );
   
   $items['og/activity'] = array(
     'title' => 'Group activity', 
@@ -154,7 +163,7 @@ function og_menu() {
     'page callback' => 'og_list_users_faces_page',
     'page arguments' => array(2),
     'type' => MENU_LOCAL_TASK,
-    'access callback' => 'og_menu_access_faces',
+    'access callback' => 'og_menu_access_picture',
     'access arguments' => array(2),
   );
   
@@ -183,6 +192,25 @@ function og_menu() {
 
   return $items;
 }
+
+function og_menu_access_unsubscribe($group_node, $account) {
+  global $user;
+  
+  if ($account->uid != $user->uid && !og_is_group_admin($group_node)) {
+    // only admins can remove another member
+    return FALSE;
+  }
+  
+  if ($group_node->og_selective == OG_CLOSED && !og_is_group_admin($group_node)) {
+    return FALSE;
+  }
+  
+  if ($group_node->uid == $account->uid) {
+    return FALSE;
+  }
+  
+  return TRUE;
+} 
 
 function og_menu_access_invite($node) {
   return $node->og_selective < OG_INVITE_ONLY || og_is_group_admin($node);
@@ -461,7 +489,7 @@ function og_email_form_submit($form, &$form_state) {
   $form_state['redirect'] = "node/{$form_state['values'][gid]}";
 }
 
-function og_manage($gid) {
+function og_manage($group_node) {
   global $user;
 
   // warn users who can't receive mail anyway
@@ -470,20 +498,17 @@ function og_manage($gid) {
     return '';
   }
   
-  $group = node_load($gid);
-  $bc[] = array('path' => "og", 'title' => t('Groups'));
-  $bc[] = array('path' => "node/$gid", 'title' => $group->title);
-  // TODO: menu_set_location needed?
-  menu_set_location($bc);
+  // TODOH WTF on menu.
+  $bc = og_get_breadcrumb($group_node);
+  drupal_set_breadcrumb($bc);
   
-  return drupal_get_form('og_manage_form', $group);
+  return drupal_get_form('og_manage_form', $group_node);
 }
 
-function og_manage_form($group) {
+function og_manage_form($form_state, $group) {
   global $user;
-  
-  // avoid double messages on POST
-  if (empty($_POST)) {
+  // avoid double messages on form submit
+  if (!$form_state['submitted']) {
     // group manager can't leave
     if ($group->og_selective == OG_CLOSED) {
       drupal_set_message(t('You may not leave this group because it is a %closed group. You should request removal from a group administrator.', array('%closed' => t('closed'))));
@@ -622,15 +647,10 @@ function og_deny($node, $uid) {
   return "node/$node->nid";
 }
 
-function og_create_admin($node, $uid) {
-  $account = user_load(array('uid' => $uid));
-  return drupal_get_form('og_create_admin_confirm', $node, $account);
-}
-
 /**
  * OG create admin form
  */
-function og_create_admin_confirm($node, $account) {
+function og_create_admin_confirm($form_state, $node, $account) {
   $form['node'] = array('#type' => 'value', '#value' => $node);
   $form['account'] = array('#type' => 'value', '#value' => $account);
   return confirm_form($form, 
@@ -661,15 +681,10 @@ function og_create_admin_confirm_submit($form, &$form_state) {
   $form_state['#redirect'] = "og/users/$node->nid";
 }
 
-function og_delete_admin($node, $uid) {
-  $account = user_load(array('uid' => $uid));
-  return drupal_get_form('og_remove_admin_confirm', $node, $account);
-}
-
 /**
  * OG remove admin form
  */
-function og_remove_admin_confirm($node, $account) {
+function og_remove_admin_confirm($form_state, $node, $account) {
   $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
   $form['account'] = array('#type' => 'value', '#value' => $account);
   return confirm_form($form, 
@@ -677,7 +692,8 @@ function og_remove_admin_confirm($node, $account) {
                  "og/users/$node->nid",
                  ' ', 
                  t('Remove'), 
-                 t('Cancel'));
+                 t('Cancel')
+          );
 }
 
 /**
@@ -688,7 +704,7 @@ function og_remove_admin_confirm_submit($form, &$form_state) {
   $gid = $form_state['values']['gid'];
   og_save_subscription($gid, $account->uid, array('is_admin' => 0));
   drupal_set_message(t('%name is no longer a %ga', array('%name' => $account->name, '%ga' => t('group administrator'))));
-  return "og/users/$gid";
+  $form_state['redirect'] = "og/users/$gid";
 }
 
 function og_invite_form($node) {
@@ -706,7 +722,6 @@ function og_invite_form($node) {
   );
   $form['op'] = array('#type' => 'submit', '#value' => t('Send invitation'));
   $form['gid'] = array ('#type' => 'value', '#value' => $node->nid);
-  $form['valid_emails'] = array('#type' => 'value', '#value' => array());
   return $form;
 }
 
@@ -758,7 +773,7 @@ function og_invite_form_validate($form, &$form_state) {
 
 function og_invite_form_submit($form, &$form_state) {
   $emails = $form_state['valid_emails'];
-  $node = node_load($form_state['values']);
+  $node = node_load($form_state['values']['gid']);
 
   $variables = array(
     '@group' => $node->title,
@@ -831,7 +846,7 @@ function og_confirm_subscribe($gid, $node, $account) {
  * Confirm og membership submit handler
  */
 function og_confirm_subscribe_submit($form, &$form_state) {
-  $return = og_subscribe_user($form_values['gid'], $form_values['account'], $form_values['request']);
+  $return = og_subscribe_user($form_state['values']['gid'], $form_state['values']['account'], $form_state['values']['request']);
   if (!empty($return['message'])) {
       drupal_set_message($return['message']);
   }
@@ -892,39 +907,15 @@ function og_subscribe_user($gid, $account, $request = NULL) {
   return $return_value;
 }
 
-// TODO: Move access control
-function og_unsubscribe($gid, $uid = NULL) {
-  global $user;
-  if (is_null($uid)) {
-    $uid = $user->uid;
-  }
-  $node = node_load($gid);
-  if ($uid != $user->uid && !og_is_group_admin($node)) {
-    // only admins can remove another member
-    drupal_access_denied();
-    exit();
-  }
-  if (($node->og_selective == OG_CLOSED && !og_is_group_admin($node)) || $node->uid == $uid){
-    // Regular users may not leave from a closed group
-    // Group manager may never leave (TODO: fix), such a link should never be generated
-    drupal_access_denied();
-    exit();
-  }
-  else {
-    return drupal_get_form('og_confirm_unsubscribe', $gid, $node, $uid);
-  }
-}
-
 /**
  * Confirm og unsubscription form
  */
-function og_confirm_unsubscribe($gid, $node, $uid) {
-  $form['gid'] = array('#type' => 'value', '#value' => $gid);
-  $form['uid'] = array('#type' => 'value', '#value' => $uid);
-  $account = user_load(array('uid' => $uid));
+function og_confirm_unsubscribe($form_state, $group_node, $account) {
+  $form['group_node'] = array('#type' => 'value', '#value' => $group_node);
+  $form['account'] = array('#type' => 'value', '#value' => $account);
   return confirm_form($form, 
-               t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $node->title)),
-               'og/manage/'. $node->nid, ' ', t('Remove'), t('Cancel'));
+               t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $group_node->title)),
+               'og/users/'. $group_node->nid, ' ', t('Remove'), t('Cancel'));
 }
 
 /**
@@ -932,14 +923,15 @@ function og_confirm_unsubscribe($gid, $node, $uid) {
  */
 function og_confirm_unsubscribe_submit($form, &$form_state) {
   global $user;
-  
-  og_delete_subscription($form_state['values']['gid'], $form_state['values']['uid']);
-  drupal_set_message(t('User removed from group.'));
-  if ($user->uid == $form_state['values']['uid']) {
-    return 'og';
+  $group_node = $form_state['values']['group_node'];
+  $account = $form_state['values']['account'];
+  og_delete_subscription($group_node->nid, $account->uid);
+  drupal_set_message(t('%user removed from %group.', array('%user' => $account->name, '%group' => $group_node->title)));
+  if ($user->uid == $account->uid) {
+    return $form_state['redirect'] = 'og';
   }
   else {
-    $form_state['redirect'] = "node/". $form_state['values']['gid'];
+    $form_state['redirect'] = "node/". $group_node->nid;
   }
 }
 
@@ -981,7 +973,7 @@ function og_list_users_sql($min_is_active = 1, $min_is_admin = 0, $orderby='u.na
   return "SELECT u.uid, u.name, u.mail, u.picture, ou.* FROM {og_uid} ou INNER JOIN {users} u ON ou.uid = u.uid WHERE ou.nid = %d AND u.status > 0 AND ou.is_active >= $min_is_active AND ou.is_admin >= $min_is_admin ORDER BY $orderby";
 }
 
-function og_add_users($group) {
+function og_add_users($form_state, $group_node) {
   $form['og_names'] = array(
     '#type' => 'textarea',
     '#title' => t('List of users'),
@@ -992,7 +984,7 @@ function og_add_users($group) {
     '#description' => t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.')
   );
   $form['op'] = array('#type' => 'submit', '#value' => t('Add users'));
-  $form['gid'] = array('#type' => 'value', '#value' => $$group->nid);
+  $form['gid'] = array('#type' => 'value', '#value' => $group_node->nid);
   return $form;
 }
 
@@ -1030,38 +1022,38 @@ function og_add_users_submit($form, &$form_state) {
   drupal_set_message(format_plural(count($accounts), '1 user added to the group', '@count users added to the group'));
 }
 
-function og_list_users_page($node) {
-  $access = og_is_group_admin($node);
+function og_list_users_page($group_node) {
+  $access = og_is_group_admin($group_node);
   if ($access) {
     $header[] = array('data' => t('Operations'), 'colspan' => 2);
   }
   // prepend the group manager
   $i=0;
-  $rows[$i][] = array('data' => theme('username', $node). '&nbsp;<em>'. t('manager'). '</em>', 'colspan' => 3);
+  $rows[$i][] = array('data' => theme('username', $group_node). '&nbsp;<em>'. t('manager'). '</em>', 'colspan' => 3);
   $i++;
 
   $sql = og_list_users_sql(0,0,'ou.is_admin DESC, ou.is_active ASC, u.name ASC');
   /* list group admins first, pending members second, regular members last.  Alphabetize within each of these categories */
-  $result = pager_query($sql, 500, 0, NULL, $gid);
+  $result = pager_query($sql, 500, 0, NULL, $group_node->nid);
   while ($account = db_fetch_object($result)) {
-      if ($account->uid != $node->uid) {
+      if ($account->uid != $group_node->uid) {
         $username = theme('username', $account);
         if  (!$account->is_active)  { $username .= '&nbsp;<em>'.t('(approval needed)'). '</em>'; }
         elseif ($account->is_admin) { $username .= '&nbsp;<em>'.t('administrator'). '</em>'; }
         $rows[$i][] = $username;
         if ($access) {
           if ($account->is_active) {
-            $rows[$i][] = l(t('remove'), "og/unsubscribe/$gid/$account->uid", array('query' => "destination=og/users/$gid"));
+            $rows[$i][] = l(t('remove'), "og/unsubscribe/$group_node->nid/$account->uid", array('query' => "destination=og/users/$group_node->nid"));
             if ($account->is_admin) {
-              $rows[$i][] = l(t('admin: remove'), "og/delete_admin/$gid/$account->uid", array('query' => 'destination='. $_GET['q']));
+              $rows[$i][] = l(t('admin: remove'), "og/delete_admin/$group_node->nid/$account->uid", array('query' => drupal_get_destination()));
             }
             else {
-              $rows[$i][] = l(t('admin: create'), "og/create_admin/$gid/$account->uid", array('query' => 'destination='. $_GET['q']));
+              $rows[$i][] = l(t('admin: create'), "og/create_admin/$group_node->nid/$account->uid", array('query' => drupal_get_destination()));
             }
           }
           else {
-            $rows[$i][] = l(t('approve'), "og/approve/$gid/$account->uid", array('query' => "destination=og/users/$gid"));
-            $rows[$i][] = l(t('deny'), "og/deny/$gid/$account->uid", array('query' => "destination=og/users/$gid"));
+            $rows[$i][] = l(t('approve'), "og/approve/$group_node->nid/$account->uid", array('query' => drupal_get_destination()));
+            $rows[$i][] = l(t('deny'), "og/deny/$group_node->nid/$account->uid", array('query' => drupal_get_destination()));
           }
         }
         $i++;
@@ -1074,7 +1066,7 @@ function og_list_users_page($node) {
   $output = theme('table', $header, $rows);
   $bc[] = array('path' => "og", 'title' => t('Groups'));
   $bc[] = array('path' => "node/$gid", 'title' => $node->title);
-  menu_set_location($bc);
+  // menu_set_location($bc);
   drupal_set_title(t('Members'). ': '. l($node->title, "node/$node->nid"));
   return $output;
 }
@@ -1084,17 +1076,18 @@ function og_list_users_faces_page($node, $column_count = 5, $row_count = 10, $pa
   $sql = og_list_users_sql(0, 0, 'ou.is_admin DESC, u.picture DESC, u.name ASC');
   /* list group admins first, members with pics second, regular members last.  Alphabetize within each of these categories */
   $result = pager_query($sql, $max_per_page, $pager_id, NULL, $node->nid);
-  $output = theme('og_picture_grid', $result, $column_count);
+  $total = $GLOBALS['pager_total_items'][$element];
+  $output = theme('og_picture_grid', $result, $column_count, $total);
   $output .= theme('pager', NULL, $max_per_page, $pager_id);
   return $output;
 }
 
 // From views_bonus: grid.inc.
-// TODOL: use Views
-function theme_og_picture_grid($result, $column_count = 5) {
+// TODOL: use Views. 
+// todoh use pager total in content item panels
+function theme_og_picture_grid($result, $column_count = 5, $total) {
   $content = '<table class="og-picture-grid">';
   $count = 0;
-  $total = db_num_rows($result);
   while ($user = db_fetch_object($result)) {
     $classes = 'og-picture-grid-item';
     if ($count < $column_count) {
@@ -1194,9 +1187,9 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
       );
   }
   else {
-    $bc[] = array('path' => "og", 'title' => t('Groups'));
-    $bc[] = array('path' => "node/$node->nid", 'title' => $node->title);
-    menu_set_location($bc);
+    $bc[] = l(t("Home"), '');    
+    $bc[] = l(t('Groups'), "og");
+    drupal_set_breadcrumb($bc);
 
     unset($node->content['body']);
     $node->content['og_mission'] = array(
@@ -1219,7 +1212,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
         $view->description = $node->og_description;
         $args[] = 'feed';
       }
-      $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
+      // TODOH $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
       // Views will set either total_rows or num_rows depending on whether View has a pager.
       if ($view->total_rows || $view->num_rows || $view->page_empty) {
         $node->content['view'] = array('#value' => $built);
@@ -1228,7 +1221,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
         // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
         og_home_empty($node);
       }
-      drupal_set_title(filter_xss_admin(views_get_title($view, 'page')));
+      // TODOH drupal_set_title(filter_xss_admin(views_get_title($view, 'page')));
     } 
   }
 }
@@ -1436,6 +1429,14 @@ function og_update_group($node) {
   }
 }
 
+// Return a breadcrumb array for a given groupnode.
+function og_get_breadcrumb($group_node) {
+  $bc[] = l(t('Home'), "");
+  $bc[] = l(t('Groups'), "og");
+  $bc[] = l($group_node->title, "node/$group_node->nid");
+  return $bc;
+}
+
 /**
  * Implementation of hook_nodeapi().
  *
@@ -1448,11 +1449,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       $group_node = og_get_group_context();
       
       if ($group_node && $page && $node->og_groups) {
-        // set breadcrumb and title on non group nodes
-        $bc[] = array('path' => "og", 'title' => t('Groups'));
-        $bc[] = array('path' => "node/$group_node->nid", 'title' => $group_node->title);
-        $bc[] = array('path' => "node/$node->nid", 'title' => $node->title);
-        menu_set_location($bc);
+        $bc = og_get_breadcrumb();
+        drupal_set_breadcrumb($bc);
       }
       if (og_is_group_type($node->type)) {
         og_view_group($node, $teaser, $page);
@@ -1620,14 +1618,12 @@ function og_form_alter(&$form, &$form_state, $form_id) {
       $form['options']['sticky']['#title'] = t('Sticky at top of group home page and other lists');
     }
     elseif (og_is_group_post_type($node->type)) {
-      if (!$node->nid) {
         if ($group_node = og_get_group_context()) {
-          $bc[] = array('path' => 'og', 'title' => t('Groups'));
-          $bc[] = array('path' => "node/$group_node->nid", 'title' => $group_node->title);
-          $bc[] = array('path' => "node/add/$node->type", 'title' => t('Create foo')); //TODO fix title
-          // TODO: not working for unknown reason
-          // menu_set_location($bc);
+        $bc = og_get_breadcrumb($group_node);
+        if ($node->nid) {
+          $bc[] = l($node->title, "node/$node->nid");
         }
+        drupal_set_breadcrumb($bc);
       } 
       og_form_add_og_audience($form, $form_state);
     }
@@ -1641,9 +1637,17 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#type' => 'value',
     '#value' => $usage,
   );
-  $form['#submit']['og_node_type_form_submit'] = array();
+  $form['#submit'][] = 'og_node_type_form_submit';
   $options = og_types_map();
-  $form['workflow']['og_content_type_usage'] = array(
+  $form['og'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Organic groups'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#access' => user_access('administer organic groups'),
+  );
+  
+  $form['og']['og_content_type_usage'] = array(
     '#type' => 'radios',
     '#title' => t('Organic groups usage'),
     '#default_value' => $usage,
@@ -1693,7 +1697,7 @@ function og_node_delete_group_form(&$form) {
     unset($options[$form['nid']['#value']]);
     $form['target'] = array('#type' => 'select', '#title' => t('Target group'), '#default_value' => 0, '#options' => $options, '#weight' => 0, '#description' => t('If you chose <b>Move all group posts</b> above, specify a destination group.'));
     // register a submit handler
-    $form['#submit']['og_node_delete_confirm_submit'] = array();
+    $form['#submit'][] = 'og_node_delete_confirm_submit';
   }
   $form['actions']['submit']['#value'] = t('Delete group');
 }
@@ -1924,14 +1928,6 @@ function og_form_add_og_audience(&$form, $form_state) {
   }
   else if ($required) {
     form_set_error('title', t('You must !join before posting a %type.', array('!join' => l(t('join a group'), 'og'), '%type' => node_get_types('name', $node->type))));
-  }
-  
-  if (count($form['og_nodeapi']['visible']) > 1) {
-    // TODOL: nicer syntax
-    $form['og_nodeapi']['#type'] = 'fieldset';
-    $form['og_nodeapi']['#title'] = t('Groups');
-    $form['og_nodeapi']['#collapsible'] = TRUE;
-    $form['og_nodeapi']['#collapsed'] = $gids ? TRUE : FALSE;
   }
 }
 
@@ -2205,9 +2201,9 @@ function og_mail($key, &$message, $params) {
 
 /**
  * Define all OG email bodies
- * Modelled after Drupal's user.module
+ * Modelled after user.module
  */
-function _og_user_mail_text($messageid, $language = NULL, $variables = array()) {
+function _og_mail_text($messageid, $language = NULL, $variables = array()) {
   $langcode = isset($language) ? $language->language : NULL;
   
   // Check if an admin setting overrides the default string.
@@ -2488,20 +2484,30 @@ function og_feed($gid) {
 function og_block($op = 'list', $delta = 0, $edit = array()) {
   if ($op == 'list') {
     $blocks[0]['info'] = t('Group details');
+    $blocks[0]['cache'] = BLOCK_NO_CACHE;
+    
     // $blocks[1] used to be the album block. We do not change the numbers to not confuse people who update.
+    
     $blocks[2]['info'] = t('Group members');
+    $blocks[2]['cache'] = BLOCK_NO_CACHE;
+    
     $blocks[3]['info'] = t('New groups');
+    $blocks[3]['cache'] = BLOCK_CACHE_GLOBAL;
+    
     // Now provided by og_views. Please don't reuse this number 4
     // $blocks[4]['info'] = t('My groups');
+    
     $blocks[5]['info'] = t('Group notifications');
-    $blocks[6]['info'] = t('Group Network');
+    $blocks[5]['cache'] = BLOCK_NO_CACHE;
+    
+    $blocks[6]['info'] = t('Group network');
+    $blocks[6]['cache'] = BLOCK_CACHE_PER_USER;
     
     // Auto-enable the group blocks for fresh installations.
     $blocks[0]['status'] = 1;
     $blocks[0]['weight'] = -2;
     $blocks[5]['status'] = 1;
     $blocks[5]['weight'] = -1;
-    
     return $blocks;
   }
   elseif ($op == 'view') {
@@ -2622,7 +2628,7 @@ function og_block_users_network() {
   if ($user->uid && count($user->og_groups)) {
     $max = variable_get('og_block_cnt_2', 10);
     $placeholders = db_placeholders($user->og_groups);
-    $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". implode(", ", $placeholders) .") GROUP BY ogu.uid, u.name, u.picture ORDER BY u.name ASC";
+    $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". $placeholders .") GROUP BY ogu.uid, u.name, u.picture ORDER BY u.name ASC";
     $args = array_keys($user->og_groups);
     array_unshift($args, $user->uid);
     $result = db_query_range($sql, $args, 0, $max);
@@ -2743,7 +2749,7 @@ function og_block_details() {
     }
   
     // Modify these links by reference. If you want control of the whole block, see og_block_details().
-    drupal_alter('og_links');
+    drupal_alter('og_links', $links);
 
     $block['content'] = theme('item_list', $links). $post;
     $block['subject'] = l($node->title, "node/$node->nid");
@@ -2760,9 +2766,9 @@ function og_block_details() {
  function og_subscriber_count_link($node) {
   global $user;
   $result = db_query(og_list_users_sql(0), $node->nid);
-  $cntall = db_num_rows($result);
-  $cntpending = 0;
+  $cntpending = $cntall = 0;
   while ($row = db_fetch_object($result)) {
+    $cntall++;
     if ($row->is_active == 0) {
       $cntpending++;
     }

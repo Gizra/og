@@ -141,6 +141,14 @@ function og_access_alter_nongroup_form(&$form, $node) {
         $form['og_nodeapi']['visible']['og_public'] = array('#type' => 'checkbox', '#title' => t('Public'), '#default_value' => $node->nid ? $node->og_public : 0, '#description' => t('Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>Public</em>.'), '#weight' => 2);
         break;
     }
+    
+    if (count($form['og_nodeapi']['visible']) > 1) {
+      $form['og_nodeapi']['#type'] = 'fieldset';
+      $form['og_nodeapi']['#title'] = t('Groups');
+      $form['og_nodeapi']['#collapsible'] = TRUE;
+      $form['og_nodeapi']['#collapsed'] = $selected_groups ? TRUE : FALSE;
+    }
+
   }
 
 }

@@ -8,7 +8,7 @@ function og_admin_settings() {
   // content types
   $is_configured = count(og_get_types('group')) && count(og_get_types('group_post'));
   if (!$is_configured) {
-    form_set_error('content_types_table', t('You must designate at least one content type to act as a Group node and another as a Group post. <a href="!create">Create new content type</a> if needed.', array('!create' => url('admin/content/types/add'))));
+    form_set_error('content_types_table', t('You must designate at least one content type to act as a Group node and another as a Group post. <a href="!create">Create new content type</a> if needed.', array('!create' => url('admin/content/types/add', array('query' => drupal_get_destination())))));
   }
   $form['og_settings']['content_types'] = array(
     '#type' => 'fieldset', 
@@ -24,7 +24,7 @@ function og_admin_settings() {
     $rows[] = array(
       $type->name,
       $map[$usage],
-      l(t('Edit'), "admin/content/types/$type_url_str", array('query' => drupal_get_destination())),      
+      l(t('Edit'), "admin/content/node-type/$type_url_str", array('query' => drupal_get_destination())),      
     );
   }
   $form['og_settings']['content_types']['content_types_table'] = array('#value' => theme('table', $header, $rows));
@@ -148,4 +148,3 @@ function og_admin_settings() {
 
   return system_settings_form($form);
 }
-
