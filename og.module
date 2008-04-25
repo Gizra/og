@@ -262,6 +262,34 @@ function og_theme() {
   );
 }
 
+/**
+ * Enrich non group nodes with the list og groups that the node belongs to.
+ * 
+ * @return void
+ **/
+function og_preprocess_node(&$variables) {
+  $node = $variables['node'];
+  if (og_is_group_post_type($node->type)) {
+    $current_groups = og_node_groups_distinguish($node->og_groups_both, FALSE);
+    foreach ($current_groups['accessible'] as $gid => $item) {
+      $og_links['og_'. $gid] = array('title' => $item['title'], 'href' => "node/$gid");
+    }
+    $variables['og_links']['view'] = theme('links', $og_links);
+    $variables['og_links']['raw'] = $og_links;
+    array_unshift($variables['template_files'], 'node-og-group-post');
+  }
+  elseif (og_is_group_type($node->type)) {
+    // This looks awful on a group node
+    unset($variables['submitted']);
+    array_unshift($variables['template_files'], 'node-og-group');
+  }
+}
+
+function og_theme_registry_alter(&$variables) {
+  $variables['node']['theme paths'][] = drupal_get_path('module', 'og');
+  array_unshift($variables['template_files'], 'node-og-group');
+  dsm($variables);
+}
 
 function og_init() {
   // we have to perform a load in order to assure that the $user->og_groups bits are present.
@@ -1449,7 +1477,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       $group_node = og_get_group_context();
       
       if ($group_node && $page && $node->og_groups) {
-        $bc = og_get_breadcrumb();
+        $bc = og_get_breadcrumb($group_node);
         drupal_set_breadcrumb($bc);
       }
       if (og_is_group_type($node->type)) {
@@ -1775,7 +1803,7 @@ function og_node_groups_distinguish($groups_names_both, $exclude_joined = TRUE) 
   }
   else {
     $placeholders = db_placeholders($groups_names_both);
-    $sql = 'SELECT n.nid FROM {node} n WHERE n.nid IN ('. implode(', ', $placeholders). ')';
+    $sql = 'SELECT n.nid FROM {node} n WHERE n.nid IN ('. $placeholders. ')';
     $result = db_query(db_rewrite_sql($sql), array_keys($groups_names_both));
     while ($row = db_fetch_object($result)) {
       $current_groups['accessible'][$row->nid]['title'] = $groups_names_both[$row->nid];
