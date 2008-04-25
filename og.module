@@ -287,8 +287,6 @@ function og_preprocess_node(&$variables) {
 
 function og_theme_registry_alter(&$variables) {
   $variables['node']['theme paths'][] = drupal_get_path('module', 'og');
-  array_unshift($variables['template_files'], 'node-og-group');
-  dsm($variables);
 }
 
 function og_init() {
