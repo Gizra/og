@@ -83,12 +83,12 @@ function og_views_data_og() {
   );
   $data['og']['private'] = array(
     'title' => t('Group: Private'),
+    'help' => t('Is the group home page private or not.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
-      'label' => t('Is the group home page private or not.'),
     ),
   );
   $data['og']['directory'] = array(
@@ -102,10 +102,10 @@ function og_views_data_og() {
     ),
   );
   $data['og']['subscribe'] = array(
+    'title' => t('Group: Join Link'),
+    'help' => t('Displays a links for joining a group when a user is not already a member.'),
     'field' => array(
       'handler' => 'views_handler_field_og_subscribe',
-      'title' => t('Group: Join Link'),
-      'help' => t('Displays a links for joining a group when a user is not already a member.'),
     ),
   );
   $data['og']['notification'] = array(
@@ -118,7 +118,7 @@ function og_views_data_og() {
       'handler' => 'views_handler_filter_boolean_operator',
     ),
   );
-  if (module_exists('translation')) {
+  if (module_exists('locale')) {
     $data['og']['language'] = array(
       'title' => t('Group: Language'),
       'help' => t('Displays the language selected for a given group.'),

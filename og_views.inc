@@ -29,6 +29,7 @@ function og_views_tables() {
       'fields' => array(
         'description' => array(
           'name' => t('OG: Group: Description'),
+          'help' => t('A group\'s description as enterd on the grop form.'),
         ),
         'count' => array(
           'name' => t('OG: Group: Members Count'),

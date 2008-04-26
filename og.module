@@ -1383,13 +1383,13 @@ function og_group_form($node) {
   }
   
   // TODOH: language
-  if (module_exists('locale') && $languages = locale_supported_languages()) {
-    if (count($languages['name']) > 1) {
-      $languages['name'] = array_map('check_plain', $languages['name']);
-      $form['locale']['og_language'] = array('#type' => 'radios',
+  if (module_exists('locale') && $languages = locale_language_list()) {
+    if (count($languages) > 1) {
+      $form['locale']['og_language'] = array(
+        '#type' => 'radios',
         '#title' => t('Language'),
         '#default_value' => $node->og_language,
-        '#options' => $languages['name'],
+        '#options' => $languages,
         '#description' => t('Selecting a different locale will change the interface language of the group. Users who have chosen a preferred language always see their chosen language.'),
       );
     }
