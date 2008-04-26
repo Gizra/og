@@ -543,8 +543,8 @@ function og_manage_form($form_state, $group) {
       drupal_set_message(t('You may not leave this group because you are its owner. A site administrator can assign ownership to another user and then you may leave.'));
     }
     else {
-      $links[] = l(t('Leave this group'), "og/unsubscribe/$group->nid");
-      $form['unsubscribe'] = array('#value' => theme('item_list', $links, t('Actions')));
+      $links[] = l(t('Leave this group'), "og/unsubscribe/$group->nid/$user->uid");
+      $form['unsubscribe'] = array('#value' => theme('item_list', $links));
     }
   }
 
@@ -856,7 +856,7 @@ function og_subscribe($gid, $uid = NULL) {
 /**
  * Confirm og membership form
  */
-function og_confirm_subscribe($gid, $node, $account) {
+function og_confirm_subscribe($form_state, $gid, $node, $account) {
  $form['gid'] = array('#type' => 'value', '#value' => $gid);
  $form['account'] = array('#type' => 'value', '#value' => $account);
  if ($node->og_selective == OG_MODERATED) {
@@ -1275,6 +1275,15 @@ function og_home_empty($node) {
 // A FAPI theme callback. See og_view_group(). Also called from an og_panels content item.
 function theme_og_mission($form) {
   return !empty($form['#value']) ? '<div id="mission" class="og-mission">'. $form['#value']. '</div>' : '';
+}
+
+function og_selective_map() {
+  return array(
+    OG_OPEN => t('Open'),
+    OG_MODERATED => t('Moderated'),
+    OG_INVITE_ONLY => t('Invite only'),
+    OG_CLOSED => t('Closed'),
+  );
 }
 
 /**
