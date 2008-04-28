@@ -304,9 +304,8 @@ function og_init() {
   $_SESSION['og_last'] = og_get_group_context();
 
   // TODOH: standardize name of .inc files and use module_load_include. See http://api.drupal.org/api/function/module_load_include/6
-  require dirname(__FILE__). '/og_views.inc';
   if (module_exists('workflow_ng')) {
-    require dirname(__FILE__). '/og_workflow_ng.inc';
+    module_load_include('inc', 'og', 'og_workflow_ng');
   }
   og_determine_context();
   // og_set_locale();
@@ -587,8 +586,8 @@ function og_manage_form($form_state, $group) {
 function og_manage_form_submit($form, &$form_state) {
   global $user;
   $passed_values = $form_state['values'];
-  unset($passed_values['gid'], $passed_values['op'], $passed_values['form_id'], $passed_values['form_token']);
-  og_save_subscription($form_values['gid'], $user->uid, $passed_values);
+  unset($passed_values['gid'], $passed_values['op'], $passed_values['form_id'], $passed_values['form_build_id'], $passed_values['form_token']);
+  og_save_subscription($form_state['values']['gid'], $user->uid, $passed_values);
   drupal_set_message(t('Membership saved.'));
 }
 
@@ -1415,7 +1414,7 @@ function og_get_node_groups($node) {
   }
 }
 
-// The query for the get_node_groups function. Is reused in og_views.inc
+// The query for the get_node_groups function. Is reused in og.views.inc
 function og_get_node_groups_result($nid) {
   // We do not run db_rewrite_sql() here since we need to know about groups that the user cannot access as well (i.e. node edit).
   $sql = "SELECT oga.group_nid, n.title FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.group_nid WHERE oga.nid = %d";
@@ -2910,7 +2909,7 @@ function theme_og_format_subscriber_status($group) {
  *
  */
 function og_xmlrpc() {
-  require_once drupal_get_path('module', 'og'). '/og_xmlrpc.inc';
+  module_load_include('inc', 'og', 'og_xmlrpc');
   return array(
     array(
       'og.subscribe_user',
