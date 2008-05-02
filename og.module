@@ -357,7 +357,7 @@ function og_manage_form($group) {
     }
     else {
       $links[] = l(t('Leave this group'), "og/unsubscribe/$group->nid");
-      $form['unsubscribe'] = array('#type' => 'markup', '#value' => theme('item_list', $links, t('Actions')));
+      $form['unsubscribe'] = array('#type' => 'markup', '#value' => theme('item_list', $links));
     }
   }
 

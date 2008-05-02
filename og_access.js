@@ -20,12 +20,14 @@ Drupal.og_accessAttach = function() {
 
     // Set initial value
     if ( $('.og-audience .form-checkbox').size() > 0 ) {
+      // The checkbox way of showing audience
       if ( $('input.og-audience:checked').size() < 1) {
           $('#edit-og-public').attr("disabled", "disabled");
       }    
     }
     else {
-      if ( $('.og-audience option:selected').size() < 1) {
+      // The select way of showing audience
+      if ($('.og-audience option').size() > 0 && $('.og-audience option:selected').size() < 1) {
           $('#edit-og-public').attr("disabled", "disabled");
       }        
     }
