@@ -303,7 +303,6 @@ function og_init() {
   // we get a NOTICE if doing this from within og_determine_context() so I do it here for now.
   $_SESSION['og_last'] = og_get_group_context();
 
-  // TODOH: standardize name of .inc files and use module_load_include. See http://api.drupal.org/api/function/module_load_include/6
   if (module_exists('workflow_ng')) {
     module_load_include('inc', 'og', 'og_workflow_ng');
   }
@@ -1212,6 +1211,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
       );
   }
   else {
+    // See http://drupal.org/files/issues/bc-fixup-204415-50.patch for an alternate way
     $bc[] = l(t("Home"), '');    
     $bc[] = l(t('Groups'), "og");
     drupal_set_breadcrumb($bc);
@@ -1394,7 +1394,6 @@ function og_group_form($node) {
     }
   }
   
-  // TODOH: FAPI is a bit awkward here. See http://drupal.org/node/144132#comment-643920?
   if ($theme_form = system_theme_select_form(t('Selecting a different theme will change the look and feel of the group.'), $edit['theme'] ? $edit['theme'] : $node->og_theme, 2)) {
     $theme_form['themes']['#weight'] = 8;
     $form += $theme_form;
