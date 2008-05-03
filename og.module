@@ -669,7 +669,7 @@ function og_subscribe($gid, $uid = NULL) {
     $account = user_load(array('uid' => $uid));
   }
   $node = node_load($gid);
-  if ($node->og_selective >= OG_INVITE_ONLY) {
+  if ($node->og_selective >= OG_INVITE_ONLY || $node->status == 0) {
     drupal_access_denied();
     exit();
   }

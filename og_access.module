@@ -123,6 +123,9 @@ function og_access_alter_nongroup_form(&$form, $node) {
           break;
         }
       }
+    }
+    else {
+      // TODOL: No groups. Public must be checked if it is visible.
     } 
 
     switch ($vis) {
