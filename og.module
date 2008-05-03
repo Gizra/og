@@ -831,7 +831,7 @@ function og_subscribe($gid, $uid = NULL) {
     $account = user_load(array('uid' => $uid));
   }
   $node = node_load($gid);
-  if ($node->og_selective >= OG_INVITE_ONLY  || $node->status == 0) {
+  if ($node->og_selective >= OG_INVITE_ONLY || $node->status == 0) {
     drupal_access_denied();
     exit();
   }
@@ -2154,33 +2154,22 @@ function og_mail_notify($type, $obj) {
  * @see og_mail_notify()
  */
 function og_node_view($node, $teaser = FALSE) {
-  $node = (object)$node;
+  // Remove the delimiter (if any) that separates the teaser from the body.
+  // TODO: this strips legitimate uses of '<!--break-->' also.
+  $node->body = str_replace('<!--break-->', '', $node->body);
 
-  $node = node_build_content($node, $teaser, $page);
-
-  // Set the proper node part, then unset unused $node part so that a bad
-  // theme can not open a security hole.
-  $content = drupal_render($node->content);
-  if ($teaser) {
-    $node->teaser = $content;
-    unset($node->body);
+  // The 'view' hook can be implemented to overwrite the default function
+  // to display nodes.
+  if (node_hook($node, 'view')) {
+    node_invoke($node, 'view', $teaser, TRUE);
   }
   else {
-    $node->body = $content;
-    unset($node->teaser);
+    $node = node_prepare($node, $teaser);
   }
-
-  // Allow modules to modify the fully-built node.
-  node_invoke_nodeapi($node, 'alter', $teaser, $page);
-
-  if ($teaser) {
-    $output .= $node->teaser;
-  }
-  else {
-    $output .= $node->body;
-  }
-
-  return $output;
+  // Allow modules to change $node->body before viewing.
+  node_invoke_nodeapi($node, 'view', $teaser, TRUE);
+  
+  return $teaser ? $node->teaser : $node->body;
 }
 
 // 2 functions ripped from mail.inc in project.module package
