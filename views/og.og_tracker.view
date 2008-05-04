@@ -1,0 +1,277 @@
+<?php
+// $Id$
+
+$view = new view;
+$view->name = 'og_tracker';
+$view->description = 'Shows active posts across the whole site.';
+$view->tag = 'og';
+$view->view_php = '';
+$view->base_table = 'node';
+$view->is_cacheable = '0';
+$view->api_version = 2;
+$view->disabled = FALSE; // Edit this to true to make a default view disabled initially
+$view->display = array();
+  $display = new views_display;
+  $display->id = 'default';
+  $display->display_title = 'Defaults';
+  $display->display_plugin = 'default';
+  $display->position = '1';
+  $display->display_options = array (
+  'style_plugin' => 'table',
+  'style_options' => 
+  array (
+    'columns' => 
+    array (
+    ),
+    'default' => '',
+    'info' => 
+    array (
+    ),
+    'override' => true,
+    'order' => 'asc',
+  ),
+  'row_plugin' => 'fields',
+  'row_options' => 
+  array (
+  ),
+  'relationships' => 
+  array (
+  ),
+  'fields' => 
+  array (
+    'type' => 
+    array (
+      'id' => 'type',
+      'table' => 'node',
+      'field' => 'type',
+      'label' => 'Type',
+      'relationship' => 'none',
+      'link_to_node' => 1,
+    ),
+    'title' => 
+    array (
+      'id' => 'title',
+      'table' => 'node',
+      'field' => 'title',
+      'label' => 'Title',
+      'relationship' => 'none',
+      'link_to_node' => 1,
+    ),
+    'name' => 
+    array (
+      'id' => 'name',
+      'table' => 'users',
+      'field' => 'name',
+      'label' => 'Author',
+      'link_to_user' => 1,
+      'relationship' => 'none',
+    ),
+    'comment_count' => 
+    array (
+      'id' => 'comment_count',
+      'table' => 'node_comment_statistics',
+      'field' => 'comment_count',
+      'label' => 'Replies',
+      'set_precision' => false,
+      'precision' => 0,
+      'decimal' => '.',
+      'separator' => ',',
+      'prefix' => '',
+      'suffix' => '',
+      'relationship' => 'none',
+    ),
+    'group_nid' => 
+    array (
+      'id' => 'group_nid',
+      'table' => 'og_ancestry',
+      'field' => 'group_nid',
+      'label' => 'Groups',
+      'type' => 'separator',
+      'separator' => ', ',
+      'empty' => '',
+      'relationship' => 'none',
+    ),
+    'last_comment_timestamp' => 
+    array (
+      'id' => 'last_comment_timestamp',
+      'table' => 'node_comment_statistics',
+      'field' => 'last_comment_timestamp',
+      'label' => 'Last post',
+      'date_format' => 'small',
+      'custom_date_format' => '',
+      'relationship' => 'none',
+    ),
+  ),
+  'sorts' => 
+  array (
+    'last_comment_timestamp' => 
+    array (
+      'id' => 'last_comment_timestamp',
+      'table' => 'node_comment_statistics',
+      'field' => 'last_comment_timestamp',
+      'order' => 'DESC',
+      'granularity' => 'second',
+      'relationship' => 'none',
+    ),
+  ),
+  'arguments' => 
+  array (
+  ),
+  'filters' => 
+  array (
+    'status' => 
+    array (
+      'id' => 'status',
+      'table' => 'node',
+      'field' => 'status',
+      'operator' => '=',
+      'value' => 1,
+      'group' => 0,
+      'exposed' => false,
+      'expose' => 
+      array (
+        'operator' => false,
+        'label' => '',
+      ),
+      'relationship' => 'none',
+      'expose_button' => 
+      array (
+        'button' => 'Expose',
+      ),
+    ),
+  ),
+  'items_per_page' => 25,
+  'title' => 'Recent posts across whole site',
+  'use_pager' => '1',
+  'pager_element' => 0,
+  'offset' => 0,
+);
+$view->display['default'] = $display;
+  $display = new views_display;
+  $display->id = 'page';
+  $display->display_title = 'Page';
+  $display->display_plugin = 'page';
+  $display->position = '2';
+  $display->display_options = array (
+  'defaults' => 
+  array (
+    'access' => true,
+    'title' => true,
+    'header' => true,
+    'header_format' => true,
+    'header_empty' => true,
+    'footer' => true,
+    'footer_format' => true,
+    'footer_empty' => true,
+    'empty' => true,
+    'empty_format' => true,
+    'use_ajax' => true,
+    'items_per_page' => true,
+    'offset' => true,
+    'use_pager' => true,
+    'pager_element' => true,
+    'use_more' => true,
+    'distinct' => true,
+    'link_display' => true,
+    'style_plugin' => true,
+    'style_options' => true,
+    'row_plugin' => true,
+    'row_options' => true,
+    'relationships' => true,
+    'fields' => true,
+    'sorts' => true,
+    'arguments' => true,
+    'filters' => true,
+  ),
+  'relationships' => 
+  array (
+  ),
+  'fields' => 
+  array (
+  ),
+  'sorts' => 
+  array (
+  ),
+  'arguments' => 
+  array (
+  ),
+  'filters' => 
+  array (
+  ),
+  'path' => 'group/tracker',
+  'menu' => 
+  array (
+    'type' => 'tab',
+    'title' => 'Recent posts',
+    'weight' => '5',
+  ),
+);
+$view->display['page'] = $display;
+  $display = new views_display;
+  $display->id = 'feed';
+  $display->display_title = 'Feed';
+  $display->display_plugin = 'feed';
+  $display->position = '3';
+  $display->display_options = array (
+  'defaults' => 
+  array (
+    'access' => true,
+    'title' => true,
+    'header' => true,
+    'header_format' => true,
+    'header_empty' => true,
+    'footer' => true,
+    'footer_format' => true,
+    'footer_empty' => true,
+    'empty' => true,
+    'empty_format' => true,
+    'use_ajax' => true,
+    'items_per_page' => true,
+    'offset' => true,
+    'use_pager' => true,
+    'pager_element' => true,
+    'use_more' => true,
+    'distinct' => true,
+    'link_display' => true,
+    'style_plugin' => false,
+    'style_options' => false,
+    'row_plugin' => false,
+    'row_options' => false,
+    'relationships' => true,
+    'fields' => true,
+    'sorts' => true,
+    'arguments' => true,
+    'filters' => true,
+  ),
+  'relationships' => 
+  array (
+  ),
+  'fields' => 
+  array (
+  ),
+  'sorts' => 
+  array (
+  ),
+  'arguments' => 
+  array (
+  ),
+  'filters' => 
+  array (
+  ),
+  'displays' => 
+  array (
+  ),
+  'style_plugin' => 'rss',
+  'style_options' => 
+  array (
+    'mission_description' => false,
+    'description' => '',
+  ),
+  'row_plugin' => 'node_rss',
+  'path' => 'group/tracker/feed',
+  'row_options' => 
+  array (
+    'item_length' => 'default',
+  ),
+);
+$view->display['feed'] = $display;
