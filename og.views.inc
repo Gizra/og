@@ -277,8 +277,11 @@ function og_views_data_og_ancestry() {
   // todoh Add setting of context
   $filterhelp = t('Filter for posts in specified organic groups. <em>Value</em> should be a one or more node ids (i.e. integers), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context (if View is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id.');
   $data['og_ancestry']['group_nid'] = array(
-    'title' => t('Group nid'),
-    'help' => t('TODOL'),
+    'title' => t('Groups'),
+    'help' => t('The groups for a post.'),
+    'field' => array(
+      'handler' => 'views_handler_field_og_group_nids',
+    ),
     'relationship' => array(
       'title' => t('Group node'),
       'help' => t('Bring in information about the group node.'),
@@ -299,16 +302,6 @@ function og_views_data_og_ancestry() {
       'handler' => 'views_handler_argument_og_group_nid',
       'numeric' => TRUE,
       'help' => $filterhelp,
-    ),
-  );
-  
-  // Pseudofield for showing all groups on a node
-  $data['og_ancestry']['group_nids'] = array(
-    'title' => t('Groups'),
-    'help' => t('The groups for a post.'),
-    'field' => array(
-      // TODOH: not working
-      'handler' => 'views_handler_field_og_group_nids',
     ),
   );
   
@@ -360,6 +353,11 @@ class views_handler_argument_og_group_nid extends views_handler_argument_many_to
 }
 
 class views_handler_field_og_group_nids extends views_handler_field_prerender_list {
+  function init(&$view, $options) {
+    parent::init($view, $options);
+    $this->additional_fields['nid'] = array('table' => 'og_ancestry', 'field' => 'nid');
+  }
+  
   /**
    * Add this term to the query
    */
@@ -367,11 +365,15 @@ class views_handler_field_og_group_nids extends views_handler_field_prerender_li
     $this->add_additional_fields();
   }
   
+  // we have to query to get all the groups into a single element
   function pre_render($values) {
-    // we have to query to get all the groups into a single element
-    $result = og_get_node_groups_result($values->nid);
-    while ($row = db_fetch_object($result)) {
-      $this->items[$row->group_nid] = l($row->title, "node/$row->group_nid");
+    // field_alias is used by our render method.
+    $this->field_alias = $this->aliases['nid'];
+    foreach ($values as $value) {
+      $result = og_get_node_groups_result($value->nid);
+      while ($row = db_fetch_object($result)) {
+        $this->items[$value->nid][$row->group_nid] = l($row->title, "node/$row->group_nid");
+      }
     }
   }
 }
@@ -406,18 +408,24 @@ function og_views_data_og_uid() {
     ),
   );
   
-            
-            
-  
-  $data['og_uid']['uid_current'] = array(
-    'title' => t('OG: Post in User Subbed Groups'),
-    'real field' => 'uid',
+  $data['og_uid']['nid'] = array(
+    'title' => t('Group'),
+    // 'relationship' => array(
+    //       'title' => t('Group node (memberships)'),
+    //       'help' => t('Bring in information about the group node.'),
+    //       'base' => 'node',
+    //       'field' => 'nid',
+    //       'handler' => 'views_handler_relationship',
+    //       'label' => t('Group'),
+    //     ),
     'help' => t('Posts are filtered to where current user is a member.'),
     'filter' => array(
       'handler' => 'views_handler_filter_user_current',
+      'label' => t('OG: Post in user\'s subbed groups'),
+      'help' => 'todo',
     ),
-  );
-  
+  ); 
+    
   $data['og_uid']['mail_type'] = array(
     'title' => t('OG: Notification email'),
     'help' => t('Does member receive email notifications for a group.'),
