@@ -1,0 +1,325 @@
+<?php
+// $Id$
+
+$view = new view;
+$view->name = 'og';
+$view->description = 'Groups directory';
+$view->tag = 'og';
+$view->view_php = '';
+$view->base_table = 'node';
+$view->is_cacheable = '0';
+$view->api_version = 2;
+$view->disabled = FALSE; // Edit this to true to make a default view disabled initially
+$view->display = array();
+  $display = new views_display;
+  $display->id = 'default';
+  $display->display_title = 'Defaults';
+  $display->display_plugin = 'default';
+  $display->position = '1';
+  $display->display_options = array (
+  'style_plugin' => 'table',
+  'style_options' => 
+  array (
+    'columns' => 
+    array (
+    ),
+    'default' => '',
+    'info' => 
+    array (
+    ),
+    'override' => true,
+    'order' => 'asc',
+  ),
+  'row_plugin' => 'fields',
+  'row_options' => 
+  array (
+  ),
+  'relationships' => 
+  array (
+  ),
+  'fields' => 
+  array (
+    'title' => 
+    array (
+      'id' => 'title',
+      'table' => 'node',
+      'field' => 'title',
+      'label' => 'Group',
+      'relationship' => 'none',
+      'link_to_node' => 1,
+    ),
+    'name' => 
+    array (
+      'id' => 'name',
+      'table' => 'users',
+      'field' => 'name',
+      'label' => 'Manager',
+      'link_to_user' => 1,
+      'relationship' => 'none',
+    ),
+    'description' => 
+    array (
+      'id' => 'description',
+      'table' => 'og',
+      'field' => 'description',
+      'label' => 'Description',
+      'relationship' => 'none',
+    ),
+    'subscribe' => 
+    array (
+      'id' => 'subscribe',
+      'table' => 'og',
+      'field' => 'subscribe',
+      'label' => 'Join Link',
+      'relationship' => 'none',
+    ),
+  ),
+  'sorts' => 
+  array (
+    'created' => 
+    array (
+      'id' => 'created',
+      'table' => 'node',
+      'field' => 'created',
+      'order' => 'DESC',
+      'granularity' => 'second',
+      'relationship' => 'none',
+    ),
+  ),
+  'arguments' => 
+  array (
+  ),
+  'filters' => 
+  array (
+    'status' => 
+    array (
+      'id' => 'status',
+      'table' => 'node',
+      'field' => 'status',
+      'operator' => '=',
+      'value' => 1,
+      'group' => 0,
+      'exposed' => false,
+      'expose' => 
+      array (
+        'operator' => false,
+        'label' => '',
+      ),
+      'relationship' => 'none',
+      'expose_button' => 
+      array (
+        'button' => 'Expose',
+      ),
+    ),
+    'title' => 
+    array (
+      'id' => 'title',
+      'table' => 'node',
+      'field' => 'title',
+      'operator' => 'contains',
+      'value' => '',
+      'group' => 0,
+      'exposed' => true,
+      'expose' => 
+      array (
+        'operator' => 'title_oper',
+        'identifier' => 'title',
+        'label' => 'Search for a group by name',
+        'optional' => 1,
+        'remember' => 0,
+      ),
+      'case' => 0,
+      'relationship' => 'none',
+      'expose_button' => 
+      array (
+        'button' => 'Hide',
+      ),
+    ),
+    'type_groups_all' => 
+    array (
+      'id' => 'type_groups_all',
+      'table' => 'og',
+      'field' => 'type_groups_all',
+      'operator' => '=',
+      'value' => '',
+      'group' => 0,
+      'exposed' => false,
+      'expose' => 
+      array (
+        'operator' => false,
+        'label' => '',
+      ),
+      'relationship' => 'none',
+      'expose_button' => 
+      array (
+        'button' => 'Expose',
+      ),
+    ),
+    'directory' => 
+    array (
+      'id' => 'directory',
+      'table' => 'og',
+      'field' => 'directory',
+      'operator' => '=',
+      'value' => 1,
+      'group' => 0,
+      'exposed' => false,
+      'expose' => 
+      array (
+        'operator' => false,
+        'label' => '',
+      ),
+      'relationship' => 'none',
+      'expose_button' => 
+      array (
+        'button' => 'Expose',
+      ),
+    ),
+  ),
+  'items_per_page' => 90,
+  'use_ajax' => '1',
+  'use_pager' => '1',
+  'pager_element' => 0,
+  'offset' => 0,
+  'empty' => 'No groups',
+  'empty_format' => '1',
+);
+$view->display['default'] = $display;
+  $display = new views_display;
+  $display->id = 'feed';
+  $display->display_title = 'Feed';
+  $display->display_plugin = 'feed';
+  $display->position = '2';
+  $display->display_options = array (
+  'defaults' => 
+  array (
+    'access' => true,
+    'title' => true,
+    'header' => true,
+    'header_format' => true,
+    'header_empty' => true,
+    'footer' => true,
+    'footer_format' => true,
+    'footer_empty' => true,
+    'empty' => true,
+    'empty_format' => true,
+    'use_ajax' => true,
+    'items_per_page' => false,
+    'offset' => false,
+    'use_pager' => false,
+    'pager_element' => false,
+    'use_more' => true,
+    'distinct' => true,
+    'link_display' => true,
+    'style_plugin' => false,
+    'style_options' => false,
+    'row_plugin' => false,
+    'row_options' => false,
+    'relationships' => true,
+    'fields' => true,
+    'sorts' => true,
+    'arguments' => true,
+    'filters' => true,
+  ),
+  'relationships' => 
+  array (
+  ),
+  'fields' => 
+  array (
+  ),
+  'sorts' => 
+  array (
+  ),
+  'arguments' => 
+  array (
+  ),
+  'filters' => 
+  array (
+  ),
+  'displays' => 
+  array (
+  ),
+  'style_plugin' => 'rss',
+  'style_options' => 
+  array (
+    'mission_description' => false,
+    'description' => '',
+  ),
+  'row_plugin' => 'node_rss',
+  'row_options' => 
+  array (
+    'item_length' => 'default',
+  ),
+  'items_per_page' => 20,
+  'offset' => 0,
+  'use_pager' => '1',
+  'pager_element' => 0,
+  'path' => 'og/all/feed',
+);
+$view->display['feed'] = $display;
+  $display = new views_display;
+  $display->id = 'page';
+  $display->display_title = 'Page';
+  $display->display_plugin = 'page';
+  $display->position = '3';
+  $display->display_options = array (
+  'defaults' => 
+  array (
+    'access' => true,
+    'title' => true,
+    'header' => true,
+    'header_format' => true,
+    'header_empty' => true,
+    'footer' => true,
+    'footer_format' => true,
+    'footer_empty' => true,
+    'empty' => true,
+    'empty_format' => true,
+    'use_ajax' => true,
+    'items_per_page' => true,
+    'offset' => true,
+    'use_pager' => true,
+    'pager_element' => true,
+    'use_more' => true,
+    'distinct' => true,
+    'link_display' => true,
+    'style_plugin' => true,
+    'style_options' => true,
+    'row_plugin' => true,
+    'row_options' => true,
+    'relationships' => true,
+    'fields' => true,
+    'sorts' => true,
+    'arguments' => true,
+    'filters' => true,
+  ),
+  'relationships' => 
+  array (
+  ),
+  'fields' => 
+  array (
+  ),
+  'sorts' => 
+  array (
+  ),
+  'arguments' => 
+  array (
+  ),
+  'filters' => 
+  array (
+  ),
+  'path' => 'og/all',
+  'menu' => 
+  array (
+    'type' => 'default tab',
+    'title' => 'Groups',
+    'weight' => '0',
+  ),
+  'tab_options' => 
+  array (
+    'type' => 'normal',
+    'title' => 'Groups',
+    'weight' => '0',
+  ),
+);
+$view->display['page'] = $display;

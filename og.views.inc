@@ -44,16 +44,15 @@ function og_views_data_og() {
   $data['og']['count'] = array(
     'title' => t('TODO: Group: Members Count'),
     'field' => array(
-      'handler' => 'og_handler_field_count',
+      'handler' => 'views_handler_field_og_member_count',
       'click sortable' => FALSE,
       'help' => t('Number of members for a group. Excludes memberships which are pending approval.'),
-      'notafield' => TRUE,
     ),
   );
   $data['og']['post_count'] = array(
     'title' => t('TODO: Group: Post Count'),
     'field' => array(
-      'handler' => 'og_handler_post_count',
+      'handler' => 'views_handler_field_og_post_count',
       'click sortable' => FALSE,
       'help' => t('Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown.'),
       'notafield' => TRUE,
@@ -151,14 +150,35 @@ function og_views_data_og() {
   $data['og']['type_groups'] = array(
     'title' => t('Group Types'), // The item it appears as on the UI,
     'help' => t('The type of a group (for example, "blog entry", "forum post", "story", etc).'),
+    'real field' => 'type',
     'filter' => array(
       'handler' => 'views_handler_filter_og_type',
+    ),
+  );
+  
+  $data['og']['type_groups_all'] = array(
+    'title' => t('Group Types (all)'), // The item it appears as on the UI,
+    'help' => t('The type of a group (for example, "blog entry", "forum post", "story", etc).'),
+    'real field' => 'type',
+    'filter' => array(
+      'handler' => 'views_handler_filter_og_type_all',
+      'help' => t('Restrict to all content types that have been marked as groups.'),
     ),
   );
   
   return $data;
 }
 
+class views_handler_filter_og_type_all extends views_handler_filter {
+  function query() {
+    $group_types = og_get_types('group');
+    $placeholders = db_placeholders($group_types, 'varchar');
+    // todoh: use aliases properly
+    $this->query->add_where($this->options['group'], "node.type IN ($placeholders)", $group_types);
+  }
+}
+
+// TODOL: query does not work.
 class views_handler_filter_og_type extends views_handler_filter_node_type {
   function get_value_options() {
     if (!isset($this->value_options)) {

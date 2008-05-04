@@ -38,7 +38,15 @@ function og_help($path, $arg) {
 }
 
 function og_menu() {
-    // anon users should be able to get to the join page
+  // anon users should be able to get to the join page
+  $items['og/subscribe'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_subscribe', 
+    'access callback' => TRUE, 
+    'title' => 'Join group'
+  );
+  
+  // anon users should be able to get to the join page
   $items['og/subscribe'] = array(
     'type' => MENU_CALLBACK, 
     'page callback' => 'og_subscribe', 
