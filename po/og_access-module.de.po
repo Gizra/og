@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-05-04 19:01+0200\n"
-"PO-Revision-Date: 2008-05-05 00:23+0100\n"
+"PO-Revision-Date: 2008-05-05 00:29+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -34,7 +34,7 @@ msgstr "Sowohl in den ausgewählten Gruppen, als auch auf anderen Seiten sichtba
 
 #: og_access.module:33;33
 msgid "Visibility chosen by author/editor using a checkbox on the posting form. "
-msgstr "Die vom Autor/Bearbeiter über ein Kontrollkästchen im Beitragsformular ausgewählte Sichtbarkeit."
+msgstr "Die vom Autor/Bearbeiter über ein Kontrollkästchen im Beitragsformular ausgewählte Sichtbarkeit. "
 
 #: og_access.module:33
 msgid "Checkbox defaults to @pub."
