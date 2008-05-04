@@ -101,6 +101,32 @@ $view->display = array();
       'custom_date_format' => '',
       'relationship' => 'none',
     ),
+    'timestamp' => 
+    array (
+      'id' => 'timestamp',
+      'table' => 'history_user',
+      'field' => 'timestamp',
+      'label' => '',
+      'comments' => 1,
+      'relationship' => 'none',
+      'link_to_node' => 0,
+    ),
+    'new_comments' => 
+    array (
+      'id' => 'new_comments',
+      'table' => 'node',
+      'field' => 'new_comments',
+      'label' => '',
+      'set_precision' => false,
+      'precision' => 0,
+      'decimal' => '.',
+      'separator' => ',',
+      'prefix' => '',
+      'suffix' => 'new',
+      'link_to_comment' => 1,
+      'no_empty' => 1,
+      'relationship' => 'none',
+    ),
   ),
   'sorts' => 
   array (
