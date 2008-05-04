@@ -2,8 +2,8 @@
 // $Id$
 
 $view = new view;
-$view->name = 'og';
-$view->description = 'Groups directory';
+$view->name = 'og_my';
+$view->description = 'List user\'s subscribed groups and provide link to manage subscription';
 $view->tag = 'og';
 $view->view_php = '';
 $view->base_table = 'node';
@@ -57,32 +57,33 @@ $view->display = array();
       'link_to_user' => 1,
       'relationship' => 'none',
     ),
-    'description' => 
+    'mail_type' => 
     array (
-      'id' => 'description',
-      'table' => 'og',
-      'field' => 'description',
-      'label' => 'Description',
+      'id' => 'mail_type',
+      'table' => 'og_uid',
+      'field' => 'mail_type',
+      'label' => 'Email',
+      'type' => 'yes-no',
+      'not' => 0,
       'relationship' => 'none',
     ),
-    'subscribe' => 
+    'managelink' => 
     array (
-      'id' => 'subscribe',
-      'table' => 'og',
-      'field' => 'subscribe',
-      'label' => 'Join Link',
+      'id' => 'managelink',
+      'table' => 'og_uid',
+      'field' => 'managelink',
+      'label' => 'Manage',
       'relationship' => 'none',
     ),
   ),
   'sorts' => 
   array (
-    'created' => 
+    'title' => 
     array (
-      'id' => 'created',
+      'id' => 'title',
       'table' => 'node',
-      'field' => 'created',
-      'order' => 'DESC',
-      'granularity' => 'second',
+      'field' => 'title',
+      'order' => 'ASC',
       'relationship' => 'none',
     ),
   ),
@@ -111,30 +112,6 @@ $view->display = array();
         'button' => 'Expose',
       ),
     ),
-    'title' => 
-    array (
-      'id' => 'title',
-      'table' => 'node',
-      'field' => 'title',
-      'operator' => 'contains',
-      'value' => '',
-      'group' => 0,
-      'exposed' => true,
-      'expose' => 
-      array (
-        'operator' => 'title_oper',
-        'identifier' => 'title',
-        'label' => 'Search for a group by name',
-        'optional' => 1,
-        'remember' => 0,
-      ),
-      'case' => 0,
-      'relationship' => 'none',
-      'expose_button' => 
-      array (
-        'button' => 'Hide',
-      ),
-    ),
     'type_groups_all' => 
     array (
       'id' => 'type_groups_all',
@@ -155,11 +132,11 @@ $view->display = array();
         'button' => 'Expose',
       ),
     ),
-    'directory' => 
+    'uid_current' => 
     array (
-      'id' => 'directory',
-      'table' => 'og',
-      'field' => 'directory',
+      'id' => 'uid_current',
+      'table' => 'og_uid',
+      'field' => 'uid_current',
       'operator' => '=',
       'value' => 1,
       'group' => 0,
@@ -176,93 +153,45 @@ $view->display = array();
       ),
     ),
   ),
-  'items_per_page' => 90,
-  'use_ajax' => '1',
+  'items_per_page' => 50,
+  'title' => 'My groups',
   'use_pager' => '1',
   'pager_element' => 0,
   'offset' => 0,
-  'empty' => 'No groups',
+  'header' => '<?php 
+
+return strtr(\'You may edit all your email subscriptions using this convenient page. Also, you might be interested in an <a href="!url" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.\', array(\'!url\' => url(\'og/opml\')));
+
+?>',
+  'header_format' => '3',
+  'header_empty' => 1,
+  'access' => 
+  array (
+    'type' => 'role',
+    'role' => 
+    array (
+      2 => 2,
+      1 => 0,
+    ),
+    'perm' => 'view advanced help topic',
+  ),
+  'footer' => '<?php
+
+  $url = url("og/opml");
+  return theme(\'opml_icon\', $url);
+
+?>',
+  'footer_format' => '3',
+  'footer_empty' => 1,
+  'empty' => 'Not a member of any groups.',
   'empty_format' => '1',
-  'title' => 'Groups',
 );
 $view->display['default'] = $display;
-  $display = new views_display;
-  $display->id = 'feed';
-  $display->display_title = 'Feed';
-  $display->display_plugin = 'feed';
-  $display->position = '2';
-  $display->display_options = array (
-  'defaults' => 
-  array (
-    'access' => true,
-    'title' => true,
-    'header' => true,
-    'header_format' => true,
-    'header_empty' => true,
-    'footer' => true,
-    'footer_format' => true,
-    'footer_empty' => true,
-    'empty' => true,
-    'empty_format' => true,
-    'use_ajax' => true,
-    'items_per_page' => false,
-    'offset' => false,
-    'use_pager' => false,
-    'pager_element' => false,
-    'use_more' => true,
-    'distinct' => true,
-    'link_display' => true,
-    'style_plugin' => false,
-    'style_options' => false,
-    'row_plugin' => false,
-    'row_options' => false,
-    'relationships' => true,
-    'fields' => true,
-    'sorts' => true,
-    'arguments' => true,
-    'filters' => true,
-  ),
-  'relationships' => 
-  array (
-  ),
-  'fields' => 
-  array (
-  ),
-  'sorts' => 
-  array (
-  ),
-  'arguments' => 
-  array (
-  ),
-  'filters' => 
-  array (
-  ),
-  'displays' => 
-  array (
-  ),
-  'style_plugin' => 'rss',
-  'style_options' => 
-  array (
-    'mission_description' => false,
-    'description' => '',
-  ),
-  'row_plugin' => 'node_rss',
-  'row_options' => 
-  array (
-    'item_length' => 'default',
-  ),
-  'items_per_page' => 20,
-  'offset' => 0,
-  'use_pager' => '1',
-  'pager_element' => 0,
-  'path' => 'og/all/feed',
-);
-$view->display['feed'] = $display;
   $display = new views_display;
   $display->id = 'page';
   $display->display_title = 'Page';
   $display->display_plugin = 'page';
-  $display->position = '3';
+  $display->position = '2';
   $display->display_options = array (
   'defaults' => 
   array (
@@ -309,17 +238,11 @@ $view->display['feed'] = $display;
   'filters' => 
   array (
   ),
-  'path' => 'og/all',
+  'path' => 'og/my',
   'menu' => 
   array (
-    'type' => 'default tab',
-    'title' => 'Groups',
-    'weight' => '0',
-  ),
-  'tab_options' => 
-  array (
-    'type' => 'normal',
-    'title' => 'Groups',
+    'type' => 'tab',
+    'title' => 'My groups',
     'weight' => '0',
   ),
 );

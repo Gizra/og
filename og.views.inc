@@ -419,7 +419,7 @@ function og_views_data_og_uid() {
   );
   
   $data['og_uid']['mail_type'] = array(
-    'title' => t('OG: Subscription email'),
+    'title' => t('OG: Notification email'),
     'help' => t('Does member receive email notifications for a group.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
@@ -452,7 +452,7 @@ class views_handler_field_og_managelink extends views_handler_field {
 
   function render($values) {
     global $user;
-    return l(t('my membership'), "og/manage/$values->nid", array('query' => drupal_get_destination()));
+    return l(t('My membership'), "og/manage/$values->nid", array('query' => drupal_get_destination()));
   }
 }
   
