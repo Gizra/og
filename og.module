@@ -1225,19 +1225,28 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
     );
     
     $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
-    $views_available = variable_get('views_defaults', array());
-    if ($views_available[$view->name] == "disabled") { 
+    if ($view->disabled) { 
       // Do nothing. Assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
     }
     else {
-      $view->url = 'node';
+      $view->init();
       $args[] = $node->nid;
-      // TODO: use own callback for feeds
+      $view->is_cacheable = FALSE;
+      // $view->url = 'node'; // for pager
+      $view->set_arguments(array($node->nid));
+      // TODO: use own menu callback for feeds
       if (arg(2) == 'feed') {
+        // TODOH: none of this group feed is working well yet
         $view->description = $node->og_description;
-        $args[] = 'feed';
+        $view->set_display('feed');
+        $view->render();
+        exit();
       }
-      // TODOH $built = views_build_view('embed', $view, $args, $view->use_pager, $view->nodes_per_page);
+      else {
+        $view->set_display('default');
+        $built = $view->render();
+      }
+
       // Views will set either total_rows or num_rows depending on whether View has a pager.
       if ($view->total_rows || $view->num_rows || $view->page_empty) {
         $node->content['view'] = array('#value' => $built);
@@ -1246,7 +1255,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
         // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
         og_home_empty($node);
       }
-      // TODOH drupal_set_title(filter_xss_admin(views_get_title($view, 'page')));
+      drupal_set_title(filter_xss_admin($view->build_info['title']));
     } 
   }
 }
@@ -2873,7 +2882,7 @@ function og_is_picture() {
 // TODOH: check with Views2
 function og_get_available_views() {
   $views = array();
-  $result = db_query("SELECT name, description FROM {view_view} WHERE name LIKE 'og_ghp_%'");
+  $result = db_query("SELECT name, description FROM {views_view} WHERE name LIKE 'og_ghp_%'");
   while ($view = db_fetch_object($result)) {
     $views[$view->name] =  check_plain("$view->description ($view->name)");
   }

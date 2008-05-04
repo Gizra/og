@@ -124,3 +124,72 @@ $view->display = array();
   'offset' => 0,
 );
 $view->display['default'] = $display;
+  $display = new views_display;
+  $display->id = 'feed';
+  $display->display_title = 'Feed';
+  $display->display_plugin = 'feed';
+  $display->position = '2';
+  $display->display_options = array (
+  'defaults' => 
+  array (
+    'access' => true,
+    'title' => true,
+    'header' => true,
+    'header_format' => true,
+    'header_empty' => true,
+    'footer' => true,
+    'footer_format' => true,
+    'footer_empty' => true,
+    'empty' => true,
+    'empty_format' => true,
+    'use_ajax' => true,
+    'items_per_page' => true,
+    'offset' => true,
+    'use_pager' => true,
+    'pager_element' => true,
+    'use_more' => true,
+    'distinct' => true,
+    'link_display' => true,
+    'style_plugin' => false,
+    'style_options' => false,
+    'row_plugin' => false,
+    'row_options' => false,
+    'relationships' => true,
+    'fields' => true,
+    'sorts' => true,
+    'arguments' => true,
+    'filters' => true,
+  ),
+  'relationships' => 
+  array (
+  ),
+  'fields' => 
+  array (
+  ),
+  'sorts' => 
+  array (
+  ),
+  'arguments' => 
+  array (
+  ),
+  'filters' => 
+  array (
+  ),
+  'displays' => 
+  array (
+    'default' => 0,
+  ),
+  'style_plugin' => 'rss',
+  'style_options' => 
+  array (
+    'mission_description' => false,
+    'description' => '',
+  ),
+  'row_plugin' => 'node_rss',
+  'row_options' => 
+  array (
+    'item_length' => 'default',
+  ),
+  'path' => 'og_not_used_but_must_have_a_path',
+);
+$view->display['feed'] = $display;

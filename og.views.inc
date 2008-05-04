@@ -274,7 +274,9 @@ function og_views_data_og_ancestry() {
     ),
     'argument' => array(
       'name' => t('Post: in specified group (by number)'),
-      'handler' => 'views_handler_argument_many_to_one',
+      'name field' => 'title', // the field to display in the summary.
+      'validate type' => 'nid', // TODOH: not sure. copied from node.nid
+      'handler' => 'views_handler_argument_og_group_nid',
       'numeric' => TRUE,
       'help' => $filterhelp,
     ),
@@ -320,6 +322,21 @@ function og_views_data_og_ancestry() {
   );
 
   return $data;
+}
+
+class views_handler_argument_og_group_nid extends views_handler_argument_many_to_one {
+  /**
+   * Override the behavior of title(). Get the title of the node.
+   */
+  function title() {
+    // TODOL: how to handle multiple arguments.
+    $title = db_result(db_query(db_rewrite_sql("SELECT n.title FROM {node} n WHERE n.nid = %d"), $this->argument));
+    if (empty($title)) {
+      return t('No title');
+    }
+
+    return check_plain($title);
+  }
 }
 
 class views_handler_field_og_group_nids extends views_handler_field_prerender_list {
