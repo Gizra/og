@@ -1,0 +1,149 @@
+# LANGUAGE translation of Drupal (c:\Contributions\modules\og\og.module)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from file: og.module,v 1.81 2005/06/30 04:30:49 weitzman
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: German translation of OG\n"
+"POT-Creation-Date: 2008-05-04 19:01+0200\n"
+"PO-Revision-Date: 2008-05-04 23:16+0100\n"
+"Last-Translator: Alexander Hass\n"
+"Language-Team: DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+
+#: includes/groupcontent.inc:5
+msgid "Welcome message"
+msgstr "Willkommensmitteilung"
+
+#: includes/groupcontent.inc:8
+msgid "The welcome message for the group. Specified on group edit form"
+msgstr "Die Willkommensmeldung für die Gruppe. Angegeben auf dem „Bearbeiten“-Formular der Gruppe"
+
+#: includes/groupcontent.inc:18
+msgid "Group description"
+msgstr "Eine Beschreibung der Gruppe."
+
+#: includes/groupcontent.inc:21
+msgid "The group description as specified on the group edit form."
+msgstr "Die Gruppenbeschreibung, wie diese auf dem „Bearbeiten“-Formular der Gruppe angegeben wurde."
+
+#: includes/groupcontent.inc:30
+msgid "Group Subscribers"
+msgstr "Gruppenmitglieder"
+
+#: includes/groupcontent.inc:33
+msgid "The list of group subscribers or just group admins."
+msgstr "Die Liste von Gruppenmitgliedern oder nur Gruppenadministratoren."
+
+#: includes/groupcontent.inc:45
+msgid "Search this group."
+msgstr "Diese Gruppe durchsuchen."
+
+#: includes/groupcontent.inc:54;147
+msgid "Group Faces"
+msgstr "Gruppengesichter"
+
+#: includes/groupcontent.inc:57
+msgid "Show a grid of user pictures."
+msgstr "Ein Raster von Benutzerbildern anzeigen."
+
+#: includes/groupcontent.inc:68;231
+msgid "Welcome"
+msgstr "Willkommen"
+
+# not literally
+#: includes/groupcontent.inc:83
+#, fuzzy
+msgid "Welcome statement goes here."
+msgstr "Willkommenmeldung wird hier angezeigt."
+
+# not literally
+#: includes/groupcontent.inc:100
+#, fuzzy
+msgid "Description goes here."
+msgstr "Beschreibung wird hier angezeigt."
+
+#: includes/groupcontent.inc:111
+msgid "Group Members"
+msgstr "Gruppenmitglieder"
+
+# not literally
+#: includes/groupcontent.inc:117
+#, fuzzy
+msgid "Member list goes here."
+msgstr "Mitgliederliste wird hier angezeigt."
+
+#: includes/groupcontent.inc:128
+msgid "Group Search"
+msgstr "Gruppensuche"
+
+# not literally
+#: includes/groupcontent.inc:136
+#, fuzzy
+msgid "Search form goes here."
+msgstr "Suchformular wird hier angezeigt."
+
+# not literally
+#: includes/groupcontent.inc:153
+#, fuzzy
+msgid "Faces go here."
+msgstr "Gesichter wird hier angezeigt."
+
+#: includes/groupcontent.inc:163
+msgid "Number of pictures per row"
+msgstr "Anzahl an Bildern pro Zeile"
+
+#: includes/groupcontent.inc:169
+msgid "Maximum number of rows per page"
+msgstr "Die maximale Anzahl an Einträgen pro Seite"
+
+#: includes/groupcontent.inc:175
+msgid "Pager ID"
+msgstr "Pager-ID"
+
+#: includes/groupcontent.inc:185
+msgid "Number of members"
+msgstr "Anzahl von Mitgliedern"
+
+#: includes/groupcontent.inc:186
+msgid "Maxmimum number of members that should appear on the list"
+msgstr "Die maximale Anzahl an Mitgliedern, die in der Liste angezeigt werden sollen"
+
+#: includes/groupcontent.inc:195
+msgid "You may specify which types of group members appear in this listing."
+msgstr "Hier kann angegeben werden, welche Typen von Gruppenmitgliedern in der Auflistung angezeigt werden."
+
+#: includes/groupcontent.inc:199
+msgid "Show more link"
+msgstr "„Mehr“-Verweis anzeigen"
+
+# not literally
+#: includes/groupcontent.inc:201
+msgid "Should a <em>more</em> link appear when more members are in the group but not listed."
+msgstr "Soll ein <em>mehr</em>-Verweis angezeigt werden, wenn mehr als die angezeigten Mitglieder in der Gruppe sind."
+
+#: includes/groupcontent.inc:205
+msgid "Show pictures"
+msgstr "Bilder anzeigen"
+
+#: includes/groupcontent.inc:207
+msgid "Should member pictures be shown in addition to member names."
+msgstr "Sollen Mitgliederbilder zusätzlich zu den Mitgliedernamen angezeigt werden."
+
+#: includes/groupcontent.inc:214
+msgid "Number of members must be an integer."
+msgstr "Die Anzahl von Mitgliedern muss eine Zahl sein."
+
+#: includes/groupcontent.inc:222
+msgid "Number of pictures per row must be an integer."
+msgstr "Die Anzahl von Bildern pro Zeile muss eine Zahl sein."
+
+#: includes/groupcontent.inc:225
+msgid "Maximum number of rows per page must be an integer."
+msgstr "Die maximale Anzahl von Zeilen muss eine Zahl sein."
+

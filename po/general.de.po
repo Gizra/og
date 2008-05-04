@@ -1,0 +1,214 @@
+# LANGUAGE translation of Drupal (c:\Contributions\modules\og\og.module)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from file: og.module,v 1.81 2005/06/30 04:30:49 weitzman
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: German translation of OG\n"
+"POT-Creation-Date: 2008-05-04 19:01+0200\n"
+"PO-Revision-Date: 2008-05-04 22:35+0100\n"
+"Last-Translator: Alexander Hass\n"
+"Language-Team: DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+
+#: node.tpl.php:22
+#: og.module:339;949;1069;1304;1478;2153;2222
+#: og_access.module:150
+#: og_panels.module:266
+msgid "Groups"
+msgstr "Gruppen"
+
+#: og_workflow_ng.inc:38
+#: og_panels.module:546;643
+#: includes/groupcontent.inc:9;22;34;46;58
+msgid "Group"
+msgstr "Gruppe"
+
+#: og.module:86
+#: og_panels.module:42
+msgid "List"
+msgstr "Alle anzeigen"
+
+#: og.module:88
+#: includes/groupcontent.inc:247
+msgid "Faces"
+msgstr "Gesichter"
+
+#: og.module:510;556;704;807
+#: og_panels.module:148
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: og.module:910;2700
+#: og_panels.module:240
+msgid "Operations"
+msgstr "Operationen"
+
+#: og.module:1029
+#: og_panels.module:240
+msgid "Title"
+msgstr "Titel"
+
+#: og.module:1064;1143
+#: includes/groupcontent.inc:94;235
+msgid "Description"
+msgstr "Beschreibung"
+
+#: og.module:2342
+#: includes/groupcontent.inc:239
+msgid "Group members"
+msgstr "Gruppenmitglieder"
+
+#: og.module:2382
+#: includes/groupcontent.inc:192
+msgid "Group roles"
+msgstr "Gruppenrollen"
+
+#: og.module:2384
+#: includes/groupcontent.inc:194
+msgid "Standard members"
+msgstr "Standardmitglieder"
+
+#: og.module:2384
+#: includes/groupcontent.inc:194
+msgid "Administrators"
+msgstr "Administratoren"
+
+#: og.module:2684
+#: includes/groupcontent.inc:243
+msgid "Search"
+msgstr "Suchen"
+
+#: og_panels.module:596
+#: includes/groupcontent.inc:42
+msgid "Group search"
+msgstr "Gruppensuche"
+
+#: og_workflow_ng.inc:15
+msgid "User joins group"
+msgstr "Benutzer tritt der Gruppe bei"
+
+#: og_workflow_ng.inc:16;21
+msgid "OG"
+msgstr "OG"
+
+#: og_workflow_ng.inc:20
+msgid "User leaves group"
+msgstr "Benutzer verlässt die Gruppe"
+
+#: og_workflow_ng.inc:37
+msgid "User, who joins group"
+msgstr "Der dieser Gruppe beitretende Benutzer"
+
+#: og_xmlrpc.inc:13
+msgid "unrecognized user ID: %uid"
+msgstr "Unbekannte Benutzer-ID: %uid"
+
+#: og_xmlrpc.inc:17;37;52
+msgid "Wrong username or password."
+msgstr "Der Benutzername oder das Passwort ist falsch."
+
+#: og_xmlrpc.inc:33
+msgid "User is not a member of the specified group"
+msgstr "Der Benutzer ist kein Mitglied der angegebenen Gruppe"
+
+#: og_xmlrpc.inc:48
+msgid "User is not allowed to retrieve membership information for another user."
+msgstr ""
+
+#: og.install:98
+msgid "Organic groups module enabled. Please see the included !README file for further installation instructions."
+msgstr ""
+
+#: og_access.install:21;42
+msgid "The node access table has been rebuilt."
+msgstr "Die Inhaltsberechtigungstabelle wurde neu aufgebaut."
+
+#: og.info:0
+msgid "Enable users to create and manage their own 'groups'"
+msgstr ""
+
+#: og_access.info:0
+msgid "Enable access control for private posts and private groups."
+msgstr ""
+
+#: og_panels.info:0
+msgid "Organic groups panels"
+msgstr "Organische-Gruppen-Panels"
+
+#: og_panels.info:0
+msgid "Enable group admins to create panel pages."
+msgstr ""
+
+#: includes/groupcontext.inc:37
+msgid "Require this context from an external source (such as containing panel page)"
+msgstr ""
+
+#: includes/groupcontext.inc:38
+msgid "If selected, group selection (below) will be ignored"
+msgstr ""
+
+# not literally
+#: includes/groupcontext.inc:46
+#, fuzzy
+msgid "Enter the NID of a group"
+msgstr "Die Beitrags-ID der Gruppe eingeben"
+
+#: includes/groupcontext.inc:56
+msgid "Currently set to \"%title\""
+msgstr "Derzeit eingestellt auf „%title“"
+
+#: includes/groupcontext.inc:74
+msgid "You must select a node."
+msgstr "Ein Beitrag muss ausgewählt werden."
+
+#: includes/groupcontext.inc:100
+msgid "Invalid group selected."
+msgstr "Ungültige Gruppe ausgewählt."
+
+#: includes/groupcontext.inc:103
+msgid "Node is of type %type which not a group type."
+msgstr "Der Beitrag vom Typ %type ist kein Gruppentyp."
+
+# Not literally
+#: tests/og_testcase.php:21
+msgid "Your %post has been created."
+msgstr "Der Beitrag %post wurde erstellt."
+
+#: (duplicate) og.module:2941
+#, fuzzy
+msgid "Organic groups group type"
+msgstr "Gruppentyp von organischen Gruppen"
+
+#: (duplicate) og.module:2942
+msgid "You have no node types which are acting as groups. See the Notes section of the !readme and the Content types fieldset at top of <a href=\"!settings\">OG settings</a>."
+msgstr ""
+
+#: (duplicate) og.module:2949
+#, fuzzy
+msgid "Organic groups modules"
+msgstr "Module für organischen Gruppen"
+
+#: (duplicate) og.module:2950
+msgid "Organic groups works best when !job_queue.module is enabled. See the Integration section of the !readme."
+msgstr ""
+
+#: (duplicate) og.module:2957
+#, fuzzy
+msgid "Organic groups access control"
+msgstr "Zugriffskontrolle für organischen Gruppen"
+
+#: (duplicate) og.module:2958
+#, fuzzy
+msgid "Organic groups access control module is disabled. See the !modules"
+msgstr "Das Modul für die Zugriffskontrolle von organischen Gruppen ist deaktiviert. Weitere Information unter !modules"
+
+#: (duplicate) og.module:2958
+msgid "modules page"
+msgstr "Modulseite"
+

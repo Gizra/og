@@ -1,0 +1,125 @@
+# LANGUAGE translation of Drupal (c:\Contributions\modules\og\og.module)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from file: og.module,v 1.81 2005/06/30 04:30:49 weitzman
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: German translation of OG\n"
+"POT-Creation-Date: 2008-05-04 19:01+0200\n"
+"PO-Revision-Date: 2008-05-04 23:16+0100\n"
+"Last-Translator: Alexander Hass\n"
+"Language-Team: DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+
+#: og_access.module:20
+#, fuzzy
+msgid "Organic Groups Access configuration"
+msgstr "Zugriffskonfiguration für Organische-Gruppen"
+
+#: og_access.module:21
+msgid "Choose whether new groups should be private or public"
+msgstr "Auswählen, ob neue Gruppen privat oder öffentlich sind"
+
+#: og_access.module:33
+msgid "Visible only within the targeted groups"
+msgstr "Nur in den ausgewählten Gruppen sichtbar."
+
+#: og_access.module:33
+msgid "Visible within the targeted groups and on other pages"
+msgstr "Sowohl in den ausgewählten Gruppen, als auch auf anderen Seiten sichtbar"
+
+#: og_access.module:33;33
+msgid "Visibility chosen by author/editor using a checkbox on the posting form. "
+msgstr "Die vom Autor/Bearbeiter über ein Kontrollkästchen im Beitragsformular ausgewählte Sichtbarkeit."
+
+#: og_access.module:33
+msgid "Checkbox defaults to @pub."
+msgstr "Die Standardeinstellung des Kontrollkästchens ist @pub."
+
+#: og_access.module:33;34;141;144
+msgid "Public"
+msgstr "Öffentlich"
+
+#: og_access.module:33
+msgid "Checkbox defaults to @pri."
+msgstr "Die Standardeinstellung des Kontrollkästchens ist @pri."
+
+#: og_access.module:33
+msgid "Private"
+msgstr "Privat"
+
+#: og_access.module:34
+msgid "Visibility of posts"
+msgstr "Sichtbarkeit der Beiträge"
+
+#: og_access.module:34
+msgid "Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.  If the setting you want is disabled here, check the settings under <em>Private Groups</em> setting below.  You cannot set node visibility to always be public if private groups are set to always on and vice versa."
+msgstr ""
+
+# Standardzielgruppe(n) ?
+#: og_access.module:37
+#, fuzzy
+msgid "New group home pages and default audience are always public."
+msgstr "Neue Gruppenhauptseiten und die Standardzielgruppen sind immer öffentlich."
+
+# Standardzielgruppe(n) ?
+#: og_access.module:38
+#, fuzzy
+msgid "New group home pages and default audience are always private."
+msgstr "Neue Gruppenhauptseiten und die Standardzielgruppen sind immer privat."
+
+#: og_access.module:39
+msgid "Group administrator chooses whether her group homepage and audience are private or not. Defaults to %yes."
+msgstr "Der Gruppenadministrator wählt aus, ob ihre Gruppenstartseite und Zielgruppe privat ist oder nicht. Die Standardeinstellung ist %yes."
+
+#: og_access.module:39
+msgid "private"
+msgstr "Privat"
+
+#: og_access.module:40
+msgid "Group administrator chooses whether her group homepage and audience are private or not. Defaults to %no."
+msgstr "Der Gruppenadministrator wählt aus, ob ihre Gruppenstartseite und Zielgruppe privat ist oder nicht. Die Standardeinstellung ist %no."
+
+#: og_access.module:40
+msgid "public"
+msgstr "Öffentlich"
+
+#: og_access.module:44
+msgid "Private Groups"
+msgstr "Private Gruppen"
+
+#: og_access.module:47
+msgid "<p>A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private.  This setting controls what private groups options can be used when creating a new group or editing an existing group.  If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here.<p><p>Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Node authoring form / Visibility of Posts</em> setting on this page.  Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups!  To change those you must edit the groups and their individual content nodes directly.  If the setting you want is disabled here, check <em>Visibility of Posts</em> above.  You cannot choose to only have private groups if node visibility is set to be always public, and vice versa.</p>"
+msgstr ""
+
+#: og_access.module:84
+msgid "private group"
+msgstr "Private Gruppen"
+
+#: og_access.module:86
+msgid "Should this group be visible only to its members?  Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>"
+msgstr "Soll diese Gruppe nur für deren Mitglieder sichtbar sein? Deaktiviert, sobald die Gruppe auf <em>Im Verzeichnis anzeigen</em> oder <em>Mitgliedschaftsanfragen: offen</em> eingestellt ist."
+
+#: og_access.module:141;144
+msgid "Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>Public</em>."
+msgstr "Diesen Beitrag jedem oder nur den Mitgliedern der unten ausgewählten Gruppen anzeigen. Beiträge ohne Gruppenzuordnung sind immer <em>Öffentlich</em>."
+
+# not literally
+#: og_access.module:260
+msgid "All users may view this node."
+msgstr "Alle Benutzer können diesen Beitrag lesen."
+
+# not literally
+#: og_access.module:264
+msgid "Subscribers of !group_n may view this node."
+msgstr "Mitglieder von !group_n können diesen Beitrag lesen."
+
+#: og_access.module:0
+msgid "og_access"
+msgstr "og_access"
+
