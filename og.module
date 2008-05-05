@@ -27,7 +27,7 @@ define('OG_NOTIFICATION_SELECTIVE', 2);
 function og_help($path, $arg) {
   if ($path) {
     switch ($path) {
-      case ($arg[4] == 'og'):
+      case ($arg[2] == 'block' && $arg[4] == 'og'):
         return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
         break;
       case 'admin/settings/og':
@@ -188,12 +188,11 @@ function og_menu() {
   
   // Email tab on group node.
     $items['node/%node/email'] = array(
-      'title' => 'Send email to %group',
-      'title arguments' => array($group->title), 
+      'title' => t('E-mail'),
       'page callback' => 'drupal_get_form', 
       'page arguments' => array('og_email_form', 2), 
       'access callback' => 'og_is_group_admin', 
-      'access arguments' => array(2),
+      'access arguments' => array(1),
       'type' => MENU_LOCAL_TASK, 
       'weight' => 7
     );
