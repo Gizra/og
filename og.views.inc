@@ -100,6 +100,9 @@ function og_views_data_og() {
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
     ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
   );
   $data['og']['directory'] = array(
     'title' => t('Group: List in Directory'),
@@ -109,6 +112,9 @@ function og_views_data_og() {
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
   );
   $data['og']['subscribe'] = array(
@@ -126,6 +132,9 @@ function og_views_data_og() {
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
   );
   if (module_exists('locale')) {
@@ -332,6 +341,9 @@ function og_views_data_og_ancestry() {
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
     ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
   );
 
   return $data;
@@ -433,6 +445,9 @@ function og_views_data_og_uid() {
     'field' => array(
       'handler' => 'views_handler_field_boolean',
     ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
   );
   $data['og_uid']['managelink'] = array(
     'title' => t('OG: Manage membership link'),
@@ -447,6 +462,9 @@ function og_views_data_og_uid() {
     'field ' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => FALSE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
   );
   

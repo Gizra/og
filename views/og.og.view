@@ -114,15 +114,6 @@ $view->display = array();
   ),
   'sorts' => 
   array (
-    'created' => 
-    array (
-      'id' => 'created',
-      'table' => 'node',
-      'field' => 'created',
-      'order' => 'DESC',
-      'granularity' => 'second',
-      'relationship' => 'none',
-    ),
   ),
   'arguments' => 
   array (
