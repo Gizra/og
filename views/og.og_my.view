@@ -146,11 +146,11 @@ $view->display = array();
         'button' => 'Expose',
       ),
     ),
-    'uid_current' => 
+    'uid' => 
     array (
-      'id' => 'uid_current',
+      'id' => 'uid',
       'table' => 'og_uid',
-      'field' => 'uid_current',
+      'field' => 'uid',
       'operator' => '=',
       'value' => 1,
       'group' => 0,

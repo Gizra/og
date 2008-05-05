@@ -410,14 +410,6 @@ function og_views_data_og_uid() {
   
   $data['og_uid']['nid'] = array(
     'title' => t('Group'),
-    // 'relationship' => array(
-    //       'title' => t('Group node (memberships)'),
-    //       'help' => t('Bring in information about the group node.'),
-    //       'base' => 'node',
-    //       'field' => 'nid',
-    //       'handler' => 'views_handler_relationship',
-    //       'label' => t('Group'),
-    //     ),
     'help' => t('Posts are filtered to where current user is a member.'),
     'filter' => array(
       'handler' => 'views_handler_filter_user_current',
@@ -425,6 +417,15 @@ function og_views_data_og_uid() {
       'help' => 'todo',
     ),
   ); 
+  
+  $data['og_uid']['uid'] = array(
+    'title' => t('Group member'),
+    'filter' => array(
+      'handler' => 'views_handler_filter_user_current',
+      'label' => t('OG: Group in User\'s Groups'),
+    ),
+  );
+  
     
   $data['og_uid']['mail_type'] = array(
     'title' => t('OG: Notification email'),
