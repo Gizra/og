@@ -20,15 +20,60 @@ $view->display = array();
   'style_plugin' => 'table',
   'style_options' => 
   array (
+    'override' => 1,
+    'order' => 'desc',
     'columns' => 
     array (
+      'type' => 'type',
+      'title' => 'title',
+      'name' => 'name',
+      'comment_count' => 'comment_count',
+      'group_nid' => 'group_nid',
+      'last_comment_timestamp' => 'last_comment_timestamp',
+      'timestamp' => 'title',
+      'new_comments' => 'comment_count',
     ),
-    'default' => '',
     'info' => 
     array (
+      'type' => 
+      array (
+        'sortable' => 1,
+        'separator' => '',
+      ),
+      'title' => 
+      array (
+        'sortable' => 1,
+        'separator' => '&nbsp;',
+      ),
+      'name' => 
+      array (
+        'sortable' => 1,
+        'separator' => '',
+      ),
+      'comment_count' => 
+      array (
+        'sortable' => 1,
+        'separator' => '<br />',
+      ),
+      'group_nid' => 
+      array (
+        'separator' => '',
+      ),
+      'last_comment_timestamp' => 
+      array (
+        'sortable' => 1,
+        'separator' => '&nbsp;',
+      ),
+      'timestamp' => 
+      array (
+        'separator' => '',
+      ),
+      'new_comments' => 
+      array (
+        'separator' => '',
+      ),
     ),
-    'override' => true,
-    'order' => 'asc',
+    'default' => 'last_comment_timestamp',
   ),
   'row_plugin' => 'fields',
   'row_options' => 
@@ -110,18 +155,35 @@ $view->display = array();
       'custom_date_format' => '',
       'relationship' => 'none',
     ),
+    'timestamp' => 
+    array (
+      'id' => 'timestamp',
+      'table' => 'history_user',
+      'field' => 'timestamp',
+      'label' => '',
+      'comments' => 1,
+      'relationship' => 'none',
+      'link_to_node' => 0,
+    ),
+    'new_comments' => 
+    array (
+      'id' => 'new_comments',
+      'table' => 'node',
+      'field' => 'new_comments',
+      'label' => '',
+      'set_precision' => false,
+      'precision' => 0,
+      'decimal' => '.',
+      'separator' => ',',
+      'prefix' => '',
+      'suffix' => 'new',
+      'link_to_comment' => 1,
+      'no_empty' => 1,
+      'relationship' => 'none',
+    ),
   ),
   'sorts' => 
   array (
-    'last_comment_timestamp' => 
-    array (
-      'id' => 'last_comment_timestamp',
-      'table' => 'node_comment_statistics',
-      'field' => 'last_comment_timestamp',
-      'order' => 'DESC',
-      'granularity' => 'second',
-      'relationship' => 'none',
-    ),
   ),
   'arguments' => 
   array (
