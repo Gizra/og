@@ -21,12 +21,13 @@ $view->display = array();
   'style_options' => 
   array (
     'override' => 1,
-    'order' => 'asc',
+    'order' => 'desc',
     'columns' => 
     array (
       'title' => 'title',
       'name' => 'name',
       'description' => 'description',
+      'created' => 'created',
       'subscribe' => 'subscribe',
     ),
     'info' => 
@@ -45,12 +46,17 @@ $view->display = array();
       array (
         'separator' => '',
       ),
+      'created' => 
+      array (
+        'sortable' => 1,
+        'separator' => '',
+      ),
       'subscribe' => 
       array (
         'separator' => '',
       ),
     ),
-    'default' => '-1',
+    'default' => 'created',
   ),
   'row_plugin' => 'fields',
   'row_options' => 
@@ -85,6 +91,16 @@ $view->display = array();
       'table' => 'og',
       'field' => 'description',
       'label' => 'Description',
+      'relationship' => 'none',
+    ),
+    'created' => 
+    array (
+      'id' => 'created',
+      'table' => 'node',
+      'field' => 'created',
+      'label' => 'Post date',
+      'date_format' => 'custom',
+      'custom_date_format' => 'M y',
       'relationship' => 'none',
     ),
     'subscribe' => 
@@ -261,8 +277,6 @@ $view->display['default'] = $display;
   ),
   'displays' => 
   array (
-    'default' => 'default',
-    'page' => 'page',
   ),
   'style_plugin' => 'rss',
   'style_options' => 
