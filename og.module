@@ -190,7 +190,7 @@ function og_menu() {
     $items['node/%node/email'] = array(
       'title' => t('E-mail'),
       'page callback' => 'drupal_get_form', 
-      'page arguments' => array('og_email_form', 2), 
+      'page arguments' => array('og_email_form', 1), 
       'access callback' => 'og_is_group_admin', 
       'access arguments' => array(1),
       'type' => MENU_LOCAL_TASK, 
@@ -473,8 +473,14 @@ function og_set_theme($nid) {
  * @param $node
  *   The group node.
  */
- function og_email_form($node) {
-  $form['subject'] = array(
+ function og_email_form($form_state, $node) {
+   drupal_set_title(t('Send email to %group', array('%group' => $node->title)));
+
+   if (!$form_state['post']) {
+     drupal_set_message(t('Your email will be sent to all members of this group. Please use this feature sparingly.'));
+   }
+   
+   $form['subject'] = array(
     '#type' => 'textfield', 
     '#title' => t('Subject'), 
     '#size' => 70, 
@@ -517,7 +523,6 @@ function og_email_form_submit($form, &$form_state) {
     drupal_mail('og', 'admin_email', trim($mail), $GLOBALS['language'], $variables, $from);
   }
   drupal_set_message(format_plural(count($emails), '1 email sent.', '@count emails sent'));
-  $form_state['redirect'] = "node/{$form_state['values'][gid]}";
 }
 
 function og_manage($group_node) {
@@ -539,7 +544,7 @@ function og_manage($group_node) {
 function og_manage_form($form_state, $group) {
   global $user;
   // avoid double messages on form submit
-  if (!$form_state['submitted']) {
+  if (!$form_state['post']) {
     // group manager can't leave
     if ($group->og_selective == OG_CLOSED) {
       drupal_set_message(t('You may not leave this group because it is a %closed group. You should request removal from a group administrator.', array('%closed' => t('closed'))));
