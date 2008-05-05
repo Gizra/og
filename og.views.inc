@@ -41,30 +41,29 @@ function og_views_data_og() {
       'click sortable' => FALSE,
     ),
   );
-  $data['og']['count'] = array(
-    'title' => t('TODO: Group: Members Count'),
+  $data['og']['member_count'] = array(
+    'title' => t('Group: Members Count'),
     'field' => array(
       'handler' => 'views_handler_field_og_member_count',
-      'click sortable' => FALSE,
+      'click sortable' => TRUE,
       'help' => t('Number of members for a group. Excludes memberships which are pending approval.'),
     ),
   );
   $data['og']['post_count'] = array(
-    'title' => t('TODO: Group: Post Count'),
+    'title' => t('Group: Post Count'),
     'field' => array(
       'handler' => 'views_handler_field_og_post_count',
-      'click sortable' => FALSE,
+      'click sortable' => TRUE,
       'help' => t('Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown.'),
       'notafield' => TRUE,
      ),
   );
   $data['og']['post_count_new'] = array(
-      'title' => t('TODO: Group: Post Count *New*'),
+      'title' => t('Group: Post Count *New*'),
       'field' => array(
-        'handler' => 'og_handler_post_count_new',
-        'sortable' => FALSE,
-        'notafield' => TRUE,
-        'help' => t('Number of new posts in a group for the current user. The <em>new</em> indicator may be optionally appended using the <em>Option</em> dropdown.'),
+        'handler' => 'views_handler_field_og_post_count_new',
+        'click sortable' => TRUE,
+        'help' => t('Number of new posts in a group for the current user.'),
       ),
   );
   
@@ -163,6 +162,41 @@ function og_views_data_og() {
   );
   
   return $data;
+}
+
+/**
+ * We do not try to run db_rewrite_sql() on this subquery so the count is potenially more than the user can see.
+ */
+// oga.group_nid=n.nid is not right.
+// class views_handler_field_og_post_count_new extends views_handler_field_numeric {
+//   function query() {
+//     global $user;
+//     $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid LEFT JOIN {history} h ON n.nid=h.nid AND h.uid = $user->uid WHERE n.status = 1 AND oga.group_nid = n.nid AND h.timestamp IS NULL AND n.created > ". NODE_NEW_LIMIT;
+//     dsm($sql);
+//     $this->query->add_field('', "($sql)", 'post_count_new');
+//     $this->field_alias = 'post_count_new';
+//   }
+// }
+
+/**
+ * We do not try to run db_rewrite_sql() on this subquery so the count is potenially more than the user can see.
+ */
+class views_handler_field_og_post_count extends views_handler_field_numeric {
+  function query() {
+    $sql = "SELECT COUNT(n.nid) FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid WHERE n.status = 1 AND oga.group_nid = %d";
+    $sql = str_replace('%d', 'og.nid', $sql);
+    $this->query->add_field('', "($sql)", 'post_count');
+    $this->field_alias = 'post_count';
+  }
+}
+
+class views_handler_field_og_member_count extends views_handler_field_numeric {
+  function query() {
+    $sql = og_list_users_sql(1, 0, NULL, TRUE);
+    $sql = str_replace('%d', 'og.nid', $sql);
+    $this->query->add_field('', "($sql)", 'member_count');
+    $this->field_alias = 'member_count';
+  }
 }
 
 class views_handler_filter_og_type_all extends views_handler_filter {

@@ -25,9 +25,11 @@ $view->display = array();
     'columns' => 
     array (
       'title' => 'title',
-      'name' => 'name',
       'description' => 'description',
+      'name' => 'name',
       'created' => 'created',
+      'post_count' => 'post_count',
+      'member_count' => 'member_count',
       'subscribe' => 'subscribe',
     ),
     'info' => 
@@ -37,16 +39,26 @@ $view->display = array();
         'sortable' => 1,
         'separator' => '',
       ),
+      'description' => 
+      array (
+        'separator' => '',
+      ),
       'name' => 
       array (
         'sortable' => 1,
         'separator' => '',
       ),
-      'description' => 
+      'created' => 
       array (
+        'sortable' => 1,
         'separator' => '',
       ),
-      'created' => 
+      'post_count' => 
+      array (
+        'sortable' => 1,
+        'separator' => '',
+      ),
+      'member_count' => 
       array (
         'sortable' => 1,
         'separator' => '',
@@ -76,6 +88,14 @@ $view->display = array();
       'relationship' => 'none',
       'link_to_node' => 1,
     ),
+    'description' => 
+    array (
+      'id' => 'description',
+      'table' => 'og',
+      'field' => 'description',
+      'label' => 'Description',
+      'relationship' => 'none',
+    ),
     'name' => 
     array (
       'id' => 'name',
@@ -83,14 +103,6 @@ $view->display = array();
       'field' => 'name',
       'label' => 'Manager',
       'link_to_user' => 1,
-      'relationship' => 'none',
-    ),
-    'description' => 
-    array (
-      'id' => 'description',
-      'table' => 'og',
-      'field' => 'description',
-      'label' => 'Description',
       'relationship' => 'none',
     ),
     'created' => 
@@ -101,6 +113,34 @@ $view->display = array();
       'label' => 'Post date',
       'date_format' => 'custom',
       'custom_date_format' => 'M y',
+      'relationship' => 'none',
+    ),
+    'post_count' => 
+    array (
+      'id' => 'post_count',
+      'table' => 'og',
+      'field' => 'post_count',
+      'label' => 'Posts',
+      'set_precision' => false,
+      'precision' => 0,
+      'decimal' => '.',
+      'separator' => ',',
+      'prefix' => '',
+      'suffix' => '',
+      'relationship' => 'none',
+    ),
+    'member_count' => 
+    array (
+      'id' => 'member_count',
+      'table' => 'og',
+      'field' => 'member_count',
+      'label' => 'Members',
+      'set_precision' => false,
+      'precision' => 0,
+      'decimal' => '.',
+      'separator' => ',',
+      'prefix' => '',
+      'suffix' => '',
       'relationship' => 'none',
     ),
     'subscribe' => 
