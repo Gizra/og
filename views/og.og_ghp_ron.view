@@ -177,7 +177,7 @@ $view->display['default'] = $display;
   ),
   'displays' => 
   array (
-    'default' => 0,
+    'default' => 'default',
   ),
   'style_plugin' => 'rss',
   'style_options' => 
