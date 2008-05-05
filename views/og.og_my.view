@@ -20,15 +20,37 @@ $view->display = array();
   'style_plugin' => 'table',
   'style_options' => 
   array (
+    'override' => 1,
+    'order' => 'asc',
     'columns' => 
     array (
+      'title' => 'title',
+      'name' => 'name',
+      'mail_type' => 'mail_type',
+      'managelink' => 'managelink',
     ),
-    'default' => '',
     'info' => 
     array (
+      'title' => 
+      array (
+        'sortable' => 1,
+        'separator' => '',
+      ),
+      'name' => 
+      array (
+        'sortable' => 1,
+        'separator' => '',
+      ),
+      'mail_type' => 
+      array (
+        'separator' => '',
+      ),
+      'managelink' => 
+      array (
+        'separator' => '',
+      ),
     ),
-    'override' => true,
-    'order' => 'asc',
+    'default' => 'title',
   ),
   'row_plugin' => 'fields',
   'row_options' => 
@@ -78,14 +100,6 @@ $view->display = array();
   ),
   'sorts' => 
   array (
-    'title' => 
-    array (
-      'id' => 'title',
-      'table' => 'node',
-      'field' => 'title',
-      'order' => 'ASC',
-      'relationship' => 'none',
-    ),
   ),
   'arguments' => 
   array (

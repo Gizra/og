@@ -20,15 +20,37 @@ $view->display = array();
   'style_plugin' => 'table',
   'style_options' => 
   array (
+    'override' => 1,
+    'order' => 'asc',
     'columns' => 
     array (
+      'title' => 'title',
+      'name' => 'name',
+      'description' => 'description',
+      'subscribe' => 'subscribe',
     ),
-    'default' => '',
     'info' => 
     array (
+      'title' => 
+      array (
+        'sortable' => 1,
+        'separator' => '',
+      ),
+      'name' => 
+      array (
+        'sortable' => 1,
+        'separator' => '',
+      ),
+      'description' => 
+      array (
+        'separator' => '',
+      ),
+      'subscribe' => 
+      array (
+        'separator' => '',
+      ),
     ),
-    'override' => true,
-    'order' => 'asc',
+    'default' => '-1',
   ),
   'row_plugin' => 'fields',
   'row_options' => 
