@@ -581,7 +581,7 @@ function og_views_default_views() {
     array (
       'tablename' => 'node',
       'field' => 'title',
-      'label' => 'Group',
+      'label' => 'Title',
       'handler' => 'views_handler_field_nodelink_with_mark',
       'sortable' => '1',
       'options' => 'link',

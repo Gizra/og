@@ -6,7 +6,7 @@ Groups may choose their own theme and language. Groups have RSS feeds and email 
 
 INSTALLATION
 ---------------
-- Enable the og module. If you want to protect some posts so that only certain users may view them, enable the 'Organic Groups access control' module as well. Please make sure og is working well on its own before enabling other OG related modules.
+- Enable the Organic Groups module. If you want to protect some posts so that only certain users may view them, enable the 'Organic Groups access control' module as well. Please make sure og is working well on its own before enabling other OG related modules.
 - Visit the admin/og/og page.
 - On admin/og/og, see the content types table at the top. Click edit beside each type to set its 'usage'. You usually want to create a new node type via admin/content/types page and then designate that node type as a group from here. See the first item in NOTES below. 
 - Set other preferences on admin/og/og as desired. It may take some experimenting before you arrive at a configuration well suited to your needs.
@@ -15,7 +15,7 @@ INSTALLATION
 - On the admin/build/block page, enable the 'Group details' with a low 'weight' value. Optionally enable the other 'Group' blocks.
 - Grant permissions as needed on the admin/user/access page 
 - Begin creating groups (visit the node/add page), joining those groups, and posting into those groups. The join link appears in the Group details block, for non invite-only groups.
-- Consider enabling the following modules which work well with OG: Pathauto, Locale, Job queue. After your install is working nicely, consider enabling og add-on modules like og_mandatory_group, og_vocab, and og_panels. Those are know to work well with OG. Many others of varying quality are listed at http://drupal.org/project/Modules/category/90.
+- Consider enabling the following modules which work well with OG: Pathauto, Locale, Job queue. After your install is working nicely, consider enabling og add-on modules like og_mandatory_group, og_vocab, and og_panels. Those are know to work well with OG. Beware of the helper modules listed at at http://drupal.org/project/Modules/category/90. Many of them actually break OG in subtle ways.
 
 NOTES
 ----------------
@@ -46,7 +46,7 @@ INTEGRATION
 
 UNIT TESTING
 ----------------------
-This module comes with a suite of unit tests. Please help update and build more of them. See http://drupal.org/simpletest
+This module comes with a small suite of unit tests. Please help update and build more of them. See http://drupal.org/simpletest
 
 TODO/BUGS/FEATURE REQUESTS
 ----------------
