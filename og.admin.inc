@@ -96,16 +96,6 @@ function og_admin_settings() {
     '#description' => t('Do you require that all (non administrator) posts be affiliated with a group? Note that changing this setting will affect existing posts when they are edited.')
   );
   unset($options);
-
-  // audience home page - Views
-  $options = og_get_available_views();
-  $form['og_settings']['group_details']['og_home_page_view'] = array(
-    '#type' => 'radios', 
-    '#title' => t('Home page presentation'), 
-    '#options' => $options, 
-    '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'), 
-    '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using !theme. Also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module.', array('!README' => og_readme(), '!theme' => l(t('typical Views themeing techniques'), 'http://drupal.org/node/42597'))),
-  );
   
   // member pictures
   $form['og_settings']['group_details']['og_member_pics'] = array(

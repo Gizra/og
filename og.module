@@ -743,7 +743,10 @@ function og_remove_admin_confirm_submit($form, &$form_state) {
   $form_state['redirect'] = "og/users/$gid";
 }
 
-function og_invite_form($node) {
+function og_invite_form($form_state, $node) {
+  $bc = og_get_breadcrumb($node);
+  drupal_set_breadcrumb($bc);
+  
   $max = variable_get('og_email_max', 10);
 
   $form['mails'] = array(
@@ -1107,6 +1110,7 @@ function og_list_users_page($group_node) {
   return $output;
 }
 
+// TODOL: css needs work.
 function og_list_users_faces_page($node, $column_count = 5, $row_count = 10, $pager_id = 0) {
   $max_per_page = $row_count * $column_count;
   $sql = og_list_users_sql(0, 0, 'ou.is_admin DESC, u.picture DESC, u.name ASC');
@@ -2862,7 +2866,10 @@ function og_og_create_links($group) {
     // When this becomes a proper menu in D6, we get sorting for free
     $type_name = $types[$post_type]->name;
     if (module_invoke($types[$post_type]->module, 'access', 'create', $post_type)) {
-      $links["create_$post_type"] = l(t('Create !type', array('!type' => $type_name)), "node/add/$post_type", array('title' => t('Add a new !s in this group.', array('!s' => $type_name))), "gids[]=$group->nid");
+      $links["create_$post_type"] = l(t('Create !type', array('!type' => $type_name)), "node/add/$post_type", array(
+        'title' => t('Add a new !s in this group.', array('!s' => $type_name)),
+        'query' => "gids[]=$group->nid",
+        ));
     }
   }
   return $links ? $links : array();
@@ -2888,31 +2895,6 @@ function og_search_form($group) {
 
 function og_is_picture() {
   return variable_get('user_pictures', 0) && variable_get('og_member_pics', TRUE);
-}
-
-// TODOL: move this to new API function in Views where I can influence the WHERE clause.
-// TODOH: check with Views2
-function og_get_available_views() {
-  $views = array();
-  $result = db_query("SELECT name, description FROM {views_view} WHERE name LIKE 'og_ghp_%'");
-  while ($view = db_fetch_object($result)) {
-    $views[$view->name] =  check_plain("$view->description ($view->name)");
-  }
-  
-  // views_load_cache(); // the function below was not loaded without this call
-  $default_views = views_get_all_views();
-  $views_status = variable_get('views_defaults', array());
-  foreach ($default_views as $view) {
-    // filter this list to simplify for admins. 
-    if (substr($view->name, 0, 7) == 'og_ghp_') {
-      if (!$views[$view->name] && 
-        ($views_status[$view->name] == 'enabled' || (!$views_status[$view->name] && !$view->disabled))) {
-        $views[$view->name] = check_plain("$view->description ($view->name)");
-      }
-    }
-  }
-  ksort($views);
-  return $views;
 }
 
 // TODO: maybe use a custom theme('mark') here?

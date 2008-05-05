@@ -57,13 +57,6 @@ function og_views_data_og() {
       'help' => t('Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown.'),
       'notafield' => TRUE,
      ),
-     // 'option' => array(
-          //             '#type' => 'select',
-          //             '#options' => array_merge(array('all' => t('All')), $group_post_type_options),
-          //             '#default_value' => 'all',
-          //             // View will not save with #multiple, for some reason. Help.
-          //             // '#multiple' => TRUE,
-          //           ),
   );
   $data['og']['post_count_new'] = array(
       'title' => t('TODO: Group: Post Count *New*'),
@@ -72,12 +65,6 @@ function og_views_data_og() {
         'sortable' => FALSE,
         'notafield' => TRUE,
         'help' => t('Number of new posts in a group for the current user. The <em>new</em> indicator may be optionally appended using the <em>Option</em> dropdown.'),
-        // 'option' => array(
-        //    '#type' => 'select',
-        //    '#options' => array(
-        //      'normal' => 'Normal',
-        //      'withmark' => 'With new mark'
-        //     ),
       ),
   );
   
@@ -187,7 +174,7 @@ class views_handler_filter_og_type_all extends views_handler_filter {
   }
 }
 
-// TODOL: query does not work.
+// TODOL: query() does not work.
 class views_handler_filter_og_type extends views_handler_filter_node_type {
   function get_value_options() {
     if (!isset($this->value_options)) {
