@@ -1502,8 +1502,14 @@ function og_form_alter($form_id, &$form) {
     $form['page-info']['url']['#description'] .= t("<p>To display a View as a tab on your Organic Groups group home pages, set the url to 'node/\$group/custom' (where <em>custom</em> is whatever you wish). Then open Page >> Menu and check <em>Provide Menu</em> and <em>Provide Menu as Tab</em>; also make the first argument in the View be the <em>OG: Group nid(s)</em> argument. The <em>\$group</em> path element is a placeholder for the group nid and it ensures that the tab <strong>only</strong> appears on OG group nodes.</p>");
   }
   
-  if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
-    $usage = variable_get('og_content_type_usage_'. $form['identity']['type']['#default_value'], 'omitted');
+  if ($form_id == 'node_type_form') {
+    // Built in content types do not alow changes to type machine name.
+    if (isset($form['identity']['type']['#default_value'])) {
+      $usage = variable_get('og_content_type_usage_'. $form['identity']['type']['#default_value'], 'omitted');
+    }
+    else {
+      $usage = variable_get('og_content_type_usage_'. $form['identity']['type']['#value'], 'omitted');
+    }
     // Persist $usage so that we can rebuild node access as needed.
     $form['old_og_content_type_usage'] = array(
       '#type' => 'value',
