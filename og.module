@@ -1696,7 +1696,13 @@ function og_form_alter(&$form, &$form_state, $form_id) {
 }
 
 function og_form_node_type_form_alter(&$form, &$form_state) {
-  $usage = variable_get('og_content_type_usage_'. $form['identity']['type']['#default_value'], 'omitted');
+  // Built in content types do not allow changes to type machine name.
+  if (isset($form['identity']['type']['#default_value'])) {
+    $usage = variable_get('og_content_type_usage_'. $form['identity']['type']['#default_value'], 'omitted');
+  }
+  else {
+    $usage = variable_get('og_content_type_usage_'. $form['identity']['type']['#value'], 'omitted');
+  }
   // Persist $usage so that we can rebuild node access as needed.
   $form['old_og_content_type_usage'] = array(
     '#type' => 'value',

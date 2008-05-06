@@ -326,15 +326,7 @@ function og_update_5600() {
 function og_update_5700() {
   $ret = array();
   if (variable_get('og_enabled', FALSE) && !module_exists('og_access')) {
-    $ret[] = update_sql("DELETE FROM {system} WHERE name = 'og_access'"); // just to be sure
-    $filename = drupal_get_path('module', 'og'). "/og_access";
-    $sql = "INSERT INTO {system} (filename, name, type, description, status, throttle, bootstrap, schema_version, weight) VALUES ('$filename', 'og_access', 'module', 'Enable access control for private posts and private groups.', 1, 0, 0, -1, 1)";
-    $ret[] = update_sql($sql);
-    // Refresh the module list to include the new enabled module.
-    module_list(TRUE, FALSE);
-    // Force to regenerate the stored list of hook implementations.
-    module_implements('', FALSE, TRUE);
-    cache_clear_all('*', 'cache_menu', TRUE);
+    module_enable('og_access');
   }
   // variable_del('og_enabled'); is harmless to leave around, and will help if someone reruns the update.
   
