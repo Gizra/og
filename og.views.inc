@@ -435,27 +435,40 @@ function og_views_data_og_uid() {
     'users' => array(
       'left_field' => 'uid',
       'field' => 'uid',
-      'extra' => array(
-        array('field' => 'is_active', 'value' => 1, 'numeric' => TRUE),
-      ),
+      // Not desireable anymore. We need to list pending requests.
+      // 'extra' => array(
+      //        array('field' => 'is_active', 'value' => 1, 'numeric' => TRUE),
+      //      ),
     ),
   );
   
   $data['og_uid']['nid'] = array(
     'title' => t('Group'),
-    'help' => t('Posts are filtered to where current user is a member.'),
+    'help' => t('Group that a member belongs to.'),
     'filter' => array(
       'handler' => 'views_handler_filter_user_current',
-      'label' => t('OG: Post in user\'s subbed groups'),
-      'help' => 'todo',
+      'help' => t('Posts are filtered to where current user is a member.'),
+    ),
+    'relationship' => array(
+      'title' => t('Group node'),
+      'help' => t('Bring in information about the group node.'),
+      'base' => 'node',
+      'field' => 'nid',
+      'handler' => 'views_handler_relationship',
+      'label' => t('Group'),
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_many_to_one',
+      'help' => t('Posts are filtered to where current user is a member.'),
     ),
   ); 
   
   $data['og_uid']['uid'] = array(
     'title' => t('Group member'),
+    // 'help' => t('foo')
     'filter' => array(
       'handler' => 'views_handler_filter_user_current',
-      'label' => t('OG: Group in User\'s Groups'),
+      'help' => t('OG: Group in User\'s Groups'),
     ),
   );
   
@@ -470,14 +483,38 @@ function og_views_data_og_uid() {
       'handler' => 'views_handler_sort',
     ),
   );
-  $data['og_uid']['managelink'] = array(
+  $data['og_uid']['managelinkadmin'] = array(
+    'title' => t('OG: Admin Manage link'),
+    'help' => t('A link to the <em>Admin create or remove</em> page.'),
+    'field' => array(
+      'handler' => 'views_handler_field_og_managelinkadmin',
+      'click sortable' => FALSE,
+    ),
+  );
+  $data['og_uid']['managelinkmy'] = array(
     'title' => t('OG: Manage membership link'),
     'help' => t('A link to the <em>My membership</em> page.'),
+    'field' => array(
+      'handler' => 'views_handler_field_og_managelinkmy',
+      'click sortable' => FALSE,
+    ),
+  );
+  $data['og_uid']['managelink'] = array(
+    'title' => t('OG: Approve/Deny/Remove membership link'),
+    'help' => t('A link to approve/deny/remove a group member.'),
     'field' => array(
       'handler' => 'views_handler_field_og_managelink',
       'click sortable' => FALSE,
     ),
   );
+  $data['og_uid']['is_manager'] = array(
+      'title' => t('OG: Is the group manager'),
+      'help' => t('Add <em>manager</em> text if user is the group manager.'),
+      'field' => array(
+        'handler' => 'views_handler_field_og_is_manager',
+        'click sortable' => FALSE,
+      ),
+    );
   $data['og_uid']['is_admin'] = array(
     'title' => t('OG: Is member an admin in a group'),
     'field ' => array(
@@ -488,11 +525,109 @@ function og_views_data_og_uid() {
       'handler' => 'views_handler_sort',
     ),
   );
-  
+    
   return $data;
 }
 
+/**
+ * Field handler to show if user is manager or not of the displayed group node.
+ *
+ * @ingroup views_field_handlers
+ */
+class views_handler_field_og_is_manager extends views_handler_field {
+  function construct() {
+    parent::construct();
+    $this->additional_fields['uid'] = array('table' => 'og_uid', 'field' => 'uid');
+    $this->additional_fields['node_uid'] = array('table' => 'node', 'field' => 'uid');
+  }
+  
+  function query() {
+    $this->ensure_my_table();
+    $this->add_additional_fields();
+  }
+  
+  function render($values) {
+    $uid = $values->{$this->aliases['uid']};
+    $node_uid = $values->{$this->aliases['node_uid']};
+    if ($uid == $node_uid) {
+      return '<em>'. t('manager'). '</em>'; 
+    }
+  }
+}
+
+/**
+ * Field handler to add/remove an admin.
+ *
+ * @ingroup views_field_handlers
+ */
+class views_handler_field_og_managelinkadmin extends views_handler_field {
+  function construct() {
+    parent::construct();
+    $this->additional_fields['uid'] = array('table' => 'og_uid', 'field' => 'uid');
+    $this->additional_fields['is_admin'] = array('table' => 'og_uid', 'field' => 'is_admin');
+    $this->additional_fields['nid'] = array('table' => 'og_uid', 'field' => 'nid');
+  }
+  
+  function query() {
+    $this->ensure_my_table();
+    $this->add_additional_fields();
+  }
+  
+  function render($values) {
+    $nid = $values->{$this->aliases['nid']};
+    $uid = $values->{$this->aliases['uid']};
+    $is_admin = $values->{$this->aliases['is_admin']};
+    $node = node_load($nid);
+    // Only show links to group admins. And don't show next to group manager.
+    if (og_is_group_admin($node) && $uid != $node->uid) {
+      if ($is_admin) {
+        return l(t('admin: remove'), "og/delete_admin/$nid/$uid", array('query' => drupal_get_destination()));
+      }
+      else {
+        return l(t('admin: create'), "og/create_admin/$nid/$uid", array('query' => drupal_get_destination()));
+      } 
+    }
+  }
+}
+
+/**
+ * Field handler to approve/deny a subscription request, or remove a member.
+ *
+ * @ingroup views_field_handlers
+ */
 class views_handler_field_og_managelink extends views_handler_field {
+  function construct() {
+    parent::construct();
+    $this->additional_fields['is_active'] = array('table' => 'og_uid', 'field' => 'is_active');
+    $this->additional_fields['uid'] = array('table' => 'og_uid', 'field' => 'uid');
+    $this->additional_fields['nid'] = array('table' => 'og_uid', 'field' => 'nid');
+  }
+  
+  function query() {
+    $this->ensure_my_table();
+    $this->add_additional_fields();
+  }
+  
+  function render($values) {
+    $nid = $values->{$this->aliases['nid']};
+    $uid = $values->{$this->aliases['uid']};
+    $is_active = $values->{$this->aliases['is_active']};
+    $node = node_load($nid);
+    // Only show links to group admins. And don't show next to group manager.
+    if (og_is_group_admin($node) && $uid != $node->uid) {
+      if ($is_active) {
+        return l(t('remove'), "og/unsubscribe/$nid/$uid", array('query' => drupal_get_destination()));
+      }
+      else {
+        $approve = l(t('approve'), "og/approve/$nid/$uid", array('query' => drupal_get_destination()));
+        $deny = l(t('deny'), "og/deny/$nid/$uid", array('query' => drupal_get_destination()));
+        return t('Request: !a or !d', array('!a' => $approve, '!d' => $deny));
+      }
+    }
+  }
+}
+
+class views_handler_field_og_managelinkmy extends views_handler_field {
   function query() {
     $this->ensure_my_table();
     $this->add_additional_fields();

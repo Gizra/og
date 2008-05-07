@@ -46,14 +46,6 @@ function og_menu() {
     'title' => 'Join group'
   );
   
-  // anon users should be able to get to the join page
-  $items['og/subscribe'] = array(
-    'type' => MENU_CALLBACK, 
-    'page callback' => 'og_subscribe', 
-    'access callback' => TRUE, 
-    'title' => 'Join group'
-  );
-  
   $items['og/opml'] = array(
     'type' => MENU_CALLBACK, 
     'page callback' => 'og_opml', 
@@ -155,9 +147,9 @@ function og_menu() {
 
   //membership page and its 'add members' tab
   $items['og/users/%node'] = array(
-    'page callback' => 'og_list_users_page',
+    'page callback' => 'views_page',
     'title' => 'Members', 
-    'page arguments' => array(2), 
+    'page arguments' => array('og_members', 'defaults', arg(2)), 
     'type' => MENU_CALLBACK, 
     'access' => 'og_is_group_member',
     'access arguments' => array(2),

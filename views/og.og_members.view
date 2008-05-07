@@ -20,15 +20,36 @@ $view->display = array();
   'style_plugin' => 'table',
   'style_options' => 
   array (
+    'override' => 0,
+    'order' => 'asc',
     'columns' => 
     array (
+      'name' => 'name',
+      'managelink' => 'managelink',
+      'managelinkadmin' => 'managelinkadmin',
+      'is_manager' => 'name',
     ),
-    'default' => '',
     'info' => 
     array (
+      'name' => 
+      array (
+        'sortable' => 0,
+        'separator' => '&nbsp;',
+      ),
+      'managelink' => 
+      array (
+        'separator' => '',
+      ),
+      'managelinkadmin' => 
+      array (
+        'separator' => '',
+      ),
+      'is_manager' => 
+      array (
+        'separator' => '',
+      ),
     ),
-    'override' => true,
-    'order' => 'asc',
+    'default' => '-1',
   ),
   'row_plugin' => 'fields',
   'row_options' => 
@@ -36,6 +57,15 @@ $view->display = array();
   ),
   'relationships' => 
   array (
+    'nid' => 
+    array (
+      'id' => 'nid',
+      'table' => 'og_uid',
+      'field' => 'nid',
+      'label' => 'Group',
+      'required' => 0,
+      'relationship' => 'none',
+    ),
   ),
   'fields' => 
   array (
@@ -62,6 +92,14 @@ $view->display = array();
       'table' => 'og_uid',
       'field' => 'managelinkadmin',
       'label' => 'Admin',
+      'relationship' => 'none',
+    ),
+    'is_manager' => 
+    array (
+      'id' => 'is_manager',
+      'table' => 'og_uid',
+      'field' => 'is_manager',
+      'label' => '',
       'relationship' => 'none',
     ),
   ),
@@ -137,63 +175,3 @@ $view->display = array();
   'empty_format' => '1',
 );
 $view->display['default'] = $display;
-  $display = new views_display;
-  $display->id = 'page';
-  $display->display_title = 'Page';
-  $display->display_plugin = 'page';
-  $display->position = '2';
-  $display->display_options = array (
-  'defaults' => 
-  array (
-    'access' => true,
-    'title' => true,
-    'header' => true,
-    'header_format' => true,
-    'header_empty' => true,
-    'footer' => true,
-    'footer_format' => true,
-    'footer_empty' => true,
-    'empty' => true,
-    'empty_format' => true,
-    'use_ajax' => true,
-    'items_per_page' => true,
-    'offset' => true,
-    'use_pager' => true,
-    'pager_element' => true,
-    'use_more' => true,
-    'distinct' => true,
-    'link_display' => true,
-    'style_plugin' => true,
-    'style_options' => true,
-    'row_plugin' => true,
-    'row_options' => true,
-    'relationships' => true,
-    'fields' => true,
-    'sorts' => true,
-    'arguments' => true,
-    'filters' => true,
-  ),
-  'relationships' => 
-  array (
-  ),
-  'fields' => 
-  array (
-  ),
-  'sorts' => 
-  array (
-  ),
-  'arguments' => 
-  array (
-  ),
-  'filters' => 
-  array (
-  ),
-  'path' => 'og/memberstest',
-  'menu' => 
-  array (
-    'type' => 'none',
-    'title' => '',
-    'weight' => '0',
-  ),
-);
-$view->display['page'] = $display;
