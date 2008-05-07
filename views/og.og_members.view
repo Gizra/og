@@ -28,6 +28,8 @@ $view->display = array();
       'managelink' => 'managelink',
       'managelinkadmin' => 'managelinkadmin',
       'is_manager' => 'name',
+      'is_admin' => 'name',
+      'is_active' => 'name',
     ),
     'info' => 
     array (
@@ -46,6 +48,16 @@ $view->display = array();
       ),
       'is_manager' => 
       array (
+        'separator' => '',
+      ),
+      'is_admin' => 
+      array (
+        'sortable' => 0,
+        'separator' => '',
+      ),
+      'is_active' => 
+      array (
+        'sortable' => 0,
         'separator' => '',
       ),
     ),
@@ -99,6 +111,22 @@ $view->display = array();
       'id' => 'is_manager',
       'table' => 'og_uid',
       'field' => 'is_manager',
+      'label' => '',
+      'relationship' => 'none',
+    ),
+    'is_admin' => 
+    array (
+      'id' => 'is_admin',
+      'table' => 'og_uid',
+      'field' => 'is_admin',
+      'label' => '',
+      'relationship' => 'none',
+    ),
+    'is_active' => 
+    array (
+      'id' => 'is_active',
+      'table' => 'og_uid',
+      'field' => 'is_active',
       'label' => '',
       'relationship' => 'none',
     ),

@@ -507,26 +507,74 @@ function og_views_data_og_uid() {
       'click sortable' => FALSE,
     ),
   );
-  $data['og_uid']['is_manager'] = array(
-      'title' => t('OG: Is the group manager'),
-      'help' => t('Add <em>manager</em> text if user is the group manager.'),
-      'field' => array(
-        'handler' => 'views_handler_field_og_is_manager',
-        'click sortable' => FALSE,
-      ),
-    );
   $data['og_uid']['is_admin'] = array(
     'title' => t('OG: Is member an admin in a group'),
-    'field ' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => FALSE,
+    'help' => t('Add <em>admin</em> text if user is the group manager.'),
+    'field' => array(
+      'handler' => 'views_handler_field_og_is_admin',
+      'click sortable' => TRUE,
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+       'handler' => 'views_handler_sort',
+    ),
+  );
+  $data['og_uid']['is_active'] = array(
+    'title' => t('OG: Is membership approved'),
+    'help' => t('Add <em>approval needed</em> user if user\'s membership request is pending.'),
+    'field' => array(
+      'handler' => 'views_handler_field_og_is_active',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+       'handler' => 'views_handler_sort',
+    ),
+  );
+  $data['og_uid']['is_manager'] = array(
+    'title' => t('OG: Is the group manager'),
+    'help' => t('Add <em>manager</em> text if user is the group manager.'),
+    'field' => array(
+      'handler' => 'views_handler_field_og_is_manager',
+      'click sortable' => FALSE,
     ),
   );
     
   return $data;
+}
+
+/**
+ * Field handler to show if user is admin or not.
+ *
+ * @ingroup views_field_handlers
+ */
+class views_handler_field_og_is_active extends views_handler_field {
+  
+  function query() {
+    $this->ensure_my_table();
+    $this->add_additional_fields();
+  }
+  
+  function render($values) {
+    $is_active = $values->{$this->field_alias};
+    if (!$is_active) {
+      return '<em>('. t('approval needed'). ')</em>'; 
+    }
+  }
+
+}
+
+/**
+ * Field handler to show if user is admin or not.
+ *
+ * @ingroup views_field_handlers
+ */
+class views_handler_field_og_is_admin extends views_handler_field {
+  function render($values) {
+     $is_admin = $values->{$this->field_alias};
+    // don't use og_is__group_admin here since we don't want mark on 'admin nodes' people.
+    if ($is_admin) {
+      return '<em>'. t('admin'). '</em>'; 
+    }
+  }
 }
 
 /**

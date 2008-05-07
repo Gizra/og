@@ -146,10 +146,11 @@ function og_menu() {
   );
 
   //membership page and its 'add members' tab
+  $arg = arg(2);
   $items['og/users/%node'] = array(
     'page callback' => 'views_page',
     'title' => 'Members', 
-    'page arguments' => array('og_members', 'defaults', arg(2)), 
+    'page arguments' => array('og_members', 'defaults', $arg), 
     'type' => MENU_CALLBACK, 
     'access' => 'og_is_group_member',
     'access arguments' => array(2),
@@ -247,8 +248,8 @@ function og_is_group_member($gid) {
 /*
  * Determine whether user can act as a group administrator for a given group.
  */
-function og_is_group_admin($node) {
-  return og_is_group_type($node->type) && node_access('update', $node);
+function og_is_group_admin($node, $account = NULL) {
+  return og_is_group_type($node->type) && node_access('update', $node, $account);
 }
 
 // An implementation of hook_theme().
