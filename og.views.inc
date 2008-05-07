@@ -547,12 +547,6 @@ function og_views_data_og_uid() {
  * @ingroup views_field_handlers
  */
 class views_handler_field_og_is_active extends views_handler_field {
-  
-  function query() {
-    $this->ensure_my_table();
-    $this->add_additional_fields();
-  }
-  
   function render($values) {
     $is_active = $values->{$this->field_alias};
     if (!$is_active) {
@@ -570,7 +564,7 @@ class views_handler_field_og_is_active extends views_handler_field {
 class views_handler_field_og_is_admin extends views_handler_field {
   function render($values) {
      $is_admin = $values->{$this->field_alias};
-    // don't use og_is__group_admin here since we don't want mark on 'admin nodes' people.
+    // don't use og_is_group_admin() here since we don't want mark on 'admin nodes' people.
     if ($is_admin) {
       return '<em>'. t('admin'). '</em>'; 
     }

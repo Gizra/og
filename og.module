@@ -113,7 +113,7 @@ function og_menu() {
     'page callback' => 'og_manage',
     'page arguments' => array(2),
     'access callback' => 'og_is_group_member', 
-    'access arguments' => array(arg(2)),
+    'access arguments' => array(2),
     'title' => t('Manage membership'), 
     'type' => MENU_CALLBACK, 
   );
@@ -145,17 +145,16 @@ function og_menu() {
     'weight' => -5,
   );
 
-  //membership page and its 'add members' tab
-  $arg = arg(2);
-  $items['og/users/%node'] = array(
+  //Membership page Uses Views
+  $items['og/users/%'] = array(
     'page callback' => 'views_page',
     'title' => 'Members', 
-    'page arguments' => array('og_members', 'defaults', $arg), 
+    'page arguments' => array('og_members', 'defaults', 2), 
     'type' => MENU_CALLBACK, 
     'access' => 'og_is_group_member',
     'access arguments' => array(2),
   );
-  $items['og/users/%node/list'] = array(
+  $items['og/users/%/list'] = array(
     'title' => t('List'), 
     'type' => MENU_DEFAULT_LOCAL_TASK
   );
@@ -233,7 +232,7 @@ function og_is_group_member($gid) {
 
   // Allow caller to pass in a full $node. Used by menu items.
   if (is_object($gid)) {
-    $gid = $gid->gid;
+    $gid = $gid->nid;
   }
   
   $groups = array_keys($user->og_groups);
