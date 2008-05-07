@@ -1060,55 +1060,6 @@ function og_add_users_submit($form, &$form_state) {
   drupal_set_message(format_plural(count($accounts), '1 user added to the group', '@count users added to the group'));
 }
 
-function og_list_users_page($group_node) {
-  $access = og_is_group_admin($group_node);
-  if ($access) {
-    $header[] = array('data' => t('Operations'), 'colspan' => 2);
-  }
-  // prepend the group manager
-  $i=0;
-  $rows[$i][] = array('data' => theme('username', $group_node). '&nbsp;<em>'. t('manager'). '</em>', 'colspan' => 3);
-  $i++;
-
-  $sql = og_list_users_sql(0,0,'ou.is_admin DESC, ou.is_active ASC, u.name ASC');
-  /* list group admins first, pending members second, regular members last.  Alphabetize within each of these categories */
-  $result = pager_query($sql, 500, 0, NULL, $group_node->nid);
-  while ($account = db_fetch_object($result)) {
-      if ($account->uid != $group_node->uid) {
-        $username = theme('username', $account);
-        if  (!$account->is_active)  { $username .= '&nbsp;<em>'.t('(approval needed)'). '</em>'; }
-        elseif ($account->is_admin) { $username .= '&nbsp;<em>'.t('administrator'). '</em>'; }
-        $rows[$i][] = $username;
-        if ($access) {
-          if ($account->is_active) {
-            $rows[$i][] = l(t('remove'), "og/unsubscribe/$group_node->nid/$account->uid", array('query' => "destination=og/users/$group_node->nid"));
-            if ($account->is_admin) {
-              $rows[$i][] = l(t('admin: remove'), "og/delete_admin/$group_node->nid/$account->uid", array('query' => drupal_get_destination()));
-            }
-            else {
-              $rows[$i][] = l(t('admin: create'), "og/create_admin/$group_node->nid/$account->uid", array('query' => drupal_get_destination()));
-            }
-          }
-          else {
-            $rows[$i][] = l(t('approve'), "og/approve/$group_node->nid/$account->uid", array('query' => drupal_get_destination()));
-            $rows[$i][] = l(t('deny'), "og/deny/$group_node->nid/$account->uid", array('query' => drupal_get_destination()));
-          }
-        }
-        $i++;
-      }
-  }
-  if ($pager = theme('pager', NULL, 500)) {
-    $rows[$i][] = array('data' => $pager, 'colspan' => 2);
-  }
-  $header = array();
-  $output = theme('table', $header, $rows);
-  $bc[] = array('path' => "og", 'title' => t('Groups'));
-  $bc[] = array('path' => "node/$gid", 'title' => $node->title);
-  // menu_set_location($bc);
-  drupal_set_title(t('Members'). ': '. l($node->title, "node/$node->nid"));
-  return $output;
-}
-
 // TODOL: css needs work.
 function og_list_users_faces_page($node, $column_count = 5, $row_count = 10, $pager_id = 0) {
   $max_per_page = $row_count * $column_count;

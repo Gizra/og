@@ -141,6 +141,14 @@ $view->display = array();
       'order' => 'DESC',
       'relationship' => 'none',
     ),
+    'is_active' => 
+    array (
+      'id' => 'is_active',
+      'table' => 'og_uid',
+      'field' => 'is_active',
+      'order' => 'ASC',
+      'relationship' => 'none',
+    ),
     'name' => 
     array (
       'id' => 'name',
