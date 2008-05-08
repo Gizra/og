@@ -1,14 +1,12 @@
-# $Id$
-#
 # LANGUAGE translation of Drupal (og_views.inc)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
-# Generated from file: og_views.inc,v 1.12.2.52 2008/04/23 13:46:46 weitzman
+# Generated from file: og_views.inc,v 1.5 2006/10/05 17:32:15 weitzman
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-05-04 19:01+0200\n"
+"POT-Creation-Date: 2006-10-22 11:29-0400\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -17,243 +15,119 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: og_views.inc:31
-msgid "OG: Group: Description"
+#: og_views.inc:47
+msgid "Displays <em>yes</em> if group automatically sends email notifications to subscribers"
 msgstr ""
 
-#: og_views.inc:34
-msgid "OG: Group: Members Count"
+#: og_views.inc:51
+msgid "Displays the language selected for a given group"
 msgstr ""
 
-#: og_views.inc:36
-msgid "Number of members for a group. Excludes memberships which are pending approval."
-msgstr ""
-
-#: og_views.inc:41
-msgid "OG: Group: Post Count"
-msgstr ""
-
-#: og_views.inc:45
-msgid "Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown."
-msgstr ""
-
-#: og_views.inc:48
-msgid "All"
-msgstr ""
-
-#: og_views.inc:55
-msgid "OG: Group: Post Count *New*"
-msgstr ""
-
-#: og_views.inc:59
-msgid "Number of new posts in a group for the current user. The <em>new</em> indicator may be optionally appended using the <em>Option</em> dropdown."
-msgstr ""
-
-#: og_views.inc:69;111
-msgid "OG: Group: Selective"
-msgstr ""
-
-#: og_views.inc:72;104
-msgid "OG: Group: Private"
-msgstr ""
-
-#: og_views.inc:75
-msgid "OG: Group: Join Link"
-msgstr ""
-
-#: og_views.inc:80
-msgid "Displays a links for joining a group when a user is not already a member."
-msgstr ""
-
-#: og_views.inc:83
-msgid "OG: Group: Notification"
-msgstr ""
-
-#: og_views.inc:85
-msgid "Displays <em>yes</em> if group automatically sends email notifications to members"
-msgstr ""
-
-#: og_views.inc:88;118
-msgid "OG: Group: Language"
-msgstr ""
-
-#: og_views.inc:91
-msgid "Displays the language selected for a given group."
-msgstr ""
-
-#: og_views.inc:97
-msgid "OG: Group: List in directory"
-msgstr ""
-
-#: og_views.inc:101
+#: og_views.inc:61
 msgid "Admin specifies whether or not a group appears in the public listings."
 msgstr ""
 
-#: og_views.inc:108
-msgid "Is the group home page private or not."
-msgstr ""
-
-#: og_views.inc:114
-msgid "Open"
-msgstr ""
-
-#: og_views.inc:114
-msgid "Moderated"
-msgstr ""
-
-#: og_views.inc:114
-msgid "Invite Only"
-msgstr ""
-
-#: og_views.inc:114;1313
-msgid "Closed"
-msgstr ""
-
-#: og_views.inc:115
-msgid "The group preference which determines how membership requests are managed (moderated, invite only, etc.)."
-msgstr ""
-
-#: og_views.inc:127
-msgid "Restrict groups to specific languages."
-msgstr ""
-
-#: og_views.inc:144
-msgid "OG: Post in specified group (by number)"
-msgstr ""
-
-#: og_views.inc:147
-msgid "Filter for posts in specified organic groups. <em>Value</em> should be a one or more node ids (i.e. integers), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context (if View is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id."
-msgstr ""
-
-#: og_views.inc:152
-msgid "OG: Post in specified groups (by name)"
-msgstr ""
-
-#: og_views.inc:155
-msgid "Filter for posts in specified organic groups. Value should be a one or more group names (partial name is supported), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context is <strong>not</strong> be set the the first specified group (unfortunately, you must use <em>OG: Post in specified group (by number)</em> for that)."
-msgstr ""
-
-#: og_views.inc:158
-msgid "OG: Post in specified group type"
-msgstr ""
-
-#: og_views.inc:165
-msgid "Filter for a given organic group type."
-msgstr ""
-
-#: og_views.inc:168
-msgid "OG: Posts in current group"
-msgstr ""
-
-#: og_views.inc:169
-msgid "Posts in current group. Useful for blocks where determining context is hard. If page is not in any group context, no nodes are listed and thus a block would not appear."
-msgstr ""
-
-#: og_views.inc:176;187
-msgid "OG: Public"
-msgstr ""
-
-#: og_views.inc:177
-msgid "Posts marked as Public, which are viewable by non group members as well."
-msgstr ""
-
-#: og_views.inc:178;308
-msgid "Is"
-msgstr ""
-
-#: og_views.inc:189
+#: og_views.inc:80;104
 msgid "Displays <em>yes</em> if post is public according to OG."
 msgstr ""
 
-#: og_views.inc:206
-msgid "OG: Group names"
+#: og_views.inc:121
+msgid "Og: Group Name"
 msgstr ""
 
-#: og_views.inc:209
-msgid "Display links to any groups that are affiliated with a post."
+#: og_views.inc:125
+msgid "Display the title of the first group a node belongs to."
 msgstr ""
 
-#: og_views.inc:229
-msgid "OG: Subscription email"
+#: og_views.inc:145
+msgid "Og: Subscription email"
 msgstr ""
 
-#: og_views.inc:232
-msgid "Does member receive email notifications for a group."
+#: og_views.inc:148
+msgid "Does subscriber receive email notifications for a group."
 msgstr ""
 
-#: og_views.inc:235
-msgid "OG: Manage membership link"
+#: og_views.inc:165
+msgid "Og: Group in User Subbed Groups"
 msgstr ""
 
-#: og_views.inc:241
-msgid "OG: Is member an admin in a group"
+#: og_views.inc:169
+msgid "Groups are filtered to where current user is a member ."
 msgstr ""
 
-#: og_views.inc:249
-msgid "OG: Group in User's Groups"
+#: og_views.inc:190
+msgid "Og: Post in User Subbed Groups"
 msgstr ""
 
-#: og_views.inc:253
-msgid "Groups are filtered to where current user is a member."
-msgstr ""
-
-#: og_views.inc:274
-msgid "OG: Post in User Subbed Groups"
-msgstr ""
-
-#: og_views.inc:278
+#: og_views.inc:194
 msgid "Posts are filtered to groups that current user is a member of."
 msgstr ""
 
-#: og_views.inc:298
-msgid "OG: node type (selector)"
+#: og_views.inc:204
+msgid "Og: Group nid"
 msgstr ""
 
-#: og_views.inc:303
-msgid "A node type selector that is limited to og-enabled node types. Use as exposed filter that only contains og node types."
+#: og_views.inc:206
+msgid "This argument filters for a given organic group"
 msgstr ""
 
-#: og_views.inc:307
-msgid "OG: type"
+#: og_views.inc:233
+msgid "Shows all activity in subscribed groups."
 msgstr ""
 
-#: og_views.inc:312
-msgid "Restrict to node types which have been designated behave as groups."
+#: og_views.inc:237
+msgid "recent posts in my groups"
 msgstr ""
 
-#: og_views.inc:322
-msgid "OG: Group nid(s)"
+#: og_views.inc:242
+msgid "There are no posts in your subscribed groups."
 msgstr ""
 
-#: og_views.inc:324
-msgid "Filter for the one or more organic groups. Groups should be specified as a comma or plus delimited list of node ids, like taxonomy URLs. "
+#: og_views.inc:249
+msgid "my recent"
 msgstr ""
 
-#: og_views.inc:327
-msgid "OG: Group name"
+#: og_views.inc:269
+msgid "Group"
 msgstr ""
 
-#: og_views.inc:333
-msgid "Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</e> field to specify how to match the supplied name."
+#: og_views.inc:275;380
+msgid "Type"
 msgstr ""
 
-#: og_views.inc:353;382
-msgid "All posts"
+#: og_views.inc:301;406
+msgid "Last Post"
 msgstr ""
 
-#: og_views.inc:1315
+#: og_views.inc:336
+msgid "Shows unread posts in subscribed groups."
+msgstr ""
+
+#: og_views.inc:342
+msgid "unread posts in my groups"
+msgstr ""
+
+#: og_views.inc:347
+msgid "There are no new posts in your subscribed groups."
+msgstr ""
+
+#: og_views.inc:354
+msgid "my unread"
+msgstr ""
+
+#: og_views.inc:458
+msgid "external website"
+msgstr ""
+
+#: og_views.inc:470
+msgid "Closed"
+msgstr ""
+
+#: og_views.inc:472
 msgid "Invite only"
 msgstr ""
 
-#: og_views.inc:1344
-msgid "my membership"
-msgstr ""
-
-#: og_views.inc:1348
+#: og_views.inc:488
 msgid "yes"
-msgstr ""
-
-#: og_views.inc:1390
-msgid "Current group"
 msgstr ""
 

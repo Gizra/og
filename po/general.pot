@@ -1,28 +1,16 @@
-# $Id$
-#
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  node.tpl.php,v 1.5.2.4 2008/03/18 15:18:39 weitzman
-#  og.module,v 1.298.2.183 2008/05/03 15:38:48 weitzman
-#  og_access.module,v 1.1.2.9 2008/05/03 13:47:14 weitzman
-#  og_panels.module,v 1.1.2.30 2008/04/20 17:51:10 weitzman
-#  og_workflow_ng.inc,v 1.1.2.2 2008/04/14 14:02:14 weitzman
-#  includes/groupcontent.inc: n/a
-#  og_xmlrpc.inc: n/a
-#  og.install,v 1.21.2.30 2008/05/03 13:59:15 weitzman
-#  og_access.install,v 1.1.2.4 2008/04/23 14:40:31 weitzman
-#  og.info: n/a
-#  og_access.info: n/a
-#  og_panels.info,v 1.1.2.2 2008/02/26 22:38:13 weitzman
-#  groupcontext.inc,v 1.1.2.3 2008/03/22 21:50:52 weitzman
-#  tests/og_testcase.php: n/a
+#  node.tpl.php,v 1.4 2005/06/24 05:12:20 weitzman
+#  og.module,v 1.260 2006/10/22 15:05:24 weitzman
+#  og_views.inc,v 1.5 2006/10/05 17:32:15 weitzman
+#  og.install,v 1.18 2006/09/29 01:38:02 weitzman
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-05-04 19:01+0200\n"
+"POT-Creation-Date: 2006-10-22 11:29-0400\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -31,76 +19,44 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: node.tpl.php:22 og.module:339;949;1069;1304;1478;2153;2222 og_access.module:150 og_panels.module:266
-msgid "Groups"
+#: node.tpl.php:21 og.module:49;314;806;940;1159
+msgid "groups"
 msgstr ""
 
-#: og_workflow_ng.inc:38 og_panels.module:546;643 includes/groupcontent.inc:9;22;34;46;58
-msgid "Group"
-msgstr ""
-
-#: og.module:86 og_panels.module:42
-msgid "List"
-msgstr ""
-
-#: og.module:88 includes/groupcontent.inc:247
-msgid "Faces"
-msgstr ""
-
-#: og.module:510;556;704;807 og_panels.module:148
-msgid "Cancel"
-msgstr ""
-
-#: og.module:910;2700 og_panels.module:240
-msgid "Operations"
-msgstr ""
-
-#: og.module:1029 og_panels.module:240
+#: og_views.inc:281;386 og.module:834;2153
 msgid "Title"
 msgstr ""
 
-#: og.module:1064;1143 includes/groupcontent.inc:94;235
-msgid "Description"
+#: og_views.inc:288;393 og.module:2153
+msgid "Author"
 msgstr ""
 
-#: og.module:2342 includes/groupcontent.inc:239
-msgid "Group members"
+#: og_views.inc:294;399 og.module:2153
+msgid "Replies"
 msgstr ""
 
-#: og.module:2382 includes/groupcontent.inc:192
-msgid "Group roles"
+#: og_views.inc:474 og.module:602;2017
+msgid "subscribe"
 msgstr ""
 
-#: og.module:2384 includes/groupcontent.inc:194
-msgid "Standard members"
+#: og_views.inc:484 og.module:2000
+msgid "my subscription"
 msgstr ""
 
-#: og.module:2384 includes/groupcontent.inc:194
-msgid "Administrators"
+#: og.module:353;721 tests/og_testcase.php:20;22
+msgid "Submit"
 msgstr ""
 
-#: og.module:2684 includes/groupcontent.inc:243
-msgid "Search"
+#: og.module:2047;2059 og.install:418
+msgid "Disable"
 msgstr ""
 
-#: og_panels.module:596 includes/groupcontent.inc:42
-msgid "Group search"
+#: og.module:0 og.install:340
+msgid "og"
 msgstr ""
 
-#: og_workflow_ng.inc:15
-msgid "User joins group"
-msgstr ""
-
-#: og_workflow_ng.inc:16;21
-msgid "OG"
-msgstr ""
-
-#: og_workflow_ng.inc:20
-msgid "User leaves group"
-msgstr ""
-
-#: og_workflow_ng.inc:37
-msgid "User, who joins group"
+#: node.tpl.php:25
+msgid "categories"
 msgstr ""
 
 #: og_xmlrpc.inc:13
@@ -116,90 +72,14 @@ msgid "User is not a member of the specified group"
 msgstr ""
 
 #: og_xmlrpc.inc:48
-msgid "User is not allowed to retrieve membership information for another user."
+msgid "User is not allowed to retrieve subscriptions for another user."
 msgstr ""
 
-#: og.install:98
-msgid "Organic groups module enabled. Please see the included !README file for further installation instructions."
+#: og.install:90
+msgid "Organic groups module enabled. Please see the included readme.txt file for further installation instructions."
 msgstr ""
 
-#: og_access.install:21;42
-msgid "The node access table has been rebuilt."
-msgstr ""
-
-#: og.info:0
-msgid "Enable users to create and manage their own 'groups'"
-msgstr ""
-
-#: og_access.info:0
-msgid "Enable access control for private posts and private groups."
-msgstr ""
-
-#: og_panels.info:0
-msgid "Organic groups panels"
-msgstr ""
-
-#: og_panels.info:0
-msgid "Enable group admins to create panel pages."
-msgstr ""
-
-#: includes/groupcontext.inc:37
-msgid "Require this context from an external source (such as containing panel page)"
-msgstr ""
-
-#: includes/groupcontext.inc:38
-msgid "If selected, group selection (below) will be ignored"
-msgstr ""
-
-#: includes/groupcontext.inc:46
-msgid "Enter the NID of a group"
-msgstr ""
-
-#: includes/groupcontext.inc:56
-msgid "Currently set to \"%title\""
-msgstr ""
-
-#: includes/groupcontext.inc:74
-msgid "You must select a node."
-msgstr ""
-
-#: includes/groupcontext.inc:100
-msgid "Invalid group selected."
-msgstr ""
-
-#: includes/groupcontext.inc:103
-msgid "Node is of type %type which not a group type."
-msgstr ""
-
-#: tests/og_testcase.php:21
-msgid "Your %post has been created."
-msgstr ""
-
-#: (duplicate) og.module:2941 
-msgid "Organic groups group type"
-msgstr ""
-
-#: (duplicate) og.module:2942 
-msgid "You have no node types which are acting as groups. See the Notes section of the !readme and the Content types fieldset at top of <a href=\"!settings\">OG settings</a>."
-msgstr ""
-
-#: (duplicate) og.module:2949 
-msgid "Organic groups modules"
-msgstr ""
-
-#: (duplicate) og.module:2950 
-msgid "Organic groups works best when !job_queue.module is enabled. See the Integration section of the !readme."
-msgstr ""
-
-#: (duplicate) og.module:2957 
-msgid "Organic groups access control"
-msgstr ""
-
-#: (duplicate) og.module:2958 
-msgid "Organic groups access control module is disabled. See the !modules"
-msgstr ""
-
-#: (duplicate) og.module:2958 
-msgid "modules page"
+#: tests/og_testcase.php:25
+msgid "Your %post was created."
 msgstr ""
 
