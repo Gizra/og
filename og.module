@@ -2571,6 +2571,7 @@ function og_block_details() {
   }
 }
 
+// todol make this a menu
 function og_og_block_details($node) {
   global $user;
 

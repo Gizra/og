@@ -330,7 +330,7 @@ function og_views_arguments() {
         '#type' => 'select',
         '#options' => 'views_handler_operator_like',
       ),
-      'help' => t('Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</e> field to specify how to match the supplied name.'),
+      'help' => t('Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</em> field to specify how to match the supplied name.'),
       )
     );
   return $args;

@@ -27,7 +27,7 @@ function og_panels_ct_list_description() {
 
 function og_panels_ct_list_subscribers() {
   $items['og_subscribers'] = array(
-    'title' => t('Group Subscribers'),
+    'title' => t('Group Members'),
     'icon' => 'user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
     'description' => t('The list of group subscribers or just group admins.'),
@@ -183,7 +183,7 @@ function og_panels_content_types_addedit_callback_subscribers($id, $panel_args, 
   $form['num_items'] = array(
     '#type' => 'textfield',
     '#title' => t('Number of members'),
-    '#description' => t('Maxmimum number of members that should appear on the list'),
+    '#description' => t('Maximum number of members that should appear on the list'),
     '#default_value' => isset($conf['num_items']) ? $conf['num_items'] : 10,
     '#size' => 5,
   );
