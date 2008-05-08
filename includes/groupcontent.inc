@@ -27,7 +27,7 @@ function og_panels_ct_list_description() {
 
 function og_panels_ct_list_subscribers() {
   $items['og_subscribers'] = array(
-    'title' => t('Group Subscribers'),
+    'title' => t('Group Members'),
     'icon' => 'user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
     'description' => t('The list of group subscribers or just group admins.'),

@@ -257,6 +257,6 @@ function og_access_node_access_explain($row) {
   }
   elseif ($row->realm == 'og_subscriber') {
     $node = node_load((int)$row->gid);
-    return t('Subscribers of !group_n may view this node.', array('@op' => $op, '!group_n' => l($node->title, "node/$row->gid")));
+    return t('Members of !group_n may view this node.', array('@op' => $op, '!group_n' => l($node->title, "node/$row->gid")));
   }
 }
