@@ -202,6 +202,26 @@ $view->display = array();
   ),
   'filters' => 
   array (
+    'status' => 
+    array (
+      'id' => 'status',
+      'table' => 'users',
+      'field' => 'status',
+      'operator' => '=',
+      'value' => 1,
+      'group' => 0,
+      'exposed' => false,
+      'expose' => 
+      array (
+        'operator' => false,
+        'label' => '',
+      ),
+      'relationship' => 'none',
+      'expose_button' => 
+      array (
+        'button' => 'Expose',
+      ),
+    ),
   ),
   'items_per_page' => 90,
   'use_pager' => '1',

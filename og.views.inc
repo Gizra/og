@@ -514,6 +514,9 @@ function og_views_data_og_uid() {
       'handler' => 'views_handler_field_og_is_admin',
       'click sortable' => TRUE,
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_og_is_admin',
+    ),
     'sort' => array(
        'handler' => 'views_handler_sort',
     ),
@@ -524,6 +527,9 @@ function og_views_data_og_uid() {
     'field' => array(
       'handler' => 'views_handler_field_og_is_active',
       'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_boolean_operator',
     ),
     'sort' => array(
        'handler' => 'views_handler_sort',
@@ -536,9 +542,63 @@ function og_views_data_og_uid() {
       'handler' => 'views_handler_field_og_is_manager',
       'click sortable' => FALSE,
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_boolean_operator',
+    ),
+  );
+  $data['og_uid']['created'] = array(
+    'title' => t('OG: Membership create date'),
+    'help' => t('The date when the membership was created.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'sort' => array(
+       'handler' => 'views_handler_sort_date',
+    ),
+  );
+  $data['og_uid']['changed'] = array(
+    'title' => t('OG: Membership last updated date'),
+    'help' => t('The date when the membership was last updated.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'sort' => array(
+       'handler' => 'views_handler_sort_date',
+    ),
   );
     
   return $data;
+}
+
+class views_handler_filter_og_is_admin extends views_handler_filter_in_operator {
+  function get_value_options() {
+    if (!isset($this->value_options)) {
+      $this->value_title = t('Member types');
+      $options = array(t('Members'), t('Group Administrators'));
+      $this->value_options = $options;
+    }
+  }
+  
+  // 0 won't work as a key for checkboxes.
+  function value_form(&$form, &$form_state) { 
+    parent::value_form(&$form, &$form_state); 
+    $form['value']['#type'] = 'select'; 
+    $form['value']['#multiple'] = TRUE; 
+  }
+  
+  // Remove problematic array_filter().
+  function value_submit($form, &$form_state) {
+    $form_state['values']['options']['value'] = $form_state['values']['options']['value'];
+  }
+  
 }
 
 /**

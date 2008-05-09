@@ -2675,17 +2675,40 @@ function og_block_subscribers() {
  *   An HTML list.
  **/
 function og_block_subscribers_list($gid, $max = 10, $is_admin = array('members', 'admin'), $show_more = TRUE, $show_picture = NULL) {
-  $placeholders = db_placeholders(array_filter($is_admin));
-  $sql = "SELECT DISTINCT(u.uid), u.*, ogu.created FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.is_admin IN ($placeholders) AND ogu.nid = %d AND ogu.is_active = 1 AND u.status = 1 ORDER BY ogu.created DESC";
-  if (!empty($is_admin['members'])) {
-    $args[] = 0;
-  }
-  if (!empty($is_admin['admins'])) {
-    $args[] = 1;
-  }
-  $args[] = $gid;
-  $result = db_query_range($sql, $args, 0, $max);
-  return og_user_title_list($result, $gid, $show_more, $show_picture);
+  
+  // $display_id = 'default';
+  //   $view = views_get_view('og_members');
+  //   $view->init();
+  //   $view->set_arguments(array($gid));
+  //   if (!empty($is_admin['members'])) {
+  //     $args[] = 0;
+  //   }
+  //   if (!empty($is_admin['admins'])) {
+  //     $args[] = 1;
+  //   }
+  //   $name = $view->add_item($display_id, 'filter', 'og_uid', 'is_admin');
+  //   $item = $view->get_item($display_id, 'filter', $name);
+  //   $item['value'] = array(0, 1);
+  //   $view->set_item($display_id, 'filter', $name, $item);
+  //   $view->is_cacheable = FALSE;
+  // //  $view->build();
+  // //  dsm($view);
+  //   $view->execute();
+  //             // dsm($view->result);
+  //   foreach ($view->result as $result) {
+  //     foreach ($view->field as $id => $field) {
+  //         if (!empty($view->field[$id]['handler'])) {
+  //           $view->field[$id]['handler']->pre_render($view->result);
+  //         }
+  //       }
+  //   }
+  //   // return 'aa';
+  //   
+  //   $sql = "SELECT DISTINCT(u.uid), u.*, ogu.created FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.is_admin IN ($placeholders) AND ogu.nid = %d AND ogu.is_active = 1 AND u.status = 1 ORDER BY ogu.created DESC";
+  //   
+  //   $args[] = $gid;
+  //   $result = db_query_range($sql, $args, 0, $max);
+  //   return og_user_title_list($result, $gid, $show_more, $show_picture);
 }
 
 // shows users. analogous to node_title_list()
