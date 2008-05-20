@@ -92,14 +92,6 @@ function og_menu() {
     'title' => 'Delete group administrator',
   );
   
-  $items['og/feed'] = array(
-    'page callback' => 'og_feed', 
-    'title' => 'Group feed', 
-    'type' => MENU_CALLBACK, 
-    'access callback' => 'og_is_group_member',
-    'access arguments' => array(2), 
-  );
-  
   // members only and can't be invite or closed
   $items['og/invite/%node'] = array(
     'page callback' => 'drupal_get_form',
@@ -187,6 +179,17 @@ function og_menu() {
       'access arguments' => array(1),
       'type' => MENU_LOCAL_TASK, 
       'weight' => 7
+    );
+    
+    // Group feed
+    $items['node/%node/feed'] = array(
+      'page callback' => 'og_feed', 
+      'page arguments' => array(1),
+      'title callback' => 'node_page_title',
+      'title arguments' => array(1),  
+      'type' => MENU_CALLBACK, 
+      'access callback' => 'node_access',
+      'access arguments' => array('view', 1), 
     );
 
   return $items;
@@ -307,55 +310,34 @@ function og_init() {
   }
   
   drupal_add_css(drupal_get_path('module', 'og'). '/og.css');
-  // we get a NOTICE if doing this from within og_determine_context() so I do it here for now.
-  $_SESSION['og_last'] = og_get_group_context();
 
   if (module_exists('workflow_ng')) {
     module_load_include('inc', 'og', 'og_workflow_ng');
   }
-  og_determine_context();
-  // og_set_locale();
+  
+  // Set group context and language if needed.
+  if ($node = og_determine_context()) {
+    og_set_language($node);
+  }
+  $_SESSION['og_last'] = $node;
 }
 
 /**
- * Return the *group* language in effect for a given page. There is no guarantee that the 
- * page actually is shown in this language.
- * 
- * @return string or NULL
- *   A langcode or NULL
- **/
-function og_language() {
-  if ($group_node = og_get_group_context()) {
-    return $group_node->language;
+ *  Set the language for the page based on group's language. Will have no effect
+ * if user has set a personal language.
+ * @param string $node 
+ *   A group node object.
+ */
+function og_set_language($node) {
+  if ($node->og_language) {
+    $map = language_list();
+    $og_language = $map[$node->og_language];
+    $user_language = user_preferred_language($account, $og_language);
+    if ($og_language == $user_language) {
+      $GLOBALS['language'] = $og_language;
+    }
   }
 }
-/**
- * Like locale_initialize(), but includes a check for group language and sets accordingly.
- * Priority goes: user => group => site default
- * TODO: see user_preferred_language()
- **/
-// function og_set_locale() {
-//   global $user, $locale;
-//     
-//   if (function_exists('locale')) {
-//     $languages = locale_supported_languages();
-//     $languages = $languages['name'];
-//   }
-//   else {
-//     // Ensure the locale/language is correctly returned, even without locale.module.
-//     // Useful for e.g. XML/HTML 'lang' attributes.
-//     $languages = array('en' => 'English');
-//   }
-// 
-//   if ($user->uid && isset($languages[$user->language])) {
-//     // do nothing. user specified language has priority
-//   }
-//   elseif ($group_node = og_get_group_context()) {
-//     if ($group_node->og_language && isset($languages[$group_node->og_language])) {
-//       $locale = $group_node->og_language;
-//     }
-//   }
-// }
 
 /**
  * Implementation of hook_perm().
@@ -398,7 +380,7 @@ function og_determine_context() {
     $group_node = og_set_theme(arg(2));
   }
 
-  og_set_group_context($group_node);
+  return og_set_group_context($group_node);
 }
 
 /**
@@ -1205,19 +1187,9 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
       $view->is_cacheable = FALSE;
       // $view->url = 'node'; // for pager
       $view->set_arguments(array($node->nid));
-      // TODO: use own menu callback for feeds
-      if (arg(2) == 'feed') {
-        // TODOH: none of this group feed is working well yet
-        $view->description = $node->og_description;
-        $view->set_display('feed');
-        $view->build();
-        $view->render();
-        exit();
-      }
-      else {
-        $view->set_display('default');
-        $built = $view->render();
-      }
+      $view->set_display('default');
+      $built = $view->render();
+      
 
       // Views will set either total_rows or num_rows depending on whether View has a pager.
       if ($view->total_rows || $view->num_rows || $view->page_empty) {
@@ -1618,7 +1590,6 @@ function og_form_alter(&$form, &$form_state, $form_id) {
       $form = array_merge($form, og_group_form($node));
       
       // Don't trample on custom label.
-      dsm($form['body_field']);
       if ($form['body_field']['body']['#title'] == t('Body')) {
         $form['body_field']['body']['#title'] = t('Mission statement');
         $form['body_field']['body']['#description'] = t('A welcome greeting for your group home page. Consider listing the group objectives and mission.');
@@ -2485,12 +2456,17 @@ function og_is_group_type($type) {
 }
 
 /**
- * Menu callback. Handle old feed urls with permanent redirect. Hopefully rss readers respect that.
- * Don't bother with the overhead of drupal_goto()
+ * Menu callback. Render group feed.
  */
-function og_feed($gid) {
-  header("HTTP/1.1 301 Moved Permanently");
-  header('Location: '. url("node/$gid/feed", array('absolute' => TRUE)));
+function og_feed($node) {
+  $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
+  $view->is_cacheable = FALSE;
+  $view->set_display('feed');
+  // TODOL: not working
+  $view->override_path = "node/$node->nid";
+  $view->set_arguments(array($node->nid));
+  $view->display['feed']->display_options['style_options']['description'] = $node->og_description;
+  print $view->render();
 }
 
 
