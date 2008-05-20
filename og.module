@@ -1814,7 +1814,7 @@ function og_node_groups_distinguish($groups_names_both, $exclude_joined = TRUE) 
  * by other OG contrib modules.
  */
  // TODOH: update FAPI. See http://drupal.org/node/144132#comment-643920
-function og_form_add_og_audience(&$form, $form_state) {
+function og_form_add_og_audience(&$form, &$form_state) {
   global $user;
   // determine the selected groups if fapi doesn't tell us.
   if ($_SERVER["REQUEST_METHOD"] == 'GET') {
@@ -1854,7 +1854,7 @@ function og_form_add_og_audience(&$form, $form_state) {
   else {
     // Classify those groups which the node already has but the author does not.
     $current_groups = og_node_groups_distinguish($node->og_groups_both);
-    // Put inaccessible groups in the $form so that they can persist. See og_submit_group()
+    // Put inaccessible groups in the $form so that they can persist. See og_pre_save_group() and og_access_alter_nongroup_form() in og_access.module
     $form['og_invisible']['og_groups_inaccessible'] = array('#type' => 'value', '#value' => $current_groups['inaccessible']);
     
     // Add the accessible groups that they node already belongs to.
