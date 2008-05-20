@@ -5,4 +5,4 @@ package = "Organic groups"
 dependencies[] = og
 dependencies[] = panels
 dependencies[] = panels_views
-core = 6.x
+; core = 6.x
