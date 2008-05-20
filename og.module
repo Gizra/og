@@ -252,14 +252,22 @@ function og_is_group_admin($node, $account = NULL) {
 }
 
 // An implementation of hook_theme().
-// TODOH Add our custom templates. Maybe add mission. See http://drupal.org/node/114774#theme_registry
 function og_theme() {
   return array(
     'opml_icon' => array('arguments' => array('url')),
     'og_format_subscriber_status' => array('arguments' => array('group')),
     'og_picture_grid' => array('arguments' => array('result', 'column_count')),
+    'og_mission' => array('template' => 'og-mission', 'arguments' => array('form' => NULL)),
   );
 }
+
+/**
+ * Simplify $mission variable for the template
+ */
+function og_preprocess_og_mission(&$variables) {
+  $variables['mission'] = $variables['form']['#value'];
+}
+
 
 /**
  * Enrich non group nodes with the list og groups that the node belongs to.
@@ -1246,11 +1254,6 @@ function og_home_empty($node) {
   drupal_set_message($msg);
 }
 
-// A FAPI theme callback. See og_view_group(). Also called from an og_panels content item.
-function theme_og_mission($form) {
-  return !empty($form['#value']) ? '<div id="mission" class="og-mission">'. $form['#value']. '</div>' : '';
-}
-
 function og_selective_map() {
   return array(
     OG_OPEN => t('Open'),
@@ -1617,9 +1620,10 @@ function og_form_alter(&$form, &$form_state, $form_id) {
       $form = array_merge($form, og_group_form($node));
       
       // Don't trample on custom label.
-      if ($form['body_filter']['body']['#title'] == t('Body')) {
-        $form['body_filter']['body']['#title'] = t('Mission statement');
-        $form['body_filter']['body']['#description'] = t('A welcome greeting for your group home page. Consider listing the group objectives and mission.');
+      dsm($form['body_field']);
+      if ($form['body_field']['body']['#title'] == t('Body')) {
+        $form['body_field']['body']['#title'] = t('Mission statement');
+        $form['body_field']['body']['#description'] = t('A welcome greeting for your group home page. Consider listing the group objectives and mission.');
       }
       
       $form['author']['name']['#title'] = t('Group manager');
@@ -2514,8 +2518,8 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     $blocks[5]['info'] = t('Group notifications');
     $blocks[5]['cache'] = BLOCK_NO_CACHE;
     
-    $blocks[6]['info'] = t('Group network');
-    $blocks[6]['cache'] = BLOCK_CACHE_PER_USER;
+    // $blocks[6]['info'] = t('Group network');
+    //     $blocks[6]['cache'] = BLOCK_CACHE_PER_USER;
     
     // Auto-enable the group blocks for fresh installations.
     $blocks[0]['status'] = 1;
@@ -2531,7 +2535,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
       case 2:
         return og_block_subscribers();
       case 3:
-        return og_block_new();
+       return og_block_new();
       case 5:
         return og_block_notifications();
       case 6:
@@ -2637,19 +2641,20 @@ function og_block_new() {
   }
 }
 
+// TODOL: port this. Needs new Views filter thats a bit complex.
 function og_block_users_network() {
-  global $user;
-  if ($user->uid && count($user->og_groups)) {
-    $max = variable_get('og_block_cnt_2', 10);
-    $placeholders = db_placeholders($user->og_groups);
-    $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". $placeholders .") GROUP BY ogu.uid, u.name, u.picture ORDER BY u.name ASC";
-    $args = array_keys($user->og_groups);
-    array_unshift($args, $user->uid);
-    $result = db_query_range($sql, $args, 0, $max);
-    $block['content'] = og_user_title_list($result, NULL, FALSE);
-    $block['subject'] = t('My Network');
-    return $block;
-  }
+//   global $user;
+//   if ($user->uid && count($user->og_groups)) {
+//     $max = variable_get('og_block_cnt_2', 10);
+//     $placeholders = db_placeholders($user->og_groups);
+//     $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". $placeholders .") GROUP BY ogu.uid, u.name, u.picture ORDER BY u.name ASC";
+//     $args = array_keys($user->og_groups);
+//     array_unshift($args, $user->uid);
+//     $result = db_query_range($sql, $args, 0, $max);
+//     $block['content'] = og_user_title_list($result, NULL, FALSE);
+//     $block['subject'] = t('My Network');
+//     return $block;
+//   }
 }
 
 function og_block_subscribers() {
