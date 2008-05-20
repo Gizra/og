@@ -534,7 +534,6 @@ function og_manage($group_node) {
     return '';
   }
   
-  // TODOH WTF on menu.
   $bc = og_get_breadcrumb($group_node);
   drupal_set_breadcrumb($bc);
   
@@ -830,7 +829,7 @@ function og_invite_form_submit($form, &$form_state) {
   drupal_set_message(format_plural(count($emails), '1 invitation sent.', '@count invitations sent.'));
 }
 
-// TODOH move access control to menu
+// TODOL move access control to menu
 function og_subscribe($gid, $uid = NULL) {
   global $user;
   if (is_null($uid)) {
@@ -1203,8 +1202,6 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
       // Do nothing. Assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
     }
     else {
-      $view->init();
-      $args[] = $node->nid;
       $view->is_cacheable = FALSE;
       // $view->url = 'node'; // for pager
       $view->set_arguments(array($node->nid));
@@ -1213,6 +1210,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
         // TODOH: none of this group feed is working well yet
         $view->description = $node->og_description;
         $view->set_display('feed');
+        $view->build();
         $view->render();
         exit();
       }
