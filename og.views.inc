@@ -769,7 +769,8 @@ function og_views_plugins() {
  * Validate whether an argument is a group node. Borrows heavily form the Node argument validator.
  */
 class views_plugin_argument_validate_og_group_types extends views_plugin_argument_validate {
-  // var $option_name = 'validate_argument_node_type';
+  // What does this do?
+  var $option_name = 'validate_argument_og_group_types';
 
   function validate_form(&$form, &$form_state) {
     $form['validate_argument_nid_type'] = array(
@@ -780,6 +781,8 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
         'nids' => t('Node IDs separated by , or +'),
       ),
       '#default_value' => isset($this->argument->options['validate_argument_nid_type']) ? $this->argument->options['validate_argument_nid_type'] : 'nid',
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array('edit-options-validate-type' => array($this->id)),
     );
   }
 
