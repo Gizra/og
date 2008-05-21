@@ -54,7 +54,7 @@ TODO/BUGS/FEATURE REQUESTS
 
 UPGRADING FROM 5.0 TO 6.x
 -----------------
-- The user interface for selecting alternate Views for your grop homepage is gone. You may still select an alternate view by setting 'og_home_page_view' variable in your settings.php
+- The user interface for selecting alternate Views for your group homepage is gone. You may still select an alternate view by setting 'og_home_page_view' variable in your settings.php. Alternative, just customize your og_ghp_ron View. You can always revert it if it breaks.
 
 UPGRADING FROM 4.7 TO 5.x
 -----------------

@@ -2800,7 +2800,6 @@ function theme_og_format_subscriber_status($group) {
 
 /**
  * Implementation of hook_xmlrpc(). /*
- * TODOL Port to D6
  *
  */
 function og_xmlrpc() {
