@@ -249,7 +249,6 @@ function og_theme() {
   return array(
     'opml_icon' => array('arguments' => array('url')),
     'og_format_subscriber_status' => array('arguments' => array('group')),
-    'og_picture_grid' => array('arguments' => array('result', 'column_count')),
     'og_mission' => array('template' => 'og-mission', 'arguments' => array('form' => NULL)),
   );
 }
@@ -1040,57 +1039,6 @@ function og_add_users_submit($form, &$form_state) {
   }
   drupal_set_message(format_plural(count($accounts), '1 user added to the group', '@count users added to the group'));
 }
-
-// TODOL: css needs work.
-function og_list_users_faces_page($node, $column_count = 5, $row_count = 10, $pager_id = 0) {
-  $max_per_page = $row_count * $column_count;
-  $sql = og_list_users_sql(0, 0, 'ou.is_admin DESC, u.picture DESC, u.name ASC');
-  /* list group admins first, members with pics second, regular members last.  Alphabetize within each of these categories */
-  $result = pager_query($sql, $max_per_page, $pager_id, NULL, $node->nid);
-  $total = $GLOBALS['pager_total_items'][$element];
-  $output = theme('og_picture_grid', $result, $column_count, $total);
-  $output .= theme('pager', NULL, $max_per_page, $pager_id);
-  return $output;
-}
-
-// From views_bonus: grid.inc.
-// TODOL: use Views. 
-// todoh use pager total in content item panels
-function theme_og_picture_grid($result, $column_count = 5, $total) {
-  $content = '<table class="og-picture-grid">';
-  $count = 0;
-  while ($user = db_fetch_object($result)) {
-    $classes = 'og-picture-grid-item';
-    if ($count < $column_count) {
-      $classes .= ' first';
-    }
-    
-    $item = '';
-    if ($count % $column_count == 0) { 
-      $content .= '<tr>'; 
-    }
-    $picture = theme('user_picture', $user);
-    $name = theme('username', $user);
-    $group_role = $user->is_admin ? t('admin') : '&nbsp;';
-    $content .= "<td class=\"$classes\">$picture<div class=\"og-name\">$name</div>";
-    if ($user->is_admin) {
-      $txt = t('admin');
-      $content .= "<div class=\"group-role\">$txt</div>"; 
-    }
-    $content .= "</td>\n";
-
-    $count++;
-    if ($count % $column_count == 0 || $count == $total) {
-      $content .= '</tr>';
-    }
-  }
-  $content .= '</table>';
-  
-  if ($content) {
-    return $content;
-  }
-}
-
 
 // TODOL: use Views for opml page.
 function og_opml() {
