@@ -8,8 +8,6 @@
 
 /**
  * Definition of hook_schema();
- *
- * TODO: add table and field descriptions
  */
 function og_schema() {
   $schema = array();
@@ -376,16 +374,12 @@ function og_enable() {
   og_populate_uid_global_table();
 }
 
-// need to populate og_uid_global for existing users on enable
-// this is called from update 13 & 19 & og_enable. 
-// TODO: conditionally use subquery
+// Need to populate og_uid_global for existing users. Uses a subquery.
+// This is called from update 13 & 19 & og_enable(). 
 function og_populate_uid_global_table() {
-  $sql = 'SELECT u.uid FROM {users} u LEFT JOIN {og_uid_global} oug ON u.uid=oug.uid WHERE u.uid > 0 AND oug.og_email IS NULL';
-  $result = db_query($sql);
-  while ($row = db_fetch_object($result)) {
-    $sql = "INSERT INTO {og_uid_global} (uid, og_email) VALUES (%d, %d)";
-    db_query($sql, $row->uid, OG_NOTIFICATION_SELECTIVE);
-  }
+  $subquery = 'SELECT u.uid, %d FROM {users} u LEFT JOIN {og_uid_global} oug ON u.uid=oug.uid WHERE u.uid > 0 AND oug.og_email IS NULL';
+  $sql = "INSERT INTO {og_uid_global} (uid, og_email) $subquery";
+  db_queryd($sql, OG_NOTIFICATION_SELECTIVE);
 }
 
 function og_uninstall() {
