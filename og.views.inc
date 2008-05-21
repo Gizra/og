@@ -586,7 +586,7 @@ class views_handler_filter_og_is_admin extends views_handler_filter_in_operator 
   
   // 0 won't work as a key for checkboxes.
   function value_form(&$form, &$form_state) { 
-    parent::value_form(&$form, &$form_state); 
+    parent::value_form($form, $form_state); 
     $form['value']['#type'] = 'select'; 
     $form['value']['#multiple'] = TRUE; 
   }
