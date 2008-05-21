@@ -379,7 +379,7 @@ function og_enable() {
 function og_populate_uid_global_table() {
   $subquery = 'SELECT u.uid, %d FROM {users} u LEFT JOIN {og_uid_global} oug ON u.uid=oug.uid WHERE u.uid > 0 AND oug.og_email IS NULL';
   $sql = "INSERT INTO {og_uid_global} (uid, og_email) $subquery";
-  db_queryd($sql, OG_NOTIFICATION_SELECTIVE);
+  db_query($sql, OG_NOTIFICATION_SELECTIVE);
 }
 
 function og_uninstall() {

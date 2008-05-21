@@ -1101,7 +1101,7 @@ function theme_og_picture_grid($result, $column_count = 5, $total) {
 }
 
 
-// TODO: use Views
+// TODOL: use Views for opml page.
 function og_opml() {
   $output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
   $output .= "<opml version=\"1.1\">\n";
@@ -1478,12 +1478,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'pre_save':
         og_pre_save_group($node);
       break;
-    case 'prepare':
-      // TODO: some people don't like forcing comments to disabled for groups.
-      if (og_is_group_type($node->type)) {
-        $node->comment = COMMENT_NODE_DISABLED;
-      }
-      break;
     case 'delete':
       $sql = "DELETE FROM {og} WHERE nid = %d";
       db_query($sql, $node->nid);
@@ -1551,7 +1545,17 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'search result':
-      // TODO: add group info
+      // Similar code in og_preprocess_node()
+      $current_groups['accessible'] = array();
+      if ($node->og_groups) {
+        $current_groups = og_node_groups_distinguish($node->og_groups_both, FALSE);
+      }
+      return format_plural(count($current_groups['accessible']), '1 group', '@count groups');
+      // TODOL: bad formatting. commented out.
+      // foreach ($current_groups['accessible'] as $gid => $item) {
+      //           $og_links['og_'. $gid] = array('title' => $item['title'], 'href' => "node/$gid");
+      //         }
+      // return theme('links', $og_links, array('class' => 'groups links'));
       break;
     case 'rss item':
       if ($node->og_groups) {
@@ -1562,7 +1566,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
                          'value' => check_plain($title),
                          'attributes' => array('domain' => url("node/$gid", array('absolute' => TRUE))));
         }
-        // to get these modifications to work on 4.7, one needs to patch as per http://drupal.org/node/41703
+
         $node->body .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
         $node->teaser .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
         return $ret;
