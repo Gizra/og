@@ -314,7 +314,6 @@ function og_views_data_og_ancestry() {
       'name field' => 'title', // the field to display in the summary.
       'validate type' => 'nid',
       'handler' => 'views_handler_argument_og_group_nid',
-      'numeric' => TRUE,
       'help' => $filterhelp,
     ),
   );
@@ -361,19 +360,8 @@ class views_handler_filter_og_group_nid extends views_handler_filter_numeric {
   }
 }
 
-class views_handler_argument_og_group_nid extends views_handler_argument_many_to_one {
-  /**
-   * Override the behavior of title(). Get the title of the node.
-   */
-  function title() {
-    $args = explode(',', $this->argument);
-    $title = db_result(db_query(db_rewrite_sql("SELECT n.title FROM {node} n WHERE n.nid = %d"), $args[0]));
-    if (empty($title)) {
-      return t('No title');
-    }
-    return check_plain($title);
-  }
-  
+class views_handler_argument_og_group_nid extends views_handler_argument_numeric {
+  // Set context based on first node passed.
   function query() {
     $args = explode(',', $this->argument);
     $node = node_load((int)$args[0]);
@@ -455,8 +443,9 @@ function og_views_data_og_uid() {
       'label' => t('Group'),
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_many_to_one',
-      'help' => t('Posts are filtered to where current user is a member.'),
+      'title' => t('Group node'),
+      'handler' => 'views_handler_argument_og_uid_nid',
+      'help' => t('Members are filtered for a specific group.'),
     ),
   ); 
   
@@ -575,6 +564,29 @@ function og_views_data_og_uid() {
   return $data;
 }
 
+/**
+ * Allow Group ID(s) as argument
+ *
+ * @ingroup views_argument_handlers
+ */
+class views_handler_argument_og_uid_nid extends views_handler_argument_numeric {
+  // TODOL: set context?
+  
+  /**
+   * Give an argument the opportunity to modify the breadcrumb, if it wants.
+   * This only gets called on displays where a breadcrumb is actually used.
+   *
+   * The breadcrumb will be in the form of an array, with the keys being
+   * the path and the value being the already sanitized title of the path.
+   */
+  function set_breadcrumb(&$breadcrumb) { 
+    $nid = $this->value[0];;
+    // TODOL: not working.
+    // $breadcrumb = og_views_set_breadcrumb($nid);
+  }
+  
+}
+
 class views_handler_filter_og_is_admin extends views_handler_filter_in_operator {
   function get_value_options() {
     if (!isset($this->value_options)) {
@@ -595,7 +607,6 @@ class views_handler_filter_og_is_admin extends views_handler_filter_in_operator 
   function value_submit($form, &$form_state) {
     $form_state['values']['options']['value'] = $form_state['values']['options']['value'];
   }
-  
 }
 
 /**
@@ -637,11 +648,13 @@ class views_handler_field_og_is_manager extends views_handler_field {
   function construct() {
     parent::construct();
     $this->additional_fields['uid'] = array('table' => 'og_uid', 'field' => 'uid');
+    // TODOL: Sometimes node table is not recognized (i.e. when listing users). 
     $this->additional_fields['node_uid'] = array('table' => 'node', 'field' => 'uid');
   }
   
   function query() {
     $this->ensure_my_table();
+    $this->query->ensure_table('node');
     $this->add_additional_fields();
   }
   
@@ -738,5 +751,103 @@ class views_handler_field_og_managelinkmy extends views_handler_field {
   }
 }
   
-  
+/**
+ * An implementation of hook_views_plugins().
+ */
+function og_views_plugins() {
+  return array(
+    'argument validator' => array(
+      'og_group_types' => array(
+        'title' => t('Group nodes'),
+        'handler' => 'views_plugin_argument_validate_og_group_types',
+      ),
+    ),
+  );
+}
+
+/**
+ * Validate whether an argument is a group node. Borrows heavily form the Node argument validator.
+ */
+class views_plugin_argument_validate_og_group_types extends views_plugin_argument_validate {
+  // var $option_name = 'validate_argument_node_type';
+
+  function validate_form(&$form, &$form_state) {
+    $form['validate_argument_nid_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Argument type'),
+      '#options' => array(
+        'nid' => t('Node ID'),
+        'nids' => t('Node IDs separated by , or +'),
+      ),
+      '#default_value' => isset($this->argument->options['validate_argument_nid_type']) ? $this->argument->options['validate_argument_nid_type'] : 'nid',
+    );
+  }
+
+  function validate_argument($argument) {
+    // TODOH: check
+    $types = og_get_types('group');
+
+    $type = isset($this->argument->options['validate_argument_nid_type']) ? $this->argument->options['validate_argument_nid_type'] : 'nid';
+
+    switch ($type) {
+      case 'nid':
+        if (!is_numeric($argument)) {
+          return FALSE;
+        }
+        $node = node_load($argument);
+        if (!$node) {
+          return FALSE;
+        }
+
+        if (!og_is_group_type($node->type)) {
+          return FALSE;
+        }
+
+        // Save the title() handlers some work.
+        $this->argument->validated_title = check_plain($node->title);
+
+        if (empty($types)) {
+          return TRUE;
+        }
+
+        return in_array($node->type, $types);
+        break;
+      case 'nids':
+        $nids = new stdClass();
+        $nids->value = array($argument);
+        $nids = views_break_phrase($argument, $nids);
+        if ($nids->value == -1) {
+          return FALSE;
+        }
+
+        $placeholders = implode(', ', array_fill(0, sizeof($nids->value), '%d'));
+
+        $test = drupal_map_assoc($nids->value);
+        $titles = array();
+
+        $result = db_query("SELECT * FROM {node} WHERE nid IN ($placeholders)", $nids->value);
+        while ($node = db_fetch_object($result)) {
+          if ($types && !in_array($node->type, $types)) {
+            return FALSE;
+          }
+
+          $titles[] = check_plain($node->title);
+          unset($test[$node->nid]);
+        }
+
+        $this->argument->validated_title = implode($nids->operator == 'or' ? ' + ' : ', ', $titles);
+        // If this is not empty, we did not find a nid.
+        return empty($test);
+    }
+  }
+}
+
+function og_views_set_breadcrumb($nid) {
+  $node = node_load((int)$nid);
+  $bc = array(
+    '<front>' => t('Home'),
+    "node/$nid" => check_plain($node->title),
+  );
+  return $bc;
+}
   

@@ -139,8 +139,8 @@ function og_menu() {
 
   //Membership page Uses Views
   $items['og/users/%'] = array(
-    'page callback' => 'views_page',
     'title' => 'Members', 
+    'page callback' => 'views_page',
     'page arguments' => array('og_members', 'defaults', 2), 
     'type' => MENU_CALLBACK, 
     'access' => 'og_is_group_member',
@@ -150,10 +150,10 @@ function og_menu() {
     'title' => t('List'), 
     'type' => MENU_DEFAULT_LOCAL_TASK
   );
-  $items['og/users/%node/faces'] = array(
+  $items['og/users/%/faces'] = array(
     'title' => t('Faces'), 
-    'page callback' => 'og_list_users_faces_page',
-    'page arguments' => array(2),
+    'page callback' => 'views_page',
+    'page arguments' => array('og_members_faces', 'default', 2),
     'type' => MENU_LOCAL_TASK,
     'access callback' => 'og_menu_access_picture',
     'access arguments' => array(2),
@@ -218,13 +218,8 @@ function og_menu_access_invite($node) {
   return $node->og_selective < OG_INVITE_ONLY || og_is_group_admin($node);
 }
 
-function og_menu_access_picture($group) {
-  if (og_is_picture() && og_is_group_member($group->gid)) {
-    return TRUE;
-  }
-  else {
-    return FALSE;
-  }
+function og_menu_access_picture($gid) {
+  return og_is_picture() && og_is_group_member($id) ? TRUE : FALSE;
 }
 
 /**
@@ -239,12 +234,7 @@ function og_is_group_member($gid) {
   }
   
   $groups = array_keys($user->og_groups);
-  if (user_access('administer nodes') || in_array($gid, $groups)) {
-    return TRUE;
-  }
-  else {
-    return FALSE;
-  }
+  return user_access('administer nodes') || in_array($gid, $groups) ? TRUE : FALSE;
 }
 
 /*

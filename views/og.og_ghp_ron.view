@@ -114,6 +114,7 @@ $view->display = array();
   'use_pager' => '1',
   'pager_element' => 0,
   'offset' => 0,
+  'distinct' => 0,
 );
 $view->display['default'] = $display;
   $display = new views_display;
