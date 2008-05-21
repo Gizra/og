@@ -2211,7 +2211,7 @@ function _og_mail_text($messageid, $language = NULL, $variables = array()) {
       case 'og_invite_user_body':
         return t("Hi. I'm a member of '@group' and I welcome you to join this group as well. Please see the link and message below.\n\n@group\n@description\nJoin: !group_url\n@body", $variables, $langcode);
       case 'og_request_user_subject':
-        // TODOH: test
+        // TODOH: test this membership request mail once emails are working.
         return t("Membership request for '@group' from '@username'. @request", $variables, $langcode);        
       case 'og_request_user_body':
         return t("To instantly approve this request, visit !approve_url.\nYou may deny this request or manage members at !group_url. \n\nPersonal message from @username:\n------------------\n\n@request", $variables, $langcode);       
