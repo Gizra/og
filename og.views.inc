@@ -189,8 +189,8 @@ class views_handler_filter_og_type_all extends views_handler_filter {
   function query() {
     $group_types = og_get_types('group');
     $placeholders = db_placeholders($group_types, 'varchar');
-    // todoh: use aliases properly
-    $this->query->add_where($this->options['group'], "node.type IN ($placeholders)", $group_types);
+    $table = $this->query->ensure_table('node');
+    $this->query->add_where($this->options['group'], "$table.type IN ($placeholders)", $group_types);
   }
 }
 
@@ -289,7 +289,6 @@ function og_views_data_og_ancestry() {
     ),
   );
   
-  // todoh Add setting of context
   $filterhelp = t('Filter for posts in specified organic groups. <em>Value</em> should be a one or more node ids (i.e. integers), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context (if View is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id.');
   $data['og_ancestry']['group_nid'] = array(
     'title' => t('Groups'),
@@ -306,14 +305,14 @@ function og_views_data_og_ancestry() {
       'label' => t('Group'),
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
+      'handler' => 'views_handler_filter_og_group_nid',
       'numeric' => TRUE,
       'help' => $filterhelp,
     ),
     'argument' => array(
       'name' => t('Post: in specified group (by number)'),
       'name field' => 'title', // the field to display in the summary.
-      'validate type' => 'nid', // TODOH: not sure. copied from node.nid
+      'validate type' => 'nid',
       'handler' => 'views_handler_argument_og_group_nid',
       'numeric' => TRUE,
       'help' => $filterhelp,
@@ -340,7 +339,7 @@ function og_views_data_og_ancestry() {
   // TOODL: yes_empty field
   $data['og_ancestry']['is_public'] = array(
     'title' => t('Post: Public'),
-    'help' => t('Displays <em>yes</em> if post is public according to OG.'),
+    'help' => t('Is a given post public or private according to OG.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
     ),
@@ -353,6 +352,15 @@ function og_views_data_og_ancestry() {
   );
 
   return $data;
+}
+
+class views_handler_filter_og_group_nid extends views_handler_filter_numeric {
+  function query() {
+    if ($node = og_get_group_context()) {
+      $this->value = $node->nid;
+    }
+    parent::query();
+  }
 }
 
 class views_handler_argument_og_group_nid extends views_handler_argument_many_to_one {

@@ -280,6 +280,7 @@ function og_preprocess_og_mission(&$variables) {
 function og_preprocess_node(&$variables) {
   $node = $variables['node'];
   if (og_is_group_post_type($node->type)) {
+    // TODO: _both is not present during node preview this does not work there.
     $current_groups = og_node_groups_distinguish($node->og_groups_both, FALSE);
     foreach ($current_groups['accessible'] as $gid => $item) {
       $og_links['og_'. $gid] = array('title' => $item['title'], 'href' => "node/$gid");
@@ -1329,7 +1330,6 @@ function og_group_form($node) {
       break;    
   }
   
-  // TODOH: language
   if (module_exists('locale') && $languages = locale_language_list()) {
     if (count($languages) > 1) {
       $form['locale']['og_language'] = array(
@@ -1643,11 +1643,6 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
   );
 }
 
-// TODOH: Verify Views still uses this construct.
-function og_form_views_edit_view_alter(&$form, &$form_state) {
-  $form['page-info']['url']['#description'] .= t("<p>To display a View as a tab on your Organic Groups group home pages, set the url to 'node/\$group/custom' (where <em>custom</em> is whatever you wish). Then open Page >> Menu and check <em>Provide Menu</em> and <em>Provide Menu as Tab</em>; also make the first argument in the View be the <em>OG: Group nid(s)</em> argument. The <em>\$group</em> path element is a placeholder for the group nid and it ensures that the tab <strong>only</strong> appears on OG group nodes.</p>");
-}
-
 // Add option to migrate messages before deleting a group.
 // TODOL: add option to move memberships as well
 function og_form_node_delete_confirm_alter(&$form, &$form_state) {
@@ -1786,20 +1781,15 @@ function og_node_groups_distinguish($groups_names_both, $exclude_joined = TRUE) 
  * lives in a separate function from og_form_alter() so it can be shared
  * by other OG contrib modules.
  */
- // TODOH: update FAPI. See http://drupal.org/node/144132#comment-643920
 function og_form_add_og_audience(&$form, &$form_state) {
   global $user;
   // determine the selected groups if fapi doesn't tell us.
   if ($_SERVER["REQUEST_METHOD"] == 'GET') {
     $gids = $_GET['gids'];
   }
-  elseif ($_POST['og_groups_hidden']) {
-    $gids = unserialize($_POST['og_groups_hidden']);
-  }
   
   $node = $form['#node'];
   $required = variable_get('og_audience_required', 0) && !user_access('administer nodes');
-  
   
   // Determine the list of groups that are shown.
   // Start by collecting all groups that the user is a member of.
@@ -1836,7 +1826,6 @@ function og_form_add_og_audience(&$form, &$form_state) {
       // There is code below which assumes that $options does not have optgroups but that code is within a $simple check 
       // So we are OK as long as $simple does not apply to node edits.
       // NOTE: If you form_alter the audience element, beware that it can sometimes be an optgroup.
-      
       foreach ($current_groups['accessible'] as $key => $val) {
         $other[$key] = $val['title'];
       }
@@ -1891,10 +1880,13 @@ function og_form_add_og_audience(&$form, &$form_state) {
         $titles[] = $options[$gid];
         $item_value = implode(', ', $titles);
       }
-      $form['og_nodeapi']['visible']['og_groups_visible'] = array('#type' => 'item', '#title' => t('Audience'), '#value' => $item_value);
+      $form['og_nodeapi']['visible']['og_groups_visible'] = array(
+        '#type' => 'item', 
+        '#title' => t('Audience'), 
+        '#value' => $item_value
+      );
       $assoc_groups = drupal_map_assoc($groups);
-      // this hidden element persists audience values during a Preview cycle. avoids errors on Preview.
-      $form['og_nodeapi']['invisible']['og_groups_hidden'] = array('#type' => 'hidden', '#value' => serialize($assoc_groups));
+      
       // this 'value' element persists the audience value during submit process
       $form['og_nodeapi']['invisible']['og_groups'] = array('#type' => 'value', '#value' => $assoc_groups);
     }
@@ -2082,7 +2074,7 @@ function og_mail_notify($type, $obj) {
           'List-Owner' => mime_header_encode($row->group_owner). " <$ownerurl>", 
           "List-Archive" => "<$group_home>"
         );
-        // todoh no headers?
+        // todoh no mail headers?
         drupal_mail('og', 'mail', $row->mail, $GLOBALS['language'], $variables, $from_mail);
       }
     }
@@ -2178,7 +2170,7 @@ function og_mail_output($body, $html = TRUE) {
 }
 
 /**
- * Implementation of hook_mail().
+ * Implementation of hook_mail(). TODOH: All mail bodies and subjects empty.
  */
 function og_mail($key, &$message, $params) {
   $language = $message['language'];
@@ -2970,20 +2962,4 @@ function og_readme() {
   $href = drupal_get_path('module', 'og'). '/README.txt';
   $link = "<a href=\"$base_path$href\">". t('README file'). '</a>';
   return $link;
-}
-
-/**
- * Handle '$group' in a URL.
- * TODOH: Might not be needed in Views2
- */
-function og_url_group($token, $argument, $arg) {
-  global $user;
-  if (!is_numeric($arg)) {
-    return FALSE;
-  }
-  $node = node_load($arg);
-  if (og_is_group_type($node->type)) {
-    return TRUE;
-  }
-  return FALSE;
 }
