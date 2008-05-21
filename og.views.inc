@@ -356,9 +356,8 @@ function og_views_data_og_ancestry() {
 
 class views_handler_filter_og_group_nid extends views_handler_filter_numeric {
   function query() {
-    if ($node = og_get_group_context()) {
-      $this->value = $node->nid;
-    }
+    $node = node_load((int)$this->value['value']);
+    og_set_group_context($node);
     parent::query();
   }
 }
@@ -368,13 +367,19 @@ class views_handler_argument_og_group_nid extends views_handler_argument_many_to
    * Override the behavior of title(). Get the title of the node.
    */
   function title() {
-    // TODOL: how to handle multiple arguments.
-    $title = db_result(db_query(db_rewrite_sql("SELECT n.title FROM {node} n WHERE n.nid = %d"), $this->argument));
+    $args = explode(',', $this->argument);
+    $title = db_result(db_query(db_rewrite_sql("SELECT n.title FROM {node} n WHERE n.nid = %d"), $args[0]));
     if (empty($title)) {
       return t('No title');
     }
-
     return check_plain($title);
+  }
+  
+  function query() {
+    $args = explode(',', $this->argument);
+    $node = node_load((int)$args[0]);
+    og_set_group_context($node);
+    parent::query();
   }
 }
 
