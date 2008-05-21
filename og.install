@@ -15,63 +15,63 @@ function og_schema() {
   $schema = array();
 
   $schema['og'] = array(
-    'description'     => '',
+    'description'     => 'Stores information about each group',
     'fields'          => array(
       'nid'             => array(
-        'description'     => '',
+        'description'     => 'The group\'s {node}.nid',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'selective'       => array(
-        'description'     => '',
+        'description'     => 'Determines how subscription requests are handled (open, moderated, invite only, closed).',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'description'     => array(
-        'description'     => '',
+        'description'     => 'Group description. Shows up by default on group directory.',
         'type'            => 'varchar',
         'length'          => 255,
         'not null'        => FALSE,
       ),
       'theme'           => array(
-        'description'     => '',
+        'description'     => 'The group specific theme (if any). See {system}.name.',
         'type'            => 'varchar',
         'length'          => 255,
         'not null'        => FALSE,
       ),
       'register'        => array(
-        'description'     => '',
+        'description'     => 'Should users be able to join this group from registration form.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'directory'       => array(
-        'description'     => '',
+        'description'     => 'Should this group appear in the groups directory.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'notification'    => array(
-        'description'     => '',
+        'description'     => 'Not currently used.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'language'        => array(
-        'description'     => '',
+        'description'     => 'Group specific language. See {languages}.language.',
         'type'            => 'varchar',
         'length'          => 12,
         'not null'        => TRUE,
         'default'         => '',
       ),
       'private'         => array(
-        'description'     => '',
+        'description'     => 'Is group home page private or public.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
@@ -82,56 +82,56 @@ function og_schema() {
   );
 
   $schema['og_uid'] = array(
-    'description'     => '',
+    'description'     => 'Group memberships',
     'fields'          => array(
       'nid'             => array(
-        'description'     => '',
+        'description'     => 'Group\'s {node}.nid',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'og_role'         => array(
-        'description'     => '',
+        'description'     => 'Not currently used.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'is_active'       => array(
-        'description'     => '',
+        'description'     => 'Is this membership active or pending?',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'is_admin'        => array(
-        'description'     => '',
+        'description'     => 'Is this user a group administrator',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'uid'             => array(
-        'description'     => '',
+        'description'     => 'The user for this membership. See {users}.uid.',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'mail_type'       => array(
-        'description'     => '',
+        'description'     => 'Email notification preference.',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => FALSE,
       ),
       'created'         => array(
-        'description'     => '',
+        'description'     => 'Time when this membership was created.',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => FALSE,
         'default'         => 0,
       ),
       'changed'         => array(
-        'description'     => '',
+        'description'     => 'Time when this membership was last changed.',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => FALSE,
@@ -141,16 +141,16 @@ function og_schema() {
     'primary key'       => array('nid', 'uid'),
   );
   $schema['og_uid_global']  = array(
-    'description'     => '',
+    'description'     => 'User preferences that are not group specific.',
     'fields'          => array(
       'uid'             => array(
-        'description'     => '',
+        'description'     => 'The user. See {users}.uid.',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'og_email'        => array(
-        'description'     => '',
+        'description'     => 'Notification preference for group posts (always, never, depends per group)',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
@@ -163,19 +163,19 @@ function og_schema() {
     'description'     => '',
     'fields'          => array(
       'nid'             => array(
-        'description'     => '',
+        'description'     => 'The post\'s {node}.nid.',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'group_nid'       => array(
-        'description'     => '',
+        'description'     => 'The group\'s {node}.nid',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'is_public'       => array(
-        'description'     => '',
+        'description'     => 'Is this a public or private post? This value is always the same across all groups for a given post.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
