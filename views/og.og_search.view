@@ -103,6 +103,27 @@ $view->display = array();
         'button' => 'Expose',
       ),
     ),
+    'keys' => array(
+      'id' => 'keys',
+      'table' => 'search_index',
+      'field' => 'keys',
+      'operator' => 'required',
+      'value' => '',
+      'group' => 0,
+      'exposed' => TRUE,
+      'expose' => array(
+        'operator' => '',
+        'identifier' => 'keys',
+        'label' => '',
+        'optional' => 0,
+        'single' => 1,
+        'remember' => 0,
+      ),
+      'relationship' => 'none',
+      'expose_button' => array(
+        'button' => 'Hide',
+      ),
+    ),
   ),
   'items_per_page' => 50,
   'title' => 'Search',
@@ -113,3 +134,46 @@ $view->display = array();
   'offset' => 0,
 );
 $view->display['default'] = $display;
+  $display = new views_display;
+  $display->id = 'page';
+  $display->display_title = 'Page';
+  $display->display_plugin = 'page';
+  $display->position = '2';
+  $display->display_options = array(
+  'defaults' => array(
+    'access' => TRUE,
+    'title' => TRUE,
+    'header' => TRUE,
+    'header_format' => TRUE,
+    'header_empty' => TRUE,
+    'footer' => TRUE,
+    'footer_format' => TRUE,
+    'footer_empty' => TRUE,
+    'empty' => TRUE,
+    'empty_format' => TRUE,
+    'use_ajax' => TRUE,
+    'items_per_page' => TRUE,
+    'offset' => TRUE,
+    'use_pager' => TRUE,
+    'pager_element' => TRUE,
+    'use_more' => TRUE,
+    'distinct' => TRUE,
+    'link_display' => TRUE,
+    'style_plugin' => TRUE,
+    'style_options' => TRUE,
+    'row_plugin' => TRUE,
+    'row_options' => TRUE,
+    'relationships' => TRUE,
+    'fields' => TRUE,
+    'sorts' => TRUE,
+    'arguments' => TRUE,
+    'filters' => TRUE,
+  ),
+  'relationships' => array(),
+  'fields' => array(),
+  'sorts' => array(),
+  'arguments' => array(),
+  'filters' => array(),
+  'path' => 'og/search',
+);
+$view->display['page'] = $display;

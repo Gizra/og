@@ -260,7 +260,6 @@ function og_preprocess_og_mission(&$variables) {
   $variables['mission'] = $variables['form']['#value'];
 }
 
-
 /**
  * Enrich non group nodes with the list og groups that the node belongs to.
  * 
@@ -2770,22 +2769,28 @@ function og_og_create_links($group) {
   return $links ? $links : array();
 }
 
-function og_search_form($group) {
-  $form['filter0'] = array(
+function og_search_form($form_state, $group) {
+  $form_state['keys'] = array(
     '#type' => 'textfield',
     '#title' => '',
     '#description' => '',
     '#size' => 19,
     '#maxlength' => 255,
   );
-  $form['submit'] = array(
+  $form_state['submit'] = array(
     '#type' => 'submit', 
     '#value' => t('Search'),
   );
-  $form['#process'] = array('views_filters_process' => array());
-  $form['#method'] = 'get';
-  $form['#action'] = url("og/search/$group->nid");
-  return $form;
+  $form_state['#pre_render'][] = 'og_search_form_pre_render';
+  $form_state['#method'] = 'get';
+  $form_state['#action'] = url("og/search/$group->nid");
+  return $form_state;
+}
+
+// Clean up query string like Views does.
+function og_search_form_pre_render($form_state) {
+  unset($form_state['form_build_id'], $form_state['form_token'], $form_state['form_id']);
+  return $form_state;
 }
 
 function og_is_picture() {
