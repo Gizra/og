@@ -478,6 +478,7 @@ function og_email_form_submit($form, &$form_state) {
 
   $variables = array(
     '@group' => $node->title,
+    '@subject' => $form_state['values']['subject'],
     '@body' => $form_state['values']['body'],
     '@site' => variable_get('site_name', 'drupal'),
     '!url_group' => url("node/$node->nid", array('absolute' => TRUE)),
@@ -2135,32 +2136,33 @@ function _og_mail_text($messageid, $language = NULL, $variables = array()) {
   // No override, return with default strings.
   else {
     switch ($messageid) {
-      case 'og_new_node_subject':
+      case 'new_node_subject':
         return t("@group: '@title' at @site", $variables, $langcode);
-      case 'og_new_node_body':
+      case 'new_node_body':
         return t("@type '@subject' by @username\n\n@node_teaser\n\n!read_more: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed from the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables, $langcode);    
-      case 'og_admin_email_body':
+      case 'admin_email_subject':
+        return $variables['@subject'];
+      case 'admin_email_body':
         return t("@body\n\n--\nThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe", $variables, $langcode);
-      case 'og_approve_user_subject':
+      case 'approve_user_subject':
         return t("Membership request approved for '@title'", $variables, $langcode);
-      case 'og_approve_user_body':
+      case 'approve_user_body':
         return t("You may now post messages in this group located at !group_url", $variables, $langcode);
-      case 'og_deny_user_subject':
+      case 'deny_user_subject':
         return t("Membership request denied for '@title'", $variables, $langcode);
-      case 'og_deny_user_body':
+      case 'deny_user_body':
         return t("Sorry, your membership request was denied.", $variables, $langcode);
-      case 'og_invite_user_subject':
+      case 'invite_user_subject':
         return t("Invitation to join the group '@group' at @site", $variables, $langcode);
-      case 'og_invite_user_body':
+      case 'invite_user_body':
         return t("Hi. I'm a member of '@group' and I welcome you to join this group as well. Please see the link and message below.\n\n@group\n@description\nJoin: !group_url\n@body", $variables, $langcode);
-      case 'og_request_user_subject':
-        // TODOH: test this membership request mail once emails are working.
-        return t("Membership request for '@group' from '@username'. @request", $variables, $langcode);        
-      case 'og_request_user_body':
+      case 'request_user_subject':
+        return t("Membership request for '@group' from '@username'", $variables, $langcode);        
+      case 'request_user_body':
         return t("To instantly approve this request, visit !approve_url.\nYou may deny this request or manage members at !group_url. \n\nPersonal message from @username:\n------------------\n\n@request", $variables, $langcode);       
-      case 'og_new_admin_subject':
+      case 'new_admin_subject':
         return t("You are now an administrator for the group '@group'", $variables, $langcode);        
-      case 'og_new_admin_body':
+      case 'new_admin_body':
         return t("@username, you are now an administrator for the group '@group'.\n\nYou can administer this group by logging in here:\n !group_url", $variables, $langcode);       
     }
   }
