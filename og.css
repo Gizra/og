@@ -26,28 +26,22 @@
   display: inline;
 }
 
-table.og-picture-grid {
-  width: 100%;
-}
-
-table.og-picture-grid td {
-  text-align: center;
-  width: 20%;
-  padding: 7px 0 7px 0;
+.view-id-og_members_faces table td, .view-id-og_members_block {
   border-top: #CCCCCC 1px dotted;
-}
-
-table.og-picture-grid td.first {
-  border-top: none;
-}
-
-td.og-picture-grid-item {
   text-align: center;
   vertical-align: bottom;
 }
 
-td.og-picture-grid-item .group-role {
-  font-style: italic;
+.view-id-og_members_faces tr.row-first td {
+  border-top: none;
 }
 
+.view-id-og_members_faces div.picture, .view-id-og_members_block div.picture {
+  float: none;
+}
+
+/*.view-id-og_members_faces td .group-role {
+  font-style: italic;
+}
+*/
 
