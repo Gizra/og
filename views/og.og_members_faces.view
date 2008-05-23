@@ -118,6 +118,8 @@ $view->display = array();
       'validate_argument_php' => '',
       'require_value' => 0,
       'reduce_duplicates' => 0,
+      'validate_argument_is_member' => 1,
+      'not' => 0,
     ),
   ),
   'filters' => array(
@@ -164,5 +166,6 @@ $view->display = array();
   'empty_format' => '1',
   'distinct' => 0,
   'use_ajax' => '1',
+  'title' => 'Group faces',
 );
 $view->display['default'] = $display;

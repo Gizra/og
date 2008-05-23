@@ -785,10 +785,17 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
       '#process' => array('views_process_dependency'),
       '#dependency' => array('edit-options-validate-type' => array($this->id)),
     );
+    
+    $form['validate_argument_is_member'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Validate current user is a member of a specified group'),
+      '#default_value' => !empty($this->argument->options['validate_argument_is_member']),
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array('edit-options-validate-type' => array($this->id)),
+    );
   }
 
   function validate_argument($argument) {
-    // TODOH: check
     $types = og_get_types('group');
 
     $type = isset($this->argument->options['validate_argument_nid_type']) ? $this->argument->options['validate_argument_nid_type'] : 'nid';
@@ -805,6 +812,12 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
 
         if (!og_is_group_type($node->type)) {
           return FALSE;
+        }
+        
+        if (!empty($this->argument->options['validate_argument_is_member'])) {
+          if (!og_is_group_member($node->nid)) {
+            return FALSE;
+          }
         }
 
         // Save the title() handlers some work.
@@ -826,13 +839,24 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
 
         $placeholders = implode(', ', array_fill(0, sizeof($nids->value), '%d'));
 
-        $test = drupal_map_assoc($nids->value);
+        $test_types = drupal_map_assoc($nids->value);
+        $has_membership = FALSE;
         $titles = array();
 
         $result = db_query("SELECT * FROM {node} WHERE nid IN ($placeholders)", $nids->value);
         while ($node = db_fetch_object($result)) {
           if ($types && !in_array($node->type, $types)) {
             return FALSE;
+          }
+          
+          if (!empty($this->argument->options['validate_argument_is_member'])) {
+            // If user is a member of any of the specified groups, then she has access.
+            if (!$has_membership && og_is_group_member($node->nid)) {
+              $has_membership = TRUE;
+            }
+          }
+          else {
+            $has_membership = TRUE;
           }
 
           $titles[] = check_plain($node->title);
@@ -841,7 +865,7 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
 
         $this->argument->validated_title = implode($nids->operator == 'or' ? ' + ' : ', ', $titles);
         // If this is not empty, we did not find a nid.
-        return empty($test);
+        return empty($test) && $has_membership;
     }
   }
 }

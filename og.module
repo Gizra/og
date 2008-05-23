@@ -139,19 +139,7 @@ function og_menu() {
     'weight' => -5,
   );
 
-  //Membership page Uses Views
-  $items['og/users/%'] = array(
-    'title' => 'Members', 
-    'page callback' => 'views_page',
-    'page arguments' => array('og_members', 'default', 2), 
-    'type' => MENU_CALLBACK, 
-    'access callback' => 'og_is_group_member',
-    'access arguments' => array(2),
-  );
-  $items['og/users/%/list'] = array(
-    'title' => t('List'), 
-    'type' => MENU_DEFAULT_LOCAL_TASK
-  );
+  // This exists because I can't easily restrict access based on pictures_enabled using Views.
   $items['og/users/%/faces'] = array(
     'title' => t('Faces'), 
     'page callback' => 'views_page',
@@ -1905,7 +1893,7 @@ function og_comment($comment, $op) {
  * @return
  *   none
  */
- // TODOH: og_mail and subfunctions.
+ // TODOH: move to Notifications framework.
 function og_mail_notify($type, $obj) {
   if ($type == 'comment') {
     if (!is_object($obj)) {
@@ -2009,7 +1997,7 @@ function og_mail_notify($type, $obj) {
       $last_mail = $row->mail;
       
       // New for D6. See http://drupal.org/node/114774#node_access_account
-      // TODOH: check if this blocks comments properly.
+      // TODO: check if this blocks comments properly.
       if (node_access('view', $obj, user_load($row->uid))) {
         // Append these group specific variables.
         $variables['@group'] = $row->group_name;
@@ -2025,7 +2013,7 @@ function og_mail_notify($type, $obj) {
           'List-Owner' => mime_header_encode($row->group_owner). " <$ownerurl>", 
           "List-Archive" => "<$group_home>"
         );
-        // todoh no mail headers?
+        // todo no mail headers?
         drupal_mail('og', 'mail', $row->mail, $GLOBALS['language'], $variables, $from_mail);
       }
     }
@@ -2121,7 +2109,7 @@ function og_mail_output($body, $html = TRUE) {
 }
 
 /**
- * Implementation of hook_mail(). TODOH: All mail bodies and subjects empty.
+ * Implementation of hook_mail().
  */
 function og_mail($key, &$message, $params) {
   $language = $message['language'];
