@@ -1,0 +1,291 @@
+<?php
+// $Id$
+
+$view = new view;
+$view->name = 'og_members_block';
+$view->description = 'Member listing block';
+$view->tag = 'og';
+$view->view_php = '';
+$view->base_table = 'users';
+$view->is_cacheable = '0';
+$view->api_version = 2;
+$view->disabled = FALSE; // Edit this to true to make a default view disabled initially
+$view->display = array();
+  $display = new views_display;
+  $display->id = 'default';
+  $display->display_title = 'Defaults';
+  $display->display_plugin = 'default';
+  $display->position = '1';
+  $display->display_options = array(
+  'style_plugin' => 'table',
+  'style_options' => array(
+    'override' => 0,
+    'order' => 'asc',
+    'columns' => array(
+      'name' => 'name',
+      'is_admin' => 'name',
+      'picture' => 'name',
+    ),
+    'info' => array(
+      'name' => array(
+        'sortable' => 0,
+        'separator' => '&nbsp;',
+      ),
+      'is_admin' => array(
+        'sortable' => 0,
+        'separator' => '',
+      ),
+      'picture' => array(
+        'sortable' => 0,
+        'separator' => '',
+      ),
+    ),
+    'default' => '-1',
+  ),
+  'row_plugin' => 'fields',
+  'row_options' => array(),
+  'relationships' => array(
+    'nid' => array(
+      'id' => 'nid',
+      'table' => 'og_uid',
+      'field' => 'nid',
+      'label' => 'Group',
+      'required' => 0,
+      'relationship' => 'none',
+    ),
+  ),
+  'fields' => array(
+    'picture' => array(
+      'id' => 'picture',
+      'table' => 'users',
+      'field' => 'picture',
+      'label' => '',
+      'relationship' => 'none',
+    ),
+    'name' => array(
+      'id' => 'name',
+      'table' => 'users',
+      'field' => 'name',
+      'label' => '',
+      'link_to_user' => 1,
+      'relationship' => 'none',
+    ),
+    'is_admin' => array(
+      'id' => 'is_admin',
+      'table' => 'og_uid',
+      'field' => 'is_admin',
+      'label' => '',
+      'relationship' => 'none',
+    ),
+  ),
+  'sorts' => array(
+    'created' => array(
+      'id' => 'created',
+      'table' => 'og_uid',
+      'field' => 'created',
+      'order' => 'DESC',
+      'granularity' => 'second',
+      'relationship' => 'none',
+    ),
+  ),
+  'arguments' => array(
+    'nid' => array(
+      'id' => 'nid',
+      'table' => 'og_uid',
+      'field' => 'nid',
+      'default_action' => 'default',
+      'style_plugin' => 'default_summary',
+      'style_options' => array(
+        'count' => TRUE,
+        'override' => FALSE,
+        'items_per_page' => 25,
+      ),
+      'wildcard' => 'all',
+      'wildcard_substitution' => 'All',
+      'title' => 'Members of %1',
+      'default_argument_type' => 'php',
+      'default_argument' => '',
+      'validate_type' => 'none',
+      'validate_fail' => 'not found',
+      'break_phrase' => FALSE,
+      'add_table' => 0,
+      'relationship' => 'none',
+      'default_argument_fixed' => '39',
+      'default_argument_php' => 'if ($node = og_get_group_context()) {
+        return $node->nid;
+      }
+      else {
+        return NULL;
+      }',
+      'validate_argument_node_type' => array(
+        'blog' => 0,
+        'poll' => 0,
+        'book' => 0,
+        'group1' => 0,
+        'group2' => 0,
+        'page' => 0,
+        'story' => 0,
+      ),
+      'validate_argument_php' => '',
+      'require_value' => 0,
+      'reduce_duplicates' => 0,
+      'validate_argument_vocabulary' => array(
+        '1' => 0,
+        '2' => 0,
+        '3' => 0,
+        '4' => 0,
+      ),
+      'validate_argument_type' => 'tid',
+    ),
+  ),
+  'filters' => array(
+    'status' => array(
+      'id' => 'status',
+      'table' => 'users',
+      'field' => 'status',
+      'operator' => '=',
+      'value' => 1,
+      'group' => 0,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
+        'label' => '',
+      ),
+      'relationship' => 'none',
+      'expose_button' => array(
+        'button' => 'Expose',
+      ),
+    ),
+    'is_active' => array(
+      'id' => 'is_active',
+      'table' => 'og_uid',
+      'field' => 'is_active',
+      'operator' => '=',
+      'value' => 1,
+      'group' => 0,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
+        'label' => '',
+      ),
+      'relationship' => 'none',
+      'expose_button' => array(
+        'button' => 'Expose',
+      ),
+    ),
+    'is_admin' => array(
+      'id' => 'is_admin',
+      'table' => 'og_uid',
+      'field' => 'is_admin',
+      'operator' => 'in',
+      'value' => array(
+        '0' => '0',
+        '1' => '1',
+      ),
+      'group' => 0,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
+        'label' => '',
+      ),
+      'relationship' => 'none',
+      'expose_button' => array(
+        'button' => 'Expose',
+      ),
+    ),
+  ),
+  'items_per_page' => 90,
+  'use_pager' => '1',
+  'pager_element' => 0,
+  'offset' => 0,
+  'empty' => '',
+  'empty_format' => '1',
+  'title' => 'Recent members',
+);
+$view->display['default'] = $display;
+  $display = new views_display;
+  $display->id = 'block';
+  $display->display_title = 'Block Admins';
+  $display->display_plugin = 'block';
+  $display->position = '2';
+  $display->display_options = array(
+  'defaults' => array(
+    'access' => TRUE,
+    'title' => TRUE,
+    'header' => TRUE,
+    'header_format' => TRUE,
+    'header_empty' => TRUE,
+    'footer' => TRUE,
+    'footer_format' => TRUE,
+    'footer_empty' => TRUE,
+    'empty' => TRUE,
+    'empty_format' => TRUE,
+    'use_ajax' => TRUE,
+    'items_per_page' => TRUE,
+    'offset' => TRUE,
+    'use_pager' => TRUE,
+    'pager_element' => TRUE,
+    'use_more' => TRUE,
+    'distinct' => TRUE,
+    'link_display' => TRUE,
+    'style_plugin' => TRUE,
+    'style_options' => TRUE,
+    'row_plugin' => TRUE,
+    'row_options' => TRUE,
+    'relationships' => TRUE,
+    'fields' => TRUE,
+    'sorts' => TRUE,
+    'arguments' => TRUE,
+    'filters' => TRUE,
+  ),
+  'relationships' => array(),
+  'fields' => array(),
+  'sorts' => array(),
+  'arguments' => array(),
+  'filters' => array(),
+  'block_description' => 'Group admins',
+);
+$view->display['block'] = $display;
+  $display = new views_display;
+  $display->id = 'block_1';
+  $display->display_title = 'Block Admins, Members';
+  $display->display_plugin = 'block';
+  $display->position = '3';
+  $display->display_options = array(
+  'defaults' => array(
+    'access' => TRUE,
+    'title' => TRUE,
+    'header' => TRUE,
+    'header_format' => TRUE,
+    'header_empty' => TRUE,
+    'footer' => TRUE,
+    'footer_format' => TRUE,
+    'footer_empty' => TRUE,
+    'empty' => TRUE,
+    'empty_format' => TRUE,
+    'use_ajax' => TRUE,
+    'items_per_page' => TRUE,
+    'offset' => TRUE,
+    'use_pager' => TRUE,
+    'pager_element' => TRUE,
+    'use_more' => TRUE,
+    'distinct' => TRUE,
+    'link_display' => TRUE,
+    'style_plugin' => TRUE,
+    'style_options' => TRUE,
+    'row_plugin' => TRUE,
+    'row_options' => TRUE,
+    'relationships' => TRUE,
+    'fields' => TRUE,
+    'sorts' => TRUE,
+    'arguments' => TRUE,
+    'filters' => TRUE,
+  ),
+  'relationships' => array(),
+  'fields' => array(),
+  'sorts' => array(),
+  'arguments' => array(),
+  'filters' => array(),
+  'block_description' => 'Group members',
+);
+$view->display['block_1'] = $display;
