@@ -731,8 +731,9 @@ class views_handler_field_og_managelink extends views_handler_field {
         return l(t('remove'), "og/unsubscribe/$nid/$uid", array('query' => drupal_get_destination()));
       }
       else {
-        $approve = l(t('approve'), "og/approve/$nid/$uid", array('query' => drupal_get_destination()));
-        $deny = l(t('deny'), "og/deny/$nid/$uid", array('query' => drupal_get_destination()));
+        $token = og_get_token($nid);
+        $approve = l(t('approve'), "og/approve/$nid/$uid/$token", array('query' => drupal_get_destination()));
+        $deny = l(t('deny'), "og/deny/$nid/$uid/$token", array('query' => drupal_get_destination()));
         return t('Request: !a or !d', array('!a' => $approve, '!d' => $deny));
       }
     }

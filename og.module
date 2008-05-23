@@ -61,16 +61,18 @@ function og_menu() {
     'title' => 'Leave group',
   );
   
-  $items['og/approve/%node'] = array(
+  $items['og/approve/%node/%user/%'] = array(
     'type' => MENU_CALLBACK, 
-    'page callback' => 'og_approve', 
+    'page callback' => 'og_approve',
+    'page arguments' => array(2, 3, 4),
     'access callback' => 'og_is_group_admin', 
     'access arguments' => array(2),
     'title' => 'Approve membership request'
   ); 
-  $items['og/deny/%node'] = array(
+  $items['og/deny/%node/%user/%'] = array(
     'type' => MENU_CALLBACK, 
-    'page callback' => 'og_deny', 
+    'page callback' => 'og_deny',
+    'page arguments' => array(2, 3, 4),
     'access callback' => 'og_is_group_admin', 
     'access arguments' => array(2),
     'title' => 'Deny membership request',
@@ -141,9 +143,9 @@ function og_menu() {
   $items['og/users/%'] = array(
     'title' => 'Members', 
     'page callback' => 'views_page',
-    'page arguments' => array('og_members', 'defaults', 2), 
+    'page arguments' => array('og_members', 'default', 2), 
     'type' => MENU_CALLBACK, 
-    'access' => 'og_is_group_member',
+    'access callback' => 'og_is_group_member',
     'access arguments' => array(2),
   );
   $items['og/users/%/list'] = array(
@@ -219,7 +221,7 @@ function og_menu_access_invite($node) {
 }
 
 function og_menu_access_picture($gid) {
-  return og_is_picture() && og_is_group_member($id) ? TRUE : FALSE;
+  return og_is_picture() && og_is_group_member($gid) ? TRUE : FALSE;
 }
 
 /**
@@ -615,18 +617,19 @@ function og_delete_subscription($gid, $uid){
   module_invoke_all('og', 'user delete', $gid, $uid, array());
 }
 
-function og_approve($gid, $uid) {
-  $account = user_load(array('uid' => (int)$uid));
-  if ($account === FALSE) {
-   drupal_set_message(t("User approval failed, user no longer available on website."), 'error');
-   return '';
+function og_approve($node, $account, $token) {
+  if (!og_check_token($token, $node->nid)) {
+    drupal_set_message(t('Bad token. You seem to have followed an invalid link.'), 'error');
+    drupal_access_denied();
+    return;
   }
+  
   if (in_array($node->nid, array_keys($account->og_groups))) {
     drupal_set_message(t("!name already approved to group %group", array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
     return '';
   }
   else {
-    og_save_subscription($node->nid, $uid, array('is_active' => 1));
+    og_save_subscription($node->nid, $account->uid, array('is_active' => 1));
     drupal_set_message(t('Membership request approved.'));
          
     $variables = array(
@@ -634,14 +637,19 @@ function og_approve($gid, $uid) {
        '!group_url'=> url("node/$node->nid", array('absolute' => TRUE))
     );     
     
-    $account = user_load(array('uid' => $uid));
+    $account = user_load(array('uid' => $account->uid));
     drupal_mail('og', 'approve_user', $account->mail, $GLOBALS['language'], $variables);
-    return "node/$node->nid";
+    drupal_goto("node/$node->nid");
   }
 }
 
-function og_deny($node, $uid) {
-  og_delete_subscription($node->nid, $uid);
+function og_deny($node, $account, $token) {
+  if (!og_check_token($token, $node->nid)) {
+    drupal_set_message(t('Bad token. You seem to have followed an invalid link.'), 'error');
+    drupal_access_denied();
+    return;
+  }
+  og_delete_subscription($node->nid, $account->uid);
   drupal_set_message(t('Membership request denied.'));
   
   $variables = array(
@@ -649,9 +657,9 @@ function og_deny($node, $uid) {
     '!group_url' => url("node/$node->nid", array('absolute' => TRUE))
   );
   
-  $account = user_load(array('uid' => $uid));
+  $account = user_load(array('uid' => $account->uid));
   drupal_mail('og', 'deny_user', $account->mail, $GLOBALS['language'], $variables);
-  return "node/$node->nid";
+  drupal_goto("node/$node->nid");
 }
 
 /**
@@ -2910,4 +2918,18 @@ function og_readme() {
   $href = drupal_get_path('module', 'og'). '/README.txt';
   $link = "<a href=\"$base_path$href\">". t('README file'). '</a>';
   return $link;
+}
+
+/**
+ * Get a private token used to protect links from spoofing - CSRF.
+ */
+function og_get_token($nid) {
+  return drupal_get_token($nid);
+}
+
+/**
+ * Check to see if a token value matches the specified node.
+ */
+function og_check_token($token, $seed) {
+  return drupal_get_token($seed) == $token;
 }

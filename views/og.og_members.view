@@ -16,14 +16,12 @@ $view->display = array();
   $display->display_title = 'Defaults';
   $display->display_plugin = 'default';
   $display->position = '1';
-  $display->display_options = array (
+  $display->display_options = array(
   'style_plugin' => 'table',
-  'style_options' => 
-  array (
+  'style_options' => array(
     'override' => 0,
     'order' => 'asc',
-    'columns' => 
-    array (
+    'columns' => array(
       'name' => 'name',
       'managelink' => 'managelink',
       'managelinkadmin' => 'managelinkadmin',
@@ -31,32 +29,25 @@ $view->display = array();
       'is_admin' => 'name',
       'is_active' => 'name',
     ),
-    'info' => 
-    array (
-      'name' => 
-      array (
+    'info' => array(
+      'name' => array(
         'sortable' => 0,
         'separator' => '&nbsp;',
       ),
-      'managelink' => 
-      array (
+      'managelink' => array(
         'separator' => '',
       ),
-      'managelinkadmin' => 
-      array (
+      'managelinkadmin' => array(
         'separator' => '',
       ),
-      'is_manager' => 
-      array (
+      'is_manager' => array(
         'separator' => '',
       ),
-      'is_admin' => 
-      array (
+      'is_admin' => array(
         'sortable' => 0,
         'separator' => '',
       ),
-      'is_active' => 
-      array (
+      'is_active' => array(
         'sortable' => 0,
         'separator' => '',
       ),
@@ -64,13 +55,9 @@ $view->display = array();
     'default' => '-1',
   ),
   'row_plugin' => 'fields',
-  'row_options' => 
-  array (
-  ),
-  'relationships' => 
-  array (
-    'nid' => 
-    array (
+  'row_options' => array(),
+  'relationships' => array(
+    'nid' => array(
       'id' => 'nid',
       'table' => 'og_uid',
       'field' => 'nid',
@@ -79,10 +66,8 @@ $view->display = array();
       'relationship' => 'none',
     ),
   ),
-  'fields' => 
-  array (
-    'name' => 
-    array (
+  'fields' => array(
+    'name' => array(
       'id' => 'name',
       'table' => 'users',
       'field' => 'name',
@@ -90,40 +75,35 @@ $view->display = array();
       'link_to_user' => 1,
       'relationship' => 'none',
     ),
-    'managelink' => 
-    array (
+    'managelink' => array(
       'id' => 'managelink',
       'table' => 'og_uid',
       'field' => 'managelink',
       'label' => 'Manage',
       'relationship' => 'none',
     ),
-    'managelinkadmin' => 
-    array (
+    'managelinkadmin' => array(
       'id' => 'managelinkadmin',
       'table' => 'og_uid',
       'field' => 'managelinkadmin',
       'label' => 'Admin',
       'relationship' => 'none',
     ),
-    'is_manager' => 
-    array (
+    'is_manager' => array(
       'id' => 'is_manager',
       'table' => 'og_uid',
       'field' => 'is_manager',
       'label' => '',
       'relationship' => 'none',
     ),
-    'is_admin' => 
-    array (
+    'is_admin' => array(
       'id' => 'is_admin',
       'table' => 'og_uid',
       'field' => 'is_admin',
       'label' => '',
       'relationship' => 'none',
     ),
-    'is_active' => 
-    array (
+    'is_active' => array(
       'id' => 'is_active',
       'table' => 'og_uid',
       'field' => 'is_active',
@@ -131,26 +111,22 @@ $view->display = array();
       'relationship' => 'none',
     ),
   ),
-  'sorts' => 
-  array (
-    'is_admin' => 
-    array (
+  'sorts' => array(
+    'is_admin' => array(
       'id' => 'is_admin',
       'table' => 'og_uid',
       'field' => 'is_admin',
       'order' => 'DESC',
       'relationship' => 'none',
     ),
-    'is_active' => 
-    array (
+    'is_active' => array(
       'id' => 'is_active',
       'table' => 'og_uid',
       'field' => 'is_active',
       'order' => 'ASC',
       'relationship' => 'none',
     ),
-    'name' => 
-    array (
+    'name' => array(
       'id' => 'name',
       'table' => 'users',
       'field' => 'name',
@@ -158,19 +134,16 @@ $view->display = array();
       'relationship' => 'none',
     ),
   ),
-  'arguments' => 
-  array (
-    'nid' => 
-    array (
+  'arguments' => array(
+    'nid' => array(
       'id' => 'nid',
       'table' => 'og_uid',
       'field' => 'nid',
       'default_action' => 'not found',
       'style_plugin' => 'default_summary',
-      'style_options' => 
-      array (
-        'count' => true,
-        'override' => false,
+      'style_options' => array(
+        'count' => TRUE,
+        'override' => FALSE,
         'items_per_page' => 25,
       ),
       'wildcard' => 'all',
@@ -178,15 +151,14 @@ $view->display = array();
       'title' => 'Members of %1',
       'default_argument_type' => 'fixed',
       'default_argument' => '',
-      'validate_type' => 'node',
+      'validate_type' => 'og_group_types',
       'validate_fail' => 'not found',
-      'break_phrase' => false,
+      'break_phrase' => 0,
       'add_table' => 0,
       'relationship' => 'none',
       'default_argument_fixed' => '',
       'default_argument_php' => '',
-      'validate_argument_node_type' => 
-      array (
+      'validate_argument_node_type' => array(
         'blog' => 0,
         'poll' => 0,
         'book' => 0,
@@ -198,27 +170,34 @@ $view->display = array();
       'validate_argument_php' => '',
       'require_value' => 0,
       'reduce_duplicates' => 0,
+      'default_argument_user' => 0,
+      'validate_argument_node_access' => 0,
+      'validate_argument_nid_type' => 'nid',
+      'validate_argument_vocabulary' => array(
+        '1' => 0,
+        '2' => 0,
+        '3' => 0,
+        '4' => 0,
+      ),
+      'validate_argument_type' => 'tid',
+      'not' => 0,
     ),
   ),
-  'filters' => 
-  array (
-    'status' => 
-    array (
+  'filters' => array(
+    'status' => array(
       'id' => 'status',
       'table' => 'users',
       'field' => 'status',
       'operator' => '=',
       'value' => 1,
       'group' => 0,
-      'exposed' => false,
-      'expose' => 
-      array (
-        'operator' => false,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
         'label' => '',
       ),
       'relationship' => 'none',
-      'expose_button' => 
-      array (
+      'expose_button' => array(
         'button' => 'Expose',
       ),
     ),
