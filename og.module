@@ -2416,7 +2416,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     $blocks[2]['cache'] = BLOCK_NO_CACHE;
     
     $blocks[3]['info'] = t('New groups');
-    $blocks[3]['cache'] = BLOCK_CACHE_GLOBAL;
+    $blocks[3]['cache'] = BLOCK_CACHE_PER_USER;
     
     // Now provided by og_views. Please don't reuse this number 4
     // $blocks[4]['info'] = t('My groups');
@@ -2429,8 +2429,10 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     
     // Auto-enable the group blocks for fresh installations.
     $blocks[0]['status'] = 1;
+    $blocks[0]['region'] = 'left';
     $blocks[0]['weight'] = -2;
     $blocks[5]['status'] = 1;
+    $blocks[0]['region'] = 'left';
     $blocks[5]['weight'] = -1;
     return $blocks;
   }
