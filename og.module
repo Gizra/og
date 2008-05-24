@@ -1333,7 +1333,7 @@ function og_devel_generate(&$node) {
     $node->og_directory = rand(0,1);
     $node->og_private = rand(0,1); // Ignored if og_access not installed.
     $node->og_description = devel_create_greeking(rand(1, 20), TRUE);
-    $node->og_selective = rand(0,1);
+    $node->og_selective = rand(0,3);
     
     if (module_exists('locale') && $languages = locale_language_list()) {
       if (count($languages) > 1) {
