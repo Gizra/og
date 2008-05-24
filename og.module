@@ -1267,7 +1267,7 @@ function og_group_form($node) {
   
   if (module_exists('locale') && $languages = locale_language_list()) {
     if (count($languages) > 1) {
-      $form['locale']['og_language'] = array(
+      $form['og_language'] = array(
         '#type' => 'radios',
         '#title' => t('Language'),
         '#default_value' => $node->og_language,
@@ -1303,7 +1303,7 @@ function og_get_node_groups_result($nid) {
   return db_query($sql, $nid);
 }
 
-function og_pre_save_group(&$node) {
+function og_presave_group(&$node) {
   if (!empty($node->og_groups_inaccessible)) {
     // Add the inaccessible groups which did not show in Audience selector
     $node->og_groups = (array)$node->og_groups + $node->og_groups_inaccessible;
@@ -1319,7 +1319,38 @@ function og_pre_save_group(&$node) {
     $node->og_groups = array_filter($node->og_groups);
     $node->og_groups = array_keys($node->og_groups);
   }
+  
+  // Support devel module's bulk node generation.
+  // Affiliate up group posts with a group. Also populate special group fields.
+  if ($node->devel_generate) {
+    og_devel_generate($node);
+  }
+}
 
+function og_devel_generate(&$node) {
+  if (og_is_group_type($node->type)) {
+    $node->og_register = rand(0,1);
+    $node->og_directory = rand(0,1);
+    $node->og_private = rand(0,1); // Ignored if og_access not installed.
+    $node->og_description = devel_create_greeking(rand(1, 20), TRUE);
+    $node->og_selective = rand(0,1);
+    
+    if (module_exists('locale') && $languages = locale_language_list()) {
+      if (count($languages) > 1) {
+        $node->og_language = array_rand($languages);
+      }
+    }      
+  }
+  elseif (og_is_group_post_type($node->type)) {
+    $types = og_get_types('group');
+    $placeholders = db_placeholders($types, 'varchar');
+    $sql = "SELECT nid FROM {node} WHERE type IN ($placeholders) AND status = 1 ORDER BY RAND()"; 
+    $result = db_query_range($sql, $types, 0, rand(1,4));
+    while ($row = db_fetch_object($result)) {
+      $node->og_groups[] = $row->nid;
+    }
+    $node->og_public = rand(0,1); // Ignored if og_access not installed.
+  }
 }
 
 function og_load_group(&$node) {
@@ -1410,8 +1441,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         
       }
       break;
-    case 'pre_save':
-        og_pre_save_group($node);
+    case 'presave':
+      og_presave_group($node);
       break;
     case 'delete':
       $sql = "DELETE FROM {og} WHERE nid = %d";
@@ -1756,7 +1787,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
   else {
     // Classify those groups which the node already has but the author does not.
     $current_groups = og_node_groups_distinguish($node->og_groups_both);
-    // Put inaccessible groups in the $form so that they can persist. See og_pre_save_group() and og_access_alter_nongroup_form() in og_access.module
+    // Put inaccessible groups in the $form so that they can persist. See og_presave_group() and og_access_alter_nongroup_form() in og_access.module
     $form['og_invisible']['og_groups_inaccessible'] = array('#type' => 'value', '#value' => $current_groups['inaccessible']);
     
     // Add the accessible groups that they node already belongs to.
