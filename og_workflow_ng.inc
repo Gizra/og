@@ -16,6 +16,12 @@ function og_event_info() {
       '#module' => t('OG'),
       '#arguments' => og_workflow_ng_events_hook_og_arguments(),
     ),
+    'og_user_approved' => array(
+      '#label' => t('User approved to group by admin'),
+      '#module' => t('OG'),
+      '#description' => t('A pending member is approved by a group administrator.'),
+      '#arguments' => og_workflow_ng_events_hook_og_arguments(),
+    ),
     'og_user_delete' => array(
       '#label' => t('User leaves group'),
       '#module' => t('OG'),
@@ -57,8 +63,12 @@ function og_workflow_ng_events_argument_og_node($uid, $gid) {
  * Implementation of hook_og()
  */
 function og_og($op, $gid, $uid, $args){
-  if (in_array($op, array('user insert', 'user delete'))) { 	
+  if (in_array($op, array('user insert', 'user delete'))) {   
     $op = str_replace(' ', '_', $op);    
     workflow_ng_invoke_event('og_'. $op, $uid, $gid);   
+  }
+  // Pending member was approved.
+  elseif ($op = 'user update' && $args['is_active']) {
+    workflow_ng_invoke_event('og_user_approved', $uid, $gid);
   }
 }
