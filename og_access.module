@@ -17,7 +17,7 @@ function og_access_menu($may_cache) {
   if ($may_cache) {
     $items[] = array(
       'path' => 'admin/og/og_access',
-      'title' => t('Organic Groups Access configuration'),
+      'title' => t('Organic groups access configuration'),
       'description' => t('Choose whether new groups should be private or public'),
       'callback' => 'drupal_get_form',
       'callback arguments' => array('og_access_settings'),
@@ -30,8 +30,8 @@ function og_access_menu($may_cache) {
 function og_access_settings() {
   drupal_add_js(drupal_get_path('module', 'og_access'). '/og_access.js'); // load the form javascript to handle private groups / node visibility conflicts in the og access settings form.
   
-  $options = array(t('Visible only within the targeted groups'), t('Visible within the targeted groups and on other pages'), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pub.', array('@pub' => t('Public'))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pri.', array('@pri' => t('Private'))));
-  $form['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.  If the setting you want is disabled here, check the settings under <em>Private Groups</em> setting below.  You cannot set node visibility to always be public if private groups are set to always on and vice versa.', array('@pub' => t('Public'))), '#options' => $options);
+  $options = array(t('Visible only within the targeted groups.'), t('Visible within the targeted groups and on other pages.'), t('Visibility chosen by author/editor using a checkbox on the posting form.') .' '. t('Checkbox defaults to @pub.', array('@pub' => t('Public'))), t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pri.', array('@pri' => t('Private'))));
+  $form['og_visibility'] = array('#type' => 'radios', '#title' => t('Visibility of posts'), '#default_value' => variable_get('og_visibility', 0), '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting. If the setting you want is disabled here, check the settings under <em>Private Groups</em> setting below. You cannot set node visibility to always be public if private groups are set to always on and vice versa.', array('@pub' => t('Public'))), '#options' => $options);
   
   // private groups control
   $options = array(t('New group home pages and default audience are always public.'),
@@ -44,7 +44,7 @@ function og_access_settings() {
     '#title' => t('Private Groups'), 
     '#options' => $options, 
     '#default_value' => variable_get('og_private_groups', OG_PRIVATE_GROUPS_CHOOSE_FALSE),    
-    '#description' =>t("<p>A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private.  This setting controls what private groups options can be used when creating a new group or editing an existing group.  If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here.<p><p>Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Node authoring form / Visibility of Posts</em> setting on this page.  Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups!  To change those you must edit the groups and their individual content nodes directly.  If the setting you want is disabled here, check <em>Visibility of Posts</em> above.  You cannot choose to only have private groups if node visibility is set to be always public, and vice versa.</p>"),                              
+    '#description' => '<p>'. t("A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private. This setting controls what private groups options can be used when creating a new group or editing an existing group. If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here.") .'<p><p>'. t('Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Node authoring form / Visibility of Posts</em> setting on this page. Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups! To change those you must edit the groups and their individual content nodes directly. If the setting you want is disabled here, check <em>Visibility of Posts</em> above. You cannot choose to only have private groups if node visibility is set to be always public, and vice versa.') .'</p>',                              
   );
   return system_settings_form($form);
 }
@@ -81,9 +81,9 @@ function og_access_alter_group_form(&$form, $node) {
     case OG_PRIVATE_GROUPS_CHOOSE_FALSE :
       $form['og_private'] = array (
         '#type' => 'checkbox',
-        '#title' => t('private group'), 
+        '#title' => t('Private group'), 
         '#default_value' => $node->nid ? $node->og_private : $default, 
-        '#description' => t('Should this group be visible only to its members?  Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>'));
+        '#description' => t('Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>.'));
         break;
   }
 }
@@ -257,10 +257,10 @@ function og_access_node_access_records($node) {
  */
 function og_access_node_access_explain($row) {
   if ($row->realm == 'og_public') {
-    return t('All users may view this node.', array('@op' => $op));
+    return t('All users may view this node.');
   }
   elseif ($row->realm == 'og_subscriber') {
     $node = node_load((int)$row->gid);
-    return t('Members of !group_n may view this node.', array('@op' => $op, '!group_n' => l($node->title, "node/$row->gid")));
+    return t('Members of !group_n may view this node.', array('!group_n' => l($node->title, "node/$row->gid")));
   }
 }

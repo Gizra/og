@@ -6,9 +6,7 @@ function og_panels_help($section) {
     case 'admin/help#og_panels':
       return t('After enabling this module, visit the new Pages tab on any group. There, group admins may create as many pages as desired for their group. The pages may contain any layout that the site offers and admins may arrange many different types of content as desired. Site admins can restrict the types of content that may be added on the <a href="!settings">og_panels settings</a> page. You might want to make some Views available using <a href="!apv">admin/panels/views</a>. Group admins may designate one page as their group home page.', array('!settings' => url('admin/og/og_panels'), '!apv' => url('admin/panels/views')));
       case (arg(0) == 'node' && arg(2) == 'og_panels' && !arg(3)):
-        return t(
-          '<p>Create custom pages for your group. Use custom pages to organize your content in a pretty and informative manner. Your group can group to be a whole website within a web site. Each custom page becomes a tab when viewing your group. One of your custom pages should be designated as your <em>group home page</em>. That page will then display when visitors first arrive at your group.</p>
-          <p>Start by clicking the <a href="!url">Add new page</a> tab. Then you will choose a custom layout for your page. Then you will want to <em>edit content</em> for your custom page.</p>', array('!url' => url('node/'. arg(1). '/og_panels/form')));
+        return '<p>'. t('Create custom pages for your group. Use custom pages to organize your content in a pretty and informative manner. Your group can group to be a whole website within a web site. Each custom page becomes a tab when viewing your group. One of your custom pages should be designated as your <em>group home page</em>. That page will then display when visitors first arrive at your group.') .'</p><p>'. t('Start by clicking the <a href="!url">Add new page</a> tab. Then you will choose a custom layout for your page. Then you will want to <em>edit content</em> for your custom page.', array('!url' => url('node/'. arg(1). '/og_panels/form'))) .'</p>';
   }
 }
 
@@ -16,8 +14,8 @@ function og_panels_menu($may_cache) {
   if ($may_cache) {
     $items[] = array(
       'path' => 'admin/og/og_panels',
-      'title' => 'Organic groups panels',
-      'description' => 'Configure the content that is available to group admins when creating group pages.',
+      'title' => t('Organic groups panels'),
+      'description' => t('Configure the content that is available to group admins when creating group pages.'),
       'callback' => 'og_panels_admin_content',
       'access' => user_access('administer organic groups'),
     );
@@ -151,7 +149,7 @@ function og_panels_delete_confirm($did, $group_node) {
 
 function og_panels_delete_confirm_submit($form_id, $form_values) {
   og_panels_delete($form_values['did']);
-  drupal_set_message(t('%title has been deleted', array('%title' => $form_values['page_title'])));
+  drupal_set_message(t('%title has been deleted.', array('%title' => $form_values['page_title'])));
 }
 
 function og_panels_delete($did) {
@@ -183,11 +181,11 @@ function og_panels_table($displays, $group_node) {
   foreach ($displays as $display) {
     $item['page_title'] = array('#value' => l($display->page_title, "node/$nid/$display->path"));
     $item['weight'] = array('#type' => 'weight', '#default_value' => $display->weight);
-    $item['edit content'] = array('#value' => l(t('edit content'), "node/$nid/og_panels/$display->did/panel_content", array(), drupal_get_destination()));
-    $item['change layout'] = array('#value' => l(t('change layout'), "node/$nid/og_panels/$display->did/panel_layout"));
-    $item['edit layout settings'] = array('#value' => l(t('edit layout settings'), "node/$nid/og_panels/$display->did/panel_settings"));
-    $item['edit page'] = array('#value' => l(t('edit page'), "node/$nid/og_panels/form/$display->did", array(), drupal_get_destination()));
-    $item['delete page'] =  array('#value' => l(t('delete page'), "node/$nid/og_panels/$display->did/delete", array(), drupal_get_destination()));
+    $item['edit content'] = array('#value' => l(t('Edit content'), "node/$nid/og_panels/$display->did/panel_content", array(), drupal_get_destination()));
+    $item['change layout'] = array('#value' => l(t('Change layout'), "node/$nid/og_panels/$display->did/panel_layout"));
+    $item['edit layout settings'] = array('#value' => l(t('Edit layout settings'), "node/$nid/og_panels/$display->did/panel_settings"));
+    $item['edit page'] = array('#value' => l(t('Edit page'), "node/$nid/og_panels/form/$display->did", array(), drupal_get_destination()));
+    $item['delete page'] =  array('#value' => l(t('Delete page'), "node/$nid/og_panels/$display->did/delete", array(), drupal_get_destination()));
      
     $form['displays'][$display->did] = $item;
      
@@ -206,7 +204,7 @@ function og_panels_table($displays, $group_node) {
   );
   $form['submit'] = array(
     '#type' => 'submit', 
-    '#value' => t('Save Settings'),
+    '#value' => t('Save settings'),
   );
 
   $form['group_node'] = array('#type' => 'value', '#value' => $group_node);
@@ -580,7 +578,7 @@ function og_panels_panels_content_types() {
   );
   
     $items['og_subscribers'] = array(
-      'title' => t('OG Members'),
+      'title' => t('OG members'),
       'content_types' => 'og_panels_ct_list_subscribers',
       'single' => TRUE, // only provides a single content type
       'render callback' => 'og_panels_ct_render_callback_subscribers',
@@ -603,7 +601,7 @@ function og_panels_panels_content_types() {
     
     if (og_is_picture()) {
       $items['og_faces'] = array(
-        'title' => t('OG Faces'),
+        'title' => t('OG faces'),
         'content_types' => 'og_panels_ct_list_faces',
         'single' => TRUE, // only provides a single content type
         'render callback' => 'og_panels_ct_render_callback_faces',

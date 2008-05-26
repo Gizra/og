@@ -10,7 +10,7 @@ function og_xmlrpc_subscribe_user($username, $password, $gid, $uid) {
       return $return;
     }
     else {
-      return og_xmlrpc_error(t('unrecognized user ID: %uid', array('%uid' => $uid)));
+      return og_xmlrpc_error(t('Unrecognized user ID: %uid.', array('%uid' => $uid)));
     }
   }
   else {
@@ -30,7 +30,7 @@ function og_xmlrpc_get_all_subscribers($username, $password, $gid, $min_is_activ
       return $users;
     }
     else {
-      return og_xmlrpc_error(t('User is not a member of the specified group'));
+      return og_xmlrpc_error(t('User is not a member of the specified group.'));
     }
   }
   else {
