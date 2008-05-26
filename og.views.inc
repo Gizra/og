@@ -42,7 +42,7 @@ function og_views_data_og() {
     ),
   );
   $data['og']['member_count'] = array(
-    'title' => t('Group: Members Count'),
+    'title' => t('Group: Members count'),
     'field' => array(
       'handler' => 'views_handler_field_og_member_count',
       'click sortable' => TRUE,
@@ -50,7 +50,7 @@ function og_views_data_og() {
     ),
   );
   $data['og']['post_count'] = array(
-    'title' => t('Group: Post Count'),
+    'title' => t('Group: Post count'),
     'field' => array(
       'handler' => 'views_handler_field_og_post_count',
       'click sortable' => TRUE,
@@ -59,7 +59,7 @@ function og_views_data_og() {
      ),
   );
   $data['og']['post_count_new'] = array(
-      'title' => t('Group: Post Count *New*'),
+      'title' => t('Group: Post count *new*'),
       'field' => array(
         'handler' => 'views_handler_field_og_post_count_new',
         'click sortable' => TRUE,
@@ -91,7 +91,7 @@ function og_views_data_og() {
     ),
   );
   $data['og']['directory'] = array(
-    'title' => t('Group: List in Directory'),
+    'title' => t('Group: List in directory'),
     'help' => t('Admin specifies whether or not a group appears in the public listings.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
@@ -104,7 +104,7 @@ function og_views_data_og() {
     ),
   );
   $data['og']['subscribe'] = array(
-    'title' => t('Group: Join Link'),
+    'title' => t('Group: Join link'),
     'help' => t('Displays a links for joining a group when a user is not already a member.'),
     'field' => array(
       'handler' => 'views_handler_field_og_subscribe',
@@ -143,7 +143,7 @@ function og_views_data_og() {
   // pseudofield
   // Node type
   $data['og']['type_groups'] = array(
-    'title' => t('Group Types'), // The item it appears as on the UI,
+    'title' => t('Group types'), // The item it appears as on the UI,
     'help' => t('The type of a group (for example, "blog entry", "forum post", "story", etc).'),
     'real field' => 'type',
     'filter' => array(
@@ -152,7 +152,7 @@ function og_views_data_og() {
   );
   
   $data['og']['type_groups_all'] = array(
-    'title' => t('Group Types (all)'), // The item it appears as on the UI,
+    'title' => t('Group types (all)'), // The item it appears as on the UI,
     'help' => t('The type of a group (for example, "blog entry", "forum post", "story", etc).'),
     'real field' => 'type',
     'filter' => array(
@@ -279,7 +279,7 @@ function og_views_data_og_ancestry() {
   $data['og_ancestry']['table']['base'] = array(
     'field' => 'nid',
     'title' => t('Group posts'),
-    'help' => t("Posts which are affiiated with a group."),
+    'help' => t('Posts which are affiiated with a group.'),
   );
 
   $data['og_ancestry']['table']['join'] = array(
@@ -454,7 +454,7 @@ function og_views_data_og_uid() {
     // 'help' => t('foo')
     'filter' => array(
       'handler' => 'views_handler_filter_user_current',
-      'help' => t('OG: Group in User\'s Groups'),
+      'help' => t("OG: Group in user's groups"),
     ),
   );
   
@@ -470,7 +470,7 @@ function og_views_data_og_uid() {
     ),
   );
   $data['og_uid']['managelinkadmin'] = array(
-    'title' => t('OG: Admin Manage link'),
+    'title' => t('OG: Admin manage link'),
     'help' => t('A link to the <em>Admin create or remove</em> page.'),
     'field' => array(
       'handler' => 'views_handler_field_og_managelinkadmin',
@@ -509,7 +509,7 @@ function og_views_data_og_uid() {
   );
   $data['og_uid']['is_active'] = array(
     'title' => t('OG: Is membership approved'),
-    'help' => t('Add <em>approval needed</em> user if user\'s membership request is pending.'),
+    'help' => t("Add <em>approval needed</em> user if user's membership request is pending."),
     'field' => array(
       'handler' => 'views_handler_field_og_is_active',
       'click sortable' => TRUE,
@@ -591,7 +591,7 @@ class views_handler_filter_og_is_admin extends views_handler_filter_in_operator 
   function get_value_options() {
     if (!isset($this->value_options)) {
       $this->value_title = t('Member types');
-      $options = array(t('Members'), t('Group Administrators'));
+      $options = array(t('Members'), t('Group administrators'));
       $this->value_options = $options;
     }
   }
@@ -662,7 +662,7 @@ class views_handler_field_og_is_manager extends views_handler_field {
     $uid = $values->{$this->aliases['uid']};
     $node_uid = $values->{$this->aliases['node_uid']};
     if ($uid == $node_uid) {
-      return '<em>'. t('manager'). '</em>'; 
+      return '<em>'. t('Manager'). '</em>'; 
     }
   }
 }
@@ -693,10 +693,10 @@ class views_handler_field_og_managelinkadmin extends views_handler_field {
     // Only show links to group admins. And don't show next to group manager.
     if (og_is_group_admin($node) && $uid != $node->uid) {
       if ($is_admin) {
-        return l(t('admin: remove'), "og/delete_admin/$nid/$uid", array('query' => drupal_get_destination()));
+        return l(t('Admin: Remove'), "og/delete_admin/$nid/$uid", array('query' => drupal_get_destination()));
       }
       else {
-        return l(t('admin: create'), "og/create_admin/$nid/$uid", array('query' => drupal_get_destination()));
+        return l(t('Admin: Create'), "og/create_admin/$nid/$uid", array('query' => drupal_get_destination()));
       } 
     }
   }
