@@ -16,14 +16,12 @@ $view->display = array();
   $display->display_title = 'Defaults';
   $display->display_plugin = 'default';
   $display->position = '1';
-  $display->display_options = array (
+  $display->display_options = array(
   'style_plugin' => 'table',
-  'style_options' => 
-  array (
+  'style_options' => array(
     'override' => 1,
     'order' => 'desc',
-    'columns' => 
-    array (
+    'columns' => array(
       'type' => 'type',
       'title' => 'title',
       'name' => 'name',
@@ -32,52 +30,40 @@ $view->display = array();
       'last_comment_timestamp' => 'last_comment_timestamp',
       'new_comments' => 'comment_count',
     ),
-    'info' => 
-    array (
-      'type' => 
-      array (
+    'info' => array(
+      'type' => array(
         'sortable' => 1,
         'separator' => '',
       ),
-      'title' => 
-      array (
+      'title' => array(
         'sortable' => 1,
         'separator' => '',
       ),
-      'name' => 
-      array (
+      'name' => array(
         'sortable' => 1,
         'separator' => '',
       ),
-      'comment_count' => 
-      array (
+      'comment_count' => array(
         'sortable' => 1,
         'separator' => '&nbsp;',
       ),
-      'group_nid' => 
-      array (
+      'group_nid' => array(
         'separator' => '',
       ),
-      'last_comment_timestamp' => 
-      array (
+      'last_comment_timestamp' => array(
         'sortable' => 1,
         'separator' => '',
       ),
-      'new_comments' => 
-      array (
+      'new_comments' => array(
         'separator' => '',
       ),
     ),
     'default' => 'last_comment_timestamp',
   ),
   'row_plugin' => 'fields',
-  'row_options' => 
-  array (
-  ),
-  'relationships' => 
-  array (
-    'group_nid' => 
-    array (
+  'row_options' => array(),
+  'relationships' => array(
+    'group_nid' => array(
       'id' => 'group_nid',
       'table' => 'og_ancestry',
       'field' => 'group_nid',
@@ -86,10 +72,8 @@ $view->display = array();
       'relationship' => 'none',
     ),
   ),
-  'fields' => 
-  array (
-    'type' => 
-    array (
+  'fields' => array(
+    'type' => array(
       'id' => 'type',
       'table' => 'node',
       'field' => 'type',
@@ -97,8 +81,7 @@ $view->display = array();
       'relationship' => 'none',
       'link_to_node' => 1,
     ),
-    'title' => 
-    array (
+    'title' => array(
       'id' => 'title',
       'table' => 'node',
       'field' => 'title',
@@ -106,8 +89,7 @@ $view->display = array();
       'relationship' => 'none',
       'link_to_node' => 1,
     ),
-    'name' => 
-    array (
+    'name' => array(
       'id' => 'name',
       'table' => 'users',
       'field' => 'name',
@@ -115,13 +97,12 @@ $view->display = array();
       'link_to_user' => 1,
       'relationship' => 'none',
     ),
-    'comment_count' => 
-    array (
+    'comment_count' => array(
       'id' => 'comment_count',
       'table' => 'node_comment_statistics',
       'field' => 'comment_count',
       'label' => 'Replies',
-      'set_precision' => false,
+      'set_precision' => FALSE,
       'precision' => 0,
       'decimal' => '.',
       'separator' => ',',
@@ -129,8 +110,7 @@ $view->display = array();
       'suffix' => '',
       'relationship' => 'none',
     ),
-    'group_nid' => 
-    array (
+    'group_nid' => array(
       'id' => 'group_nid',
       'table' => 'og_ancestry',
       'field' => 'group_nid',
@@ -140,8 +120,7 @@ $view->display = array();
       'empty' => '',
       'relationship' => 'none',
     ),
-    'last_comment_timestamp' => 
-    array (
+    'last_comment_timestamp' => array(
       'id' => 'last_comment_timestamp',
       'table' => 'node_comment_statistics',
       'field' => 'last_comment_timestamp',
@@ -150,13 +129,12 @@ $view->display = array();
       'custom_date_format' => '',
       'relationship' => 'none',
     ),
-    'new_comments' => 
-    array (
+    'new_comments' => array(
       'id' => 'new_comments',
       'table' => 'node',
       'field' => 'new_comments',
       'label' => '',
-      'set_precision' => false,
+      'set_precision' => FALSE,
       'precision' => 0,
       'decimal' => '.',
       'separator' => ',',
@@ -167,71 +145,74 @@ $view->display = array();
       'relationship' => 'none',
     ),
   ),
-  'sorts' => 
-  array (
-  ),
-  'arguments' => 
-  array (
-  ),
-  'filters' => 
-  array (
-    'status' => 
-    array (
+  'sorts' => array(),
+  'arguments' => array(),
+  'filters' => array(
+    'status' => array(
       'id' => 'status',
       'table' => 'node',
       'field' => 'status',
       'operator' => '=',
       'value' => 1,
       'group' => 0,
-      'exposed' => false,
-      'expose' => 
-      array (
-        'operator' => false,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
         'label' => '',
       ),
       'relationship' => 'none',
-      'expose_button' => 
-      array (
+      'expose_button' => array(
         'button' => 'Expose',
       ),
     ),
-    'uid_current' => 
-    array (
+    'uid_current' => array(
       'id' => 'uid_current',
       'table' => 'og_uid',
       'field' => 'uid_current',
       'operator' => '=',
       'value' => 1,
       'group' => 0,
-      'exposed' => false,
-      'expose' => 
-      array (
-        'operator' => false,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
         'label' => '',
       ),
       'relationship' => 'group_nid',
-      'expose_button' => 
-      array (
+      'expose_button' => array(
         'button' => 'Expose',
       ),
     ),
-    'timestamp' => 
-    array (
+    'timestamp' => array(
       'id' => 'timestamp',
       'table' => 'history_user',
       'field' => 'timestamp',
       'operator' => '=',
       'value' => '',
       'group' => 0,
-      'exposed' => false,
-      'expose' => 
-      array (
-        'operator' => false,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
         'label' => '',
       ),
       'relationship' => 'none',
-      'expose_button' => 
-      array (
+      'expose_button' => array(
+        'button' => 'Expose',
+      ),
+    ),
+    'uid' => array(
+      'id' => 'uid',
+      'table' => 'og_uid',
+      'field' => 'uid',
+      'operator' => '=',
+      'value' => 1,
+      'group' => 0,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
+        'label' => '',
+      ),
+      'relationship' => 'none',
+      'expose_button' => array(
         'button' => 'Expose',
       ),
     ),
@@ -250,61 +231,48 @@ $view->display['default'] = $display;
   $display->display_title = 'Page';
   $display->display_plugin = 'page';
   $display->position = '2';
-  $display->display_options = array (
-  'defaults' => 
-  array (
-    'access' => true,
-    'title' => true,
-    'header' => true,
-    'header_format' => true,
-    'header_empty' => true,
-    'footer' => true,
-    'footer_format' => true,
-    'footer_empty' => true,
-    'empty' => true,
-    'empty_format' => true,
-    'use_ajax' => true,
-    'items_per_page' => true,
-    'offset' => true,
-    'use_pager' => true,
-    'pager_element' => true,
-    'use_more' => true,
-    'distinct' => true,
-    'link_display' => true,
-    'style_plugin' => true,
-    'style_options' => true,
-    'row_plugin' => true,
-    'row_options' => true,
-    'relationships' => true,
-    'fields' => true,
-    'sorts' => true,
-    'arguments' => true,
-    'filters' => true,
+  $display->display_options = array(
+  'defaults' => array(
+    'access' => TRUE,
+    'title' => TRUE,
+    'header' => TRUE,
+    'header_format' => TRUE,
+    'header_empty' => TRUE,
+    'footer' => TRUE,
+    'footer_format' => TRUE,
+    'footer_empty' => TRUE,
+    'empty' => TRUE,
+    'empty_format' => TRUE,
+    'use_ajax' => TRUE,
+    'items_per_page' => TRUE,
+    'offset' => TRUE,
+    'use_pager' => TRUE,
+    'pager_element' => TRUE,
+    'use_more' => TRUE,
+    'distinct' => TRUE,
+    'link_display' => TRUE,
+    'style_plugin' => TRUE,
+    'style_options' => TRUE,
+    'row_plugin' => TRUE,
+    'row_options' => TRUE,
+    'relationships' => TRUE,
+    'fields' => TRUE,
+    'sorts' => TRUE,
+    'arguments' => TRUE,
+    'filters' => TRUE,
   ),
-  'relationships' => 
-  array (
-  ),
-  'fields' => 
-  array (
-  ),
-  'sorts' => 
-  array (
-  ),
-  'arguments' => 
-  array (
-  ),
-  'filters' => 
-  array (
-  ),
+  'relationships' => array(),
+  'fields' => array(),
+  'sorts' => array(),
+  'arguments' => array(),
+  'filters' => array(),
   'path' => 'group/myunread',
-  'menu' => 
-  array (
+  'menu' => array(
     'type' => 'default tab',
     'title' => 'My Unread',
     'weight' => '0',
   ),
-  'tab_options' => 
-  array (
+  'tab_options' => array(
     'type' => 'normal',
     'title' => 'My Unread',
     'weight' => '0',
@@ -316,65 +284,53 @@ $view->display['page'] = $display;
   $display->display_title = 'Feed';
   $display->display_plugin = 'feed';
   $display->position = '3';
-  $display->display_options = array (
-  'defaults' => 
-  array (
-    'access' => true,
-    'title' => true,
-    'header' => true,
-    'header_format' => true,
-    'header_empty' => true,
-    'footer' => true,
-    'footer_format' => true,
-    'footer_empty' => true,
-    'empty' => true,
-    'empty_format' => true,
-    'use_ajax' => true,
-    'items_per_page' => true,
-    'offset' => true,
-    'use_pager' => true,
-    'pager_element' => true,
-    'use_more' => true,
-    'distinct' => true,
-    'link_display' => true,
-    'style_plugin' => false,
-    'style_options' => false,
-    'row_plugin' => false,
-    'row_options' => false,
-    'relationships' => true,
-    'fields' => true,
-    'sorts' => true,
-    'arguments' => true,
-    'filters' => true,
+  $display->display_options = array(
+  'defaults' => array(
+    'access' => TRUE,
+    'title' => TRUE,
+    'header' => TRUE,
+    'header_format' => TRUE,
+    'header_empty' => TRUE,
+    'footer' => TRUE,
+    'footer_format' => TRUE,
+    'footer_empty' => TRUE,
+    'empty' => TRUE,
+    'empty_format' => TRUE,
+    'use_ajax' => TRUE,
+    'items_per_page' => TRUE,
+    'offset' => TRUE,
+    'use_pager' => TRUE,
+    'pager_element' => TRUE,
+    'use_more' => TRUE,
+    'distinct' => TRUE,
+    'link_display' => TRUE,
+    'style_plugin' => FALSE,
+    'style_options' => FALSE,
+    'row_plugin' => FALSE,
+    'row_options' => FALSE,
+    'relationships' => TRUE,
+    'fields' => TRUE,
+    'sorts' => TRUE,
+    'arguments' => TRUE,
+    'filters' => TRUE,
   ),
-  'relationships' => 
-  array (
-  ),
-  'fields' => 
-  array (
-  ),
-  'sorts' => 
-  array (
-  ),
-  'arguments' => 
-  array (
-  ),
-  'filters' => 
-  array (
-  ),
-  'displays' => 
-  array (
+  'relationships' => array(),
+  'fields' => array(),
+  'sorts' => array(),
+  'arguments' => array(),
+  'filters' => array(),
+  'displays' => array(
+    'page' => 'page',
+    'default' => 0,
   ),
   'style_plugin' => 'rss',
-  'style_options' => 
-  array (
-    'mission_description' => false,
+  'style_options' => array(
+    'mission_description' => FALSE,
     'description' => '',
   ),
   'row_plugin' => 'node_rss',
-  'path' => 'group/tracker/feed',
-  'row_options' => 
-  array (
+  'path' => 'group/myunread/feed',
+  'row_options' => array(
     'item_length' => 'default',
   ),
 );
