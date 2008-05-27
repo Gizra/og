@@ -387,7 +387,7 @@ function og_uninstall() {
 
   // Delete variables
   $variables = array(
-    'og_member_pics', 'og_help', 'og_block_cnt_2', 'og_block_cnt_3',
+    'og_help', 'og_block_cnt_2', 'og_block_cnt_3',
     'og_audience_checkboxes', 'og_omitted', 'og_content_type_usage',
     'og_audience_required', 'og_omitted_email_node_types',
     'og_visibility_directory', 'og_visibility_registration',

@@ -201,7 +201,7 @@ $view->display['default'] = $display;
   $display->display_options = array(
   'defaults' => array(
     'access' => TRUE,
-    'title' => TRUE,
+    'title' => FALSE,
     'header' => TRUE,
     'header_format' => TRUE,
     'header_empty' => TRUE,
@@ -234,6 +234,7 @@ $view->display['default'] = $display;
   'arguments' => array(),
   'filters' => array(),
   'block_description' => 'Group admins',
+  'title' => 'Group admins',
 );
 $view->display['block'] = $display;
   $display = new views_display;

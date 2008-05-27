@@ -97,14 +97,6 @@ function og_admin_settings() {
   );
   unset($options);
   
-  // member pictures
-  $form['og_settings']['group_details']['og_member_pics'] = array(
-    '#type' => 'checkbox', 
-    '#title' => t('Member pictures'), 
-    '#default_value' => variable_get('og_member_pics', TRUE), 
-    '#description' => t('Should member pictures be shown on the members page, the group members block, and group details block? You must also enable pictures in !user.', array('!user' => l(t('User configuration'), 'admin/user/settings')))
-  );
-
   $form['og_settings']['email'] = array(
     '#type' => 'fieldset', 
     '#title' => t('Email settings'), 

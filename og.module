@@ -2443,10 +2443,8 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     $blocks[0]['cache'] = BLOCK_NO_CACHE;
     
     // $blocks[1] used to be the album block. We do not change the numbers to not confuse people who update.
-    
-    $blocks[2]['info'] = t('Group members');
-    $blocks[2]['cache'] = BLOCK_NO_CACHE;
-    
+    // $blocks[2] used to be the group members block. This is now served by Views. We do not change the numbers to not confuse people who update.
+  
     $blocks[3]['info'] = t('New groups');
     $blocks[3]['cache'] = BLOCK_CACHE_PER_USER;
     
@@ -2472,8 +2470,6 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     switch ($delta) {
       case 0:
         return og_block_details();
-      case 2:
-        return og_block_subscribers();
       case 3:
        return og_block_new();
       case 5:
@@ -2527,30 +2523,26 @@ function og_block_notifications() {
   global $user;
   
   if ($groupnode = og_get_group_context()) {
-    // only members can see this block
-    if (in_array($groupnode->nid, array_keys($user->og_groups))) {
-      $content = t('This group offers a !groupfeed and an !email.', array('!groupfeed' => l(t('RSS feed'), "node/$groupnode->nid/feed"), '!email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
-      if (module_exists('views') && module_exists('views_rss')) {
-        // NOTE: See og.css for styling specific to these lists
-        $content .= ' '. t('Or subscribe to these personalized, sitewide feeds:');
-        $inline = array('class' => 'links inline');      
-        $l1[] = array('title' => t('Feed'), 'href' => 'group/myunread/feed');
-        $l1[] = array('title' => t('Page'), 'href' => 'group/myunread');
-        $links['my_unread'] = t('My unread:') .' '. theme('links', $l1, $inline);
-      
-        $l2[] = array('title' => t('Feed'), 'href' => 'group/mytracker/feed');
-        $l2[] = array('title' => t('Page'), 'href' => 'group/mytracker');
-        $links['my_group'] = t('My group:') .' '. theme('links', $l2, $inline);
-      
-        $l3[] = array('title' => t('Feed'), 'href' => 'group/tracker/feed');
-        $l3[] = array('title' => t('Page'), 'href' => 'group/tracker');
-        $links['all_posts'] = array('data' => t('All posts:') .' '. theme('links', $l3, $inline));
-        $content .= theme('item_list', $links);
-      }
-      $block['content'] = $content;
-      $block['subject'] = t('Group notifications');
-      return $block;
+    $content = t('This group offers a !groupfeed and an !email.', array('!groupfeed' => l(t('RSS feed'), "node/$groupnode->nid/feed"), '!email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
+    // NOTE: See og.css for styling specific to these lists
+    $content .= ' '. t('Or subscribe to these personalized, sitewide feeds:');
+    $inline = array('class' => 'links inline');
+    if ($user->uid) {
+      $l1[] = array('title' => t('Feed'), 'href' => 'group/myunread/feed');
+      $l1[] = array('title' => t('Page'), 'href' => 'group/myunread');
+      $links['my_unread'] = t('My unread:') .' '. theme('links', $l1, $inline);
+    
+      $l2[] = array('title' => t('Feed'), 'href' => 'group/mytracker/feed');
+      $l2[] = array('title' => t('Page'), 'href' => 'group/mytracker');
+      $links['my_group'] = t('My group:') .' '. theme('links', $l2, $inline);
     }
+    $l3[] = array('title' => t('Feed'), 'href' => 'group/tracker/feed');
+    $l3[] = array('title' => t('Page'), 'href' => 'group/tracker');
+    $links['all_posts'] = array('data' => t('All posts:') .' '. theme('links', $l3, $inline));
+    $content .= theme('item_list', $links);
+    $block['content'] = $content;
+    $block['subject'] = t('Group notifications');
+    return $block;
   }
 }
 
@@ -2578,115 +2570,6 @@ function og_block_new() {
     $block['subject'] = t('New groups');
     $block['content'] = $output;
     return $block;
-  }
-}
-
-// TODOL: port this. Needs new Views filter thats a bit complex.
-function og_block_users_network() {
-//   global $user;
-//   if ($user->uid && count($user->og_groups)) {
-//     $max = variable_get('og_block_cnt_2', 10);
-//     $placeholders = db_placeholders($user->og_groups);
-//     $sql = "SELECT ogu.uid, u.name, u.picture FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.uid != %d AND ogu.nid IN (". $placeholders .") GROUP BY ogu.uid, u.name, u.picture ORDER BY u.name ASC";
-//     $args = array_keys($user->og_groups);
-//     array_unshift($args, $user->uid);
-//     $result = db_query_range($sql, $args, 0, $max);
-//     $block['content'] = og_user_title_list($result, NULL, FALSE);
-//     $block['subject'] = t('My Network');
-//     return $block;
-//   }
-}
-
-function og_block_subscribers() {
-  global $user;
-  if ($group_node = og_get_group_context()) {
-    $gid = $group_node->nid;
-    // only members can see membership list
-    if (in_array($gid, array_keys($user->og_groups))) {
-      $max = variable_get('og_block_cnt_2', 10);
-      // Should we show admins, standard users, or both. From block configuration.
-      $is_admin = variable_get("og_block_subscribers_is_admin", drupal_map_assoc(array('members', 'admins')));
-      $block['subject'] = t('Recently joined');
-      $block['content'] = og_block_subscribers_list($gid, $max, $is_admin);
-      return $block;
-    }
-  }
-}
-
-/**
- * API function for retrieving a list of group members. Used by og and og_panels
- * 
- * @return string
- *   An HTML list.
- **/
-function og_block_subscribers_list($gid, $max = 10, $is_admin = array('members', 'admin'), $show_more = TRUE, $show_picture = NULL) {
-  
-  // $display_id = 'default';
-  //   $view = views_get_view('og_members');
-  //   $view->init();
-  //   $view->set_arguments(array($gid));
-  //   if (!empty($is_admin['members'])) {
-  //     $args[] = 0;
-  //   }
-  //   if (!empty($is_admin['admins'])) {
-  //     $args[] = 1;
-  //   }
-  //   $name = $view->add_item($display_id, 'filter', 'og_uid', 'is_admin');
-  //   $item = $view->get_item($display_id, 'filter', $name);
-  //   $item['value'] = array(0, 1);
-  //   $view->set_item($display_id, 'filter', $name, $item);
-  //   $view->is_cacheable = FALSE;
-  // //  $view->build();
-  // //  dsm($view);
-  //   $view->execute();
-  //             // dsm($view->result);
-  //   foreach ($view->result as $result) {
-  //     foreach ($view->field as $id => $field) {
-  //         if (!empty($view->field[$id]['handler'])) {
-  //           $view->field[$id]['handler']->pre_render($view->result);
-  //         }
-  //       }
-  //   }
-  //   // return 'aa';
-  //   
-  //   $sql = "SELECT DISTINCT(u.uid), u.*, ogu.created FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.is_admin IN ($placeholders) AND ogu.nid = %d AND ogu.is_active = 1 AND u.status = 1 ORDER BY ogu.created DESC";
-  //   
-  //   $args[] = $gid;
-  //   $result = db_query_range($sql, $args, 0, $max);
-  //   return og_user_title_list($result, $gid, $show_more, $show_picture);
-}
-
-// shows users. analogous to node_title_list()
-function og_user_title_list($result, $gid = NULL, $show_more = TRUE, $show_picture = NULL) {
-  if (is_null($show_picture)) {
-    $show_picture = og_is_picture();
-  }
-  
-  while ($row = db_fetch_object($result)) {
-    if ($show_picture) {
-      //showing member pictures
-      $link = theme('user_picture', $row). theme('username', $row);
-      $links[] = "\n". '<div class="og-picture-wrapper">'. "\n". $link. "\n". '</div>'. "\n";
-    }
-    else {
-      $link = theme('username', $row);
-      $links[] = "\n". $link. "\n";
-    }
-    
-  }
-
-  if ($links) {
-    $max = variable_get('og_block_cnt_2', 10);
-    if (count($links) > $max-1) {
-      array_pop($links);
-      $txt = t('more');
-      $title = array('title' => t('View all members.'));
-      if ($show_more) {
-        $more = $show_picture ? l($txt, "og/users/$gid/faces", array('attributes' => $title)) : l($txt, "og/users/$gid", array('attributes' => $title));
-        $append = "<div class=\"more-link\">$more</div>";
-      }
-    }
-    return theme('item_list', $links). $append;
   }
 }
 
@@ -2824,7 +2707,7 @@ function og_search_form_pre_render($form_state) {
 }
 
 function og_is_picture() {
-  return variable_get('user_pictures', 0) && variable_get('og_member_pics', TRUE);
+  return variable_get('user_pictures', 0);
 }
 
 // TODOL: maybe use a custom theme('mark') here?
