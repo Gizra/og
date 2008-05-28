@@ -16,14 +16,12 @@ $view->display = array();
   $display->display_title = 'Defaults';
   $display->display_plugin = 'default';
   $display->position = '1';
-  $display->display_options = array (
+  $display->display_options = array(
   'style_plugin' => 'table',
-  'style_options' => 
-  array (
+  'style_options' => array(
     'override' => 1,
     'order' => 'desc',
-    'columns' => 
-    array (
+    'columns' => array(
       'title' => 'title',
       'description' => 'description',
       'name' => 'name',
@@ -32,55 +30,41 @@ $view->display = array();
       'member_count' => 'member_count',
       'subscribe' => 'subscribe',
     ),
-    'info' => 
-    array (
-      'title' => 
-      array (
+    'info' => array(
+      'title' => array(
         'sortable' => 1,
         'separator' => '',
       ),
-      'description' => 
-      array (
+      'description' => array(
         'separator' => '',
       ),
-      'name' => 
-      array (
+      'name' => array(
         'sortable' => 1,
         'separator' => '',
       ),
-      'created' => 
-      array (
+      'created' => array(
         'sortable' => 1,
         'separator' => '',
       ),
-      'post_count' => 
-      array (
+      'post_count' => array(
         'sortable' => 1,
         'separator' => '',
       ),
-      'member_count' => 
-      array (
+      'member_count' => array(
         'sortable' => 1,
         'separator' => '',
       ),
-      'subscribe' => 
-      array (
+      'subscribe' => array(
         'separator' => '',
       ),
     ),
     'default' => 'created',
   ),
   'row_plugin' => 'fields',
-  'row_options' => 
-  array (
-  ),
-  'relationships' => 
-  array (
-  ),
-  'fields' => 
-  array (
-    'title' => 
-    array (
+  'row_options' => array(),
+  'relationships' => array(),
+  'fields' => array(
+    'title' => array(
       'id' => 'title',
       'table' => 'node',
       'field' => 'title',
@@ -88,16 +72,14 @@ $view->display = array();
       'relationship' => 'none',
       'link_to_node' => 1,
     ),
-    'description' => 
-    array (
+    'description' => array(
       'id' => 'description',
       'table' => 'og',
       'field' => 'description',
       'label' => 'Description',
       'relationship' => 'none',
     ),
-    'name' => 
-    array (
+    'name' => array(
       'id' => 'name',
       'table' => 'users',
       'field' => 'name',
@@ -105,8 +87,7 @@ $view->display = array();
       'link_to_user' => 1,
       'relationship' => 'none',
     ),
-    'created' => 
-    array (
+    'created' => array(
       'id' => 'created',
       'table' => 'node',
       'field' => 'created',
@@ -115,36 +96,7 @@ $view->display = array();
       'custom_date_format' => 'M y',
       'relationship' => 'none',
     ),
-    'post_count' => 
-    array (
-      'id' => 'post_count',
-      'table' => 'og',
-      'field' => 'post_count',
-      'label' => 'Posts',
-      'set_precision' => false,
-      'precision' => 0,
-      'decimal' => '.',
-      'separator' => ',',
-      'prefix' => '',
-      'suffix' => '',
-      'relationship' => 'none',
-    ),
-    'member_count' => 
-    array (
-      'id' => 'member_count',
-      'table' => 'og',
-      'field' => 'member_count',
-      'label' => 'Members',
-      'set_precision' => false,
-      'precision' => 0,
-      'decimal' => '.',
-      'separator' => ',',
-      'prefix' => '',
-      'suffix' => '',
-      'relationship' => 'none',
-    ),
-    'subscribe' => 
-    array (
+    'subscribe' => array(
       'id' => 'subscribe',
       'table' => 'og',
       'field' => 'subscribe',
@@ -152,45 +104,35 @@ $view->display = array();
       'relationship' => 'none',
     ),
   ),
-  'sorts' => 
-  array (
-  ),
-  'arguments' => 
-  array (
-  ),
-  'filters' => 
-  array (
-    'status' => 
-    array (
+  'sorts' => array(),
+  'arguments' => array(),
+  'filters' => array(
+    'status' => array(
       'id' => 'status',
       'table' => 'node',
       'field' => 'status',
       'operator' => '=',
       'value' => 1,
       'group' => 0,
-      'exposed' => false,
-      'expose' => 
-      array (
-        'operator' => false,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
         'label' => '',
       ),
       'relationship' => 'none',
-      'expose_button' => 
-      array (
+      'expose_button' => array(
         'button' => 'Expose',
       ),
     ),
-    'title' => 
-    array (
+    'title' => array(
       'id' => 'title',
       'table' => 'node',
       'field' => 'title',
       'operator' => 'contains',
       'value' => '',
       'group' => 0,
-      'exposed' => true,
-      'expose' => 
-      array (
+      'exposed' => TRUE,
+      'expose' => array(
         'operator' => 'title_oper',
         'identifier' => 'title',
         'label' => 'Search for a group by name',
@@ -199,48 +141,41 @@ $view->display = array();
       ),
       'case' => 0,
       'relationship' => 'none',
-      'expose_button' => 
-      array (
+      'expose_button' => array(
         'button' => 'Hide',
       ),
     ),
-    'type_groups_all' => 
-    array (
+    'type_groups_all' => array(
       'id' => 'type_groups_all',
       'table' => 'og',
       'field' => 'type_groups_all',
       'operator' => '=',
       'value' => '',
       'group' => 0,
-      'exposed' => false,
-      'expose' => 
-      array (
-        'operator' => false,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
         'label' => '',
       ),
       'relationship' => 'none',
-      'expose_button' => 
-      array (
+      'expose_button' => array(
         'button' => 'Expose',
       ),
     ),
-    'directory' => 
-    array (
+    'directory' => array(
       'id' => 'directory',
       'table' => 'og',
       'field' => 'directory',
       'operator' => '=',
       'value' => 1,
       'group' => 0,
-      'exposed' => false,
-      'expose' => 
-      array (
-        'operator' => false,
+      'exposed' => FALSE,
+      'expose' => array(
+        'operator' => FALSE,
         'label' => '',
       ),
       'relationship' => 'none',
-      'expose_button' => 
-      array (
+      'expose_button' => array(
         'button' => 'Expose',
       ),
     ),
@@ -260,64 +195,49 @@ $view->display['default'] = $display;
   $display->display_title = 'Feed';
   $display->display_plugin = 'feed';
   $display->position = '2';
-  $display->display_options = array (
-  'defaults' => 
-  array (
-    'access' => true,
-    'title' => true,
-    'header' => true,
-    'header_format' => true,
-    'header_empty' => true,
-    'footer' => true,
-    'footer_format' => true,
-    'footer_empty' => true,
-    'empty' => true,
-    'empty_format' => true,
-    'use_ajax' => true,
-    'items_per_page' => false,
-    'offset' => false,
-    'use_pager' => false,
-    'pager_element' => false,
-    'use_more' => true,
-    'distinct' => true,
-    'link_display' => true,
-    'style_plugin' => false,
-    'style_options' => false,
-    'row_plugin' => false,
-    'row_options' => false,
-    'relationships' => true,
-    'fields' => true,
-    'sorts' => true,
-    'arguments' => true,
-    'filters' => true,
+  $display->display_options = array(
+  'defaults' => array(
+    'access' => TRUE,
+    'title' => TRUE,
+    'header' => TRUE,
+    'header_format' => TRUE,
+    'header_empty' => TRUE,
+    'footer' => TRUE,
+    'footer_format' => TRUE,
+    'footer_empty' => TRUE,
+    'empty' => TRUE,
+    'empty_format' => TRUE,
+    'use_ajax' => TRUE,
+    'items_per_page' => FALSE,
+    'offset' => FALSE,
+    'use_pager' => FALSE,
+    'pager_element' => FALSE,
+    'use_more' => TRUE,
+    'distinct' => TRUE,
+    'link_display' => TRUE,
+    'style_plugin' => FALSE,
+    'style_options' => FALSE,
+    'row_plugin' => FALSE,
+    'row_options' => FALSE,
+    'relationships' => TRUE,
+    'fields' => TRUE,
+    'sorts' => TRUE,
+    'arguments' => TRUE,
+    'filters' => TRUE,
   ),
-  'relationships' => 
-  array (
-  ),
-  'fields' => 
-  array (
-  ),
-  'sorts' => 
-  array (
-  ),
-  'arguments' => 
-  array (
-  ),
-  'filters' => 
-  array (
-  ),
-  'displays' => 
-  array (
-  ),
+  'relationships' => array(),
+  'fields' => array(),
+  'sorts' => array(),
+  'arguments' => array(),
+  'filters' => array(),
+  'displays' => array(),
   'style_plugin' => 'rss',
-  'style_options' => 
-  array (
-    'mission_description' => false,
+  'style_options' => array(
+    'mission_description' => FALSE,
     'description' => '',
   ),
   'row_plugin' => 'node_rss',
-  'row_options' => 
-  array (
+  'row_options' => array(
     'item_length' => 'default',
   ),
   'items_per_page' => 20,
@@ -332,61 +252,48 @@ $view->display['feed'] = $display;
   $display->display_title = 'Page';
   $display->display_plugin = 'page';
   $display->position = '3';
-  $display->display_options = array (
-  'defaults' => 
-  array (
-    'access' => true,
-    'title' => true,
-    'header' => true,
-    'header_format' => true,
-    'header_empty' => true,
-    'footer' => true,
-    'footer_format' => true,
-    'footer_empty' => true,
-    'empty' => true,
-    'empty_format' => true,
-    'use_ajax' => true,
-    'items_per_page' => true,
-    'offset' => true,
-    'use_pager' => true,
-    'pager_element' => true,
-    'use_more' => true,
-    'distinct' => true,
-    'link_display' => true,
-    'style_plugin' => true,
-    'style_options' => true,
-    'row_plugin' => true,
-    'row_options' => true,
-    'relationships' => true,
-    'fields' => true,
-    'sorts' => true,
-    'arguments' => true,
-    'filters' => true,
+  $display->display_options = array(
+  'defaults' => array(
+    'access' => TRUE,
+    'title' => TRUE,
+    'header' => TRUE,
+    'header_format' => TRUE,
+    'header_empty' => TRUE,
+    'footer' => TRUE,
+    'footer_format' => TRUE,
+    'footer_empty' => TRUE,
+    'empty' => TRUE,
+    'empty_format' => TRUE,
+    'use_ajax' => TRUE,
+    'items_per_page' => TRUE,
+    'offset' => TRUE,
+    'use_pager' => TRUE,
+    'pager_element' => TRUE,
+    'use_more' => TRUE,
+    'distinct' => TRUE,
+    'link_display' => TRUE,
+    'style_plugin' => TRUE,
+    'style_options' => TRUE,
+    'row_plugin' => TRUE,
+    'row_options' => TRUE,
+    'relationships' => TRUE,
+    'fields' => TRUE,
+    'sorts' => TRUE,
+    'arguments' => TRUE,
+    'filters' => TRUE,
   ),
-  'relationships' => 
-  array (
-  ),
-  'fields' => 
-  array (
-  ),
-  'sorts' => 
-  array (
-  ),
-  'arguments' => 
-  array (
-  ),
-  'filters' => 
-  array (
-  ),
+  'relationships' => array(),
+  'fields' => array(),
+  'sorts' => array(),
+  'arguments' => array(),
+  'filters' => array(),
   'path' => 'og/all',
-  'menu' => 
-  array (
+  'menu' => array(
     'type' => 'default tab',
     'title' => 'Groups',
     'weight' => '0',
   ),
-  'tab_options' => 
-  array (
+  'tab_options' => array(
     'type' => 'normal',
     'title' => 'Groups',
     'weight' => '0',

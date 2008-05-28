@@ -2592,7 +2592,7 @@ function og_block_details() {
         $links['my_membership'] = $subscribe;
       }
       if (module_exists('search') && user_access('search content')) {
-        $post = drupal_get_form('og_search_form', $node);
+        $suffix = drupal_get_form('og_search_form', $node);
       }
     }
     elseif ($subscription == 'requested') {
@@ -2616,7 +2616,7 @@ function og_block_details() {
     // Modify these links by reference. If you want control of the whole block, see og_block_details().
     drupal_alter('og_links', $links);
 
-    $block['content'] = theme('item_list', $links). $post;
+    $block['content'] = theme('item_list', $links). $suffix;
     $block['subject'] = l($node->title, "node/$node->nid");
     return $block;
   }
@@ -2702,7 +2702,7 @@ function og_search_form($form_state, $group) {
 
 // Clean up query string like Views does.
 function og_search_form_pre_render($form_state) {
-  unset($form_state['form_build_id'], $form_state['form_token'], $form_state['form_id']);
+  // unset($form_state['form_build_id'], $form_state['form_token'], $form_state['form_id']);
   return $form_state;
 }
 
