@@ -270,8 +270,8 @@ function og_panels_page($did, $group_node, $title = NULL) {
   // menu_set_location($bc);
   drupal_set_breadcrumb($bc);
   // Mark node as read and show feed icon for any group panel page (how to do this better?)
-  drupal_add_feed(url("node/$nid/feed"), t('@name at @site', array('@name' => $node->title, '@site' => variable_get('site_name', 'drupal'))));
-  node_tag_new($node->nid);
+  drupal_add_feed(url("node/$group_node->nid/feed"), t('@name at @site', array('@name' => $group_node->title, '@site' => variable_get('site_name', 'drupal'))));
+  node_tag_new($group_node->nid);
   
   
   $allargs = func_get_args();
