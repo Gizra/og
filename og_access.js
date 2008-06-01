@@ -1,4 +1,6 @@
-Drupal.og_accessAttach = function() {
+/* Node authoring form for group posts
+ */
+Drupal.behaviors.og_access_group_post = function() {
   
   /* Node authoring form for group content -Disable the public checkbox if no groups are selected in in Audience */
     $('.og-audience').click(function() {
@@ -57,11 +59,13 @@ Drupal.og_accessAttach = function() {
     if ($("#edit-og-private:checked").val()) {
         $("input[@Name='og_selective']:nth(0)").removeAttr('checked').attr('disabled','disabled');
     }
+}
 
 
-    /* Node authoring form for group homepages - Don't allow "private group" and "list in groups directory" at the same time 
-     * This is just for improved UI. You may change it if you need this combination.
-     */
+/* Node authoring form for group homepages - Don't allow "private group" and "list in groups directory" at the same time 
+ * This is just for improved UI. You may change it if you need this combination.
+ */
+Drupal.behaviors.og_access_group_node = function() {
     $("#edit-og-private").click(function() { 
       if ($("#edit-og-private:checked").val()) {
         $("#edit-og-directory").removeAttr("checked").attr('disabled','disabled');
@@ -115,11 +119,13 @@ Drupal.og_accessAttach = function() {
       $("input[@name='og_private_groups']:nth(0)").removeAttr('disabled');
       $("input[@name='og_private_groups']:nth(1)").attr('disabled','disabled');     
   }
+}
     
   /* admin og settings form, "Node Authoring Form - Visibilty of Posts"
    * Disable "Visible within the targeted groups and on other pages" if private groups set to "always private"
    * Disable "Visible only within the targeted groups" if private groups set to "always public"
    */
+Drupal.behaviors.og_access_admin_settings = function() {
   $("input[@Name='og_private_groups']").click(function() {
       if ( $("input[@Name='og_private_groups']:checked").val() == 1 ) {
         $("input[@name='og_visibility']:nth(0)").removeAttr('disabled');
@@ -144,9 +150,4 @@ Drupal.og_accessAttach = function() {
       $("input[@name='og_visibility']:nth(0)").attr('disabled','disabled');
       $("input[@name='og_visibility']:nth(1)").removeAttr('disabled');  
   }
-
-}
-
-if (Drupal.jsEnabled) {
-  $(document).ready(Drupal.og_accessAttach);
 }
