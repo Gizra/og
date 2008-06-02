@@ -297,12 +297,12 @@ function og_views_data_og_ancestry() {
       'handler' => 'views_handler_field_og_group_nids',
     ),
     'relationship' => array(
-      'title' => t('Group node'),
-      'help' => t('Bring in information about the group node.'),
+      'title' => t('Group node (post)'),
+      'help' => t('Bring in information about the group node based on a post\'s groups.'),
       'base' => 'node',
       'field' => 'group_nid',
       'handler' => 'views_handler_relationship',
-      'label' => t('Group'),
+      'label' => t('Group node (post)'),
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_og_group_nid',
@@ -373,7 +373,7 @@ class views_handler_argument_og_group_nid extends views_handler_argument_numeric
 class views_handler_field_og_group_nids extends views_handler_field_prerender_list {
   function init(&$view, $options) {
     parent::init($view, $options);
-    $this->additional_fields['nid'] = array('table' => 'og_ancestry', 'field' => 'nid');
+    $this->additional_fields['og_ancestry_nid'] = array('table' => 'og_ancestry', 'field' => 'nid');
   }
   
   /**
@@ -386,7 +386,7 @@ class views_handler_field_og_group_nids extends views_handler_field_prerender_li
   // we have to query to get all the groups into a single element
   function pre_render($values) {
     // field_alias is used by our render method.
-    $this->field_alias = $this->aliases['nid'];
+    $this->field_alias = $this->aliases['og_ancestry_nid'];
     foreach ($values as $value) {
       $result = og_get_node_groups_result($value->nid);
       while ($row = db_fetch_object($result)) {
@@ -420,27 +420,19 @@ function og_views_data_og_uid() {
     'users' => array(
       'left_field' => 'uid',
       'field' => 'uid',
-      // Not desireable anymore. We need to list pending requests.
-      // 'extra' => array(
-      //        array('field' => 'is_active', 'value' => 1, 'numeric' => TRUE),
-      //      ),
     ),
   );
   
   $data['og_uid']['nid'] = array(
     'title' => t('Group'),
     'help' => t('Group that a member belongs to.'),
-    'filter' => array(
-      'handler' => 'views_handler_filter_user_current',
-      'help' => t('Posts are filtered to where current user is a member.'),
-    ),
     'relationship' => array(
-      'title' => t('Group node'),
-      'help' => t('Bring in information about the group node.'),
+      'title' => t('Group node (member)'),
+      'help' => t('Bring in information about the group node based on a user\'s membership.'),
       'base' => 'node',
       'field' => 'nid',
       'handler' => 'views_handler_relationship',
-      'label' => t('Group'),
+      'label' => t('Group node (member)'),
     ),
     'argument' => array(
       'title' => t('Group node'),

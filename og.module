@@ -94,7 +94,7 @@ function og_menu() {
     'title' => 'Delete group administrator',
   );
   
-  // members only and can't be invite or closed
+  // members only and group may not be invite-only or closed
   $items['og/invite/%node'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_invite_form', 2),
@@ -205,7 +205,7 @@ function og_menu_access_unsubscribe($group_node, $account) {
 } 
 
 function og_menu_access_invite($node) {
-  return $node->og_selective < OG_INVITE_ONLY || og_is_group_admin($node);
+  return og_is_group_member($node) && ($node->og_selective < OG_INVITE_ONLY || og_is_group_admin($node));
 }
 
 function og_menu_access_picture($gid) {
@@ -873,7 +873,7 @@ function og_subscribe_user($gid, $account, $request = NULL) {
   switch ($node->og_selective) {
     case OG_MODERATED:
       og_save_subscription($gid, $account->uid, array('is_active' => 0));
-      $sql = og_list_users_sql(1, 1);
+      $sql = og_list_users_sql(1, 1, NULL);
       $res = db_query($sql, $node->nid);
       while ($row = db_fetch_object($res)) {
         if ($row->mail) {
@@ -982,7 +982,9 @@ function og_list_users_sql($min_is_active = 1, $min_is_admin = 0, $orderby='u.na
   }
   else {
     $fields = "u.uid, u.name, u.mail, u.picture, ou.*";
-    $order = "ORDER BY $orderby";
+    if ($orderby) {
+      $order = "ORDER BY $orderby";
+    }
   }
   return "SELECT $fields FROM {og_uid} ou INNER JOIN {users} u ON ou.uid = u.uid WHERE ou.nid = %d AND u.status > 0 AND ou.is_active >= $min_is_active AND ou.is_admin >= $min_is_admin $order";
 }
@@ -2462,7 +2464,7 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     $blocks[0]['region'] = 'left';
     $blocks[0]['weight'] = -2;
     $blocks[5]['status'] = 1;
-    $blocks[0]['region'] = 'left';
+    $blocks[5]['region'] = 'left';
     $blocks[5]['weight'] = -1;
     return $blocks;
   }
@@ -2630,7 +2632,7 @@ function og_block_details() {
  */
  function og_subscriber_count_link($node) {
   global $user;
-  $result = db_query(og_list_users_sql(0), $node->nid);
+  $result = db_query(og_list_users_sql(0, 0, NULL), $node->nid);
   $cntpending = $cntall = 0;
   while ($row = db_fetch_object($result)) {
     $cntall++;
