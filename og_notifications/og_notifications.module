@@ -64,8 +64,9 @@ function og_notifications_form_alter($form_id, &$form) {
       // General content settings
       $select = array();
       $nodetypes = node_get_types();
-      foreach ($nodetypes as $ntype => $nname) {
-        $select[$ntype] = $nname->name;
+      $ogtypes = og_get_types('group_post');
+      foreach ($ogtypes as $ntype) {
+        $select[$ntype] = $nodetypes[$ntype]->name;
       }
 
       $form['group']['og_notifications_content_types'] = array(
@@ -505,7 +506,7 @@ function _og_notifications_node_options($account, $node) {
     foreach ($node->og_groups as $index => $gid) {
       // Content type
       $options[] = array(
-        'name' => t('Posts in group %name', array('%name' => $node->og_groups_names[$index])),
+        'name' => t('Posts in group %name', array('%name' => $node->og_groups_both[$gid])),
         'type' => 'group',
         'fields' => array('group' => $gid),
       );
