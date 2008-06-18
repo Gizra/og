@@ -60,7 +60,7 @@
 <?php endif; ?>
 
   <div class="meta">
-  <?php if ($submitted): ?>
+  <?php if (isset($submitted)): ?>
     <span class="submitted"><?php print $submitted ?></span>
   <?php endif; ?>
 

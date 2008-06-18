@@ -405,7 +405,7 @@ function og_set_theme($nid) {
       default:
         // Node is in multiple groups. Preference goes to the group we showed on the prior page view (if any),
         // Then to a group the current user is a member of
-        if (in_array($_SESSION['og_last']->nid, $node->og_groups)) {
+        if (isset($_SESSION['og_last']) && in_array($_SESSION['og_last']->nid, $node->og_groups)) {
           $group_node = node_load($_SESSION['og_last']->nid);
           $custom_theme = $group_node->og_theme;
         }
@@ -1178,10 +1178,8 @@ function og_selective_map() {
  *
  * @param object $node
  */
-function og_group_form($node) {
+function og_group_form($node, $form_state) {
   global $user;
-  
-  $edit = $_POST['edit'];
 
   $form['og_description'] = array(
     '#type' => 'textfield', 
@@ -1280,8 +1278,8 @@ function og_group_form($node) {
       );
     }
   }
-  
-  if ($theme_form = system_theme_select_form(t('Selecting a different theme will change the look and feel of the group.'), $edit['theme'] ? $edit['theme'] : $node->og_theme, 2)) {
+
+  if ($theme_form = system_theme_select_form(t('Selecting a different theme will change the look and feel of the group.'), isset($form_state['values']['theme']) ? $form_state['values']['theme'] : $node->og_theme, 2)) {
     $theme_form['themes']['#weight'] = 8;
     $form += $theme_form;
   }
@@ -1321,6 +1319,11 @@ function og_presave_group(&$node) {
     $node->og_theme = NULL;
   }
   
+  // TODOL Once ancestry table uses drupal_write_record(), this is not needed.
+  if (!isset($node->og_public)) {
+    $node->og_public = TRUE;
+  }
+  
   // Normalize og_groups array
   if (isset($node->og_groups)) {
     $node->og_groups = array_filter($node->og_groups);
@@ -1329,7 +1332,7 @@ function og_presave_group(&$node) {
   
   // Support devel module's bulk node generation.
   // Affiliate up group posts with a group. Also populate special group fields.
-  if ($node->devel_generate) {
+  if (isset($node->devel_generate)) {
     og_devel_generate($node);
   }
 }
@@ -1375,6 +1378,7 @@ function og_insert_group($node) {
 
 function og_update_group($node) {
   // If an existing node becomes a group, then a row may not be present in {og} table.
+  // TODOH Rename fields, use drupal_write_record(), gets rid of notices when updating group.
   $sql = "SELECT nid FROM {og} WHERE nid = %d";
   if (db_result(db_query($sql, $node->nid))) {
     $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', directory = %d, notification = %d, language = '%s', private = %d WHERE nid = %d";
@@ -1404,7 +1408,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'view':
       $group_node = og_get_group_context();
       
-      if ($group_node && $page && $node->og_groups) {
+      if ($group_node && $page && !empty($node->og_groups)) {
         $bc = og_get_breadcrumb($group_node);
         drupal_set_breadcrumb($bc);
       }
@@ -1512,7 +1516,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_save_subscription($node->nid, $node->uid, array('is_active' => 1, 'is_admin' => 1));
         // load new group into $user->og_groups so that author can get redirected to the new group
         if ($node->uid == $user->uid) {
-          $user->og_groups = og_get_subscriptions($account->uid, 1, TRUE);
+          $user->og_groups = og_get_subscriptions($user->uid, 1, TRUE);
         }
       }
       else {
@@ -1566,7 +1570,7 @@ function og_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['#node']) && $form_id == $form['#node']->type .'_node_form') {
     $node = $form['#node'];
     if (og_is_group_type($node->type)) {
-      $form = array_merge($form, og_group_form($node));
+      $form = array_merge($form, og_group_form($node, $form_state));
       
       // Don't trample on custom label.
       if ($form['body_field']['body']['#title'] == t('Body')) {
@@ -1763,7 +1767,7 @@ function og_node_groups_distinguish($groups_names_both, $exclude_joined = TRUE) 
 function og_form_add_og_audience(&$form, &$form_state) {
   global $user;
   // determine the selected groups if fapi doesn't tell us.
-  if ($_SERVER["REQUEST_METHOD"] == 'GET') {
+  if (isset($_GET['gids'])) {
     $gids = $_GET['gids'];
   }
   
@@ -1831,7 +1835,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
     // also show read only mode if user has 1 option and we are in required mode
     $simple = TRUE;
   }
-  elseif ($gids) {
+  elseif (!empty($gids)) {
    // populate field from the querystring if sent
    $groups = $gids;
    if (!user_access('administer nodes') && $simple) {
