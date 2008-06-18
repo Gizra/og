@@ -96,7 +96,7 @@ function og_admin_settings() {
     '#description' => t('Do you require that all (non administrator) posts be affiliated with a group? Note that changing this setting will affect existing posts when they are edited.')
   );
   unset($options);
-  
+
   $form['og_settings']['email'] = array(
     '#type' => 'fieldset', 
     '#title' => t('Email settings'), 
