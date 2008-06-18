@@ -380,7 +380,8 @@ function og_get_group_context() {
  */
 function og_set_group_context($group_node = NULL) {
   static $stored_group_node;
-  if (og_is_group_type($group_node->type)) {
+  
+  if (is_object($group_node) && og_is_group_type($group_node->type)) {
     $stored_group_node = $group_node;
   }
   return $stored_group_node;
