@@ -1319,7 +1319,7 @@ function og_presave_group(&$node) {
   }
   
   // Normalize og_groups array
-  if (is_array($node->og_groups)) {
+  if (isset($node->og_groups)) {
     $node->og_groups = array_filter($node->og_groups);
     $node->og_groups = array_keys($node->og_groups);
   }
@@ -2330,7 +2330,7 @@ function og_save_ancestry($node) {
   if (og_is_group_post_type($node->type)) {
     $sql = "DELETE FROM {og_ancestry} WHERE nid = %d";
     db_query($sql, $node->nid);
-    if (is_array($node->og_groups)) {
+    if (isset($node->og_groups)) {
       $node->og_groups = array_unique($node->og_groups);
       foreach ($node->og_groups as $gid) {
         $sql = "INSERT INTO {og_ancestry} (nid, group_nid, is_public) VALUES (%d, %d, %d)";
