@@ -2260,7 +2260,6 @@ function og_save_ancestry($node) {
  * An implementation of hook_node_type. Automatically update admin preferences when node type is renamed or removed.
  */
 function og_node_type($op, $info) {
-  $values = variable_get($variable, array());
   switch ($op) {
     case 'delete':
       variable_del('og_content_type_usage_'. $info->type);
