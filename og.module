@@ -256,9 +256,10 @@ function og_preprocess_og_mission(&$variables) {
  * @return void
  **/
 function og_preprocess_node(&$variables) {
+  $og_links = array(); 
   $node = $variables['node'];
-  if (og_is_group_post_type($node->type)) {
-    // TODO: _both is not present during node preview this does not work there.
+  // TODO: _both is not present during node preview group links don't curently show there.
+  if (og_is_group_post_type($node->type) && $node->build_mode != NODE_BUILD_PREVIEW) {
     $current_groups = og_node_groups_distinguish($node->og_groups_both, FALSE);
     foreach ($current_groups['accessible'] as $gid => $item) {
       $og_links['og_'. $gid] = array('title' => $item['title'], 'href' => "node/$gid");
@@ -395,7 +396,7 @@ function og_set_theme($nid) {
     return $node;
   }
   else {
-    switch (count($node->og_groups)) {
+    switch (!empty($node->og_groups)) {
       case 0:
         return NULL;
       case 1:
@@ -839,10 +840,20 @@ function og_subscribe($gid, $uid = NULL) {
  * Confirm og membership form
  */
 function og_confirm_subscribe($form_state, $gid, $node, $account) {
- $form['gid'] = array('#type' => 'value', '#value' => $gid);
- $form['account'] = array('#type' => 'value', '#value' => $account);
- if ($node->og_selective == OG_MODERATED) {
-   $form['request'] = array('#type' => 'textarea', '#title' => t('Additional details'), '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.'));
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+  $form['account'] = array('#type' => 'value', '#value' => $account);
+  if ($node->og_selective == OG_MODERATED) {
+    $form['request'] = array(
+      '#type' => 'textarea', 
+      '#title' => t('Additional details'), 
+      '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
+    );
+  }
+  else {
+    $form['request'] = array(
+      '#type' => 'value', 
+      '#value' => '',
+   );
  }
  return confirm_form($form, 
                 t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
@@ -873,6 +884,7 @@ function og_subscribe_user($gid, $account, $request = NULL) {
   $node = node_load($gid);
   switch ($node->og_selective) {
     case OG_MODERATED:
+      $admins = array();
       og_save_subscription($gid, $account->uid, array('is_active' => 0));
       $sql = og_list_users_sql(1, 1, NULL);
       $res = db_query($sql, $node->nid);
@@ -1135,7 +1147,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
       
 
       // Views will set either total_rows or num_rows depending on whether View has a pager.
-      if ($view->total_rows || $view->num_rows || $view->page_empty) {
+      if (@$view->total_rows || @$view->num_rows || @$view->page_empty) {
         $node->content['view'] = array('#value' => $built);
       }
       elseif (empty($_POST)) {
@@ -1587,7 +1599,7 @@ function og_form_alter(&$form, &$form_state, $form_id) {
     elseif (og_is_group_post_type($node->type)) {
         if ($group_node = og_get_group_context()) {
         $bc = og_get_breadcrumb($group_node);
-        if ($node->nid) {
+        if (isset($node->nid)) {
           $bc[] = l($node->title, "node/$node->nid");
         }
         drupal_set_breadcrumb($bc);
@@ -2649,6 +2661,7 @@ function og_block_details() {
   global $user;
   $result = db_query(og_list_users_sql(0, 0, NULL), $node->nid);
   $cntpending = $cntall = 0;
+  $subscription = '';
   while ($row = db_fetch_object($result)) {
     $cntall++;
     if ($row->is_active == 0) {
