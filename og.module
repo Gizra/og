@@ -986,6 +986,9 @@ function og_list_users_sql($min_is_active = 1, $min_is_admin = 0, $orderby='u.na
     if ($orderby) {
       $order = "ORDER BY $orderby";
     }
+    else {
+      $order = '';
+    }
   }
   return "SELECT $fields FROM {og_uid} ou INNER JOIN {users} u ON ou.uid = u.uid WHERE ou.nid = %d AND u.status > 0 AND ou.is_active >= $min_is_active AND ou.is_admin >= $min_is_admin $order";
 }
@@ -2322,10 +2325,12 @@ function og_user($op, $edit, &$account, $category = NULL) {
         foreach ($account->og_groups as $key => $val) {
           $links[$key] = l($val['title'], "node/$key") . theme('og_format_subscriber_status', $val);
         }
-        return $user->content['summary']['groups'] = array(
+
+        $account->content['summary']['groups'] = array(
           '#title' => t('Groups'),
-          '#value' => $links,
-          '#theme' => 'item_list',
+          '#value' => theme('item_list', $links),
+          // Not working in 6
+          // '#theme' => 'item_list',
           '#attributes' => array('class' => 'og_groups'),
           // Only show list of groups to self and admins. TOOD: Make this configurable or doable via Views.
           '#access' => $account->uid == $user->uid || user_access('administer organic groups'),
@@ -2589,6 +2594,7 @@ function og_block_details() {
     
   // Only display group details if we have a group context.
   if (($node = og_get_group_context()) && node_access('view', $node)) {
+    $suffix = '';
     list($txt, $subscription) = og_subscriber_count_link($node);
     if ($subscription == 'active' || user_access('administer nodes')) {
       $links = module_invoke_all('og_create_links', $node);
