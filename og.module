@@ -1616,7 +1616,7 @@ function og_node_delete_confirm_submit($form_id, $form_values) {
     unset($node->og_groups[$deleted_group_nid]);
     if ($move_children) {
       // there is an array_unique() in og_save_ancestry which giards against duplicates so don't worry here.
-      $node->og_groups[] = $target_group_nid;
+      $node->og_groups[$target_group_nid] = $target_group_nid;
     }
     if ($delete_orphans && count($node->og_groups) == 0) {
       node_delete($node->nid);
@@ -2314,7 +2314,7 @@ function og_is_mail_type($type) {
 function og_is_wiki_type($type) {
   $usage = variable_get('og_content_type_usage_'. $type, 'omitted');
   return strpos($usage, 'wiki') ? TRUE : FALSE;
-}
+}``
 
 // returns TRUE if node type can be posted into a group.
 function og_is_group_post_type($type) {
