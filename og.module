@@ -2710,13 +2710,14 @@ function og_subscribe_link($node) {
 // $group is an object containing a group node.
 // TODO: Make this a proper menu
 function og_og_create_links($group) {
+  global $user;
   $post_types = og_get_types('group_post');
   $types = node_get_types();
   foreach ($post_types as $post_type) {
     // We used to check for node_access(create) but then node admins would get a false positive and see node types that they could not create.
     // When this becomes a proper menu in D6, we get sorting for free
     $type_name = $types[$post_type]->name;
-    if (module_invoke($types[$post_type]->module, 'access', 'create', $post_type)) {
+    if (module_invoke($types[$post_type]->module, 'access', 'create', $post_type, $user)) {
       $links["create_$post_type"] = l(t('Create !type', array('!type' => $type_name)), "node/add/$post_type", array(
         'title' => t('Add a new !s in this group.', array('!s' => $type_name)),
         'query' => "gids[]=$group->nid",
