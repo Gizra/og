@@ -226,7 +226,8 @@ function og_access_node_access_records($node) {
       'gid' => $node->nid, 
       'grant_view' => 1, 
       'grant_update' => 1, 
-      'grant_delete' => 1
+      'grant_delete' => 1,
+      'priority' => 0,
     );
     
     if (!$node->og_private) {
@@ -236,7 +237,9 @@ function og_access_node_access_records($node) {
         'gid' => 0,
         'grant_view' => 1,
         'grant_update' => 0,
-        'grant_delete' => 0 );
+        'grant_delete' => 0,
+        'priority' => 0,
+      );
     }
     else {
       // If the group private, let subscribers view the group homepage.
@@ -245,27 +248,49 @@ function og_access_node_access_records($node) {
         'gid' => $node->nid,
         'grant_view' => 1,
         'grant_update' => 0,
-        'grant_delete' => 0
+        'grant_delete' => 0,
+        'priority' => 0,
       );
 
     }
   }
-  elseif (is_array($node->og_groups)) {
+  elseif (!empty($node->og_groups)) {
     // Applies to non group nodes.
     if ($node->og_public) {
-      $grants[] = array('realm' => 'og_public', 'gid' => 0, 'grant_view' => 1, 'grant_update' => 0, 'grant_delete' => 0);
+      $grants[] = array(
+        'realm' => 'og_public', 
+        'gid' => 0, 
+        'grant_view' => 1, 
+        'grant_update' => 0, 
+        'grant_delete' => 0,
+        'priority' => 0,
+      );
     }
     
     foreach ($node->og_groups as $gid) {
       // Group administrators get all operations.
-      $grants[] = array('realm' => 'og_admin', 'gid' => $gid, 'grant_view' => 1, 'grant_update' => 1, 'grant_delete' => 1);
+      $grants[] = array(
+        'realm' => 'og_admin', 
+        'gid' => $gid, 
+        'grant_view' => 1, 
+        'grant_update' => 1, 
+        'grant_delete' => 1,
+        'priority' => 0,
+      );
       // Normal subscribers just get update operation if node type is a wiki type.
       $is_wiki = og_is_wiki_type($node->type);
-      $grants[] = array('realm' => 'og_subscriber', 'gid' => $gid, 'grant_view' => 1, 'grant_update' => $is_wiki, 'grant_delete' => 0);
+      $grants[] = array(
+        'realm' => 'og_subscriber', 
+        'gid' => $gid, 
+        'grant_view' => 1, 
+        'grant_update' => $is_wiki, 
+        'grant_delete' => 0,
+        'priority' => 0,
+      );
     }
   }
 
-  return $grants;
+  return isset($grants) ? $grants : NULL;
 }
 
 /**
