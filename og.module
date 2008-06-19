@@ -1346,7 +1346,7 @@ function og_presave_group(&$node) {
   }
   
   // Support devel module's bulk node generation.
-  // Affiliate up group posts with a group. Also populate special group fields.
+  // Affiliate group posts with group(s). Also populate special group fields.
   if (isset($node->devel_generate)) {
     og_devel_generate($node);
   }
@@ -1671,11 +1671,25 @@ function og_node_delete_group_form(&$form) {
   if (user_access('administer nodes')) {
     $options[] = t('Move all group posts to the group listed below.');
   }
-  $form['verb'] = array('#type' => 'radios', '#title' => t('Group posts'), '#options' => $options, '#weight' => 0, '#description' => t('In addition to deleting this group, you may choose how to disposition the posts within it.'));
+  $form['verb'] = array(
+    '#type' => 'radios', 
+    '#title' => t('Group posts'), 
+    '#options' => $options, 
+    '#weight' => -1, 
+    '#description' => t('In addition to deleting this group, you may choose how to disposition the posts within it.')
+  );
   if (user_access('administer nodes')) {
     $options = og_all_groups_options();
     unset($options[$form['nid']['#value']]);
-    $form['target'] = array('#type' => 'select', '#title' => t('Target group'), '#default_value' => 0, '#options' => $options, '#weight' => 0, '#description' => t('If you chose <strong>Move all group posts</strong> above, specify a destination group.'));
+    $form['target'] = array(
+      '#type' => 'select', 
+      '#title' => t('Target group'), 
+      '#default_value' => 0, 
+      '#options' => $options, 
+      '#weight' => 0, 
+      '#description' => t('If you chose <strong>Move all group posts</strong> above, specify a destination group.'),
+    );
+    
     // register a submit handler
     $form['#submit'][] = 'og_node_delete_confirm_submit';
   }
@@ -1713,7 +1727,7 @@ function og_node_delete_confirm_submit($form, &$form_state) {
     unset($node->og_groups[$deleted_group_nid]);
     if ($move_children) {
       // there is an array_unique() in og_save_ancestry which guards against duplicates so don't worry here.
-      $node->og_groups[] = $target_group_nid;
+      $node->og_groups[$target_group_nid] = $target_group_nid;
     }
     if ($delete_orphans && count($node->og_groups) == 0) {
       node_delete($node->nid);
@@ -1723,7 +1737,7 @@ function og_node_delete_confirm_submit($form, &$form_state) {
     }
   }
   if ($move_children) {
-    return 'node/'. $target_group_nid;
+    $form_state['redirect']  = 'node/'. $target_group_nid;
   }
 }
 
