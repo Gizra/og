@@ -2314,7 +2314,7 @@ function og_is_mail_type($type) {
 function og_is_wiki_type($type) {
   $usage = variable_get('og_content_type_usage_'. $type, 'omitted');
   return strpos($usage, 'wiki') ? TRUE : FALSE;
-}``
+}
 
 // returns TRUE if node type can be posted into a group.
 function og_is_group_post_type($type) {
