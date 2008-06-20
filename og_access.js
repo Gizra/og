@@ -99,7 +99,6 @@ Drupal.behaviors.og_access_group_node = function() {
    * Disable "Visible only within the targeted groups" if private groups set to "always public"
    */
 Drupal.behaviors.og_access_admin_settings = function() {
-  console.log("hi");
   $("input[@Name='og_private_groups']").click(function() {
       if ( $("input[@Name='og_private_groups']:checked").val() == 1 ) {
         $("input[@name='og_visibility']:nth(0)").removeAttr('disabled');
