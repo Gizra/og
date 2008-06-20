@@ -2353,6 +2353,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
         }
 
         $account->content['summary']['groups'] = array(
+          '#type' => 'item',
           '#title' => t('Groups'),
           '#value' => theme('item_list', $links),
           // Not working in 6
