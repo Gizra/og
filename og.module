@@ -1031,7 +1031,7 @@ function og_add_users_og_names_validate($form, $form_state) {
       $uids[] = $account->uid;
     }
     else {
-      $bad[] = $name;
+      $bad[] = check_plain($name);
       $err = TRUE;
     }
   }
