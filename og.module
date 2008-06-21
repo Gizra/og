@@ -889,7 +889,7 @@ function og_add_users_validate($form_id, $form_values) {
       $uids[] = $account->uid;
     }
     else {
-      $bad[] = $name;
+      $bad[] = check_plain($name);
       $err = TRUE;
     }
   }
