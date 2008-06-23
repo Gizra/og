@@ -167,23 +167,3 @@ $handler->override_option('tab_options', array(
   'title' => '',
   'weight' => 0,
 ));
-$handler = $view->new_display('feed', 'Feed', 'feed');
-$handler->override_option('row_plugin', 'node_rss');
-$handler->override_option('row_options', array(
-  'item_length' => 'default',
-));
-$handler->override_option('path', 'og/my/feed');
-$handler->override_option('menu', array(
-  'type' => 'none',
-  'title' => '',
-  'weight' => 0,
-));
-$handler->override_option('tab_options', array(
-  'type' => 'none',
-  'title' => '',
-  'weight' => 0,
-));
-$handler->override_option('displays', array(
-  'default' => 'default',
-  'page' => 'page',
-));
