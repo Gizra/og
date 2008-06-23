@@ -990,6 +990,7 @@ function og_get_subscriptions($uid, $min_is_active = 1, $reset = FALSE) {
 }
 
 function og_list_users_sql($min_is_active = 1, $min_is_admin = 0, $orderby='u.name ASC', $count = FALSE) {
+  $order = '';
   if ($count) {
     $fields = 'COUNT(*)';
   }
@@ -997,9 +998,6 @@ function og_list_users_sql($min_is_active = 1, $min_is_admin = 0, $orderby='u.na
     $fields = "u.uid, u.name, u.mail, u.picture, ou.*";
     if ($orderby) {
       $order = "ORDER BY $orderby";
-    }
-    else {
-      $order = '';
     }
   }
   return "SELECT $fields FROM {og_uid} ou INNER JOIN {users} u ON ou.uid = u.uid WHERE ou.nid = %d AND u.status > 0 AND ou.is_active >= $min_is_active AND ou.is_admin >= $min_is_admin $order";
