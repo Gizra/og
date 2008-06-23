@@ -50,7 +50,7 @@ function og_menu() {
     'type' => MENU_CALLBACK, 
     'page callback' => 'og_opml', 
     'access callback' => 'user_is_logged_in', 
-    'title' => t('OPML')
+    'title' => 'OPML',
   );
   $items['og/unsubscribe/%node/%user'] = array(
     'type' => MENU_CALLBACK, 
@@ -100,7 +100,7 @@ function og_menu() {
     'page arguments' => array('og_invite_form', 2),
     'access callback' => 'og_menu_access_invite', 
     'access arguments' => array(2),
-    'title' => t('Send invitation'), 
+    'title' => 'Send invitation', 
     'type' => MENU_CALLBACK, 
   );
   $items["og/manage/%node"] = array(
@@ -108,7 +108,7 @@ function og_menu() {
     'page arguments' => array(2),
     'access callback' => 'og_is_group_member', 
     'access arguments' => array(2),
-    'title' => t('Manage membership'), 
+    'title' => 'Manage membership', 
     'type' => MENU_CALLBACK, 
   );
   
@@ -141,7 +141,7 @@ function og_menu() {
 
   // This exists because I can't easily restrict access based on pictures_enabled using Views.
   $items['og/users/%/faces'] = array(
-    'title' => t('Faces'), 
+    'title' => 'Faces', 
     'page callback' => 'views_page',
     'page arguments' => array('og_members_faces', 'default', 2),
     'type' => MENU_LOCAL_TASK,
@@ -162,7 +162,7 @@ function og_menu() {
   
   // Email tab on group node.
     $items['node/%node/email'] = array(
-      'title' => t('E-mail'),
+      'title' => 'E-mail',
       'page callback' => 'drupal_get_form', 
       'page arguments' => array('og_email_form', 1), 
       'access callback' => 'og_is_group_admin', 

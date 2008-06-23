@@ -14,8 +14,8 @@ function og_panels_menu($may_cache) {
   if ($may_cache) {
     $items[] = array(
       'path' => 'admin/og/og_panels',
-      'title' => t('Organic groups panels'),
-      'description' => t('Configure the content that is available to group admins when creating group pages.'),
+      'title' => 'Organic groups panels',
+      'description' => 'Configure the content that is available to group admins when creating group pages.',
       'callback' => 'og_panels_admin_content',
       'access' => user_access('administer organic groups'),
     );
@@ -27,7 +27,7 @@ function og_panels_menu($may_cache) {
         $nid = arg(1);
         $items[] = array(
           'path' => "node/$nid/og_panels",
-          'title' => t('Pages'),
+          'title' => 'Pages',
           'callback' => 'og_panels_overview',
           'callback arguments' => array($node),
           'access' => og_is_group_admin($node) && user_access('manage OG panels pages'),
@@ -37,7 +37,7 @@ function og_panels_menu($may_cache) {
         
         $items[] = array(
           'path' => "node/$nid/og_panels/list",
-          'title' => t('List'),
+          'title' => 'List',
           'type' => MENU_DEFAULT_LOCAL_TASK,
           'weight' => -10,
         );
@@ -46,7 +46,7 @@ function og_panels_menu($may_cache) {
           'path' => "node/$nid/og_panels/form",
           'callback' => 'drupal_get_form',
           'callback arguments' => array('og_panels_form', $node),
-          'title' => arg(4) ? t('Edit page') : t('Add new page'),
+          'title' => arg(4) ? 'Edit page' : 'Add new page',
           'type' => MENU_LOCAL_TASK,
           'weight' => 0, 
         );
@@ -116,7 +116,7 @@ function og_panels_menu($may_cache) {
           
           $items[] = array(
             'path' => "node/$nid/og_panels/". arg(3). '/delete',
-            'title' => t('Delete'),
+            'title' => 'Delete',
             'callback' => 'drupal_get_form',
             'callback arguments' => array('og_panels_delete_confirm', arg(3), $node),
             'type' => MENU_CALLBACK,

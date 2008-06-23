@@ -15,8 +15,8 @@ define('OG_VISIBLE_CHOOSE_PRIVATE', 3);
 
 function og_access_menu() {
   $items['admin/og/og_access'] = array(
-    'title' => t('Organic groups access configuration'),
-    'description' => t('Choose whether new groups should be private or public'),
+    'title' => 'Organic groups access configuration',
+    'description' => 'Choose whether new groups should be private or public',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_access_settings'),
     'access arguments' => array('administer site configuration'),
