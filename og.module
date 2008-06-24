@@ -2718,8 +2718,9 @@ function og_og_create_links($group) {
     // We used to check for node_access(create) but then node admins would get a false positive and see node types that they could not create.
     // When this becomes a proper menu in D6, we get sorting for free
     $type_name = $types[$post_type]->name;
+    $type_url_str = str_replace('_', '-', $post_type);
     if (module_invoke($types[$post_type]->module, 'access', 'create', $post_type, $user)) {
-      $links["create_$post_type"] = l(t('Create !type', array('!type' => $type_name)), "node/add/$post_type", array(
+      $links["create_$post_type"] = l(t('Create !type', array('!type' => $type_name)), "node/add/$type_url_str", array(
         'title' => t('Add a new !s in this group.', array('!s' => $type_name)),
         'query' => "gids[]=$group->nid",
         ));
