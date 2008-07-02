@@ -265,6 +265,24 @@ function og_preprocess_og_mission(&$variables) {
 }
 
 /**
+ * Make group context available to javascript for ad tags and anaytics.
+ * 
+ * @return void
+ **/
+function og_preprocess_page(&$variables) {
+  if ($group_node = og_get_group_context()) {
+    $data = array(array('og' => array('group_context' => array(
+      'nid' => $group_node->nid, 
+      'title' => $group_node->title,
+      'type' => $group_node->type,
+    ))));
+    // Copied from drupal_get_js().
+    $js =  "\n". '<script type="text/javascript">jQuery.extend(Drupal.settings, '. drupal_to_js(call_user_func_array('array_merge_recursive', $data)) .");</script>\n";
+    $variables['scripts'] .= $js;
+  }
+}
+
+/**
  * Enrich non group nodes with the list og groups that the node belongs to.
  * 
  * @return void
@@ -313,6 +331,7 @@ function og_init() {
   if ($node = og_determine_context()) {
     og_set_language($node);
   }
+  // TODOL: try to set this less often to avoid filling sessions table during spidering.
   $_SESSION['og_last'] = $node;
 }
 
@@ -398,14 +417,6 @@ function og_set_group_context($group_node = NULL) {
   
   if (is_object($group_node) && og_is_group_type($group_node->type)) {
     $stored_group_node = $group_node;
-    drupal_add_js(
-      array('og' => array('group_context' => array(
-        'nid' => $group_node->nid, 
-        'title' => $group_node->title,
-        'type' => $group_node->type,
-        ))),
-      'setting'
-    );
   }
   return $stored_group_node;
 }
@@ -844,12 +855,12 @@ function og_subscribe($node, $uid = NULL) {
     exit();
   }
   
-  // only admins can add another member
+  // Only admins can add another member.
   if ($account->uid != $user->uid && !og_is_group_admin($node)) {
     drupal_access_denied();
     exit();
   }
-  // user is already a member of this group, redirect to group homepage
+  // User is already a member of this group, redirect to group homepage.
   else if (isset($account->og_groups[$node->nid])) {
     drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title)));
     drupal_goto('node/'. $node->nid);
@@ -981,7 +992,7 @@ function og_confirm_unsubscribe_submit($form, &$form_state) {
 /**
  * Load all memberships for a given user. 
  * 
- * Since a user's memberships are loaded into $user object, this function is only occassionally 
+ * Since a user's memberships are loaded into $user object, this function is only occasionally 
  * useful to get group memberships for users other than the current user. Even
  * then, it often makes sense to call user_load() instead of this function.
  * 
@@ -1126,7 +1137,7 @@ function og_page_activity() {
 /**
  * When you view a group, you really see some facts about the group in a block and then 
  * lists of nodes affiliated with that group. The node list is provided by the View of 
- * your choice (see admin/og/og). If you use og_panels.module and the group has defined
+ * your choice (see the variable 'og_home_page_view'). If you use og_panels.module and the group has defined
  * a default home page, then that page becomes the presentation of the GHP.
  *
  * @return void
@@ -1156,7 +1167,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
     );
     
     $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
-    if ($view->disabled) { 
+    if (!empty($view->disabled)) { 
       // Do nothing. Assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
     }
     else {
@@ -1685,7 +1696,7 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
 }
 
 // Add option to migrate messages before deleting a group.
-// TODOL: add option to move memberships as well
+// TODO: add option to move memberships as well
 function og_form_node_delete_confirm_alter(&$form, &$form_state) {
   $node = node_load($form['nid']['#value']);
   if (og_is_group_type($node->type)) {
@@ -1749,6 +1760,7 @@ function og_node_delete_nongroup_form(&$form) {
 
 // Return all node ids belonging to a group. No access control.
 // If you are retrieving for displaying, you should use code like below instead of this function:
+// TODO: update this comment
 // $info = views_build_view('items', $view, array($group_nid));
 function og_group_child_nids($group_nid) {
   $result = db_query('SELECT oga.nid FROM {og_ancestry} oga WHERE oga.group_nid = %d', $group_nid);
@@ -1759,7 +1771,7 @@ function og_group_child_nids($group_nid) {
   return $child_nids;
 }
 
-// Submit handler for node delete form. handles deletes to group nodes.
+// Submit handler for node delete form. Handles deletes to group nodes.
 function og_node_delete_confirm_submit($form, &$form_state) {
   $deleted_group_nid = $form_state['values']['nid'];
   $target_group_nid = $form_state['values']['target'];
@@ -1784,7 +1796,7 @@ function og_node_delete_confirm_submit($form, &$form_state) {
   }
 }
 
-// Return an array containing all groups. suitable for a form item
+// Return an array containing all groups - suitable for a form item.
 function og_all_groups_options() {
   list($types, $in) = og_get_sql_args();
   $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type $in AND n.status = 1 ORDER BY n.title ASC";
@@ -1838,7 +1850,7 @@ function og_node_groups_distinguish($groups_names_both, $exclude_joined = TRUE) 
  */
 function og_form_add_og_audience(&$form, &$form_state) {
   global $user;
-  // determine the selected groups if fapi doesn't tell us.
+  // Determine the selected groups if FAPI doesn't tell us.
   if (isset($_GET['gids'])) {
     $gids = $_GET['gids'];
   }
@@ -1899,7 +1911,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
     }
   }
   
-  // show read only item if we are non-admin, and in simple mode (i.e. non-checkboxes) and at least one group is in querystring
+  // Show read only item if we are non-admin, and in simple mode (i.e. non-checkboxes) and at least one group is in querystring
   $simple = !user_access('administer organic groups') && !variable_get('og_audience_checkboxes', TRUE) && count($gids);
   
   // determine value of audience multi-select
