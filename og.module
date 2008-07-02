@@ -388,7 +388,6 @@ function og_set_group_context($group_node = NULL) {
       array('og' => array('group_context' => array(
         'nid' => $group_node->nid, 
         'title' => $group_node->title,
-        'taxonomy' => isset($group_node->taxonomy) ? $group_node->taxonomy : array(),
         'type' => $group_node->type,
         ))),
       'setting'
