@@ -38,11 +38,13 @@ function og_help($path, $arg) {
 }
 
 function og_menu() {
-  // anon users should be able to get to the join page
-  $items['og/subscribe'] = array(
+  // Anon users should be able to get to the join page
+  $items['og/subscribe/%node'] = array(
     'type' => MENU_CALLBACK, 
-    'page callback' => 'og_subscribe', 
-    'access callback' => TRUE, 
+    'page callback' => 'og_subscribe',
+    'page arguments' => array(2), 
+    'access callback' => 'node_access',
+    'access arguments' => array('view', 2),
     'title' => 'Join group'
   );
   
@@ -188,16 +190,28 @@ function og_menu() {
 function og_menu_access_unsubscribe($group_node, $account) {
   global $user;
   
-  if ($account->uid != $user->uid && !og_is_group_admin($group_node)) {
-    // only admins can remove another member
+  // Unsubscribee must already be a member
+  if (!in_array($group_node->nid, array_keys($account->og_groups))) {
     return FALSE;
   }
   
+  // Only admins can remove another member
+  if ($account->uid != $user->uid && !og_is_group_admin($group_node)) {
+    return FALSE;
+  }
+  
+  // Regular users may not unsubscribe from CLOSED groups.
   if ($group_node->og_selective == OG_CLOSED && !og_is_group_admin($group_node)) {
     return FALSE;
   }
   
+  // Group manager may not unsubscribe
   if ($group_node->uid == $account->uid) {
+    return FALSE;
+  }
+  
+  // Protect private groups.
+  if (!node_access('view', $group_node)) {
     return FALSE;
   }
   
@@ -530,9 +544,11 @@ function og_manage_form($form_state, $group) {
   }
 
   $submit_button = FALSE;
+  // og_email can be NULL when you enable og on an existing site.
+  if (empty($user->og_email)) {
+    $user->og_email = OG_NOTIFICATION_SELECTIVE;
+  }
   switch ($user->og_email) {
-    // og_email can be NULL when you enable og on an existing site.
-    case NULL:
     case OG_NOTIFICATION_SELECTIVE:
       $form['mail_type'] = array(
         '#type' => 'radios', 
@@ -808,8 +824,7 @@ function og_invite_form_submit($form, &$form_state) {
   drupal_set_message(format_plural(count($emails), '1 invitation sent.', '@count invitations sent.'));
 }
 
-// TODOL move access control to menu
-function og_subscribe($gid, $uid = NULL) {
+function og_subscribe($node, $uid = NULL) {
   global $user;
   if (is_null($uid)) {
     if ($user->uid) {
@@ -823,8 +838,8 @@ function og_subscribe($gid, $uid = NULL) {
   else {
     $account = user_load(array('uid' => $uid));
   }
-  $node = node_load($gid);
-  if ($node->og_selective >= OG_INVITE_ONLY || $node->status == 0) {
+
+  if ($node->og_selective >= OG_INVITE_ONLY || $node->status == 0 || !og_is_group_type($node->type)) {
     drupal_access_denied();
     exit();
   }
@@ -840,7 +855,7 @@ function og_subscribe($gid, $uid = NULL) {
     drupal_goto('node/'. $node->nid);
   }
   else {
-    return drupal_get_form('og_confirm_subscribe', $gid, $node, $account);
+    return drupal_get_form('og_confirm_subscribe', $node->nid, $node, $account);
   }
 }
 
@@ -1041,7 +1056,7 @@ function og_add_users_og_names_validate($form, $form_state) {
       $err = TRUE;
     }
   }
-  if ($err) {
+  if (isset($err)) {
     form_set_error('og_names', t('Unrecognized %names:', array('%names' => format_plural(count($bad), 'name', 'names'))) .' '. implode(', ', $bad));
   }
 }
@@ -1201,7 +1216,18 @@ function og_selective_map() {
  */
 function og_group_form($node, $form_state) {
   global $user;
-
+  
+  // Set the default values for a new item. By using += rather than =, we
+  // only overwrite array keys that have not yet been set. It's safe to use
+  // on both an empty array, and an incoming array with full or partial data.
+  $node = (array)$node;
+  $node += array(
+    'og_description' => NULL,
+    'og_theme' => NULL,
+    'nid' => NULL,
+  );
+  $node = (object)$node;
+  
   $form['og_description'] = array(
     '#type' => 'textfield', 
     '#title' => t('Description'), 
@@ -1331,8 +1357,11 @@ function og_presave_group(&$node) {
     // Add the inaccessible groups which did not show in Audience selector
     $node->og_groups = (array)$node->og_groups + $node->og_groups_inaccessible;
   }
-  // Change $node->theme to $node->og_theme so it matches how we node_load(). the node form uses $theme and not og_theme
-  // If author chose the default theme, then '' is written to the DB and group will follow any change made by site admin.
+  
+  /**
+   * Change $node->theme to $node->og_theme so it matches node_load(). The node form uses $theme, not $og_theme.
+   * If author chose the default theme, then '' is written to DB and group follows changes made by site admin.
+   */
   if (isset($node->theme)) {
     $node->og_theme = $node->theme;
   }
@@ -1340,9 +1369,15 @@ function og_presave_group(&$node) {
     $node->og_theme = NULL;
   }
   
-  // TODOL Once ancestry table uses drupal_write_record(), this is not needed.
+  // TODOL Once ancestry table uses drupal_write_record(), these are not needed.
   if (!isset($node->og_public)) {
     $node->og_public = TRUE;
+  }
+  if (!isset($node->og_language)) {
+    $node->og_language = NULL;
+  }
+  if (!isset($node->og_notification)) {
+    $node->og_notification = NULL;
   }
   
   // Normalize og_groups array
@@ -1836,6 +1871,9 @@ function og_form_add_og_audience(&$form, &$form_state) {
   }
   else {
     // Classify those groups which the node already has but the author does not.
+    if (!isset($node->og_groups_both)) {
+      $node->og_groups_both = array();
+    }
     $current_groups = og_node_groups_distinguish($node->og_groups_both);
     // Put inaccessible groups in the $form so that they can persist. See og_presave_group() and og_access_alter_nongroup_form() in og_access.module
     $form['og_invisible']['og_groups_inaccessible'] = array('#type' => 'value', '#value' => $current_groups['inaccessible']);
@@ -2734,7 +2772,7 @@ function og_og_create_links($group) {
         ));
     }
   }
-  return $links ? $links : array();
+  return isset($links) ? $links : array();
 }
 
 function og_search_form($form_state, $group) {

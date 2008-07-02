@@ -90,7 +90,7 @@ function og_access_alter_group_form(&$form, $node) {
       $form['og_private'] = array (
         '#type' => 'checkbox',
         '#title' => t('Private group'), 
-        '#default_value' => $node->nid ? $node->og_private : $default, 
+        '#default_value' => isset($node->nid) ? $node->og_private : $default, 
         '#description' => t('Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>.'));
         break;
   }
