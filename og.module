@@ -109,7 +109,7 @@ function og_menu() {
     'page callback' => 'og_manage',
     'page arguments' => array(2),
     'access callback' => 'og_is_group_member', 
-    'access arguments' => array(2),
+    'access arguments' => array(2, FALSE),
     'title' => 'Manage membership', 
     'type' => MENU_CALLBACK, 
   );
@@ -227,9 +227,12 @@ function og_menu_access_picture($gid) {
 }
 
 /**
- * Check current user's membership in a group. Site admins always return TRUE.
+ * Check current user's membership in a group. 
+ * 
+ * @param $include_admins
+ *  Whether or not site admins are considered members.
  **/
-function og_is_group_member($gid) {
+function og_is_group_member($gid, $include_admins = TRUE) {
   global $user;
 
   // Allow caller to pass in a full $node. Used by menu items.
@@ -238,7 +241,12 @@ function og_is_group_member($gid) {
   }
   
   $groups = array_keys($user->og_groups);
-  return user_access('administer nodes') || in_array($gid, $groups) ? TRUE : FALSE;
+  if ($include_admins) {
+    return user_access('administer nodes') || in_array($gid, $groups) ? TRUE : FALSE;
+  }
+  else {
+    return in_array($gid, $groups) ? TRUE : FALSE;
+  }
 }
 
 /*
@@ -559,6 +567,7 @@ function og_manage_form($form_state, $group) {
   if (empty($user->og_email)) {
     $user->og_email = OG_NOTIFICATION_SELECTIVE;
   }
+
   switch ($user->og_email) {
     case OG_NOTIFICATION_SELECTIVE:
       $form['mail_type'] = array(
@@ -1058,7 +1067,7 @@ function og_add_users_og_names_validate($form, $form_state) {
   $names = explode(',', $form_state['values']['og_names']);
   foreach ($names as $name) {
     $account = user_load(array('name' => trim($name)));
-    if ($account->uid) {
+    if (isset($account->uid)) {
       $accounts[] = $account;
       $uids[] = $account->uid;
     }
@@ -2689,10 +2698,13 @@ function og_block_details() {
       }
       $links['subscribers'] = $txt;
       $links['manager'] =  t('Manager:') .' '. theme('username', $node);
-      $subscribe = isset($subscription) ? l(t('My membership'), "og/manage/$node->nid") : og_subscribe_link($node);
+      
+      // Site admins get a Join link if they are not yet subscribed.
+      $subscribe = isset($subscription) && og_is_group_member($node->nid, FALSE) ? l(t('My membership'), "og/manage/$node->nid") : og_subscribe_link($node);
       if(isset($subscribe)) {
         $links['my_membership'] = $subscribe;
       }
+      
       if (module_exists('search') && user_access('search content')) {
         $suffix = drupal_get_form('og_search_form', $node);
       }
