@@ -496,6 +496,16 @@ function og_update_5700() {
    node_access_rebuild();
    return $ret;
  }
+ 
+ /**
+  * Force menu rebuild since subscribe/unsubscribe paths are better protected now.
+  */ 
+ function og_update_5702() {
+   $ret[] = array('success' => TRUE, 'query' => 'Menu has been rebuilt.');
+   menu_rebuild();
+   return $ret;
+ }
+ 
 
 // end updates //
 

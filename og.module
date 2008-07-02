@@ -40,10 +40,10 @@ function og_menu($may_cache) {
 
   if ($may_cache) {
     // anon users should be able to get to the join page
-    $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_subscribe', 'access' => TRUE, 'title' => t('Join group'));
+    $items[] = array('path' => 'og/subscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_menu_check_node_view', 'access' => TRUE, 'callback arguments' => array('og_subscribe'), 'title' => t('Join group'));
     
     $items[] = array('path' => 'og/opml', 'type' => MENU_CALLBACK, 'callback' => 'og_opml', 'access' => $access, 'title' => t('OPML'));
-    $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_unsubscribe', 'access' => $access, 'title' => t('Leave group'));
+    $items[] = array('path' => 'og/unsubscribe', 'type' => MENU_CALLBACK, 'callback' => 'og_menu_check_node_view', 'callback arguments' => array('og_unsubscribe'), 'access' => $access, 'title' => t('Leave group'));
     $items[] = array('path' => 'og/approve', 'type' => MENU_CALLBACK, 'callback' => 'og_approve', 'access' => $access, 'title' => t('Approve membership request'));
     $items[] = array('path' => 'og/deny', 'type' => MENU_CALLBACK, 'callback' => 'og_deny', 'access' => $access, 'title' => t('Deny membership request'));
     $items[] = array('path' => 'og/create_admin', 'type' => MENU_CALLBACK, 'callback' => 'og_create_admin', 'access' => $access, 'title' => t('Create group administrator'));
@@ -118,6 +118,24 @@ function og_menu_check() {
   else {
     drupal_access_denied();
   }
+}
+
+// check for node access 'view' and then pass along to the real menu callback
+// arguments must be in this order: function, $gid, <extra params required by function>
+function og_menu_check_node_view() {
+  global $user;
+
+  $args = func_get_args();
+  $function = array_shift($args);
+  $gid = $args[0];
+  $node = node_load((int)$gid);
+  if (node_access('view', $node)) {
+    return call_user_func_array($function, $args);
+  }
+  else {
+    drupal_access_denied();
+  }
+  
 }
 
 /**
@@ -687,7 +705,7 @@ function og_subscribe($gid, $uid = NULL) {
     $account = user_load(array('uid' => $uid));
   }
   $node = node_load($gid);
-  if ($node->og_selective >= OG_INVITE_ONLY || $node->status == 0) {
+  if ($node->og_selective >= OG_INVITE_ONLY || $node->status == 0 || !og_is_group_type($node->type)) {
     drupal_access_denied();
     exit();
   }
@@ -797,12 +815,14 @@ function og_unsubscribe($gid, $uid = NULL) {
     $uid = $user->uid;
   }
   $node = node_load($gid);
-  if ($uid != $user->uid && !og_is_node_admin($node)) {
-    // only admins can remove another member
+  $account = user_load(array('uid' => $uid));
+  if (!in_array($gid, array_keys($account->og_groups)) || ($uid != $user->uid && !og_is_node_admin($node))) {
+    // Ubsubscribee must be a member.
+    // Only admins can remove another member.
     drupal_access_denied();
     exit();
   }
-  if (($node->og_selective == OG_CLOSED && !og_is_node_admin($node)) || $node->uid == $uid){
+  if (!og_is_group_type($node->type) || ($node->og_selective == OG_CLOSED && !og_is_node_admin($node)) || $node->uid == $uid){
     // Regular users may not leave from a closed group
     // Group manager may never leave (TODO: fix), such a link should never be generated
     drupal_access_denied();
@@ -1118,7 +1138,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
         // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
         og_home_empty($node);
       }
-      drupal_set_title(filter_xss_admin(views_get_title($view, 'page')));
+      drupal_set_title(check_plain(views_get_title($view, 'page')));
     } 
   }
 }
@@ -1792,7 +1812,7 @@ function og_form_add_og_audience($form_id, &$form) {
     // 'simple' mode. read only.
     if (count($groups)) {
       foreach ($groups as $gid) {
-        $titles[] = $options[$gid];
+        $titles[] = check_plain($options[$gid]);
         $item_value = implode(', ', $titles);
       }
       $form['og_nodeapi']['visible']['og_groups_visible'] = array(
