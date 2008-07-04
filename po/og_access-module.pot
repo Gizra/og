@@ -2,13 +2,13 @@
 #
 # LANGUAGE translation of Drupal (og_access.module)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
-# Generated from file: og_access.module,v 1.1.2.9 2008/05/03 13:47:14 weitzman
+# Generated from file: og_access.module,v 1.1.2.11 2008/05/26 14:03:35 weitzman
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-05-04 19:01+0200\n"
+"POT-Creation-Date: 2008-07-04 09:52+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: og_access.module:20
-msgid "Organic Groups Access configuration"
+msgid "Organic groups access configuration"
 msgstr ""
 
 #: og_access.module:21
@@ -26,15 +26,15 @@ msgid "Choose whether new groups should be private or public"
 msgstr ""
 
 #: og_access.module:33
-msgid "Visible only within the targeted groups"
+msgid "Visible only within the targeted groups."
 msgstr ""
 
 #: og_access.module:33
-msgid "Visible within the targeted groups and on other pages"
+msgid "Visible within the targeted groups and on other pages."
 msgstr ""
 
-#: og_access.module:33;33
-msgid "Visibility chosen by author/editor using a checkbox on the posting form. "
+#: og_access.module:33
+msgid "Visibility chosen by author/editor using a checkbox on the posting form."
 msgstr ""
 
 #: og_access.module:33
@@ -43,6 +43,10 @@ msgstr ""
 
 #: og_access.module:33;34;141;144
 msgid "Public"
+msgstr ""
+
+#: og_access.module:33
+msgid "Visibility chosen by author/editor using a checkbox on the posting form. "
 msgstr ""
 
 #: og_access.module:33
@@ -58,7 +62,7 @@ msgid "Visibility of posts"
 msgstr ""
 
 #: og_access.module:34
-msgid "Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.  If the setting you want is disabled here, check the settings under <em>Private Groups</em> setting below.  You cannot set node visibility to always be public if private groups are set to always on and vice versa."
+msgid "Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting. If the setting you want is disabled here, check the settings under <em>Private Groups</em> setting below. You cannot set node visibility to always be public if private groups are set to always on and vice versa."
 msgstr ""
 
 #: og_access.module:37
@@ -90,15 +94,19 @@ msgid "Private Groups"
 msgstr ""
 
 #: og_access.module:47
-msgid "<p>A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private.  This setting controls what private groups options can be used when creating a new group or editing an existing group.  If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here.<p><p>Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Node authoring form / Visibility of Posts</em> setting on this page.  Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups!  To change those you must edit the groups and their individual content nodes directly.  If the setting you want is disabled here, check <em>Visibility of Posts</em> above.  You cannot choose to only have private groups if node visibility is set to be always public, and vice versa.</p>"
+msgid "A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private. This setting controls what private groups options can be used when creating a new group or editing an existing group. If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here."
+msgstr ""
+
+#: og_access.module:47
+msgid "Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Node authoring form / Visibility of Posts</em> setting on this page. Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups! To change those you must edit the groups and their individual content nodes directly. If the setting you want is disabled here, check <em>Visibility of Posts</em> above. You cannot choose to only have private groups if node visibility is set to be always public, and vice versa."
 msgstr ""
 
 #: og_access.module:84
-msgid "private group"
+msgid "Private group"
 msgstr ""
 
 #: og_access.module:86
-msgid "Should this group be visible only to its members?  Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>"
+msgid "Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>."
 msgstr ""
 
 #: og_access.module:141;144
@@ -110,7 +118,7 @@ msgid "All users may view this node."
 msgstr ""
 
 #: og_access.module:264
-msgid "Subscribers of !group_n may view this node."
+msgid "Members of !group_n may view this node."
 msgstr ""
 
 #: og_access.module:0

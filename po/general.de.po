@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-05-04 19:01+0200\n"
-"PO-Revision-Date: 2008-05-04 22:35+0100\n"
+"POT-Creation-Date: 2008-07-04 09:52+0200\n"
+"PO-Revision-Date: 2008-07-04 09:54+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -17,20 +17,73 @@ msgstr ""
 "X-Poedit-Country: GERMANY\n"
 
 #: node.tpl.php:22
-#: og.module:339;949;1069;1304;1478;2153;2222
+#: og_views.inc:828;1004
+#: og.module:357;979;1099;1334;1508;2189;2258
 #: og_access.module:150
-#: og_panels.module:266
+#: og_panels.module:264
+#: og_notifications/og_notifications.module:25;34;160
 msgid "Groups"
 msgstr "Gruppen"
 
-#: og_workflow_ng.inc:38
-#: og_panels.module:546;643
+#: og_views.inc:48
+#: og_notifications/og_notifications.module:269
+msgid "All"
+msgstr "Alle"
+
+#: og_views.inc:480;584;986
+#: og.module:1059
+#: og_panels.module:238
+msgid "Title"
+msgstr "Titel"
+
+#: og_views.inc:573;754;852
+#: og_workflow_ng.inc:44
+#: og_panels.module:544;641
 #: includes/groupcontent.inc:9;22;34;46;58
+#: og_notifications/og_notifications.module:235
 msgid "Group"
 msgstr "Gruppe"
 
+#: og_views.inc:578
+#: og.module:2736
+#: og_notifications/og_notifications.module:289
+msgid "Type"
+msgstr "Typ"
+
+#: og_views.inc:707
+#: og.module:1733;1760
+msgid "My groups"
+msgstr "Meine Gruppen"
+
+#: og_views.inc:761;860
+#: og.module:944;1060
+msgid "Manager"
+msgstr "Verwalter"
+
+#: og_views.inc:766;865
+#: og.module:85;982
+msgid "Members"
+msgstr "Mitglieder"
+
+#: og_views.inc:870
+#: og.module:1094;1173
+#: includes/groupcontent.inc:94;235
+msgid "Description"
+msgstr "Beschreibung"
+
+#: og_views.inc:875
+#: og.module:732;2689
+msgid "Join"
+msgstr ""
+
+#: og_views.inc:1036
+#: og.module:2720
+#: includes/groupcontent.inc:243
+msgid "Search"
+msgstr "Suchen"
+
 #: og.module:86
-#: og_panels.module:42
+#: og_panels.module:40
 msgid "List"
 msgstr "Alle anzeigen"
 
@@ -39,52 +92,42 @@ msgstr "Alle anzeigen"
 msgid "Faces"
 msgstr "Gesichter"
 
-#: og.module:510;556;704;807
-#: og_panels.module:148
+#: og.module:538;584;732;837
+#: og_panels.module:146
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: og.module:910;2700
-#: og_panels.module:240
+#: og.module:940;2736
+#: og_panels.module:238
 msgid "Operations"
 msgstr "Operationen"
 
-#: og.module:1029
-#: og_panels.module:240
-msgid "Title"
-msgstr "Titel"
-
-#: og.module:1064;1143
-#: includes/groupcontent.inc:94;235
-msgid "Description"
-msgstr "Beschreibung"
-
-#: og.module:2342
+#: og.module:2377
 #: includes/groupcontent.inc:239
 msgid "Group members"
 msgstr "Gruppenmitglieder"
 
-#: og.module:2382
+#: og.module:2417
 #: includes/groupcontent.inc:192
 msgid "Group roles"
 msgstr "Gruppenrollen"
 
-#: og.module:2384
+#: og.module:2419
 #: includes/groupcontent.inc:194
 msgid "Standard members"
 msgstr "Standardmitglieder"
 
-#: og.module:2384
+#: og.module:2419
 #: includes/groupcontent.inc:194
 msgid "Administrators"
 msgstr "Administratoren"
 
-#: og.module:2684
-#: includes/groupcontent.inc:243
-msgid "Search"
-msgstr "Suchen"
+#: og_panels.module:496;511
+#: og_notifications/og_notifications.module:313
+msgid "Save"
+msgstr "Speichern"
 
-#: og_panels.module:596
+#: og_panels.module:594
 #: includes/groupcontent.inc:42
 msgid "Group search"
 msgstr "Gruppensuche"
@@ -93,28 +136,36 @@ msgstr "Gruppensuche"
 msgid "User joins group"
 msgstr "Benutzer tritt der Gruppe bei"
 
-#: og_workflow_ng.inc:16;21
+#: og_workflow_ng.inc:16;21;27
 msgid "OG"
 msgstr "OG"
 
 #: og_workflow_ng.inc:20
+msgid "User approved to group by admin"
+msgstr ""
+
+#: og_workflow_ng.inc:22
+msgid "A pending member is approved by a group administrator."
+msgstr ""
+
+#: og_workflow_ng.inc:26
 msgid "User leaves group"
 msgstr "Benutzer verlässt die Gruppe"
 
-#: og_workflow_ng.inc:37
+#: og_workflow_ng.inc:43
 msgid "User, who joins group"
 msgstr "Der dieser Gruppe beitretende Benutzer"
 
 #: og_xmlrpc.inc:13
-msgid "unrecognized user ID: %uid"
-msgstr "Unbekannte Benutzer-ID: %uid"
+msgid "Unrecognized user ID: %uid."
+msgstr "Unerkannte Benutzer-ID: %uid."
 
 #: og_xmlrpc.inc:17;37;52
 msgid "Wrong username or password."
 msgstr "Der Benutzername oder das Passwort ist falsch."
 
 #: og_xmlrpc.inc:33
-msgid "User is not a member of the specified group"
+msgid "User is not a member of the specified group."
 msgstr "Der Benutzer ist kein Mitglied der angegebenen Gruppe"
 
 #: og_xmlrpc.inc:48
@@ -138,15 +189,11 @@ msgid "Enable access control for private posts and private groups."
 msgstr ""
 
 #: og_panels.info:0
-msgid "Organic groups panels"
-msgstr "Organische-Gruppen-Panels"
-
-#: og_panels.info:0
 msgid "Enable group admins to create panel pages."
 msgstr ""
 
 #: includes/groupcontext.inc:37
-msgid "Require this context from an external source (such as containing panel page)"
+msgid "Require this context from an external source (such as containing panel page)."
 msgstr ""
 
 #: includes/groupcontext.inc:38
@@ -180,35 +227,38 @@ msgstr "Der Beitrag vom Typ %type ist kein Gruppentyp."
 msgid "Your %post has been created."
 msgstr "Der Beitrag %post wurde erstellt."
 
-#: (duplicate) og.module:2941
+#: (duplicate) og.module:2977
 #, fuzzy
 msgid "Organic groups group type"
 msgstr "Gruppentyp von organischen Gruppen"
 
-#: (duplicate) og.module:2942
+#: (duplicate) og.module:2978
 msgid "You have no node types which are acting as groups. See the Notes section of the !readme and the Content types fieldset at top of <a href=\"!settings\">OG settings</a>."
 msgstr ""
 
-#: (duplicate) og.module:2949
+#: (duplicate) og.module:2985
 #, fuzzy
 msgid "Organic groups modules"
 msgstr "Module für organischen Gruppen"
 
-#: (duplicate) og.module:2950
+#: (duplicate) og.module:2986
 msgid "Organic groups works best when !job_queue.module is enabled. See the Integration section of the !readme."
 msgstr ""
 
-#: (duplicate) og.module:2957
+#: (duplicate) og.module:2993
 #, fuzzy
 msgid "Organic groups access control"
 msgstr "Zugriffskontrolle für organischen Gruppen"
 
-#: (duplicate) og.module:2958
+#: (duplicate) og.module:2994
 #, fuzzy
 msgid "Organic groups access control module is disabled. See the !modules"
 msgstr "Das Modul für die Zugriffskontrolle von organischen Gruppen ist deaktiviert. Weitere Information unter !modules"
 
-#: (duplicate) og.module:2958
+#: (duplicate) og.module:2994
 msgid "modules page"
 msgstr "Modulseite"
+
+#~ msgid "Organic groups panels"
+#~ msgstr "Organische-Gruppen-Panels"
 

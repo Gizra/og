@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-05-04 19:01+0200\n"
-"PO-Revision-Date: 2008-05-04 23:16+0100\n"
+"POT-Creation-Date: 2008-07-04 09:52+0200\n"
+"PO-Revision-Date: 2008-07-04 09:55+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,8 @@ msgid "Welcome message"
 msgstr "Willkommensmitteilung"
 
 #: includes/groupcontent.inc:8
-msgid "The welcome message for the group. Specified on group edit form"
+#, fuzzy
+msgid "The welcome message for the group. Specified on group edit form."
 msgstr "Die Willkommensmeldung für die Gruppe. Angegeben auf dem „Bearbeiten“-Formular der Gruppe"
 
 #: includes/groupcontent.inc:18
@@ -32,8 +33,8 @@ msgstr "Eine Beschreibung der Gruppe."
 msgid "The group description as specified on the group edit form."
 msgstr "Die Gruppenbeschreibung, wie diese auf dem „Bearbeiten“-Formular der Gruppe angegeben wurde."
 
-#: includes/groupcontent.inc:30
-msgid "Group Subscribers"
+#: includes/groupcontent.inc:30;111
+msgid "Group Members"
 msgstr "Gruppenmitglieder"
 
 #: includes/groupcontent.inc:33
@@ -67,10 +68,6 @@ msgstr "Willkommenmeldung wird hier angezeigt."
 #, fuzzy
 msgid "Description goes here."
 msgstr "Beschreibung wird hier angezeigt."
-
-#: includes/groupcontent.inc:111
-msgid "Group Members"
-msgstr "Gruppenmitglieder"
 
 # not literally
 #: includes/groupcontent.inc:117
@@ -111,7 +108,8 @@ msgid "Number of members"
 msgstr "Anzahl von Mitgliedern"
 
 #: includes/groupcontent.inc:186
-msgid "Maxmimum number of members that should appear on the list"
+#, fuzzy
+msgid "Maximum number of members that should appear on the list."
 msgstr "Die maximale Anzahl an Mitgliedern, die in der Liste angezeigt werden sollen"
 
 #: includes/groupcontent.inc:195

@@ -2,13 +2,13 @@
 #
 # LANGUAGE translation of Drupal (og_views.inc)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
-# Generated from file: og_views.inc,v 1.12.2.52 2008/04/23 13:46:46 weitzman
+# Generated from file: og_views.inc,v 1.12.2.55 2008/05/26 14:03:35 weitzman
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-05-04 19:01+0200\n"
+"POT-Creation-Date: 2008-07-04 09:52+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -22,7 +22,7 @@ msgid "OG: Group: Description"
 msgstr ""
 
 #: og_views.inc:34
-msgid "OG: Group: Members Count"
+msgid "OG: Group: Members count"
 msgstr ""
 
 #: og_views.inc:36
@@ -30,23 +30,27 @@ msgid "Number of members for a group. Excludes memberships which are pending app
 msgstr ""
 
 #: og_views.inc:41
-msgid "OG: Group: Post Count"
+msgid "OG: Group: Post count"
 msgstr ""
 
 #: og_views.inc:45
 msgid "Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown."
 msgstr ""
 
-#: og_views.inc:48
-msgid "All"
-msgstr ""
-
 #: og_views.inc:55
-msgid "OG: Group: Post Count *New*"
+msgid "OG: Group: Post count *new*"
 msgstr ""
 
 #: og_views.inc:59
 msgid "Number of new posts in a group for the current user. The <em>new</em> indicator may be optionally appended using the <em>Option</em> dropdown."
+msgstr ""
+
+#: og_views.inc:63
+msgid "Normal"
+msgstr ""
+
+#: og_views.inc:64
+msgid "With new mark"
 msgstr ""
 
 #: og_views.inc:69;111
@@ -190,7 +194,7 @@ msgid "OG: Is member an admin in a group"
 msgstr ""
 
 #: og_views.inc:249
-msgid "OG: Group in User's Groups"
+msgid "OG: Group in user's groups"
 msgstr ""
 
 #: og_views.inc:253
@@ -234,11 +238,135 @@ msgid "OG: Group name"
 msgstr ""
 
 #: og_views.inc:333
-msgid "Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</e> field to specify how to match the supplied name."
+msgid "Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</em> field to specify how to match the supplied name."
 msgstr ""
 
 #: og_views.inc:353;382
 msgid "All posts"
+msgstr ""
+
+#: og_views.inc:427
+msgid "Shows all activity in subscribed groups."
+msgstr ""
+
+#: og_views.inc:433
+msgid "Recent posts in my groups"
+msgstr ""
+
+#: og_views.inc:438
+msgid "There are no posts in your subscribed groups."
+msgstr ""
+
+#: og_views.inc:445
+msgid "My recent"
+msgstr ""
+
+#: og_views.inc:488;592;993
+msgid "Author"
+msgstr ""
+
+#: og_views.inc:494;598;998
+msgid "Replies"
+msgstr ""
+
+#: og_views.inc:501;605;1009
+msgid "Last post"
+msgstr ""
+
+#: og_views.inc:531
+msgid "Shows unread posts in subscribed groups."
+msgstr ""
+
+#: og_views.inc:537
+msgid "Unread posts in my groups"
+msgstr ""
+
+#: og_views.inc:542
+msgid "There are no new posts in your subscribed groups."
+msgstr ""
+
+#: og_views.inc:549
+msgid "My unread"
+msgstr ""
+
+#: og_views.inc:646
+msgid "OG: Group home page - River of news. Default"
+msgstr ""
+
+#: og_views.inc:701
+msgid "List user's subscribed groups and provide link to manage subscription"
+msgstr ""
+
+#: og_views.inc:708
+msgid "You may edit all your email subscriptions using this convenient page. Also, you might be interested in an <a href=\"!url\" rel=\"nofollow\">OPML feed containing feeds from all your subscribed groups</a>."
+msgstr ""
+
+#: og_views.inc:717
+msgid "No subscribed groups"
+msgstr ""
+
+#: og_views.inc:771
+msgid "Email"
+msgstr ""
+
+#: og_views.inc:776
+msgid "Manage"
+msgstr ""
+
+#: og_views.inc:816
+msgid "Groups directory"
+msgstr ""
+
+#: og_views.inc:821
+msgid "No groups"
+msgstr ""
+
+#: og_views.inc:912
+msgid "Search for a group by name"
+msgstr ""
+
+#: og_views.inc:926
+msgid "Shows active posts across the whole site"
+msgstr ""
+
+#: og_views.inc:931
+msgid "Recent posts across whole site"
+msgstr ""
+
+#: og_views.inc:943
+msgid "Recent posts"
+msgstr ""
+
+#: og_views.inc:963
+msgid "Recent posts for %1"
+msgstr ""
+
+#: og_views.inc:1031
+msgid "Search within a particular group"
+msgstr ""
+
+#: og_views.inc:1041
+msgid "No posts found."
+msgstr ""
+
+#: og_views.inc:1059
+msgid "Search results for %1"
+msgstr ""
+
+#: og_views.inc:1087
+msgid "Enter keyword"
+msgstr ""
+
+#: og_views.inc:1100
+msgid "Display recent comments block in a group"
+msgstr ""
+
+#: og_views.inc:1105
+msgid "Recent comments"
+msgstr ""
+
+#: og_views.inc:1173
+msgid "Recent posts for current term filtered by node type and/or taxonomy term"
 msgstr ""
 
 #: og_views.inc:1315

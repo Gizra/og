@@ -8,7 +8,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-05-04 19:01+0200\n"
+"POT-Creation-Date: 2008-07-04 09:52+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -22,7 +22,7 @@ msgid "Welcome message"
 msgstr ""
 
 #: includes/groupcontent.inc:8
-msgid "The welcome message for the group. Specified on group edit form"
+msgid "The welcome message for the group. Specified on group edit form."
 msgstr ""
 
 #: includes/groupcontent.inc:18
@@ -33,8 +33,8 @@ msgstr ""
 msgid "The group description as specified on the group edit form."
 msgstr ""
 
-#: includes/groupcontent.inc:30
-msgid "Group Subscribers"
+#: includes/groupcontent.inc:30;111
+msgid "Group Members"
 msgstr ""
 
 #: includes/groupcontent.inc:33
@@ -63,10 +63,6 @@ msgstr ""
 
 #: includes/groupcontent.inc:100
 msgid "Description goes here."
-msgstr ""
-
-#: includes/groupcontent.inc:111
-msgid "Group Members"
 msgstr ""
 
 #: includes/groupcontent.inc:117
@@ -102,7 +98,7 @@ msgid "Number of members"
 msgstr ""
 
 #: includes/groupcontent.inc:186
-msgid "Maxmimum number of members that should appear on the list"
+msgid "Maximum number of members that should appear on the list."
 msgstr ""
 
 #: includes/groupcontent.inc:195

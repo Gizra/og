@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-05-04 19:01+0200\n"
-"PO-Revision-Date: 2008-05-04 23:14+0100\n"
+"POT-Creation-Date: 2008-07-04 09:52+0200\n"
+"PO-Revision-Date: 2008-07-04 10:13+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgid "OG: Group: Description"
 msgstr "OG: Gruppe: Beschreibung"
 
 #: og_views.inc:34
-msgid "OG: Group: Members Count"
+msgid "OG: Group: Members count"
 msgstr "OG: Gruppe: Anzahl der Mitglieder"
 
 #: og_views.inc:36
@@ -29,24 +29,28 @@ msgid "Number of members for a group. Excludes memberships which are pending app
 msgstr "Anzahl der Mitglieder einer Gruppe. Mitgliedschaften die auf eine Bestätigung warten sind ausgenommen."
 
 #: og_views.inc:41
-msgid "OG: Group: Post Count"
+msgid "OG: Group: Post count"
 msgstr "OG: Gruppe: Anzahl der Beiträge"
 
 #: og_views.inc:45
 msgid "Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown."
 msgstr "Anzahl der veröffentlichten Beiträge in einer Gruppe. Dies kann mit dem <em>Optionen</em>-Auswahlfeld nach Beitragstyp begrenzt werden."
 
-#: og_views.inc:48
-msgid "All"
-msgstr "Alle"
-
 #: og_views.inc:55
-msgid "OG: Group: Post Count *New*"
+msgid "OG: Group: Post count *new*"
 msgstr "OG: Gruppe: Anzahl der *neuen* Beiträge"
 
 #: og_views.inc:59
 msgid "Number of new posts in a group for the current user. The <em>new</em> indicator may be optionally appended using the <em>Option</em> dropdown."
 msgstr "Anzahl von neuen Beiträgen eines Benutzers in einer Gruppe. Der <em>neu</em> Hinweis kann optional durch Verwendung des <em>Optionen</em>-Auswahlfelds angehängt werden."
+
+#: og_views.inc:63
+msgid "Normal"
+msgstr "Normal"
+
+#: og_views.inc:64
+msgid "With new mark"
+msgstr ""
 
 #: og_views.inc:69;111
 msgid "OG: Group: Selective"
@@ -190,7 +194,7 @@ msgid "OG: Is member an admin in a group"
 msgstr "OG: Ist das Mitglied ein Administrator in einer Gruppe"
 
 #: og_views.inc:249
-msgid "OG: Group in User's Groups"
+msgid "OG: Group in user's groups"
 msgstr "OG: Gruppe in Benutzergruppen"
 
 #: og_views.inc:253
@@ -199,7 +203,6 @@ msgstr "Gruppen werden nach der Mitgliedschaft des aktuellen Benutzers gefiltert
 
 # User Subbed Groups?
 #: og_views.inc:274
-#, fuzzy
 msgid "OG: Post in User Subbed Groups"
 msgstr "OG: Beiträge in dem Benutzer vertrauten Gruppen"
 
@@ -238,12 +241,138 @@ msgid "OG: Group name"
 msgstr "OG: Gruppenname"
 
 #: og_views.inc:333
-msgid "Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</e> field to specify how to match the supplied name."
+msgid "Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</em> field to specify how to match the supplied name."
 msgstr ""
 
 #: og_views.inc:353;382
 msgid "All posts"
 msgstr "Alle Beiträge"
+
+#: og_views.inc:427
+msgid "Shows all activity in subscribed groups."
+msgstr "Alle Aktivität in den abonnierten Gruppen anzeigen."
+
+#: og_views.inc:433
+msgid "Recent posts in my groups"
+msgstr "Neueste Beiträge in meinen Gruppen"
+
+#: og_views.inc:438
+msgid "There are no posts in your subscribed groups."
+msgstr "Keine Beiträge in den abonnierten Gruppen."
+
+#: og_views.inc:445
+msgid "My recent"
+msgstr "Meine Neusten"
+
+#: og_views.inc:488;592;993
+msgid "Author"
+msgstr "Autor"
+
+#: og_views.inc:494;598;998
+msgid "Replies"
+msgstr "Antworten"
+
+#: og_views.inc:501;605;1009
+msgid "Last post"
+msgstr "Letzter Beitrag"
+
+#: og_views.inc:531
+msgid "Shows unread posts in subscribed groups."
+msgstr "Ungelesene Beiträge in abonnierten Gruppen anzeigen."
+
+#: og_views.inc:537
+msgid "Unread posts in my groups"
+msgstr "Ungelesene Beiträge in dieser Gruppe"
+
+#: og_views.inc:542
+msgid "There are no new posts in your subscribed groups."
+msgstr "Keine neuen Beiträge in den abonnierten Gruppen."
+
+#: og_views.inc:549
+msgid "My unread"
+msgstr "Meine Ungelesenen"
+
+#: og_views.inc:646
+msgid "OG: Group home page - River of news. Default"
+msgstr ""
+
+#: og_views.inc:701
+msgid "List user's subscribed groups and provide link to manage subscription"
+msgstr ""
+
+#: og_views.inc:708
+msgid "You may edit all your email subscriptions using this convenient page. Also, you might be interested in an <a href=\"!url\" rel=\"nofollow\">OPML feed containing feeds from all your subscribed groups</a>."
+msgstr ""
+
+#: og_views.inc:717
+msgid "No subscribed groups"
+msgstr "Keine abonnierten Gruppen"
+
+#: og_views.inc:771
+msgid "Email"
+msgstr "E-Mail"
+
+#: og_views.inc:776
+msgid "Manage"
+msgstr "Verwalten"
+
+#: og_views.inc:816
+msgid "Groups directory"
+msgstr "Gruppenverzeichnis"
+
+#: og_views.inc:821
+msgid "No groups"
+msgstr "Keine Gruppen"
+
+#: og_views.inc:912
+msgid "Search for a group by name"
+msgstr "Über den Namen nach einer Gruppe suchen"
+
+# not literally
+#: og_views.inc:926
+msgid "Shows active posts across the whole site"
+msgstr "Aktive Beiträge der gesamten Website anzeigen"
+
+# not literally
+#: og_views.inc:931
+msgid "Recent posts across whole site"
+msgstr "Neuste Beiträge der gesamte Website"
+
+#: og_views.inc:943
+msgid "Recent posts"
+msgstr "Neuste Beiträge"
+
+#: og_views.inc:963
+msgid "Recent posts for %1"
+msgstr "Neueste Beiträge für %1"
+
+#: og_views.inc:1031
+msgid "Search within a particular group"
+msgstr "Innerhalb einer bestimmten Gruppe suchen"
+
+#: og_views.inc:1041
+msgid "No posts found."
+msgstr "Keine Beiträge gefunden."
+
+#: og_views.inc:1059
+msgid "Search results for %1"
+msgstr "Suchergebnis für %1"
+
+#: og_views.inc:1087
+msgid "Enter keyword"
+msgstr "Schlüsselwort eingeben"
+
+#: og_views.inc:1100
+msgid "Display recent comments block in a group"
+msgstr "Einen Block mit neusten Kommentaren in einer Gruppe anzeigen"
+
+#: og_views.inc:1105
+msgid "Recent comments"
+msgstr "Neueste Kommentare"
+
+#: og_views.inc:1173
+msgid "Recent posts for current term filtered by node type and/or taxonomy term"
+msgstr ""
 
 #: og_views.inc:1315
 msgid "Invite only"
@@ -260,4 +389,7 @@ msgstr "Ja"
 #: og_views.inc:1390
 msgid "Current group"
 msgstr "Aktuelle Gruppe"
+
+#~ msgid "All"
+#~ msgstr "Alle"
 
