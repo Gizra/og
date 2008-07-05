@@ -2928,7 +2928,7 @@ function og_requirements($phase) {
     if (!module_exists('og_access')) {
       $requirements['og_access'] = array(
         'title' => $t('Organic groups access control'),
-        'value' => $t('Organic groups access control module is disabled. See the !modules.', array('!settings' => l($t('modules page'), 'admin/build/modules'))),
+        'value' => $t('Organic groups access control module is disabled. See the !modules.', array('!modules' => l($t('modules page'), 'admin/build/modules'))),
         'severity' => REQUIREMENT_INFO
       );
     }
