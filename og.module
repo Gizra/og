@@ -1244,6 +1244,7 @@ function og_group_form($node, $form_state) {
   $node += array(
     'og_description' => NULL,
     'og_theme' => NULL,
+    'og_language' => NULL,
     'nid' => NULL,
   );
   $node = (object)$node;
@@ -1568,7 +1569,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         og_save_ancestry($node);
       }
       
-      $skip_notification = FALSE; 
+      // Disable emails for now until Notifications integration is in.
+      $skip_notification = TRUE; 
       // Any module that returns TRUE from its hook_og_notify($node) will prevent sending notifications.
       // og2list and og_subscriptions use this to send own notifications.
       foreach(module_implements('og_notify') as $module) {
@@ -1995,7 +1997,8 @@ function og_comment($comment, $op) {
       $comment = (array) $comment;
       // fall through
     case 'insert':
-      $skip_notification = FALSE; 
+      // Disable emails until Notifications integration is in.
+      $skip_notification = TRUE; 
       // Any module that returns true from its hook_og_notify($node) will prevent sending notifications.
       // og2list uses this to send its own notifications instead for mailing list content.
       $node = node_load($comment['nid']);
