@@ -2355,8 +2355,8 @@ function og_user($op, $edit, &$account, $category = NULL) {
           '#options' => $options, 
           '#default_value' => $default_value,
         );
+        return $form;
       }
-      return $form;
     case 'form':
       if ($category == 'account' && !empty($account->og_groups)) {
         $form['og_settings'] = array(
@@ -2380,7 +2380,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
       }
       break;
     case 'insert':
-      if (is_array($edit['og_register'])) {
+      if (isset($edit['og_register'])) {
         foreach (array_keys(array_filter($edit['og_register'])) as $gid) {
           $return = og_subscribe_user($gid, $account);
           if (!empty($return['message'])) {
