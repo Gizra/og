@@ -227,13 +227,22 @@ function og_menu_access_picture($gid) {
 }
 
 /**
- * Check current user's membership in a group. 
+ * Check a user's membership in a group. 
  * 
+ * @param gid
+ *  An integer or a node object representing the group node.
  * @param $include_admins
  *  Whether or not site admins are considered members.
- **/
-function og_is_group_member($gid, $include_admins = TRUE) {
-  global $user;
+ * @param $uid
+ *   Pass a user id or NULL inorder to check current user.
+ */
+function og_is_group_member($gid, $include_admins = TRUE, $uid = NULL) {
+  if ($uid) {
+    $user = user_load(array('uid' => $uid));  
+  }
+  else {
+    global $user;    
+  }
 
   // Allow caller to pass in a full $node. Used by menu items.
   if (is_object($gid)) {
@@ -242,7 +251,7 @@ function og_is_group_member($gid, $include_admins = TRUE) {
   
   $groups = array_keys($user->og_groups);
   if ($include_admins) {
-    return user_access('administer nodes') || in_array($gid, $groups) ? TRUE : FALSE;
+    return user_access('administer nodes', $user) || in_array($gid, $groups) ? TRUE : FALSE;
   }
   else {
     return in_array($gid, $groups) ? TRUE : FALSE;
