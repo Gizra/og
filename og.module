@@ -1139,6 +1139,9 @@ function og_page_activity() {
       format_interval(time()-$row->lct),
     );
   }
+  if (!isset($rows)) {
+    $rows[] = array(array('data' => t('No groups.'), 'colspan' => 6));
+  }
   return theme('table', $header, $rows);
   
 }
@@ -1399,6 +1402,9 @@ function og_presave_group(&$node) {
   }
   if (!isset($node->og_notification)) {
     $node->og_notification = NULL;
+  }
+  if (!isset($node->og_notification)) {
+    $node->og_private = FALSE;
   }
   
   // Normalize og_groups array
@@ -2571,13 +2577,14 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     //     $blocks[6]['cache'] = BLOCK_CACHE_PER_USER;
     
     // Auto-enable the group blocks for fresh installations.
-    $blocks[0]['status'] = 1;
-    $blocks[0]['region'] = 'left';
-    $blocks[0]['weight'] = -2;
-    $blocks[5]['status'] = 1;
-    $blocks[5]['region'] = 'left';
-    $blocks[5]['weight'] = -1;
-    return $blocks;
+    // TODOL: In order for this to work, you must rehash blocks during install which has been problematic.
+    // $blocks[0]['status'] = 1;
+    //     $blocks[0]['region'] = 'left';
+    //     $blocks[0]['weight'] = -2;
+    //     $blocks[5]['status'] = 1;
+    //     $blocks[5]['region'] = 'left';
+    //     $blocks[5]['weight'] = -1;
+    //     return $blocks;
   }
   elseif ($op == 'view') {
     switch ($delta) {
