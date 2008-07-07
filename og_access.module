@@ -97,7 +97,7 @@ function og_access_alter_group_form(&$form, $node) {
 }
 
 // Add public checkbox to node edit form.
-function og_access_alter_nongroup_form(&$form, $node) {
+function og_access_alter_nongroup_form(&$form, $form_state, $node) {
   global $user;
   
   if (og_is_group_post_type($node->type)) {
@@ -119,12 +119,13 @@ function og_access_alter_nongroup_form(&$form, $node) {
     $groups = $form['og_initial_groups']['#value'];
     
     // If the post is to a private group, visibility must default to one of the private options.
-    $selected_groups = isset($form['#post']['og_groups']) ? array_filter($form['#post']['og_groups']) : $groups;
+    $selected_groups = isset($form_state['values']['og_groups']) ? array_filter($form_state['values']['og_groups']) : $groups;
     if (count($selected_groups)) {  
       foreach ($selected_groups as $gid) {
         $group_node = new stdClass();
         $group_node->nid = $gid;
         og_load_group($group_node);
+        // dsm($group_node);
          if ($group_node->og_private) {
            // Try not to show checkbox if admin likes to reduce decisions for node authors.
            $vis = variable_get('og_visibility', 0) == OG_VISIBLE_BOTH ? OG_VISIBLE_GROUPONLY : OG_VISIBLE_CHOOSE_PRIVATE;
@@ -187,7 +188,7 @@ function og_access_form_alter(&$form, &$form_state, $form_id) {
       og_access_alter_group_form($form, $node);
     }
     else {
-      og_access_alter_nongroup_form($form, $node);
+      og_access_alter_nongroup_form($form, $form_state, $node);
     }
   }
 }

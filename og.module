@@ -190,8 +190,8 @@ function og_menu() {
 function og_menu_access_unsubscribe($group_node, $account) {
   global $user;
   
-  // Unsubscribee must already be a member
-  if (!in_array($group_node->nid, array_keys($account->og_groups))) {
+  // Unsubscribee must already be a member.
+  if (!og_is_group_member($group_node, FALSE, $account)) {
     return FALSE;
   }
   
@@ -669,7 +669,7 @@ function og_approve($node, $account, $token) {
     return;
   }
   
-  if (in_array($node->nid, array_keys($account->og_groups))) {
+  if (og_is_group_member($node, FALSE, $account)) {
     drupal_set_message(t("!name already approved to group %group.", array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
     return '';
   }
@@ -1217,7 +1217,7 @@ function og_home_empty($node) {
   global $user;
   
   $dest = drupal_get_destination();
-  if (in_array($node->nid, array_keys($user->og_groups))) {
+  if (og_is_group_member($node->nid)) {
     $msg = t('No posts in this group.');
   }
   else {
@@ -1955,7 +1955,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
      $groups = array_intersect($gids, array_keys($options));
    }
   }
-  elseif ($node->nid || $node->og_groups) {
+  elseif (isset($node->nid) || isset($node->og_groups)) {
     $groups = $node->og_groups;
   }
   else {
