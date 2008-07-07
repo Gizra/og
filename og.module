@@ -298,8 +298,9 @@ function og_preprocess_page(&$variables) {
 function og_preprocess_node(&$variables) {
   $og_links = array(); 
   $node = $variables['node'];
-  // TODO: _both is not present during node preview group links don't curently show there.
-  if (og_is_group_post_type($node->type) && $node->build_mode != NODE_BUILD_PREVIEW) {
+  // TODO: _both is not present during node preview and when you remove all audiences. 
+  // So group links don't curently show then.
+  if (og_is_group_post_type($node->type) && !empty($node->og_groups_both)) {
     $current_groups = og_node_groups_distinguish($node->og_groups_both, FALSE);
     foreach ($current_groups['accessible'] as $gid => $item) {
       $og_links['og_'. $gid] = array('title' => $item['title'], 'href' => "node/$gid");
@@ -1874,6 +1875,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
   
   $node = $form['#node'];
   $required = variable_get('og_audience_required', 0) && !user_access('administer nodes');
+  $is_optgroup = FALSE;
   
   // Determine the list of groups that are shown.
   // Start by collecting all groups that the user is a member of.
@@ -1922,9 +1924,6 @@ function og_form_add_og_audience(&$form, &$form_state) {
         t('Other groups') => $other,
       );
       $is_optgroup = TRUE;
-    }
-    else {
-      $is_optgroup = FALSE;
     }
   }
   
@@ -2584,7 +2583,8 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     //     $blocks[5]['status'] = 1;
     //     $blocks[5]['region'] = 'left';
     //     $blocks[5]['weight'] = -1;
-    //     return $blocks;
+    
+    return $blocks;
   }
   elseif ($op == 'view') {
     switch ($delta) {
