@@ -18,6 +18,7 @@ function og_admin_settings() {
   );
   $map = og_types_map();
   $header = array(t('Type'), t('Usage'), t('Operations'));
+  $rows = array();
   foreach (node_get_types() as $type) {
     $type_url_str = str_replace('_', '-', $type->type);
     $usage = variable_get('og_content_type_usage_'. $type->type, 'omitted');
