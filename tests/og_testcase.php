@@ -16,7 +16,7 @@ class OgTestCase extends DrupalTestCase {
     $edit['og_selective'] = (string)$selective;
 //    $this->_browser->setFieldByName('edit[og_theme]', ''); // May not be present, so no error catching
 
-    $this->drupalPostRequest("node/add/$type", $edit, 'Submit');
+    $this->drupalPost("node/add/$type", $edit, t('Submit'));
 
     $this->assertWantedRaw(t('Your %post has been created.', array ('%post' => $type)), 'Group created');
 
@@ -71,7 +71,10 @@ class OgTestCase extends DrupalTestCase {
     while (sizeof($this->_cleanupNodeTypes) > 0) {
       $name = array_pop($this->_cleanupNodeTypes);
 
-      node_type_delete_confirm_submit(0, array('name' => $name, 'type' => $name));
+      $ar = array('name' => $name, 'type' => $name);
+      // named this array so it can be passed by reference.
+      // anonymous variables cannot.
+      node_type_delete_confirm_submit(0, $ar);
     }
     parent::tearDown();
   }

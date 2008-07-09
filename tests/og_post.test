@@ -41,7 +41,7 @@ class OgPost extends OgTestCase {
     //$edit['og_public']      = true;
     $edit['og_groups[' . $gid . ']'] = true;
     
-    $this->drupalPostRequest("node/add/page", $edit, 'Submit');
+    $this->drupalPost("node/add/page", $edit, 'Submit');
     
     $this->assertWantedRaw(t('Your %post has been created.', array ('%post' => node_get_types('name', 'page'))), 'post created');
     
