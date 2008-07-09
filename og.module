@@ -1831,7 +1831,7 @@ function og_all_groups_options() {
   while ($row = db_fetch_object($result)) {
     $options[$row->nid] = $row->title;
   }
-  return $options ? $options : array();
+  return isset($options) ? $options : array();
 }
 
 /**
@@ -1955,7 +1955,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
      $groups = array_intersect($gids, array_keys($options));
    }
   }
-  elseif (isset($node->nid) || isset($node->og_groups)) {
+  elseif (isset($node->og_groups)) {
     $groups = $node->og_groups;
   }
   else {
