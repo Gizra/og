@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-07-12 16:01+0200\n"
-"PO-Revision-Date: 2008-07-12 16:03+0100\n"
+"PO-Revision-Date: 2008-07-13 00:29+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -378,7 +378,7 @@ msgstr "Beschreibung"
 #: og_views.inc:875
 #: og.module:732;2689
 msgid "Join"
-msgstr ""
+msgstr "Beitreten"
 
 #: og_views.inc:912
 msgid "Search for a group by name"
@@ -490,7 +490,7 @@ msgstr "Der Benutzer ist kein Mitglied der angegebenen Gruppe"
 
 #: og_xmlrpc.inc:48
 msgid "User is not allowed to retrieve membership information for another user."
-msgstr ""
+msgstr "Der Benutzer ist nicht berechtigt, Mitgliedschaftsinformationen über andere Benutzer abzufragen."
 
 #: og.module:30
 msgid "Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages."
@@ -518,7 +518,7 @@ msgstr "Gruppe verlassen"
 
 #: og.module:47
 msgid "Approve membership request"
-msgstr "Beitrittsgesuch bestätigen"
+msgstr "Beitrittsgesuch akzeptieren"
 
 #: og.module:48
 msgid "Deny membership request"
@@ -669,11 +669,11 @@ msgstr ""
 
 #: og.module:472
 msgid "!name already approved to group %group."
-msgstr "!name wurde schon freigegeben für die Gruppe %group."
+msgstr "!name wurde schon für die Gruppe %group freigegeben."
 
 #: og.module:477
 msgid "Membership request approved."
-msgstr "Der Antrag auf Mitgliedschaft wurde bestätigt."
+msgstr "Der Antrag auf Mitgliedschaft wurde akzeptiert."
 
 #: og.module:499
 msgid "Membership request denied."
@@ -681,7 +681,7 @@ msgstr "Der Antrag auf Mitgliedschaft wurde abgelehnt."
 
 #: og.module:534
 msgid "Are you sure you want to make %name a group administrator for the group %title?"
-msgstr ""
+msgstr "Soll %name wirklich zu einem Gruppen-Administrator der Gruppe %title gemacht werden?"
 
 #: og.module:537
 msgid "Confirm"
@@ -702,7 +702,7 @@ msgstr "Gruppenadministrator"
 
 #: og.module:580
 msgid "Are you sure you want to remove %name as a group administrator for the group %title?"
-msgstr ""
+msgstr "Soll der Gruppen-Administrator %name wirklich aus der Gruppe %title entfernt werden?"
 
 #: og.module:583;837;958
 msgid "Remove"
@@ -750,15 +750,16 @@ msgstr "@user ist schon ein Mitglied der Gruppe @group"
 
 #: og.module:727
 msgid "Additional details"
-msgstr ""
+msgstr "Zusätzliche Details"
 
 #: og.module:727
+#, fuzzy
 msgid "Add any detail which will help an administrator decide whether to approve or deny your membership request."
-msgstr ""
+msgstr "Geben Sie irgendwelche Details ein, die dem Administrator bei der Entscheidung helfen, ob er den Antrag auf Mitgliedschaft genehmigt oder ablehnt."
 
 #: og.module:730
 msgid "Are you sure you want to join the group %title?"
-msgstr ""
+msgstr "Wollen Sie wirklich der Gruppe %title beitreten?"
 
 #: og.module:777
 msgid ""
@@ -769,6 +770,12 @@ msgid ""
 "\n"
 "@request"
 msgstr ""
+"\n"
+"\n"
+"Persönliche Nachricht von @name:\n"
+"------------------\n"
+"\n"
+"@request"
 
 #: og.module:782
 msgid "Membership request to the %group group awaits approval by an administrator."
@@ -784,7 +791,7 @@ msgstr ""
 
 #: og.module:836
 msgid "Are you sure you want to remove !name from the group %title?"
-msgstr ""
+msgstr "Soll !name wirklich aus der Gruppe %title entfernt werden?"
 
 #: og.module:847
 msgid "User removed from group."
@@ -801,7 +808,7 @@ msgstr "Ein oder mehrere Benutzernamen eintragen, um sie der Gruppe hinzuzufüge
 #: og.module:917
 #, fuzzy
 msgid "Unrecognized %names:"
-msgstr "Unerkannte %names:"
+msgstr "Nicht erkannte %names:"
 
 #: og.module:940;2736
 #: og_panels.module:238
@@ -826,7 +833,7 @@ msgstr "Admin: Erstellen"
 
 #: og.module:967
 msgid "Approve"
-msgstr "Zustimmen"
+msgstr "Akzeptieren"
 
 #: og.module:968
 msgid "Deny"
@@ -862,15 +869,15 @@ msgstr "Keine öffentlichen Beiträge in dieser Gruppe."
 
 #: og.module:1148
 msgid "You must <a href=\"!register\">register</a> or <a href=\"!login\">login</a> and become a member in order to post messages, and view any private posts."
-msgstr ""
+msgstr "Sie müssen sich <a href=\"!register\">registrieren</a> oder <a href=\"!login\">anmelden</a> und ein Mitglied werden, um Beiträge zu erstellen oder private Beiträge anzusehen."
 
 #: og.module:1152
 msgid "Consider <a href=\"!url\">joining this group</a> in order to view its posts."
-msgstr ""
+msgstr "Sie könnten <a href=\"!url\">dieser Gruppe beitreten</a>, um deren Beiträge zu sehen."
 
 #: og.module:1173
 msgid "A brief description for the group details block and the group directory."
-msgstr ""
+msgstr "Eine kurze Beschreibung für den Gruppendetails-Block und das Gruppenverzeichnis."
 
 #: og.module:1183
 msgid "Membership requests"
@@ -878,11 +885,11 @@ msgstr "Anträge auf Mitgliedschaft"
 
 #: og.module:1186
 msgid "open - membership requests are accepted immediately."
-msgstr "offen - Mitgliedschaftsanträge werden sofort akzeptiert."
+msgstr "Offen - Mitgliedschaftsanträge werden sofort akzeptiert."
 
 #: og.module:1186
 msgid "moderated - membership requests must be approved."
-msgstr "moderiert - Mitgliedschaftsanträge müssen genehmigt werden."
+msgstr "Moderiert - Mitgliedschaftsanträge müssen genehmigt werden."
 
 #: og.module:1186
 msgid "invite only - membership must be created by an administrator."
@@ -890,11 +897,11 @@ msgstr "Nur Einladungen - Mitgliedschaft muss von einem Administrator erstellt w
 
 #: og.module:1186
 msgid "closed - membership is exclusively managed by an administrator."
-msgstr "geschlossen - Mitgliedschaften werden exklusiv von einem Administrator verwaltet."
+msgstr "Geschlossen - Mitgliedschaften werden exklusiv von einem Administrator verwaltet."
 
 #: og.module:1187
 msgid "How should membership requests be handled in this group? When you select <em>closed</em>, users will not be able to join <strong>or</strong> leave."
-msgstr ""
+msgstr "Wie sollen Anträge auf Mitgliedschaft in dieser Gruppe gehandhabt werden? Wenn Sie <em>Geschlossen</em> auswählen, können Benutzer nicht beitreten <strong>oder</strong> austreten."
 
 #: og.module:1210;2766
 msgid "registration form"
@@ -910,11 +917,12 @@ msgstr "Im Gruppenverzeichnis anzeigen"
 
 #: og.module:1235
 msgid "Should this group appear on the !page?  Disabled if the group is set to <em>private group</em>."
-msgstr ""
+msgstr "Soll diese Gruppe auf der !page erscheinen? Deaktiviert, wenn die Gruppe als <em>private Gruppe</em> eingestellt ist."
 
+# context sensive string
 #: og.module:1235
 msgid "list of groups page"
-msgstr ""
+msgstr "Gruppenlisten-Seite"
 
 #: og.module:1244
 msgid "Language"
@@ -926,11 +934,11 @@ msgstr ""
 
 #: og.module:1252
 msgid "Selecting a different theme will change the look and feel of the group."
-msgstr ""
+msgstr "Die Auswahl eines anderen Themes wird das Erscheinungsbild der Gruppe ändern."
 
 #: og.module:1362
 msgid "The group manager, %name, must have an email address in his <a href=\"!profile\">profile</a>."
-msgstr ""
+msgstr "Der Gruppenmanager %name, muss eine E-Mail-Adresse in seinem <a href=\"!profile\">Benutzerprofil</a> hinterlegt haben."
 
 #: og.module:1368
 msgid "You must use the default input format when authoring a group node."
@@ -940,9 +948,10 @@ msgstr ""
 msgid "You must !join before posting on this web site."
 msgstr ""
 
+# context sensitive
 #: og.module:1375;1837
 msgid "join a group"
-msgstr "Einer Gruppe beitreten"
+msgstr "einer Gruppe beitreten"
 
 #: og.module:1435
 msgid "OG: notify group members about node %nid - !link."
@@ -1082,7 +1091,7 @@ msgstr ""
 
 #: og.module:2115
 msgid "Membership request approved for '@title'"
-msgstr "Der Antrag auf Mitgliedschaft für ‚%title‘ wurde bestätigt."
+msgstr "Der Antrag auf Mitgliedschaft für ‚%title‘ wurde akzeptiert."
 
 #: og.module:2117
 msgid "You may now post messages in this group located at !group_url."
@@ -2135,7 +2144,7 @@ msgstr "Suchformular wird hier angezeigt."
 #: includes/groupcontent.inc:153
 #, fuzzy
 msgid "Faces go here."
-msgstr "Gesichter wird hier angezeigt."
+msgstr "Gesichter werden hier angezeigt."
 
 #: includes/groupcontent.inc:163
 msgid "Number of pictures per row"
@@ -2156,7 +2165,7 @@ msgstr "Anzahl von Mitgliedern"
 #: includes/groupcontent.inc:186
 #, fuzzy
 msgid "Maximum number of members that should appear on the list."
-msgstr "Die maximale Anzahl an Mitgliedern, die in der Liste angezeigt werden sollen"
+msgstr "Die maximale Anzahl an Mitgliedern, die in der Liste angezeigt werden sollen."
 
 #: includes/groupcontent.inc:195
 msgid "You may specify which types of group members appear in this listing."
