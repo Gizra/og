@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-07-04 09:52+0200\n"
-"PO-Revision-Date: 2008-07-04 10:28+0100\n"
+"POT-Creation-Date: 2008-07-12 16:01+0200\n"
+"PO-Revision-Date: 2008-07-12 16:03+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -15,6 +15,482 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
+
+#: node.tpl.php:22
+#: og_views.inc:828;1004
+#: og.module:357;979;1099;1334;1508;2189;2258
+#: og_access.module:150
+#: og_panels.module:264
+msgid "Groups"
+msgstr "Gruppen"
+
+#: og_views.inc:31
+msgid "OG: Group: Description"
+msgstr "OG: Gruppe: Beschreibung"
+
+#: og_views.inc:34
+msgid "OG: Group: Members count"
+msgstr "OG: Gruppe: Anzahl der Mitglieder"
+
+#: og_views.inc:36
+msgid "Number of members for a group. Excludes memberships which are pending approval."
+msgstr "Anzahl der Mitglieder einer Gruppe. Mitgliedschaften die auf eine Bestätigung warten sind ausgenommen."
+
+#: og_views.inc:41
+msgid "OG: Group: Post count"
+msgstr "OG: Gruppe: Anzahl der Beiträge"
+
+#: og_views.inc:45
+msgid "Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown."
+msgstr "Anzahl der veröffentlichten Beiträge in einer Gruppe. Dies kann mit dem <em>Optionen</em>-Auswahlfeld nach Beitragstyp begrenzt werden."
+
+#: og_views.inc:48
+msgid "All"
+msgstr "Alle"
+
+#: og_views.inc:55
+msgid "OG: Group: Post count *new*"
+msgstr "OG: Gruppe: Anzahl der *neuen* Beiträge"
+
+#: og_views.inc:59
+msgid "Number of new posts in a group for the current user. The <em>new</em> indicator may be optionally appended using the <em>Option</em> dropdown."
+msgstr "Anzahl von neuen Beiträgen eines Benutzers in einer Gruppe. Der <em>neu</em> Hinweis kann optional durch Verwendung des <em>Optionen</em>-Auswahlfelds angehängt werden."
+
+#: og_views.inc:63
+msgid "Normal"
+msgstr "Normal"
+
+#: og_views.inc:64
+msgid "With new mark"
+msgstr ""
+
+#: og_views.inc:69;111
+msgid "OG: Group: Selective"
+msgstr "OG: Gruppe: Ausgewählt"
+
+#: og_views.inc:72;104
+msgid "OG: Group: Private"
+msgstr "OG: Gruppe: Privat"
+
+#: og_views.inc:75
+msgid "OG: Group: Join Link"
+msgstr "OG: Gruppe: Beitrittsverweis"
+
+#: og_views.inc:80
+msgid "Displays a links for joining a group when a user is not already a member."
+msgstr ""
+
+#: og_views.inc:83
+msgid "OG: Group: Notification"
+msgstr "OG: Gruppe: Benachrichtigung"
+
+#: og_views.inc:85
+msgid "Displays <em>yes</em> if group automatically sends email notifications to members"
+msgstr "Zeigt <em>ja</em> an, wenn die Gruppe automatisch E-Mailbenachrichtigungen an Mitglieder verschickt"
+
+#: og_views.inc:88;118
+msgid "OG: Group: Language"
+msgstr "OG: Gruppe: Sprache"
+
+#: og_views.inc:91
+msgid "Displays the language selected for a given group."
+msgstr "Zeigt die für eine angegebene Gruppe ausgewählte Sprache an."
+
+#: og_views.inc:97
+msgid "OG: Group: List in directory"
+msgstr "OG: Gruppe: Im Verzeichnis anzeigen"
+
+#: og_views.inc:101
+msgid "Admin specifies whether or not a group appears in the public listings."
+msgstr "Der Administrator gibt an, ob eine Gruppe in den öffentlichen Auflistungen erscheint oder nicht."
+
+#: og_views.inc:108
+msgid "Is the group home page private or not."
+msgstr "Ist die Gruppenstartseite privat oder nicht."
+
+#: og_views.inc:114
+msgid "Open"
+msgstr "Offen"
+
+#: og_views.inc:114
+msgid "Moderated"
+msgstr "Moderiert"
+
+#: og_views.inc:114
+msgid "Invite Only"
+msgstr "Nur einladen"
+
+#: og_views.inc:114;1313
+msgid "Closed"
+msgstr "Geschlossen"
+
+#: og_views.inc:115
+msgid "The group preference which determines how membership requests are managed (moderated, invite only, etc.)."
+msgstr ""
+
+#: og_views.inc:127
+msgid "Restrict groups to specific languages."
+msgstr "Beschränkt Gruppen auf angegebene Spachen."
+
+#: og_views.inc:144
+msgid "OG: Post in specified group (by number)"
+msgstr "OG: Beitrag in angegebener Gruppe (nach Zahl)"
+
+#: og_views.inc:147
+msgid "Filter for posts in specified organic groups. <em>Value</em> should be a one or more node ids (i.e. integers), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context (if View is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id."
+msgstr ""
+
+#: og_views.inc:152
+msgid "OG: Post in specified groups (by name)"
+msgstr "OG: Beitrag in angegebenen Gruppen (nach Name)"
+
+#: og_views.inc:155
+msgid "Filter for posts in specified organic groups. Value should be a one or more group names (partial name is supported), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context is <strong>not</strong> be set the the first specified group (unfortunately, you must use <em>OG: Post in specified group (by number)</em> for that)."
+msgstr ""
+
+#: og_views.inc:158
+msgid "OG: Post in specified group type"
+msgstr "OG: Beitrag in angegebenem Gruppentyp"
+
+#: og_views.inc:165
+msgid "Filter for a given organic group type."
+msgstr "Nach einen angegeben Organischen-Gruppentyp filtern."
+
+#: og_views.inc:168
+msgid "OG: Posts in current group"
+msgstr "OG: Beiträge in der aktuellen Gruppe"
+
+#: og_views.inc:169
+msgid "Posts in current group. Useful for blocks where determining context is hard. If page is not in any group context, no nodes are listed and thus a block would not appear."
+msgstr "Beiträge in der aktuelle Gruppe. Sinnvoll für Blöcke bei denen der Zusammenhang schwer festzustellen ist. Wenn eine Seite in keinem Gruppenzusammenhang steht, werden keine Beiträge angezeigt und deshalb würde ein Block nicht erscheinen."
+
+#: og_views.inc:176;187
+msgid "OG: Public"
+msgstr "OG: Öffentlich"
+
+#: og_views.inc:177
+msgid "Posts marked as Public, which are viewable by non group members as well."
+msgstr "Beiträge die als Öffentlich markiert sind und deshalb auch für nicht Mitglieder sichtbar sind."
+
+#: og_views.inc:178;308
+msgid "Is"
+msgstr "ist"
+
+#: og_views.inc:189
+msgid "Displays <em>yes</em> if post is public according to OG."
+msgstr "Zeigt <em>ja</em> an, wenn der Beitrag gemäß OG öffentlich ist."
+
+#: og_views.inc:206
+msgid "OG: Group names"
+msgstr "OG: Gruppennamen"
+
+#: og_views.inc:209
+#, fuzzy
+msgid "Display links to any groups that are affiliated with a post."
+msgstr "Zeigt Verweise zu beliebigen Gruppen, die zu einem Beitrag gehören."
+
+#: og_views.inc:229
+msgid "OG: Subscription email"
+msgstr "OG: Mitgliedschafts-E-Mail"
+
+#: og_views.inc:232
+msgid "Does member receive email notifications for a group."
+msgstr "Werden Mitglieder E-Mailbenachrichtigungen für eine Gruppe erhalten."
+
+#: og_views.inc:235
+msgid "OG: Manage membership link"
+msgstr "OG: Mitgliedschaftverweis verwalten"
+
+#: og_views.inc:241
+msgid "OG: Is member an admin in a group"
+msgstr "OG: Ist das Mitglied ein Administrator in einer Gruppe"
+
+#: og_views.inc:249
+msgid "OG: Group in user's groups"
+msgstr "OG: Gruppe in Benutzergruppen"
+
+#: og_views.inc:253
+msgid "Groups are filtered to where current user is a member."
+msgstr "Gruppen werden nach der Mitgliedschaft des aktuellen Benutzers gefiltert."
+
+# User Subbed Groups?
+#: og_views.inc:274
+msgid "OG: Post in User Subbed Groups"
+msgstr "OG: Beiträge in dem Benutzer vertrauten Gruppen"
+
+#: og_views.inc:278
+msgid "Posts are filtered to groups that current user is a member of."
+msgstr "Beiträge werden nach Gruppen gefiltert, in denen der aktuelle Benutzer ein Mitglied ist."
+
+# not literally
+#: og_views.inc:298
+msgid "OG: node type (selector)"
+msgstr "OG: Beitragstyp (Auswahlfeld)"
+
+# exposed filter?
+#: og_views.inc:303
+msgid "A node type selector that is limited to og-enabled node types. Use as exposed filter that only contains og node types."
+msgstr "Ein Auswahlfeld für Beitragstypen ist begrenzt auf Beitragstypen die für OG aktiviert sind. Kann als offener Filter verwendet werden, der nur OG-Beitragstypen enthält."
+
+#: og_views.inc:307
+msgid "OG: type"
+msgstr "OG: Typ"
+
+#: og_views.inc:312
+msgid "Restrict to node types which have been designated behave as groups."
+msgstr ""
+
+#: og_views.inc:322
+msgid "OG: Group nid(s)"
+msgstr "OG: Gruppenbeitrags-ID(s)"
+
+#: og_views.inc:324
+msgid "Filter for the one or more organic groups. Groups should be specified as a comma or plus delimited list of node ids, like taxonomy URLs. "
+msgstr ""
+
+#: og_views.inc:327
+msgid "OG: Group name"
+msgstr "OG: Gruppenname"
+
+#: og_views.inc:333
+msgid "Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</em> field to specify how to match the supplied name."
+msgstr ""
+
+#: og_views.inc:353;382
+msgid "All posts"
+msgstr "Alle Beiträge"
+
+#: og_views.inc:427
+msgid "Shows all activity in subscribed groups."
+msgstr "Alle Aktivität in den abonnierten Gruppen anzeigen."
+
+#: og_views.inc:433
+msgid "Recent posts in my groups"
+msgstr "Neueste Beiträge in meinen Gruppen"
+
+#: og_views.inc:438
+msgid "There are no posts in your subscribed groups."
+msgstr "Keine Beiträge in den abonnierten Gruppen."
+
+#: og_views.inc:445
+msgid "My recent"
+msgstr "Meine Neusten"
+
+#: og_views.inc:480;584;986
+#: og.module:1059
+#: og_panels.module:238
+msgid "Title"
+msgstr "Titel"
+
+#: og_views.inc:488;592;993
+msgid "Author"
+msgstr "Autor"
+
+#: og_views.inc:494;598;998
+msgid "Replies"
+msgstr "Antworten"
+
+#: og_views.inc:501;605;1009
+msgid "Last post"
+msgstr "Letzter Beitrag"
+
+#: og_views.inc:531
+msgid "Shows unread posts in subscribed groups."
+msgstr "Ungelesene Beiträge in abonnierten Gruppen anzeigen."
+
+#: og_views.inc:537
+msgid "Unread posts in my groups"
+msgstr "Ungelesene Beiträge in dieser Gruppe"
+
+#: og_views.inc:542
+msgid "There are no new posts in your subscribed groups."
+msgstr "Keine neuen Beiträge in den abonnierten Gruppen."
+
+#: og_views.inc:549
+msgid "My unread"
+msgstr "Meine Ungelesenen"
+
+#: og_views.inc:573;754;852
+#: og_workflow_ng.inc:44
+#: og_panels.module:544;641
+#: includes/groupcontent.inc:9;22;34;46;58
+msgid "Group"
+msgstr "Gruppe"
+
+#: og_views.inc:578
+#: og.module:2736
+msgid "Type"
+msgstr "Typ"
+
+#: og_views.inc:646
+msgid "OG: Group home page - River of news. Default"
+msgstr ""
+
+#: og_views.inc:701
+msgid "List user's subscribed groups and provide link to manage subscription"
+msgstr ""
+
+#: og_views.inc:707
+#: og.module:1733;1760
+msgid "My groups"
+msgstr "Meine Gruppen"
+
+#: og_views.inc:708
+msgid "You may edit all your email subscriptions using this convenient page. Also, you might be interested in an <a href=\"!url\" rel=\"nofollow\">OPML feed containing feeds from all your subscribed groups</a>."
+msgstr ""
+
+#: og_views.inc:717
+msgid "No subscribed groups"
+msgstr "Keine abonnierten Gruppen"
+
+#: og_views.inc:761;860
+#: og.module:944;1060
+msgid "Manager"
+msgstr "Verwalter"
+
+#: og_views.inc:766;865
+#: og.module:85;982
+msgid "Members"
+msgstr "Mitglieder"
+
+#: og_views.inc:771
+msgid "Email"
+msgstr "E-Mail"
+
+#: og_views.inc:776
+msgid "Manage"
+msgstr "Verwalten"
+
+#: og_views.inc:816
+msgid "Groups directory"
+msgstr "Gruppenverzeichnis"
+
+#: og_views.inc:821
+msgid "No groups"
+msgstr "Keine Gruppen"
+
+#: og_views.inc:870
+#: og.module:1094;1173
+#: includes/groupcontent.inc:94;235
+msgid "Description"
+msgstr "Beschreibung"
+
+#: og_views.inc:875
+#: og.module:732;2689
+msgid "Join"
+msgstr ""
+
+#: og_views.inc:912
+msgid "Search for a group by name"
+msgstr "Über den Namen nach einer Gruppe suchen"
+
+# not literally
+#: og_views.inc:926
+msgid "Shows active posts across the whole site"
+msgstr "Aktive Beiträge der gesamten Website anzeigen"
+
+# not literally
+#: og_views.inc:931
+msgid "Recent posts across whole site"
+msgstr "Neuste Beiträge der gesamte Website"
+
+#: og_views.inc:943
+msgid "Recent posts"
+msgstr "Neuste Beiträge"
+
+#: og_views.inc:963
+msgid "Recent posts for %1"
+msgstr "Neueste Beiträge für %1"
+
+#: og_views.inc:1031
+msgid "Search within a particular group"
+msgstr "Innerhalb einer bestimmten Gruppe suchen"
+
+#: og_views.inc:1036
+#: og.module:2720
+#: includes/groupcontent.inc:243
+msgid "Search"
+msgstr "Suchen"
+
+#: og_views.inc:1041
+msgid "No posts found."
+msgstr "Keine Beiträge gefunden."
+
+#: og_views.inc:1059
+msgid "Search results for %1"
+msgstr "Suchergebnis für %1"
+
+#: og_views.inc:1087
+msgid "Enter keyword"
+msgstr "Schlüsselwort eingeben"
+
+#: og_views.inc:1100
+msgid "Display recent comments block in a group"
+msgstr "Einen Block mit neusten Kommentaren in einer Gruppe anzeigen"
+
+#: og_views.inc:1105
+msgid "Recent comments"
+msgstr "Neueste Kommentare"
+
+#: og_views.inc:1173
+msgid "Recent posts for current term filtered by node type and/or taxonomy term"
+msgstr ""
+
+#: og_views.inc:1315
+msgid "Invite only"
+msgstr "Nur einladen"
+
+#: og_views.inc:1344
+msgid "my membership"
+msgstr "Meine Mitgliedschaft"
+
+#: og_views.inc:1348
+msgid "yes"
+msgstr "Ja"
+
+#: og_views.inc:1390
+msgid "Current group"
+msgstr "Aktuelle Gruppe"
+
+#: og_workflow_ng.inc:15
+msgid "User joins group"
+msgstr "Benutzer tritt der Gruppe bei"
+
+#: og_workflow_ng.inc:16;21;27
+msgid "OG"
+msgstr "OG"
+
+#: og_workflow_ng.inc:20
+msgid "User approved to group by admin"
+msgstr ""
+
+#: og_workflow_ng.inc:22
+msgid "A pending member is approved by a group administrator."
+msgstr ""
+
+#: og_workflow_ng.inc:26
+msgid "User leaves group"
+msgstr "Benutzer verlässt die Gruppe"
+
+#: og_workflow_ng.inc:43
+msgid "User, who joins group"
+msgstr "Der dieser Gruppe beitretende Benutzer"
+
+#: og_xmlrpc.inc:13
+msgid "Unrecognized user ID: %uid."
+msgstr "Unerkannte Benutzer-ID: %uid."
+
+#: og_xmlrpc.inc:17;37;52
+msgid "Wrong username or password."
+msgstr "Der Benutzername oder das Passwort ist falsch."
+
+#: og_xmlrpc.inc:33
+msgid "User is not a member of the specified group."
+msgstr "Der Benutzer ist kein Mitglied der angegebenen Gruppe"
+
+#: og_xmlrpc.inc:48
+msgid "User is not allowed to retrieve membership information for another user."
+msgstr ""
 
 #: og.module:30
 msgid "Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages."
@@ -78,7 +554,6 @@ msgstr "Gruppenaktivität"
 #: og_access.info:0
 #: og_panels.info:0
 #: includes/groupcontent.inc:10;23;35;47;59
-#: og_notifications/og_notifications.info:0
 msgid "Organic groups"
 msgstr "Organische-Gruppen"
 
@@ -93,6 +568,16 @@ msgstr "Einstellungen für organische Gruppen"
 #: og.module:74
 msgid "Configure the main Organic groups module (og)"
 msgstr ""
+
+#: og.module:86
+#: og_panels.module:40
+msgid "List"
+msgstr "Alle anzeigen"
+
+#: og.module:88
+#: includes/groupcontent.inc:247
+msgid "Faces"
+msgstr "Gesichter"
 
 #: og.module:92
 msgid "Add members"
@@ -201,6 +686,11 @@ msgstr ""
 #: og.module:537
 msgid "Confirm"
 msgstr "Bestätigen"
+
+#: og.module:538;584;732;837
+#: og_panels.module:146
+msgid "Cancel"
+msgstr "Abbrechen"
 
 #: og.module:549
 msgid "%name was promoted to %ga."
@@ -311,7 +801,12 @@ msgstr "Ein oder mehrere Benutzernamen eintragen, um sie der Gruppe hinzuzufüge
 #: og.module:917
 #, fuzzy
 msgid "Unrecognized %names:"
-msgstr "Unbekannte %names:"
+msgstr "Unerkannte %names:"
+
+#: og.module:940;2736
+#: og_panels.module:238
+msgid "Operations"
+msgstr "Operationen"
 
 #: og.module:953;2184
 msgid "(approval needed)"
@@ -699,6 +1194,11 @@ msgstr ""
 msgid "Group details"
 msgstr "Gruppendetails"
 
+#: og.module:2377
+#: includes/groupcontent.inc:239
+msgid "Group members"
+msgstr "Gruppenmitglieder"
+
 #: og.module:2378;2499
 msgid "New groups"
 msgstr "Neue Gruppen"
@@ -714,6 +1214,21 @@ msgstr "Gruppen-Netzwerk"
 #: og.module:2411
 msgid "Maximum number of members to show"
 msgstr "Die maximale Anzahl der anzuzeigenden Mitglieder"
+
+#: og.module:2417
+#: includes/groupcontent.inc:192
+msgid "Group roles"
+msgstr "Gruppenrollen"
+
+#: og.module:2419
+#: includes/groupcontent.inc:194
+msgid "Standard members"
+msgstr "Standardmitglieder"
+
+#: og.module:2419
+#: includes/groupcontent.inc:194
+msgid "Administrators"
+msgstr "Administratoren"
 
 #: og.module:2420
 msgid "You may specify which types of group members appear in the listing."
@@ -1211,4 +1726,506 @@ msgstr "Organische Gruppen verwalten"
 #: og.module:0
 msgid "og"
 msgstr "og"
+
+#: og_access.module:20
+msgid "Organic groups access configuration"
+msgstr "Zugriffskonfiguration für organische Gruppen"
+
+#: og_access.module:21
+msgid "Choose whether new groups should be private or public"
+msgstr "Auswählen, ob neue Gruppen privat oder öffentlich sind"
+
+#: og_access.module:33
+msgid "Visible only within the targeted groups."
+msgstr "Nur in den ausgewählten Gruppen sichtbar."
+
+#: og_access.module:33
+msgid "Visible within the targeted groups and on other pages."
+msgstr "Sowohl in den ausgewählten Gruppen, als auch auf anderen Seiten sichtbar."
+
+#: og_access.module:33
+msgid "Visibility chosen by author/editor using a checkbox on the posting form."
+msgstr "Die vom Autor/Bearbeiter über ein Kontrollkästchen im Beitragsformular ausgewählte Sichtbarkeit. "
+
+#: og_access.module:33
+msgid "Checkbox defaults to @pub."
+msgstr "Die Standardeinstellung des Kontrollkästchens ist @pub."
+
+#: og_access.module:33;34;141;144
+msgid "Public"
+msgstr "Öffentlich"
+
+#: og_access.module:33
+msgid "Visibility chosen by author/editor using a checkbox on the posting form. "
+msgstr "Die vom Autor/Bearbeiter über ein Kontrollkästchen im Beitragsformular ausgewählte Sichtbarkeit. "
+
+#: og_access.module:33
+msgid "Checkbox defaults to @pri."
+msgstr "Die Standardeinstellung des Kontrollkästchens ist @pri."
+
+#: og_access.module:33
+msgid "Private"
+msgstr "Privat"
+
+#: og_access.module:34
+msgid "Visibility of posts"
+msgstr "Sichtbarkeit der Beiträge"
+
+#: og_access.module:34
+msgid "Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting. If the setting you want is disabled here, check the settings under <em>Private Groups</em> setting below. You cannot set node visibility to always be public if private groups are set to always on and vice versa."
+msgstr ""
+
+# Standardzielgruppe(n) ?
+#: og_access.module:37
+msgid "New group home pages and default audience are always public."
+msgstr "Neue Gruppenhauptseiten und die Standardzielgruppen sind immer öffentlich."
+
+# Standardzielgruppe(n) ?
+#: og_access.module:38
+msgid "New group home pages and default audience are always private."
+msgstr "Neue Gruppenhauptseiten und die Standardzielgruppen sind immer privat."
+
+#: og_access.module:39
+msgid "Group administrator chooses whether her group homepage and audience are private or not. Defaults to %yes."
+msgstr "Der Gruppenadministrator wählt aus, ob ihre Gruppenstartseite und Zielgruppe privat ist oder nicht. Die Standardeinstellung ist %yes."
+
+#: og_access.module:39
+msgid "private"
+msgstr "Privat"
+
+#: og_access.module:40
+msgid "Group administrator chooses whether her group homepage and audience are private or not. Defaults to %no."
+msgstr "Der Gruppenadministrator wählt aus, ob ihre Gruppenstartseite und Zielgruppe privat ist oder nicht. Die Standardeinstellung ist %no."
+
+#: og_access.module:40
+msgid "public"
+msgstr "Öffentlich"
+
+#: og_access.module:44
+msgid "Private Groups"
+msgstr "Private Gruppen"
+
+#: og_access.module:47
+msgid "A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private. This setting controls what private groups options can be used when creating a new group or editing an existing group. If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here."
+msgstr ""
+
+#: og_access.module:47
+msgid "Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Node authoring form / Visibility of Posts</em> setting on this page. Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups! To change those you must edit the groups and their individual content nodes directly. If the setting you want is disabled here, check <em>Visibility of Posts</em> above. You cannot choose to only have private groups if node visibility is set to be always public, and vice versa."
+msgstr ""
+
+#: og_access.module:84
+msgid "Private group"
+msgstr "Private Gruppe"
+
+#: og_access.module:86
+msgid "Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>."
+msgstr "Soll diese Gruppe nur für deren Mitglieder sichtbar sein? Deaktiviert, sobald die Gruppe auf <em>Im Verzeichnis anzeigen</em> oder <em>Mitgliedschaftsanfragen: offen</em> eingestellt ist."
+
+#: og_access.module:141;144
+msgid "Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>Public</em>."
+msgstr "Diesen Beitrag jedem oder nur den Mitgliedern der unten ausgewählten Gruppen anzeigen. Beiträge ohne Gruppenzuordnung sind immer <em>Öffentlich</em>."
+
+# not literally
+#: og_access.module:260
+msgid "All users may view this node."
+msgstr "Alle Benutzer können diesen Beitrag lesen."
+
+# not literally
+#: og_access.module:264
+msgid "Members of !group_n may view this node."
+msgstr "Mitglieder von !group_n können diesen Beitrag lesen."
+
+#: og_access.module:0
+msgid "og_access"
+msgstr "og_access"
+
+#: og_panels.module:7
+msgid "After enabling this module, visit the new Pages tab on any group. There, group admins may create as many pages as desired for their group. The pages may contain any layout that the site offers and admins may arrange many different types of content as desired. Site admins can restrict the types of content that may be added on the <a href=\"!settings\">og_panels settings</a> page. You might want to make some Views available using <a href=\"!apv\">admin/panels/views</a>. Group admins may designate one page as their group home page."
+msgstr ""
+
+#: og_panels.module:9
+msgid "Create custom pages for your group. Use custom pages to organize your content in a pretty and informative manner. Your group can group to be a whole website within a web site. Each custom page becomes a tab when viewing your group. One of your custom pages should be designated as your <em>group home page</em>. That page will then display when visitors first arrive at your group."
+msgstr ""
+
+#: og_panels.module:9
+msgid "Start by clicking the <a href=\"!url\">Add new page</a> tab. Then you will choose a custom layout for your page. Then you will want to <em>edit content</em> for your custom page."
+msgstr ""
+
+#: og_panels.module:17
+#: og_panels.info:0
+msgid "Organic groups panels"
+msgstr "Organische-Gruppen-Panels"
+
+#: og_panels.module:18
+msgid "Configure the content that is available to group admins when creating group pages."
+msgstr ""
+
+#: og_panels.module:30;461
+msgid "Pages"
+msgstr "Seiten"
+
+#: og_panels.module:49;187
+msgid "Edit page"
+msgstr "Seite bearbeiten"
+
+#: og_panels.module:49
+msgid "Add new page"
+msgstr "Neue Seite hinzufügen"
+
+#: og_panels.module:119;146
+msgid "Delete"
+msgstr "Löschen"
+
+#: og_panels.module:143
+msgid "Are you sure you want to delete %title?"
+msgstr "Soll %title wirklich gelöscht werden?"
+
+#: og_panels.module:145
+msgid "This action cannot be undone."
+msgstr "Diese Aktion kann nicht rückgängig gemacht werden."
+
+#: og_panels.module:152
+msgid "%title has been deleted."
+msgstr "%title wurde gelöscht."
+
+#: og_panels.module:184
+msgid "Edit content"
+msgstr "Inhalt bearbeiten"
+
+#: og_panels.module:185
+msgid "Change layout"
+msgstr "Layout ändern"
+
+#: og_panels.module:186
+msgid "Edit layout settings"
+msgstr "Layouteinstellungen bearbeiten"
+
+#: og_panels.module:188
+msgid "Delete page"
+msgstr "Seite löschen"
+
+#: og_panels.module:207
+msgid "Save settings"
+msgstr "Einstellungen speichern"
+
+#: og_panels.module:238
+msgid "Home page"
+msgstr "Startseite"
+
+#: og_panels.module:238
+msgid "Weight"
+msgstr "Reihenfolge"
+
+#: og_panels.module:249
+msgid "Updated panels configuration."
+msgstr "Panelkonfiguration wurde aktualisiert."
+
+#: og_panels.module:263;459
+msgid "Home"
+msgstr "Startseite"
+
+#: og_panels.module:273
+msgid "@name at @site"
+msgstr "@name auf @site"
+
+#: og_panels.module:301
+msgid "Page title"
+msgstr "Seitentitel"
+
+#: og_panels.module:305
+msgid "This is the title of the page and of the tab."
+msgstr "Dies ist der Titel der Seite und des Tabulators."
+
+#: og_panels.module:311
+msgid "Path"
+msgstr "Pfad"
+
+#: og_panels.module:316
+msgid "This page is currently your default group home page and has no configurable path."
+msgstr "Diese Seite ist derzeit die Standardgruppen-Startseite und hat keinen konfigurierbaren Pfad."
+
+#: og_panels.module:327
+msgid "Show blocks"
+msgstr "Blöcke anzeigen"
+
+#: og_panels.module:330
+msgid "If unchecked, the standard group blocks will not be shown unless you place them into your page content. This gives admin more control over page presentation."
+msgstr ""
+
+#: og_panels.module:334
+msgid "Published"
+msgstr "Veröffentlicht"
+
+#: og_panels.module:336
+msgid "If unchecked, this page is only accessible by group or site administrators. Thats useful while you are configuring the page."
+msgstr ""
+
+#: og_panels.module:341
+msgid "Update page"
+msgstr "Seite aktualisieren"
+
+#: og_panels.module:341
+msgid "Create page"
+msgstr "Seite erstellen"
+
+#: og_panels.module:424
+msgid "%path is a reserved system path, and cannot be used for a group page. Please enter another path."
+msgstr "%path ist ein reservierter Systempfad und kann nicht für eine Gruppenseite verwendet werden. Geben Sie einen anderen Pfad ein."
+
+#: og_panels.module:427
+msgid "Panel paths may only contain alphanumeric characters and dashes."
+msgstr "Panelpfade dürfen nur alphanumerische Zeichen und Striche enthalten."
+
+#: og_panels.module:430
+msgid "That path is currently in use by another one of your group's pages. Please enter another path."
+msgstr "Dieser Pfad wird derzeit von einer anderen Gruppenseite verwendet. Geben Sie einen anderen Pfad ein."
+
+#: og_panels.module:443
+msgid "Group page updated."
+msgstr "Gruppenseite wurde aktualisiert."
+
+#: og_panels.module:451
+msgid "Group page created."
+msgstr "Gruppenseite wurde erstellt."
+
+#: og_panels.module:475
+msgid "Organic groups panel pages deleted."
+msgstr "Panelseiten von Organischen-Gruppen wurden gelöscht."
+
+#: og_panels.module:496;511
+msgid "Save"
+msgstr "Speichern"
+
+#: og_panels.module:545
+msgid "A node object that is flagged as an OG group type."
+msgstr "Ein Beitragsobjekt das als ein OG-Gruppentyp markiert ist."
+
+# Mission?
+#: og_panels.module:561
+msgid "OG mission"
+msgstr "OG-Ziele"
+
+#: og_panels.module:573
+msgid "OG description"
+msgstr "OG-Beschreibung"
+
+#: og_panels.module:581
+msgid "OG members"
+msgstr "OG-Mitglieder"
+
+#: og_panels.module:594
+#: includes/groupcontent.inc:42
+msgid "Group search"
+msgstr "Gruppensuche"
+
+#: og_panels.module:604
+msgid "OG faces"
+msgstr "OG-Gesichter"
+
+#: og_panels.module:623
+msgid "Group from node"
+msgstr "Die Gruppe des Beitrags"
+
+#: og_panels.module:625
+msgid "Adds a group from a node context; if multiple groups are associated with a node, this will get the \"first\" group only."
+msgstr ""
+
+#: og_panels.module:626
+msgid "Node"
+msgstr "Beitrag"
+
+#: og_panels.module:132
+msgid "manage OG panels pages"
+msgstr "OG-Panelseiten verwalten"
+
+#: og_panels.module:0
+msgid "og_panels"
+msgstr "og_panels"
+
+#: og.install:98
+msgid "Organic groups module enabled. Please see the included !README file for further installation instructions."
+msgstr ""
+
+#: og_access.install:21;42
+msgid "The node access table has been rebuilt."
+msgstr "Die Inhaltsberechtigungstabelle wurde neu aufgebaut."
+
+#: og.info:0
+msgid "Enable users to create and manage their own 'groups'"
+msgstr ""
+
+#: og_access.info:0
+msgid "Enable access control for private posts and private groups."
+msgstr ""
+
+#: og_panels.info:0
+msgid "Enable group admins to create panel pages."
+msgstr ""
+
+#: includes/groupcontent.inc:5
+msgid "Welcome message"
+msgstr "Willkommensmitteilung"
+
+#: includes/groupcontent.inc:8
+#, fuzzy
+msgid "The welcome message for the group. Specified on group edit form."
+msgstr "Die Willkommensmeldung für die Gruppe. Angegeben auf dem „Bearbeiten“-Formular der Gruppe"
+
+#: includes/groupcontent.inc:18
+msgid "Group description"
+msgstr "Eine Beschreibung der Gruppe."
+
+#: includes/groupcontent.inc:21
+msgid "The group description as specified on the group edit form."
+msgstr "Die Gruppenbeschreibung, wie diese auf dem „Bearbeiten“-Formular der Gruppe angegeben wurde."
+
+#: includes/groupcontent.inc:30;111
+msgid "Group Members"
+msgstr "Gruppenmitglieder"
+
+#: includes/groupcontent.inc:33
+msgid "The list of group subscribers or just group admins."
+msgstr "Die Liste von Gruppenmitgliedern oder nur Gruppenadministratoren."
+
+#: includes/groupcontent.inc:45
+msgid "Search this group."
+msgstr "Diese Gruppe durchsuchen."
+
+#: includes/groupcontent.inc:54;147
+msgid "Group Faces"
+msgstr "Gruppengesichter"
+
+#: includes/groupcontent.inc:57
+msgid "Show a grid of user pictures."
+msgstr "Ein Raster von Benutzerbildern anzeigen."
+
+#: includes/groupcontent.inc:68;231
+msgid "Welcome"
+msgstr "Willkommen"
+
+# not literally
+#: includes/groupcontent.inc:83
+#, fuzzy
+msgid "Welcome statement goes here."
+msgstr "Willkommenmeldung wird hier angezeigt."
+
+# not literally
+#: includes/groupcontent.inc:100
+#, fuzzy
+msgid "Description goes here."
+msgstr "Beschreibung wird hier angezeigt."
+
+# not literally
+#: includes/groupcontent.inc:117
+#, fuzzy
+msgid "Member list goes here."
+msgstr "Mitgliederliste wird hier angezeigt."
+
+#: includes/groupcontent.inc:128
+msgid "Group Search"
+msgstr "Gruppensuche"
+
+# not literally
+#: includes/groupcontent.inc:136
+#, fuzzy
+msgid "Search form goes here."
+msgstr "Suchformular wird hier angezeigt."
+
+# not literally
+#: includes/groupcontent.inc:153
+#, fuzzy
+msgid "Faces go here."
+msgstr "Gesichter wird hier angezeigt."
+
+#: includes/groupcontent.inc:163
+msgid "Number of pictures per row"
+msgstr "Anzahl an Bildern pro Zeile"
+
+#: includes/groupcontent.inc:169
+msgid "Maximum number of rows per page"
+msgstr "Die maximale Anzahl an Einträgen pro Seite"
+
+#: includes/groupcontent.inc:175
+msgid "Pager ID"
+msgstr "Pager-ID"
+
+#: includes/groupcontent.inc:185
+msgid "Number of members"
+msgstr "Anzahl von Mitgliedern"
+
+#: includes/groupcontent.inc:186
+#, fuzzy
+msgid "Maximum number of members that should appear on the list."
+msgstr "Die maximale Anzahl an Mitgliedern, die in der Liste angezeigt werden sollen"
+
+#: includes/groupcontent.inc:195
+msgid "You may specify which types of group members appear in this listing."
+msgstr "Hier kann angegeben werden, welche Typen von Gruppenmitgliedern in der Auflistung angezeigt werden."
+
+#: includes/groupcontent.inc:199
+msgid "Show more link"
+msgstr "„Mehr“-Verweis anzeigen"
+
+# not literally
+#: includes/groupcontent.inc:201
+msgid "Should a <em>more</em> link appear when more members are in the group but not listed."
+msgstr "Soll ein <em>mehr</em>-Verweis angezeigt werden, wenn mehr als die angezeigten Mitglieder in der Gruppe sind."
+
+#: includes/groupcontent.inc:205
+msgid "Show pictures"
+msgstr "Bilder anzeigen"
+
+#: includes/groupcontent.inc:207
+msgid "Should member pictures be shown in addition to member names."
+msgstr "Sollen Mitgliederbilder zusätzlich zu den Mitgliedernamen angezeigt werden."
+
+#: includes/groupcontent.inc:214
+msgid "Number of members must be an integer."
+msgstr "Die Anzahl von Mitgliedern muss eine Zahl sein."
+
+#: includes/groupcontent.inc:222
+msgid "Number of pictures per row must be an integer."
+msgstr "Die Anzahl von Bildern pro Zeile muss eine Zahl sein."
+
+#: includes/groupcontent.inc:225
+msgid "Maximum number of rows per page must be an integer."
+msgstr "Die maximale Anzahl von Zeilen muss eine Zahl sein."
+
+#: includes/groupcontext.inc:37
+msgid "Require this context from an external source (such as containing panel page)."
+msgstr ""
+
+#: includes/groupcontext.inc:38
+msgid "If selected, group selection (below) will be ignored"
+msgstr ""
+
+# not literally
+#: includes/groupcontext.inc:46
+#, fuzzy
+msgid "Enter the NID of a group"
+msgstr "Die Beitrags-ID der Gruppe eingeben"
+
+#: includes/groupcontext.inc:56
+msgid "Currently set to \"%title\""
+msgstr "Derzeit eingestellt auf „%title“"
+
+#: includes/groupcontext.inc:74
+msgid "You must select a node."
+msgstr "Ein Beitrag muss ausgewählt werden."
+
+#: includes/groupcontext.inc:100
+msgid "Invalid group selected."
+msgstr "Ungültige Gruppe ausgewählt."
+
+#: includes/groupcontext.inc:103
+msgid "Node is of type %type which not a group type."
+msgstr "Der Beitrag vom Typ %type ist kein Gruppentyp."
+
+# Not literally
+#: tests/og_testcase.php:21
+msgid "Your %post has been created."
+msgstr "Der Beitrag %post wurde erstellt."
+
+#~ msgid "edit page"
+#~ msgstr "Seite bearbeiten"
 
