@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OG notifications\n"
 "POT-Creation-Date: 2008-07-04 09:52+0200\n"
-"PO-Revision-Date: 2008-07-04 19:50+0100\n"
+"PO-Revision-Date: 2008-07-13 19:14+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -70,7 +70,7 @@ msgstr ""
 
 #: og_notifications/og_notifications.module:298;498;514
 msgid "%type posts in this group"
-msgstr "%type Beiträge in dieser Gruppe"
+msgstr "%type-Beiträge in dieser Gruppe"
 
 #: og_notifications/og_notifications.module:316
 msgid "There are no active group subscriptions available."
