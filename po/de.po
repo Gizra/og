@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-07-12 16:01+0200\n"
-"PO-Revision-Date: 2008-07-13 18:57+0100\n"
+"PO-Revision-Date: 2008-07-13 19:12+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -1011,7 +1011,7 @@ msgstr "Gruppenbeiträge"
 
 #: og.module:1597
 msgid "In addition to deleting this group, you may choose how to disposition the posts within it."
-msgstr "Zusätzlich zum Löschen dieser Gruppe kann auswählen werden, was mit den darin enthaltenen Beträgen geschehen soll."
+msgstr "Zusätzlich zum Löschen dieser Gruppe kann ausgewählt werden, was mit den darin enthaltenen Beträgen geschehen soll."
 
 #: og.module:1601
 msgid "Target group"
@@ -1488,7 +1488,7 @@ msgstr "Festlegung einer Zielgruppe erforderlich"
 
 #: og.module:2779
 msgid "Do you require that all (non administrator) posts be affiliated with a group? Note that changing this setting will affect existing posts when they are edited."
-msgstr "Sollen alle (auch nicht-administrative) Beiträge einer Gruppe zugewiesen werden? Eine Änderung dieser Einstellung wird Auswirkungen auf vorhandene Beiträge haben, wenn diese bearbeitet werden."
+msgstr "Müssen alle (auch nicht-administrative) Beiträge einer Gruppe zugewiesen werden? Eine Änderung dieser Einstellung wird Auswirkungen auf vorhandene Beiträge haben, wenn diese bearbeitet werden."
 
 #: og.module:2784
 msgid "Home page presentation"
@@ -1684,7 +1684,7 @@ msgstr "Module für organischen Gruppen"
 
 #: (duplicate) og.module:2986
 msgid "Organic groups works best when !job_queue.module is enabled. See the Integration section of the !readme."
-msgstr "Organische Gruppen funktioniert am besten, wenn !job_queue aktiviert ist. Nähere Informationen gibt es im Integrationsabschnitt der !readme."
+msgstr "Organische Gruppen funktioniert am besten, wenn das !job_queue aktiviert ist. Nähere Informationen gibt es im Integrationsabschnitt der !readme."
 
 #: (duplicate) og.module:2993
 #: og_access.info:0
@@ -2077,7 +2077,7 @@ msgstr "Die Inhaltsberechtigungstabelle wurde neu aufgebaut."
 
 #: og.info:0
 msgid "Enable users to create and manage their own 'groups'"
-msgstr "Ermöglicht Benutzers eigene ‚Gruppen‘ zu erstellen und verwalten."
+msgstr "Ermöglicht Benutzern eigene ‚Gruppen‘ zu erstellen und verwalten."
 
 #: og_access.info:0
 msgid "Enable access control for private posts and private groups."
@@ -2129,7 +2129,7 @@ msgstr "Willkommen"
 
 #: includes/groupcontent.inc:83
 msgid "Welcome statement goes here."
-msgstr "Die Willkommenmeldung wird hier angezeigt."
+msgstr "Die Willkommensmeldung wird hier angezeigt."
 
 #: includes/groupcontent.inc:100
 msgid "Description goes here."
