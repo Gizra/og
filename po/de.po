@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-07-12 16:01+0200\n"
-"PO-Revision-Date: 2008-07-13 19:28+0100\n"
+"PO-Revision-Date: 2008-07-13 19:58+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -1365,7 +1365,7 @@ msgstr "Einen Neuen !s in diese Gruppe hinzufügen."
 
 #: og.module:2733
 msgid "You must designate at least one content type to act as a Group node and another as a Group post. <a href=\"!create\">Create new content type</a> if needed."
-msgstr ""
+msgstr "Es muss mindestens ein Inhaltstyp festgelegt werden, der als Gruppe und ein weiterer der als Gruppenbeitrag fungiert. Nach Bedarf kann ein <a href=\"!create\">neuer Inhaltstyp</a> erstellt werden."
 
 #: og.module:2735
 msgid "Content types"
@@ -1428,7 +1428,7 @@ msgstr "Neue Gruppen erscheinen nicht im Registrierungsformular. Ausschließlich
 
 #: og.module:2762
 msgid "New groups always appear on the registration form."
-msgstr ""
+msgstr "Neue Gruppen erscheinen immer im Registrierungsformular."
 
 #: og.module:2763
 msgid "Group creator chooses whether her group appears on the registration form. Defaults to %in."
@@ -1492,7 +1492,7 @@ msgstr "Müssen alle (auch nicht-administrative) Beiträge einer Gruppe zugewies
 
 #: og.module:2784
 msgid "Home page presentation"
-msgstr ""
+msgstr "Darstellung der Startseite"
 
 #: og.module:2784
 msgid "Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using !theme. Also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module."
@@ -1508,7 +1508,7 @@ msgstr "Mitgliederbilder"
 
 #: og.module:2787
 msgid "Should member pictures be shown on the members page, the group members block, and group details block? You must also enable pictures in !user."
-msgstr ""
+msgstr "Sollen Mitgliederbilder auf der Mitgliederseite, im Gruppenmitglieder-Block und dem Gruppendetails-Block angezeigt werden? Hierzu müssen Bilder in den !user aktiviert sein."
 
 #: og.module:2787
 msgid "User configuration"
@@ -1524,7 +1524,7 @@ msgstr "Format des „Von:“-Feldes"
 
 #: og.module:2795
 msgid "Specify the format of the \"From:\" field on outgoing notifications. Available variables: @user_mail, @user_name, @site_mail, @site_name. Note that the @user_mail token reveals the author's email address. If the admin email examples above appear blank, you need to set your site email in the Site Configuration panel."
-msgstr "Das Format des „Von:“-Feldes für ausgehende Benachrichtigungen festlegen. Verfügbare Variablen sind: @user_mail, @user_name, @site_mail und @site_name. Bitte beachten Sie, dass der Platzhalter @user_mail die E-Mail-Adresse des Autors anzeigt. Sollten die oben aufgeführten administrativen E-Mail-Beispiele leer erscheinen, muss die E-Mail der Website in den „Website-Informationen“ eingetragen werden."
+msgstr "Das Format des „Von:“-Feldes für ausgehende Benachrichtigungen festlegen. Verfügbare Variablen sind: @user_mail, @user_name, @site_mail und @site_name. Bitte beachten Sie, dass der Platzhalter @user_mail die E-Mail-Adresse des Autors anzeigt. Sollten die oben aufgeführten administrativen E-Mail-Beispiele leer gelassen werden, muss die E-Mail der Website in den „Website-Informationen“ eingetragen werden."
 
 #: og.module:2797
 msgid "New content subject"
@@ -1584,11 +1584,11 @@ msgstr "Der Textkörper der E-Mail, die an abgelehnte Benutzer gesendet wird. Ve
 
 #: og.module:2804
 msgid "Invite user email subject"
-msgstr ""
+msgstr "Betreff der Einladungs-E-Mail an Benutzer"
 
 #: og.module:2804
 msgid "The subject of the email sent to users invited to join a group. Available variables: @group, @site, @description, !group_url, @body"
-msgstr ""
+msgstr "Der Betreff der E-Mail, die an eingeladenen Benutzer zum Beitritt in die Gruppe verschickt wird. Verfügbare Variablen: @group, @site, @description, !group_url, @body"
 
 #: og.module:2805
 msgid "Invite user email body"
