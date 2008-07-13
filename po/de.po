@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-07-12 16:01+0200\n"
-"PO-Revision-Date: 2008-07-13 19:12+0100\n"
+"PO-Revision-Date: 2008-07-13 19:28+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -908,7 +908,7 @@ msgstr "Registrierungsformular"
 
 #: og.module:1210
 msgid "Should users be able to join this group during registration?. If checked, a corresponding checkbox will be added to the registration form."
-msgstr "Soll diese Gruppe auf dem Registrierungsformular zur Anmeldung angeboten werden? Falls ausgewählt, wird dem Registrierungsformular ein entsprechendes Kontrollkästchen hinzugefügt."
+msgstr "Soll diese Gruppe auf dem Registrierungsformular zur Anmeldung angeboten werden? Falls ausgewählt, wird dem Registrierungsformular ein entsprechendes Ankreuzfeld hinzugefügt."
 
 #: og.module:1235
 msgid "list in groups directory"
@@ -1468,7 +1468,7 @@ msgstr "Sollen neue Mitglieder automatisch per E-Mail benachrichtigt werden, wen
 
 #: og.module:2775
 msgid "Audience checkboxes"
-msgstr "Kontrollkästchen für die Zielgruppen"
+msgstr "Ankreuzfelder für die Zielgruppen"
 
 #: og.module:2775
 msgid "Show each group that the user is a member of as a checkbox in the Audience section. This enables the member to place her post into multiple groups. If unchecked, simplify the user interface by omitting the checkboxes and assuming user wants to post into the current group. This simplification only applies to new nodes, and not to edits of existing nodes. Group administrators always see checkboxes."
@@ -1767,11 +1767,11 @@ msgstr "Sowohl in den ausgewählten Gruppen, als auch auf anderen Seiten sichtba
 
 #: og_access.module:33
 msgid "Visibility chosen by author/editor using a checkbox on the posting form."
-msgstr "Die vom Autor/Bearbeiter über ein Kontrollkästchen im Beitragsformular ausgewählte Sichtbarkeit. "
+msgstr "Die vom Autor/Bearbeiter über ein Ankreuzfeld im Beitragsformular ausgewählte Sichtbarkeit. "
 
 #: og_access.module:33
 msgid "Checkbox defaults to @pub."
-msgstr "Die Standardeinstellung des Kontrollkästchens ist @pub."
+msgstr "Die Standardeinstellung des Ankreuzfeldes ist @pub."
 
 #: og_access.module:33;34;141;144
 msgid "Public"
@@ -1779,11 +1779,11 @@ msgstr "Öffentlich"
 
 #: og_access.module:33
 msgid "Visibility chosen by author/editor using a checkbox on the posting form. "
-msgstr "Die vom Autor/Bearbeiter über ein Kontrollkästchen im Beitragsformular ausgewählte Sichtbarkeit. "
+msgstr "Die vom Autor/Bearbeiter über ein Ankreuzfeld im Beitragsformular ausgewählte Sichtbarkeit. "
 
 #: og_access.module:33
 msgid "Checkbox defaults to @pri."
-msgstr "Die Standardeinstellung des Kontrollkästchens ist @pri."
+msgstr "Die Standardeinstellung des Ankreuzfeldes ist @pri."
 
 #: og_access.module:33
 msgid "Private"
