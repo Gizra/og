@@ -100,7 +100,8 @@ function og_access_alter_group_form(&$form, $node) {
 function og_access_alter_nongroup_form(&$form, $form_state, $node) {
   global $user;
   
-  if (og_is_group_post_type($node->type)) {
+  // If user has no subscriptions, don't bother with Public checkbox - it's meaningless.
+  if (og_is_group_post_type($node->type) && !empty($form['og_nodeapi']['visible'])) {
     // get the visibility for normal users
     $vis = variable_get('og_visibility', 0);
 
