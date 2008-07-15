@@ -2825,21 +2825,21 @@ function og_og_create_links($group) {
 }
 
 function og_search_form($form_state, $group) {
-  $form_state['keys'] = array(
+  $form['keys'] = array(
     '#type' => 'textfield',
     '#title' => '',
     '#description' => '',
     '#size' => 19,
     '#maxlength' => 255,
   );
-  $form_state['submit'] = array(
+  $form['submit'] = array(
     '#type' => 'submit', 
     '#value' => t('Search'),
   );
-  $form_state['#pre_render'][] = 'og_search_form_pre_render';
-  $form_state['#method'] = 'get';
-  $form_state['#action'] = url("og/search/$group->nid");
-  return $form_state;
+  // $form['#pre_render'][] = 'og_search_form_pre_render';
+  $form['#method'] = 'get';
+  $form['#action'] = url("og/search/$group->nid");
+  return $form;
 }
 
 // Clean up query string like Views does.
