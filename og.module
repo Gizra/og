@@ -188,10 +188,9 @@ function og_menu() {
 }
 
 function og_menu_access_unsubscribe($group_node, $account) {
-  global $user;
-  
+  global $user;  
   // Unsubscribee must already be a member.
-  if (!og_is_group_member($group_node, FALSE, $account)) {
+  if (!og_is_group_member($group_node, FALSE, $account->uid)) {
     return FALSE;
   }
   
@@ -199,7 +198,7 @@ function og_menu_access_unsubscribe($group_node, $account) {
   if ($account->uid != $user->uid && !og_is_group_admin($group_node)) {
     return FALSE;
   }
-  
+
   // Regular users may not unsubscribe from CLOSED groups.
   if ($group_node->og_selective == OG_CLOSED && !og_is_group_admin($group_node)) {
     return FALSE;
@@ -234,7 +233,7 @@ function og_menu_access_picture($gid) {
  * @param $include_admins
  *  Whether or not site admins are considered members.
  * @param $uid
- *   Pass a user id or NULL inorder to check current user.
+ *   Pass a user id, or pass NULL in order to check current user.
  */
 function og_is_group_member($gid, $include_admins = TRUE, $uid = NULL) {
   if ($uid) {
