@@ -10,9 +10,20 @@ class OgSubscribe extends OgTestCase {
   }
   
   function testAddOg() {
-    $og_type = $this->addNodeType();
+    //$og_type = $this->addNodeType();
+    $og_content_type = $this->drupalCreateContentType(array(
+    	'description' => $this->randomName(32, "description ... "),
+      'help' => $this->randomName(32, "description ... ")));
+    $og_type = $og_content_type->name;
+    $this->drupalVariableSet('og_content_type_usage_'. $og_type, 'group');
+
+    // Create an administrator
     $web_user = $this->drupalCreateUserRolePerm(array('access content', "create $og_type content", "edit $og_type content", 'create pages', 'create groups'));
+
+    menu_rebuild();
+    // Log in as administrator
     $this->drupalLoginUser($web_user);
+    // Create an open group as the administrator
     $gid = $this->addOg($og_type, OG_OPEN);
     $node = node_load($gid);
     
@@ -20,24 +31,24 @@ class OgSubscribe extends OgTestCase {
     $b = $this->_browser;
     $this->_browser = new SimpleBrowser();
 
-    
+    // Create a normal user
     $join_user = $this->drupalCreateUserRolePerm(array('access content'));
     $this->drupalLoginUser($join_user);
-    
-    /* Test subscribing a new user */
+     
+    // Test subscribe a new user
     $url = url('og/subscribe/' . $gid, array('absolute' => TRUE));
     $ret = $this->_browser->get($url);
+    // This user can access the subscribe page for an open group
     $this->assertTrue($ret, " [browser] GET $url");
     // No theme, "Text" only
     $this->assertWantedRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
                             "Confirmation text found.");
     $this->clickSubmit("Join");
-                            
-    $this->assertWantedRaw(t('You are now a member of the @group', array('@group' => $node->title)),
+    $this->assertWantedRaw(t('You are now a member of the <em>@group', array('@group' => $node->title)),
                             'Subscribed to group - text found.');
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
 
-    /* Find user in list */
+    // Find user in list
     $url = url('og/users/' . $gid, array("absolute" => true));
     $ret = $b->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
@@ -49,15 +60,12 @@ class OgSubscribe extends OgTestCase {
     // Test unsubscribing a new user 
     $url = url("og/unsubscribe/$gid/$join_user->uid", array('absolute' => true));
     $ret = $this->_browser->get($url);
-    // print_r($ret);die(sd);
     $this->assertTrue($ret, " [browser] GET $url");
-    
-    $this->assertWantedRaw(t('Are you sure you want to remove !name from the group @title?', array('!name' => $join_user->name, '@title' => $node->title)),
+    $this->assertWantedRaw(t('Are you sure you want to remove !name from the group <em>@title</em>?', array('!name' => $join_user->name, '@title' => $node->title)),
                             "Leave confirmation text found");
     
     $this->clickSubmit('Remove');
-    
-    $this->assertWantedRaw(t('User removed from group.'), 'User unsubscribed to group - text found.');
+    $this->assertWantedRaw(t('<em>!user</em> removed from <em>!group</em>.', array('!user' => $join_user->name, '!group' => $node->title)), 'User unsubscribed to group - text found.');
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
 
     $this->_browser = $b;
@@ -80,16 +88,16 @@ class OgSubscribe extends OgTestCase {
     $url = url('og/subscribe/' . $gid, array('absolute' => TRUE));
     $ret = $this->_browser->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertNoUnwantedRaw(t('You are now a member of the @group group', array('@group' => $node->title)),
+    $this->assertNoUnwantedRaw(t('You are now a member of the <em>@group</em> group', array('@group' => $node->title)),
                                 'User member of group - text not found.');
 
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
-    $this->assertNoUnwantedRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
+    $this->assertNoUnwantedRaw(t('Are you sure you want to join the group <em>%title</em>?', array('%title' => $node->title)),
                             "Confirmation text found.");
     $this->clickSubmit("Join");
 
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
-    $this->assertWantedRaw(t('This is a closed group. The group administrators add/remove members as needed.'), 'Closed/Rejected text found.');
+    $this->assertWantedRaw(t('Access denied'), 'Closed/Rejected text found.');
     // Find user in list 
     $url = url('og/users/' . $gid, array('absolute' => TRUE));
     $ret = $b->get($url);
@@ -99,7 +107,7 @@ class OgSubscribe extends OgTestCase {
 
     $this->_browser = $b;
     
-    /* INVITE ONLY GROUP ********************************************************/
+    // INVITE ONLY GROUP ********************************************************
     $gid = $this->addOg($og_type, OG_INVITE_ONLY);
     $node = node_load($gid);
 
@@ -122,9 +130,9 @@ class OgSubscribe extends OgTestCase {
     $this->clickSubmit("Join");
 
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
-    $this->assertWantedRaw(t('This is an invite only group. The group administrators add/remove members as needed.'), 'Rejected text found.');
+    $this->assertWantedRaw(t('Access denied'), 'Rejected text found.');
 
-   // Find user in list 
+    // Find user in list 
     $url = url('og/users/' . $gid, array('absolute' => TRUE));
     $ret = $b->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
@@ -156,9 +164,8 @@ class OgSubscribe extends OgTestCase {
     $this->clickSubmit("Join");
 
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
-    
-    $this->assertWantedRaw(t('Membership request to the %group group awaits approval by an administrator.',
-                                           array('%group' => $node->title)), 'Approval text found.');
+    $this->assertWantedRaw(t('Membership request to the <em>@group</em> group awaits approval by an administrator.',
+                                           array('@group' => $node->title)), 'Approval text found.');
 
     // Find user in list, Inactive users _ARE_ listed
     $this->_browser = $b; // Switch back to admin view
@@ -196,9 +203,6 @@ class OgSubscribe extends OgTestCase {
                                 'User member of group - text not found.');
 
     $this->assertNoUnwantedRaw(t('Page not found'), 'page not not found.');
-    
-    $this->assertWantedRaw(t('Membership request to the %group group awaits approval by an administrator.',
-                                           array('%group' => $node->title)), 'Approval text found.');
 
     // Find user in list, Inactive users _ARE_ listed
     $this->_browser = $b; // Switch back to admin view
