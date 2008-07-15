@@ -5,7 +5,7 @@ function og_panels_ct_list_mission() {
     'title' => t('Welcome message'),
     'icon' => 'user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
-    'description' => t('The welcome message for the group. Specified on group edit form'),
+    'description' => t('The welcome message for the group. Specified on group edit form.'),
     'required context' => new panels_required_context(t('Group'), 'group'),
     'category' => array(t('Organic groups'), -10),
     
@@ -27,7 +27,7 @@ function og_panels_ct_list_description() {
 
 function og_panels_ct_list_subscribers() {
   $items['og_subscribers'] = array(
-    'title' => t('Group Members'),
+    'title' => t('Group members'),
     'icon' => 'user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
     'description' => t('The list of group subscribers or just group admins.'),
@@ -51,7 +51,7 @@ function og_panels_ct_list_search() {
 
 function og_panels_ct_list_faces() {
   $items['og_faces'] = array(
-    'title' => t('Group Faces'),
+    'title' => t('Group faces'),
     'icon' => 'user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
     'description' => t('Show a grid of user pictures.'),
@@ -108,7 +108,7 @@ function og_panels_ct_render_callback_subscribers($conf, $panel_args, $context) 
   $node = isset($context->data) ? drupal_clone($context->data) : NULL;
   $block->module = 'og_panels';
 
-  $block->subject = t('Group Members');
+  $block->subject = t('Group members');
   if ($node) {
     $block->content = og_block_subscribers_list($node->nid, $conf['num_items'], $conf['og_panels_subscribers_is_admin'], $conf['show_more'], $conf['show_picture']);
     $block->delta = $node->nid;
@@ -125,7 +125,7 @@ function og_panels_ct_render_callback_search($conf, $panel_args, $context) {
   $node = isset($context->data) ? drupal_clone($context->data) : NULL;
   $block->module = 'og_panels';
 
-  $block->subject = t('Group Search');
+  $block->subject = t('Group search');
   if ($node) {
     if (module_exists('search') && user_access('search content')) {
       $block->content = drupal_get_form('og_search_form', $node);
@@ -144,7 +144,7 @@ function og_panels_ct_render_callback_faces($conf, $panel_args, $context) {
   $node = isset($context->data) ? drupal_clone($context->data) : NULL;
   $block->module = 'og_panels';
 
-  $block->subject = t('Group Faces');
+  $block->subject = t('Group faces');
   if ($node) {
     $block->content = og_list_users_faces_page($node, $conf['column_count'], $conf['row_count'], $conf['pager_id']);
     $block->delta = $node->nid;

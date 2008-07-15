@@ -16,7 +16,7 @@ define('OG_VISIBLE_CHOOSE_PRIVATE', 3);
 function og_access_menu() {
   $items['admin/og/og_access'] = array(
     'title' => 'Organic groups access configuration',
-    'description' => 'Choose whether new groups should be private or public',
+    'description' => 'Choose whether new groups should be private or public.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_access_settings'),
     'access arguments' => array('administer site configuration'),
@@ -28,31 +28,32 @@ function og_access_settings() {
   drupal_add_js(drupal_get_path('module', 'og_access'). '/og_access.js'); // load the form javascript to handle private groups / node visibility conflicts in the og access settings form.
   
   $options = array(
-    t('Visible only within the targeted groups'), 
-    t('Visible within the targeted groups and on other pages'), 
-    t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pub.', array('@pub' => t('Public'))), 
-    t('Visibility chosen by author/editor using a checkbox on the posting form. '). t('Checkbox defaults to @pri.', array('@pri' => t('Private')))
+    t('Visible only within the targeted groups.'), 
+    t('Visible within the targeted groups and on other pages.'), 
+    t('Visibility chosen by author/editor using a checkbox on the posting form. Checkbox defaults to <em>public</em>.'), 
+    t('Visibility chosen by author/editor using a checkbox on the posting form. Checkbox defaults to <em>private</em>.')
   );
   $form['og_visibility'] = array(
     '#type' => 'radios', 
     '#title' => t('Visibility of posts'), 
     '#default_value' => variable_get('og_visibility', 0), 
-    '#description' =>t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post @pub. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.  If the setting you want is disabled here, check the settings under <em>Private Groups</em> setting below.  You cannot set node visibility to always be public if private groups are set to always on and vice versa.', array('@pub' => t('Public'))), 
+    '#description' => t('Determine how broadly available a given post should be when it is affiliated with a group. OG admins always see the checkbox for making a post public. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting. If the setting you want is disabled here, check the settings under <em>Private Groups</em> setting below. You cannot set node visibility to always be public if private groups are set to always on and vice versa.'), 
     '#options' => $options,
   );
   
   // private groups control
-  $options = array(t('New group home pages and default audience are always public.'),
-               t('New group home pages and default audience are always private.'),
-               t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to %yes.', array('%yes' => t('private'))),
-               t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to %no.', array('%no' => t('public'))),
-             );
+  $options = array(
+    t('New group home pages and default audience are always public.'),
+    t('New group home pages and default audience are always private.'),
+    t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to <em>private</em>.'),
+    t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to <em>public</em>.'),
+  );
   $form['og_private_groups'] = array(
     '#type' => 'radios', 
     '#title' => t('Private groups'), 
     '#options' => $options, 
     '#default_value' => variable_get('og_private_groups', OG_PRIVATE_GROUPS_CHOOSE_FALSE),    
-    '#description' =>t("<p>A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private.  This setting controls what private groups options can be used when creating a new group or editing an existing group.  If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here.<p><p>Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Visibility of Posts</em> setting on this page.  Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups!  To change those you must edit the groups and their individual content nodes directly.  If the setting you want is disabled here, check <em>Visibility of Posts</em> above.  You cannot choose to only have private groups if node visibility is set to be always public, and vice versa.</p>"),                              
+    '#description' => '<p>'. t("A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private. This setting controls what private groups options can be used when creating a new group or editing an existing group. If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here.") .'</p><p>'. t('Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Visibility of Posts</em> setting on this page. Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups! To change those you must edit the groups and their individual content nodes directly. If the setting you want is disabled here, check <em>Visibility of Posts</em> above. You cannot choose to only have private groups if node visibility is set to be always public, and vice versa.') .'</p>'),                              
   );
   return system_settings_form($form);
 }
@@ -91,8 +92,9 @@ function og_access_alter_group_form(&$form, $node) {
         '#type' => 'checkbox',
         '#title' => t('Private group'), 
         '#default_value' => isset($node->nid) ? $node->og_private : $default, 
-        '#description' => t('Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>.'));
-        break;
+        '#description' => t('Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>.')
+      );
+      break;
   }
 }
 
@@ -151,7 +153,7 @@ function og_access_alter_nongroup_form(&$form, $form_state, $node) {
           '#type' => 'checkbox', 
           '#title' => t('Public'), 
           '#default_value' => isset($node->og_public) ? $node->og_public : 1, 
-          '#description' => t('Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>Public</em>.'), 
+          '#description' => t('Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>public</em>.'), 
           '#weight' => 2,
         );
         break;
@@ -160,7 +162,7 @@ function og_access_alter_nongroup_form(&$form, $form_state, $node) {
           '#type' => 'checkbox', 
           '#title' => t('Public'), 
           '#default_value' => isset($node->nid) ? $node->og_public : 0, 
-          '#description' => t('Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>Public</em>.'), 
+          '#description' => t('Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>public</em>.'), 
           '#weight' => 2,
         );
         break;

@@ -205,7 +205,7 @@ class views_handler_filter_og_type_all extends views_handler_filter {
     }
     else {
       $this->query->add_where($this->options['group'], "FALSE");
-      drupal_set_message(t('You have no node types which are acting as groups. See the Notes section of the !readme and the Content types fieldset at top of <a href="!settings">OG settings</a>.', array('!readme' => og_readme(), '!settings' => url('admin/og/og'))), 'error');
+      drupal_set_message(t('You have no node types which are acting as groups. See the notes section of the !readme_file and the content types fieldset at top of <a href="!settings">OG settings</a>.', array('!readme_file' => og_readme(), '!settings' => url('admin/og/og'))), 'error');
     }
   }
 }
@@ -314,7 +314,7 @@ function og_views_data_og_ancestry() {
     ),
     'relationship' => array(
       'title' => t('Group node (post)'),
-      'help' => t('Bring in information about the group node based on a post\'s groups.'),
+      'help' => t("Bring in information about the group node based on a post's groups."),
       'base' => 'node',
       'field' => 'group_nid',
       'handler' => 'views_handler_relationship',
@@ -444,7 +444,7 @@ function og_views_data_og_uid() {
     'help' => t('Group that a member belongs to.'),
     'relationship' => array(
       'title' => t('Group node (member)'),
-      'help' => t('Bring in information about the group node based on a user\'s membership.'),
+      'help' => t("Bring in information about the group node based on a user's membership."),
       'base' => 'node',
       'field' => 'nid',
       'handler' => 'views_handler_relationship',
@@ -740,9 +740,7 @@ class views_handler_field_og_managelink extends views_handler_field {
       }
       else {
         $token = og_get_token($nid);
-        $approve = l(t('approve'), "og/approve/$nid/$uid/$token", array('query' => drupal_get_destination()));
-        $deny = l(t('deny'), "og/deny/$nid/$uid/$token", array('query' => drupal_get_destination()));
-        return t('Request: !a or !d', array('!a' => $approve, '!d' => $deny));
+        return t('Request: <a href="@approve">approve</a> or <a href="@deny">deny</a>.', array('@approve' => url("og/approve/$nid/$uid/$token", array('query' => drupal_get_destination())), '@deny' => url("og/deny/$nid/$uid/$token", array('query' => drupal_get_destination()))));
       }
     }
   }
@@ -787,7 +785,7 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
       '#title' => t('Argument type'),
       '#options' => array(
         'nid' => t('Node ID'),
-        'nids' => t('Node IDs separated by , or +'),
+        'nids' => t("Node ID's separated by , or +"),
       ),
       '#default_value' => isset($this->argument->options['validate_argument_nid_type']) ? $this->argument->options['validate_argument_nid_type'] : 'nid',
       '#process' => array('views_process_dependency'),

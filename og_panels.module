@@ -424,7 +424,7 @@ function og_panels_form_validate($form_id, $form_values, $form) {
     form_error($form['path'], t('%path is a reserved system path, and cannot be used for a group page. Please enter another path.', array('%path' => $form_values['path']))); 
   }
   else if (preg_match("/[^A-Za-z0-9-]/", $form_values['path'])) {
-    form_error($form['path'], t("Panel paths may only contain alphanumeric characters and dashes."));
+    form_error($form['path'], t('Panel paths may only contain alphanumeric characters and dashes.'));
   }
   else if (db_result(db_query("SELECT path FROM {og_panels} WHERE path = '%s' AND did <> %d AND nid = %d", $form_values['path'], $form_values['did'], $form_values['nid']))) {
     form_error($form['path'], t("That path is currently in use by another one of your group's pages. Please enter another path."));
@@ -620,7 +620,7 @@ function og_panels_panels_content_types() {
 function og_panels_panels_relationships() {
   include_once './'. drupal_get_path('module', 'og_panels') .'/includes/grouprelationships.inc';
   $args['group_from_node'] = array(
-    'title' => t("Group from node"),
+    'title' => t('Group from node'),
     'keyword' => 'group',
     'description' => t('Adds a group from a node context; if multiple groups are associated with a node, this will get the "first" group only.'),
     'required context' => new panels_required_context(t('Node'), 'node'),

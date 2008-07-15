@@ -13,63 +13,63 @@ function og_schema() {
   $schema = array();
 
   $schema['og'] = array(
-    'description'     => 'Stores information about each group',
+    'description'     => t('Stores information about each group.'),
     'fields'          => array(
       'nid'             => array(
-        'description'     => 'The group\'s {node}.nid',
+        'description'     => t("The group's {node}.nid."),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'selective'       => array(
-        'description'     => 'Determines how subscription requests are handled (open, moderated, invite only, closed).',
+        'description'     => t('Determines how subscription requests are handled (open, moderated, invite only, closed).'),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'description'     => array(
-        'description'     => 'Group description. Shows up by default on group directory.',
+        'description'     => t('Group description. Shows up by default on group directory.'),
         'type'            => 'varchar',
         'length'          => 255,
         'not null'        => FALSE,
       ),
       'theme'           => array(
-        'description'     => 'The group specific theme (if any). See {system}.name.',
+        'description'     => t('The group specific theme (if any). See {system}.name.'),
         'type'            => 'varchar',
         'length'          => 255,
         'not null'        => FALSE,
       ),
       'register'        => array(
-        'description'     => 'Should users be able to join this group from registration form.',
+        'description'     => t('Should users be able to join this group from registration form.'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'directory'       => array(
-        'description'     => 'Should this group appear in the groups directory.',
+        'description'     => t('Should this group appear in the groups directory.'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'notification'    => array(
-        'description'     => 'Not currently used.',
+        'description'     => t('Not currently used.'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'language'        => array(
-        'description'     => 'Group specific language. See {languages}.language.',
+        'description'     => t('Group specific language. See {languages}.language.'),
         'type'            => 'varchar',
         'length'          => 12,
         'not null'        => TRUE,
         'default'         => '',
       ),
       'private'         => array(
-        'description'     => 'Is group home page private or public.',
+        'description'     => t('Is group home page private or public.'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
@@ -80,56 +80,56 @@ function og_schema() {
   );
 
   $schema['og_uid'] = array(
-    'description'     => 'Group memberships',
+    'description'     => t('Group memberships'),
     'fields'          => array(
       'nid'             => array(
-        'description'     => 'Group\'s {node}.nid',
+        'description'     => t("Group's {node}.nid."),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'og_role'         => array(
-        'description'     => 'Not currently used.',
+        'description'     => t('Not currently used.'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'is_active'       => array(
-        'description'     => 'Is this membership active or pending?',
+        'description'     => t('Is this membership active or pending?'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'is_admin'        => array(
-        'description'     => 'Is this user a group administrator',
+        'description'     => t('Is this user a group administrator?'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'uid'             => array(
-        'description'     => 'The user for this membership. See {users}.uid.',
+        'description'     => t('The user for this membership. See {users}.uid.'),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'mail_type'       => array(
-        'description'     => 'Email notification preference.',
+        'description'     => t('Email notification preference.'),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => FALSE,
       ),
       'created'         => array(
-        'description'     => 'Time when this membership was created.',
+        'description'     => t('Time when this membership was created.'),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => FALSE,
         'default'         => 0,
       ),
       'changed'         => array(
-        'description'     => 'Time when this membership was last changed.',
+        'description'     => t('Time when this membership was last changed.'),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => FALSE,
@@ -139,16 +139,16 @@ function og_schema() {
     'primary key'       => array('nid', 'uid'),
   );
   $schema['og_uid_global']  = array(
-    'description'     => 'User preferences that are not group specific.',
+    'description'     => t('User preferences that are not group specific.'),
     'fields'          => array(
       'uid'             => array(
-        'description'     => 'The user. See {users}.uid.',
+        'description'     => t('The user. See {users}.uid.'),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'og_email'        => array(
-        'description'     => 'Notification preference for group posts (always, never, depends per group)',
+        'description'     => t('Notification preference for group posts (always, never, depends per group).'),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
@@ -161,19 +161,19 @@ function og_schema() {
     'description'     => '',
     'fields'          => array(
       'nid'             => array(
-        'description'     => 'The post\'s {node}.nid.',
+        'description'     => t("The post's {node}.nid."),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'group_nid'       => array(
-        'description'     => 'The group\'s {node}.nid',
+        'description'     => t("The group's {node}.nid."),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'is_public'       => array(
-        'description'     => 'Is this a public or private post? This value is always the same across all groups for a given post.',
+        'description'     => t('Is this a public or private post? This value is always the same across all groups for a given post.'),
         'type'            => 'int',
         'size'            => 'tiny',
         'default'         => 1,
@@ -200,7 +200,7 @@ function og_install() {
 
   // Need og_readme() function.
   drupal_load('module', 'og');
-  drupal_set_message(t('Organic groups module enabled. Please see the included !README file for further installation instructions.', array('!README' => og_readme())));
+  drupal_set_message(t('Organic groups module enabled. Please see the included !readme_file for further installation instructions.', array('!readme_file' => og_readme())));
 }
 
 // First 5.x update.

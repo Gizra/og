@@ -31,7 +31,7 @@ function og_help($path, $arg) {
         return t('Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages.');
         break;
       case 'admin/settings/og':
-        return t('In order to let group admins determine their own group theme, you must enable multiple themes using !page.', array('!page' => l(t('theme configuration page'), 'admin/build/themes')));
+        return t('In order to let group admins determine their own group theme, you must enable multiple themes using <a href="@url">theme configuration page</a>.', array('@url' => url('admin/build/themes')));
         break;
     }
   }
@@ -560,7 +560,7 @@ function og_manage_form($form_state, $group) {
   if (!$form_state['post']) {
     // group manager can't leave
     if ($group->og_selective == OG_CLOSED) {
-      drupal_set_message(t('You may not leave this group because it is a %closed group. You should request removal from a group administrator.', array('%closed' => t('closed'))));
+      drupal_set_message(t('You may not leave this group because it is a <em>closed</em> group. You should request removal from a group administrator.'));
     }
     elseif ($group->uid == $user->uid) {
       drupal_set_message(t('You may not leave this group because you are its owner. A site administrator can assign ownership to another user and then you may leave.'));
@@ -583,7 +583,10 @@ function og_manage_form($form_state, $group) {
         '#type' => 'radios', 
         '#title' => t('Email notification'), 
         '#default_value' => $user->og_groups[$group->nid]['mail_type'], 
-        '#options' => array(1 => t('enabled'), 0 => t('disabled')), 
+        '#options' => array(
+          1 => t('Enabled'),
+          0 => t('Disabled')
+        ), 
         '#description' => t('Do you want to receive an email each time a message is posted to this group?')
       );
       $submit_button = TRUE;
@@ -592,14 +595,14 @@ function og_manage_form($form_state, $group) {
       $form['mail_type'] = array(
         '#type' => 'item', 
         '#title' => t('Email notification'), 
-        '#value' => t('Your <a href="!prof">personal profile</a> is configured to: <em>Always receive email notifications</em>.', array('!prof' => url("user/$user->uid/edit"))),
+        '#value' => t('Your <a href="!prof">user profile</a> is configured to: <em>Always receive email notifications</em>.', array('!prof' => url("user/$user->uid/edit"))),
       ); 
       break;
     case OG_NOTIFICATION_NEVER:
       $form['mail_type'] = array(
         '#type' => 'item', 
         '#title' => t('Email notification'), 
-        '#value' => t('Your <a href="!prof">personal profile</a> is configured to: <em>Never receive email notifications</em>.', array('!prof' => url("user/$user->uid/edit")))
+        '#value' => t('Your <a href="!prof">user profile</a> is configured to: <em>Never receive email notifications</em>.', array('!prof' => url("user/$user->uid/edit")))
       ); 
       break;
   }
@@ -669,7 +672,7 @@ function og_approve($node, $account, $token) {
   }
   
   if (og_is_group_member($node, FALSE, $account)) {
-    drupal_set_message(t("!name already approved to group %group.", array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
+    drupal_set_message(t('!name already approved to group %group.', array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
     return '';
   }
   else {
@@ -728,7 +731,7 @@ function og_create_admin_confirm_submit($form, &$form_state) {
   $node = $form_state['values']['node'];
   
   og_save_subscription($node->nid, $account->uid, array('is_admin' => 1));
-  drupal_set_message(t('%name was promoted to %ga.', array('%name' => $account->name, '%ga' => t('group administrator'))));
+  drupal_set_message(t('%name was promoted to <em>group administrator</em>.', array('%name' => $account->name)));
   
   $variables = array(
     '@group' => $node->title,
@@ -762,7 +765,7 @@ function og_remove_admin_confirm_submit($form, &$form_state) {
   $account = $form_state['values']['account'];
   $gid = $form_state['values']['gid'];
   og_save_subscription($gid, $account->uid, array('is_admin' => 0));
-  drupal_set_message(t('%name is no longer a %ga.', array('%name' => $account->name, '%ga' => t('group administrator'))));
+  drupal_set_message(t('%name is no longer a <em>group administrator</em>.', array('%name' => $account->name)));
   $form_state['redirect'] = "og/users/$gid";
 }
 
@@ -797,7 +800,7 @@ function og_invite_form_validate($form, &$form_state) {
   $mails = str_replace("\n", ',', $mails);
   $emails = explode(',', $mails);
   if (count($emails) > $max) {
-    form_set_error('mails', t("You may not specify more than %max email addresses or usernames.", array('%max' => $max)));
+    form_set_error('mails', t('You may not specify more than %max email addresses or usernames.', array('%max' => $max)));
   }
   elseif (in_array($user->mail, $emails)) {
     form_set_error('mails', t('You may not invite yourself - @self.', array('@self' => $user->mail)));
@@ -824,7 +827,7 @@ function og_invite_form_validate($form, &$form_state) {
       }
     }
     if (count($bad)) {
-      form_set_error('mails', t('Invalid email address or username:') .' '. implode(' ', $bad));
+      form_set_error('mails', t('Invalid email address or username: @value.', array('@value' => implode(', ', $bad))));
     }
     else {
       // Store valid e-mails so we don't have to go through that looping again on submit
@@ -1086,7 +1089,7 @@ function og_add_users_og_names_validate($form, $form_state) {
     }
   }
   if (isset($err)) {
-    form_set_error('og_names', t('Unrecognized %names:', array('%names' => format_plural(count($bad), 'name', 'names'))) .' '. implode(', ', $bad));
+    form_set_error('og_names', format_plural(count($bad), 'Unrecognized name: %bad.', 'Unrecognized names: %bad.', array('%bad' => implode(', ', $bad))));
   }
 }
 
@@ -1149,7 +1152,7 @@ function og_page_activity() {
     );
   }
   if (!isset($rows)) {
-    $rows[] = array(array('data' => t('No groups.'), 'colspan' => 6));
+    $rows[] = array(array('data' => t('No groups available.'), 'colspan' => 6));
   }
   return theme('table', $header, $rows);
   
@@ -1274,10 +1277,10 @@ function og_group_form($node, $form_state) {
 
   $default = isset($node->nid) ? $node->og_selective : OG_OPEN;
   $options = array(
-    t('open - membership requests are accepted immediately.'), 
-    t('moderated - membership requests must be approved.'), 
-    t('invite only - membership must be created by an administrator.'), 
-    t('closed - membership is exclusively managed by an administrator.'),
+    t('Open - membership requests are accepted immediately.'),
+    t('Moderated - membership requests must be approved.'),
+    t('Invite only - membership must be created by an administrator.'),
+    t('Closed - membership is exclusively managed by an administrator.'),
   );
   $form['og_selective'] = array(
     '#type' => 'radios', 
@@ -1343,7 +1346,7 @@ function og_group_form($node, $form_state) {
         '#type' => 'checkbox', 
         '#title' => t('List in groups directory'),  
         '#default_value' => $node->nid ? $node->og_directory : $default, 
-        '#description' => t('Should this group appear on the !page? Disabled if the group is set to <em>private group</em>.', array('!page' => l(t('list of groups page'), 'og'))));
+        '#description' => t('Should this group appear on the <a href="@url">list of groups page</a>? Disabled if the group is set to <em>private group</em>.', array('@url' => url('og'))));
       break;    
   }
   
@@ -1529,7 +1532,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         // Email address is required for contacting the Manager
         $account = user_load(array('uid' => $node->uid));
         if ($account->uid > 0 && empty($account->mail)) {
-          form_set_error('name', t('The group manager, %name, must have an email address in his <a href="!profile">profile</a>.', array('%name' => $account->name, '!profile' => url("user/$node->uid/edit"))));
+          form_set_error('name', t('The group manager %name, must have an email address in his <a href="@profile">user profile</a>.', array('%name' => $account->name, '@profile' => url("user/$node->uid/edit"))));
         }
         
         // Must be authored in the default input format or else admins might not get their admin perms
@@ -1542,7 +1545,7 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
         if (og_is_group_post_type($node->type) && variable_get('og_audience_required', FALSE) && !user_access('administer nodes')) {
           if (!isset($node->og_groups)) {
-            form_set_error('title', t('You must !join before posting on this web site.', array('!join' => l(t('join a group'), 'og'))));
+            form_set_error('title', t('You must <a href="@join">join a group</a> before posting on this web site.', array('@join' => url('og'))));
           }
         }
         
@@ -2000,7 +2003,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
       '#multiple' => TRUE);
   }
   else if ($required) {
-    form_set_error('title', t('You must !join before posting a %type.', array('!join' => l(t('join a group'), 'og'), '%type' => node_get_types('name', $node->type))));
+    form_set_error('title', t('You must <a href="@join">join a group</a> before posting a %type.', array('@join' => url('og'), '%type' => node_get_types('name', $node->type))));
   }
 }
 
@@ -2376,12 +2379,13 @@ function og_user($op, $edit, &$account, $category = NULL) {
           '#type' => 'fieldset',
           '#title' => t('Organic groups settings'),
           '#collapsible' => TRUE,
-          '#weight' => 4);
-        $options = array(OG_NOTIFICATION_NEVER => t('Never send email notifications. Useful when tracking activity via RSS feed instead.'),
-                         OG_NOTIFICATION_ALWAYS =>  t('Always send email notifications'),
-                         OG_NOTIFICATION_SELECTIVE => t("Selectively send email notification based on the checkbox for each of my group's <em>My Membership</em> page."),
-                          );
-                         
+          '#weight' => 4
+        );
+        $options = array(
+          OG_NOTIFICATION_NEVER => t('Never send email notifications. Useful when tracking activity via RSS feed instead.'),
+          OG_NOTIFICATION_ALWAYS =>  t('Always send email notifications.'),
+          OG_NOTIFICATION_SELECTIVE => t("Selectively send email notification based on the checkbox for each of my group's <em>My membership</em> page."),
+        );
         $form['og_settings']['og_email'] = array(
           '#type' => 'radios', 
           '#title' => t('Email notifications'), 
@@ -2619,7 +2623,10 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
           '#type' => 'checkboxes', 
           '#title' => t('Group roles'), 
           '#default_value' => variable_get("og_block_subscribers_is_admin", array('members', 'admins')), 
-          '#options' => array('members' => t('Standard members'), 'admins' => t('Administrators')), 
+          '#options' => array(
+            'members' => t('Standard members'),
+            'admins' => t('Administrators')
+          ), 
           '#description' => t('You may specify which types of group members appear in the listing.'),
         );
         return $items;
@@ -2651,22 +2658,22 @@ function og_block_notifications() {
   global $user;
   
   if ($groupnode = og_get_group_context()) {
-    $content = t('This group offers a !groupfeed and an !email.', array('!groupfeed' => l(t('RSS feed'), "node/$groupnode->nid/feed"), '!email' => l(t('email subscription'), 'og/manage/'. $groupnode->nid)));
+    $content = t('This group offers a <a href="@groupfeed">RSS feed</a> and an <a href="@email">email subscription</a>.', array('@groupfeed' => url("node/$groupnode->nid/feed"), '@email' => url('og/manage/'. $groupnode->nid)));
     // NOTE: See og.css for styling specific to these lists
     $content .= ' '. t('Or subscribe to these personalized, sitewide feeds:');
     $inline = array('class' => 'links inline');
     if ($user->uid) {
       $l1[] = array('title' => t('Feed'), 'href' => 'group/myunread/feed');
       $l1[] = array('title' => t('Page'), 'href' => 'group/myunread');
-      $links['my_unread'] = t('My unread:') .' '. theme('links', $l1, $inline);
+      $links['my_unread'] = t('My unread: @links.', array('@links' => theme('links', $l1, $inline)));
     
       $l2[] = array('title' => t('Feed'), 'href' => 'group/mytracker/feed');
       $l2[] = array('title' => t('Page'), 'href' => 'group/mytracker');
-      $links['my_group'] = t('My group:') .' '. theme('links', $l2, $inline);
+      $links['my_group'] = t('My group: @links.', array('@links' => theme('links', $l2, $inline)));
     }
     $l3[] = array('title' => t('Feed'), 'href' => 'group/tracker/feed');
     $l3[] = array('title' => t('Page'), 'href' => 'group/tracker');
-    $links['all_posts'] = array('data' => t('All posts:') .' '. theme('links', $l3, $inline));
+    $links['all_posts'] = array('data' => t('All posts: @links', array('@links' => theme('links', $l3, $inline))));
     $content .= theme('item_list', $links);
     $block['content'] = $content;
     $block['subject'] = t('Group notifications');
@@ -2715,7 +2722,7 @@ function og_block_details() {
         $links['invite'] = l(t('Invite friend'), "og/invite/$node->nid");
       }
       $links['subscribers'] = $txt;
-      $links['manager'] =  t('Manager:') .' '. theme('username', $node);
+      $links['manager'] = t('Manager: !name', array('!name' => theme('username', $node)));
       
       // Site admins get a Join link if they are not yet subscribed.
       $subscribe = isset($subscription) && og_is_group_member($node->nid, FALSE) ? l(t('My membership'), "og/manage/$node->nid") : og_subscribe_link($node);
@@ -2739,10 +2746,10 @@ function og_block_details() {
       $links['subscribe'] = og_subscribe_link($node);
     }
     elseif ($node->og_selective == OG_INVITE_ONLY) {
-      $links['closed'] = t('This is an @invite group. The group administrators add/remove members as needed.', array('@invite' => t('invite only')));
+      $links['closed'] = t('This is an <em>invite only</em> group. The group administrators add/remove members as needed.');
     }
     elseif ($node->og_selective == OG_CLOSED) {
-      $links['closed'] = t('This is a @closed group. The group administrators add/remove members as needed.', array('@closed' => t('closed')));
+      $links['closed'] = t('This is a <em>closed</em> group. The group administrators add/remove members as needed.');
     }
   
     // Modify these links by reference. If you want control of the whole block, see og_block_details().
@@ -2809,7 +2816,7 @@ function og_og_create_links($group) {
     $type_url_str = str_replace('_', '-', $post_type);
     if (module_invoke($types[$post_type]->module, 'access', 'create', $post_type, $user)) {
       $links["create_$post_type"] = l(t('Create !type', array('!type' => $type_name)), "node/add/$type_url_str", array(
-        'title' => t('Add a new !s in this group.', array('!s' => $type_name)),
+        'title' => t('Add a new !type in this group.', array('!type' => $type_name)),
         'query' => "gids[]=$group->nid",
         ));
     }
@@ -2927,7 +2934,7 @@ function og_requirements($phase) {
     if (!count(array_intersect($og_types, $all_types))) {
           $requirements['og_group_types']  = array(
             'title' => $t('Organic groups group type'),
-            'value' => $t('You have no node types which are acting as groups. See the Notes section of the !readme and the Content types fieldset at top of <a href="!settings">OG settings</a>.', array('!readme' => og_readme(), '!settings' => url('admin/og/og'))),
+            'value' => $t('You have no node types which are acting as groups. See the notes section of the !readme_file and the content types fieldset at top of <a href="!settings">OG settings</a>.', array('!readme_file' => og_readme(), '!settings' => url('admin/og/og'))),
             'severity' => REQUIREMENT_ERROR,
           );
         }
@@ -2935,7 +2942,7 @@ function og_requirements($phase) {
     if (!module_exists('job_queue')) {
       $requirements['og_modules']  = array(
         'title' => $t('Organic groups modules'),
-        'value' => $t('Organic groups works best when !job_queue.module is enabled. See the Integration section of the !readme.', array('!job_queue' => l('job_queue.module', 'http://drupal.org/project/job_queue'), '!readme' => og_readme())),
+        'value' => $t('Organic groups works best when <a href="@job_queue">job_queue.module</a> is enabled. See the integration section of the !readme_file.', array('@job_queue' => 'http://drupal.org/project/job_queue', '!readme_file' => og_readme())),
         'severity' => REQUIREMENT_INFO
       );
     }
@@ -2943,7 +2950,7 @@ function og_requirements($phase) {
     if (!module_exists('og_access')) {
       $requirements['og_access'] = array(
         'title' => $t('Organic groups access control'),
-        'value' => $t('Organic groups access control module is disabled. See the !modules.', array('!modules' => l($t('modules page'), 'admin/build/modules'))),
+        'value' => $t('Organic groups access control module is disabled. See the <a href="@modules">modules page</a>.', array('@modules' => url('admin/build/modules'))),
         'severity' => REQUIREMENT_INFO
       );
     }
