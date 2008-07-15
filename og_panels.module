@@ -637,7 +637,7 @@ function og_panels_block_info($module, $delta, &$info) {
       unset($info);
       break;
     case 'default':
-      $info['icon'] = 'user-multiple.png';
+      $info['icon'] = 'images/user-multiple.png';
       $info['required context'] = new panels_required_context(t('Group'), 'group');
       $info['path'] = drupal_get_path('module', 'og_panels'). '/';
       $info['category'] = t('Organic groups');

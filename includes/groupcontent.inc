@@ -3,7 +3,7 @@
 function og_panels_ct_list_mission() {
   $items['og_mission'] = array(
     'title' => t('Welcome message'),
-    'icon' => 'user-multiple.png',
+    'icon' => 'images/user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
     'description' => t('The welcome message for the group. Specified on group edit form.'),
     'required context' => new panels_required_context(t('Group'), 'group'),
@@ -16,7 +16,7 @@ function og_panels_ct_list_mission() {
 function og_panels_ct_list_description() {
   $items['og_description'] = array(
     'title' => t('Group description'),
-    'icon' => 'user-multiple.png',
+    'icon' => 'images/user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
     'description' => t('The group description as specified on the group edit form.'),
     'required context' => new panels_required_context(t('Group'), 'group'),
@@ -28,7 +28,7 @@ function og_panels_ct_list_description() {
 function og_panels_ct_list_subscribers() {
   $items['og_subscribers'] = array(
     'title' => t('Group members'),
-    'icon' => 'user-multiple.png',
+    'icon' => 'images/user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
     'description' => t('The list of group subscribers or just group admins.'),
     'required context' => new panels_required_context(t('Group'), 'group'),
@@ -40,7 +40,7 @@ function og_panels_ct_list_subscribers() {
 function og_panels_ct_list_search() {
   $items['og_search'] = array(
     'title' => t('Group search'),
-    'icon' => 'user-multiple.png',
+    'icon' => 'images/user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
     'description' => t('Search this group.'),
     'required context' => new panels_required_context(t('Group'), 'group'),
@@ -52,7 +52,7 @@ function og_panels_ct_list_search() {
 function og_panels_ct_list_faces() {
   $items['og_faces'] = array(
     'title' => t('Group faces'),
-    'icon' => 'user-multiple.png',
+    'icon' => 'images/user-multiple.png',
     'path' => drupal_get_path('module', 'og_panels'). '/',
     'description' => t('Show a grid of user pictures.'),
     'required context' => new panels_required_context(t('Group'), 'group'),
