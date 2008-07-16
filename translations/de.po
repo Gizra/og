@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-07-15 21:57+0200\n"
-"PO-Revision-Date: 2008-07-15 23:48+0100\n"
+"PO-Revision-Date: 2008-07-16 08:47+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -224,7 +224,7 @@ msgstr "Textkörper der Einladungs-E-Mail an Benutzer"
 
 #: og.admin.inc:170
 msgid "The body of the email sent to users invited to join a group. Available variables: @group, @site, @description, !group_url, @body."
-msgstr "Der Betreff der E-Mail, die an eingeladenen Benutzer zum Beitritt in die Gruppe verschickt wird. Verfügbare Variablen: @group, @site, @description, !group_url, @body."
+msgstr ""
 
 #: og.admin.inc:175
 msgid "Request user email subject"
@@ -232,7 +232,7 @@ msgstr "Betreff der E-Mail für die Anfrage eines Benutzers"
 
 #: og.admin.inc:176
 msgid "The subject of the email sent to a user's request to join a group. Available variables: @group, @username, !approve_url, !group_url."
-msgstr "Der Betreff der E-Mail, die an einen neuen Administrator für eine Gruppe gesendet wird. Verfügbare Variablen: @group, @username, !group_url."
+msgstr ""
 
 #: og.admin.inc:181
 msgid "Request user email body"
@@ -240,7 +240,7 @@ msgstr "Textkörper der E-Mail für den Antrag eines Benutzers"
 
 #: og.admin.inc:183
 msgid "The body of the email sent to a user's request to join a group. Available variables: @group, @username, !approve_url, !group_url."
-msgstr "Der Textkörper der E-Mail, die an einen neuen Administrator einer Gruppe gesendet wird. Verfügbare Variablen: @group, @username, !group_url, !invite_url."
+msgstr ""
 
 #: og.admin.inc:188
 msgid "New admin user email subject"
