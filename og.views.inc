@@ -165,7 +165,7 @@ function og_views_data_og() {
 }
 
 /**
- * We do not try to run db_rewrite_sql() on this subquery so the count is potenially more than the user can see.
+ * We do not try to run db_rewrite_sql() on this subquery so the count is potentially more than the user can see.
  */
 class views_handler_field_og_post_count extends views_handler_field_numeric {
   function query() {
