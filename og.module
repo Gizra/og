@@ -445,8 +445,8 @@ function og_set_theme($nid) {
     $custom_theme = $node->og_theme;
     return $node;
   }
-  else {
-    switch (!empty($node->og_groups)) {
+  elseif (isset($node->og_groups)) {
+    switch (count($node->og_groups)) {
       case 0:
         return NULL;
       case 1:
@@ -455,7 +455,7 @@ function og_set_theme($nid) {
         break;
       default:
         // Node is in multiple groups. Preference goes to the group we showed on the prior page view (if any),
-        // Then to a group the current user is a member of
+        // Then to a group the current user is a member of.
         if (isset($_SESSION['og_last']) && in_array($_SESSION['og_last']->nid, $node->og_groups)) {
           $group_node = node_load($_SESSION['og_last']->nid);
           $custom_theme = $group_node->og_theme;

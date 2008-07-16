@@ -307,4 +307,8 @@ function og_access_node_access_explain($row) {
     $node = node_load((int)$row->gid);
     return t('Members of !group_n may view this node.', array('!group_n' => l($node->title, "node/$row->gid")));
   }
+  elseif ($row->realm == 'og_admin') {
+    $node = node_load((int)$row->gid);
+    return t('Group admins of !group_n may view/edit/delete this node.', array('!group_n' => l($node->title, "node/$row->gid")));
+  }
 }
