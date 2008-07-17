@@ -2665,15 +2665,15 @@ function og_block_notifications() {
     if ($user->uid) {
       $l1[] = array('title' => t('Feed'), 'href' => 'group/myunread/feed');
       $l1[] = array('title' => t('Page'), 'href' => 'group/myunread');
-      $links['my_unread'] = t('My unread: @links.', array('@links' => theme('links', $l1, $inline)));
+      $links['my_unread'] = t('My unread: !links.', array('!links' => theme('links', $l1, $inline)));
     
       $l2[] = array('title' => t('Feed'), 'href' => 'group/mytracker/feed');
       $l2[] = array('title' => t('Page'), 'href' => 'group/mytracker');
-      $links['my_group'] = t('My group: @links.', array('@links' => theme('links', $l2, $inline)));
+      $links['my_group'] = t('My group: !links.', array('!links' => theme('links', $l2, $inline)));
     }
     $l3[] = array('title' => t('Feed'), 'href' => 'group/tracker/feed');
     $l3[] = array('title' => t('Page'), 'href' => 'group/tracker');
-    $links['all_posts'] = array('data' => t('All posts: @links', array('@links' => theme('links', $l3, $inline))));
+    $links['all_posts'] = array('data' => t('All posts: !links', array('!links' => theme('links', $l3, $inline))));
     $content .= theme('item_list', $links);
     $block['content'] = $content;
     $block['subject'] = t('Group notifications');
