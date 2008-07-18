@@ -1,0 +1,521 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Subscriptions to content in groups.
+ *
+ * Group subscriptions are allowed for users who have view access to the group
+ * node. Whether a user can get a notification about a specific post will be
+ * decided later.
+ */
+
+/**
+ * Implementation of hook_menu_()
+ */
+function og_notifications_menu($may_cache) {
+  global $user;  // we need the user to to build some urls
+  $items = array();
+
+  if (!$may_cache) {
+    if ($user->uid && arg(0) == 'user' && is_numeric(arg(1)) && arg(2) == 'notifications' && ($user->uid == arg(1) || user_access('administer notifications'))) {
+      $account = ($user->uid == arg(1)) ? $user : user_load(array('uid' => arg(1)));
+      $items[] = array(
+        'path' => 'user/'. $account->uid .'/notifications/group',
+        'access' => user_access('subscribe to content in groups'),
+        'title' => t('Groups'),
+        'callback' => 'drupal_get_form',
+        'callback arguments' => array('og_notifications_user_page', $account),
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 10
+      );
+      $items[] = array(
+        'path' => 'user/'. $account->uid .'/notifications/grouptype',
+        'access' => user_access('subscribe to content in groups'),
+        'title' => t('Groups'),
+        'callback' => 'og_notifications_grouptype_user_page',
+        'callback arguments' => array($account),
+        'type' => MENU_CALLBACK
+      );
+    }
+  }
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm()
+ */
+function og_notifications_perm() {
+  return array('subscribe to content in groups');
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function og_notifications_form_alter($form_id, &$form) {
+  switch ($form_id) {
+    case 'notifications_content_settings_form':
+      $form['group'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Group subscriptions'),
+        '#collapsible' => TRUE,
+        '#weight' => 0,
+      );
+      // General content settings
+      $select = array();
+      $nodetypes = node_get_types();
+      $ogtypes = og_get_types('group_post');
+      foreach ($ogtypes as $ntype) {
+        $select[$ntype] = $nodetypes[$ntype]->name;
+      }
+
+      $form['group']['og_notifications_content_types'] = array(
+        '#type'          => 'checkboxes',
+        '#title'         => t('Allowed content types'),
+        '#default_value' => variable_get('og_notifications_content_types', array()),
+        '#options'       => $select,
+        '#description'   => t('Select specific content types which should be <em>allowed</em> for subscriptions to <em>group + content type</em>.'),
+        '#multiple'      => TRUE,
+      );
+      break;
+    case 'user_edit':
+      // TODO: Is perm checking necessary here?
+      // Insert autosubscribe option into the messaging section of the user edit
+      // form.
+      $account = $form['_account']['#value'];
+      // TODO: Strings need to conform with OG and notifications terminology.
+      $form['messaging']['og_notifications_autosubscribe'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Automatically enable notifications for any organic groups that I join.'),
+        '#description' => t('Group notifications can be <a href="!manage-url">customised</a> in greater detail if necessary.', array('!manage-url' => url('user/'. $account->uid .'/notifications/group'))),
+        '#default_value' => isset($account->og_notifications_autosubscribe) ? $account->og_notifications_autosubscribe : variable_get('og_notifications_autosubscribe', 1)
+      );
+      break;
+    case 'og_admin_settings':
+      // Insert the global autosubsribe checkbox into the OG administration
+      // page. The fieldset should probably be renamed?
+      $form['og_settings']['email']['og_notifications_autosubscribe'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Autosubscribe users to any groups that they join.'),
+        '#description' => t('Automatically enable notifications by default. Users can override this via their account page.'),
+        '#default_value' => variable_get('og_notifications_autosubscribe', 1),
+        '#weight' => -1
+      );
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi()
+ */
+function og_notifications_nodeapi(&$node, $op, $arg = 0) {
+  switch ($op) {
+    case 'delete':
+      // Remove all group subscriptions for this node
+      notifications_delete_subscriptions(array('type' => 'group'), array('group' => $node->nid));
+      notifications_delete_subscriptions(array('type' => 'grouptype'), array('group' => $node->nid));
+  }
+}
+
+/**
+ * Implementation of hook_og().
+ */
+function og_notifications_og($op, $gid, $uid, $args) {
+  switch ($op) {
+    case 'user insert':
+      $account = user_load(array('uid' => $uid));
+      og_notifications_user_autosubscribe($account, $gid);
+      break;
+    case 'user delete':
+      $account = user_load(array('uid' => $uid));
+      og_notifications_user_unsubscribe($account, $gid);
+      break;
+  }
+}
+
+/**
+ * Temporary implementation of hook_og_notify() to override og's inbuilt
+ * notification system.
+ */
+function og_notifications_og_notify() {
+  return TRUE;
+}
+
+/**
+ * Implementation of hook_notifications().
+ */
+function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL) {
+  switch ($op) {
+    case 'names':
+      $subs = &$arg0;
+      if ($subs->event_type == 'node') {
+        if (!empty($subs->fields['group']) && ($group = node_load($subs->fields['group']))) {
+          $subs->names['group'] = t('Group: %name', array('%name' => $group->title));
+        }
+      }
+      break;
+    case 'subscription types':
+      $types['group'] = array(
+        'event_type' => 'node',
+        'title' => t('Groups'),
+        'access' => 'subscribe to content in groups',
+        'page' => 'og_notifications_user_page',
+        'fields' => array('group'),
+      );
+      $types['grouptype'] = array(
+        'event_type' => 'node',
+        'title' => t('Content type in group'),
+        'access' => 'subscribe to content in groups',
+        'fields' => array('group', 'type'),
+      );
+      return $types;
+    case 'query':
+      // $arg0 = 'event' and $arg1 = 'node' and $event = $arg2
+      // $arg0 = 'user'  and $arg1 = 'noe' and $node = $arg2
+      if ($arg0 == 'event' && $arg1 == 'node' && ($node = $arg2->node) || $arg0 == 'user' && $arg1 == 'node' && ($node = $arg2)) {
+        $query = array();
+        if ($node->og_groups) {
+          $query[] = array(
+            'join' => "LEFT JOIN {og_ancestry} og ON f.field = 'group' AND f.value = CAST(og.group_nid AS CHAR(255))",
+            'where' => 'og.nid = %d',
+            'args' => array($node->nid),
+          );
+        }
+        if ($arg0 == 'user' && og_is_group_type($node->type)) {
+          $query[]['fields']['group'] = $node->nid;
+        }
+        return $query;
+      }
+      break;
+    case 'node options':
+      return _og_notifications_node_options($arg0, $arg1);
+    case 'event load': // $arg0 is event
+      // Nothing to load here, the user may be subscribed through one of many parent groups
+      break;
+    case 'event types':
+      // Event types for this are defined in notifications_content module
+      break;
+    case 'access':
+      $type = $arg0;
+      $account = &$arg1;
+      $object = &$arg2;
+      if ($type == 'subscription' && !empty($object->fields['group'])) {
+        if (($group = node_load($object->fields['group'])) && og_is_group_type($group->type) && notifications_content_node_allow($account, $group)) {
+          return array(TRUE);
+        }
+        else {
+          return array(FALSE);
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Menu callback: Group and grouptype subscription management form. This should
+ * ideally play nicer with notifications_user_form. However, due to issues with
+ * support for multi-field subscriptions, it is currently going about things in
+ * a roundabout manner.
+ *
+ * @param Object $account
+ *   User object of the user whose page is to be displayed.
+ * @return Array $form
+ *   Form array.
+ */
+function og_notifications_user_page($account = NULL) {
+  global $user;
+
+  $account = $account ? $account : $user;
+
+  if (!empty($user->og_groups)) {
+    $ngroups = _og_notifications_user_groups($account->uid);
+    $ngrouptypes = _og_notifications_user_grouptypes($account->uid);
+
+    // Tap into notifications_user_form to retrieve variables and defaults.
+    $group_form = notifications_user_form($account, 'group', $ngroups, $user->og_groups, array('type' => 'group', 'event_type' => 'node'), array('title' => t('Group')));
+    // Grouptype uses multiple fields which are not addressed adequately by
+    // notifications_user_form.
+    $grouptype_form = notifications_user_form($account, 'grouptype', $ngrouptypes, variable_get('og_notifications_content_types', array()), array('type' => 'grouptype', 'event_type' => 'node'), array('title' => t('Group Type')));
+
+    // TODO: Trim unnecessary items.
+    $form = array(
+      'account' => $group_form['account'],
+      'group_defaults' => $group_form['defaults'],
+      'group_current' => $group_form['current'],
+      'group_subscription_fields' => $group_form['subscription_fields'],
+      'grouptype_defaults' => $grouptype_form['defaults'],
+      'grouptype_current' => $grouptype_form['current'],
+      'grouptype_subscription_fields' => $grouptype_form['subscription_fields']
+    );
+
+    $content_types = array_filter(variable_get('og_notifications_content_types', array()));
+    foreach ($user->og_groups as $gid => $group) {
+      $group_index = 'groups-'. $gid;
+
+      $types = array();
+      foreach ($content_types as $type => $title) {
+        // Check if value exists; Only enable node type subscriptions if the
+        // group is not already subscribed to (for all posts).
+        $bool = isset($ngrouptypes[$gid]) && isset($ngrouptypes[$gid][$type]);
+        $types[$type] = array(
+          'title' => $title,
+          'checkbox' => $bool,
+          'send_interval' => $bool ? $ngrouptypes[$gid][$type]->send_interval : $grouptype_form['defaults']['#value']['send_interval'],
+          'send_method' => $bool ? $ngrouptypes[$gid][$type]->send_method : $grouptype_form['defaults']['#value']['send_method']
+        );
+      }
+      $all = array(
+        'all' => array(
+          'title' => t('All'),
+          'checkbox' => isset($ngroups[$gid]),
+          'send_interval' => isset($ngroups[$gid]) ? $ngroups[$gid]->send_interval : $group_form['defaults']['#value']['send_interval'],
+          'send_method' => $ngroups[$gid]->send_method
+        )
+      );
+      $types = $all + $types;
+
+      $form[$group_index] = array(
+        '#type' => 'fieldset',
+        '#title' => check_plain($group['title']),
+        '#collapsible' => TRUE,
+        '#collapsed' => !isset($ngroups[$gid]) && empty($ngrouptypes[$gid])
+      );
+
+      // Reuse theme function.
+      $form[$group_index]['subscriptions'] = array(
+        '#tree' => TRUE,
+        '#parents' => array('groups', $gid),
+        '#theme' => 'notifications_form_table',
+        '#header' => array(theme('table_select_header_cell'), t('Type'), t('Send interval'), t('Send method'))
+      );
+
+      foreach ($types as $key => $value) {
+        $form[$group_index]['subscriptions']['checkbox'][$key] = array(
+          '#type' => 'checkbox',
+          '#default_value' => $value['checkbox'],
+        );
+        $form[$group_index]['subscriptions']['title'][$key] = array(
+          '#value' => t('%type posts in this group', array('%type' => $value['title']))
+        );
+        $form[$group_index]['subscriptions']['send_interval'][$key] = array(
+          '#type' => 'select',
+          '#options' => _notifications_send_intervals(),
+          '#default_value' => $value['send_interval'],
+        );
+        $form[$group_index]['subscriptions']['send_method'][$key] = array(
+          '#type' => 'select',
+          '#options' => _notifications_send_methods(),
+          '#default_value' => $value['send_method'],
+        );
+      }
+    }
+
+    $form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  }
+  else {
+    drupal_set_message(t('There are no active group subscriptions available.'));
+  }
+
+  return $form;
+}
+
+/**
+ * Process og_notifications_user_page form submission.
+ *
+ * @todo Decide on whether to allow contenttype and "all" subscriptions for the
+ * same group.
+ */
+function og_notifications_user_page_submit($form, $form_values) {
+  $groups = $grouptypes = array();
+  $current = $form_values['grouptype_current'];
+
+  foreach ($form_values['groups'] as $gid => $values) {
+    $groups['checkbox'][$gid] = $values['checkbox']['all'];
+    $groups['send_interval'][$gid] = $values['send_interval']['all'];
+    $groups['send_method'][$gid] = $values['send_method']['all'];
+    unset($form_values['groups'][$gid]['checkbox']['all'], $form_values['groups'][$gid]['send_interval']['all'], $form_values['groups'][$gid]['send_method']['all']);
+
+    // Save grouptype subscriptions directly as notifications_user_form_submit
+    // does not handle multiple-field notifications very well.
+    foreach ($form_values['groups'][$gid]['checkbox'] as $type => $check) {
+      $subscription = NULL;
+      if ($check == 1) {
+        if (!isset($current[$gid]) || !isset($current[$gid][$type])) {
+          $subscription = $form_values['grouptype_defaults'] + array('uid' => $form_values['account']->uid);
+        }
+        elseif ($current[$gid][$type]->send_interval != $values['send_interval'][$type] || $current[$gid][$type]->send_method != $values['send_method'][$type]) {
+          $subscription = (array)($current[$gid][$type]);
+        }
+        if ($subscription) {
+          $subscription['send_interval'] = $values['send_interval'][$type];
+          $subscription['send_method'] = $values['send_method'][$type];
+          $subscription['fields'] = array('group' => $gid, 'type' => $type);
+          notifications_save_subscription($subscription);
+        }
+      }
+      elseif (isset($current[$gid]) && isset($current[$gid][$type])) {
+        notifications_delete_subscription($current[$gid][$type]->sid);
+      }
+    }
+  }
+
+  // Save group changes.
+  $group_submit = array(
+    'account' => $form_values['account'],
+    'current' => $form_values['group_current'],
+    'defaults' => $form_values['group_defaults'],
+    'subscription_fields' => $form_values['group_subscription_fields'],
+    'subscriptions' => $groups
+  );
+  notifications_user_form_submit('og_notifications_user_page', $group_submit);
+}
+
+/**
+ * Menu callback: Since the default notifications UI lists group and grouptype
+ * as separate entries, redirect the grouptype management link to the group
+ * management page.
+ *
+ * @param Object $account
+ *   User object of the user whose grouptypes are to be managed.
+ */
+function og_notifications_grouptype_user_page($account) {
+  drupal_goto('user/'. $account->uid .'/notifications/group');
+}
+
+/**
+ * Handle autosubscriptions for users when they join a group.
+ *
+ * @param Object $account
+ *   The user account object.
+ * @param Integer $gid
+ *   The node ID of the group being subscribed to.
+ */
+function og_notifications_user_autosubscribe($account, $gid) {
+  if (isset($account->og_notifications_autosubscribe) ? $account->og_notifications_autosubscribe : variable_get('og_notifications_autosubscribe', 1)) {
+    og_notifications_user_subscribe($account, $gid);
+  }
+}
+
+/**
+ * Subscribe a user to a group.
+ *
+ * @param Object $account
+ *   The user account object.
+ * @param Integer $gid
+ *   The node ID of the group being subscribed to.
+ */
+function og_notifications_user_subscribe($account, $gid) {
+  $subscription = _notifications_subscription_defaults($account);
+
+  $subscription['uid'] = $account->uid;
+  $subscription['type'] = 'group';
+  $subscription['event_type'] = 'node';
+  $subscription['fields'] = array('group' => $gid);
+
+  notifications_save_subscription($subscription);
+}
+
+/**
+ * Unsubscribe a user from a group. This also unsunscribes the user from any
+ * grouptype subscriptions within the group.
+ *
+ * @param Object $account
+ *   The user account object.
+ * @param Integer $gid
+ *   The node ID of the group being subscribed to.
+ */
+function og_notifications_user_unsubscribe($account, $gid) {
+  // @todo: Handle direct node subscriptions for private groups.
+  // Niche cases include multi-group nodes.
+  notifications_delete_subscriptions(array('uid' => $account->uid, 'type' => 'grouptype'), array('group' => $gid));
+  notifications_delete_subscriptions(array('uid' => $account->uid, 'type' => 'group'), array('group' => $gid));
+}
+
+/**
+ * Retrieve a list of organic groups that a user is subscribed (via
+ * notifications) to.
+ *
+ * @param Integer $uid
+ *   The user ID of the user whose groups are to be retrieved.
+ * @return Array $ngroups
+ *   An associative array of the resulting groups.
+ */
+function _og_notifications_user_groups($uid) {
+  // No checks for group published or not?
+  $query = "SELECT no.*, nof.value AS nid, n.type AS node_type, n.title FROM {notifications} no
+    INNER JOIN {notifications_fields} nof ON no.sid = nof.sid LEFT JOIN {node} n ON nof.value = CAST(n.nid AS CHAR(255))
+    WHERE no.uid = %d AND (no.type = 'group') AND no.conditions = 1 AND nof.field = 'group'
+    ORDER BY node_type, n.title";
+  $results = db_query($query, $uid);
+
+  $ngroups = array();
+  while ($sub = db_fetch_object($results)) {
+    $ngroups[$sub->nid] = $sub;
+  }
+
+  return $ngroups;
+}
+
+/**
+ * Retrieve a list of organic group content types that a user is subscribed (via
+ * notifications) to.
+ *
+ * @param Integer $uid
+ *   The user ID of the user whose groups are to be retrieved.
+ * @return Array $ngrouptypes
+ *   An associative array of the resulting content types sorted by groups.
+ */
+function _og_notifications_user_grouptypes($uid) {
+  $query = "SELECT no.*, nof1.value AS group_nid, nof2.value AS node_type FROM {notifications} no
+    INNER JOIN {notifications_fields} nof1 ON no.sid = nof1.sid
+    INNER JOIN {notifications_fields} nof2 ON no.sid = nof2.sid
+    WHERE no.uid = %d AND (no.type = 'grouptype') AND no.conditions = 2 AND nof1.field = 'group' AND nof2.field = 'type'
+    ORDER BY group_nid, node_type";
+  $results = db_query($query, $uid);
+
+  $ngrouptypes = array();
+  while ($sub = db_fetch_object($results)) {
+    $ngrouptypes[$sub->group_nid][$sub->node_type] = $sub;
+  }
+
+  return $ngrouptypes;
+}
+
+/**
+ * Options to display for node subscriptions.
+ */
+function _og_notifications_node_options($account, $node) {
+  // If node is a group type
+  if (og_is_group_type($node->type)) {
+    $options[] = array(
+      'name' => t('To all posts in this group'),
+      'type' => 'group',
+      'fields' => array('group' => $node->nid),
+    );
+
+    foreach (array_filter(variable_get('og_notifications_content_types', array())) as $type) {
+      $options[] = array(
+        'name' => t('%type posts in this group', array('%type' => node_get_types('name', $type))),
+        'type' => 'grouptype',
+        'fields' => array('group' => $node->nid, 'type' => $type),
+      );
+    }
+  }
+  // If node is part of a group user may be subscribed to the node through one of the groups
+  if ($node->og_groups) {
+    foreach ($node->og_groups as $index => $gid) {
+      // Content type
+      $options[] = array(
+        'name' => t('Posts in group %name', array('%name' => $node->og_groups_both[$gid])),
+        'type' => 'group',
+        'fields' => array('group' => $gid),
+      );
+      $options[] = array(
+        'name' => t('%type posts in this group', array('%type' => node_get_types('name', $node->type))),
+        'type' => 'grouptype',
+        'fields' => array('group' => $gid, 'type' => $node->type),
+      );
+    }
+  }
+  return $options;
+}
