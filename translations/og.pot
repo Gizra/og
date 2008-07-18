@@ -4,9 +4,9 @@
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
 #  node-og-group-post.tpl.php,v 1.1 2008/04/25 04:21:45 weitzman
-#  og.views.inc,v 1.33 2008/07/15 00:59:45 weitzman
-#  og.module,v 1.553 2008/07/15 19:37:14 weitzman
-#  og_access.module,v 1.22 2008/07/15 17:03:45 weitzman
+#  og.views.inc,v 1.34 2008/07/16 14:30:00 weitzman
+#  og.module,v 1.555 2008/07/17 02:37:03 weitzman
+#  og_access.module,v 1.23 2008/07/16 19:40:56 weitzman
 #  og_panels.module,v 1.38 2008/07/15 19:17:22 weitzman
 #  og.admin.inc,v 1.9 2008/07/15 00:59:45 weitzman
 #  og.info: n/a
@@ -23,7 +23,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-07-15 21:57+0200\n"
+"POT-Creation-Date: 2008-07-18 20:33+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -1209,15 +1209,15 @@ msgid "Page"
 msgstr ""
 
 #: og.module:2668
-msgid "My unread: @links."
+msgid "My unread: !links."
 msgstr ""
 
 #: og.module:2672
-msgid "My group: @links."
+msgid "My group: !links."
 msgstr ""
 
 #: og.module:2676
-msgid "All posts: @links"
+msgid "All posts: !links"
 msgstr ""
 
 #: og.module:2688;2688
@@ -1516,6 +1516,10 @@ msgstr ""
 
 #: og_access.module:308
 msgid "Members of !group_n may view this node."
+msgstr ""
+
+#: og_access.module:312
+msgid "Group admins of !group_n may view/edit/delete this node."
 msgstr ""
 
 #: og_access.module:18
