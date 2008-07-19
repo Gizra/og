@@ -384,6 +384,20 @@ class views_handler_argument_og_group_nid extends views_handler_argument_numeric
     og_set_group_context($node);
     parent::query();
   }
+  
+  /**
+   * Override the behavior of title(). Get the title of the node.
+   */
+  function title_query() {
+    $titles = array();
+    $placeholders = implode(', ', array_fill(0, sizeof($this->value), '%d'));
+
+    $result = db_query("SELECT n.title FROM {node} n WHERE n.nid IN ($placeholders)", $this->value);
+    while ($term = db_fetch_object($result)) {
+      $titles[] = check_plain($term->title);
+    }
+    return $titles;
+  }
 }
 
 class views_handler_field_og_group_nids extends views_handler_field_prerender_list {
@@ -883,4 +897,3 @@ function og_views_set_breadcrumb($nid) {
   );
   return $bc;
 }
-  
