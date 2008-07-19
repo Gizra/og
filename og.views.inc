@@ -305,7 +305,7 @@ function og_views_data_og_ancestry() {
     ),
   );
   
-  $filterhelp = t('Filter for posts in specified organic groups. <em>Value</em> should be a one or more node ids (i.e. integers), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context (if View is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id.');
+  $filterhelp = t('<strong>Posts</strong> are filtered for specified organic groups. The page context (if Display is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id.');
   $data['og_ancestry']['group_nid'] = array(
     'title' => t('Groups'),
     'help' => t('The groups for a post.'),
@@ -453,7 +453,7 @@ function og_views_data_og_uid() {
     'argument' => array(
       'title' => t('Group node'),
       'handler' => 'views_handler_argument_og_uid_nid',
-      'help' => t('Members are filtered for a specific group.'),
+      'help' => t('<strong>Members</strong> are filtered for a specific group.'),
     ),
   ); 
   
@@ -805,7 +805,7 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
     $types = og_get_types('group');
 
     $type = isset($this->argument->options['validate_argument_nid_type']) ? $this->argument->options['validate_argument_nid_type'] : 'nid';
-
+    
     switch ($type) {
       case 'nid':
         if (!is_numeric($argument)) {
@@ -829,11 +829,11 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
         // Save the title() handlers some work.
         $this->argument->validated_title = check_plain($node->title);
 
+        // Admin has not setup any content types to behave as a group. Thats unsupported.
         if (empty($types)) {
           return TRUE;
         }
 
-        return in_array($node->type, $types);
         break;
       case 'nids':
         $nids = new stdClass();
@@ -845,16 +845,16 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
 
         $placeholders = implode(', ', array_fill(0, sizeof($nids->value), '%d'));
 
-        $test_types = drupal_map_assoc($nids->value);
         $has_membership = FALSE;
         $titles = array();
+        $test_nids = drupal_map_assoc($nids->value);
 
-        $result = db_query("SELECT * FROM {node} WHERE nid IN ($placeholders)", $nids->value);
+        $result = db_query("SELECT nid, type, title FROM {node} WHERE nid IN ($placeholders)", $nids->value);
         while ($node = db_fetch_object($result)) {
-          if ($types && !in_array($node->type, $types)) {
+          if (!og_is_group_type($node->type)) {
             return FALSE;
           }
-          
+
           if (!empty($this->argument->options['validate_argument_is_member'])) {
             // If user is a member of any of the specified groups, then she has access.
             if (!$has_membership && og_is_group_member($node->nid)) {
@@ -866,12 +866,12 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
           }
 
           $titles[] = check_plain($node->title);
-          unset($test[$node->nid]);
+          unset($test_nids[$node->nid]);
         }
 
         $this->argument->validated_title = implode($nids->operator == 'or' ? ' + ' : ', ', $titles);
-        // If this is not empty, we did not find a nid.
-        return empty($test) && $has_membership;
+        // If $test is not empty, we did not find a nid.
+        return empty($test_nids) && $has_membership;
     }
   }
 }
