@@ -805,7 +805,6 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
     $types = og_get_types('group');
 
     $type = isset($this->argument->options['validate_argument_nid_type']) ? $this->argument->options['validate_argument_nid_type'] : 'nid';
-    
     switch ($type) {
       case 'nid':
         if (!is_numeric($argument)) {
@@ -833,8 +832,8 @@ class views_plugin_argument_validate_og_group_types extends views_plugin_argumen
         if (empty($types)) {
           return TRUE;
         }
-
-        break;
+        
+        return TRUE;
       case 'nids':
         $nids = new stdClass();
         $nids->value = array($argument);
