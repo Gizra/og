@@ -1356,7 +1356,7 @@ function og_group_form($node, $form_state) {
         '#type' => 'radios',
         '#title' => t('Language'),
         '#default_value' => $node->og_language,
-        '#options' => $languages,
+        '#options' => array('' => t('Language neutral')) + $languages,
         '#description' => t('Selecting a different locale will change the interface language of the group. Users who have chosen a preferred language always see their chosen language.'),
       );
     }
