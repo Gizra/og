@@ -1415,7 +1415,7 @@ function og_presave_group(&$node) {
   if (!isset($node->og_notification)) {
     $node->og_notification = NULL;
   }
-  if (!isset($node->og_notification)) {
+  if (!isset($node->og_private)) {
     $node->og_private = FALSE;
   }
   
