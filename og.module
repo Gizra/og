@@ -525,6 +525,8 @@ function og_set_theme($nid) {
 }
 
 function og_email_form_submit($form, &$form_state) {
+  global $user;
+  
   $node = node_load($form_state['values']['gid']);
 
   $variables = array(
@@ -533,10 +535,9 @@ function og_email_form_submit($form, &$form_state) {
     '@body' => $form_state['values']['body'],
     '@site' => variable_get('site_name', 'drupal'),
     '!url_group' => url("node/$node->nid", array('absolute' => TRUE)),
-    '!url_unsubscribe' => url("og/unsubscribe/$node->nid", array('absolute' => TRUE))
+    '!url_unsubscribe' => url("og/unsubscribe/$node->nid/$user->uid", array('absolute' => TRUE))
   );
   
-  global $user;
   $from = $user->mail;
   $sql = og_list_users_sql(1);
   $result = db_query($sql, $form_state['values']['gid']);
