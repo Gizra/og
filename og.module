@@ -189,9 +189,19 @@ function og_menu() {
 
 function og_menu_access_unsubscribe($group_node, $account) {
   global $user;  
-  // Unsubscribee must already be a member.
+  // Unsubscribee must already be a member or pending member.
   if (!og_is_group_member($group_node, FALSE, $account->uid)) {
-    return FALSE;
+    // Check pending as well.
+    $subs = og_get_subscriptions($account->uid, 0);
+    foreach ($subs as $key => $sub) {
+      if ($group_node->nid == $key) {
+        $is_member = TRUE;
+        break;
+      }
+    }
+    if (empty($is_member)) {
+      return FALSE;
+    }
   }
   
   // Only admins can remove another member
@@ -2736,7 +2746,7 @@ function og_block_details() {
     }
     elseif ($subscription == 'requested') {
       $links['approval'] = t('Your membership request awaits approval.');
-      $links['delete'] = l(t('Delete request'), "og/unsubscribe/$node->nid", array('query' => 'destination=og'));
+      $links['delete'] = l(t('Delete request'), "og/unsubscribe/$node->nid/$user->uid", array('query' => 'destination=og'));
     }
     elseif (!$user->uid) {
       $dest = drupal_get_destination();
