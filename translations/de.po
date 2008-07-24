@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-07-18 20:33+0200\n"
-"PO-Revision-Date: 2008-07-18 21:49+0100\n"
+"POT-Creation-Date: 2008-07-15 21:57+0200\n"
+"PO-Revision-Date: 2008-07-16 08:47+0100\n"
 "Last-Translator: Alexander Hass\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -358,7 +358,7 @@ msgstr "Gruppentypen (alle)"
 
 #: og.views.inc:160
 msgid "Restrict to all content types that have been marked as groups."
-msgstr "Auf alle Inhaltstypen begrenzen, die als Gruppen markiert wurden."
+msgstr ""
 
 #: (duplicate) og.views.inc:208
 #: og.module:2937
@@ -384,10 +384,9 @@ msgstr "Nur einladen"
 msgid "Group posts"
 msgstr "Gruppenbeiträge"
 
-# TODO: typo on english string
 #: og.views.inc:298
 msgid "Posts which are affiiated with a group."
-msgstr "Die mit einer Gruppe verbundenen Beiträge."
+msgstr ""
 
 #: og.views.inc:308
 msgid "Filter for posts in specified organic groups. <em>Value</em> should be a one or more node ids (i.e. integers), separated by commas or pluses. Like taxonomy, pluses indicate that the post must appear in one of the specified groups, whereas commas indicate that the post must appear in every specified group. The page context (if View is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id."
@@ -395,7 +394,7 @@ msgstr ""
 
 #: og.views.inc:311
 msgid "The groups for a post."
-msgstr "Die Gruppen für einen Beitrag."
+msgstr ""
 
 #: og.views.inc:316;321
 msgid "Group node (post)"
@@ -403,7 +402,7 @@ msgstr "Gruppenbeitrag (Beitrag)"
 
 #: og.views.inc:317
 msgid "Bring in information about the group node based on a post's groups."
-msgstr "Informationen über den Gruppenbeitrag, basierend auf den Gruppen eines Beitrags."
+msgstr ""
 
 #: og.views.inc:329
 msgid "Post: in specified group (by number)"
@@ -442,7 +441,7 @@ msgstr "Gruppe"
 
 #: og.views.inc:444
 msgid "Group that a member belongs to."
-msgstr "Die Gruppe zu der ein Mitglied gehört."
+msgstr ""
 
 #: og.views.inc:446;451
 msgid "Group node (member)"
@@ -450,7 +449,7 @@ msgstr "Gruppenbeitrag (Mitglied)"
 
 #: og.views.inc:447
 msgid "Bring in information about the group node based on a user's membership."
-msgstr "Information über den Gruppenbeitrag, basierend auf der Mitgliedschaft eines Benutzers."
+msgstr ""
 
 #: og.views.inc:454
 #: og.module:2488
@@ -483,23 +482,23 @@ msgstr ""
 
 #: og.views.inc:482
 msgid "A link to the <em>Admin create or remove</em> page."
-msgstr "Ein Verweis zur <em>Administator erstellen oder entfernen</em>-Seite."
+msgstr ""
 
 #: og.views.inc:489
 msgid "OG: Edit membership link"
-msgstr "OG: Mitgliedschafts-Verweis bearbeiten"
+msgstr ""
 
 #: og.views.inc:490
 msgid "A link to the <em>My membership</em> page."
-msgstr "Ein Verweis zur <em>Meine Mitgliedschaft</em>-Seite."
+msgstr ""
 
 #: og.views.inc:497
 msgid "OG: Approve/Deny/Remove membership link"
-msgstr "OG: Akzeptieren/Ablehnen/Entfernen Mitgliedschafts-Verweis."
+msgstr ""
 
 #: og.views.inc:498
 msgid "A link to approve/deny/remove a group member."
-msgstr "Ein Verweis zum Akzeptieren/Ablehnen/Entfernen eines Gruppenmitglieds."
+msgstr ""
 
 #: og.views.inc:505
 msgid "OG: Is member an admin in a group"
@@ -507,42 +506,39 @@ msgstr "OG: Ist das Mitglied ein Administrator in einer Gruppe"
 
 #: og.views.inc:506
 msgid "Add <em>admin</em> text if user is the group manager."
-msgstr "<em>Verwalter</em>-Text hinzufügen, wenn der Benutzer ein Gruppenmanager ist."
+msgstr ""
 
 #: og.views.inc:519
 msgid "OG: Is membership approved"
 msgstr "OG: Ob die Mitgliedschaft akzeptiert wurde"
 
-# TODO: "user"?
-# Translation sound not perfect.
 #: og.views.inc:520
-#, fuzzy
 msgid "Add <em>approval needed</em> user if user's membership request is pending."
-msgstr "<em>Genehmigung erforderlich</em> hinzufügen, wenn der Mitgliedschaftantrag eines Benutzers auf Bestätigung wartet."
+msgstr ""
 
 #: og.views.inc:533
 msgid "OG: Is the group manager"
-msgstr "OG: Ist der Gruppenmanager"
+msgstr ""
 
 #: og.views.inc:534
 msgid "Add <em>manager</em> text if user is the group manager."
-msgstr "<em>Manager</em>-Text hinzufügen, wenn der Benutzer ein Gruppenmanager ist."
+msgstr ""
 
 #: og.views.inc:544
 msgid "OG: Membership create date"
-msgstr "OG: Mitgliedschaftsbeitrittsdatum"
+msgstr ""
 
 #: og.views.inc:545
 msgid "The date when the membership was created."
-msgstr "Das Datum an dem die Mitgliedschaft begonnen hat."
+msgstr ""
 
 #: og.views.inc:558
 msgid "OG: Membership last updated date"
-msgstr "OG: Letztes Aktualisierungsdatum einer Mitgliedschaft"
+msgstr ""
 
 #: og.views.inc:559
 msgid "The date when the membership was last updated."
-msgstr "Das Datum zu dem die Mitgliedschaft das letzte mal aktualisiert wurde."
+msgstr ""
 
 #: og.views.inc:601
 msgid "Member types"
@@ -606,8 +602,9 @@ msgid "Node ID's separated by , or +"
 msgstr "Beitrags-ID's getrennt mit , oder +"
 
 #: og.views.inc:797
+#, fuzzy
 msgid "Validate current user is a member of a specified group"
-msgstr "Aktuellen Benutzer auf Mitgliedschaft in einer bestimmten Gruppe überprüfen"
+msgstr "Überprüfen, ob der aktuelle Benutzer ein Mitglied von einer bestimmten Gruppe ist"
 
 #: og.views.inc:882
 #: og.module:1181;1491
@@ -661,7 +658,7 @@ msgstr "Gruppenspezifische Blöcke sind nur auf Gruppenseiten und nicht auf syst
 
 #: og.module:34
 msgid "In order to let group admins determine their own group theme, you must enable multiple themes using <a href=\"@url\">theme configuration page</a>."
-msgstr "Damit Gruppenadministratoren ein eigenes Gruppen-Theme festlegen können, müssen auf der <a href=\"@url\">Theme-Konfigurations-Seite</a> mehrere Themes aktiviert werden."
+msgstr ""
 
 #: og.module:490
 msgid "Send email to %group"
@@ -693,7 +690,7 @@ msgstr "E-Mail senden"
 
 #: og.module:563
 msgid "You may not leave this group because it is a <em>closed</em> group. You should request removal from a group administrator."
-msgstr "Diese Gruppe kann nicht verlassen werden, da es eine <em>geschlossene</em> Gruppe ist. Das Entfernen muss bei einem Gruppenadministrator beantragt werden."
+msgstr ""
 
 #: og.module:566
 msgid "You may not leave this group because you are its owner. A site administrator can assign ownership to another user and then you may leave."
@@ -796,7 +793,7 @@ msgstr "Persönliche Nachricht"
 
 #: og.module:786
 msgid "Optional. Enter a message which will become part of the invitation email."
-msgstr "Optional. Diese Nachricht wird Teil der Einladungs-E-Mail."
+msgstr ""
 
 #: og.module:788;105
 msgid "Send invitation"
@@ -1075,7 +1072,7 @@ msgstr "Weiterlesen"
 
 #: og.module:2123
 msgid "View original"
-msgstr "Orginal ansehen"
+msgstr ""
 
 #: og.module:2294
 msgid "@group: '@title' at @site"
@@ -1279,7 +1276,7 @@ msgstr "Die maximale Anzahl der anzuzeigenden Gruppen"
 
 #: og.module:2661
 msgid "This group offers a <a href=\"@groupfeed\">RSS feed</a> and an <a href=\"@email\">email subscription</a>."
-msgstr "Diese Gruppe stellt einen <a href=\"@groupfeed\">RSS-Newsfeed</a> und eine <a href=\"@email\">E-Mail-Benachrichtigung</a> zu Verfügung."
+msgstr ""
 
 #: og.module:2663
 msgid "Or subscribe to these personalized, sitewide feeds:"
@@ -1294,17 +1291,17 @@ msgid "Page"
 msgstr "Seite"
 
 #: og.module:2668
-msgid "My unread: !links."
-msgstr "Meine Ungelesenen: !links."
+msgid "My unread: @links."
+msgstr "Meine Ungelesenen: @links."
 
 #: og.module:2672
-msgid "My group: !links."
-msgstr "Meine Gruppen: !links."
+msgid "My group: @links."
+msgstr "Meine Gruppen: @links."
 
 # TODO: english period is missing
 #: og.module:2676
-msgid "All posts: !links"
-msgstr "Alle Beiträge: !links."
+msgid "All posts: @links"
+msgstr "Alle Beiträge: @links."
 
 #: og.module:2688;2688
 msgid "OPML feed"
@@ -1615,10 +1612,6 @@ msgstr "Alle Benutzer können diesen Beitrag lesen."
 msgid "Members of !group_n may view this node."
 msgstr "Mitglieder von !group_n können diesen Beitrag lesen."
 
-#: og_access.module:312
-msgid "Group admins of !group_n may view/edit/delete this node."
-msgstr ""
-
 #: og_access.module:18
 msgid "Organic groups access configuration"
 msgstr "Zugriffskonfiguration für organische Gruppen"
@@ -1846,7 +1839,7 @@ msgstr "Gruppenbeschreibung. Wird standardmäßig im Gruppenverzeichnis angezeig
 
 #: og.install:38
 msgid "The group specific theme (if any). See {system}.name."
-msgstr "Das gruppenspezifische Theme (soweit vorhanden). Referenz zu {system}.name."
+msgstr ""
 
 # TODO: question mark
 #: og.install:44
@@ -1863,7 +1856,7 @@ msgstr "Derzeit nicht verwendet."
 
 #: og.install:65
 msgid "Group specific language. See {languages}.language."
-msgstr "Gruppenspezifische Sprache. Referenz zu {languages}.language."
+msgstr ""
 
 # TODO: question mark
 #: og.install:72
@@ -1880,7 +1873,7 @@ msgstr "Die {node}.nid der Gruppe."
 
 #: og.install:99
 msgid "Is this membership active or pending?"
-msgstr "Ist die Mitgliedschaft aktiv oder ausstehend?"
+msgstr ""
 
 #: og.install:106
 msgid "Is this user a group administrator?"
@@ -1891,8 +1884,9 @@ msgid "The user for this membership. See {users}.uid."
 msgstr ""
 
 #: og.install:119
+#, fuzzy
 msgid "Email notification preference."
-msgstr "E-Mail-Benachrichtigungs-Einstellungen."
+msgstr "E-Mail-Benachrichtigung"
 
 #: og.install:125
 msgid "Time when this membership was created."
