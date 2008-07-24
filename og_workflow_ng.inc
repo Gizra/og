@@ -13,12 +13,12 @@ function og_event_info() {
   return array(
     'og_user_insert' => array(
       '#label' => t('User joins group'),
-      '#module' => t('OG'),
+      '#module' => 'OG',
       '#arguments' => og_workflow_ng_events_hook_og_arguments(),
     ),
     'og_user_approved' => array(
       '#label' => t('User approved to group by admin'),
-      '#module' => t('OG'),
+      '#module' => 'OG',
       '#description' => t('A pending member is approved by a group administrator.'),
       '#arguments' => og_workflow_ng_events_hook_og_arguments(),
     ),
