@@ -682,7 +682,7 @@ function og_approve($node, $account, $token) {
     return;
   }
   
-  if (og_is_group_member($node, FALSE, $account)) {
+  if (og_is_group_member($node, FALSE, $account->uid)) {
     drupal_set_message(t('!name already approved to group %group.', array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
     return '';
   }
