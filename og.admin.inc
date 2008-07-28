@@ -115,7 +115,8 @@ function og_admin_settings() {
   $form['og_settings']['email']['og_new_node_subject'] = array(
     '#type' => 'textfield', 
     '#title' => t('New content subject'), 
-    '#description' => 'Subject of email for new content. Available variables: @group, !group_url, @type, @site, !content_url, !reply_url, @title, @subject, @node_full, @node_teaser, @username. %subject contains the comment title in the case of a comment but the node title in the case of a new post. @title is always the node title.', '#default_value' => _og_mail_text('og_new_node_subject')
+    '#description' => 'Subject of email for new content. Available variables: @group, !group_url, @type, @site, !content_url, !reply_url, @title, @subject, @node_full, @node_teaser, @username. %subject contains the comment title in the case of a comment but the node title in the case of a new post. @title is always the node title.',
+    '#default_value' => variable_get('og_new_node_subject', _og_mail_text('og_new_node_subject')),
   );
   $form['og_settings']['email']['og_new_node_body'] = array(
     '#type' => 'textarea',

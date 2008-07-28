@@ -335,7 +335,8 @@ function og_preprocess_node(&$variables) {
 }
 
 function og_theme_registry_alter(&$variables) {
-  $variables['node']['theme paths'][] = drupal_get_path('module', 'og');
+  // Check for og provided templates just before we use the default node.tpl.php
+  array_splice($variables['node']['theme paths'], 1, 0, drupal_get_path('module', 'og')); 
 }
 
 function og_init() {
