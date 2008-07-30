@@ -2,4 +2,6 @@
 name = Organic Groups Notifications
 description = Allows users to subscribe to content in groups.
 package = "Organic groups"
-dependencies = notifications notifications_content og
+dependencies[] = notifications
+dependencies[] = notifications_content
+dependencies[] =  og
