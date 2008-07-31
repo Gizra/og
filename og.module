@@ -1673,7 +1673,8 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#type' => 'value',
     '#value' => $usage,
   );
-  $form['#submit'][] = 'og_node_type_form_submit';
+  // We push to the front so we can unset() variables before they are saved.
+  array_unshift($form['#submit'], 'og_node_type_form_submit');
   $options = og_types_map();
   $form['og'] = array(
     '#type' => 'fieldset',
@@ -1713,6 +1714,8 @@ function og_node_type_form_submit($form, &$form_state) {
   if ($new != $old) {
     node_access_needs_rebuild();
   }
+  // Prevent this old variable from being saved to DB.
+  unset($form_state['values']['old_'. $var]);
 }
 
 // Form_alter() the node_delete form for a group
