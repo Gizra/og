@@ -2366,6 +2366,14 @@ function og_feed($gid) {
   header('Location: '. url("node/$gid/feed", NULL, NULL, TRUE));
 }
 
+/**
+ * Check a user's membership in a group. Site admins always return TRUE.
+ */
+function og_is_group_member($gid, $user) {
+  $groups = array_keys($user->og_groups);
+  return user_access('administer nodes') || in_array($gid, $groups) ? TRUE : FALSE;
+}
+
 
 /**
  * Implementation of hook_block().
