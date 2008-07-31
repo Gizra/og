@@ -1,5 +1,4 @@
 name = Organic groups
-description = "Enable users to create and manage their own 'groups'"
+description = "Enable users to create and manage groups.  OG Views integration module is recommended for best experience."
 package = "Organic groups"
-dependencies[] = views
 core = 6.x

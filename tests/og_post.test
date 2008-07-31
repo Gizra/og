@@ -94,6 +94,7 @@ class OgPost extends OgTestCase {
     $this->_browser = new SimpleBrowser();
     $this->drupalLoginUser($super_admin_user);
     
+    // Check the admin's activity page.
     $url = url('og/activity');
     $ret = $this->get($url, FALSE, FALSE, TRUE);
     $this->assertWantedRaw($t, 'The new group appears on the administrators group activity page');

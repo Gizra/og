@@ -173,9 +173,8 @@ class OgSubscribe extends OgTestCase {
     $this->get($url);
     $this->assertTrue($ret, " [browser] GET $url");
     $this->assertWantedRaw($join_user->name, 'Username found');
-    
     $this->clickLink(t('deny'));
-
+dfb($this);
     $this->assertWantedRaw(t('Membership request denied.'), 'Denied text found.');
     
 

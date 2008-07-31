@@ -369,6 +369,15 @@ function og_update_6000() {
   }
 }
 
+// Update to support views modularization while retaining backward compatibility.
+function og_update_6001() {
+  $ret = array();
+  module_enable(array('og_views'));
+  //enable the og_views block instead of the plain og one
+  db_query("UPDATE {blocks} SET module = 'og_views', delta = '1' WHERE module = 'og' AND delta = '5'");
+  return $ret;
+}
+
 // end updates //
 
 function og_enable() {

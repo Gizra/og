@@ -1,0 +1,167 @@
+<?php
+// $Id$
+
+function og_views_menu() {
+  // This exists because I can't easily restrict access based on pictures_enabled using Views.
+  $items['og/users/%/faces'] = array(
+    'title' => 'Faces', 
+    'page callback' => 'views_page',
+    'page arguments' => array('og_members_faces', 'default', 2),
+    'type' => MENU_LOCAL_TASK,
+    'access callback' => 'og_menu_access_picture',
+    'access arguments' => array(2),
+  );
+
+  // Group feed
+  $items['node/%node/feed'] = array(
+    'page callback' => 'og_views_feed', 
+    'page arguments' => array(1),
+    'title callback' => 'node_page_title',
+    'title arguments' => array(1),  
+    'type' => MENU_CALLBACK, 
+    'access callback' => 'node_access',
+    'access arguments' => array('view', 1), 
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback. Render group feed.
+ */
+function og_views_feed($node) {
+  $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
+  $view->is_cacheable = FALSE;
+  $view->set_display('feed');
+  // TODOL: not working
+  $view->override_path = "node/$node->nid";
+  $view->set_arguments(array($node->nid));
+  $view->display['feed']->display_options['style_options']['description'] = $node->og_description;
+  print $view->render();
+}
+
+function og_views_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks[0]['info'] = t('Group search');
+    $blocks[0]['cache'] = BLOCK_NO_CACHE;
+    
+    $blocks[1]['info'] = t('Group notifications (views enhanced)');
+    $blocks[1]['cache'] = BLOCK_NO_CACHE;
+    return $blocks;
+  }
+  elseif ($op == 'view') {
+    switch($delta) {
+      case 0:
+        return og_views_block_search();
+      case 1:
+        return og_views_block_notifications();
+    }
+  }
+}
+
+function og_views_block_notifications() {
+  global $user;
+  
+  if ($groupnode = og_get_group_context()) {
+    $content = t('This group offers a <a href="@groupfeed">RSS feed</a> and an <a href="@email">email subscription</a>.', array('@groupfeed' => url("node/$groupnode->nid/feed"), '@email' => url('og/manage/'. $groupnode->nid)));
+    // NOTE: See og.css for styling specific to these lists
+    $content .= ' '. t('Or subscribe to these personalized, sitewide feeds:');
+    $inline = array('class' => 'links inline');
+    if ($user->uid) {
+      $l1[] = array('title' => t('Feed'), 'href' => 'group/myunread/feed');
+      $l1[] = array('title' => t('Page'), 'href' => 'group/myunread');
+      $links['my_unread'] = t('My unread: !links', array('!links' => theme('links', $l1, $inline)));
+    
+      $l2[] = array('title' => t('Feed'), 'href' => 'group/mytracker/feed');
+      $l2[] = array('title' => t('Page'), 'href' => 'group/mytracker');
+      $links['my_group'] = t('My group: !links', array('!links' => theme('links', $l2, $inline)));
+    }
+    $l3[] = array('title' => t('Feed'), 'href' => 'group/tracker/feed');
+    $l3[] = array('title' => t('Page'), 'href' => 'group/tracker');
+    $links['all_posts'] = array('data' => t('All posts: !links', array('!links' => theme('links', $l3, $inline))));
+    $content .= theme('item_list', $links);
+    $block['content'] = $content;
+    $block['subject'] = t('Group notifications');
+    return $block;
+  }
+}
+
+function og_views_block_search() {
+  if (!module_exists('search') || !user_access('search content')) {
+    return;
+  }
+  if ($groupnode = og_get_group_context()) {
+    $block['content'] = drupal_get_form('og_views_search_form', $groupnode);
+    $block['subject'] = l($groupnode->title, "node/$groupnode->nid");
+    return $block;
+  }
+}
+
+function og_views_search_form($form_state, $group) {
+  $form['keys'] = array(
+    '#type' => 'textfield',
+    '#title' => '',
+    '#description' => '',
+    '#size' => 19,
+    '#maxlength' => 255,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit', 
+    '#value' => t('Search'),
+  );
+  // $form['#pre_render'][] = 'og_views_search_form_pre_render';
+  $form['#method'] = 'get';
+  $form['#action'] = url("og/search/$group->nid");
+  return $form;
+}
+
+// Clean up query string like Views does. Not working.
+function og_views_search_form_pre_render($form_state) {
+  // unset($form_state['form_build_id'], $form_state['form_token'], $form_state['form_id']);
+  return $form_state;
+}
+
+// An implementation of hook_og_links_alter(). 
+// Hyperlink the members count to the members listing.
+function og_views_og_links_alter(&$links, $node) {
+  if (isset($links['subscribers'])) {
+    $txt = strip_tags($links['subscribers']);
+    $links['subscribers'] = og_is_picture() ? l($txt, "og/users/$node->nid/faces") : l($txt, "og/users/$node->nid");
+  }
+}
+
+function og_views_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+  switch ($op) {
+    case 'view':
+      if (og_is_group_type($node->type) && (!$teaser || $page)) {
+        og_views_view_group($node, $teaser, $page);
+      }
+    break;
+  }
+}
+
+function og_views_view_group($node, $teaser, $page) {
+  $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
+  if (!$view || !empty($view->disabled)) { 
+    // Do nothing. Assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
+  }
+  else {
+    $view->is_cacheable = FALSE;
+    // $view->url = 'node'; // for pager
+    $view->set_arguments(array($node->nid));
+    $view->set_display('default');
+    $built = $view->render();
+    
+
+    // Views will set either total_rows or num_rows depending on whether View has a pager.
+    if (@$view->total_rows || @$view->num_rows || @$view->page_empty) {
+      $node->content['view'] = array('#value' => $built);
+    }
+    elseif (empty($_POST)) {
+      // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
+      og_home_empty($node);
+    }
+    drupal_set_title(filter_xss_admin($view->build_info['title']));
+    drupal_add_feed(url("node/$node->nid/feed"), drupal_get_title());
+  }
+}
