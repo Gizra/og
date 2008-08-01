@@ -161,7 +161,7 @@ function og_access_alter_nongroup_form(&$form, $form_state, $node) {
         $form['og_nodeapi']['visible']['og_public'] = array(
           '#type' => 'checkbox', 
           '#title' => t('Public'), 
-          '#default_value' => isset($node->nid) ? $node->og_public : 0, 
+          '#default_value' => isset($node->og_public) ? $node->og_public : 0, 
           '#description' => t('Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>public</em>.'), 
           '#weight' => 2,
         );
