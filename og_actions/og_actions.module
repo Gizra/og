@@ -60,7 +60,7 @@ function og_actions_action_info() {
 function og_make_public_action($node, $context) {
   if (isset($node->og_groups)) {
     $node->og_public = 1;
-    watchdog('action', t('Set node %id to Public', array('%id' => intval($node->nid))));
+    watchdog('action', 'Set node %id to public.', array('%id' => intval($node->nid)));
   }
 }
 
@@ -70,7 +70,7 @@ function og_make_public_action($node, $context) {
 function og_make_private_action($node, $context) {
   if (isset($node->og_groups)) {
     $node->og_public = 0;
-    watchdog('action', t('Set node %id to Private', array('%id' => intval($node->nid))));
+    watchdog('action', 'Set node %id to private.', array('%id' => intval($node->nid)));
   }
 }
 
@@ -80,7 +80,7 @@ function og_make_private_action($node, $context) {
 function og_remove_groups_action($node, $context) {
   if (!empty($node->og_groups)) {
     $node->og_groups = array();
-    watchdog('action', t('Removed node %id from all groups', array('%id' => intval($node->nid))));
+    watchdog('action', 'Removed node %id from all groups.', array('%id' => intval($node->nid)));
   }
 }
 
@@ -92,7 +92,7 @@ function og_add_group_action($node, $context) {
   if (isset($context['group'])) {
 
     $node->og_groups[] = $context['group'];
-    watchdog('action', t('Added node id %id to %group', array('%id' => intval($node->nid), '%group' => $context['group'])));
+    watchdog('action', 'Added node id %id to %group.', array('%id' => intval($node->nid), '%group' => $context['group']));
   }
 }
 
@@ -112,7 +112,7 @@ function og_add_group_action_form($context) {
       '#type' => 'select',
       '#title' => t('Group'),
       '#options' => $groups,
-      '#description' => t('Select the group to add to the node'),
+      '#description' => t('Select the group to add to the node.'),
       '#required' => TRUE,
     );
   }
@@ -139,7 +139,7 @@ function og_remove_group_action($node, $context) {
         unset($node->og_groups[$key]);
       }
     }
-    watchdog('action', t('Removed node id %id from %group', array('%id' => intval($node->nid), '%group' => $context['group'])));
+    watchdog('action', 'Removed node id %id from %group.', array('%id' => intval($node->nid), '%group' => $context['group']));
   }
 }
 
@@ -159,7 +159,7 @@ function og_remove_group_action_form($context) {
       '#type' => 'select',
       '#title' => t('Group'),
       '#options' => $groups,
-      '#description' => t('Select the group to remove from the node'),
+      '#description' => t('Select the group to remove from the node.'),
       '#required' => TRUE,
     );
   }   

@@ -22,7 +22,7 @@ function og_notifications_menu($may_cache) {
       $items[] = array(
         'path' => 'user/'. $account->uid .'/notifications/group',
         'access' => user_access('subscribe to content in groups'),
-        'title' => t('Groups'),
+        'title' => 'Groups',
         'callback' => 'drupal_get_form',
         'callback arguments' => array('og_notifications_user_page', $account),
         'type' => MENU_LOCAL_TASK,
@@ -31,7 +31,7 @@ function og_notifications_menu($may_cache) {
       $items[] = array(
         'path' => 'user/'. $account->uid .'/notifications/grouptype',
         'access' => user_access('subscribe to content in groups'),
-        'title' => t('Groups'),
+        'title' => 'Groups',
         'callback' => 'og_notifications_grouptype_user_page',
         'callback arguments' => array($account),
         'type' => MENU_CALLBACK
