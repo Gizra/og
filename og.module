@@ -246,11 +246,21 @@ function og_is_group_member($gid, $include_admins = TRUE, $uid = NULL) {
   }
 }
 
-/*
- * Determine whether user can act as a group administrator for a given group.
- */
+/**
+  * Determine whether user can act as a group administrator for a given group.
+  *
+  * @param string $node 
+  *   A group node object.
+  * @param string $account
+  *   A user account object. If not supplied, the current user is assumed.
+  * @return boolean
+  */ 
 function og_is_group_admin($node, $account = NULL) {
-  return og_is_group_type($node->type) && node_access('update', $node, $account);
+  if (is_null($account)) {
+    $account = $GLOBALS['user'];
+  }
+  
+  return og_is_group_type($node->type) && (user_access('administer nodes', $account) || !empty($account->og_groups[$node->nid]['is_admin']));
 }
 
 // An implementation of hook_theme().
@@ -1503,11 +1513,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           form_set_error('name', t('The group manager %name, must have an email address in his <a href="@profile">user profile</a>.', array('%name' => $account->name, '@profile' => url("user/$node->uid/edit"))));
         }
         
-        // Must be authored in the default input format or else admins might not get their admin perms
-        // If Body field is omitted, there may not yet be a $node->format
-        if (isset($node->format) && $node->format != filter_resolve_format(FILTER_FORMAT_DEFAULT)) {
-          form_set_error('body', t('You must use the default input format when authoring a group node.'));
-        }
       }
       else {
         // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
