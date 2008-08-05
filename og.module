@@ -1362,11 +1362,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           form_set_error('name', t('The group manager, %name, must have an email address in his <a href="!profile">profile</a>.', array('%name' => $account->name, '!profile' => url("user/$node->uid/edit"))));
         }
         
-        // Must be authored in the default input format or else admins might not get their admin perms
-        // If Body field is omitted, there may not yet be a $node->format
-        if (isset($node->format) && $node->format != filter_resolve_format(FILTER_FORMAT_DEFAULT)) {
-          form_set_error('body', t("You must use the default input format when authoring a group node."));
-        }
       }
       else {
         // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
@@ -2151,7 +2146,8 @@ function og_get_sql_args() {
  * Determine whether user can act as a group administrator for a given group.
  */
 function og_is_node_admin($node) {
-  return node_access('update', $node);
+  global $user;
+  return og_is_group_type($node->type) && (user_access('administer nodes') || !empty($user->og_groups[$node->nid]['is_admin']));
 }
 
 function og_user($op, $edit, &$account, $category = NULL) {
