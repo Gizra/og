@@ -340,10 +340,6 @@ function og_init() {
   
   drupal_add_css(drupal_get_path('module', 'og'). '/og.css');
 
-  if (module_exists('workflow_ng')) {
-    module_load_include('inc', 'og', 'og_workflow_ng');
-  }
-  
   // Set group context and language if needed.
   if ($node = og_determine_context()) {
     og_set_language($node);
@@ -374,6 +370,22 @@ function og_set_language($node) {
  */
 function og_perm() {
   return array('administer organic groups');
+}
+
+/**
+ * Implementation of hook_og().
+ */
+function og_og($op, $gid, $uid, $args) {
+  if (module_exists('rules')) {
+    if (in_array($op, array('user insert', 'user delete'))) {   
+      $op = str_replace(' ', '_', $op);    
+      rules_invoke_event('og_'. $op, $uid, $gid);   
+    }
+    // Pending member was approved.
+    elseif ($op = 'user update' && $args['is_active']) {
+      rules_invoke_event('og_user_approved', $uid, $gid);
+    }    
+  }
 }
 
 /**
