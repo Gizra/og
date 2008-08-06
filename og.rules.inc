@@ -12,44 +12,48 @@
 function og_rules_event_info() {
   return array(
     'og_user_insert' => array(
-      'label' => t('User subscribes to group'),      
-      'description' => t("A user has subscribed to a group and is approved. If the user isn't approved then this event won't be triggered."),
+      'label' => t('User subscribes to group'),
+      'help' => t("A user has subscribed to a group and is approved. If the user isn't approved then this event won't be triggered."),
       'arguments' => og_rules_events_hook_og_arguments(),
       'module' => 'Organic groups',
     ),
     'og_user_approved' => array(
-      'label' => t('User approved to group by admin'),      
-      'description' => t('A pending member is approved by a group administrator.'),
+      'label' => t('User approved to group by admin'),
       'arguments' => og_rules_events_hook_og_arguments(),
       'module' => 'Organic groups',
     ),
     'og_user_delete' => array(
       'label' => t('User unsubscribes from group'),
-      'description' => t('A user has unsubscribed from a group.'),
       'arguments' => og_rules_events_hook_og_arguments(),
       'module' => 'Organic groups',
    ),
- );    
+ );
 }
 
 /**
  * Describes the arguments available for the og_hook().
- * 
- * We pass uid and gid to rules so that the argument handlers can 
- * load the full entities. As an affect uid and gid must be mentioned here too.
+ *
+ * We pass uid and gid to rules so that the argument handlers can
+ * load the full variables, but we hide them from the interface.
  */
 function og_rules_events_hook_og_arguments() {
   return array(
-    'uid' => NULL,
-    'gid' => NULL,
+    'uid' => array(
+      'type' => 'number',
+      'hidden' => TRUE,
+    ),
+    'gid' => array(
+      'type' => 'number',
+      'hidden' => TRUE,
+    ),
     'account' => array(
-      'type' => 'user', 
-      'label' => t('User that subscribed to the group'), 
+      'type' => 'user',
+      'label' => t('User that subscribed to the group'),
       'handler' => 'og_rules_events_argument_og_user',
     ),
     'group' => array(
-      'type' => 'node', 
-      'label' => t('Group'), 
+      'type' => 'node',
+      'label' => t('Group'),
       'handler' => 'og_rules_events_argument_og_node',
     ),
   ) + rules_events_global_user_argument();
@@ -59,7 +63,7 @@ function og_rules_events_hook_og_arguments() {
  * Handler to get the user.
  */
 function og_rules_events_argument_og_user($uid, $gid) {
-  return user_load(array('uid' => $uid)); 
+  return user_load(array('uid' => $uid));
 }
 
 /**
@@ -82,25 +86,23 @@ function og_rules_action_info() {
           'label' => t('User who will be subscribed'),
         ),
         'group' => array(
-          'type' => 'node', 
+          'type' => 'node',
           'label' => t('Group that user will be subscribed to'),
         ),
       ),
-      'description' => t('Subscribe a user to a group.'),
       'module' => 'Organic groups',
-    ),  
+    ),
     'og_rules_action_remove_user' => array(
       'label' => t('Unsubscribe user from group'),
       'arguments' => array(
-        'user' => array('type' => 'user', 
+        'user' => array('type' => 'user',
         'label' => t('User who will be unsubscribed'),
         ),
         'group' => array(
-          'type' => 'node', 
+          'type' => 'node',
           'label' => t('Group that user will be unsubscribed from'),
         ),
       ),
-      'description' => t('Unsubscribe a user from a group.'),
       'module' => 'Organic groups',
     ),
   );
@@ -146,28 +148,28 @@ function og_rules_condition_info() {
       'label' => t('User is group member'),
       'arguments' => array(
         'user' => array(
-          'type' => 'user', 
+          'type' => 'user',
           'label' => t('User'),
         ),
         'group' => array(
-          'type' => 'node', 
+          'type' => 'node',
           'label' => t('Group'),
         ),
       ),
-      'description' => t('Evaluates to TRUE if the user is an approved member of the group. If the user is a pending member this condition will return FALSE.'),
+      'help' => t('Evaluates to TRUE if the user is an approved member of the group. If the user is a pending member this condition will return FALSE.'),
       'module' => 'Organic groups',
     ),
     'og_rules_condition_content_is_group' => array(
       'label' => t('Content is a group'),
       'arguments' => array(
         'group' => array(
-          'type' => 'node', 
+          'type' => 'node',
           'label' => t('Group'),
         ),
       ),
-      'description' => t('Evaluates to TRUE if the content is a group.'),
+      'help' => t('Evaluates to TRUE if the content is a group.'),
       'module' => 'Organic groups',
-    ),    
+    ),
   );
 }
 
