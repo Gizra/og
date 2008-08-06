@@ -154,4 +154,4 @@ Drupal.behaviors.og_access_admin_settings = function() {
         $("input[@name='og_private_groups']:nth(0)").removeAttr('disabled');
         $("input[@name='og_private_groups']:nth(1)").attr('disabled','disabled');     
     }
-}
+};
