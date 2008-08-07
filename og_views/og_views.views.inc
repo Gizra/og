@@ -169,6 +169,7 @@ function og_views_data_og() {
  */
 class views_handler_field_og_post_count extends views_handler_field_numeric {
   function query() {
+    $table = $this->query->ensure_table('og');
     $sql = "SELECT COUNT(n.nid) FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid WHERE n.status = 1 AND oga.group_nid = %d";
     $sql = str_replace('%d', 'og.nid', $sql);
     $this->query->add_field('', "($sql)", 'post_count');
@@ -176,8 +177,29 @@ class views_handler_field_og_post_count extends views_handler_field_numeric {
   }
 }
 
+/**
+ * We do not try to run db_rewrite_sql() on this subquery so the count is potentially more than the user can see.
+ */
+class views_handler_field_og_post_count_new extends views_handler_field_numeric {
+  function query() {
+    global $user;
+    $table = $this->query->ensure_table('og');
+    $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.nid LEFT JOIN {history} h ON n.nid=h.nid AND h.uid = %uid WHERE n.status = 1 AND oga.group_nid = $table.nid AND h.timestamp IS NULL AND n.created > %created";
+    $sql = strtr($sql, array('%uid' => $user->uid, '%created' => NODE_NEW_LIMIT));
+    $this->query->add_field('', "($sql)", 'post_count_new');
+    $this->field_alias = 'post_count_new';
+  }
+  
+  function render($values) {
+    if ($cnt = $values->{$this->field_alias}) {
+      return $cnt. theme('mark', MARK_NEW);
+    }
+  }
+}
+
 class views_handler_field_og_member_count extends views_handler_field_numeric {
   function query() {
+    $table = $this->query->ensure_table('og');
     $sql = og_list_users_sql(1, 0, NULL, TRUE);
     $sql = str_replace('%d', 'og.nid', $sql);
     $this->query->add_field('', "($sql)", 'member_count');
