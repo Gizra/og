@@ -8,23 +8,23 @@ function og_actions_action_info() {
   $actions = array(
     'og_remove_groups_action' => array(
       'type' => 'node',
-      'description' => t('Remove the node from all groups'),
+      'description' => t('Remove post from all groups'),
       'configurable' => FALSE,
       'hooks' => array(
         'nodeapi' => array('insert', 'update'),
       ),
-    ),    
+    ),
     'og_add_group_action' => array(
       'type' => 'node',
-      'description' => t('Add node to the specified group'),
+      'description' => t('Add post to the specified group'),
       'configurable' => TRUE,
       'hooks' => array(
         'nodeapi' => array('insert', 'update'),
       ),
-    ),    
+    ),
     'og_remove_group_action' => array(
       'type' => 'node',
-      'description' => t('Remove node from the specified group'),
+      'description' => t('Remove post from the specified group'),
       'configurable' => TRUE,
       'hooks' => array(
         'nodeapi' => array('insert', 'update'),
@@ -35,7 +35,7 @@ function og_actions_action_info() {
     $actions += array(
       'og_make_public_action' => array(
         'type' => 'node',
-        'description' => t('Make the node publicly visible'),
+        'description' => t('Make post publicly visible'),
         'configurable' => FALSE,
         'hooks' => array(
           'nodeapi' => array('insert', 'update'),
@@ -43,7 +43,7 @@ function og_actions_action_info() {
       ),
       'og_make_private_action' => array(
         'type' => 'node',
-        'description' => t('Make the node private to its groups'),
+        'description' => t('Make post private to its groups'),
         'configurable' => FALSE,
         'hooks' => array(
           'nodeapi' => array('insert', 'update'),
@@ -113,6 +113,7 @@ function og_add_group_action_form($context) {
       '#title' => t('Group'),
       '#options' => $groups,
       '#description' => t('Select the group to add to the node.'),
+      '#default_value' => $context['group'],
       '#required' => TRUE,
     );
   }
@@ -160,9 +161,10 @@ function og_remove_group_action_form($context) {
       '#title' => t('Group'),
       '#options' => $groups,
       '#description' => t('Select the group to remove from the node.'),
+      '#default_value' => $context['group'],
       '#required' => TRUE,
     );
-  }   
+  }
   else {
     drupal_set_message(t('There are no groups. You must have at least one existing group with nodes assigned to use this action.'));
   }
@@ -176,4 +178,15 @@ function og_remove_group_action_submit($form, &$form_state) {
   return array(
     'group' => $form_state['values']['group'],
   );
+}
+
+/**
+ * Implementation of hook_rules_action_info_alter().
+ *
+ * Lets the actions show up under "Organic Groups" in rules.
+ */
+function og_actions_rules_action_info_alter(&$actions) {
+  foreach (array_keys(og_actions_action_info()) as $action_name) {
+    $actions['rules_core_'. $action_name]['module'] = 'Organic groups';
+  }
 }
