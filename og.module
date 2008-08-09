@@ -1344,10 +1344,10 @@ function og_group_form($node, $form_state) {
     if (count($languages) > 1) {
       $form['og_language'] = array(
         '#type' => 'radios',
-        '#title' => t('Language'),
+        '#title' => t('Group language'),
         '#default_value' => $node->og_language,
         '#options' => array('' => t('Language neutral')) + $languages,
-        '#description' => t('Selecting a different locale will change the interface language of the group. Users who have chosen a preferred language always see their chosen language.'),
+        '#description' => t('Selecting a different locale will change the interface language for all group pages and emails. Users who have chosen a preferred language always see their chosen language.'),
       );
     }
   }
