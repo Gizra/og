@@ -141,27 +141,23 @@ function og_views_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 }
 
 function og_views_view_group($node, $teaser, $page) {
-  $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
-  if (!$view || !empty($view->disabled)) { 
-    // Do nothing. Assume the group node type handles homepage, or theme layer - i.e. node-<node_type>.tpl.php
+  $name = variable_get('og_home_page_view', 'og_ghp_ron');
+  $view = views_get_view($name);
+  if (!$view) { 
+    drupal_set_message('The View @name was not found. Check your variables table or settings.php', array('@name' => $name), 'error');
   }
   else {
-    $view->is_cacheable = FALSE;
-    // $view->url = 'node'; // for pager
-    $view->set_arguments(array($node->nid));
-    $view->set_display('default');
-    $built = $view->render();
-    
-
-    // Views will set either total_rows or num_rows depending on whether View has a pager.
-    if (@$view->total_rows || @$view->num_rows || @$view->page_empty) {
-      $node->content['view'] = array('#value' => $built);
-    }
-    elseif (empty($_POST)) {
-      // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
-      og_home_empty($node);
-    }
-    drupal_set_title(filter_xss_admin($view->build_info['title']));
-    drupal_add_feed(url("node/$node->nid/feed"), drupal_get_title());
+    $built = $view->preview('default', array($node->nid));
   }
+
+  // Views will set either total_rows or num_rows depending on whether View has a pager.
+  if (@$view->total_rows || @$view->num_rows || @$view->page_empty) {
+    $node->content['view'] = array('#value' => $built);
+  }
+  elseif (empty($_POST)) {
+    // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
+    og_home_empty($node);
+  }
+  drupal_set_title(filter_xss_admin($view->build_info['title']));
+  drupal_add_feed(url("node/$node->nid/feed"), drupal_get_title());
 }
