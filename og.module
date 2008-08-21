@@ -153,15 +153,15 @@ function og_menu() {
   );
   
   // Email tab on group node.
-    $items['node/%node/email'] = array(
-      'title' => 'E-mail',
-      'page callback' => 'drupal_get_form', 
-      'page arguments' => array('og_email_form', 1), 
-      'access callback' => 'og_is_group_admin', 
-      'access arguments' => array(1),
-      'type' => MENU_LOCAL_TASK, 
-      'weight' => 7
-    );
+  $items['node/%node/email'] = array(
+    'title' => 'E-mail',
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('og_email_form', 1), 
+    'access callback' => 'og_is_group_admin', 
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK, 
+    'weight' => 7
+  );
 
   return $items;
 }
