@@ -166,6 +166,31 @@ function og_menu() {
   return $items;
 }
 
+function og_menu_alter(&$menu) {
+  // If og_access is disabled, we at least add back the edit tab for group admins to edit their posts.
+  $menu['node/%node/edit']['access callback'] = 'og_menu_access_node_edit';
+  $menu['node/%node/edit']['access arguments'] = array(1);
+}
+
+function og_menu_access_node_edit($node) {
+  // Am I a group admin for this group post?
+  if (!module_exists('og_access') && isset($node->og_groups)) {
+    foreach ($node->og_groups as $gid) {
+      if (og_is_group_admin(node_load($gid))) {
+        return TRUE;
+      }
+    }
+  }
+  
+  // Am I group admin for this group node?
+  if (!module_exists('og_access') && og_is_group_admin($node)) {
+    return TRUE;
+  }
+  
+  // Since the group admin tests failed, check access as usual.
+  return node_access('update', $node);
+}
+
 function og_menu_access_unsubscribe($group_node, $account) {
   global $user;  
   // Unsubscribee must already be a member or pending member.
