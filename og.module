@@ -2297,7 +2297,7 @@ function _og_mail_text($messageid, $language = NULL, $variables = array()) {
   $langcode = isset($language) ? $language->language : NULL;
   
   // Check if an admin setting overrides the default string.
-  if ($admin_setting = variable_get($messageid, FALSE)) {
+  if ($admin_setting = variable_get('og_'. $messageid, FALSE)) {
     return strtr($admin_setting, $variables);
   }
   // No override, return with default strings.
