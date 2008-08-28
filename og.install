@@ -21,54 +21,54 @@ function og_schema() {
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
-      'selective'       => array(
+      'og_selective'       => array(
         'description'     => t('Determines how subscription requests are handled (open, moderated, invite only, closed).'),
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
         'default'         => 0,
       ),
-      'description'     => array(
+      'og_description'     => array(
         'description'     => t('Group description. Shows up by default on group directory.'),
         'type'            => 'varchar',
         'length'          => 255,
         'not null'        => FALSE,
       ),
-      'theme'           => array(
+      'og_theme'           => array(
         'description'     => t('The group specific theme (if any). See {system}.name.'),
         'type'            => 'varchar',
         'length'          => 255,
         'not null'        => FALSE,
       ),
-      'register'        => array(
+      'og_register'        => array(
         'description'     => t('Should users be able to join this group from registration form.'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
-      'directory'       => array(
+      'og_directory'       => array(
         'description'     => t('Should this group appear in the groups directory.'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
-      'notification'    => array(
+      'og_notification'    => array(
         'description'     => t('Not currently used.'),
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
-      'language'        => array(
+      'og_language'        => array(
         'description'     => t('Group specific language. See {languages}.language.'),
         'type'            => 'varchar',
         'length'          => 12,
         'not null'        => TRUE,
         'default'         => '',
       ),
-      'private'         => array(
+      'og_private'         => array(
         'description'     => t('Is group home page private or public.'),
         'type'            => 'int',
         'size'            => 'tiny',
@@ -375,6 +375,23 @@ function og_update_6001() {
   module_enable(array('og_views'));
   //enable the og_views block instead of the plain og one
   db_query("UPDATE {blocks} SET module = 'og_views', delta = '1' WHERE module = 'og' AND delta = '5'");
+  return $ret;
+}
+
+// Change field names in {og} table. Enables use of drupal_write_record()
+function og_update_6002() {
+  $ret = array();
+  
+  $schema = drupal_get_schema_unprocessed('og', 'og');
+  $fields = $schema['fields'];
+  db_change_field($ret, 'og', 'selective', 'og_selective', $fields['og_selective']);
+  db_change_field($ret, 'og', 'register', 'og_register', $fields['og_register']);
+  db_change_field($ret, 'og', 'theme', 'og_theme', $fields['og_theme']);
+  db_change_field($ret, 'og', 'directory', 'og_directory', $fields['og_directory']);
+  db_change_field($ret, 'og', 'description', 'og_description', $fields['og_description']);
+  db_change_field($ret, 'og', 'notification', 'og_notification', $fields['og_notification']);
+  db_change_field($ret, 'og', 'language', 'og_language', $fields['og_language']);
+  db_change_field($ret, 'og', 'private', 'og_private', $fields['og_private']);
   return $ret;
 }
 

@@ -664,34 +664,28 @@ function og_manage_form_submit($form, &$form_state) {
  *
  * @param $gid node ID of a group
  * @param $uid user ID of user
- * @param $args an array with details of this membership. Possible array keys are:
-     is_active, is_admin, mail_type, created
+ * @param $args an array with details of this membership. Recognized array keys are:
+     is_active, is_admin, mail_type, created. Other values are passed to hook implementations.
  */
 function og_save_subscription($gid, $uid, $args = array()) {
   $sql = "SELECT COUNT(*) FROM {og_uid} WHERE nid = %d AND uid = %d";
   $cnt = db_result(db_query($sql, $gid, $uid));
   $time = time();
+  $subscription = array(
+    'nid' => $gid,
+    'uid' => $uid,
+    'created' => isset($args['created']) ? $args['created'] : $time,
+    'changed' => $time
+  );
+  unset($args['created']);
+  $subscription += $args;
+  
   if ($cnt == 0) {
-    // this pattern borrowed from user_save()
-    $fields = array('nid', 'uid', 'created', 'changed');
-    $values = array($gid, $uid, isset($args['created']) ? $args['created'] : $time, $time);
-    unset($args['created']);
-    foreach ($args as $key => $value) {
-      $fields[] = db_escape_string($key);
-      $values[] = $value;
-      $s[] = "'%s'";
-    }
-    // TODO: consider using drupal_write_record()
-    db_query('INSERT INTO {og_uid} ('. implode(', ', $fields). ') VALUES (%d, %d, %d, %d, '. implode(', ', $s). ')', $values);
+    drupal_write_record('og_uid', $subscription);
     module_invoke_all('og', 'user insert', $gid, $uid, $args);
   }
   else {
-    $cond[] = 'changed = '. $time;
-    foreach ($args as $key => $value) {
-      $cond[] = db_escape_string($key)." = '". db_escape_string($value). "'";
-    }
-    $cond = implode(', ', $cond);
-    db_query("UPDATE {og_uid} SET $cond WHERE nid = %d AND uid = %d", $gid, $uid);
+    drupal_write_record('og_uid', $subscription, array('nid', 'uid'));
     module_invoke_all('og', 'user update', $gid, $uid, $args);
   }
 }
@@ -1478,23 +1472,20 @@ function og_devel_generate(&$node) {
 }
 
 function og_load_group(&$node) {
-  $sql = 'SELECT selective AS og_selective, description AS og_description, theme AS og_theme, register AS og_register, directory AS og_directory, notification AS og_notification, language AS og_language, private AS og_private FROM {og} WHERE nid = %d';
+  $sql = 'SELECT * FROM {og} WHERE nid = %d';
   $result = db_query($sql, $node->nid);
   $node = (object) array_merge((array)$node, (array)db_fetch_array($result));
 }
 
 function og_insert_group($node) {
-  $sql = "INSERT INTO {og} (nid, theme, selective, description, register, directory, notification, language, private) VALUES (%d, '%s', %d, '%s', %d, %d, %d, '%s', %d)";
-  db_query($sql, $node->nid, $node->og_theme, $node->og_selective, $node->og_description, $node->og_register, $node->og_directory, $node->og_notification, $node->og_language, $node->og_private);
+  drupal_write_record('og', $node);
 }
 
 function og_update_group($node) {
   // If an existing node becomes a group, then a row may not be present in {og} table.
-  // TODOH Rename fields, use drupal_write_record(), gets rid of notices when updating group.
   $sql = "SELECT nid FROM {og} WHERE nid = %d";
   if (db_result(db_query($sql, $node->nid))) {
-    $sql = "UPDATE {og} SET theme = '%s', selective = %d, register = %d, description = '%s', directory = %d, notification = %d, language = '%s', private = %d WHERE nid = %d";
-    db_query($sql, $node->og_theme, $node->og_selective, $node->og_register, $node->og_description, $node->og_directory, $node->og_notification, $node->og_language, $node->og_private, $node->nid);
+    drupal_write_record('og', $node, array('nid'));
   }
   else {
     og_insert_group($node);  
@@ -2474,8 +2465,13 @@ function og_save_ancestry($node) {
     if (isset($node->og_groups)) {
       $node->og_groups = array_unique($node->og_groups);
       foreach ($node->og_groups as $gid) {
-        $sql = "INSERT INTO {og_ancestry} (nid, group_nid, is_public) VALUES (%d, %d, %d)";
-        db_query($sql, $node->nid, $gid, $node->og_public);
+        // TODOL: rename is_public to og_public in DB.
+        $ancestry = array(
+          'nid' => $node->nid,
+          'group_nid' => $gid,
+          'is_public' => $node->og_public,
+        );
+        drupal_write_record('og_ancestry', $ancestry);
       }
     }
   }
@@ -2676,11 +2672,11 @@ function theme_opml_icon($url) {
 
 function og_block_new() {
   list($types, $in) = og_get_sql_args();
-  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.directory=1 AND n.type $in AND n.status = 1";
+  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.og_directory=1 AND n.type $in AND n.status = 1";
   $cnt = db_result(db_query(db_rewrite_sql($sql), $types));
   if ($cnt > 0) {
     $max = variable_get('og_block_cnt_3', 10);
-    $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type $in AND og.directory=1 ORDER BY nid DESC";
+    $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type $in AND og.og_directory=1 ORDER BY nid DESC";
     $result = db_query_range(db_rewrite_sql($sql), $types, 0, $max);
     $output = node_title_list($result);
     if ($cnt > $max) {

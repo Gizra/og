@@ -35,6 +35,7 @@ function og_views_data_og() {
   );
   $data['og']['description'] = array(
     'title' => t('Group: Description'),
+    'real field' => 'og_description',
     'field' => array(
       'handler' => 'views_handler_field_markup',
       'format' => FILTER_FORMAT_DEFAULT,
@@ -70,6 +71,7 @@ function og_views_data_og() {
   $data['og']['selective'] = array(
     'title' => t('Group: Selective'),
     'help' => t('The group preference which determines how membership requests are managed (moderated, invite only, etc.).'),
+    'real field' => 'og_selective',
     'field' => array(
       'handler' => 'views_handler_field_og_selective',
     ),
@@ -80,6 +82,7 @@ function og_views_data_og() {
   $data['og']['private'] = array(
     'title' => t('Group: Private'),
     'help' => t('Is the group home page private or not.'),
+    'real field' => 'og_private',
     'field' => array(
       'handler' => 'views_handler_field_boolean',
     ),
@@ -93,7 +96,9 @@ function og_views_data_og() {
   $data['og']['directory'] = array(
     'title' => t('Group: List in directory'),
     'help' => t('Admin specifies whether or not a group appears in the public listings.'),
+    'real field' => 'og_directory',
     'field' => array(
+      'real field' => 'og_directory',
       'handler' => 'views_handler_field_boolean',
     ),
     'filter' => array(
@@ -113,6 +118,7 @@ function og_views_data_og() {
   $data['og']['notification'] = array(
     'title' => t('Group: Notification'),
     'help' => t('Does group sending email notifications to its members by default'),
+    'real field' => 'og_notification',
     'field' => array(
       'handler' => 'views_handler_field_boolean',
     ),
@@ -127,6 +133,7 @@ function og_views_data_og() {
     $data['og']['language'] = array(
       'title' => t('Group: Language'),
       'help' => t('Displays the language selected for a given group.'),
+      'real field' => 'og_language',
       'field' => array(
         'handler' => 'views_handler_field_node_language',
         'click sortable' => TRUE,
@@ -287,7 +294,7 @@ class views_handler_filter_og_selective extends views_handler_filter_in_operator
 class views_handler_field_og_subscribe extends views_handler_field {
   function construct() {
     parent::construct();
-    $this->additional_fields['selective'] = 'selective';
+    $this->additional_fields['og_selective'] = 'og_selective';
   }
 
   function query() {
@@ -298,7 +305,7 @@ class views_handler_field_og_subscribe extends views_handler_field {
   function render($values) {
     global $user;
     if (!in_array($values->nid, array_keys($user->og_groups))) {
-      switch ((int)$values->{$this->aliases['selective']}) {
+      switch ((int)$values->{$this->aliases['og_selective']}) {
         case OG_CLOSED:
           return '<em>'. t('Closed'). '</em>';
         case OG_INVITE_ONLY:
