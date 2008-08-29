@@ -1792,9 +1792,7 @@ function og_node_delete_nongroup_form(&$form) {
 }
 
 // Return all node ids belonging to a group. No access control.
-// If you are retrieving for displaying, you should use code like below instead of this function:
-// TODO: update this comment
-// $info = views_build_view('items', $view, array($group_nid));
+// If you are retrieving for displaying, you may want to use an embedded View instead of this function.
 function og_group_child_nids($group_nid) {
   $result = db_query('SELECT oga.nid FROM {og_ancestry} oga WHERE oga.group_nid = %d', $group_nid);
   $child_nids = array();
