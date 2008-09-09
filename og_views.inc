@@ -79,11 +79,6 @@ function og_views_tables() {
           'notafield' => TRUE,
           'help' => t('Displays a links for joining a group when a user is not already a member.'),
         ),
-        'notification' => array(
-          'name' => t('OG: Group: Notification'),
-          'handler' => 'og_handler_field_yesempty',
-          'help' => t('Displays <em>yes</em> if group automatically sends email notifications to members'),
-        ),
         'language' => array(
           'name' => t('OG: Group: Language'),
           'handler' => 'og_handler_field_language',
@@ -225,12 +220,6 @@ function og_views_tables() {
         ),
       ),
       'fields' => array(
-        'mail_type' => array(
-          'name' => t('OG: Subscription email'),
-          'handler' => 'og_handler_field_yesempty',
-          'sortable' => false,
-          'help' => t('Does member receive email notifications for a group.'),
-        ),
         'managelink' => array(
           'name' => t('OG: Manage membership link'),
           'handler' => 'og_handler_field_managelink',

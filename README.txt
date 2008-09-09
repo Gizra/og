@@ -41,8 +41,9 @@ You may wish to stylize nodes which have properties assigned by this module.
 
 INTEGRATION
 ---------------------
-- I recommend enabling the job_queue.module. When you do, group email notifications are sent during cron runs, instead of immediately after a post is submitted. This speeds up posting a lot, for big groups. The delay also helps authors fix typos in their posts before the mail is sent.
 - This module exposes an API for retrieving and managing membership via direct PHP functions [og_save_subscription()] and via XMLRPC.
+- Enabling og_notifications provides subscription support for groups and group
+posts. The README in the og_notifications directory provides more information.
 
 UNIT TESTING
 ----------------------

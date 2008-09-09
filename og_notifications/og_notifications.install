@@ -1,0 +1,55 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_install().
+ */
+function og_notifications_install() {
+  drupal_set_message(t('Organic groups notifications module installation script complete.'));
+
+  $flag = variable_get('og_notifications_update_required');
+  if ($flag) {
+    og_notifications_og_upgrade();
+  }
+}
+
+/**
+ * Notications upgrade: Based on the upgrade flag, move existing subscriptions
+ * to the notifications module.
+ */
+function og_notifications_og_upgrade() {
+  $ret = array();
+
+  // Load notifications and dependencies.
+  drupal_load('module', 'og_notifications');
+  drupal_load('module', 'notifications');
+  drupal_load('module', 'token');
+  drupal_load('module', 'messaging');
+
+  // Save notification subscription for each group based on og_uid.mail_type.
+  $result = db_query("SELECT nid, uid FROM {og_uid} WHERE mail_type = 1");
+  while ($subscription = db_fetch_object($result)) {
+    $account = user_load(array('uid' => $subscription->uid));
+    og_notifications_user_subscribe($account, $subscription->nid);
+  }
+  // @todo Save auto-subscription in the user table based on og_uid_global.
+  
+
+  // Drop field notification.
+  $ret[] = update_sql("ALTER TABLE {og} DROP notification");
+  // Drop field mail_type.
+  $ret[] = update_sql("ALTER TABLE {og_uid} DROP mail_type");
+  // Drop table og_uid_global.
+  $ret[] = update_sql("DROP TABLE {og_uid_global}");
+
+  variable_del('og_notifications_update_required');
+
+  return $ret;
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function og_notifications_uninstall() {
+  drupal_set_message(t('Organic groups notifications module uninstallation script complete.'));
+}

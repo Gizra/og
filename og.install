@@ -12,7 +12,6 @@ function og_install() {
         theme varchar(255) NULL,
         register int(1) NOT NULL default 0,
         directory int(1) NOT NULL default 0,
-        notification int(1) NOT NULL default 0,
         language varchar(12) NOT NULL default '',
         private int(1) NOT NULL default 0,
         PRIMARY KEY  (nid)
@@ -24,9 +23,8 @@ function og_install() {
         is_active int(1) NOT NULL DEFAULT 0,
         is_admin int(1) NOT NULL DEFAULT 0,
         uid int(11) NOT NULL,
-        mail_type int(11) NULL,
-      	created int(11) NULL DEFAULT 0,
-      	changed int(11) NULL DEFAULT 0,
+        created int(11) NULL DEFAULT 0,
+        changed int(11) NULL DEFAULT 0,
         PRIMARY KEY  (nid, uid)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
       
@@ -52,7 +50,6 @@ function og_install() {
         website varchar(255) NULL,
         register smallint NOT NULL default 0,
         directory smallint NOT NULL default 0,
-        notification smallint NOT NULL default 0,
         language varchar(12) NOT NULL default '',
         private smallint NOT NULL default 0,  
         PRIMARY KEY  (nid)
@@ -64,9 +61,8 @@ function og_install() {
         is_active smallint NOT NULL DEFAULT 0,
         is_admin smallint NOT NULL DEFAULT 0,
         uid int NOT NULL,
-        mail_type int NULL,
-	    created int NULL DEFAULT 0,
-	    changed int NULL DEFAULT 0,
+        created int NULL DEFAULT 0,
+        changed int NULL DEFAULT 0,
         PRIMARY KEY  (nid, uid)
       );");
       
@@ -76,8 +72,7 @@ function og_install() {
         PRIMARY KEY (uid)
       );");
       
-      db_query("
-      CREATE TABLE {og_ancestry} (
+      db_query("CREATE TABLE {og_ancestry} (
        nid int NOT NULL,
        group_nid int NOT NULL,
        is_public smallint NOT NULL
@@ -506,10 +501,19 @@ function og_update_5700() {
    return $ret;
  }
  
+ /**
+  * Notifications upgrade: Set flag to indicate that this is an upgraded 
+  * installation.
+  */ 
+ function og_update_5703() {
+   variable_set('og_notifications_update_required', 1);
 
-// end updates //
+   return array();
+ }
+ 
+ // end updates //
 
-function og_enable() {
+ function og_enable() {
   og_populate_uid_global_table();
 }
 
@@ -545,7 +549,8 @@ function og_uninstall() {
     'og_invite_user_body', 'og_invite_user_subject',
     'og_new_admin_body', 'og_new_admin_subject',
     'og_new_node_body', 'og_new_node_subject',
-    'og_notification', 'og_request_user_body', 'og_request_user_subject',
+    'og_request_user_body', 'og_request_user_subject',
+    'og_notifications_update_required'
   );
   foreach ($variables as $variable) {
     variable_del($variable);
