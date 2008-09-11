@@ -145,7 +145,7 @@ function og_views_og_links_alter(&$links, $node) {
 function og_views_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'view':
-      if (og_is_group_type($node->type) && (!$teaser || $page)) {
+      if (og_is_group_type($node->type) && !$teaser && $page) {
         og_views_view_group($node, $teaser, $page);
       }
     break;
