@@ -1210,8 +1210,8 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
   }
   else {
     // See http://drupal.org/files/issues/bc-fixup-204415-50.patch for an alternate way
-    $bc[] = l(t('Home'), '');    
-    $bc[] = l(t('Groups'), 'og');
+    $bc = og_get_breadcrumb($node);
+    array_pop($bc);
     drupal_set_breadcrumb($bc);
 
     unset($node->content['body']);
@@ -1355,7 +1355,7 @@ function og_group_form($node, $form_state) {
         '#type' => 'checkbox', 
         '#title' => t('List in groups directory'),  
         '#default_value' => $node->nid ? $node->og_directory : $default, 
-        '#description' => t('Should this group appear on the <a href="@url">list of groups page</a>? Disabled if the group is set to <em>private group</em>.', array('@url' => url('og'))));
+        '#description' => t('Should this group appear on the <a href="@url">list of groups page</a> (requires OG Views module)? Disabled if the group is set to <em>private group</em>.', array('@url' => url('og'))));
       break;    
   }
   
@@ -1495,7 +1495,9 @@ function og_update_group($node) {
 // Return a breadcrumb array for a given groupnode.
 function og_get_breadcrumb($group_node) {
   $bc[] = l(t('Home'), "");
-  $bc[] = l(t('Groups'), "og");
+  if (module_exists('og_views')) {
+    $bc[] = l(t('Groups'), "og");
+  }
   $bc[] = l($group_node->title, "node/$group_node->nid");
   return $bc;
 }

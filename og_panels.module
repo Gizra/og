@@ -260,15 +260,13 @@ function og_panels_page($did, $group_node, $title = NULL) {
   if ($title) {
     drupal_set_title(check_plain($title));
   }
-  $bc[] = l(t('Home'), "");
-  $bc[] = l(t('Groups'), "og");
   if (!$og_panel->default_page) {
+    $bc[] = l(t('Home'), "");
     $bc[] = l($group_node->title, "node/$group_node->nid");
+    // I tried MSL but it let me down. again.
+    // menu_set_location($bc);
+    drupal_set_breadcrumb($bc);
   }
-  // $bc[] = array('path' => "node/$og_panel->nid/$og_panel->path", 'title' => $og_panel->page_title);
-  // I tried MSL but it let me down. again.
-  // menu_set_location($bc);
-  drupal_set_breadcrumb($bc);
   // Mark node as read and show feed icon for any group panel page (how to do this better?)
   drupal_add_feed(url("node/$group_node->nid/feed"), t('@name at @site', array('@name' => $group_node->title, '@site' => variable_get('site_name', 'drupal'))));
   node_tag_new($group_node->nid);
