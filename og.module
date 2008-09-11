@@ -2356,7 +2356,7 @@ function og_user($op, $edit, &$account, $category = NULL) {
       else {      
         $default_value = array();
         // perhaps this should be a View
-        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type $in AND n.status = 1 AND o.register = 1 ORDER BY n.title"), $types);
+        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, o.* FROM {node} n INNER JOIN {og} o ON n.nid = o.nid WHERE n.type $in AND n.status = 1 AND o.og_register = 1 ORDER BY n.title"), $types);
       }
       
       while ($group = db_fetch_object($result)) {

@@ -1,10 +1,13 @@
 <?php
 // $Id$
 
+/**
+ * Implementation of hook_menu().
+ */
 function og_views_menu() {
   // This exists because I can't easily restrict access based on pictures_enabled using Views.
   $items['og/users/%/faces'] = array(
-    'title' => 'Faces', 
+    'title' => 'Faces',
     'page callback' => 'views_page',
     'page arguments' => array('og_members_faces', 'default', 2),
     'type' => MENU_LOCAL_TASK,
@@ -14,16 +17,25 @@ function og_views_menu() {
 
   // Group feed
   $items['node/%node/feed'] = array(
-    'page callback' => 'og_views_feed', 
+    'page callback' => 'og_views_feed',
     'page arguments' => array(1),
     'title callback' => 'node_page_title',
-    'title arguments' => array(1),  
-    'type' => MENU_CALLBACK, 
+    'title arguments' => array(1),
+    'type' => MENU_CALLBACK,
     'access callback' => 'node_access',
-    'access arguments' => array('view', 1), 
+    'access arguments' => array('view', 1),
   );
 
   return $items;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function og_views_views_api() {
+  return array(
+    'api' => 2,
+  );
 }
 
 /**
@@ -144,7 +156,7 @@ function og_views_view_group($node, $teaser, $page) {
   $name = variable_get('og_home_page_view', 'og_ghp_ron');
   $view = views_get_view($name);
   if (!$view) { 
-    drupal_set_message('The View @name was not found. Check your variables table or settings.php', array('@name' => $name), 'error');
+    drupal_set_message(t('The View @name was not found. Check your variables table or settings.php', array('@name' => $name)), 'error');
   }
   else {
     $built = $view->preview('default', array($node->nid));
