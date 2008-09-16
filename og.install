@@ -431,3 +431,42 @@ function og_uninstall() {
     variable_del($variable);
   }
 }
+
+function og_requirements($phase) {
+  // Need og_readme() function.
+  drupal_load('module', 'og');
+  
+  $requirements = array();
+  // Ensure translations don't break at install time
+  $t = get_t();
+  if ($phase == 'runtime') {
+    $og_types = og_get_types('group');
+    $all_types = array_keys(node_get_types('types'));
+    if (!count(array_intersect($og_types, $all_types))) {
+          $requirements['og_group_types']  = array(
+            'title' => $t('Organic groups group type'),
+            'value' => $t('You have no node types which are acting as groups. See the notes section of the !readme_file and the content types fieldset at top of <a href="!settings">OG settings</a>.', array('!readme_file' => og_readme(), '!settings' => url('admin/og/og'))),
+            'severity' => REQUIREMENT_ERROR,
+          );
+        }
+    
+    if (!module_exists('job_queue')) {
+      $requirements['og_modules']  = array(
+        'title' => $t('Organic groups modules'),
+        'value' => $t('Organic groups works best when <a href="@job_queue">job_queue.module</a> is enabled. See the integration section of the !readme_file.', array('@job_queue' => 'http://drupal.org/project/job_queue', '!readme_file' => og_readme())),
+        'severity' => REQUIREMENT_INFO
+      );
+    }
+    
+    if (!module_exists('og_access')) {
+      $requirements['og_access'] = array(
+        'title' => $t('Organic groups access control'),
+        'value' => $t('Organic groups access control module is disabled. See the <a href="@modules">modules page</a>.', array('@modules' => url('admin/build/modules'))),
+        'severity' => REQUIREMENT_INFO
+      );
+    }
+  }
+  
+  return $requirements;
+}
+
