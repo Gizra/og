@@ -1,0 +1,107 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  node-og-group-post.tpl.php,v 1.1 2008/04/25 04:21:45 weitzman
+#  og.module,v 1.567 2008/08/05 15:29:33 weitzman
+#  og_access.module,v 1.25 2008/08/01 03:45:44 weitzman
+#  og_panels.module,v 1.38 2008/07/15 19:17:22 weitzman
+#  og_notifications.module,v 1.3 2008/08/05 04:39:34 weitzman
+#  og_views.views.inc,v 1.1 2008/07/31 19:21:11 weitzman
+#  og.admin.inc,v 1.11 2008/07/28 18:33:32 weitzman
+#  og.rules.inc,v 1.1 2008/08/05 15:29:33 weitzman
+#  includes/groupcontent.inc: n/a
+#  og_actions.module,v 1.2 2008/08/05 04:39:34 weitzman
+#  tests/og_testcase.php: n/a
+#  og_views.module,v 1.1 2008/07/31 19:01:43 weitzman
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-09-17 09:00+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: node-og-group-post.tpl.php:77 og.module:1195;1482;2356;2432 og_access.module:173 og_panels.module:264 og_notifications/og_notifications.module:160;25;34 og_views/og_views.views.inc:310
+msgid "Groups"
+msgstr ""
+
+#: og.admin.inc:20 og_notifications/og_notifications.module:289
+msgid "Type"
+msgstr ""
+
+#: og.rules.inc:52;154;165 og_panels.module:544;641 includes/groupcontent.inc:9;22;34;46;58 og_actions/og_actions.module:113;160 og_notifications/og_notifications.module:235 og_views/og_views.views.inc:457
+msgid "Group"
+msgstr ""
+
+#: og.module:623 og_panels.module:496;511 og_notifications/og_notifications.module:313 tests/og_testcase.php:19
+msgid "Save"
+msgstr ""
+
+#: og.module:1150 og_views/og_views.views.inc:687
+msgid "Manager"
+msgstr ""
+
+#: og.module:1188;1259 includes/groupcontent.inc:94;235
+msgid "Description"
+msgstr ""
+
+#: og.module:1194;1481 og_panels.module:263;459 og_views/og_views.views.inc:895
+msgid "Home"
+msgstr ""
+
+#: og.module:1232 og_views/og_views.views.inc:283
+msgid "Invite only"
+msgstr ""
+
+#: og.module:1233 og_views/og_views.views.inc:281
+msgid "Closed"
+msgstr ""
+
+#: og.module:1747 og_views/og_views.views.inc:297
+msgid "Group posts"
+msgstr ""
+
+#: og.module:2478 og_views/og_views.views.inc:468
+msgid "Group node"
+msgstr ""
+
+#: og.module:2559;2638 og_views/og_views.module:84
+msgid "Group notifications"
+msgstr ""
+
+#: og.module:2599 includes/groupcontent.inc:192
+msgid "Group roles"
+msgstr ""
+
+#: og.module:2602 includes/groupcontent.inc:194
+msgid "Standard members"
+msgstr ""
+
+#: og.module:2603 includes/groupcontent.inc:194
+msgid "Administrators"
+msgstr ""
+
+#: (duplicate) og.module:2867  og_views/og_views.views.inc:208
+msgid "You have no node types which are acting as groups. See the notes section of the !readme_file and the content types fieldset at top of <a href=\"!settings\">OG settings</a>."
+msgstr ""
+
+#: og_panels.module:594 includes/groupcontent.inc:42;128 og_views/og_views.module:45
+msgid "Group search"
+msgstr ""
+
+#: includes/groupcontent.inc:243 og_views/og_views.module:110
+msgid "Search"
+msgstr ""
+
+#: includes/groupcontent.inc:247 og_views/og_views.module:7
+msgid "Faces"
+msgstr ""
+

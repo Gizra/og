@@ -1,36 +1,29 @@
 # $Id$
 #
-# LANGUAGE translation of Drupal (general)
+# LANGUAGE translation of Drupal (root)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  node-og-group-post.tpl.php,v 1.1 2008/04/25 04:21:45 weitzman
-#  og.module,v 1.567 2008/08/05 15:29:33 weitzman
-#  og_access.module,v 1.25 2008/08/01 03:45:44 weitzman
-#  og_panels.module,v 1.38 2008/07/15 19:17:22 weitzman
-#  og_notifications.module,v 1.3 2008/08/05 04:39:34 weitzman
-#  og_views.views.inc,v 1.1 2008/07/31 19:21:11 weitzman
 #  og.admin.inc,v 1.11 2008/07/28 18:33:32 weitzman
+#  og_panels.module,v 1.38 2008/07/15 19:17:22 weitzman
+#  og.module,v 1.567 2008/08/05 15:29:33 weitzman
 #  og.rules.inc,v 1.1 2008/08/05 15:29:33 weitzman
-#  includes/groupcontent.inc: n/a
-#  og_actions.module,v 1.2 2008/08/05 04:39:34 weitzman
 #  og_xmlrpc.inc: n/a
-#  tests/og_testcase.php: n/a
 #  og.info: n/a
 #  og_access.info: n/a
 #  og_panels.info,v 1.3 2008/05/20 01:45:09 weitzman
+#  includes/groupcontent.inc: n/a
 #  og_actions.info,v 1.1 2008/08/01 03:45:44 weitzman
 #  og_notifications.info,v 1.3 2008/07/30 14:39:54 weitzman
+#  og_views.views.inc,v 1.1 2008/07/31 19:21:11 weitzman
 #  og_views.info,v 1.1 2008/07/31 19:01:43 weitzman
-#  og_views.module,v 1.1 2008/07/31 19:01:43 weitzman
+#  og_access.module,v 1.25 2008/08/01 03:45:44 weitzman
 #  og.install,v 1.60 2008/07/31 19:01:42 weitzman
-#  groupcontext.inc,v 1.3 2008/05/26 13:57:32 weitzman
-#  og_notifications.install,v 1.1 2008/07/18 19:13:27 weitzman
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-08-05 19:30+0200\n"
+"POT-Creation-Date: 2008-09-17 09:00+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -39,20 +32,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: node-og-group-post.tpl.php:77 og.module:1195;1482;2356;2432 og_access.module:173 og_panels.module:264 og_notifications/og_notifications.module:160;25;34 og_views/og_views.views.inc:310
-msgid "Groups"
-msgstr ""
-
 #: og.admin.inc:11
 msgid "You must designate at least one content type to act as a group node and another as a group post. <a href=\"!create\">Create new content type</a> if needed."
 msgstr ""
 
 #: og.admin.inc:15
 msgid "Content types"
-msgstr ""
-
-#: og.admin.inc:20 og_notifications/og_notifications.module:289
-msgid "Type"
 msgstr ""
 
 #: og.admin.inc:20
@@ -299,10 +284,6 @@ msgstr ""
 msgid "User that subscribed to the group"
 msgstr ""
 
-#: og.rules.inc:52;154;165 og_panels.module:544;641 includes/groupcontent.inc:9;22;34;46;58 og_actions/og_actions.module:113;160 og_notifications/og_notifications.module:235 og_views/og_views.views.inc:457
-msgid "Group"
-msgstr ""
-
 #: og.rules.inc:78
 msgid "Subscribe user to group"
 msgstr ""
@@ -451,10 +432,6 @@ msgstr ""
 msgid "Your <a href=\"!prof\">user profile</a> is configured to: <em>Never receive email notifications</em>."
 msgstr ""
 
-#: og.module:623 og_panels.module:496;511 og_notifications/og_notifications.module:313 tests/og_testcase.php:19
-msgid "Save"
-msgstr ""
-
 #: og.module:634
 msgid "Membership saved."
 msgstr ""
@@ -595,10 +572,6 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: og.module:1150 og_views/og_views.views.inc:687
-msgid "Manager"
-msgstr ""
-
 #: og.module:1151
 msgid "Posts"
 msgstr ""
@@ -617,14 +590,6 @@ msgstr ""
 
 #: og.module:1168
 msgid "No groups available."
-msgstr ""
-
-#: og.module:1188;1259 includes/groupcontent.inc:94;235
-msgid "Description"
-msgstr ""
-
-#: og.module:1194;1481 og_panels.module:263;459 og_views/og_views.views.inc:895
-msgid "Home"
 msgstr ""
 
 #: og.module:1213
@@ -649,14 +614,6 @@ msgstr ""
 
 #: og.module:1231
 msgid "Moderated"
-msgstr ""
-
-#: og.module:1232 og_views/og_views.views.inc:283
-msgid "Invite only"
-msgstr ""
-
-#: og.module:1233 og_views/og_views.views.inc:281
-msgid "Closed"
 msgstr ""
 
 #: og.module:1264
@@ -769,10 +726,6 @@ msgstr ""
 
 #: og.module:1743
 msgid "Move all group posts to the group listed below."
-msgstr ""
-
-#: og.module:1747 og_views/og_views.views.inc:297
-msgid "Group posts"
 msgstr ""
 
 #: og.module:1750
@@ -903,10 +856,6 @@ msgstr ""
 msgid "When posts are submitted into your groups, you may be notified via email."
 msgstr ""
 
-#: og.module:2478 og_views/og_views.views.inc:468
-msgid "Group node"
-msgstr ""
-
 #: og.module:2479
 msgid "May not be posted into a group."
 msgstr ""
@@ -931,24 +880,8 @@ msgstr ""
 msgid "New groups"
 msgstr ""
 
-#: og.module:2559;2638 og_views/og_views.module:84
-msgid "Group notifications"
-msgstr ""
-
 #: og.module:2593
 msgid "Maximum number of members to show"
-msgstr ""
-
-#: og.module:2599 includes/groupcontent.inc:192
-msgid "Group roles"
-msgstr ""
-
-#: og.module:2602 includes/groupcontent.inc:194
-msgid "Standard members"
-msgstr ""
-
-#: og.module:2603 includes/groupcontent.inc:194
-msgid "Administrators"
 msgstr ""
 
 #: og.module:2605
@@ -1053,10 +986,6 @@ msgstr ""
 
 #: (duplicate) og.module:2866 
 msgid "Organic groups group type"
-msgstr ""
-
-#: (duplicate) og.module:2867  og_views/og_views.views.inc:208
-msgid "You have no node types which are acting as groups. See the notes section of the !readme_file and the content types fieldset at top of <a href=\"!settings\">OG settings</a>."
 msgstr ""
 
 #: (duplicate) og.module:2874 
@@ -1425,10 +1354,6 @@ msgstr ""
 msgid "OG members"
 msgstr ""
 
-#: og_panels.module:594 includes/groupcontent.inc:42;128 og_views/og_views.module:45
-msgid "Group search"
-msgstr ""
-
 #: og_panels.module:604
 msgid "OG faces"
 msgstr ""
@@ -1571,673 +1496,5 @@ msgstr ""
 
 #: og_panels.info:0
 msgid "Enable group admins to create panel pages."
-msgstr ""
-
-#: includes/groupcontent.inc:5
-msgid "Welcome message"
-msgstr ""
-
-#: includes/groupcontent.inc:8
-msgid "The welcome message for the group. Specified on group edit form."
-msgstr ""
-
-#: includes/groupcontent.inc:18
-msgid "Group description"
-msgstr ""
-
-#: includes/groupcontent.inc:21
-msgid "The group description as specified on the group edit form."
-msgstr ""
-
-#: includes/groupcontent.inc:30;111;239
-msgid "Group members"
-msgstr ""
-
-#: includes/groupcontent.inc:33
-msgid "The list of group subscribers or just group admins."
-msgstr ""
-
-#: includes/groupcontent.inc:45
-msgid "Search this group."
-msgstr ""
-
-#: includes/groupcontent.inc:54;147
-msgid "Group faces"
-msgstr ""
-
-#: includes/groupcontent.inc:57
-msgid "Show a grid of user pictures."
-msgstr ""
-
-#: includes/groupcontent.inc:68;231
-msgid "Welcome"
-msgstr ""
-
-#: includes/groupcontent.inc:83
-msgid "Welcome statement goes here."
-msgstr ""
-
-#: includes/groupcontent.inc:100
-msgid "Description goes here."
-msgstr ""
-
-#: includes/groupcontent.inc:117
-msgid "Member list goes here."
-msgstr ""
-
-#: includes/groupcontent.inc:136
-msgid "Search form goes here."
-msgstr ""
-
-#: includes/groupcontent.inc:153
-msgid "Faces go here."
-msgstr ""
-
-#: includes/groupcontent.inc:163
-msgid "Number of pictures per row"
-msgstr ""
-
-#: includes/groupcontent.inc:169
-msgid "Maximum number of rows per page"
-msgstr ""
-
-#: includes/groupcontent.inc:175
-msgid "Pager ID"
-msgstr ""
-
-#: includes/groupcontent.inc:185
-msgid "Number of members"
-msgstr ""
-
-#: includes/groupcontent.inc:186
-msgid "Maxmimum number of members that should appear on the list"
-msgstr ""
-
-#: includes/groupcontent.inc:195
-msgid "You may specify which types of group members appear in this listing."
-msgstr ""
-
-#: includes/groupcontent.inc:199
-msgid "Show more link"
-msgstr ""
-
-#: includes/groupcontent.inc:201
-msgid "Should a <em>more</em> link appear when more members are in the group but not listed."
-msgstr ""
-
-#: includes/groupcontent.inc:205
-msgid "Show pictures"
-msgstr ""
-
-#: includes/groupcontent.inc:207
-msgid "Should member pictures be shown in addition to member names."
-msgstr ""
-
-#: includes/groupcontent.inc:214
-msgid "Number of members must be an integer."
-msgstr ""
-
-#: includes/groupcontent.inc:222
-msgid "Number of pictures per row must be an integer."
-msgstr ""
-
-#: includes/groupcontent.inc:225
-msgid "Maximum number of rows per page must be an integer."
-msgstr ""
-
-#: includes/groupcontent.inc:243 og_views/og_views.module:110
-msgid "Search"
-msgstr ""
-
-#: includes/groupcontent.inc:247 og_views/og_views.module:7
-msgid "Faces"
-msgstr ""
-
-#: includes/groupcontext.inc:37
-msgid "Require this context from an external source (such as containing panel page)."
-msgstr ""
-
-#: includes/groupcontext.inc:38
-msgid "If selected, group selection (below) will be ignored."
-msgstr ""
-
-#: includes/groupcontext.inc:46
-msgid "Enter the NID of a group"
-msgstr ""
-
-#: includes/groupcontext.inc:56
-msgid "Currently set to \"%title\""
-msgstr ""
-
-#: includes/groupcontext.inc:74
-msgid "You must select a node."
-msgstr ""
-
-#: includes/groupcontext.inc:100
-msgid "Invalid group selected."
-msgstr ""
-
-#: includes/groupcontext.inc:103
-msgid "Node is of type %type which not a group type."
-msgstr ""
-
-#: og_actions/og_actions.module:11
-msgid "Remove the node from all groups"
-msgstr ""
-
-#: og_actions/og_actions.module:19
-msgid "Add node to the specified group"
-msgstr ""
-
-#: og_actions/og_actions.module:27
-msgid "Remove node from the specified group"
-msgstr ""
-
-#: og_actions/og_actions.module:38
-msgid "Make the node publicly visible"
-msgstr ""
-
-#: og_actions/og_actions.module:46
-msgid "Make the node private to its groups"
-msgstr ""
-
-#: og_actions/og_actions.module:115
-msgid "Select the group to add to the node."
-msgstr ""
-
-#: og_actions/og_actions.module:120
-msgid "Please <a href=\"!url\">create</a> a group first."
-msgstr ""
-
-#: og_actions/og_actions.module:162
-msgid "Select the group to remove from the node."
-msgstr ""
-
-#: og_actions/og_actions.module:167
-msgid "There are no groups. You must have at least one existing group with nodes assigned to use this action."
-msgstr ""
-
-#: og_actions/og_actions.module:63;73;83;95;142
-msgid "action"
-msgstr ""
-
-#: og_actions/og_actions.module:63
-msgid "Set node %id to public."
-msgstr ""
-
-#: og_actions/og_actions.module:73
-msgid "Set node %id to private."
-msgstr ""
-
-#: og_actions/og_actions.module:83
-msgid "Removed node %id from all groups."
-msgstr ""
-
-#: og_actions/og_actions.module:95
-msgid "Added node id %id to %group."
-msgstr ""
-
-#: og_actions/og_actions.module:142
-msgid "Removed node id %id from %group."
-msgstr ""
-
-#: og_actions/og_actions.module:0
-msgid "og_actions"
-msgstr ""
-
-#: og_actions/og_actions.info:0
-msgid "Organic groups actions"
-msgstr ""
-
-#: og_actions/og_actions.info:0
-msgid "Provides actions for use with Organic Groups and Trigger."
-msgstr ""
-
-#: og_notifications/og_notifications.module:60
-msgid "Group subscriptions"
-msgstr ""
-
-#: og_notifications/og_notifications.module:74
-msgid "Allowed content types"
-msgstr ""
-
-#: og_notifications/og_notifications.module:77
-msgid "Select specific content types which should be <em>allowed</em> for subscriptions to <em>group + content type</em>."
-msgstr ""
-
-#: og_notifications/og_notifications.module:89
-msgid "Automatically enable notifications for any organic groups that I join."
-msgstr ""
-
-#: og_notifications/og_notifications.module:90
-msgid "Group notifications can be <a href=\"!manage-url\">customised</a> in greater detail if necessary."
-msgstr ""
-
-#: og_notifications/og_notifications.module:99
-msgid "Autosubscribe users to any groups that they join."
-msgstr ""
-
-#: og_notifications/og_notifications.module:100
-msgid "Automatically enable notifications by default. Users can override this via their account page."
-msgstr ""
-
-#: og_notifications/og_notifications.module:153
-msgid "Group: %name"
-msgstr ""
-
-#: og_notifications/og_notifications.module:167
-msgid "Content type in group"
-msgstr ""
-
-#: og_notifications/og_notifications.module:238
-msgid "Group Type"
-msgstr ""
-
-#: og_notifications/og_notifications.module:269
-msgid "All"
-msgstr ""
-
-#: og_notifications/og_notifications.module:289
-msgid "Send interval"
-msgstr ""
-
-#: og_notifications/og_notifications.module:289
-msgid "Send method"
-msgstr ""
-
-#: og_notifications/og_notifications.module:298;498;514
-msgid "%type posts in this group"
-msgstr ""
-
-#: og_notifications/og_notifications.module:316
-msgid "There are no active group subscriptions available."
-msgstr ""
-
-#: og_notifications/og_notifications.module:491
-msgid "To all posts in this group"
-msgstr ""
-
-#: og_notifications/og_notifications.module:509
-msgid "Posts in group %name"
-msgstr ""
-
-#: og_notifications/og_notifications.module:49
-msgid "subscribe to content in groups"
-msgstr ""
-
-#: og_notifications/og_notifications.module:0
-msgid "og_notifications"
-msgstr ""
-
-#: og_notifications/og_notifications.install:8
-msgid "Organic groups notifications module installation script complete."
-msgstr ""
-
-#: og_notifications/og_notifications.install:54
-msgid "Organic groups notifications module uninstallation script complete."
-msgstr ""
-
-#: og_notifications/og_notifications.info:0
-msgid "Organic Groups Notifications"
-msgstr ""
-
-#: og_notifications/og_notifications.info:0
-msgid "Allows users to subscribe to content in groups."
-msgstr ""
-
-#: og_views/og_views.views.inc:37
-msgid "Group: Description"
-msgstr ""
-
-#: og_views/og_views.views.inc:45
-msgid "Group: Members count"
-msgstr ""
-
-#: og_views/og_views.views.inc:49
-msgid "Number of members for a group. Excludes memberships which are pending approval."
-msgstr ""
-
-#: og_views/og_views.views.inc:53
-msgid "Group: Post count"
-msgstr ""
-
-#: og_views/og_views.views.inc:57
-msgid "Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown."
-msgstr ""
-
-#: og_views/og_views.views.inc:62
-msgid "Group: Post count *new*"
-msgstr ""
-
-#: og_views/og_views.views.inc:66
-msgid "Number of new posts in a group for the current user."
-msgstr ""
-
-#: og_views/og_views.views.inc:71
-msgid "Group: Selective"
-msgstr ""
-
-#: og_views/og_views.views.inc:72
-msgid "The group preference which determines how membership requests are managed (moderated, invite only, etc.)."
-msgstr ""
-
-#: og_views/og_views.views.inc:81
-msgid "Group: Private"
-msgstr ""
-
-#: og_views/og_views.views.inc:82
-msgid "Is the group home page private or not."
-msgstr ""
-
-#: og_views/og_views.views.inc:94
-msgid "Group: List in directory"
-msgstr ""
-
-#: og_views/og_views.views.inc:95
-msgid "Admin specifies whether or not a group appears in the public listings."
-msgstr ""
-
-#: og_views/og_views.views.inc:107
-msgid "Group: Join link"
-msgstr ""
-
-#: og_views/og_views.views.inc:108
-msgid "Displays a links for joining a group when a user is not already a member."
-msgstr ""
-
-#: og_views/og_views.views.inc:114
-msgid "Group: Notification"
-msgstr ""
-
-#: og_views/og_views.views.inc:115
-msgid "Does group sending email notifications to its members by default"
-msgstr ""
-
-#: og_views/og_views.views.inc:128
-msgid "Group: Language"
-msgstr ""
-
-#: og_views/og_views.views.inc:129
-msgid "Displays the language selected for a given group."
-msgstr ""
-
-#: og_views/og_views.views.inc:146
-msgid "Group types"
-msgstr ""
-
-#: og_views/og_views.views.inc:147;156
-msgid "The type of a group (for example, \"blog entry\", \"forum post\", \"story\", etc)."
-msgstr ""
-
-#: og_views/og_views.views.inc:155
-msgid "Group types (all)"
-msgstr ""
-
-#: og_views/og_views.views.inc:160
-msgid "Restrict to all content types that have been marked as groups."
-msgstr ""
-
-#: og_views/og_views.views.inc:217
-msgid "Group node type"
-msgstr ""
-
-#: og_views/og_views.views.inc:298
-msgid "Posts which are affiiated with a group."
-msgstr ""
-
-#: og_views/og_views.views.inc:308
-msgid "<strong>Posts</strong> are filtered for specified organic groups. The page context (if Display is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id."
-msgstr ""
-
-#: og_views/og_views.views.inc:311
-msgid "The groups for a post."
-msgstr ""
-
-#: og_views/og_views.views.inc:316;321
-msgid "Group node (post)"
-msgstr ""
-
-#: og_views/og_views.views.inc:317
-msgid "Bring in information about the group node based on a post's groups."
-msgstr ""
-
-#: og_views/og_views.views.inc:329
-msgid "Post: in specified group (by number)"
-msgstr ""
-
-#: og_views/og_views.views.inc:338
-msgid "Post: Nid"
-msgstr ""
-
-#: og_views/og_views.views.inc:339
-msgid "The node ID of the node."
-msgstr ""
-
-#: og_views/og_views.views.inc:346
-msgid "OG: Posts in current group"
-msgstr ""
-
-#: og_views/og_views.views.inc:347
-msgid "Posts in current group. Useful for blocks where determining context is hard. If page is not in any group context, no nodes are listed and thus a block would not appear."
-msgstr ""
-
-#: og_views/og_views.views.inc:355
-msgid "Post: Public"
-msgstr ""
-
-#: og_views/og_views.views.inc:356
-msgid "Is a given post public or private according to OG."
-msgstr ""
-
-#: og_views/og_views.views.inc:458
-msgid "Group that a member belongs to."
-msgstr ""
-
-#: og_views/og_views.views.inc:460;465
-msgid "Group node (member)"
-msgstr ""
-
-#: og_views/og_views.views.inc:461
-msgid "Bring in information about the group node based on a user's membership."
-msgstr ""
-
-#: og_views/og_views.views.inc:470
-msgid "<strong>Members</strong> are filtered for a specific group."
-msgstr ""
-
-#: og_views/og_views.views.inc:475
-msgid "Group member"
-msgstr ""
-
-#: og_views/og_views.views.inc:479
-msgid "OG: Group in user's groups"
-msgstr ""
-
-#: og_views/og_views.views.inc:485
-msgid "OG: Notification email"
-msgstr ""
-
-#: og_views/og_views.views.inc:486
-msgid "Does member receive email notifications for a group."
-msgstr ""
-
-#: og_views/og_views.views.inc:495
-msgid "OG: Admin manage link"
-msgstr ""
-
-#: og_views/og_views.views.inc:496
-msgid "A link to the <em>Admin create or remove</em> page."
-msgstr ""
-
-#: og_views/og_views.views.inc:503
-msgid "OG: Edit membership link"
-msgstr ""
-
-#: og_views/og_views.views.inc:504
-msgid "A link to the <em>My membership</em> page."
-msgstr ""
-
-#: og_views/og_views.views.inc:511
-msgid "OG: Approve/Deny/Remove membership link"
-msgstr ""
-
-#: og_views/og_views.views.inc:512
-msgid "A link to approve/deny/remove a group member."
-msgstr ""
-
-#: og_views/og_views.views.inc:519
-msgid "OG: Is member an admin in a group"
-msgstr ""
-
-#: og_views/og_views.views.inc:520
-msgid "Add <em>admin</em> text if user is the group manager."
-msgstr ""
-
-#: og_views/og_views.views.inc:533
-msgid "OG: Is membership approved"
-msgstr ""
-
-#: og_views/og_views.views.inc:534
-msgid "Add <em>approval needed</em> user if user's membership request is pending."
-msgstr ""
-
-#: og_views/og_views.views.inc:547
-msgid "OG: Is the group manager"
-msgstr ""
-
-#: og_views/og_views.views.inc:548
-msgid "Add <em>manager</em> text if user is the group manager."
-msgstr ""
-
-#: og_views/og_views.views.inc:558
-msgid "OG: Membership create date"
-msgstr ""
-
-#: og_views/og_views.views.inc:559
-msgid "The date when the membership was created."
-msgstr ""
-
-#: og_views/og_views.views.inc:572
-msgid "OG: Membership last updated date"
-msgstr ""
-
-#: og_views/og_views.views.inc:573
-msgid "The date when the membership was last updated."
-msgstr ""
-
-#: og_views/og_views.views.inc:615
-msgid "Member types"
-msgstr ""
-
-#: og_views/og_views.views.inc:616
-msgid "Members"
-msgstr ""
-
-#: og_views/og_views.views.inc:616
-msgid "Group administrators"
-msgstr ""
-
-#: og_views/og_views.views.inc:643
-msgid "approval needed"
-msgstr ""
-
-#: og_views/og_views.views.inc:659
-msgid "admin"
-msgstr ""
-
-#: og_views/og_views.views.inc:718
-msgid "Admin: Remove"
-msgstr ""
-
-#: og_views/og_views.views.inc:721
-msgid "Admin: Create"
-msgstr ""
-
-#: og_views/og_views.views.inc:753
-msgid "Remove membership"
-msgstr ""
-
-#: og_views/og_views.views.inc:757
-msgid "Request: <a href=\"@approve\">approve</a> or <a href=\"@deny\">deny</a>."
-msgstr ""
-
-#: og_views/og_views.views.inc:771
-msgid "Edit membership"
-msgstr ""
-
-#: og_views/og_views.views.inc:782
-msgid "Group nodes"
-msgstr ""
-
-#: og_views/og_views.views.inc:799
-msgid "Argument type"
-msgstr ""
-
-#: og_views/og_views.views.inc:801
-msgid "Node ID"
-msgstr ""
-
-#: og_views/og_views.views.inc:802
-msgid "Node ID's separated by , or +"
-msgstr ""
-
-#: og_views/og_views.views.inc:811
-msgid "Validate current user is a member of a specified group"
-msgstr ""
-
-#: og_views/og_views.module:48
-msgid "Group notifications (views enhanced)"
-msgstr ""
-
-#: og_views/og_views.module:66
-msgid "This group offers a <a href=\"@groupfeed\">RSS feed</a> and an <a href=\"@email\">email subscription</a>."
-msgstr ""
-
-#: og_views/og_views.module:68
-msgid "Or subscribe to these personalized, sitewide feeds:"
-msgstr ""
-
-#: og_views/og_views.module:71;75;79
-msgid "Feed"
-msgstr ""
-
-#: og_views/og_views.module:72;76;80
-msgid "Page"
-msgstr ""
-
-#: og_views/og_views.module:73
-msgid "My unread: !links"
-msgstr ""
-
-#: og_views/og_views.module:77
-msgid "My group: !links"
-msgstr ""
-
-#: og_views/og_views.module:81
-msgid "All posts: !links"
-msgstr ""
-
-#: og_views/og_views.module:0
-msgid "og_views"
-msgstr ""
-
-#: og_views/og_views.info:0
-msgid "Organic groups Views integration"
-msgstr ""
-
-#: og_views/og_views.info:0
-msgid "Use Views to search and display organic groups. Highly recommended."
-msgstr ""
-
-#: tests/og_testcase.php:7
-msgid "Og testing functionality"
-msgstr ""
-
-#: tests/og_testcase.php:8
-msgid "Setup and teardown functionality for organic groups"
-msgstr ""
-
-#: tests/og_testcase.php:20
-msgid "has been created"
 msgstr ""
 

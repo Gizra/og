@@ -1,0 +1,31 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (tests)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from file: tests/og_testcase.php: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-09-17 09:00+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: tests/og_testcase.php:7
+msgid "Og testing functionality"
+msgstr ""
+
+#: tests/og_testcase.php:8
+msgid "Setup and teardown functionality for organic groups"
+msgstr ""
+
+#: tests/og_testcase.php:20
+msgid "has been created"
+msgstr ""
+

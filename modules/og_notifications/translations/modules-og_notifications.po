@@ -1,0 +1,102 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (og_notifications/og_notifications.module)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  og_notifications.module,v 1.1.2.2 2008/06/06 08:27:47 karthik
+#  og_notifications.info,v 1.1.2.1 2008/06/04 21:47:52 karthik
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OG notifications\n"
+"POT-Creation-Date: 2008-07-04 09:52+0200\n"
+"PO-Revision-Date: 2008-07-13 19:14+0100\n"
+"Last-Translator: Alexander Hass\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+
+#: og_notifications/og_notifications.module:60
+msgid "Group subscriptions"
+msgstr "Gruppenmitgliedschaften"
+
+#: og_notifications/og_notifications.module:74
+msgid "Allowed content types"
+msgstr "Zulässige Inhaltstypen"
+
+#: og_notifications/og_notifications.module:77
+msgid "Select specific content types which should be <em>allowed</em> for subscriptions to <em>group + content type</em>."
+msgstr ""
+
+#: og_notifications/og_notifications.module:89
+msgid "Automatically enable notifications for any organic groups that I join."
+msgstr ""
+
+#: og_notifications/og_notifications.module:90
+msgid "Group notifications can be <a href=\"!manage-url\">customised</a> in greater detail if necessary."
+msgstr ""
+
+#: og_notifications/og_notifications.module:99
+msgid "Autosubscribe users to any groups that they join."
+msgstr ""
+
+#: og_notifications/og_notifications.module:100
+msgid "Automatically enable notifications by default. Users can override this via their account page."
+msgstr ""
+
+#: og_notifications/og_notifications.module:153
+msgid "Group: %name"
+msgstr "Gruppe: %name"
+
+#: og_notifications/og_notifications.module:167
+msgid "Content type in group"
+msgstr "Inhaltstyp in der Gruppe"
+
+#: og_notifications/og_notifications.module:238
+msgid "Group Type"
+msgstr "Gruppentyp"
+
+#: og_notifications/og_notifications.module:289
+msgid "Send interval"
+msgstr ""
+
+#: og_notifications/og_notifications.module:289
+msgid "Send method"
+msgstr ""
+
+#: og_notifications/og_notifications.module:298;498;514
+msgid "%type posts in this group"
+msgstr "%type-Beiträge in dieser Gruppe"
+
+#: og_notifications/og_notifications.module:316
+msgid "There are no active group subscriptions available."
+msgstr ""
+
+#: og_notifications/og_notifications.module:491
+msgid "To all posts in this group"
+msgstr "Zu allen Beiträgen in dieser Gruppe"
+
+#: og_notifications/og_notifications.module:509
+msgid "Posts in group %name"
+msgstr "Beiträge in der Gruppe %name"
+
+#: og_notifications/og_notifications.module:49
+msgid "subscribe to content in groups"
+msgstr ""
+
+#: og_notifications/og_notifications.module:0
+msgid "og_notifications"
+msgstr "og_notifications"
+
+#: og_notifications/og_notifications.info:0
+msgid "Organic Groups Notifications"
+msgstr "Organische-Gruppen-Benachrichtigungen"
+
+#: og_notifications/og_notifications.info:0
+msgid "Allows users to subscribe to content in groups."
+msgstr ""
+
