@@ -384,9 +384,6 @@ function og_manage_form($group) {
     }
   }
 
-  if ($submit) {
-    $form['op'] = array('#type' => 'submit', '#value' => t('Submit'));
-  }
   $form['gid'] = array('#type' => 'value', '#value' => $group->nid);
   return $form;
 }
@@ -1407,12 +1404,12 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           'body' => _og_user_mail_text('og_new_admin_body', $variables)
         );
 
+        // Alert the user that they are now the admin of the group.
         module_invoke_all('og', 'admin new', $gid, $account->uid, $message);
       }
       else {
         og_save_ancestry($node);
       }
-
       break;
     case 'update':
       if (og_is_group_type($node->type)) {
