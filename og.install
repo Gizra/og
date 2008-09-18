@@ -54,13 +54,6 @@ function og_schema() {
         'not null'        => TRUE,
         'default'         => 0,
       ),
-      'og_notification'    => array(
-        'description'     => t('Not currently used.'),
-        'type'            => 'int',
-        'size'            => 'tiny',
-        'not null'        => TRUE,
-        'default'         => 0,
-      ),
       'og_language'        => array(
         'description'     => t('Group specific language. See {languages}.language.'),
         'type'            => 'varchar',
@@ -114,12 +107,6 @@ function og_schema() {
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
-      ),
-      'mail_type'       => array(
-        'description'     => t('Email notification preference.'),
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => FALSE,
       ),
       'created'         => array(
         'description'     => t('Time when this membership was created.'),
@@ -389,7 +376,6 @@ function og_update_6002() {
   db_change_field($ret, 'og', 'theme', 'og_theme', $fields['og_theme']);
   db_change_field($ret, 'og', 'directory', 'og_directory', $fields['og_directory']);
   db_change_field($ret, 'og', 'description', 'og_description', $fields['og_description']);
-  db_change_field($ret, 'og', 'notification', 'og_notification', $fields['og_notification']);
   db_change_field($ret, 'og', 'language', 'og_language', $fields['og_language']);
   db_change_field($ret, 'og', 'private', 'og_private', $fields['og_private']);
   return $ret;
@@ -406,6 +392,7 @@ function og_enable() {
 function og_populate_uid_global_table() {
   $subquery = 'SELECT u.uid, %d FROM {users} u LEFT JOIN {og_uid_global} oug ON u.uid=oug.uid WHERE u.uid > 0 AND oug.og_email IS NULL';
   $sql = "INSERT INTO {og_uid_global} (uid, og_email) $subquery";
+  // @TODO: og_uid_global issue with og_notifications is still pending.
   db_query($sql, OG_NOTIFICATION_SELECTIVE);
 }
 
@@ -425,7 +412,8 @@ function og_uninstall() {
     'og_invite_user_body', 'og_invite_user_subject',
     'og_new_admin_body', 'og_new_admin_subject',
     'og_new_node_body', 'og_new_node_subject',
-    'og_notification', 'og_request_user_body', 'og_request_user_subject',
+    'og_request_user_body', 'og_request_user_subject',
+    'og_notifications_update_required'
   );
   foreach ($variables as $variable) {
     variable_del($variable);

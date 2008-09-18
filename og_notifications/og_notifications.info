@@ -4,4 +4,5 @@ description = Allows users to subscribe to content in groups.
 package = "Organic groups"
 dependencies[] = notifications
 dependencies[] = notifications_content
-dependencies[] =  og
+dependencies[] = og
+core = 6.x

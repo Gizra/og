@@ -19,11 +19,6 @@ define('OG_DIRECTORY_ALWAYS', 1);
 define('OG_DIRECTORY_CHOOSE_TRUE', 2);
 define('OG_DIRECTORY_CHOOSE_FALSE', 3);
 
-// site admin chooses in og_admin_settings() whether new registrants receive group email notifications by default
-define('OG_NOTIFICATION_NEVER', 0);
-define('OG_NOTIFICATION_ALWAYS', 1);
-define('OG_NOTIFICATION_SELECTIVE', 2);
-
 function og_help($path, $arg) {
   if ($path) {
     switch ($path) {
@@ -151,12 +146,12 @@ function og_menu() {
     'access callback' => 'og_is_group_admin',
     'access arguments' => array(2),
   );
-  
-  // Email tab on group node.
-  $items['node/%node/email'] = array(
-    'title' => 'E-mail',
+
+    // Broadcast tab on group node.
+  $items['node/%node/broadcast'] = array(
+    'title' => 'Broadcast',
     'page callback' => 'drupal_get_form', 
-    'page arguments' => array('og_email_form', 1), 
+    'page arguments' => array('og_broadcast_form', 1), 
     'access callback' => 'og_is_group_admin', 
     'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK, 
@@ -517,17 +512,17 @@ function og_set_theme($nid) {
 }
 
 /**
- * Admins may broadcast email to all their members
+ * Admins may broadcast messages to all their members.
  *
  * @ingroup forms
  * @param $node
  *   The group node.
  */
- function og_email_form($form_state, $node) {
-   drupal_set_title(t('Send email to %group', array('%group' => $node->title)));
+ function og_broadcast_form($form_state, $node) {
+   drupal_set_title(t('Send message to %group', array('%group' => $node->title)));
 
    if (!empty($form_state['post'])) {
-     drupal_set_message(t('Your email will be sent to all members of this group. Please use this feature sparingly.'));
+     drupal_set_message(t('Your message will be sent to all members of this group.'));
    }
    
    $form['subject'] = array(
@@ -535,7 +530,7 @@ function og_set_theme($nid) {
     '#title' => t('Subject'), 
     '#size' => 70,
     '#maxlength' => 250,
-    '#description' => t('Enter a subject for your email.'), 
+    '#description' => t('Enter a subject for your message.'), 
     '#required' => TRUE,
   );
   $form['body'] = array(
@@ -543,19 +538,25 @@ function og_set_theme($nid) {
     '#title' => t('Body'), 
     '#rows' => 5,
     '#cols' => 90,
-    '#description' => t('Enter a body for your email.'), 
+    '#description' => t('Enter a body for your message.'), 
     '#required' => TRUE
   );
-  $form['send'] = array('#type' => 'submit', '#value' => t('Send email'));
+  $form['send'] = array('#type' => 'submit', '#value' => t('Send message'));
   $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
   return $form;
 }
 
-function og_email_form_submit($form, &$form_state) {
+function og_broadcast_form_submit($form, &$form_state) {
   global $user;
-  
-  $node = node_load($form_state['values']['gid']);
 
+  $sql = og_list_users_sql(1);
+  $result = db_query($sql, $form_state['values']['gid']);
+  $recipients = array();
+  while ($row = db_fetch_object($result)) {
+    $recipients[] = $row->uid;
+  }
+
+  $node = node_load($form_state['values']['gid']);
   $variables = array(
     '@group' => $node->title,
     '@subject' => $form_state['values']['subject'],
@@ -564,28 +565,24 @@ function og_email_form_submit($form, &$form_state) {
     '!url_group' => url("node/$node->nid", array('absolute' => TRUE)),
     '!url_unsubscribe' => url("og/unsubscribe/$node->nid/$user->uid", array('absolute' => TRUE))
   );
+
+  $message = array(
+    'from' => $user,
+    'subject' => $form_state['values']['subject'],
+    'body' => _og_mail_text('og_admin_email_body', $variables),
+    'queue' => TRUE
+  );
+
+  // Send notifications to each member; Sending an array of recipients implies
+  // that this is a bulk message.
+  module_invoke_all('og', 'user broadcast', $node->nid, $recipients, $message);
+  drupal_set_message(format_plural(count($recipients), '1 message queued for delivery.', '@count messages queued for delivery.'));
   
-  $from = $user->mail;
-  $sql = og_list_users_sql(1);
-  $result = db_query($sql, $form_state['values']['gid']);
-  while ($row = db_fetch_object($result)) {
-     $emails[] = $row->mail;
-  }
-  foreach ($emails as $mail) {
-    drupal_mail('og', 'admin_email', trim($mail), $GLOBALS['language'], $variables, $from);
-  }
-  drupal_set_message(format_plural(count($emails), '1 email sent.', '@count emails sent.'));
 }
 
 function og_manage($group_node) {
   global $user;
 
-  // warn users who can't receive mail anyway
-  if ($txt = user_validate_mail($user->mail)) {
-    drupal_set_message($txt, 'error');
-    return '';
-  }
-  
   $bc = og_get_breadcrumb($group_node);
   drupal_set_breadcrumb($bc);
   
@@ -609,44 +606,6 @@ function og_manage_form($form_state, $group) {
     }
   }
 
-  $submit_button = FALSE;
-  // og_email can be NULL when you enable og on an existing site.
-  if (empty($user->og_email)) {
-    $user->og_email = OG_NOTIFICATION_SELECTIVE;
-  }
-
-  switch ($user->og_email) {
-    case OG_NOTIFICATION_SELECTIVE:
-      $form['mail_type'] = array(
-        '#type' => 'radios', 
-        '#title' => t('Email notification'), 
-        '#default_value' => $user->og_groups[$group->nid]['mail_type'], 
-        '#options' => array(
-          1 => t('Enabled'),
-          0 => t('Disabled')
-        ), 
-        '#description' => t('Do you want to receive an email each time a message is posted to this group?')
-      );
-      $submit_button = TRUE;
-      break;
-    case OG_NOTIFICATION_ALWAYS:
-      $form['mail_type'] = array(
-        '#type' => 'item', 
-        '#title' => t('Email notification'), 
-        '#value' => t('Your <a href="!prof">user profile</a> is configured to: <em>Always receive email notifications</em>.', array('!prof' => url("user/$user->uid/edit"))),
-      ); 
-      break;
-    case OG_NOTIFICATION_NEVER:
-      $form['mail_type'] = array(
-        '#type' => 'item', 
-        '#title' => t('Email notification'), 
-        '#value' => t('Your <a href="!prof">user profile</a> is configured to: <em>Never receive email notifications</em>.', array('!prof' => url("user/$user->uid/edit")))
-      ); 
-      break;
-  }
-  if ($submit_button) {
-    $form['op'] = array('#type' => 'submit', '#value' => t('Save'));
-  }
   $form['gid'] = array('#type' => 'value', '#value' => $group->nid);
   return $form;
 }
@@ -665,7 +624,7 @@ function og_manage_form_submit($form, &$form_state) {
  * @param $gid node ID of a group
  * @param $uid user ID of user
  * @param $args an array with details of this membership. Recognized array keys are:
-     is_active, is_admin, mail_type, created. Other values are passed to hook implementations.
+     is_active, is_admin, created. Other values are passed to hook implementations.
  */
 function og_save_subscription($gid, $uid, $args = array()) {
   $sql = "SELECT COUNT(*) FROM {og_uid} WHERE nid = %d AND uid = %d";
@@ -712,12 +671,15 @@ function og_approve($node, $account, $token) {
     drupal_set_message(t('Membership request approved.'));
          
     $variables = array(
-       '@title' => $node->title,
-       '!group_url'=> url("node/$node->nid", array('absolute' => TRUE))
-    );     
-    
-    $account = user_load(array('uid' => $account->uid));
-    drupal_mail('og', 'approve_user', $account->mail, $GLOBALS['language'], $variables);
+      '@title' => $node->title,
+      '!group_url'=> url("node/$node->nid", array('absolute' => TRUE))
+    );
+    $message = array(
+      'subject' => _og_mail_text('og_approve_user_subject', $variables),
+      'body' => _og_mail_text('og_approve_user_body', $variables)
+    );
+
+    module_invoke_all('og', 'user approve', $node->nid, $uid, $message);
     drupal_goto("node/$node->nid");
   }
 }
@@ -735,9 +697,13 @@ function og_deny($node, $account, $token) {
     '@title' => $node->title,
     '!group_url' => url("node/$node->nid", array('absolute' => TRUE))
   );
-  
-  $account = user_load(array('uid' => $account->uid));
-  drupal_mail('og', 'deny_user', $account->mail, $GLOBALS['language'], $variables);
+
+  $message = array(
+    'subject' => _og_mail_text('og_deny_user_subject', $variables),
+    'body' => _og_mail_text('og_deny_user_body', $variables)
+  );
+
+  module_invoke_all('og', 'user deny', $node->nid, $uid, $message);
   drupal_goto("node/$node->nid");
 }
 
@@ -761,17 +727,23 @@ function og_create_admin_confirm($form_state, $node, $account) {
 function og_create_admin_confirm_submit($form, &$form_state) {
   $account = $form_state['values']['account'];
   $node = $form_state['values']['node'];
-  
+
   og_save_subscription($node->nid, $account->uid, array('is_admin' => 1));
   drupal_set_message(t('%name was promoted to <em>group administrator</em>.', array('%name' => $account->name)));
-  
+
   $variables = array(
     '@group' => $node->title,
     '!group_url' => url("node/$node->nid", array('absolute' => TRUE)),
     '@username' => $account->name
   );
-  
-  drupal_mail('og', 'new_admin', $account->mail, $GLOBALS['language'], $variables);
+
+  $message = array(
+    'subject' => _og_mail_text('og_new_admin_subject', $variables),
+    'body' => _og_mail_text('og_new_admin_body', $variables)
+  );
+
+  module_invoke_all('og', 'admin create', $node->nid, $account->uid, $message);
+
   $form_state['#redirect'] = "og/users/$node->nid";
 }
 
@@ -782,12 +754,12 @@ function og_remove_admin_confirm($form_state, $node, $account) {
   $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
   $form['account'] = array('#type' => 'value', '#value' => $account);
   return confirm_form($form, 
-                 t('Are you sure you want to remove %name as a group administrator for the group %title?', array('%name' => $account->name, '%title' => $node->title)),
-                 "og/users/$node->nid",
-                 ' ', 
-                 t('Remove'), 
-                 t('Cancel')
-          );
+    t('Are you sure you want to remove %name as a group administrator for the group %title?', array('%name' => $account->name, '%title' => $node->title)),
+    "og/users/$node->nid",
+    ' ', 
+    t('Remove'), 
+    t('Cancel')
+  );
 }
 
 /**
@@ -961,7 +933,7 @@ function og_confirm_subscribe_submit($form, &$form_state) {
 
 
 /**
- * Create a new membership for a given user to given group and send proper email. Edits to membership should 
+ * Create a new membership for a given user to given group. Edits to membership should  
  * go through og_save_subscription(). No access control since this is an API function.
  *
  * @return string 'approval', 'subscribed' or 'rejected' depending on the group's configuration.
@@ -975,12 +947,16 @@ function og_subscribe_user($gid, $account, $request = NULL) {
       og_save_subscription($gid, $account->uid, array('is_active' => 0));
       $sql = og_list_users_sql(1, 1, NULL);
       $res = db_query($sql, $node->nid);
+      $admins = array();
       while ($row = db_fetch_object($res)) {
-        if ($row->mail) {
-          $admins[] = $row->mail;
-        }
+        $admins[] = $row->uid;
       }
-      if ($admins) {
+      if (!empty($admins)) {
+        // Prepend user's request text with standard cruft. Should be a
+        // variable but that's a bit annoying.
+        if ($request) {
+          $request = t("\n\nPersonal message from @name:\n------------------\n\n@request", array('@name' => $account->name, '@request' => $request));
+        }
         $variables = array(
           '@group' => $node->title,
           '@username' => $account->name,
@@ -989,7 +965,14 @@ function og_subscribe_user($gid, $account, $request = NULL) {
           '@request' => $request,
         );
         
-        drupal_mail('og', 'request_user', implode(', ', $admins), $GLOBALS['language'], $variables);
+        $message = array(
+          'subject' => _og_mail_text('og_request_user_subject', $variables),
+          'body' => _og_mail_text('og_request_user_body', $variables) . $request
+        );
+
+        // Send notifications to each admin; Sending an array of recipients
+        // implies that this is a bulk message.
+        module_invoke_all('og', 'user request', $gid, $admins, $message);
       }
       $return_value = array('type' => 'approval',
                             'message' => t('Membership request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
@@ -1536,22 +1519,12 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
       break;
     case 'validate':
-      if (og_is_group_type($node->type)) {
-        // Email address is required for contacting the Manager
-        $account = user_load(array('uid' => $node->uid));
-        if ($account->uid > 0 && empty($account->mail)) {
-          form_set_error('name', t('The group manager %name, must have an email address in his <a href="@profile">user profile</a>.', array('%name' => $account->name, '@profile' => url("user/$node->uid/edit"))));
+      // Ensure that a group is selected if groups are required. needed when
+      // author has no groups. In other cases, fapi does the validation.
+      if (og_is_group_post_type($node->type) && variable_get('og_audience_required', FALSE) && !user_access('administer nodes')) {
+        if (!isset($node->og_groups)) {
+          form_set_error('title', t('You must <a href="@join">join a group</a> before posting on this web site.', array('@join' => url('og'))));
         }
-        
-      }
-      else {
-        // Ensure that a group is selected if groups are required. needed when author has no groups. In other cases, fapi does the validation
-        if (og_is_group_post_type($node->type) && variable_get('og_audience_required', FALSE) && !user_access('administer nodes')) {
-          if (!isset($node->og_groups)) {
-            form_set_error('title', t('You must <a href="@join">join a group</a> before posting on this web site.', array('@join' => url('og'))));
-          }
-        }
-        
       }
       break;
     case 'presave':
@@ -1583,31 +1556,16 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           '!invite_url' => url("og/invite/$node->nid", array('absolute' => TRUE))
         );
 
+        $message = array(
+          'subject' => _og_mail_text('og_new_admin_subject', $variables),
+          'body' => _og_mail_text('og_new_admin_body', $variables)
+        );
+
         // Alert the user that they are now the admin of the group.  
-        drupal_mail('og', 'new_admin', $account->mail, $GLOBALS['language'], $variables);      
+        module_invoke_all('og', 'admin new', $node->nid, $account->uid, $message);      
       }
       else {
         og_save_ancestry($node);
-      }
-      
-      // Disable emails for now until Notifications integration is in.
-      $skip_notification = TRUE; 
-      // Any module that returns TRUE from its hook_og_notify($node) will prevent sending notifications.
-      // og2list and og_subscriptions use this to send own notifications.
-      foreach(module_implements('og_notify') as $module) {
-        if (module_invoke($module,'og_notify',$node)) {
-          $skip_notification = TRUE;
-          break;
-        }
-      }
-      if (!$skip_notification && $node->status && og_is_mail_type($node->type) && $node->og_groups) {
-        if (module_exists('job_queue')) {
-          $description = t('OG: notify group members about node %nid - !link.', array('%nid' => $node->nid, '!link' => l($node->title, "node/$node->nid")));
-          job_queue_add('og_mail', $description, array('node', $node->nid));
-        }
-        else {
-          og_mail_notify('node', $node);
-        }
       }
       break;
     case 'update':
@@ -2011,184 +1969,11 @@ function og_form_add_og_audience(&$form, &$form_state) {
   }
 }
 
-function og_comment($comment, $op) {
-  switch ($op) {
-    case 'publish':
-      $comment = (array) $comment;
-      // fall through
-    case 'insert':
-      // Disable emails until Notifications integration is in.
-      $skip_notification = TRUE; 
-      // Any module that returns true from its hook_og_notify($node) will prevent sending notifications.
-      // og2list uses this to send its own notifications instead for mailing list content.
-      $node = node_load($comment['nid']);
-
-      foreach(module_implements('og_notify') as $module) {
-        if (module_invoke($module, 'og_notify', $node)) {
-          $skip_notification = TRUE;
-          break;
-        }
-      }
-      // remove the perm check after 5.3 is released.
-      if ($comment['status'] == COMMENT_PUBLISHED && !$skip_notification && og_is_mail_type($node->type) && isset($node->og_groups) && !empty($node->og_groups)) {
-        if (module_exists('job_queue')) {
-          $description = t('OG: Notify group members about comment %id on !link.', array('%id' => $comment['cid'], '!link' => l($node->title, "node/$node->nid", array('fragment' => 'comment-'. $comment['cid']))));
-          job_queue_add('og_mail', $description, array('comment', $comment['cid']));
-        }
-        else {
-          og_mail_notify('comment', (object)$comment);
-        }
-      }
-      break;
-  }  
-}
-
-
-/**
- * Send this node/comment via email to all email members. Called from og_nodeapi() and og_comment().
- * Sometimes called from during cron if job_queue.module is enabled (recommended).
- * TODO: this function is a bit messy. rethink.
- *
- * @param $type
- *   the object type: node or comment
- * @param $id
- *   a node or comment object. if a non object is supplied, a load() operation is performed.
- * @return
- *   none
- */
- // TODOH: move to Notifications framework.
-function og_mail_notify($type, $obj) {
-  if ($type == 'comment') {
-    if (!is_object($obj)) {
-      $obj = _comment_load($obj);
-    }
-    // registered user
-    if ($obj->uid) {
-      $account = user_load(array('uid' => $obj->uid));
-      $obj->name = $account->name;
-    }
-    else {
-      $obj->name = variable_get('anonymous', 'Anonymous');
-    }
-    $rendered = check_markup($obj->comment, $obj->format, FALSE);
-    
-    $obj->body = $rendered;
-    $obj->teaser = $rendered;
-    $originalurl = url("node/$obj->nid", array('fragment' => "comment-$obj->cid", 'absolute' => TRUE));
-    $replyurl = url("comment/reply/$obj->nid/$obj->cid", array('absolute' => TRUE));
-    $node = node_load($obj->nid);
-    $obj->og_groups = $node->og_groups;
-    $obj->title = $node->title;
-    $obj->msgid = $obj->nid. '-'. $obj->cid. og_msgid_server();
-    $reply = $obj->nid. '-';
-    if ($obj->pid) {
-      $reply .= $obj->pid;
-    }
-    else {
-      $reply .= '0';
-    }
-    $obj->in_reply_to .= $reply. og_msgid_server();
-    $type_friendly = 'comment';
-  }
-  else {
-    if (!is_object($obj)) {
-      $obj = node_load($obj);
-    }
-    $account = user_load(array('uid' => $obj->uid));
-    $obj->name = $account->name;
-    $obj->subject = $obj->title;
-    // These calls to og_node_view() setup the node body and teaser, apply the
-    // appropriate input filters, and handle CCK fields, event fields, etc.
-    $obj->body = og_node_view($obj, FALSE);
-    $obj->teaser = og_node_view($obj, TRUE);
-    $obj->msgid = $obj->nid. '-0'. og_msgid_server();
-    $originalurl = url("node/$obj->nid", array('absolute' => TRUE));
-    $replyurl = url("comment/reply/$obj->nid", array('fragment' => 'comment-form', 'absolute' => TRUE));
-    $type_friendly = node_get_types('name', $obj);
-  }
-  
-  // set email from variables
-  $variables = array(
-    '@user_mail' => $account->mail ? $account->mail : variable_get("site_mail", ini_get("sendmail_from")),
-    '@user_name' => mime_header_encode($obj->name),
-    '@site_mail' => variable_get("site_mail", ini_get("sendmail_from")),
-    '@site_name' => mime_header_encode(variable_get("site_name", 'Drupal')),
-  );
-  $from_mail = strtr(variable_get("og_email_notification_pattern", '@user_name  <@site_mail>'), $variables); 
-
-  $headers = array('X-Mailer' => 'Drupal - og_mail', 'Precedence' => 'list', 'Message-Id' => "<$obj->msgid>");
-  if ($obj->in_reply_to) {
-    $headers['In-Reply-To'] =  "<$obj->in_reply_to>";
-  }
-
-  // set email body variables
-  $variables = array(
-    '@site' => variable_get('site_name', 'drupal'), 
-    '!read_more' => $obj->readmore ? t('Read more') : t('View original'),
-    '!content_url' => $originalurl,
-    '!reply_url' => $replyurl,
-    '@title' => trim($obj->title),
-    '@subject' => trim($obj->subject),
-    '@node_full' => trim(og_mail_output($obj->body)),
-    '@node_teaser' => trim(og_mail_output($obj->teaser)),
-    '@username' => $obj->name
-  );
-  
-  // Send email to selective subscribers and global subscribers.
-  // We use if() here in case node/comment no longer has any groups (i.e. this function can be called from cron).
-  if (is_array($obj->og_groups) && !empty($obj->og_groups)) {
-    $groups = implode(', ', $obj->og_groups);
-    // tricky query here. mysql returns NULL in the case of NULL != 0 so i rework this for 2 positive statements about og_email field
-    // ORDER BY favors newer groups to help them get ramped up. Thus, they are perceived as active.
-    $sql = "SELECT u.mail, u.uid, ou.nid AS gid, n.title AS group_name, n.uid AS group_uid, u.name AS group_owner, oug.og_email 
-            FROM {og_uid} ou INNER JOIN {users} u ON ou.uid=u.uid 
-            INNER JOIN {og_uid_global} oug ON ou.uid=oug.uid 
-            INNER JOIN {node} n ON ou.nid=n.nid 
-            WHERE ou.nid IN ($groups) AND (
-              (oug.og_email = %d AND ou.mail_type=1) OR
-              (oug.og_email = %d)
-              ) AND u.status = 1 AND u.mail != '' AND ou.is_active = 1 
-              ORDER by u.mail DESC, n.created DESC
-              ";
-    $result = db_query($sql, OG_NOTIFICATION_SELECTIVE, OG_NOTIFICATION_ALWAYS);
-    $last_mail = '';
-    while ($row = db_fetch_object($result)) {
-      // only notify each user once. we used to do this with GROUP BY but got very hard to assure that all the selected fields came from same record.
-      if ($row->mail == $last_mail) {
-        continue;
-      }
-      $last_mail = $row->mail;
-      
-      // New for D6. See http://drupal.org/node/114774#node_access_account
-      // TODO: check if this blocks comments properly.
-      if (node_access('view', $obj, user_load($row->uid))) {
-        // Append these group specific variables.
-        $variables['@group'] = $row->group_name;
-        $variables['!group_url'] = url("og/manage/$row->gid", array('absolute' => TRUE));
-        $variables['@type'] = $type_friendly;
-
-        $unsubscribe = url("og/manage/$row->gid", array('absolute' => TRUE));
-        $ownerurl = url("user/$row->group_uid", array('absolute' => TRUE));
-        $group_home = url("node/$row->gid", array('absolute' => TRUE));
-        $groupheaders = $headers + array(
-          'List-Id' => mime_header_encode($row->group_name). " <$group_home>", 
-          'List-Unsubscribe' => "<$unsubscribe>", 
-          'List-Owner' => mime_header_encode($row->group_owner). " <$ownerurl>", 
-          "List-Archive" => "<$group_home>"
-        );
-        // todo no mail headers?
-        drupal_mail('og', 'mail', $row->mail, $GLOBALS['language'], $variables, $from_mail);
-      }
-    }
-  }
-}
-
 /**
  * Similar to node_view() but without calling theme('node').
  *
  * This is needed to get the proper body or teaser for nodes (e.g. Event,
- * Location, CCK node types) and to clean up the body for use in email
- * notifications.
+ * Location, CCK node types) and to clean up the body for use in notifications.
  *
  * @param $node
  *   The node object you want to view.
@@ -2220,73 +2005,13 @@ function og_node_view($node, $teaser = FALSE) {
   return $teaser ? $node->teaser : $node->body;
 }
 
-// 2 functions ripped from mail.inc in project.module package
-function og_mail_urls($url = 0) {
-  static $urls = array();
-  if ($url) {
-    $urls[] = strpos($url, '://') ? $url : url($url, array('absolute' => TRUE));
-    return count($urls);
-  }
-  return $urls;
-}
-
-// takes filtered HTML as input and transforms for email
-// modified from project.module 
-function og_mail_output($body, $html = TRUE) {
-  static $i = 0;
-
-  if ($html) {
-    $pattern = '@<a +([^ >]+ )*?href *= *"([^>"]+?)"[^>]*>([^<]+?)</a>@ei';
-    $body = preg_replace($pattern, "'\\3 ['. og_mail_urls('\\2') .']'", $body);
-    $urls = og_mail_urls();
-    if (count($urls)) {
-      $body .= "\n";
-      for ($max = count($urls); $i < $max; $i++) {
-        $body .= '['. ($i + 1) .'] '. $urls[$i] ."\n";
-      }
-    }
-
-    $body = preg_replace('!</?blockquote>!i', '"', $body);
-    $body = preg_replace('!</?(em|i)>!i', '/', $body);
-    $body = preg_replace('!</?(b|strong)>!i', '*', $body);
-    $body = preg_replace("@<br />(?!\n)@i", "\n", $body);
-    $body = preg_replace("@</p.*>(?!\n\n)@i", "\n\n", $body);
-    $body = preg_replace("@</h1>(?!\n\n)@i", " #\n", $body);
-    $body = preg_replace("@</h2>(?!\n\n)@i", " ##\n", $body);
-    $body = preg_replace("@</h3>(?!\n\n)@i", " ###\n", $body);
-    $body = preg_replace("@</h4>(?!\n\n)@i", " ####\n", $body);
-    $body = preg_replace("@</(li|dd)>\n?@i", "\n", $body);
-    $body = preg_replace("@<h1.*>@i", "\n\n# ", $body);
-    $body = preg_replace("@<h2.*>@i", "\n\n## ", $body);
-    $body = preg_replace("@<h3.*>@i", "\n\n### ", $body);
-    $body = preg_replace("@<h4.*>@i", "\n\n#### ", $body);
-    $body = preg_replace("@<li.*>@i", "* ", $body);
-    $body = strip_tags($body);
-    $body = decode_entities($body);
-    $body = wordwrap($body, 72);
-  }
-  else {
-    $body = decode_entities($body);
-  }
-  return $body;
-}
-
 /**
- * Implementation of hook_mail().
- */
-function og_mail($key, &$message, $params) {
-  $language = $message['language'];
-  $message['subject'] .= _og_mail_text($key .'_subject', $language, $params);
-  $message['body'][] = _og_mail_text($key .'_body', $language, $params);
-}
-
-/**
- * Define all OG email bodies
+ * Define all OG message strings.
  * Modelled after user.module
  */
-function _og_mail_text($messageid, $language = NULL, $variables = array()) {
+function _og_mail_text($messageid, $variables = array(), $language = NULL) {
   $langcode = isset($language) ? $language->language : NULL;
-  
+
   // Check if an admin setting overrides the default string.
   if ($admin_setting = variable_get('og_'. $messageid, FALSE)) {
     return strtr($admin_setting, $variables);
@@ -2294,33 +2019,33 @@ function _og_mail_text($messageid, $language = NULL, $variables = array()) {
   // No override, return with default strings.
   else {
     switch ($messageid) {
-      case 'new_node_subject':
+      case 'og_new_node_subject':
         return t("@group: '@title' at @site", $variables, $langcode);
-      case 'new_node_body':
+      case 'og_new_node_body':
         return t("@type '@subject' by @username\n\n@node_teaser\n\n!read_more: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed from the group '@group' at @site.\nTo manage your subscription, visit !group_url", $variables, $langcode);    
-      case 'admin_email_subject':
+      case 'og_admin_email_subject':
         return $variables['@subject'];
-      case 'admin_email_body':
+      case 'og_admin_email_body':
         return t("@body\n\n--\nThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe", $variables, $langcode);
-      case 'approve_user_subject':
+      case 'og_approve_user_subject':
         return t("Membership request approved for '@title'", $variables, $langcode);
-      case 'approve_user_body':
+      case 'og_approve_user_body':
         return t("You may now post messages in this group located at !group_url", $variables, $langcode);
-      case 'deny_user_subject':
+      case 'og_deny_user_subject':
         return t("Membership request denied for '@title'", $variables, $langcode);
-      case 'deny_user_body':
+      case 'og_deny_user_body':
         return t("Sorry, your membership request was denied.", $variables, $langcode);
-      case 'invite_user_subject':
+      case 'og_invite_user_subject':
         return t("Invitation to join the group '@group' at @site", $variables, $langcode);
-      case 'invite_user_body':
+      case 'og_invite_user_body':
         return t("Hi. I'm a member of '@group' and I welcome you to join this group as well. Please see the link and message below.\n\n@group\n@description\nJoin: !group_url\n@body", $variables, $langcode);
-      case 'request_user_subject':
+      case 'og_request_user_subject':
         return t("Membership request for '@group' from '@username'", $variables, $langcode);        
-      case 'request_user_body':
+      case 'og_request_user_body':
         return t("To instantly approve this request, visit !approve_url.\nYou may deny this request or manage members at !group_url. \n\nPersonal message from @username:\n------------------\n\n@request", $variables, $langcode);       
-      case 'new_admin_subject':
+      case 'og_new_admin_subject':
         return t("You are now an administrator for the group '@group'", $variables, $langcode);        
-      case 'new_admin_body':
+      case 'og_new_admin_body':
         return t("@username, you are now an administrator for the group '@group'.\n\nYou can administer this group by logging in here:\n !group_url", $variables, $langcode);       
     }
   }
@@ -2377,29 +2102,6 @@ function og_user($op, $edit, &$account, $category = NULL) {
         );
         return $form;
       }
-    case 'form':
-      if ($category == 'account' && !empty($account->og_groups)) {
-        $form['og_settings'] = array(
-          '#type' => 'fieldset',
-          '#title' => t('Organic groups settings'),
-          '#collapsible' => TRUE,
-          '#weight' => 4
-        );
-        $options = array(
-          OG_NOTIFICATION_NEVER => t('Never send email notifications. Useful when tracking activity via RSS feed instead.'),
-          OG_NOTIFICATION_ALWAYS =>  t('Always send email notifications.'),
-          OG_NOTIFICATION_SELECTIVE => t("Selectively send email notification based on the checkbox for each of my group's <em>My membership</em> page."),
-        );
-        $form['og_settings']['og_email'] = array(
-          '#type' => 'radios', 
-          '#title' => t('Email notifications'), 
-          '#options' => $options, 
-          '#default_value' => isset($account->og_email) ? $account->og_email : variable_get('og_notification', 2),
-          '#description' => t('When posts are submitted into your groups, you may be notified via email.'),
-        );
-        return $form;
-      }
-      break;
     case 'insert':
       if (isset($edit['og_register'])) {
         foreach (array_keys(array_filter($edit['og_register'])) as $gid) {
@@ -2409,33 +2111,13 @@ function og_user($op, $edit, &$account, $category = NULL) {
           }
         }  
       }
-      
-      $sql = 'INSERT INTO {og_uid_global} (uid, og_email) VALUES (%d, %d)';
-      db_query($sql, $account->uid, variable_get('og_notification', OG_NOTIFICATION_ALWAYS));
-      $account->og_email = NULL;
-      break;
-    case 'update':
-      if (isset($edit['og_email'])) {
-        $sql = 'UPDATE {og_uid_global} SET og_email=%d WHERE uid=%d';
-        db_query($sql, $edit['og_email'], $account->uid);
-        $account->og_email = NULL;
-      }
       break;
     case 'delete':
-      // User delete doesn't exist, but it should and will one day. See http://drupal.org/node/8
-      $sql = 'DELETE FROM {og_uid_global} WHERE uid=%d';
-      db_query($sql, $account->uid);
-
       $sql = 'DELETE FROM {og_uid} WHERE uid=%d';
       db_query($sql, $account->uid);
       break;
     case 'load':
       $account->og_groups = og_get_subscriptions($account->uid);
-
-      $result = db_query_range("SELECT og_email FROM {og_uid_global} WHERE uid = %d", $account->uid, 0, 1);
-      if ($row = db_fetch_object($result)) {
-        $account->og_email = $row->og_email;
-      }
       break;
     case 'view':
       if ($account->og_groups) {
@@ -2498,13 +2180,13 @@ function og_types_map() {
   $usages = array(
     'group' => t('Group node'),
     'omitted' => t('May not be posted into a group.'),
-    'group_post_standard_mail' => t('Standard group post (typically only author may edit). Sends email notifications.'),
-    'group_post_standard_nomail' => t('Standard group post (typically only author may edit). No email notification.'),
+    'group_post_standard_mail' => t('Standard group post (typically only author may edit). Sends notifications.'),
+    'group_post_standard_nomail' => t('Standard group post (typically only author may edit). No notification.'),
   );
   
   if (module_exists('og_access')) {
-    $usages['group_post_wiki_mail'] = t('Wiki group post (any group member may edit). Sends email notifications.');
-    $usages['group_post_wiki_nomail'] = t('Wiki group post (any group member may edit). No email notification.');
+    $usages['group_post_wiki_mail'] = t('Wiki group post (any group member may edit). Sends notifications.');
+    $usages['group_post_wiki_nomail'] = t('Wiki group post (any group member may edit). No notification.');
   }
   
   return $usages;
@@ -2525,12 +2207,6 @@ function og_get_types($usage) {
     }
   }
   return isset($return[$usage]) ? $return[$usage] : array();
-}
-
-// returns TRUE if node type should generate email notifications when posted to a group.
-function og_is_mail_type($type) {
-  $usage = variable_get('og_content_type_usage_'. $type, 'omitted');
-  return strpos($usage, 'mail') && !strpos($usage, 'nomail') ? TRUE : FALSE;
 }
 
 // returns TRUE if node type lets all subscribers edit the node.
@@ -2654,7 +2330,7 @@ function og_block_notifications() {
   global $user;
   
   if ($groupnode = og_get_group_context()) {
-    $content = t('This group offers an <a href="@email">email subscription</a>.', array('@email' => url('og/manage/'. $groupnode->nid)));
+    $content = t('This group offers a !subscription.', array('!subscription' => l(t('subscription option'), 'og/manage/'. $groupnode->nid)));
     $block['content'] = $content;
     $block['subject'] = t('Group notifications');
     return $block;
