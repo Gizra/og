@@ -3,7 +3,7 @@
 require_once dirname(__FILE__). '/og_testcase.php';
 
 class OgPost extends OgTestCase {
-  function get_info() {
+  function getInfo() {
     return array('name'  => t('Og posting test'),
                  'desc'  => t('Tests to post a page to an og.'),
                  'group' => 'Organic groups');
@@ -18,12 +18,11 @@ class OgPost extends OgTestCase {
     $og_type_hn = str_replace("_", "-", $og_type_name);
     menu_rebuild();
 
-    $this->drupalVariableSet('og_content_type_usage_'. $og_type_name, 'group');
+    variable_set('og_content_type_usage_'. $og_type_name, 'group');
 
     // Prepare & login admin user
-    $admin_user = $this->drupalCreateUserRolePerm(array('administer content types', 'administer nodes', 'access content', 'create groups', "create $og_type_hn content", "edit $og_type_hn content"));
-    $this->_browser = new SimpleBrowser();
-    $this->drupalLoginUser($admin_user);
+    $admin_user = $this->drupalCreateUser(array('administer content types', 'administer nodes', 'access content', 'create groups', "create $og_type_hn content", "edit $og_type_hn content"));
+    $this->drupalLogin($admin_user);
     
     // Create & load new group 
     $gid = $this->addOg($og_type_name, OG_OPEN);
@@ -39,23 +38,23 @@ class OgPost extends OgTestCase {
     menu_rebuild();
     // Set this to be a pretty much standard group post. Here it needs underscores, not hyphens
     // So I use $og_post_type->name
-    $this->drupalVariableSet('og_content_type_usage_'.$og_post_type->name, 'group_post_standard_mail');
+    variable_set('og_content_type_usage_'.$og_post_type->name, 'group_post_standard_mail');
 
     // Prepare & login everyman user
-    $this->_browser = new SimpleBrowser();
-    $web_user = $this->drupalCreateUserRolePerm(array('access content', "create $og_post_type->name content"));
-    $this->drupalLoginUser($web_user);
+    $web_user = $this->drupalCreateUser(array('access content', "create $og_post_type->name content"));
+    $this->drupalLogin($web_user);
     
     $url = url("og/subscribe/$gid");
-    $ret = $this->get($url, FALSE, FALSE, TRUE);
+    $ret = $this->drupalGet($url);
     $this->assertTrue($ret, " [browser] GET $url");
     
-    $this->assertWantedRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
+    $this->assertRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
                             "Confirmation text found.");
-    $this->clickSubmit("Join");
+    
+    $this->drupalPost(NULL, array(), t('Join'));
 
-    $this->assertNoUnwantedRaw(t('Page not found'), 'page was found.');
-    $this->assertWantedRaw(t('You are now a member of the <em>@group', array('@group' => $node->title)),
+    $this->assertNoRaw(t('Page not found'), 'page was found.');
+    $this->assertRaw(t('You are now a member of the <em>@group', array('@group' => $node->title)),
                                 'User subscribed to group - text not found.');
     
 
@@ -69,35 +68,33 @@ class OgPost extends OgTestCase {
     $this->drupalPost("node/add/".$og_post_type_name, $edit, t('Save'));
 
     // Check for success
-    $this->assertWantedRaw(t('has been created.', array ('%post' => node_get_types('name', 'page'), '%title' => $title)), 'post created');
+    $this->assertRaw(t('has been created.', array ('%post' => node_get_types('name', 'page'), '%title' => $title)), 'post created');
     
     $url = url("node/$gid");
-    $ret = $this->get($url, FALSE, FALSE, TRUE);
+    $ret = $this->drupalGet($url);
     $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertWantedText(t($edit['title']), 'Group node title found.');
+    $this->assertText(t($edit['title']), 'Group node title found.');
     $node = node_load(array('title' => $edit['title']));
     //print_r($node);
     $this->assertNotNull($node, 'Node found in database. %s');
     
     $url = url('og/my');
-    $ret = $this->get($url, FALSE, FALSE, TRUE);
+    $ret = $this->drupalGet($url);
     $n = node_load($gid);
     $t = $n->title;
-    $this->assertWantedRaw($t, 'The group joined appears on the My Groups page.');
+    $this->assertRaw($t, 'The group joined appears on the My Groups page.');
 
     // Create a superuser
-    $super_admin_user = $this->drupalCreateUserRolePerm(array('administer content types', 'administer organic groups', 'administer nodes', 'access content', 'create groups', "create $og_type_hn content", "edit $og_type_hn content"));
-    $this->_browser = new SimpleBrowser();
+    $super_admin_user = $this->drupalCreateUser(array('administer content types', 'administer organic groups', 'administer nodes', 'access content', 'create groups', "create $og_type_hn content", "edit $og_type_hn content"));
     // Because drupalLogout is not accessible here
     $this->drupalGet('logout'); 
     // Log in the administrator
-    $this->_browser = new SimpleBrowser();
-    $this->drupalLoginUser($super_admin_user);
+    $this->drupalLogin($super_admin_user);
     
     // Check the admin's activity page.
     $url = url('og/activity');
-    $ret = $this->get($url, FALSE, FALSE, TRUE);
-    $this->assertWantedRaw($t, 'The new group appears on the administrators group activity page');
+    $ret = $this->drupalGet($url);
+    $this->assertRaw($t, 'The new group appears on the administrators group activity page');
 
     node_delete($node->nid);
     node_delete($gid);
