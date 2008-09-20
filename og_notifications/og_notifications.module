@@ -100,14 +100,6 @@ function og_notifications_form_alter($form_id, &$form) {
         '#default_value' => variable_get('og_notifications_autosubscribe', 1),
         '#weight' => -5
       );
-      $form['og_settings']['notifications']['og_notifications_delivery'] = array(
-        '#type' => 'radios',
-        '#title' => t('Delivery method'),
-        '#description' => t('Select the delivery method for <em>administrative</em> messages.'),
-        '#options' => messaging_method_list(),
-        '#default_value' => variable_get('og_notifications_delivery', 'mail'),
-        '#weight' => -4
-      );
       break;
   }
 }
@@ -121,6 +113,7 @@ function og_notifications_nodeapi(&$node, $op, $arg = 0) {
       // Remove all group subscriptions for this node.
       notifications_delete_subscriptions(array('type' => 'group'), array('group' => $node->nid));
       notifications_delete_subscriptions(array('type' => 'grouptype'), array('group' => $node->nid));
+      break;
   }
 }
 
@@ -145,54 +138,9 @@ function og_notifications_og($op, $gid, $uid, $args) {
     case 'admin create':
     case 'admin new':
     case 'user broadcast':
-      // @TODO: Consider providing options for the full gamut of message body
-      // options (header, footer etc.).
-      // @TODO: Reuse the messaging API's inbuilt token support.
-
-      $method = variable_get('og_notifications_delivery', 'mail');
-      // Avoid exposing the messaging API's internal data structure to OG to
-      // promote reuse.
-      $args['body'] = array('event' => $args['body']);
-      $args['type'] = 'og-notifications';
-
-      // Allow queue and from address overrides.
-      $queue = isset($args['queue']) ? $args['queue'] : FALSE;
-      if (isset($args['from'])) {
-        $args['sender_account'] = $args['from'];
-        // This should probably be using the og_email_notification_pattern
-        // variable.
-      }
-
-      // Clean up $message ($args).
-      unset($args['queue'], $args['from']);
-
-      // Is this a bulk message?
-      $bulk = is_array($uid) ? TRUE : FALSE;
-      if ($bulk) {
-        // Are the recipients UIDs or e-mail addresses?
-        if (isset($args['email']) && $args['email'] == TRUE) {
-          $destinations = $uid;
-        }
-        else {
-          $destinations = array();
-          foreach ($uid as $recipient) {
-            $destinations[] = messaging_load_user($recipient);
-          }
-        }
-        unset($args['email']);
-        // Disabled until bulk messaging is fixed in messaging_message_send_out().
-        // messaging_message_send($destinations, $args, $method, $queue);
-
-        // Workaround: (doesn't work for e-mail input)
-        foreach ($destinations as $account) {
-          messaging_message_send_user($account, $args, $method, $queue);
-        }
-      }
-      else {
-        // It is assumed that a non-bulk e-mail is always targetted at a UID
-        // and not an e-mail address.
-        $account = messaging_load_user($uid);
-        messaging_message_send_user($account, $args, $method, $queue);
+      $destinations = is_array($uid) ? $uid : array($uid);
+      foreach ($destinations as $uid) {
+        notifications_lite_send($uid, $args['subject'], $args['body']);
       }
       break;
   }
@@ -271,8 +219,6 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
       );
       return $types;
     case 'query':
-      // $arg0 = 'event' and $arg1 = 'node' and $event = $arg2
-      // $arg0 = 'user'  and $arg1 = 'noe' and $node = $arg2
       if ($arg0 == 'event' && $arg1 == 'node' && ($node = $arg2->node) || $arg0 == 'user' && $arg1 == 'node' && ($node = $arg2)) {
         $query = array();
         if ($node->og_groups) {
@@ -290,8 +236,9 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
       break;
     case 'node options':
       return _og_notifications_node_options($arg0, $arg1);
-    case 'event load': // $arg0 is event
-      // Nothing to load here, the user may be subscribed through one of many parent groups
+    case 'event load':
+      // Nothing to load here, the user may be subscribed through one of many 
+      // parent groups.
       break;
     case 'event types':
       // Event types for this are defined in notifications_content module

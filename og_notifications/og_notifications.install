@@ -14,7 +14,7 @@ function og_notifications_install() {
 }
 
 /**
- * Notications upgrade: Based on the upgrade flag, move existing subscriptions
+ * Notifications upgrade: Based on the upgrade flag, move existing subscriptions
  * to the notifications module.
  */
 function og_notifications_og_upgrade() {
@@ -51,5 +51,6 @@ function og_notifications_og_upgrade() {
  * Implementation of hook_uninstall().
  */
 function og_notifications_uninstall() {
+  // @TODO: Clear any queued messages in notifications?
   drupal_set_message(t('Organic groups notifications module uninstallation script complete.'));
 }
