@@ -209,13 +209,14 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
         'title' => t('Groups'),
         'access' => 'subscribe to content in groups',
         'page' => 'og_notifications_user_page',
-        'fields' => array('group'),
+        'fields' => array('group')
       );
       $types['grouptype'] = array(
         'event_type' => 'node',
         'title' => t('Content type in group'),
         'access' => 'subscribe to content in groups',
-        'fields' => array('group', 'type'),
+        'page' => 'og_notifications_user_page',
+        'fields' => array('group', 'type')
       );
       return $types;
     case 'query':
