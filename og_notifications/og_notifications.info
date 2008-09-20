@@ -1,8 +1,9 @@
 ; $Id$
 name = Organic Groups Notifications
-description = Allows users to subscribe to content in groups.
+description = Allows users to receive notifications and subscribe to group content.
 package = "Organic groups"
+dependencies[] = og
 dependencies[] = notifications
 dependencies[] = notifications_content
-dependencies[] = og
+dependencies[] = notifications_lite
 core = 6.x
