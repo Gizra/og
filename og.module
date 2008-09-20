@@ -343,8 +343,7 @@ function og_broadcast_form_submit($form_id, $form_values) {
   $message = array(
     'from' => $user,
     'subject' => $form_values['subject'],
-    'body' => _og_user_mail_text('og_admin_email_body', $variables),
-    'queue' => TRUE
+    'body' => _og_user_mail_text('og_admin_email_body', $variables)
   );
 
   // Send notifications to each member; Sending an array of recipients implies
