@@ -6,7 +6,19 @@
  */
 
 /**
- * Implementation of hook_menu_()
+ * Implementation of hook_help().
+ */
+function og_notifications_help($section) {
+  global $user;
+
+  switch ($section) {
+    case 'user/'. $user->uid .'/notifications/group':
+      return t('Customise notifications for each of your groups along with their frequency and delivery method. If so desired, you can also restrict notifications only for certain content types in each group.');
+  }
+}
+
+/**
+ * Implementation of hook_menu().
  */
 function og_notifications_menu($may_cache) {
   global $user;
@@ -24,10 +36,10 @@ function og_notifications_menu($may_cache) {
         'type' => MENU_LOCAL_TASK,
         'weight' => 10
       );
+      // grouptype redirects to group.
       $items[] = array(
         'path' => 'user/'. $account->uid .'/notifications/grouptype',
         'access' => user_access('subscribe to content in groups'),
-        'title' => t('Groups'),
         'callback' => 'og_notifications_grouptype_user_page',
         'callback arguments' => array($account),
         'type' => MENU_CALLBACK
