@@ -1174,7 +1174,7 @@ function og_page_activity() {
 
 /**
  * When you view a group, you really see some facts about the group in a block and then 
- * lists of nodes affiliated with that group. The node list is provided by the View of 
+ * lists of nodes affiliated with that group (requires og_views module). The node list is provided by the View of 
  * your choice (see the variable 'og_home_page_view'). If you use og_panels.module and the group has defined
  * a default home page, then that page becomes the presentation of the GHP.
  *
