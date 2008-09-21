@@ -300,7 +300,7 @@ function og_preprocess_og_mission(&$variables) {
 }
 
 /**
- * Make group context available to javascript for ad tags and anaytics.
+ * Make group context available to javascript for ad tags and analytics.
  * 
  * @return void
  **/
@@ -1966,42 +1966,6 @@ function og_form_add_og_audience(&$form, &$form_state) {
   else if ($required) {
     form_set_error('title', t('You must <a href="@join">join a group</a> before posting a %type.', array('@join' => url('og'), '%type' => node_get_types('name', $node->type))));
   }
-}
-
-/**
- * Similar to node_view() but without calling theme('node').
- *
- * This is needed to get the proper body or teaser for nodes (e.g. Event,
- * Location, CCK node types) and to clean up the body for use in notifications.
- *
- * @param $node
- *   The node object you want to view.
- * @param $teaser
- *   Boolean to select the teaser or the body of the node.
- *
- * @return
- *   The requested data, filtered and ready for use in an e-mail.
- *
- * @see node_view()
- * @see og_mail_notify()
- */
-function og_node_view($node, $teaser = FALSE) {
-  // Remove the delimiter (if any) that separates the teaser from the body.
-  // TODO: this strips legitimate uses of '<!--break-->' also.
-  $node->body = str_replace('<!--break-->', '', $node->body);
-
-  // The 'view' hook can be implemented to overwrite the default function
-  // to display nodes.
-  if (node_hook($node, 'view')) {
-    node_invoke($node, 'view', $teaser, TRUE);
-  }
-  else {
-    $node = node_prepare($node, $teaser);
-  }
-  // Allow modules to change $node->body before viewing.
-  node_invoke_nodeapi($node, 'view', $teaser, TRUE);
-  
-  return $teaser ? $node->teaser : $node->body;
 }
 
 /**

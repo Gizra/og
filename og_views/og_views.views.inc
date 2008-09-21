@@ -241,8 +241,7 @@ function og_views_data_og() {
     );
   }
   
-  // pseudofield
-  // Node type
+  // Pseudofield which actually operates on node.type
   $data['og']['type_groups'] = array(
     'title' => t('Group types'), // The item it appears as on the UI,
     'help' => t('The type of a group (for example, "blog entry", "forum post", "story", etc).'),

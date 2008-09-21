@@ -11,5 +11,19 @@ class og_views_handler_filter_og_type extends views_handler_filter_node_type {
       }
       $this->value_options = $options;
     }
-  }  
+  }
+  
+  // This is a copy of views_handler_filter_in_operator::query
+  // We force the table to be 'node' instead of 'og'. There might be cleaner ways to do this.
+  function query() {
+    if (empty($this->value)) {
+      return;
+    }
+    $table = $this->query->ensure_table('node');
+    $placeholder = !empty($this->definition['numeric']) ? '%d' : "'%s'";
+
+    $replace = array_fill(0, sizeof($this->value), $placeholder);
+    $in = ' (' . implode(", ", $replace) . ')';
+    $this->query->add_where($this->options['group'], "$table.$this->real_field " . $this->operator . $in, $this->value);
+  } 
 }
