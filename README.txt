@@ -51,7 +51,6 @@ TODO/BUGS/FEATURE REQUESTS
 UPGRADING FROM 5.0 TO 6.x
 -----------------
 - The upgrade auto-enables the new og_views module. This is needed to get the same functionality that was present in D5.
-- The user interface for selecting alternate Views for your group homepage is gone. You may still select an alternate view by setting 'og_home_page_view' variable in your settings.php. Alternative, just customize your og_ghp_ron View. You can always revert it if it breaks
 - Group members block (og/2) block is now served by Views: views/og_members_block-block_1
 - Group search is now in its own block which must be enabled manually. It used to be integrated into the Group details block.
 
