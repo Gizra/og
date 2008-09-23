@@ -96,7 +96,7 @@ function og_menu($may_cache) {
           'title' => t('Broadcast'),
           'callback' => 'drupal_get_form',
           'callback arguments' => array('og_broadcast_form', arg(1)),
-          'access' => og_is_node_admin($node),
+          'access' => og_broadcast_access($node),
           'type' => MENU_LOCAL_TASK,
           'weight' => 7
         );
@@ -2784,4 +2784,12 @@ function og_url_group($token, $argument, $arg) {
     return TRUE;
   }
   return FALSE;
+}
+
+/**
+ * Access callback: og_notifications (or similar) is required for the broadcast
+ * tab. Override menu item to amend.
+ */
+function og_broadcast_access($node) {
+  return og_is_node_admin($node) && module_exists('og_notifications');
 }
