@@ -150,11 +150,11 @@ function og_menu() {
     // Broadcast tab on group node.
   $items['node/%node/broadcast'] = array(
     'title' => 'Broadcast',
-    'page callback' => 'drupal_get_form', 
+    'page callback' => 'drupal_get_form',
     'page arguments' => array('og_broadcast_form', 1), 
-    'access callback' => 'og_is_group_admin', 
+    'access callback' => 'og_broadcast_access', 
     'access arguments' => array(1),
-    'type' => MENU_LOCAL_TASK, 
+    'type' => MENU_LOCAL_TASK,
     'weight' => 7
   );
 
@@ -2534,4 +2534,12 @@ function og_get_token($nid) {
  */
 function og_check_token($token, $seed) {
   return drupal_get_token($seed) == $token;
+}
+
+/**
+ * Access callback: og_notifications (or similar) is required for the broadcast
+ * tab. Override menu item to amend.
+ */
+function og_broadcast_access($node) {
+  return og_is_group_admin($node) && module_exists('og_notifications');
 }
