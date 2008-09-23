@@ -7,8 +7,7 @@
 function og_notifications_install() {
   drupal_set_message(t('Organic groups notifications module installation script complete.'));
 
-  $flag = variable_get('og_notifications_update_required', FALSE);
-  if ($flag) {
+  if (variable_get('og_notifications_update_required', FALSE)) {
     og_notifications_og_upgrade();
   }
 }
