@@ -2143,13 +2143,11 @@ function og_types_map() {
   $usages = array(
     'group' => t('Group node'),
     'omitted' => t('May not be posted into a group.'),
-    'group_post_standard_mail' => t('Standard group post (typically only author may edit). Sends notifications.'),
-    'group_post_standard_nomail' => t('Standard group post (typically only author may edit). No notification.'),
+    'group_post_standard' => t('Standard group post (typically only author may edit).')
   );
   
   if (module_exists('og_access')) {
-    $usages['group_post_wiki_mail'] = t('Wiki group post (any group member may edit). Sends notifications.');
-    $usages['group_post_wiki_nomail'] = t('Wiki group post (any group member may edit). No notification.');
+    $usages['group_post_wiki'] = t('Wiki group post (any group member may edit).');
   }
   
   return $usages;
