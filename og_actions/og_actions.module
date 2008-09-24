@@ -91,7 +91,7 @@ function og_remove_groups_action($node, $context) {
 function og_add_group_action($node, $context) {
   if (isset($context['group'])) {
 
-    $node->og_groups[] = $context['group'];
+    $node->og_groups[$context['group']] = $context['group'];
     watchdog('action', 'Added node id %id to %group.', array('%id' => intval($node->nid), '%group' => $context['group']));
   }
 }
