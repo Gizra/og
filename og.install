@@ -506,23 +506,6 @@ function og_update_5700() {
   * installation.
   */ 
 function og_update_5703() {
-  // Remove mail / no mail options from group types.
-  $types = node_get_types();
-  foreach ($types as $type) {
-    $type = 'og_content_type_usage_'. $type->type;
-    $usage = variable_get($type, '');
-    switch ($usage) {
-      case 'group_post_standard_mail':
-      case 'group_post_standard_nomail':
-        variable_set($type, 'group_post_standard');
-        break; 
-      case 'group_post_wiki_mail':
-      case 'group_post_wiki_nomail':
-        variable_set($type, 'group_post_wiki');
-        break; 
-    }
-  }
-
   // Set update flag for og_notifications.
   variable_set('og_notifications_update_required', 1);
 
