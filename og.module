@@ -314,6 +314,7 @@ function og_preprocess_page(&$variables) {
     // Copied from drupal_get_js().
     $js =  "\n". '<script type="text/javascript">jQuery.extend(Drupal.settings, '. drupal_to_js(call_user_func_array('array_merge_recursive', $data)) .");</script>\n";
     $variables['scripts'] .= $js;
+    $variables['body_classes'] .= " og-context og-context-$group_node->nid";
   }
 }
 
