@@ -1561,8 +1561,11 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           'body' => _og_mail_text('og_new_admin_body', $variables)
         );
 
-        // Alert the user that they are now the admin of the group.  
-        module_invoke_all('og', 'admin new', $node->nid, $account->uid, $message);      
+        // Skip the alert if we are auto-generating nodes.
+        if (empty($node->devel_generate)) {
+          // Alert the user that they are now the admin of the group.  
+          module_invoke_all('og', 'admin new', $node->nid, $account->uid, $message);      
+        }
       }
       else {
         og_save_ancestry($node);
