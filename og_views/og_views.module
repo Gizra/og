@@ -57,7 +57,7 @@ function og_views_block($op = 'list', $delta = 0, $edit = array()) {
     $blocks[0]['info'] = t('Group search');
     $blocks[0]['cache'] = BLOCK_NO_CACHE;
     
-    $blocks[1]['info'] = t('Group notifications (views enhanced)');
+    $blocks[1]['info'] = t('Group notifications (Views enhanced)');
     $blocks[1]['cache'] = BLOCK_NO_CACHE;
     return $blocks;
   }
