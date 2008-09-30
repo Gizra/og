@@ -41,28 +41,6 @@ function og_notifications_og_upgrade() {
   // Drop table og_uid_global.
   $ret[] = update_sql("DROP TABLE {og_uid_global}");
 
-  // Remove mail / no mail options from OG group types and move preferences to
-  // og_notifications.
-  $types = og_get_types('group_post');
-  $mail_types = array();
-  foreach ($types as $type) {
-    $variable = 'og_content_type_usage_'. $type;
-    $usage = variable_get($variable, '');
-    switch ($usage) {
-      case 'group_post_standard_mail':
-        $mail_types[$type] = $type;
-      case 'group_post_standard_nomail':
-        variable_set($variable, 'group_post_standard');
-        break;
-      case 'group_post_wiki_mail':
-        $mail_types[$type] = $type;
-      case 'group_post_wiki_nomail':
-        variable_set($variable, 'group_post_wiki');
-        break;
-    }
-  }
-  variable_set('og_notifications_content_types', $mail_types);
-
   variable_del('og_notifications_update_required');
 
   return $ret;
