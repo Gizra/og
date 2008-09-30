@@ -506,6 +506,30 @@ function og_update_5700() {
   * installation.
   */ 
 function og_update_5703() {
+  // Remove mail / no mail options from OG group types and move preferences to
+  // og_notifications.
+  $types = og_get_types('group_post');
+  $mail_types = array();
+  foreach ($types as $type) {
+    $variable = 'og_content_type_usage_'. $type;
+    $usage = variable_get($variable, '');
+    switch ($usage) {
+      case 'group_post_standard_mail':
+        $mail_types[$type] = $type;
+      case 'group_post_standard_nomail':
+        variable_set($variable, 'group_post_standard');
+        break;
+      case 'group_post_wiki_mail':
+        $mail_types[$type] = $type;
+      case 'group_post_wiki_nomail':
+        variable_set($variable, 'group_post_wiki');
+        break;
+    }
+  }
+  // Set variable for og_notifications. If it is never enabled, this variable
+  // is also deleted in og_uninstall.
+  variable_set('og_notifications_content_types', $mail_types);
+
   // Set update flag for og_notifications.
   variable_set('og_notifications_update_required', 1);
 
@@ -551,7 +575,7 @@ function og_uninstall() {
     'og_new_admin_body', 'og_new_admin_subject',
     'og_new_node_body', 'og_new_node_subject',
     'og_request_user_body', 'og_request_user_subject',
-    'og_notifications_update_required'
+    'og_notifications_update_required', 'og_notifications_content_types'
   );
   foreach ($variables as $variable) {
     variable_del($variable);
