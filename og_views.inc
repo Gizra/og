@@ -320,7 +320,12 @@ function og_views_arguments() {
         '#options' => 'views_handler_operator_like',
       ),
       'help' => t('Filter for the one or more organic groups. Groups should be specified by name, or part of a name. Use the <em>Option</em> field to specify how to match the supplied name.'),
-      )
+      ),
+    'og_uid' => array(
+      'name' => t('OG: User is subscribed to group'), 
+      'handler' => 'og_views_handler_argument_uid',
+      'help' => t("Filter for groups that user is subscribed to.  User is specified by user ID (integer).  This argument exposes a user's group subscriptions to other users. Depending on your site, this may be a violation of their privacy. Use it thoughfully."),
+    ),
     );
   return $args;
 }
@@ -351,6 +356,21 @@ function og_handler_argument_gid($op, &$query, $argtype, $arg = '') {
       break;
     case 'title':
       return db_result(db_query_range('SELECT title FROM {node} WHERE nid = %d', $query, 0, 1));;
+  }
+}
+
+/**
+ * Custom argument for filtering by groups that a user is subscribed to
+ */
+function og_views_handler_argument_uid($op, &$query, $a1, $a2 = null) {
+  switch ($op) {
+    case 'filter':
+      $query->ensure_table('og_uid');
+      $query->add_where("og_uid.uid = %d", $a2);
+      break;
+    case 'title':
+      // This returns the title for this node in the title, breadcrumb, etc.
+      return db_result(db_query('SELECT name FROM {users} WHERE uid = %d', $a2));
   }
 }
 
