@@ -987,7 +987,7 @@ function og_list_users_page($gid) {
 
 function og_list_users_faces_page($gid, $column_count = 5, $row_count = 10, $pager_id = 0) {
   $max_per_page = $row_count * $column_count;
-  $sql = og_list_users_sql(0, 0, 'ou.is_admin DESC, u.picture DESC, u.name ASC');
+  $sql = og_list_users_sql(1, 0, 'ou.is_admin DESC, u.picture DESC, u.name ASC');
   /* list group admins first, members with pics second, regular members last.  Alphabetize within each of these categories */
   $result = pager_query($sql, $max_per_page, $pager_id, NULL, $gid);
   $output = theme('og_picture_grid', $result, $column_count);
