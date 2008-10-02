@@ -28,11 +28,6 @@ function og_install() {
         PRIMARY KEY  (nid, uid)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
       
-      db_query("CREATE TABLE {og_uid_global} (
-        uid int(11) NOT NULL,
-        og_email int(11) NOT NULL DEFAULT 2,
-        PRIMARY KEY  (uid)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
       db_query("CREATE TABLE {og_ancestry} (
         nid int(11) NOT NULL,
         group_nid int(11) NOT NULL,
@@ -64,12 +59,6 @@ function og_install() {
         created int NULL DEFAULT 0,
         changed int NULL DEFAULT 0,
         PRIMARY KEY  (nid, uid)
-      );");
-      
-      db_query("CREATE TABLE {og_uid_global} (
-        uid int NOT NULL,
-        og_email int NOT NULL DEFAULT 2,
-        PRIMARY KEY (uid)
       );");
       
       db_query("CREATE TABLE {og_ancestry} (
@@ -306,8 +295,11 @@ function og_update_12() {
   return $ret;
 }
 
-// populate the og_uid_global table. we have to choose selective here for backward compatibility. 
-// to set everyone up for 'always' notifications, run this after the update: UPDATE og_uid_global SET og_email=1
+// populate the og_uid_global table. we have to choose selective here for 
+// backward compatibility. To set everyone up for 'always' notifications, run
+// this after the update: UPDATE og_uid_global SET og_email=1
+// og_uid_global is later moved into og_notifications. This update is only
+// around to retain schema consistency - the population script has been removed.
 function og_update_13() {
   switch ($GLOBALS['db_type']) { 
     case 'mysql': 
@@ -326,14 +318,7 @@ function og_update_13() {
       );");
       break;
   }
-  
-  // works for mysql and postgres
-  $sql = 'SELECT uid FROM {users} WHERE uid > 0';
-  $result = db_query($sql);
-  while ($row = db_fetch_object($result)) {
-    $sql = "INSERT INTO {og_uid_global} (uid, og_email) VALUES (%d, %d)";
-    db_query($sql, $row->uid, OG_NOTIFICATION_SELECTIVE);
-  }
+
   return array();
 }
 
@@ -418,9 +403,9 @@ function og_update_18() {
   return array();
 }
 
+// Formerly contained og_uid_global code which is no longer required.
 function og_update_19() {
-  og_populate_uid_global_table();
-  return array('Populated og_uid_global table');
+  return array();
 }
 
 function og_update_20() {
@@ -530,6 +515,9 @@ function og_update_5703() {
   // is also deleted in og_uninstall.
   variable_set('og_notifications_content_types', $mail_types);
 
+  // Vestigial variable.
+  variable_del('og_omitted_email_node_types');
+
   // Set update flag for og_notifications.
   variable_set('og_notifications_update_required', 1);
 
@@ -538,34 +526,23 @@ function og_update_5703() {
 
  // end updates //
 
- function og_enable() {
-  og_populate_uid_global_table();
-}
-
-// need to populate og_uid_global for existing users on enable
-// this is called from update 13 & 19 & og_enable. 
-// TODO: conditionally use subquery
-function og_populate_uid_global_table() {
-  $sql = 'SELECT u.uid FROM {users} u LEFT JOIN {og_uid_global} oug ON u.uid=oug.uid WHERE u.uid > 0 AND oug.og_email IS NULL';
-  $result = db_query($sql);
-  while ($row = db_fetch_object($result)) {
-    $sql = "INSERT INTO {og_uid_global} (uid, og_email) VALUES (%d, %d)";
-    db_query($sql, $row->uid, OG_NOTIFICATION_SELECTIVE);
-  }
-}
-
 function og_uninstall() {
   // Drop database table
   db_query('DROP TABLE {og}');
   db_query('DROP TABLE {og_uid}');
-  db_query('DROP TABLE {og_uid_global}');
   db_query('DROP TABLE {og_ancestry}');
+
+  // In case og_notifications has never been enabled, the vestigial 
+  // og_uid_global table will still be around. 
+  if (variable_get('og_notifications_update_required', FALSE)) {
+    db_query('DROP TABLE {og_uid_global}');
+  }
 
   // Delete variables
   $variables = array(
     'og_member_pics', 'og_help', 'og_block_cnt_2', 'og_block_cnt_3',
     'og_audience_checkboxes', 'og_omitted', 'og_content_type_usage',
-    'og_audience_required', 'og_omitted_email_node_types',
+    'og_audience_required',
     'og_visibility_directory', 'og_visibility_registration',
     'og_home_page_view', 'og_email_max', 'og_node_types',
     'og_admin_email_body', 'og_email_notification_pattern',
