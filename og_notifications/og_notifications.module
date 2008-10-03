@@ -51,6 +51,27 @@ function og_notifications_perm() {
 }
 
 /**
+ * Implementation of hook_user().
+ * Handle uid entry in the og_notifications table.
+ */
+function og_notifications_user($type, &$edit, &$user, $category = NULL) {
+  switch ($type) {
+    case 'insert':
+      db_query("INSERT INTO {og_notifications} (uid) VALUES (%d)", $user->uid);
+      break;
+    case 'update':
+      if (isset($edit['og_notifications_autosubscribe'])) {
+        og_notifications_user_autosubscribe_set($user->uid, $edit['og_notifications_autosubscribe']);
+        unset($edit['og_notifications_autosubscribe']);
+      }
+      break;
+    case 'delete':
+      db_query("DELETE FROM {og_notifications} WHERE uid = %d", $user->uid);
+      break;
+  }
+}
+
+/**
  * Implementation of hook_form_alter().
  */
 function og_notifications_form_alter(&$form, $form_state, $form_id) {
@@ -80,28 +101,26 @@ function og_notifications_form_alter(&$form, $form_state, $form_id) {
       );
       break;
     case 'user_edit':
-      // TODO: Is perm checking necessary here?
       // Insert autosubscribe option into the messaging section of the user edit
       // form.
-
       // user_edit is, oddly enough, also the form_id for forms in other
       // sub-tabs such as those added by the profile module.
       if (!arg(3)) {
         $account = $form['_account']['#value'];
-        // TODO: Strings need to conform with OG and notifications terminology.
         $form['messaging']['og_notifications_autosubscribe'] = array(
           '#type' => 'checkbox',
           '#title' => t('Automatically enable notifications for any groups that I join.'),
-          '#description' => t('Group notifications can be <a href="!manage-url">customised</a> in greater detail if required.', array('!manage-url' => url('user/'. $account->uid .'/notifications/group'))),
-          '#default_value' => isset($account->og_notifications_autosubscribe) ? $account->og_notifications_autosubscribe : variable_get('og_notifications_autosubscribe', 1)
+          '#description' => t('Group notifications can also be <a href="!manage-url">customised</a> in greater detail if required.', array('!manage-url' => url('user/'. $account->uid .'/notifications/group'))),
+          '#default_value' => og_notifications_user_autosubscribe_get($account->uid)
         );
       }
       break;
     case 'og_admin_settings':
+      // Default autosubscription setting.
       $form['og_settings']['notifications']['og_notifications_autosubscribe'] = array(
         '#type' => 'checkbox',
         '#title' => t('Autosubscribe users to any groups that they join.'),
-        '#description' => t('Automatically enable notifications by default. Users can override this via their account page.'),
+        '#description' => t('Automatically enable notifications by default. Users can override this via their account page. Changing this setting will only affect new users and those who have not overridden the system default.'),
         '#default_value' => variable_get('og_notifications_autosubscribe', 1),
         '#weight' => -5
       );
@@ -450,9 +469,35 @@ function og_notifications_grouptype_user_page($account) {
  *   The node ID of the group being subscribed to.
  */
 function og_notifications_user_autosubscribe($account, $gid) {
-  if (isset($account->og_notifications_autosubscribe) ? $account->og_notifications_autosubscribe : variable_get('og_notifications_autosubscribe', 1)) {
+  if (og_notifications_user_autosubscribe_get($account->uid)) {
     og_notifications_user_subscribe($account, $gid);
   }
+}
+
+/**
+ * Retrieve autosubscription setting for a particular user. -1 in the
+ * og_notifications table indicates that the site default is to be used.
+ *
+ * @param Integer $uid
+ *   The uid of the user.
+ * @return Integer
+ *   1 or 0 as per the autosubscribe preference.
+ */
+function og_notifications_user_autosubscribe_get($uid) {
+  $autosubscribe = db_result(db_query("SELECT autosubscribe FROM {og_notifications} WHERE uid = %d", $uid));
+  return $autosubscribe == -1 ? variable_get('og_notifications_autosubscribe', 1) : $autosubscribe;
+}
+
+/**
+ * Retrieve autosubscription setting for a particular user.
+ *
+ * @param Integer $uid
+ *   The uid of the user.
+ * @param Integer $autosubscribe
+ *   Autosubscription option: 0 or 1.
+ */
+function og_notifications_user_autosubscribe_set($uid, $autosubscribe) {
+  return db_query("UPDATE {og_notifications} SET autosubscribe = %d WHERE uid = %d", $autosubscribe, $uid);
 }
 
 /**
