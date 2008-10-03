@@ -486,10 +486,10 @@ function og_update_5700() {
    return $ret;
  }
  
- /**
-  * Notifications upgrade: Set flag to indicate that this is an upgraded 
-  * installation.
-  */ 
+/**
+ * Notifications upgrade: Set flag to indicate that this is an upgraded 
+ * installation.
+ */ 
 function og_update_5703() {
   // Remove mail / no mail options from OG group types and move preferences to
   // og_notifications.

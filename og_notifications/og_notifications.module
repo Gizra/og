@@ -88,7 +88,7 @@ function og_notifications_form_alter($form_id, &$form) {
         '#type' => 'fieldset',
         '#title' => t('Group subscriptions'),
         '#collapsible' => TRUE,
-        '#weight' => 0,
+        '#weight' => 0
       );
       // General content settings
       $select = array();
@@ -99,12 +99,12 @@ function og_notifications_form_alter($form_id, &$form) {
       }
 
       $form['group']['og_notifications_content_types'] = array(
-        '#type'          => 'checkboxes',
-        '#title'         => t('Allowed content types'),
+        '#type' => 'checkboxes',
+        '#title' => t('Allowed content types'),
         '#default_value' => variable_get('og_notifications_content_types', array()),
-        '#options'       => $select,
-        '#description'   => t('Select specific content types which should be <em>allowed</em> for subscriptions to <em>group + content type</em>.'),
-        '#multiple'      => TRUE,
+        '#options' => $select,
+        '#description' => t('Select specific content types which should be <em>allowed</em> for subscriptions to <em>group + content type</em>.'),
+        '#multiple' => TRUE
       );
       break;
     case 'user_edit':
@@ -198,7 +198,7 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
             'subject' => t('Subject for event notifications'),
             'header' => t('Body header for event notifications'),
             'main' => t('Body for event notifications'),
-            'footer' => t('Body footer for event notifications'),
+            'footer' => t('Body footer for event notifications')
           );
         break;
       }
@@ -213,7 +213,7 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
             'main' => t("A [type] has been updated: [title]\n\n[event_list]"),
             'footer' => array(
               t('This is an automatic message from [site-name])'),
-              t('To manage your subscriptions, browse to [subscriptions-manage]'),
+              t('To manage your subscriptions, browse to [subscriptions-manage]')
             )
           );
       }
@@ -372,7 +372,7 @@ function og_notifications_user_page($account = NULL) {
       foreach ($types as $key => $value) {
         $form[$group_index]['subscriptions']['checkbox'][$key] = array(
           '#type' => 'checkbox',
-          '#default_value' => $value['checkbox'],
+          '#default_value' => $value['checkbox']
         );
         $form[$group_index]['subscriptions']['title'][$key] = array(
           '#value' => t('%type posts in this group', array('%type' => $value['title']))
@@ -380,12 +380,12 @@ function og_notifications_user_page($account = NULL) {
         $form[$group_index]['subscriptions']['send_interval'][$key] = array(
           '#type' => 'select',
           '#options' => _notifications_send_intervals(),
-          '#default_value' => $value['send_interval'],
+          '#default_value' => $value['send_interval']
         );
         $form[$group_index]['subscriptions']['send_method'][$key] = array(
           '#type' => 'select',
           '#options' => _notifications_send_methods(),
-          '#default_value' => $value['send_method'],
+          '#default_value' => $value['send_method']
         );
       }
     }
