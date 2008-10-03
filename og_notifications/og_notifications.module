@@ -67,8 +67,10 @@ function og_notifications_user($type, &$edit, &$user, $category = NULL) {
       db_query("INSERT INTO {og_notifications} (uid) VALUES (%d)", $user->uid);
       break;
     case 'update':
-      og_notifications_user_autosubscribe_set($user->uid, $edit['og_notifications_autosubscribe']);
-      unset($edit['og_notifications_autosubscribe']);
+      if (isset($edit['og_notifications_autosubscribe'])) {
+        og_notifications_user_autosubscribe_set($user->uid, $edit['og_notifications_autosubscribe']);
+        unset($edit['og_notifications_autosubscribe']);
+      }
       break;
     case 'delete':
       db_query("DELETE FROM {og_notifications} WHERE uid = %d", $user->uid);
