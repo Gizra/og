@@ -100,10 +100,10 @@ function og_notifications_form_alter(&$form, $form_state, $form_id) {
         '#multiple'      => TRUE,
       );
       break;
-    case 'user_edit':
+    case 'user_profile_form':
       // Insert autosubscribe option into the messaging section of the user edit
       // form.
-      // user_edit is, oddly enough, also the form_id for forms in other
+      // user_profile_form is, oddly enough, also the form_id for forms in other
       // sub-tabs such as those added by the profile module.
       if (!arg(3)) {
         $account = $form['_account']['#value'];
