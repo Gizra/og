@@ -346,41 +346,6 @@ function og_update_5701() {
  return $ret;
 }
 
-function og_update_6000() {
-  $ret = array();
-  // Fix how we append the custom request text from a group join request.
-  $name = 'og_request_user_body';
-  if ($txt = variable_get($name, FALSE)) {
-    $txt .= "\n\nPersonal message from @username:\n------------------\n\n@request";
-    variable_set($name, $txt);
-  }
-}
-
-// Update to support views modularization while retaining backward compatibility.
-function og_update_6001() {
-  $ret = array();
-  drupal_install_modules(array('og_views'));
-  //enable the og_views block instead of the plain og one
-  db_query("UPDATE {blocks} SET module = 'og_views', delta = '1' WHERE module = 'og' AND delta = '5'");
-  return $ret;
-}
-
-// Change field names in {og} table. Enables use of drupal_write_record()
-function og_update_6002() {
-  $ret = array();
-  
-  $schema = drupal_get_schema_unprocessed('og', 'og');
-  $fields = $schema['fields'];
-  db_change_field($ret, 'og', 'selective', 'og_selective', $fields['og_selective']);
-  db_change_field($ret, 'og', 'register', 'og_register', $fields['og_register']);
-  db_change_field($ret, 'og', 'theme', 'og_theme', $fields['og_theme']);
-  db_change_field($ret, 'og', 'directory', 'og_directory', $fields['og_directory']);
-  db_change_field($ret, 'og', 'description', 'og_description', $fields['og_description']);
-  db_change_field($ret, 'og', 'language', 'og_language', $fields['og_language']);
-  db_change_field($ret, 'og', 'private', 'og_private', $fields['og_private']);
-  return $ret;
-}
-
 /**
  * Notifications upgrade: Set flag to indicate that this is an upgraded 
  * installation.
@@ -417,6 +382,41 @@ function og_update_5703() {
   variable_set('og_notifications_update_required', 1);
 
   return array();
+}
+
+function og_update_6000() {
+  $ret = array();
+  // Fix how we append the custom request text from a group join request.
+  $name = 'og_request_user_body';
+  if ($txt = variable_get($name, FALSE)) {
+    $txt .= "\n\nPersonal message from @username:\n------------------\n\n@request";
+    variable_set($name, $txt);
+  }
+}
+
+// Update to support views modularization while retaining backward compatibility.
+function og_update_6001() {
+  $ret = array();
+  drupal_install_modules(array('og_views'));
+  //enable the og_views block instead of the plain og one
+  db_query("UPDATE {blocks} SET module = 'og_views', delta = '1' WHERE module = 'og' AND delta = '5'");
+  return $ret;
+}
+
+// Change field names in {og} table. Enables use of drupal_write_record()
+function og_update_6002() {
+  $ret = array();
+  
+  $schema = drupal_get_schema_unprocessed('og', 'og');
+  $fields = $schema['fields'];
+  db_change_field($ret, 'og', 'selective', 'og_selective', $fields['og_selective']);
+  db_change_field($ret, 'og', 'register', 'og_register', $fields['og_register']);
+  db_change_field($ret, 'og', 'theme', 'og_theme', $fields['og_theme']);
+  db_change_field($ret, 'og', 'directory', 'og_directory', $fields['og_directory']);
+  db_change_field($ret, 'og', 'description', 'og_description', $fields['og_description']);
+  db_change_field($ret, 'og', 'language', 'og_language', $fields['og_language']);
+  db_change_field($ret, 'og', 'private', 'og_private', $fields['og_private']);
+  return $ret;
 }
 
 // end updates //
