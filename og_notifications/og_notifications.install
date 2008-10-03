@@ -96,7 +96,7 @@ function og_notifications_og_upgrade() {
  * Implementation of hook_uninstall().
  */
 function og_notifications_uninstall() {
-  drupal_uninstall_schema('og');
+  drupal_uninstall_schema('og_notifications');
 
   variable_del('og_notifications_autosubscribe');
   variable_del('og_notifications_content_types');
