@@ -257,7 +257,7 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
           $query[] = array(
             'join' => "LEFT JOIN {og_ancestry} oga ON f.field = 'group' AND f.value = CAST(oga.group_nid AS CHAR(255))",
             'where' => 'oga.nid = %d',
-            'args' => array($node->nid),
+            'args' => array($node->nid)
           );
         }
         if ($arg0 == 'user' && og_is_group_type($node->type)) {
@@ -344,12 +344,14 @@ function og_notifications_user_page($account = NULL) {
           'send_method' => $bool ? $ngrouptypes[$gid][$type]->send_method : $grouptype_form['defaults']['#value']['send_method']
         );
       }
+
+      $bool = isset($ngroups[$gid]);
       $all = array(
         'all' => array(
           'title' => t('All'),
-          'checkbox' => isset($ngroups[$gid]),
-          'send_interval' => isset($ngroups[$gid]) ? $ngroups[$gid]->send_interval : $group_form['defaults']['#value']['send_interval'],
-          'send_method' => $ngroups[$gid]->send_method
+          'checkbox' => $bool,
+          'send_interval' => $bool ? $ngroups[$gid]->send_interval : $group_form['defaults']['#value']['send_interval'],
+          'send_method' => $bool ? $ngroups[$gid]->send_method : $group_form['defaults']['#value']['send_method']
         )
       );
       $types = $all + $types;
@@ -393,6 +395,7 @@ function og_notifications_user_page($account = NULL) {
     $form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   }
   else {
+    $form = array();
     drupal_set_message(t('There are no active group subscriptions available.'));
   }
 
@@ -591,6 +594,8 @@ function _og_notifications_user_grouptypes($uid) {
  * Options to display for node subscriptions.
  */
 function _og_notifications_node_options($account, $node) {
+  $options = array();
+
   // If node is a group type
   if (og_is_group_type($node->type)) {
     $options[] = array(
@@ -612,7 +617,7 @@ function _og_notifications_node_options($account, $node) {
     foreach ($node->og_groups as $index => $gid) {
       // Content type
       $options[] = array(
-        'name' => t('Posts in %name', array('%name' => $node->og_groups_both[$gid])),
+        'name' => t('Posts in group %name', array('%name' => $node->og_groups_both[$gid])),
         'type' => 'group',
         'fields' => array('group' => $gid)
       );
