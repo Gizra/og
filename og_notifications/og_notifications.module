@@ -244,8 +244,6 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
       );
       return $types;
     case 'query':
-      // $arg0 = 'event' and $arg1 = 'node' and $event = $arg2
-      // $arg0 = 'user'  and $arg1 = 'noe' and $node = $arg2
       if ($arg0 == 'event' && $arg1 == 'node' && ($node = $arg2->node) || $arg0 == 'user' && $arg1 == 'node' && ($node = $arg2)) {
         $query = array();
         if (isset($node->og_groups)) {
@@ -368,7 +366,7 @@ function og_notifications_user_page($form_state, $account = NULL) {
       foreach ($types as $key => $value) {
         $form[$group_index]['subscriptions']['checkbox'][$key] = array(
           '#type' => 'checkbox',
-          '#default_value' => $value['checkbox'],
+          '#default_value' => $value['checkbox']
         );
         $form[$group_index]['subscriptions']['title'][$key] = array(
           '#value' => t('%type posts in this group', array('%type' => $value['title']))
