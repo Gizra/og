@@ -12,7 +12,8 @@ class og_views_handler_field_og_member_count extends views_handler_field_numeric
     $nid = $values->nid;
     $txt = $values->member_count;
     if (og_is_group_member($nid)) {
-      return og_is_picture() ? l($txt, "og/users/$nid/faces") : l($txt, "og/users/$nid");
+      $value = og_is_picture() ? l($txt, "og/users/$nid/faces") : l($txt, "og/users/$nid");
+      return check_plain($this->options['prefix']) . $value . check_plain($this->options['suffix']);
     }
     else {
       return parent::render($values);
