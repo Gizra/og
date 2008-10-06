@@ -125,25 +125,6 @@ function og_schema() {
     ),
     'primary key'       => array('nid', 'uid'),
   );
-  $schema['og_uid_global']  = array(
-    'description'     => t('User preferences that are not group specific.'),
-    'fields'          => array(
-      'uid'             => array(
-        'description'     => t('The user. See {users}.uid.'),
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
-      ),
-      'og_email'        => array(
-        'description'     => t('Notification preference for group posts (always, never, depends per group).'),
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
-        'default'         => 2,
-      ),
-    ),
-    'primary key'     => array('uid'),
-  );
   $schema['og_ancestry'] = array(
     'description'     => '',
     'fields'          => array(
@@ -424,6 +405,12 @@ function og_update_6002() {
 function og_uninstall() {
   drupal_uninstall_schema('og');
 
+  // In case og_notifications has never been enabled, the vestigial 
+  // og_uid_global table will still be around. 
+  if (variable_get('og_notifications_update_required', FALSE)) {
+    db_query('DROP TABLE {og_uid_global}');
+  }
+
   // Delete variables
   $variables = array(
     'og_help', 'og_block_cnt_2', 'og_block_cnt_3',
@@ -438,7 +425,7 @@ function og_uninstall() {
     'og_new_admin_body', 'og_new_admin_subject',
     'og_new_node_body', 'og_new_node_subject',
     'og_request_user_body', 'og_request_user_subject',
-    'og_notifications_update_required'
+    'og_notifications_update_required', 'og_notifications_content_types'
   );
   foreach ($variables as $variable) {
     variable_del($variable);
