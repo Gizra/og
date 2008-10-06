@@ -28,15 +28,6 @@ $handler->override_option('fields', array(
     'link_to_user' => 1,
     'relationship' => 'none',
   ),
-  'mail_type' => array(
-    'id' => 'mail_type',
-    'table' => 'og_uid',
-    'field' => 'mail_type',
-    'label' => 'Email',
-    'type' => 'yes-no',
-    'not' => 0,
-    'relationship' => 'none',
-  ),
   'managelinkmy' => array(
     'label' => 'Manage',
     'exclude' => 0,
@@ -110,7 +101,7 @@ $handler->override_option('access', array(
 $handler->override_option('title', 'My groups');
 $handler->override_option('header', '<?php 
 
-return strtr(\'You may edit all your email subscriptions using this convenient page. Also, you might be interested in an <a href="!url" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.\', array(\'!url\' => url(\'og/opml\')));
+return strtr(\'You might be interested in an <a href="!url" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.\', array(\'!url\' => url(\'og/opml\')));
 
 ?>');
 $handler->override_option('header_format', '3');
@@ -134,7 +125,6 @@ $handler->override_option('style_options', array(
   'columns' => array(
     'title' => 'title',
     'name' => 'name',
-    'mail_type' => 'mail_type',
     'managelink' => 'managelink',
   ),
   'info' => array(
@@ -144,9 +134,6 @@ $handler->override_option('style_options', array(
     ),
     'name' => array(
       'sortable' => 1,
-      'separator' => '',
-    ),
-    'mail_type' => array(
       'separator' => '',
     ),
     'managelink' => array(

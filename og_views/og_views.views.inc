@@ -209,20 +209,6 @@ function og_views_data_og() {
       'handler' => 'og_views_handler_field_og_subscribe',
     ),
   );
-  $data['og']['notification'] = array(
-    'title' => t('Group: Notification'),
-    'help' => t('Does group sending email notifications to its members by default'),
-    'real field' => 'og_notification',
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
   if (module_exists('locale')) {
     $data['og']['language'] = array(
       'title' => t('Group: Language'),
@@ -378,16 +364,6 @@ function og_views_data_og_uid() {
     'filter' => array(
       'handler' => 'views_handler_filter_user_current',
       'help' => t("OG: Group in user's groups"),
-    ),
-  );
-  $data['og_uid']['mail_type'] = array(
-    'title' => t('OG: Notification email'),
-    'help' => t('Does member receive email notifications for a group.'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
     ),
   );
   $data['og_uid']['managelinkadmin'] = array(
