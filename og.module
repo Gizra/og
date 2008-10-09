@@ -2223,8 +2223,9 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     $blocks[5]['info'] = t('Group notifications');
     $blocks[5]['cache'] = BLOCK_NO_CACHE;
     
+    // Now provided by og_views. Please don't reuse this number 6
     // $blocks[6]['info'] = t('Group network');
-    //     $blocks[6]['cache'] = BLOCK_CACHE_PER_USER;
+
     
     // Auto-enable the group blocks for fresh installations.
     // TODOL: In order for this to work, you must rehash blocks during install which has been problematic.
@@ -2245,8 +2246,6 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
        return og_block_new();
       case 5:
         return og_block_notifications();
-      case 6:
-        return og_block_users_network();
     }
   }
   elseif ($op == 'configure') {
