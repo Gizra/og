@@ -2187,7 +2187,7 @@ function og_is_group_post_type($type) {
 }
 
 function og_is_omitted_type($type) {
-  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'omitted' ? TRUE : FALSE;
+  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'omitted';
 }
 
 /**
@@ -2198,7 +2198,7 @@ function og_is_omitted_type($type) {
  * @return boolean
  */
 function og_is_group_type($type) {
-  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'group' ? TRUE : FALSE;
+  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'group';
 }
 
 /**
