@@ -59,15 +59,24 @@ class OgSubscribe extends OgTestCase {
         $this->drupalPost(NULL, array(), t('Join'));
         // Assert membership approval, waiting for approval text.
         $this->assertRaw(t($key == 'open' ? 'You are now a member of the %title.' : 'Membership request to the %title group awaits approval by an administrator.', array('%title' => $this->nodes[$key]->title)), t('Subscribed @selective group text found.', array('@selective' => $key)));
+        // Assert user is properly subscribed to open group.
+        if ($key == 'open') {
+          // Only in the 'open' group the web user is considered subscribed.
+          $this->assertTrue(array_key_exists($this->nodes[$key]->nid, og_get_subscriptions($this->web_user->uid, 1, TRUE)), t('Subscribed open group is loaded into user object.'));
+        }
 
         // Unsubscribe a group.
         $this->drupalGet('og/unsubscribe/'. $this->nodes[$key]->nid .'/'. $this->web_user->uid);
-        file_put_contents('output.html', $this->drupalGetContent());
         $this->assertRaw(t('Are you sure you want to remove @user from the group %title?', array('@user' => $this->web_user->name, '%title' => $this->nodes[$key]->title)), t('Unsubscribe @selective group text found.', array('@selective' => $key)));
         // Click the join button.
         $this->drupalPost(NULL, array(), t('Remove'));
         // Assert membership removal.
         $this->assertRaw(t('%user removed from %group.', array('%user' => $this->web_user->name, '%group' => $this->nodes[$key]->title)), t('Confirmation of unsubscribing @selective group text found.', array('@selective' => $key)));
+        // Assert user is properly removed to group.
+        if ($key == 'open') {
+          // Assert the group was removed from web user.
+          $this->assertFalse(array_key_exists($this->nodes[$key]->nid, og_get_subscriptions($this->web_user->uid, 1, TRUE)), t('Open group was removed from the og_uid table.'));
+        }
       }
       else {
         // Assert a 403 page is given.
