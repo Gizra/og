@@ -161,7 +161,7 @@ function og_install() {
   drupal_install_schema('og');
 
   // enable standard og blocks. for custom profiles, block may not be included yet.
-  if (function_exists('block_rehash')) {
+  if (function_exists('_block_rehash')) {
     _block_rehash();
   }
   
