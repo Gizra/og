@@ -1,222 +1,79 @@
 <?php
+// $Id$
 
-require_once dirname(__FILE__). '/og_testcase.php';
+/**
+ * @file
+ * Tests for membership related operations in the organic groups module.
+ */
+
+require_once dirname(__FILE__) .'/og_testcase.php';
 
 class OgSubscribe extends OgTestCase {
   function getInfo() {
-    return array('name'  => t('Og membership test'),
-                 'desc'  => t('Tests og membership functionality and asserts correct behavior with all og_selective settings'),
-                 'group' => 'Organic groups');
+    return array(
+      'name' => t('Organic groups membership tests'),
+      'description' => t("Tests membership functionality and asserts correct behavior with all the different selective settings (e.g. open, moderated, etc')."),
+      'group' => t('Organic groups'),
+    );
   }
-  
-  function testAddOg() {
-    //$og_type = $this->addNodeType();
-    $og_content_type = $this->drupalCreateContentType(array(
-    	'description' => $this->randomName(32, "description ... "),
-      'help' => $this->randomName(32, "description ... ")));
-    $og_type = $og_content_type->name;
-    variable_set('og_content_type_usage_'. $og_type, 'group');
 
-    // Create an administrator
-    $web_user = $this->drupalCreateUser(array('access content', "create $og_type content", "edit $og_type content", 'create pages', 'create groups'));
+  /**
+   * Implementation of setUp().
+   */
+  function setUp() {
+    parent::setUp('og', 'og_access');
+    // Create a user with admin permissions.
+    $this->web_admin = $this->drupalCreateUser(array('administer nodes', 'administer content types', 'access administration pages', 'administer site configuration', 'administer organic groups'));
+    $this->drupalLogin($this->web_admin);
 
+    // Create a group node content type.
+    $og_group_type = $this->drupalCreateContentType();
+    variable_set('og_content_type_usage_'. $og_group_type->name, 'group');
+
+    // Rebuild the menu so the new content types will appear in the menu.
     menu_rebuild();
-    // Log in as administrator
-    $this->drupalLogin($web_user);
-    // Create an open group as the administrator
-    $gid = $this->addOg($og_type, OG_OPEN);
-    $node = node_load($gid);
-    
-    // $b will be the "admin browser, sometimes backed up in _browser, sometimes used explictly"
-    $b = $this->_browser;
-    $this->_browser = new SimpleBrowser();
 
-    // Create a normal user
-    $join_user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($join_user);
-     
-    // Test subscribe a new user
-    $url = url('og/subscribe/' . $gid, array('absolute' => TRUE));
-    $ret = $this->_browser->drupalGet($url);
-    // This user can access the subscribe page for an open group
-    $this->assertTrue($ret, " [browser] GET $url");
-    // No theme, "Text" only
-    $this->assertRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
-                            "Confirmation text found.");
-    $this->clickSubmit("Join");
-    $this->assertRaw(t('You are now a member of the <em>@group', array('@group' => $node->title)),
-                            'Subscribed to group - text found.');
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
+    // Create groups with different visibility (open, moderated, etc').
+    $this->selective = array('open' => OG_OPEN, 'moderated' => OG_MODERATED, 'invite' => OG_INVITE_ONLY, 'closed' => OG_CLOSED);
+    $this->nodes = array();
+    foreach ($this->selective as $key => $selective)   {
+      // Create a group node and save the node in $this.
+      $this->nodes[$key] = node_load($this->addOgGroup($og_group_type->name, $selective));
+    }
 
-    // Find user in list
-    $url = url('og/users/' . $gid, array("absolute" => true));
-    $ret = $b->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assert(new TextExpectation($join_user->name),
-                    $b->getContentAsText(), $message);
-    
-    /** @TODO: Test Posting etc... */
-    
-    // Test unsubscribing a new user 
-    $url = url("og/unsubscribe/$gid/$join_user->uid", array('absolute' => true));
-    $ret = $this->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertRaw(t('Are you sure you want to remove !name from the group <em>@title</em>?', array('!name' => $join_user->name, '@title' => $node->title)),
-                            "Leave confirmation text found");
-    
-    $this->clickSubmit('Remove');
-    $this->assertRaw(t('<em>!user</em> removed from <em>!group</em>.', array('!user' => $join_user->name, '!group' => $node->title)), 'User unsubscribed to group - text found.');
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
-
-    $this->_browser = $b;
-    
-    // Find user in list */
-    $url = url('og/users/' . $gid, array('absolute' => true));
-    $ret = $b->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertNoRaw($join_user->name, 'User name not found.');
-
-    // CLOSED GROUP ************************************************************
-    $gid = $this->addOg($og_type, OG_CLOSED);
-    $node = node_load($gid);
-   
-    $b = $this->_browser;
-    $this->_browser = new SimpleBrowser();
-    $this->drupalLogin($join_user);
-
-    // Test subscribing a new user 
-    $url = url('og/subscribe/' . $gid, array('absolute' => TRUE));
-    $ret = $this->_browser->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertNoRaw(t('You are now a member of the <em>@group</em> group', array('@group' => $node->title)),
-                                'User member of group - text not found.');
-
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
-    $this->assertNoRaw(t('Are you sure you want to join the group <em>%title</em>?', array('%title' => $node->title)),
-                            "Confirmation text found.");
-    $this->clickSubmit("Join");
-
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
-    $this->assertRaw(t('Access denied'), 'Closed/Rejected text found.');
-    // Find user in list 
-    $url = url('og/users/' . $gid, array('absolute' => TRUE));
-    $ret = $b->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assert(new NoTextExpectation($join_user->name),
-                    $b->drupalGetContentAsText(), 'Username not found');
-
-    $this->_browser = $b;
-    
-    // INVITE ONLY GROUP ********************************************************
-    $gid = $this->addOg($og_type, OG_INVITE_ONLY);
-    $node = node_load($gid);
-
-    $b = $this->_browser;
-    $this->_browser = new SimpleBrowser();
-
-    $this->drupalLogin($join_user);
-
-    // Test subscribing a new user 
-    $url = url('og/subscribe/' . $gid, array('absolute' => TRUE));
-    $ret = $this->_browser->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertNoRaw(t('You are now a member of the @group group', array('@group' => $node->title)),
-                                'User member of group - text not found.');
-
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
-    
-    $this->assertNoRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
-                            "Confirmation text found.");
-    $this->clickSubmit("Join");
-
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
-    $this->assertRaw(t('Access denied'), 'Rejected text found.');
-
-    // Find user in list 
-    $url = url('og/users/' . $gid, array('absolute' => TRUE));
-    $ret = $b->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assert(new NoTextExpectation($join_user->name),
-                    $b->drupalGetContentAsText(), 'Username not found');
-
-
-    $this->_browser = $b;
-    // MODERATED GROUP ---------------------------------------------
-    $gid = $this->addOg($og_type, OG_MODERATED);
-    $node = node_load($gid);
-    
-    $b = $this->_browser;
-    $this->_browser = new SimpleBrowser();
-
-    $this->drupalLogin($join_user);
-
-    // Test subscribing a new user 
-    $url = url('og/subscribe/' . $gid, array('absolute' => TRUE));
-    $ret = $this->_browser->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertNoRaw(t('You are now a member of the @group', array('@group' => $node->title)),
-                                'User member of group - text not found.');
-
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
-    
-    $this->assertRaw(t('Are you sure you want to join the group @title?', array('@title' => $node->title)),
-                            "Confirmation text found.");
-    $this->clickSubmit("Join");
-
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
-    $this->assertRaw(t('Membership request to the <em>@group</em> group awaits approval by an administrator.',
-                                           array('@group' => $node->title)), 'Approval text found.');
-
-    // Find user in list, Inactive users _ARE_ listed
-    $this->_browser = $b; // Switch back to admin view
-    $url = url('og/users/' . $gid, array('absolute' => TRUE));
-    $this->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertRaw($join_user->name, 'Username found');
-    $this->clickLink(t('deny'));
-dfb($this);
-    $this->assertRaw(t('Membership request denied.'), 'Denied text found.');
-    
-
-    $url = url('og/users/' . $gid, array('absolute' => TRUE));
-    $this->drupalGet($url);
-    $this->assertNoRaw($join_user->name, 'Username not found');
-
-    // Now try this again
-    $this->_browser = new SimpleBrowser();
-
-    $this->drupalLogin($join_user);
-
-    // Test subscribing a new user 
-    $url = url('og/subscribe/' . $gid, array('absolute' => TRUE));
-    $ret = $this->_browser->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    
-    $this->assertRaw(t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
-                            "Confirmation text found.");
-    $this->clickSubmit("Join");
-
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
-
-    $this->assertNoRaw(t('You are now a member of the %group group', array('%group' => $node->title)),
-                                'User member of group - text not found.');
-
-    $this->assertNoRaw(t('Page not found'), 'page not not found.');
-
-    // Find user in list, Inactive users _ARE_ listed
-    $this->_browser = $b; // Switch back to admin view
-    $url = url('og/users/' . $gid, array('absolute' => TRUE));
-    $ret = $this->_browser->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertRaw($join_user->name, 'Username found');
-    
-    $this->clickLink(t('approve'));
-
-    $this->assertRaw(t('Membership request approved.'), 'Approved text found.');
-    
-    $url = url('og/users/' . $gid, array('absolute' => TRUE));
-    $ret = $this->_browser->drupalGet($url);
-    $this->assertTrue($ret, " [browser] GET $url");
-    $this->assertRaw($join_user->name, 'Username found again');
+    // Create web user that will join the groups.
+    $this->web_user = $this->drupalCreateUser(array('access content'));
   }
+
+  /**
+   * Test a web user subscribing and unsubscribing a group.
+   */
+  function testWebUserSubscribeOg() {
+    $this->drupalLogin($this->web_user);
+    foreach ($this->selective as $key => $selective) {
+      // Get the join page.
+      $this->drupalGet('og/subscribe/'. $this->nodes[$key]->nid);
+      if ($key == 'open' || $key == 'moderated') {
+        $this->assertRaw(t('Are you sure you want to join the group %title?', array('%title' => $this->nodes[$key]->title)), t('Subscribe to @selective group text found.', array('@selective' => $key)));
+        // Click the join button.
+        $this->drupalPost(NULL, array(), t('Join'));
+        // Assert membership approval, waiting for approval text.
+        $this->assertRaw(t($key == 'open' ? 'You are now a member of the %title.' : 'Membership request to the %title group awaits approval by an administrator.', array('%title' => $this->nodes[$key]->title)), t('Subscribed @selective group text found.', array('@selective' => $key)));
+
+        // Unsubscribe a group.
+        $this->drupalGet('og/unsubscribe/'. $this->nodes[$key]->nid .'/'. $this->web_user->uid);
+        file_put_contents('output.html', $this->drupalGetContent());
+        $this->assertRaw(t('Are you sure you want to remove @user from the group %title?', array('@user' => $this->web_user->name, '%title' => $this->nodes[$key]->title)), t('Unsubscribe @selective group text found.', array('@selective' => $key)));
+        // Click the join button.
+        $this->drupalPost(NULL, array(), t('Remove'));
+        // Assert membership removal.
+        $this->assertRaw(t('%user removed from %group.', array('%user' => $this->web_user->name, '%group' => $this->nodes[$key]->title)), t('Confirmation of unsubscribing @selective group text found.', array('@selective' => $key)));
+      }
+      else {
+        // Assert a 403 page is given.
+        $this->assertResponse(403, t('User got a 403 page while trying to access @selective group subscription.', array('@selective' => $key)));
+      }
+    }
+  }
+
 }

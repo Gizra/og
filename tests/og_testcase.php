@@ -83,7 +83,6 @@ class OgTestCase extends DrupalWebTestCase {
     $type_hyphen = str_replace('_', '-', $type);
 
     $this->drupalPost('node/add/'. $type_hyphen, $edit, t('Save'));
-    dd($GLOBALS['user'], 'user');
 
     // Check that the form has been submitted.
     $this->assertRaw(t('!type %title has been created.', array('!type' => $type, '%title' => $edit['title'])), t('%og_type created.', array('%og_type' => $og_type)));
