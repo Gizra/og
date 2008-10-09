@@ -475,7 +475,9 @@ function og_set_theme($nid) {
   global $custom_theme, $user;
   $node = node_load(intval($nid));
   if (og_is_group_type($node->type)) {
-    $custom_theme = $node->og_theme;
+    if (!$custom_theme) {
+      $custom_theme = $node->og_theme;
+    }
     return $node;
   }
   elseif (isset($node->og_groups)) {
@@ -484,14 +486,18 @@ function og_set_theme($nid) {
         return NULL;
       case 1:
         $group_node = node_load(current($node->og_groups));
-        $custom_theme = $group_node->og_theme;
+        if (!$custom_theme) {
+          $custom_theme = $group_node->og_theme;
+        }
         break;
       default:
         // Node is in multiple groups. Preference goes to the group we showed on the prior page view (if any),
         // Then to a group the current user is a member of.
         if (isset($_SESSION['og_last']) && in_array($_SESSION['og_last']->nid, $node->og_groups)) {
           $group_node = node_load($_SESSION['og_last']->nid);
-          $custom_theme = $group_node->og_theme;
+          if (!$custom_theme) {
+            $custom_theme = $group_node->og_theme;
+          }
         }
         else {
           $groups = array();
@@ -505,7 +511,9 @@ function og_set_theme($nid) {
           }
           // use array_shift and not [0] because array_intersect preserves keys
           $group_node = node_load(array_shift($groups));
-          $custom_theme = $group_node->og_theme;
+          if (!$custom_theme) {
+            $custom_theme = $group_node->og_theme;
+          }
         }
     }
     return $group_node;
@@ -1650,7 +1658,7 @@ function og_form_alter(&$form, &$form_state, $form_id) {
       $form['options']['sticky']['#title'] = t('Sticky at top of group home page and other lists.');
     }
     elseif (og_is_group_post_type($node->type)) {
-        if ($group_node = og_get_group_context()) {
+      if ($group_node = og_get_group_context()) {
         $bc = og_get_breadcrumb($group_node);
         if (isset($node->nid)) {
           $bc[] = l($node->title, "node/$node->nid");
@@ -1969,7 +1977,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
       '#options' => $options, 
       '#required' => $required, 
       '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'),
-      '#default_value' => $groups, 
+      '#default_value' => $groups ? $groups : array(),
       '#required' => $required, 
       '#multiple' => TRUE);
   }
