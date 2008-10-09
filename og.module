@@ -1607,7 +1607,11 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           $append['og_links'] = array('title' => $title, 'href' => "node/$gid");
           $ret[] = array('key'   => 'group',
                          'value' => check_plain($title),
-                         'attributes' => array('domain' => url("node/$gid", array('absolute' => TRUE))));
+                         'attributes' => array(
+                           'domain' => url("node/$gid", array('absolute' => TRUE)),
+                           'xmlns' => 'http://drupal.org/project/og',
+                          ),
+          );
         }
 
         $node->body .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
