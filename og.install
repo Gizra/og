@@ -293,7 +293,7 @@ function og_update_5600() {
 function og_update_5700() {
   $ret = array();
   if (variable_get('og_enabled', FALSE) && !module_exists('og_access')) {
-    module_enable('og_access');
+    drupal_install_modules('og_access');
   }
   // variable_del('og_enabled'); is harmless to leave around, and will help if someone reruns the update.
   
