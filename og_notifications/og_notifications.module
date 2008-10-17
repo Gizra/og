@@ -596,8 +596,8 @@ function _og_notifications_user_grouptypes($uid) {
 function _og_notifications_node_options($account, $node) {
   $options = array();
 
-  // If node is a group type
-  if (og_is_group_type($node->type)) {
+  // If node is a group type and the user is subscribed to this group.
+  if (og_is_group_type($node->type) && isset($account->og_groups[$node->nid])) {
     $options[] = array(
       'name' => t('All posts in %group', array('%group' => $node->title)),
       'type' => 'group',
@@ -612,20 +612,24 @@ function _og_notifications_node_options($account, $node) {
       );
     }
   }
-  // If node is part of a group user may be subscribed to the node through one of the groups
+  // If node is part of a group user may be subscribed to the node through one
+  // of the groups.
   if ($node->og_groups) {
     foreach ($node->og_groups as $index => $gid) {
-      // Content type
-      $options[] = array(
-        'name' => t('Posts in group %name', array('%name' => $node->og_groups_both[$gid])),
-        'type' => 'group',
-        'fields' => array('group' => $gid)
-      );
-      $options[] = array(
-        'name' => t('%type posts in %group', array('%group' => $node->og_groups_both[$gid], '%type' => node_get_types('name', $node->type))),
-        'type' => 'grouptype',
-        'fields' => array('group' => $gid, 'type' => $node->type)
-      );
+      // Only members get to see subscription options.
+      if (isset($account->og_groups[$gid])) {
+        // Content type
+        $options[] = array(
+          'name' => t('Posts in group %name', array('%name' => $node->og_groups_both[$gid])),
+          'type' => 'group',
+          'fields' => array('group' => $gid)
+        );
+        $options[] = array(
+          'name' => t('%type posts in %group', array('%group' => $node->og_groups_both[$gid], '%type' => node_get_types('name', $node->type))),
+          'type' => 'grouptype',
+          'fields' => array('group' => $gid, 'type' => $node->type)
+        );
+      }
     }
   }
 
