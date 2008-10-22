@@ -306,14 +306,13 @@ function og_preprocess_og_mission(&$variables) {
  **/
 function og_preprocess_page(&$variables) {
   if ($group_node = og_get_group_context()) {
-    $data = array(array('og' => array('group_context' => array(
+    $data = array('og' => array('group_context' => array(
       'nid' => $group_node->nid, 
       'title' => $group_node->title,
       'type' => $group_node->type,
-    ))));
-    // Copied from drupal_get_js().
-    $js =  "\n". '<script type="text/javascript">jQuery.extend(Drupal.settings, '. drupal_to_js(call_user_func_array('array_merge_recursive', $data)) .");</script>\n";
-    $variables['scripts'] .= $js;
+    )));
+    drupal_add_js($data, 'setting');
+    $variables['scripts'] = drupal_get_js();
     $variables['body_classes'] .= " og-context og-context-$group_node->nid";
   }
 }
