@@ -364,8 +364,9 @@ function og_init() {
   if ($node = og_determine_context()) {
     og_set_language($node);
   }
-  // TODOL: try to set this less often to avoid filling sessions table during spidering.
-  $_SESSION['og_last'] = $node;
+  if ($user->uid || variable_get('cache', CACHE_DISABLED) == CACHE_DISABLED) {
+    $_SESSION['og_last'] = $node;
+  }
 }
 
 /**
