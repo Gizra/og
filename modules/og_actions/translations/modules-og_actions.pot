@@ -1,16 +1,16 @@
 # $Id$
 #
-# LANGUAGE translation of Drupal (og_actions)
+# LANGUAGE translation of Drupal (modules-og_actions)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  og_actions.module,v 1.2 2008/08/05 04:39:34 weitzman
-#  og_actions.info,v 1.1 2008/08/01 03:45:44 weitzman
+#  og_actions.module,v 1.5 2008/10/29 20:01:54 dww
+#  og_actions.info,v 1.2 2008/10/29 20:01:46 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-09-17 09:00+0200\n"
+"POT-Creation-Date: 2008-10-29 22:28+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -19,75 +19,75 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: og_actions/og_actions.module:11
-msgid "Remove the node from all groups"
+#: modules/og_actions/og_actions.module:11
+msgid "Remove post from all groups"
 msgstr ""
 
-#: og_actions/og_actions.module:19
-msgid "Add node to the specified group"
+#: modules/og_actions/og_actions.module:19
+msgid "Add post to the specified group"
 msgstr ""
 
-#: og_actions/og_actions.module:27
-msgid "Remove node from the specified group"
+#: modules/og_actions/og_actions.module:27
+msgid "Remove post from the specified group"
 msgstr ""
 
-#: og_actions/og_actions.module:38
-msgid "Make the node publicly visible"
+#: modules/og_actions/og_actions.module:38
+msgid "Make post publicly visible"
 msgstr ""
 
-#: og_actions/og_actions.module:46
-msgid "Make the node private to its groups"
+#: modules/og_actions/og_actions.module:46
+msgid "Make post private to its groups"
 msgstr ""
 
-#: og_actions/og_actions.module:115
+#: modules/og_actions/og_actions.module:115
 msgid "Select the group to add to the node."
 msgstr ""
 
-#: og_actions/og_actions.module:120
+#: modules/og_actions/og_actions.module:121
 msgid "Please <a href=\"!url\">create</a> a group first."
 msgstr ""
 
-#: og_actions/og_actions.module:162
+#: modules/og_actions/og_actions.module:163
 msgid "Select the group to remove from the node."
 msgstr ""
 
-#: og_actions/og_actions.module:167
+#: modules/og_actions/og_actions.module:169
 msgid "There are no groups. You must have at least one existing group with nodes assigned to use this action."
 msgstr ""
 
-#: og_actions/og_actions.module:63;73;83;95;142
+#: modules/og_actions/og_actions.module:63;73;83;95;143
 msgid "action"
 msgstr ""
 
-#: og_actions/og_actions.module:63
+#: modules/og_actions/og_actions.module:63
 msgid "Set node %id to public."
 msgstr ""
 
-#: og_actions/og_actions.module:73
+#: modules/og_actions/og_actions.module:73
 msgid "Set node %id to private."
 msgstr ""
 
-#: og_actions/og_actions.module:83
+#: modules/og_actions/og_actions.module:83
 msgid "Removed node %id from all groups."
 msgstr ""
 
-#: og_actions/og_actions.module:95
+#: modules/og_actions/og_actions.module:95
 msgid "Added node id %id to %group."
 msgstr ""
 
-#: og_actions/og_actions.module:142
+#: modules/og_actions/og_actions.module:143
 msgid "Removed node id %id from %group."
 msgstr ""
 
-#: og_actions/og_actions.module:0
+#: modules/og_actions/og_actions.module:0
 msgid "og_actions"
 msgstr ""
 
-#: og_actions/og_actions.info:0
+#: modules/og_actions/og_actions.info:0
 msgid "Organic groups actions"
 msgstr ""
 
-#: og_actions/og_actions.info:0
+#: modules/og_actions/og_actions.info:0
 msgid "Provides actions for use with Organic Groups and Trigger."
 msgstr ""
 

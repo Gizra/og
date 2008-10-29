@@ -2,13 +2,13 @@
 #
 # LANGUAGE translation of Drupal (tests)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
-# Generated from file: tests/og_testcase.php: n/a
+# Generated from file: og_testcase.php,v 1.10 2008/10/09 12:39:50 weitzman
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-09-17 09:00+0200\n"
+"POT-Creation-Date: 2008-10-29 22:28+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -17,15 +17,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: tests/og_testcase.php:7
-msgid "Og testing functionality"
+#: tests/og_testcase.php:61
+msgid "Group post"
 msgstr ""
 
-#: tests/og_testcase.php:8
-msgid "Setup and teardown functionality for organic groups"
+#: tests/og_testcase.php:88
+msgid "!type %title has been created."
 msgstr ""
 
-#: tests/og_testcase.php:20
-msgid "has been created"
+#: tests/og_testcase.php:88
+msgid "%og_type created."
+msgstr ""
+
+#: tests/og_testcase.php:93
+msgid "%og_type loaded properly."
 msgstr ""
 
