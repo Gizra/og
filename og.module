@@ -288,7 +288,7 @@ function og_theme() {
   return array(
     'opml_icon' => array('arguments' => array('url')),
     'og_format_subscriber_status' => array('arguments' => array('group')),
-    'og_mission' => array('template' => 'og-mission', 'arguments' => array('form' => NULL)),
+    'og_mission' => array('template' => 'og-mission', 'arguments' => array('form' => NULL), 'path' => drupal_get_path('module', 'og'). '/theme'),
   );
 }
 
