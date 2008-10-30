@@ -31,6 +31,16 @@ function og_notifications_install() {
 }
 
 /**
+ * Update function to quick-fix OG-D5 installations that already had this module
+ * enabled prior to the 5703 update.
+ */
+function og_notifications_update_5001() {
+  if (variable_get('og_notifications_update_required', FALSE)) {
+    og_notifications_install();
+  }
+}
+
+/**
  * Implementation of hook_enable().
  */
 function og_notifications_enable() {
