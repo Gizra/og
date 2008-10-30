@@ -1,8 +1,11 @@
 <?php
 // $Id$
+
 /**
  * @file
- * Subscriptions to content in groups.
+ * Provide notifications and messaging support for organic groups.
+ *
+ * @author Karthik Kumar / Zen [ http://drupal.org/user/21209 ].
  */
 
 /**
