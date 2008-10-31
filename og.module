@@ -418,29 +418,36 @@ function og_og($op, $gid, $uid, $args) {
 function og_determine_context() {
   global $custom_theme;
   $group_node = NULL; // a node object containing the 'active' group for this request
+  
+  // Recognize context when handling a request from a Views ajax block. See views_ajax().
+  $path = isset($_REQUEST['view_path']) ? $_REQUEST['view_path'] : NULL;
 
-  if (arg(0) == 'og' && is_numeric(arg(2))) {
-    $group_node = og_set_theme(arg(2));
+  if (arg(0, $path) == 'og' && is_numeric(arg(2, $path))) {
+    $group_node = og_set_theme(arg(2, $path));
   }
-  elseif (arg(0) == 'node' && is_numeric(arg(1))) {
-    $group_node = og_set_theme(arg(1));
+  elseif (arg(0, $path) == 'node' && is_numeric(arg(1, $path))) {
+    $group_node = og_set_theme(arg(1, $path));
   }
-  elseif (arg(0) == 'node' && arg(1) == 'add' && arg(2) == 'book' && arg(3) == 'parent') {
-    $group_node = og_set_theme(arg(4));
+  elseif (arg(0, $path) == 'node' && arg(1, $path) == 'add' && arg(2, $path) == 'book' && arg(3, $path) == 'parent') {
+    $group_node = og_set_theme(arg(4, $path));
     $_REQUEST['edit']['og_groups'][] = $group_node->nid; // checks the right box on node form
   }
-  elseif (arg(0) == 'node' && arg(1) == 'add' && isset($_REQUEST['gids'])) {
+  elseif (arg(0, $path) == 'node' && arg(1, $path) == 'add' && isset($_REQUEST['gids'])) {
     $gid = intval(current($_REQUEST['gids']));
     $group_node = node_load($gid);
     $custom_theme = $group_node->og_theme;
   }
-  elseif (arg(0) == 'comment' && in_array(arg(1), array('edit', 'delete')) && is_numeric(arg(2))) {
-    $nid = db_result(db_query('SELECT nid FROM {comments} WHERE cid = %d', arg(2)));
+  elseif (arg(0, $path) == 'comment' && in_array(arg(1, $path), array('edit', 'delete')) && is_numeric(arg(2, $path))) {
+    $nid = db_result(db_query('SELECT nid FROM {comments} WHERE cid = %d', arg(2, $path)));
     $group_node = og_set_theme($nid);
   }
-  elseif (arg(0) == 'comment' && is_numeric(arg(2))) {
+  elseif (arg(0, $path) == 'comment' && is_numeric(arg(2, $path))) {
     // comment/reply/cid/nid URL pattern. 
-    $group_node = og_set_theme(arg(2));
+    $group_node = og_set_theme(arg(2, $path));
+  }
+  elseif (arg(0, $path) == 'comment' && is_numeric(arg(2, $path))) {
+    // comment/reply/cid/nid URL pattern. 
+    $group_node = og_set_theme(arg(2, $path));
   }
 
   return og_set_group_context($group_node);
