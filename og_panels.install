@@ -26,7 +26,7 @@ function og_panels_install() {
         path varchar(100) NOT NULL,
         default_page integer NULL,
         show_blocks integer NULL,
-        weight integer(4) NOT NULL DEFAULT 0,
+        weight smallint NOT NULL DEFAULT 0,
         PRIMARY KEY  (did)
       );");
       break;
