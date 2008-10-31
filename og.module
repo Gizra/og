@@ -810,8 +810,8 @@ function og_unsubscribe($gid, $uid = NULL) {
   }
   $node = node_load($gid);
   $account = user_load(array('uid' => $uid));
-  if (!in_array($gid, array_keys($account->og_groups)) || ($uid != $user->uid && !og_is_node_admin($node))) {
-    // Ubsubscribee must be a member.
+  if (!in_array($gid, array_keys(og_get_subscriptions($account->uid, 0))) || ($uid != $user->uid && !og_is_node_admin($node))) {
+    // Ubsubscribee must be a member or awaiting approval
     // Only admins can remove another member.
     drupal_access_denied();
     exit();
