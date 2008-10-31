@@ -103,34 +103,19 @@ function og_views_block_search() {
     return;
   }
   if ($groupnode = og_get_group_context()) {
-    $block['content'] = drupal_get_form('og_views_search_form', $groupnode);
+    $block['content'] = og_views_block_search_form($groupnode);
     $block['subject'] = l($groupnode->title, "node/$groupnode->nid");
     return $block;
   }
 }
 
-function og_views_search_form($form_state, $group) {
-  $form['keys'] = array(
-    '#type' => 'textfield',
-    '#title' => '',
-    '#description' => '',
-    '#size' => 19,
-    '#maxlength' => 255,
-  );
-  $form['submit'] = array(
-    '#type' => 'submit', 
-    '#value' => t('Search'),
-  );
-  // $form['#pre_render'][] = 'og_views_search_form_pre_render';
-  $form['#method'] = 'get';
-  $form['#action'] = url("og/search/$group->nid");
-  return $form;
-}
-
-// Clean up query string like Views does. Not working.
-function og_views_search_form_pre_render($form_state) {
-  // unset($form_state['form_build_id'], $form_state['form_token'], $form_state['form_id']);
-  return $form_state;
+function og_views_block_search_form($groupnode) {
+  // Render our display programmatically after adding an argument. Take that!
+  $view = views_get_view('og_search');
+  $view->set_display('default');
+  $view->set_arguments(array($groupnode->nid));
+  $block = $view->display_handler->view_special_blocks('-exp');
+  return $block['content'];
 }
 
 // An implementation of hook_og_links_alter(). 
@@ -173,6 +158,9 @@ function og_views_form_alter(&$form, $form_state, $form_id) {
       '#options' => $options,
       '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'),
     );
+  }
+  elseif ($form_id == 'views_exposed_form' && $form_state['view']->name == 'og_search') {
+    $form['submit']['#value'] = t('Search group');
   }
 }
 
