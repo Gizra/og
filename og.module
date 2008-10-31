@@ -2702,6 +2702,11 @@ function og_token_list($type = 'all') {
 function og_token_values($type, $object = NULL) {
   switch ($type) {
     case 'node':
+      // Set some defaults.
+      $values['ogname'] = '';
+      $values['ogname-raw'] = '';
+      $values['og-id'] = '';
+
       if (is_array($object->og_groups)) {
         $gids = array_filter($object->og_groups);
         foreach ($gids as $gid) {
@@ -2711,16 +2716,11 @@ function og_token_values($type, $object = NULL) {
           $values['og-id'] = $gid;
           break;
         }
-        return $values;
       }
-      break;    
+      return $values;
   }
-  
-  // No group info found. Return defaults.
-  $values['ogname'] = '';
-  $values['ogname-raw'] = '';
-  $values['og-id'] = '';
-  return $values;
+
+  return;
 }
 
 /**
