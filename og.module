@@ -1295,7 +1295,7 @@ function og_group_form($node, $form_state) {
     '#maxlength' => 150, 
     '#required' => TRUE, 
     '#description' => t('A brief description for the group details block and the group directory.'), 
-    '#weight' => -4
+    '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'og_description') : -4,
   );
 
   $default = isset($node->nid) ? $node->og_selective : OG_OPEN;
@@ -1311,6 +1311,7 @@ function og_group_form($node, $form_state) {
     '#required' => TRUE,
     '#default_value' => $default, 
     '#options' => $options, 
+    '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'og_selective') : 0,
     '#description' => t('How should membership requests be handled in this group? When you select <em>closed</em>, users will not be able to join <strong>or</strong> leave.')
   );
 
@@ -1338,7 +1339,8 @@ function og_group_form($node, $form_state) {
       $form['og_register'] = array(
         '#type' => 'checkbox',
         '#title' => t('Registration form'),
-        '#default_value' => $node->nid ? $node->og_register : $default, 
+        '#default_value' => $node->nid ? $node->og_register : $default,
+        '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'og_register') : 0, 
         '#description' =>t('May users join this group during registration? If checked, a corresponding checkbox will be added to the registration form.'),
       );
       break;    
@@ -1369,6 +1371,7 @@ function og_group_form($node, $form_state) {
         '#type' => 'checkbox', 
         '#title' => t('List in groups directory'),  
         '#default_value' => $node->nid ? $node->og_directory : $default, 
+        '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'og_directory') : 0,
         '#description' => t('Should this group appear on the <a href="@url">list of groups page</a> (requires OG Views module)? Disabled if the group is set to <em>private group</em>.', array('@url' => url('og'))));
       break;    
   }
@@ -1380,6 +1383,7 @@ function og_group_form($node, $form_state) {
         '#title' => t('Group language'),
         '#default_value' => $node->og_language,
         '#options' => array('' => t('Language neutral')) + $languages,
+        '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'og_language') : 0,
         '#description' => t('Selecting a different locale will change the interface language for all group pages and emails. Users who have chosen a preferred language always see their chosen language.'),
       );
     }
@@ -1693,6 +1697,54 @@ function og_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 
+/**
+ * Implementation of hook_content_extra_fields.
+ */
+function og_content_extra_fields($type_name) {
+  $extras = array();
+  
+  if (og_is_group_post_type($type_name)) {
+    $description = t('OG audience');
+    if (module_exists('og_access')) {
+      $description .= t(' & Public checkbox.');
+    } 
+    $extra['og_nodeapi'] = array(
+      'label' => t('Groups'),
+      'description' => $description,
+      'weight' => 0,
+    );
+  }
+  elseif (og_is_group_type($type_name)) {
+    $extra['og_description'] = array(
+      'label' => t('Description'),
+      'description' => t('Group description.'),
+      'weight' => -4,
+    );
+    $extra['og_selective'] = array(
+      'label' => t('Membership requests'),
+      'description' => t('Handling of group membership requests.'),
+    );
+    $extra['og_register'] = array(
+      'label' => t('Registration form'),
+      'description' => t('Checkbox for visibility on registration form.'),
+    );
+    $extra['og_directory'] = array(
+      'label' => t('List in groups directory'),
+      'description' => t('Checkbox for visibility in the groups directory.'),
+    );
+    if (module_exists('locale') && $languages = locale_language_list()) {
+      if (count($languages) > 1) {
+        $extra['og_language'] = array(
+          'label' => t('Group language'),
+          'description' => t('The default interface language for this group.'),
+        );
+      }
+    }  
+  }
+    
+  return $extra;
+}
+
 function og_form_node_type_form_alter(&$form, &$form_state) {
   // Built in content types do not allow changes to type machine name.
   if (isset($form['identity']['type']['#default_value'])) {
@@ -1970,6 +2022,10 @@ function og_form_add_og_audience(&$form, &$form_state) {
     '#type' => 'value',
     '#value' => $groups,
   );
+
+  if (module_exists('content')) {
+    $form['og_nodeapi']['#weight'] = content_extra_field_weight($form['#node']->type, 'og_nodeapi');
+  }
 
   // Emit the audience form element.
   if ($simple) {

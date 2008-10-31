@@ -58,6 +58,20 @@ function og_access_settings() {
   return system_settings_form($form);
 }
 
+/**
+ * Implementation of hook_content_extra_fields.
+ */
+function og_access_content_extra_fields($type_name) {
+  $extra = array();
+  if (og_is_group_type($type_name)) {
+    $extra['og_private'] = array(
+      'label' => t('Private group'),
+      'description' => t('Checkbox for visibility of group home page to non-members.'),
+    );
+  }
+  return $extra;
+}
+
 function og_access_alter_group_form(&$form, $node) {
   // private groups
   $visibility = variable_get('og_private_groups', OG_PRIVATE_GROUPS_CHOOSE_FALSE);
@@ -92,6 +106,7 @@ function og_access_alter_group_form(&$form, $node) {
         '#type' => 'checkbox',
         '#title' => t('Private group'), 
         '#default_value' => isset($node->nid) ? $node->og_private : $default, 
+        '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'og_private') : 0,        
         '#description' => t('Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>.')
       );
       break;
