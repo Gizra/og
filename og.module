@@ -2257,7 +2257,7 @@ function og_block_subscribers() {
  * @return string
  *   An HTML list.
  **/
-function og_block_subscribers_list($gid, $max = 10, $is_admin = array('members', 'admin'), $show_more = TRUE, $show_picture = NULL) {
+function og_block_subscribers_list($gid, $max = 10, $is_admin = array('members', 'admins'), $show_more = TRUE, $show_picture = NULL) {
   $placeholders = array_fill(0, count(array_filter($is_admin)), '%d');
   $placeholders = implode(', ', $placeholders);
   $sql = "SELECT DISTINCT(u.uid), u.*, ogu.created FROM {og_uid} ogu INNER JOIN {users} u ON ogu.uid = u.uid WHERE ogu.is_admin IN ($placeholders) AND ogu.nid = %d AND ogu.is_active = 1 AND u.status = 1 ORDER BY ogu.created DESC";
