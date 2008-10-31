@@ -634,7 +634,7 @@ function og_panels_block_info($module, $delta, &$info) {
       // Provide alternate versions as content items
       unset($info);
       break;
-    case 'default':
+    default:
       $info['icon'] = 'images/user-multiple.png';
       $info['required context'] = new panels_required_context(t('Group'), 'group');
       $info['path'] = drupal_get_path('module', 'og_panels'). '/';
