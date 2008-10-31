@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+if (!module_exists('taxonomy')) {
+  return;
+}
+
 $view = new view;
 $view->name = 'og_recent_type_term';
 $view->description = 'Recent posts for current term filtered by node type and/or taxonomy term';

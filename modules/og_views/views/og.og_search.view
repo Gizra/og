@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+if (!module_exists('search')) {
+  return;
+}
+
 $view = new view;
 $view->name = 'og_search';
 $view->description = 'Search within a particular group.';

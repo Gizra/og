@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+if (!module_exists('upload')) {
+  return;
+}
+
 $view = new view;
 $view->name = 'og_files';
 $view->description = 'List all uploads for a given group';
