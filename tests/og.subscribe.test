@@ -12,7 +12,7 @@ class OgSubscribe extends OgTestCase {
   function getInfo() {
     return array(
       'name' => t('Organic groups membership tests'),
-      'description' => t("Tests membership functionality and asserts correct behavior with all the different selective settings (e.g. open, moderated, etc')."),
+      'description' => t("Tests membership functionality and asserts correct behavior with all the different selective settings (e.g. open, moderated, etc'). Note: requires Views"),
       'group' => t('Organic groups'),
     );
   }
@@ -21,7 +21,7 @@ class OgSubscribe extends OgTestCase {
    * Implementation of setUp().
    */
   function setUp() {
-    parent::setUp('og', 'og_access');
+    parent::setUp('og', 'og_access', 'views', 'og_views');
     // Create a user with admin permissions.
     $this->web_admin = $this->drupalCreateUser(array('administer nodes', 'administer content types', 'access administration pages', 'administer site configuration', 'administer organic groups'));
     $this->drupalLogin($this->web_admin);
