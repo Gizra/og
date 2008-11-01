@@ -1702,15 +1702,11 @@ function og_form_alter(&$form, &$form_state, $form_id) {
  */
 function og_content_extra_fields($type_name) {
   $extras = array();
-  
+
   if (og_is_group_post_type($type_name)) {
-    $description = t('OG audience');
-    if (module_exists('og_access')) {
-      $description .= t(' & Public checkbox.');
-    } 
     $extra['og_nodeapi'] = array(
       'label' => t('Groups'),
-      'description' => $description,
+      'description' => module_exists('og_access') ? t('OG audience & Public checkbox.') : t('OG audience.'),
       'weight' => 0,
     );
   }
