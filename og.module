@@ -72,8 +72,10 @@ function og_menu($may_cache) {
     drupal_add_css(drupal_get_path('module', 'og'). '/og.css');
     
     // we get a NOTICE if doing this from within og_theme() so I do it here for now.
-    if ($user->uid || variable_get('cache', CACHE_DISABLED) == CACHE_DISABLED) {
-      $_SESSION['og_last'] = og_get_group_context();
+    if ($group_node = og_get_group_context()) {
+      if ($user->uid || variable_get('cache', CACHE_DISABLED) == CACHE_DISABLED) {
+        $_SESSION['og_last'] = og_get_group_context();
+      }
     }
 
     //membership page and its 'add members' tab
