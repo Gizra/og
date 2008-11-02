@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-og_access)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  og_access.module,v 1.27 2008/10/31 17:22:01 weitzman
+#  og_access.module,v 1.28 2008/11/02 13:27:40 weitzman
 #  modules/og_access/og_access.info: n/a
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-11-02 12:11+0100\n"
+"POT-Creation-Date: 2008-11-02 23:57+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -96,11 +96,11 @@ msgid "All users may view this node."
 msgstr ""
 
 #: modules/og_access/og_access.module:323
-msgid "Members of !group_n may view this node."
+msgid "Members of <a href=\"@group-node\">@group-name</a> may view this node."
 msgstr ""
 
 #: modules/og_access/og_access.module:327
-msgid "Group admins of !group_n may view/edit/delete this node."
+msgid "Group admins of <a href=\"@group-node\">@group-name</a> may view/edit/delete this node."
 msgstr ""
 
 #: modules/og_access/og_access.module:18

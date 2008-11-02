@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-02 12:11+0100\n"
-"PO-Revision-Date: 2008-11-02 18:11+0100\n"
+"PO-Revision-Date: 2008-11-03 00:24+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -58,11 +58,11 @@ msgstr ""
 
 #: modules/og_views/og_views.views.inc:177
 msgid "Group: Private"
-msgstr "Gruppe: Privat"
+msgstr "Gruppe: Nicht öffentlich"
 
 #: modules/og_views/og_views.views.inc:178
 msgid "Is the group home page private or not."
-msgstr "Ist die Gruppenstartseite privat oder nicht."
+msgstr "Ist die Gruppenstartseite öffentlich oder nicht öffentlich."
 
 #: modules/og_views/og_views.views.inc:191
 msgid "Group: List in directory"
@@ -151,7 +151,7 @@ msgstr "Beitrag: Öffentlich"
 
 #: modules/og_views/og_views.views.inc:315
 msgid "Is a given post public or private according to OG."
-msgstr "Ob ein Beitrag aus bezogen auf OG öffentlich oder privat ist."
+msgstr "Ist ein angegebener Beitrag bezogen auf OG öffentlich oder nicht öffentlich."
 
 #: modules/og_views/og_views.views.inc:346
 msgid "Group that a member belongs to."

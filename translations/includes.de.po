@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-02 12:11+0100\n"
-"PO-Revision-Date: 2008-11-02 17:41+0100\n"
+"PO-Revision-Date: 2008-11-03 00:12+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -36,7 +36,7 @@ msgstr "Bearbeiten"
 #: includes/og.admin.inc:42
 #, fuzzy
 msgid "New groups don't appear in the groups directory. Administrators control the directory exclusively."
-msgstr "Neue Gruppen erscheinen nicht im Gruppen-Verzeichnis. Ausschließlich Administratoren steuern das Verzeichnis."
+msgstr "Neue Gruppen erscheinen nicht im Gruppenverzeichnis. Ausschließlich Administratoren steuern das Verzeichnis."
 
 #: includes/og.admin.inc:43
 msgid "New groups always appear in the groups directory."
@@ -110,7 +110,7 @@ msgstr "Müssen alle (auch nicht-administrative) Beiträge einer Gruppe zugewies
 
 #: includes/og.admin.inc:92
 msgid "Messaging & Notifications"
-msgstr ""
+msgstr "Nachrichtenvermittlung & Benachrichtigungen"
 
 #: includes/og.admin.inc:98
 msgid "Format of \"From:\" field"
@@ -137,99 +137,88 @@ msgid "Body of the notification for new content. Available variables: @group, !g
 msgstr "Der Textkörper einer Benachrichtigung für neuem Inhalt. Verfügbare Variablen: @group, !group_url, @type, @site, !content_url, !reply_url, @title, @subject, @node_full, @node_teaser und @username. @subject enthält bei einem Kommentar den Kommentartitel und bei einem neuen Beitrag den Beitragstitel. %title enthält immer den Titel des Beitrags."
 
 #: includes/og.admin.inc:117
-#, fuzzy
 msgid "Group admin notification body"
-msgstr "E-Mail-Benachrichtigungen der Gruppe"
+msgstr "Textkörper der Benachrichtigung an einen Gruppenadministrator"
 
 #: includes/og.admin.inc:119
 msgid "The body of the message sent to users from the group admin. Available variables: @group, @body, @site, !url_group, !url_unsubscribe"
 msgstr "Der Textkörper der Nachricht, die vom Gruppenadministrator an Benutzer gesendet wird. Verfügbare Variablen: @group, @body, @site, !url_group, !url_unsubscribe."
 
 #: includes/og.admin.inc:124
-#, fuzzy
 msgid "User approved notification subject"
-msgstr "Betreff der E-Mail an akzeptierte Benutzer"
+msgstr "Betreff der Benachrichtigung an akzeptierte Benutzer"
 
 #: includes/og.admin.inc:125
 msgid "The subject of the message sent to new approved members. Available variables: !group_url, @title"
 msgstr "Der Betreff der Nachricht, die an neue akzeptierte Mitglieder gesendet wird. Verfügbare Variablen: !group_url, @title."
 
 #: includes/og.admin.inc:130
-#, fuzzy
 msgid "User approved notification body"
-msgstr "Textkörper der E-Mail an akzeptierte Benutzer"
+msgstr "Textkörper der Benachrichtigung an akzeptierte Benutzer"
 
 #: includes/og.admin.inc:132
 msgid "The body of the message sent to new approved members. Available variables: !group_url, @title"
 msgstr "Der Textkörper der Nachricht, die an neue akzeptierte Mitglieder gesendet wird. Verfügbare Variablen: !group_url, @title."
 
 #: includes/og.admin.inc:137
-#, fuzzy
 msgid "User denied notification subject"
-msgstr "Betreff der E-Mail an abgelehnte Benutzer"
+msgstr "Betreff der Benachrichtigung an abgelehnte Benutzer"
 
 #: includes/og.admin.inc:138
 msgid "The subject of the message sent to denied users. Available variables: !group_url, @title"
 msgstr "Der Betreff der Nachricht, die an abgelehnte Benutzer gesendet wird. Verfügbare Variablen: !group_url, @title."
 
 #: includes/og.admin.inc:143
-#, fuzzy
 msgid "User denied notification body"
-msgstr "Textkörper der E-Mail an abgelehnte Benutzer"
+msgstr "Textkörper der Benachrichtigung an abgelehnte Benutzer"
 
 #: includes/og.admin.inc:145
 msgid "The body of the message sent to denied users. Available variables: !group_url, @title"
 msgstr "Der Textkörper der Nachricht, die an abgelehnte Benutzer gesendet wird. Verfügbare Variablen: !group_url, @title."
 
 #: includes/og.admin.inc:150
-#, fuzzy
 msgid "Invite user notification subject"
-msgstr "Betreff der Einladungs-E-Mail an Benutzer"
+msgstr "Betreff der Einladungsbenachrichtigung an Benutzer"
 
 #: includes/og.admin.inc:151
 msgid "The subject of the message sent to users invited to join a group. Available variables: @group, @site, @description, !group_url, @body"
 msgstr "Der Betreff der Nachricht, die an eingeladenen Benutzer zum Beitritt in eine Gruppe verschickt wird. Verfügbare Variablen: @group, @site, @description, !group_url, @body."
 
 #: includes/og.admin.inc:156
-#, fuzzy
 msgid "Invite user notification body"
-msgstr "Textkörper der Einladungs-E-Mail an Benutzer"
+msgstr "Textkörper der Einladungsbenachrichtigung an Benutzer"
 
 #: includes/og.admin.inc:158
 msgid "The body of the message sent to users invited to join a group. Available variables: @group, @site, @description, !group_url, @body"
 msgstr "Der Betreff der Nachricht, die an eingeladenen Benutzer zum Beitritt in eine Gruppe verschickt wird. Verfügbare Variablen: @group, @site, @description, !group_url, @body."
 
 #: includes/og.admin.inc:163
-#, fuzzy
 msgid "Request user notification subject"
-msgstr "Betreff der E-Mail für die Anfrage eines Benutzers"
+msgstr "Betreff der Benachrichtigung für die Anfrage eines Benutzers"
 
 #: includes/og.admin.inc:164
 msgid "The subject of the message sent to a user's request to join a group. Available variables: @group, @username, !approve_url, !group_url"
 msgstr "Der Betreff der Nachricht, die bei einer Gruppenbeitrittsanfrage eines Benutzers verschickt wird. Verfügbare Variablen: @group, @username, !approve_url, !group_url."
 
 #: includes/og.admin.inc:169
-#, fuzzy
 msgid "Request user notification body"
-msgstr "Textkörper der E-Mail für den Antrag eines Benutzers"
+msgstr "Textkörper der Benachrichtigung für den Anfrage eines Benutzers"
 
 #: includes/og.admin.inc:171
 msgid "The body of the message sent to a user's request to join a group. Available variables: @group, @username, !approve_url, !group_url"
 msgstr "Der Textkörper der Nachricht, die bei einer Gruppenbeitrittsanfrage eines Benutzers verschickt wird. Verfügbare Variablen: @group, @username, !approve_url, !group_url."
 
 #: includes/og.admin.inc:176
-#, fuzzy
 msgid "New admin user notification subject"
-msgstr "Betreff der E-Mail an einen neuen Administrator"
+msgstr "Betreff der Benachrichtigung an einen neuen Administrator"
 
 #: includes/og.admin.inc:177
 msgid "The subject of the message sent to a new admin for a group. Available variables: @group, @username, !group_url"
 msgstr "Der Betreff der E-Mail, die an einen neuen Administrator für eine Gruppe gesendet wird. Verfügbare Variablen: @group, @username, !group_url."
 
 #: includes/og.admin.inc:182
-#, fuzzy
 msgid "New admin user notification body"
-msgstr "Textkörper der E-Mail an einen neuen Administrator"
+msgstr "Textkörper der Benachrichtigung an einen neuen Administrator"
 
 #: includes/og.admin.inc:184
 msgid "The body of the message sent to a new admin for a group. Available variables: @group, @username, !group_url, !invite_url"
@@ -356,9 +345,10 @@ msgstr "Suchen"
 msgid "Require this context from an external source (such as containing panel page)."
 msgstr "Diesen Kontext von einer externen Quelle anfragen (wie z.B. eine beinhaltete Panel-Seite)"
 
+# TODO: English -> enabled/checked
 #: includes/og.panelscontext.inc:38
 msgid "If selected, group selection (below) will be ignored."
-msgstr ""
+msgstr "Sobald aktiviert, wird die (nachfolgende) Gruppenauswahl ignoriert."
 
 #: includes/og.panelscontext.inc:46
 msgid "Enter the NID of a group"
@@ -401,7 +391,6 @@ msgid "User that subscribed to the group"
 msgstr ""
 
 #: includes/og.rules.inc:82
-#, fuzzy
 msgid "Subscribe user to group"
 msgstr "Benutzer zur Gruppe hinzufügen"
 

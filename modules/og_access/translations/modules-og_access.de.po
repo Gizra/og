@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-11-02 12:11+0100\n"
-"PO-Revision-Date: 2008-11-02 17:52+0100\n"
+"POT-Creation-Date: 2008-11-02 23:57+0100\n"
+"PO-Revision-Date: 2008-11-03 00:18+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -30,7 +30,7 @@ msgstr "Die vom Autor/Bearbeiter über ein Ankreuzfeld im Beitragsformular ausge
 
 #: modules/og_access/og_access.module:34
 msgid "Visibility chosen by author/editor using a checkbox on the posting form. Checkbox defaults to <em>private</em>."
-msgstr "Die vom Autor/Bearbeiter über ein Ankreuzfeld im Beitragsformular ausgewählte Sichtbarkeit. Die Standardeinstellung des Ankreuzfeldes ist <em>privat</em>."
+msgstr "Die vom Autor/Bearbeiter über ein Ankreuzfeld im Beitragsformular ausgewählte Sichtbarkeit. Die Standardeinstellung des Ankreuzfeldes ist <em>nicht öffentlich</em>."
 
 #: modules/og_access/og_access.module:38
 msgid "Visibility of posts"
@@ -43,24 +43,24 @@ msgstr ""
 # Standardzielgruppe(n) ?
 #: modules/og_access/og_access.module:46
 msgid "New group home pages and default audience are always public."
-msgstr "Neue Gruppenhauptseiten und die Standardzielgruppen sind immer öffentlich."
+msgstr "Neue Gruppenstartseiten und die Standardzielgruppen sind immer öffentlich."
 
 # Standardzielgruppe(n) ?
 #: modules/og_access/og_access.module:47
 msgid "New group home pages and default audience are always private."
-msgstr "Neue Gruppenstartseiten und die Standardzielgruppen sind immer privat."
+msgstr "Neue Gruppenstartseiten und die Standardzielgruppen sind immer nicht öffentlich."
 
 #: modules/og_access/og_access.module:48
 msgid "Group administrator chooses whether her group homepage and audience are private or not. Defaults to <em>private</em>."
-msgstr "Der Gruppenadministrator wählt aus, ob seine Gruppenstartseite und Zielgruppe privat ist oder nicht. Die Standardeinstellung ist <em>privat</em>."
+msgstr "Der Gruppenadministrator wählt aus, ob seine Gruppenstartseite und Zielgruppe öffentlich ist oder nicht. Die Standardeinstellung ist <em>nicht öffentlich</em>."
 
 #: modules/og_access/og_access.module:49
 msgid "Group administrator chooses whether her group homepage and audience are private or not. Defaults to <em>public</em>."
-msgstr "Der Gruppenadministrator wählt aus, ob seine Gruppenstartseite und Zielgruppe privat ist oder nicht. Die Standardeinstellung ist <em>öffentlich</em>."
+msgstr "Der Gruppenadministrator wählt aus, ob seine Gruppenstartseite und Zielgruppe öffentlich ist oder nicht. Die Standardeinstellung ist <em>öffentlich</em>."
 
 #: modules/og_access/og_access.module:53
 msgid "Private groups"
-msgstr "Private Gruppen"
+msgstr "Nicht öffentliche Gruppen"
 
 #: modules/og_access/og_access.module:56
 msgid "A private group's group home page cannot be seen by non-members, and new posts created in the group will default to being private. This setting controls what private groups options can be used when creating a new group or editing an existing group. If you select one of the <em>group administrator chooses</em> options then it will be up to group admins whether their new groups are private or not, with the default you specify here."
@@ -72,7 +72,7 @@ msgstr ""
 
 #: modules/og_access/og_access.module:68;107
 msgid "Private group"
-msgstr "Private Gruppe"
+msgstr "Nicht öffentliche Gruppe"
 
 #: modules/og_access/og_access.module:69
 msgid "Checkbox for visibility of group home page to non-members."
@@ -95,13 +95,11 @@ msgid "All users may view this node."
 msgstr "Alle Benutzer können diesen Beitrag lesen."
 
 #: modules/og_access/og_access.module:323
-#, fuzzy
-msgid "Members of !group_n may view this node."
+msgid "Members of <a href=\"@group-node\">@group-name</a> may view this node."
 msgstr "Mitglieder von <a href=\"@group-node\">@group-name</a> können diesen Beitrag lesen."
 
 #: modules/og_access/og_access.module:327
-#, fuzzy
-msgid "Group admins of !group_n may view/edit/delete this node."
+msgid "Group admins of <a href=\"@group-node\">@group-name</a> may view/edit/delete this node."
 msgstr "Gruppenadmins von <a href=\"@group-node\">@group-name</a> können diesen Beitrag lesen/bearbeiten/löschen."
 
 #: modules/og_access/og_access.module:18
@@ -110,7 +108,7 @@ msgstr "Zugriffskonfiguration für organische Gruppen"
 
 #: modules/og_access/og_access.module:19
 msgid "Choose whether new groups should be private or public."
-msgstr "Auswählen, ob neue Gruppen privat oder öffentlich sind."
+msgstr "Auswählen, ob neue Gruppen öffentlich oder nicht öffentlich sind."
 
 #: modules/og_access/og_access.module:0
 msgid "og_access"
@@ -118,5 +116,5 @@ msgstr "og_access"
 
 #: modules/og_access/og_access.info:0
 msgid "Enable access control for private posts and private groups."
-msgstr "Ermöglicht die Zugriffskontrolle auf private Beiträge und Gruppen."
+msgstr "Ermöglicht die Zugriffskontrolle auf nicht öffentliche Beiträge und Gruppen."
 
