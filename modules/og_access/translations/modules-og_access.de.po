@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-02 23:57+0100\n"
-"PO-Revision-Date: 2008-11-03 00:18+0100\n"
+"PO-Revision-Date: 2008-11-03 00:35+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -43,16 +43,16 @@ msgstr ""
 # Standardzielgruppe(n) ?
 #: modules/og_access/og_access.module:46
 msgid "New group home pages and default audience are always public."
-msgstr "Neue Gruppenstartseiten und die Standardzielgruppen sind immer öffentlich."
+msgstr "Neue Gruppen-Startseiten und die Standardzielgruppen sind immer öffentlich."
 
 # Standardzielgruppe(n) ?
 #: modules/og_access/og_access.module:47
 msgid "New group home pages and default audience are always private."
-msgstr "Neue Gruppenstartseiten und die Standardzielgruppen sind immer nicht öffentlich."
+msgstr "Neue Gruppen-Startseiten und die Standardzielgruppen sind immer nicht öffentlich."
 
 #: modules/og_access/og_access.module:48
 msgid "Group administrator chooses whether her group homepage and audience are private or not. Defaults to <em>private</em>."
-msgstr "Der Gruppenadministrator wählt aus, ob seine Gruppenstartseite und Zielgruppe öffentlich ist oder nicht. Die Standardeinstellung ist <em>nicht öffentlich</em>."
+msgstr "Der Gruppenadministrator wählt aus, ob seine Gruppen-Startseite und Zielgruppe öffentlich ist oder nicht. Die Standardeinstellung ist <em>nicht öffentlich</em>."
 
 #: modules/og_access/og_access.module:49
 msgid "Group administrator chooses whether her group homepage and audience are private or not. Defaults to <em>public</em>."
@@ -76,7 +76,7 @@ msgstr "Nicht öffentliche Gruppe"
 
 #: modules/og_access/og_access.module:69
 msgid "Checkbox for visibility of group home page to non-members."
-msgstr "Ankreuzfeld für die Sichtbarkeit der Gruppenstartseite für Nichtmitglieder."
+msgstr "Ankreuzfeld für die Sichtbarkeit der Gruppen-Startseite für Nichtmitglieder."
 
 #: modules/og_access/og_access.module:110
 msgid "Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>."

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-02 23:57+0100\n"
-"PO-Revision-Date: 2008-11-03 00:27+0100\n"
+"PO-Revision-Date: 2008-11-03 00:34+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -328,7 +328,7 @@ msgstr "Beschreibung der Website"
 # not literally
 #: og.module:1682
 msgid "A welcome greeting for your group home page. Consider listing the group objectives and mission."
-msgstr "Ein Willkommensgruß für die Startseite der Gruppe. Hier können die Ziele der Gruppe und Slogan angezeigt werden."
+msgstr "Ein Willkommensgruß für die Startseite der Gruppe. Hier können die Ziele der Gruppe und ein Slogan angezeigt werden."
 
 #: og.module:1685
 msgid "Group manager"
@@ -336,7 +336,7 @@ msgstr "Gruppenmanager"
 
 #: og.module:1686
 msgid "Sticky at top of group home page and other lists."
-msgstr "Am Anfang der Gruppenstartseite und anderen Listen anzeigen."
+msgstr "Am Anfang der Gruppen-Startseite und anderen Listen anzeigen."
 
 # "Public checkbox"?
 #: og.module:1710
@@ -829,7 +829,7 @@ msgstr "Gruppenspezifische Sprache. Referenz zu {languages}.language."
 # TODO: question mark
 #: og.install:65
 msgid "Is group home page private or public."
-msgstr "Ist die Gruppenstartseite öffentlich oder nicht öffentlich?"
+msgstr "Ist die Gruppen-Startseite öffentlich oder nicht öffentlich?"
 
 #: og.install:76
 msgid "Group memberships"

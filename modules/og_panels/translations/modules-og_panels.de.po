@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-02 12:11+0100\n"
-"PO-Revision-Date: 2008-11-02 18:09+0100\n"
+"PO-Revision-Date: 2008-11-03 00:32+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -98,7 +98,7 @@ msgstr "Pfad"
 
 #: modules/og_panels/og_panels.module:314
 msgid "This page is currently your default group home page and has no configurable path."
-msgstr "Diese Seite ist derzeit die Standardgruppen-Startseite und hat keinen konfigurierbaren Pfad."
+msgstr "Diese Seite ist derzeit die standardmäßige Gruppen-Startseite und hat keinen konfigurierbaren Pfad."
 
 #: modules/og_panels/og_panels.module:325
 msgid "Show blocks"

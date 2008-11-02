@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-02 12:11+0100\n"
-"PO-Revision-Date: 2008-11-03 00:24+0100\n"
+"PO-Revision-Date: 2008-11-03 00:33+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -62,7 +62,7 @@ msgstr "Gruppe: Nicht öffentlich"
 
 #: modules/og_views/og_views.views.inc:178
 msgid "Is the group home page private or not."
-msgstr "Ist die Gruppenstartseite öffentlich oder nicht öffentlich."
+msgstr "Ist die Gruppen-Startseite öffentlich oder nicht öffentlich."
 
 #: modules/og_views/og_views.views.inc:191
 msgid "Group: List in directory"
@@ -279,7 +279,7 @@ msgstr "Alle Beiträge: !links"
 
 #: modules/og_views/og_views.module:156
 msgid "Group home page view"
-msgstr "Ansicht der Gruppenstartseite"
+msgstr "Ansicht der Gruppen-Startseite"
 
 #: modules/og_views/og_views.module:157
 msgid "Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques - see Theme information link when editing your View. Also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module."
