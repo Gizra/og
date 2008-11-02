@@ -1603,7 +1603,7 @@ function og_group_child_nids($group_nid) {
   return $child_nids;
 }
 
-// submit handler for node delete form. handles deletes to group nodes
+// Submit handler for node delete form. handles deletes to group nodes.
 function og_node_delete_confirm_submit($form_id, $form_values) {
   $deleted_group_nid = $form_values['nid'];
   $target_group_nid = $form_values['target'];
@@ -1613,7 +1613,7 @@ function og_node_delete_confirm_submit($form_id, $form_values) {
     $node = node_load($child_nid);
     unset($node->og_groups[$deleted_group_nid]);
     if ($move_children) {
-      // there is an array_unique() in og_save_ancestry which giards against duplicates so don't worry here.
+      // There is an array_unique() in og_save_ancestry() which guards against duplicates so don't worry here.
       $node->og_groups[$target_group_nid] = $target_group_nid;
     }
     if ($delete_orphans && count($node->og_groups) == 0) {
@@ -1745,7 +1745,7 @@ function og_form_add_og_audience($form_id, &$form) {
     }
   }
   
-  // show read only item if we are non-admin, and in simple mode (i.e. non-checkboxes) and at least one group is in querystring
+  // Show read only item if we are non-admin, and in simple mode (i.e. non-checkboxes) and at least one group is in querystring
   $simple = !user_access('administer organic groups') && !variable_get('og_audience_checkboxes', TRUE) && count($gids);
   
   // determine value of audience multi-select
