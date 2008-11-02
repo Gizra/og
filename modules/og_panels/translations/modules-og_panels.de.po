@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-10-29 22:28+0100\n"
-"PO-Revision-Date: 2008-10-29 23:17+0100\n"
+"POT-Creation-Date: 2008-11-02 12:11+0100\n"
+"PO-Revision-Date: 2008-11-02 18:09+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -192,7 +192,6 @@ msgid "manage OG panels pages"
 msgstr "OG-Panelseiten verwalten"
 
 #: modules/og_panels/og_panels.module:17
-#: modules/og_panels/og_panels.info:0
 msgid "Organic groups panels"
 msgstr "Organische-Gruppen-Panels"
 
@@ -207,6 +206,10 @@ msgstr "Alle anzeigen"
 #: modules/og_panels/og_panels.module:0
 msgid "og_panels"
 msgstr "og_panels"
+
+#: modules/og_panels/og_panels.info:0
+msgid "Organic groups panels.** NOT COMPATIBLE WITH DRUPAL 6 YET **"
+msgstr ""
 
 #: modules/og_panels/og_panels.info:0
 msgid "Enable group admins to create panel pages."

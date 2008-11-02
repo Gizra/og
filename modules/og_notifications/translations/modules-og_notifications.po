@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OG notifications\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2008-10-29 23:16+0100\n"
+"PO-Revision-Date: 2008-11-02 18:09+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -20,133 +20,133 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 
-#: modules/og_notifications/og_notifications.module:16
+#: modules/og_notifications/og_notifications.module:19
 msgid "Customise notifications for each of your groups along with their frequency and delivery method. If so desired, you can also restrict notifications only for certain content types in each group."
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:82
+#: modules/og_notifications/og_notifications.module:85
 msgid "Group subscriptions"
 msgstr "Gruppenmitgliedschaften"
 
-#: modules/og_notifications/og_notifications.module:96
+#: modules/og_notifications/og_notifications.module:99
 msgid "Allowed content types"
 msgstr "Zulässige Inhaltstypen"
 
-#: modules/og_notifications/og_notifications.module:99
+#: modules/og_notifications/og_notifications.module:102
 msgid "Select specific content types which should be <em>allowed</em> for subscriptions to <em>group + content type</em>."
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:112
+#: modules/og_notifications/og_notifications.module:115
 msgid "Automatically enable notifications for any groups that I join."
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:113
+#: modules/og_notifications/og_notifications.module:116
 msgid "Group notifications can also be <a href=\"!manage-url\">customised</a> in greater detail if required."
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:122
+#: modules/og_notifications/og_notifications.module:125
 msgid "Autosubscribe users to any groups that they join."
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:123
+#: modules/og_notifications/og_notifications.module:126
 msgid "Automatically enable notifications by default. Users can override this via their account page. Changing this setting will only affect new users and those who have not overridden the system default."
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:182
+#: modules/og_notifications/og_notifications.module:185
 msgid "OG notifications"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:183
+#: modules/og_notifications/og_notifications.module:186
 msgid "Most fields will be provided during the event."
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:191
+#: modules/og_notifications/og_notifications.module:194
 msgid "Subject for event notifications"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:192
+#: modules/og_notifications/og_notifications.module:195
 msgid "Body header for event notifications"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:193
+#: modules/og_notifications/og_notifications.module:196
 msgid "Body for event notifications"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:194
+#: modules/og_notifications/og_notifications.module:197
 msgid "Body footer for event notifications"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:204
+#: modules/og_notifications/og_notifications.module:207
 msgid "[site-name] subscription update for [user]"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:205
+#: modules/og_notifications/og_notifications.module:208
 msgid ""
 "Greetings, [user].\n"
 "\n"
 "These are your messages"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:206
+#: modules/og_notifications/og_notifications.module:209
 msgid ""
 "A [type] has been updated: [title]\n"
 "\n"
 "[event_list]"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:208
+#: modules/og_notifications/og_notifications.module:211
 msgid "This is an automatic message from [site-name])"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:209
+#: modules/og_notifications/og_notifications.module:212
 msgid "To manage your subscriptions, browse to [subscriptions-manage]"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:226
+#: modules/og_notifications/og_notifications.module:229
 msgid "Group: %name"
 msgstr "Gruppe: %name"
 
-#: modules/og_notifications/og_notifications.module:240
+#: modules/og_notifications/og_notifications.module:243
 msgid "Content type in group"
 msgstr "Inhaltstyp in der Gruppe"
 
-#: modules/og_notifications/og_notifications.module:310
+#: modules/og_notifications/og_notifications.module:313
 msgid "Group Type"
 msgstr "Gruppentyp"
 
-#: modules/og_notifications/og_notifications.module:343
+#: modules/og_notifications/og_notifications.module:346
 msgid "All"
 msgstr "Alle"
 
-#: modules/og_notifications/og_notifications.module:363
+#: modules/og_notifications/og_notifications.module:366
 msgid "Send interval"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:363
+#: modules/og_notifications/og_notifications.module:366
 msgid "Send method"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:372
+#: modules/og_notifications/og_notifications.module:375
 msgid "%type posts in this group"
 msgstr "%type-Beiträge in dieser Gruppe"
 
-#: modules/og_notifications/og_notifications.module:391
+#: modules/og_notifications/og_notifications.module:394
 msgid "There are no active group subscriptions available."
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:595
+#: modules/og_notifications/og_notifications.module:598
 msgid "All posts in %group"
 msgstr "Alle Beiträge in %group"
 
-#: modules/og_notifications/og_notifications.module:602;621
+#: modules/og_notifications/og_notifications.module:605;624
 msgid "%type posts in %group"
 msgstr "%type-Beiträge in %group"
 
-#: modules/og_notifications/og_notifications.module:616
+#: modules/og_notifications/og_notifications.module:619
 msgid "Posts in group %name"
 msgstr "Beiträge in der Gruppe %name"
 
-#: modules/og_notifications/og_notifications.module:50
+#: modules/og_notifications/og_notifications.module:53
 msgid "subscribe to content in groups"
 msgstr ""
 

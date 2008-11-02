@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-10-29 22:28+0100\n"
-"PO-Revision-Date: 2008-10-29 23:10+0100\n"
+"POT-Creation-Date: 2008-11-02 12:11+0100\n"
+"PO-Revision-Date: 2008-11-02 12:14+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -16,82 +16,82 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 
-#: og.module:729;769;928;1016
+#: og.module:741;781;949;1037
 #: modules/og_panels/og_panels.module:146
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: og.module:1161
+#: og.module:1182
 #: modules/og_panels/og_panels.module:238
 msgid "Title"
 msgstr "Titel"
 
-#: og.module:1162
+#: og.module:1183
 #: modules/og_views/includes/og_views_handler_field_og_is_manager.inc:25
 msgid "Manager"
 msgstr "Verwalter"
 
-#: og.module:1200;1271
+#: og.module:1221;1292;1715
 #: includes/og.panelscontent.inc:94;235
 msgid "Description"
 msgstr "Beschreibung"
 
-#: og.module:1244
+#: og.module:1265
 #: modules/og_views/includes/og_views_handler_field_og_subscribe.inc:25
 msgid "Invite only"
 msgstr "Nur einladen"
 
-#: og.module:1245
+#: og.module:1266
 #: modules/og_views/includes/og_views_handler_field_og_subscribe.inc:23
 msgid "Closed"
 msgstr "Geschlossen"
 
-#: og.module:1490
+#: og.module:1515
 #: modules/og_panels/og_panels.module:264;457
 #: modules/og_views/og_views.views.inc:467
 msgid "Home"
 msgstr "Startseite"
 
-#: og.module:1492;2080;2113
-#: modules/og_access/og_access.module:173
-#: modules/og_notifications/og_notifications.module:233;26
+#: og.module:1517;1708;2154;2187
+#: modules/og_access/og_access.module:188
+#: modules/og_notifications/og_notifications.module:236;29
 #: modules/og_views/og_views.views.inc:271
 #: theme/node-og-group-post.tpl.php:77
 msgid "Groups"
 msgstr "Gruppen"
 
-#: og.module:1742
+#: og.module:1811
 #: modules/og_views/og_views.views.inc:258
 msgid "Group posts"
 msgstr "Gruppenbeiträge"
 
-#: og.module:2164
+#: og.module:2238
 #: modules/og_views/og_views.views.inc:356
 #: tests/og_testcase.php:35
 msgid "Group node"
 msgstr "Gruppe"
 
-#: og.module:2225
+#: og.module:2299
 #: includes/og.admin.inc:36
 msgid "Group details"
 msgstr "Gruppendetails"
 
-#: og.module:2237;2315
+#: og.module:2311;2389
 #: modules/og_views/og_views.module:96
 msgid "Group notifications"
 msgstr "Gruppenbenachrichtigungen"
 
-#: og.module:2276
+#: og.module:2350
 #: includes/og.panelscontent.inc:192
 msgid "Group roles"
 msgstr "Gruppenrollen"
 
-#: og.module:2279
+#: og.module:2353
 #: includes/og.panelscontent.inc:194
 msgid "Standard members"
 msgstr "Standardmitglieder"
 
-#: og.module:2280
+#: og.module:2354
 #: includes/og.panelscontent.inc:194
 msgid "Administrators"
 msgstr "Administratoren"
@@ -107,7 +107,7 @@ msgid "Organic groups access control"
 msgstr "Zugriffskontrolle für organischen Gruppen"
 
 #: includes/og.admin.inc:20
-#: modules/og_notifications/og_notifications.module:363
+#: modules/og_notifications/og_notifications.module:366
 msgid "Type"
 msgstr "Typ"
 
@@ -119,7 +119,7 @@ msgstr "Operationen"
 #: includes/og.panelscontent.inc:9;22;34;46;58
 #: includes/og.rules.inc:56;156;167
 #: modules/og_actions/og_actions.module:113;161
-#: modules/og_notifications/og_notifications.module:307
+#: modules/og_notifications/og_notifications.module:310
 #: modules/og_panels/og_panels.module:542;639
 #: modules/og_views/og_views.views.inc:345
 msgid "Group"
@@ -131,17 +131,12 @@ msgstr "Gruppe"
 msgid "Group search"
 msgstr "Gruppensuche"
 
-#: includes/og.panelscontent.inc:243
-#: modules/og_views/og_views.module:122
-msgid "Search"
-msgstr "Suchen"
-
 #: includes/og.panelscontent.inc:247
 #: modules/og_views/og_views.module:10
 msgid "Faces"
 msgstr "Gesichter"
 
-#: modules/og_notifications/og_notifications.module:387
+#: modules/og_notifications/og_notifications.module:390
 #: modules/og_panels/og_panels.module:494;509
 #: tests/og_testcase.php:85
 msgid "Save"

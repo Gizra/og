@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-10-29 22:28+0100\n"
-"PO-Revision-Date: 2008-10-29 23:13+0100\n"
+"POT-Creation-Date: 2008-11-02 12:11+0100\n"
+"PO-Revision-Date: 2008-11-02 17:52+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -48,7 +48,7 @@ msgstr "Neue Gruppenhauptseiten und die Standardzielgruppen sind immer öffentli
 # Standardzielgruppe(n) ?
 #: modules/og_access/og_access.module:47
 msgid "New group home pages and default audience are always private."
-msgstr "Neue Gruppenhauptseiten und die Standardzielgruppen sind immer privat."
+msgstr "Neue Gruppenstartseiten und die Standardzielgruppen sind immer privat."
 
 #: modules/og_access/og_access.module:48
 msgid "Group administrator chooses whether her group homepage and audience are private or not. Defaults to <em>private</em>."
@@ -70,35 +70,39 @@ msgstr ""
 msgid "Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Visibility of Posts</em> setting on this page. Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups! To change those you must edit the groups and their individual content nodes directly. If the setting you want is disabled here, check <em>Visibility of Posts</em> above. You cannot choose to only have private groups if node visibility is set to be always public, and vice versa."
 msgstr ""
 
-#: modules/og_access/og_access.module:93
+#: modules/og_access/og_access.module:68;107
 msgid "Private group"
 msgstr "Private Gruppe"
 
-#: modules/og_access/og_access.module:95
+#: modules/og_access/og_access.module:69
+msgid "Checkbox for visibility of group home page to non-members."
+msgstr "Ankreuzfeld für die Sichtbarkeit der Gruppenstartseite für Nichtmitglieder."
+
+#: modules/og_access/og_access.module:110
 msgid "Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>."
 msgstr "Soll diese Gruppe nur für deren Mitglieder sichtbar sein? Deaktiviert, sobald die Gruppe auf <em>Im Verzeichnis anzeigen</em> oder <em>Mitgliedschaftsanfragen: offen</em> eingestellt ist."
 
-#: modules/og_access/og_access.module:154;163
+#: modules/og_access/og_access.module:169;178
 msgid "Public"
 msgstr "Öffentlich"
 
-#: modules/og_access/og_access.module:156;165
+#: modules/og_access/og_access.module:171;180
 msgid "Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>public</em>."
 msgstr "Diesen Beitrag jedem oder nur den Mitgliedern der unten ausgewählten Gruppen anzeigen. Beiträge ohne Gruppenzuordnung sind immer <em>öffentlich</em>."
 
-# not literally
-#: modules/og_access/og_access.module:304
+#: modules/og_access/og_access.module:319
 msgid "All users may view this node."
 msgstr "Alle Benutzer können diesen Beitrag lesen."
 
-# not literally
-#: modules/og_access/og_access.module:308
+#: modules/og_access/og_access.module:323
+#, fuzzy
 msgid "Members of !group_n may view this node."
-msgstr "Mitglieder von !group_n können diesen Beitrag lesen."
+msgstr "Mitglieder von <a href=\"@group-node\">@group-name</a> können diesen Beitrag lesen."
 
-#: modules/og_access/og_access.module:312
+#: modules/og_access/og_access.module:327
+#, fuzzy
 msgid "Group admins of !group_n may view/edit/delete this node."
-msgstr ""
+msgstr "Gruppenadmins von <a href=\"@group-node\">@group-name</a> können diesen Beitrag lesen/bearbeiten/löschen."
 
 #: modules/og_access/og_access.module:18
 msgid "Organic groups access configuration"

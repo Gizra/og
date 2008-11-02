@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-10-29 22:28+0100\n"
-"PO-Revision-Date: 2008-10-29 23:14+0100\n"
+"POT-Creation-Date: 2008-11-02 12:11+0100\n"
+"PO-Revision-Date: 2008-11-02 18:08+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -30,15 +30,16 @@ msgstr "Beitrag aus der angegebenen Gruppe entfernen"
 
 #: modules/og_actions/og_actions.module:38
 msgid "Make post publicly visible"
-msgstr ""
+msgstr "Den Beitrag öffentlich sichbar machen."
 
+# Sounds mechanic
 #: modules/og_actions/og_actions.module:46
 msgid "Make post private to its groups"
-msgstr ""
+msgstr "Den Beitrag für seine Gruppen nicht öffentlich machen."
 
 #: modules/og_actions/og_actions.module:115
 msgid "Select the group to add to the node."
-msgstr ""
+msgstr "Die zum Beitrag hinzuzufügende Gruppe auswählen."
 
 #: modules/og_actions/og_actions.module:121
 msgid "Please <a href=\"!url\">create</a> a group first."
@@ -46,11 +47,11 @@ msgstr "Als erstes eine Gruppe <a href=\"!url\">erstellen</a>."
 
 #: modules/og_actions/og_actions.module:163
 msgid "Select the group to remove from the node."
-msgstr ""
+msgstr "Die vom Beitrag zu entfernende Gruppe auswählen."
 
 #: modules/og_actions/og_actions.module:169
 msgid "There are no groups. You must have at least one existing group with nodes assigned to use this action."
-msgstr ""
+msgstr "Es sind Gruppen vorhanden. Um diese Aktion zu verwenden, muss mindestens eine Gruppe mit zugewiesenen Beiträgen vorhanden sein."
 
 #: modules/og_actions/og_actions.module:63;73;83;95;143
 msgid "action"
@@ -58,11 +59,11 @@ msgstr "Aktion"
 
 #: modules/og_actions/og_actions.module:63
 msgid "Set node %id to public."
-msgstr ""
+msgstr "Die Beitrags-ID %id öffentlich anzeigen."
 
 #: modules/og_actions/og_actions.module:73
 msgid "Set node %id to private."
-msgstr ""
+msgstr "Die Beitrags-ID %id nicht öffentlich anzeigen."
 
 #: modules/og_actions/og_actions.module:83
 msgid "Removed node %id from all groups."
@@ -86,5 +87,5 @@ msgstr "Aktionen für organische Gruppen"
 
 #: modules/og_actions/og_actions.info:0
 msgid "Provides actions for use with Organic Groups and Trigger."
-msgstr ""
+msgstr "Ermöglicht die Verwendung von Aktionen bei organischen Gruppen und Triggern."
 

@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-10-29 22:28+0100\n"
-"PO-Revision-Date: 2008-10-29 23:21+0100\n"
+"POT-Creation-Date: 2008-11-02 12:11+0100\n"
+"PO-Revision-Date: 2008-11-02 18:11+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -74,7 +74,7 @@ msgstr "Der Administrator gibt an, ob eine Gruppe in den öffentlichen Auflistun
 
 #: modules/og_views/og_views.views.inc:206
 msgid "Group: Join link"
-msgstr "Gruppe: Beitrittsverweis"
+msgstr "Gruppe: Beitrittslink"
 
 #: modules/og_views/og_views.views.inc:207
 msgid "Displays a links for joining a group when a user is not already a member."
@@ -183,23 +183,23 @@ msgstr ""
 
 #: modules/og_views/og_views.views.inc:371
 msgid "A link to the <em>Admin create or remove</em> page."
-msgstr "Ein Verweis zur <em>Administator erstellen oder entfernen</em>-Seite."
+msgstr "Ein Link zur <em>Administator erstellen oder entfernen</em>-Seite."
 
 #: modules/og_views/og_views.views.inc:378
 msgid "OG: Edit membership link"
-msgstr "OG: Mitgliedschafts-Verweis bearbeiten"
+msgstr "OG: Mitgliedschafts-Link bearbeiten"
 
 #: modules/og_views/og_views.views.inc:379
 msgid "A link to the <em>My membership</em> page."
-msgstr "Ein Verweis zur <em>Meine Mitgliedschaft</em>-Seite."
+msgstr "Ein Link zur <em>Meine Mitgliedschaft</em>-Seite."
 
 #: modules/og_views/og_views.views.inc:386
 msgid "OG: Approve/Deny/Remove membership link"
-msgstr "OG: Akzeptieren/Ablehnen/Entfernen Mitgliedschafts-Verweis."
+msgstr "OG: Akzeptieren/Ablehnen/Entfernen Mitgliedschafts-Link."
 
 #: modules/og_views/og_views.views.inc:387
 msgid "A link to approve/deny/remove a group member."
-msgstr "Ein Verweis zum Akzeptieren/Ablehnen/Entfernen eines Gruppenmitglieds."
+msgstr "Ein Link zum Akzeptieren/Ablehnen/Entfernen eines Gruppenmitglieds."
 
 #: modules/og_views/og_views.views.inc:394
 msgid "OG: Is member an admin in a group"
@@ -277,15 +277,19 @@ msgstr "Meine Gruppen: !links"
 msgid "All posts: !links"
 msgstr "Alle Beiträge: !links"
 
-#: modules/og_views/og_views.module:171
+#: modules/og_views/og_views.module:156
 msgid "Group home page view"
-msgstr ""
+msgstr "Ansicht der Gruppenstartseite"
 
-#: modules/og_views/og_views.module:172
+#: modules/og_views/og_views.module:157
 msgid "Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques - see Theme information link when editing your View. Also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module."
 msgstr ""
 
-#: modules/og_views/og_views.module:183
+#: modules/og_views/og_views.module:163
+msgid "Search group"
+msgstr "Gruppe suchen"
+
+#: modules/og_views/og_views.module:171
 msgid "The View @name was not found. Check your variables table or settings.php"
 msgstr ""
 
