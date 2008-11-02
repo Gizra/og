@@ -21,7 +21,7 @@ class OgSubscribe extends OgTestCase {
    * Implementation of setUp().
    */
   function setUp() {
-    parent::setUp('og', 'og_access', 'views', 'og_views');
+    parent::setUp('og', 'og_access');
     // Create a user with admin permissions.
     $this->web_admin = $this->drupalCreateUser(array('administer nodes', 'administer content types', 'access administration pages', 'administer site configuration', 'administer organic groups'));
     $this->drupalLogin($this->web_admin);
