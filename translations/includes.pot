@@ -13,7 +13,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-29 22:28+0100\n"
+"POT-Creation-Date: 2008-11-02 12:11+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -336,6 +336,10 @@ msgstr ""
 
 #: includes/og.panelscontent.inc:225
 msgid "Maximum number of rows per page must be an integer."
+msgstr ""
+
+#: includes/og.panelscontent.inc:243
+msgid "Search"
 msgstr ""
 
 #: includes/og.panelscontext.inc:37

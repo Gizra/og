@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-og_panels)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  og_panels.module,v 1.40 2008/10/29 19:59:19 dww
-#  og_panels.info,v 1.4 2008/10/29 19:59:01 dww
+#  og_panels.module,v 1.41 2008/10/31 12:14:04 weitzman
+#  og_panels.info,v 1.5 2008/11/01 11:42:31 weitzman
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-29 22:28+0100\n"
+"POT-Creation-Date: 2008-11-02 12:11+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -191,7 +191,7 @@ msgstr ""
 msgid "manage OG panels pages"
 msgstr ""
 
-#: modules/og_panels/og_panels.module:17 modules/og_panels/og_panels.info:0
+#: modules/og_panels/og_panels.module:17
 msgid "Organic groups panels"
 msgstr ""
 
@@ -205,6 +205,10 @@ msgstr ""
 
 #: modules/og_panels/og_panels.module:0
 msgid "og_panels"
+msgstr ""
+
+#: modules/og_panels/og_panels.info:0
+msgid "Organic groups panels.** NOT COMPATIBLE WITH DRUPAL 6 YET **"
 msgstr ""
 
 #: modules/og_panels/og_panels.info:0

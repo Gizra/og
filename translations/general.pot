@@ -3,18 +3,18 @@
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  og.module,v 1.594 2008/10/29 20:40:42 weitzman
-#  og_panels.module,v 1.40 2008/10/29 19:59:19 dww
+#  og.module,v 1.599 2008/11/01 11:41:19 weitzman
+#  og_panels.module,v 1.41 2008/10/31 12:14:04 weitzman
 #  modules/og_views/includes/og_views_handler_field_og_is_manager.inc: n/a
 #  includes/og.panelscontent.inc: n/a
 #  modules/og_views/includes/og_views_handler_field_og_subscribe.inc: n/a
 #  og_views.views.inc,v 1.7 2008/10/29 19:59:42 dww
-#  og_access.module,v 1.26 2008/10/29 19:58:40 dww
-#  og_notifications.module,v 1.13 2008/10/29 19:59:32 dww
+#  og_access.module,v 1.27 2008/10/31 17:22:01 weitzman
+#  og_notifications.module,v 1.14 2008/10/30 19:18:53 karthik
 #  node-og-group-post.tpl.php,v 1.2 2008/10/29 20:04:34 dww
 #  og_testcase.php,v 1.10 2008/10/09 12:39:50 weitzman
 #  og.admin.inc,v 1.13 2008/10/29 19:57:53 dww
-#  og_views.module,v 1.7 2008/10/29 19:59:49 dww
+#  og_views.module,v 1.8 2008/10/31 18:45:31 weitzman
 #  og.install,v 1.69 2008/10/09 15:06:31 weitzman
 #  modules/og_views/includes/og_views_handler_filter_og_type_all.inc: n/a
 #  modules/og_access/og_access.info: n/a
@@ -25,7 +25,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-29 22:28+0100\n"
+"POT-Creation-Date: 2008-11-02 12:11+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -34,63 +34,63 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: og.module:729;769;928;1016 modules/og_panels/og_panels.module:146
+#: og.module:741;781;949;1037 modules/og_panels/og_panels.module:146
 msgid "Cancel"
 msgstr ""
 
-#: og.module:1161 modules/og_panels/og_panels.module:238
+#: og.module:1182 modules/og_panels/og_panels.module:238
 msgid "Title"
 msgstr ""
 
-#: og.module:1162 modules/og_views/includes/og_views_handler_field_og_is_manager.inc:25
+#: og.module:1183 modules/og_views/includes/og_views_handler_field_og_is_manager.inc:25
 msgid "Manager"
 msgstr ""
 
-#: og.module:1200;1271 includes/og.panelscontent.inc:94;235
+#: og.module:1221;1292;1715 includes/og.panelscontent.inc:94;235
 msgid "Description"
 msgstr ""
 
-#: og.module:1244 modules/og_views/includes/og_views_handler_field_og_subscribe.inc:25
+#: og.module:1265 modules/og_views/includes/og_views_handler_field_og_subscribe.inc:25
 msgid "Invite only"
 msgstr ""
 
-#: og.module:1245 modules/og_views/includes/og_views_handler_field_og_subscribe.inc:23
+#: og.module:1266 modules/og_views/includes/og_views_handler_field_og_subscribe.inc:23
 msgid "Closed"
 msgstr ""
 
-#: og.module:1490 modules/og_panels/og_panels.module:264;457 modules/og_views/og_views.views.inc:467
+#: og.module:1515 modules/og_panels/og_panels.module:264;457 modules/og_views/og_views.views.inc:467
 msgid "Home"
 msgstr ""
 
-#: og.module:1492;2080;2113 modules/og_access/og_access.module:173 modules/og_notifications/og_notifications.module:233;26 modules/og_views/og_views.views.inc:271 theme/node-og-group-post.tpl.php:77
+#: og.module:1517;1708;2154;2187 modules/og_access/og_access.module:188 modules/og_notifications/og_notifications.module:236;29 modules/og_views/og_views.views.inc:271 theme/node-og-group-post.tpl.php:77
 msgid "Groups"
 msgstr ""
 
-#: og.module:1742 modules/og_views/og_views.views.inc:258
+#: og.module:1811 modules/og_views/og_views.views.inc:258
 msgid "Group posts"
 msgstr ""
 
-#: og.module:2164 modules/og_views/og_views.views.inc:356 tests/og_testcase.php:35
+#: og.module:2238 modules/og_views/og_views.views.inc:356 tests/og_testcase.php:35
 msgid "Group node"
 msgstr ""
 
-#: og.module:2225 includes/og.admin.inc:36
+#: og.module:2299 includes/og.admin.inc:36
 msgid "Group details"
 msgstr ""
 
-#: og.module:2237;2315 modules/og_views/og_views.module:96
+#: og.module:2311;2389 modules/og_views/og_views.module:96
 msgid "Group notifications"
 msgstr ""
 
-#: og.module:2276 includes/og.panelscontent.inc:192
+#: og.module:2350 includes/og.panelscontent.inc:192
 msgid "Group roles"
 msgstr ""
 
-#: og.module:2279 includes/og.panelscontent.inc:194
+#: og.module:2353 includes/og.panelscontent.inc:194
 msgid "Standard members"
 msgstr ""
 
-#: og.module:2280 includes/og.panelscontent.inc:194
+#: og.module:2354 includes/og.panelscontent.inc:194
 msgid "Administrators"
 msgstr ""
 
@@ -102,7 +102,7 @@ msgstr ""
 msgid "Organic groups access control"
 msgstr ""
 
-#: includes/og.admin.inc:20 modules/og_notifications/og_notifications.module:363
+#: includes/og.admin.inc:20 modules/og_notifications/og_notifications.module:366
 msgid "Type"
 msgstr ""
 
@@ -110,7 +110,7 @@ msgstr ""
 msgid "Operations"
 msgstr ""
 
-#: includes/og.panelscontent.inc:9;22;34;46;58 includes/og.rules.inc:56;156;167 modules/og_actions/og_actions.module:113;161 modules/og_notifications/og_notifications.module:307 modules/og_panels/og_panels.module:542;639 modules/og_views/og_views.views.inc:345
+#: includes/og.panelscontent.inc:9;22;34;46;58 includes/og.rules.inc:56;156;167 modules/og_actions/og_actions.module:113;161 modules/og_notifications/og_notifications.module:310 modules/og_panels/og_panels.module:542;639 modules/og_views/og_views.views.inc:345
 msgid "Group"
 msgstr ""
 
@@ -118,15 +118,11 @@ msgstr ""
 msgid "Group search"
 msgstr ""
 
-#: includes/og.panelscontent.inc:243 modules/og_views/og_views.module:122
-msgid "Search"
-msgstr ""
-
 #: includes/og.panelscontent.inc:247 modules/og_views/og_views.module:10
 msgid "Faces"
 msgstr ""
 
-#: modules/og_notifications/og_notifications.module:387 modules/og_panels/og_panels.module:494;509 tests/og_testcase.php:85
+#: modules/og_notifications/og_notifications.module:390 modules/og_panels/og_panels.module:494;509 tests/og_testcase.php:85
 msgid "Save"
 msgstr ""
 

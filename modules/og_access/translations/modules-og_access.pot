@@ -3,14 +3,14 @@
 # LANGUAGE translation of Drupal (modules-og_access)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  og_access.module,v 1.26 2008/10/29 19:58:40 dww
+#  og_access.module,v 1.27 2008/10/31 17:22:01 weitzman
 #  modules/og_access/og_access.info: n/a
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-10-29 22:28+0100\n"
+"POT-Creation-Date: 2008-11-02 12:11+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -71,31 +71,35 @@ msgstr ""
 msgid "Note that the privacy of all <em>content</em> in the group is determined as each node is created or edited, according to the <em>Visibility of Posts</em> setting on this page. Note also that changing this setting only affects the default for new groups being created, not the privacy of any existing groups! To change those you must edit the groups and their individual content nodes directly. If the setting you want is disabled here, check <em>Visibility of Posts</em> above. You cannot choose to only have private groups if node visibility is set to be always public, and vice versa."
 msgstr ""
 
-#: modules/og_access/og_access.module:93
+#: modules/og_access/og_access.module:68;107
 msgid "Private group"
 msgstr ""
 
-#: modules/og_access/og_access.module:95
+#: modules/og_access/og_access.module:69
+msgid "Checkbox for visibility of group home page to non-members."
+msgstr ""
+
+#: modules/og_access/og_access.module:110
 msgid "Should this group be visible only to its members? Disabled if the group is set to <em>List in Directory</em> or <em>Membership requests: open</em>."
 msgstr ""
 
-#: modules/og_access/og_access.module:154;163
+#: modules/og_access/og_access.module:169;178
 msgid "Public"
 msgstr ""
 
-#: modules/og_access/og_access.module:156;165
+#: modules/og_access/og_access.module:171;180
 msgid "Show this post to everyone, or only to members of the groups checked above. Posts without any groups are always <em>public</em>."
 msgstr ""
 
-#: modules/og_access/og_access.module:304
+#: modules/og_access/og_access.module:319
 msgid "All users may view this node."
 msgstr ""
 
-#: modules/og_access/og_access.module:308
+#: modules/og_access/og_access.module:323
 msgid "Members of !group_n may view this node."
 msgstr ""
 
-#: modules/og_access/og_access.module:312
+#: modules/og_access/og_access.module:327
 msgid "Group admins of !group_n may view/edit/delete this node."
 msgstr ""
 
