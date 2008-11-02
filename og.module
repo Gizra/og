@@ -368,9 +368,10 @@ function og_init() {
   // Set group context and language if needed.
   if ($node = og_determine_context()) {
     og_set_language($node);
-  }
-  if ($user->uid || variable_get('cache', CACHE_DISABLED) == CACHE_DISABLED) {
-    $_SESSION['og_last'] = $node;
+    // In D7, restrict use of $_SESSION if this lands http://drupal.org/node/201122.
+    if ($user->uid || variable_get('cache', CACHE_DISABLED) == CACHE_DISABLED) {
+      $_SESSION['og_last'] = $node;
+    }
   }
 }
 
