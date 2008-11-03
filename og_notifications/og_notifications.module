@@ -215,7 +215,7 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
             'header' => t("Greetings, [user].\n\nThese are your messages"),
             'main' => t("A [type] has been updated: [title]\n\n[event_list]"),
             'footer' => array(
-              t('This is an automatic message from [site-name])'),
+              t('This is an automatic message from [site-name]'),
               t('To manage your subscriptions, browse to [subscriptions-manage]')
             )
           );
