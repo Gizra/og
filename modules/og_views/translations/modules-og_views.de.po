@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-03 16:10+0100\n"
-"PO-Revision-Date: 2008-11-03 16:14+0100\n"
+"PO-Revision-Date: 2008-11-03 16:16+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -304,5 +304,5 @@ msgstr "Views-Integration in organischen Gruppen"
 
 #: modules/og_views/og_views.info:0
 msgid "<strong>Highly recommended.</strong>. Use Views to search and display organic groups."
-msgstr "<strong>\tIn hohem Maße empfohlen.</strong> Ansichten sollten zum Suchen und Anzeigen von organischen Gruppen verwendet werden."
+msgstr "<strong>In hohem Maße empfohlen.</strong> Ansichten sollten zum Suchen und Anzeigen von organischen Gruppen verwendet werden."
 
