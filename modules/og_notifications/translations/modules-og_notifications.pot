@@ -89,7 +89,7 @@ msgid "A [type] has been updated: [title]\n\n[event_list]"
 msgstr ""
 
 #: modules/og_notifications/og_notifications.module:211
-msgid "This is an automatic message from [site-name])"
+msgid "This is an automatic message from [site-name]"
 msgstr ""
 
 #: modules/og_notifications/og_notifications.module:212
