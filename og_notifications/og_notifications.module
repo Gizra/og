@@ -253,15 +253,19 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
         'fields' => array('group', 'type')
       );
       return $types;
+    case 'subscription fields':
+      // Information about available fields for subscriptions
+      $fields['group'] = array(
+        'name' => t('Group'),
+        'field' => 'group',
+        'type' => 'int',
+      );
+      return $fields;
     case 'query':
       if ($arg0 == 'event' && $arg1 == 'node' && ($node = $arg2->node) || $arg0 == 'user' && $arg1 == 'node' && ($node = $arg2)) {
         $query = array();
         if ($node->og_groups) {
-          $query[] = array(
-            'join' => "LEFT JOIN {og_ancestry} oga ON f.field = 'group' AND f.value = CAST(oga.group_nid AS CHAR(255))",
-            'where' => 'oga.nid = %d',
-            'args' => array($node->nid)
-          );
+          $query[]['fields']['group'] = $node->og_groups;
         }
         if ($arg0 == 'user' && og_is_group_type($node->type)) {
           $query[]['fields']['group'] = $node->nid;
