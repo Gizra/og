@@ -154,7 +154,7 @@ function og_views_form_alter(&$form, $form_state, $form_id) {
     $form['og_settings']['group_details']['og_home_page_view'] = array(
       '#type' => 'select',
       '#title' => t('Group home page view'),
-      '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques - see Theme information link when editing your View. Also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module.', array('!README' => og_readme())),
+      '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques. See the Theme information link when editing your View and also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module.', array('!README' => og_readme())),
       '#options' => $options,
       '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'),
     );
@@ -168,7 +168,7 @@ function og_views_view_group($node, $teaser, $page) {
   $name = variable_get('og_home_page_view', 'og_ghp_ron');
   $view = views_get_view($name);
   if (!$view) { 
-    drupal_set_message(t('The View @name was not found. Check your variables table or settings.php', array('@name' => $name)), 'error');
+    drupal_set_message(t('The View %name was not found. Check your variables table or settings.php.', array('%name' => $name)), 'error');
   }
   else {
     $built = $view->preview('default', array($node->nid));

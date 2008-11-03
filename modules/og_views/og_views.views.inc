@@ -204,7 +204,7 @@ function og_views_data_og() {
   );
   $data['og']['subscribe'] = array(
     'title' => t('Group: Join link'),
-    'help' => t('Displays a links for joining a group when a user is not already a member.'),
+    'help' => t('Displays a link for joining a group when a user is not already a member.'),
     'field' => array(
       'handler' => 'og_views_handler_field_og_subscribe',
     ),
