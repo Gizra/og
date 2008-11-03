@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-02 12:11+0100\n"
-"PO-Revision-Date: 2008-11-03 00:33+0100\n"
+"PO-Revision-Date: 2008-11-03 13:35+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -45,8 +45,9 @@ msgid "Group: Post count *new*"
 msgstr "Gruppe: Anzahl *neuer* Beiträge"
 
 #: modules/og_views/og_views.views.inc:162
+#, fuzzy
 msgid "Number of new posts in a group for the current user."
-msgstr ""
+msgstr "Anzahl an neuen Beiträgen in einer Gruppe für den aktuellen Benutzer."
 
 #: modules/og_views/og_views.views.inc:166
 msgid "Group: Selective"
@@ -54,7 +55,7 @@ msgstr "Gruppe: Ausgewählt"
 
 #: modules/og_views/og_views.views.inc:167
 msgid "The group preference which determines how membership requests are managed (moderated, invite only, etc.)."
-msgstr ""
+msgstr "Die Gruppenpräferenz die festlegt, wie Mitgliedschaftsanfragen verwaltet werden (Moderiert, Nur einladen, etc.)."
 
 #: modules/og_views/og_views.views.inc:177
 msgid "Group: Private"
@@ -78,7 +79,7 @@ msgstr "Gruppe: Beitrittslink"
 
 #: modules/og_views/og_views.views.inc:207
 msgid "Displays a links for joining a group when a user is not already a member."
-msgstr ""
+msgstr "Zeigt einen Link für den Gruppenbeitritt an, wenn ein Benutzer noch kein Mitglied ist."
 
 #: modules/og_views/og_views.views.inc:214
 msgid "Group: Language"
@@ -111,7 +112,7 @@ msgstr "Die mit einer Gruppe verbundenen Beiträge."
 
 #: modules/og_views/og_views.views.inc:268
 msgid "<strong>Posts</strong> are filtered for specified organic groups. The page context (if Display is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id."
-msgstr ""
+msgstr "<strong>Beiträge</strong> werden nach bestimmten organischen Gruppen gefiltert. Der Seitenkontext (wenn die Anzeige eine Seite ist) wird auf die erste angezeigte Gruppe eingestellt. Das bedeutet, dass die Blöcke und Pfadnavigation (sowie gegebenenfalls Theme und Lokale) auf der ersten angegebenen Beitrags-ID basieren wird."
 
 #: modules/og_views/og_views.views.inc:272
 msgid "The groups for a post."
@@ -179,7 +180,7 @@ msgstr "OG: Gruppe in Benutzergruppen"
 
 #: modules/og_views/og_views.views.inc:370
 msgid "OG: Admin manage link"
-msgstr ""
+msgstr "OG: Admin-Verwaltungslink"
 
 #: modules/og_views/og_views.views.inc:371
 msgid "A link to the <em>Admin create or remove</em> page."
@@ -283,7 +284,7 @@ msgstr "Ansicht der Gruppen-Startseite"
 
 #: modules/og_views/og_views.module:157
 msgid "Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques - see Theme information link when editing your View. Also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module."
-msgstr ""
+msgstr "Eine Ansicht für die Gruppen-Startseite aussuchen. Nur Ansichten deren Namen mit <strong>og_ghp_</strong> beginnen sind geeignet. Die Ansicht bestimmt das Layout der Gruppen-Startseite. Die Darstellung kann mit typischen Themeing-Techniken verändert werden. Nähere Information gibt es unter dem Theme-Informations-Link beim Bearbeiten der Ansicht und im Theme-Abschnitt der !README. Bitte beachten Sie auch, dass Gruppen-Administratoren diese Darstellung mit dem mitgelieferten <em>Organische-Gruppen-Panels</em>-Modul übersteuern können."
 
 #: modules/og_views/og_views.module:163
 msgid "Search group"
@@ -291,7 +292,7 @@ msgstr "Gruppe suchen"
 
 #: modules/og_views/og_views.module:171
 msgid "The View @name was not found. Check your variables table or settings.php"
-msgstr ""
+msgstr "Die Ansicht @name wurde nicht gefunden. Überprüfen Sie die Variablen-Tabelle oder settings.php."
 
 #: modules/og_views/og_views.module:0
 msgid "og_views"
@@ -299,9 +300,9 @@ msgstr "og_views"
 
 #: modules/og_views/og_views.info:0
 msgid "Organic groups Views integration"
-msgstr ""
+msgstr "Views-Integration in organischen Gruppen"
 
 #: modules/og_views/og_views.info:0
 msgid "<strong>Highly recommended.</strong>. Use Views to search and display organic groups."
-msgstr ""
+msgstr "<strong>	In hohem Maße empfohlen.</strong> Ansichten sollten zum Suchen und Anzeigen von organischen Gruppen verwendet werden."
 
