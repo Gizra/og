@@ -6,7 +6,7 @@
  * Tests for membership related operations in the organic groups module.
  */
 
-require_once dirname(__FILE__) .'/og_testcase.php';
+require_once drupal_get_path('module', 'og') . '/tests/og_testcase.php';
 
 class OgSubscribe extends OgTestCase {
   function getInfo() {
