@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-02 12:11+0100\n"
-"PO-Revision-Date: 2008-11-03 00:32+0100\n"
+"PO-Revision-Date: 2008-11-03 13:44+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -26,7 +26,7 @@ msgstr "Benutzerdefinierte Seiten für die Gruppe erstellen. Benutzerdefinierte 
 
 #: modules/og_panels/og_panels.module:9
 msgid "Start by clicking the <a href=\"!url\">Add new page</a> tab. Then you will choose a custom layout for your page. Then you will want to <em>edit content</em> for your custom page."
-msgstr ""
+msgstr "Durch Anklicken des <a href=\"!url\">Neue Seite hinzufügen</a>-Reiters beginnen. Dann ein benutzerdefiniertes Layout für die Seite auswählen. Danach für die benutzerdefinierte Seite den <em>Inhalt bearbeiten</em>."
 
 #: modules/og_panels/og_panels.module:143
 msgid "Are you sure you want to delete %title?"
@@ -209,7 +209,7 @@ msgstr "og_panels"
 
 #: modules/og_panels/og_panels.info:0
 msgid "Organic groups panels.** NOT COMPATIBLE WITH DRUPAL 6 YET **"
-msgstr ""
+msgstr "Organische-Gruppen-Panels. ** NOCH NICHT KOMPATIBEL MIT DRUPAL 6 **"
 
 #: modules/og_panels/og_panels.info:0
 msgid "Enable group admins to create panel pages."
