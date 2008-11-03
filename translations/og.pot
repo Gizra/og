@@ -3,7 +3,7 @@
 # LANGUAGE translation of Drupal (root)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  og.module,v 1.601 2008/11/02 13:27:39 weitzman
+#  og.module,v 1.602 2008/11/03 02:18:01 weitzman
 #  og.info: n/a
 #  includes/og.panelscontent.inc: n/a
 #  modules/og_access/og_access.info: n/a
@@ -19,7 +19,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-11-02 23:57+0100\n"
+"POT-Creation-Date: 2008-11-03 11:17+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -28,677 +28,699 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: og.module:26
+#: og.module:32
 msgid "Group specific blocks are only visible on group pages and not on systemwide pages like the home page or admin pages."
 msgstr ""
 
-#: og.module:29
+#: og.module:35
 msgid "In order to let group admins determine their own group theme, you must enable multiple themes using <a href=\"@url\">theme configuration page</a>."
 msgstr ""
 
-#: og.module:544
+#: og.module:550
 msgid "Send message to %group"
 msgstr ""
 
-#: og.module:547
+#: og.module:553
 msgid "Your message will be sent to all members of this group."
 msgstr ""
 
-#: og.module:552
+#: og.module:558
 msgid "Subject"
 msgstr ""
 
-#: og.module:555
+#: og.module:561
 msgid "Enter a subject for your message."
 msgstr ""
 
-#: og.module:560;1680
+#: og.module:566;1672
 msgid "Body"
 msgstr ""
 
-#: og.module:563
+#: og.module:569
 msgid "Enter a body for your message."
 msgstr ""
 
-#: og.module:566
+#: og.module:572
 msgid "Send message"
 msgstr ""
 
-#: og.module:619
+#: og.module:625
 msgid "You may not leave this group because it is a <em>closed</em> group. You should request removal from a group administrator."
 msgstr ""
 
-#: og.module:622
+#: og.module:628
 msgid "You may not leave this group because you are its owner. A site administrator can assign ownership to another user and then you may leave."
 msgstr ""
 
-#: og.module:625
+#: og.module:631
 msgid "Leave this group"
 msgstr ""
 
-#: og.module:639
+#: og.module:645
 msgid "Membership saved."
 msgstr ""
 
-#: og.module:681;710
+#: og.module:687;716
 msgid "Bad token. You seem to have followed an invalid link."
 msgstr ""
 
-#: og.module:687
+#: og.module:693
 msgid "!name already approved to group %group."
 msgstr ""
 
-#: og.module:692
+#: og.module:698
 msgid "Membership request approved."
 msgstr ""
 
-#: og.module:715
+#: og.module:721
 msgid "Membership request denied."
 msgstr ""
 
-#: og.module:738
+#: og.module:744
 msgid "Are you sure you want to make %name a group administrator for the group %title?"
 msgstr ""
 
-#: og.module:741
+#: og.module:747
 msgid "Confirm"
 msgstr ""
 
-#: og.module:753
+#: og.module:759
 msgid "%name was promoted to <em>group administrator</em>."
 msgstr ""
 
-#: og.module:778
+#: og.module:784
 msgid "Are you sure you want to remove %name as a group administrator for the group %title?"
 msgstr ""
 
-#: og.module:781;1038
+#: og.module:787;1044
 msgid "Remove"
 msgstr ""
 
-#: og.module:793
+#: og.module:799
 msgid "%name is no longer a <em>group administrator</em>."
 msgstr ""
 
-#: og.module:805
+#: og.module:811
 msgid "Email addresses or usernames"
 msgstr ""
 
-#: og.module:806
+#: og.module:812
 msgid "Enter up to %max email addresses or usernames. Separate multiple addresses by commas or new lines. Each person will receive an invitation message from you."
 msgstr ""
 
-#: og.module:810
+#: og.module:816
 msgid "Personal message"
 msgstr ""
 
-#: og.module:811
+#: og.module:817
 msgid "Optional. Enter a message which will become part of the invitation email."
 msgstr ""
 
-#: og.module:813;100
+#: og.module:819;106
 msgid "Send invitation"
 msgstr ""
 
-#: og.module:828
+#: og.module:834
 msgid "You may not specify more than %max email addresses or usernames."
 msgstr ""
 
-#: og.module:831
+#: og.module:837
 msgid "You may not invite yourself - @self."
 msgstr ""
 
-#: og.module:855
+#: og.module:861
 msgid "Invalid email address or username: @value."
 msgstr ""
 
-#: og.module:900
+#: og.module:906
 msgid "In order to join this group, you must login or register a new account. After you have successfully done so, you will need to request membership again."
 msgstr ""
 
-#: og.module:920
+#: og.module:926
 msgid "@user is already a member the group @group."
 msgstr ""
 
-#: og.module:937
+#: og.module:943
 msgid "Additional details"
 msgstr ""
 
-#: og.module:938
+#: og.module:944
 msgid "Add any detail which will help an administrator decide whether to approve or deny your membership request."
 msgstr ""
 
-#: og.module:948
+#: og.module:954
 msgid "Are you sure you want to join the group %title?"
 msgstr ""
 
-#: og.module:950;2506
+#: og.module:956;2532
 msgid "Join"
 msgstr ""
 
-#: og.module:988
+#: og.module:994
 msgid "\n\nPersonal message from @name:\n------------------\n\n@request"
 msgstr ""
 
-#: og.module:1008
+#: og.module:1014
 msgid "Membership request to the %group group awaits approval by an administrator."
 msgstr ""
 
-#: og.module:1014
+#: og.module:1020
 msgid "You are now a member of the %group."
 msgstr ""
 
-#: og.module:1024
+#: og.module:1030
 msgid "Membership request to the %group group was rejected, only group administrators can add users to this group."
 msgstr ""
 
-#: og.module:1037
+#: og.module:1043
 msgid "Are you sure you want to remove !name from the group %title?"
 msgstr ""
 
-#: og.module:1054
+#: og.module:1060
 msgid "%user removed from %group."
 msgstr ""
 
-#: og.module:1111
+#: og.module:1117
 msgid "List of users"
 msgstr ""
 
-#: og.module:1116
+#: og.module:1122
 msgid "Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma."
 msgstr ""
 
-#: og.module:1119
+#: og.module:1125
 msgid "Add users"
 msgstr ""
 
-#: og.module:1185
+#: og.module:1191
 msgid "Posts"
 msgstr ""
 
-#: og.module:1186
+#: og.module:1192
 msgid "Comments"
 msgstr ""
 
-#: og.module:1187
+#: og.module:1193
 msgid "Age"
 msgstr ""
 
-#: og.module:1188
+#: og.module:1194
 msgid "Last comment"
 msgstr ""
 
-#: og.module:1202
+#: og.module:1208
 msgid "No groups available."
 msgstr ""
 
-#: og.module:1247
+#: og.module:1253
 msgid "No posts in this group."
 msgstr ""
 
-#: og.module:1250
+#: og.module:1256
 msgid "No public posts in this group."
 msgstr ""
 
-#: og.module:1252
+#: og.module:1258
 msgid "You must <a href=\"!register\">register</a> or <a href=\"!login\">login</a> and become a member in order to post messages, and view any private posts."
 msgstr ""
 
-#: og.module:1256
+#: og.module:1262
 msgid "Consider <a href=\"!url\">joining this group</a> in order to view its posts."
 msgstr ""
 
-#: og.module:1264
+#: og.module:1270
 msgid "Open"
 msgstr ""
 
-#: og.module:1265
+#: og.module:1271
 msgid "Moderated"
 msgstr ""
 
-#: og.module:1298
+#: og.module:1304
 msgid "A brief description for the group details block and the group directory."
 msgstr ""
 
-#: og.module:1304
+#: og.module:1310
 msgid "Open - membership requests are accepted immediately."
 msgstr ""
 
-#: og.module:1305
+#: og.module:1311
 msgid "Moderated - membership requests must be approved."
 msgstr ""
 
-#: og.module:1306
+#: og.module:1312
 msgid "Invite only - membership must be created by an administrator."
 msgstr ""
 
-#: og.module:1307
+#: og.module:1313
 msgid "Closed - membership is exclusively managed by an administrator."
 msgstr ""
 
-#: og.module:1311;1721
+#: og.module:1317;1713
 msgid "Membership requests"
 msgstr ""
 
-#: og.module:1316
+#: og.module:1322
 msgid "How should membership requests be handled in this group? When you select <em>closed</em>, users will not be able to join <strong>or</strong> leave."
 msgstr ""
 
-#: og.module:1342;1725
+#: og.module:1348;1717
 msgid "Registration form"
 msgstr ""
 
-#: og.module:1345
+#: og.module:1351
 msgid "May users join this group during registration? If checked, a corresponding checkbox will be added to the registration form."
 msgstr ""
 
-#: og.module:1373;1729
+#: og.module:1379;1721
 msgid "List in groups directory"
 msgstr ""
 
-#: og.module:1376
+#: og.module:1382
 msgid "Should this group appear on the <a href=\"@url\">list of groups page</a> (requires OG Views module)? Disabled if the group is set to <em>private group</em>."
 msgstr ""
 
-#: og.module:1384;1735
+#: og.module:1390;1727
 msgid "Group language"
 msgstr ""
 
-#: og.module:1386
+#: og.module:1392
 msgid "Language neutral"
 msgstr ""
 
-#: og.module:1388
+#: og.module:1394
 msgid "Selecting a different locale will change the interface language for all group pages and emails. Users who have chosen a preferred language always see their chosen language."
 msgstr ""
 
-#: og.module:1393
+#: og.module:1399
 msgid "Selecting a different theme will change the look and feel of the group."
 msgstr ""
 
-#: og.module:1564
+#: og.module:1556
 msgid "You must <a href=\"@join\">join a group</a> before posting on this web site."
 msgstr ""
 
-#: og.module:1681
+#: og.module:1673
 msgid "Mission statement"
 msgstr ""
 
-#: og.module:1682
+#: og.module:1674
 msgid "A welcome greeting for your group home page. Consider listing the group objectives and mission."
 msgstr ""
 
-#: og.module:1685
+#: og.module:1677
 msgid "Group manager"
 msgstr ""
 
-#: og.module:1686
+#: og.module:1678
 msgid "Sticky at top of group home page and other lists."
 msgstr ""
 
-#: og.module:1710
+#: og.module:1702
 msgid "OG audience & Public checkbox."
 msgstr ""
 
-#: og.module:1710
+#: og.module:1702
 msgid "OG audience."
 msgstr ""
 
-#: og.module:1717
+#: og.module:1709
 msgid "Group description."
 msgstr ""
 
-#: og.module:1722
+#: og.module:1714
 msgid "Handling of group membership requests."
 msgstr ""
 
-#: og.module:1726
+#: og.module:1718
 msgid "Checkbox for visibility on registration form."
 msgstr ""
 
-#: og.module:1730
+#: og.module:1722
 msgid "Checkbox for visibility in the groups directory."
 msgstr ""
 
-#: og.module:1736
+#: og.module:1728
 msgid "The default interface language for this group."
 msgstr ""
 
-#: og.module:1763;120 og.info:0;0 includes/og.panelscontent.inc:10;23;35;47;59 modules/og_access/og_access.info:0 modules/og_actions/og_actions.info:0 modules/og_notifications/og_notifications.info:0 modules/og_panels/og_panels.module:641 modules/og_panels/og_panels.info:0 modules/og_views/og_views.views.inc:123;255;333 modules/og_views/og_views.info:0
+#: og.module:1755;126 og.info:0;0 includes/og.panelscontent.inc:10;23;35;47;59 modules/og_access/og_access.info:0 modules/og_actions/og_actions.info:0 modules/og_notifications/og_notifications.info:0 modules/og_panels/og_panels.module:641 modules/og_panels/og_panels.info:0 modules/og_views/og_views.views.inc:123;255;333 modules/og_views/og_views.info:0
 msgid "Organic groups"
 msgstr ""
 
-#: og.module:1771
+#: og.module:1763
 msgid "Organic groups usage"
 msgstr ""
 
-#: og.module:1774
+#: og.module:1766
 msgid "Specify how organic groups should treat nodes of this type. Nodes may behave as a group, as group posts, or may not participate in organic groups at all."
 msgstr ""
 
-#: og.module:1805
+#: og.module:1797
 msgid "Do nothing."
 msgstr ""
 
-#: og.module:1806
+#: og.module:1798
 msgid "Delete all group posts which don't also belong to another group."
 msgstr ""
 
-#: og.module:1808
+#: og.module:1800
 msgid "Move all group posts to the group listed below."
 msgstr ""
 
-#: og.module:1815
-msgid "In addition to deleting this group, you may choose how to disposition the posts within it."
+#: og.module:1801
+msgid "Move all group posts and memberships to the group listed below."
 msgstr ""
 
-#: og.module:1822
+#: og.module:1809
+msgid "In addition to deleting this group, you choose how to disposition the posts and memberships within it."
+msgstr ""
+
+#: og.module:1816
 msgid "Target group"
 msgstr ""
 
-#: og.module:1826
+#: og.module:1820
 msgid "If you chose <strong>Move all group posts</strong> above, specify a destination group."
 msgstr ""
 
-#: og.module:1832
+#: og.module:1829
 msgid "Delete group"
 msgstr ""
 
-#: og.module:1956;1985
+#: og.module:1982;2011
 msgid "My groups"
 msgstr ""
 
-#: og.module:1957;1986
+#: og.module:1983;2012
 msgid "Other groups"
 msgstr ""
 
-#: og.module:2037;2051
+#: og.module:2063;2077
 msgid "Audience"
 msgstr ""
 
-#: og.module:2061
+#: og.module:2087
 msgid "You must <a href=\"@join\">join a group</a> before posting a %type."
 msgstr ""
 
-#: og.module:2080
+#: og.module:2106
 msgid "@group: '@title' at @site"
 msgstr ""
 
-#: og.module:2082
+#: og.module:2108
 msgid "@type '@subject' by @username\n\n@node_teaser\n\n!read_more: !content_url\nPost reply: !reply_url\n\n--\nYou are subscribed from the group '@group' at @site.\nTo manage your subscription, visit !group_url"
 msgstr ""
 
-#: og.module:2086
+#: og.module:2112
 msgid "@body\n\n--\nThis message was sent by an administrator in the '@group' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe"
 msgstr ""
 
-#: og.module:2088
+#: og.module:2114
 msgid "Membership request approved for '@title'"
 msgstr ""
 
-#: og.module:2090
+#: og.module:2116
 msgid "You may now post messages in this group located at !group_url"
 msgstr ""
 
-#: og.module:2092
+#: og.module:2118
 msgid "Membership request denied for '@title'"
 msgstr ""
 
-#: og.module:2094
+#: og.module:2120
 msgid "Sorry, your membership request was denied."
 msgstr ""
 
-#: og.module:2097
+#: og.module:2123
 msgid "Invitation to join the group '@group' at @site"
 msgstr ""
 
-#: og.module:2099
+#: og.module:2125
 msgid "Hi. I'm a member of '@group' and I welcome you to join this group as well. Please see the link and message below.\n\n@group\n@description\nJoin: !group_url\n@body"
 msgstr ""
 
-#: og.module:2101
+#: og.module:2127
 msgid "Membership request for '@group' from '@username'"
 msgstr ""
 
-#: og.module:2103
+#: og.module:2129
 msgid "To instantly approve this request, visit !approve_url.\nYou may deny this request or manage members at !group_url. \n\nPersonal message from @username:\n------------------\n\n@request"
 msgstr ""
 
-#: og.module:2105
+#: og.module:2131
 msgid "You are now an administrator for the group '@group'"
 msgstr ""
 
-#: og.module:2107
+#: og.module:2133
 msgid "@username, you are now an administrator for the group '@group'.\n\nYou can administer this group by logging in here:\n !group_url"
 msgstr ""
 
-#: og.module:2148
+#: og.module:2174
 msgid "Join %name."
 msgstr ""
 
-#: og.module:2150
+#: og.module:2176
 msgid "(approval needed)"
 msgstr ""
 
-#: og.module:2240
+#: og.module:2266
 msgid "May not be posted into a group."
 msgstr ""
 
-#: og.module:2241
+#: og.module:2267
 msgid "Standard group post (typically only author may edit)."
 msgstr ""
 
-#: og.module:2245
+#: og.module:2271
 msgid "Wiki group post (any group member may edit)."
 msgstr ""
 
-#: og.module:2306;2416
+#: og.module:2332;2442
 msgid "New groups"
 msgstr ""
 
-#: og.module:2345
+#: og.module:2371
 msgid "Maximum number of members to show"
 msgstr ""
 
-#: og.module:2357
+#: og.module:2383
 msgid "You may specify which types of group members appear in the listing."
 msgstr ""
 
-#: og.module:2361
+#: og.module:2387
 msgid "Maximum number of groups to show"
 msgstr ""
 
-#: og.module:2388
+#: og.module:2414
 msgid "This group offers a <a href=\"@subscription\">subscription option</a>."
 msgstr ""
 
-#: og.module:2399;2399
+#: og.module:2425;2425
 msgid "OPML feed"
 msgstr ""
 
-#: og.module:2414
+#: og.module:2440
 msgid "more"
 msgstr ""
 
-#: og.module:2414
+#: og.module:2440
 msgid "Browse the newest groups."
 msgstr ""
 
-#: og.module:2432
+#: og.module:2458
 msgid "Invite friend"
 msgstr ""
 
-#: og.module:2435
+#: og.module:2461
 msgid "Manager: !name"
 msgstr ""
 
-#: og.module:2438
+#: og.module:2464
 msgid "My membership"
 msgstr ""
 
-#: og.module:2444
+#: og.module:2470
 msgid "Your membership request awaits approval."
 msgstr ""
 
-#: og.module:2445
+#: og.module:2471
 msgid "Delete request"
 msgstr ""
 
-#: og.module:2449
+#: og.module:2475
 msgid "You must <a href=\"!register\">register</a>/<a href=\"!login\">login</a> in order to post into this group."
 msgstr ""
 
-#: og.module:2455
+#: og.module:2481
 msgid "This is an <em>invite only</em> group. The group administrators add/remove members as needed."
 msgstr ""
 
-#: og.module:2458
+#: og.module:2484
 msgid "This is a <em>closed</em> group. The group administrators add/remove members as needed."
 msgstr ""
 
-#: og.module:2503
+#: og.module:2529
 msgid "Request membership"
 msgstr ""
 
-#: og.module:2524
+#: og.module:2550
 msgid "Create !type"
 msgstr ""
 
-#: og.module:2525
+#: og.module:2551
 msgid "Add a new !type in this group."
 msgstr ""
 
-#: og.module:2541
+#: og.module:2567
 msgid "(pending approval)"
 msgstr ""
 
-#: og.module:2556
+#: og.module:2582
 msgid "Add a user to a group."
 msgstr ""
 
-#: og.module:2561
+#: og.module:2587
 msgid "All members for a given group."
 msgstr ""
 
-#: og.module:2566
+#: og.module:2592
 msgid "Retrieve the group memberships for a given user."
 msgstr ""
 
-#: og.module:2575
+#: og.module:2601
 msgid "Title of top group"
 msgstr ""
 
-#: og.module:2576
+#: og.module:2602
 msgid "Unfiltered title of top group. WARNING - raw user input."
 msgstr ""
 
-#: og.module:2577
+#: og.module:2603
 msgid "ID of top group"
 msgstr ""
 
-#: og.module:2614
+#: og.module:2640
 msgid "README file"
 msgstr ""
 
-#: og.module:600
+#: og.module:606
 msgid "1 message queued for delivery."
 msgid_plural "@count messages queued for delivery."
 msgstr[0] ""
 msgstr[1] ""
 
-#: og.module:881
+#: og.module:887
 msgid "1 invitation sent."
 msgid_plural "@count invitations sent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: og.module:1139
+#: og.module:1145
 msgid "Unrecognized name: %bad."
 msgid_plural "Unrecognized names: %bad."
 msgstr[0] ""
 msgstr[1] ""
 
-#: og.module:1155
+#: og.module:1161
 msgid "1 user added to the group."
 msgid_plural "@count users added to the group."
 msgstr[0] ""
 msgstr[1] ""
 
-#: og.module:1632
+#: og.module:1624
 msgid "1 group"
 msgid_plural "@count groups"
 msgstr[0] ""
 msgstr[1] ""
 
-#: og.module:2055
+#: og.module:1876
+msgid "Deleted 1 orphan post."
+msgid_plural "Deleted @count orphan posts."
+msgstr[0] ""
+msgstr[1] ""
+
+#: og.module:1879
+msgid "Moved 1 orphan post."
+msgid_plural "Moved @count orphan posts."
+msgstr[0] ""
+msgstr[1] ""
+
+#: og.module:1901
+msgid "Moved 1 membership."
+msgid_plural "Moved @count memberships."
+msgstr[0] ""
+msgstr[1] ""
+
+#: og.module:2081
 msgid "Show this post in this group."
 msgid_plural "Show this post in these groups."
 msgstr[0] ""
 msgstr[1] ""
 
-#: og.module:2495
+#: og.module:2521
 msgid "1 member"
 msgid_plural "@count members"
 msgstr[0] ""
 msgstr[1] ""
 
-#: og.module:399
+#: og.module:405
 msgid "administer organic groups"
 msgstr ""
 
-#: og.module:43
+#: og.module:49
 msgid "Join group"
 msgstr ""
 
-#: og.module:50
+#: og.module:56
 msgid "OPML"
 msgstr ""
 
-#: og.module:58
+#: og.module:64
 msgid "Leave group"
 msgstr ""
 
-#: og.module:67
+#: og.module:73
 msgid "Approve membership request"
 msgstr ""
 
-#: og.module:75
+#: og.module:81
 msgid "Deny membership request"
 msgstr ""
 
-#: og.module:83
+#: og.module:89
 msgid "Create group administrator"
 msgstr ""
 
-#: og.module:91
+#: og.module:97
 msgid "Delete group administrator"
 msgstr ""
 
-#: og.module:108
+#: og.module:114
 msgid "Manage membership"
 msgstr ""
 
-#: og.module:113
+#: og.module:119
 msgid "Group activity"
 msgstr ""
 
-#: og.module:121
+#: og.module:127
 msgid "Administer the suite of Organic groups modules."
 msgstr ""
 
-#: og.module:132
+#: og.module:138
 msgid "Organic groups configuration"
 msgstr ""
 
-#: og.module:134
+#: og.module:140
 msgid "Configure the main Organic groups module (og)."
 msgstr ""
 
-#: og.module:142
+#: og.module:148
 msgid "Add members"
 msgstr ""
 
-#: og.module:152
+#: og.module:158
 msgid "Broadcast"
 msgstr ""
 
