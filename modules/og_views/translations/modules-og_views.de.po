@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-11-02 12:11+0100\n"
-"PO-Revision-Date: 2008-11-03 13:35+0100\n"
+"POT-Creation-Date: 2008-11-03 16:10+0100\n"
+"PO-Revision-Date: 2008-11-03 16:14+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -78,7 +78,7 @@ msgid "Group: Join link"
 msgstr "Gruppe: Beitrittslink"
 
 #: modules/og_views/og_views.views.inc:207
-msgid "Displays a links for joining a group when a user is not already a member."
+msgid "Displays a link for joining a group when a user is not already a member."
 msgstr "Zeigt einen Link für den Gruppenbeitritt an, wenn ein Benutzer noch kein Mitglied ist."
 
 #: modules/og_views/og_views.views.inc:214
@@ -283,7 +283,7 @@ msgid "Group home page view"
 msgstr "Ansicht der Gruppen-Startseite"
 
 #: modules/og_views/og_views.module:157
-msgid "Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques - see Theme information link when editing your View. Also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module."
+msgid "Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques. See the Theme information link when editing your View and also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module."
 msgstr "Eine Ansicht für die Gruppen-Startseite aussuchen. Nur Ansichten deren Namen mit <strong>og_ghp_</strong> beginnen sind geeignet. Die Ansicht bestimmt das Layout der Gruppen-Startseite. Die Darstellung kann mit typischen Themeing-Techniken verändert werden. Nähere Information gibt es unter dem Theme-Informations-Link beim Bearbeiten der Ansicht und im Theme-Abschnitt der !README. Bitte beachten Sie auch, dass Gruppen-Administratoren diese Darstellung mit dem mitgelieferten <em>Organische-Gruppen-Panels</em>-Modul übersteuern können."
 
 #: modules/og_views/og_views.module:163
@@ -291,8 +291,8 @@ msgid "Search group"
 msgstr "Gruppe suchen"
 
 #: modules/og_views/og_views.module:171
-msgid "The View @name was not found. Check your variables table or settings.php"
-msgstr "Die Ansicht @name wurde nicht gefunden. Überprüfen Sie die Variablen-Tabelle oder settings.php."
+msgid "The View %name was not found. Check your variables table or settings.php."
+msgstr "Die Ansicht %name wurde nicht gefunden. Überprüfen Sie die Variablen-Tabelle oder settings.php."
 
 #: modules/og_views/og_views.module:0
 msgid "og_views"
@@ -304,5 +304,5 @@ msgstr "Views-Integration in organischen Gruppen"
 
 #: modules/og_views/og_views.info:0
 msgid "<strong>Highly recommended.</strong>. Use Views to search and display organic groups."
-msgstr "<strong>	In hohem Maße empfohlen.</strong> Ansichten sollten zum Suchen und Anzeigen von organischen Gruppen verwendet werden."
+msgstr "<strong>\tIn hohem Maße empfohlen.</strong> Ansichten sollten zum Suchen und Anzeigen von organischen Gruppen verwendet werden."
 

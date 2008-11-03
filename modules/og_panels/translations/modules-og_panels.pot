@@ -4,13 +4,13 @@
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
 #  og_panels.module,v 1.41 2008/10/31 12:14:04 weitzman
-#  og_panels.info,v 1.5 2008/11/01 11:42:31 weitzman
+#  og_panels.info,v 1.6 2008/11/03 15:02:04 weitzman
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-11-02 12:11+0100\n"
+"POT-Creation-Date: 2008-11-03 16:10+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -208,7 +208,7 @@ msgid "og_panels"
 msgstr ""
 
 #: modules/og_panels/og_panels.info:0
-msgid "Organic groups panels.** NOT COMPATIBLE WITH DRUPAL 6 YET **"
+msgid "Organic groups panels. NOT COMPATIBLE WITH DRUPAL 6 YET."
 msgstr ""
 
 #: modules/og_panels/og_panels.info:0

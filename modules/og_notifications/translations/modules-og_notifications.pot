@@ -3,7 +3,7 @@
 # LANGUAGE translation of Drupal (modules-og_notifications)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  og_notifications.module,v 1.14 2008/10/30 19:18:53 karthik
+#  og_notifications.module,v 1.15 2008/11/03 15:08:17 weitzman
 #  og_notifications.install,v 1.8 2008/10/29 19:59:27 dww
 #  og_notifications.info,v 1.7 2008/10/29 19:59:23 dww
 #
@@ -11,7 +11,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-11-02 12:11+0100\n"
+"POT-Creation-Date: 2008-11-03 16:10+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
