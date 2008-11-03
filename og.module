@@ -19,6 +19,12 @@ define('OG_DIRECTORY_ALWAYS', 1);
 define('OG_DIRECTORY_CHOOSE_TRUE', 2);
 define('OG_DIRECTORY_CHOOSE_FALSE', 3);
 
+// Dispositioning of nodes and memberships after deletion of a group node.
+define('OG_DELETE_NOTHING', 0);
+define('OG_DELETE_ORPHANS', 1);
+define('OG_DELETE_MOVE_NODES', 2);
+define('OG_DELETE_MOVE_NODES_MEMBERSHIPS', 3);
+
 function og_help($path, $arg) {
   if ($path) {
     switch ($path) {
@@ -1433,20 +1439,6 @@ function og_presave_group(&$node) {
     $node->og_theme = NULL;
   }
   
-  // TODOL Once ancestry table uses drupal_write_record(), these are not needed.
-  if (!isset($node->og_public)) {
-    $node->og_public = TRUE;
-  }
-  if (!isset($node->og_language)) {
-    $node->og_language = NULL;
-  }
-  if (!isset($node->og_notification)) {
-    $node->og_notification = NULL;
-  }
-  if (!isset($node->og_private)) {
-    $node->og_private = FALSE;
-  }
-  
   // Normalize og_groups array
   if (isset($node->og_groups)) {
     $node->og_groups = array_filter($node->og_groups);
@@ -1802,17 +1794,19 @@ function og_node_type_form_submit($form, &$form_state) {
 
 // Form_alter() the node_delete form for a group
 function og_node_delete_group_form(&$form) {
-  $options[] = t('Do nothing.');
-  $options[] = t("Delete all group posts which don't also belong to another group.");
+  $options[OG_DELETE_NOTHING] = t('Do nothing.');
+  $options[OG_DELETE_ORPHANS] = t("Delete all group posts which don't also belong to another group.");
   if (user_access('administer nodes')) {
-    $options[] = t('Move all group posts to the group listed below.');
+    $options[OG_DELETE_MOVE_NODES] = t('Move all group posts to the group listed below.');
+    $options[OG_DELETE_MOVE_NODES_MEMBERSHIPS] = t('Move all group posts and memberships to the group listed below.');
   }
   $form['verb'] = array(
     '#type' => 'radios', 
     '#title' => t('Group posts'), 
     '#options' => $options, 
+    '#default_value' => OG_DELETE_NOTHING,
     '#weight' => -1, 
-    '#description' => t('In addition to deleting this group, you may choose how to disposition the posts within it.')
+    '#description' => t('In addition to deleting this group, you choose how to disposition the posts and memberships within it.')
   );
   if (user_access('administer nodes')) {
     $options = og_all_groups_options();
@@ -1826,7 +1820,10 @@ function og_node_delete_group_form(&$form) {
       '#description' => t('If you chose <strong>Move all group posts</strong> above, specify a destination group.'),
     );
     
-    // register a submit handler
+    // Register a submit handlers for moving child nodes and memberships. 
+    // Memberships should move before the group node is deleted.
+    // Group nodes wait until afterwards so that our custom redirect works.
+    array_unshift($form['#submit'], 'og_node_delete_move_memberships');
     $form['#submit'][] = 'og_node_delete_confirm_submit';
   }
   $form['actions']['submit']['#value'] = t('Delete group');
@@ -1855,8 +1852,10 @@ function og_group_child_nids($group_nid) {
 function og_node_delete_confirm_submit($form, &$form_state) {
   $deleted_group_nid = $form_state['values']['nid'];
   $target_group_nid = $form_state['values']['target'];
-  $move_children = $form_state['values']['verb'] == 2;
-  $delete_orphans = $form_state['values']['verb'] == 1;
+  $delete_orphans = $form_state['values']['verb'] == OG_DELETE_ORPHANS;
+  $move_children = $form_state['values']['verb'] >= OG_DELETE_MOVE_NODES;
+  
+  $count = 0;
   foreach (og_group_child_nids($deleted_group_nid) as $child_nid) {
     $node = node_load($child_nid);
     unset($node->og_groups[$deleted_group_nid]);
@@ -1870,9 +1869,36 @@ function og_node_delete_confirm_submit($form, &$form_state) {
     else {
       node_save($node);
     }
+    $count++;
   }
+  
+  if ($delete_orphans) {
+    drupal_set_message(format_plural($count, 'Deleted 1 orphan post.', 'Deleted @count orphan posts.'));
+  }
+  elseif ($move_children) {
+    drupal_set_message(format_plural($count, 'Moved 1 orphan post.', 'Moved @count orphan posts.'));
+  }
+  
   if ($move_children) {
     $form_state['redirect']  = 'node/'. $target_group_nid;
+  }
+}
+
+// Submit handler for group node delete form.
+// Move memberships to target group after a deletion of a group node. No access control.
+function og_node_delete_move_memberships($form, &$form_state) {
+  if ($form_state['values']['verb'] == OG_DELETE_MOVE_NODES_MEMBERSHIPS) {
+    $deleted_group_nid = $form_state['values']['nid'];
+    $target_group_nid = $form_state['values']['target'];
+  
+    $sql = og_list_users_sql();
+    $result = db_query($sql, $deleted_group_nid);
+    $count = 0;
+    while ($row = db_fetch_object($result)) {
+      og_save_subscription($target_group_nid, $row->uid, array('is_active' => 1));
+      $count++;
+    }
+    drupal_set_message(format_plural($count, 'Moved 1 membership.', 'Moved @count memberships.'));
   }
 }
 
