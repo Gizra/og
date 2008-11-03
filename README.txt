@@ -51,6 +51,7 @@ TODO/BUGS/FEATURE REQUESTS
 UPGRADING FROM 5.0 TO 6.x
 -----------------
 - The upgrade auto-enables the new og_views module. This is needed to get the same functionality that was present in D5.
+- There is no support for migrating custom Views. Please redo those in Views2. You might need to use a Relationship.
 - Group members block (og/2) block is now served by Views: views/og_members_block-block_1
 - Group search is now in its own block which must be enabled manually. It used to be integrated into the Group details block.
 
