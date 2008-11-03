@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-03 11:17+0100\n"
-"PO-Revision-Date: 2008-11-03 11:30+0100\n"
+"PO-Revision-Date: 2008-11-04 00:33+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -482,26 +482,23 @@ msgstr ""
 
 #: og.module:2114
 msgid "Membership request approved for '@title'"
-msgstr "Der Antrag auf Mitgliedschaft für ‚%title‘ wurde akzeptiert."
+msgstr "Der Antrag auf Mitgliedschaft für ‚@title‘ wurde akzeptiert"
 
-# TODO: period
 #: og.module:2116
 msgid "You may now post messages in this group located at !group_url"
-msgstr "Sie dürfen jetzt Beiträge in dieser Gruppe verfassen, die sich unter !group_url befindet."
+msgstr "Sie dürfen jetzt Beiträge in dieser Gruppe verfassen, die sich unter !group_url befindet"
 
-# TODO: period
 #: og.module:2118
 msgid "Membership request denied for '@title'"
-msgstr "Der Antrag auf Mitgliedschaft für ‚@title‘ wurde abgelehnt."
+msgstr "Der Antrag auf Mitgliedschaft für ‚@title‘ wurde abgelehnt"
 
 #: og.module:2120
 msgid "Sorry, your membership request was denied."
 msgstr "Der Antrag auf Mitgliederschaft wurde leider abgelehnt."
 
-# TODO: period
 #: og.module:2123
 msgid "Invitation to join the group '@group' at @site"
-msgstr "Einladung der Gruppe „@group“ auf @site beizutreten."
+msgstr "Einladung der Gruppe ‚@group‘ auf @site beizutreten"
 
 #: og.module:2125
 msgid ""
@@ -519,10 +516,9 @@ msgstr ""
 "Beitreten: !group_url\n"
 "@body"
 
-# TODO: period
 #: og.module:2127
 msgid "Membership request for '@group' from '@username'"
-msgstr "Mitgliedschaftsantrag von „@username“ für „@group“."
+msgstr "Mitgliedschaftsantrag von ‚@username‘ für ‚@group‘"
 
 #: og.module:2129
 msgid ""
@@ -542,10 +538,9 @@ msgstr ""
 "\n"
 "@request"
 
-# TODO: period
 #: og.module:2131
 msgid "You are now an administrator for the group '@group'"
-msgstr "Sie sind jetzt ein Administrator für die Gruppe „@group“."
+msgstr "Sie sind jetzt ein Administrator für die Gruppe ‚@group‘"
 
 #: og.module:2133
 msgid ""
