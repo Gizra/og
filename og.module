@@ -139,6 +139,7 @@ function og_menu() {
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure the main Organic groups module (og).', 
     'file' => 'og.admin.inc',
+    'file path' => drupal_get_path('module', 'og'). '/includes',
     'weight' => -5,
   );
   
