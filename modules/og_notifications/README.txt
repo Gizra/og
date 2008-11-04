@@ -43,3 +43,4 @@ messaging and other related modules.
 CREDITS
 -------
 Authored by Karthik Kumar / Zen [ http://drupal.org/user/21209 ]
+Sponsored by Kevin Millecam [Webwise Solutions]
