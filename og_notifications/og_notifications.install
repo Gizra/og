@@ -48,6 +48,25 @@ function og_notifications_enable() {
 }
 
 /**
+ * Implementation of hook_requirements().
+ */
+function og_notifications_requirements($phase) {
+  if ($phase == 'install') {
+    $schema = db_result(db_query("SELECT schema_version FROM {system} WHERE type = 'module' AND name = 'og'"));
+    if ($schema < 5703) {
+      $t = get_t();
+      return array(
+        'og_notifications' => array(
+          'title' => $t('OG notifications'),
+          'value' => $t('Please ensure that your installation of organic groups is up to date before enabling OG notifications.'),
+          'severity' => REQUIREMENT_ERROR
+        )
+      );
+    }
+  }
+}
+
+/**
  * Notifications upgrade: Based on the upgrade flag, move existing subscriptions
  * to the notifications module.
  */
