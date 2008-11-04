@@ -214,6 +214,13 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
           );
       }
       break;
+    case 'tokens':
+      $tokens = array();
+      if ($arg1 == 'og-notifications') {
+        $tokens = array('global', 'subscription', 'user', 'node');
+      }
+
+      return $tokens;
   }
 }
 
