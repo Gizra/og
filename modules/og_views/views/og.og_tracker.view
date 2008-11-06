@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+if (!module_exists('comment')) {
+  return;
+}
+
 $view = new view;
 $view->name = 'og_tracker';
 $view->description = 'Shows active posts across the whole site.';

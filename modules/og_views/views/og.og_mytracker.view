@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+if (!module_exists('comment')) {
+  return;
+}
+
 $view = new view;
 $view->name = 'og_mytracker';
 $view->description = 'Shows all activity in subscribed groups.';
