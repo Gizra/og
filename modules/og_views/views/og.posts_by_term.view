@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+if (!module_exists('taxonomy')) {
+  return;
+}
+
 $view = new view;
 $view->name = 'og_by_subject';
 $view->description = 'Shows group posts categorized by taxonomy';
@@ -9,7 +13,7 @@ $view->view_php = '';
 $view->base_table = 'node';
 $view->is_cacheable = FALSE;
 $view->api_version = 2;
-$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+$view->disabled = TRUE; /* Edit this to true to make a default view disabled initially */
 $handler = $view->new_display('default', 'Defaults', 'default');
 $handler->override_option('fields', array(
   'type' => array(
