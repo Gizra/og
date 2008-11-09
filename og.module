@@ -370,7 +370,7 @@ function og_init() {
     $user->og_groups = array();
   }
   
-  drupal_add_css(drupal_get_path('module', 'og'). 'theme/og.css');
+  drupal_add_css(drupal_get_path('module', 'og'). '/theme/og.css');
 
   // Set group context and language if needed.
   if ($node = og_determine_context()) {

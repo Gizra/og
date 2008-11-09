@@ -21,7 +21,7 @@
   text-decoration:none;
 }
 
-/*used in node.tpl.php*/
+/*used in node-og-group-post.tpl.php*/
 .groups .links  {
   display: inline;
 }
