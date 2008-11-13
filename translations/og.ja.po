@@ -236,7 +236,7 @@ msgstr "マネージャ"
 
 #: og.module:1192
 msgid "Posts"
-msgstr "記事"
+msgstr "投稿"
 
 #: og.module:1193
 msgid "Comments"
@@ -1417,7 +1417,7 @@ msgstr "認められていないユーザID: %uid"
 
 #: includes/og.xmlrpc.inc:17;37;52
 msgid "Wrong username or password."
-msgstr "ユーザ名またはパスワードが間違っています。"
+msgstr "ユーザ名かパスワードが不正です。"
 
 #: includes/og.xmlrpc.inc:33
 msgid "User is not a member of the specified group."
