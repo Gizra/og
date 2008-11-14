@@ -244,7 +244,7 @@ function og_access_node_access_records($node) {
       'gid' => $node->nid, 
       'grant_view' => 1, 
       'grant_update' => 1, 
-      'grant_delete' => 1,
+      'grant_delete' => 0,
       'priority' => 0,
     );
     
