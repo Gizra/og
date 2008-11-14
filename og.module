@@ -1622,7 +1622,8 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       if ($node->og_groups) {
         $current_groups = og_node_groups_distinguish($node->og_groups_both, FALSE);
       }
-      return format_plural(count($current_groups['accessible']), '1 group', '@count groups');
+      $msg = format_plural(count($current_groups['accessible']), '1 group', '@count groups');
+      return array('og_msg' => $msg);
       // TODOL: bad formatting. commented out.
       // foreach ($current_groups['accessible'] as $gid => $item) {
       //           $og_links['og_'. $gid] = array('title' => $item['title'], 'href' => "node/$gid");
