@@ -238,7 +238,7 @@ function og_menu_access_invite($node) {
 }
 
 function og_menu_access_picture($gid) {
-  return og_is_picture() && og_is_group_member($gid) ? TRUE : FALSE;
+  return og_is_picture() && og_is_group_member($gid);
 }
 
 /**
@@ -274,7 +274,7 @@ function og_is_group_member($gid, $include_admins = TRUE, $uid = NULL) {
     return user_access('administer nodes', $user) || in_array($gid, $groups) ? TRUE : FALSE;
   }
   else {
-    return in_array($gid, $groups) ? TRUE : FALSE;
+    return in_array($gid, $groups);
   }
 }
 
