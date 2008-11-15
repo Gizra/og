@@ -6,8 +6,8 @@ if (!module_exists('taxonomy')) {
 }
 
 $view = new view;
-$view->name = 'og_by_subject';
-$view->description = 'Shows group posts categorized by taxonomy';
+$view->name = 'posts_by_term';
+$view->description = 'Shows group posts categorized by taxonomy term';
 $view->tag = 'og';
 $view->view_php = '';
 $view->base_table = 'node';
