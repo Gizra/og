@@ -98,8 +98,6 @@ $handler->override_option('filters', array(
 ));
 $handler->override_option('access', array(
   'type' => 'none',
-  'role' => array(),
-  'perm' => '',
 ));
 $handler->override_option('items_per_page', 20);
 $handler->override_option('use_pager', '1');
@@ -124,6 +122,7 @@ $handler->override_option('menu', array(
   'type' => 'none',
   'title' => '',
   'weight' => 0,
+  'name' => 'navigation',
 ));
 $handler->override_option('tab_options', array(
   'type' => 'none',
