@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OG notifications\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2008-11-03 16:13+0100\n"
+"PO-Revision-Date: 2008-11-15 21:34+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -109,47 +109,47 @@ msgstr "Dies ist eine automatische Nachricht von [site-name]"
 msgid "To manage your subscriptions, browse to [subscriptions-manage]"
 msgstr "Die Abonnements können unter [subscriptions-manage] verwaltet werden."
 
-#: modules/og_notifications/og_notifications.module:229
+#: modules/og_notifications/og_notifications.module:236
 msgid "Group: %name"
 msgstr "Gruppe: %name"
 
-#: modules/og_notifications/og_notifications.module:243
+#: modules/og_notifications/og_notifications.module:250
 msgid "Content type in group"
 msgstr "Inhaltstyp in der Gruppe"
 
-#: modules/og_notifications/og_notifications.module:313
+#: modules/og_notifications/og_notifications.module:320
 msgid "Group Type"
 msgstr "Gruppentyp"
 
-#: modules/og_notifications/og_notifications.module:346
+#: modules/og_notifications/og_notifications.module:353
 msgid "All"
 msgstr "Alle"
 
-#: modules/og_notifications/og_notifications.module:366
+#: modules/og_notifications/og_notifications.module:373
 msgid "Send interval"
 msgstr "Sende-Intervall"
 
-#: modules/og_notifications/og_notifications.module:366
+#: modules/og_notifications/og_notifications.module:373
 msgid "Send method"
 msgstr "Sende-Methode"
 
-#: modules/og_notifications/og_notifications.module:375
+#: modules/og_notifications/og_notifications.module:382
 msgid "%type posts in this group"
 msgstr "%type-Beiträge in dieser Gruppe"
 
-#: modules/og_notifications/og_notifications.module:394
+#: modules/og_notifications/og_notifications.module:401
 msgid "There are no active group subscriptions available."
 msgstr "Keine aktiven Gruppen-Abonnements vorhanden."
 
-#: modules/og_notifications/og_notifications.module:598
+#: modules/og_notifications/og_notifications.module:605
 msgid "All posts in %group"
 msgstr "Alle Beiträge in %group"
 
-#: modules/og_notifications/og_notifications.module:605;624
+#: modules/og_notifications/og_notifications.module:612;631
 msgid "%type posts in %group"
 msgstr "%type-Beiträge in %group"
 
-#: modules/og_notifications/og_notifications.module:619
+#: modules/og_notifications/og_notifications.module:626
 msgid "Posts in group %name"
 msgstr "Beiträge in der Gruppe %name"
 
@@ -173,7 +173,7 @@ msgstr "Speichert automatische Abonnementspräferenzen für jeden Benutzer."
 msgid "The user's {user}.uid."
 msgstr "Die Benutzer {user}.uid."
 
-#: modules/og_notifications/og_notifications.install:105
+#: modules/og_notifications/og_notifications.install:106
 msgid "Organic groups notifications module uninstallation script complete."
 msgstr "Das Deinstallationsskript des Benachrichtigungsmoduls für organischen Gruppen wurde ausgeführt."
 

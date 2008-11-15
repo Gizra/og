@@ -3,7 +3,7 @@
 # LANGUAGE translation of Drupal (includes)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  og.admin.inc,v 1.13 2008/10/29 19:57:53 dww
+#  og.admin.inc,v 1.14 2008/11/06 02:16:01 weitzman
 #  includes/og.panelscontent.inc: n/a
 #  og.panelscontext.inc,v 1.4 2008/10/29 20:02:28 dww
 #  og.rules.inc,v 1.3 2008/10/29 19:57:56 dww
@@ -13,7 +13,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-11-02 12:11+0100\n"
+"POT-Creation-Date: 2008-11-15 20:51+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"

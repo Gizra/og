@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
-"POT-Creation-Date: 2008-11-02 12:11+0100\n"
-"PO-Revision-Date: 2008-11-04 00:45+0100\n"
+"POT-Creation-Date: 2008-11-15 20:51+0100\n"
+"PO-Revision-Date: 2008-11-15 22:43+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -90,7 +90,7 @@ msgstr "Ankreuzfelder für die Zielgruppen"
 
 #: includes/og.admin.inc:75
 msgid "Show each group that the user is a member of as a checkbox in the \"Audience\" section. This enables the member to place her post into multiple groups. If unchecked, simplify the user interface by omitting the checkboxes and assuming user wants to post into the current group. This simplification only applies to new nodes, and not to edits of existing nodes. Group administrators always see checkboxes."
-msgstr ""
+msgstr "Zeigt jede Gruppe zu der ein Benutzer gehört als Ankreuzfeld im „Zielgruppen“-Bereich an. Dies ermöglicht dem Mitglied einen Beitrag in mehrere Gruppen einzustellen. Sobald deaktiviert, wird die Benutzeroberfläche durch Weglassen der Ankreuzfelder vereinfacht und angenommen, dass der Benutzer den Beitrag in die aktuelle Gruppe einstellen möchte. Diese Vereinfachung trifft nur auf neue Beiträge zu und nicht auf Bearbeitungen vorhandener Beiträge. Gruppen-Administratoren sehen die Ankreuzfelder immer."
 
 #: includes/og.admin.inc:79
 msgid "Optional"
@@ -100,6 +100,7 @@ msgstr "Optional"
 msgid "Required"
 msgstr "Erforderlich"
 
+# TODO: English could be "Audience" only as the options have the values optional/required.
 #: includes/og.admin.inc:82
 #, fuzzy
 msgid "Audience required"
@@ -371,49 +372,69 @@ msgstr "Ungültige Gruppe ausgewählt."
 msgid "Node is of type %type which not a group type."
 msgstr "Der Beitrag vom Typ %type ist kein Gruppentyp."
 
+# subscribe?
 #: includes/og.rules.inc:15
+#, fuzzy
 msgid "User subscribes to group"
 msgstr "Benutzer tritt der Gruppe bei"
 
 #: includes/og.rules.inc:16
 msgid "A user has subscribed to a group and is approved. If the user isn't approved then this event won't be triggered."
-msgstr ""
+msgstr "Ein Benutzer ist einer Gruppe beigetreten und wurde akzeptiert. Wenn der Benutzer nicht akzeptiert ist, wird das Ereignis nicht ausgeführt."
 
+# unsubscribe?
 #: includes/og.rules.inc:21
+#, fuzzy
 msgid "User approved to group by admin"
 msgstr "Benutzer wurde vom Administrator für die Gruppe akzeptiert"
 
+# unsubscribe?
 #: includes/og.rules.inc:26
+#, fuzzy
 msgid "User unsubscribes from group"
-msgstr ""
+msgstr "Benutzer tritt aus der Gruppe aus"
 
+# subscribe?
 #: includes/og.rules.inc:51
+#, fuzzy
 msgid "User that subscribed to the group"
-msgstr ""
+msgstr "Benutzer, der dieser Gruppe beigetreten ist"
 
+# subscribe?
 #: includes/og.rules.inc:82
+#, fuzzy
 msgid "Subscribe user to group"
 msgstr "Benutzer zur Gruppe hinzufügen"
 
+# subscribe?
 #: includes/og.rules.inc:86
+#, fuzzy
 msgid "User who will be subscribed"
-msgstr ""
+msgstr "Benutzer, der hinzugefügt wird"
 
+# subscribe?
 #: includes/og.rules.inc:90
+#, fuzzy
 msgid "Group that user will be subscribed to"
-msgstr ""
+msgstr "Gruppe zu der dieser Benutzer hinzugefügt wird"
 
+# unsubscribe?
 #: includes/og.rules.inc:96
+#, fuzzy
 msgid "Unsubscribe user from group"
-msgstr ""
+msgstr "Benutzer aus Gruppe entfernen"
 
+# unsubscribe?
 #: includes/og.rules.inc:99
+#, fuzzy
 msgid "User who will be unsubscribed"
-msgstr ""
+msgstr "Benutzer, der entfernt wird"
 
+# unsubscribe?
 #: includes/og.rules.inc:103
+#, fuzzy
 msgid "Group that user will be unsubscribed from"
-msgstr ""
+msgstr "Gruppe aus der dieser Benutzer entfernt wird"
 
 #: includes/og.rules.inc:128
 msgid "Subscription is approved"
@@ -421,7 +442,7 @@ msgstr "Mitgliedschaft wurde bestätigt"
 
 #: includes/og.rules.inc:129
 msgid "When enabled the user will automatically be approved. When disabled user will be a pending member."
-msgstr ""
+msgstr "Sobald aktiviert, wird ein Benutzer automatisch akzeptiert. Sobald deaktiviert, wird der Benutzer ein unbestätigtes Mitglied."
 
 #: includes/og.rules.inc:148
 msgid "User is group member"
