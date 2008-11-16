@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation of OG\n"
 "POT-Creation-Date: 2008-11-15 20:51+0100\n"
-"PO-Revision-Date: 2008-11-15 21:35+0100\n"
+"PO-Revision-Date: 2008-11-16 14:23+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: DE\n"
 "MIME-Version: 1.0\n"
@@ -283,9 +283,8 @@ msgid "Group home page view"
 msgstr "Ansicht der Gruppen-Startseite"
 
 #: modules/og_views/og_views.module:157
-#, fuzzy
 msgid "Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques. See the Theme information link when editing your View and also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module."
-msgstr "Eine Ansicht für die Gruppen-Startseite aussuchen. Nur Ansichten deren Namen mit <strong>og_ghp_</strong> beginnen sind geeignet. Die Ansicht bestimmt das Layout der Gruppen-Startseite. Die Darstellung kann mit typischen Themeing-Techniken verändert werden. Nähere Information gibt es unter dem Theme-Informations-Link beim Bearbeiten der Ansicht und im Theme-Abschnitt der !README. Bitte beachten Sie auch, dass Gruppen-Administratoren diese Darstellung mit dem mitgelieferten <em>Organische-Gruppen-Panels</em>-Modul übersteuern können."
+msgstr "Eine Ansicht für die Gruppen-Startseite aussuchen. Nur Ansichten deren Namen mit <strong>og_ghp_</strong> beginnen sind geeignet. Die Ansicht bestimmt das Layout der Gruppen-Startseite. Die Darstellung kann mit typischen Themeing-Techniken verändert werden. Nähere Information gibt es unter dem Theme-Informations-Link beim Bearbeiten der Ansicht und im Theme-Abschnitt der !README. Bitte beachten Sie auch, dass Gruppen-Administratoren diese Darstellung mit dem mitgelieferten <em>Organische Gruppen-Panels</em>-Modul übersteuern können."
 
 #: modules/og_views/og_views.module:163
 msgid "Search group"

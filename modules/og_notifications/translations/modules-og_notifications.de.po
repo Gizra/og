@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OG notifications\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2008-11-15 21:34+0100\n"
+"PO-Revision-Date: 2008-11-16 14:21+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -179,7 +179,7 @@ msgstr "Das Deinstallationsskript des Benachrichtigungsmoduls für organischen G
 
 #: modules/og_notifications/og_notifications.info:0
 msgid "Organic Groups Notifications"
-msgstr "Organische-Gruppen-Benachrichtigungen"
+msgstr "Organische Gruppen-Benachrichtigungen"
 
 #: modules/og_notifications/og_notifications.info:0
 msgid "Allows users to receive notifications and subscribe to group content."
