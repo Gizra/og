@@ -174,12 +174,14 @@ function og_views_view_group($node, $teaser, $page) {
     $built = $view->preview('default', array($node->nid));
   }
 
-  // Views will set either total_rows or num_rows depending on whether View has a pager.
-  if (@$view->total_rows || @$view->num_rows || @$view->page_empty) {
+  // Views will set either total_rows or num_rows depending on whether
+  // View has a pager, or might show an empty text.
+  if (!empty($view->total_rows) || !empty($view->num_rows) || !empty($view->page_empty) || !empty($view->display[$view->current_display]->display_options['empty'])) {
     $node->content['view'] = array('#value' => $built);
   }
   elseif (empty($_POST)) {
-    // Use this default empty text unless overridden by View (which is a usually not a good idea. This text is smart)
+    // If views hasn't show any text we show og's empty text.
+    // Otherwise show it to everybody.
     og_home_empty($node);
   }
   drupal_set_title(filter_xss_admin($view->build_info['title']));
