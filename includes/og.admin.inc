@@ -149,14 +149,14 @@ function og_admin_settings() {
     '#type' => 'textfield',
     '#title' => t('Invite user notification subject'),
     '#description' => t('The subject of the message sent to users invited to join a group. Available variables: @group, @site, @description, !group_url, @body'),
-    '#default_value' => _og_mail_text('invite_user_subject')
+    '#default_value' => _og_mail_text('og_invite_user_subject')
   );
   $form['og_settings']['notifications']['og_invite_user_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Invite user notification body'),
     '#rows' => 10,
     '#description' => t('The body of the message sent to users invited to join a group. Available variables: @group, @site, @description, !group_url, @body'),
-    '#default_value' => _og_mail_text('invite_user_body')
+    '#default_value' => _og_mail_text('og_invite_user_body')
   );   
   $form['og_settings']['notifications']['og_request_user_subject'] = array(
     '#type' => 'textfield',

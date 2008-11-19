@@ -898,8 +898,8 @@ function og_invite_form_submit($form, &$form_state) {
  */
 function og_mail($key, &$message, $params) {
   $language = $message['language'];
-  $message['subject'] .= _og_mail_text($key .'_subject', $params, $language);
-  $message['body'][] = _og_mail_text($key .'_body', $params, $language);
+  $message['subject'] .= _og_mail_text('og_'.$key .'_subject', $params, $language);
+  $message['body'][] = _og_mail_text('og_'.$key .'_body', $params, $language);
 }
 
 function og_subscribe($node, $uid = NULL) {
@@ -2103,7 +2103,7 @@ function _og_mail_text($messageid, $variables = array(), $language = NULL) {
   $langcode = isset($language) ? $language->language : NULL;
 
   // Check if an admin setting overrides the default string.
-  if ($admin_setting = variable_get('og_'. $messageid, FALSE)) {
+  if ($admin_setting = variable_get($messageid, FALSE)) {
     return strtr($admin_setting, $variables);
   }
   // No override, return with default strings.
@@ -2126,9 +2126,9 @@ function _og_mail_text($messageid, $variables = array(), $language = NULL) {
       case 'og_deny_user_body':
         return t("Sorry, your membership request was denied.", $variables, $langcode);
       // These emails have no 'og' prefix as they come through hook_mail().
-      case 'invite_user_subject':
+      case 'og_invite_user_subject':
         return t("Invitation to join the group '@group' at @site", $variables, $langcode);
-      case 'invite_user_body':
+      case 'og_invite_user_body':
         return t("Hi. I'm a member of '@group' and I welcome you to join this group as well. Please see the link and message below.\n\n@group\n@description\nJoin: !group_url\n@body", $variables, $langcode);
       case 'og_request_user_subject':
         return t("Membership request for '@group' from '@username'", $variables, $langcode);        
