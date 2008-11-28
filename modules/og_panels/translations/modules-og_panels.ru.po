@@ -1,0 +1,217 @@
+# Russian translation of Drupal (modules-og_panels)
+# Copyright 2008 Alexey Osodoev <alexey@osodoev.info>
+# Generated from files:
+#  og_panels.module,v 1.41 2008/10/31 12:14:04 weitzman
+#  og_panels.info,v 1.6 2008/11/03 15:02:04 weitzman
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: og-6.x-1.0\n"
+"POT-Creation-Date: 2008-11-03 16:10+0100\n"
+"PO-Revision-Date: 2008-11-21 04:53+0800\n"
+"Last-Translator: Alexey Osodoev <alexey@osodoev.info>\n"
+"Language-Team: Russian <alexey@osodoev.info>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-Language: Russian\n"
+"X-Poedit-Country: RUSSIAN FEDERATION\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: modules/og_panels/og_panels.module:7
+msgid "After enabling this module, visit the new \"Pages\" tab on any group. There, group admins may create as many pages as desired for their group. The pages may contain any layout that the site offers and admins may arrange many different types of content as desired. Site admins can restrict the types of content that may be added on the <a href=\"!settings\">og_panels settings</a> page. You might want to make some Views available using <a href=\"!apv\">admin/panels/views</a>. Group admins may designate one page as their group home page."
+msgstr "После включения этого модуля, зайдите на закладку \"Страницы\" любой группы. На ней администраторы групп могут создавать только страниц, сколько потребуется. Страницы могут иметь любую предлагаемую сайтом компоновку, и администраторы могут разместить различные типы материалов как им потребуется. Администраторы сайта могут ограничить типы материалов, которые могут быть добавлены на странице <a href=\"!settings\">настроек og_panels</a>. Возможно вы захотите включить некоторые Views: <a href=\"!apv\">admin/panels/views</a>. Администраторы групп могут установить одну страницу главной страницей группы."
+
+#: modules/og_panels/og_panels.module:9
+msgid "Create custom pages for your group. Use custom pages to organize your content in a pretty and informative manner. Your group can group to be a whole website within a web site. Each custom page becomes a tab when viewing your group. One of your custom pages should be designated as your <em>group home page</em>. That page will then display when visitors first arrive at your group."
+msgstr "Создайте собственные страницы для своей группы. Используйте собственные страницы чтобы красиво и информативно организовать материалы. Ваша группа может быть отдельным веб-сайтом на веб-сайте. Каждая созданная страница становится вкладкой при просмотре группы. Одна из созданных страниц может быть назначена <em>главной страницей группы</em>. В этом случае эта страница будет отображаться, когда посетитель впервые зайдет в группу."
+
+#: modules/og_panels/og_panels.module:9
+msgid "Start by clicking the <a href=\"!url\">Add new page</a> tab. Then you will choose a custom layout for your page. Then you will want to <em>edit content</em> for your custom page."
+msgstr "Начните с вкладки <a href=\"!url\">Добавить новую страницу</a>. Затем выберите вариант компоновки для страницы. После этого вы сможете <em>редактировать содержимое</em> своей страницы."
+
+#: modules/og_panels/og_panels.module:143
+msgid "Are you sure you want to delete %title?"
+msgstr "Уверены, что хотите удалить %title?"
+
+#: modules/og_panels/og_panels.module:145
+msgid "This action cannot be undone."
+msgstr "Это действие невозможно отменить."
+
+#: modules/og_panels/og_panels.module:146;119
+msgid "Delete"
+msgstr "Удалить"
+
+#: modules/og_panels/og_panels.module:152
+msgid "%title has been deleted"
+msgstr "%title удалено"
+
+#: modules/og_panels/og_panels.module:184
+msgid "Edit content"
+msgstr "Редактировать содержимое"
+
+#: modules/og_panels/og_panels.module:185
+msgid "Change layout"
+msgstr "Изменить компоновку"
+
+#: modules/og_panels/og_panels.module:186
+msgid "Edit layout settings"
+msgstr "Редактировать параметры компоновки"
+
+#: modules/og_panels/og_panels.module:187
+msgid "Edit page"
+msgstr "Редактировать страницу"
+
+#: modules/og_panels/og_panels.module:188
+msgid "Delete page"
+msgstr "Удалить страницу"
+
+#: modules/og_panels/og_panels.module:207
+msgid "Save settings"
+msgstr "Сохранить настройки"
+
+#: modules/og_panels/og_panels.module:238
+msgid "Home page"
+msgstr "Главная страница"
+
+#: modules/og_panels/og_panels.module:238
+msgid "Weight"
+msgstr "Вес"
+
+#: modules/og_panels/og_panels.module:249
+msgid "Updated panels configuration."
+msgstr "Конфигурация panels обновлена."
+
+#: modules/og_panels/og_panels.module:271
+msgid "@name at @site"
+msgstr "Группа @name на сайте @site"
+
+#: modules/og_panels/og_panels.module:299
+msgid "Page title"
+msgstr "Заголовок страницы"
+
+#: modules/og_panels/og_panels.module:303
+msgid "This is the title of the page and of the tab."
+msgstr "Это заголовок страницы и вкладки."
+
+#: modules/og_panels/og_panels.module:309
+msgid "Path"
+msgstr "Путь"
+
+#: modules/og_panels/og_panels.module:314
+msgid "This page is currently your default group home page and has no configurable path."
+msgstr "Эта страница сейчас является главной страницей группы по умолчанию и не имеет настраиваемого пути."
+
+#: modules/og_panels/og_panels.module:325
+msgid "Show blocks"
+msgstr "Показывать блоки"
+
+#: modules/og_panels/og_panels.module:328
+msgid "If unchecked, the standard group blocks will not be shown unless you place them into your page content. This gives admin more control over page presentation."
+msgstr "Если не установлено, стандартные блоки групп не будут показываться, если только вы не поместите их в содержимом страницы. Это дает администратору больше возможностей управления внешним видом страницы."
+
+#: modules/og_panels/og_panels.module:332
+msgid "Published"
+msgstr "Опубликован"
+
+#: modules/og_panels/og_panels.module:334
+msgid "If unchecked, this page is only accessible by group or site administrators. Thats useful while you are configuring the page."
+msgstr "Если не установлено, эта страница будет доступна только администраторам сайта или группы. Это может быть полезно пока вы настраиваете страницу."
+
+#: modules/og_panels/og_panels.module:339
+msgid "Update page"
+msgstr "Обновить страницу"
+
+#: modules/og_panels/og_panels.module:339
+msgid "Create page"
+msgstr "Создать страницу"
+
+#: modules/og_panels/og_panels.module:422
+msgid "%path is a reserved system path, and cannot be used for a group page. Please enter another path."
+msgstr "%path является зарезервированным системным путем и не может использоваться страницей группы. Пожалуйста, введите другой путь."
+
+#: modules/og_panels/og_panels.module:425
+msgid "Panel paths may only contain alphanumeric characters and dashes."
+msgstr "Пути для Panel могут состоять только из букв, цифр и символов \"-\"."
+
+#: modules/og_panels/og_panels.module:428
+msgid "That path is currently in use by another one of your group's pages. Please enter another path."
+msgstr "Этот путь уже используется одной из других ваших страниц. Пожалуйста, введите другой путь."
+
+#: modules/og_panels/og_panels.module:441
+msgid "Group page updated."
+msgstr "Страница группы обновлена."
+
+#: modules/og_panels/og_panels.module:449
+msgid "Group page created."
+msgstr "Страница группы создана."
+
+#: modules/og_panels/og_panels.module:459;30
+msgid "Pages"
+msgstr "Страницы"
+
+#: modules/og_panels/og_panels.module:473
+msgid "Organic groups panel pages deleted."
+msgstr "Страницы Organic groups panel удалены."
+
+#: modules/og_panels/og_panels.module:543
+msgid "A node object that is flagged as an OG group type."
+msgstr "Узел (node), тип которого отмечен как тип группы."
+
+#: modules/og_panels/og_panels.module:559
+msgid "OG mission"
+msgstr "Формулировка назначения группы"
+
+#: modules/og_panels/og_panels.module:571
+msgid "OG description"
+msgstr "Описание группы"
+
+#: modules/og_panels/og_panels.module:579
+msgid "OG members"
+msgstr "Участники группы"
+
+#: modules/og_panels/og_panels.module:602
+msgid "OG faces"
+msgstr "Лица группы"
+
+#: modules/og_panels/og_panels.module:621
+msgid "Group from node"
+msgstr "Группа узла (node)"
+
+#: modules/og_panels/og_panels.module:623
+msgid "Adds a group from a node context; if multiple groups are associated with a node, this will get the \"first\" group only."
+msgstr "Добавляет группу из контекста узла; если узел привязан к нескольких группам, будет возвращена только \"первая\"."
+
+#: modules/og_panels/og_panels.module:624
+msgid "Node"
+msgstr "Node"
+
+#: modules/og_panels/og_panels.module:132
+msgid "manage OG panels pages"
+msgstr "управлять страницами OG panels"
+
+#: modules/og_panels/og_panels.module:17
+msgid "Organic groups panels"
+msgstr "Organic groups panels"
+
+#: modules/og_panels/og_panels.module:18
+msgid "Configure the content that is available to group admins when creating group pages."
+msgstr "Настроить содержание, доступное администраторам групп при создании страниц групп."
+
+#: modules/og_panels/og_panels.module:40
+msgid "List"
+msgstr "Список"
+
+#: modules/og_panels/og_panels.module:0
+msgid "og_panels"
+msgstr "og_panels"
+
+#: modules/og_panels/og_panels.info:0
+msgid "Organic groups panels. NOT COMPATIBLE WITH DRUPAL 6 YET."
+msgstr "Organic groups panels. ПОКА НЕ СОВМЕСТИМО С DRUPAL 6."
+
+#: modules/og_panels/og_panels.info:0
+msgid "Enable group admins to create panel pages."
+msgstr "Позволяет администраторам групп создавать panel-страницы."
+
