@@ -425,9 +425,6 @@ function og_views_data_og_uid() {
       'handler' => 'og_views_handler_field_og_is_manager',
       'click sortable' => FALSE,
     ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
   );
   $data['og_uid']['created'] = array(
     'title' => t('OG: Membership create date'),
