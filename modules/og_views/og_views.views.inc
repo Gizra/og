@@ -12,7 +12,7 @@ function og_views_views_handlers() {
     'handlers' => array(
       // filter
       'og_views_handler_filter_og_group_nid' => array(
-        'parent' => 'views_handler_filter_numeric',
+        'parent' => 'views_handler_filter_many_to_one',
       ),
       'og_views_handler_filter_og_type_all' => array(
         'parent' => 'views_handler_filter',
@@ -265,7 +265,7 @@ function og_views_data_og_ancestry() {
     ),
   );
   
-  $filterhelp = t('<strong>Posts</strong> are filtered for specified organic groups. The page context (if Display is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id.');
+  $help = 
   
   $data['og_ancestry']['group_nid'] = array(
     'title' => t('Groups'),
@@ -284,14 +284,15 @@ function og_views_data_og_ancestry() {
     'filter' => array(
       'handler' => 'og_views_handler_filter_og_group_nid',
       'numeric' => TRUE,
-      'help' => $filterhelp,
+      'allow empty' => TRUE, // To select posts with no groups. Requires http://drupal.org/node/340824
+      'help' => t('<strong>Posts</strong> are filtered for specific organic groups.'),
     ),
     'argument' => array(
       'name' => t('Post: in specified group (by number)'),
       'name field' => 'title', // the field to display in the summary.
       'validate type' => 'nid',
       'handler' => 'og_views_handler_argument_og_group_nid',
-      'help' => $filterhelp,
+      'help' => t('<strong>Posts</strong> are filtered for specified organic groups. The page context (if Display is a page) will be set to the first listed group. That means that blocks and breadcrumbs (and theme and locale, if applicable) will be based upon the first specified node id.'),
     ),
   );
   $data['og_ancestry']['nid'] = array(
