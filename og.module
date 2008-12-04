@@ -2185,7 +2185,7 @@ function og_block_notifications() {
       
         $l3[] = array('title' => t('Feed'), 'href' => 'group/tracker/feed');
         $l3[] = array('title' => t('Page'), 'href' => 'group/tracker');
-        $links['all_posts'] = array('data' => t('All posts:') .' '. theme('links', $l3, $inline));
+        $links['all_posts'] = t('All posts:') .' '. theme('links', $l3, $inline);
         $content .= theme('item_list', $links);
       }
       $block['content'] = $content;
