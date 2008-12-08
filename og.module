@@ -1701,7 +1701,7 @@ function og_form_alter(&$form, &$form_state, $form_id) {
  * Implementation of hook_content_extra_fields.
  */
 function og_content_extra_fields($type_name) {
-  $extras = array();
+  $extra = array();
 
   if (og_is_group_post_type($type_name)) {
     $extra['og_nodeapi'] = array(
