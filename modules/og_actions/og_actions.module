@@ -30,6 +30,18 @@ function og_actions_action_info() {
         'nodeapi' => array('insert', 'update'),
       ),
     ),
+    'og_subscribe_user_action' => array(
+      'type' => 'user',
+      'description' => t('Subscribe user to the specified group'),
+      'configurable' => TRUE,
+      'hooks' => 'any',
+    ),
+    'og_unsubscribe_user_action' => array(
+      'type' => 'user',
+      'description' => t('Unsubscribe user from the specified group'),
+      'configurable' => TRUE,
+      'hooks' => 'any',
+    ),
   );
   if (module_exists('og_access')) {
     $actions += array(
@@ -175,6 +187,100 @@ function og_remove_group_action_form($context) {
  * Submit handler for Remove Group action configuration.
  */
 function og_remove_group_action_submit($form, &$form_state) {
+  return array(
+    'group' => $form_state['values']['group'],
+  );
+}
+
+/**
+ * A configurable action to subscribe a user to a specific group.
+ */
+function og_subscribe_user_action($account, $context) {
+  if (isset($context['group'])) {
+    og_subscribe_user($context['group'], $account);
+    watchdog('action', 'Subscribed user %name to %group.', array('%name' => $account->name, '%group' => $context['group']));
+  }
+}
+
+/**
+ * Configuration form for Add User action.
+ */
+function og_subscribe_user_action_form($context) {
+  $form = array();
+
+  if (!isset($context['group'])) {
+    $context['group'] = '';
+  }
+
+  $groups = og_all_groups_options();
+  if (count($groups)) {
+    $form['group'] = array(
+      '#type' => 'select',
+      '#title' => t('Group'),
+      '#options' => $groups,
+      '#description' => t('Select the group to which this user should be subscribed.'),
+      '#default_value' => $context['group'],
+      '#required' => TRUE,
+    );
+  }
+  else {
+    drupal_set_message(t('Please <a href="!url">create</a> a group first.', array('!url' => url('admin/content'))));
+  }
+  return $form;
+}
+
+/**
+ * Submission handler for Subscribe User action configuration form.
+ */
+function og_subscribe_user_action_submit($form, &$form_state) {
+  return array(
+    'group' => $form_state['values']['group'],
+  );
+}
+
+/**
+ * A configurable action to unsubscribe a user from a specific group.
+ */
+function og_unsubscribe_user_action($account, $context) {
+  if (isset($context['group'])) {
+    og_delete_subscription($context['group'], $account->uid);
+    watchdog('action', 'Unsubscribed user %name to %group.', array('%name' => $account->name, '%group' => $context['group']));
+  }
+}
+
+/**
+ * Configuration form for Unsubscribe User action.
+ */
+function og_unsubscribe_user_action_form($context) {
+  $form = array();
+
+  if (!isset($context['group'])) {
+    $context['group'] = '';
+  }
+
+  $groups = og_all_groups_options();
+  if (count($groups)) {
+    $form['group'] = array(
+      '#type' => 'select',
+      '#title' => t('Group'),
+      '#options' => $groups,
+      '#description' => t('Select the group to which this user should be unsubscribed.'),
+      '#default_value' => $context['group'],
+      '#required' => TRUE,
+    );
+  }
+  else {
+    drupal_set_message(t('Please <a href="!url">create</a> a group first.', array('!url' => url('admin/conten
+t'))));
+  }
+  return $form;
+}
+
+
+/**
+ * Submission handler for Unsubscribe User action configuration form.
+ */
+function og_unsubscribe_user_action_submit($form, &$form_state) {
   return array(
     'group' => $form_state['values']['group'],
   );
