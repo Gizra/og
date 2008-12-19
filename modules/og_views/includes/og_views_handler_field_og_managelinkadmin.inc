@@ -23,13 +23,19 @@ class og_views_handler_field_og_managelinkadmin extends views_handler_field {
     $is_admin = $values->{$this->aliases['is_admin']};
     $node = node_load($nid);
     // Only show links to group admins. And don't show next to group manager.
-    if (og_is_group_admin($node) && $uid != $node->uid) {
+    if ($uid != $node->uid) {
       if ($is_admin) {
-        return l(t('Admin: Remove'), "og/delete_admin/$nid/$uid", array('query' => drupal_get_destination()));
+        $item = menu_get_item("og/delete_admin/$nid/$uid");
+        if ($item['access']) {
+          return l(t('Admin: Remove'), "og/delete_admin/$nid/$uid", array('query' => drupal_get_destination()));
+         }
       }
       else {
-        return l(t('Admin: Create'), "og/create_admin/$nid/$uid", array('query' => drupal_get_destination()));
-      } 
+        $item = menu_get_item("og/create_admin/$nid/$uid");
+        if ($item['access']) {
+          return l(t('Admin: Create'), "og/create_admin/$nid/$uid", array('query' => drupal_get_destination()));
+        }
+      }
     }
   }
 }

@@ -23,13 +23,19 @@ class og_views_handler_field_og_managelink extends views_handler_field {
     $is_active = $values->{$this->aliases['is_active']};
     $node = node_load($nid);
     // Only show links to group admins. And don't show next to group manager.
-    if (og_is_group_admin($node) && $uid != $node->uid) {
+    if ($uid != $node->uid) {
       if ($is_active) {
-        return l(t('Remove membership'), "og/unsubscribe/$nid/$uid", array('query' => drupal_get_destination()));
+        $item = menu_get_item("og/unsubscribe/$nid/$uid");
+        if ($item['access']) {
+          return l(t('Remove membership'), "og/unsubscribe/$nid/$uid", array('query' => drupal_get_destination()));
+        }
       }
       else {
         $token = og_get_token($nid);
-        return t('Request: <a href="@approve">approve</a> or <a href="@deny">deny</a>.', array('@approve' => url("og/approve/$nid/$uid/$token", array('query' => drupal_get_destination())), '@deny' => url("og/deny/$nid/$uid/$token", array('query' => drupal_get_destination()))));
+        $item = menu_get_item("og/approve/$nid/$uid/$token");
+        if ($item['access']) {
+          return t('Request: <a href="@approve">approve</a> or <a href="@deny">deny</a>.', array('@approve' => url("og/approve/$nid/$uid/$token", array('query' => drupal_get_destination())), '@deny' => url("og/deny/$nid/$uid/$token", array('query' => drupal_get_destination()))));
+        }
       }
     }
   }
