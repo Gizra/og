@@ -34,13 +34,37 @@ function og_actions_action_info() {
       'type' => 'user',
       'description' => t('Subscribe user to the specified group'),
       'configurable' => TRUE,
-      'hooks' => 'any',
+      'hooks' => array(),
     ),
     'og_unsubscribe_user_action' => array(
       'type' => 'user',
       'description' => t('Unsubscribe user from the specified group'),
       'configurable' => TRUE,
-      'hooks' => 'any',
+      'hooks' => array(),
+    ),
+    'og_promote_user_action' => array(
+      'type' => 'user',
+      'description' => t('Promote user to an administrator in the specified group'),
+      'configurable' => TRUE,
+      'hooks' => array(),
+    ),
+    'og_demote_user_action' => array(
+      'type' => 'user',
+      'description' => t('Demote user from an administrator in the specified group'),
+      'configurable' => TRUE,
+      'hooks' => array(),
+    ),
+    'og_approve_user_action' => array(
+      'type' => 'user',
+      'description' => t('Approve user subscription to the specified group'),
+      'configurable' => TRUE,
+      'hooks' => array(),
+    ),
+    'og_deny_user_action' => array(
+      'type' => 'user',
+      'description' => t('Deny user subscription to the specified group'),
+      'configurable' => TRUE,
+      'hooks' => array(),
     ),
   );
   if (module_exists('og_access')) {
@@ -197,7 +221,7 @@ function og_remove_group_action_submit($form, &$form_state) {
  */
 function og_subscribe_user_action($account, $context) {
   if (isset($context['group'])) {
-    og_subscribe_user($context['group'], $account);
+    og_save_subscription($context['group'], $account, array('is_active' => 1));
     watchdog('action', 'Subscribed user %name to %group.', array('%name' => $account->name, '%group' => $context['group']));
   }
 }
@@ -281,6 +305,196 @@ t'))));
  * Submission handler for Unsubscribe User action configuration form.
  */
 function og_unsubscribe_user_action_submit($form, &$form_state) {
+  return array(
+    'group' => $form_state['values']['group'],
+  );
+}
+
+/**
+ * A configurable action to promote a user to a group administrator.
+ */
+function og_promote_user_action($account, $context) {
+  if (isset($context['group'])) {
+    og_save_subscription($context['group'], $account->uid, array('is_admin' => 1));
+    watchdog('action', '%name was promoted to <em>group administrator</em> in %group.', array('%name' => $account->name, '%group' => $context['group']));
+  }
+}
+
+/**
+ * Configuration form for Promote User action.
+ */
+function og_promote_user_action_form($context) {
+  $form = array();
+
+  if (!isset($context['group'])) {
+    $context['group'] = '';
+  }
+
+  $groups = og_all_groups_options();
+  if (count($groups)) {
+    $form['group'] = array(
+      '#type' => 'select',
+      '#title' => t('Group'),
+      '#options' => $groups,
+      '#description' => t('Select the group to which this user should be promoted.'),
+      '#default_value' => $context['group'],
+      '#required' => TRUE,
+    );
+  }
+  else {
+    drupal_set_message(t('Please <a href="!url">create</a> a group first.', array('!url' => url('admin/conten
+t'))));
+  }
+  return $form;
+}
+
+
+/**
+ * Submission handler for Promote User action configuration form.
+ */
+function og_promote_user_action_submit($form, &$form_state) {
+  return array(
+    'group' => $form_state['values']['group'],
+  );
+}
+
+/**
+ * A configurable action to demote a user from a group administrator.
+ */
+function og_demote_user_action($account, $context) {
+  if (isset($context['group'])) {
+    og_save_subscription($context['group'], $account->uid, array('is_admin' => 0));
+    watchdog('action', 'Demoted user %name from <em>group administrator</em> in %group.', array('%name' => $account->name, '%group' => $context['group']));
+  }
+}
+
+/**
+ * Configuration form for Demote User action.
+ */
+function og_demote_user_action_form($context) {
+  $form = array();
+
+  if (!isset($context['group'])) {
+    $context['group'] = '';
+  }
+
+  $groups = og_all_groups_options();
+  if (count($groups)) {
+    $form['group'] = array(
+      '#type' => 'select',
+      '#title' => t('Group'),
+      '#options' => $groups,
+      '#description' => t('Select the group from which this user should be demoted.'),
+      '#default_value' => $context['group'],
+      '#required' => TRUE,
+    );
+  }
+  else {
+    drupal_set_message(t('Please <a href="!url">create</a> a group first.', array('!url' => url('admin/conten
+t'))));
+  }
+  return $form;
+}
+
+
+/**
+ * Submission handler for Demote User action configuration form.
+ */
+function og_demote_user_action_submit($form, &$form_state) {
+  return array(
+    'group' => $form_state['values']['group'],
+  );
+}
+
+/**
+ * A configurable action to approve a user from a group administrator.
+ */
+function og_approve_user_action($account, $context) {
+  if (isset($context['group'])) {
+    og_save_subscription($context['group'], $account->uid, array('is_active' => 1));
+    watchdog('action', "Approved user %name's subscription to %group.", array('%name' => $account->name, '%group' => $context['group']));
+  }
+}
+
+/**
+ * Configuration form for Approve User action.
+ */
+function og_approve_user_action_form($context) {
+  $form = array();
+
+  if (!isset($context['group'])) {
+    $context['group'] = '';
+  }
+
+  $groups = og_all_groups_options();
+  if (count($groups)) {
+    $form['group'] = array(
+      '#type' => 'select',
+      '#title' => t('Group'),
+      '#options' => $groups,
+      '#description' => t('Select the group whose user subscription request should be approved.'),
+      '#default_value' => $context['group'],
+      '#required' => TRUE,
+    );
+  }
+  else {
+    drupal_set_message(t('Please <a href="!url">create</a> a group first.', array('!url' => url('admin/conten
+t'))));
+  }
+  return $form;
+}
+
+/**
+ * Submission handler for Approve User action configuration form.
+ */
+function og_approve_user_action_submit($form, &$form_state) {
+  return array(
+    'group' => $form_state['values']['group'],
+  );
+}
+
+/**
+ * A configurable action to deny a user's group subscription request.
+ */
+function og_deny_user_action($account, $context) {
+  if (isset($context['group'])) {
+    og_save_subscription($context['group'], $account->uid, array('is_active' => 0));
+    watchdog('action', "Denied user %name's subscription to %group.", array('%name' => $account->name, '%group' => $context['group']));
+  }
+}
+
+/**
+ * Configuration form for Deny User action.
+ */
+function og_deny_user_action_form($context) {
+  $form = array();
+
+  if (!isset($context['group'])) {
+    $context['group'] = '';
+  }
+
+  $groups = og_all_groups_options();
+  if (count($groups)) {
+    $form['group'] = array(
+      '#type' => 'select',
+      '#title' => t('Group'),
+      '#options' => $groups,
+      '#description' => t('Select the group whose user subscription request should be denied.'),
+      '#default_value' => $context['group'],
+      '#required' => TRUE,
+    );
+  }
+  else {
+    drupal_set_message(t('Please <a href="!url">create</a> a group first.', array('!url' => url('admin/conten
+t'))));
+  }
+  return $form;
+}
+
+/**
+ * Submission handler for Deny User action configuration form.
+ */
+function og_deny_user_action_submit($form, &$form_state) {
   return array(
     'group' => $form_state['values']['group'],
   );
