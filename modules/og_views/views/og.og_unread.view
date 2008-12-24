@@ -7,7 +7,7 @@ $view->description = 'Shows unread posts in subscribed groups.';
 $view->tag = 'og';
 $view->view_php = '';
 $view->base_table = 'node';
-$view->is_cacheable = '0';
+$view->is_cacheable = FALSE;
 $view->api_version = 2;
 $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 $handler = $view->new_display('default', 'Defaults', 'default');
@@ -148,9 +148,10 @@ $handler->override_option('filters', array(
   ),
 ));
 $handler->override_option('access', array(
-  'type' => 'none',
-  'role' => array(),
-  'perm' => '',
+  'type' => 'role',
+  'role' => array(
+    '2' => 2,
+  ),
 ));
 $handler->override_option('title', 'Unread posts in my groups');
 $handler->override_option('empty', 'There are no new posts in your groups.');
@@ -206,6 +207,7 @@ $handler->override_option('menu', array(
   'type' => 'default tab',
   'title' => 'My Unread',
   'weight' => '0',
+  'name' => 'navigation',
 ));
 $handler->override_option('tab_options', array(
   'type' => 'normal',
@@ -213,6 +215,11 @@ $handler->override_option('tab_options', array(
   'weight' => '0',
 ));
 $handler = $view->new_display('feed', 'Feed', 'feed');
+$handler->override_option('style_plugin', 'rss');
+$handler->override_option('style_options', array(
+  'mission_description' => FALSE,
+  'description' => '',
+));
 $handler->override_option('row_plugin', 'node_rss');
 $handler->override_option('row_options', array(
   'item_length' => 'default',
@@ -222,6 +229,7 @@ $handler->override_option('menu', array(
   'type' => 'none',
   'title' => '',
   'weight' => 0,
+  'name' => 'navigation',
 ));
 $handler->override_option('tab_options', array(
   'type' => 'none',
@@ -232,3 +240,4 @@ $handler->override_option('displays', array(
   'page' => 'page',
   'default' => 0,
 ));
+$handler->override_option('sitename_title', FALSE);
