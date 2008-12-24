@@ -2348,8 +2348,9 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
     // Now provided by og_views. Please don't reuse this number 4
     // $blocks[4]['info'] = t('My groups');
     
-    $blocks[5]['info'] = t('Group notifications');
-    $blocks[5]['cache'] = BLOCK_NO_CACHE;
+    // Notification modules must now provide this.
+    // $blocks[5]['info'] = t('Group notifications');
+    // $blocks[5]['cache'] = BLOCK_NO_CACHE;
     
     // Now provided by og_views. Please don't reuse this number 6
     // $blocks[6]['info'] = t('Group network');
@@ -2372,8 +2373,6 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
         return og_block_details();
       case 3:
        return og_block_new();
-      case 5:
-        return og_block_notifications();
     }
   }
   elseif ($op == 'configure') {
@@ -2417,17 +2416,6 @@ function og_block($op = 'list', $delta = 0, $edit = array()) {
         }
         break;
     }
-  }
-}
-
-function og_block_notifications() {
-  global $user;
-  
-  if ($groupnode = og_get_group_context()) {
-    $content = t('This group offers a <a href="@subscription">subscription option</a>.', array('@subscription' => url('og/manage/'. $groupnode->nid)));
-    $block['content'] = $content;
-    $block['subject'] = t('Group notifications');
-    return $block;
   }
 }
 
