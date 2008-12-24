@@ -237,10 +237,6 @@ function og_menu_access_invite($node) {
   return og_is_group_member($node) && ($node->og_selective < OG_INVITE_ONLY || og_is_group_admin($node));
 }
 
-function og_menu_access_picture($gid) {
-  return og_is_picture() && og_is_group_member($gid);
-}
-
 /**
  * Check a user's membership in a group. 
  * 
