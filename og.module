@@ -678,10 +678,10 @@ function og_save_subscription($gid, $uid, $args = array()) {
   }
 }
 
-function og_delete_subscription($gid, $uid){
+function og_delete_subscription($gid, $uid, $args = array()){
   $sql = "DELETE FROM {og_uid} WHERE nid = %d AND uid = %d";
   db_query($sql, $gid, $uid);
-  module_invoke_all('og', 'user delete', $gid, $uid, array());
+  module_invoke_all('og', 'user delete', $gid, $uid, $args);
 }
 
 function og_approve($node, $account, $token) {
