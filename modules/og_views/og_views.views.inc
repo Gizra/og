@@ -264,9 +264,6 @@ function og_views_data_og_ancestry() {
       'field' => 'nid',
     ),
   );
-  
-  $help = 
-  
   $data['og_ancestry']['group_nid'] = array(
     'title' => t('Groups'),
     'help' => t('The groups for a post.'),
