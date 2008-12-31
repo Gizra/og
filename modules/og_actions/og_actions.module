@@ -10,6 +10,7 @@ function og_actions_action_info() {
       'type' => 'node',
       'description' => t('Remove post from all groups'),
       'configurable' => FALSE,
+      'behavior' => array('changes_node_property'), // For Views Bulk Operations module
       'hooks' => array(
         'nodeapi' => array('insert', 'update'),
       ),
@@ -17,6 +18,7 @@ function og_actions_action_info() {
     'og_add_group_action' => array(
       'type' => 'node',
       'description' => t('Add post to the specified group'),
+      'behavior' => array('changes_node_property'), // For Views Bulk Operations module
       'configurable' => TRUE,
       'hooks' => array(
         'nodeapi' => array('insert', 'update'),
@@ -25,6 +27,7 @@ function og_actions_action_info() {
     'og_remove_group_action' => array(
       'type' => 'node',
       'description' => t('Remove post from the specified group'),
+      'behavior' => array('changes_node_property'), // For Views Bulk Operations module
       'configurable' => TRUE,
       'hooks' => array(
         'nodeapi' => array('insert', 'update'),
@@ -72,6 +75,7 @@ function og_actions_action_info() {
       'og_make_public_action' => array(
         'type' => 'node',
         'description' => t('Make post publicly visible'),
+        'behavior' => array('changes_node_property'), // For Views Bulk Operations module
         'configurable' => FALSE,
         'hooks' => array(
           'nodeapi' => array('insert', 'update'),
@@ -80,6 +84,7 @@ function og_actions_action_info() {
       'og_make_private_action' => array(
         'type' => 'node',
         'description' => t('Make post private to its groups'),
+        'behavior' => array('changes_node_property'), // For Views Bulk Operations module
         'configurable' => FALSE,
         'hooks' => array(
           'nodeapi' => array('insert', 'update'),
