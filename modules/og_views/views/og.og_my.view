@@ -99,21 +99,6 @@ $handler->override_option('access', array(
   'perm' => 'view advanced help topic',
 ));
 $handler->override_option('title', 'My groups');
-$handler->override_option('header', '<?php 
-
-return strtr(\'You might be interested in an <a href="!url" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.\', array(\'!url\' => url(\'og/opml\')));
-
-?>');
-$handler->override_option('header_format', '3');
-$handler->override_option('header_empty', 1);
-$handler->override_option('footer', '<?php
-
-  $url = url("og/opml");
-  return theme(\'opml_icon\', $url);
-
-?>');
-$handler->override_option('footer_format', '3');
-$handler->override_option('footer_empty', 1);
 $handler->override_option('empty', 'Not a member of any groups.');
 $handler->override_option('empty_format', '1');
 $handler->override_option('items_per_page', 50);

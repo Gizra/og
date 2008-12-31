@@ -144,32 +144,37 @@ function og_views_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 }
 
 /**
+ * Implementation of hook_form_TAG_alter().
+ */
+function og_views_form_og_admin_settings_alter(&$form, $form_state) {
+  $views = views_get_all_views();
+
+  $options = array();
+  foreach ($views as $key => $view) {
+    if (substr($key, 0, strlen('og_ghp_')) == 'og_ghp_') {
+      $options[$key] = $view->name;
+    }
+  }
+
+  $form['og_settings']['group_details']['og_home_page_view'] = array(
+    '#type' => 'select',
+    '#title' => t('Group home page view'),
+    '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques. See the Theme information link when editing your View and also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module.', array('!README' => og_readme())),
+    '#options' => $options,
+    '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'),
+  );
+}
+
+/**
  * Implementation of hook_form_alter().
  */
 function og_views_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id == 'og_admin_settings') {
-    $views = views_get_all_views();
-
-    $options = array();
-    foreach ($views as $key => $view) {
-      if (substr($key, 0, strlen('og_ghp_')) == 'og_ghp_') {
-        $options[$key] = $view->name;
-      }
-    }
-
-    $form['og_settings']['group_details']['og_home_page_view'] = array(
-      '#type' => 'select',
-      '#title' => t('Group home page view'),
-      '#description' => t('Pick a View for your group home page. Only Views whose names start with <strong>og_ghp_</strong> are eligible. The View determines the layout of your group home page. You may alter the presentation using typical Views themeing techniques. See the Theme information link when editing your View and also see the Theme section of the !README. Also note that group admins can override this presentation using the included <em>Organic Groups Panels</em> module.', array('!README' => og_readme())),
-      '#options' => $options,
-      '#default_value' => variable_get('og_home_page_view', 'og_ghp_ron'),
-    );
-  }
-  elseif ($form_id == 'views_exposed_form' && $form_state['view']->name == 'og_search') {
+  if ($form_id == 'views_exposed_form' && $form_state['view']->name == 'og_search') {
     $form['submit']['#value'] = t('Search group');
   }
 }
 
+// Embed the group homepage.
 function og_views_view_group($node, $teaser, $page) {
   $name = variable_get('og_home_page_view', 'og_ghp_ron');
   $view = views_get_view($name);
@@ -192,4 +197,20 @@ function og_views_view_group($node, $teaser, $page) {
   }
   drupal_set_title(filter_xss_admin($view->build_info['title']));
   drupal_add_feed(url("node/$node->nid/feed"), drupal_get_title());
+}
+
+/**
+ * An implementation of hook_views_pre_view().
+ */
+function og_views_views_pre_view(&$view, &$display_id, &$args) {
+  if ($view->name == 'og_my') {
+    if (!$view->display_handler->get_option('header')) {
+      $txt = t('You might be interested in an <a href="!url" rel="nofollow">OPML feed containing feeds from all your subscribed groups</a>.', array('!url' => url('og/opml')));
+      
+      $view->attachment_before = $txt;
+    }
+    if (!$view->display_handler->get_option('footer')) {
+      $view->attachment_after = theme('opml_icon', url('og/opml'));
+    }
+  }
 }
