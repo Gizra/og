@@ -105,6 +105,17 @@ function og_rules_action_info() {
       ),
       'module' => 'Organic groups',
     ),
+    'og_rules_action_add_group_node' => array(
+      'label' => t('Add group node settings to content'),
+      'arguments' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Content that will become a group node'),
+        ),
+      ),
+      'help' => t("When creating a group node organic groups module requires some group settings. This action should be used after 'Add new content' action, that adds a <a href=\"@group-node-type\">group node type</a> content, and will result with a new group node.", array('@group-node-type' => url('admin/og/og'))),
+      'module' => 'Organic groups',
+    ),    
   );
 }
 
@@ -131,12 +142,37 @@ function og_rules_action_subscribe_user_form($settings, &$form) {
   );
 }
 
-
 /**
  * Action: Unsubscribe user from group.
  */
 function og_rules_action_remove_user($user, $node, $settings) {
   og_delete_subscription($node->nid, $user->uid);
+}
+
+/**
+ * Action:Add group node settings to content.
+ */
+function og_rules_action_add_group_node($node, $settings) {
+  if (og_is_group_type($node->type)) {
+    // Add og keys to the node.
+    foreach ($settings['og_fieldset']['og_settings'] as $key => $value){
+      $node->$key = $value;
+    }
+    return array('node' => $node); 
+  } 
+}
+
+/**
+ * Action:Add group node settings to content form.
+ */
+function og_rules_action_add_group_node_form($settings, &$form) {
+  $node = !empty($settings['og_fieldset']['og_settings']) ? $settings['og_fieldset']['og_settings'] : array();
+  $og_form = og_group_form($node, array());
+  $form['settings']['og_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Organic groups form settings'),
+  );
+  $form['settings']['og_fieldset']['og_settings'] = $og_form;
 }
 
 /**

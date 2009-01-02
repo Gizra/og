@@ -1307,7 +1307,7 @@ function og_group_form($node, $form_state) {
     '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'og_description') : -4,
   );
 
-  $default = isset($node->nid) ? $node->og_selective : OG_OPEN;
+  $default = isset($node->og_selective) ? $node->og_selective : OG_OPEN;
   $options = array(
     t('Open - membership requests are accepted immediately.'),
     t('Moderated - membership requests must be approved.'),
@@ -1348,7 +1348,7 @@ function og_group_form($node, $form_state) {
       $form['og_register'] = array(
         '#type' => 'checkbox',
         '#title' => t('Registration form'),
-        '#default_value' => $node->nid ? $node->og_register : $default,
+        '#default_value' => isset($node->og_register) ? $node->og_register : $default,
         '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'og_register') : 0, 
         '#description' =>t('May users join this group during registration? If checked, a corresponding checkbox will be added to the registration form.'),
       );
@@ -1379,7 +1379,7 @@ function og_group_form($node, $form_state) {
       $form['og_directory'] = array(
         '#type' => 'checkbox', 
         '#title' => t('List in groups directory'),  
-        '#default_value' => $node->nid ? $node->og_directory : $default, 
+        '#default_value' => isset($node->og_directory) ? $node->og_directory : $default, 
         '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'og_directory') : 0,
         '#description' => t('Should this group appear on the <a href="@url">list of groups page</a> (requires OG Views module)? Disabled if the group is set to <em>private group</em>.', array('@url' => url('og'))));
       break;    
