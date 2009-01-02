@@ -307,8 +307,12 @@ function og_access_node_access_records($node) {
       );
     }
   }
-
-  return isset($grants) ? $grants : NULL;
+  if (!empty($grants)) {
+    // Allow other modules to change the grants.
+    drupal_alter('og_access_grants', $grants, $node);
+    return $grants;
+  }
+  return NULL;
 }
 
 /**
