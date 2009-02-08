@@ -309,12 +309,12 @@ function og_notifications_user_page($form_state, $account = NULL) {
   global $user;
   $account = $account ? $account : $user;
 
-  if (!empty($user->og_groups)) {
+  if (!empty($account->og_groups)) {
     $ngroups = _og_notifications_user_groups($account->uid);
     $ngrouptypes = _og_notifications_user_grouptypes($account->uid);
 
     // Tap into notifications_user_form to retrieve variables and defaults.
-    $group_form = notifications_user_form(NULL, $account, 'group', $ngroups, $user->og_groups, array('type' => 'group', 'event_type' => 'node'), array('title' => t('Group')));
+    $group_form = notifications_user_form(NULL, $account, 'group', $ngroups, $account->og_groups, array('type' => 'group', 'event_type' => 'node'), array('title' => t('Group')));
     // Grouptype uses multiple fields which are not addressed adequately by
     // notifications_user_form.
     $grouptype_form = notifications_user_form(NULL, $account, 'grouptype', $ngrouptypes, variable_get('og_notifications_content_types', array()), array('type' => 'grouptype', 'event_type' => 'node'), array('title' => t('Group Type')));
@@ -331,7 +331,7 @@ function og_notifications_user_page($form_state, $account = NULL) {
     );
 
     $content_types = array_filter(variable_get('og_notifications_content_types', array()));
-    foreach ($user->og_groups as $gid => $group) {
+    foreach ($account->og_groups as $gid => $group) {
       $group_index = 'groups-'. $gid;
 
       $types = array();
