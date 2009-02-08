@@ -258,9 +258,9 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
         $query = array();
         if (isset($node->og_groups)) {
           $query[] = array(
-            'join' => "LEFT JOIN {og_ancestry} oga ON f.field = 'group' AND f.value = CAST(oga.group_nid AS CHAR(255))",
-            'where' => 'oga.nid = %d',
-            'args' => array($node->nid)
+            'join' => "LEFT JOIN {og_ancestry} oga ON oga.nid = %d",
+            'join args' => array($node->nid),
+            'fields sql' => "f.field = 'group' AND f.intval = oga.group_nid"
           );
         }
         if ($arg0 == 'user' && og_is_group_type($node->type)) {
