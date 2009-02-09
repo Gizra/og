@@ -437,7 +437,9 @@ function og_notifications_user_page_submit($form, &$form_state) {
         if ($subscription) {
           $subscription['send_interval'] = $values['send_interval'][$type];
           $subscription['send_method'] = $values['send_method'][$type];
-          $subscription['fields'] = array('group' => $gid, 'type' => $type);
+          // String cast due to notifications requiring it as the value field is
+          // a varchar.
+          $subscription['fields'] = array('group' => (string) $gid, 'type' => $type);
           notifications_save_subscription($subscription);
         }
       }
@@ -524,7 +526,9 @@ function og_notifications_user_subscribe($account, $gid) {
   $subscription['uid'] = $account->uid;
   $subscription['type'] = 'group';
   $subscription['event_type'] = 'node';
-  $subscription['fields'] = array('group' => $gid);
+  // String cast due to notifications requiring it as the value field is
+  // a varchar.
+  $subscription['fields'] = array('group' => (string) $gid);
 
   notifications_save_subscription($subscription);
 }
