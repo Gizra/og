@@ -449,7 +449,8 @@ function og_determine_context() {
   elseif (arg(0, $path) == 'node' && arg(1, $path) == 'add' && isset($_REQUEST['gids'])) {
     $gid = intval(current($_REQUEST['gids']));
     $group_node = node_load($gid);
-    $custom_theme = $group_node->og_theme;
+    if (!$custom_theme)
+      $custom_theme = $group_node->og_theme;
   }
   elseif (arg(0, $path) == 'comment' && in_array(arg(1, $path), array('edit', 'delete')) && is_numeric(arg(2, $path))) {
     $nid = db_result(db_query('SELECT nid FROM {comments} WHERE cid = %d', arg(2, $path)));
