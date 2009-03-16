@@ -1256,13 +1256,15 @@ function og_home_empty($node) {
     $msg = t('No posts in this group.');
   }
   else {
-    $msg = t('No public posts in this group.');
     if (!$user->uid) {
-      $msg .= t(' You must <a href="!register">register</a> or <a href="!login">login</a> and become a member in order to post messages, and view any private posts.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest))));
+      $msg = t('No public posts in this group. You must <a href="!register">register</a> or <a href="!login">login</a> and become a member in order to post messages, and view any private posts.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest))));
     }
     // TODOL: hide this from pending members too
     elseif ($node->og_selective < OG_INVITE_ONLY) {
-      $msg .= ' '. t('Consider <a href="!url">joining this group</a> in order to view its posts.', array('!url' => url("og/subscribe/$node->nid", array('query' => $dest))));
+      $msg = t('No public posts in this group. Consider <a href="!url">joining this group</a> in order to view its posts.', array('!url' => url("og/subscribe/$node->nid", array('query' => $dest))));
+    }
+    else {
+      $msg = t('No public posts in this group.');
     }
   }
   drupal_set_message($msg);
@@ -2033,7 +2035,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
   
   // Show read only item if we are non-admin, and in simple mode (i.e. non-checkboxes) and at least one group is in querystring
   $simple = !user_access('administer organic groups') && !variable_get('og_audience_checkboxes', TRUE) && count($gids);
-  
+    
   // determine value of audience multi-select
   if (count($options) == 1 && $required) {
     $gids = array_keys($options);
