@@ -417,7 +417,7 @@ function og_og($op, $gid, $uid, $args) {
       rules_invoke_event('og_'. $op, $uid, $gid);   
     }
     // Pending member was approved.
-    elseif ($op = 'user update' && $args['is_active']) {
+    elseif ($op == 'user update' && $args['is_active']) {
       rules_invoke_event('og_user_approved', $uid, $gid);
     }    
   }
