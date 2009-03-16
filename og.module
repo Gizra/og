@@ -1638,7 +1638,9 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       // return theme('links', $og_links, array('class' => 'groups links'));
       break;
     case 'rss item':
-      if ($node->og_groups) {
+      if (isset($node->og_groups)) {
+        $ret = array();
+        $append = array();
         foreach ($node->og_groups_both as $gid => $title) {
           // TODO: should be absolute link. core bug.
           $append['og_links'] = array('title' => $title, 'href' => "node/$gid");
@@ -1704,7 +1706,7 @@ function og_form_alter(&$form, &$form_state, $form_id) {
  */
 function og_content_extra_fields($type_name) {
   $extra = array();
-
+  
   if (og_is_group_post_type($type_name)) {
     $extra['og_nodeapi'] = array(
       'label' => t('Groups'),
@@ -1721,20 +1723,24 @@ function og_content_extra_fields($type_name) {
     $extra['og_selective'] = array(
       'label' => t('Membership requests'),
       'description' => t('Handling of group membership requests.'),
+      'weight' => 0,
     );
     $extra['og_register'] = array(
       'label' => t('Registration form'),
       'description' => t('Checkbox for visibility on registration form.'),
+      'weight' => 0,
     );
     $extra['og_directory'] = array(
       'label' => t('List in groups directory'),
       'description' => t('Checkbox for visibility in the groups directory.'),
+      'weight' => 0,
     );
     if (module_exists('locale') && $languages = locale_language_list()) {
       if (count($languages) > 1) {
         $extra['og_language'] = array(
           'label' => t('Group language'),
           'description' => t('The default interface language for this group.'),
+          'weight' => 0,
         );
       }
     }  
@@ -2614,7 +2620,7 @@ function og_token_values($type, $object = NULL) {
       $values['ogname-raw'] = '';
       $values['og-id'] = '';
       
-      if (is_array($object->og_groups)) {
+      if (!empty($object->og_groups) && is_array($object->og_groups)) {
         $gids = array_filter($object->og_groups);
         foreach ($gids as $gid) {
           $title = db_result(db_query("SELECT title FROM {node} WHERE nid = %d", $gid));
@@ -2627,7 +2633,6 @@ function og_token_values($type, $object = NULL) {
       }
       break;    
   }
-  
   return $values;
 }
 
