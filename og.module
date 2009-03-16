@@ -2606,6 +2606,7 @@ function og_token_list($type = 'all') {
  * Implementation of hook_token_values() for og specific tokens
  */
 function og_token_values($type, $object = NULL) {
+  $values = array();
   switch ($type) {
     case 'node':
       // Set some defaults.
