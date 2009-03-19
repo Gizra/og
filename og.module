@@ -1768,13 +1768,14 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
   // We push to the front so we can unset() variables before they are saved.
   array_unshift($form['#submit'], 'og_node_type_form_submit');
   $options = og_types_map();
-  $form['og'] += array(
+  $og = array(
     '#type' => 'fieldset',
     '#title' => t('Organic groups'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#access' => user_access('administer organic groups'),
   );
+  $form['og'] = isset($form['og']) ? $form['og'] + $og : $og;
   
   $form['og']['og_content_type_usage'] = array(
     '#type' => 'radios',
