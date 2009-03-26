@@ -193,8 +193,20 @@ function og_menu_access_node_edit($node) {
   return node_access('update', $node);
 }
 
-function og_menu_access_unsubscribe($group_node, $account) {
+/**
+ * Check if current user may unsubscribe the specified user from the specified group.
+ *
+ * @param $group_node 
+ * @param $account 
+ * @return boolean
+ */
+function og_menu_access_unsubscribe($group_node, $account = NULL) {
   global $user;  
+  
+  if (empty($account)) {
+    $account = $user;
+  }
+  
   // Unsubscribee must already be a member or pending member.
   if (!og_is_group_member($group_node, FALSE, $account->uid)) {
     // Check pending as well.
