@@ -7,7 +7,7 @@ $view->description = 'List user\'s subscribed groups and provide link to manage 
 $view->tag = 'og';
 $view->view_php = '';
 $view->base_table = 'node';
-$view->is_cacheable = '0';
+$view->is_cacheable = FALSE;
 $view->api_version = 2;
 $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 $handler = $view->new_display('default', 'Defaults', 'default');
@@ -35,6 +35,13 @@ $handler->override_option('fields', array(
     'table' => 'og_uid',
     'field' => 'managelinkmy',
     'relationship' => 'none',
+  ),
+));
+$handler->override_option('sorts', array(
+  'title' => array(
+    'id' => 'title',
+    'table' => 'node',
+    'field' => 'title',
   ),
 ));
 $handler->override_option('filters', array(
@@ -73,20 +80,23 @@ $handler->override_option('filters', array(
     ),
   ),
   'uid' => array(
-    'id' => 'uid',
-    'table' => 'og_uid',
-    'field' => 'uid',
     'operator' => '=',
-    'value' => 1,
+    'value' => '1',
     'group' => 0,
     'exposed' => FALSE,
     'expose' => array(
       'operator' => FALSE,
       'label' => '',
     ),
+    'id' => 'uid',
+    'table' => 'og_uid',
+    'field' => 'uid',
     'relationship' => 'none',
     'expose_button' => array(
       'button' => 'Expose',
+    ),
+    'override' => array(
+      'button' => 'Override',
     ),
   ),
 ));
@@ -103,6 +113,7 @@ $handler->override_option('empty', 'Not a member of any groups.');
 $handler->override_option('empty_format', '1');
 $handler->override_option('items_per_page', 50);
 $handler->override_option('use_pager', '1');
+$handler->override_option('use_more', 1);
 $handler->override_option('style_plugin', 'table');
 $handler->override_option('style_options', array(
   'override' => 1,
@@ -133,9 +144,53 @@ $handler->override_option('menu', array(
   'type' => 'tab',
   'title' => 'My groups',
   'weight' => '0',
+  'name' => 'navigation',
 ));
 $handler->override_option('tab_options', array(
   'type' => 'none',
   'title' => '',
   'weight' => 0,
 ));
+$handler = $view->new_display('block', 'Block', 'block_1');
+$handler->override_option('fields', array(
+  'title' => array(
+    'id' => 'title',
+    'table' => 'node',
+    'field' => 'title',
+    'label' => 'Group',
+    'relationship' => 'none',
+    'link_to_node' => 1,
+  ),
+  'post_count_new' => array(
+    'label' => 'New',
+    'set_precision' => FALSE,
+    'precision' => 0,
+    'decimal' => '.',
+    'separator' => ',',
+    'prefix' => '',
+    'suffix' => '',
+    'exclude' => 0,
+    'id' => 'post_count_new',
+    'table' => 'og',
+    'field' => 'post_count_new',
+    'override' => array(
+      'button' => 'Use default',
+    ),
+    'relationship' => 'none',
+  ),
+));
+$handler->override_option('sorts', array(
+  'title' => array(
+    'order' => 'ASC',
+    'id' => 'title',
+    'table' => 'node',
+    'field' => 'title',
+    'override' => array(
+      'button' => 'Use default',
+    ),
+    'relationship' => 'none',
+  ),
+));
+$handler->override_option('use_pager', '0');
+$handler->override_option('block_description', 'My groups');
+$handler->override_option('block_caching', -1);
