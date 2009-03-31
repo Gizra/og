@@ -6,7 +6,10 @@ function og_views_default_views() {
   $files = file_scan_directory(drupal_get_path('module', 'og_views'). '/views', '.view');
   foreach ($files as $absolute => $file) {
     require $absolute;
-    $views[substr($file->name, 3)] = $view;
+    if (isset($view)) {
+      $views[substr($file->name, 3)] = $view;
+    }
   }
   return $views;
 }
+
