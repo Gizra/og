@@ -374,7 +374,7 @@ function og_theme_registry_alter(&$variables) {
 }
 
 function og_init() {
-  // we have to perform a load in order to assure that the $user->og_groups bits are present.
+  // We have to perform a load in order to assure that the $user->og_groups bits are present.
   global $user;
   if ($user->uid) {
     $user = user_load(array('uid' => $user->uid));
@@ -386,10 +386,24 @@ function og_init() {
   drupal_add_css(drupal_get_path('module', 'og'). '/theme/og.css');
 
   // Set group context and language if needed.
-  if ($node = og_determine_context()) {
-    og_set_language($node);
-    // In D7, restrict use of $_SESSION if this lands http://drupal.org/node/201122.
+  if ($group_node = og_determine_context()) {
+    og_set_theme($group_node);
+    og_set_group_context($group_node);
+    // TODOL: is this too late for menu links and such?
+    og_set_language($group_node);
+  }
+}
+
+/**
+ * Set session variable thats used to determine group context when node is in multiple groups.
+ * @see og_determine_context().
+ */
+function og_exit() {
+  global $user;
+  
+  if ($node = og_get_group_context()) {
     if ($user->uid || variable_get('cache', CACHE_DISABLED) == CACHE_DISABLED) {
+      // @TODO - In D7, eliminate use of $_SESSION for anon users. See http://drupal.org/node/201122.
       $_SESSION['og_last'] = $node->nid;
     }
   }
@@ -436,121 +450,138 @@ function og_og($op, $gid, $uid, $args) {
 }
 
 /**
- * Set group context based on URL. Modules may override what we set here.
- * Set a custom theme based on what group is being displayed (if any).
- * Be smart about selecting the 'active' group for ambiguous urls like node/$nid
- * TODOL see http://api.drupal.org/api/function/menu_get_object/6
+ * Set group context using the menu system.
+ *
+ * Modules may override the custom theme and group context set here.
+ * @see og_set_group_context()
+ * 
+ * @return
+ *   A group node object, or NULL if not a group page.
  */
 function og_determine_context() {
-  global $custom_theme;
-  $group_node = NULL; // a node object containing the 'active' group for this request
-  
-  // Recognize context when handling a request from a Views ajax block. See views_ajax().
-  $path = isset($_REQUEST['view_path']) ? $_REQUEST['view_path'] : NULL;
+  $item = menu_get_item();
+  $object = menu_get_object();
 
-  if (arg(0, $path) == 'og' && is_numeric(arg(2, $path))) {
-    $group_node = og_set_theme(arg(2, $path));
+  // Use the menu system to get the path.
+  $path = $item['path'];
+
+  // Check if this is an existing node.
+  if (!empty($object->nid)) {
+    $node = $object;
   }
-  elseif (arg(0, $path) == 'node' && is_numeric(arg(1, $path))) {
-    $group_node = og_set_theme(arg(1, $path));
-  }
-  elseif (arg(0, $path) == 'node' && arg(1, $path) == 'add' && arg(2, $path) == 'book' && arg(3, $path) == 'parent') {
-    $group_node = og_set_theme(arg(4, $path));
-    $_REQUEST['edit']['og_groups'][] = $group_node->nid; // checks the right box on node form
-  }
-  elseif (arg(0, $path) == 'node' && arg(1, $path) == 'add' && isset($_REQUEST['gids'])) {
+  // Check if we are in the node add page.
+  elseif (strpos($path, 'node/add') === 0 && !empty($_REQUEST['gids'])) {
+    // URL pattern: node/add/story?gids[]=1
     $gid = intval(current($_REQUEST['gids']));
-    $group_node = node_load($gid);
-    if (!$custom_theme)
-      $custom_theme = $group_node->og_theme;
+    $node = node_load($gid);
   }
-  elseif (arg(0, $path) == 'comment' && in_array(arg(1, $path), array('edit', 'delete')) && is_numeric(arg(2, $path))) {
-    $nid = db_result(db_query('SELECT nid FROM {comments} WHERE cid = %d', arg(2, $path)));
-    $group_node = og_set_theme($nid);
+  elseif (($item['map'][0] == 'og' && !empty($item['map'][2])) || $path == 'comment/reply/%') {
+    $node = menu_get_object('node', 2);
   }
-  elseif (arg(0, $path) == 'comment' && is_numeric(arg(2, $path))) {
-    // comment/reply/cid/nid URL pattern. 
-    $group_node = og_set_theme(arg(2, $path));
-  }
-  elseif (arg(0, $path) == 'comment' && is_numeric(arg(2, $path))) {
-    // comment/reply/cid/nid URL pattern. 
-    $group_node = og_set_theme(arg(2, $path));
+  elseif ($path == 'comment/edit' || $path == 'comment/delete') {
+    // Get the node from the comment object.
+    $comment = _comment_load($item['page_arguments'][0]);
+    $node = node_load($comment->nid);
   }
 
-  return og_set_group_context($group_node);
+  if (!empty($node) && ($group_node = og_determine_context_get_group($node))) {
+    return $group_node;
+  }  
 }
 
 /**
- * API function for getting the group context (if any) for the current request. Used
- * for things like setting current theme and breadcrumbs. This context is set during og_determine_context()
+ * Helper function; Get an appropriate group node to be set as the group conext.
  *
- * @return $node object
+ * If a group post belongs to multiple group nodes, the logic for determining the
+ * group node is:
+ * 1) The group we showed on the prior page view (if any).
+ * 2) The only or one of the group(s) the current user is a member of.
+ * 3) The 'first' group in $node->og_groups.
+ *
+ * @param $node
+ *   The node that the context should be retrieved from.
+ * @param $account
+ *   (optional) The account to check, if not given use currently logged in user.
+ * @return
+ *   The group node if exists and accesiable by the user.
+ * @see og_determine_context()
+ */
+function og_determine_context_get_group($node, $account = NULL) {
+  if (empty($account)) {
+    global $user;
+    $account = $user;
+  }
+  if (og_is_group_type($node->type)) {
+    $group_node = $node;
+  }
+  elseif (og_is_group_post_type($node->type) && !empty($node->og_groups)) {
+    // Post may be is in multiple groups ...
+    if (isset($_SESSION['og_last']) && in_array($_SESSION['og_last'], $node->og_groups)) {
+      $group = $_SESSION['og_last'];
+    }
+    // Intersect the node's groups with the user's groups and choose one of those, if possible.
+    elseif (!empty($user->og_groups) && ($gid = current(array_intersect($node->og_groups, array_keys($user->og_groups))))) {
+      $group = $gid;
+    }
+    else {
+      // No user is logged in, or none of the node's groups are the user's groups
+      $group = current($node->og_groups);
+    }
+    
+    if (!empty($group)) {
+      $group_node = node_load($group);
+    }
+  }
+  // Make sure user has view access to the group node.
+  if (!empty($group_node) && node_access('view', $group_node, $account)) {
+    return $group_node;
+  }
+}
+
+/**
+ * API function for getting the group context (if any) for the current request.
+ * Used for things like setting current theme and breadcrumbs.
+ * This context is set during og_determine_context().
+ *
+ * @return
+ *   The group node object if exists.
  */
 function og_get_group_context() {
   return og_set_group_context();
 }
 
 /**
- * API function for setting the group context for the current request. Modules may set this as needed. 
+ * API function; Set the group context for the current request.
+ * Modules may set this as needed.
  * This context is originally set during og_determine_context().
- *
- * @return $node object
+ * @param $node
+ *   The group node object that should be set as the context.
+ *   You can use og_determine_context_get_group() to assist you with finding
+ *   the appropriate group node.
+ * @return
+ *   The group node object if set.
  */
-function og_set_group_context($group_node = NULL) {
+function og_set_group_context($node = NULL) {
   static $stored_group_node;
-  
-  if (is_object($group_node) && og_is_group_type($group_node->type)) {
-    $stored_group_node = $group_node;
+  if (!empty($node) && og_is_group_type($node->type)) {
+    $stored_group_node = $node;
   }
-  return $stored_group_node;
+  return !empty($stored_group_node) ? $stored_group_node : NULL;
 }
 
-function og_set_theme($nid) {
+/**
+ * API function; Set the theme for the current request.
+ *
+ * @param $node
+ *   Pass the group node object or the node id.
+ */
+function og_set_theme($group_node) {
   global $custom_theme, $user;
-  $node = node_load(intval($nid));
-  if (og_is_group_type($node->type)) {
-    if (!$custom_theme) {
-      $custom_theme = $node->og_theme;
-    }
-    return $node;
+  if (!is_object($group_node)) {
+    $group_node = node_load($group_node);
   }
-  elseif (isset($node->og_groups)) {
-    switch (count($node->og_groups)) {
-      case 0:
-        return NULL;
-      case 1:
-        $group_node = node_load(current($node->og_groups));
-        if (!$custom_theme) {
-          $custom_theme = $group_node->og_theme;
-        }
-        break;
-      default:
-        // Node is in multiple groups. Preference goes to the group we showed on the prior page view (if any),
-        // Then to a group the current user is a member of.
-        if (isset($_SESSION['og_last']) && in_array($_SESSION['og_last'], $node->og_groups)) {
-          $group_node = node_load($_SESSION['og_last']);
-          if (!$custom_theme) {
-            $custom_theme = $group_node->og_theme;
-          }
-        }
-        else {
-          $groups = array();
-          // intersect the node's groups with the user's groups
-          if ($user->uid) {
-            $groups = array_intersect($node->og_groups, array_keys($user->og_groups));
-          }
-          // no user is logged in, or none of the node's groups are the user's groups
-          if (empty($groups)) {
-            $groups = $node->og_groups;
-          }
-          // use array_shift and not [0] because array_intersect preserves keys
-          $group_node = node_load(array_shift($groups));
-          if (!$custom_theme) {
-            $custom_theme = $group_node->og_theme;
-          }
-        }
-    }
-    return $group_node;
+  if (!$custom_theme && !empty($group_node->og_theme)) {
+    $custom_theme = $group_node->og_theme;
   }
 }
 
