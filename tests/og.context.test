@@ -1,0 +1,116 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Context test for the organic groups module.
+ */
+
+require_once drupal_get_path('module', 'og') . '/tests/og_testcase.php';
+
+class OgContext extends OgTestCase {
+  function getInfo() {
+    return array(
+      'name'  => t('Organic groups context tests'),
+      'description' => t('Tests the context system that determines how a group should be presented to the user.'),
+      'group' => t('Organic groups'),
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og');
+    // Create a user with admin permissions.
+    $web_admin = $this->drupalCreateUser(array('administer nodes', 'administer content types', 'access administration pages', 'administer site configuration', 'administer organic groups', 'administer blocks'));
+    $this->drupalLogin($web_admin);
+
+    // Create a group node content type.
+    $og_group_type = $this->drupalCreateContentType();
+    variable_set('og_content_type_usage_'. $og_group_type->name, 'group');
+    $this->group_type = $og_group_type->name;
+
+    // Create a second group node content type, so user is a member of
+    // two groups.
+    $og_group_type_second = $this->drupalCreateContentType();
+    variable_set('og_content_type_usage_'. $og_group_type_second->name, 'group');
+
+    // Create a group post content type.
+    $og_post_type = $this->drupalCreateContentType();
+    variable_set('og_content_type_usage_'. $og_post_type->name, 'group_post_standard');
+    $this->post_type = $og_post_type->name;
+
+    // Rebuild the menu so the new content types will appear in the menu.
+    menu_rebuild();
+
+    // Create a group node.
+    $this->group_nid = $this->addOgGroup($og_group_type->name);
+    // Create the second group node.
+    $this->addOgGroup($og_group_type_second->name);
+
+    // Create a post node.
+    $this->post_nid = $this->addOgPost($og_post_type->name, array($this->group_nid));
+
+    // Add the 'Group details' block (it's delta is 0).
+    $edit = array();
+    $edit['og_0[region]'] = 'left';
+    $this->drupalPost('admin/build/block', $edit, t('Save blocks'));
+    $this->assertText(t('The block settings have been updated.'), t('Block successfully added.'));
+  }
+
+  /**
+   * Test the context in different situations.
+   */
+  function testOgContex() {
+    // Prepare all the tests, with the URLs and if the block should appear or
+    // be hidden.
+    $tests = array(
+      'group node view' => array(
+        'path' => 'node/'. $this->group_nid,
+        'display' => TRUE,
+      ),
+      'group node add' => array(
+        'path' => 'node/add/'. $this->group_type,
+        'display' => FALSE,
+      ),
+      'group post view' => array(
+        'path' => 'node/'. $this->post_nid,
+        'display' => TRUE,
+      ),
+      'group post edit' => array(
+        'path' => 'node/'. $this->post_nid .'/edit',
+        'display' => TRUE,
+      ),
+      'group post delete' => array(
+        'path' => 'node/'. $this->post_nid .'/delete',
+        'display' => TRUE,
+      ),
+      'group post add' => array(
+        'path' => 'node/add/'. $this->post_type,
+        'display' => FALSE,
+      ),
+      'group post add with ?gids[] in the URL' => array(
+        'path' => 'node/add/'. $this->post_type,
+        'query' => 'gids[]='. $this->group_nid,
+        'display' => TRUE,
+      ),
+      "OG's menu callback (group manage)" => array(
+        'path' => 'og/manage/'. $this->group_nid,
+        'display' => TRUE,
+      ),
+    );
+
+    foreach ($tests as $test_name => $test) {
+      $this->drupalGet($test['path'], !empty($test['query']) ? array('query' => $test['query']) : array());
+      if ($test['display']) {
+        $assert_func = 'assertText';
+        $display = t('displayed');
+      }
+      else {
+        $assert_func = 'assertNoText';
+        $display = t('hidden');
+      }
+      // Confirm that the block is being displayed/ hidden.
+      $this->$assert_func(t('My membership'), t('Block successfully being @display on the %test_name page.', array('@display' => $display, '%test_name' => $test_name)));
+    }
+  }
+}
+
