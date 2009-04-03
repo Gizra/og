@@ -119,6 +119,8 @@ function og_notifications_form_alter(&$form, $form_state, $form_id) {
       }
       break;
     case 'og_admin_settings':
+      unset($form['og_new_node_subject'], $form['og_new_node_body']);
+      $form['og_settings']['notifications']['#description'] = t('Node event notifications can be configured via the <a href="!url">messaging templates</a> interface.', array('!url' => url('admin/messaging/template')));
       // Default autosubscription setting.
       $form['og_settings']['notifications']['og_notifications_autosubscribe'] = array(
         '#type' => 'checkbox',
@@ -182,19 +184,41 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
       // Generic notifications event
       $info['og-notifications'] = array(
         'module' => 'og_notifications',
-        'name' => t('OG notifications'),
-        'help' => t('Most fields will be provided during the event.')
+        'name' => t('OG notifications (default)'),
+        'help' => t('Most fields will be provided during the event.'),
+        'description' => t('Notifications for organic groups node events. Other group notification strings can be customised via the <a href="!url">OG config</a> page.', array('!url' => url('admin/og/og')))
+      );
+      $info['og-notifications-insert'] = array(
+        'module' => 'og_notifications',
+        'name' => t('OG notifications for new content'),
+        'help' => t('Most fields will be provided during the event.'),
+        'description' => t('Notifications for organic groups node creation events.')
+      );
+      $info['og-notifications-update'] = array(
+        'module' => 'og_notifications',
+        'name' => t('OG notifications for updated content'),
+        'help' => t('Most fields will be provided during the event.'),
+        'description' => t('Notifications for organic groups node update events.')
+      );
+      $info['og-notifications-comment'] = array(
+        'module' => 'og_notifications',
+        'name' => t('OG notifications for comments'),
+        'help' => t('Most fields will be provided during the event.'),
+        'description' => t('Notifications for organic groups comment events.')
       );
       return $info;
     case 'message keys':
       $type = $arg1;
       switch ($type) {
         case 'og-notifications':
+        case 'og-notifications-insert':
+        case 'og-notifications-update':
+        case 'og-notifications-comment':
           return array(
-            'subject' => t('Subject for event notifications'),
-            'header' => t('Body header for event notifications'),
-            'main' => t('Body for event notifications'),
-            'footer' => t('Body footer for event notifications')
+            'subject' => t('Subject'),
+            'header' => t('Body header'),
+            'main' => t('Body'),
+            'footer' => t('Body footer')
           );
         break;
       }
@@ -203,10 +227,43 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
       $type = $arg1;
       switch ($type) {
         case 'og-notifications':
+        case 'og-notifications-update':
           return array(
-            'subject' => t('[site-name] subscription update for [user]'),
-            'header' => t("Greetings, [user].\n\nThese are your messages"),
-            'main' => t("A [type] has been updated: [title]\n\n[event_list]"),
+            'subject' => t('[site-name] [ogname]: [title]'),
+            'header' => t("Greetings, [user],"),
+            'main' => array(
+              t('A [type-name] has been updated in group [ogname]: [title]'),
+              t('[node-teaser]'),
+              t('Read more at [node-url].')
+            ),
+            'footer' => array(
+              t('This is an automatic message from [site-name]'),
+              t('To manage your subscriptions, browse to [subscriptions-manage]')
+            )
+          );
+        case 'og-notifications-insert':
+          return array(
+            'subject' => t('[site-name] [ogname]: [title]'),
+            'header' => t("Greetings, [user],"),
+            'main' => array(
+              t('A [type-name] has been created in group [ogname]: [title]'),
+              t('[node-teaser]'),
+              t('Read more at [node-url].')
+            ),
+            'footer' => array(
+              t('This is an automatic message from [site-name]'),
+              t('To manage your subscriptions, browse to [subscriptions-manage]')
+            )
+          );
+        case 'og-notifications-comment':
+          return array(
+            'subject' => t('[site-name] [ogname]: [title]'),
+            'header' => t("Greetings, [user],"),
+            'main' => array(
+              t('A new comment has been added by [comment-author-name] to this thread in group [ogname]: [comment-title]'),
+              t('[comment-body]'),
+              t('Read more at [comment-url] or reply via [comment-reply-url].')
+            ),
             'footer' => array(
               t('This is an automatic message from [site-name]'),
               t('To manage your subscriptions, browse to [subscriptions-manage]')
@@ -216,11 +273,49 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
       break;
     case 'tokens':
       $tokens = array();
-      if ($arg1 == 'og-notifications') {
-        $tokens = array('global', 'subscription', 'user', 'node');
+      if (strpos($arg1, 'og-notifications') === 0) {
+        $tokens = array('global', 'subscription', 'user', 'node', 'comment');
       }
 
       return $tokens;
+  }
+}
+
+/**
+ * A workaround to ensure that OG can provide custom message templates for
+ * notifications.
+ *
+ * @param Object $message
+ *   The message object.
+ * @param Object $info
+ *   Sending method information.
+ */
+function og_notifications_message_alter(&$message, $info) {
+  if ($sid = _og_notification_check_message($message)) {
+    $event = $message->notifications['events'][0];
+    // Cater for different message groups (actions).
+    $group = 'og-notifications-'. $event->action;
+    $send_method = $message->method;
+    $subscription = notifications_load_subscription($sid);
+
+    $text = array(
+      'subject' => messaging_message_part($group, 'subject', $send_method, $event),
+      'header' => messaging_message_part($group, 'header', $send_method, $event),
+      'main'  => messaging_message_part($group, 'main', $send_method, $event),
+      'footer' => messaging_message_part($group, 'footer', $send_method, $event)
+    );
+
+    $objects = array('user' => $message->account, 'node' => $event->objects['node'], 'subscription' => $subscription);
+    if ($event->action == 'comment') {
+      $objects['comment'] = $event->objects['comment'];
+    }
+
+    $objects = array_merge($objects, $event->objects);
+    $text = messaging_text_replace($text, $objects);
+
+    $message->subject = $text['subject'];
+    unset($text['subject']);
+    $message->body = $text;
   }
 }
 
@@ -272,16 +367,15 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
     case 'node options':
       return _og_notifications_node_options($arg0, $arg1);
     case 'event load':
-      // Nothing to load here, the user may be subscribed through one of many 
-      // parent groups.
+      // Piggy-backing on notifications_content.
       break;
     case 'event types':
-      // Event types for this are defined in notifications_content module
+      // Piggy-backing on notifications_content.
       break;
     case 'access':
       $type = $arg0;
-      $account = &$arg1;
-      $object = &$arg2;
+      $account = $arg1;
+      $object = $arg2;
       if ($type == 'subscription' && !empty($object->fields['group'])) {
         if (($group = node_load($object->fields['group'])) && og_is_group_type($group->type) && notifications_content_node_allow($account, $group)) {
           return array(TRUE);
@@ -643,4 +737,30 @@ function _og_notifications_node_options($account, $node) {
   }
 
   return $options;
+}
+
+
+/**
+ * Helper function for og_notifications_message_alter. This function checks to
+ * see if the message object being passed is an OG notification.
+ *
+ * @param Object $message
+ *   The message object
+ * @return Boolean
+ *   True if this is an OG notification message. False, otherwise ...
+ */
+function _og_notification_check_message($message) {
+  $sid = 0;
+
+  if (isset($message->notifications) && isset($message->notifications['subscriptions'])) {
+    $params = current($message->notifications['subscriptions']);
+    if (count($params) > 1) {
+      // Check if "group" is one of the fields. This is a general presumption
+      // that any subscription with at least two fields, one of them being a
+      // group, is an OG subscription.
+      $sid = db_result(db_query("SELECT sid FROM {notifications_fields} WHERE field = 'group' AND sid IN (". db_placeholders($params) .")", $params));
+    }
+  }
+
+  return $sid > 0;
 }
