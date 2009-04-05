@@ -628,7 +628,7 @@ function og_notifications_user_subscribe($account, $gid) {
 }
 
 /**
- * Unsubscribe a user from a group. This also unsunscribes the user from any
+ * Unsubscribe a user from a group. This also unsubscribes the user from any
  * grouptype subscriptions within the group.
  *
  * @param Object $account
@@ -653,7 +653,8 @@ function og_notifications_user_unsubscribe($account, $gid) {
  *   An associative array of the resulting groups.
  */
 function _og_notifications_user_groups($uid) {
-  // No checks for group published or not?
+  // No checks for group published or not? NB: Nodes belonging to unpublished
+  // groups are still accessible with links to the parent group.
   $query = "SELECT no.*, nof.value AS nid, n.type AS node_type, n.title FROM {notifications} no
     INNER JOIN {notifications_fields} nof ON no.sid = nof.sid LEFT JOIN {node} n ON nof.value = CAST(n.nid AS CHAR(255))
     WHERE no.uid = %d AND (no.type = 'group') AND no.conditions = 1 AND nof.field = 'group'
