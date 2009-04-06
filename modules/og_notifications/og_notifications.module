@@ -16,7 +16,7 @@ function og_notifications_help($path, $arg) {
 
   switch ($path) {
     case 'user/%/notifications/group':
-      return t('Customise notifications for each of your groups along with their frequency and delivery method. If so desired, you can also restrict notifications only for certain content types in each group.');
+      return t('Customize notifications for each of your groups along with their frequency and delivery method. If so desired, you can also restrict notifications only for certain content types in each group.');
   }
 }
 
@@ -113,7 +113,7 @@ function og_notifications_form_alter(&$form, $form_state, $form_id) {
         $form['messaging']['og_notifications_autosubscribe'] = array(
           '#type' => 'checkbox',
           '#title' => t('Automatically enable notifications for any groups that I join.'),
-          '#description' => t('Group notifications can also be <a href="!manage-url">customised</a> in greater detail if required.', array('!manage-url' => url('user/'. $account->uid .'/notifications/group'))),
+          '#description' => t('Group notifications can also be <a href="!manage-url">customized</a> in greater detail if required.', array('!manage-url' => url('user/'. $account->uid .'/notifications/group'))),
           '#default_value' => og_notifications_user_autosubscribe_get($account->uid)
         );
       }
@@ -186,7 +186,7 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
         'module' => 'og_notifications',
         'name' => t('OG notifications (default)'),
         'help' => t('Most fields will be provided during the event.'),
-        'description' => t('Notifications for organic groups node events. Other group notification strings can be customised via the <a href="!url">OG config</a> page.', array('!url' => url('admin/og/og')))
+        'description' => t('Notifications for organic groups node events. Other group notification strings can be customized via the <a href="!url">OG config</a> page.', array('!url' => url('admin/og/og')))
       );
       $info['og-notifications-insert'] = array(
         'module' => 'og_notifications',
