@@ -1,3 +1,5 @@
+<?php
+
 $view = new view;
 $view->name = 'og_members_block';
 $view->description = 'Member listing block';
