@@ -1,13 +1,10 @@
-<?php
-// $Id$
-
 $view = new view;
 $view->name = 'og_members_block';
 $view->description = 'Member listing block';
 $view->tag = 'og';
 $view->view_php = '';
 $view->base_table = 'users';
-$view->is_cacheable = '0';
+$view->is_cacheable = FALSE;
 $view->api_version = 2;
 $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 $handler = $view->new_display('default', 'Defaults', 'default');
@@ -79,11 +76,11 @@ $handler->override_option('arguments', array(
     'relationship' => 'none',
     'default_argument_fixed' => '39',
     'default_argument_php' => 'if ($node = og_get_group_context()) {
-            return $node->nid;
-          }
-          else {
-            return NULL;
-          }',
+                return $node->nid;
+              }
+              else {
+                return NULL;
+              }',
     'validate_argument_node_type' => array(
       'blog' => 0,
       'poll' => 0,
@@ -186,7 +183,67 @@ $handler->override_option('row_options', array(
   'separator' => '&nbsp;',
 ));
 $handler = $view->new_display('block', 'Block Admins', 'block');
+$handler->override_option('filters', array(
+  'status' => array(
+    'id' => 'status',
+    'table' => 'users',
+    'field' => 'status',
+    'operator' => '=',
+    'value' => 1,
+    'group' => 0,
+    'exposed' => FALSE,
+    'expose' => array(
+      'operator' => FALSE,
+      'label' => '',
+    ),
+    'relationship' => 'none',
+    'expose_button' => array(
+      'button' => 'Expose',
+    ),
+  ),
+  'is_active' => array(
+    'id' => 'is_active',
+    'table' => 'og_uid',
+    'field' => 'is_active',
+    'operator' => '=',
+    'value' => 1,
+    'group' => 0,
+    'exposed' => FALSE,
+    'expose' => array(
+      'operator' => FALSE,
+      'label' => '',
+    ),
+    'relationship' => 'none',
+    'expose_button' => array(
+      'button' => 'Expose',
+    ),
+  ),
+  'is_admin' => array(
+    'operator' => 'in',
+    'value' => array(
+      '1' => '1',
+    ),
+    'group' => 0,
+    'exposed' => FALSE,
+    'expose' => array(
+      'operator' => FALSE,
+      'label' => '',
+    ),
+    'id' => 'is_admin',
+    'table' => 'og_uid',
+    'field' => 'is_admin',
+    'relationship' => 'none',
+    'expose_button' => array(
+      'button' => 'Expose',
+    ),
+    'override' => array(
+      'button' => 'Use default',
+    ),
+  ),
+));
 $handler->override_option('title', 'Group admins');
 $handler->override_option('block_description', 'Group admins');
+$handler->override_option('block_caching', -1);
 $handler = $view->new_display('block', 'Block Admins, Members', 'block_1');
 $handler->override_option('block_description', 'Group members');
+$handler->override_option('block_caching', -1);
