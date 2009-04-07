@@ -6,9 +6,9 @@
  */
 function og_views_menu() {
   // This exists because I can't easily restrict access based on pictures_enabled using Views.
-  $items['og/users/%/faces'] = array(
+  $items['og/users/%node/faces'] = array(
     'title' => 'Faces',
-    'page callback' => 'views_page',
+    'page callback' => 'og_views_users_faces',
     'page arguments' => array('og_members_faces', 'default', 2),
     'type' => MENU_LOCAL_TASK,
     'access callback' => 'og_menu_access_picture',
@@ -29,9 +29,19 @@ function og_views_menu() {
   return $items;
 }
 
+// An menu access callback.
 function og_menu_access_picture($gid) {
   $view = views_get_view('og_members_faces');
   return og_is_picture() && og_is_group_member($gid) && !$view->disabled;
+}
+
+/**
+ * A menu callback. Extracts the nid from $node and passes along to views_page().
+ *
+ */
+function og_views_users_faces($view_name, $display, $node) {
+  $arg = $node->nid;
+  return views_page($view_name, $display, $arg);
 }
 
 
