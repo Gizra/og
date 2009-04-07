@@ -226,7 +226,7 @@ function og_remove_group_action_submit($form, &$form_state) {
  */
 function og_subscribe_user_action($account, $context) {
   if (isset($context['group'])) {
-    og_save_subscription($context['group'], $account, array('is_active' => 1));
+    og_save_subscription($context['group'], $account->uid, array('is_active' => 1));
     watchdog('action', 'Subscribed user %name to %group.', array('%name' => $account->name, '%group' => $context['group']));
   }
 }
