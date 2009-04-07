@@ -607,7 +607,9 @@ function og_notifications_user_autosubscribe_set($uid, $autosubscribe) {
 }
 
 /**
- * Subscribe a user to a group.
+ * Subscribe a user to a group or to be more precise, to all subscribe-able
+ * content types within the group. This method is also called during the upgrade
+ * process in .install.
  *
  * @param Object $account
  *   The user account object.
@@ -615,16 +617,34 @@ function og_notifications_user_autosubscribe_set($uid, $autosubscribe) {
  *   The node ID of the group being subscribed to.
  */
 function og_notifications_user_subscribe($account, $gid) {
-  $subscription = _notifications_subscription_defaults($account);
+  // Remove all existing user->group subscriptions. 
+  og_notifications_user_unsubscribe($account, $gid);
 
-  $subscription['uid'] = $account->uid;
-  $subscription['type'] = 'group';
-  $subscription['event_type'] = 'node';
-  // String cast due to notifications requiring it as the value field is
-  // a varchar.
-  $subscription['fields'] = array('group' => (string) $gid);
+  $subscription_default = _notifications_subscription_defaults($account);
 
-  notifications_save_subscription($subscription);
+  $subscription_default['uid'] = $account->uid;
+  $subscription_default['type'] = 'grouptype';
+  $subscription_default['event_type'] = 'node';
+
+  // Only subscribe the user to enabled types.
+  $content_types = array_filter(variable_get('og_notifications_content_types', array()));
+  // If the types array is empty, subscribe to all group types. This is mainly
+  // only valid during the upgrade.
+  if (empty($content_types)) {
+    $content_types = og_get_types('group_post');
+  }
+  foreach ($content_types as $type) {
+    // Reset $subscription as notifications_save_subscription casts the input
+    // array into an object.
+    $subscription = $subscription_default;
+    // String cast due to notifications requiring it (as the value field is
+    // a varchar).
+    $subscription['fields'] = array(
+      'group' => (string) $gid,
+      'type' => $type
+    );
+    notifications_save_subscription($subscription);
+  }
 }
 
 /**
