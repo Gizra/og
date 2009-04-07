@@ -81,7 +81,13 @@ function og_views_block_notifications() {
   global $user;
   
   if ($groupnode = og_get_group_context()) {
-    $content = t('This group offers a <a href="@groupfeed">RSS feed</a> and an <a href="@email">email subscription</a>.', array('@groupfeed' => url("node/$groupnode->nid/feed"), '@email' => url('og/manage/'. $groupnode->nid)));
+    $content = t('This group offers a <a href="@groupfeed">RSS feed</a>', array('@groupfeed' => url("node/$groupnode->nid/feed")));
+    if (module_exists('og_notifications') && $user->uid) {
+      $content .= t(' and an <a href="@email">email subscription</a>.', array('@email' => url('user/$user->uid/notifications/group')));
+    }
+    else {
+      $content .= '.';
+    }
     // NOTE: See og.css for styling specific to these lists
     $content .= ' '. t('Or subscribe to these personalized, sitewide feeds:');
     $inline = array('class' => 'links inline');
