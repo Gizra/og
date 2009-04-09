@@ -101,7 +101,7 @@ function og_views_views_plugins() {
  */
 function og_views_views_data() {
   $data = array();
-  $tables = array('og', 'og_ancestry', 'og_uid');
+  $tables = array('og', 'og_ancestry', 'og_uid', 'og_access_post');
   foreach ($tables as $table) {
     $function = "og_views_data_$table";
     $data += $function();
@@ -182,9 +182,12 @@ function og_views_data_og() {
     'real field' => 'og_private',
     'field' => array(
       'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('Private'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -197,9 +200,12 @@ function og_views_data_og() {
     'field' => array(
       'real field' => 'og_directory',
       'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('List in directory'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -259,7 +265,7 @@ function og_views_data_og_ancestry() {
   $data['og_ancestry']['table']['base'] = array(
     'field' => 'nid',
     'title' => t('Group posts'),
-    'help' => t('Posts which are affiiated with a group.'),
+    'help' => t('Posts which are affiliated with a group.'),
   );
   $data['og_ancestry']['table']['join'] = array(
     'node' => array(
@@ -310,22 +316,40 @@ function og_views_data_og_ancestry() {
       'handler' => 'og_views_handler_filter_og_picg',
     ),
   );
-  
-  // TOODL: yes_empty field
-  $data['og_ancestry']['is_public'] = array(
+
+  return $data;
+}
+
+// --------- Table og_access_post
+function og_views_data_og_access_post() {
+  $data['og_access_post']['table']['group']  = t('Organic groups');
+  $data['og_access_post']['table']['base'] = array(
+    'field' => 'nid',
+    'title' => t('Group posts'),
+    'help' => t('Posts which are affiiated with a group.'),
+  );
+  $data['og_access_post']['table']['join'] = array(
+    'node' => array(
+      'left_field' => 'nid',
+      'field' => 'nid',
+    ),
+  );
+  $data['og_access_post']['og_public'] = array(
     'title' => t('Post: Public'),
-    'help' => t('Is a given post public or private according to OG.'),
+    'help' => t('Is a given group post public or private according to OG.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('Public'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
-  );
-
+  );  
   return $data;
 }
 
@@ -422,13 +446,15 @@ function og_views_data_og_uid() {
   );
   $data['og_uid']['is_active'] = array(
     'title' => t('OG: Is membership approved'),
-    'help' => t("Add <em>approval needed</em> user if user's membership request is pending."),
+    'help' => t("Appends <em>approval needed</em> if user's membership request is pending."),
     'field' => array(
       'handler' => 'og_views_handler_field_og_is_active',
       'click sortable' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('Approved'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
        'handler' => 'views_handler_sort',

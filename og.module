@@ -1594,9 +1594,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         // TODO: Refactor so we don't need 2 arrays.
         $node->og_groups = drupal_map_assoc(array_keys($grps));
         $node->og_groups_both = $grps;
-        
-        $public = db_result(db_query_range("SELECT is_public FROM {og_ancestry} WHERE nid = %d", $node->nid, 0, 1));
-        $node->og_public = $public ? TRUE : FALSE;
       }
       else {
         $node->og_groups = $node->og_groups_both = array();
@@ -2293,11 +2290,9 @@ function og_save_ancestry($node) {
     if (isset($node->og_groups)) {
       $node->og_groups = array_unique($node->og_groups);
       foreach ($node->og_groups as $gid) {
-        // TODOL: rename is_public to og_public in DB.
         $ancestry = array(
           'nid' => $node->nid,
           'group_nid' => $gid,
-          'is_public' => $node->og_public,
         );
         drupal_write_record('og_ancestry', $ancestry);
       }

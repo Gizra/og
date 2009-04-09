@@ -24,6 +24,34 @@ function og_access_menu() {
   return $items;
 }
 
+function og_access_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+  switch ($op) {
+    case 'load':
+      if (og_is_group_post_type($node->type)) {
+        $node->og_public = (bool)db_result(db_query("SELECT og_public FROM {og_access_post} WHERE nid = %d", $node->nid));
+      }
+      break;
+    case 'insert':
+      // Save og_public.
+      if (og_is_group_post_type($node->type)) {
+        drupal_write_record('og_access_post', $node);
+      }
+      break;
+    case 'update':
+      // Save og_public.
+      if (og_is_group_post_type($node->type)) {
+        drupal_write_record('og_access_post', $node, 'nid');
+      }
+      break;
+    case 'delete':
+      if (og_is_group_post_type($node->type)) {
+        $sql = "DELETE FROM {og_access_post} WHERE nid = %d";
+        db_query($sql, $node->nid);
+      }
+      break;
+  }
+}
+
 function og_access_settings() {
   drupal_add_js(drupal_get_path('module', 'og_access'). '/og_access.js'); // load the form javascript to handle private groups / node visibility conflicts in the og access settings form.
   

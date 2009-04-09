@@ -140,18 +140,8 @@ function og_schema() {
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
-      'is_public'       => array(
-        'description'     => t('Is this a public or private post? This value is always the same across all groups for a given post.'),
-        'type'            => 'int',
-        'size'            => 'tiny',
-        'default'         => 1,
-        'not null'        => TRUE,
-      ),
     ),
-    'indexes'         => array(
-      'nid'             => array('nid'),
-      'group_nid'       => array('group_nid'),
-    ),
+    'primary key'       => array('nid', 'group_nid'),
   );
 
   return $schema;
@@ -221,6 +211,32 @@ function og_migrate_type_basic_14() {
     module_disable(array('og_basic'));
     node_types_rebuild();
   }
+}
+
+// Safely add primary key to og_ancestry table. Called from og.istall and og_access.install.
+function og_ancestry_dedupe() {
+  $schema['og_ancestry_new'] = array(
+    'description'     => '',
+    'fields'          => array(
+      'nid'             => array(
+        'description'     => t("The post's {node}.nid."),
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'group_nid'       => array(
+        'description'     => t("The group's {node}.nid."),
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+    ),
+  );
+  db_create_table($ret, 'og_ancestry_new', $schema['og_ancestry_new']);
+  $ret[] = update_sql("INSERT INTO {og_ancestry_new} SELECT DISTINCT * FROM {og_ancestry}");
+  db_drop_table($ret, 'og_ancestry');
+  db_rename_table($ret, 'og_ancestry_new', 'og_ancestry');
+  db_add_primary_key($ret, 'og_ancestry', array('nid', 'group_nid'));
 }
 
 function og_update_15() {
@@ -399,6 +415,20 @@ function og_update_6002() {
   db_change_field($ret, 'og', 'description', 'og_description', $fields['og_description']);
   db_change_field($ret, 'og', 'language', 'og_language', $fields['og_language']);
   db_change_field($ret, 'og', 'private', 'og_private', $fields['og_private']);
+  return $ret;
+}
+
+// Migrate the is_public column from og_ancestry to a new og_nid table. Denormalizing.
+function og_update_6003() {
+  $ret = array();
+  if (module_exists('og_access')) {
+    // Do nothing. An og_access update handles this.
+  }
+  else {
+    db_drop_field($ret, 'og_ancestry', 'is_public');
+    og_ancestry_dedupe();
+  }
+  
   return $ret;
 }
 

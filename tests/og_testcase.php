@@ -56,7 +56,6 @@ class OgTestCase extends DrupalWebTestCase {
     $keys = array(
       'og_groups',
       'og_groups_both',
-      'og_public',
     );
     $og_type = t('Group post');
     return $this->_addOgContent($type, $og_type, $edit, $keys);
