@@ -464,6 +464,7 @@ function og_views_data_og_uid() {
     'title' => t('OG: Is the group manager'),
     'help' => t('Add <em>manager</em> text if user is the group manager.'),
     'field' => array(
+      'field' => 'uid',
       'handler' => 'og_views_handler_field_og_is_manager',
       'click sortable' => FALSE,
     ),
