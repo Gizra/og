@@ -35,7 +35,7 @@ function og_actions_action_info() {
     ),
     'og_subscribe_user_action' => array(
       'type' => 'user',
-      'description' => t('Subscribe user to the specified group'),
+      'description' => t('Subscribe user to the specified groups'),
       'configurable' => TRUE,
       'hooks' => array(),
     ),
@@ -225,9 +225,12 @@ function og_remove_group_action_submit($form, &$form_state) {
  * A configurable action to subscribe a user to a specific group.
  */
 function og_subscribe_user_action($account, $context) {
-  if (isset($context['group'])) {
-    og_save_subscription($context['group'], $account->uid, array('is_active' => 1));
-    watchdog('action', 'Subscribed user %name to %group.', array('%name' => $account->name, '%group' => $context['group']));
+  if (isset($context['groups'])) {
+    
+    foreach ($context['groups'] as $gid) {
+      og_save_subscription($gid, $account->uid, array('is_active' => 1));
+    }
+    watchdog('action', 'Subscribed user %name to %numgroup groups.', array('%name' => $account->name, '%numgroups' => count($context['groups'])));
   }
 }
 
@@ -237,19 +240,20 @@ function og_subscribe_user_action($account, $context) {
 function og_subscribe_user_action_form($context) {
   $form = array();
 
-  if (!isset($context['group'])) {
-    $context['group'] = '';
+  if (!isset($context['groups'])) {
+    $context['groups'] = '';
   }
 
   $groups = og_all_groups_options();
   if (count($groups)) {
-    $form['group'] = array(
+    $form['groups'] = array(
       '#type' => 'select',
-      '#title' => t('Group'),
+      '#title' => t('Groups'),
       '#options' => $groups,
-      '#description' => t('Select the group to which this user should be subscribed.'),
-      '#default_value' => $context['group'],
+      '#description' => t('Select the groups to which this user should be subscribed.'),
+      '#default_value' => $context['groups'],
       '#required' => TRUE,
+      '#multiple' => TRUE,
     );
   }
   else {
@@ -263,7 +267,7 @@ function og_subscribe_user_action_form($context) {
  */
 function og_subscribe_user_action_submit($form, &$form_state) {
   return array(
-    'group' => $form_state['values']['group'],
+    'groups' => $form_state['values']['groups'],
   );
 }
 
