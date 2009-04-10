@@ -16,7 +16,7 @@ INSTALLATION
 
 NOTES
 ----------------
-- This module supports designating any contnt type to act as a group. This content type should be defined by a custom module or via the admin/content/types page. When defining your type, you usually want the title label to be 'Group name' and the body label to be 'Welcome message'. Since all nodes of this type are treated as groups, you will usually not want to designate the standard page, story, or book node types as groups. The feature where custom content types may act as groups enables you to have custom fields for your groups and even different fields for different kinds of groups (i.e. content types). 
+- This module supports designating any content type to act as a group. This content type should be defined by a custom module or via the admin/content/types page. When defining your type, you usually want the title label to be 'Group name' and the body label to be 'Welcome message'. Since all nodes of this type are treated as groups, you will usually not want to designate the standard page, story, or book node types as groups. The feature where custom content types may act as groups enables you to have custom fields for your groups and even different fields for different kinds of groups (i.e. content types). 
 - There are a few handy tabs at the path 'group'. You might want to add a link in your Navigation to that url. Each tab also provides a useful RSS feed.
 - 'Administer nodes' permission is required for changing the Manager of a group (do so by changing the posts' Author.)
 - 'Administer nodes' permission enables viewing of all nodes regardless of private/public status.
@@ -28,6 +28,7 @@ DEVELOPERS & SITE BUILDERS
 - You may craft your own URLs which produce useful behavior. For example, user/register?gids[]=4 will add a checked checkbox for to the user's registration page for subscribing to group nid=4. This feature overrides the usual preference for groups to always appear during registration.
 - You alter the links in the group details block using hook_og_link_alter($links, $group_node). See og_block_details().
 - The current group context is available to javascript code at Drupal.settings.og. This is useful for enriching ad tags and analytics calls with group information.
+- Use Views Bulk Operations module to mass update user memberships and also content affiliations.
 
 THEMES
 ------------------
