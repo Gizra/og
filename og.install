@@ -419,7 +419,7 @@ function og_update_6002() {
 }
 
 // Migrate the is_public column from og_ancestry to a new og_nid table. Denormalizing.
-function og_update_6003() {
+function og_update_6203() {
   $ret = array();
   if (module_exists('og_access')) {
     // Do nothing. An og_access update handles this.

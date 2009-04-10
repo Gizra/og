@@ -51,7 +51,7 @@ function og_access_uninstall() {
 }
 
 // Migrate the is_public column from og_ancestry to a new og_access_post table. Denormalizing.
-function og_access_update_6001() {
+function og_access_update_6201() {
   $ret = array();
   // Create new table.
   $schema['og_access_post'] = array(
