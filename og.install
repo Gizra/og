@@ -214,7 +214,7 @@ function og_migrate_type_basic_14() {
 }
 
 // Safely add primary key to og_ancestry table. Called from og.istall and og_access.install.
-function og_ancestry_dedupe() {
+function og_ancestry_dedupe(&$ret) {
   $schema['og_ancestry_new'] = array(
     'description'     => '',
     'fields'          => array(
@@ -426,7 +426,7 @@ function og_update_6203() {
   }
   else {
     db_drop_field($ret, 'og_ancestry', 'is_public');
-    og_ancestry_dedupe();
+    og_ancestry_dedupe($ret);
   }
   
   return $ret;

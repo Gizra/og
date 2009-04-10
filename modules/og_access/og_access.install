@@ -84,7 +84,7 @@ function og_access_update_6201() {
   
   // Dedupe og_ancestry table because some sites had dupes of unkown origin.
   // See og.install.
-  og_ancestry_dedupe();
+  og_ancestry_dedupe($ret);
   
   return $ret;
 }
