@@ -1,9 +1,0 @@
-; $Id$
-name = Organic groups panels. NOT COMPATIBLE WITH DRUPAL 6 YET.
-description = "Enable group admins to create panel pages."
-package = "Organic groups"
-dependencies[] = og
-dependencies[] = panels
-dependencies[] = panels_views
-dependencies[] = drupal6 ponies
-; core = 6.x

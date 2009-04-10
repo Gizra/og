@@ -1,7 +1,0 @@
-; $Id$
-name = Organic groups actions
-description = Provides actions for use with Organic Groups and Trigger.
-package = "Organic groups"
-dependencies[] = og
-dependencies[] = trigger
-core = 6.x
