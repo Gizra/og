@@ -16,7 +16,7 @@ function og_notifications_help($path, $arg) {
 
   switch ($path) {
     case 'user/%/notifications/group':
-      return t('Customize notifications for each of your groups along with their frequency and delivery method. If so desired, you can also restrict notifications only for certain content types in each group.');
+      return t('Customize notifications for each of your groups and each of their content types along with their frequency and delivery method.');
   }
 }
 
@@ -404,92 +404,68 @@ function og_notifications_user_page($form_state, $account = NULL) {
   $account = $account ? $account : $user;
 
   if (!empty($account->og_groups)) {
-    $ngroups = _og_notifications_user_groups($account->uid);
-    $ngrouptypes = _og_notifications_user_grouptypes($account->uid);
-
-    // Tap into notifications_user_form to retrieve variables and defaults.
-    $group_form = notifications_user_form(NULL, $account, 'group', $ngroups, $account->og_groups, array('type' => 'group', 'event_type' => 'node'), array('title' => t('Group')));
-    // Grouptype uses multiple fields which are not addressed adequately by
-    // notifications_user_form.
-    $grouptype_form = notifications_user_form(NULL, $account, 'grouptype', $ngrouptypes, variable_get('og_notifications_content_types', array()), array('type' => 'grouptype', 'event_type' => 'node'), array('title' => t('Group Type')));
-
-    // TODO: Trim unnecessary items.
-    $form = array(
-      'account' => $group_form['account'],
-      'group_defaults' => $group_form['defaults'],
-      'group_current' => $group_form['current'],
-      'group_subscription_fields' => $group_form['subscription_fields'],
-      'grouptype_defaults' => $grouptype_form['defaults'],
-      'grouptype_current' => $grouptype_form['current'],
-      'grouptype_subscription_fields' => $grouptype_form['subscription_fields']
-    );
-
     $content_types = array_filter(variable_get('og_notifications_content_types', array()));
     $content_names = node_get_types('names');
+    $send_methods = _notifications_send_methods();
+    $send_intervals = _notifications_send_intervals();
 
-    foreach ($account->og_groups as $gid => $group) {
-      $group_index = 'groups-'. $gid;
+    $header = array(
+      theme('table_select_header_cell'),
+      array('data' => t('Group'), 'field' => 'n.title', 'sort' => 'asc'),
+      array('data' => t('Type'), 'field' => 'node_type'),
+      array('data' => t('Send method'), 'field' => 'no.send_method'),
+      array('data' => t('Send Interval'), 'field' => 'no.send_interval')
+    );
 
-      $types = array();
-      foreach ($content_types as $type => $title) {
-        // Check if value exists; Only enable node type subscriptions if the
-        // group is not already subscribed to (for all posts).
-        $bool = isset($ngrouptypes[$gid]) && isset($ngrouptypes[$gid][$type]);
-        $types[$type] = array(
-          'title' => check_plain($content_names[$type]),
-          'checkbox' => $bool,
-          'send_interval' => $bool ? $ngrouptypes[$gid][$type]->send_interval : $grouptype_form['defaults']['#value']['send_interval'],
-          'send_method' => $bool ? $ngrouptypes[$gid][$type]->send_method : $grouptype_form['defaults']['#value']['send_method']
+    $sql = "SELECT n.nid AS group_nid, n.title, nof2.value AS node_type, no.* FROM {notifications} no
+      INNER JOIN {notifications_fields} nof1 ON no.sid = nof1.sid
+      INNER JOIN {notifications_fields} nof2 ON no.sid = nof2.sid
+      INNER JOIN {node} n ON nof1.value = n.nid
+      WHERE no.uid = %d AND (no.type = 'grouptype') AND no.conditions = 2 AND nof1.field = 'group' AND nof2.field = 'type'";
+    $sql .= tablesort_sql($header);
+    $count_sql = "SELECT COUNT(nof2.value) FROM {notifications} no
+      INNER JOIN {notifications_fields} nof1 ON no.sid = nof1.sid
+      INNER JOIN {notifications_fields} nof2 ON no.sid = nof2.sid
+      WHERE no.uid = %d AND (no.type = 'grouptype') AND no.conditions = 2 AND nof1.field = 'group' AND nof2.field = 'type'";
+    $result = pager_query($sql, 50, 0, $count_sql, $account->uid);
+
+    // Reuse notifications theme function for the embedded table.
+    $form['subscriptions'] = array(
+      '#tree' => TRUE,
+      '#theme' => 'notifications_form_table',
+      '#header' => $header
+    );
+    $subscriptions_current = array();
+    while ($subscription = db_fetch_object($result)) {
+      $key = $subscription->sid;
+      $subscriptions_current[$key] = $subscription;
+      $form['subscriptions']['checkbox'][$key] = array(
+        '#type' => 'checkbox',
+        '#default_value' => $subscription->sid
+      );
+      $form['subscriptions']['group'][$key] = array('#value' => l($subscription->title, 'node/'. $subscription->group_nid));
+      $form['subscriptions']['node_type'][$key] = array('#value' => check_plain($subscription->node_type));
+      // Hide send methods if only one available.
+      if (count($send_methods) > 1) {
+        $form['subscriptions']['send_method'][$key] = array(
+          '#type' => 'select',
+          '#options' => $send_methods,
+          '#default_value' => $subscription->send_method
         );
       }
-
-      $bool = isset($ngroups[$gid]);
-      $all = array(
-        'all' => array(
-          'title' => t('All'),
-          'checkbox' => $bool,
-          'send_interval' => $bool ? $ngroups[$gid]->send_interval : $group_form['defaults']['#value']['send_interval'],
-          'send_method' => $bool ? $ngroups[$gid]->send_method : $group_form['defaults']['#value']['send_method']
-        )
-      );
-      $types = $all + $types;
-
-      $form[$group_index] = array(
-        '#type' => 'fieldset',
-        '#title' => check_plain($group['title']),
-        '#collapsible' => TRUE,
-        '#collapsed' => !isset($ngroups[$gid]) && empty($ngrouptypes[$gid])
-      );
-
-      // Reuse theme function.
-      $form[$group_index]['subscriptions'] = array(
-        '#tree' => TRUE,
-        '#parents' => array('groups', $gid),
-        '#theme' => 'notifications_form_table',
-        '#header' => array(theme('table_select_header_cell'), t('Type'), t('Send interval'), t('Send method'))
-      );
-
-      foreach ($types as $key => $value) {
-        $form[$group_index]['subscriptions']['checkbox'][$key] = array(
-          '#type' => 'checkbox',
-          '#default_value' => $value['checkbox']
-        );
-        $form[$group_index]['subscriptions']['title'][$key] = array(
-          '#value' => t('%type posts in this group', array('%type' => $value['title']))
-        );
-        $form[$group_index]['subscriptions']['send_interval'][$key] = array(
-          '#type' => 'select',
-          '#options' => _notifications_send_intervals(),
-          '#default_value' => $value['send_interval']
-        );
-        $form[$group_index]['subscriptions']['send_method'][$key] = array(
-          '#type' => 'select',
-          '#options' => _notifications_send_methods(),
-          '#default_value' => $value['send_method']
+      else {
+        $form['subscriptions']['send_method'][$key] = array(
+          '#type' => 'value',
+          '#value' => $subscription->send_method
         );
       }
+      $form['subscriptions']['send_interval'][$key] = array(
+        '#type' => 'select',
+        '#options' => $send_intervals,
+        '#default_value' => $subscription->send_interval
+      );
     }
-
+    $form['subscriptions']['current'] = array('#type' => 'value', '#value' => $subscriptions_current);
     $form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   }
   else {
@@ -507,51 +483,26 @@ function og_notifications_user_page($form_state, $account = NULL) {
  * same group.
  */
 function og_notifications_user_page_submit($form, &$form_state) {
-  $groups = $grouptypes = array();
   $form_values = $form_state['values'];
-  $current = $form_values['grouptype_current'];
-
-  foreach ($form_values['groups'] as $gid => $values) {
-    $groups['checkbox'][$gid] = $values['checkbox']['all'];
-    $groups['send_interval'][$gid] = $values['send_interval']['all'];
-    $groups['send_method'][$gid] = $values['send_method']['all'];
-    unset($form_values['groups'][$gid]['checkbox']['all'], $form_values['groups'][$gid]['send_interval']['all'], $form_values['groups'][$gid]['send_method']['all']);
-
-    // Save grouptype subscriptions directly as notifications_user_form_submit
-    // does not handle multiple-field notifications very well.
-    foreach ($form_values['groups'][$gid]['checkbox'] as $type => $check) {
-      $subscription = NULL;
-      if ($check == 1) {
-        if (!isset($current[$gid]) || !isset($current[$gid][$type])) {
-          $subscription = $form_values['grouptype_defaults'] + array('uid' => $form_values['account']->uid);
-        }
-        elseif ($current[$gid][$type]->send_interval != $values['send_interval'][$type] || $current[$gid][$type]->send_method != $values['send_method'][$type]) {
-          $subscription = (array)($current[$gid][$type]);
-        }
-        if ($subscription) {
-          $subscription['send_interval'] = $values['send_interval'][$type];
-          $subscription['send_method'] = $values['send_method'][$type];
-          // String cast due to notifications requiring it as the value field is
-          // a varchar.
-          $subscription['fields'] = array('group' => (string) $gid, 'type' => $type);
-          notifications_save_subscription($subscription);
-        }
-      }
-      elseif (isset($current[$gid]) && isset($current[$gid][$type])) {
-        notifications_delete_subscription($current[$gid][$type]->sid);
+  $current = $form_values['subscriptions']['current'];
+  foreach ($form_values['subscriptions']['checkbox'] as $sid => $check) {
+    $subscription = $current[$sid];
+    // Insert fields array as per notifications' requirements.
+    $subscription->fields = array('group' => (string) $subscription->group_nid, 'type' => $subscription->node_type);
+    if ($check == 1) {
+      if ($subscription->send_interval != $form_values['subscriptions']['send_interval'][$sid] || $subscription->send_method != $form_values['subscriptions']['send_method'][$sid]) {
+        $subscription->send_interval = $form_values['subscriptions']['send_interval'][$sid];
+        $subscription->send_method = $form_values['subscriptions']['send_method'][$sid];
+        // String cast due to notifications requiring it as the value field is
+        // a varchar.
+        notifications_save_subscription($subscription);
       }
     }
+    else {
+      // Unsubscribe if not checked ...
+      notifications_delete_subscription($sid);
+    }
   }
-
-  // Save group changes.
-  $group_submit['values'] = array(
-    'account' => $form_values['account'],
-    'current' => $form_values['group_current'],
-    'defaults' => $form_values['group_defaults'],
-    'subscription_fields' => $form_values['group_subscription_fields'],
-    'subscriptions' => $groups
-  );
-  notifications_user_form_submit('og_notifications_user_page', $group_submit);
 }
 
 /**
@@ -661,57 +612,6 @@ function og_notifications_user_unsubscribe($account, $gid) {
   // Niche cases include multi-group nodes.
   notifications_delete_subscriptions(array('uid' => $account->uid, 'type' => 'grouptype'), array('group' => $gid));
   notifications_delete_subscriptions(array('uid' => $account->uid, 'type' => 'group'), array('group' => $gid));
-}
-
-/**
- * Retrieve a list of organic groups that a user is subscribed (via
- * notifications) to.
- *
- * @param Integer $uid
- *   The user ID of the user whose groups are to be retrieved.
- * @return Array $ngroups
- *   An associative array of the resulting groups.
- */
-function _og_notifications_user_groups($uid) {
-  // No checks for group published or not? NB: Nodes belonging to unpublished
-  // groups are still accessible with links to the parent group.
-  $query = "SELECT no.*, nof.value AS nid, n.type AS node_type, n.title FROM {notifications} no
-    INNER JOIN {notifications_fields} nof ON no.sid = nof.sid LEFT JOIN {node} n ON nof.value = CAST(n.nid AS CHAR(255))
-    WHERE no.uid = %d AND (no.type = 'group') AND no.conditions = 1 AND nof.field = 'group'
-    ORDER BY node_type, n.title";
-  $results = db_query($query, $uid);
-
-  $ngroups = array();
-  while ($sub = db_fetch_object($results)) {
-    $ngroups[$sub->nid] = $sub;
-  }
-
-  return $ngroups;
-}
-
-/**
- * Retrieve a list of organic group content types that a user is subscribed (via
- * notifications) to.
- *
- * @param Integer $uid
- *   The user ID of the user whose groups are to be retrieved.
- * @return Array $ngrouptypes
- *   An associative array of the resulting content types sorted by groups.
- */
-function _og_notifications_user_grouptypes($uid) {
-  $query = "SELECT no.*, nof1.value AS group_nid, nof2.value AS node_type FROM {notifications} no
-    INNER JOIN {notifications_fields} nof1 ON no.sid = nof1.sid
-    INNER JOIN {notifications_fields} nof2 ON no.sid = nof2.sid
-    WHERE no.uid = %d AND (no.type = 'grouptype') AND no.conditions = 2 AND nof1.field = 'group' AND nof2.field = 'type'
-    ORDER BY group_nid, node_type";
-  $results = db_query($query, $uid);
-
-  $ngrouptypes = array();
-  while ($sub = db_fetch_object($results)) {
-    $ngrouptypes[$sub->group_nid][$sub->node_type] = $sub;
-  }
-
-  return $ngrouptypes;
 }
 
 /**
