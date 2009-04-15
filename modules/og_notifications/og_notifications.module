@@ -208,8 +208,7 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
       );
       return $info;
     case 'message keys':
-      $type = $arg1;
-      switch ($type) {
+      switch ($arg1) {
         case 'og-notifications':
         case 'og-notifications-insert':
         case 'og-notifications-update':
@@ -224,8 +223,7 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
       }
       break;
     case 'messages':
-      $type = $arg1;
-      switch ($type) {
+      switch ($arg1) {
         case 'og-notifications':
         case 'og-notifications-update':
           return array(
