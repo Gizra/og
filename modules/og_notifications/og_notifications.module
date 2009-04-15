@@ -223,50 +223,37 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
       }
       break;
     case 'messages':
+      $template = array(
+        'subject' => t('[site-name] [ogname]: [title]'),
+        'header' => t("Greetings, [user],"),
+        'main' => array(
+          t('A [type-name] has been updated in group [ogname]: [title]'),
+          t('[node-teaser]'),
+          t('Read more at [node-url].')
+        ),
+        'footer' => array(
+          t('This is an automatic message from [site-name]'),
+          t('To manage your subscriptions, browse to [subscriptions-manage]')
+        )
+      );
       switch ($arg1) {
         case 'og-notifications':
         case 'og-notifications-update':
-          return array(
-            'subject' => t('[site-name] [ogname]: [title]'),
-            'header' => t("Greetings, [user],"),
-            'main' => array(
-              t('A [type-name] has been updated in group [ogname]: [title]'),
-              t('[node-teaser]'),
-              t('Read more at [node-url].')
-            ),
-            'footer' => array(
-              t('This is an automatic message from [site-name]'),
-              t('To manage your subscriptions, browse to [subscriptions-manage]')
-            )
-          );
+          return $template;
         case 'og-notifications-insert':
-          return array(
-            'subject' => t('[site-name] [ogname]: [title]'),
-            'header' => t("Greetings, [user],"),
-            'main' => array(
-              t('A [type-name] has been created in group [ogname]: [title]'),
-              t('[node-teaser]'),
-              t('Read more at [node-url].')
-            ),
-            'footer' => array(
-              t('This is an automatic message from [site-name]'),
-              t('To manage your subscriptions, browse to [subscriptions-manage]')
-            )
+          $template['main'] = array(
+            t('A [type-name] has been created in group [ogname]: [title]'),
+            t('[node-teaser]'),
+            t('Read more at [node-url].')
           );
+          return $template;
         case 'og-notifications-comment':
-          return array(
-            'subject' => t('[site-name] [ogname]: [title]'),
-            'header' => t("Greetings, [user],"),
-            'main' => array(
+          $template['main'] = array(
               t('A new comment has been added by [comment-author-name] to this thread in group [ogname]: [comment-title]'),
               t('[comment-body]'),
               t('Read more at [comment-url] or reply via [comment-reply-url].')
-            ),
-            'footer' => array(
-              t('This is an automatic message from [site-name]'),
-              t('To manage your subscriptions, browse to [subscriptions-manage]')
-            )
           );
+          return $template;
       }
       break;
     case 'tokens':
