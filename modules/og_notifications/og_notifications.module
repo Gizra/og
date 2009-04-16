@@ -26,7 +26,7 @@ function og_notifications_help($path, $arg) {
 function og_notifications_menu() {
   $items = array();
   $items['user/%user/notifications/group'] = array(
-    'title' => 'Group subscriptions',
+    'title' => 'Group',
     'page callback' => 'og_notifications_user_page',
     'page arguments' => array(1),
     'access callback' => 'notifications_content_access', 
@@ -321,16 +321,18 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
       $types['group'] = array(
         'event_type' => 'node',
         'title' => t('Groups'),
-        'access' => 'subscribe to content in groups',
-        'page' => 'og_notifications_user_page',
-        'fields' => array('group')
+        'access' => 'subscribe to all content in groups',
+        'page callback' => 'og_notifications_user_page',
+        'fields' => array('group'),
+        'description' => t('Subscribe to all content within a group.')
       );
       $types['grouptype'] = array(
         'event_type' => 'node',
         'title' => t('Content type in group'),
-        'access' => 'subscribe to content in groups',
-        'page' => 'og_notifications_user_page',
-        'fields' => array('group', 'type')
+        'access' => 'subscribe to specific content in groups',
+        'page callback' => 'og_notifications_user_page',
+        'fields' => array('group', 'type'),
+        'description' => t('Subscribe to specific content within a group.')
       );
       return $types;
     case 'query':
