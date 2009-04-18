@@ -335,6 +335,31 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
         'description' => t('Subscribe to specific content within a group.')
       );
       return $types;
+    case 'subscription fields':
+      // @TODO: This is just something of a placeholder at the moment while
+      // notifications settles down ...
+
+      // Information about available fields for subscriptions
+      // - format callback => will be used to convert the value into a displayable output
+      // - value callback => will be used to convert autocomplete name into field value
+      // - autocomplete path => path for autocomplete field
+      // - options callback / arguments => used to produce a drop down field
+      $fields['group'] = array(
+        'name' => t('Group'),
+        'field' => 'nid',
+        'type' => 'int',
+        'autocomplete path' => 'notifications/autocomplete/node/title',
+        'autocomplete callback' => 'notifications_node_nid2autocomplete',
+        'format callback' => 'notifications_node_nid2title',
+        'value callback' => 'notifications_node_title2nid'
+      );
+      $fields['type'] = array(
+        'name' => t('Content type'),
+        'field' => 'type',
+        'type' => 'string',
+        'options callback' => 'notifications_content_types'
+      );
+      return $fields;
     case 'query':
       if ($arg0 == 'event' && $arg1 == 'node' && ($node = $arg2->node) || $arg0 == 'user' && $arg1 == 'node' && ($node = $arg2)) {
         $query = array();
