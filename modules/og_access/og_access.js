@@ -42,16 +42,16 @@ Drupal.behaviors.og_access_group_node = function() {
      */
     $("#edit-og-private").click(function() { 
       if ($("#edit-og-private:checked").val()) {
-        $("input[@Name='og_selective']:nth(0)").removeAttr('checked').attr('disabled','disabled');
+        $("input[Name='og_selective']:nth(0)").removeAttr('checked').attr('disabled','disabled');
       }
       else {
-        $("input[@Name='og_selective']:nth(0)").removeAttr('disabled');
+        $("input[Name='og_selective']:nth(0)").removeAttr('disabled');
       }
     });
 
-    $("input[@Name='og_selective']").click(function() {
+    $("input[Name='og_selective']").click(function() {
         // If Open is selected.
-        if ($("input[@Name='og_selective']:checked").val() == 0) {
+        if ($("input[Name='og_selective']:checked").val() == 0) {
           $("#edit-og-private").removeAttr("checked").attr('disabled','disabled');
         }
         else {
@@ -60,7 +60,7 @@ Drupal.behaviors.og_access_group_node = function() {
     });
 
     if ($("#edit-og-private:checked").val()) {
-        $("input[@Name='og_selective']:nth(0)").removeAttr('checked').attr('disabled','disabled');
+        $("input[Name='og_selective']:nth(0)").removeAttr('checked').attr('disabled','disabled');
     }
     
     $("#edit-og-private").click(function() { 
@@ -99,59 +99,59 @@ Drupal.behaviors.og_access_group_node = function() {
    * Disable "Visible only within the targeted groups" if private groups set to "always public"
    */
 Drupal.behaviors.og_access_admin_settings = function() {
-  $("input[@Name='og_private_groups']").click(function() {
-      if ( $("input[@Name='og_private_groups']:checked").val() == 1 ) {
-        $("input[@name='og_visibility']:nth(0)").removeAttr('disabled');
-        $("input[@name='og_visibility']:nth(1)").attr('disabled','disabled');
+  $("input[Name='og_private_groups']").click(function() {
+      if ( $("input[Name='og_private_groups']:checked").val() == 1 ) {
+        $("input[name='og_visibility']:nth(0)").removeAttr('disabled');
+        $("input[name='og_visibility']:nth(1)").attr('disabled','disabled');
       }
-      else if ( $("input[@Name='og_private_groups']:checked").val() == 0 ) {
-        $("input[@name='og_visibility']:nth(0)").attr('disabled','disabled');
-        $("input[@name='og_visibility']:nth(1)").removeAttr('disabled');  
+      else if ( $("input[Name='og_private_groups']:checked").val() == 0 ) {
+        $("input[name='og_visibility']:nth(0)").attr('disabled','disabled');
+        $("input[name='og_visibility']:nth(1)").removeAttr('disabled');  
       }
       else { 
-        $("input[@name='og_visibility']:nth(0)").removeAttr('disabled');  
-        $("input[@name='og_visibility']:nth(1)").removeAttr('disabled');  
+        $("input[name='og_visibility']:nth(0)").removeAttr('disabled');  
+        $("input[name='og_visibility']:nth(1)").removeAttr('disabled');  
       }
     }
   );
 
   // Set intial value.
-  if ( $("input[@Name='og_private_groups']:checked").val() == 1 ) {
-    $("input[@name='og_visibility']:nth(0)").removeAttr('disabled');
-    $("input[@name='og_visibility']:nth(1)").attr('disabled','disabled');
+  if ( $("input[Name='og_private_groups']:checked").val() == 1 ) {
+    $("input[name='og_visibility']:nth(0)").removeAttr('disabled');
+    $("input[name='og_visibility']:nth(1)").attr('disabled','disabled');
   }
-  else if ( $("input[@Name='og_private_groups']:checked").val() == 0 ) {
-      $("input[@name='og_visibility']:nth(0)").attr('disabled','disabled');
-      $("input[@name='og_visibility']:nth(1)").removeAttr('disabled');  
+  else if ( $("input[Name='og_private_groups']:checked").val() == 0 ) {
+      $("input[name='og_visibility']:nth(0)").attr('disabled','disabled');
+      $("input[name='og_visibility']:nth(1)").removeAttr('disabled');  
   }
   
     /* "Group details - Private Groups"
      * Disable "always public" if Node authoring visibility set to "Visible only within the targeted groups"
      * Disable "always private" if Node authoring visibility set to "Visible within the targeted groups and on other pages"
      */
-    $("input[@Name='og_visibility']").click(function() {
-      if ($("input[@Name='og_visibility']:checked").val() == 0) {
-          $("input[@name='og_private_groups']:nth(0)").attr('disabled','disabled');
-          $("input[@name='og_private_groups']:nth(1)").removeAttr('disabled');
+    $("input[Name='og_visibility']").click(function() {
+      if ($("input[Name='og_visibility']:checked").val() == 0) {
+          $("input[name='og_private_groups']:nth(0)").attr('disabled','disabled');
+          $("input[name='og_private_groups']:nth(1)").removeAttr('disabled');
         }
-        else if ($("input[@Name='og_visibility']:checked").val() == 1) {
-          $("input[@name='og_private_groups']:nth(0)").removeAttr('disabled');
-          $("input[@name='og_private_groups']:nth(1)").attr('disabled','disabled');
+        else if ($("input[Name='og_visibility']:checked").val() == 1) {
+          $("input[name='og_private_groups']:nth(0)").removeAttr('disabled');
+          $("input[name='og_private_groups']:nth(1)").attr('disabled','disabled');
         } 
         else {
-          $("input[@name='og_private_groups']:nth(0)").removeAttr('disabled');
-          $("input[@name='og_private_groups']:nth(1)").removeAttr('disabled');
+          $("input[name='og_private_groups']:nth(0)").removeAttr('disabled');
+          $("input[name='og_private_groups']:nth(1)").removeAttr('disabled');
         }
       }
     );
 
     // Set initial value.
-    if ($("input[@Name='og_visibility']:checked").val() == 0) {
-        $("input[@name='og_private_groups']:nth(0)").attr('disabled','disabled');
-        $("input[@name='og_private_groups']:nth(1)").removeAttr('disabled');
+    if ($("input[Name='og_visibility']:checked").val() == 0) {
+        $("input[name='og_private_groups']:nth(0)").attr('disabled','disabled');
+        $("input[name='og_private_groups']:nth(1)").removeAttr('disabled');
     }
-    else if ($("input[@Name='og_visibility']:checked").val() == 1) {
-        $("input[@name='og_private_groups']:nth(0)").removeAttr('disabled');
-        $("input[@name='og_private_groups']:nth(1)").attr('disabled','disabled');     
+    else if ($("input[Name='og_visibility']:checked").val() == 1) {
+        $("input[name='og_private_groups']:nth(0)").removeAttr('disabled');
+        $("input[name='og_private_groups']:nth(1)").attr('disabled','disabled');     
     }
 };
