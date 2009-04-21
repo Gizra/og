@@ -157,7 +157,7 @@ function og_install() {
   
 
   // Need og_readme() function.
-  drupal_load('module', 'og');
+  include_once dirname(__FILE__) . '/og.module';
   drupal_set_message(t('Organic groups module enabled. Please see the included !readme_file for further installation instructions.', array('!readme_file' => og_readme())));
 }
 
@@ -350,7 +350,7 @@ function og_update_5701() {
 function og_update_5703() {
   // Remove mail / no mail options from OG group types and move preferences to
   // og_notifications.
-  drupal_load('module', 'og');
+  include_once dirname(__FILE__) . '/og.module';
   $types = og_get_types('group_post');
   $mail_types = array();
   foreach ($types as $type) {
@@ -466,7 +466,7 @@ function og_uninstall() {
 
 function og_requirements($phase) {
   // Need og_readme() function.
-  drupal_load('module', 'og');
+  include_once dirname(__FILE__) . '/og.module';
   
   $requirements = array();
   // Ensure translations don't break at install time
