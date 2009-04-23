@@ -949,7 +949,13 @@ function og_subscribe($node, $uid = NULL) {
       $account = $user;
     }
     else {
-      drupal_set_message(t('In order to join this group, you must login or register a new account. After you have successfully done so, you will need to request membership again.'));
+      $dest = drupal_get_destination();
+      if (variable_get('user_register', 1) == 0) {
+        drupal_set_message(t('In order to join this group, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
+      }
+      else {
+        drupal_set_message(t('In order to join this group, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest)))));
+      }
       drupal_goto('user');
     }
   }
@@ -1300,7 +1306,12 @@ function og_home_empty($node) {
   }
   else {
     if (!$user->uid) {
-      $msg = t('No public posts in this group. You must <a href="!register">register</a> or <a href="!login">login</a> and become a member in order to post messages, and view any private posts.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest))));
+      if (variable_get('user_register', 1) == 0) {
+        $msg = t('No public posts in this group. You must <a href="!login">login</a> and become a member in order to post messages, and view any private posts.', array('!login' => url("user/login", array('query' => $dest))));
+      }
+      else {
+        $msg = t('No public posts in this group. You must <a href="!register">register</a> or <a href="!login">login</a> and become a member in order to post messages, and view any private posts.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest))));
+      }
     }
     // TODOL: hide this from pending members too
     elseif ($node->og_selective < OG_INVITE_ONLY) {
@@ -2517,7 +2528,12 @@ function og_block_details() {
     }
     elseif (!$user->uid) {
       $dest = drupal_get_destination();
-      $links['must_login'] = t('You must <a href="!register">register</a>/<a href="!login">login</a> in order to post into this group.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest))));
+      if (variable_get('user_register', 1) == 0) {
+        $links['must_login'] = t('You must <a href="!login">login</a> in order to post into this group.', array('!login' => url("user/login", array('query' => $dest))));
+      }
+      else {
+        $links['must_login'] = t('You must <a href="!register">register</a> or <a href="!login">login</a> in order to post into this group.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest))));
+      }
     }
     elseif ($node->og_selective < OG_INVITE_ONLY) {
       $links['subscribe'] = og_subscribe_link($node);
