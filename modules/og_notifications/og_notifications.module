@@ -803,12 +803,10 @@ function _og_notification_check_message($message) {
 
   if (isset($message->notifications) && isset($message->notifications['subscriptions'])) {
     $params = current($message->notifications['subscriptions']);
-    if (count($params) > 1) {
-      // Check if "group" is one of the fields. This is a general presumption
-      // that any subscription with at least two fields, one of them being a
-      // group, is an OG subscription.
-      $sid = db_result(db_query("SELECT sid FROM {notifications_fields} WHERE field = 'group' AND sid IN (". db_placeholders($params) .")", $params));
-    }
+    // Check if "group" is one of the fields. This is a general presumption
+    // that any subscription with at least two fields, one of them being a
+    // group, is an OG subscription.
+    $sid = db_result(db_query("SELECT sid FROM {notifications} WHERE type = 'grouptype' AND sid = %d", $params[0]));
   }
 
   return $sid > 0 ? $sid : 0;
