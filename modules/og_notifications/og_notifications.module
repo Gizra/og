@@ -363,12 +363,8 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
     case 'query':
       if ($arg0 == 'event' && $arg1 == 'node' && ($node = $arg2->node) || $arg0 == 'user' && $arg1 == 'node' && ($node = $arg2)) {
         $query = array();
-        if (isset($node->og_groups)) {
-          $query[] = array(
-            'join' => "LEFT JOIN {og_ancestry} oga ON oga.nid = %d",
-            'join args' => array($node->nid),
-            'fields sql' => "f.field = 'group' AND f.intval = oga.group_nid"
-          );
+        if (!empty($node->og_groups)) {
+          $query[]['fields']['group'] = $node->og_groups;
         }
         if ($arg0 == 'user' && og_is_group_type($node->type)) {
           $query[]['fields']['group'] = $node->nid;
