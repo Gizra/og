@@ -77,6 +77,13 @@ function og_notifications_form_alter(&$form, $form_state, $form_id) {
         '#multiple' => TRUE
       );
       break;
+    case 'notifications_add_subscription_form':
+      // Remove unauthorised node types.
+      if ($form['type']['#value'] == 'grouptype') {
+        $content_types = array_filter(variable_get('og_notifications_content_types', array()));
+        $form['info']['fields'][1]['value']['#options'] = array_intersect_key($form['info']['fields'][1]['value']['#options'], $content_types);
+      }
+      break;
     case 'user_profile_form':
       // Insert autosubscribe option into the messaging section of the user edit
       // form.
@@ -300,23 +307,15 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
       );
       return $types;
     case 'subscription fields':
-      // @TODO: This is just something of a placeholder at the moment while
-      // notifications settles down ...
-
-      // Information about available fields for subscriptions
-      // - format callback => will be used to convert the value into a displayable output
-      // - value callback => will be used to convert autocomplete name into field value
-      // - autocomplete path => path for autocomplete field
-      // - options callback / arguments => used to produce a drop down field
       $fields['group'] = array(
         'name' => t('Group'),
         'field' => 'nid',
         'type' => 'int',
-        'autocomplete path' => 'notifications/autocomplete/node/title',
-        'autocomplete callback' => 'notifications_node_nid2autocomplete',
-        'format callback' => 'notifications_node_nid2title',
-        'value callback' => 'notifications_node_title2nid'
+        'options callback' => 'og_notifications_groups'
       );
+      // Notifications does not allow custom callbacks for overlapping fields.
+      // This is resolved via a form_alter refines the field to only displsy
+      // authorised node types.
       $fields['type'] = array(
         'name' => t('Content type'),
         'field' => 'type',
@@ -358,6 +357,26 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
       }
       break;
   }
+}
+
+/**
+ * Options callback for subscription fields in hook_notifications. Returns a
+ * list of groups for the current user (presuming that this callback is only
+ * relevant in the "add subscriptions" page.
+ *
+ * @return Array $options
+ *   An array of the users organic groups.
+ */
+function og_notifications_groups() {
+  $options = array();
+  $uid = arg(0) == 'user' && is_numeric(arg(1)) ? arg(1) : 0;
+
+  $result = db_query("SELECT n.nid, n.title FROM {og_uid} ogu INNER JOIN {node} n USING (nid) WHERE ogu.uid = %d", $uid);
+  while ($group = db_fetch_object($result)) {
+    $options[$group->nid] = $group->title;
+  }
+
+  return $options;
 }
 
 /**
