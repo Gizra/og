@@ -300,7 +300,7 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
       $types['grouptype'] = array(
         'event_type' => 'node',
         'title' => t('Content type in group'),
-        'access' => 'subscribe to specific content in groups',
+        'access' => 'subscribe to content in groups',
         'page callback' => 'og_notifications_user_page',
         'fields' => array('group', 'type'),
         'description' => t('Subscribe to specific content within a group.')
@@ -364,7 +364,7 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
 /**
  * Options callback for subscription fields in hook_notifications. Returns a
  * list of groups for the current user (presuming that this callback is only
- * relevant in the "add subscriptions" page.
+ * relevant in the "add subscriptions" page).
  *
  * @return Array $options
  *   An array of the users organic groups.
