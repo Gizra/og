@@ -324,17 +324,19 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
       );
       return $fields;
     case 'query':
-      if ($arg0 == 'event' && $arg1 == 'node' && ($node = $arg2->node) || $arg0 == 'user' && $arg1 == 'node' && ($node = $arg2)) {
-        $query = array();
+      $query = array();
+
+      if ($arg0 == 'event' && $arg1 == 'node' && $node = $arg2->node) {
         if (!empty($node->og_groups)) {
           $query[]['fields']['group'] = $node->og_groups;
         }
-        if ($arg0 == 'user' && og_is_group_type($node->type)) {
-          $query[]['fields']['group'] = $node->nid;
-        }
-        return $query;
       }
-      break;
+      else if ($arg0 == 'user' && $arg1 == 'node') {
+        // Called by notifications_autosubscribe; $arg2 holds the nid.
+        $query[]['fields']['group'] = $arg2;
+      }
+
+      return $query;
     case 'node options':
       return _og_notifications_node_options($arg0, $arg1);
     case 'event load':
@@ -518,7 +520,6 @@ function _og_notifications_node_options($account, $node) {
 
   return $options;
 }
-
 
 /**
  * Helper function for og_notifications_message_alter. This function checks to
