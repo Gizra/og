@@ -26,7 +26,7 @@ NOTES
 DEVELOPERS & SITE BUILDERS
 ------------------
 - You may craft your own URLs which produce useful behavior. For example, user/register?gids[]=4 will add a checked checkbox for to the user's registration page for subscribing to group nid=4. This feature overrides the usual preference for groups to always appear during registration.
-- You alter the links in the group details block using hook_og_link_alter($links, $group_node). See og_block_details().
+- You alter the links in the group details block using hook_og_links_alter($links, $group_node). See og_block_details().
 - The current group context is available to javascript code at Drupal.settings.og. This is useful for enriching ad tags and analytics calls with group information.
 - Use Views Bulk Operations module to mass update user memberships and also content affiliations.
 
