@@ -30,7 +30,7 @@ function og_notifications_schema() {
         'not null' => TRUE
       ),
       'autosubscribe' => array(
-        'description' => t(''),
+        'description' => t("The user's autosubscribe preference: -1, 0 or 1 which corresponds to 'Site default', 'Disabled' or 'Enabled' respectively."),
         'type' => 'int',
         'size' => 'tiny',
         'not null' => TRUE,
