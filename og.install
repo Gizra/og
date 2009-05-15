@@ -13,56 +13,56 @@ function og_schema() {
   $schema = array();
 
   $schema['og'] = array(
-    'description'     => t('Stores information about each group.'),
+    'description'     => 'Stores information about each group.',
     'fields'          => array(
       'nid'             => array(
-        'description'     => t("The group's {node}.nid."),
+        'description'     => "The group's {node}.nid.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'og_selective'       => array(
-        'description'     => t('Determines how subscription requests are handled (open, moderated, invite only, closed).'),
+        'description'     => 'Determines how subscription requests are handled (open, moderated, invite only, closed).',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'og_description'     => array(
-        'description'     => t('Group description. Shows up by default on group directory.'),
+        'description'     => 'Group description. Shows up by default on group directory.',
         'type'            => 'varchar',
         'length'          => 255,
         'not null'        => FALSE,
       ),
       'og_theme'           => array(
-        'description'     => t('The group specific theme (if any). See {system}.name.'),
+        'description'     => 'The group specific theme (if any). See {system}.name.',
         'type'            => 'varchar',
         'length'          => 255,
         'not null'        => FALSE,
       ),
       'og_register'        => array(
-        'description'     => t('Should users be able to join this group from registration form.'),
+        'description'     => 'Should users be able to join this group from registration form.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'og_directory'       => array(
-        'description'     => t('Should this group appear in the groups directory.'),
+        'description'     => 'Should this group appear in the groups directory.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'og_language'        => array(
-        'description'     => t('Group specific language. See {languages}.language.'),
+        'description'     => 'Group specific language. See {languages}.language.',
         'type'            => 'varchar',
         'length'          => 12,
         'not null'        => TRUE,
         'default'         => '',
       ),
       'og_private'         => array(
-        'description'     => t('Is group home page private or public.'),
+        'description'     => 'Is group home page private or public.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
@@ -73,50 +73,50 @@ function og_schema() {
   );
 
   $schema['og_uid'] = array(
-    'description'     => t('Group memberships'),
+    'description'     => 'Group memberships',
     'fields'          => array(
       'nid'             => array(
-        'description'     => t("Group's {node}.nid."),
+        'description'     => "Group's {node}.nid.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'og_role'         => array(
-        'description'     => t('Not currently used.'),
+        'description'     => 'Not currently used.',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'is_active'       => array(
-        'description'     => t('Is this membership active or pending?'),
+        'description'     => 'Is this membership active or pending?',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'is_admin'        => array(
-        'description'     => t('Is this user a group administrator?'),
+        'description'     => 'Is this user a group administrator?',
         'type'            => 'int',
         'size'            => 'tiny',
         'not null'        => TRUE,
         'default'         => 0,
       ),
       'uid'             => array(
-        'description'     => t('The user for this membership. See {users}.uid.'),
+        'description'     => 'The user for this membership. See {users}.uid.',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'created'         => array(
-        'description'     => t('Time when this membership was created.'),
+        'description'     => 'Time when this membership was created.',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => FALSE,
         'default'         => 0,
       ),
       'changed'         => array(
-        'description'     => t('Time when this membership was last changed.'),
+        'description'     => 'Time when this membership was last changed.',
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => FALSE,
@@ -129,13 +129,13 @@ function og_schema() {
     'description'     => '',
     'fields'          => array(
       'nid'             => array(
-        'description'     => t("The post's {node}.nid."),
+        'description'     => "The post's {node}.nid.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'group_nid'       => array(
-        'description'     => t("The group's {node}.nid."),
+        'description'     => "The group's {node}.nid.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
@@ -154,7 +154,7 @@ function og_install() {
   if (function_exists('_block_rehash')) {
     _block_rehash();
   }
-  
+
 
   // Need og_readme() function.
   include_once dirname(__FILE__) . '/og.module';
@@ -164,9 +164,9 @@ function og_install() {
 // First 5.x update.
 // use the new na_arbitrator way of writing to node_access table
 function og_update_14() {
-  switch ($GLOBALS['db_type']) { 
-    case 'mysql': 
-    case 'mysqli': 
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
       $ret[] = update_sql("CREATE TABLE {og_ancestry} (
         nid int(11) NOT NULL,
         group_nid int(11) NOT NULL,
@@ -186,16 +186,16 @@ function og_update_14() {
     break;
   }
   og_migrate_type_basic_14();
-  
+
   // populate og_ancestry.
   $result = db_query_temporary(
-    "SELECT na.nid, na.gid, IF(MIN(na.realm) = 'og_all', 1, 0) AS is_public 
-     FROM {node_access} na INNER JOIN {node} n ON na.nid=n.nid 
-     WHERE realm IN ('og_all', 'og_subscriber') AND n.type NOT IN ('%s') GROUP BY na.nid, na.gid ORDER BY nid ASC", 
+    "SELECT na.nid, na.gid, IF(MIN(na.realm) = 'og_all', 1, 0) AS is_public
+     FROM {node_access} na INNER JOIN {node} n ON na.nid=n.nid
+     WHERE realm IN ('og_all', 'og_subscriber') AND n.type NOT IN ('%s') GROUP BY na.nid, na.gid ORDER BY nid ASC",
        implode(', ', variable_get('og_node_types', array('og'))), 'og_migrate');
   $sql = "INSERT INTO {og_ancestry} (nid, group_nid, is_public) SELECT nid, gid, is_public FROM {og_migrate}";
   db_query($sql);
-  
+
   // rebuild takes care of writing new access records
   // too bad this part can't be performed over multiple updates
   node_access_rebuild();
@@ -219,13 +219,13 @@ function og_ancestry_dedupe(&$ret) {
     'description'     => '',
     'fields'          => array(
       'nid'             => array(
-        'description'     => t("The post's {node}.nid."),
+        'description'     => "The post's {node}.nid.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'group_nid'       => array(
-        'description'     => t("The group's {node}.nid."),
+        'description'     => "The group's {node}.nid.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
@@ -289,7 +289,7 @@ function og_update_20() {
 
 /**
  * Changes '@body' to '@node_teaser' in existing e-mail templates.
- */ 
+ */
 function og_update_5600() {
   $ret = array();
   $variables = array('og_new_node_body', 'og_new_node_subject');
@@ -305,20 +305,20 @@ function og_update_5600() {
 
 /**
  * Enable og_access module if needed
- */ 
+ */
 function og_update_5700() {
   $ret = array();
   if (variable_get('og_enabled', FALSE) && !module_exists('og_access')) {
     drupal_install_modules('og_access');
   }
   // variable_del('og_enabled'); is harmless to leave around, and will help if someone reruns the update.
-  
+
   return $ret;
 }
 
 /**
  * Update variables to new content type system. Also rebuild node_access for new grants system.
- * 
+ *
  * @return void
  **/
 function og_update_5701() {
@@ -336,17 +336,17 @@ function og_update_5701() {
     }
     else {
       variable_set('og_content_type_usage_'. $type->type, 'group_post_standard_mail');
-    } 
+    }
   }
- 
+
  node_access_rebuild();
  return $ret;
 }
 
 /**
- * Notifications upgrade: Set flag to indicate that this is an upgraded 
+ * Notifications upgrade: Set flag to indicate that this is an upgraded
  * installation.
- */ 
+ */
 function og_update_5703() {
   // Remove mail / no mail options from OG group types and move preferences to
   // og_notifications.
@@ -405,7 +405,7 @@ function og_update_6001() {
 // Change field names in {og} table. Enables use of drupal_write_record()
 function og_update_6002() {
   $ret = array();
-  
+
   $schema = drupal_get_schema_unprocessed('og', 'og');
   $fields = $schema['fields'];
   db_change_field($ret, 'og', 'selective', 'og_selective', $fields['og_selective']);
@@ -428,7 +428,7 @@ function og_update_6203() {
     db_drop_field($ret, 'og_ancestry', 'is_public');
     og_ancestry_dedupe($ret);
   }
-  
+
   return $ret;
 }
 
@@ -437,8 +437,8 @@ function og_update_6203() {
 function og_uninstall() {
   drupal_uninstall_schema('og');
 
-  // In case og_notifications has never been enabled, the vestigial 
-  // og_uid_global table will still be around. 
+  // In case og_notifications has never been enabled, the vestigial
+  // og_uid_global table will still be around.
   if (variable_get('og_notifications_update_required', FALSE)) {
     db_query('DROP TABLE {og_uid_global}');
   }
@@ -467,7 +467,7 @@ function og_uninstall() {
 function og_requirements($phase) {
   // Need og_readme() function.
   include_once dirname(__FILE__) . '/og.module';
-  
+
   $requirements = array();
   // Ensure translations don't break at install time
   $t = get_t();
@@ -490,6 +490,6 @@ function og_requirements($phase) {
       );
     }
   }
-  
+
   return $requirements;
 }
