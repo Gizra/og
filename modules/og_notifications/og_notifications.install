@@ -21,16 +21,16 @@ function og_notifications_schema() {
   $schema = array();
 
   $schema['og_notifications'] = array(
-    'description' => t('Stores autosubscription preferences for each user.'),
+    'description' => 'Stores autosubscription preferences for each user.',
     'fields' => array(
       'uid' => array(
-        'description' => t("The user's {user}.uid."),
+        'description' => "The user's {user}.uid.",
         'type' => 'int',
         'size' => 'normal',
         'not null' => TRUE
       ),
       'autosubscribe' => array(
-        'description' => t("The user's autosubscribe preference: -1, 0 or 1 which corresponds to 'Site default', 'Disabled' or 'Enabled' respectively."),
+        'description' => "The user's autosubscribe preference: -1, 0 or 1 which corresponds to 'Site default', 'Disabled' or 'Enabled' respectively.",
         'type' => 'int',
         'size' => 'tiny',
         'not null' => TRUE,
