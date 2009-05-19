@@ -2662,6 +2662,7 @@ function og_token_list($type = 'all') {
     $tokens['node']['ogname'] = t('Title of top group');
     $tokens['node']['ogname-raw'] = t('Unfiltered title of top group. WARNING - raw user input.');
     $tokens['node']['og-id'] = t('ID of top group');
+    $tokens['node']['og-type'] = t("Type of top group");
     return $tokens;
   }
 }
@@ -2677,14 +2678,16 @@ function og_token_values($type, $object = NULL) {
       $values['ogname'] = '';
       $values['ogname-raw'] = '';
       $values['og-id'] = '';
+      $values['og-type'] = '';
       
       if (!empty($object->og_groups) && is_array($object->og_groups)) {
         $gids = array_filter($object->og_groups);
         foreach ($gids as $gid) {
-          $title = db_result(db_query("SELECT title FROM {node} WHERE nid = %d", $gid));
-          $values['ogname'] = check_plain($title);
+          $group = db_fetch_object(db_query("SELECT title, type FROM {node} WHERE nid = %d", $gid));
+          $values['ogname'] = check_plain($group->title);
           $values['ogname-raw'] = $title;
           $values['og-id'] = $gid;
+          $values['og-type'] = check_plain($group->type);
           break;
         }
         return $values;
