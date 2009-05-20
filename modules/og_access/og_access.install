@@ -11,13 +11,13 @@ function og_access_schema() {
     'description'     => 'Global properties for group posts.',
     'fields'          => array(
       'nid'             => array(
-        'description'     => t("The post's {node}.nid."),
+        'description'     => "The post's {node}.nid.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'og_public'       => array(
-        'description'     => t('Is this a public or private post?'),
+        'description'     => 'Is this a public or private post?',
         'type'            => 'int',
         'size'            => 'tiny',
         'default'         => 1,
@@ -58,13 +58,13 @@ function og_access_update_6201() {
     'description'     => 'Global properties for group posts.',
     'fields'          => array(
       'nid'             => array(
-        'description'     => t("The post's {node}.nid."),
+        'description'     => "The post's {node}.nid.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
       'og_public'       => array(
-        'description'     => t('Is this a public or private post?'),
+        'description'     => 'Is this a public or private post?',
         'type'            => 'int',
         'size'            => 'tiny',
         'default'         => 1,
