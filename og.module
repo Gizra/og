@@ -1040,11 +1040,6 @@ function og_subscribe_user($gid, $account, $request = NULL) {
         $admins[] = $row->uid;
       }
       if (!empty($admins)) {
-        // Prepend user's request text with standard cruft. Should be a
-        // variable but that's a bit annoying.
-        if ($request) {
-          $request = t("\n\nPersonal message from @name:\n------------------\n\n@request", array('@name' => $account->name, '@request' => $request));
-        }
         $variables = array(
           '@group' => $node->title,
           '@username' => $account->name,
@@ -1055,7 +1050,7 @@ function og_subscribe_user($gid, $account, $request = NULL) {
         
         $message = array(
           'subject' => _og_mail_text('og_request_user_subject', $variables),
-          'body' => _og_mail_text('og_request_user_body', $variables) . $request
+          'body' => _og_mail_text('og_request_user_body', $variables),
         );
 
         // Send notifications to each admin; Sending an array of recipients
