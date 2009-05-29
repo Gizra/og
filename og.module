@@ -1194,6 +1194,8 @@ function og_add_users_og_names_validate($form, $form_state) {
 }
 
 function og_add_users_submit($form, &$form_state) {
+  $accounts = array();
+
   // Safest option is to do a select, filter existing members, then insert.
   $names = explode(',', $form_state['values']['og_names']);
   foreach ($names as $name) {
