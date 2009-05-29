@@ -567,15 +567,29 @@ function og_get_group_context() {
  *   The group node object that should be set as the context.
  *   You can use og_determine_context_get_group() to assist you with finding
  *   the appropriate group node.
+ * @param $clear
+ *   Clear the group context.
  * @return
  *   The group node object if set.
  */
-function og_set_group_context($node = NULL) {
+function og_set_group_context($node = NULL, $clear = FALSE) {
   static $stored_group_node;
+
+  if ($clear) {
+    $stored_group_node = NULL;
+  }
+
   if (!empty($node) && og_is_group_type($node->type)) {
     $stored_group_node = $node;
   }
   return !empty($stored_group_node) ? $stored_group_node : NULL;
+}
+
+/**
+ * API function; Clear the group context for the current request.
+ */
+function og_clear_group_context() {
+  og_set_group_context(NULL, TRUE);
 }
 
 /**
