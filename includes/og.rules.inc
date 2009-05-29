@@ -115,7 +115,7 @@ function og_rules_action_info() {
       ),
       'help' => t("When creating a group node organic groups module requires some group settings. This action should be used after 'Add new content' action, that adds a <a href=\"@group-node-type\">group node type</a> content, and will result with a new group node.", array('@group-node-type' => url('admin/og/og'))),
       'module' => 'Organic groups',
-    ),    
+    ),
   );
 }
 
@@ -158,8 +158,8 @@ function og_rules_action_add_group_node($node, $settings) {
     foreach ($settings['og_fieldset']['og_settings'] as $key => $value){
       $node->$key = $value;
     }
-    return array('node' => $node); 
-  } 
+    return array('node' => $node);
+  }
 }
 
 /**
@@ -206,6 +206,17 @@ function og_rules_condition_info() {
       'help' => t('Evaluates to TRUE if the content is a group.'),
       'module' => 'Organic groups',
     ),
+    'og_rules_condition_content_is_group_post' => array(
+      'label' => t('Content is a group post'),
+      'arguments' => array(
+        'group' => array(
+          'type' => 'node',
+          'label' => t('Group post'),
+        ),
+      ),
+      'help' => t('Evaluates to TRUE if the content is a group post.'),
+      'module' => 'Organic groups',
+    ),
   );
 }
 
@@ -217,8 +228,15 @@ function og_rules_condition_user_in_group($user, $node, $settings) {
 }
 
 /**
- * Condition: Content is a group.
+ * Condition: Content is a group node.
  */
 function og_rules_condition_content_is_group($node, $settings) {
   return og_is_group_type($node->type);
+}
+
+/**
+ * Condition: Content is a group post.
+ */
+function og_rules_condition_content_is_group_post($node, $settings) {
+  return og_is_group_post_type($node->type);
 }
