@@ -48,7 +48,7 @@ function og_admin_settings() {
     '#type' => 'radios', 
     '#title' => t('Groups directory control'), 
     '#default_value' => variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_TRUE), 
-    '#description' =>t('OG admins always see the checkbox for adding a group to the <em>groups directory</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'), 
+    '#description' =>t('Site admins always see the checkbox for adding a group to the <em>groups directory</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'), 
     '#options' => $options
   );
   
