@@ -851,7 +851,7 @@ function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
     $node->content['og_description'] = array(
       '#type' => 'item',
       '#title' => t('Description'),
-      '#value' => $node->og_description,
+      '#value' => check_plain($node->og_description),
       );
   }
   else {
