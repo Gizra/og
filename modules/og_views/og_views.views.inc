@@ -153,7 +153,7 @@ function og_views_data_og() {
     'field' => array(
       'handler' => 'og_views_handler_field_og_post_count',
       'click sortable' => TRUE,
-      'help' => t('Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown.'),
+      'help' => t('Number of published posts in a group.'),
       'notafield' => TRUE,
      ),
   );
