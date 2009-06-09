@@ -17,7 +17,7 @@ function og_actions_action_info() {
     ),
     'og_add_group_action' => array(
       'type' => 'node',
-      'description' => t('Add post to the specified group'),
+      'description' => t('Add post to the specified groups'),
       'behavior' => array('changes_node_property'), // For Views Bulk Operations module
       'configurable' => TRUE,
       'hooks' => array(
@@ -26,7 +26,7 @@ function og_actions_action_info() {
     ),
     'og_remove_group_action' => array(
       'type' => 'node',
-      'description' => t('Remove post from the specified group'),
+      'description' => t('Remove post from the specified groups'),
       'behavior' => array('changes_node_property'), // For Views Bulk Operations module
       'configurable' => TRUE,
       'hooks' => array(
@@ -41,7 +41,7 @@ function og_actions_action_info() {
     ),
     'og_unsubscribe_user_action' => array(
       'type' => 'user',
-      'description' => t('Unsubscribe user from the specified group'),
+      'description' => t('Unsubscribe user from the specified groups'),
       'configurable' => TRUE,
       'hooks' => array(),
     ),
@@ -126,14 +126,15 @@ function og_remove_groups_action($node, $context) {
 }
 
 /**
- * A configurable action to add a node to a specific group in organic groups.
+ * A configurable action to add a node to specific groups in organic groups.
  * Requires actions.module.
  */
 function og_add_group_action($node, $context) {
-  if (isset($context['group'])) {
-
-    $node->og_groups[$context['group']] = $context['group'];
-    watchdog('action', 'Added node id %id to %group.', array('%id' => intval($node->nid), '%group' => $context['group']));
+  if (isset($context['groups'])) {
+    foreach ($context['groups'] as $gid) {
+      $node->og_groups[$gid] = $gid;
+    }
+    watchdog('action', 'Added node id %id to groups %groups.', array('%id' => intval($node->nid), '%groups' => implode(',', $context['groups'])));
   }
 }
 
@@ -141,21 +142,21 @@ function og_add_group_action($node, $context) {
  * Configuration form for Add Group action.
  */
 function og_add_group_action_form($context) {
-
-  if (!isset($context['group'])) {
-    $context['group'] = '';
+  if (!isset($context['groups'])) {
+    $context['groups'] = array();
   }
 
   $groups = og_all_groups_options();
   if (count($groups)) {
     $form = array();
-    $form['group'] = array(
+    $form['groups'] = array(
       '#type' => 'select',
-      '#title' => t('Group'),
+      '#title' => t('Groups'),
       '#options' => $groups,
-      '#description' => t('Select the group to add to the node.'),
-      '#default_value' => $context['group'],
+      '#description' => t('Select the groups to add to the node.'),
+      '#default_value' => $context['groups'],
       '#required' => TRUE,
+      '#multiple' => TRUE,
     );
   }
   else {
@@ -166,22 +167,24 @@ function og_add_group_action_form($context) {
 
 function og_add_group_action_submit($form, &$form_state) {
   return array(
-    'group' => $form_state['values']['group'],
+    'groups' => $form_state['values']['groups'],
   );
 }
 
 /**
- * A configurable action to remove a node from a specific group in og.
+ * A configurable action to remove a node from specific groups in og.
  * Requires actions.module
  */
 function og_remove_group_action($node, $context) {
-  if (isset($context['group'])) {
+  if (isset($context['groups'])) {
     foreach ($node->og_groups as $key => $gid) {
-      if ($gid == $context['group']) {
-        unset($node->og_groups[$key]);
+      foreach ($context['groups'] as $newkey => $newgid) {
+        if ($gid == $newgid) {
+          unset($node->og_groups[$key]);
+        }
       }
     }
-    watchdog('action', 'Removed node id %id from %group.', array('%id' => intval($node->nid), '%group' => $context['group']));
+    watchdog('action', 'Removed node id %id from groups %groups.', array('%id' => intval($node->nid), '%groups' => implode(',', $context['groups'])));
   }
 }
 
@@ -189,21 +192,21 @@ function og_remove_group_action($node, $context) {
  * Configuration form for Remove Group action.
  */
 function og_remove_group_action_form($context) {
-
-  if (!isset($context['group'])) {
-    $context['group'] = '';
+  if (!isset($context['groups'])) {
+    $context['groups'] = array();
   }
 
   $groups = og_all_groups_options();
   if (count($groups)) {
     $form = array();
-    $form['group'] = array(
+    $form['groups'] = array(
       '#type' => 'select',
-      '#title' => t('Group'),
+      '#title' => t('Groups'),
       '#options' => $groups,
-      '#description' => t('Select the group to remove from the node.'),
-      '#default_value' => $context['group'],
+      '#description' => t('Select the groups to remove from the node.'),
+      '#default_value' => $context['groups'],
       '#required' => TRUE,
+      '#multiple' => TRUE,
     );
   }
   else {
@@ -217,20 +220,19 @@ function og_remove_group_action_form($context) {
  */
 function og_remove_group_action_submit($form, &$form_state) {
   return array(
-    'group' => $form_state['values']['group'],
+    'groups' => $form_state['values']['groups'],
   );
 }
 
 /**
- * A configurable action to subscribe a user to a specific group.
+ * A configurable action to subscribe a user to specific groups.
  */
 function og_subscribe_user_action($account, $context) {
   if (isset($context['groups'])) {
-    
     foreach ($context['groups'] as $gid) {
       og_save_subscription($gid, $account->uid, array('is_active' => 1));
     }
-    watchdog('action', 'Subscribed user %name to %numgroup groups.', array('%name' => $account->name, '%numgroups' => count($context['groups'])));
+    watchdog('action', 'Subscribed user %name to groups %groups.', array('%name' => $account->name, '%groups' => implode(',', $context['groups'])));
   }
 }
 
@@ -241,7 +243,7 @@ function og_subscribe_user_action_form($context) {
   $form = array();
 
   if (!isset($context['groups'])) {
-    $context['groups'] = '';
+    $context['groups'] = array();
   }
 
   $groups = og_all_groups_options();
@@ -272,12 +274,14 @@ function og_subscribe_user_action_submit($form, &$form_state) {
 }
 
 /**
- * A configurable action to unsubscribe a user from a specific group.
+ * A configurable action to unsubscribe a user from specific groups.
  */
 function og_unsubscribe_user_action($account, $context) {
-  if (isset($context['group'])) {
-    og_delete_subscription($context['group'], $account->uid);
-    watchdog('action', 'Unsubscribed user %name to %group.', array('%name' => $account->name, '%group' => $context['group']));
+  if (isset($context['groups'])) {
+    foreach ($context['groups'] as $gid) {
+      og_delete_subscription($gid, $account->uid);
+    }
+    watchdog('action', 'Unsubscribed user %name from groups %groups.', array('%name' => $account->name, '%groups' => implode(',', $context['groups'])));
   }
 }
 
@@ -287,19 +291,20 @@ function og_unsubscribe_user_action($account, $context) {
 function og_unsubscribe_user_action_form($context) {
   $form = array();
 
-  if (!isset($context['group'])) {
-    $context['group'] = '';
+  if (!isset($context['groups'])) {
+    $context['groups'] = array();
   }
 
   $groups = og_all_groups_options();
   if (count($groups)) {
-    $form['group'] = array(
+    $form['groups'] = array(
       '#type' => 'select',
-      '#title' => t('Group'),
+      '#title' => t('Groups'),
       '#options' => $groups,
-      '#description' => t('Select the group to which this user should be unsubscribed.'),
-      '#default_value' => $context['group'],
+      '#description' => t('Select the groups to which this user should be unsubscribed.'),
+      '#default_value' => $context['groups'],
       '#required' => TRUE,
+      '#multiple' => TRUE,
     );
   }
   else {
@@ -315,7 +320,7 @@ t'))));
  */
 function og_unsubscribe_user_action_submit($form, &$form_state) {
   return array(
-    'group' => $form_state['values']['group'],
+    'groups' => $form_state['values']['groups'],
   );
 }
 
