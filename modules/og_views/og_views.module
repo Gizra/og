@@ -214,11 +214,12 @@ function og_views_view_group($node, $teaser, $page) {
       // Otherwise show it to everybody.
       og_home_empty($node);
     }
+    
     drupal_set_title(filter_xss_admin($view->build_info['title']));
+    drupal_add_feed(url("node/$node->nid/feed"), drupal_get_title());
   }
   else {
     drupal_set_title(filter_xss_admin($node->title));
-    drupal_add_feed(url("node/$node->nid/feed"), drupal_get_title());
   }
 }
 
