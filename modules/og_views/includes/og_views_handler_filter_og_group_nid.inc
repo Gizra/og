@@ -11,8 +11,10 @@ class og_views_handler_filter_og_group_nid extends views_handler_filter_many_to_
   }
   
   function query() {
-    $node = node_load((int)$this->value[0]);
-    og_set_group_context($node);
+    if (isset($this->value['value'])) {
+      $node = node_load((int)$this->value[0]);
+      og_set_group_context($node);
+    }
     parent::query();
   }
 }
