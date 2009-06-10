@@ -534,3 +534,13 @@ function _og_notification_check_message($message) {
 
   return $sid > 0 ? $sid : 0;
 }
+
+// Used by Views field/filter.
+// TODO: Use constants instead of integers.
+function og_notifications_autosubscribe_map() {
+  return array(
+    -1 => t('Site default'), 
+    0 => t('Disabled'),
+    1 => t('Enabled'),
+  );
+}
