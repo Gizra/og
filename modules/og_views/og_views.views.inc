@@ -536,7 +536,6 @@ function og_views_data_og_notifications() {
       'handler' => 'og_views_handler_filter_autosubscribe',
     ),
   );
-dsm($data);
   return $data;
 }
 
