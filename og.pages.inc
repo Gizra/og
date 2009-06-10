@@ -119,7 +119,7 @@ function og_create_admin_confirm($form_state, $node, $account) {
   $form['node'] = array('#type' => 'value', '#value' => $node);
   $form['account'] = array('#type' => 'value', '#value' => $account);
   return confirm_form($form, 
-           t('Are you sure you want to make %name a group administrator for the group %title?', array('%name' => $account->name, '%title' => $node->title)),
+           t('Are you sure you want to make !name a group administrator for the group %title?', array('!name' => theme('username', $account), '%title' => $node->title)),
            "og/users/$node->nid", 
            ' ',
            t('Confirm'), 
@@ -159,7 +159,7 @@ function og_remove_admin_confirm($form_state, $node, $account) {
   $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
   $form['account'] = array('#type' => 'value', '#value' => $account);
   return confirm_form($form, 
-    t('Are you sure you want to remove %name as a group administrator for the group %title?', array('%name' => $account->name, '%title' => $node->title)),
+    t('Are you sure you want to remove !name as a group administrator for the group %title?', array('!name' => theme('username', $account), '%title' => $node->title)),
     "og/users/$node->nid",
     ' ', 
     t('Remove'), 
