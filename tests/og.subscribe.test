@@ -9,7 +9,7 @@
 require_once drupal_get_path('module', 'og') . '/tests/og_testcase.php';
 
 class OgSubscribe extends OgTestCase {
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('Organic groups membership tests'),
       'description' => t("Tests membership functionality and asserts correct behavior with all the different selective settings (e.g. open, moderated, etc'). Note: requires Views"),

@@ -13,7 +13,7 @@ class OgPost extends OgTestCase {
   /**
    * Implementation of getInfo().
    */
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name'  => t('Organic groups posting test'),
       'description' => t('Tests posting a group post into a group node.'),

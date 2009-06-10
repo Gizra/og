@@ -13,7 +13,7 @@ class OgWiki extends OgTestCase {
   /**
    * Implementation of getInfo().
    */
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name'  => t('Organic groups wiki test'),
       'description' => t('Tests posting a wiki post and editing it.'),

@@ -9,7 +9,7 @@
 require_once drupal_get_path('module', 'og') . '/tests/og_testcase.php';
 
 class OgContext extends OgTestCase {
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name'  => t('Organic groups context tests'),
       'description' => t('Tests the context system that determines how a group should be presented to the user.'),
