@@ -2235,6 +2235,7 @@ function og_token_list($type = 'all') {
     $tokens['node']['ogname-raw'] = t('Unfiltered title of top group. WARNING - raw user input.');
     $tokens['node']['og-id'] = t('ID of top group');
     $tokens['node']['og-type'] = t("Type of top group");
+    $tokens['node']['ogalias'] = t("URL alias for the top group.");
     return $tokens;
   }
 }
@@ -2251,6 +2252,7 @@ function og_token_values($type, $object = NULL) {
       $values['ogname-raw'] = '';
       $values['og-id'] = '';
       $values['og-type'] = '';
+      $values['ogalias'] = '';
       
       if (!empty($object->og_groups) && is_array($object->og_groups)) {
         $gids = array_filter($object->og_groups);
@@ -2260,6 +2262,7 @@ function og_token_values($type, $object = NULL) {
           $values['ogname-raw'] = $title;
           $values['og-id'] = $gid;
           $values['og-type'] = check_plain($group->type);
+          $values['ogalias'] = drupal_get_path_alias('node/'. $gid);
           break;
         }
         return $values;
