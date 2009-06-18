@@ -2259,7 +2259,7 @@ function og_token_values($type, $object = NULL) {
         foreach ($gids as $gid) {
           $group = db_fetch_object(db_query("SELECT title, type FROM {node} WHERE nid = %d", $gid));
           $values['ogname'] = check_plain($group->title);
-          $values['ogname-raw'] = $title;
+          $values['ogname-raw'] = $group->title;
           $values['og-id'] = $gid;
           $values['og-type'] = check_plain($group->type);
           $values['ogalias'] = drupal_get_path_alias('node/'. $gid);
