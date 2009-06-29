@@ -1323,7 +1323,12 @@ function og_form_alter(&$form, &$form_state, $form_id) {
           $bc[] = l($node->title, "node/$node->nid");
         }
         drupal_set_breadcrumb($bc);
-      } 
+      }
+      // Pass the gids if it exists in the request, and not set already by 
+      // another module, so it can be used by og_form_add_og_audience().
+      if (!empty($_GET['gids']) && empty($form_state['og_gids'])) {
+        $form_state['og_gids'] = $_GET['gids'];
+      }      
       og_form_add_og_audience($form, $form_state);
     }
   }
@@ -1600,11 +1605,11 @@ function og_node_groups_distinguish($groups_names_both, $exclude_joined = TRUE) 
  */
 function og_form_add_og_audience(&$form, &$form_state) {
   global $user;
-  // Determine the selected groups if FAPI doesn't tell us.
-  if (isset($_GET['gids'])) {
-    $gids = $_GET['gids'];
+  // Determine the selected groups if it is stored in the form_state.
+  if (!empty($form_state['og_gids'][0]) && empty($form_state['og_groups'])) {
+    $gids = explode(',', $form_state['og_gids'][0]);
   }
-  
+    
   $node = $form['#node'];
   $required = variable_get('og_audience_required', 0) && !user_access('administer nodes');
   $is_optgroup = FALSE;
