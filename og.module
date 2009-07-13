@@ -429,7 +429,8 @@ function og_set_language($node) {
   if ($node->og_language) {
     $map = language_list();
     $og_language = $map[$node->og_language];
-    $user_language = user_preferred_language($account, $og_language);
+    global $user;
+    $user_language = user_preferred_language($user, $og_language);
     if ($og_language == $user_language) {
       $GLOBALS['language'] = $og_language;
     }
