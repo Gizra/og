@@ -1,144 +1,309 @@
 <?php
 // $Id$
 
-function og_panels_help($section) {
-  switch ($section) {
+function og_panels_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#og_panels':
       return t('After enabling this module, visit the new "Pages" tab on any group. There, group admins may create as many pages as desired for their group. The pages may contain any layout that the site offers and admins may arrange many different types of content as desired. Site admins can restrict the types of content that may be added on the <a href="!settings">og_panels settings</a> page. You might want to make some Views available using <a href="!apv">admin/panels/views</a>. Group admins may designate one page as their group home page.', array('!settings' => url('admin/og/og_panels'), '!apv' => url('admin/panels/views')));
-      case (arg(0) == 'node' && arg(2) == 'og_panels' && !arg(3)):
-        return '<p>'. t('Create custom pages for your group. Use custom pages to organize your content in a pretty and informative manner. Your group can group to be a whole website within a web site. Each custom page becomes a tab when viewing your group. One of your custom pages should be designated as your <em>group home page</em>. That page will then display when visitors first arrive at your group.') .'</p><p>'. t('Start by clicking the <a href="!url">Add new page</a> tab. Then you will choose a custom layout for your page. Then you will want to <em>edit content</em> for your custom page.', array('!url' => url('node/'. arg(1). '/og_panels/form'))) .'</p>';
+    case(arg(0) == 'node' && arg(2) == 'og_panels' && !arg(3)):
+      return '<p>'. t('Create custom pages for your group. Use custom pages to organize your content in a pretty and informative manner. Your group can group to be a whole website within a web site. Each custom page becomes a tab when viewing your group. One of your custom pages should be designated as your <em>group home page</em>. That page will then display when visitors first arrive at your group.') .'</p><p>'. t('Start by clicking the <a href="!url">Add new page</a> tab. Then you will choose a custom layout for your page. Then you will want to <em>edit content</em> for your custom page.', array('!url' => url('node/'. arg(1). '/og_panels/form'))) .'</p>';
   }
 }
 
-function og_panels_menu($may_cache) {
-  if ($may_cache) {
-    $items[] = array(
-      'path' => 'admin/og/og_panels',
-      'title' => 'Organic groups panels',
-      'description' => 'Configure the content that is available to group admins when creating group pages.',
-      'callback' => 'og_panels_admin_content',
-      'access' => user_access('administer organic groups'),
-    );
+function og_panels_menu() {
+  $items['admin/og/og_panels'] = array(
+    'title' => 'Organic groups panels',
+    'description' => 'Configure the content that is available to group admins when creating group pages.',
+    'page callback' => 'og_panels_admin_content',
+    'access arguments' => array('administer organic groups'),
+  );
+  $items['node/%node/og_panels'] = array(
+    'title' => 'Pages',
+    'page callback' => 'og_panels_overview',
+    'page arguments' => array(1),
+    'access callback' => 'og_panels_access_admin',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 8,
+  );
+  $items['node/%node/og_panels/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['node/%node/og_panels/form'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_panels_form', 1),
+    'title callback' => 'og_panels_tab_edit_title',
+    'title arguments' => array(4),
+    'access callback' => 'og_panels_access_admin',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+  $items['node/%/og_panels/%/view'] = array(
+    'page callback' => 'og_panels_page',
+    'page arguments' => array(3, 1),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['node/%node/og_panels/%/panel_layout'] = array(
+    'page callback' => 'og_panels_edit_layout',
+    'page arguments' => array(3, 1),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'og_panels_access_admin',
+    'access arguments' => array(1),
+  );
+
+  $items['node/%node/og_panels/%/panel_settings'] = array(
+    'page callback' => 'og_panels_edit_layout_settings',
+    'page arguments' => array(3, 1),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'og_panels_access_admin',
+    'access arguments' => array(1),
+  );
+
+  $items['node/%node/og_panels/%/panel_content'] = array(
+    'page callback' => 'og_panels_edit_content',
+    'page arguments' => array(3, 1),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'og_panels_access_admin',
+    'access arguments' => array(1),
+  );
+
+  $items['node/%node/og_panels/%/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_panels_delete_confirm', 3, 1),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'og_panels_access_admin',
+    'access arguments' => array(1),
+  );
+  // Add generic realm of callbacks for og_panels tabs.
+  $items = array_merge($items, _og_panels_nodes_menu());
+  return $items;
+}
+
+/**
+ * Implementation of hook_menu_alter()
+ *
+ * Allow the overriding of the default node/%node/view tab!
+ *
+ * We can use 1 as the argument here, as a pane set to be the homepage always gets tab_num #1
+ */
+function og_panels_menu_alter(&$items) {
+  $items['node/%node/view'] = array(
+    'title callback' => 'og_panels_tab_title',
+    'title arguments' => array(1, NULL, TRUE),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api()
+ *
+ * Needed so that our other hooks are picked up.
+ */
+function og_panels_ctools_plugin_api($module, $api) {
+  if ($module == 'page_manager' && $api == 'pages_default') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_dierctory() to let the system know
+ * we implement task and task_handler plugins.
+ */
+function og_panels_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'page_manager') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Implementation of hook_default_page_manager_handlers()
+ */
+function og_panels_default_page_manager_handlers() {
+  $handler = new stdClass;
+  $handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
+  $handler->api_version = 1;
+  $handler->name = 'node_view_og_panel';
+  $handler->task = 'node_view';
+  $handler->subtask = '';
+  $handler->handler = 'og_panel';
+  $handler->weight = -99;
+  $handler->conf = array(
+    'autogenerate_title' => FALSE,
+    'title' => 'OG Panels',
+  );
+
+  
+  $handlers[$handler->name] = $handler; 
+
+  return $handlers;
+}
+
+function og_panels_tab_edit_title($item = NULL) {
+  if ($item) {
+    return t('Edit page');
   }
   else {
-    if (arg(0) == 'node' && is_numeric(arg(1))) {
-      $node = node_load(arg(1));
-      if (og_is_group_type($node->type) && node_access('view', $node)) {
-        $nid = arg(1);
-        $items[] = array(
-          'path' => "node/$nid/og_panels",
-          'title' => 'Pages',
-          'callback' => 'og_panels_overview',
-          'callback arguments' => array($node),
-          'access' => og_is_group_admin($node) && user_access('manage OG panels pages'),
-          'type' => MENU_LOCAL_TASK,
-          'weight' => 8,
-        );
-        
-        $items[] = array(
-          'path' => "node/$nid/og_panels/list",
-          'title' => 'List',
-          'type' => MENU_DEFAULT_LOCAL_TASK,
-          'weight' => -10,
-        );
-        
-        $items[] = array(
-          'path' => "node/$nid/og_panels/form",
-          'callback' => 'drupal_get_form',
-          'callback arguments' => array('og_panels_form', $node),
-          'title' => arg(4) ? 'Edit page' : 'Add new page',
-          'type' => MENU_LOCAL_TASK,
-          'weight' => 0, 
-        );
-        
-        $displays = og_panels_get_all($node->nid);
-        foreach ($displays as $display) {
-          if ($display->default_page && $display->published && arg(2) != 'feed') {
-            // Hijack the menu handler for this node.
-            $items[] = array(
-              'path' => "node/$nid",
-              'title' => $node->title, // doesn't work
-              'callback' => 'og_panels_page',
-              'callback arguments' => array($display->did, $node, $node->title),
-            );
-            
-            /*
-             * Optional. Horrible hack since the tab title is not changeable in D5. Add the following code 
-             * to your theme's template.php in the _phptemplate_variables('page') section.
-             *   if (isset($GLOBALS['og_panels_view_tab_fix'])) {
-             *     $variables['tabs'] = str_replace('>View<', '>'. $GLOBALS['og_panels_view_tab_fix']. '<', $variables['tabs']);
-             *   }
-             */
-            $GLOBALS['og_panels_view_tab_fix'] = check_plain($display->page_title);
-          }
-          else {
-            $items[] = array(
-              'path' => "node/$nid/$display->path",
-              'title' => $display->page_title,
-              'callback' => 'og_panels_page',
-              // have to pass all these args so the args are known in panels_page()
-              'callback arguments' => array($display->did, $node, $display->page_title),
-              'type' => MENU_LOCAL_TASK,
-              'access' => $display->published || (og_is_group_admin($node) && user_access('manage OG panels pages')),
-              'weight' => $display->weight,
-            );
-          }
-        }
-        
-        $items[] = array(
-          'path' => "node/$nid/og_panels/". arg(3). '/view',
-          'callback' => 'og_panels_page',
-          'callback arguments' => array(arg(3), $node),
-          'type' => MENU_CALLBACK,
-        );
-        
-        if (is_numeric(arg(3))) {   
-          $items[] = array(
-            'path' => "node/$nid/og_panels/". arg(3). '/panel_layout',
-            'callback' => 'og_panels_edit_layout',
-            'callback arguments' => array(arg(3), $node),
-            'type' => MENU_CALLBACK,
-          );
+    return t('Add new page');
+  }
+}
 
-          $items[] = array(
-            'path' => "node/$nid/og_panels/". arg(3). '/panel_settings',
-            'callback' => 'og_panels_edit_layout_settings',
-            'callback arguments' => array(arg(3), $node),
-            'type' => MENU_CALLBACK,
-          );
 
-          $items[] = array(
-            'path' => "node/$nid/og_panels/". arg(3). '/panel_content',
-            'callback' => 'og_panels_edit_content',
-            'callback arguments' => array(arg(3), $node),
-            'type' => MENU_CALLBACK,
-          );
-          
-          $items[] = array(
-            'path' => "node/$nid/og_panels/". arg(3). '/delete',
-            'title' => 'Delete',
-            'callback' => 'drupal_get_form',
-            'callback arguments' => array('og_panels_delete_confirm', arg(3), $node),
-            'type' => MENU_CALLBACK,
-          ); 
-        }
-      }
-    }
+/**
+ * Custom callback to return a limited array of menu callbacks allowing lots of og_panels,
+ * but with only a few menu router items.
+ *
+ * Based on: http://drupal.org/node/362031
+ *
+ */
+function _og_panels_nodes_menu() {
+  $items = array();
+  $result = db_query("SELECT DISTINCT tab_num FROM {og_panels} ORDER BY tab_num ASC");
+  while ($tab = db_fetch_object($result)) {
+    $items['node/%/og-panel/'. $tab->tab_num] = array(
+      'title callback' => 'og_panels_tab_title',
+      'title arguments' => array(1, $tab->tab_num),
+      'page callback' => 'og_panels_page',
+      'page arguments' => array(1, $tab->tab_num),
+      'access callback' => '_og_panels_node_access',
+      'access arguments' => array(1, $tab->tab_num),
+      'type' => MENU_LOCAL_TASK,
+      'tab_parent' => 'node/%',
+      'tab_root' => 'node/%',
+    );
   }
   return $items;
+}
+
+/**
+ * Title callback for tab menu items
+ *
+ * This takes input from both the menu tabs, and a home page override.
+ *
+ * It also sets the page title back to being the node name, and sets the tab to "home" in the event of no homepage override.
+ */
+function og_panels_tab_title($node, $tab_num = 1, $view = FALSE) {
+  if (!is_object($node)) {
+    $node = node_load($node);
+  }
+  $tab = og_panels_node_data($node->nid, $tab_num);
+  if ($view && !$tab['default_page']) {
+    return t('Home');
+  }
+  drupal_set_title($node->title);
+  return $tab['page_title'];
+}
+
+/**
+ * Helper function to load og_panels tab info for a node
+ *
+ * @param int $nid
+ *   The node id we are interested in.
+ * @param int $tab_num
+ *   Optional: the specific tab number.
+ * @returns
+ *   Returns an array of og_panels row-arrays, or just one array for a tab_num, if specified. 
+ */
+function og_panels_node_data($nid, $tab_num = FALSE) {
+  static $data = array();
+  if (!$data[$nid]) {
+    $result = $result = db_query("SELECT * FROM {og_panels} WHERE nid = %d", $nid);
+    while ($tab = db_fetch_array($result)) {
+      $data[$nid][$tab['tab_num']] = $tab;
+    }
+  }
+  if ($tab_num) {
+    return $data[$nid][$tab_num];
+  }
+  elseif (og_panels_node_data) {
+    return $data[$nid];
+  }
+  else {
+    return array();
+  }
+}
+
+/**
+ * Access callback.
+ *
+ * Find out if a panel exists for this node and use node_access if so.
+ *
+ * Otherwise, no such panel, so FALSE.
+ */
+function _og_panels_node_access($nid, $tab_num) {
+  $tab = og_panels_node_data($nid, $tab_num);
+  if ($tab['nid']) {
+    if ($tab['default_page']) {
+      // A bit counter-intuative.
+      // This prevents duplicate tabs from showing up when we override the "view" title.
+      // Because we get that panel through our page_manager task_handler, and not a direct
+      // menu callback.
+      return FALSE;
+    }
+    $node = node_load($nid);
+    if ($tab['published']) {
+      return node_access('view', $node);
+    }
+    else {
+      return node_access('update', $node);
+    }
+  }
+  else {
+    return FALSE;
+  }
+
+}
+
+function _og_panels_node_page_title($nid) {
+  return node_page_title(node_load($nid));
+}
+
+
+/**
+ * Override default "view" tab if we're in a og_panels situation
+ */
+function og_panels_main_tab_title($node) {
+  $displays = og_panels_get_all($node->nid);
+  foreach ($displays as $display) {
+    if ($display->default_page) {
+      return check_plain($display->page_title);
+    }
+  }
+  return t('View');
 }
 
 function og_panels_perm() {
   return array('manage OG panels pages');
 }
 
-function og_panels_delete_confirm($did, $group_node) {
+/**
+ * Manu access functions for checking multiple variables
+ */
+function og_panels_access_admin($node) {
+  if (og_is_group_admin($node) && user_access('manage OG panels pages')) {
+    return TRUE;
+  }
+}
+
+function og_panels_access_view($node, $display) {
+  // show admins unpublished displays
+  if ($display->published || (og_is_group_admin($node) && user_access('manage OG panels pages'))) {
+    return TRUE;
+  }
+}
+
+function og_panels_delete_confirm(&$form_state, $did, $group_node) {
   $form['did'] = array('#type' => 'value', '#value' => $did);
   $form['nid'] = array('#type' => 'value', '#value' => $group_node->nid);
   $sql = "SELECT page_title FROM {og_panels} WHERE did = %d";
   $page_title = db_result(db_query($sql, $did));
   $form['page_title'] = array('#type' => 'value', '#value' => $page_title);
-  
+
   return confirm_form($form,
     t('Are you sure you want to delete %title?', array('%title' => $page_title)),
     isset($_GET['destination']) ? $_GET['destination'] : 'node/'. $node->nid. 'og_panels',
@@ -148,19 +313,31 @@ function og_panels_delete_confirm($did, $group_node) {
 }
 
 function og_panels_delete_confirm_submit($form_id, $form_values) {
-  og_panels_delete($form_values['did']);
-  drupal_set_message(t('%title has been deleted', array('%title' => $form_values['page_title'])));
+  og_panels_delete($form_values['values']['did'], $form_values['values']['nid']);
+  drupal_set_message(t('%title has been deleted', array('%title' => $form_values['values']['page_title'])));
 }
 
-function og_panels_delete($did) {
+/**
+ * Remove the og_panel link and the panel itself. 
+ *
+ * Rebuild menu so sub-task dissapears right away.
+ */
+function og_panels_delete($did, $nid) {
+  if (module_exists('path')) {
+    // release path alias
+    // need tab_num here for the path alias
+    $tab_num = db_result(db_query("SELECT tab_num FROM {og_panels} WHERE nid = %d AND did = %d", $nid, $did));
+    path_set_alias('node/'. $nid .'/og-panel/'. $tab_num);
+  }
   $sql = "DELETE FROM {og_panels} WHERE did = %d";
   db_query($sql, $did);
   panels_delete_display($did);
+  _og_panels_tab_renumber($nid);
 }
 
 /**
  * Menu callback. List the pages for this specified group. Provide helpful operations links.
- * 
+ *
  * @return string
  **/
 function og_panels_overview($group_node) {
@@ -172,23 +349,25 @@ function og_panels_overview($group_node) {
 
 /**
  * A form for setting the group homepage. Includes a helpful table of Pages and their operations links.
- * 
+ *
  * @return $form array
  **/
-function og_panels_table($displays, $group_node) {
+function og_panels_table(&$form_state, $displays, $group_node) {
   $nid = $group_node->nid;
   $form['#tree'] = TRUE; // #tree must be true in order to separate out the entries in the weight field
+  $options = array();
+  $default_page = NULL;
   foreach ($displays as $display) {
-    $item['page_title'] = array('#value' => l($display->page_title, "node/$nid/$display->path"));
+    $item['page_title'] = array('#value' => l($display->page_title, "node/$nid/og-panel/$display->tab_num"));
     $item['weight'] = array('#type' => 'weight', '#default_value' => $display->weight);
     $item['edit content'] = array('#value' => l(t('Edit content'), "node/$nid/og_panels/$display->did/panel_content", array('query' => drupal_get_destination())));
     $item['change layout'] = array('#value' => l(t('Change layout'), "node/$nid/og_panels/$display->did/panel_layout"));
     $item['edit layout settings'] = array('#value' => l(t('Edit layout settings'), "node/$nid/og_panels/$display->did/panel_settings"));
     $item['edit page'] = array('#value' => l(t('Edit page'), "node/$nid/og_panels/form/$display->did", array('query' => drupal_get_destination())));
     $item['delete page'] =  array('#value' => l(t('Delete page'), "node/$nid/og_panels/$display->did/delete", array('query' => drupal_get_destination())));
-     
+
     $form['displays'][$display->did] = $item;
-     
+
     // Store the default_page for later.
     if ($display->default_page == 1) {
       $default_page = $display->did;
@@ -196,14 +375,18 @@ function og_panels_table($displays, $group_node) {
     // Prepare the options for the radios.
     $options[$display->did] = '';
   }
-   
+
   $form['default_page'] = array(
-    '#type' => 'radios', 
-    '#options' => $options, 
+    '#type' => 'radios',
+    '#options' => $options,
     '#default_value' => $default_page,
   );
+  $form['reset'] = array(
+    '#type' => 'submit',
+    '#value' => t('Reset Homepage'),
+  );
   $form['submit'] = array(
-    '#type' => 'submit', 
+    '#type' => 'submit',
     '#value' => t('Save settings'),
   );
 
@@ -212,10 +395,23 @@ function og_panels_table($displays, $group_node) {
 }
 
 /**
+ * Implementation of hook_theme()
+ *
+ * For the table theme on the form
+ */
+function og_panels_theme($existing, $type, $theme, $path) {
+  return array(
+    'og_panels_table' => array(
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
+/**
  * Wrangle the $form into a tabular listing of pages.
  *
  * @ingroup Themeable functions
- * 
+ *
  * @return void
  **/
 function theme_og_panels_table($form) {
@@ -223,44 +419,57 @@ function theme_og_panels_table($form) {
     if (is_numeric($did)) {
       $rows[] = array(
         drupal_render($form['default_page'][$did]),
-        drupal_render($form['displays'][$did]['page_title']), 
+        drupal_render($form['displays'][$did]['page_title']),
         drupal_render($form['displays'][$did]['weight']),
         drupal_render($form['displays'][$did]['edit content']),
-        drupal_render($form['displays'][$did]['change layout']), 
-        drupal_render($form['displays'][$did]['edit layout settings']), 
+        drupal_render($form['displays'][$did]['change layout']),
+        drupal_render($form['displays'][$did]['edit layout settings']),
         drupal_render($form['displays'][$did]['edit page']),
         drupal_render($form['displays'][$did]['delete page']),
       );
     }
   }
   
+
   $output = drupal_render($form);
   $header = array(t('Home page'), t('Title'), t('Weight'), array('align' => 'center', 'colspan' => 5, 'data' => t('Operations')));
   return theme('table', $header, $rows). $output;
 }
 
-function og_panels_table_submit($form_id, $form_values) {
-  db_query("UPDATE {og_panels} SET default_page = 0 WHERE nid = %d", $form_values['group_node']->nid);
-  foreach ($form_values['displays'] as $did => $settings) {
-    $default = $did == $form_values['default_page'] ? TRUE : FALSE;
+function og_panels_table_submit($form, &$form_state) {
+  db_query("UPDATE {og_panels} SET default_page = 0 WHERE nid = %d", $form_state['values']['group_node']->nid);
+  foreach ($form_state['values']['displays'] as $did => $settings) {
+    $default = ($did == $form_state['values']['default_page'] && $form_state['values']['op'] != $form_state['values']['reset']) ? TRUE : FALSE;
     $sql = "UPDATE {og_panels} SET weight = %d, default_page = %d WHERE did = %d";
     db_query($sql, $settings['weight'], $default, $did);
   }
+  // compact the tab_nums and rebuild menus
+  _og_panels_tab_renumber($form_state['values']['group_node']->nid);  
   drupal_set_message(t('Updated panels configuration.'));
 }
 
 /**
- * A menu callback. Renders an og_panel based upon its display ID.
- * 
+ * A menu callback. Renders an og_panel based upon the nid and current path (if any).
+ *
+ * @param int $nid
+ *   Node id of the group
+ *
+ * @param int $tab_num
+ *   Number for the tab
+ *
+ * @param bool $print
+ *   If this is being called from within the page_manager, return rather than print.
+ *
  * @return void
  **/
-function og_panels_page($did, $group_node, $title = NULL) {
-  $og_panel = og_panels_get_one_by_display($did);
+function og_panels_page($nid, $tab_num, $print = FALSE) {
+  $tab = og_panels_node_data($nid, $tab_num);
+  $group_node = node_load($tab['did']);
   // Set breadcrumb and title on non group nodes
-  if ($title) {
-    drupal_set_title(check_plain($title));
+  if ($tab['page_title']) {
+    drupal_set_title(check_plain($tab['page_title']));
   }
-  if (!$og_panel->default_page) {
+  if (!$tab['default_page']) {
     $bc[] = l(t('Home'), "");
     $bc[] = l($group_node->title, "node/$group_node->nid");
     // I tried MSL but it let me down. again.
@@ -270,23 +479,26 @@ function og_panels_page($did, $group_node, $title = NULL) {
   // Mark node as read and show feed icon for any group panel page (how to do this better?)
   drupal_add_feed(url("node/$group_node->nid/feed"), t('@name at @site', array('@name' => $group_node->title, '@site' => variable_get('site_name', 'drupal'))));
   node_tag_new($group_node->nid);
-  
-  
+
   $allargs = func_get_args();
   $args = array_slice($allargs, 3);
-  $display = og_panels_load_display($did, $group_node);
+  $display = og_panels_load_display($tab['did'], $group_node);
   $display->args = $args;
   $output = panels_render_display($display);
-  // We print instead of return in order to allow blocks to be suppressed.
-  print theme('page', $output, $og_panel->show_blocks);
+  if ($print) {
+    print theme('page', $output, $did['show_blocks']);
+  }
+  else {
+    return $output;
+  }
 }
 
 /**
  * Add/edit an og_panel.
- * 
+ *
  * @return void
  **/
-function og_panels_form($group_node, $did = NULL) {
+function og_panels_form(&$form_state, $group_node, $did = NULL) {
   drupal_set_title(check_plain($group_node->title));
   if (!is_null($did)) {
     $display = og_panels_get_one_by_display($did);
@@ -294,7 +506,7 @@ function og_panels_form($group_node, $did = NULL) {
   else {
     $display = new stdClass;
   }
-  
+
   $form['page_title'] = array(
     '#title' => t('Page title'),
     '#type' => 'textfield',
@@ -303,17 +515,15 @@ function og_panels_form($group_node, $did = NULL) {
     '#description' => t('This is the title of the page and of the tab.'),
     '#size' => 32,
   );
-  global $base_url;
-  $field_prefix = "$base_url/node/$group_node->nid/";
   $form[$display->default_page ? 'path_placeholder' : 'path'] = array(
     '#title' => t('Path'),
     '#type' => 'textfield',
     '#default_value' => $display->default_page ? '' : $display->path,
-    '#field_prefix' =>  $field_prefix,
-    '#required' => $display->default_page ? FALSE : TRUE,
-    '#description' => $display->default_page ? t('This page is currently your default group home page and has no configurable path.') : '',
+    '#field_prefix' => url('node/'. $group_node->nid, array('absolute' => TRUE)) .'/',
+    '#description' => $display->default_page ? t('This page is currently your default group home page and has no configurable path.') : t('An optional path alias for this page.'),
     '#disabled' => $display->default_page,
     '#size' => 32,
+    '#access' => module_exists('path'),
   );
   if ($display->default_page) {
     $form['path'] = array(
@@ -330,16 +540,17 @@ function og_panels_form($group_node, $did = NULL) {
   $form['published'] = array(
     '#type' => 'checkbox',
     '#title' => t('Published'),
-    '#default_value' => $display->published,
+    '#default_value' => ($display->did) ? $display->published : TRUE,
     '#description' => t('If unchecked, this page is only accessible by group or site administrators. Thats useful while you are configuring the page.'),
   );
-  
+
   $form['submit'] = array(
-    '#type' => 'submit', 
+    '#type' => 'submit',
     '#value' => $did ? t('Update page') : t('Create page'),
   );
   $form['did'] = array('#type' => 'value', '#value' => $did);
   $form['nid'] = array('#type' => 'value', '#value' => $group_node->nid);
+  $form['tab_num'] = array('#type' => 'value', '#value' => $display->tab_num);
   return $form;
 }
 
@@ -350,8 +561,8 @@ function og_panels_form($group_node, $did = NULL) {
  * @return array $rows
  *   An associative array keyed by the $did of the og_panel
  */
-function og_panels_get_all($nid) {  
-  $sql = "SELECT * FROM {og_panels} WHERE nid = %d ORDER BY default_page DESC, weight ASC";
+function og_panels_get_all($nid) {
+  $sql = "SELECT * FROM {og_panels} WHERE nid = %d ORDER BY default_page DESC, weight ASC, page_title ASC";
   $result = db_query($sql, $nid);
   while ($row = db_fetch_object($result)) {
     $rows[$row->did] = $row;
@@ -390,24 +601,25 @@ function og_panels_get_one_by_nid_default($nid) {
 
 /**
  * Load an og_panel's display information.
- * 
- * Loads a panels display object with various parameters, depending on the information passed into the load function. 
- * 
+ *
+ * Loads a panels display object with various parameters, depending on the information passed into the load function.
+ *
  * @param int $did
  *   The did of the panels display.
  * @param object $group_node = NULL
  *   The node object for the group to which the panel is attached.
  * @param bool $ct = FALSE
- *   If TRUE, content_types are also loaded into the $display object 
- * 
+ *   If TRUE, content_types are also loaded into the $display object
+ *
  * @return mixed
  *   Either returns a display object, or FALSE if no display was found with the parameters provided.
  */
 function og_panels_load_display($did, $group_node = NULL, $ct = FALSE) {
   panels_load_include('plugins');
+  ctools_include('context');
   $display = panels_load_display($did);
   if (is_object($group_node)) {
-    $display->context = array('og_panels' => panels_context_create('group', $group_node));
+    $display->context = array('og_panels' => ctools_context_create('node', $group_node));
     if ($ct) {
       panels_load_include('common');
       $display->content_types = panels_common_get_allowed_types('og_panels', $display->context);
@@ -416,38 +628,106 @@ function og_panels_load_display($did, $group_node = NULL, $ct = FALSE) {
   return is_object($display) ? $display : FALSE;
 }
 
-function og_panels_form_validate($form_id, $form_values, $form) {
+function og_panels_form_validate($form, &$form_state) {
   $pathblacklist = array('view', 'edit', 'delete', 'outline', 'load', 'render', 'clone');
-  if (in_array($form_values['path'], $pathblacklist)) {
-    form_error($form['path'], t('%path is a reserved system path, and cannot be used for a group page. Please enter another path.', array('%path' => $form_values['path']))); 
+  if (in_array($form_state['values']['path'], $pathblacklist)) {
+    form_error($form['path'], t('%path is a reserved system path, and cannot be used for a group page. Please enter another path.', array('%path' => $form_state['values']['path'])));
   }
-  else if (preg_match("/[^A-Za-z0-9-]/", $form_values['path'])) {
+  else if (preg_match("/[^A-Za-z0-9-]/", $form_state['values']['path'])) {
     form_error($form['path'], t('Panel paths may only contain alphanumeric characters and dashes.'));
   }
-  else if (db_result(db_query("SELECT path FROM {og_panels} WHERE path = '%s' AND did <> %d AND nid = %d", $form_values['path'], $form_values['did'], $form_values['nid']))) {
+  else if (db_result(db_query("SELECT path FROM {og_panels} WHERE path = '%s' AND did <> %d AND nid = %d", $form_state['values']['path'], $form_state['values']['did'], $form_state['values']['nid']))) {
     form_error($form['path'], t("That path is currently in use by another one of your group's pages. Please enter another path."));
   }
 }
 
 /**
  * INSERT or UPDATE a new og_panel. If insert, redirect to layout form.
- * 
+ *
+ * Handles tab numbering and path aliases.
+ *
  * @return void
  **/
-function og_panels_form_submit($form_id, $form_values) {
-  if ($form_values['did']) {
-    $sql = "UPDATE {og_panels} SET page_title='%s', path='%s', published=%d, show_blocks=%d WHERE did = %d";
-    db_query($sql, $form_values['page_title'], $form_values['path'], $form_values['published'], $form_values['show_blocks'], $form_values['did']);
+function og_panels_form_submit($form, &$form_state) {
+  if ($form_state['values']['did']) {
+    $sql = "UPDATE {og_panels} SET page_title = '%s', path = '%s', published = %d, show_blocks = %d WHERE did = %d";
+    db_query($sql, $form_state['values']['page_title'], $form_state['values']['path'], $form_state['values']['published'], $form_state['values']['show_blocks'], $form_state['values']['did']);
     drupal_set_message(t('Group page updated.'));
   }
   else {
     // Create a new display and record that.
     $display = panels_new_display();
     panels_save_display($display);
-    $sql = "INSERT INTO {og_panels} (did, nid, page_title, path, published, show_blocks) VALUES (%d, %d, '%s', '%s', %d, %d)";
-    db_query($sql, $display->did, $form_values['nid'], $form_values['page_title'], $form_values['path'], $form_values['published'], $form_values['show_blocks']);
+    $form_state['values']['tab_num'] = _og_panels_tab_num($form_state['values']['nid']);
+    $sql = "INSERT INTO {og_panels} (did, nid, page_title, path, published, show_blocks, tab_num) VALUES (%d, %d, '%s', '%s', %d, %d, %d)";
+    db_query($sql, $display->did, $form_state['values']['nid'], $form_state['values']['page_title'], $form_state['values']['path'], $form_state['values']['published'], $form_state['values']['show_blocks'], $form_state['values']['tab_num']);
+    _og_panels_tab_renumber($form_state['values']['nid']);
     drupal_set_message(t('Group page created.'));
-    return 'node/'. $form_values['nid']. "/og_panels/$display->did/panel_layout";
+    $form_state['redirect'] = 'node/'. $form_state['values']['nid']. '/og_panels/'. $display->did .'/panel_layout';
+  }
+  
+  // Whether new or an update, we should cycle the path alias.
+  if ($form_state['values']['path'] != '' && module_exists('path')) {
+    _og_panels_tab_path_alias($form_state['values']['nid'], $form_state['values']['tab_num'], $form_state['values']['path']);
+  }
+}
+
+/**
+ * Helper function to make path aliases for tab_nums, since we renumber them often
+ */
+function _og_panels_tab_path_alias($nid, $tab_num, $path) {
+  $alias = drupal_get_path_alias('node/'. $nid) .'/'. $path;
+  path_set_alias('node/'. $nid. '/og-panel/'. $tab_num, $alias);
+}
+
+
+/**
+ * Get next tab number for node.
+ *
+ * Rebuild menu if new number > current max.
+ */
+function _og_panels_tab_num($nid) {
+  $max = db_result(db_query("SELECT MAX(tab_num) FROM {og_panels}", $nid));
+  $tab_num = db_result(db_query("SELECT MAX(tab_num) + 1 FROM {og_panels} WHERE nid = %d", $nid));
+  if ($tab_num > $max || $max == 0) {
+    // A new high number! We want to rebuild at the end of the page cycle, not right now.
+    variable_set('menu_rebuild_needed', TRUE);
+  }
+  // if this is the first tab, it's going to be NULL
+  if ($tab_num == NULL) {
+    $tab_num = 1;
+  }
+  return $tab_num;
+}
+
+/**
+ * Internal function to compact/renumber tabs based on weight
+ */
+function _og_panels_tab_renumber($nid) {
+  $displays = array();
+  $result = db_query("SELECT * FROM {og_panels} WHERE nid = %d ORDER BY default_page DESC, weight ASC, page_title ASC", $nid);
+  while($display = db_fetch_object($result)) {
+    $displays[] = $display;
+  }
+  
+  // Now, clear them all!
+  db_query("DELETE FROM {og_panels} WHERE nid = %d", $nid);
+  if (module_exists('path')) {
+    db_query("DELETE FROM {url_alias} WHERE src LIKE 'node/%d/og-panel/%%'", $nid);
+  }
+  
+  // Rewrite with newly indexed tab_nums, starting at 1.
+  $tab_num = 1;
+  foreach($displays as $object) {
+    $original_tab_num = $object->tab_num;
+    $object->tab_num = $tab_num;
+    // remap paths if this tab has one.
+    if ($object->path != '' && module_exists('path')) {
+      // set new alias.
+      _og_panels_tab_path_alias($object->nid, $object->tab_num, $object->path);
+    }
+    drupal_write_record('og_panels', $object);
+    $tab_num++;
   }
 }
 
@@ -481,10 +761,10 @@ function og_panels_nodeapi($node, $op) {
 
 /**
  * Pass through to the panels layout editor.
- * 
+ *
  * @param int $did
- *  the $did of the og_panel to be edited. 
- * 
+ *  the $did of the og_panel to be edited.
+ *
  * @param object $group_node
  *  the node object to which the og_panel is attached.
  */
@@ -496,10 +776,10 @@ function og_panels_edit_layout($did, $group_node) {
 
 /**
  * Pass through to the panels layout settings editor.
- * 
+ *
  * @param int $did
- *  the $did of the og_panel to be edited. 
- * 
+ *  the $did of the og_panel to be edited.
+ *
  * @param object $group_node
  *  the node object to which the og_panel is attached.
  */
@@ -511,10 +791,10 @@ function og_panels_edit_layout_settings($did, $group_node) {
 
 /**
  * Pass through to the panels content editor.
- * 
+ *
  * @param int $did
- *  the $did of the og_panel to be edited. 
- * 
+ *  the $did of the og_panel to be edited.
+ *
  * @param object $group_node
  *  the node object to which the og_panel is attached.
  */
@@ -534,10 +814,10 @@ function og_panels_admin_content() {
 
 /**
  * Implementation of hook_panels_contexts()
- * 
+ *
  */
 function og_panels_panels_contexts() {
-  include_once './'. drupal_get_path('module', 'og_panels') .'/includes/groupcontext.inc';
+  include_once './'. drupal_get_path('module', 'og') .'/includes/og.panelscontext.inc';
   $args['group'] = array(
     'title' => t('Group'),
     'description' => t('A node object that is flagged as an OG group type.'),
@@ -554,7 +834,7 @@ function og_panels_panels_contexts() {
  * Implementation of hook_panels_content_types()
  */
 function og_panels_panels_content_types() {
-  include_once './'. drupal_get_path('module', 'og_panels') .'/includes/groupcontent.inc';
+  include_once './'. drupal_get_path('module', 'og') .'/includes/og.panelscontent.inc';
   $items['og_mission'] = array(
     'title' => t('OG mission'),
     'content_types' => 'og_panels_ct_list_mission',
@@ -574,7 +854,7 @@ function og_panels_panels_content_types() {
     'render callback' => 'og_panels_ct_render_callback_description',
     'title callback' => 'og_panels_ct_title_callback_description',
   );
-  
+
     $items['og_subscribers'] = array(
       'title' => t('OG members'),
       'content_types' => 'og_panels_ct_list_subscribers',
@@ -586,7 +866,7 @@ function og_panels_panels_content_types() {
       'add validate callback' => 'og_panels_content_types_validate_callback_subscribers',
       'edit validate callback' => 'og_panels_content_types_validate_callback_subscribers',
     );
-    
+
     if (module_exists('search')) {
       $items['og_search'] = array(
         'title' => t('Group search'),
@@ -596,7 +876,7 @@ function og_panels_panels_content_types() {
         'title callback' => 'og_panels_ct_title_callback_search',
       );
     }
-    
+
     if (og_is_picture()) {
       $items['og_faces'] = array(
         'title' => t('OG faces'),
@@ -609,8 +889,8 @@ function og_panels_panels_content_types() {
         'add validate callback' => 'og_panels_content_types_validate_callback_faces',
         'edit validate callback' => 'og_panels_content_types_validate_callback_faces',
       );
-      
-    }    
+
+    }
   return $items;
 }
 
@@ -641,7 +921,7 @@ function og_panels_block_info($module, $delta, &$info) {
       $info['category'] = t('Organic groups');
       break;
   }
-  
+
   // These blocks do not need group context.
   if ($delta == 3 || $delta == 6) {
     unset($info['required context']);
