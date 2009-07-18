@@ -138,7 +138,6 @@ function og_panels_default_page_manager_handlers() {
     'title' => 'OG Panels',
   );
 
-  
   $handlers[$handler->name] = $handler; 
 
   return $handlers;
@@ -381,13 +380,13 @@ function og_panels_table(&$form_state, $displays, $group_node) {
     '#options' => $options,
     '#default_value' => $default_page,
   );
-  $form['reset'] = array(
-    '#type' => 'submit',
-    '#value' => t('Reset Homepage'),
-  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save settings'),
+  );
+  $form['reset'] = array(
+    '#type' => 'submit',
+    '#value' => t('Reset Homepage'),
   );
 
   $form['group_node'] = array('#type' => 'value', '#value' => $group_node);
@@ -415,25 +414,29 @@ function og_panels_theme($existing, $type, $theme, $path) {
  * @return void
  **/
 function theme_og_panels_table($form) {
+  drupal_add_tabledrag('og-panels-table-table', 'order', 'sibiling', 'weightorder');
   foreach (element_children($form['displays']) as $did) {
     if (is_numeric($did)) {
+      $form['displays'][$did]['weight']['#attributes']['class'] = 'weightorder';
       $rows[] = array(
-        drupal_render($form['default_page'][$did]),
-        drupal_render($form['displays'][$did]['page_title']),
-        drupal_render($form['displays'][$did]['weight']),
-        drupal_render($form['displays'][$did]['edit content']),
-        drupal_render($form['displays'][$did]['change layout']),
-        drupal_render($form['displays'][$did]['edit layout settings']),
-        drupal_render($form['displays'][$did]['edit page']),
-        drupal_render($form['displays'][$did]['delete page']),
+        'class' => 'draggable', 
+        'data' => array(
+          drupal_render($form['default_page'][$did]),
+          drupal_render($form['displays'][$did]['page_title']),
+          drupal_render($form['displays'][$did]['weight']),
+          drupal_render($form['displays'][$did]['edit content']),
+          drupal_render($form['displays'][$did]['change layout']),
+          drupal_render($form['displays'][$did]['edit layout settings']),
+          drupal_render($form['displays'][$did]['edit page']),
+          drupal_render($form['displays'][$did]['delete page']),
+        ),
       );
     }
   }
-  
 
   $output = drupal_render($form);
   $header = array(t('Home page'), t('Title'), t('Weight'), array('align' => 'center', 'colspan' => 5, 'data' => t('Operations')));
-  return theme('table', $header, $rows). $output;
+  return theme('table', $header, $rows, array('id' => 'og-panels-table-table')). $output;
 }
 
 function og_panels_table_submit($form, &$form_state) {
