@@ -489,7 +489,7 @@ function og_panels_page($nid, $tab_num, $print = FALSE) {
   $display->args = $args;
   $output = panels_render_display($display);
   if ($print) {
-    print theme('page', $output, $did['show_blocks']);
+    print theme('page', $output, $tab['show_blocks']);
   }
   else {
     return $output;
