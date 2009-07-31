@@ -2189,7 +2189,7 @@ function og_og_create_links($group) {
     $type_url_str = str_replace('_', '-', $post_type);
     if (module_invoke($types[$post_type]->module, 'access', 'create', $post_type, $user)) {
       $links["create_$post_type"] = l(t('Create !type', array('!type' => $type_name)), "node/add/$type_url_str", array(
-        'title' => t('Add a new !type in this group.', array('!type' => $type_name)),
+        'attributes' => array('title' => t('Add a new !type in this group.', array('!type' => $type_name))),
         'query' => "gids[]=$group->nid",
         ));
     }
