@@ -5,5 +5,5 @@ package = "Organic groups"
 dependencies[] = og
 dependencies[] = panels
 dependencies[] = ctools
-dependencies[] = delegator
+dependencies[] = page_manager
 core = 6.x
