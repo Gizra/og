@@ -430,7 +430,7 @@ function og_page_activity() {
     array('data' => t('Manager'), 'field' => 'u.name'),
     array('data' => t('Posts'), 'field' => 'ncount'),
     array('data' => t('Comments'), 'field' => 'ccount'),
-    array('data' => t('Age'), 'field' => 'node_group_nid.created'),
+    array('data' => t('Age'), 'field' => 'ncreated'),
     array('data' => t('Last comment'), 'field' => 'lct', 'sort' => 'asc'),
   );
   $result = db_query($sql. tablesort_sql($header));
