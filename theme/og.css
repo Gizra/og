@@ -41,9 +41,7 @@
 	text-indent: -1em;
 }
 
-
-/*TODOL: Line not hidden*/
-.view-id-og_members_faces tr.row-first td, .view-id-og_members_block ul li:first {
+.view-id-og_members_faces tr.row-first td, .view-id-og_members_block ul li:first-child {
   border-top: none;
 }
 
