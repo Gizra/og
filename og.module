@@ -760,7 +760,7 @@ function og_subscribe_user($gid, $account, $request = NULL) {
       case OG_OPEN:
         og_save_subscription($gid, $account->uid, array('is_active' => 1));
         $return_value = array('type' => 'subscribed',
-                              'message' => t('You are now a member of the %group.', array('%group' => $node->title)));
+                              'message' => t('You are now a member of %group.', array('%group' => $node->title)));
         break;
       case OG_CLOSED:
       case OG_INVITE_ONLY:
