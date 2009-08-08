@@ -619,25 +619,27 @@ function og_set_theme($group_node) {
      is_active, is_admin, created. Other values are passed to hook implementations.
  */
 function og_save_subscription($gid, $uid, $args = array()) {
-  $sql = "SELECT COUNT(*) FROM {og_uid} WHERE nid = %d AND uid = %d";
-  $cnt = db_result(db_query($sql, $gid, $uid));
-  $time = time();
-  $subscription = array(
-    'nid' => $gid,
-    'uid' => $uid,
-    'created' => isset($args['created']) ? $args['created'] : $time,
-    'changed' => $time
-  );
-  unset($args['created']);
-  $subscription += $args;
-  
-  if ($cnt == 0) {
-    drupal_write_record('og_uid', $subscription);
-    module_invoke_all('og', 'user insert', $gid, $uid, $args);
-  }
-  else {
-    drupal_write_record('og_uid', $subscription, array('nid', 'uid'));
-    module_invoke_all('og', 'user update', $gid, $uid, $args);
+  if ($uid > 0) {
+    $sql = "SELECT COUNT(*) FROM {og_uid} WHERE nid = %d AND uid = %d";
+    $cnt = db_result(db_query($sql, $gid, $uid));
+    $time = time();
+    $subscription = array(
+      'nid' => $gid,
+      'uid' => $uid,
+      'created' => isset($args['created']) ? $args['created'] : $time,
+      'changed' => $time
+    );
+    unset($args['created']);
+    $subscription += $args;
+
+    if ($cnt == 0) {
+      drupal_write_record('og_uid', $subscription);
+      module_invoke_all('og', 'user insert', $gid, $uid, $args);
+    }
+    else {
+      drupal_write_record('og_uid', $subscription, array('nid', 'uid'));
+      module_invoke_all('og', 'user update', $gid, $uid, $args);
+    }
   }
 }
 
