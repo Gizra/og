@@ -715,56 +715,66 @@ function og_mail($key, &$message, $params) {
  * @return string 'approval', 'subscribed' or 'rejected' depending on the group's configuration.
  **/
 function og_subscribe_user($gid, $account, $request = NULL) {
-  // moderated groups must approve all members (selective=1)
-  $node = node_load($gid);
-  switch ($node->og_selective) {
-    case OG_MODERATED:
-      $admins = array();
-      og_save_subscription($gid, $account->uid, array('is_active' => 0));
-      $sql = og_list_users_sql(1, 1, NULL);
-      $res = db_query($sql, $node->nid);
-      $admins = array();
-      while ($row = db_fetch_object($res)) {
-        $admins[] = $row->uid;
-      }
-      if (!empty($admins)) {
-        $variables = array(
-          '@group' => $node->title,
-          '@username' => $account->name,
-          '!approve_url' => url("og/approve/$node->nid/$account->uid", array('absolute' => TRUE)),
-          '!group_url' => url("og/users/$node->nid", array('absolute' => TRUE)),
-          '@request' => $request,
-        );
-        
-        $message = array(
-          'subject' => _og_mail_text('og_request_user_subject', $variables),
-          'body' => _og_mail_text('og_request_user_body', $variables),
-        );
-
-        // Send notifications to each admin; Sending an array of recipients
-        // implies that this is a bulk message.
-        module_invoke_all('og', 'user request', $gid, $admins, $message);
-      }
-      $return_value = array('type' => 'approval',
-                            'message' => t('Membership request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
-
-      break;
-    case OG_OPEN:
-      og_save_subscription($gid, $account->uid, array('is_active' => 1));
-      $return_value = array('type' => 'subscribed',
-                            'message' => t('You are now a member of the %group.', array('%group' => $node->title)));
-      break;
-    case OG_CLOSED:
-    case OG_INVITE_ONLY:
-      // admins can add members to these groups, but others can't.
-      if (og_is_group_admin($node)) {
-        og_save_subscription($gid, $account->uid, array('is_active' => 1));
-      }
-      else {
-        $return_value = array('type' => 'rejected',
-                            'message' => t('Membership request to the %group group was rejected, only group administrators can add users to this group.', array('%group' => $node->title)));
-      }
+  if ($account->uid == 0) {
+    // Silly admins can do this. Maybe code can too when an account gets deleted. See http://drupal.org/node/434632.
+    $return_value = array(
+      'type' => 'rejected',
+      'message' => t('Membership request to the %group group was rejected; the anonymous user may not join a group.', array('%group' => $node->title))
+    );
   }
+  else {
+    // Moderated groups must approve all members (selective=1).
+    $node = node_load($gid);
+    switch ($node->og_selective) {
+      case OG_MODERATED:
+        $admins = array();
+        og_save_subscription($gid, $account->uid, array('is_active' => 0));
+        $sql = og_list_users_sql(1, 1, NULL);
+        $res = db_query($sql, $node->nid);
+        $admins = array();
+        while ($row = db_fetch_object($res)) {
+          $admins[] = $row->uid;
+        }
+        if (!empty($admins)) {
+          $variables = array(
+            '@group' => $node->title,
+            '@username' => $account->name,
+            '!approve_url' => url("og/approve/$node->nid/$account->uid", array('absolute' => TRUE)),
+            '!group_url' => url("og/users/$node->nid", array('absolute' => TRUE)),
+            '@request' => $request,
+          );
+
+          $message = array(
+            'subject' => _og_mail_text('og_request_user_subject', $variables),
+            'body' => _og_mail_text('og_request_user_body', $variables),
+          );
+
+          // Send notifications to each admin; Sending an array of recipients
+          // implies that this is a bulk message.
+          module_invoke_all('og', 'user request', $gid, $admins, $message);
+        }
+        $return_value = array('type' => 'approval',
+                              'message' => t('Membership request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
+
+        break;
+      case OG_OPEN:
+        og_save_subscription($gid, $account->uid, array('is_active' => 1));
+        $return_value = array('type' => 'subscribed',
+                              'message' => t('You are now a member of the %group.', array('%group' => $node->title)));
+        break;
+      case OG_CLOSED:
+      case OG_INVITE_ONLY:
+        // admins can add members to these groups, but others can't.
+        if (og_is_group_admin($node)) {
+          og_save_subscription($gid, $account->uid, array('is_active' => 1));
+        }
+        else {
+          $return_value = array('type' => 'rejected',
+                              'message' => t('Membership request to the %group group was rejected, only group administrators can add users to this group.', array('%group' => $node->title)));
+        }
+    }
+  }
+                      
   return $return_value;
 }
 
@@ -1241,11 +1251,13 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'update':
       if (og_is_group_type($node->type)) {
         og_update_group($node);
-        // make sure the node owner is a full powered member
-        og_save_subscription($node->nid, $node->uid, array('is_active' => 1, 'is_admin' => 1));
-        // load new group into $user->og_groups so that author can get redirected to the new group
-        if ($node->uid == $user->uid) {
-          $user->og_groups = og_get_subscriptions($user->uid, 1, TRUE);
+        if ($node->uid > 0) {
+          // Make sure the node owner is a full powered member.
+          og_save_subscription($node->nid, $node->uid, array('is_active' => 1, 'is_admin' => 1));
+          // Load new group into $user->og_groups so that author can get redirected to the new group.
+          if ($node->uid == $user->uid) {
+            $user->og_groups = og_get_subscriptions($user->uid, 1, TRUE);
+          }
         }
       }
       else {
