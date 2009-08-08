@@ -95,7 +95,8 @@ function og_notifications_form_alter(&$form, $form_state, $form_id) {
           '#type' => 'checkbox',
           '#title' => t('Automatically enable notifications for any groups that I join.'),
           '#description' => t('Group notifications can also be <a href="!manage-url">customized</a> in greater detail if required.', array('!manage-url' => url('user/'. $account->uid .'/notifications/group'))),
-          '#default_value' => og_notifications_user_autosubscribe_get($account->uid)
+          '#default_value' => og_notifications_user_autosubscribe_get($account->uid),
+          '#access' => notifications_content_access($account, 'subscribe to content in groups'),
         );
       }
       break;
