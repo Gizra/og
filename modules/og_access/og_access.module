@@ -28,7 +28,9 @@ function og_access_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'load':
       if (og_is_group_post_type($node->type)) {
-        $node->og_public = (bool)db_result(db_query("SELECT og_public FROM {og_access_post} WHERE nid = %d", $node->nid));
+        // Can't assume that og_access post records already exist. See http://drupal.org/node/522728. 
+        $public_value = db_result(db_query("SELECT og_public FROM {og_access_post} WHERE nid = %d", $node->nid));
+        $node->og_public = ($public_value === '0') ? FALSE : TRUE;
       }
       break;
     case 'insert':
@@ -40,7 +42,14 @@ function og_access_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'update':
       // Save og_public.
       if (og_is_group_post_type($node->type)) {
-        drupal_write_record('og_access_post', $node, 'nid');
+        // Can't assume that og_access post records already exist. See http://drupal.org/node/522728. 
+        // TODO D7: use merge query.
+        if (!db_result(db_query_range("SELECT nid FROM {og_access_post} WHERE nid = %d", $node->nid, 0, 1))) {
+          drupal_write_record('og_access_post', $node);
+        } 
+        else {
+          drupal_write_record('og_access_post', $node, 'nid');
+        }
       }
       break;
     case 'delete':
