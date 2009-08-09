@@ -768,21 +768,6 @@ function og_panels_edit_layout($did, $group_node) {
 }
 
 /**
- * Pass through to the panels layout settings editor.
- *
- * @param int $did
- *  the $did of the og_panel to be edited.
- *
- * @param object $group_node
- *  the node object to which the og_panel is attached.
- */
-function og_panels_edit_layout_settings($did, $group_node) {
-  og_panels_set_breadcrumb('panel_edit', $group_node);
-  $display = og_panels_load_display($did);
-  return panels_edit_layout_settings($display, t('Save'), "node/$group_node->nid/og_panels");
-}
-
-/**
  * Pass through to the panels content editor.
  *
  * @param int $did
