@@ -647,6 +647,9 @@ function og_panels_form_submit($form, &$form_state) {
   if ($form_state['values']['did']) {
     $sql = "UPDATE {og_panels} SET page_title = '%s', path = '%s', published = %d, show_blocks = %d WHERE did = %d";
     db_query($sql, $form_state['values']['page_title'], $form_state['values']['path'], $form_state['values']['published'], $form_state['values']['show_blocks'], $form_state['values']['did']);
+    if ($form_state['values']['path'] != '' && module_exists('path')) {
+      _og_panels_tab_path_alias($form_state['values']['nid'], $form_state['values']['tab_num'], $form_state['values']['path']);
+    }
     drupal_set_message(t('Group page updated.'));
   }
   else {
@@ -659,11 +662,6 @@ function og_panels_form_submit($form, &$form_state) {
     _og_panels_tab_renumber($form_state['values']['nid']);
     drupal_set_message(t('Group page created.'));
     $form_state['redirect'] = 'node/'. $form_state['values']['nid']. '/og_panels/'. $display->did .'/panel_layout';
-  }
-  
-  // Whether new or an update, we should cycle the path alias.
-  if ($form_state['values']['path'] != '' && module_exists('path')) {
-    _og_panels_tab_path_alias($form_state['values']['nid'], $form_state['values']['tab_num'], $form_state['values']['path']);
   }
 }
 
