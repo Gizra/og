@@ -461,7 +461,7 @@ function og_panels_table_submit($form, &$form_state) {
  *
  * @return void
  **/
-function og_panels_page($nid, $tab_num, $print = FALSE) {
+function og_panels_page($nid, $tab_num, $print = TRUE) {
   $tab = og_panels_node_data($nid, $tab_num);
   $group_node = node_load($tab['nid']);
   og_set_group_context($group_node);
