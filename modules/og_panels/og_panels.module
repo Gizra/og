@@ -238,18 +238,16 @@ function _og_panels_node_access($nid, $tab_num) {
   $tab = og_panels_node_data($nid, $tab_num);
   if ($tab['nid']) {
     if ($tab['default_page']) {
-      // A bit counter-intuative.
+      // A bit counter-intuitive.
       // This prevents duplicate tabs from showing up when we override the "view" title.
       // Because we get that panel through our page_manager task_handler, and not a direct
       // menu callback.
       return FALSE;
     }
+    
     $node = node_load($nid);
     if ($tab['published']) {
       return node_access('view', $node);
-    }
-    else {
-      return node_access('update', $node);
     }
   }
   else {
@@ -361,7 +359,6 @@ function og_panels_table(&$form_state, $displays, $group_node) {
     $item['weight'] = array('#type' => 'weight', '#default_value' => $display->weight);
     $item['edit content'] = array('#value' => l(t('Edit content'), "node/$nid/og_panels/$display->did/panel_content", array('query' => drupal_get_destination())));
     $item['change layout'] = array('#value' => l(t('Change layout'), "node/$nid/og_panels/$display->did/panel_layout"));
-    $item['edit layout settings'] = array('#value' => l(t('Edit layout settings'), "node/$nid/og_panels/$display->did/panel_settings"));
     $item['edit page'] = array('#value' => l(t('Edit page'), "node/$nid/og_panels/form/$display->did", array('query' => drupal_get_destination())));
     $item['delete page'] =  array('#value' => l(t('Delete page'), "node/$nid/og_panels/$display->did/delete", array('query' => drupal_get_destination())));
 
@@ -426,7 +423,6 @@ function theme_og_panels_table($form) {
           drupal_render($form['displays'][$did]['weight']),
           drupal_render($form['displays'][$did]['edit content']),
           drupal_render($form['displays'][$did]['change layout']),
-          drupal_render($form['displays'][$did]['edit layout settings']),
           drupal_render($form['displays'][$did]['edit page']),
           drupal_render($form['displays'][$did]['delete page']),
         ),
@@ -435,7 +431,7 @@ function theme_og_panels_table($form) {
   }
 
   $output = drupal_render($form);
-  $header = array(t('Home page'), t('Title'), t('Weight'), array('align' => 'center', 'colspan' => 5, 'data' => t('Operations')));
+  $header = array(t('Home page'), t('Title'), t('Weight'), array('align' => 'center', 'colspan' => 4, 'data' => t('Operations')));
   return theme('table', $header, $rows, array('id' => 'og-panels-table-table')). $output;
 }
 
