@@ -463,18 +463,14 @@ function og_panels_table_submit($form, &$form_state) {
  **/
 function og_panels_page($nid, $tab_num, $print = FALSE) {
   $tab = og_panels_node_data($nid, $tab_num);
-  $group_node = node_load($tab['did']);
+  $group_node = node_load($tab['nid']);
+  og_set_group_context($group_node);
+
   // Set breadcrumb and title on non group nodes
   if ($tab['page_title']) {
     drupal_set_title(check_plain($tab['page_title']));
   }
-  if (!$tab['default_page']) {
-    $bc[] = l(t('Home'), "");
-    $bc[] = l($group_node->title, "node/$group_node->nid");
-    // I tried MSL but it let me down. again.
-    // menu_set_location($bc);
-    drupal_set_breadcrumb($bc);
-  }
+  
   // Mark node as read and show feed icon for any group panel page (how to do this better?)
   drupal_add_feed(url("node/$group_node->nid/feed"), t('@name at @site', array('@name' => $group_node->title, '@site' => variable_get('site_name', 'drupal'))));
   node_tag_new($group_node->nid);
