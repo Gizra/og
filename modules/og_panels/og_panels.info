@@ -1,8 +1,0 @@
-; $Id$
-name = Organic groups panels.
-description = "Enable group admins to create panel pages."
-package = "Organic groups"
-dependencies[] = og
-dependencies[] = panels
-dependencies[] = page_manager
-core = 6.x
