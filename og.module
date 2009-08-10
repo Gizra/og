@@ -486,7 +486,7 @@ function og_determine_context() {
     $gid = intval(current($_REQUEST['gids']));
     $node = node_load($gid);
   }
-  elseif (($item['map'][0] == 'og' && !empty($item['map'][2])) || $path == 'comment/reply/%') {
+  elseif ((!empty($item['map'][2]) && $item['map'][0] == 'og') || $path == 'comment/reply/%') {
     $node = menu_get_object('node', 2);
   }
   elseif ($path == 'comment/edit' || $path == 'comment/delete') {
