@@ -575,7 +575,6 @@ function og_get_group_context() {
  *   The group node object if set.
  */
 function og_set_group_context($node = NULL, $clear = FALSE) {
-  // ddebug_backtrace();
   static $stored_group_node;
 
   if ($clear) {
