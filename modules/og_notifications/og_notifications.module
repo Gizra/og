@@ -748,7 +748,7 @@ function _og_notifications_node_options($account, $node) {
   if (isset($node->og_groups)) {
     foreach ($node->og_groups as $index => $gid) {
       // Only members get to see subscription options.
-      if (isset($account->og_groups[$gid])) {
+      if (isset($account->og_groups[$gid]) && in_array($node->type, array_filter(variable_get('og_notifications_content_types', array())))) {
         // Content type
         $options[] = array(
           'name' => t('%type posts in %group', array('%group' => $node->og_groups_both[$gid], '%type' => node_get_types('name', $node->type))),
