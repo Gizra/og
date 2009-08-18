@@ -107,7 +107,7 @@ function og_notifications_form_alter(&$form, $form_state, $form_id) {
       // form.
       // user_profile_form is, oddly enough, also the form_id for forms in other
       // sub-tabs such as those added by the profile module.
-      if ($form['_category']['#value']=='account') {
+      if ($form['_category']['#value'] == 'account') {
         $account = $form['_account']['#value'];
         $form['messaging']['og_notifications_autosubscribe'] = array(
           '#type' => 'checkbox',
