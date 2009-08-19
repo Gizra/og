@@ -411,12 +411,25 @@ function og_notifications_user_page($account = NULL) {
   global $user;
   $account = $account ? $account : $user;
 
-  if (!empty($account->og_groups)) {
-    return drupal_get_form('og_notifications_add_form', $account) . drupal_get_form('og_notifications_manage_form', $account);
+  $groups = array();
+  foreach($account->og_groups as $gid => $group) {
+    // Handle unpublished groups.
+    if ($group['status']) {
+      $groups[$gid] = $group['title'];
+    }
+  }
+
+  if (!empty($groups)) {
+    $output = drupal_get_form('og_notifications_add_form', $account, $groups) . drupal_get_form('og_notifications_manage_form', $account);
   }
   else {
-    drupal_set_message(t('There are no active group subscriptions available.'));
+    // If there are no active groups available do not show either form. This
+    // also applies to unpublished groups even if related subscriptions are
+    // still active.
+    $output = t('There are no active group subscriptions available.');
   }
+
+  return $output;
 }
 
 /**
@@ -427,7 +440,7 @@ function og_notifications_user_page($account = NULL) {
  * @return Array $form
  *   Form array.
  */
-function og_notifications_add_form($form_state, $account) {
+function og_notifications_add_form($form_state, $account, $groups) {
   $content_types = array_filter(variable_get('og_notifications_content_types', array()));
   $content_names = node_get_types('names');
   foreach ($content_types as $type) {
@@ -436,10 +449,6 @@ function og_notifications_add_form($form_state, $account) {
   $defaults = _notifications_subscription_defaults($account);
   $send_methods = _notifications_send_methods();
   $send_intervals = _notifications_send_intervals();
-
-  foreach($account->og_groups as $gid => $group) {
-    $account->og_groups[$gid] = $group['title'];
-  }
 
   $header = array(t('Group'), t('Type'), t('Send method'), t('Send Interval'));
   // Reuse notifications theme function for the embedded table. This also
@@ -454,7 +463,7 @@ function og_notifications_add_form($form_state, $account) {
   );
   $form['subscription']['group'][0] = array(
     '#type' => 'select',
-    '#options' => $account->og_groups
+    '#options' => $groups
   );
   $form['subscription']['node_type'][0] = array(
     '#type' => 'select',
@@ -543,12 +552,13 @@ function og_notifications_manage_form($form_state, $account) {
     INNER JOIN {notifications_fields} nof1 ON no.sid = nof1.sid
     INNER JOIN {notifications_fields} nof2 ON no.sid = nof2.sid
     INNER JOIN {node} n ON nof1.value = n.nid
-    WHERE no.uid = %d AND (no.type = 'grouptype') AND no.conditions = 2 AND nof1.field = 'group' AND nof2.field = 'type'";
+    WHERE no.uid = %d AND (no.type = 'grouptype') AND no.conditions = 2 AND nof1.field = 'group' AND nof2.field = 'type' AND n.status = 1";
   $sql .= tablesort_sql($header);
   $count_sql = "SELECT COUNT(nof2.value) FROM {notifications} no
     INNER JOIN {notifications_fields} nof1 ON no.sid = nof1.sid
     INNER JOIN {notifications_fields} nof2 ON no.sid = nof2.sid
-    WHERE no.uid = %d AND (no.type = 'grouptype') AND no.conditions = 2 AND nof1.field = 'group' AND nof2.field = 'type'";
+    INNER JOIN {node} n ON nof1.value = n.nid
+    WHERE no.uid = %d AND (no.type = 'grouptype') AND no.conditions = 2 AND nof1.field = 'group' AND nof2.field = 'type' AND n.status = 1";
   $result = pager_query($sql, 50, 0, $count_sql, $account->uid);
 
   // Reuse notifications theme function for the embedded table.
