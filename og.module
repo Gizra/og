@@ -454,8 +454,11 @@ function og_element_info() {
  * Process organic groups audience FAPI element.
  */
 function og_elements_process($element, &$form_state, $form) {
-
   global $user;
+  
+  $field = $form['#fields'][$element['#field_name']]['field'];
+  $instance = $form['#fields'][$element['#field_name']]['instance'];
+  $field_key  = $element['#columns'][0];  
 
   // Allow showing the form element for another user.
   $uid = !empty($element['uid']) ? $element['uid'] : $user->uid;
@@ -489,12 +492,6 @@ function og_elements_process($element, &$form_state, $form) {
     // Show a select list if their are a minimum of groups.
     $type = $groups_count >= $element['#minimum_for_select_list'] ? 'select' : 'checkboxes';
   }
-
-
-  $field = $form['#fields'][$element['#field_name']]['field'];
-  $instance = $form['#fields'][$element['#field_name']]['instance'];
-  $field_key  = $element['#columns'][0];
-
 
   $element[$field_key] = array(
     '#type' => $type,

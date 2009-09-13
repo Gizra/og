@@ -40,6 +40,42 @@ function hook_og_save_association_alter($object) {
   }
 }
 
+/**
+ * Alter a group that is being fetched.
+ * 
+ * @param $group
+ *   An object with the following keys:
+ *   - nid: 
+ *       The node ID of the group.
+ *   - data:
+ *       Optional; An array of data related to the association. The data is per
+ *       per group, and it's up to an implementing module to act on the data.
+ */
+function hook_og_get_group_alter($group) {
+  // Set the theme according to the user name.
+  global $user;
+  if ($user->name == 'foo') {
+    // An implementing module should act on this data and change the theme
+    // accordingly.
+    $group->data['theme'] = 'MY_THEME';
+  }  
+}
+
+/**
+ * Alter a group that is being saved.
+ * 
+ * @param $group
+ *   An object with the following keys:
+ *   - nid: 
+ *       The node ID of the group.
+ *   - data:
+ *       Optional; An array of data related to the association. The data is per
+ *       per group, and it's up to an implementing module to act on the data.
+ */
+function hook_og_set_group_alter($group) {
+
+}
+
 
 /**
  * @} End of "addtogroup hooks".
