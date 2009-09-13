@@ -1,0 +1,126 @@
+<?php
+// $Id: og.install,v 1.71.4.5 2009/05/15 17:28:02 weitzman Exp $
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the organic groups module.
+ */
+
+/**
+ * Implement hook_schema().
+ */
+function og_schema() {
+  $schema = array();
+
+  $schema['og'] = array(
+    'description'     => 'Stores information about each connection of a node or a user to a group node.',
+    'fields'          => array(
+       'oid' => array(
+        'description' => 'Unique ID for the group association.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),  
+      'nid'               => array(
+        'description'     => "The group's node ID.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'content_id'             => array(
+        'description'     => "The node or user's ID for the object that needs to be associated with a group node.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'type'     => array(
+        'description'     => 'The type of the content - "node" or "user".',
+        'type'            => 'varchar',
+        'length'          => 32,
+        'not null'        => TRUE,
+        'default' => '',
+      ),
+      'state'     => array(
+        'description'     => 'The state of the association.',
+        'type'            => 'varchar',
+        'length'          => 255,
+        'not null'        => TRUE,
+        'default' => '',
+      ),      
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array with the data related to the associated node or user.',
+      ),
+    ),
+    'primary key' => array('oid'),
+    'unique keys' => array(
+      'oid' => array('oid'),
+    ),
+  );
+
+  $schema['og_content_types'] = array(
+    'description'     => 'Store the content types that are marked as playing a part in the organic groups.',
+    'fields'          => array(
+      'name'     => array(
+        'description'     => 'The name of the content type.',
+        'type'            => 'varchar',
+        'length'          => 255,
+        'not null'        => TRUE,
+        'default' => '',
+      ),  
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array with the data related to the associated node or user.',
+      ),
+    ),
+    'primary key' => array('name'),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+  );
+
+  $schema['og_groups'] = array(
+    'description'     => 'Store information related to the groups.',
+    'fields'          => array(
+      'nid'               => array(
+        'description'     => "The group's node ID.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array with the data to the group.',
+      ),
+    ),
+    'primary key' => array('nid'),
+    'unique keys' => array(
+      'nid' => array('nid'),
+    ),
+  );  
+  
+  return $schema;
+}
+
+/**
+ * Implement hook_install().
+ */
+function og_install() {
+  drupal_install_schema('og');
+}
+
+/**
+ * Implement hook_uninstall().
+ */
+function og_uninstall() {
+  drupal_uninstall_schema('og');
+}

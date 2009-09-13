@@ -1,0 +1,69 @@
+<?php
+// $Id$
+
+/**
+ * Test the organic groups API functions.
+ * 
+ * Test associating nodes and users with a single node.
+ */
+class OgApiUnitTest extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Grouping content',
+      'description' => 'Test the organic groups API.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og');
+    $web_user = $this->drupalCreateUser(array('create article content', 'create page content'));
+    $this->drupalLogin($web_user);
+    $this->uid = $web_user->uid;
+  }
+
+  /**
+   * Create four nodes a user, and associate them to a group.
+   */
+  function testContentAssociation() {
+  	$group = $this->drupalCreateNode(array('type' => 'article'));
+  	$nodes = array();
+    $nodes[] = $this->drupalCreateNode(array('type' => 'article'));
+    $nodes[] = $this->drupalCreateNode(array('type' => 'article'));
+    $nodes[] = $this->drupalCreateNode(array('type' => 'article'));
+    $nodes[] = $this->drupalCreateNode(array('type' => 'page'));
+    
+    foreach ($nodes as $node) {
+      og_set_association($group->nid, $node->nid, 'node');	
+    }
+            
+    // Associate the user.
+    og_set_association($group->nid, $this->uid, 'user');
+
+    $association_get = og_get_association_by_group($group->nid);
+    
+    $this->assertTrue(count($association_get['node']) == 4, t('All associated nodes were found.'));
+    $this->assertTrue(count($association_get['user']) == 1, t('Associated user was found.'));
+    
+    
+    // Move some content to a new group.
+    $new_group = $this->drupalCreateNode(array('type' => 'article'));
+    og_change_group_association($group->nid, $new_group->nid, array('node' => array($nodes[1]->nid, $nodes[2]->nid, $nodes[3]->nid)));
+    
+    $association_get = og_get_association_by_group($group->nid);
+    $this->assertTrue(count($association_get['node']) == 1, t('Some content moved from old group.'));
+    
+    $association_get = og_get_association_by_group($new_group->nid);
+    $this->assertTrue(count($association_get['node']) == 3, t('Some content moved to new group.'));
+    
+    // Move all the rest of the content to a new group.
+     og_change_group_association($group->nid, $new_group->nid);
+    $association_get = og_get_association_by_group($group->nid);
+    $this->assertTrue(empty($association_get), t('All content moved from old group.'));
+     
+    $association_get = og_get_association_by_group($new_group->nid);
+    $this->assertTrue(count($association_get['node']) == 4 && count($association_get['user']) == 1, t('All content moved to new group.'));    
+     
+  }
+}

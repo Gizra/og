@@ -1,0 +1,561 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Enable users to create and manage groups.
+ */
+
+
+/*******************************************************************************
+ * API functions
+ ******************************************************************************/
+
+/**
+ * Set an association between a node and a group node.
+ * 
+ * @param $nid
+ *   The group's node ID.
+ * @param $content_id
+ *   The ID of the content to be associated with the group node.
+ * @param $type
+ *   The type of the content - "node" or "user".
+ * @param $state
+ *   The state of the association.
+ * @param $data
+ *   An array of data related to the association.
+ * @return
+ */
+function og_set_association($nid, $content_id, $type = 'node', $state = '', $data = array()) {
+  $object = new stdClass();
+  $object->nid = $nid;
+  $object->content_id = $content_id;
+  $object->type = $type;
+  $object->state = $state;
+  $object->data = $data;
+  // Let other modules change the saved object.
+  drupal_alter('og_save_association', $object);
+
+  // Delete any previous record.
+  og_delete_association($object->nid, $object->content_id, $object->type);
+
+  // Write the new record to the database.
+  drupal_write_record('og', $object);
+}
+
+/**
+ * Get the content associated with a group node.
+ *
+ * @param $nid
+ *   The group node ID.
+ * @param $type
+ *   Optional; Return only the content of a certain type. The value can be a
+ *   fieldable object such as "node" or "user".
+ */
+function og_get_association_by_group($nid, $type = array('node', 'user')) {
+	$return = array();
+
+  $query = db_select('og', 'og');
+  $result = $query->fields('og', array('nid', 'content_id', 'type', 'state', 'data'))
+    ->condition('nid', $nid)
+    ->condition('type', $type, 'IN')
+    ->execute()
+    ->fetchAll();
+
+  foreach ($result as $value) {
+  	$return[$value->type][$value->content_id] = $value;
+  }
+  return $return;
+}
+
+/**
+ * Get the groups associated with a content.
+ *
+ * This can be used to get all the groups related to a node, or to get all the
+ * subscriptions of a user.
+ *
+ * @param $nid
+ *   The content ID.
+ * @param $type
+ *   Array with the content type. This value must be a fieldable object such as
+ *   "node" or "user".
+ */
+function og_get_association_by_content($content_id, $type = 'node') {
+  $query = db_select('og', 'og');
+  return $query->fields('og', array('nid', 'content_id', 'type', 'state', 'data'))
+    ->condition('content_id', $content_id)
+    ->condition('type', $type)
+    ->execute()
+    ->fetchAll();
+}
+
+/**
+ * Delete all content associated with a group.
+ *
+ * @param $nid
+ *   The group node ID.
+ * @param $type
+ *   Optional; Delete the content of a certain type. The value can be "node"
+ *   or "user".
+ */
+function og_delete_association_by_group($nid, $type = array('node', 'user')) {
+  db_delete('og')
+    ->condition('nid', $nid)
+    ->condition('type', $type, 'IN')
+    ->execute();
+}
+
+/**
+ * Delete all group nodes associated with a content ID.
+ *
+ * @param $nid
+ *   The content ID.
+ * @param $type
+ *   The type of the content. The value can be "node" or "user".
+ */
+function og_delete_association_by_content($content_id, $type = 'node') {
+  db_delete('og')
+    ->condition('content_id', $content_id)
+    ->condition('type', $type)
+    ->execute();
+}
+
+/**
+ * Delete a specific association.
+ *
+ * @param $nid
+ *   The group node ID.
+ * @param $content_id
+ *   The content ID.
+ * @param $type
+ *   The content type.
+ */
+function og_delete_association($nid, $content_id, $type = 'node') {
+  db_delete('og')
+    ->condition('nid', $nid)
+    ->condition('content_id', $content_id)
+    ->condition('type', $type)
+    ->execute();
+}
+
+/**
+ * Move all associated objects to a new group node.
+ *
+ * @param $old_nid
+ *  The old group node ID.
+ * @param $new_nid
+ *   The new group node ID.
+ * @param $content
+ *   Array keyed by content type of the content IDs that needs to be
+ *   changed.
+ *   @code
+ *   $content_ids = array(
+ *     'node' = array(1, 2),
+ *     'user' = array(1),
+ *   );
+ *   @endcode
+ *   If this value is an empty array, then all the content IDs that are
+ *   associated with the group node will be changed.
+ * @return
+ *   An array with the changed content IDs keyed by the content type.
+ */
+function og_change_group_association($old_nid, $new_nid, $content = array()) {
+  $query = db_update('og')
+    ->fields(array('nid' => $new_nid))
+    ->condition('nid', $old_nid);
+
+  if (!empty($content)) {
+    $db_or = db_or();
+    foreach ($content as $type => $content_id) {
+      $db_or->condition(db_and()->condition('type', $type)->condition('content_id', $content_id));
+    }
+    $query->condition($db_or);
+  }
+    $query->execute();
+}
+
+/**
+ * Get a group object.
+ *
+ * The group object is not the group node. It is the data related to a group,
+ * which can be for example the access permissions per group.
+ *
+ * @param $nid
+ *   The group node ID.
+ */
+function og_get_group($nid) {
+	$group = db_query("SELECT * FROM {og_groups} WHERE nid = :nid", array(':nid' => $nid))->fetchObject();
+	// Unserialize the data.
+	$group->data = unserialize($group->data);
+	
+	// Allow other modules to change the group object.
+	drupal_alter('og_get_group', $group);
+	
+	return $group;
+}
+
+/**
+ * Set a group object.
+ *
+ * @param $nid
+ *   The group node ID.
+ * @param $data
+ *   Optional; An array with data related to the group.
+ */
+function og_set_group($nid, $data = array()) {
+  $group = new stdClass();
+  $group->nid = $nid;
+  $group->data = $data;
+
+  // Allow other modules to change the group object.
+  drupal_alter('og_set_group', $group);
+
+  // Delete an existing record.
+  og_group_delete($nid);
+
+  // Write the new record.
+  drupal_write_record('og_groups', $group);
+}
+
+/**
+ * Delete a group object.
+ *
+ * @param $nid
+ *   The group node ID.
+ */
+function og_group_delete($nid) {
+  db_delete('og_groups')
+    ->condition('nid', $nid)
+    ->execute();
+}
+
+/**
+ * Get the groups a content belongs to.
+ *
+ * @param $content_id
+ *   The content ID.
+ * @param $type
+ *   The content type.
+ * @return
+ *   An array with the groups or an empty array if none found.
+ */
+function og_get_groups_of_content($content_id, $type = 'user') {
+  return db_query("SELECT * FROM {og} WHERE content_id = :content_id AND type = :type", array(':content_id' => $content_id, ':type' => $type))->fetchAllAssoc('nid');
+}
+
+/**
+ * Get the groups a content belongs to - ready to be used in a form element.
+ *
+ * @param $groups
+ *   An array of group objects.
+ * @return
+ *   An array keyed by "content groups" and "other groups". Inside them there are
+ *   the group's node ID and the sanitized group's name.
+ *
+ * @see og_get_groups_of_content().
+ */
+function og_get_groups_for_form($content_id, $type = 'user') {
+  $return = array('content groups' => array(), 'other groups' => array());
+  // Get all the existing groups.
+  if ($all_groups = og_get_all_groups_for_form()) {
+
+    // Get the groups belonging to the content.
+    $content_groups = array_keys(og_get_groups_of_content($content_id, $type));
+
+    // TODO: Is it faster to use array_diff & array_intersect?
+    foreach ($all_groups as $nid => $name) {
+      if (in_array($nid, $content_groups)) {
+        $return['content groups'][$nid] = $name;
+      }
+      else {
+        $return['other groups'][$nid] = $name;
+      }
+    }
+
+  }
+
+  return $return;
+}
+
+function og_get_all_groups_for_form() {
+  $return = db_query("SELECT og.nid, n.title FROM {og_groups} og INNER JOIN {node} n ON og.nid = n.nid ORDER BY og.nid")->fetchAllKeyed();
+  // Sanitize the result.
+  array_walk($return, 'check_plain');
+  return $return;
+}
+
+/**
+ * Return the group type (i.e. "group" or "post") of a node type.
+ *
+ * @param $node_type
+ *   The node type to be checked.
+ * @return
+ *   The group type or an empty string if node type doesn't participate in
+ *   organic groups.
+ */
+function og_get_group_type($node_type) {
+  return variable_get('og_content_type_usage_'. $type, 'omitted');
+}
+
+/**
+ * Add OG audience field to group post node types.
+ * @param $node_types
+ *   Array of the node types that need to have the field attached to.
+ * @return
+ *   The node types that have been changed, as some might already have the
+ *   fields attached to them.
+ */
+function og_set_fields($node_types = array()) {
+  foreach ($node_types as $type) {
+    $field = field_info_field('og_audience');
+    if (empty($field)) {
+      $field = array(
+        'field_name' => 'og_audience',
+        'type' => 'list_number',
+      );
+      $field = field_create_field($field);
+    }
+
+    $instance = field_info_instance('og_audience', $type);
+    if (empty($instance)) {
+      $instance = array(
+        'field_name' => 'og_audience',
+        'bundle' => $type,
+        'label' => t('Groups audience'),
+        // FIXME: the field is created with wrong widget.
+        'widget_type' => 'og_audience',
+        'display' => array(
+          'full' => array(
+            'label' => 'hidden',
+            'type' => 'list_default',
+          ),
+          'teaser' => array(
+            'label' => 'hidden',
+            'type' => 'list_default',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+}
+
+/*******************************************************************************
+ * Hook implementations
+ ******************************************************************************/
+
+/**
+ * Implement hook_field_info().
+ */
+function og_field_info() {
+  return array(
+    'og' => array(
+      'label' => t('Organic groups'),
+      'description' => t('This field stores group nodes.'),
+      'default_widget' => 'og_audience',
+      'default_formatter' => 'og_list_default',
+    ),
+  );
+}
+
+/**
+ * Implement hook_field_formatter_info().
+ */
+function og_field_formatter_info() {
+  return array(
+    'og_list_default' => array(
+      'label' => t('OG default list'),
+      'field types' => array('og'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_field_schema().
+ */
+function og_field_schema($field) {
+  $columns = array(
+    'value' => array(
+      'type' => 'float',
+      'unsigned' => TRUE,
+      'not null' => FALSE,
+    ),
+  );
+  return array(
+    'columns' => $columns,
+    'indexes' => array(
+      'value' => array('value'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_field_widget_info().
+ */
+function og_field_widget_info() {
+  return array(
+    'og_audience' => array(
+      'label' => t('Organic groups audience'),
+      'field types' => array('og'),
+      'behaviors' => array(
+        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implement hook_field_widget().
+ */
+function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = NULL) {
+  $element = array(
+    '#type' => $instance['widget']['type'],
+    '#default_value' => !empty($items) ? $items : array(),
+  );
+  return $element;
+}
+
+/**
+ * Implement hook_field_is_empty().
+ */
+function og_field_is_empty($item, $field) {
+  return empty($item['value']);
+}
+
+
+/**
+ * Implement hook_element_info().
+ *
+ * Define a group selection form element.
+ */
+function og_element_info() {
+  return array(
+    'og_audience' => array(
+      '#input' => TRUE,
+      '#columns' => array('value'),
+      '#delta' => 0,
+      '#read_only' => FALSE,
+      '#opt_group' => FALSE,
+      '#opt_group_access_check' => TRUE,
+      '#user_groups' => array(),
+      '#other_groups' => array(),
+      '#minimum_for_select_list' => 20,
+      '#uid' => NULL,
+      '#process' => array('og_elements_process'),
+    ),
+  );
+}
+
+/*******************************************************************************
+ * Function callbacks
+ ******************************************************************************/
+
+/**
+ * Process organic groups audience FAPI element.
+ */
+function og_elements_process($element, &$form_state, $form) {
+
+  global $user;
+
+  // Allow showing the form element for another user.
+  $uid = !empty($element['uid']) ? $element['uid'] : $user->uid;
+  $content_groups = og_allowed_values($field, $uid);
+
+  // Determine if a user may see other groups as-well.
+  $opt_group = FALSE;
+
+  if (user_access('administer organic groups')) {
+    $opt_group = TRUE;
+  }
+  elseif ($element['#opt_group'] && $element['#opt_group_access_check']) {
+    $opt_group = TRUE;
+  }
+
+  // The group options presented to the user.
+  $options = array();
+  if ($opt_group) {
+    $groups_count = count($content_groups['content groups']) + count($content_groups['other groups']);
+    if (!empty($content_groups['content groups'])) {
+      $options += array(t('My groups') => $content_groups['content groups']);
+    }
+    if (!empty($content_groups['other groups'])) {
+      $options += array(t('Other groups') => $content_groups['other groups']);
+    }
+    $type = 'select';
+  }
+  else {
+    $groups_count = count($content_groups['content groups']);
+    $options = $content_groups['content groups'];
+    // Show a select list if their are a minimum of groups.
+    $type = $groups_count >= $element['#minimum_for_select_list'] ? 'select' : 'checkboxes';
+  }
+
+
+  $field = $form['#fields'][$element['#field_name']]['field'];
+  $instance = $form['#fields'][$element['#field_name']]['instance'];
+  $field_key  = $element['#columns'][0];
+
+
+  $element[$field_key] = array(
+    '#type' => $type,
+    '#title' => !empty($element['#title']) ? $element['#title'] : t('Groups'),
+    '#description' => !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.'),
+    '#options' => $options,
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
+    '#required' => isset($element['#required']) ? $element['#required'] : $instance['required'],
+    '#multiple' => isset($element['#multiple']) ? $element['#multiple'] : $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED,
+    '#attributes' => !empty($element['#attributes']) ? $element['#attributes'] : array('class' => array('og-audience')),
+    '#disabled' => empty($groups_count),
+  );
+
+  // Set #element_validate in a way that it will not wipe out other
+  // validation functions already set by other modules.
+  if (empty($element['#element_validate'])) {
+    $element['#element_validate'] = array();
+  }
+  array_unshift($element['#element_validate'], 'options_validate');
+
+  // Make sure field info will be available to the validator which
+  // does not get the values in $form.
+  $form_state['#fields'][$element['#field_name']] = $form['#fields'][$element['#field_name']];
+
+  return $element;
+}
+
+/**
+ * Create an array of allowed values for this field.
+ *
+ * @return
+ *   Array keyed by "content groups" and "other groups".
+ */
+function og_allowed_values($field, $uid = NULL) {
+  $allowed_values = &drupal_static(__FUNCTION__, array());
+
+  if (isset($allowed_values[$field['field_name']])) {
+    return $allowed_values[$field['field_name']];
+  }
+
+  global $user;
+  $uid = !empty($uid) ? $uid : $user->uid;
+
+  $allowed_values[$field['field_name']] = og_get_groups_for_form($uid, 'user');
+  return $allowed_values[$field['field_name']];
+}
+
+
+/**
+ * Theme function for OG list field formatter.
+ *
+ * @return
+ *   A link to the group node.
+ */
+function theme_field_formatter_og_list_default($element) {
+  $field = field_info_field($element['#field_name']);
+  $options = og_allowed_values($field);
+  // Flatten the options. We don't use array_merge() because we want to keep the
+  // index key, which is the group node ID.
+  $options = $options['content groups'] + $options['other groups'];
+  // Return the group's link.
+  $return = l($options[$element['#item']['value']], 'node/'. $element['#item']['value']);
+  return $return;
+}
