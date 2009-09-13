@@ -1,7 +1,6 @@
 name = Organic groups
 description = "API to allow associating content with group nodes."
 package = "Organic groups"
-dependencies[] = list
 core = 7.x
 files[] = og.module
 files[] = og.install
