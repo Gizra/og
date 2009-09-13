@@ -422,7 +422,6 @@ function og_field_is_empty($item, $field) {
   return empty($item['value']);
 }
 
-
 /**
  * Implement hook_element_info().
  *
