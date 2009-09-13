@@ -322,7 +322,6 @@ function og_set_fields($node_types = array()) {
         'field_name' => 'og_audience',
         'bundle' => $type,
         'label' => t('Groups audience'),
-        // FIXME: the field is created with wrong widget.
         'widget_type' => 'og_audience',
         'display' => array(
           'full' => array(
