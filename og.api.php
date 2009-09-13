@@ -76,6 +76,25 @@ function hook_og_set_group_alter($group) {
 
 }
 
+/**
+ * Return the types of group or group posts available.
+ * 
+ * @return
+ *   An array keyed with the type name and it's value is an array with the 
+ *   following keys:
+ *   - type: The type can be "group", "group_post" or "omitted".
+ *   - description: Explanation about the type.
+ */
+function hook_og_types_info() {
+  // Add a wiki style group post.
+  return array(
+    'wiki' => array(
+      'type' => 'group_post',
+      'description' => t('Wiki group post (any group member may edit).'),
+    )
+  );
+}
+
 
 /**
  * @} End of "addtogroup hooks".

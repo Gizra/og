@@ -285,19 +285,6 @@ function og_get_all_groups_for_form() {
 }
 
 /**
- * Return the group type (i.e. "group" or "post") of a node type.
- *
- * @param $node_type
- *   The node type to be checked.
- * @return
- *   The group type or an empty string if node type doesn't participate in
- *   organic groups.
- */
-function og_get_group_type($node_type) {
-  return variable_get('og_content_type_usage_'. $type, 'omitted');
-}
-
-/**
  * Add OG audience field to group post node types.
  * @param $node_types
  *   Array of the node types that need to have the field attached to.
@@ -337,6 +324,61 @@ function og_set_fields($node_types = array()) {
       field_create_instance($instance);
     }
   }
+}
+
+/**
+ * Get an array with all the types of group or group posts available.
+ */
+function og_get_og_types() {
+  $og_types = &drupal_static(__FUNCTION__, array());
+
+  if (!empty($og_types)) {
+    return $og_types;
+  }
+    
+  $og_types = module_invoke_all('og_types_info');  
+  // Add a non organic groups type.
+  $og_types['omitted'] = array('type'=> 'omitted', 'description' => t('May not be posted into a group.'));
+  
+  return $og_types;
+}
+
+/**
+ * Return all content types which meet a specified organic group type.
+ * 
+ * @param $type
+ *   Optional; An array with the organic group types, for example "group" or 
+ *   "group_post". 
+ * @return
+ *   An array keyed with content type and organic group type as value, or all 
+ *   the content types if $type is empty.  
+ */
+function og_get_type_by_og_type($og_types = array()) {
+  $return = array();
+  if (empty($og_types)) {
+    // All organic groups types.
+    $og_types = array_keys(og_get_og_types()); 
+  }
+  foreach (node_type_get_types() as $type => $value) {
+     $usage = og_get_group_type($type);
+    if (in_array($usage, $og_types)) {
+      $return[$type] = $usage;
+    }
+  }
+  return $return;
+}
+
+/**
+ * Return the group type (i.e. "group" or "group_post") of a node type.
+ *
+ * @param $node_type
+ *   The node type to be checked.
+ * @return
+ *   The group type or an empty string if node type doesn't participate in
+ *   organic groups.
+ */
+function og_get_group_type($type) {
+  return variable_get('og_content_type_usage_'. $type, 'omitted');
 }
 
 /*******************************************************************************
@@ -441,6 +483,23 @@ function og_element_info() {
       '#uid' => NULL,
       '#process' => array('og_elements_process'),
     ),
+  );
+}
+
+/**
+ * Implement hook_og_types_info().
+ */
+function og_og_types_info() {
+  return array(   
+    'group' => array(
+       'type' => 'group',
+       'description' => t('Group node'),
+       
+     ),
+     'group_post' => array(
+       'type' => 'group_post',
+       'description' => t('Standard group post (typically only author may edit).'),
+     ),
   );
 }
 
