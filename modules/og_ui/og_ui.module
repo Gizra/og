@@ -1,0 +1,146 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Allow users to subscribe and manage their subscriptions to groups.
+ */
+
+/*******************************************************************************
+ * Hook implementations
+ ******************************************************************************/
+
+
+/**
+ * Implement hook_menu().
+ */
+function og_ui_menu() {
+  // Anonymous users should be able to get to the join page.
+  $items['og/subscribe/%node'] = array(
+    'type' => MENU_CALLBACK, 
+    'file' => 'og.pages.inc',
+    'page callback' => 'og_subscribe',
+    'page arguments' => array(2), 
+    'access callback' => 'node_access',
+    'access arguments' => array('view', 2),
+    'title' => 'Join group'
+  );
+  
+  $items['og/opml'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_opml', 
+    'access callback' => 'user_is_logged_in', 
+    'title' => 'OPML',
+  );
+  $items['og/unsubscribe/%node/%user'] = array(
+    'type' => MENU_CALLBACK, 
+    'file' => 'og.pages.inc',
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('og_confirm_unsubscribe', 2, 3),
+    'access callback' => 'og_menu_access_unsubscribe', 
+    'access arguments' => array(2, 3),
+    'title' => 'Leave group',
+  );
+  
+  $items['og/approve/%node/%user/%'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_approve',
+    'page arguments' => array(2, 3, 4),
+    'access callback' => 'og_is_group_admin', 
+    'access arguments' => array(2),
+    'title' => 'Approve membership request'
+  ); 
+  $items['og/deny/%node/%user/%'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'og_deny',
+    'page arguments' => array(2, 3, 4),
+    'access callback' => 'og_is_group_admin', 
+    'access arguments' => array(2),
+    'title' => 'Deny membership request',
+  );
+  $items['og/create_admin/%node/%user'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_create_admin_confirm', 2, 3), 
+    'access callback' => 'og_is_group_admin', 
+    'access arguments' => array(2),
+    'title' => 'Create group administrator',
+    'file' => 'og.pages.inc',
+  );
+  $items['og/delete_admin/%node/%user'] = array(
+    'type' => MENU_CALLBACK, 
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('og_remove_admin_confirm', 2, 3),
+    'access callback' => 'og_is_group_admin', 
+    'access arguments' => array(2),
+    'title' => 'Delete group administrator',
+    'file' => 'og.pages.inc',
+  );
+  
+  // members only and group may not be invite-only or closed
+  $items['og/invite/%node'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_invite_form', 2),
+    'access callback' => 'og_menu_access_invite', 
+    'access arguments' => array(2),
+    'title' => 'Send invitation', 
+    'type' => MENU_CALLBACK, 
+    'file' => 'og.pages.inc',
+  );
+  $items["og/manage/%node"] = array(
+    'page callback' => 'og_manage',
+    'page arguments' => array(2),
+    'access callback' => 'og_is_group_member', 
+    'access arguments' => array(2, FALSE),
+    'title' => 'Manage membership', 
+    'type' => MENU_CALLBACK, 
+    'file' => 'og.pages.inc',
+  );
+  
+  $items['admin/og'] = array(
+    'title' => 'Organic groups',
+    'description' => 'Administer the suite of Organic groups modules.',
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/og/og'] = array(
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('og_ui_admin_settings'), 
+    'title' => 'Organic groups configuration', 
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Configure organic groups module.', 
+    'file' => 'og_ui.admin.inc',
+    'file path' => drupal_get_path('module', 'og_ui'),
+    'weight' => -5,
+  );
+  
+  // group admin only
+  $items['og/users/%node/add_user'] = array(
+    'page callback' => 'drupal_get_form', 
+    'title' => 'Add members', 
+    'page arguments' => array('og_add_users', 2), 
+    'type' => MENU_LOCAL_TASK, 
+    'file' => 'og.pages.inc',
+    'weight' => 5, 
+    'access callback' => 'og_is_group_admin',
+    'access arguments' => array(2),
+  );
+
+    // Broadcast tab on group node.
+  $items['node/%node/broadcast'] = array(
+    'title' => 'Broadcast',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_broadcast_form', 1), 
+    'access callback' => 'og_broadcast_access', 
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'og.pages.inc',
+    'weight' => 7
+  );
+
+  return $items;
+}
