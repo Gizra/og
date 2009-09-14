@@ -86,7 +86,7 @@ function og_get_association_by_content($content_id, $type = 'node') {
     ->condition('content_id', $content_id)
     ->condition('type', $type)
     ->execute()
-    ->fetchAll();
+    ->fetchAllAssoc('nid');
 }
 
 /**
@@ -353,7 +353,7 @@ function og_get_og_types() {
  *   An array keyed with content type and organic group type as value, or all 
  *   the content types if $type is empty.  
  */
-function og_get_type_by_og_type($og_types = array()) {
+function og_get_node_type_by_group_type($og_types = array()) {
   $return = array();
   if (empty($og_types)) {
     // All organic groups types.
@@ -371,7 +371,7 @@ function og_get_type_by_og_type($og_types = array()) {
 /**
  * Return the group type (i.e. "group" or "group_post") of a node type.
  *
- * @param $node_type
+ * @param $type
  *   The node type to be checked.
  * @return
  *   The group type or an empty string if node type doesn't participate in
@@ -380,6 +380,33 @@ function og_get_type_by_og_type($og_types = array()) {
 function og_get_group_type($type) {
   return variable_get('og_content_type_usage_'. $type, 'omitted');
 }
+
+/**
+ * Return TRUE if the node type is a "group" type.
+ * 
+ * This is a wrapper function around og_get_group_type().
+ *
+ * @param $type
+ *   The node type to be checked.
+ */
+function og_is_group($type) {
+  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'group';
+}
+
+/**
+ * Return TRUE if the node type is a "group content" type.
+ * 
+ * This is a wrapper function around og_get_group_type().
+ *
+ * @param $type
+ *   The node type to be checked.
+ */
+function og_is_group_post($type) {
+  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'group post';
+}
+
+
+
 
 /*******************************************************************************
  * Hook implementations
@@ -496,8 +523,8 @@ function og_og_types_info() {
        'description' => t('Group node'),
        
      ),
-     'group_post' => array(
-       'type' => 'group_post',
+     'group post' => array(
+       'type' => 'group post',
        'description' => t('Standard group post (typically only author may edit).'),
      ),
   );
