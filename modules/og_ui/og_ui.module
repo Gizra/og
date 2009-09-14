@@ -248,8 +248,8 @@ function og_determine_context_by_node($node, $account = NULL) {
  * @return
  *   The group node ID if exists.
  */
-function og_get_group_context() {
-  return og_set_group_context();
+function og_get_context() {
+  return og_set_context();
 }
 
 /**
