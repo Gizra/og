@@ -89,7 +89,7 @@ function hook_og_types_info() {
   // Add a wiki style group post.
   return array(
     'wiki' => array(
-      'type' => 'group_post',
+      'type' => 'group post',
       'description' => t('Wiki group post (any group member may edit).'),
     )
   );
