@@ -82,7 +82,7 @@ function _og_ui_content_types() {
   $form = array();
   
   // Content types.
-  $is_configured = count(og_get_type_by_og_type(array('group', 'group_post')));
+  $is_configured = count(og_get_node_type_by_og_type(array('group'))) && count(og_get_node_type_by_og_type(array('group post')));
   if (!$is_configured) {
     form_set_error('content_types_table', t('You must designate at least one content type to act as a group node and another as a group post. <a href="!create">Create new content type</a> if needed.', array('!create' => url('admin/content/types/add', array('query' => drupal_get_destination())))));
   }  
@@ -95,7 +95,7 @@ function _og_ui_content_types() {
     '#collapsed' => $is_configured,
   );
   
-  $og_types = og_get_type_by_og_type();
+  $og_types = og_get_node_type_by_og_type();
   $node_types = node_type_get_types();
     
   $header = array(t('Type'), t('Usage'), t('Operations'));

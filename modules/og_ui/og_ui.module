@@ -6,6 +6,9 @@
  * Allow users to subscribe and manage their subscriptions to groups.
  */
 
+// Load all Field module hooks for organic groups.
+require(drupal_get_path('module', 'og_ui') . '/og_ui.field.inc');
+
 /*******************************************************************************
  * Hook implementations
  ******************************************************************************/
@@ -170,7 +173,6 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     $options[$type] = $value['description'];
   }
 
-
   $form['og'] = array(
     '#type' => 'fieldset',
     '#title' => t('Organic groups'),
@@ -188,6 +190,52 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
   );
 }
 
+/**
+* Implement hook_node_type_delete().
+*/
+function og_ui_node_type_delete($info) {
+  variable_del('og_content_type_usage_' . $info->type);
+}
+
+/**
+ * Define custom insert behavior for this module's field types.
+ *
+ * @param $obj_type
+ *   The type of $object.
+ * @param $object
+ *   The object for the operation.
+ * @param $field
+ *   The field structure for the operation.
+ * @param $instance
+ *   The instance structure for $field on $object's bundle.
+ * @param $langcode
+ *   The language associated to $items.
+ * @param $items
+ *   $object->{$field['field_name']}[$langcode], or an empty array if unset.
+ */
+function og_ui_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
+  dpm(array($obj_type, $object, $field, $instance, $langcode, $items));
+}
+
+/**
+ * Define custom update behavior for this module's field types.
+ *
+ * @param $obj_type
+ *   The type of $object.
+ * @param $object
+ *   The object for the operation.
+ * @param $field
+ *   The field structure for the operation.
+ * @param $instance
+ *   The instance structure for $field on $object's bundle.
+ * @param $langcode
+ *   The language associated to $items.
+ * @param $items
+ *   $object->{$field['field_name']}[$langcode], or an empty array if unset.
+ */
+function og_ui_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
+  dpm(array($obj_type, $object, $field, $instance, $langcode, $items));  
+}
 
 /**
  * Set group context using the menu system.
