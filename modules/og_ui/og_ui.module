@@ -198,46 +198,6 @@ function og_ui_node_type_delete($info) {
 }
 
 /**
- * Define custom insert behavior for this module's field types.
- *
- * @param $obj_type
- *   The type of $object.
- * @param $object
- *   The object for the operation.
- * @param $field
- *   The field structure for the operation.
- * @param $instance
- *   The instance structure for $field on $object's bundle.
- * @param $langcode
- *   The language associated to $items.
- * @param $items
- *   $object->{$field['field_name']}[$langcode], or an empty array if unset.
- */
-function og_ui_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
-  dpm(array($obj_type, $object, $field, $instance, $langcode, $items));
-}
-
-/**
- * Define custom update behavior for this module's field types.
- *
- * @param $obj_type
- *   The type of $object.
- * @param $object
- *   The object for the operation.
- * @param $field
- *   The field structure for the operation.
- * @param $instance
- *   The instance structure for $field on $object's bundle.
- * @param $langcode
- *   The language associated to $items.
- * @param $items
- *   $object->{$field['field_name']}[$langcode], or an empty array if unset.
- */
-function og_ui_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
-  dpm(array($obj_type, $object, $field, $instance, $langcode, $items));  
-}
-
-/**
  * Set group context using the menu system.
  *
  * Modules may override the custom theme and group context set here.

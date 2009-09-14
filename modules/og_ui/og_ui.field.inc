@@ -88,6 +88,53 @@ function og_ui_field_is_empty($item, $field) {
   return empty($item['value']);
 }
 
+/**
+ * Implement hook_field_insert().
+ */
+function og_ui_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
+  if ($field['type'] == 'og') {
+    // TODO: What we do with other objects?
+    if ($obj_type == 'node') {
+      // Create new associations.
+      foreach ($items as $value) {
+        og_set_association($value['value'], $object->nid, $obj_type);
+      }
+    }
+
+  }
+}
+
+/**
+ * Implement hook_field_update().
+ */
+function og_ui_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
+  if ($field['type'] == 'og') {
+    if ($obj_type == 'node') {
+      // Delete association of object.
+      og_delete_association_by_content($object->nid, $obj_type);
+
+      // Create new associations.
+      foreach ($items as $value) {
+        og_set_association($value['value'], $object->nid, $obj_type);
+      }
+    }
+  }
+}
+
+/**
+ * Implement hook_field_delete().
+ */
+function hook_field_delete($obj_type, $object, $field, $instance, $langcode, &$items) {
+  if ($field['type'] == 'og') {
+    if ($obj_type == 'node') {
+      // Delete association of object.
+      og_delete_association_by_content($object->nid, $obj_type);
+    }
+  }
+}
+
+
+
 
 /*******************************************************************************
  * Theme functions
