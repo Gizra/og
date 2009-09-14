@@ -144,3 +144,135 @@ function og_ui_menu() {
 
   return $items;
 }
+
+/**
+ * Implement hook_init().
+ */
+function og_ui_init() {
+  if ($group_node = og_determine_context()) {
+    og_set_context($group_node);
+  }
+}
+
+
+
+/**
+ * Set group context using the menu system.
+ *
+ * Modules may override the custom theme and group context set here.
+ * @see og_set_group_context()
+ * 
+ * @return
+ *   A group node object, or NULL if no context was found.
+ */
+function og_determine_context() {
+  $item = menu_get_item();
+  $object = menu_get_object();
+
+  // Use the menu system to get the path.
+  $path = $item['path'];
+
+  // Check if this is an existing node.
+  if (!empty($object->nid)) {
+    $node = $object;
+  }
+  // Check if we are in the node add page.
+  elseif (strpos($path, 'node/add') === 0 && !empty($_REQUEST['gids'])) {
+    // URL pattern: node/add/story?gids[]=1
+    $gid = intval(current($_REQUEST['gids']));
+    $node = node_load($gid);
+  }
+  elseif (($item['map'][0] == 'og' && !empty($item['map'][2])) || $path == 'comment/reply/%') {
+    $node = menu_get_object('node', 2);
+  }
+  elseif ($path == 'comment/edit' || $path == 'comment/delete') {
+    // Get the node from the comment object.
+    $comment = comment_load($item['page_arguments'][0]);
+    $node = node_load($comment->nid);
+  }
+
+  if (!empty($node) && ($group_node = og_determine_context_by_node($node))) {
+    return $group_node;
+  }  
+}
+
+/**
+ * Get an appropriate group node to be set as the group context.
+ *
+ * If a group post belongs to multiple group nodes, the logic for determining the
+ * group node is:
+ * 1) TODO: Are we still writing things to the seesion ? 
+ *    The group we showed on the prior page view (if any).
+ * 2) The only or one of the group(s) the current user is a member of.
+ * 3) The 'first' group in $node->og_groups.
+ *
+ * @param $node
+ *   The node that the context should be retrieved from.
+ * @param $account
+ *   (optional) The account to check, if not given use currently logged in user.
+ * @return
+ *   The group node if exists and accessible by the user.
+ *   
+ * @see og_determine_context()
+ */
+function og_determine_context_by_node($node, $account = NULL) {
+  if (empty($account)) {
+    global $user;
+    $account = $user;
+  }
+  if (og_is_group($node->type)) {
+    $group_node = $node;
+  }
+  elseif (og_is_group_post($node->type) && ($groups = og_get_association_by_content($node->nid))) {
+    
+    if ($user_groups = og_get_association_by_content($account->uid, 'user')) {
+      $gid = current(array_intersect(array_keys($groups), array_keys($user_groups)));
+    }
+    
+    if (!empty($group)) {
+      $group_node = node_load($group);
+    }
+  }
+  // Make sure user has view access to the group node.
+  if (!empty($group_node) && node_access('view', $group_node, $account)) {
+    return $group_node;
+  }
+}
+
+/**
+ * Get the group context, if exists, for the current request.
+ * 
+ * This is Used for things like setting current theme and breadcrumbs.
+ * The context is set during og_determine_context().
+ *
+ * @return
+ *   The group node ID if exists.
+ */
+function og_get_group_context() {
+  return og_set_group_context();
+}
+
+/**
+ * Set the group context for the current request.
+ * 
+ * Modules may set this as needed.
+ * This context is originally set during hook_init().
+ * 
+ * @param $node
+ *   The group node object that should be set as the context.
+ * @return
+ *   The group node ID if set.
+ */
+function og_set_context($node = NULL) {
+  $gid = &drupal_static(__FUNCTION__, '');
+
+  if ($gid && empty($node)) {
+    return $gid;
+  }
+  
+  if (!empty($node) && og_is_group($node->type)) {
+    $gid = $node->nid;
+  }
+
+  return $gid;
+}
