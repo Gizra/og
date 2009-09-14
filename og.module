@@ -159,7 +159,7 @@ function og_delete_association($nid, $content_id, $type = 'node') {
  * @return
  *   An array with the changed content IDs keyed by the content type.
  */
-function og_change_group_association($old_nid, $new_nid, $content = array()) {
+function og_move_group_association($old_nid, $new_nid, $content = array()) {
   $query = db_update('og')
     ->fields(array('nid' => $new_nid))
     ->condition('nid', $old_nid);
