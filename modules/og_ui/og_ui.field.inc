@@ -133,16 +133,19 @@ function hook_field_delete($obj_type, $object, $field, $instance, $langcode, &$i
   }
 }
 
-
+/**
+ * Implement hook_field_delete_instance()
+ */
+function og_ui_field_delete_instance($instance) {
+}
 
 
 /*******************************************************************************
  * Theme functions
  ******************************************************************************/
 
-
 /**
- * Theme function for OG list field formatter.
+ * Organic group audience list field formatter.
  *
  * @return
  *   A link to the group node.

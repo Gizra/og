@@ -198,6 +198,29 @@ function og_ui_node_type_delete($info) {
 }
 
 /**
+* Implement hook_node_delete().
+*/
+function og_ui_node_insert($node) {
+  if (og_is_group($node->type)) {
+    // Add group.
+    // TODO: Get default settings.
+    og_set_group($node->nid);
+    // Associate the node author with the group.
+    og_set_association($node->nid, $node->uid, 'user');
+  }
+}
+
+/**
+* Implement hook_node_delete().
+*/
+function og_ui_node_delete($node) {
+  if (og_is_group($node->type)) {
+    // Remove group.
+    og_delete_group($node->nid);
+  }
+}
+
+/**
  * Set group context using the menu system.
  *
  * Modules may override the custom theme and group context set here.

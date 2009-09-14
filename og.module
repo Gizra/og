@@ -211,7 +211,7 @@ function og_set_group($nid, $data = array()) {
   drupal_alter('og_set_group', $group);
 
   // Delete an existing record.
-  og_group_delete($nid);
+  og_delete_group($nid);
 
   // Write the new record.
   drupal_write_record('og_groups', $group);
@@ -223,7 +223,7 @@ function og_set_group($nid, $data = array()) {
  * @param $nid
  *   The group node ID.
  */
-function og_group_delete($nid) {
+function og_delete_group($nid) {
   db_delete('og_groups')
     ->condition('nid', $nid)
     ->execute();
