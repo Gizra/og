@@ -248,9 +248,8 @@ function og_ui_node_delete($node) {
 }
 
 /**
- * 
- * 
- * Edits to membership should  
+ * Edits to membership should
+ *   
  * go through og_save_subscription(). No access control since this is an API function.
  *
  * @return string 'approval', 'subscribed' or 'rejected' depending on the group's configuration.
@@ -279,29 +278,19 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = NULL) {
   switch ($node->og_selective) {
     case OG_OPEN:
       og_set_association($gid, $account->uid, 'user', OG_STATE_ACTIVE);      
-      $return_value = array('type' => 'subscribed', 'message' => t('You are now a member of the %group.', array('%group' => $node->title)));
+      $return = array('type' => 'subscribed', 'message' => t('You are now a member of the %group.', array('%group' => $node->title)));
       break;
           
     // Moderated groups must approve all members.
     case OG_MODERATED:
-      $admins = array();
       og_set_association($gid, $account->uid, 'user', OG_STATE_PENDING);
       
       // Get the privileged users that should approve and deny the subscription.
-      $roles = $group->data['permission']['approve and deny subscription']['roles'];
-      
-      
+      $roles = $group->data['permission']['approve and deny subscription']['roles'];      
+      $users = og_get_users_by_roles($node->nid, $roles);
       
       // Prepare variables for Rule to act on the user subscription.
-
-      
-      $sql = og_list_users_sql(1, 1, NULL);
-      $res = db_query($sql, $node->nid);
-      $admins = array();
-      while ($row = db_fetch_object($res)) {
-        $admins[] = $row->uid;
-      }
-      if (!empty($admins)) {
+      if (!empty($users)) {
         $variables = array(
           '@group' => $node->title,
           '@username' => $account->name,
@@ -309,33 +298,26 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = NULL) {
           '!group_url' => url("og/users/$node->nid", array('absolute' => TRUE)),
           '@request' => $request,
         );
-        
-        $message = array(
-          'subject' => _og_mail_text('og_request_user_subject', $variables),
-          'body' => _og_mail_text('og_request_user_body', $variables),
-        );
 
         // Send notifications to each admin; Sending an array of recipients
         // implies that this is a bulk message.
         module_invoke_all('og', 'user request', $gid, $admins, $message);
       }
-      $return_value = array('type' => 'approval',
-                            'message' => t('Membership request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
-
+      
+      $return = array('type' => 'approval', 'message' => t('Membership request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
       break;
 
     case OG_CLOSED:
     case OG_INVITE_ONLY:
-      // admins can add members to these groups, but others can't.
+      // Admins can add members to these groups, but others can't.
       if (og_is_group_admin($node)) {
         og_save_subscription($gid, $account->uid, array('is_active' => 1));
       }
       else {
-        $return_value = array('type' => 'rejected',
-                            'message' => t('Membership request to the %group group was rejected, only group administrators can add users to this group.', array('%group' => $node->title)));
+        $return = array('type' => 'rejected', 'message' => t('Membership request to the %group group was rejected, only group administrators can add users to this group.', array('%group' => $node->title)));
       }
   }
-  return $return_value;
+  return $return;
 }
 
 /**
