@@ -10,17 +10,19 @@ class OgUiSubscriptionUnitTest extends DrupalWebTestCase {
     return array(
       'name' => 'Users subscription',
       'description' => 'Test user subscription.',
-      'group' => 'Organic groups UI',
+      'group' => 'Organic groups',
     );
   }
 
   function setUp() {
     parent::setUp('og', 'og_ui');
-    // Create a group content type.
-    $this->drupalCreateContentType(array('type' => 'group', 'og_content_type_usage' => 'group'));        
-    $web_admin = $this->drupalCreateUser(array('access content', 'create group content', 'edit any group content'));
+    $web_admin = $this->drupalCreateUser(array('administer content types'));
     $this->drupalLogin($web_admin);
     $this->web_admin = $web_admin->uid;
+        
+    // Create a group content type.
+    $this->drupalCreateContentType(array('type' => 'group', 'og_content_type_usage' => 'group'));        
+
     
     // Create a "open" group node.
     $group_open = $this->drupalCreateNode(array('type' => 'group'));
@@ -40,8 +42,7 @@ class OgUiSubscriptionUnitTest extends DrupalWebTestCase {
   function testUserSubscription() {
     // Login web user.
     $web_user = $this->drupalCreateUser(array('access content'));
-    $this->drupalLogin($web_user);
-        
+    $this->drupalLogin($web_user);        
     $this->ogOpenGroup();
   }
   

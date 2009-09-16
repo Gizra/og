@@ -3,8 +3,6 @@
 
 /**
  * Test the organic groups API functions.
- * 
- * Test associating nodes and users with a single node.
  */
 class OgApiUnitTest extends DrupalWebTestCase {
 
