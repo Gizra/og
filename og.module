@@ -386,48 +386,6 @@ function og_delete_user_roles($nid, $uid, $roles = array()) {
 
 
 /**
- * Add OG audience field to group post node types.
- * @param $node_types
- *   Array of the node types that need to have the field attached to.
- * @return
- *   The node types that have been changed, as some might already have the
- *   fields attached to them.
- */
-function og_set_fields($node_types = array()) {
-  foreach ($node_types as $type) {
-    $field = field_info_field('og');
-    if (empty($field)) {
-      $field = array(
-        'field_name' => 'og',
-        'type' => 'og',
-      );
-      $field = field_create_field($field);
-    }
-
-    $instance = field_info_instance('og', $type);
-    if (empty($instance)) {
-      $instance = array(
-        'field_name' => 'og',
-        'bundle' => $type,
-        'label' => t('Groups audience'),
-        'widget_type' => 'og_audience',
-        'display' => array(
-          'full' => array(
-            'label' => 'above',
-            'type' => 'og_list_default',
-          ),
-          'teaser' => array(
-            'label' => 'above',
-            'type' => 'og_list_default',
-          ),
-        ),
-      );
-      field_create_instance($instance);
-    }
-  }
-}
-
-/**
  * Get an array with all the types of group or group posts available.
  */
 function og_get_og_types() {

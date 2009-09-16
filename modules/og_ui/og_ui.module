@@ -10,10 +10,10 @@
 require(drupal_get_path('module', 'og_ui') . '/og_ui.field.inc');
 
 // Selective groups states. chosen by the group admin
-define ('OG_OPEN', 0);
-define ('OG_MODERATED', 1);
-define ('OG_INVITE_ONLY', 2);
-define ('OG_CLOSED', 3);
+define ('OG_OPEN', 'open');
+define ('OG_MODERATED', 'moderated');
+define ('OG_INVITE_ONLY', 'invite');
+define ('OG_CLOSED', 'closed');
 
 // site admin chooses in og_settings() whether group creator can put his group on the registration form
 define('OG_REGISTRATION_NEVER', 0);
@@ -257,13 +257,118 @@ function og_ui_og_set_group_alter($group) {
       'approve and deny subscription' => array(
         'title' => t('Approve and deny subscription'),
         'description' => t("Allow user to allow or deny another user's subscription request."),
-        'roles' => array('admin'),
+        'roles' => array('administrator'),
       ),
     ),
     'roles' => array(
-      'admin' => t('Group admin'),
+      'administrator' => t('Group administrator'),
     ),
   );
+}
+
+/**
+ * Implement hook_og_group_selective_info().
+ */
+function og_ui_og_group_selective_info() {
+  return array(
+    OG_OPEN => t('Open'),
+    OG_MODERATED => t('Moderated'),
+    OG_MODERATED => t('Invite only'),
+    OG_CLOSED => t('Closed'),
+  ); 
+}
+
+/**
+ * Add fields to group post node types.
+ * 
+ * @param $node_types
+ *   Array of the node types that need to have the field attached to.
+ * @return
+ *   The node types that have been changed, as some might already have the
+ *   fields attached to them.
+ */
+function og_ui_group_type_set_fields($node_types = array()) {
+  foreach ($node_types as $type) {
+    $field = field_info_field('og_audience');
+    if (empty($field)) {
+      $field = array(
+        'field_name' => 'og_audience',
+        'type' => 'og',
+        'locked' => TRUE,
+      );
+      $field = field_create_field($field);
+    }
+
+    $instance = field_info_instance('og', $type);
+    if (empty($instance)) {
+      $instance = array(
+        'field_name' => 'og_audience',
+        'bundle' => $type,
+        'label' => t('Groups audience'),
+        'widget_type' => 'og_audience',
+        'display' => array(
+          'full' => array(
+            'label' => 'above',
+            'type' => 'og_list_default',
+          ),
+          'teaser' => array(
+            'label' => 'above',
+            'type' => 'og_list_default',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+    
+    $field = field_info_field('og_selective');
+    if (empty($field)) {
+      $field = array(
+        'field_name' => 'og_selective',
+        'type' => 'list_text',
+        'locked' => TRUE,
+        'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_ui_group_selective'),
+        'required' => TRUE,       
+      );
+      $field = field_create_field($field);
+    }
+
+    $instance = field_info_instance('og', $type);
+    if (empty($instance)) {
+      $instance = array(
+        'field_name' => 'og_selective',
+        'bundle' => $type,
+        'label' => t('Groups selective'),
+        'widget_type' => 'options_select',
+        'display' => array(
+          'full' => array(
+            'label' => 'above',
+            'type' => 'list_default',
+          ),
+          'teaser' => array(
+            'label' => 'above',
+            'type' => 'list_default',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }    
+  }
+}
+
+/**
+ * Add fields to group post node types.
+ * 
+ * @param $node_types
+ *   Array of the node types that need to have the field attached to.
+ * @return
+ *   TODO: The node types that have been changed, as some might already have the
+ *   fields attached to them.
+ */
+function og_ui_group_post_type_set_fields($node_types = array()) {
+}
+
+function og_ui_group_selective() {
+  return module_invoke_all('og_group_selective_info');
 }
 
 /**
