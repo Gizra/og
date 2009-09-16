@@ -251,7 +251,7 @@ function og_ui_node_delete($node) {
  * Implement hook_og_get_group_alter().
  */
 function og_ui_og_set_group_alter($group) {
-  // Add basic permission and roles.
+  // Add basic permissions and roles.
   $group->data += array(
     'permissions' => array(
       'approve and deny subscription' => array(
@@ -283,7 +283,9 @@ function og_ui_og_set_group_alter($group) {
  *   Optional; The user object. If not set the current user will be used.
  * @param $request
  *   Optional; The request message that should be sent to the group admin.
- * @return unknown_type
+ * @return
+ *  A keyed array with "type" as the subscription result, and "message" with the
+ *  message to be presented to the user.
  */
 function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
   if (empty($account)) {
@@ -311,11 +313,14 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
       $roles = $group->data['permissions']['approve and deny subscription']['roles'];
       $uids = og_get_users_by_roles($node->nid, $roles);
       
+      // Add the group manager.
+      $uids[] = $node->uid;
+      
       // Allow other modules to alter the users.
       drupal_alter('og_ui_user_request', $uids, $node, $group, $account, $request);
             
       if (!empty($uids)) {
-        // Prepare variables for Rule to act on the user subscription.
+        // Prepare variables for Rules to act on the user subscription.
 /*        $variables = array(
           '@group' => $node->title,
           '@username' => $account->name,
@@ -350,7 +355,7 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
  * @return
  *   A group node object, or NULL if no context was found.
  */
-function og_determine_context() {
+function og_ui_determine_context() {
   $item = menu_get_item();
   $object = menu_get_object();
 
@@ -376,7 +381,7 @@ function og_determine_context() {
     $node = node_load($comment->nid);
   }
 
-  if (!empty($node) && ($group_node = og_determine_context_by_node($node))) {
+  if (!empty($node) && ($group_node = og_ui_determine_context_by_node($node))) {
     return $group_node;
   }
 }
@@ -400,7 +405,7 @@ function og_determine_context() {
  *
  * @see og_determine_context()
  */
-function og_determine_context_by_node($node, $account = NULL) {
+function og_ui_determine_context_by_node($node, $account = NULL) {
   if (empty($account)) {
     global $user;
     $account = $user;
@@ -433,8 +438,8 @@ function og_determine_context_by_node($node, $account = NULL) {
  * @return
  *   The group node ID if exists.
  */
-function og_get_context() {
-  return og_set_context();
+function og_ui_get_context() {
+  return og_ui_set_context();
 }
 
 /**
@@ -448,7 +453,7 @@ function og_get_context() {
  * @return
  *   The group node ID if set.
  */
-function og_set_context($node = NULL) {
+function og_ui_set_context($node = NULL) {
   $gid = &drupal_static(__FUNCTION__, '');
 
   if ($gid && empty($node)) {
