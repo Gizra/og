@@ -33,7 +33,7 @@ function hook_og_ui_user_request(&$uids, $node, $group, $account, $request) {
 /**
  * Define selective types of groups. 
  */
-function og_ui_og_group_selective_info() {
+function hook_og_group_selective_info() {
   return array(
     'private' => t('Private'),
   ); 

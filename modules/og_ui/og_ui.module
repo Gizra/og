@@ -225,6 +225,13 @@ function og_ui_node_type_delete($info) {
 }
 
 /**
+* Implement hook_node_type_insert().
+*/
+function og_ui_node_type_insert($info) {
+  og_ui_group_type_set_fields(array($info->type));
+}
+
+/**
 * Implement hook_node_delete().
 */
 function og_ui_node_insert($node) {
@@ -299,7 +306,7 @@ function og_ui_group_type_set_fields($node_types = array()) {
       $field = field_create_field($field);
     }
 
-    $instance = field_info_instance('og', $type);
+    $instance = field_info_instance('og_audience', $type);
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'og_audience',
@@ -332,7 +339,7 @@ function og_ui_group_type_set_fields($node_types = array()) {
       $field = field_create_field($field);
     }
 
-    $instance = field_info_instance('og', $type);
+    $instance = field_info_instance('og_selective', $type);
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'og_selective',
