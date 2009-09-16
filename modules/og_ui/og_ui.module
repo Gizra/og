@@ -228,7 +228,12 @@ function og_ui_node_type_delete($info) {
 * Implement hook_node_type_insert().
 */
 function og_ui_node_type_insert($info) {
-  og_ui_group_type_set_fields(array($info->type));
+  if (og_is_group_type($info->type)) {
+    og_ui_group_type_set_fields(array($info->type));
+  }
+  elseif (og_is_group_post_type($info->type)) {
+    og_ui_group_post_type_set_fields(array($info->type));
+  }
 }
 
 /**
@@ -296,36 +301,6 @@ function og_ui_og_group_selective_info() {
  */
 function og_ui_group_type_set_fields($node_types = array()) {
   foreach ($node_types as $type) {
-    $field = field_info_field('og_audience');
-    if (empty($field)) {
-      $field = array(
-        'field_name' => 'og_audience',
-        'type' => 'og',
-        'locked' => TRUE,
-      );
-      $field = field_create_field($field);
-    }
-
-    $instance = field_info_instance('og_audience', $type);
-    if (empty($instance)) {
-      $instance = array(
-        'field_name' => 'og_audience',
-        'bundle' => $type,
-        'label' => t('Groups audience'),
-        'widget_type' => 'og_audience',
-        'display' => array(
-          'full' => array(
-            'label' => 'above',
-            'type' => 'og_list_default',
-          ),
-          'teaser' => array(
-            'label' => 'above',
-            'type' => 'og_list_default',
-          ),
-        ),
-      );
-      field_create_instance($instance);
-    }
 
     $field = field_info_field('og_selective');
     if (empty($field)) {
@@ -372,6 +347,38 @@ function og_ui_group_type_set_fields($node_types = array()) {
  *   fields attached to them.
  */
 function og_ui_group_post_type_set_fields($node_types = array()) {
+  foreach ($node_types as $type) {  
+    $field = field_info_field('og_audience');
+    if (empty($field)) {
+      $field = array(
+        'field_name' => 'og_audience',
+        'type' => 'og',
+        'locked' => TRUE,
+      );
+      $field = field_create_field($field);
+    }
+
+    $instance = field_info_instance('og_audience', $type);
+    if (empty($instance)) {
+      $instance = array(
+        'field_name' => 'og_audience',
+        'bundle' => $type,
+        'label' => t('Groups audience'),
+        'widget_type' => 'og_audience',
+        'display' => array(
+          'full' => array(
+            'label' => 'above',
+            'type' => 'og_list_default',
+          ),
+          'teaser' => array(
+            'label' => 'above',
+            'type' => 'og_list_default',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
 }
 
 function og_ui_group_selective() {
