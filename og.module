@@ -285,6 +285,91 @@ function og_get_all_groups_for_form() {
 }
 
 /**
+ * Set a user role in a specific group.
+ * 
+ * @param $nid
+ *   The group node ID.
+ * @param $uid
+ *   The user ID.
+ * @param $role
+ *   The role name.
+ */
+function og_set_user_roles($nid, $uid, $role = '') {
+  // Delete all existing user roles.
+  og_delete_user_roles($nid, $uid);
+  
+  $object = new stdClass();
+  $object->nid = $nid;
+  $object->uid = $uid;
+  $object->role = $role;
+    
+  drupal_write_record('og_users_roles', $object);
+  
+}
+
+/**
+ * Get all the roles in a group of a user.
+ * 
+ * @param $nid
+ *   The group node ID.
+ * @param $uid
+ *   The user ID.
+ */
+function og_get_user_roles($nid, $uid) {
+  return db_query("SELECT role FROM {og_users_roles} WHERE nid = :nid AND uid = :uid", array(':nid' => $nid, ':uid' => $uid))->fetchAll();
+  
+}
+
+/**
+ * Get all the roles in a group.
+ * 
+ * @param $nid
+ *   The group node ID.
+ */
+function og_get_all_group_roles($nid) {
+  return db_query("SELECT role FROM {og_users_roles} WHERE nid = :nid", array(':nid' => $nid))->fetchAll();  
+  
+}
+
+/**
+ * Delete roles of a group.
+ * 
+ * @param $nid
+ *   The group node ID.
+ * @param $roles
+ *   Optional; Array with the role names. If empty, all the roles in the group
+ *   will be deleted.
+ */
+function og_delete_all_group_roles($nid, $roles = array()) {
+  $query = db_delete('og_users_roles')->condition('nid', $nid);
+  if (!empty($roles)) {
+     $query->condition('role', $roles, 'IN');
+  }
+
+  $query->execute();
+}
+
+/**
+ * Delete user roles of a group.
+ * 
+ * @param $nid
+ *   The group node ID.
+ * @param $uid
+ *   The user ID.
+ * @param $roles
+ *   Optional; An array with roles that need to be deleted. If empty all the 
+ *   user roles will be deleted. 
+ */
+function og_delete_user_roles($nid, $uid, $roles = array()) {
+  $query = db_delete('og_users_roles')->condition('nid', $nid)->condition('uid', $uid);
+  if (!empty($roles)) {
+    $query->condition('role', $roles, 'IN');
+  }  
+  $query->execute();
+}
+
+
+/**
  * Add OG audience field to group post node types.
  * @param $node_types
  *   Array of the node types that need to have the field attached to.
@@ -389,7 +474,7 @@ function og_get_group_type($type) {
  * @param $type
  *   The node type to be checked.
  */
-function og_is_group($type) {
+function og_is_group_type($type) {
   return variable_get('og_content_type_usage_'. $type, 'omitted') == 'group';
 }
 
@@ -401,7 +486,7 @@ function og_is_group($type) {
  * @param $type
  *   The node type to be checked.
  */
-function og_is_group_post($type) {
+function og_is_group_post_type($type) {
   return variable_get('og_content_type_usage_'. $type, 'omitted') == 'group post';
 }
 
@@ -411,8 +496,6 @@ function og_is_group_post($type) {
 /*******************************************************************************
  * Hook implementations
  ******************************************************************************/
-
-
 
 /**
  * Implement hook_element_info().

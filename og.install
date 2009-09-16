@@ -61,30 +61,6 @@ function og_schema() {
     ),
   );
 
-  $schema['og_content_types'] = array(
-    'description'     => 'Store the content types that are marked as playing a part in the organic groups.',
-    'fields'          => array(
-      'name'     => array(
-        'description'     => 'The name of the content type.',
-        'type'            => 'varchar',
-        'length'          => 255,
-        'not null'        => TRUE,
-        'default' => '',
-      ),  
-      'data' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'size' => 'big',
-        'serialize' => TRUE,
-        'description' => 'A serialized array with the data related to the associated node or user.',
-      ),
-    ),
-    'primary key' => array('name'),
-    'unique keys' => array(
-      'name' => array('name'),
-    ),
-  );
-
   $schema['og_groups'] = array(
     'description'     => 'Store information related to the groups.',
     'fields'          => array(
@@ -106,6 +82,38 @@ function og_schema() {
     'unique keys' => array(
       'nid' => array('nid'),
     ),
+  );
+  
+  $schema['og_users_roles'] = array(
+    'description' => 'Store information related to roles within groups.',
+    'fields' => array(
+       'oid' => array(
+        'description' => 'Unique ID for the user roles.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'nid'             => array(
+        'description'     => "The group node ID.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'uid'             => array(
+        'description'     => "The user ID.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),            
+      'role'     => array(
+        'description'     => 'The user role.',
+        'type'            => 'varchar',
+        'length'          => 255,
+        'not null'        => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('oid'),
   );  
   
   return $schema;
