@@ -339,7 +339,8 @@ function og_get_all_group_roles($nid) {
  *   Array with the roles to query.
  */
 function og_get_users_by_roles($nid, $roles = array()) {
-    return $query->fields('og_users_roles', array('uid'))
+  $query = db_select('og_users_roles', 'og_users_roles');
+  return $query->fields('og_users_roles', array('uid'))
     ->condition('nid', $nid)
     ->condition('role', $roles, 'IN')
     ->execute()
