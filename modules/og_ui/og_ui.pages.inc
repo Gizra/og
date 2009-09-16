@@ -88,7 +88,7 @@ function og_confirm_subscribe($form_state, $gid, $node, $account) {
  * Confirm og membership submit handler
  */
 function og_confirm_subscribe_submit($form, &$form_state) {
-  $return = og_subscribe_user($form_state['values']['gid'], $form_state['values']['account'], $form_state['values']['request']);
+  $return = og_ui_subscribe_user($form_state['values']['gid'], $form_state['values']['account'], $form_state['values']['request']);
   if (!empty($return['message'])) {
       drupal_set_message($return['message']);
   }
