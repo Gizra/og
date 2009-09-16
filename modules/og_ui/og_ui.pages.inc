@@ -60,7 +60,7 @@ function og_subscribe($node, $uid = NULL) {
 }
 
 /**
- * Confirm og membership form
+ * Confirm OG membership form.
  */
 function og_confirm_subscribe($form_state, $gid, $node, $account) {
   $form['gid'] = array('#type' => 'value', '#value' => $gid);
@@ -78,14 +78,11 @@ function og_confirm_subscribe($form_state, $gid, $node, $account) {
       '#value' => '',
    );
  }
- return confirm_form($form, 
-                t('Are you sure you want to join the group %title?', array('%title' => $node->title)),
-                'node/'. $node->nid, ' ',
-                t('Join'), t('Cancel'));
+ return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $node->title)), 'node/'. $node->nid, ' ', t('Join'), t('Cancel'));
 }
 
 /**
- * Confirm og membership submit handler
+ * Submit handler; Confirm OG membership.
  */
 function og_confirm_subscribe_submit($form, &$form_state) {
   $return = og_ui_subscribe_user($form_state['values']['gid'], $form_state['values']['account'], $form_state['values']['request']);

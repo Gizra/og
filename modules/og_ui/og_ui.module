@@ -179,8 +179,8 @@ function og_ui_menu() {
  * Implement hook_init().
  */
 function og_ui_init() {
-  if ($group_node = og_determine_context()) {
-    og_set_context($group_node);
+  if ($group_node = og_ui_determine_context()) {
+    og_ui_set_context($group_node);
   }
 }
 
@@ -295,11 +295,8 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
   
   $node = node_load($gid);
   $group = og_get_group($gid);
-  
-  // TODO: Remove and take from group field.
-  $node->og_selective = OG_MODERATED;
-  
-  switch ($node->og_selective) {
+   
+  switch (og_ui_get_og_selective($node)) {
     case OG_OPEN:
       og_set_association($gid, $account->uid, 'user', OG_STATE_ACTIVE);      
       $return = array('type' => 'subscribed', 'message' => t('You are now a member of the %group.', array('%group' => $node->title)));
@@ -344,6 +341,19 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
       }
   }
   return $return;
+}
+
+/**
+ * Get the selective type of the group.
+ * 
+ * @param $node
+ *   The group node.
+ */
+function og_ui_get_og_selective($node) {
+  // TODO: Make dynamic.
+  $field = 'field_og_selective';
+  $langcode = FIELD_LANGUAGE_NONE;
+  return $node->{$field}[$langcode][0]['value'];  
 }
 
 /**
@@ -403,7 +413,7 @@ function og_ui_determine_context() {
  * @return
  *   The group node if exists and accessible by the user.
  *
- * @see og_determine_context()
+ * @see og_ui_determine_context()
  */
 function og_ui_determine_context_by_node($node, $account = NULL) {
   if (empty($account)) {
@@ -433,7 +443,7 @@ function og_ui_determine_context_by_node($node, $account = NULL) {
  * Get the group context, if exists, for the current request.
  *
  * This is Used for things like setting current theme and breadcrumbs.
- * The context is set during og_determine_context().
+ * The context is set during og_ui_determine_context().
  *
  * @return
  *   The group node ID if exists.
