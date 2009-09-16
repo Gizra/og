@@ -282,12 +282,12 @@ function og_ui_og_group_selective_info() {
     OG_MODERATED => t('Moderated'),
     OG_MODERATED => t('Invite only'),
     OG_CLOSED => t('Closed'),
-  ); 
+  );
 }
 
 /**
  * Add fields to group post node types.
- * 
+ *
  * @param $node_types
  *   Array of the node types that need to have the field attached to.
  * @return
@@ -326,15 +326,14 @@ function og_ui_group_type_set_fields($node_types = array()) {
       );
       field_create_instance($instance);
     }
-    
+
     $field = field_info_field('og_selective');
     if (empty($field)) {
       $field = array(
         'field_name' => 'og_selective',
         'type' => 'list_text',
         'locked' => TRUE,
-        'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_ui_group_selective'),
-        'required' => TRUE,       
+        'settings' => array('allowed_values_function' => 'og_ui_group_selective'),
       );
       $field = field_create_field($field);
     }
@@ -345,6 +344,7 @@ function og_ui_group_type_set_fields($node_types = array()) {
         'field_name' => 'og_selective',
         'bundle' => $type,
         'label' => t('Groups selective'),
+        'required' => TRUE,
         'widget_type' => 'options_select',
         'display' => array(
           'full' => array(
@@ -358,13 +358,13 @@ function og_ui_group_type_set_fields($node_types = array()) {
         ),
       );
       field_create_instance($instance);
-    }    
+    }
   }
 }
 
 /**
  * Add fields to group post node types.
- * 
+ *
  * @param $node_types
  *   Array of the node types that need to have the field attached to.
  * @return
@@ -380,15 +380,15 @@ function og_ui_group_selective() {
 
 /**
  * Edits to membership should
- *   
+ *
  * go through og_save_subscription(). No access control since this is an API function.
  *
  * @return string 'approval', 'subscribed' or 'rejected' depending on the group's configuration.
  **/
 
 /**
- * Create a new membership for a given user to given group. 
- * 
+ * Create a new membership for a given user to given group.
+ *
  * @param $gid
  *   The group ID.
  * @param $account
@@ -404,30 +404,30 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
     global $user;
     $account = $user;
   }
-  
+
   $node = node_load($gid);
   $group = og_get_group($gid);
-   
+
   switch (og_ui_get_og_selective($node)) {
     case OG_OPEN:
-      og_set_association($gid, $account->uid, 'user', OG_STATE_ACTIVE);      
+      og_set_association($gid, $account->uid, 'user', OG_STATE_ACTIVE);
       $return = array('type' => 'subscribed', 'message' => t('You are now a member of the %group.', array('%group' => $node->title)));
       break;
-          
+
     // Moderated groups must approve all members.
     case OG_MODERATED:
       og_set_association($gid, $account->uid, 'user', OG_STATE_PENDING);
-      
+
       // Get the privileged users that should approve and deny the subscription.
       $roles = $group->data['permissions']['approve and deny subscription']['roles'];
       $uids = og_get_users_by_roles($node->nid, $roles);
-      
+
       // Add the group manager.
       $uids[] = $node->uid;
-      
+
       // Allow other modules to alter the users.
       drupal_alter('og_ui_user_request', $uids, $node, $group, $account, $request);
-            
+
       if (!empty($uids)) {
         // Prepare variables for Rules to act on the user subscription.
 /*        $variables = array(
@@ -438,7 +438,7 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
           '@request' => $request,
         );*/
       }
-      
+
       $return = array('type' => 'approval', 'message' => t('Membership request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
       break;
 
@@ -457,7 +457,7 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
 
 /**
  * Get the selective type of the group.
- * 
+ *
  * @param $node
  *   The group node.
  */
@@ -465,7 +465,7 @@ function og_ui_get_og_selective($node) {
   // TODO: Make dynamic.
   $field = 'field_og_selective';
   $langcode = FIELD_LANGUAGE_NONE;
-  return $node->{$field}[$langcode][0]['value'];  
+  return $node->{$field}[$langcode][0]['value'];
 }
 
 /**
