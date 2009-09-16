@@ -242,7 +242,6 @@ function og_ui_node_type_insert($info) {
 function og_ui_node_insert($node) {
   if (og_is_group_type($node->type)) {
     // Add group.
-    // TODO: Get default settings.
     og_set_group($node->nid);
     // Associate the node author with the group.
     og_set_association($node->nid, $node->uid, 'user');
@@ -281,7 +280,7 @@ function og_ui_og_set_group_alter($group) {
 /**
  * Implement hook_og_group_selective_info().
  */
-function og_ui_og_group_selective_info() {
+function og_ui_og_selective_info() {
   return array(
     OG_OPEN => t('Open'),
     OG_MODERATED => t('Moderated'),
@@ -382,7 +381,7 @@ function og_ui_group_post_type_set_fields($node_types = array()) {
 }
 
 function og_ui_group_selective() {
-  return module_invoke_all('og_group_selective_info');
+  return module_invoke_all('og_selective_info');
 }
 
 /**
@@ -433,7 +432,7 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
       $uids[] = $node->uid;
 
       // Allow other modules to alter the users.
-      drupal_alter('og_ui_user_request', $uids, $node, $group, $account, $request);
+      drupal_alter('og_user_request', $uids, $node, $group, $account, $request);
 
       if (!empty($uids)) {
         // Prepare variables for Rules to act on the user subscription.

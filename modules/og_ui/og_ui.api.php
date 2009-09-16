@@ -25,7 +25,7 @@
  * @param $request
  *   Optional; The request text the subscribing user has entered.
  */
-function hook_og_ui_user_request(&$uids, $node, $group, $account, $request) {
+function hook_og_user_request(&$uids, $node, $group, $account, $request) {
   // Add user ID 1 to the list of notified users.
   $uids[] = 1;
 }
@@ -33,7 +33,7 @@ function hook_og_ui_user_request(&$uids, $node, $group, $account, $request) {
 /**
  * Define selective types of groups. 
  */
-function hook_og_group_selective_info() {
+function hook_og_selective_info() {
   return array(
     'private' => t('Private'),
   ); 
