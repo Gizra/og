@@ -248,6 +248,25 @@ function og_ui_node_delete($node) {
 }
 
 /**
+ * Implement hook_og_get_group_alter().
+ */
+function og_ui_og_set_group_alter($group) {
+  // Add basic permission and roles.
+  $group->data += array(
+    'permissions' => array(
+      'approve and deny subscription' => array(
+        'title' => t('Approve and deny subscription'),
+        'description' => t("Allow user to allow or deny another user's subscription request."),
+        'roles' => array('admin'),
+      ),
+    ),
+    'roles' => array(
+      'admin' => t('Group admin'),
+    ),
+  );
+}
+
+/**
  * Edits to membership should
  *   
  * go through og_save_subscription(). No access control since this is an API function.
@@ -273,8 +292,11 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = NULL) {
   }
   
   $node = node_load($gid);
-  $group = og_get_group($nid);
+  $group = og_get_group($gid);
   
+  $node->og_selective = OG_MODERATED;
+  
+ 
   switch ($node->og_selective) {
     case OG_OPEN:
       og_set_association($gid, $account->uid, 'user', OG_STATE_ACTIVE);      
@@ -286,7 +308,7 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = NULL) {
       og_set_association($gid, $account->uid, 'user', OG_STATE_PENDING);
       
       // Get the privileged users that should approve and deny the subscription.
-      $roles = $group->data['permission']['approve and deny subscription']['roles'];      
+      $roles = $group->data['permissions']['approve and deny subscription']['roles'];
       $users = og_get_users_by_roles($node->nid, $roles);
       
       // Prepare variables for Rule to act on the user subscription.
