@@ -87,9 +87,15 @@ function og_field_widget_info() {
  * Implement hook_field_widget().
  */
 function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = NULL) {
+	$default_values = array();
+	if (!empty($items)) {
+		foreach ($items as $item) {
+			$default_values[$item['value']] = $item['value'];
+		}
+	}
   $element = array(
     '#type' => $instance['widget']['type'],
-    '#default_value' => !empty($items) ? $items : array(),
+    '#default_value' => $default_values,
   );
   
   $defaults = array('data' => array(), 'state' => '');
