@@ -278,8 +278,14 @@ function og_node_type_delete($info) {
 */
 function og_node_insert($node) {
   if (og_is_group_type($node->type)) {
+  	global $user;
     // Add group.
     og_set_group($node->nid);
+    // TODO: Subscribe the user to the group.
+    
+    // Set the user a group manager.
+    og_set_user_roles($node->nid, $user->uid, array('manager'));
+    
   }
 }
 
@@ -291,7 +297,9 @@ function og_node_insert($node) {
 * make sure it is registered. 
 */
 function og_node_update($node) {
-	og_node_insert($node);
+	if (!og_get_group($node->nid)) {
+	  og_node_insert($node);
+	}
 }
 
 /**
@@ -433,40 +441,36 @@ function og_delete_group($nid) {
 }
 
 /**
- * Get the groups a content belongs to.
- *
- * @param $content_id
- *   The content ID.
- * @param $type
- *   The content type.
- * @return
- *   An array with the groups or an empty array if none found.
- */
-function og_get_groups_of_content($content_id, $type = 'user') {
-  return db_query("SELECT * FROM {og} WHERE content_id = :content_id AND type = :type", array(':content_id' => $content_id, ':type' => $type))->fetchAllAssoc('nid');
-}
-
-
-/**
- * Set a user role in a specific group.
+ * Set a user roles in a specific group.
  * 
  * @param $nid
  *   The group node ID.
  * @param $uid
  *   The user ID.
  * @param $role
- *   The role name.
+ *   Array with the roles name.
+ * @param $add
+ *   Optioanl; If TRUE previous roles would be deleted.
  */
-function og_set_user_roles($nid, $uid, $role = '') {
-  // Delete all existing user roles.
-  og_delete_user_roles($nid, $uid);
+function og_set_user_roles($nid, $uid, $roles = array(), $replace = FALSE) {
+  if ($replace) {
+	  // Delete all existing user roles.
+    og_delete_user_roles($nid, $uid);
+  }
+  else {
+  	// Get existing roles.
+  	$existing_roles = og_get_user_roles($nid, $uid);
+  	// Keep only the non-existing roles.
+  	$roles = array_diff($roles, $existing_roles);
+  }
   
-  $object = new stdClass();
-  $object->nid = $nid;
-  $object->uid = $uid;
-  $object->role = $role;
-    
-  drupal_write_record('og_users_roles', $object);
+  foreach ($roles as $role) {
+	  $object = new stdClass();
+	  $object->nid = $nid;
+	  $object->uid = $uid;
+	  $object->role = $role;	    
+	  drupal_write_record('og_users_roles', $object);
+  }
   
 }
 

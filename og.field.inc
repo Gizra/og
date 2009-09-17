@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Field module functionality for the Organic groups UI module.
+ * Field module functionality for the Organic groups module.
  */
 
 /*******************************************************************************
@@ -91,6 +91,11 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
     '#type' => $instance['widget']['type'],
     '#default_value' => !empty($items) ? $items : array(),
   );
+  
+  $defaults = array('data' => array(), 'state' => '');
+  foreach ($items as $delta => $item) {
+    $items[$delta] = array_merge($defaults, $items[$delta]);
+  }
   return $element;
 }
 
@@ -118,6 +123,8 @@ function og_field_insert($obj_type, $object, $field, $instance, $langcode, &$ite
 
 /**
  * Implement hook_field_update().
+ * 
+ * FIXME: pass the data and state values.
  */
 function og_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
   // Allow other modules to alter the data.
@@ -164,7 +171,8 @@ function og_set_og_audince_field($bundle) {
     $field = array(
       'field_name' => 'og_audience',
       'type' => 'og',
-      'locked' => TRUE,
+      // TODO: Lock only delete.
+      // 'locked' => TRUE,
     );
     $field = field_create_field($field);
   }
