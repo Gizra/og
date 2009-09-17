@@ -2113,11 +2113,11 @@ function theme_opml_icon($url) {
 
 function og_block_new() {
   list($types, $in) = og_get_sql_args();
-  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.og_directory=1 AND n.type $in AND n.status = 1";
+  $sql = "SELECT COUNT(*) FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE og.og_directory=1 AND n.type $in AND n.status = 1 AND moderate = 0";
   $cnt = db_result(db_query(db_rewrite_sql($sql), $types));
   if ($cnt > 0) {
     $max = variable_get('og_block_cnt_3', 10);
-    $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type $in AND og.og_directory=1 ORDER BY nid DESC";
+    $sql = "SELECT n.nid, n.title FROM {node} n INNER JOIN {og} og ON n.nid = og.nid WHERE n.status = 1 AND n.type $in AND og.og_directory=1 AND moderate = 0 ORDER BY nid DESC";
     $result = db_query_range(db_rewrite_sql($sql), $types, 0, $max);
     $output = node_title_list($result);
     if ($cnt > $max) {
