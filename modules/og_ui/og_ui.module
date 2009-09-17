@@ -253,10 +253,10 @@ function og_ui_node_type_form_submit($form, &$form_state) {
 	$og_type = $og_types[$form_state['values']['og_content_type_usage']]['type'];
 	
 	if ($og_type == 'group') {
-		og_ui_group_type_set_fields(array($type));
+		og_ui_og_type_set_fields(array($type));
 	}
 	elseif ($og_type == 'group post') {
-	  og_ui_group_post_type_set_fields(array($type));	
+	  og_ui_og_type_set_fields(array($type));	
 	}
 }
 
@@ -272,10 +272,10 @@ function og_ui_node_type_delete($info) {
 */
 function og_ui_node_type_insert($info) {
   if (og_is_group_type($info->type)) {
-    og_ui_group_type_set_fields(array($info->type));
+    og_ui_og_type_set_fields(array($info->type));
   }
   elseif (og_is_group_post_type($info->type)) {
-    og_ui_group_post_type_set_fields(array($info->type));
+    og_ui_og_type_set_fields(array($info->type));
   }
 }
 
@@ -360,6 +360,11 @@ function og_ui_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   return FALSE;
 }
 
+function og_ui_get_group_selective($node) {
+	$langcode = FIELD_LANGUAGE_NONE;
+	return $node->{OG_SELECTIVE_FIELD}[$langcode][0]['value'];
+}
+
 /**
  * Add fields to group post node types.
  *
@@ -369,7 +374,7 @@ function og_ui_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
  *   The node types that have been changed, as some might already have the
  *   fields attached to them.
  */
-function og_ui_group_type_set_fields($node_types = array()) {
+function og_ui_og_type_set_fields($node_types = array()) {
   foreach ($node_types as $type) {
 
     $field = field_info_field(OG_SELECTIVE_FIELD);
@@ -378,7 +383,7 @@ function og_ui_group_type_set_fields($node_types = array()) {
         'field_name' => OG_SELECTIVE_FIELD,
         'type' => 'list_text',
         'locked' => TRUE,
-        'settings' => array('allowed_values_function' => 'og_ui_get_group_selective'),
+        'settings' => array('allowed_values_function' => 'og_ui_get_og_selective'),
       );
       $field = field_create_field($field);
     }
@@ -416,7 +421,7 @@ function og_ui_group_type_set_fields($node_types = array()) {
  *   TODO: The node types that have been changed, as some might already have the
  *   fields attached to them.
  */
-function og_ui_group_post_type_set_fields($node_types = array()) {
+function og_ui_og_type_set_fields($node_types = array()) {
   foreach ($node_types as $type) {  
     $field = field_info_field('og_audience');
     if (empty($field)) {
@@ -451,7 +456,7 @@ function og_ui_group_post_type_set_fields($node_types = array()) {
   }
 }
 
-function og_ui_get_group_selective() {
+function og_ui_get_og_selective() {
   return module_invoke_all('og_selective_info');
 }
 
