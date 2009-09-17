@@ -897,9 +897,13 @@ function og_allowed_values($field, $account = NULL) {
 
   if (empty($account)) {
     global $user;
+        
     $account = $user;
-  }  
+  }
 
+  //FIXME: Remove after I find why fields don't appear.
+  $account = user_load($account->uid);
+  
   $allowed_values[$field['field_name']] = og_get_groups_for_form($account);
   return $allowed_values[$field['field_name']];
 }
@@ -921,7 +925,7 @@ function og_get_groups_for_form($object) {
   if ($all_groups = og_get_all_groups_for_form()) {
 
     // Get the groups belonging to the content.
-    $content_groups = array_keys(og_get_groups($object));
+    $content_groups = og_get_groups($object);
 
     // TODO: Is it faster to use array_diff & array_intersect?
     foreach ($all_groups as $nid => $name) {
