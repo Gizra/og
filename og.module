@@ -808,15 +808,19 @@ function og_set_context($node = NULL) {
  * Process organic groups audience FAPI element.
  */
 function og_elements_process($element, &$form_state, $form) {
-  global $user;
-  
   $field = $form['#fields'][$element['#field_name']]['field'];
   $instance = $form['#fields'][$element['#field_name']]['instance'];
   $field_key  = $element['#columns'][0];  
 
   // Allow showing the form element for another user.
-  $uid = !empty($element['uid']) ? $element['uid'] : $user->uid;
-  $content_groups = og_allowed_values($field, $uid);
+  if (!empty($element['uid'])) {
+  	$account = user_load($element['uid']);
+  }
+  else {
+   global $user;
+  	$account = $user;
+  }
+  $content_groups = og_allowed_values($field, $account);
 
   // Determine if a user may see other groups as-well.
   $opt_group = FALSE;
@@ -879,17 +883,19 @@ function og_elements_process($element, &$form_state, $form) {
  * @return
  *   Array keyed by "content groups" and "other groups".
  */
-function og_allowed_values($field, $uid = NULL) {
+function og_allowed_values($field, $account = NULL) {
   $allowed_values = &drupal_static(__FUNCTION__, array());
 
   if (isset($allowed_values[$field['field_name']])) {
     return $allowed_values[$field['field_name']];
   }
 
-  global $user;
-  $uid = !empty($uid) ? $uid : $user->uid;
+  if (empty($account)) {
+    global $user;
+    $account = $user;
+  }  
 
-  $allowed_values[$field['field_name']] = og_get_groups_for_form($uid, 'user');
+  $allowed_values[$field['field_name']] = og_get_groups_for_form($account);
   return $allowed_values[$field['field_name']];
 }
 
@@ -904,13 +910,13 @@ function og_allowed_values($field, $uid = NULL) {
  *
  * @see og_get_groups_of_content().
  */
-function og_get_groups_for_form($content_id, $type = 'user') {
+function og_get_groups_for_form($object) {
   $return = array('content groups' => array(), 'other groups' => array());
   // Get all the existing groups.
   if ($all_groups = og_get_all_groups_for_form()) {
 
     // Get the groups belonging to the content.
-    $content_groups = array_keys(og_get_groups_of_content($content_id, $type));
+    $content_groups = array_keys(og_get_groups($object));
 
     // TODO: Is it faster to use array_diff & array_intersect?
     foreach ($all_groups as $nid => $name) {
