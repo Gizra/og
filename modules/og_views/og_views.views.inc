@@ -528,14 +528,3 @@ function og_views_data_og_notifications() {
   );
   return $data;
 }
-
-// -------- Utility functions.
-
-function og_views_set_breadcrumb($nid) {
-  $node = node_load((int)$nid);
-  $bc = array(
-    '<front>' => t('Home'),
-    "node/$nid" => check_plain($node->title),
-  );
-  return $bc;
-}
