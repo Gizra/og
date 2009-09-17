@@ -37,10 +37,8 @@ function og_subscribe($node, $uid = NULL) {
       $account = user_load($uid);
     }
     
-
-    $langcode = FIELD_LANGUAGE_NONE;
-    //TODO: Remove hardcode of field.    
-    if ($node->OG_SELECTIVE_FIELD[$langcode][0]['value'] >= OG_INVITE_ONLY || $node->status == 0) {
+    $langcode = FIELD_LANGUAGE_NONE;    
+    if ($node->{OG_SELECTIVE_FIELD}[$langcode][0]['value'] >= OG_INVITE_ONLY || $node->status == 0) {
       drupal_access_denied();
       exit();
     }
