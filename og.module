@@ -394,6 +394,7 @@ function og_init() {
   }
   
   drupal_add_css(drupal_get_path('module', 'og'). '/theme/og.css');
+  drupal_add_js(drupal_get_path('module', 'og'). '/og.js');
 
   // Set group context and language if needed.
   if ($group_node = og_determine_context()) {
@@ -1205,6 +1206,15 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           form_set_error('title', t('You must <a href="@join">join a group</a> before posting on this web site.', array('@join' => url('og'))));
         }
       }
+
+      // Ensure that the number of groups specified as node audience do not exceed group limit
+      $og_groups_filtered = array_filter($node->og_groups);
+      $max_number = variable_get('og_max_groups_' . $node->type,'');
+      if ($og_groups_filtered && $max_number) {
+        if (count($og_groups_filtered) > $max_number && !user_access('administer nodes')) {
+          form_set_error('og_groups', format_plural($max_number, "The audience for this post may not exceed !max_number group.", "The audience for this post may not exceed !max_number groups.", array('!max_number' => $max_number)));
+        }
+      }
       break;
     case 'presave':
       og_presave_group($node);
@@ -1412,6 +1422,7 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
   );
   // We push to the front so we can unset() variables before they are saved.
   array_unshift($form['#submit'], 'og_node_type_form_submit');
+  array_unshift($form['#validate'], 'og_node_type_form_validate');
   $options = og_types_map();
   $og = array(
     '#type' => 'fieldset',
@@ -1429,6 +1440,18 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#options' => $options,
     '#description' => t('Specify how organic groups should treat nodes of this type. Nodes may behave as a group, as group posts, or may not participate in organic groups at all.'),
   );
+
+  if (isset($form['identity']['type']['#default_value'])) {
+    $max_number = variable_get('og_max_groups_' . $form['identity']['type']['#default_value'],'');
+  }
+
+  $form['og']['og_max_groups'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Group limit'),
+    '#default_value' => $max_number,
+    '#size' => 3,
+    '#description' => t('If the usage is standard group post, specify the number of groups the nodes of this type may be posted into. Leave blank for no limit.'),
+  );
 }
 
 // Add option to migrate messages before deleting a group.
@@ -1440,6 +1463,14 @@ function og_form_node_delete_confirm_alter(&$form, &$form_state) {
   }
   elseif (og_is_group_post_type($node->type)) {
     og_node_delete_nongroup_form($form);
+  }
+}
+
+// Make sure max number of groups is positive integer
+function og_node_type_form_validate($form, &$form_state) {
+  $max_number = $form_state['values']['og_max_groups'];
+  if ($max_number != '' && (!is_numeric($max_number) || $max_number <= 0 || floor($max_number) != $max_number)) {
+    form_set_error('og_max_groups',t('The group limit must be a positive integer'));
   }
 }
 
@@ -1736,13 +1767,15 @@ function og_form_add_og_audience(&$form, &$form_state) {
   elseif ($cnt = count($options, COUNT_RECURSIVE)) {
     // show multi-select. if less than 20 choices, use checkboxes.
     $type = $cnt >= 20 || $is_optgroup ? 'select' : 'checkboxes';
+    $max_groups = variable_get('og_max_groups_'.$node->type,'');
+    $description_max_groups = ($max_groups && !user_access('administer nodes')) ? format_plural($max_groups," Limited to !max_groups choice."," Limited to !max_groups choices.", array('!max_groups' => $max_groups)):'';
     $form['og_nodeapi']['visible']['og_groups'] = array(
       '#type' => $type, 
       '#title' => t('Audience'), 
       '#attributes' => array('class' => 'og-audience'),
       '#options' => $type == 'checkboxes' ? array_map('filter_xss', $options) : $options, 
       '#required' => $required, 
-      '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'),
+      '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.') . $description_max_groups,
       '#default_value' => $groups ? $groups : array(),
       '#required' => $required, 
       '#multiple' => TRUE);
@@ -1912,6 +1945,7 @@ function og_node_type($op, $info) {
   switch ($op) {
     case 'delete':
       variable_del('og_content_type_usage_'. $info->type);
+      variable_del('og_max_groups_'. $info->type);
       break;
     case 'update':
       $usage = variable_get('og_content_type_usage_'. $info->type, 'omitted');
