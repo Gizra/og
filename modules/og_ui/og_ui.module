@@ -249,7 +249,7 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
  */
 function og_ui_node_type_form_submit($form, &$form_state) {
 	$type = $form_state['values']['type'];
-	$og_types = og_ui_get_group_selective();
+	$og_types = og_get_og_types();
 	$og_type = $og_types[$form_state['values']['og_content_type_usage']]['type'];
 	
 	if ($og_type == 'group') {
