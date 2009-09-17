@@ -1,6 +1,0 @@
-name = Organic groups UI
-description = "Allow users to subscribe and manage their subscriptions to groups."
-package = "Organic groups"
-core = 7.x
-dependencies[] = og
-files[] = og_ui.module
