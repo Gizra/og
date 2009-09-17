@@ -269,6 +269,27 @@ function og_node_type_delete($info) {
 }
 
 /**
+* Implement hook_node_insert().
+*/
+function og_node_insert($node) {
+  if (og_is_group_type($node->type)) {
+    // Add group.
+    og_set_group($node->nid);
+  }
+}
+
+/**
+* Implement hook_node_update().
+* 
+* In most cases group will be already registered on og_node_insert() however if
+* the content already exists, but wasn't defined as a group node, then we must
+* make sure it is registered. 
+*/
+function og_node_update($node) {
+	og_node_insert($node);
+}
+
+/**
 * Implement hook_node_delete().
 */
 function og_node_delete($node) {
