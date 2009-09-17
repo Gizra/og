@@ -19,55 +19,6 @@ function og_ui_install() {
 function og_schema() {
   $schema = array();
 
-  $schema['og'] = array(
-    'description'     => 'Stores information about each connection of a node or a user to a group node.',
-    'fields'          => array(
-       'oid' => array(
-        'description' => 'Unique ID for the group association.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),  
-      'nid'               => array(
-        'description'     => "The group's node ID.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
-      ),
-      'content_id'             => array(
-        'description'     => "The node or user's ID for the object that needs to be associated with a group node.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
-      ),
-      'type'     => array(
-        'description'     => 'The type of the content - "node" or "user".',
-        'type'            => 'varchar',
-        'length'          => 32,
-        'not null'        => TRUE,
-        'default' => '',
-      ),
-      'state'     => array(
-        'description'     => 'The state of the association.',
-        'type'            => 'varchar',
-        'length'          => 255,
-        'not null'        => TRUE,
-        'default' => '',
-      ),      
-      'data' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'size' => 'big',
-        'serialize' => TRUE,
-        'description' => 'A serialized array with the data related to the associated node or user.',
-      ),
-    ),
-    'primary key' => array('oid'),
-    'unique keys' => array(
-      'oid' => array('oid'),
-    ),
-  );
-
   $schema['og_groups'] = array(
     'description'     => 'Store information related to the groups.',
     'fields'          => array(
