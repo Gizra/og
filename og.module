@@ -64,6 +64,290 @@ define('OG_ACCESS_IGNORE', NULL);
 define('OG_SELECTIVE_FIELD', 'og_selective');
 
 /*******************************************************************************
+ * Hook implementations
+ ******************************************************************************/
+
+
+/**
+ * Implement hook_menu().
+ */
+function og_menu() {
+  // Anonymous users should be able to get to the join page.
+  $items['og/subscribe/%node'] = array(
+    'type' => MENU_CALLBACK,
+    'file' => 'og.pages.inc',
+    'page callback' => 'og_subscribe',
+    'page arguments' => array(2),
+    'access callback' => 'og_access',
+    'access arguments' => array('subscribe', 2),
+    'title' => 'Join group'
+  );
+
+  $items['og/opml'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'og_opml',
+    'access callback' => 'user_is_logged_in',
+    'title' => 'OPML',
+  );
+  $items['og/unsubscribe/%node/%user'] = array(
+    'type' => MENU_CALLBACK,
+    'file' => 'og.pages.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_confirm_unsubscribe', 2, 3),
+    'access callback' => 'og_menu_access_unsubscribe',
+    'access arguments' => array('unsubscribe', array('node' => 2, 'user' => 3)),
+    'title' => 'Leave group',
+  );
+
+  $items['og/approve/%node/%user/%'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'og_approve',
+    'page arguments' => array(2, 3, 4),
+    'access callback' => 'og_is_group_admin',
+    'access arguments' => array('approve', array('node' => 2, 'user' => 3)),
+    'title' => 'Approve membership request'
+  );
+  $items['og/deny/%node/%user/%'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'og_deny',
+    'page arguments' => array(2, 3, 4),
+    'access callback' => 'og_is_group_admin',
+    'access arguments' => array(2),
+    'title' => 'Deny membership request',
+  );
+  $items['og/create_admin/%node/%user'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_create_admin_confirm', 2, 3),
+    'access callback' => 'og_is_group_admin',
+    'access arguments' => array(2),
+    'title' => 'Create group administrator',
+    'file' => 'og.pages.inc',
+  );
+  $items['og/delete_admin/%node/%user'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_remove_admin_confirm', 2, 3),
+    'access callback' => 'og_is_group_admin',
+    'access arguments' => array(2),
+    'title' => 'Delete group administrator',
+    'file' => 'og.pages.inc',
+  );
+
+  // members only and group may not be invite-only or closed
+  $items['og/invite/%node'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_invite_form', 2),
+    'access callback' => 'og_menu_access_invite',
+    'access arguments' => array(2),
+    'title' => 'Send invitation',
+    'type' => MENU_CALLBACK,
+    'file' => 'og.pages.inc',
+  );
+  $items["og/manage/%node"] = array(
+    'page callback' => 'og_manage',
+    'page arguments' => array(2),
+    'access callback' => 'og_is_group_member',
+    'access arguments' => array(2, FALSE),
+    'title' => 'Manage membership',
+    'type' => MENU_CALLBACK,
+    'file' => 'og.pages.inc',
+  );
+
+  $items['admin/og'] = array(
+    'title' => 'Organic groups',
+    'description' => 'Administer the suite of Organic groups modules.',
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/og/og'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_admin_settings'),
+    'title' => 'Organic groups configuration',
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Configure organic groups module.',
+    'file' => 'og.admin.inc',
+    'file path' => drupal_get_path('module', 'og'),
+    'weight' => -5,
+  );
+
+  // group admin only
+  $items['og/users/%node/add_user'] = array(
+    'page callback' => 'drupal_get_form',
+    'title' => 'Add members',
+    'page arguments' => array('og_add_users', 2),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'og.pages.inc',
+    'weight' => 5,
+    'access callback' => 'og_is_group_admin',
+    'access arguments' => array(2),
+  );
+
+    // Broadcast tab on group node.
+  $items['node/%node/broadcast'] = array(
+    'title' => 'Broadcast',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_broadcast_form', 1),
+    'access callback' => 'og_broadcast_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'og.pages.inc',
+    'weight' => 7
+  );
+
+  return $items;
+}
+
+/**
+ * Implement hook_init().
+ */
+function og_init() {
+  if ($group_node = og_determine_context()) {
+    og_set_context($group_node);
+  }
+}
+
+/**
+ * Implement hook_form_FORM_ID_alter().
+ */
+function og_form_node_type_form_alter(&$form, &$form_state) {
+  $node_type = $form['#node_type']->type;
+
+ // Get all the group types (group, group post, etc').
+  $options = array();
+  foreach (og_get_og_types() as $type => $value) {
+    $options[$type] = $value['description'];
+  }
+
+  $form['og'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Organic groups'),
+    '#collapsible' => TRUE,
+    '#group' => 'additional_settings',
+    '#access' => user_access('administer organic groups'),
+  );
+  $form['og']['og_content_type_usage'] = array(
+    '#type' => 'radios',
+    '#title' => t('Organic groups usage'),
+    '#default_value' =>  og_get_group_type($node_type),
+    '#options' => $options,
+    '#description' => t('Specify how organic groups should treat nodes of this type. Nodes may behave as a group, as group posts, or may not participate in organic groups at all.'),
+  );
+  // Add own submit handler.
+  $form['#submit'][] = 'og_node_type_form_submit';
+}
+
+/**
+ * Submit handler; Set the group type.
+ * 
+ * We can't use hook_node_type_insert() to set the group, since variables are 
+ * saved later on.
+ * @see node_type_form_submit().
+ */
+function og_node_type_form_submit($form, &$form_state) {
+  $type = $form_state['values']['type'];
+  $og_types = og_get_og_types();
+  $og_type = $og_types[$form_state['values']['og_content_type_usage']]['type'];
+  
+  if ($og_type == 'group') {
+    og_group_type_set_fields(array($type));
+  }
+  elseif ($og_type == 'group post') {
+    og_group_post_type_set_fields(array($type));  
+  }
+}
+
+/**
+* Implement hook_node_type_delete().
+*/
+function og_node_type_delete($info) {
+  variable_del('og_content_type_usage_' . $info->type);
+}
+
+/**
+* Implement hook_node_delete().
+*/
+function og_node_delete($node) {
+  if (og_is_group_type($node->type)) {
+    // Remove group.
+    og_delete_group($node->nid);
+  }
+}
+
+/**
+ * Implement hook_og_get_group_alter().
+ */
+function og_og_set_group_alter($group) {
+  // Add basic permissions and roles.
+  $group->data += array(
+    'permissions' => array(
+      'approve and deny subscription' => array(
+        'title' => t('Approve and deny subscription'),
+        'description' => t("Allow user to allow or deny another user's subscription request."),
+        'roles' => array('administrator'),
+      ),
+    ),
+    'roles' => array(
+      'administrator' => t('Group administrator'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_og_selective_info().
+ */
+function og_og_selective_info() {
+  return array(
+    OG_OPEN => t('Open'),
+    OG_MODERATED => t('Moderated'),
+    OG_MODERATED => t('Invite only'),
+    OG_CLOSED => t('Closed'),
+  );
+}
+
+/**
+ * Implement hook_element_info().
+ *
+ * Define a group selection form element.
+ */
+function og_element_info() {
+  return array(
+    'og_audience' => array(
+      '#read_only' => FALSE,
+      '#opt_group' => FALSE,
+      '#opt_group_access_check' => TRUE,
+      '#user_groups' => array(),
+      '#other_groups' => array(),
+      '#minimum_for_select_list' => 20,
+      '#uid' => NULL,
+      '#process' => array('og_elements_process'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_og_types_info().
+ */
+function og_og_types_info() {
+  return array(   
+    'group' => array(
+       'type' => 'group',
+       'description' => t('Group node'),
+       
+     ),
+     'group post' => array(
+       'type' => 'group post',
+       'description' => t('Standard group post (typically only author may edit).'),
+     ),
+  );
+}
+
+
+/*******************************************************************************
  * API functions
  ******************************************************************************/
 
@@ -136,46 +420,6 @@ function og_get_groups_of_content($content_id, $type = 'user') {
   return db_query("SELECT * FROM {og} WHERE content_id = :content_id AND type = :type", array(':content_id' => $content_id, ':type' => $type))->fetchAllAssoc('nid');
 }
 
-/**
- * Get the groups a content belongs to - ready to be used in a form element.
- *
- * @param $groups
- *   An array of group objects.
- * @return
- *   An array keyed by "content groups" and "other groups". Inside them there are
- *   the group's node ID and the sanitized group's name.
- *
- * @see og_get_groups_of_content().
- */
-function og_get_groups_for_form($content_id, $type = 'user') {
-  $return = array('content groups' => array(), 'other groups' => array());
-  // Get all the existing groups.
-  if ($all_groups = og_get_all_groups_for_form()) {
-
-    // Get the groups belonging to the content.
-    $content_groups = array_keys(og_get_groups_of_content($content_id, $type));
-
-    // TODO: Is it faster to use array_diff & array_intersect?
-    foreach ($all_groups as $nid => $name) {
-      if (in_array($nid, $content_groups)) {
-        $return['content groups'][$nid] = $name;
-      }
-      else {
-        $return['other groups'][$nid] = $name;
-      }
-    }
-
-  }
-
-  return $return;
-}
-
-function og_get_all_groups_for_form() {
-  $return = db_query("SELECT og.nid, n.title FROM {og_groups} og INNER JOIN {node} n ON og.nid = n.nid ORDER BY og.nid")->fetchAllKeyed();
-  // Sanitize the result.
-  array_walk($return, 'check_plain');
-  return $return;
-}
 
 /**
  * Set a user role in a specific group.
@@ -470,83 +714,6 @@ function og_get_og_selective() {
 }
 
 /**
- * Edits to membership should
- *
- * go through og_save_subscription(). No access control since this is an API function.
- *
- * @return string 'approval', 'subscribed' or 'rejected' depending on the group's configuration.
- **/
-
-/**
- * Create a new membership for a given user to given group.
- *
- * @param $gid
- *   The group ID.
- * @param $account
- *   Optional; The user object. If not set the current user will be used.
- * @param $request
- *   Optional; The request message that should be sent to the group admin.
- * @return
- *  A keyed array with "type" as the subscription result, and "message" with the
- *  message to be presented to the user.
- */
-function og_subscribe_user($gid, $account = NULL, $request = '') {
-  if (empty($account)) {
-    global $user;
-    $account = $user;
-  }
-
-  $node = node_load($gid);
-  $group = og_get_group($gid);
-
-  switch (og_get_og_selective($node)) {
-    case OG_OPEN:
-      og_set_association($gid, $account->uid, 'user', OG_STATE_ACTIVE);
-      $return = array('type' => 'subscribed', 'message' => t('You are now a member of the %group.', array('%group' => $node->title)));
-      break;
-
-    // Moderated groups must approve all members.
-    case OG_MODERATED:
-      og_set_association($gid, $account->uid, 'user', OG_STATE_PENDING);
-
-      // Get the privileged users that should approve and deny the subscription.
-      $roles = $group->data['permissions']['approve and deny subscription']['roles'];
-      $uids = og_get_users_by_roles($node->nid, $roles);
-
-      // Add the group manager.
-      $uids[] = $node->uid;
-
-      // Allow other modules to alter the users.
-      drupal_alter('og_user_request', $uids, $node, $group, $account, $request);
-
-      if (!empty($uids)) {
-        // Prepare variables for Rules to act on the user subscription.
-/*        $variables = array(
-          '@group' => $node->title,
-          '@username' => $account->name,
-          '!approve_url' => url("og/approve/$node->nid/$account->uid", array('absolute' => TRUE)),
-          '!group_url' => url("og/users/$node->nid", array('absolute' => TRUE)),
-          '@request' => $request,
-        );*/
-      }
-
-      $return = array('type' => 'approval', 'message' => t('Membership request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
-      break;
-
-    case OG_CLOSED:
-    case OG_INVITE_ONLY:
-      // Admins can add members to these groups, but others can't.
-      if (og_is_group_admin($node)) {
-        og_save_subscription($gid, $account->uid, array('is_active' => 1));
-      }
-      else {
-        $return = array('type' => 'rejected', 'message' => t('Membership request to the %group group was rejected, only group administrators can add users to this group.', array('%group' => $node->title)));
-      }
-  }
-  return $return;
-}
-
-/**
  * Set group context using the menu system.
  *
  * Modules may override the custom theme and group context set here.
@@ -706,288 +873,6 @@ function og_set_og_audince_field($bundle) {
 }
 
 
-/*******************************************************************************
- * Hook implementations
- ******************************************************************************/
-
-
-/**
- * Implement hook_menu().
- */
-function og_menu() {
-  // Anonymous users should be able to get to the join page.
-  $items['og/subscribe/%node'] = array(
-    'type' => MENU_CALLBACK,
-    'file' => 'og.pages.inc',
-    'page callback' => 'og_subscribe',
-    'page arguments' => array(2),
-    'access callback' => 'og_access',
-    'access arguments' => array('subscribe', 2),
-    'title' => 'Join group'
-  );
-
-  $items['og/opml'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'og_opml',
-    'access callback' => 'user_is_logged_in',
-    'title' => 'OPML',
-  );
-  $items['og/unsubscribe/%node/%user'] = array(
-    'type' => MENU_CALLBACK,
-    'file' => 'og.pages.inc',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_confirm_unsubscribe', 2, 3),
-    'access callback' => 'og_menu_access_unsubscribe',
-    'access arguments' => array('unsubscribe', array('node' => 2, 'user' => 3)),
-    'title' => 'Leave group',
-  );
-
-  $items['og/approve/%node/%user/%'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'og_approve',
-    'page arguments' => array(2, 3, 4),
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array('approve', array('node' => 2, 'user' => 3)),
-    'title' => 'Approve membership request'
-  );
-  $items['og/deny/%node/%user/%'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'og_deny',
-    'page arguments' => array(2, 3, 4),
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array(2),
-    'title' => 'Deny membership request',
-  );
-  $items['og/create_admin/%node/%user'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_create_admin_confirm', 2, 3),
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array(2),
-    'title' => 'Create group administrator',
-    'file' => 'og.pages.inc',
-  );
-  $items['og/delete_admin/%node/%user'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_remove_admin_confirm', 2, 3),
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array(2),
-    'title' => 'Delete group administrator',
-    'file' => 'og.pages.inc',
-  );
-
-  // members only and group may not be invite-only or closed
-  $items['og/invite/%node'] = array(
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_invite_form', 2),
-    'access callback' => 'og_menu_access_invite',
-    'access arguments' => array(2),
-    'title' => 'Send invitation',
-    'type' => MENU_CALLBACK,
-    'file' => 'og.pages.inc',
-  );
-  $items["og/manage/%node"] = array(
-    'page callback' => 'og_manage',
-    'page arguments' => array(2),
-    'access callback' => 'og_is_group_member',
-    'access arguments' => array(2, FALSE),
-    'title' => 'Manage membership',
-    'type' => MENU_CALLBACK,
-    'file' => 'og.pages.inc',
-  );
-
-  $items['admin/og'] = array(
-    'title' => 'Organic groups',
-    'description' => 'Administer the suite of Organic groups modules.',
-    'position' => 'right',
-    'weight' => -5,
-    'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => array('administer site configuration'),
-    'file' => 'system.admin.inc',
-    'file path' => drupal_get_path('module', 'system'),
-  );
-  $items['admin/og/og'] = array(
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_admin_settings'),
-    'title' => 'Organic groups configuration',
-    'access arguments' => array('administer site configuration'),
-    'description' => 'Configure organic groups module.',
-    'file' => 'og.admin.inc',
-    'file path' => drupal_get_path('module', 'og'),
-    'weight' => -5,
-  );
-
-  // group admin only
-  $items['og/users/%node/add_user'] = array(
-    'page callback' => 'drupal_get_form',
-    'title' => 'Add members',
-    'page arguments' => array('og_add_users', 2),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'og.pages.inc',
-    'weight' => 5,
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array(2),
-  );
-
-    // Broadcast tab on group node.
-  $items['node/%node/broadcast'] = array(
-    'title' => 'Broadcast',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_broadcast_form', 1),
-    'access callback' => 'og_broadcast_access',
-    'access arguments' => array(1),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'og.pages.inc',
-    'weight' => 7
-  );
-
-  return $items;
-}
-
-/**
- * Implement hook_init().
- */
-function og_init() {
-  if ($group_node = og_determine_context()) {
-    og_set_context($group_node);
-  }
-}
-
-/**
- * Implement hook_form_FORM_ID_alter().
- */
-function og_form_node_type_form_alter(&$form, &$form_state) {
-  $node_type = $form['#node_type']->type;
-
- // Get all the group types (group, group post, etc').
-  $options = array();
-  foreach (og_get_og_types() as $type => $value) {
-    $options[$type] = $value['description'];
-  }
-
-  $form['og'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Organic groups'),
-    '#collapsible' => TRUE,
-    '#group' => 'additional_settings',
-    '#access' => user_access('administer organic groups'),
-  );
-  $form['og']['og_content_type_usage'] = array(
-    '#type' => 'radios',
-    '#title' => t('Organic groups usage'),
-    '#default_value' =>  og_get_group_type($node_type),
-    '#options' => $options,
-    '#description' => t('Specify how organic groups should treat nodes of this type. Nodes may behave as a group, as group posts, or may not participate in organic groups at all.'),
-  );
-  // Add own submit handler.
-  $form['#submit'][] = 'og_node_type_form_submit';
-}
-
-/**
- * Submit handler; Set the group type.
- * 
- * We can't use hook_node_type_insert() to set the group, since variables are 
- * saved later on.
- * @see node_type_form_submit().
- */
-function og_node_type_form_submit($form, &$form_state) {
-  $type = $form_state['values']['type'];
-  $og_types = og_get_og_types();
-  $og_type = $og_types[$form_state['values']['og_content_type_usage']]['type'];
-  
-  if ($og_type == 'group') {
-    og_group_type_set_fields(array($type));
-  }
-  elseif ($og_type == 'group post') {
-    og_group_post_type_set_fields(array($type));  
-  }
-}
-
-/**
-* Implement hook_node_type_delete().
-*/
-function og_node_type_delete($info) {
-  variable_del('og_content_type_usage_' . $info->type);
-}
-
-/**
-* Implement hook_node_delete().
-*/
-function og_node_delete($node) {
-  if (og_is_group_type($node->type)) {
-    // Remove group.
-    og_delete_group($node->nid);
-  }
-}
-
-/**
- * Implement hook_og_get_group_alter().
- */
-function og_og_set_group_alter($group) {
-  // Add basic permissions and roles.
-  $group->data += array(
-    'permissions' => array(
-      'approve and deny subscription' => array(
-        'title' => t('Approve and deny subscription'),
-        'description' => t("Allow user to allow or deny another user's subscription request."),
-        'roles' => array('administrator'),
-      ),
-    ),
-    'roles' => array(
-      'administrator' => t('Group administrator'),
-    ),
-  );
-}
-
-/**
- * Implement hook_og_selective_info().
- */
-function og_og_selective_info() {
-  return array(
-    OG_OPEN => t('Open'),
-    OG_MODERATED => t('Moderated'),
-    OG_MODERATED => t('Invite only'),
-    OG_CLOSED => t('Closed'),
-  );
-}
-
-/**
- * Implement hook_element_info().
- *
- * Define a group selection form element.
- */
-function og_element_info() {
-  return array(
-    'og_audience' => array(
-      '#read_only' => FALSE,
-      '#opt_group' => FALSE,
-      '#opt_group_access_check' => TRUE,
-      '#user_groups' => array(),
-      '#other_groups' => array(),
-      '#minimum_for_select_list' => 20,
-      '#uid' => NULL,
-      '#process' => array('og_elements_process'),
-    ),
-  );
-}
-
-/**
- * Implement hook_og_types_info().
- */
-function og_og_types_info() {
-  return array(   
-    'group' => array(
-       'type' => 'group',
-       'description' => t('Group node'),
-       
-     ),
-     'group post' => array(
-       'type' => 'group post',
-       'description' => t('Standard group post (typically only author may edit).'),
-     ),
-  );
-}
 
 /*******************************************************************************
  * Function callbacks
@@ -1080,4 +965,44 @@ function og_allowed_values($field, $uid = NULL) {
 
   $allowed_values[$field['field_name']] = og_get_groups_for_form($uid, 'user');
   return $allowed_values[$field['field_name']];
+}
+
+/**
+ * Get the groups a content belongs to - ready to be used in a form element.
+ *
+ * @param $groups
+ *   An array of group objects.
+ * @return
+ *   An array keyed by "content groups" and "other groups". Inside them there are
+ *   the group's node ID and the sanitized group's name.
+ *
+ * @see og_get_groups_of_content().
+ */
+function og_get_groups_for_form($content_id, $type = 'user') {
+  $return = array('content groups' => array(), 'other groups' => array());
+  // Get all the existing groups.
+  if ($all_groups = og_get_all_groups_for_form()) {
+
+    // Get the groups belonging to the content.
+    $content_groups = array_keys(og_get_groups_of_content($content_id, $type));
+
+    // TODO: Is it faster to use array_diff & array_intersect?
+    foreach ($all_groups as $nid => $name) {
+      if (in_array($nid, $content_groups)) {
+        $return['content groups'][$nid] = $name;
+      }
+      else {
+        $return['other groups'][$nid] = $name;
+      }
+    }
+  }
+
+  return $return;
+}
+
+function og_get_all_groups_for_form() {
+  $return = db_query("SELECT og.nid, n.title FROM {og_groups} og INNER JOIN {node} n ON og.nid = n.nid ORDER BY og.nid")->fetchAllKeyed();
+  // Sanitize the result.
+  array_walk($return, 'check_plain');
+  return $return;
 }
