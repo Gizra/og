@@ -187,14 +187,10 @@ function og_ui_init() {
 /**
  * Implement hook_form_FORM_ID_alter().
  */
-function og_form_node_type_form_alter(&$form, &$form_state) {
-  // Built in content types do not allow changes to type machine name.
-  if (isset($form['identity']['type']['#default_value'])) {
-    $usage = variable_get('og_content_type_usage_'. $form['identity']['type']['#default_value'], 'omitted');
-  }
-  else {
-    $usage = variable_get('og_content_type_usage_'. $form['identity']['type']['#value'], 'omitted');
-  }
+function og_ui_form_node_type_form_alter(&$form, &$form_state) {
+  $node_type = $form['#node_type']->type;
+
+ // Get all the group types (group, group post, etc').
   $options = array();
   foreach (og_get_og_types() as $type => $value) {
     $options[$type] = $value['description'];
@@ -207,11 +203,10 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#group' => 'additional_settings',
     '#access' => user_access('administer organic groups'),
   );
-
   $form['og']['og_content_type_usage'] = array(
     '#type' => 'radios',
     '#title' => t('Organic groups usage'),
-    '#default_value' => $usage,
+    '#default_value' =>  og_get_group_type($node_type),
     '#options' => $options,
     '#description' => t('Specify how organic groups should treat nodes of this type. Nodes may behave as a group, as group posts, or may not participate in organic groups at all.'),
   );

@@ -437,7 +437,7 @@ function og_get_node_type_by_og_type($og_types = array()) {
  *   organic groups.
  */
 function og_get_group_type($type) {
-  return variable_get('og_content_type_usage_'. $type, 'omitted');
+  return variable_get('og_content_type_usage_' . $type, 'omitted');
 }
 
 /**
@@ -449,7 +449,7 @@ function og_get_group_type($type) {
  *   The node type to be checked.
  */
 function og_is_group_type($type) {
-  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'group';
+  return og_get_group_type($type) == 'group';
 }
 
 /**
@@ -461,7 +461,7 @@ function og_is_group_type($type) {
  *   The node type to be checked.
  */
 function og_is_group_post_type($type) {
-  return variable_get('og_content_type_usage_'. $type, 'omitted') == 'group post';
+  return og_get_group_type($type) == 'group post';
 }
 
 
@@ -479,9 +479,6 @@ function og_is_group_post_type($type) {
 function og_element_info() {
   return array(
     'og_audience' => array(
-      '#input' => TRUE,
-      '#columns' => array('value'),
-      '#delta' => 0,
       '#read_only' => FALSE,
       '#opt_group' => FALSE,
       '#opt_group_access_check' => TRUE,
@@ -560,7 +557,7 @@ function og_elements_process($element, &$form_state, $form) {
 
   $element[$field_key] = array(
     '#type' => $type,
-    '#title' => !empty($element['#title']) ? $element['#title'] : t('Groups'),
+    '#title' => !empty($element['#title']) ? $element['#title'] : t('Group audience'),
     '#description' => !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.'),
     '#options' => $options,
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
