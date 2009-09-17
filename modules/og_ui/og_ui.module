@@ -526,19 +526,6 @@ function og_ui_subscribe_user($gid, $account = NULL, $request = '') {
 }
 
 /**
- * Get the selective type of the group.
- *
- * @param $node
- *   The group node.
- */
-function og_ui_get_og_selective($node) {
-  // TODO: Make dynamic.
-  $field = 'field_og_selective';
-  $langcode = FIELD_LANGUAGE_NONE;
-  return $node->{$field}[$langcode][0]['value'];
-}
-
-/**
  * Set group context using the menu system.
  *
  * Modules may override the custom theme and group context set here.
