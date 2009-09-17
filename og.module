@@ -663,7 +663,9 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   return FALSE;
 }
 
-
+/**
+ * Return all the selective types of a group node (e.g. "open", "moderated").
+ */
 function og_get_og_selective() {
   return module_invoke_all('og_selective_info');
 }
