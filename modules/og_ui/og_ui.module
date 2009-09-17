@@ -210,6 +210,28 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
     '#options' => $options,
     '#description' => t('Specify how organic groups should treat nodes of this type. Nodes may behave as a group, as group posts, or may not participate in organic groups at all.'),
   );
+  // Add own submit handler.
+  $form['#submit'][] = 'og_ui_node_type_form_submit';
+}
+
+/**
+ * Submit handler; Set the group type.
+ * 
+ * We can't use hook_node_type_insert() to set the group, since variables are 
+ * saved later on.
+ * @see node_type_form_submit().
+ */
+function og_ui_node_type_form_submit($form, &$form_state) {
+	$type = $form['#node_type']->type;
+  // TODO: Add a check, so we don't try to create the fields twice.	
+  if ($form_state['values']['og_content_type_usage'] == 'group') {
+    og_ui_group_type_set_fields(array($type));  	
+  }
+  elseif ($form_state['values']['og_content_type_usage'] != 'omitted') {
+  	// TODO: Other modules may add their own grouo types.
+  	// Is it true to assume it will be a group post?
+  	og_ui_group_post_type_set_fields(array($type));
+  }
 }
 
 /**
