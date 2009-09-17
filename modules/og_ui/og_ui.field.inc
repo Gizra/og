@@ -46,6 +46,19 @@ function og_ui_field_schema($field) {
       'unsigned' => TRUE,
       'not null' => FALSE,
     ),
+    'data' => array(
+      'description' => 'Serialized additional data about the group post.',
+      'type' => 'text',
+      'not null' => FALSE,
+      'serialize' => TRUE,
+    ),
+    'state'     => array(
+      'description'     => 'The state of the group post.',
+      'type'            => 'varchar',
+      'length'          => 255,
+      'not null'        => TRUE,
+      'default' => '',
+    ),          
   );
   return array(
     'columns' => $columns,
@@ -92,15 +105,13 @@ function og_ui_field_is_empty($item, $field) {
  * Implement hook_field_insert().
  */
 function og_ui_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
-  if ($field['type'] == 'og') {
-    // TODO: What we do with other objects?
-    if ($obj_type == 'node') {
-      // Create new associations.
-      foreach ($items as $value) {
-        og_set_association($value['value'], $object->nid, $obj_type);
-      }
-    }
-
+  // Allow other modules to alter the data.
+  foreach ($items as &$item) {
+  	$item['state'] = $item['data']= array();
+  	$alter = array('state' => $item['state'], 'data' => $item['data']);
+  	drupal_alter('og_field_insert', $alter, $obj_type, $object, $field, $instance, $langcode, $items);
+  	$item['state'] = $alter['state'];
+  	$item['state'] = $alter['data'];
   }
 }
 
@@ -108,30 +119,15 @@ function og_ui_field_insert($obj_type, $object, $field, $instance, $langcode, &$
  * Implement hook_field_update().
  */
 function og_ui_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
-  if ($field['type'] == 'og') {
-    if ($obj_type == 'node') {
-      // Delete association of object.
-      og_delete_association_by_content($object->nid, $obj_type);
-
-      // Create new associations.
-      foreach ($items as $value) {
-        og_set_association($value['value'], $object->nid, $obj_type);
-      }
-    }
+  // Allow other modules to alter the data.
+  foreach ($items as &$item) {
+    $alter = array('state' => $item['state'], 'data' => $item['data']);
+    drupal_alter('og_field_update', $alter, $obj_type, $object, $field, $instance, $langcode, $items);
+    $item['state'] = $alter['state'];
+    $item['state'] = $alter['data'];      	
   }
 }
 
-/**
- * Implement hook_field_delete().
- */
-function hook_field_delete($obj_type, $object, $field, $instance, $langcode, &$items) {
-  if ($field['type'] == 'og') {
-    if ($obj_type == 'node') {
-      // Delete association of object.
-      og_delete_association_by_content($object->nid, $obj_type);
-    }
-  }
-}
 
 /**
  * Implement hook_field_delete_instance()

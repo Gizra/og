@@ -40,5 +40,44 @@ function hook_og_selective_info() {
 }
 
 /**
+ * Insert state and data, that will be saved with the group post.
+ * 
+ * @param $alter
+ *   Array keyed by "state" and "data" passed by reference.
+ *   The data passed by reference.
+ * @param $obj_type
+ * @param $object
+ * @param $field
+ * @param $instance
+ * @param $langcode
+ * @param $items
+ */
+function hook_og_field_insert(&$alter, $obj_type, $object, $field, $instance, $langcode, $items) {
+  // Add timestamp for the subscription.
+  // It's up to the implementing module to act on the data.
+  $alter['data']['timestamp'] = time();
+}
+
+
+/**
+ * Update state and data, that will be saved with the group post.
+ * 
+ * @param $alter
+ *   Array keyed by "state" and "data" passed by reference.
+ *   The data passed by reference.
+ * @param $obj_type
+ * @param $object
+ * @param $field
+ * @param $instance
+ * @param $langcode
+ * @param $items
+ */
+function hook_og_field_update (&$alter, $obj_type, $object, $field, $instance, $langcode, $items) {
+	// Reject a group post when it's updated.
+	// It's up to the implementing module to act on the data.
+	$alter['state'] = 'updated, approve urgently';
+}
+
+/**
  * @} End of "addtogroup hooks".
  */

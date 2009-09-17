@@ -222,7 +222,7 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
  * @see node_type_form_submit().
  */
 function og_ui_node_type_form_submit($form, &$form_state) {
-	$type = $form['#node_type']->type;
+	$type = $form_state['values']['type'];
   // TODO: Add a check, so we don't try to create the fields twice.	
   if ($form_state['values']['og_content_type_usage'] == 'group') {
     og_ui_group_type_set_fields(array($type));  	
