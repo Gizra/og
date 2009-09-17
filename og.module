@@ -715,7 +715,7 @@ function og_determine_context() {
  *
  * If a group post belongs to multiple group nodes, the logic for determining the
  * group node is:
- * 1) TODO: Are we still writing things to the seesion ?
+ * 1) TODO: Are we still writing things to the session ?
  *    The group we showed on the prior page view (if any).
  * 2) The only or one of the group(s) the current user is a member of.
  * 3) The 'first' group in $node->og_groups.
