@@ -9,8 +9,8 @@
 /**
  * Implement hook_install().
  */
-function og_ui_install() {
-  og_ui_set_og_audince_field('user');
+function og_install() {
+  og_set_og_audince_field('user');
 }
 
 /**
