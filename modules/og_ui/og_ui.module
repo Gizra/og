@@ -411,36 +411,7 @@ function og_ui_group_type_set_fields($node_types = array()) {
  */
 function og_ui_group_post_type_set_fields($node_types = array()) {
   foreach ($node_types as $type) {  
-    $field = field_info_field('og_audience');
-    if (empty($field)) {
-      $field = array(
-        'field_name' => 'og_audience',
-        'type' => 'og',
-        'locked' => TRUE,
-      );
-      $field = field_create_field($field);
-    }
-
-    $instance = field_info_instance('og_audience', $type);
-    if (empty($instance)) {
-      $instance = array(
-        'field_name' => 'og_audience',
-        'bundle' => $type,
-        'label' => t('Groups audience'),
-        'widget_type' => 'og_audience',
-        'display' => array(
-          'full' => array(
-            'label' => 'above',
-            'type' => 'og_list_default',
-          ),
-          'teaser' => array(
-            'label' => 'above',
-            'type' => 'og_list_default',
-          ),
-        ),
-      );
-      field_create_instance($instance);
-    }
+  	og_ui_set_og_audince_field($type);
   }
 }
 
@@ -644,4 +615,37 @@ function og_ui_set_context($node = NULL) {
   }
 
   return $gid;
+}
+
+function og_ui_set_og_audince_field($bundle) {
+  $field = field_info_field('og_audience');
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'og_audience',
+      'type' => 'og',
+      'locked' => TRUE,
+    );
+    $field = field_create_field($field);
+  }
+
+  $instance = field_info_instance('og_audience', $bundle);
+  if (empty($instance)) {
+    $instance = array(
+      'field_name' => 'og_audience',
+      'bundle' => $bundle,
+      'label' => t('Groups audience'),
+      'widget_type' => 'og_audience',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'og_list_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'og_list_default',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  } 
 }

@@ -118,17 +118,3 @@ function og_schema() {
   
   return $schema;
 }
-
-/**
- * Implement hook_install().
- */
-function og_install() {
-  drupal_install_schema('og');
-}
-
-/**
- * Implement hook_uninstall().
- */
-function og_uninstall() {
-  drupal_uninstall_schema('og');
-}
