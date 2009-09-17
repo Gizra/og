@@ -63,6 +63,11 @@ define('OG_ACCESS_IGNORE', NULL);
  */
 define('OG_SELECTIVE_FIELD', 'og_selective');
 
+/**
+ * Group audience field.
+ */
+define('OG_AUDIENCE_FIELD', 'og_audience');
+
 /*******************************************************************************
  * Hook implementations
  ******************************************************************************/
@@ -737,9 +742,9 @@ function og_determine_context_by_node($node, $account = NULL) {
   if (og_is_group_type($node->type)) {
     $group_node = $node;
   }
-  elseif (og_is_group_post_type($node->type) && ($groups = og_get_association_by_content($node->nid))) {
+  elseif (og_is_group_post_type($node->type) && ($groups = og_get_groups($node))) {
 
-    if ($user_groups = og_get_association_by_content($account->uid, 'user')) {
+    if ($user_groups = og_get_groups($account)) {
       $gid = current(array_intersect(array_keys($groups), array_keys($user_groups)));
     }
 
