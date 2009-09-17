@@ -57,6 +57,10 @@ define('OG_ACCESS_DENY', 'deny');
  */
 define('OG_ACCESS_IGNORE', NULL);
 
+/**
+ * Group node selective field.
+ */
+define('OG_SELECTIVE_FIELD', 'og_selective');
 
 /*******************************************************************************
  * Hook implementations
@@ -368,10 +372,10 @@ function og_ui_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
 function og_ui_group_type_set_fields($node_types = array()) {
   foreach ($node_types as $type) {
 
-    $field = field_info_field('og_selective');
+    $field = field_info_field(OG_SELECTIVE_FIELD);
     if (empty($field)) {
       $field = array(
-        'field_name' => 'og_selective',
+        'field_name' => OG_SELECTIVE_FIELD,
         'type' => 'list_text',
         'locked' => TRUE,
         'settings' => array('allowed_values_function' => 'og_ui_get_group_selective'),
@@ -379,10 +383,10 @@ function og_ui_group_type_set_fields($node_types = array()) {
       $field = field_create_field($field);
     }
 
-    $instance = field_info_instance('og_selective', $type);
+    $instance = field_info_instance(OG_SELECTIVE_FIELD, $type);
     if (empty($instance)) {
       $instance = array(
-        'field_name' => 'og_selective',
+        'field_name' => OG_SELECTIVE_FIELD,
         'bundle' => $type,
         'label' => t('Groups selective'),
         'required' => TRUE,
