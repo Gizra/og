@@ -10,7 +10,9 @@
  * Manage user subscription to a group.
  * 
  * @param $node
+ *   The group node object.
  * @param $uid
+ *   The user ID of the subscribing user.
  * @return unknown_type
  */
 function og_subscribe($node, $uid = NULL) {
@@ -57,6 +59,9 @@ function og_subscribe($node, $uid = NULL) {
       return drupal_get_form('og_confirm_subscribe', $node->nid, $node, $account);
     }
   }
+  // No a valid group node.
+  drupal_not_found();
+  
 }
 
 /**

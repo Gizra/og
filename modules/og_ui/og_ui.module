@@ -33,8 +33,30 @@ define('OG_DELETE_ORPHANS', 1);
 define('OG_DELETE_MOVE_NODES', 2);
 define('OG_DELETE_MOVE_NODES_MEMBERSHIPS', 3);
 
+/**
+ * Define group post states.
+ */
 define('OG_STATE_ACTIVE', 'active');
 define('OG_STATE_PENDING', 'pending');
+
+/**
+ * Modules should return this value from hook_og_access() to allow access to a 
+ * group menu item.
+ */
+define('OG_ACCESS_ALLOW', 'allow');
+
+/**
+ * Modules should return this value from hook_og_access() to deny access to a 
+ * group menu item.
+ */
+define('OG_ACCESS_DENY', 'deny');
+
+/**
+ * Modules should return this value from hook_og_access() to not affect group 
+ * menu item access.
+ */
+define('OG_ACCESS_IGNORE', NULL);
+
 
 /*******************************************************************************
  * Hook implementations
@@ -51,8 +73,8 @@ function og_ui_menu() {
     'file' => 'og_ui.pages.inc',
     'page callback' => 'og_subscribe',
     'page arguments' => array(2),
-    'access callback' => 'node_access',
-    'access arguments' => array('view', 2),
+    'access callback' => 'og_ui_access',
+    'access arguments' => array('subscribe', 2),
     'title' => 'Join group'
   );
 
@@ -68,7 +90,7 @@ function og_ui_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_confirm_unsubscribe', 2, 3),
     'access callback' => 'og_menu_access_unsubscribe',
-    'access arguments' => array(2, 3),
+    'access arguments' => array('unsubscribe', array('node' => 2, 'user' => 3)),
     'title' => 'Leave group',
   );
 
@@ -77,7 +99,7 @@ function og_ui_menu() {
     'page callback' => 'og_approve',
     'page arguments' => array(2, 3, 4),
     'access callback' => 'og_is_group_admin',
-    'access arguments' => array(2),
+    'access arguments' => array('approve', array('node' => 2, 'user' => 3)),
     'title' => 'Approve membership request'
   );
   $items['og/deny/%node/%user/%'] = array(
@@ -223,15 +245,15 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
  */
 function og_ui_node_type_form_submit($form, &$form_state) {
 	$type = $form_state['values']['type'];
-  // TODO: Add a check, so we don't try to create the fields twice.	
-  if ($form_state['values']['og_content_type_usage'] == 'group') {
-    og_ui_group_type_set_fields(array($type));  	
-  }
-  elseif ($form_state['values']['og_content_type_usage'] != 'omitted') {
-  	// TODO: Other modules may add their own grouo types.
-  	// Is it true to assume it will be a group post?
-  	og_ui_group_post_type_set_fields(array($type));
-  }
+	$og_types = og_ui_get_group_selective();
+	$og_type = $og_types[$form_state['values']['og_content_type_usage']]['type'];
+	
+	if ($og_type == 'group') {
+		og_ui_group_type_set_fields(array($type));
+	}
+	elseif ($og_type == 'group post') {
+	  og_ui_group_post_type_set_fields(array($type));	
+	}
 }
 
 /**
@@ -250,18 +272,6 @@ function og_ui_node_type_insert($info) {
   }
   elseif (og_is_group_post_type($info->type)) {
     og_ui_group_post_type_set_fields(array($info->type));
-  }
-}
-
-/**
-* Implement hook_node_delete().
-*/
-function og_ui_node_insert($node) {
-  if (og_is_group_type($node->type)) {
-    // Add group.
-    og_set_group($node->nid);
-    // Associate the node author with the group.
-    og_set_association($node->nid, $node->uid, 'user');
   }
 }
 
@@ -295,7 +305,7 @@ function og_ui_og_set_group_alter($group) {
 }
 
 /**
- * Implement hook_og_group_selective_info().
+ * Implement hook_og_selective_info().
  */
 function og_ui_og_selective_info() {
   return array(
@@ -304,6 +314,46 @@ function og_ui_og_selective_info() {
     OG_MODERATED => t('Invite only'),
     OG_CLOSED => t('Closed'),
   );
+}
+
+/**
+ * Menu callback; Central access point for all organic groups actions.
+ * 
+ * Function is imittating hook_node_access().
+ * 
+ * @param $op
+ *   The operation name.
+ * @param $node
+ *   Optioanl; The node object.
+ * @param $account
+ *   Optioanl; The user related to the action. For example if the operation is
+ *   "subscribe" then the account will be the subscribing user.
+ * @param $acting_user
+ *   Optioanl; The acting user. For example if the operation is
+ *   "subscribe" then the acting user might be the admin who should approve
+ *   or deny - according to this user access is decided.
+ *   If this field is empty the current user is used.
+ * @return
+ *   TRUE if access is allowed, otherise FALSE.
+ */
+function og_ui_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
+	if (empty($acting_user)) {
+		global $user;
+		$acting_user = $user;
+	}
+  if (user_access('administer organic groups', $acting_user)) {
+    return TRUE;
+  }
+	
+  $access = module_invoke_all('og_access', $node, $account, $acting_user);
+  if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
+    return FALSE;
+  }
+  elseif (in_array(OG_ACCESS_ALLOW, $access, TRUE)) {
+    return TRUE;
+  }
+  // No one granted access, so assume access is denied.
+  return FALSE;
 }
 
 /**
@@ -324,7 +374,7 @@ function og_ui_group_type_set_fields($node_types = array()) {
         'field_name' => 'og_selective',
         'type' => 'list_text',
         'locked' => TRUE,
-        'settings' => array('allowed_values_function' => 'og_ui_group_selective'),
+        'settings' => array('allowed_values_function' => 'og_ui_get_group_selective'),
       );
       $field = field_create_field($field);
     }
@@ -397,7 +447,7 @@ function og_ui_group_post_type_set_fields($node_types = array()) {
   }
 }
 
-function og_ui_group_selective() {
+function og_ui_get_group_selective() {
   return module_invoke_all('og_selective_info');
 }
 
