@@ -132,14 +132,19 @@ function og_field_insert($obj_type, $object, $field, $instance, $langcode, &$ite
  * 
  * FIXME: pass the data and state values.
  */
-function og_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
-  // Allow other modules to alter the data.
-/*  foreach ($items as &$item) {
+function og_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {  
+  foreach ($items as &$item) {
+  	//FIXME: Get state and data fields.
+  	$item['state'] = '';
+  	$item['data'] = array();
+  	
     $alter = array('state' => $item['state'], 'data' => $item['data']);
+    
+    // Allow other modules to alter the data.    
     drupal_alter('og_field_update', $alter, $obj_type, $object, $field, $instance, $langcode, $items);
     $item['state'] = $alter['state'];
     $item['data'] = serialize($alter['data']);      	
-  }*/
+  }
 }
 
 

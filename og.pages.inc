@@ -53,7 +53,7 @@ function og_subscribe($node, $uid = NULL) {
       drupal_goto('node/'. $node->nid);
     }
     else {
-      return drupal_get_form('og_confirm_subscribe', $node->nid, $node, $account);
+      return drupal_get_form('og_confirm_subscribe', $node, $account);
     }
   }
   // Not a valid group node.
@@ -64,10 +64,10 @@ function og_subscribe($node, $uid = NULL) {
 /**
  * Confirm OG membership form.
  */
-function og_confirm_subscribe($form_state, $gid, $node, $account) {
-  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+function og_confirm_subscribe($form, $form_state, $node, $account) {
+  $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
   $form['account'] = array('#type' => 'value', '#value' => $account);
-  if ($node->og_selective == OG_MODERATED) {
+  if (og_get_group_selective($node) == OG_MODERATED) {
     $form['request'] = array(
       '#type' => 'textarea', 
       '#title' => t('Additional details'), 
@@ -83,7 +83,7 @@ function og_confirm_subscribe($form_state, $gid, $node, $account) {
 function og_confirm_subscribe_submit($form, &$form_state) {
   $form_state['values']['request'] = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
   
-	$return = og_subscribe_user(array($form_state['values']['gid']), $form_state['values']['account'], $form_state['values']['request']);
+	og_subscribe_user(array($form_state['values']['gid']), $form_state['values']['account'], $form_state['values']['request']);
   $form_state['redirect'] = 'node/'. $form_state['values']['gid'];
 } 
 

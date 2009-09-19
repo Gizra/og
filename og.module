@@ -282,7 +282,7 @@ function og_node_insert($node) {
     // Add group.
     og_set_group($node->nid);
     // Subscribe the user to the group.
-    og_subscribe_user($node->nid, $user);
+    og_subscribe_user(array($node->nid), $user);
     
     // Set the user a group manager.
     og_set_user_roles($node->nid, $user->uid, array('manager'));
@@ -377,7 +377,7 @@ function og_og_selective_info() {
   return array(
     OG_OPEN => t('Open'),
     OG_MODERATED => t('Moderated'),
-    OG_MODERATED => t('Invite only'),
+    OG_INVITE_ONLY => t('Invite only'),
     OG_CLOSED => t('Closed'),
   );
 }
