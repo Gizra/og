@@ -699,7 +699,9 @@ function og_subscribe_user($gids = array(), $account = NULL, $replace = FALSE) {
   } 
   // FIXME: Why don't the field appear on global?
   $account = user_load($account->uid);
-  og_set_association('user', $account, $gids, 'subscribe user', $replace);  
+  og_set_association('user', $account, $gids, 'subscribe user', $replace);
+
+  og_rules_invoke_event();
 }
 
 /**
@@ -720,6 +722,8 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
   $keep_gids = array_diff($existing_gids, $gids);
 
   og_set_association('user', $account, $keep_gids, TRUE, 'unsubscribe user');
+  
+  og_rules_invoke_event();
 }
 
 /**
@@ -1064,4 +1068,13 @@ function og_get_all_groups_for_form() {
   // Sanitize the result.
   array_walk($return, 'check_plain');
   return $return;
+}
+
+/**
+ * Wrapper function to invoke a Rules event.
+ */
+function og_rules_invoke_event() {
+	if (module_exists('rules')) {
+		// Invoke a rule.
+	}
 }

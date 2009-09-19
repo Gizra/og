@@ -84,9 +84,6 @@ function og_confirm_subscribe_submit($form, &$form_state) {
   $form_state['values']['request'] = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
   
 	$return = og_subscribe_user(array($form_state['values']['gid']), $form_state['values']['account'], $form_state['values']['request']);
-  if (!empty($return['message'])) {
-    drupal_set_message($return['message']);
-  }
   $form_state['redirect'] = 'node/'. $form_state['values']['gid'];
 } 
 
