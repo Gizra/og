@@ -351,11 +351,13 @@ function og_set_association($obj_type, $object, $gids = array(), $op = '', $repl
   if ($replace) {
     unset($object->og_audience);
   }
+  
+  // Allow other modules to change the subscribed groups.
+  drupal_alter('og_set_association', $gids, $obj_type, $object, $op);
+  
   foreach ($gids as $gid) {    
     $object->og_audience[FIELD_LANGUAGE_NONE][] = array('value' => $gid);
   }
-  // Allow other modules to change the subscribed groups.
-  drupal_alter('og_set_association', $object->og_audience, $obj_type, $object, $gids, $op);
   
   //TODO: We might need to attach_insert?
   field_attach_update('user', $account);  	

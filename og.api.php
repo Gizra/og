@@ -141,25 +141,19 @@ function hook_og_field_update (&$alter, $obj_type, $object, $field, $instance, $
  * the type of action, we get the $op argument.
  * 
  * @param $edit
- *   An array with the groups the user will be subscribed to, passed by 
+ *   An array with the groups the object will be associated with, passed by 
  *   reference.
  * @param $account
  *   The user being subscribed.
- * @param $gids
- *   The original list of groups, requested to subscribe to.
   @param $op
  *   Optional; The operation that is being done (e.g. "subscribe user" or 
  *   "unsubscribe content").
- * 
- * @return unknown_type
  */
-function hook_og_set_association_alter(&$edit, $account, $gids = array(), $op = '') {
-  // Don't unsubscribe the user from the first group in the list.
-  unset($edit['og_audience'][FIELD_LANGUAGE_NONE][0]);
-  
-  // But unsubscribe from another group.
-  $existing_groups = og_get_groups($account);
-  
+function hook_og_set_association_alter(&$gids, $account, $op = '') {
+  if ($op == 'subscribe user') {
+    // 	Subscribe the user to another group.
+    $gids[] = 1;
+  }  
 }
 
 
