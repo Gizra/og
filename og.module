@@ -334,7 +334,7 @@ function og_og_set_group_alter($group) {
 }
 
 /**
- * Implement hook_og_access()
+ * Implement hook_og_access().
  */
 function og_og_access($op, $acting_user, $node, $account) {
   // Get the roles of the acting user.
@@ -349,8 +349,8 @@ function og_og_access($op, $acting_user, $node, $account) {
 	      $group = og_get_group($context_gid);
 	    }
 	    else {
-	      // We don't have a context, so we need to get all the permissions of all 
-	      // the groups the user is a member of?
+	      // TODO: We don't have a context, so we need to get all the permissions 
+	      // of all the groups the user and the group post are members of?
 	    }
 	  }
 	  if (!empty($group['data']['permissions'][$op])) {
@@ -424,14 +424,18 @@ function og_og_types_info() {
  *   The group node ID.
  */
 function og_get_group($nid) {
-	$group = db_query("SELECT * FROM {og_groups} WHERE nid = :nid", array(':nid' => $nid))->fetchObject();
-	// Unserialize the data.
-	$group->data = unserialize($group->data);
+	$group = &drupal_static(__FUNCTION__, array());
 	
-	// Allow other modules to change the group object.
-	drupal_alter('og_get_group', $group);
+	if (empty($group[$nid])) {	
+		$result = db_query("SELECT * FROM {og_groups} WHERE nid = :nid", array(':nid' => $nid))->fetchObject();
+		// Unserialize the data.
+		$result->data = unserialize($group->data);
+		
+		// Allow other modules to change the group object.
+		drupal_alter('og_get_group', $result);
+	}
 	
-	return $group;
+	return $group[$nid];
 }
 
 /**
@@ -512,8 +516,12 @@ function og_set_user_roles($nid, $uid, $roles = array(), $replace = FALSE) {
  *   The user ID.
  */
 function og_get_user_roles($nid, $uid) {
-  return db_query("SELECT role FROM {og_users_roles} WHERE nid = :nid AND uid = :uid", array(':nid' => $nid, ':uid' => $uid))->fetchAll();
-  
+	$roles = &drupal_static(__FUNCTION__, array());
+	
+	if (empty($roles[$nid][$uid])) {
+		$roles[$nid][$uid] = db_query("SELECT role FROM {og_users_roles} WHERE nid = :nid AND uid = :uid", array(':nid' => $nid, ':uid' => $uid))->fetchAll();		   
+	}
+	return $roles[$nid][$uid];
 }
 
 /**
