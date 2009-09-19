@@ -74,7 +74,6 @@ function og_admin_settings() {
   return system_settings_form($form);
 }
 
-
 /**
  * Return a table element with the content types and their organic groups type.
  */

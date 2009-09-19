@@ -748,10 +748,13 @@ function og_set_association($obj_type, $object, $gids = array(), $op = '', $repl
     unset($object->og_audience);
   }
   
+  // Keep only groups that are not yet associated with the group.
+  $gids = array_diff(og_get_groups($object), $gids);
+  
   // Allow other modules to change the subscribed groups.
   drupal_alter('og_set_association', $gids, $obj_type, $object, $op);
   
-  foreach ($gids as $gid) {    
+  foreach ($gids as $gid) { 
     $object->og_audience[FIELD_LANGUAGE_NONE][] = array('value' => $gid);
   }
   

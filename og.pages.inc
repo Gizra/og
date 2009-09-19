@@ -99,16 +99,11 @@ function og_confirm_unsubscribe_submit($form, &$form_state) {
   global $user;
   $group_node = $form_state['values']['group_node'];
   $account = $form_state['values']['account'];
-  og_delete_subscription($group_node->nid, $account->uid);
-  // If needed, reload user object to reflect unsubscribed group.
-  if ($user->uid == $account->uid) {
-    og_get_subscriptions($account->uid, 1, TRUE); // Clear cache.
-    $user = user_load(array('uid' => $user->uid));
-  }
-  drupal_set_message(t('%user removed from %group.', array('%user' => $account->name, '%group' => $group_node->title)));
-
-  // Determine where to go next. GHP if accessible, or else site front page.
-  $form_state['redirect'] = node_access('view', $group_node) ? "node/". $group_node->nid : '';
+  
+  og_unsubscribe_user(array($form_state['values']['gid']), $form_state['values']['account']);
+  
+  // Determine where to go next - Group if accessible, or else site front page.
+  $form_state['redirect'] = og_access('view', $group_node) ? 'node/' . $group_node->nid : '';
 }
 
 /**
