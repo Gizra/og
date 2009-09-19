@@ -751,7 +751,7 @@ function og_set_association($obj_type, $object, $gids = array(), $op = '', $repl
   }
   
   //TODO: We might need to attach_insert?
-  field_attach_update('user', $account);    
+  field_attach_update($obj_type, $object);    
 }
 
 

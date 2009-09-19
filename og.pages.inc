@@ -83,7 +83,7 @@ function og_confirm_subscribe($form_state, $gid, $node, $account) {
 function og_confirm_subscribe_submit($form, &$form_state) {
   $form_state['values']['request'] = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
   
-	$return = og_subscribe_user($form_state['values']['gid'], $form_state['values']['account'], $form_state['values']['request']);
+	$return = og_subscribe_user(array($form_state['values']['gid']), $form_state['values']['account'], $form_state['values']['request']);
   if (!empty($return['message'])) {
     drupal_set_message($return['message']);
   }
