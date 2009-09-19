@@ -286,82 +286,9 @@ function og_node_insert($node) {
     
     // Set the user a group manager.
     og_set_user_roles($node->nid, $user->uid, array('manager'));
-    
   }
 }
 
-/**
- * Set subscription for a user.
- * 
- * @param $gids
- *   Array of the groups to subscribe the user.
- * @param $account
- *   Optional; A user object.
- * @param $replace
- *   Optioanl; True if the group lists should replace the existing subscrptions
- *   of the user.
- */
-function og_subscribe_user($gids = array(), $account = NULL, $replace = FALSE) {
-	if (empty($account)) {
-		global $user;
-		$account = $user;
-	} 
-	// FIXME: Why don't the field appear on global?
-  $account = user_load($account->uid);
-  og_set_association('user', $account, $gids, 'subscribe user', $replace);	
-}
-
-/**
- * Set subscription for a user.
- * 
- * @param $gids
- *   Array of the groups to unsubscribe the user.
- * @param $account
- *   Optional; A user object.
- */
-function og_unsubscribe_user($gids = array(), $account = NULL) {
-  if (empty($account)) {
-    global $user;
-    $account = $user;
-  }
-  
-  $existing_gids = og_get_groups($account);
-  $keep_gids = array_diff($existing_gids, $gids);
-
-  og_set_association('user', $account, $keep_gids, TRUE, 'unsubscribe user');
-}
-
-/**
- * Set an association (e.g. subscribe) an object to a group.
- * 
- * @param $obj_type
- *   The object type (e.g. "node" or "user").
- * @param $object
- *   The object to set the association.
- * @param $gids
- *   Array of the groups to subscribe the object.
- * @param $op
- *   The operation that is being done (e.g. "subscribe user" or 
- *   "unsubscribe content").
- * @param $replace
- *   Optioanl; True if the group lists should replace the existing subscrptions
- *   of the user.
- */
-function og_set_association($obj_type, $object, $gids = array(), $op = '', $replace = FALSE) {
-  if ($replace) {
-    unset($object->og_audience);
-  }
-  
-  // Allow other modules to change the subscribed groups.
-  drupal_alter('og_set_association', $gids, $obj_type, $object, $op);
-  
-  foreach ($gids as $gid) {    
-    $object->og_audience[FIELD_LANGUAGE_NONE][] = array('value' => $gid);
-  }
-  
-  //TODO: We might need to attach_insert?
-  field_attach_update('user', $account);  	
-}
 
 /**
 * Implement hook_node_update().
@@ -703,6 +630,79 @@ function og_is_group_type($type) {
  */
 function og_is_group_post_type($type) {
   return og_get_group_type($type) == 'group post';
+}
+
+/**
+ * Subscribe a user to groups.
+ * 
+ * @param $gids
+ *   Array of the groups to subscribe the user.
+ * @param $account
+ *   Optional; A user object.
+ * @param $replace
+ *   Optioanl; True if the group lists should replace the existing subscrptions
+ *   of the user.
+ */
+function og_subscribe_user($gids = array(), $account = NULL, $replace = FALSE) {
+  if (empty($account)) {
+    global $user;
+    $account = $user;
+  } 
+  // FIXME: Why don't the field appear on global?
+  $account = user_load($account->uid);
+  og_set_association('user', $account, $gids, 'subscribe user', $replace);  
+}
+
+/**
+ * Unsubscribe a user from groups.
+ * 
+ * @param $gids
+ *   Array of the groups to unsubscribe the user.
+ * @param $account
+ *   Optional; A user object.
+ */
+function og_unsubscribe_user($gids = array(), $account = NULL) {
+  if (empty($account)) {
+    global $user;
+    $account = $user;
+  }
+  
+  $existing_gids = og_get_groups($account);
+  $keep_gids = array_diff($existing_gids, $gids);
+
+  og_set_association('user', $account, $keep_gids, TRUE, 'unsubscribe user');
+}
+
+/**
+ * Set an association (e.g. subscribe) an object to a group.
+ * 
+ * @param $obj_type
+ *   The object type (e.g. "node" or "user").
+ * @param $object
+ *   The object to set the association.
+ * @param $gids
+ *   Array of the groups to subscribe the object.
+ * @param $op
+ *   The operation that is being done (e.g. "subscribe user" or 
+ *   "unsubscribe content").
+ * @param $replace
+ *   Optioanl; True if the group lists should replace the existing subscrptions
+ *   of the user.
+ */
+function og_set_association($obj_type, $object, $gids = array(), $op = '', $replace = FALSE) {
+  if ($replace) {
+    unset($object->og_audience);
+  }
+  
+  // Allow other modules to change the subscribed groups.
+  drupal_alter('og_set_association', $gids, $obj_type, $object, $op);
+  
+  foreach ($gids as $gid) {    
+    $object->og_audience[FIELD_LANGUAGE_NONE][] = array('value' => $gid);
+  }
+  
+  //TODO: We might need to attach_insert?
+  field_attach_update('user', $account);    
 }
 
 
