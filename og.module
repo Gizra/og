@@ -338,26 +338,38 @@ function og_og_set_group_alter($group) {
  */
 function og_og_access($op, $acting_user, $node, $account) {
   // Get the roles of the acting user.
-  if ($user_roles = og_get_user_roles($node->nid, $acting_user->uid)) {
-	  if (og_is_group_type($node->nid)) {
-	    // Get the group permissions.
-	    $group = og_get_group($node->nid);
-	  }
-	  elseif (og_is_group_post_type($node->nid)) {
-	    // Try to get the context.
-	    if ($context_gid = og_get_context()) {
-	      $group = og_get_group($context_gid);
-	    }
-	    else {
-	      // TODO: We don't have a context, so we need to get all the permissions 
-	      // of all the groups the user and the group post are members of?
-	    }
-	  }
-	  if (!empty($group['data']['permissions'][$op])) {
-	    return in_array($group['data']['permissions'][$op]['roles'], $user_roles);    
-	  }
-  }
-  return FALSE;
+	if (og_is_group_type($node->nid)) {
+		// Get the group permissions.
+		$group = og_get_group($node->nid);
+		
+    $user_roles = og_get_user_roles($node->nid, $acting_user->uid);
+    return in_array($group['data']['permissions'][$op]['roles'], $user_roles);    		
+	}
+	elseif (og_is_group_post_type($node->nid)) {
+		// Try to get the context.
+		if ($context_gid = og_get_context()) {
+			$group = og_get_group($context_gid);
+		}
+		else {
+			// We don't have a context, so we need to get all the permissions
+			// of all the groups the user and the group post are members of.
+			$groups = array_diff(array_keys(og_get_groups($acting_user)), array_keys(og_get_groups($node)));
+			foreach ($groups as $value) {
+				$user_roles = og_get_user_roles($value->nid, $acting_user->uid);
+				if (in_array($value['data']['permissions'][$op]['roles'], $user_roles)) {
+					// We have a permission from one of the user's groups.
+          return OG_ACCESS_ALLOW;
+				}
+			}
+		}
+	}
+	
+	if (!empty($group['data']['permissions'][$op])) {
+		$user_roles = og_get_user_roles($node->nid, $acting_user->uid);
+		return in_array($group['data']['permissions'][$op]['roles'], $user_roles);
+	}
+	
+  return OG_ACCESS_IGNORE;
 }
 
 /**
@@ -657,7 +669,7 @@ function og_is_group_type($type) {
 }
 
 /**
- * Return TRUE if the node type is a "group content" type.
+ * Return TRUE if the node type is a "group post" type.
  * 
  * This is a wrapper function around og_get_group_type().
  *
