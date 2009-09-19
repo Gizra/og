@@ -11,10 +11,10 @@
 require(drupal_get_path('module', 'og') . '/og.field.inc');
 
 // Selective groups states. chosen by the group admin
-define ('OG_OPEN', 'open');
-define ('OG_MODERATED', 'moderated');
-define ('OG_INVITE_ONLY', 'invite');
-define ('OG_CLOSED', 'closed');
+define ('OG_OPEN', 0);
+define ('OG_MODERATED', 1);
+define ('OG_INVITE_ONLY', 2);
+define ('OG_CLOSED', 3);
 
 // site admin chooses in og_settings() whether group creator can put his group on the registration form
 define('OG_REGISTRATION_NEVER', 0);
@@ -338,14 +338,16 @@ function og_og_set_group_alter($group) {
  */
 function og_og_access($op, $acting_user, $node, $account) {
   // Get the roles of the acting user.
-	if (og_is_group_type($node->nid)) {
+	if (og_is_group_type($node->type)) {
 		// Get the group permissions.
 		$group = og_get_group($node->nid);
 		
-    $user_roles = og_get_user_roles($node->nid, $acting_user->uid);
-    return in_array($group['data']['permissions'][$op]['roles'], $user_roles);    		
+    if (!empty($group->data['permissions'][$op]['roles'])) {
+	    $user_roles = og_get_user_roles($node->nid, $acting_user->uid);
+	    return array_intersect($group->data['permissions'][$op]['roles'], $user_roles);
+    }    		
 	}
-	elseif (og_is_group_post_type($node->nid)) {
+	elseif (og_is_group_post_type($node->type)) {
 		// Try to get the context.
 		if ($context_gid = og_get_context()) {
 			$group = og_get_group($context_gid);
@@ -357,19 +359,14 @@ function og_og_access($op, $acting_user, $node, $account) {
 			foreach ($groups as $gid) {
 				$user_roles = og_get_user_roles($gid, $acting_user->uid);
 				$group = og_get_group($gid);
-				if (in_array($group['data']['permissions'][$op]['roles'], $user_roles)) {
+				if (!empty($group->data['permissions'][$op]['roles']) && in_array($group->data['permissions'][$op]['roles'], $user_roles)) {
 					// We have a permission from one of the user's groups.
           return OG_ACCESS_ALLOW;
 				}
 			}
 		}
 	}
-	
-	if (!empty($group['data']['permissions'][$op])) {
-		$user_roles = og_get_user_roles($node->nid, $acting_user->uid);
-		return in_array($group['data']['permissions'][$op]['roles'], $user_roles);
-	}
-	
+
   return OG_ACCESS_IGNORE;
 }
 
@@ -446,6 +443,8 @@ function og_get_group($nid) {
 		
 		// Allow other modules to change the group object.
 		drupal_alter('og_get_group', $result);
+				
+		$group[$nid] = $result;
 	}
 	
 	return $group[$nid];
@@ -532,7 +531,8 @@ function og_get_user_roles($nid, $uid) {
 	$roles = &drupal_static(__FUNCTION__, array());
 	
 	if (empty($roles[$nid][$uid])) {
-		$roles[$nid][$uid] = db_query("SELECT role FROM {og_users_roles} WHERE nid = :nid AND uid = :uid", array(':nid' => $nid, ':uid' => $uid))->fetchAll();		   
+		// TODO: Is it nice to pass role twice just to get  the array as map_assoc?
+		$roles[$nid][$uid] = db_query("SELECT role, role FROM {og_users_roles} WHERE nid = :nid AND uid = :uid", array(':nid' => $nid, ':uid' => $uid))->fetchAllKeyed();		   
 	}
 	return $roles[$nid][$uid];
 }
@@ -781,7 +781,7 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
     $acting_user = $user;
   }
   if (user_access('administer organic groups', $acting_user)) {
-    return OG_ACCESS_ALLOW;
+    //return OG_ACCESS_ALLOW;
   }
   
   $access = module_invoke_all('og_access', $op, $acting_user, $node, $account);
@@ -791,8 +791,8 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   elseif (in_array(OG_ACCESS_ALLOW, $access, TRUE)) {
     return TRUE;
   }
-  // No one granted access, so assume access is denied.
-  return FALSE;
+  // No one denied access, so assume access is allowed.
+  return TRUE;
 }
 
 /**
@@ -828,7 +828,7 @@ function og_determine_context() {
     $gid = intval(current($_REQUEST['gids']));
     $node = node_load($gid);
   }
-  elseif (($item['map'][0] == 'og' && !empty($item['map'][2])) || $path == 'comment/reply/%') {
+  elseif (!empty($item['map']) && ($item['map'][0] == 'og' && !empty($item['map'][2])) || $path == 'comment/reply/%') {
     $node = menu_get_object('node', 2);
   }
   elseif ($path == 'comment/edit' || $path == 'comment/delete') {
