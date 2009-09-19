@@ -2,40 +2,43 @@
 // $Id$
 
 /**
- * Test the organic groups API functions.
+ * Test the organic groups content handeling.
  */
-class OgApiUnitTest extends DrupalWebTestCase {
+class OgContentTest extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups API',
-      'description' => 'Test the organic groups API.',
+      'name' => 'Organic groups content',
+      'description' => 'Test the organic groups content handeling.',
       'group' => 'Organic groups',
     );
   }
 
   function setUp() {
     parent::setUp('og');
-    $web_user = $this->drupalCreateUser(array('create article content', 'create page content'));
-    $this->drupalLogin($web_user);
-    $this->uid = $web_user->uid;
+    $admin_user = $this->drupalCreateUser(array('administer nodes', 'administer content types'));
+    $this->drupalLogin($admin_user);
+    $this->uid = $admin_user->uid;
     
-    // Create four nodes a user, and associate them to a group.
-    $group = $this->drupalCreateNode(array('type' => 'article'));
-    $this->group = $group->nid;
+    // Create group content type.
+    $this->group_type = $this->drupalCreateContentType(array('og_content_type_usage' => 'group'));    
     
-    $nodes = array();
-    $nodes[] = $this->drupalCreateNode(array('type' => 'article'));
-    $nodes[] = $this->drupalCreateNode(array('type' => 'article'));
-    $nodes[] = $this->drupalCreateNode(array('type' => 'article'));
-    $nodes[] = $this->drupalCreateNode(array('type' => 'page')); 
+    // Create post content type.
+    $this->group_post_type = $this->drupalCreateContentType(array('og_content_type_usage' => 'group post'));
   }
 
   
-  /**
-   * Test organic groups API.
-   */
-  function testOgApi() {   
-     
+  function testOgContent() {   
+    $this->assertContentTypes();
+  }
+  
+  function assertContentTypes() {
+  	// Assert group fields were added to the content type.
+  	$this->drupalGet('node/add/'. $this->group_type);
+  	$this->assertText(t('Groups selective'), t('Groups selective field was found.'));
+  	
+    // Assert group post fields were added to the content type.
+    $this->drupalGet('node/add/'. $this->group_post_type);
+    $this->assertText(t('Groups audience'), t('Groups audience field was found.'));  	
   }
 }
