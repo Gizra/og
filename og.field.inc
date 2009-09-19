@@ -146,6 +146,7 @@ function og_field_update($obj_type, $object, $field, $instance, $langcode, &$ite
 /*******************************************************************************
  * Helper functions
  ******************************************************************************/
+
 /**
  * Get the groups a content is associated with.
  * 
