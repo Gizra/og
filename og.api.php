@@ -133,6 +133,23 @@ function hook_og_field_update (&$alter, $obj_type, $object, $field, $instance, $
   $alter['state'] = 'updated, approve urgently';
 }
 
+/**
+ * Alter the groups a user is subscribed to.
+ * 
+ * @param $edit
+ *   An array with the groups the user will be subscribed to, passed by 
+ *   reference.
+ * @param $account
+ *   The user being subscribed.
+ * @param $gids
+ *   The original list of groups, requested by the user to subscribe to.
+ * @return unknown_type
+ */
+function hook_og_subscribe_useralter(&$edit, $account, $gids) {
+	// Remove the first group from subscription.
+	unset($edit['og_audience'][FIELD_LANGUAGE_NONE][0]);
+}
+
 
 /**
  * @} End of "addtogroup hooks".

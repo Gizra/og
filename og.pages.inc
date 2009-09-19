@@ -56,7 +56,7 @@ function og_subscribe($node, $uid = NULL) {
       return drupal_get_form('og_confirm_subscribe', $node->nid, $node, $account);
     }
   }
-  // No a valid group node.
+  // Not a valid group node.
   drupal_not_found();
   
 }
@@ -74,12 +74,6 @@ function og_confirm_subscribe($form_state, $gid, $node, $account) {
       '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
     );
   }
-  else {
-    $form['request'] = array(
-      '#type' => 'value', 
-      '#value' => '',
-   );
- }
  return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $node->title)), 'node/'. $node->nid, ' ', t('Join'), t('Cancel'));
 }
 
@@ -87,27 +81,27 @@ function og_confirm_subscribe($form_state, $gid, $node, $account) {
  * Submit handler; Confirm OG membership.
  */
 function og_confirm_subscribe_submit($form, &$form_state) {
-  $return = og_subscribe_user($form_state['values']['gid'], $form_state['values']['account'], $form_state['values']['request']);
+  $form_state['values']['request'] = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
+  
+	$return = og_subscribe_user($form_state['values']['gid'], $form_state['values']['account'], $form_state['values']['request']);
   if (!empty($return['message'])) {
-      drupal_set_message($return['message']);
+    drupal_set_message($return['message']);
   }
   $form_state['redirect'] = 'node/'. $form_state['values']['gid'];
 } 
 
 
 /**
- * Confirm og unsubscription form
+ * Confirm OG unsubscription form.
  */
 function og_confirm_unsubscribe($form_state, $group_node, $account) {
   $form['group_node'] = array('#type' => 'value', '#value' => $group_node);
   $form['account'] = array('#type' => 'value', '#value' => $account);
-  return confirm_form($form, 
-               t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $group_node->title)),
-               'og/users/'. $group_node->nid, ' ', t('Remove'), t('Cancel'));
+  return confirm_form($form, t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $group_node->title)), 'og/users/'. $group_node->nid, ' ', t('Remove'), t('Cancel'));
 }
 
 /**
- * Confirm og unsubscription submit handler
+ * Submit handler; Confirm OG unsubscription.
  */
 function og_confirm_unsubscribe_submit($form, &$form_state) {
   global $user;

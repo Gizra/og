@@ -282,16 +282,40 @@ function og_node_insert($node) {
     // Add group.
     og_set_group($node->nid);
     // Subscribe the user to the group.
-    // TODO: Why don't the field appear on global?
-    
-    $account = user_load($user->uid);
-    $edit['og_audience'][FIELD_LANGUAGE_NONE][] = array('value' => $node->nid);
-    user_save($account, $edit);
+    og_subscribe_user($node->nid, $user);
     
     // Set the user a group manager.
     og_set_user_roles($node->nid, $user->uid, array('manager'));
     
   }
+}
+
+/**
+ * Set subscription for a user.
+ * 
+ * @param $gids
+ *   Array of the groups to subscribe the user.
+ * @param $account
+ *   Optional; A user object.
+ * @param $replace
+ *   Optioanl; True if the group lists should replace the existing subscrptions
+ *   of the user.
+ */
+function og_subscribe_user($gids = array(), $account = NULL, $replace = FALSE) {
+	if (empty($account)) {
+		global $user;
+		$account = $user;
+	}
+  
+	// FIXME: Why don't the field appear on global?
+  $account = user_load($account->uid);
+  foreach ($gids as $gid) {
+    $edit['og_audience'][FIELD_LANGUAGE_NONE][] = array('value' => $gid);
+  }
+  // Allow other modules to change the subscribed groups.
+  drupal_alter('og_subscribe_user', $edit, $account, $gids);
+  
+  user_save($account, $edit);	
 }
 
 /**
