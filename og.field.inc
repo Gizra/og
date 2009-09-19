@@ -234,7 +234,8 @@ function og_group_type_set_fields($node_types = array()) {
       $field = array(
         'field_name' => OG_SELECTIVE_FIELD,
         'type' => 'list_text',
-        'locked' => TRUE,
+        // TODO: Lock only delete.
+        // 'locked' => TRUE,
         'settings' => array('allowed_values_function' => 'og_get_og_selective'),
       );
       $field = field_create_field($field);

@@ -318,7 +318,7 @@ function og_node_delete($node) {
  */
 function og_og_set_group_alter($group) {
   // Add basic permissions and roles.
-  $group->data += array(
+  $data = array(
     'permissions' => array(
       'approve and deny subscription' => array(
         'title' => t('Approve and deny subscription'),
@@ -330,6 +330,34 @@ function og_og_set_group_alter($group) {
       'administrator' => t('Group administrator'),
     ),
   );
+  $group->data = array_merge($group->data, $data);
+}
+
+/**
+ * Implement hook_og_access()
+ */
+function og_og_access($op, $acting_user, $node, $account) {
+  // Get the roles of the acting user.
+  if ($user_roles = og_get_user_roles($node->nid, $acting_user->uid)) {
+	  if (og_is_group_type($node->nid)) {
+	    // Get the group permissions.
+	    $group = og_get_group($node->nid);
+	  }
+	  elseif (og_is_group_post_type($node->nid)) {
+	    // Try to get the context.
+	    if ($context_gid = og_get_context()) {
+	      $group = og_get_group($context_gid);
+	    }
+	    else {
+	      // We don't have a context, so we need to get all the permissions of all 
+	      // the groups the user is a member of?
+	    }
+	  }
+	  if (!empty($group['data']['permissions'][$op])) {
+	    return in_array($group['data']['permissions'][$op]['roles'], $user_roles);    
+	  }
+  }
+  return FALSE;
 }
 
 /**
@@ -735,7 +763,7 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
     return TRUE;
   }
   
-  $access = module_invoke_all('og_access', $node, $account, $acting_user);
+  $access = module_invoke_all('og_access', $op, $acting_user, $node, $account);
   if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
     return FALSE;
   }
@@ -952,7 +980,7 @@ function og_elements_process($element, &$form_state, $form) {
 }
 
 /**
- * Create an array of allowed values for this field.
+ * Create an array of allowed values for OG audience field.
  *
  * @return
  *   Array keyed by "content groups" and "other groups".
