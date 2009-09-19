@@ -99,8 +99,8 @@ function og_menu() {
     'file' => 'og.pages.inc',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_confirm_unsubscribe', 2, 3),
-    'access callback' => 'og_menu_access_unsubscribe',
-    'access arguments' => array('unsubscribe', array('node' => 2, 'user' => 3)),
+    'access callback' => 'og_access',
+    'access arguments' => array('unsubscribe', 2 , 3),
     'title' => 'Leave group',
   );
 
@@ -108,43 +108,25 @@ function og_menu() {
     'type' => MENU_CALLBACK,
     'page callback' => 'og_approve',
     'page arguments' => array(2, 3, 4),
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array('approve', array('node' => 2, 'user' => 3)),
+    'access callback' => 'og_access',
+    'access arguments' => array('approve membership', 2, 3),
     'title' => 'Approve membership request'
   );
   $items['og/deny/%node/%user/%'] = array(
     'type' => MENU_CALLBACK,
     'page callback' => 'og_deny',
     'page arguments' => array(2, 3, 4),
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array(2),
+    'access callback' => 'og_access',
+    'access arguments' => array('deny membership', 2, 3, 4),
     'title' => 'Deny membership request',
   );
-  $items['og/create_admin/%node/%user'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_create_admin_confirm', 2, 3),
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array(2),
-    'title' => 'Create group administrator',
-    'file' => 'og.pages.inc',
-  );
-  $items['og/delete_admin/%node/%user'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_remove_admin_confirm', 2, 3),
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array(2),
-    'title' => 'Delete group administrator',
-    'file' => 'og.pages.inc',
-  );
 
-  // members only and group may not be invite-only or closed
+  // Members only and group may not be invite-only or closed
   $items['og/invite/%node'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_invite_form', 2),
-    'access callback' => 'og_menu_access_invite',
-    'access arguments' => array(2),
+    'access callback' => 'og_access',
+    'access arguments' => array('invite', 2),
     'title' => 'Send invitation',
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
@@ -152,8 +134,8 @@ function og_menu() {
   $items["og/manage/%node"] = array(
     'page callback' => 'og_manage',
     'page arguments' => array(2),
-    'access callback' => 'og_is_group_member',
-    'access arguments' => array(2, FALSE),
+    'access callback' => 'og_access',
+    'access arguments' => array('manage', 2),
     'title' => 'Manage membership',
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
@@ -188,8 +170,8 @@ function og_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'og.pages.inc',
     'weight' => 5,
-    'access callback' => 'og_is_group_admin',
-    'access arguments' => array(2),
+    'access callback' => 'og_access',
+    'access arguments' => array('add user', 2),
   );
 
     // Broadcast tab on group node.
