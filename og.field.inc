@@ -148,25 +148,6 @@ function og_field_update($obj_type, $object, $field, $instance, $langcode, &$ite
  ******************************************************************************/
 
 /**
- * Get the groups a content is associated with.
- * 
- * @param $object
- *   The object can be a user, node or any fieldable entity.
- * @return
- *  An array with the group, or an empty array.
- */
-function og_get_groups($object) {
-  $groups = array();
-  $langcode = FIELD_LANGUAGE_NONE;
-  if (!empty($object->{OG_AUDIENCE_FIELD}[$langcode])) {
-	  foreach ($object->{OG_AUDIENCE_FIELD}[$langcode] as $gid) {
-	  	$groups[$gid['value']] = $gid['value'];
-	  }
-  }
-  return $groups;	
-}
-
-/**
  * Add organic groups audience field to fieldable enteties.
  * 
  * @param $bundle
