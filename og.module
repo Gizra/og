@@ -354,9 +354,10 @@ function og_og_access($op, $acting_user, $node, $account) {
 			// We don't have a context, so we need to get all the permissions
 			// of all the groups the user and the group post are members of.
 			$groups = array_diff(array_keys(og_get_groups($acting_user)), array_keys(og_get_groups($node)));
-			foreach ($groups as $value) {
-				$user_roles = og_get_user_roles($value->nid, $acting_user->uid);
-				if (in_array($value['data']['permissions'][$op]['roles'], $user_roles)) {
+			foreach ($groups as $gid) {
+				$user_roles = og_get_user_roles($gid, $acting_user->uid);
+				$group = og_get_group($gid);
+				if (in_array($group['data']['permissions'][$op]['roles'], $user_roles)) {
 					// We have a permission from one of the user's groups.
           return OG_ACCESS_ALLOW;
 				}
