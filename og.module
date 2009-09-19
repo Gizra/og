@@ -442,7 +442,7 @@ function og_get_group($nid) {
 	if (empty($group[$nid])) {	
 		$result = db_query("SELECT * FROM {og_groups} WHERE nid = :nid", array(':nid' => $nid))->fetchObject();
 		// Unserialize the data.
-		$result->data = unserialize($group->data);
+		$result->data = unserialize($result->data);
 		
 		// Allow other modules to change the group object.
 		drupal_alter('og_get_group', $result);
@@ -781,7 +781,7 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
     $acting_user = $user;
   }
   if (user_access('administer organic groups', $acting_user)) {
-    return TRUE;
+    return OG_ACCESS_ALLOW;
   }
   
   $access = module_invoke_all('og_access', $op, $acting_user, $node, $account);
