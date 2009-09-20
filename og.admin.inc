@@ -144,55 +144,61 @@ function theme_og_user_admin_new_role($form) {
  * @see user_admin_permissions_submit()
  * @see theme_user_admin_permissions()
  */
-function og_user_admin_permissions($form, $form_state, $rid = NULL) {
-
-  // Retrieve role names for columns.
-  $role_names = og_user_roles();
-  if (is_numeric($rid)) {
-    $role_names = array($rid => $role_names[$rid]);
-  }
-  // Fetch permissions for all roles or the one selected role.
-  $role_permissions = og_user_role_permissions($role_names);
-
-  // Store $role_names for use when saving the data.
-  $form['role_names'] = array(
-    '#type' => 'value',
-    '#value' => $role_names,
-  );
-  // Render role/permission overview:
-  $options = array();
-  $hide_descriptions = !system_admin_compact_mode();
-  foreach (module_implements('og_permission') as $module) {
-    if ($permissions = module_invoke($module, 'og_permission')) {
-      $form['permission'][] = array('#markup' => $module, '#id' => $module);
-      
-      foreach ($permissions as $perm => $perm_item) {
-        $options[$perm] = '';
-        $form['permission'][$perm] = array(
-          '#type' => 'item',
-          '#markup' => $perm_item['title'],
-          '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
-        );
-        foreach ($role_names as $rid => $name) {
-          // Builds arrays for checked boxes for each role
-          if (isset($role_permissions[$rid][$perm])) {
-            $status[$rid][] = $perm;
+function og_user_admin_permissions($form, $form_state, $node, $rid = NULL) {
+  if (og_is_group_type($node->type)) {
+    $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
+    
+    // Retrieve role names for columns.
+    $role_names = og_user_roles($node->nid);
+    if (!empty($rid)) {
+      $role_names = array($rid => $role_names[$rid]);
+    }
+    // Fetch permissions for all roles or the one selected role.
+    $role_permissions = og_user_role_permissions($role_names);
+  
+    // Store $role_names for use when saving the data.
+    $form['role_names'] = array(
+      '#type' => 'value',
+      '#value' => $role_names,
+    );
+    // Render role/permission overview:
+    $options = array();
+    $hide_descriptions = !system_admin_compact_mode();
+    foreach (module_implements('og_permission') as $module) {
+      if ($permissions = module_invoke($module, 'og_permission')) {
+        $form['permission'][] = array('#markup' => $module, '#id' => $module);
+        
+        foreach ($permissions as $perm => $perm_item) {
+          $options[$perm] = '';
+          $form['permission'][$perm] = array(
+            '#type' => 'item',
+            '#markup' => $perm_item['title'],
+            '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
+          );
+          foreach ($role_names as $rid => $name) {
+            // Builds arrays for checked boxes for each role
+            if (isset($role_permissions[$rid][$perm])) {
+              $status[$rid][] = $perm;
+            }
           }
         }
       }
     }
+  
+    // Have to build checkboxes here after checkbox arrays are built
+    foreach ($role_names as $rid => $name) {
+      $form['checkboxes'][$rid] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => isset($status[$rid]) ? $status[$rid] : array());
+      $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
+    }
+    $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
+      
+    return $form;
   }
-
-  // Have to build checkboxes here after checkbox arrays are built
-  foreach ($role_names as $rid => $name) {
-    $form['checkboxes'][$rid] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => isset($status[$rid]) ? $status[$rid] : array());
-    $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
+  else {
+    // Not a group node.
+    drupal_not_found();
+    exit;
   }
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
-
-  $form['#attached']['js'][] = drupal_get_path('module', 'user') . '/user.permissions.js';
-
-  return $form;
 }
 
 /**
@@ -209,6 +215,44 @@ function og_user_admin_permissions_submit($form, &$form_state) {
 
   // Clear the cached pages and blocks.
   cache_clear_all();
+}
+
+/**
+ * Theme the administer permissions page.
+ *
+ * @ingroup themeable
+ */
+function theme_og_user_admin_permissions($form) {
+    // The group ID.
+  $nid = $form['nid']['#value'];
+  
+  $roles = og_user_roles($nid);
+  foreach (element_children($form['permission']) as $key) {
+    $row = array();
+    // Module name
+    if (is_numeric($key)) {
+      $row[] = array('data' => drupal_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['role_names']['#value']) + 1);
+    }
+    else {
+      // Permission row.
+      $row[] = array(
+        'data' => drupal_render($form['permission'][$key]),
+        'class' => array('permission'),
+      );
+      foreach (element_children($form['checkboxes']) as $rid) {
+        $row[] = array('data' => drupal_render($form['checkboxes'][$rid][$key]), 'class' => array('checkbox'), 'title' => $roles[$rid] . ' : ' . t($key));
+      }
+    }
+    $rows[] = $row;
+  }
+  $header[] = (t('Permission'));
+  foreach (element_children($form['role_names']) as $rid) {
+    $header[] = array('data' => drupal_render($form['role_names'][$rid]), 'class' => array('checkbox'));
+  }
+  $output = theme('system_compact_link');
+  $output .= theme('table', $header, $rows, array('id' => 'permissions'));
+  $output .= drupal_render_children($form);
+  return $output;
 }
 
 

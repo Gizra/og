@@ -368,7 +368,7 @@ function og_og_set_group_alter($group) {
 /**
  * Implement og_permission
  */
-function og_og_permissions() {
+function og_og_permission() {
   return array(
     'approve and deny subscription' => array(
       'title' => t('Approve and deny subscription'),
