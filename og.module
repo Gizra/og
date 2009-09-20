@@ -331,7 +331,9 @@ function og_og_access($op, $node, $acting_user, $account) {
     
     if (!empty($group->data['permissions'][$op]['roles'])) {
       $user_roles = og_get_user_roles($node->nid, $acting_user->uid);
-      return array_intersect($group->data['permissions'][$op]['roles'], $user_roles);
+      if (array_intersect($group->data['permissions'][$op]['roles'], $user_roles)) {
+        return OG_ACCESS_ALLOW;
+      }
     }        
   }
   elseif (og_is_group_post_type($node->type)) {
