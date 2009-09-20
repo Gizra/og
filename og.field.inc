@@ -207,54 +207,6 @@ function og_get_group_selective($node) {
  * @param $node_types
  *   Array of the node types that need to have the field attached to.
  * @return
- *   The node types that have been changed, as some might already have the
- *   fields attached to them.
- */
-function og_group_type_set_fields($node_types = array()) {
-  foreach ($node_types as $type) {
-
-    $field = field_info_field(OG_SELECTIVE_FIELD);
-    if (empty($field)) {
-      $field = array(
-        'field_name' => OG_SELECTIVE_FIELD,
-        'type' => 'list_text',
-        // TODO: Lock only delete.
-        // 'locked' => TRUE,
-        'settings' => array('allowed_values_function' => 'og_get_og_selective'),
-      );
-      $field = field_create_field($field);
-    }
-
-    $instance = field_info_instance(OG_SELECTIVE_FIELD, $type);
-    if (empty($instance)) {
-      $instance = array(
-        'field_name' => OG_SELECTIVE_FIELD,
-        'bundle' => $type,
-        'label' => t('Groups selective'),
-        'required' => TRUE,
-        'widget_type' => 'options_select',
-        'display' => array(
-          'full' => array(
-            'label' => 'above',
-            'type' => 'list_default',
-          ),
-          'teaser' => array(
-            'label' => 'above',
-            'type' => 'list_default',
-          ),
-        ),
-      );
-      field_create_instance($instance);
-    }
-  }
-}
-
-/**
- * Add fields to group post node types.
- *
- * @param $node_types
- *   Array of the node types that need to have the field attached to.
- * @return
  *   TODO: The node types that have been changed, as some might already have the
  *   fields attached to them.
  */

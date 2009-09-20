@@ -64,11 +64,6 @@ define('OG_ACCESS_DENY', 'deny');
 define('OG_ACCESS_IGNORE', NULL);
 
 /**
- * Group node selective field.
- */
-define('OG_SELECTIVE_FIELD', 'og_selective');
-
-/**
  * Group audience field.
  */
 define('OG_AUDIENCE_FIELD', 'og_audience');
@@ -246,9 +241,6 @@ function og_node_type_form_submit($form, &$form_state) {
 
   if ($og_type == 'group') {
     og_group_type_set_fields(array($type));
-  }
-  elseif ($og_type == 'group post') {
-    og_group_post_type_set_fields(array($type));
   }
 }
 
