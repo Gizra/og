@@ -7,9 +7,9 @@
  */
 
 /**
- * Implement hook_install().
+ * Implement hook_enable().
  */
-function og_install() {
+function og_enable() {
   og_set_og_audince_field('user');
 }
 

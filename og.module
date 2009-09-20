@@ -72,7 +72,6 @@ define('OG_AUDIENCE_FIELD', 'og_audience');
  * Hook implementations
  ******************************************************************************/
 
-
 /**
  * Implement hook_menu().
  */
