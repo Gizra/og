@@ -106,11 +106,9 @@ function og_confirm_unsubscribe($form, &$form_state, $group_node, $account) {
  * Submit handler; Confirm OG unsubscription.
  */
 function og_confirm_unsubscribe_submit($form, &$form_state) {
-  global $user;
   $group_node = $form_state['values']['group_node'];
-  $account = $form_state['values']['account'];
 
-  og_unsubscribe_user(array($form_state['values']['gid']), $form_state['values']['account']);
+  og_unsubscribe_user(array($group_node->nid), $form_state['values']['account']);
 
   // Determine where to go next - Group if accessible, or else site front page.
   $form_state['redirect'] = og_access('view', $group_node) ? 'node/' . $group_node->nid : '';

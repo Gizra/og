@@ -28,7 +28,7 @@ define('OG_DIRECTORY_ALWAYS', 1);
 define('OG_DIRECTORY_CHOOSE_TRUE', 2);
 define('OG_DIRECTORY_CHOOSE_FALSE', 3);
 
-// Dispositioning of nodes and memberships after deletion of a group node.
+// Dispositioning of content and memberships after deletion of a group node.
 define('OG_DELETE_NOTHING', 0);
 define('OG_DELETE_ORPHANS', 1);
 define('OG_DELETE_MOVE_NODES', 2);
@@ -810,7 +810,7 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
  */
 function og_delete_association($obj_type, $object, $gids = array()) {
   // Load object to get the fields.
-  $object = call_user_func($obj_type . '_load', $object);
+  $object = og_load_object($obj_type, $object);
   
   // Indicate if the object was changed, and needs to be saved.
   $save = FALSE;
