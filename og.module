@@ -323,7 +323,7 @@ function og_og_set_group_alter($group) {
 /**
  * Implement hook_og_access().
  */
-function og_og_access($op, $acting_user, $node, $account) {
+function og_og_access($op, $node, $acting_user, $account) {
   // Get the roles of the acting user.
   if (og_is_group_type($node->type)) {
     // Get the group permissions.
@@ -355,6 +355,18 @@ function og_og_access($op, $acting_user, $node, $account) {
   }
 
   return OG_ACCESS_IGNORE;
+}
+
+/**
+ * Implement hook_node_access()
+ */
+function og_node_access($node, $op, $account) {
+  // We don't check create since anyway a non-subscribed and non-privileged user 
+  // will not be able to post to a group. 
+  if ($op != 'create' && og_get_group_type($node->type) != 'omitted') {
+    // Node is a group or group post type.
+    return og_access($op, $node, NULL, $account);
+  }
 }
 
 /**
@@ -479,18 +491,24 @@ function og_delete_group($nid) {
  *   The object type (e.g. "node" or "user").
  * @param $object
  *   The object can be a user, node or any fieldable entity.
+ * @param $check_state
+ *   Optioanl; If true then only "active" state groups will be returned.
  * @return
  *  An array with the group, or an empty array.
  */
-function og_get_groups($obj_type, $object) {
+function og_get_groups($obj_type, $object, $check_state = TRUE) {
   // Load object to get the fields.
   $object = og_load_object($obj_type, $object);
     
   $groups = array();
   $langcode = FIELD_LANGUAGE_NONE;
   if (!empty($object->{OG_AUDIENCE_FIELD}[$langcode])) {
-    foreach ($object->{OG_AUDIENCE_FIELD}[$langcode] as $gid) {
-      $groups[$gid['value']] = $gid['value'];
+    foreach ($object->{OG_AUDIENCE_FIELD}[$langcode] as $group) {
+      if ($check_state && $group['state'] != 'active') {
+        // Don't register the group if it's state isn't active.
+        continue;
+      }      
+      $groups[$gid['value']] = $group['value'];
     }
   }
   return $groups;
@@ -836,10 +854,15 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
     $acting_user = $user;
   }
   if (user_access('administer organic groups', $acting_user)) {
-    //return OG_ACCESS_ALLOW;
+    return OG_ACCESS_ALLOW;
   }
 
-  $access = module_invoke_all('og_access', $op, $acting_user, $node, $account);
+  $acting_user = og_load_object('user', $acting_user);
+  if (!empty($account)) {
+    $account = og_load_object('user', $account);
+  }
+  
+  $access = module_invoke_all('og_access', $op, $node, $acting_user, $account);
   if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
     return FALSE;
   }

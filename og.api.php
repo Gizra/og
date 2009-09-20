@@ -12,6 +12,23 @@
  */
 
 /**
+ * Determine if a user has access to a certain operation within a group context.
+ * 
+ * @param $op
+ *   The operation name.
+ * @param $node
+ *   The group or group post node object.
+ * @param $acting_user
+ *   The user object of the acting user.
+ * @param $account
+ *   Optional; The account related to the operation.
+ * @return
+ */
+function hook_og_access($op, $node, $acting_user, $account = NULL) {
+  
+}
+
+/**
  * Alter a group that is being fetched.
  *
  * @param $group
