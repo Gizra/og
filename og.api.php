@@ -23,9 +23,30 @@
  * @param $account
  *   Optional; The account related to the operation.
  * @return
+ *   OG_ACCESS_ALLOW if operation is allowed; 
+ *   OG_ACCESS_DENY if it should be denied;
+ *   OG_ACCESS_IGNORE if you don't care about this operation.
  */
 function hook_og_access($op, $node, $acting_user, $account = NULL) {
-  
+  if ($op == 'view') {
+    // Show group posts only if they are in a certain day, defined in the
+    // group's data. This data is fictional, and it's up to an implementing 
+    // module to implement it.
+    if (og_is_group_post_type($node->type)) {
+      // Get the first node group this group post belongs to.
+      $gids = og_get_groups('node', $node);
+      $group = node_load($gids[0]);
+      if (!empty($group->data['show_dates'])) {
+        $today = date('N');
+        return $group->data['show_dates'] == $today; 
+      }
+      else {
+        // The group doesn't have a day definition, so we don't care about this
+        // operation.
+        return OG_ACCESS_IGNORE;
+      }
+    }
+  }  
 }
 
 /**
