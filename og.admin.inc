@@ -18,8 +18,9 @@ function og_user_admin_role($form, $form_state, $node) {
   if (og_is_group_type($node->type)) {
     $rid = arg(5);
     if ($rid) {
-      if ($rid == DRUPAL_ANONYMOUS_RID || $rid == DRUPAL_AUTHENTICATED_RID) {
-        drupal_goto('admin/config/people/roles');
+      $og_roles = og_get_group_default_roles($node->nid);
+      if (in_array($rid, $og_roles)) {
+        drupal_goto('og/' . $node->nid . '/admin/people/roles');
       }
       // Display the edit role form.
       $role = db_query('SELECT * FROM {og_role} WHERE rid = :rid', array(':rid' => $rid))->fetchObject();
@@ -72,7 +73,7 @@ function og_user_admin_role($form, $form_state, $node) {
 function og_user_admin_role_validate($form, &$form_state) {
   if ($form_state['values']['name']) {
     if ($form_state['values']['op'] == t('Save role')) {
-      $role = og_user_role_load($form_state['values']['name']);
+      $role = og_user_role_load($form_state['values']['name'], $form_state['values']['name']);
       if ($role && $role->rid != $form_state['values']['rid']) {    
         form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
       }
@@ -113,10 +114,15 @@ function og_user_admin_role_submit($form, &$form_state) {
  */
 function theme_og_user_admin_new_role($form) {
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
-  foreach (og_user_roles($form['nid']['#value']) as $rid => $name) {
-    $edit_permissions = l(t('edit permissions'), 'admin/config/people/permissions/' . $rid);
-    if (!in_array($rid, array(DRUPAL_ANONYMOUS_RID, DRUPAL_AUTHENTICATED_RID))) {
-      $rows[] = array($name, l(t('edit role'), 'admin/config/people/roles/edit/' . $rid), $edit_permissions);
+  // The group ID.
+  $gid = $form['nid']['#value'];
+  
+  $og_roles = og_get_group_default_roles($gid);
+  
+  foreach (og_user_roles($gid) as $rid => $name) {
+    $edit_permissions = l(t('edit permissions'), 'og/' . $gid . 'admin/people/permissions/' . $rid);
+    if (!in_array($rid, $og_roles)) {
+      $rows[] = array($name, l(t('edit role'), 'og/' . $gid . 'admin/people/roles/edit/' . $rid), $edit_permissions);
     }
     else {
       $rows[] = array($name, t('locked'), $edit_permissions);

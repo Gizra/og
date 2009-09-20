@@ -321,6 +321,16 @@ function og_node_insert($node) {
 
     // Set the user a group manager.
     og_set_user_roles($node->nid, $account->uid, array('manager'));
+    
+    // Create default roles.
+    $role = new stdClass;
+    $role->name = 'anonymous';
+    $role->nid = $node->nid;
+    og_user_role_save($role);
+    
+    unset($role->rid);
+    $role->name = 'authenticated';
+    og_user_role_save($role);    
   }
 }
 
@@ -352,20 +362,7 @@ function og_node_delete($node) {
  * Implement hook_og_get_group_alter().
  */
 function og_og_set_group_alter($group) {
-  // Add basic permissions and roles.
-  $data = array(
-    'permissions' => array(
-      'approve and deny subscription' => array(
-        'title' => t('Approve and deny subscription'),
-        'description' => t("Allow user to allow or deny another user's subscription request."),
-        'roles' => array('administrator'),
-      ),
-    ),
-    'roles' => array(
-      'administrator' => t('Group administrator'),
-    ),
-  );
-  $group->data = array_merge($group->data, $data);
+
 }
 
 /**
@@ -1378,6 +1375,18 @@ function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission
 }
 
 /**
+ * Get the anonymous and authenticated user roles ID of a group.
+ * 
+ * @param $nid
+ *   The group ID.
+ * @return
+ *   A keyed array with "anonymous" and "authenticaed".
+ */
+function og_get_group_default_roles($nid) {
+  return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid AND (name = 'anonymous' OR name = 'authenticated')", array(':nid' => $nid))->fetchAllKeyed();
+}
+
+/**
  * Fetch a user role from database.
  *
  * @param $role
@@ -1386,11 +1395,12 @@ function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission
  *   A fully-loaded role object if a role with the given name or ID
  *   exists, FALSE otherwise.
  */
-function og_user_role_load($role) {
+function og_user_role_load($nid, $role) {
   $field = is_int($role) ? 'rid' : 'name';
   return db_select('og_role', 'r')
     ->fields('r')
     ->condition($field, $role)
+    ->condition('nid', $nid)
     ->execute()
     ->fetchObject();
 }
