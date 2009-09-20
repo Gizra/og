@@ -58,7 +58,7 @@ function og_field_schema($field) {
       'length'          => 255,
       'not null'        => FALSE,
       'default' => '',
-    ),          
+    ),
   );
   return array(
     'columns' => $columns,
@@ -87,17 +87,17 @@ function og_field_widget_info() {
  * Implement hook_field_widget().
  */
 function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = NULL) {
-	$default_values = array();
-	if (!empty($items)) {
-		foreach ($items as $item) {
-			$default_values[$item['value']] = $item['value'];
-		}
-	}
+  $default_values = array();
+  if (!empty($items)) {
+    foreach ($items as $item) {
+      $default_values[$item['value']] = $item['value'];
+    }
+  }
   $element = array(
     '#type' => $instance['widget']['type'],
     '#default_value' => $default_values,
   );
-  
+
   $defaults = array('data' => array(), 'state' => '');
   foreach ($items as $delta => $item) {
     $items[$delta] = array_merge($defaults, $items[$delta]);
@@ -118,32 +118,30 @@ function og_field_is_empty($item, $field) {
 function og_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
   // Allow other modules to alter the data.
   foreach ($items as &$item) {
-  	$item['state'] = !empty($item['state']) ? $item['state'] : ''; 
-  	$item['data'] = !empty($item['data']) ? $item['data'] : array();
-  	$alter = array('state' => $item['state'], 'data' => $item['data']);
-  	drupal_alter('og_field_insert', $alter, $obj_type, $object, $field, $instance, $langcode, $items);
-  	$item['state'] = $alter['state'];
-  	$item['data'] = serialize($alter['data']);
+    $item['state'] = !empty($item['state']) ? $item['state'] : '';
+    $item['data'] = !empty($item['data']) ? $item['data'] : array();
+    $alter = array('state' => $item['state'], 'data' => $item['data']);
+    drupal_alter('og_field_insert', $alter, $obj_type, $object, $field, $instance, $langcode, $items);
+    $item['state'] = $alter['state'];
+    $item['data'] = serialize($alter['data']);
   }
 }
 
 /**
  * Implement hook_field_update().
- * 
- * FIXME: pass the data and state values.
  */
-function og_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {  
+function og_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
   foreach ($items as &$item) {
-  	//FIXME: Get state and data fields.
-  	$item['state'] = '';
-  	$item['data'] = array();
-  	
+    //  FIXME: pass the data and state values.
+    $item['state'] = '';
+    $item['data'] = array();
+
     $alter = array('state' => $item['state'], 'data' => $item['data']);
-    
-    // Allow other modules to alter the data.    
+
+    // Allow other modules to alter the data.
     drupal_alter('og_field_update', $alter, $obj_type, $object, $field, $instance, $langcode, $items);
     $item['state'] = $alter['state'];
-    $item['data'] = serialize($alter['data']);      	
+    $item['data'] = serialize($alter['data']);
   }
 }
 
@@ -154,7 +152,7 @@ function og_field_update($obj_type, $object, $field, $instance, $langcode, &$ite
 
 /**
  * Add organic groups audience field to fieldable enteties.
- * 
+ *
  * @param $bundle
  *   The bundle name.
  */
@@ -189,12 +187,12 @@ function og_set_og_audince_field($bundle) {
       ),
     );
     field_create_instance($instance);
-  } 
+  }
 }
 
 /**
  * Return the selective state of a group node.
- *  
+ *
  * @param $node
  *   The group node.
  */
@@ -261,7 +259,7 @@ function og_group_type_set_fields($node_types = array()) {
  *   fields attached to them.
  */
 function og_group_post_type_set_fields($node_types = array()) {
-  foreach ($node_types as $type) {  
+  foreach ($node_types as $type) {
     og_set_og_audince_field($type);
   }
 }

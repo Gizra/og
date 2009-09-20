@@ -41,7 +41,7 @@ function og_schema() {
       'nid' => array('nid'),
     ),
   );
-  
+
   $schema['og_users_roles'] = array(
     'description' => 'Store information related to roles within groups.',
     'fields' => array(
@@ -62,7 +62,7 @@ function og_schema() {
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
-      ),            
+      ),
       'role'     => array(
         'description'     => 'The user role.',
         'type'            => 'varchar',
@@ -72,7 +72,7 @@ function og_schema() {
       ),
     ),
     'primary key' => array('oid'),
-  );  
-  
+  );
+
   return $schema;
 }

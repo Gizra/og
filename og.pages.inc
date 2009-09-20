@@ -21,34 +21,34 @@ function og_subscribe($node, $uid = NULL) {
       global $user;
       $account = $user;
 
-	    if (!$account->uid) {
-	      $dest = drupal_get_destination();
-	      if (variable_get('user_register', 1) == 0) {
-	        drupal_set_message(t('In order to join this group, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
-	      }
-	      else {
-	        drupal_set_message(t('In order to join this group, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest)))));
-	      }
-	      drupal_goto('user');
-	    }
+      if (!$account->uid) {
+        $dest = drupal_get_destination();
+        if (variable_get('user_register', 1) == 0) {
+          drupal_set_message(t('In order to join this group, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
+        }
+        else {
+          drupal_set_message(t('In order to join this group, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest)))));
+        }
+        drupal_goto('user');
+      }
     }
     else {
       $account = user_load($uid);
     }
-    
+
     // Check user isn't already subscribed.
     if (in_array($node->nid, og_get_groups($account))) {
       drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title)));
-    	drupal_goto('node/'. $node->nid);
+      drupal_goto('node/'. $node->nid);
     }
 
     elseif (og_get_group_selective($node) >= OG_INVITE_ONLY || $node->status == 0) {
-    	// Invite only group, or unpublished node.
+      // Invite only group, or unpublished node.
       drupal_access_denied();
       exit();
     }
     else {
-    	// Show the user a subscription confirmation.
+      // Show the user a subscription confirmation.
       return drupal_get_form('og_confirm_subscribe', $node, $account);
     }
   }
@@ -79,16 +79,16 @@ function og_confirm_subscribe($form, &$form_state, $node, $account) {
 function og_confirm_subscribe_submit($form, &$form_state) {
   $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
   $gid = $form_state['values']['gid'];
-  
+
   $node = node_load($gid);
-  
+
   $group = array(
     'value' => $gid,
     // Get the state of the group, and decide the user's state accordingly.
     'state' => og_get_group_selective($node) == OG_OPEN ? OG_STATE_ACTIVE : OG_STATE_PENDING,
   );
 
-	og_subscribe_user(array($group), $request);
+  og_subscribe_user(array($group), $request);
   $form_state['redirect'] = 'node/'. $form_state['values']['gid'];
 }
 
@@ -109,9 +109,9 @@ function og_confirm_unsubscribe_submit($form, &$form_state) {
   global $user;
   $group_node = $form_state['values']['group_node'];
   $account = $form_state['values']['account'];
-  
+
   og_unsubscribe_user(array($form_state['values']['gid']), $form_state['values']['account']);
-  
+
   // Determine where to go next - Group if accessible, or else site front page.
   $form_state['redirect'] = og_access('view', $group_node) ? 'node/' . $group_node->nid : '';
 }
