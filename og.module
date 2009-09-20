@@ -508,7 +508,7 @@ function og_get_groups($obj_type, $object, $check_state = TRUE) {
         // Don't register the group if it's state isn't active.
         continue;
       }      
-      $groups[$gid['value']] = $group['value'];
+      $groups[$group['value']] = $group['value'];
     }
   }
   return $groups;
