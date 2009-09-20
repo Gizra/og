@@ -151,7 +151,7 @@ function og_field_update($obj_type, $object, $field, $instance, $langcode, &$ite
  ******************************************************************************/
 
 /**
- * Add organic groups audience field to fieldable enteties.
+ * Add organic groups audience field to fieldable entities.
  *
  * @param $bundle
  *   The bundle name.
