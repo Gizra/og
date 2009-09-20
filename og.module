@@ -1149,7 +1149,7 @@ function og_get_all_groups_for_form() {
  */
 function og_rules_invoke_event() {
   if (module_exists('rules')) {
-    // Invoke a rule.
+    // Invoke a rule event.
   }
 }
 
