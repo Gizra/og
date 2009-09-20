@@ -40,7 +40,7 @@ define('OG_DELETE_MOVE_NODES_MEMBERSHIPS', 3);
 define('OG_STATE_ACTIVE', 'active');
 
 /**
- * Define pending group post states. The user is subscribed to the group but 
+ * Define pending group post states. The user is subscribed to the group but
  * isn't an active member yet.
  */
 define('OG_STATE_PENDING', 'pending');
@@ -139,14 +139,14 @@ function og_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
   );
-  
+
   // Permission administration pages.
   $items['og/%node/admin/people/roles'] = array(
     'title' => 'Roles',
     'description' => 'List, edit, or add user roles.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_user_admin_new_role', 1),
-    'access callback' => 'og_access',  
+    'access callback' => 'og_access',
     'access arguments' => array('administer permissions'),
     'file' => 'og.admin.inc',
     'weight' => -9,
@@ -154,7 +154,7 @@ function og_menu() {
   $items['og/%node/admin/people/roles/edit'] = array(
     'title' => 'Edit role',
     'page arguments' => array('og_user_admin_role', 1),
-    'access callback' => 'og_access',  
+    'access callback' => 'og_access',
     'access arguments' => array('administer permissions'),
     'type' => MENU_CALLBACK,
   );
@@ -168,7 +168,7 @@ function og_menu() {
     'file' => 'og.admin.inc',
     'weight' => -8,
   );
-  
+
 
   $items['admin/og'] = array(
     'title' => 'Organic groups',
@@ -239,7 +239,7 @@ function og_theme() {
     'og_user_admin_new_role' => array(
       'arguments' => array('form' => NULL),
       'file' => 'og.admin.inc',
-    ),    
+    ),
   );
 }
 
@@ -321,16 +321,16 @@ function og_node_insert($node) {
 
     // Set the user a group manager.
     og_set_user_roles($node->nid, $account->uid, array('manager'));
-    
+
     // Create default roles.
     $role = new stdClass;
     $role->name = 'anonymous';
     $role->nid = $node->nid;
     og_user_role_save($role);
-    
+
     unset($role->rid);
     $role->name = 'authenticated';
-    og_user_role_save($role);    
+    og_user_role_save($role);
   }
 }
 
@@ -373,8 +373,8 @@ function og_og_permissions() {
     'approve and deny subscription' => array(
       'title' => t('Approve and deny subscription'),
       'description' => t("Allow user to allow or deny another user's subscription request."),
-    ), 
-  );     
+    ),
+  );
 }
 
 /**
@@ -385,13 +385,13 @@ function og_og_access($op, $node, $acting_user, $account) {
   if (og_is_group_type($node->type)) {
     // Get the group permissions.
     $group = og_get_group($node->nid);
-    
+
     if (!empty($group->data['permissions'][$op]['roles'])) {
       $user_roles = og_get_user_roles($node->nid, $acting_user->uid);
       if (array_intersect($group->data['permissions'][$op]['roles'], $user_roles)) {
         return OG_ACCESS_ALLOW;
       }
-    }        
+    }
   }
   elseif (og_is_group_post_type($node->type)) {
     // Try to get the context.
@@ -420,8 +420,8 @@ function og_og_access($op, $node, $acting_user, $account) {
  * Implement hook_node_access()
  */
 function og_node_access($node, $op, $account) {
-  // We don't check create since anyway a non-subscribed and non-privileged user 
-  // will not be able to post to a group. 
+  // We don't check create since anyway a non-subscribed and non-privileged user
+  // will not be able to post to a group.
   if ($op != 'create' && og_get_group_type($node->type) != 'omitted') {
     // Node is a group or group post type.
     // return og_access($op, $node, NULL, $account);
@@ -493,18 +493,18 @@ function og_og_types_info() {
  */
 function og_get_group($nid) {
   $group = &drupal_static(__FUNCTION__, array());
-  
-  if (empty($group[$nid])) {  
+
+  if (empty($group[$nid])) {
     $result = db_query("SELECT * FROM {og_groups} WHERE nid = :nid", array(':nid' => $nid))->fetchObject();
     // Unserialize the data.
     $result->data = unserialize($result->data);
-    
+
     // Allow other modules to change the group object.
     drupal_alter('og_get_group', $result);
-        
+
     $group[$nid] = $result;
   }
-  
+
   return $group[$nid];
 }
 
@@ -558,7 +558,7 @@ function og_delete_group($nid) {
 function og_get_groups($obj_type, $object, $check_state = TRUE) {
   // Load object to get the fields.
   $object = og_load_object($obj_type, $object);
-    
+
   $groups = array();
   $langcode = FIELD_LANGUAGE_NONE;
   if (!empty($object->{OG_AUDIENCE_FIELD}[$langcode])) {
@@ -566,7 +566,7 @@ function og_get_groups($obj_type, $object, $check_state = TRUE) {
       if ($check_state && $group['state'] != 'active') {
         // Don't register the group if it's state isn't active.
         continue;
-      }      
+      }
       $groups[$group['value']] = $group['value'];
     }
   }
@@ -601,7 +601,7 @@ function og_set_user_roles($nid, $uid, $roles = array(), $replace = FALSE) {
     $object = new stdClass();
     $object->nid = $nid;
     $object->uid = $uid;
-    $object->role = $role;  
+    $object->role = $role;
     drupal_write_record('og_users_roles', $object);
   }
 
@@ -617,10 +617,10 @@ function og_set_user_roles($nid, $uid, $roles = array(), $replace = FALSE) {
  */
 function og_get_user_roles($nid, $uid) {
   $roles = &drupal_static(__FUNCTION__, array());
-  
+
   if (empty($roles[$nid][$uid])) {
     // TODO: Is it nice to pass role twice just to get  the array as map_assoc?
-    $roles[$nid][$uid] = db_query("SELECT role, role FROM {og_users_roles} WHERE nid = :nid AND uid = :uid", array(':nid' => $nid, ':uid' => $uid))->fetchAllKeyed();    
+    $roles[$nid][$uid] = db_query("SELECT role, role FROM {og_users_roles} WHERE nid = :nid AND uid = :uid", array(':nid' => $nid, ':uid' => $uid))->fetchAllKeyed();
   }
   return $roles[$nid][$uid];
 }
@@ -824,7 +824,7 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
 function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE) {
   // Load object to get the fields.
   $object = og_load_object($obj_type, $object);
-    
+
   $op = empty($object->og_audience) ? 'insert' : 'update';
   if ($replace) {
     unset($object->og_audience);
@@ -839,13 +839,13 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
 
   // Indicate if the object was changed, and needs to be saved.
   $save = FALSE;
-  
-  foreach ($groups as $group) {    
+
+  foreach ($groups as $group) {
     if (!in_array($group['value'], $existing_gids)) {
       // Initialize values.
       $group += array('state' => '', 'data' => array());
       $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
-      
+
       og_rules_invoke_event();
       $save = TRUE;
     }
@@ -868,19 +868,19 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
 function og_delete_association($obj_type, $object, $gids = array()) {
   // Load object to get the fields.
   $object = og_load_object($obj_type, $object);
-  
+
   // Indicate if the object was changed, and needs to be saved.
   $save = FALSE;
-  
+
   foreach ($object->og_audience[FIELD_LANGUAGE_NONE] as $key => $group) {
     if (in_array($group['value'], $gids)) {
       unset($object->og_audience[FIELD_LANGUAGE_NONE][$key]);
-      
+
       og_rules_invoke_event();
       $save = TRUE;
     }
   }
-  
+
   if ($save) {
     call_user_func('field_attach_update', $obj_type, $object);
   }
@@ -920,7 +920,7 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   if (!empty($account)) {
     $account = og_load_object('user', $account);
   }
-  
+
   $access = module_invoke_all('og_access', $op, $node, $acting_user, $account);
   if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
     return FALSE;
@@ -1219,8 +1219,8 @@ function og_rules_invoke_event() {
 
 /**
  * Return a re-loaded object with its fields.
- * 
- * This is needed only if a user account is passed, as global $user is only a 
+ *
+ * This is needed only if a user account is passed, as global $user is only a
  * partial user object.
  * @param $obj_type
  *   The object type.
@@ -1373,7 +1373,7 @@ function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission
 
 /**
  * Get the anonymous and authenticated user roles ID of a group.
- * 
+ *
  * @param $nid
  *   The group ID.
  * @return
@@ -1386,20 +1386,15 @@ function og_get_group_default_roles($nid) {
 /**
  * Fetch a user role from database.
  *
- * @param $role
- *   A string with the role name, or an integer with the role ID.
+ * @param $rid
+ *   An integer with the role ID.
  * @return
  *   A fully-loaded role object if a role with the given name or ID
  *   exists, FALSE otherwise.
  */
-function og_user_role_load($nid, $role) {
-  $field = is_int($role) ? 'rid' : 'name';
-  return db_select('og_role', 'r')
-    ->fields('r')
-    ->condition($field, $role)
-    ->condition('nid', $nid)
-    ->execute()
-    ->fetchObject();
+function og_user_role_load($rid) {
+  $result = db_query("SELECT * FROM {og_role} WHERE rid = :rid", array(':rid' => $rid));
+  return $result->fetchObject();
 }
 /**
  * Save a user role to the database.
@@ -1440,18 +1435,18 @@ function og_user_role_save($role) {
  * @param $role
  *   A string with the role name, or an integer with the role ID.
  */
-function og_user_role_delete($role) {
-  $role = user_role_load($role);
+function og_user_role_delete($rid) {
+  $role = og_user_role_load($rid);
 
   db_delete('og_role')
-    ->condition('rid', $role->rid)
+    ->condition('rid', $rid)
     ->execute();
   db_delete('og_role_permission')
-    ->condition('rid', $role->rid)
+    ->condition('rid', $rid)
     ->execute();
   // Update the users who have this role set:
   db_delete('og_users_roles')
-    ->condition('rid', $role->rid)
+    ->condition('rid', $rid)
     ->execute();
 
   module_invoke_all('og_user_role_delete', $role);

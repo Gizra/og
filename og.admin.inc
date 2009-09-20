@@ -16,14 +16,16 @@
  */
 function og_user_admin_role($form, $form_state, $node) {
   if (og_is_group_type($node->type)) {
-    $rid = arg(5);
+    $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
+        
+    $rid = arg(6);
     if ($rid) {
       $og_roles = og_get_group_default_roles($node->nid);
       if (in_array($rid, $og_roles)) {
         drupal_goto('og/' . $node->nid . '/admin/people/roles');
       }
       // Display the edit role form.
-      $role = db_query('SELECT * FROM {og_role} WHERE rid = :rid', array(':rid' => $rid))->fetchObject();
+      $role = og_user_role_load($rid);
       $form['name'] = array(
         '#type' => 'textfield',
         '#title' => t('Role name'),
@@ -47,8 +49,6 @@ function og_user_admin_role($form, $form_state, $node) {
       );
     }
     else {
-      $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
-
       $form['name'] = array(
         '#type' => 'textfield',
         '#size' => 32,
@@ -120,9 +120,9 @@ function theme_og_user_admin_new_role($form) {
   $og_roles = og_get_group_default_roles($gid);
   
   foreach (og_user_roles($gid) as $rid => $name) {
-    $edit_permissions = l(t('edit permissions'), 'og/' . $gid . 'admin/people/permissions/' . $rid);
+    $edit_permissions = l(t('edit permissions'), 'og/' . $gid . '/admin/people/permissions/' . $rid);
     if (!in_array($rid, $og_roles)) {
-      $rows[] = array($name, l(t('edit role'), 'og/' . $gid . 'admin/people/roles/edit/' . $rid), $edit_permissions);
+      $rows[] = array($name, l(t('edit role'), 'og/' . $gid . '/admin/people/roles/edit/' . $rid), $edit_permissions);
     }
     else {
       $rows[] = array($name, t('locked'), $edit_permissions);
