@@ -1154,7 +1154,7 @@ function og_rules_invoke_event() {
 }
 
 /**
- * ReReturn a re-loaded object with its fields.
+ * Return a re-loaded object with its fields.
  * 
  * This is needed only if a user account is passed, as global $user is only a 
  * partial user object.
