@@ -41,38 +41,95 @@ function og_schema() {
       'nid' => array('nid'),
     ),
   );
-
-  $schema['og_users_roles'] = array(
-    'description' => 'Store information related to roles within groups.',
+  
+  $schema['og_role_permission'] = array(
+    'description' => 'Stores the permissions assigned to user roles per group.',
     'fields' => array(
-       'oid' => array(
-        'description' => 'Unique ID for the user roles.',
+      'rid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Foreign Key: {role}.rid.',
+      ),
+      'permission' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'A single permission granted to the role identified by rid.',
+      ),
+    ),
+    'primary key' => array('rid', 'permission'),
+    'indexes' => array(
+      'permission' => array('permission'),
+    ),
+    'foreign keys' => array(
+      'rid' => array('role' => 'rid'),
+    ),
+  );
+
+  $schema['og_role'] = array(
+    'description' => 'Stores user roles.',
+    'fields' => array(
+      'rid' => array(
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
+        'description' => 'Primary Key: Unique role ID.',
+      ),
+      'nid'               => array(
+        'description'     => "The group's node ID.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),      
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Unique role name.',
+      ),
+    ),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+    'primary key' => array('rid'),
+  );
+  
+  $schema['og_users_roles'] = array(
+    'description' => 'Maps users to roles.',
+    'fields' => array(
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Primary Key: {users}.uid for user.',
+      ),
+      'rid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Primary Key: {role}.rid for role.',
       ),
       'nid'             => array(
         'description'     => "The group node ID.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
-      ),
-      'uid'             => array(
-        'description'     => "The user ID.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
-      ),
-      'role'     => array(
-        'description'     => 'The user role.',
-        'type'            => 'varchar',
-        'length'          => 255,
-        'not null'        => TRUE,
-        'default' => '',
-      ),
+      ),      
     ),
-    'primary key' => array('oid'),
-  );
+    'primary key' => array('uid', 'rid'),
+    'indexes' => array(
+      'rid' => array('rid'),
+    ),
+    'foreign keys' => array(
+      'uid' => array('users' => 'uid'),
+      'rid' => array('role' => 'rid'),
+    ),
+  );  
 
   return $schema;
 }
