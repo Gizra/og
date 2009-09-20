@@ -686,7 +686,7 @@ function og_is_group_post_type($type) {
 /**
  * Subscribe a user to groups.
  * 
- * @param $gids
+ * @param $groups
  *   Array of the groups to subscribe the user.
  * @param $account
  *   Optional; A user object.
@@ -694,14 +694,14 @@ function og_is_group_post_type($type) {
  *   Optioanl; True if the group lists should replace the existing subscrptions
  *   of the user.
  */
-function og_subscribe_user($gids = array(), $account = NULL, $replace = FALSE) {
+function og_subscribe_user($groups = array(), $account = NULL, $replace = FALSE) {
   if (empty($account)) {
     global $user;
     $account = $user;
   } 
   // FIXME: Why don't the field appear on global?
   $account = user_load($account->uid);
-  og_set_association('user', $account, $gids, 'subscribe user', $replace);
+  og_set_association('user', $account, $groups, 'subscribe user', $replace);
 
   og_rules_invoke_event();
 }
@@ -735,8 +735,11 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  *   The object type (e.g. "node" or "user").
  * @param $object
  *   The object to set the association.
- * @param $gids
- *   Array of the groups to subscribe the object.
+ * @param $groups
+ *   Keyed array of the groups to subscribe the object. Keys are:
+ *   "value" - The group ID.
+ *   "state" - Optioanl; The state of the association.
+ *   "data" - Optioanl; Array with data related to the association.
  * @param $op
  *   The operation that is being done (e.g. "subscribe user" or 
  *   "unsubscribe content").
@@ -744,20 +747,25 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  *   Optioanl; True if the group lists should replace the existing subscrptions
  *   of the user.
  */
-function og_set_association($obj_type, $object, $gids = array(), $op = '', $replace = FALSE) {
+function og_set_association($obj_type, $object, $groups = array(), $op = '', $replace = FALSE) {
 	$op = empty($object->og_audience) ? 'insert' : 'update';
   if ($replace) {
     unset($object->og_audience);
   }
   
-  // Keep only groups that are not yet associated with the group.
-  $gids = array_diff($gids, og_get_groups($object));
+  // Will be used later to keep only groups that are not yet associated with the 
+  // group.  
+  $existing_gids = og_get_groups($object);
   
   // Allow other modules to change the subscribed groups.
-  drupal_alter('og_set_association', $gids, $obj_type, $object, $op);
+  drupal_alter('og_set_association', $groups, $obj_type, $object, $op);
   
-  foreach ($gids as $gid) { 
-    $object->og_audience[FIELD_LANGUAGE_NONE][] = array('value' => $gid);
+  foreach ($groups as $group) {  	
+  	if (!in_array($group['value'], $existing_gids)) {
+	  	// Initialize values.
+	  	$group += array('state' => '', 'data' => array());
+	    $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
+  	}
   }
   
   call_user_func('field_attach_' . $op, $obj_type, $object);

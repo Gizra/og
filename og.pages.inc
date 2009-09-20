@@ -35,7 +35,9 @@ function og_subscribe($node, $uid = NULL) {
     else {
       $account = user_load($uid);
     }
-
+    
+    //FIXME: Remove
+    $account = user_load($account->uid);
     // Check user isn't already subscribed.
     if (in_array($node->nid, og_get_groups($account))) {
       drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title)));
@@ -77,9 +79,18 @@ function og_confirm_subscribe($form, &$form_state, $node, $account) {
  * Submit handler; Confirm OG membership.
  */
 function og_confirm_subscribe_submit($form, &$form_state) {
-  $form_state['values']['request'] = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
+  $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
+  $gid = $form_state['values']['gid'];
+  
+  $node = node_load($gid);
+  
+  $group = array(
+    'value' => $gid,
+    // Get the state of the group, and decide the user's state accordingly.
+    'state' => og_get_group_selective($node) == OG_OPEN ? OG_STATE_ACTIVE : OG_STATE_PENDING,
+  );
 
-	og_subscribe_user(array($form_state['values']['gid']), $form_state['values']['account'], $form_state['values']['request']);
+	og_subscribe_user(array($group), $request);
   $form_state['redirect'] = 'node/'. $form_state['values']['gid'];
 }
 
