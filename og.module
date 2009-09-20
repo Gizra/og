@@ -720,10 +720,7 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
     $account = $user;
   }
   
-  $existing_gids = og_get_groups($account);
-  $keep_gids = array_diff($existing_gids, $gids);
-
-  og_set_association('user', $account, $keep_gids, TRUE, 'unsubscribe user');
+  // TODO:
   
   og_rules_invoke_event();
 }
