@@ -23,9 +23,9 @@
  * @param $account
  *   Optional; The account related to the operation.
  * @return
- *   OG_ACCESS_ALLOW if operation is allowed; 
- *   OG_ACCESS_DENY if it should be denied;
- *   OG_ACCESS_IGNORE if you don't care about this operation.
+ *   OG_ACCESS_ALLOW  - if operation is allowed; 
+ *   OG_ACCESS_DENY   - if it should be denied;
+ *   OG_ACCESS_IGNORE - if you don't care about this operation.
  */
 function hook_og_access($op, $node, $acting_user, $account = NULL) {
   if ($op == 'view') {
@@ -38,7 +38,12 @@ function hook_og_access($op, $node, $acting_user, $account = NULL) {
       $group = node_load($gids[0]);
       if (!empty($group->data['show_dates'])) {
         $today = date('N');
-        return $group->data['show_dates'] == $today; 
+        if ($group->data['show_dates'] == $today) {
+          return OG_ACCESS_ALLOW;
+        }
+        else {
+          return OG_ACCESS_DENY;
+        }
       }
       else {
         // The group doesn't have a day definition, so we don't care about this
