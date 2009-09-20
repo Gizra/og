@@ -247,7 +247,7 @@ function og_theme() {
  * Implement hook_forms().
  */
 function og_forms() {
-  $forms['user_admin_new_role']['callback'] = 'og_user_admin_role';
+  $forms['og_user_admin_new_role']['callback'] = 'og_user_admin_role';
   return $forms;
 }
 
@@ -1343,29 +1343,29 @@ function og_user_access($string, $account = NULL) {
  *   An associative array with the role id as the key and the role name as
  *   value.
  */
-function og_user_roles($anon_user, $auth_user, $membersonly = FALSE, $permission = NULL) {
+function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission = NULL) {
   // System roles take the first two positions.
   $roles = array(
-    $anon_user => NULL,
-    $auth_user => NULL,
+    $roles['anonymous'] => NULL,
+    $roles['authenticated'] => NULL,
   );
 
   if (!empty($permission)) {
-    $result = db_query("SELECT r.* FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission ORDER BY r.name", array(':permission' => $permission));
+    $result = db_query("SELECT r.* FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.nid = :nid ORDER BY r.name", array(':permission' => $permission, ':nid' => $nid));
   }
   else {
-    $result = db_query('SELECT * FROM {og_role} ORDER BY name');
+    $result = db_query('SELECT * FROM {og_role} WHERE nid = :nid ORDER BY name', array(':nid' => $nid));
   }
 
   foreach ($result as $role) {
     switch ($role->rid) {
       // We only translate the built in role names
-      case $anon_user:
+      case $roles['anonymous']:
         if (!$membersonly) {
           $roles[$role->rid] = t($role->name);
         }
         break;
-      case $auth_user:
+      case $roles['authenticated']:
         $roles[$role->rid] = t($role->name);
         break;
       default:

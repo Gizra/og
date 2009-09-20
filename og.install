@@ -69,7 +69,7 @@ function og_schema() {
   );
 
   $schema['og_role'] = array(
-    'description' => 'Stores user roles.',
+    'description' => 'Stores user roles per group.',
     'fields' => array(
       'rid' => array(
         'type' => 'serial',
