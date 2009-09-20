@@ -116,39 +116,38 @@ function og_field_is_empty($item, $field) {
  * Implement hook_field_insert().
  */
 function og_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
-  // Allow other modules to alter the data.
-  foreach ($items as &$item) {
-    $item['state'] = !empty($item['state']) ? $item['state'] : '';
-    $item['data'] = !empty($item['data']) ? $item['data'] : array();
-    $alter = array('state' => $item['state'], 'data' => $item['data']);
-    drupal_alter('og_field_insert', $alter, $obj_type, $object, $field, $instance, $langcode, $items);
-    $item['state'] = $alter['state'];
-    $item['data'] = serialize($alter['data']);
-  }
+  og_field_write('insert', $obj_type, $object, $field, $instance, $langcode, $items);
 }
 
 /**
  * Implement hook_field_update().
  */
 function og_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
-  foreach ($items as &$item) {
-    // FIXME: pass the data and state values.
-    $item['state'] = '';
-    $item['data'] = array();
-
-    $alter = array('state' => $item['state'], 'data' => $item['data']);
-
-    // Allow other modules to alter the data.
-    drupal_alter('og_field_update', $alter, $obj_type, $object, $field, $instance, $langcode, $items);
-    $item['state'] = $alter['state'];
-    $item['data'] = serialize($alter['data']);
-  }
+  og_field_write('update', $obj_type, $object, $field, $instance, $langcode, $items);
 }
-
 
 /*******************************************************************************
  * Helper functions
  ******************************************************************************/
+/**
+ * Insert or update a field record.
+ * 
+ * @param $op
+ *   The operation - "insert" or "update".
+ */
+function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &$items) {
+  foreach ($items as &$item) {
+    $item['state'] = !empty($item['state']) ? $item['state'] : '';
+    $item['data'] = !empty($item['data']) ? $item['data'] : array();
+    $alter = array('state' => $item['state'], 'data' => $item['data']);
+
+    // Allow other modules to alter the data.
+    drupal_alter('og_field_' . $op, $alter, $obj_type, $object, $field, $instance, $langcode, $items);
+    $item['state'] = $alter['state'];
+    $item['data'] = serialize($alter['data']);
+  }  
+}
+
 
 /**
  * Add organic groups audience field to fieldable entities.
