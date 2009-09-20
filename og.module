@@ -1342,10 +1342,7 @@ function og_user_access($string, $account = NULL) {
  */
 function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission = NULL) {
   // System roles take the first two positions.
-  $roles = array(
-    $roles['anonymous'] => NULL,
-    $roles['authenticated'] => NULL,
-  );
+  $og_roles = og_get_group_default_roles($nid);
 
   if (!empty($permission)) {
     $result = db_query("SELECT r.* FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.nid = :nid ORDER BY r.name", array(':permission' => $permission, ':nid' => $nid));
@@ -1357,12 +1354,12 @@ function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission
   foreach ($result as $role) {
     switch ($role->rid) {
       // We only translate the built in role names
-      case $roles['anonymous']:
+      case $og_roles['anonymous']:
         if (!$membersonly) {
           $roles[$role->rid] = t($role->name);
         }
         break;
-      case $roles['authenticated']:
+      case $og_roles['authenticated']:
         $roles[$role->rid] = t($role->name);
         break;
       default:
