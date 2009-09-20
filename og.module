@@ -706,7 +706,7 @@ function og_subscribe_user($groups = array(), $account = NULL, $replace = FALSE)
   }
   // FIXME: Why don't the field appear on global?
   $account = user_load($account->uid);
-  og_set_association('user', $account, $groups, 'subscribe user', $replace);
+  og_set_association('user', $account, $groups, $replace);
 
   og_rules_invoke_event();
 }
@@ -725,7 +725,7 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
     $account = $user;
   }
 
-  // TODO:
+  og_delete_association('user', $account, $gids);
 
   og_rules_invoke_event();
 }
@@ -742,14 +742,11 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  *   "value" - The group ID.
  *   "state" - Optioanl; The state of the association.
  *   "data" - Optioanl; Array with data related to the association.
- * @param $op
- *   The operation that is being done (e.g. "subscribe user" or
- *   "unsubscribe content").
  * @param $replace
  *   Optioanl; True if the group lists should replace the existing subscrptions
  *   of the user.
  */
-function og_set_association($obj_type, $object, $groups = array(), $op = '', $replace = FALSE) {
+function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE) {
   $op = empty($object->og_audience) ? 'insert' : 'update';
   if ($replace) {
     unset($object->og_audience);
@@ -760,17 +757,52 @@ function og_set_association($obj_type, $object, $groups = array(), $op = '', $re
   $existing_gids = og_get_groups($object);
 
   // Allow other modules to change the subscribed groups.
-  drupal_alter('og_set_association', $groups, $obj_type, $object, $op);
+  drupal_alter('og_set_association', $groups, $obj_type, $object);
 
+  // Indicate if the object was changed, and needs to be saved.
+  $save = FALSE;
+  
   foreach ($groups as $group) {    
     if (!in_array($group['value'], $existing_gids)) {
       // Initialize values.
       $group += array('state' => '', 'data' => array());
       $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
+      
+      og_rules_invoke_event();
+      $save = TRUE;
     }
   }
+  if ($save) {
+    call_user_func('field_attach_' . $op, $obj_type, $object);
+  }
+}
 
-  call_user_func('field_attach_' . $op, $obj_type, $object);
+/**
+ * Set an association (e.g. subscribe) an object to a group.
+ *
+ * @param $obj_type
+ *   The object type (e.g. "node" or "user").
+ * @param $object
+ *   The object to set the association.
+ * @param $groups
+ *   Array with the group IDs to delete.
+ */
+function og_delete_association($obj_type, $object, $gids = array()) {
+  // Indicate if the object was changed, and needs to be saved.
+  $save = FALSE;
+  
+  foreach ($object->og_audience[FIELD_LANGUAGE_NONE] as $key => $group) {
+    if (in_array($group['value'], $gids)) {
+      unset($object->og_audience[FIELD_LANGUAGE_NONE][$key]);
+      
+      og_rules_invoke_event();
+      $save = TRUE;
+    }
+  }
+  
+  if ($save) {
+    call_user_func('field_attach_update', $obj_type, $object);
+  }
 }
 
 
