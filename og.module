@@ -385,12 +385,8 @@ function og_og_access($op, $node, $acting_user, $account) {
   if (og_is_group_type($node->type)) {
     // Get the group permissions.
     $group = og_get_group($node->nid);
-
-    if (!empty($group->data['permissions'][$op]['roles'])) {
-      $user_roles = og_get_user_roles($node->nid, $acting_user->uid);
-      if (array_intersect($group->data['permissions'][$op]['roles'], $user_roles)) {
-        return OG_ACCESS_ALLOW;
-      }
+    if (og_user_access($node->nid, $op, $acting_user)) {
+      return OG_ACCESS_ALLOW;
     }
   }
   elseif (og_is_group_post_type($node->type)) {
@@ -400,13 +396,10 @@ function og_og_access($op, $node, $acting_user, $account) {
     }
     else {
       // We don't have a context, so we need to get all the permissions
-      // of all the groups the user and the group post are members of.
-      $groups = array_diff(array_keys(og_get_groups('user', $acting_user)), array_keys(og_get_groups('node', $node)));
-      foreach ($groups as $gid) {
-        $user_roles = og_get_user_roles($gid, $acting_user->uid);
-        $group = og_get_group($gid);
-        if (!empty($group->data['permissions'][$op]['roles']) && in_array($group->data['permissions'][$op]['roles'], $user_roles)) {
-          // We have a permission from one of the user's groups.
+      // of all the groups the user and the group post is members of.
+      $gids = array_diff(array_keys(og_get_groups('user', $acting_user)), array_keys(og_get_groups('node', $node)));
+      foreach ($gids as $gid) {
+        if (og_user_access($gid, $op, $acting_user)) {
           return OG_ACCESS_ALLOW;
         }
       }
@@ -572,123 +565,6 @@ function og_get_groups($obj_type, $object, $check_state = TRUE) {
   }
   return $groups;
 }
-
-/**
- * Set a user roles in a specific group.
- *
- * @param $nid
- *   The group node ID.
- * @param $uid
- *   The user ID.
- * @param $role
- *   Array with the roles name.
- * @param $add
- *   Optioanl; If TRUE previous roles would be deleted.
- */
-function og_set_user_roles($nid, $uid, $roles = array(), $replace = FALSE) {
-  if ($replace) {
-    // Delete all existing user roles.
-    og_delete_user_roles($nid, $uid);
-  }
-  else {
-    // Get existing roles.
-    $existing_roles = og_get_user_roles($nid, $uid);
-    // Keep only the non-existing roles.
-    $roles = array_diff($roles, $existing_roles);
-  }
-
-  foreach ($roles as $role) {
-    $object = new stdClass();
-    $object->nid = $nid;
-    $object->uid = $uid;
-    $object->role = $role;
-    drupal_write_record('og_users_roles', $object);
-  }
-
-}
-
-/**
- * Get all the roles in a group of a user.
- *
- * @param $nid
- *   The group node ID.
- * @param $uid
- *   The user ID.
- */
-function og_get_user_roles($nid, $uid) {
-  $roles = &drupal_static(__FUNCTION__, array());
-
-  if (empty($roles[$nid][$uid])) {
-    // TODO: Is it nice to pass role twice just to get  the array as map_assoc?
-    $roles[$nid][$uid] = db_query("SELECT role, role FROM {og_users_roles} WHERE nid = :nid AND uid = :uid", array(':nid' => $nid, ':uid' => $uid))->fetchAllKeyed();
-  }
-  return $roles[$nid][$uid];
-}
-
-/**
- * Get all the roles in a group.
- *
- * @param $nid
- *   The group node ID.
- */
-function og_get_all_group_roles($nid) {
-  return db_query("SELECT role FROM {og_users_roles} WHERE nid = :nid", array(':nid' => $nid))->fetchAll();
-}
-
-/**
- * Get all the users with certain roles in a group.
- *
- * @param $nid
- *   The group node ID.
- * @param $roles
- *   Array with the roles to query.
- */
-function og_get_users_by_roles($nid, $roles = array()) {
-  $query = db_select('og_users_roles', 'og_users_roles');
-  return $query->fields('og_users_roles', array('uid'))
-    ->condition('nid', $nid)
-    ->condition('role', $roles, 'IN')
-    ->execute()
-    ->fetchAll();
-}
-
-/**
- * Delete roles of a group.
- *
- * @param $nid
- *   The group node ID.
- * @param $roles
- *   Optional; Array with the role names. If empty, all the roles in the group
- *   will be deleted.
- */
-function og_delete_all_group_roles($nid, $roles = array()) {
-  $query = db_delete('og_users_roles')->condition('nid', $nid);
-  if (!empty($roles)) {
-     $query->condition('role', $roles, 'IN');
-  }
-
-  $query->execute();
-}
-
-/**
- * Delete user roles of a group.
- *
- * @param $nid
- *   The group node ID.
- * @param $uid
- *   The user ID.
- * @param $roles
- *   Optional; An array with roles that need to be deleted. If empty all the
- *   user roles will be deleted.
- */
-function og_delete_user_roles($nid, $uid, $roles = array()) {
-  $query = db_delete('og_users_roles')->condition('nid', $nid)->condition('uid', $uid);
-  if (!empty($roles)) {
-    $query->condition('role', $roles, 'IN');
-  }
-  $query->execute();
-}
-
 
 /**
  * Get an array with all the types of group or group posts available.
@@ -915,6 +791,11 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   if (user_access('administer organic groups', $acting_user)) {
     return TRUE;
   }
+  
+  if ($node->uid == $acting_user->uid) {
+    // Group manager.
+    return TRUE;
+  }
 
   $acting_user = og_load_object('user', $acting_user);
   if (!empty($account)) {
@@ -928,8 +809,8 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   elseif (in_array(OG_ACCESS_ALLOW, $access, TRUE)) {
     return TRUE;
   }
-  // No one denied access, so assume access is allowed.
-  return TRUE;
+  // No one allowed access, so assume access is denied.
+  return FALSE;
 }
 
 /**
@@ -1253,7 +1134,7 @@ function og_user_role_permissions($roles = array()) {
   $role_permissions = $fetch = array();
 
   if ($roles) {
-    foreach ($roles as $rid => $name) {
+    foreach ($roles as $name => $rid) {
       if (isset($cache[$rid])) {
         $role_permissions[$rid] = $cache[$rid];
       }
@@ -1286,6 +1167,8 @@ function og_user_role_permissions($roles = array()) {
 /**
  * Determine whether the user has a given privilege.
  *
+ * @param $nid
+ *   The group node ID.
  * @param $string
  *   The permission, such as "administer nodes", being checked for.
  * @param $account
@@ -1294,11 +1177,11 @@ function og_user_role_permissions($roles = array()) {
  * @return
  *   Boolean TRUE if the current user has the requested permission.
  *
- * All permission checks in Drupal should go through this function. This
+ * All permission checks in OG should go through this function. This
  * way, we guarantee consistent behavior, and ensure that the superuser
  * can perform all actions.
  */
-function og_user_access($string, $account = NULL) {
+function og_user_access($nid, $string, $account = NULL) {
   global $user;
   $perm = &drupal_static(__FUNCTION__, array());
 
@@ -1306,21 +1189,36 @@ function og_user_access($string, $account = NULL) {
     $account = $user;
   }
 
-  // User #1 has all privileges:
+  // User #1 has all privileges.
   if ($account->uid == 1) {
     return TRUE;
   }
+  
+  // Group member has all privileges.
+  $group = node_load($nid);
+  if ($group->uid == $account->uid) {
+    return TRUE;
+  }  
 
   // To reduce the number of SQL queries, we cache the user's permissions
-  // in a static variable.
-  if (!isset($perm[$account->uid])) {
-    $role_permissions = user_role_permissions($account->roles);
-
+  // in a static variable, if the user is authenticated.
+  if (!isset($perm[$account->uid])) {    
+    $og_roles = og_get_group_roles($nid);
+    $user_groups = og_get_groups('user', $account);
+    $role_permissions = og_user_role_permissions($og_roles);
+  
     $perms = array();
     foreach ($role_permissions as $one_role) {
       $perms += $one_role;
+    }    
+    if (in_array($nid, $user_groups)) {
+      $perm[$account->uid] = $perms;            
     }
-    $perm[$account->uid] = $perms;
+    else {
+      // TODO: Anonymous user.
+      
+    }
+
   }
 
   return isset($perm[$account->uid][$string]);
@@ -1382,6 +1280,36 @@ function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission
 function og_get_group_default_roles($nid) {
   return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid AND (name = 'anonymous' OR name = 'authenticated')", array(':nid' => $nid))->fetchAllKeyed();
 }
+
+/**
+ * Get all roles ID of a group.
+ *
+ * @param $nid
+ *   The group ID.
+ * @return
+ *   A keyed array with "anonymous" and "authenticaed".
+ */
+function og_get_group_roles($nid) {
+  return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid", array(':nid' => $nid))->fetchAllKeyed();
+}
+
+/**
+ * Get all the users with certain roles in a group.
+ *
+ * @param $nid
+ *   The group node ID.
+ * @param $roles
+ *   Array with the roles to query.
+ */
+function og_get_users_by_roles($nid, $roles = array()) {
+  $query = db_select('og_users_roles', 'og_users_roles');
+  return $query->fields('og_users_roles', array('uid'))
+    ->condition('nid', $nid)
+    ->condition('role', $roles, 'IN')
+    ->execute()
+    ->fetchAll();
+}
+
 
 /**
  * Fetch a user role from database.
