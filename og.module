@@ -1038,6 +1038,7 @@ function og_elements_process($element, &$form_state, $form) {
   // The group options presented to the user.
   $options = array();
   if ($opt_group) {
+    // Show "My groups" and "Other groups".
     $groups_count = count($content_groups['content groups']) + count($content_groups['other groups']);
     if (!empty($content_groups['content groups'])) {
       $options += array(t('My groups') => $content_groups['content groups']);
@@ -1048,10 +1049,16 @@ function og_elements_process($element, &$form_state, $form) {
     $type = 'select';
   }
   else {
+    // Show only "My groups".
     $groups_count = count($content_groups['content groups']);
     $options = $content_groups['content groups'];
     // Show a select list if their are a minimum of groups.
-    $type = $groups_count >= $element['#minimum_for_select_list'] ? 'select' : 'checkboxes';
+    if ($field['cardinality'] == 1) {
+      $type = 'radios';
+    }
+    else {
+      $type = $groups_count >= $element['#minimum_for_select_list'] ? 'select' : 'checkboxes';
+    }
   }
 
   $element[$field_key] = array(

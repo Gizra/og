@@ -36,9 +36,9 @@ function hook_og_access($op, $node, $acting_user, $account = NULL) {
       // Get the first node group this group post belongs to.
       $gids = og_get_groups('node', $node);
       $group = node_load($gids[0]);
-      if (!empty($group->data['show_dates'])) {
+      if (!empty($group->data['show day'])) {
         $today = date('N');
-        if ($group->data['show_dates'] == $today) {
+        if ($group->data['show day'] == $today) {
           return OG_ACCESS_ALLOW;
         }
         else {

@@ -118,13 +118,11 @@ function og_confirm_unsubscribe_submit($form, &$form_state) {
  * Add users to group form.
  */
 function og_add_users($form, &$form_state, $group_node) {
-  $form['og_names'] = array(
-    '#type' => 'textarea',
+  $form['og_add_user'] = array(
+    '#type' => 'textfield',
     '#title' => t('List of users'),
-    '#rows' => 5,
-    '#cols' => 70,
-    // '#autocomplete_path' => 'user/autocomplete',
-    '#description' => t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.'),
+    '#autocomplete_path' => 'user/autocomplete',
+    '#description' => t('Add a user to add to the group @group.', array('@group' => $group_node->title)),
     '#element_validate' => array('og_add_users_og_names_validate'),
   );
   $form['op'] = array('#type' => 'submit', '#value' => t('Add users'));
@@ -135,21 +133,10 @@ function og_add_users($form, &$form_state, $group_node) {
 /**
  * Validate handler; Add users to group.
  */
-function og_add_users_og_names_validate($form, &$form_state) {
-  $names = explode(',', $form_state['values']['og_names']);
-  foreach ($names as $name) {
-    $account = user_load(array('name' => trim($name)));
-    if (isset($account->uid)) {
-      $accounts[] = $account;
-      $uids[] = $account->uid;
-    }
-    else {
-      $bad[] = check_plain($name);
-      $err = TRUE;
-    }
-  }
-  if (isset($err)) {
-    form_set_error('og_names', format_plural(count($bad), 'Unrecognized name: %bad.', 'Unrecognized names: %bad.', array('%bad' => implode(', ', $bad))));
+function og_add_users_validate($form, &$form_state) {
+  $account = user_load_by_name($form_state['values']['og_add_user']);
+  if (!$account) {
+    form_set_error('og_add_user', t('You have entered an invalid user name.'));
   }
 }
 
@@ -157,16 +144,10 @@ function og_add_users_og_names_validate($form, &$form_state) {
  * Submit handler; Add users to group.
  */
 function og_add_users_submit($form, &$form_state) {
-  // Safest option is to do a select, filter existing members, then insert.
-  $names = explode(',', $form_state['values']['og_names']);
-  foreach ($names as $name) {
-    $account = user_load(array('name' => trim($name)));
-    if ($account->uid) {
-      $accounts[] = $account;
-    }
-  }
-  foreach ($accounts as $account) {
-    og_save_subscription($form_state['values']['gid'], $account->uid, array('is_active' => 1));
-  }
-  drupal_set_message(format_plural(count($accounts), '1 user added to the group.', '@count users added to the group.'));
+  $group = array(
+    'value' => $form_state['values']['gid'],
+    'state' => OG_STATE_ACTIVE,
+  );
+
+  og_subscribe_user(array($group));
 }
