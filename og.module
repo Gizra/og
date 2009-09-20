@@ -755,7 +755,7 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
 
   // Will be used later to keep only groups that are not yet associated with the
   // group.
-  $existing_gids = og_get_groups($object);
+  $existing_gids = og_get_groups($obj_type, $object);
 
   // Allow other modules to change the subscribed groups.
   drupal_alter('og_set_association', $groups, $obj_type, $object);
