@@ -343,7 +343,7 @@ function og_og_access($op, $acting_user, $node, $account) {
     else {
       // We don't have a context, so we need to get all the permissions
       // of all the groups the user and the group post are members of.
-      $groups = array_diff(array_keys(og_get_groups($acting_user)), array_keys(og_get_groups($node)));
+      $groups = array_diff(array_keys(og_get_groups('user', $acting_user)), array_keys(og_get_groups('node', $node)));
       foreach ($groups as $gid) {
         $user_roles = og_get_user_roles($gid, $acting_user->uid);
         $group = og_get_group($gid);
@@ -476,12 +476,17 @@ function og_delete_group($nid) {
 /**
  * Get the groups a content is associated with.
  *
+ * @param $obj_type
+ *   The object type (e.g. "node" or "user").
  * @param $object
  *   The object can be a user, node or any fieldable entity.
  * @return
  *  An array with the group, or an empty array.
  */
-function og_get_groups($object) {
+function og_get_groups($obj_type, $object) {
+  // Load object to get the fields.
+  $object = call_user_func($obj_type . '_load', $object);
+    
   $groups = array();
   $langcode = FIELD_LANGUAGE_NONE;
   if (!empty($object->{OG_AUDIENCE_FIELD}[$langcode])) {
@@ -704,11 +709,7 @@ function og_subscribe_user($groups = array(), $account = NULL, $replace = FALSE)
     global $user;
     $account = $user;
   }
-  // FIXME: Why don't the field appear on global?
-  $account = user_load($account->uid);
   og_set_association('user', $account, $groups, $replace);
-
-  og_rules_invoke_event();
 }
 
 /**
@@ -726,8 +727,6 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
   }
 
   og_delete_association('user', $account, $gids);
-
-  og_rules_invoke_event();
 }
 
 /**
@@ -747,6 +746,9 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  *   of the user.
  */
 function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE) {
+  // Load object to get the fields.
+  $object = call_user_func($obj_type . '_load', $object);
+    
   $op = empty($object->og_audience) ? 'insert' : 'update';
   if ($replace) {
     unset($object->og_audience);
@@ -788,6 +790,9 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
  *   Array with the group IDs to delete.
  */
 function og_delete_association($obj_type, $object, $gids = array()) {
+  // Load object to get the fields.
+  $object = call_user_func($obj_type . '_load', $object);
+  
   // Indicate if the object was changed, and needs to be saved.
   $save = FALSE;
   
@@ -920,9 +925,9 @@ function og_determine_context_by_node($node, $account = NULL) {
   if (og_is_group_type($node->type)) {
     $group_node = $node;
   }
-  elseif (og_is_group_post_type($node->type) && ($groups = og_get_groups($node))) {
+  elseif (og_is_group_post_type($node->type) && ($groups = og_get_groups('node', $node))) {
 
-    if ($user_groups = og_get_groups($account)) {
+    if ($user_groups = og_get_groups('user', $account)) {
       $gid = current(array_intersect(array_keys($groups), array_keys($user_groups)));
     }
 
@@ -1073,28 +1078,30 @@ function og_allowed_values($field, $account = NULL) {
   //FIXME: Remove after I find why fields don't appear.
   $account = user_load($account->uid);
 
-  $allowed_values[$field['field_name']] = og_get_groups_for_form($account);
+  $allowed_values[$field['field_name']] = og_get_groups_for_form('user', $account);
   return $allowed_values[$field['field_name']];
 }
 
 /**
  * Get the groups a content belongs to - ready to be used in a form element.
  *
- * @param $groups
- *   An array of group objects.
+ * @param $obj_type
+ *   The object type (e.g. "node" or "user").
+ * @param $object
+ *   The object can be a user, node or any fieldable entity.
  * @return
  *   An array keyed by "content groups" and "other groups". Inside them there are
  *   the group's node ID and the sanitized group's name.
  *
  * @see og_get_groups_of_content().
  */
-function og_get_groups_for_form($object) {
+function og_get_groups_for_form($obj_type, $object) {
   $return = array('content groups' => array(), 'other groups' => array());
   // Get all the existing groups.
   if ($all_groups = og_get_all_groups_for_form()) {
 
     // Get the groups belonging to the content.
-    $content_groups = og_get_groups($object);
+    $content_groups = og_get_groups($obj_type, $object);
 
     // TODO: Is it faster to use array_diff & array_intersect?
     foreach ($all_groups as $nid => $name) {
