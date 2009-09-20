@@ -118,8 +118,8 @@ function og_field_is_empty($item, $field) {
 function og_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
   // Allow other modules to alter the data.
   foreach ($items as &$item) {
-  	$item['state'] = ''; 
-  	$item['data'] = array();
+  	$item['state'] = !empty($item['state']) ? $item['state'] : ''; 
+  	$item['data'] = !empty($item['data']) ? $item['data'] : array();
   	$alter = array('state' => $item['state'], 'data' => $item['data']);
   	drupal_alter('og_field_insert', $alter, $obj_type, $object, $field, $instance, $langcode, $items);
   	$item['state'] = $alter['state'];

@@ -36,8 +36,6 @@ function og_subscribe($node, $uid = NULL) {
       $account = user_load($uid);
     }
     
-    //FIXME: Remove
-    $account = user_load($account->uid);
     // Check user isn't already subscribed.
     if (in_array($node->nid, og_get_groups($account))) {
       drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title)));
