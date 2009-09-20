@@ -3,8 +3,199 @@
 
 /**
  * @file
- * Admin settings for the organic groups UI module.
+ * Admin settings for the organic groups module.
  */
+
+/**
+ * Menu callback: administer roles.
+ *
+ * @ingroup forms
+ * @see og_user_admin_role_validate()
+ * @see og_user_admin_role_submit()
+ * @see theme_og_user_admin_new_role()
+ */
+function og_user_admin_role() {
+  $rid = arg(5);
+  if ($rid) {
+    if ($rid == DRUPAL_ANONYMOUS_RID || $rid == DRUPAL_AUTHENTICATED_RID) {
+      drupal_goto('admin/config/people/roles');
+    }
+    // Display the edit role form.
+    $role = db_query('SELECT * FROM {og_role} WHERE rid = :rid', array(':rid' => $rid))->fetchObject();
+    $form['name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Role name'),
+      '#default_value' => $role->name,
+      '#size' => 30,
+      '#required' => TRUE,
+      '#maxlength' => 64,
+      '#description' => t('The name for this role. Example: "moderator", "editorial board", "site architect".'),
+    );
+    $form['rid'] = array(
+      '#type' => 'value',
+      '#value' => $rid,
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save role'),
+    );
+    $form['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete role'),
+    );
+  }
+  else {
+    $form['name'] = array(
+      '#type' => 'textfield',
+      '#size' => 32,
+      '#maxlength' => 64,
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add role'),
+    );
+    $form['#submit'][] = 'og_user_admin_role_submit';
+    $form['#validate'][] = 'og_user_admin_role_validate';
+  }
+  return $form;
+}
+
+function og_user_admin_role_validate($form, &$form_state) {
+  if ($form_state['values']['name']) {
+    if ($form_state['values']['op'] == t('Save role')) {
+      $role = og_user_role_load($form_state['values']['name']);
+      if ($role && $role->rid != $form_state['values']['rid']) {    
+        form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
+      }
+    }
+    elseif ($form_state['values']['op'] == t('Add role')) {
+      if (og_user_role_load($form_state['values']['name'])) {
+        form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
+      }
+    }
+  }
+  else {
+    form_set_error('name', t('You must specify a valid role name.'));
+  }
+}
+
+function og_user_admin_role_submit($form, &$form_state) {
+  $role = (object)$form_state['values'];
+  if ($form_state['values']['op'] == t('Save role')) {
+    og_user_role_save($role);
+    drupal_set_message(t('The role has been renamed.'));
+  }
+  elseif ($form_state['values']['op'] == t('Delete role')) {
+    og_user_role_delete($form_state['values']['rid']);
+    drupal_set_message(t('The role has been deleted.'));
+  }
+  elseif ($form_state['values']['op'] == t('Add role')) {
+    og_user_role_save($role);
+    drupal_set_message(t('The role has been added.'));
+  }
+  $form_state['redirect'] = 'admin/config/people/roles';
+  return;
+}
+
+/**
+ * Theme the new role form.
+ *
+ * @ingroup themeable
+ */
+function theme_og_user_admin_new_role($form) {
+  $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
+  foreach (og_user_roles() as $rid => $name) {
+    $edit_permissions = l(t('edit permissions'), 'admin/config/people/permissions/' . $rid);
+    if (!in_array($rid, array(DRUPAL_ANONYMOUS_RID, DRUPAL_AUTHENTICATED_RID))) {
+      $rows[] = array($name, l(t('edit role'), 'admin/config/people/roles/edit/' . $rid), $edit_permissions);
+    }
+    else {
+      $rows[] = array($name, t('locked'), $edit_permissions);
+    }
+  }
+  $rows[] = array(drupal_render($form['name']), array('data' => drupal_render($form['submit']), 'colspan' => 2));
+
+  $output = drupal_render_children($form);
+  $output .= theme('table', $header, $rows);
+
+  return $output;
+}
+
+
+/**
+ * Menu callback: administer permissions.
+ *
+ * @ingroup forms
+ * @see user_admin_permissions_submit()
+ * @see theme_user_admin_permissions()
+ */
+function og_user_admin_permissions($form, $form_state, $rid = NULL) {
+
+  // Retrieve role names for columns.
+  $role_names = og_user_roles();
+  if (is_numeric($rid)) {
+    $role_names = array($rid => $role_names[$rid]);
+  }
+  // Fetch permissions for all roles or the one selected role.
+  $role_permissions = og_user_role_permissions($role_names);
+
+  // Store $role_names for use when saving the data.
+  $form['role_names'] = array(
+    '#type' => 'value',
+    '#value' => $role_names,
+  );
+  // Render role/permission overview:
+  $options = array();
+  $hide_descriptions = !system_admin_compact_mode();
+  foreach (module_implements('og_permission') as $module) {
+    if ($permissions = module_invoke($module, 'og_permission')) {
+      $form['permission'][] = array('#markup' => $module, '#id' => $module);
+      
+      foreach ($permissions as $perm => $perm_item) {
+        $options[$perm] = '';
+        $form['permission'][$perm] = array(
+          '#type' => 'item',
+          '#markup' => $perm_item['title'],
+          '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
+        );
+        foreach ($role_names as $rid => $name) {
+          // Builds arrays for checked boxes for each role
+          if (isset($role_permissions[$rid][$perm])) {
+            $status[$rid][] = $perm;
+          }
+        }
+      }
+    }
+  }
+
+  // Have to build checkboxes here after checkbox arrays are built
+  foreach ($role_names as $rid => $name) {
+    $form['checkboxes'][$rid] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => isset($status[$rid]) ? $status[$rid] : array());
+    $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
+  }
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
+
+  $form['#attached']['js'][] = drupal_get_path('module', 'user') . '/user.permissions.js';
+
+  return $form;
+}
+
+/**
+ * Save permissions selected on the administer permissions page.
+ *
+ * @see og_user_admin_permissions()
+ */
+function og_user_admin_permissions_submit($form, &$form_state) {
+  foreach ($form_state['values']['role_names'] as $rid => $name) {
+    og_user_role_change_permissions($rid, $form_state['values'][$rid]);
+  }
+
+  drupal_set_message(t('The changes have been saved.'));
+
+  // Clear the cached pages and blocks.
+  cache_clear_all();
+}
+
 
 /**
  * Menu callback; Organic groups settings form.
