@@ -262,11 +262,13 @@ function og_node_insert($node) {
   	global $user;
     // Add group.
     og_set_group($node->nid);
-    // Subscribe the user to the group.
-    og_subscribe_user(array($node->nid), $user);
+    // Subscribe the node author to the group.
+    $account = user_load($node->uid);
+    
+    og_subscribe_user(array($node->nid), $account);
     
     // Set the user a group manager.
-    og_set_user_roles($node->nid, $user->uid, array('manager'));
+    og_set_user_roles($node->nid, $account->uid, array('manager'));
   }
 }
 
@@ -743,12 +745,13 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  *   of the user.
  */
 function og_set_association($obj_type, $object, $gids = array(), $op = '', $replace = FALSE) {
+	$op = empty($object->og_audience) ? 'insert' : 'update';
   if ($replace) {
     unset($object->og_audience);
   }
   
   // Keep only groups that are not yet associated with the group.
-  $gids = array_diff(og_get_groups($object), $gids);
+  $gids = array_diff($gids, og_get_groups($object));
   
   // Allow other modules to change the subscribed groups.
   drupal_alter('og_set_association', $gids, $obj_type, $object, $op);
@@ -757,8 +760,7 @@ function og_set_association($obj_type, $object, $gids = array(), $op = '', $repl
     $object->og_audience[FIELD_LANGUAGE_NONE][] = array('value' => $gid);
   }
   
-  //TODO: We might need to attach_insert?
-  field_attach_update($obj_type, $object);    
+  call_user_func('field_attach_' . $op, $obj_type, $object);
 }
 
 

@@ -12,7 +12,8 @@
  * @param $node
  *   The group node object.
  * @param $uid
- *   Optional; The user ID of the subscribing user.
+ *   Optional; The user ID of the subscribing user. If empty the current user
+ *   will be used.
  */
 function og_subscribe($node, $uid = NULL) {
   if (og_is_group_type($node->type)) {
