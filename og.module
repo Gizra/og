@@ -35,9 +35,14 @@ define('OG_DELETE_MOVE_NODES', 2);
 define('OG_DELETE_MOVE_NODES_MEMBERSHIPS', 3);
 
 /**
- * Define group post states.
+ * Define active group post states.
  */
 define('OG_STATE_ACTIVE', 'active');
+
+/**
+ * Define pending group post states. The user is subscribed to the group but 
+ * isn't an active member yet.
+ */
 define('OG_STATE_PENDING', 'pending');
 
 /**
@@ -265,7 +270,7 @@ function og_node_insert($node) {
     // Subscribe the node author to the group.
     $account = user_load($node->uid);
 
-    og_subscribe_user(array($node->nid), $account);
+    og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
 
     // Set the user a group manager.
     og_set_user_roles($node->nid, $account->uid, array('manager'));
