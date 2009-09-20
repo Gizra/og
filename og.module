@@ -1074,10 +1074,6 @@ function og_allowed_values($field, $account = NULL) {
 
     $account = $user;
   }
-
-  //FIXME: Remove after I find why fields don't appear.
-  $account = user_load($account->uid);
-
   $allowed_values[$field['field_name']] = og_get_groups_for_form('user', $account);
   return $allowed_values[$field['field_name']];
 }

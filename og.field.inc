@@ -132,7 +132,7 @@ function og_field_insert($obj_type, $object, $field, $instance, $langcode, &$ite
  */
 function og_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
   foreach ($items as &$item) {
-    //  FIXME: pass the data and state values.
+    // FIXME: pass the data and state values.
     $item['state'] = '';
     $item['data'] = array();
 
