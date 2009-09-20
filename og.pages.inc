@@ -122,7 +122,7 @@ function og_add_users($form, &$form_state, $group_node) {
     '#type' => 'textfield',
     '#title' => t('Add user'),
     '#autocomplete_path' => 'user/autocomplete',
-    '#description' => t('Add a user to add to the group %group.', array('%group' => $group_node->title)),
+    '#description' => t('Add a user to group %group.', array('%group' => $group_node->title)),
     '#element_validate' => array('og_add_users_og_names_validate'),
   );
   $form['op'] = array('#type' => 'submit', '#value' => t('Add users'));
