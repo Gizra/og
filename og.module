@@ -264,7 +264,6 @@ function og_node_type_delete($info) {
 */
 function og_node_insert($node) {
   if (og_is_group_type($node->type)) {
-    global $user;
     // Add group.
     og_set_group($node->nid);
     // Subscribe the node author to the group.
@@ -485,7 +484,7 @@ function og_delete_group($nid) {
  */
 function og_get_groups($obj_type, $object) {
   // Load object to get the fields.
-  $object = call_user_func($obj_type . '_load', $object);
+  $object = og_load_object($obj_type, $object);
     
   $groups = array();
   $langcode = FIELD_LANGUAGE_NONE;
@@ -747,7 +746,7 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  */
 function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE) {
   // Load object to get the fields.
-  $object = call_user_func($obj_type . '_load', $object);
+  $object = og_load_object($obj_type, $object);
     
   $op = empty($object->og_audience) ? 'insert' : 'update';
   if ($replace) {
@@ -1127,4 +1126,21 @@ function og_rules_invoke_event() {
   if (module_exists('rules')) {
     // Invoke a rule.
   }
+}
+
+/**
+ * ReReturn a re-loaded object with its fields.
+ * 
+ * This is needed only if a user account is passed, as global $user is only a 
+ * partial user object.
+ * @param $obj_type
+ *   The object type.
+ * @param $object
+ *   The object.
+ */
+function og_load_object($obj_type, $object) {
+  if ($obj_type == 'user') {
+    $object = user_load($object->uid);
+  }
+  return $object;
 }
