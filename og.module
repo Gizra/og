@@ -378,31 +378,11 @@ function og_og_permission() {
  * Implement hook_og_access().
  */
 function og_og_access($op, $node, $acting_user, $account) {
-  // Get the roles of the acting user.
   if (og_is_group_type($node->type)) {
-    // Get the group permissions.
-    $group = og_get_group($node->nid);
     if (og_user_access($node->nid, $op, $acting_user)) {
       return OG_ACCESS_ALLOW;
     }
   }
-  elseif (og_is_group_post_type($node->type)) {
-    // Try to get the context.
-    if ($context_gid = og_get_context()) {
-      $group = og_get_group($context_gid);
-    }
-    else {
-      // We don't have a context, so we need to get all the permissions
-      // of all the groups the user and the group post is members of.
-      $gids = array_diff(array_keys(og_get_groups('user', $acting_user)), array_keys(og_get_groups('node', $node)));
-      foreach ($gids as $gid) {
-        if (og_user_access($gid, $op, $acting_user)) {
-          return OG_ACCESS_ALLOW;
-        }
-      }
-    }
-  }
-
   return OG_ACCESS_IGNORE;
 }
 
@@ -410,12 +390,39 @@ function og_og_access($op, $node, $acting_user, $account) {
  * Implement hook_node_access()
  */
 function og_node_access($node, $op, $account) {
-  // We don't check create since anyway a non-subscribed and non-privileged user
-  // will not be able to post to a group.
-  if ($op != 'create' && og_get_group_type($node->type) != 'omitted') {
-    // Node is a group or group post type.
-    // return og_access($op, $node, NULL, $account);
+  // TODO: Deal with create group inside group.  
+  $type = $op == 'create' ? $node : $node->type;
+  if (og_get_group_type($type) != 'omitted') {
+    if ($op == 'create') {
+      
+    }
+    else {
+      // Operation should be the same as the permission name.
+      $op = $op . ' ' .  $node->type .' content';
+      // Node argument is a full node object.
+      if (og_is_group_post_type($node->nid) == 'group') {
+        if (og_user_access($node->nid, $op, $account)) {
+          return NODE_ACCESS_ALLOW;
+        }    
+      }
+      elseif ($context_gid = og_get_context()) {
+        if (og_user_access($context_gid, $op, $account)) {
+          return NODE_ACCESS_ALLOW;
+        }
+      }
+      else {
+        // We don't have a context, so we need to get all the permissions
+        // of all the groups the user and the group post is members of.
+        $gids = array_diff(array_keys(og_get_groups('user', $account)), array_keys(og_get_groups('node', $node)));
+        foreach ($gids as $gid) {
+          if (og_user_access($gid, $op, $account)) {
+            return NODE_ACCESS_ALLOW;
+          }
+        }
+      }
+    }
   }
+  return NODE_ACCESS_IGNORE;
 }
 
 /**
@@ -921,14 +928,20 @@ function og_get_context() {
  *
  * @param $node
  *   The group node object that should be set as the context.
+ * @param $determine
+ *   If set to TRUE, then try to determine the context using the menu system.
  * @return
  *   The group node ID if set.
  */
-function og_set_context($node = NULL) {
+function og_set_context($node = NULL, $determine = FALSE) {
   $gid = &drupal_static(__FUNCTION__, '');
 
   if ($gid && empty($node)) {
     return $gid;
+  }
+  
+  if ($determine) {
+    $node = og_determine_context();
   }
 
   if (!empty($node) && og_is_group_type($node->type)) {
