@@ -1199,25 +1199,27 @@ function og_user_access($nid, $string, $account = NULL) {
 
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable, if the user is authenticated.
-  if (!isset($perm[$nid][$account->uid])) {    
-    $og_roles = og_get_group_roles($nid);
+  if (!isset($perm[$nid][$account->uid])) {
     $user_groups = og_get_groups('user', $account);
-    $role_permissions = og_user_role_permissions($og_roles);
-  
-    $perms = array();
-    foreach ($role_permissions as $one_role) {
-      $perms += $one_role;
-    }    
-    if (in_array($nid, $user_groups)) {
-      $perm[$nid][$account->uid] = $perms;            
+    if (!in_array($nid, $user_groups)) {
+      // Anonymous member or a pending member. We keep only the
+      $roles = og_get_group_default_roles($nid);
+      // Keep only the anonymous role.
+      $roles = array($roles['anonymous']);
     }
     else {
-      // TODO: Anonymous member.
-      
+      // Get the roles assigned to the user in the group.
+      $roles = og_get_user_roles($nid, $account->uid);
     }
-
-  }
-
+    
+    $role_permissions = og_user_role_permissions($roles);
+    $perms = array();
+    foreach ($role_permissions as $one_role) {
+      $perms += $one_role;        
+     
+      $perm[$nid][$account->uid] = $perms;
+    }
+  }   
   return isset($perm[$nid][$account->uid][$string]);
 }
 
@@ -1288,6 +1290,20 @@ function og_get_group_default_roles($nid) {
  */
 function og_get_group_roles($nid) {
   return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid", array(':nid' => $nid))->fetchAllKeyed();
+}
+
+/**
+ * Get all roles ID of a user in a certain group.
+ *
+ * @param $nid
+ *   The group ID.
+ * @param $uid
+ *   The user ID.
+ * @return
+ *   Array with the role IDs of the user.
+ */
+function og_get_user_roles($nid, $uid) {
+  return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchAllKeyed();
 }
 
 /**
