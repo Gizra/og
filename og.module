@@ -319,9 +319,6 @@ function og_node_insert($node) {
 
     og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
 
-    // Set the user a group manager.
-    og_set_user_roles($node->nid, $account->uid, array('manager'));
-
     // Create default roles.
     $role = new stdClass;
     $role->name = 'anonymous';
@@ -330,7 +327,7 @@ function og_node_insert($node) {
 
     unset($role->rid);
     $role->name = 'authenticated';
-    og_user_role_save($role);
+    og_user_role_save($role);    
   }
 }
 
@@ -1202,7 +1199,7 @@ function og_user_access($nid, $string, $account = NULL) {
 
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable, if the user is authenticated.
-  if (!isset($perm[$account->uid])) {    
+  if (!isset($perm[$nid][$account->uid])) {    
     $og_roles = og_get_group_roles($nid);
     $user_groups = og_get_groups('user', $account);
     $role_permissions = og_user_role_permissions($og_roles);
@@ -1212,16 +1209,16 @@ function og_user_access($nid, $string, $account = NULL) {
       $perms += $one_role;
     }    
     if (in_array($nid, $user_groups)) {
-      $perm[$account->uid] = $perms;            
+      $perm[$nid][$account->uid] = $perms;            
     }
     else {
-      // TODO: Anonymous user.
+      // TODO: Anonymous member.
       
     }
 
   }
 
-  return isset($perm[$account->uid][$string]);
+  return isset($perm[$nid][$account->uid][$string]);
 }
 
 

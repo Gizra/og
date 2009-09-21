@@ -88,11 +88,8 @@ function og_schema() {
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
-        'description' => 'Unique role name.',
+        'description' => 'Unique role name per group.',
       ),
-    ),
-    'unique keys' => array(
-      'name' => array('name'),
     ),
     'primary key' => array('rid'),
   );
