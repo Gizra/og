@@ -17,7 +17,7 @@
 function og_user_admin_role($form, $form_state, $node) {
   if (og_is_group_type($node->type)) {
     $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
-        
+
     $rid = arg(6);
     if ($rid) {
       $og_roles = og_get_group_default_roles($node->nid);
@@ -74,7 +74,7 @@ function og_user_admin_role_validate($form, &$form_state) {
   if ($form_state['values']['name']) {
     if ($form_state['values']['op'] == t('Save role')) {
       $role = og_user_role_load($form_state['values']['name'], $form_state['values']['name']);
-      if ($role && $role->rid != $form_state['values']['rid']) {    
+      if ($role && $role->rid != $form_state['values']['rid']) {
         form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
       }
     }
@@ -116,9 +116,9 @@ function theme_og_user_admin_new_role($form) {
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
   // The group ID.
   $gid = $form['nid']['#value'];
-  
+
   $og_roles = og_get_group_default_roles($gid);
-  
+
   foreach (og_user_roles($gid) as $rid => $name) {
     $edit_permissions = l(t('edit permissions'), 'og/' . $gid . '/admin/people/permissions/' . $rid);
     if (!in_array($rid, $og_roles)) {
@@ -147,7 +147,7 @@ function theme_og_user_admin_new_role($form) {
 function og_user_admin_permissions($form, $form_state, $node, $rid = NULL) {
   if (og_is_group_type($node->type)) {
     $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
-    
+
     // Retrieve role names for columns.
     $role_names = og_user_roles($node->nid);
     if (!empty($rid)) {
@@ -155,7 +155,7 @@ function og_user_admin_permissions($form, $form_state, $node, $rid = NULL) {
     }
     // Fetch permissions for all roles or the one selected role.
     $role_permissions = og_user_role_permissions($role_names);
-  
+
     // Store $role_names for use when saving the data.
     $form['role_names'] = array(
       '#type' => 'value',
@@ -167,7 +167,7 @@ function og_user_admin_permissions($form, $form_state, $node, $rid = NULL) {
     foreach (module_implements('og_permission') as $module) {
       if ($permissions = module_invoke($module, 'og_permission')) {
         $form['permission'][] = array('#markup' => $module, '#id' => $module);
-        
+
         foreach ($permissions as $perm => $perm_item) {
           $options[$perm] = '';
           $form['permission'][$perm] = array(
@@ -184,14 +184,14 @@ function og_user_admin_permissions($form, $form_state, $node, $rid = NULL) {
         }
       }
     }
-  
+
     // Have to build checkboxes here after checkbox arrays are built
     foreach ($role_names as $rid => $name) {
       $form['checkboxes'][$rid] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => isset($status[$rid]) ? $status[$rid] : array());
       $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
     }
     $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
-      
+
     return $form;
   }
   else {
@@ -225,7 +225,7 @@ function og_user_admin_permissions_submit($form, &$form_state) {
 function theme_og_user_admin_permissions($form) {
     // The group ID.
   $nid = $form['nid']['#value'];
-  
+
   $roles = og_user_roles($nid);
   foreach (element_children($form['permission']) as $key) {
     $row = array();
@@ -261,12 +261,12 @@ function theme_og_user_admin_permissions($form) {
  */
 function og_admin_settings() {
   $form['og_settings'] = _og_content_types();
-  
+
   $form['og_settings']['group_details'] = array(
-    '#type' => 'fieldset', 
+    '#type' => 'fieldset',
     '#title' => t('Group details'),
-    '#description' => t('The default behavior of new groups.'),  
-    '#collapsible' => TRUE, 
+    '#description' => t('The default behavior of new groups.'),
+    '#collapsible' => TRUE,
     '#collapsed' => TRUE
   );
   // Groups directory visibility
@@ -277,13 +277,13 @@ function og_admin_settings() {
     t('Group creator chooses whether her group appears in the directory. Defaults to <em>not in directory</em>.'),
   );
   $form['og_settings']['group_details']['og_visibility_directory'] = array(
-    '#type' => 'radios', 
-    '#title' => t('Groups directory control'), 
-    '#default_value' => variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_TRUE), 
-    '#description' =>t('Site admins always see the checkbox for adding a group to the <em>groups directory</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'), 
+    '#type' => 'radios',
+    '#title' => t('Groups directory control'),
+    '#default_value' => variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_TRUE),
+    '#description' =>t('Site admins always see the checkbox for adding a group to the <em>groups directory</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'),
     '#options' => $options
   );
-  
+
   // Groups registration visibility.
   $options = array(
     t("New groups don't appear on the registration form. Administrators control the form exclusively."),
@@ -292,28 +292,28 @@ function og_admin_settings() {
     t('Group creator chooses whether her group appears on the registration form. Defaults to <em>not on form</em>.'),
   );
   $form['og_settings']['group_details']['og_visibility_registration'] = array(
-    '#type' => 'radios', 
-    '#title' => t('Registration form control'), 
-    '#default_value' => variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE), 
-    '#description' =>t('OG admins always see the checkbox for adding a group to the <em>registration form</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'), 
+    '#type' => 'radios',
+    '#title' => t('Registration form control'),
+    '#default_value' => variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE),
+    '#description' =>t('OG admins always see the checkbox for adding a group to the <em>registration form</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'),
     '#options' => $options
   );
 
   // Audience form element
   $form['og_settings']['group_details']['og_audience'] = array(
-    '#type' => 'checkbox', 
-    '#title' => t('Audience form element'), 
-    '#default_value' => variable_get('og_audience', TRUE), 
+    '#type' => 'checkbox',
+    '#title' => t('Audience form element'),
+    '#default_value' => variable_get('og_audience', TRUE),
     '#description' => t('Show a form element for the user to choose the "Audience" of the content. This enables the member to place her post into multiple groups. If unchecked, simplify the user interface by omitting the audience form element and assume the user wants to post into the current group. This simplification only applies to new nodes, and not to edits of existing content. Group administrators always see the audience form element.')
   );
-  
+
   // audience required
   $options = array(t('Optional'), t('Required'));
   $form['og_settings']['group_details']['og_audience_required'] = array(
-    '#type' => 'radios', 
-    '#title' => t('Audience required'), 
-    '#default_value' => variable_get('og_audience_required', 0), 
-    '#options' => $options, 
+    '#type' => 'radios',
+    '#title' => t('Audience required'),
+    '#default_value' => variable_get('og_audience_required', 0),
+    '#options' => $options,
     '#description' => t('Do you require that all (non administrator) posts be affiliated with a group? Note that changing this setting will affect existing posts when they are edited.')
   );
   unset($options);
@@ -329,33 +329,33 @@ function og_admin_settings() {
  */
 function _og_content_types() {
   $form = array();
-  
+
   // Content types.
   $is_configured = count(og_get_node_type_by_og_type(array('group'))) && count(og_get_node_type_by_og_type(array('group post')));
   if (!$is_configured) {
     form_set_error('content_types_table', t('You must designate at least one content type to act as a group node and another as a group post. <a href="!create">Create new content type</a> if needed.', array('!create' => url('admin/content/types/add', array('query' => drupal_get_destination())))));
-  }  
-  
+  }
+
   $form['content_types'] = array(
-    '#type' => 'fieldset', 
+    '#type' => 'fieldset',
     '#title' => t('Content types'),
     '#description' => t('You may <a href="@content-types-add">create new content types</a> as needed. Note that you may have multiple types acting as groups and multiple types are allowed as group posts.', array('@content-types-add' => url('admin/content/types/add', array('query' => drupal_get_destination())))),
-    '#collapsible' => TRUE, 
+    '#collapsible' => TRUE,
     '#collapsed' => $is_configured,
   );
-  
+
   $og_types = og_get_node_type_by_og_type();
   $node_types = node_type_get_types();
-    
+
   $header = array(t('Type'), t('Usage'), t('Operations'));
   $rows = array();
-  
+
   foreach ($og_types as $type => $usage) {
     $type_url = str_replace('_', '-', $type);
     $rows[] = array(
       $node_types[$type]->name,
       $usage,
-      l(t('Edit'), "admin/content/node-type/$type_url", array('query' => drupal_get_destination())),      
+      l(t('Edit'), "admin/content/node-type/$type_url", array('query' => drupal_get_destination())),
     );
   }
   $form['content_types']['content_types_table'] = array(
@@ -365,5 +365,5 @@ function _og_content_types() {
   );
 
   return $form;
-  
+
 }

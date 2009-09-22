@@ -68,6 +68,17 @@ define('OG_ACCESS_IGNORE', NULL);
  */
 define('OG_AUDIENCE_FIELD', 'og_audience');
 
+/**
+ * The role name of non-members.
+ */
+define('OG_ANONYMOUS_ROLE', 'anonymous member');
+
+/**
+ * The role name of members.
+ */
+define('OG_AUTHENTICATED_ROLE', 'authenticated member');
+
+
 /*******************************************************************************
  * Hook implementations
  ******************************************************************************/
@@ -323,12 +334,16 @@ function og_node_insert($node) {
 
     // Create default roles.
     $role = new stdClass;
-    $role->name = 'anonymous';
+    $role->name = OG_ANONYMOUS_ROLE;
     $role->nid = $node->nid;
     og_user_role_save($role);
 
     unset($role->rid);
-    $role->name = 'authenticated';
+    $role->name = OG_AUTHENTICATED_ROLE;
+    og_user_role_save($role);
+
+    unset($role->rid);
+    $role->name = 'admin';
     og_user_role_save($role);
   }
 }
@@ -1235,7 +1250,7 @@ function og_user_access($nid, $string, $account = NULL) {
       // Anonymous member or a pending member. We keep only the
       $roles = og_get_group_default_roles($nid);
       // Keep only the anonymous role.
-      $roles = array($roles['anonymous']);
+      $roles = array($roles[OG_ANONYMOUS_ROLE]);
     }
     else {
       // Get the roles assigned to the user in the group.
@@ -1265,37 +1280,19 @@ function og_user_access($nid, $string, $account = NULL) {
  *
  * @return
  *   An associative array with the role id as the key and the role name as
- *   value.
+ *   value. The anonymous and authenticated deault roles are on the top of the
+ *   array.
  */
 function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission = NULL) {
-  // System roles take the first two positions.
-  $og_roles = og_get_group_default_roles($nid);
-
   if (!empty($permission)) {
-    $result = db_query("SELECT r.* FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.nid = :nid ORDER BY r.name", array(':permission' => $permission, ':nid' => $nid));
+    $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.nid = :nid ORDER BY r.name", array(':permission' => $permission, ':nid' => $nid))->fetchAllKeyed();
   }
   else {
-    $result = db_query('SELECT * FROM {og_role} WHERE nid = :nid ORDER BY name', array(':nid' => $nid));
-  }
-
-  foreach ($result as $role) {
-    switch ($role->rid) {
-      // We only translate the built in role names
-      case $og_roles['anonymous']:
-        if (!$membersonly) {
-          $roles[$role->rid] = t($role->name);
-        }
-        break;
-      case $og_roles['authenticated']:
-        $roles[$role->rid] = t($role->name);
-        break;
-      default:
-        $roles[$role->rid] = $role->name;
-    }
+    $roles = db_query("SELECT rid, name FROM {og_role} WHERE nid = :nid ORDER BY name = :anon AND name = :auth AND name", array(':nid' => $nid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE))->fetchAllKeyed();
   }
 
   // Filter to remove unmatched system roles.
-  return array_filter($roles);
+  return  array_filter($roles);
 }
 
 /**
@@ -1307,7 +1304,7 @@ function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission
  *   A keyed array with "anonymous" and "authenticaed".
  */
 function og_get_group_default_roles($nid) {
-  return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid AND (name = 'anonymous' OR name = 'authenticated')", array(':nid' => $nid))->fetchAllKeyed();
+  return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid AND (name = :anon OR name = :auth)", array(':nid' => $nid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE))->fetchAllKeyed();
 }
 
 /**
