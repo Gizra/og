@@ -131,7 +131,7 @@ function og_field_update($obj_type, $object, $field, $instance, $langcode, &$ite
  ******************************************************************************/
 /**
  * Insert or update a field record.
- * 
+ *
  * @param $op
  *   The operation - "insert" or "update".
  */
@@ -145,7 +145,7 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
     drupal_alter('og_field_' . $op, $alter, $obj_type, $object, $field, $instance, $langcode, $items);
     $item['state'] = $alter['state'];
     $item['data'] = serialize($alter['data']);
-  }  
+  }
 }
 
 
@@ -188,17 +188,6 @@ function og_set_og_audince_field($bundle) {
     );
     field_create_instance($instance);
   }
-}
-
-/**
- * Return the selective state of a group node.
- *
- * @param $node
- *   The group node.
- */
-function og_get_group_selective($node) {
-  $langcode = FIELD_LANGUAGE_NONE;
-  return $node->{OG_SELECTIVE_FIELD}[$langcode][0]['value'];
 }
 
 /**

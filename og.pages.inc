@@ -41,12 +41,6 @@ function og_subscribe($node, $uid = NULL) {
       drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title)));
       drupal_goto('node/'. $node->nid);
     }
-
-    elseif (og_get_group_selective($node) >= OG_INVITE_ONLY || $node->status == 0) {
-      // Invite only group, or unpublished node.
-      drupal_access_denied();
-      exit();
-    }
     else {
       // Show the user a subscription confirmation.
       return drupal_get_form('og_confirm_subscribe', $node, $account);
@@ -63,7 +57,7 @@ function og_subscribe($node, $uid = NULL) {
 function og_confirm_subscribe($form, &$form_state, $node, $account) {
   $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
   $form['account'] = array('#type' => 'value', '#value' => $account);
-  if (og_get_group_selective($node) == OG_MODERATED) {
+  if (!og_user_access($node->nid, 'subscribe with no approval')) {
     $form['request'] = array(
       '#type' => 'textarea',
       '#title' => t('Additional details'),
@@ -78,14 +72,14 @@ function og_confirm_subscribe($form, &$form_state, $node, $account) {
  */
 function og_confirm_subscribe_submit($form, &$form_state) {
   $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
-  $gid = $form_state['values']['gid'];
+  $nid = $form_state['values']['gid'];
 
-  $node = node_load($gid);
+  $node = node_load($nid);
 
   $group = array(
-    'value' => $gid,
+    'value' => $nid,
     // Get the state of the group, and decide the user's state accordingly.
-    'state' => og_get_group_selective($node) == OG_OPEN ? OG_STATE_ACTIVE : OG_STATE_PENDING,
+    'state' => og_user_access($nid, 'subscribe with no approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING,
   );
 
   og_subscribe_user(array($group), $request);

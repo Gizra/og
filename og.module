@@ -425,7 +425,7 @@ function og_node_access($node, $op, $account) {
       // Operation should be the same as the permission name.
       $op = $op . ' ' .  $node->type .' content';
       // Node argument is a full node object.
-      if (og_is_group_post_type($node->nid) == 'group') {
+      if (og_is_group_type($node->type)) {
         if (og_user_access($node->nid, $op, $account)) {
           return NODE_ACCESS_ALLOW;
         }
@@ -961,7 +961,7 @@ function og_get_context() {
 function og_set_context($node = NULL, $determine = FALSE) {
   $gid = &drupal_static(__FUNCTION__, '');
 
-  if ($gid && empty($node)) {
+  if ($gid) {
     return $gid;
   }
 
@@ -1231,6 +1231,11 @@ function og_user_access($nid, $string, $account = NULL) {
     $account = $user;
   }
 
+  // Deny anonymous users.
+  if (!$account->uid) {
+    return FALSE;
+  }
+
   // User #1 has all privileges.
   if ($account->uid == 1) {
     return TRUE;
@@ -1250,7 +1255,7 @@ function og_user_access($nid, $string, $account = NULL) {
       // Anonymous member or a pending member. We keep only the
       $roles = og_get_group_default_roles($nid);
       // Keep only the anonymous role.
-      $roles = array($roles[OG_ANONYMOUS_ROLE]);
+      $roles = drupal_map_assoc(array($roles[OG_ANONYMOUS_ROLE]));
     }
     else {
       // Get the roles assigned to the user in the group.
