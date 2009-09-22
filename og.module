@@ -6,7 +6,6 @@
  * Enable users to create and manage groups.
  */
 
-
 // Load all Field module hooks for organic groups.
 require(drupal_get_path('module', 'og') . '/og.field.inc');
 
@@ -114,7 +113,8 @@ function og_menu() {
     'page arguments' => array(2, 3, 4),
     'access callback' => 'og_access',
     'access arguments' => array('approve membership', 2, 3),
-    'title' => 'Approve membership request'
+    'title' => 'Approve membership request',
+    'file' => 'og.pages.inc',
   );
   $items['og/deny/%node/%user/%'] = array(
     'type' => MENU_CALLBACK,
@@ -380,7 +380,11 @@ function og_og_permission() {
   return array(
     'subscribe' => array(
       'title' => t('Subscribe user to group'),
-      'description' => t("Allow user to be a member of a group."),
+      'description' => t("Allow user to be a member of a group (approval required)."),
+    ),
+    'subscribe without approval' => array(
+      'title' => t('Subscribe user to group (no approval required).'),
+      'description' => t("Allow user to be a member of a group without an approval of the group administrator."),
     ),
     'unsubscribe' => array(
       'title' => t('Unsubscribe user from group'),
@@ -1490,4 +1494,19 @@ function og_user_role_revoke_permissions($rid, array $permissions = array()) {
   // Clear the user access cache.
   drupal_static_reset('og_user_access');
   drupal_static_reset('og_user_role_permissions');
+}
+
+
+/**
+ * Get a private token used to protect links from spoofing - CSRF.
+ */
+function og_get_token($nid) {
+  return drupal_get_token($nid);
+}
+
+/**
+ * Check to see if a token value matches the specified node.
+ */
+function og_check_token($token, $seed) {
+  return drupal_get_token($seed) == $token;
 }

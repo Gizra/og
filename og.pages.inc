@@ -57,7 +57,7 @@ function og_subscribe($node, $uid = NULL) {
 function og_confirm_subscribe($form, &$form_state, $node, $account) {
   $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
   $form['account'] = array('#type' => 'value', '#value' => $account);
-  if (!og_user_access($node->nid, 'subscribe with no approval')) {
+  if (!og_user_access($node->nid, 'subscribe without approval')) {
     $form['request'] = array(
       '#type' => 'textarea',
       '#title' => t('Additional details'),
@@ -79,7 +79,7 @@ function og_confirm_subscribe_submit($form, &$form_state) {
   $group = array(
     'value' => $nid,
     // Get the state of the group, and decide the user's state accordingly.
-    'state' => og_user_access($nid, 'subscribe with no approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING,
+    'state' => og_user_access($nid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING,
   );
 
   og_subscribe_user(array($group), $request);
@@ -144,4 +144,45 @@ function og_add_users_submit($form, &$form_state) {
   );
 
   og_subscribe_user(array($group));
+}
+
+/**
+ * Allow user to approve another user's membership.
+ *
+ * @param $node
+ *   The node object.
+ * @param $account
+ *   The user to be approved object.
+ * @param $token
+ *   A security token.
+ * @return
+ */
+function og_approve($node, $account, $token) {
+  if (og_is_group_type($node->type)) {
+    if (!og_check_token($token, $node->nid)) {
+      drupal_set_message(t('Bad token. You seem to have followed an invalid link.'), 'error');
+      drupal_access_denied();
+      return;
+    }
+
+    $user_groups = og_get_groups('user', $account);
+
+    if (in_array($node->nid, $user_groups)) {
+      drupal_set_message(t('!name already approved to group %group.', array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
+      return '';
+    }
+    else {
+
+      og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
+
+      og_rules_invoke_event();
+
+      drupal_goto("node/$node->nid");
+    }
+  }
+  else {
+    drupal_not_found();
+    exit;
+  }
+
 }
