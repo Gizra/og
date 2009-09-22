@@ -13,7 +13,7 @@
 
 /**
  * Determine if a user has access to a certain operation within a group context.
- * 
+ *
  * @param $op
  *   The operation name.
  * @param $node
@@ -23,14 +23,14 @@
  * @param $account
  *   Optional; The account related to the operation.
  * @return
- *   OG_ACCESS_ALLOW  - if operation is allowed; 
+ *   OG_ACCESS_ALLOW  - if operation is allowed;
  *   OG_ACCESS_DENY   - if it should be denied;
  *   OG_ACCESS_IGNORE - if you don't care about this operation.
  */
 function hook_og_access($op, $node, $acting_user, $account = NULL) {
   if ($op == 'view') {
     // Show group posts only if they are in a certain day, defined in the
-    // group's data. This data is fictional, and it's up to an implementing 
+    // group's data. This data is fictional, and it's up to an implementing
     // module to implement it.
     if (og_is_group_post_type($node->type)) {
       // Get the first node group this group post belongs to.
@@ -51,7 +51,7 @@ function hook_og_access($op, $node, $acting_user, $account = NULL) {
         return OG_ACCESS_IGNORE;
       }
     }
-  }  
+  }
 }
 
 /**
@@ -126,15 +126,6 @@ function hook_og_types_info() {
 function hook_og_user_request(&$uids, $node, $group, $account, $request) {
   // Add user ID 1 to the list of notified users.
   $uids[] = 1;
-}
-
-/**
- * Define selective types of groups.
- */
-function hook_og_selective_info() {
-  return array(
-    'private' => t('Private'),
-  );
 }
 
 /**

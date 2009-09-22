@@ -10,12 +10,6 @@
 // Load all Field module hooks for organic groups.
 require(drupal_get_path('module', 'og') . '/og.field.inc');
 
-// Selective groups states. chosen by the group admin
-define ('OG_OPEN', 0);
-define ('OG_MODERATED', 1);
-define ('OG_INVITE_ONLY', 2);
-define ('OG_CLOSED', 3);
-
 // site admin chooses in og_settings() whether group creator can put his group on the registration form
 define('OG_REGISTRATION_NEVER', 0);
 define('OG_REGISTRATION_ALWAYS', 1);
@@ -451,18 +445,6 @@ function og_node_access($node, $op, $account) {
 }
 
 /**
- * Implement hook_og_selective_info().
- */
-function og_og_selective_info() {
-  return array(
-    OG_OPEN => t('Open'),
-    OG_MODERATED => t('Moderated'),
-    OG_INVITE_ONLY => t('Invite only'),
-    OG_CLOSED => t('Closed'),
-  );
-}
-
-/**
  * Implement hook_element_info().
  *
  * Define a group selection form element.
@@ -840,13 +822,6 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   }
   // No one allowed access, so assume access is denied.
   return FALSE;
-}
-
-/**
- * Return all the selective types of a group node (e.g. "open", "moderated").
- */
-function og_get_og_selective() {
-  return module_invoke_all('og_selective_info');
 }
 
 /**
