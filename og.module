@@ -295,8 +295,8 @@ function og_node_type_form_submit($form, &$form_state) {
   $og_types = og_get_og_types();
   $og_type = $og_types[$form_state['values']['og_content_type_usage']]['type'];
 
-  if ($og_type == 'group') {
-    og_group_type_set_fields(array($type));
+  if ($og_type == 'group post') {
+    og_group_post_type_set_fields(array($type));
   }
 }
 
@@ -327,7 +327,7 @@ function og_node_insert($node) {
 
     unset($role->rid);
     $role->name = 'authenticated';
-    og_user_role_save($role);    
+    og_user_role_save($role);
   }
 }
 
@@ -390,11 +390,11 @@ function og_og_access($op, $node, $acting_user, $account) {
  * Implement hook_node_access()
  */
 function og_node_access($node, $op, $account) {
-  // TODO: Deal with create group inside group.  
+  // TODO: Deal with create group inside group.
   $type = $op == 'create' ? $node : $node->type;
   if (og_get_group_type($type) != 'omitted') {
     if ($op == 'create') {
-      
+
     }
     else {
       // Operation should be the same as the permission name.
@@ -403,7 +403,7 @@ function og_node_access($node, $op, $account) {
       if (og_is_group_post_type($node->nid) == 'group') {
         if (og_user_access($node->nid, $op, $account)) {
           return NODE_ACCESS_ALLOW;
-        }    
+        }
       }
       elseif ($context_gid = og_get_context()) {
         if (og_user_access($context_gid, $op, $account)) {
@@ -795,7 +795,7 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   if (user_access('administer organic groups', $acting_user)) {
     return TRUE;
   }
-  
+
   if ($node->uid == $acting_user->uid) {
     // Group manager.
     return TRUE;
@@ -939,7 +939,7 @@ function og_set_context($node = NULL, $determine = FALSE) {
   if ($gid && empty($node)) {
     return $gid;
   }
-  
+
   if ($determine) {
     $node = og_determine_context();
   }
@@ -1144,7 +1144,7 @@ function og_user_role_permissions($roles = array()) {
   $role_permissions = $fetch = array();
 
   if ($roles) {
-    foreach ($roles as $name => $rid) {
+    foreach ($roles as $rid => $name) {
       if (isset($cache[$rid])) {
         $role_permissions[$rid] = $cache[$rid];
       }
@@ -1203,12 +1203,12 @@ function og_user_access($nid, $string, $account = NULL) {
   if ($account->uid == 1) {
     return TRUE;
   }
-  
+
   // Group member has all privileges.
   $group = node_load($nid);
   if ($group->uid == $account->uid) {
     return TRUE;
-  }  
+  }
 
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable, if the user is authenticated.
@@ -1224,15 +1224,15 @@ function og_user_access($nid, $string, $account = NULL) {
       // Get the roles assigned to the user in the group.
       $roles = og_get_user_roles($nid, $account->uid);
     }
-    
+
     $role_permissions = og_user_role_permissions($roles);
     $perms = array();
     foreach ($role_permissions as $one_role) {
-      $perms += $one_role;        
-     
+      $perms += $one_role;
+
       $perm[$nid][$account->uid] = $perms;
     }
-  }   
+  }
   return isset($perm[$nid][$account->uid][$string]);
 }
 
@@ -1432,8 +1432,8 @@ function og_user_role_delete($rid) {
  *   @endcode
  *   Existing permissions are not changed, unless specified in $permissions.
  *
- * @see user_role_grant_permissions()
- * @see user_role_revoke_permissions()
+ * @see og_user_role_grant_permissions()
+ * @see og_user_role_revoke_permissions()
  */
 function og_user_role_change_permissions($rid, array $permissions = array()) {
   // Grant new permissions for the role.
