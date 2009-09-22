@@ -142,7 +142,8 @@ function og_menu() {
 
   // Permission administration pages.
   $items['og/%node/admin/people/roles'] = array(
-    'title' => 'Roles',
+    'title arguments' => array('Roles for group @group', 1),
+    'title callback' => 'og_menu_title_callback',
     'description' => 'List, edit, or add user roles.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_user_admin_new_role', 1),
@@ -159,7 +160,8 @@ function og_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['og/%node/admin/people/permissions'] = array(
-    'title' => 'Permissions',
+    'title arguments' => array('Permissions for group @group', 1),
+    'title callback' => 'og_menu_title_callback',
     'description' => 'Determine access to features by selecting permissions for roles.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_user_admin_permissions', 1),
@@ -367,6 +369,14 @@ function og_og_set_group_alter($group) {
  */
 function og_og_permission() {
   return array(
+    'subscribe' => array(
+      'title' => t('Subscribe user to group'),
+      'description' => t("Allow user to be a member of a group."),
+    ),
+    'unsubscribe' => array(
+      'title' => t('Unsubscribe user from group'),
+      'description' => t("Allow user to be remove membership from a group."),
+    ),
     'approve and deny subscription' => array(
       'title' => t('Approve and deny subscription'),
       'description' => t("Allow user to allow or deny another user's subscription request."),
@@ -954,6 +964,13 @@ function og_set_context($node = NULL, $determine = FALSE) {
 /*******************************************************************************
  * Function callbacks
  ******************************************************************************/
+
+/**
+ * Menu callback; Return the title of a menu item based on the group title.
+ */
+function og_menu_title_callback($title, $node) {
+  return str_replace('@group', check_plain($node->title), $title);
+}
 
 /**
  * Process organic groups audience FAPI element.
