@@ -168,13 +168,11 @@ function og_approve($node, $account, $token) {
     $user_groups = og_get_groups('user', $account);
 
     if (in_array($node->nid, $user_groups)) {
-      drupal_set_message(t('!name already approved to group %group.', array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
+      drupal_set_message(t('!name was already approved to group %group.', array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
       return '';
     }
     else {
-
       og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
-
       og_rules_invoke_event();
 
       drupal_goto("node/$node->nid");

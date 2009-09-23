@@ -4,41 +4,44 @@
 /**
  * Test the organic groups content handeling.
  */
-class OgContentTest extends DrupalWebTestCase {
+class OgTypeTest extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups content',
-      'description' => 'Test the organic groups content handeling.',
+      'name' => 'Organic groups content types',
+      'description' => 'Test the organic groups group node and group post creation.',
       'group' => 'Organic groups',
     );
   }
 
   function setUp() {
     parent::setUp('og');
-    $admin_user = $this->drupalCreateUser(array('administer nodes', 'administer content types'));
-    $this->drupalLogin($admin_user);
-    $this->uid = $admin_user->uid;
-    
-    // Create group content type.
-    $this->group_type = $this->drupalCreateContentType(array('og_content_type_usage' => 'group'));    
-    
-    // Create post content type.
-    $this->group_post_type = $this->drupalCreateContentType(array('og_content_type_usage' => 'group post'));
   }
 
-  
-  function testOgContent() {   
-    $this->assertContentTypes();
-  }
-  
-  function assertContentTypes() {
-  	// Assert group fields were added to the content type.
-  	$this->drupalGet('node/add/'. $this->group_type);
-  	$this->assertText(t('Groups selective'), t('Groups selective field was found.'));
-  	
+
+  function testOgType() {
+    $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
+    $this->drupalLogin($admin_user);
+    $this->uid = $admin_user->uid;
+
+    $this->drupalGet('admin/structure/types/add');
+
+    // Assert OG default types exist.
+    $this->assertText(t('Group node'), t('Group node option was found.'));
+    $this->assertText(t('group post'), t('Group post option was found.'));
+    $this->assertText(t('May not be posted into a group'), t('Omitted option was found.'));
+
+    // Create group content type.
+    $group_type = $this->drupalCreateContentType(array('og_content_type_usage' => 'group'));
+
+    // Create post content type.
+    $group_post_type = $this->drupalCreateContentType(array('og_content_type_usage' => 'group post'));
+
     // Assert group post fields were added to the content type.
-    $this->drupalGet('node/add/'. $this->group_post_type);
-    $this->assertText(t('Groups audience'), t('Groups audience field was found.'));  	
+    $this->drupalGet('node/add/' . $group_type->type);
+    $this->assertText(t('Groups audience'), t('Groups audience field was found.'));
+
+    $this->drupalGet('node/add/');
+
   }
 }
