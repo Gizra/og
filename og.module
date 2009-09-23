@@ -277,7 +277,6 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#title' => t('Organic groups'),
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
-    '#access' => user_access('administer organic groups'),
   );
   $form['og']['og_content_type_usage'] = array(
     '#type' => 'radios',
