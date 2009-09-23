@@ -40,8 +40,5 @@ class OgTypeTest extends DrupalWebTestCase {
     // Assert group post fields were added to the content type.
     $this->drupalGet('node/add/' . $group_type->type);
     $this->assertText(t('Groups audience'), t('Groups audience field was found.'));
-
-    $this->drupalGet('node/add/');
-
   }
 }
