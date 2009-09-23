@@ -22,7 +22,6 @@ class OgTypeTest extends DrupalWebTestCase {
   function testOgType() {
     $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
     $this->drupalLogin($admin_user);
-    $this->uid = $admin_user->uid;
 
     $this->drupalGet('admin/structure/types/add');
 
@@ -36,6 +35,8 @@ class OgTypeTest extends DrupalWebTestCase {
 
     // Create post content type.
     $group_post_type = $this->drupalCreateContentType(array('og_content_type_usage' => 'group post'));
+
+    $this->drupalGet('admin/structure/types/' . $group_type->type);
 
     // Assert group post fields were added to the content type.
     $this->drupalGet('node/add/' . $group_type->type);
