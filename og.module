@@ -1027,17 +1027,17 @@ function og_elements_process($element, &$form_state, $form) {
     // Show "My groups" and "Other groups".
     $groups_count = count($content_groups['content groups']) + count($content_groups['other groups']);
     if (!empty($content_groups['content groups'])) {
-      $options += array(t('My groups') => $content_groups['content groups']);
+      $options += array(t('My groups') => array_diff($content_groups['content groups'], $element['#exclude']));
     }
     if (!empty($content_groups['other groups'])) {
-      $options += array(t('Other groups') => $content_groups['other groups']);
+      $options += array(t('Other groups') => array_diff($content_groups['other groups'], $element['#exclude']));
     }
     $type = 'select';
   }
   else {
     // Show only "My groups".
     $groups_count = count($content_groups['content groups']);
-    $options = $content_groups['content groups'];
+    $options = array_diff($content_groups['content groups'], $element['#exclude']);
     // Show a select list if their are a minimum of groups.
     if ($field['cardinality'] == 1) {
       $type = 'radios';
