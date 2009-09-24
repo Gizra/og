@@ -87,7 +87,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $edit[$roles[OG_ANONYMOUS_ROLE] . '[unsubscribe]'] = TRUE;
     $this->drupalPost('og/' . $this->group_nid . '/admin/people/permissions', $edit, t('Save permissions'));
     $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
-    $this->assertTrue(user_access($this->group_nid, 'unsubscribe', $account), t('User now has "Unsubscribe user from group" permission.'));
+    $this->assertTrue(og_user_access($this->group_nid, 'unsubscribe', $account), t('User now has "Unsubscribe user from group" permission.'));
 
     // Remove a permission.
     $edit = array();
