@@ -303,6 +303,8 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
 /**
  * Submit handler; Set the group type.
  *
+ * TODO: Remove after http://drupal.org/node/586436 gets in.
+ *
  * We can't use hook_node_type_insert() to set the group, since variables are
  * saved later on.
  * @see node_type_form_submit().
@@ -310,7 +312,7 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
 function og_node_type_form_submit($form, &$form_state) {
   $type = $form_state['values']['type'];
   $og_types = og_get_og_types();
-  $og_type = $og_types[$form_state['values']['og_content_type_usage']]['type'];
+  $og_type = $og_types[$form_state['values']['og_group_post_type']]['type'];
 
   if ($og_type == 'group post') {
     og_group_post_type_set_fields(array($type));
