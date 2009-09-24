@@ -80,7 +80,6 @@ define('OG_AUTHENTICATED_ROLE', 'authenticated member');
  * Implement hook_menu().
  */
 function og_menu() {
-  // Anonymous users should be able to get to the join page.
   $items['og/subscribe/%node'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
@@ -97,6 +96,7 @@ function og_menu() {
     'access callback' => 'user_is_logged_in',
     'title' => 'OPML',
   );
+
   $items['og/unsubscribe/%node/%user'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
@@ -125,7 +125,6 @@ function og_menu() {
     'title' => 'Deny membership request',
   );
 
-  // Members only and group may not be invite-only or closed
   $items['og/invite/%node'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_invite_form', 2),
@@ -157,6 +156,7 @@ function og_menu() {
     'file' => 'og.admin.inc',
     'weight' => -9,
   );
+
   $items['og/%node/admin/people/roles/edit'] = array(
     'title' => 'Edit role',
     'page arguments' => array('og_user_admin_role', 1),
@@ -164,6 +164,7 @@ function og_menu() {
     'access arguments' => array('administer permissions'),
     'type' => MENU_CALLBACK,
   );
+
   $items['og/%node/admin/people/permissions'] = array(
     'title arguments' => array('Permissions for group @group', 1),
     'title callback' => 'og_menu_title_callback',
@@ -175,7 +176,6 @@ function og_menu() {
     'file' => 'og.admin.inc',
     'weight' => -8,
   );
-
 
   $items['admin/og'] = array(
     'title' => 'Organic groups',
@@ -198,7 +198,6 @@ function og_menu() {
     'weight' => -5,
   );
 
-  // group admin only
   $items['og/users/%node/add_user'] = array(
     'page callback' => 'drupal_get_form',
     'title' => 'Add members',
@@ -268,8 +267,8 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
 
  // Get all the group types (group, group post, etc').
   $options = array();
-  foreach (og_get_og_types() as $type => $value) {
-    $options[$type] = $value['description'];
+  foreach (og_get_og_types() as $key => $value) {
+    $options[$value['type']][$key] = check_plain($value['description']);
   }
 
   $form['og'] = array(
@@ -277,14 +276,26 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#title' => t('Organic groups'),
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
+    '#description' => t('Specify how organic groups should treat content of this type. Content may behave as a group, as group posts, or may not participate in organic groups at all.'),
   );
-  $form['og']['og_content_type_usage'] = array(
+
+
+  dpm(og_get_group_type($node_type));
+  $form['og']['og_group_type'] = array(
     '#type' => 'radios',
-    '#title' => t('Organic groups usage'),
-    '#default_value' =>  og_get_group_type($node_type),
-    '#options' => $options,
-    '#description' => t('Specify how organic groups should treat nodes of this type. Nodes may behave as a group, as group posts, or may not participate in organic groups at all.'),
+    '#title' => t('Group'),
+    '#default_value' =>  og_is_group_type($node_type) ? og_get_group_type($node_type) : 'omitted',
+    '#options' => array('omitted' => t('Not a group type')) + $options['group'],
+
   );
+
+  $form['og']['og_group_post_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Group post'),
+    '#default_value' =>  og_is_group_post_type($node_type) ? og_get_group_type($node_type) : 'omitted',
+    '#options' => array('omitted' => t('Not a group post type')) + $options['group post'],
+  );
+
   // Add own submit handler.
   $form['#submit'][] = 'og_node_type_form_submit';
 }
