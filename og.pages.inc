@@ -182,5 +182,4 @@ function og_approve($node, $account, $token) {
     drupal_not_found();
     exit;
   }
-
 }
