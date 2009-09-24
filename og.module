@@ -458,6 +458,26 @@ function og_node_access($node, $op, $account) {
  * Implement hook_element_info().
  *
  * Define a group selection form element.
+ *
+ * Keyes definition:
+ * - read_only: Determine if the form element should allow a user input, or only
+ *   show the group audience.
+ * - opt_group: If TRUE then the group lists will be consisted of "my groups"
+ *   and "other groups". This is set automatically to TRUE, by the processing
+ *   function, for administrator users.
+ * - opt_group_access_check: If TRUE then the opt_group will be determined
+ *   automatically, otherwise, it will use the opt_group value.
+ * - user_groups: Array with the group the user is subscribed to keyed by the
+ *   group node ID and the group node title.
+ * - user_groups: Array with the group the user is not subscribed to keyed by
+ *   the group node ID and the group node title.
+ * - exclude: Array with the group node IDs that should be excluded from the
+ *   list.
+ * - minimum_for_select_list: The number of groups in the "user_groups" array
+ *   that should be the minimum for showing a select list instead of checkboxes
+ *   or radios.
+ * - uid: The user ID. This can be used in order to created a form element for
+ *   a different user than the acting user.
  */
 function og_element_info() {
   return array(
@@ -467,6 +487,7 @@ function og_element_info() {
       '#opt_group_access_check' => TRUE,
       '#user_groups' => array(),
       '#other_groups' => array(),
+      '#exclude' => array(),
       '#minimum_for_select_list' => 20,
       '#uid' => NULL,
       '#process' => array('og_elements_process'),

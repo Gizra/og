@@ -23,7 +23,7 @@ function og_subscribe($node, $uid = NULL) {
 
       if (!$account->uid) {
         $dest = drupal_get_destination();
-        if (variable_get('user_register', 1) == 0) {
+        if (variable_get('user_register', 1)) {
           drupal_set_message(t('In order to join this group, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
         }
         else {
