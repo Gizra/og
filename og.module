@@ -202,7 +202,7 @@ function og_menu() {
     'weight' => -5,
   );
 
-  $items['og/users/%node/add_user'] = array(
+  $items['og/%node/add_user'] = array(
     'page callback' => 'drupal_get_form',
     'title' => 'Add members',
     'page arguments' => array('og_add_users', 2),
@@ -1348,7 +1348,7 @@ function og_get_group_roles($nid) {
  *   Array with the role IDs of the user.
  */
 function og_get_user_roles($nid, $uid) {
-  return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchAllKeyed();
+  return db_query("SELECT role, role FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchAllKeyed();
 }
 
 /**
