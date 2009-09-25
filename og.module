@@ -205,12 +205,12 @@ function og_menu() {
   $items['og/%node/add_user'] = array(
     'page callback' => 'drupal_get_form',
     'title' => 'Add members',
-    'page arguments' => array('og_add_users', 2),
+    'page arguments' => array('og_add_users', 1),
     'type' => MENU_LOCAL_TASK,
     'file' => 'og.pages.inc',
     'weight' => 5,
     'access callback' => 'og_access',
-    'access arguments' => array('add user', 2),
+    'access arguments' => array('add user', 1),
   );
 
     // Broadcast tab on group node.
