@@ -62,15 +62,19 @@ define('OG_ACCESS_IGNORE', NULL);
 define('OG_AUDIENCE_FIELD', 'og_audience');
 
 /**
- * The role name of non-members.
+ * The role name of group non-members.
  */
 define('OG_ANONYMOUS_ROLE', 'anonymous member');
 
 /**
- * The role name of members.
+ * The role name of group member.
  */
 define('OG_AUTHENTICATED_ROLE', 'authenticated member');
 
+/**
+ * The role name of group administrator.
+ */
+define('OG_ADMINISTRATOR_ROLE', 'administrator');
 
 /*******************************************************************************
  * Hook implementations
@@ -345,15 +349,33 @@ function og_node_insert($node) {
     $role = new stdClass;
     $role->name = OG_ANONYMOUS_ROLE;
     $role->nid = $node->nid;
-    og_user_role_save($role);
+    og_user_role_save($role);    
+    $anon_rid = $role_rid;
 
     unset($role->rid);
     $role->name = OG_AUTHENTICATED_ROLE;
-    og_user_role_save($role);
+    og_user_role_save($role);    
+    $auth_rid = $role_rid;
 
     unset($role->rid);
     $role->name = 'admin';
-    og_user_role_save($role);
+    og_user_role_save($role);    
+    $admin_rid = $role->rid;
+    
+    // Create default permissions for roles.
+    $perms = array(
+      OG_ANONYMOUS_ROLE => array('subscribe'),
+      OG_AUTHENTICATED_ROLE => array('subscribe, unsubscribe'),
+      // All permissions.
+      OG_ADMINISTRATOR_ROLE => array_keys(og_permissions_get()),
+    );
+    
+    // Allow other modules to change default permissions.
+    drupal_alter('og_group_insert', $perms, $node);
+    
+    og_user_role_grant_permissions($anon_rid, $perms[OG_ANONYMOUS_ROLE]);
+    og_user_role_grant_permissions($auth_rid, $perms[OG_AUTHENTICATED_ROLE]);
+    og_user_role_grant_permissions($admin_rid, $perms[OG_ADMINISTRATOR_ROLE]);
   }
 }
 
@@ -402,6 +424,10 @@ function og_og_permission() {
       'title' => t('Approve and deny subscription'),
       'description' => t("Allow user to allow or deny another user's subscription request."),
     ),
+    'add user' => array(
+      'title' => t('Add user'),
+      'description' => t("Add a new user to the group."),
+    ),    
   );
 }
 
@@ -1504,6 +1530,15 @@ function og_user_role_revoke_permissions($rid, array $permissions = array()) {
   drupal_static_reset('og_user_role_permissions');
 }
 
+function og_permissions_get() {
+  $perms = &drupal_static(__FUNCTION__, array());
+  if ($perms) {
+    return $perms;
+  }
+  
+  $perms = module_invoke_all('og_permissions');
+  return $perms;   
+}
 
 /**
  * Get a private token used to protect links from spoofing - CSRF.
@@ -1518,3 +1553,4 @@ function og_get_token($nid) {
 function og_check_token($token, $seed) {
   return drupal_get_token($seed) == $token;
 }
+

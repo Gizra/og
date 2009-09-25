@@ -190,6 +190,20 @@ function hook_og_set_association_alter(&$gids, $account, $op = '') {
   }
 }
 
+/**
+ * Alter the default permissions set for a new group
+ * 
+ * @param $perms
+ *  Array with the default permission per role (anonymous, authenticated and 
+ *  administrator).
+ * @param $node
+ *   The group node.
+ */
+function hook_og_group_insert(&$perms, $node) {
+  // Remove all permissions of the anonymous member.
+  unset($perms[OG_ANONYMOUS_ROLE]);
+}
+
 
 /**
  * @} End of "addtogroup hooks".
