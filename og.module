@@ -257,15 +257,13 @@ function og_forms() {
   return $forms;
 }
 
-
-
 /**
  * Implement hook_form_FORM_ID_alter().
  */
 function og_form_node_type_form_alter(&$form, &$form_state) {
   $node_type = $form['#node_type']->type;
 
- // Get all the group types (group, group post, etc').
+ // Get all the group usage types options.
   $options = array();
   foreach (og_get_og_types() as $key => $value) {
     $options[$value['type']][$key] = check_plain($value['description']);
@@ -301,8 +299,6 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
 /**
  * Submit handler; Set the group type.
  *
- * TODO: Remove after http://drupal.org/node/586436 gets in.
- *
  * We can't use hook_node_type_insert() to set the group, since variables are
  * saved later on.
  * @see node_type_form_submit().
@@ -321,14 +317,16 @@ function og_node_type_form_submit($form, &$form_state) {
 * Implement hook_node_type_delete().
 */
 function og_node_type_delete($info) {
-  variable_del('og_content_type_usage_' . $info->type);
+  variable_del('og_group_type_' . $info->type);
+  variable_del('og_group_post_type_' . $info->type);
 }
 
 /**
-* Implement hook_node_type_delete().
+* Implement hook_node_type_insert().
+* 
+* TODO: USe after http://drupal.org/node/586436 gets in.
 */
 function og_node_type_insert($info) {
-  dpm($info);
 }
 
 /**
@@ -384,13 +382,6 @@ function og_node_delete($node) {
 }
 
 /**
- * Implement hook_og_get_group_alter().
- */
-function og_og_set_group_alter($group) {
-
-}
-
-/**
  * Implement og_permission
  */
 function og_og_permission() {
@@ -442,11 +433,6 @@ function og_node_access($node, $op, $account) {
       // Node argument is a full node object.
       if (og_is_group_type($node->type)) {
         if (og_user_access($node->nid, $op, $account)) {
-          return NODE_ACCESS_ALLOW;
-        }
-      }
-      elseif ($context_gid = og_get_context()) {
-        if (og_user_access($context_gid, $op, $account)) {
           return NODE_ACCESS_ALLOW;
         }
       }
