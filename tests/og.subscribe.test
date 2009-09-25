@@ -58,7 +58,7 @@ class OgSubscribe extends OgTestCase {
         // Click the join button.
         $this->drupalPost(NULL, array(), t('Join'));
         // Assert membership approval, waiting for approval text.
-        $this->assertRaw(t($key == 'open' ? 'You are now a member of the %title.' : 'Membership request to the %title group awaits approval by an administrator.', array('%title' => $this->nodes[$key]->title)), t('Subscribed @selective group text found.', array('@selective' => $key)));
+        $this->assertRaw(t($key == 'open' ? 'You are now a member of %title.' : 'Membership request to the %title group awaits approval by an administrator.', array('%title' => $this->nodes[$key]->title)), t('Subscribed @selective group text found.', array('@selective' => $key)));
         // Assert user is properly subscribed to open group.
         if ($key == 'open') {
           // Only in the 'open' group the web user is considered subscribed.
