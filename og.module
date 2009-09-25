@@ -365,7 +365,7 @@ function og_node_insert($node) {
     // Create default permissions for roles.
     $perms = array(
       OG_ANONYMOUS_ROLE => array('subscribe'),
-      OG_AUTHENTICATED_ROLE => array('subscribe, unsubscribe'),
+      OG_AUTHENTICATED_ROLE => array('subscribe', 'unsubscribe'),
       // All permissions.
       OG_ADMINISTRATOR_ROLE => array_keys(og_permissions_get()),
     );
@@ -1532,11 +1532,11 @@ function og_user_role_revoke_permissions($rid, array $permissions = array()) {
 
 function og_permissions_get() {
   $perms = &drupal_static(__FUNCTION__, array());
-  if ($perms) {
+  if (!empty($perms)) {
     return $perms;
   }
   
-  $perms = module_invoke_all('og_permissions');
+  $perms = module_invoke_all('og_permission');
   return $perms;   
 }
 
