@@ -350,12 +350,12 @@ function og_node_insert($node) {
     $role->name = OG_ANONYMOUS_ROLE;
     $role->nid = $node->nid;
     og_user_role_save($role);    
-    $anon_rid = $role_rid;
+    $anon_rid = $role->rid;
 
     unset($role->rid);
     $role->name = OG_AUTHENTICATED_ROLE;
     og_user_role_save($role);    
-    $auth_rid = $role_rid;
+    $auth_rid = $role->rid;
 
     unset($role->rid);
     $role->name = 'admin';
