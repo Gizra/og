@@ -704,13 +704,16 @@ function og_is_group_post_type($node_type) {
  * @param $replace
  *   Optioanl; True if the group lists should replace the existing subscrptions
  *   of the user.
+ * @param $request
+ *   Optioanl; A message created by the requesting user that should be sent to 
+ *   the group admins.
  */
-function og_subscribe_user($groups = array(), $account = NULL, $replace = FALSE) {
+function og_subscribe_user($groups = array(), $account = NULL, $replace = FALSE, $request = '') {
   if (empty($account)) {
     global $user;
     $account = $user;
   }
-  og_set_association('user', $account, $groups, $replace);
+  og_set_association('user', $account, $groups, $replace, $request);
 }
 
 /**
@@ -745,8 +748,11 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  * @param $replace
  *   Optioanl; True if the group lists should replace the existing subscrptions
  *   of the user.
+ * @param $request
+ *   Optioanl; A message created by the requesting user that should be sent to 
+ *   the group admins.
  */
-function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE) {
+function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE, $request = '') {
   // Load object to get the fields.
   $object = og_load_object($obj_type, $object);
 
@@ -1264,15 +1270,18 @@ function og_user_access($nid, $string, $account = NULL) {
   // in a static variable, if the user is authenticated.
   if (!isset($perm[$nid][$account->uid])) {
     $user_groups = og_get_groups('user', $account);
+    
+    // Get default roles.
+    $default_roles = og_get_group_default_roles($nid);    
     if (!in_array($nid, $user_groups)) {
-      // Anonymous member or a pending member. We keep only the
-      $roles = og_get_group_default_roles($nid);
       // Keep only the anonymous role.
-      $roles = drupal_map_assoc(array($roles[OG_ANONYMOUS_ROLE]));
+      $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
     }
     else {
-      // Get the roles assigned to the user in the group.
-      $roles = og_get_user_roles($nid, $account->uid);
+      // Add the authenticated role.
+      $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
+      // Get otehr roles assigned to the user in the group.      
+      $roles += og_get_user_roles($nid, $account->uid);
     }
 
     $role_permissions = og_user_role_permissions($roles);

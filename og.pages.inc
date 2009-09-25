@@ -82,7 +82,7 @@ function og_confirm_subscribe_submit($form, &$form_state) {
     'state' => og_user_access($nid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING,
   );
 
-  og_subscribe_user(array($group), $request);
+  og_subscribe_user(array($group), NULL, FALSE, $request);
   $form_state['redirect'] = 'node/'. $form_state['values']['gid'];
 }
 
