@@ -623,21 +623,21 @@ function og_delete_group($nid) {
  * @param $nid
  *   The group node ID.
  * @param $bundles
- *   Array with the bundles to include or exclude. The array is keyed with 
- *   "include" and "exclude".
+ *   Array with the bundles to include.
+ * @param $count
  * @param $cursor
  * 
  * @return
  *   Array with the object IDs.
  */
-function og_get_group_objects($nid, $bundles = array('user'), &$cursor = 0) { 
+function og_get_group_objects($nid, $bundles = array('user'), $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) { 
   $field = field_info_field('og_audience');
   $conditions = array(
     array('value', $nid),
     array('bundle', $bundles),
   );
   
-  return field_attach_query($field['id'], $conditions, FIELD_QUERY_NO_LIMIT, $cursor);  
+  return field_attach_query($field['id'], $conditions, $count, $cursor);  
 }
 
 /**
