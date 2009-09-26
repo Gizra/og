@@ -63,19 +63,17 @@ function og_user_admin_account($form, $form_state, $node) {
   $destination = drupal_get_destination();
 
   $status = array('blocked' => t('blocked'), 'pending' => t('pending'), 'active' => t('active'));
-  $roles = user_roles(TRUE);
+  $roles = array_flip(og_get_group_roles($node->nid));
   $accounts = array();
   foreach ($result as $account) {
     $accounts[$account->uid] = '';
     $form['name'][$account->uid] = array('#markup' => theme('username', $account));
     $form['status'][$account->uid] =  array('#markup' => $status[$account->state]);
-    $users_roles = array();
-    $roles_result = db_query('SELECT rid FROM {og_users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
-    foreach ($roles_result as $user_role) {
-      $users_roles[] = $roles[$user_role->rid];
+    foreach (og_get_user_roles($node->nid, $account->uid) as $rid) {
+      $user_roles[] = $roles[$rid];
     }
-    asort($users_roles);
-    $form['roles'][$account->uid][0] = array('#markup' => theme('item_list', $users_roles));
+    asort($user_roles);
+    $form['roles'][$account->uid][0] = array('#markup' => theme('item_list', $user_roles));
     $form['operations'][$account->uid] = array('#markup' => l(t('edit'), "user/$account->uid/edit", array('query' => $destination)));
   }
   $form['accounts'] = array(

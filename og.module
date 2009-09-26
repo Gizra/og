@@ -1417,7 +1417,7 @@ function og_get_group_default_roles($nid) {
  * @param $nid
  *   The group ID.
  * @return
- *   A keyed array with "anonymous" and "authenticaed".
+ *   An array keyed with the role name and the role ID as the value.
  */
 function og_get_group_roles($nid) {
   return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid", array(':nid' => $nid))->fetchAllKeyed();
