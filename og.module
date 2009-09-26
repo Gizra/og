@@ -704,7 +704,7 @@ function og_get_groups($obj_type, $object, $state = array(OG_STATE_ACTIVE)) {
   if (!empty($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE])) {
     foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $group) {
       if (!in_array($group['state'], $state)) {
-        // Don't register the group if it's state isn't active.
+        // Don't register the group if it's state isn't the one we look for.
         continue;
       }
       $groups[$group['value']] = $group['value'];
