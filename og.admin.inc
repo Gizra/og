@@ -62,13 +62,13 @@ function og_user_admin_account($form, $form_state, $node) {
   $result = og_get_group_users($node->nid);
   $destination = drupal_get_destination();
 
-  $status = array(t('blocked'), t('pending'), t('active'));
+  $status = array('blocked' => t('blocked'), 'pending' => t('pending'), 'active' => t('active'));
   $roles = user_roles(TRUE);
   $accounts = array();
   foreach ($result as $account) {
     $accounts[$account->uid] = '';
     $form['name'][$account->uid] = array('#markup' => theme('username', $account));
-    // $form['status'][$account->uid] =  array('#markup' => $status[$account->status]);
+    $form['status'][$account->uid] =  array('#markup' => $status[$account->state]);
     $users_roles = array();
     $roles_result = db_query('SELECT rid FROM {og_users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
     foreach ($roles_result as $user_role) {
