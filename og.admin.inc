@@ -7,7 +7,7 @@
  */
 
 /**
- * Form builder; User administration page.
+ * Form builder; OG user administration page.
  *
  * @ingroup forms
  * @see og_user_admin_account_validate()

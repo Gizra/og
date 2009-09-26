@@ -150,7 +150,8 @@ function og_menu() {
   
   // User listing pages.
   $items['og/%node/admin/people'] = array(
-    'title' => 'People',
+    'title arguments' => array('People in group @group', 1),
+    'title callback' => 'og_menu_title_callback',
     'description' => 'Find and manage group members.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_user_admin_account', 1),
