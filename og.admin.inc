@@ -59,13 +59,14 @@ function og_user_admin_account($form, $form_state, $node) {
     '#value' => t('Update'),
   );
   
-  $result = og_get_group_objects($node->nid);
+  $result = og_get_group_objects($node->nid, 'user');
+  dpm($result);
   $destination = drupal_get_destination();
 
   $status = array(t('blocked'), t('pending'), t('active'));
   $roles = user_roles(TRUE);
   $accounts = array();
-  foreach ($result['user'] as $account) {
+  foreach ($result as $account) {
     $accounts[$account->uid] = '';
     $form['name'][$account->uid] = array('#markup' => theme('username', $account));
     // $form['status'][$account->uid] =  array('#markup' => $status[$account->status]);
