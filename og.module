@@ -667,7 +667,7 @@ function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
   foreach ($objects as $key => $value) {
     // OG audience may be multiple field, but the group can appear only once,
     // so we extract only the value with our requested group.
-    $return[$key] = (object)_og_get_group_from_field($value, $nid);
+    $return[$key] = (object)og_get_group_from_field($nid, 'user', $value);
     // Add back the user ID and user name.
     $return[$key]->uid = $key;
     $return[$key]->name = $names[$key];
@@ -676,7 +676,18 @@ function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
   return $return;
 }
 
-function _og_get_group_from_field($object, $nid) {
+/**
+ * Extract a specific group from an object.
+ *
+ * @param $object
+ *   The object.
+ * @param $nid
+ *   The group node ID.
+ * @return
+ *   Array with the field's value.
+ */
+function og_get_group_from_object($nid, $obj_type, $object) {
+  $object = og_load_object($obj_type, $object);
   foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $value) {
     if ($value['value'] == $nid) {
       return $value;
