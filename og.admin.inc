@@ -14,6 +14,7 @@
  * @see og_user_admin_account_submit()
  */
 function og_user_admin_account($form, $form_state, $node) {
+  $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
   $form['options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Update options'),
@@ -77,10 +78,13 @@ function og_user_admin_account_validate($form, &$form_state) {
  * Submit the user administration update form.
  */
 function og_user_admin_account_submit($form, &$form_state) {
+  $nid = $form_state['values']['nid'];
+
   $operations = module_invoke_all('user_operations', $form, $form_state);
   $operation = $operations[$form_state['values']['operation']];
   // Filter out unchecked accounts.
   $accounts = array_filter($form_state['values']['accounts']);
+
   if ($function = $operation['callback']) {
     // Add in callback arguments if present.
     if (isset($operation['callback arguments'])) {
@@ -89,7 +93,7 @@ function og_user_admin_account_submit($form, &$form_state) {
     else {
       $args = array($accounts);
     }
-    call_user_func_array($function, $args);
+    call_user_func_array($function, array('nid' => $nid) + $args);
 
     drupal_set_message(t('The update has been performed.'));
   }

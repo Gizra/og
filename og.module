@@ -39,6 +39,12 @@ define('OG_STATE_ACTIVE', 'active');
 define('OG_STATE_PENDING', 'pending');
 
 /**
+ * Define blocked group post states. The user is rejected from the group.
+ */
+define('OG_STATE_BLOCKED', 'blocked');
+
+
+/**
  * Modules should return this value from hook_og_access() to allow access to a
  * group menu item.
  */
@@ -667,7 +673,7 @@ function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
   foreach ($objects as $key => $value) {
     // OG audience may be multiple field, but the group can appear only once,
     // so we extract only the value with our requested group.
-    $return[$key] = (object)og_get_group_from_field($nid, 'user', $value);
+    $return[$key] = (object)og_get_group_from_object($nid, 'user', $value);
     // Add back the user ID and user name.
     $return[$key]->uid = $key;
     $return[$key]->name = $names[$key];
@@ -686,10 +692,12 @@ function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
  * @return
  *   Array with the field's value.
  */
-function og_get_group_from_object($nid, $obj_type, $object) {
+function og_get_group_from_object($nid, $obj_type, $object, &$key = NULL) {
   $object = og_load_object($obj_type, $object);
-  foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $value) {
+  foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $key_index => $value) {
     if ($value['value'] == $nid) {
+      // Save the position of the value in the field.
+      $key = $key_index;
       return $value;
     }
   }
@@ -703,7 +711,7 @@ function og_get_group_from_object($nid, $obj_type, $object) {
  * @param $object
  *   The object can be a user, node or any fieldable entity.
  * @param $state
- *   Optioanl; Array with the state to return
+ *   Optioanl; Array with the state to return. If empty all state will return.
  * @return
  *  An array with the group, or an empty array.
  */
@@ -714,7 +722,7 @@ function og_get_groups($obj_type, $object, $state = array(OG_STATE_ACTIVE)) {
   $groups = array();
   if (!empty($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE])) {
     foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $group) {
-      if (!in_array($group['state'], $state)) {
+      if (!empty($state) && !in_array($group['state'], $state)) {
         // Don't register the group if it's state isn't the one we look for.
         continue;
       }
@@ -868,7 +876,17 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
     if (!in_array($group['value'], $existing_gids)) {
       // Initialize values.
       $group += array('state' => '', 'data' => array());
-      $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
+      $key = 0;
+      if ($value = og_get_group_from_object($group['value'], $obj_type, $object, $key)) {
+        // Group already exists, so we will replace it. The key was return from
+        // og_get_group_from_object().
+        $object->og_audience[FIELD_LANGUAGE_NONE][$key] = $group;
+
+      }
+      else {
+        // Add a new record.
+        $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
+      }
 
       og_rules_invoke_event();
       $save = TRUE;
@@ -1668,7 +1686,7 @@ function og_og_user_operations($form = array(), $form_state = array()) {
     ),
     'block' => array(
       'label' => t('Deny membership from the selected users'),
-      'callback' => 'og_user_operations_block',
+      'callback' => 'og_user_operations_deny',
     ),
   );
 
@@ -1729,17 +1747,28 @@ function og_og_user_operations($form = array(), $form_state = array()) {
 }
 
 /**
- * Callback function for admin mass unblocking users.
+ * Callback function for admin mass approving users.
  */
-function og_user_operations_unblock($accounts) {
+function og_user_operations_approve($nid, $accounts) {
+  // Intersect account with pending or blocked state users.
+  $accounts = array_intersect($accounts, og_get_groups('user', $node->nid, array(OG_PENDING_STATE, OG_BLOCKED_STATE)));
   foreach ($accounts as $uid) {
+    $group = array(
+      'value' => $nid,
+      // Get the state of the group, and decide the user's state accordingly.
+      'state' => OG_STATE_ACTIVE,
+    );
+    og_subscribe_user(array($group));
   }
 }
 
 /**
- * Callback function for admin mass blocking users.
+ * Callback function for admin mass denying users.
  */
-function og_user_operations_block($accounts) {
+function og_user_operations_deny($nid, $accounts) {
+  // Intersect account with active state users.
+  $accounts = array_intersect($accounts, og_get_groups('user', $node->nid, array(OG_PENDING_ACTIVE)));
+
   foreach ($accounts as $uid) {
   }
 }
@@ -1747,7 +1776,7 @@ function og_user_operations_block($accounts) {
 /**
  * Callback function for admin mass adding/deleting a user role.
  */
-function og_user_multiple_role_edit($accounts, $operation, $rid) {
+function og_user_multiple_role_edit($nid, $accounts, $operation, $rid) {
   switch ($operation) {
     case 'add_role':
       foreach ($accounts as $uid) {
