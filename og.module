@@ -880,8 +880,9 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
       if ($value = og_get_group_from_object($group['value'], $obj_type, $object, $key)) {
         // Group already exists, so we will replace it. The key was return from
         // og_get_group_from_object().
+        // We preserve the data and state values, provided they aren't changed.
+        $group = array_merge($value, $group);
         $object->og_audience[FIELD_LANGUAGE_NONE][$key] = $group;
-
       }
       else {
         // Add a new record.
@@ -1758,7 +1759,8 @@ function og_user_operations_approve($nid, $accounts) {
       // Get the state of the group, and decide the user's state accordingly.
       'state' => OG_STATE_ACTIVE,
     );
-    og_subscribe_user(array($group));
+    $account = user_load($uid);
+    og_subscribe_user(array($group), $account);
   }
 }
 
@@ -1770,6 +1772,8 @@ function og_user_operations_deny($nid, $accounts) {
   $accounts = array_intersect($accounts, og_get_groups('user', $node->nid, array(OG_PENDING_ACTIVE)));
 
   foreach ($accounts as $uid) {
+    $account = user_load($uid);
+    og_unsubscribe_user(array($nid), $account);
   }
 }
 
