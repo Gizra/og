@@ -622,22 +622,39 @@ function og_delete_group($nid) {
  * 
  * @param $nid
  *   The group node ID.
- * @param $bundles
- *   Array with the bundles to include.
+ * @param $obj_type
+ *   The type of $object; e.g. 'node' or 'user'.
  * @param $count
  * @param $cursor
  * 
  * @return
  *   Array with the object IDs.
  */
-function og_get_group_objects($nid, $bundles = array('user'), $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) { 
+function og_get_group_objects($nid, $obj_type = 'user', $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) { 
   $field = field_info_field('og_audience');
+  
   $conditions = array(
     array('value', $nid),
-    array('bundle', $bundles),
+    array('type', $obj_type),
   );
   
-  return field_attach_query($field['id'], $conditions, $count, $cursor);  
+  // Get the objects IDs.
+  $result = field_attach_query($field['id'], $conditions, $count, $cursor);
+
+  // Prepare objects for loading.
+  $objects = array();
+  
+  // TODO: Get the ID key name (e.g. 'nid' or 'uid').
+  $id_key = 'uid';
+  
+  foreach ($result[$obj_type] as $key => $value) {
+    $object = new stdClass();
+    $object->{$id_key} = $key;
+    $objects[$key] = $object;
+  }
+
+  field_attach_load($obj_type, $objects, FIELD_LOAD_CURRENT, array('field_id' => $field['id']));
+  return $objects;
 }
 
 /**
