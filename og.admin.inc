@@ -14,31 +14,6 @@
  * @see og_user_admin_account_submit()
  */
 function og_user_admin_account($form, $form_state, $node) {
-  $header = array(
-    array(),
-    array('data' => t('Username'), 'field' => 'u.name'),
-    array('data' => t('Status'), 'field' => 'u.status'),
-    t('Roles'),
-    t('Operations')
-  );
-
-  $query = db_select('users', 'u');
-  $query->leftJoin('og_users_roles', 'ur', 'u.uid = ur.uid');
-  
-  $query->condition('u.uid', 0, '<>');
-  user_build_filter_query($query);
-
-  $count_query = clone $query;
-  $count_query->addExpression('COUNT(DISTINCT u.uid)');
-
-  $query = $query->extend('PagerDefault')->extend('TableSort');
-  $query
-    ->fields('u', array('uid', 'name', 'status', 'created', 'access'))
-    ->limit(50)
-    ->orderByHeader($header)
-    ->setCountQuery($count_query);
-  $result = $query->execute();
-
   $form['options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Update options'),
