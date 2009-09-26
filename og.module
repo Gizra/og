@@ -446,6 +446,8 @@ function og_og_permission() {
       'description' => t("Add a new user to the group."),
     ),
     'administer group users' => array(
+      'title' => t('Administer group users'),
+      'description' => t('Manage or block users, and manage their role assignments in the group.'),    
     )
   );
 }
