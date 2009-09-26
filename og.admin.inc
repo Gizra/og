@@ -59,8 +59,7 @@ function og_user_admin_account($form, $form_state, $node) {
     '#value' => t('Update'),
   );
   
-  $result = og_get_group_objects($node->nid, 'user');
-  dpm($result);
+  $result = og_get_group_users($node->nid);
   $destination = drupal_get_destination();
 
   $status = array(t('blocked'), t('pending'), t('active'));

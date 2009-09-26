@@ -628,14 +628,15 @@ function og_delete_group($nid) {
  * @param $cursor
  * 
  * @return
- *   Array with the object IDs.
+ *   Array keyed with the object IDs and the value as array with the field 
+ *   values.
  */
-function og_get_group_objects($nid, $obj_type = 'user', $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) { 
+function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) { 
   $field = field_info_field('og_audience');
   
   $conditions = array(
     array('value', $nid),
-    array('type', $obj_type),
+    array('type', 'user'),
   );
   
   // Get the objects IDs.
@@ -643,18 +644,39 @@ function og_get_group_objects($nid, $obj_type = 'user', $count = FIELD_QUERY_NO_
 
   // Prepare objects for loading.
   $objects = array();
-  
-  // TODO: Get the ID key name (e.g. 'nid' or 'uid').
-  $id_key = 'uid';
-  
-  foreach ($result[$obj_type] as $key => $value) {
+    
+  foreach ($result['user'] as $key => $value) {
     $object = new stdClass();
-    $object->{$id_key} = $key;
+    $object->uid = $key;
     $objects[$key] = $object;
   }
 
-  field_attach_load($obj_type, $objects, FIELD_LOAD_CURRENT, array('field_id' => $field['id']));
-  return $objects;
+  field_attach_load('user', $objects, FIELD_LOAD_CURRENT, array('field_id' => $field['id']));
+  
+  $return = array();
+  
+  // Get the names of the users.
+  $names = db_query("SELECT uid, name FROM {users} WHERE uid IN (:uids)", array(':uids' => array_keys($objects)))->fetchAllKeyed();
+    
+  // Prepare the return values.
+  foreach ($objects as $key => $value) {
+    // OG audience may be multiple field, but the group can appear only once,
+    // so we extract only the value with our requested group.
+    $return[$key] = (object)_og_get_group_from_field($value, $nid);
+    // Add back the user ID and user name.
+    $return[$key]->uid = $key;
+    $return[$key]->name = $names[$key];
+  }
+  
+  return $return;
+}
+
+function _og_get_group_from_field($object, $nid) {
+  foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $value) {
+    if ($value['value'] == $nid) {
+      return $value;
+    }
+  }
 }
 
 /**
@@ -674,9 +696,8 @@ function og_get_groups($obj_type, $object, $check_state = TRUE) {
   $object = og_load_object($obj_type, $object);
 
   $groups = array();
-  $langcode = FIELD_LANGUAGE_NONE;
-  if (!empty($object->{OG_AUDIENCE_FIELD}[$langcode])) {
-    foreach ($object->{OG_AUDIENCE_FIELD}[$langcode] as $group) {
+  if (!empty($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE])) {
+    foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $group) {
       if ($check_state && $group['state'] != 'active') {
         // Don't register the group if it's state isn't active.
         continue;
