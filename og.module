@@ -691,19 +691,19 @@ function _og_get_group_from_field($object, $nid) {
  *   The object type (e.g. "node" or "user").
  * @param $object
  *   The object can be a user, node or any fieldable entity.
- * @param $check_state
- *   Optioanl; If true then only "active" state groups will be returned.
+ * @param $state
+ *   Optioanl; Array with the state to return
  * @return
  *  An array with the group, or an empty array.
  */
-function og_get_groups($obj_type, $object, $check_state = TRUE) {
+function og_get_groups($obj_type, $object, $state = array(OG_STATE_ACTIVE)) {
   // Load object to get the fields.
   $object = og_load_object($obj_type, $object);
 
   $groups = array();
   if (!empty($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE])) {
     foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $group) {
-      if ($check_state && $group['state'] != 'active') {
+      if (!in_array($group['state'], $state)) {
         // Don't register the group if it's state isn't active.
         continue;
       }
