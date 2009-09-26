@@ -39,7 +39,7 @@ function og_user_admin_account($form, $form_state, $node) {
     '#value' => t('Update'),
   );
 
-  $result = og_get_group_users($node->nid);
+  $result = og_get_group_users($node->nid, array());
   $destination = drupal_get_destination();
 
   $status = array('blocked' => t('blocked'), 'pending' => t('pending'), 'active' => t('active'));
@@ -80,7 +80,7 @@ function og_user_admin_account_validate($form, &$form_state) {
 function og_user_admin_account_submit($form, &$form_state) {
   $nid = $form_state['values']['nid'];
 
-  $operations = module_invoke_all('user_operations', $form, $form_state);
+  $operations = module_invoke_all('og_user_operations', $form, $form_state + array('nid' => $nid));
   $operation = $operations[$form_state['values']['operation']];
   // Filter out unchecked accounts.
   $accounts = array_filter($form_state['values']['accounts']);

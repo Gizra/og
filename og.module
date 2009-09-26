@@ -629,12 +629,10 @@ function og_delete_group($nid) {
 }
 
 /**
- * Get all the objects belonging to a group.
+ * Get all the users belonging to a group.
  *
  * @param $nid
  *   The group node ID.
- * @param $obj_type
- *   The type of $object; e.g. 'node' or 'user'.
  * @param $count
  * @param $cursor
  *
@@ -642,7 +640,9 @@ function og_delete_group($nid) {
  *   Array keyed with the object IDs and the value as array with the field
  *   values.
  */
-function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
+function og_get_group_users($nid, $states = array(OG_STATE_ACTIVE), $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
+  $return = array();
+
   $field = field_info_field('og_audience');
 
   $conditions = array(
@@ -651,34 +651,38 @@ function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
   );
 
   // Get the objects IDs.
-  $result = field_attach_query($field['id'], $conditions, $count, $cursor);
+  if ($result = field_attach_query($field['id'], $conditions, $count, $cursor)) {
+    // Prepare objects for loading.
+    $objects = array();
 
-  // Prepare objects for loading.
-  $objects = array();
+    foreach ($result['user'] as $key => $value) {
+      $object = new stdClass();
+      $object->uid = $key;
+      $objects[$key] = $object;
+    }
 
-  foreach ($result['user'] as $key => $value) {
-    $object = new stdClass();
-    $object->uid = $key;
-    $objects[$key] = $object;
+    field_attach_load('user', $objects, FIELD_LOAD_CURRENT, array('field_id' => $field['id']));
+
+
+    // Get the names of the users.
+    $names = db_query("SELECT uid, name FROM {users} WHERE uid IN (:uids)", array(':uids' => array_keys($objects)))->fetchAllKeyed();
+
+    // Prepare the return values.
+    foreach ($objects as $key => $value) {
+      $group = (object)og_get_group_from_object($nid, 'user', $value);
+
+      // Check if the user's state is valid.
+      if (!empty($states) && !in_array($group->state, $states)) {
+        continue;
+      }
+      // OG audience may be multiple field, but the group can appear only once,
+      // so we extract only the value with our requested group.
+      $return[$key] = $group;
+      // Add back the user ID and user name.
+      $return[$key]->uid = $key;
+      $return[$key]->name = $names[$key];
+    }
   }
-
-  field_attach_load('user', $objects, FIELD_LOAD_CURRENT, array('field_id' => $field['id']));
-
-  $return = array();
-
-  // Get the names of the users.
-  $names = db_query("SELECT uid, name FROM {users} WHERE uid IN (:uids)", array(':uids' => array_keys($objects)))->fetchAllKeyed();
-
-  // Prepare the return values.
-  foreach ($objects as $key => $value) {
-    // OG audience may be multiple field, but the group can appear only once,
-    // so we extract only the value with our requested group.
-    $return[$key] = (object)og_get_group_from_object($nid, 'user', $value);
-    // Add back the user ID and user name.
-    $return[$key]->uid = $key;
-    $return[$key]->name = $names[$key];
-  }
-
   return $return;
 }
 
@@ -1751,8 +1755,10 @@ function og_og_user_operations($form = array(), $form_state = array()) {
  * Callback function for admin mass approving users.
  */
 function og_user_operations_approve($nid, $accounts) {
+  $node = node_load($nid);
   // Intersect account with pending or blocked state users.
-  $accounts = array_intersect($accounts, og_get_groups('user', $node->nid, array(OG_PENDING_STATE, OG_BLOCKED_STATE)));
+  $users = array_keys(og_get_group_users($nid, array(OG_STATE_PENDING, OG_STATE_BLOCKED)));
+  $accounts = array_intersect($accounts, $users);
   foreach ($accounts as $uid) {
     $group = array(
       'value' => $nid,
@@ -1768,8 +1774,10 @@ function og_user_operations_approve($nid, $accounts) {
  * Callback function for admin mass denying users.
  */
 function og_user_operations_deny($nid, $accounts) {
+  $node = node_load($nid);
   // Intersect account with active state users.
-  $accounts = array_intersect($accounts, og_get_groups('user', $node->nid, array(OG_PENDING_ACTIVE)));
+  $users = array_keys(og_get_group_users($nid, array(OG_STATE_ACTIVE)));
+  $accounts = array_intersect($accounts, $users);
 
   foreach ($accounts as $uid) {
     $account = user_load($uid);
