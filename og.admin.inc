@@ -22,7 +22,8 @@ function og_user_admin_account($form, $form_state, $node) {
   );
   $options = array();
   foreach (module_implements('og_user_operations') as $module) {
-    foreach (module_invoke($module, 'og_user_operations') as $operation => $array) {
+    $result = call_user_func($module . '_og_user_operations', array(), array('nid' => $node->nid));
+    foreach ($result as $operation => $array) {
       $options[$operation] = $array['label'];
     }
   }
@@ -47,6 +48,7 @@ function og_user_admin_account($form, $form_state, $node) {
     $accounts[$account->uid] = '';
     $form['name'][$account->uid] = array('#markup' => theme('username', $account));
     $form['status'][$account->uid] =  array('#markup' => $status[$account->state]);
+    $user_roles = array();
     foreach (og_get_user_roles($node->nid, $account->uid) as $rid) {
       $user_roles[] = $roles[$rid];
     }

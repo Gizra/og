@@ -1649,20 +1649,26 @@ function og_check_token($token, $seed) {
  * Implement hook_og_user_operations().
  */
 function og_og_user_operations($form = array(), $form_state = array()) {
+  $nid = $form_state['nid'];
   $operations = array(
     'unblock' => array(
-      'label' => t('Approve the selected users'),
-      'callback' => 'og_user_user_operations_approve',
+      'label' => t('Approve membership of the selected users'),
+      'callback' => 'og_user_operations_approve',
     ),
     'block' => array(
-      'label' => t('Reject and block the selected users'),
-      'callback' => 'user_user_operations_block',
+      'label' => t('Deny membership from the selected users'),
+      'callback' => 'og_user_operations_block',
     ),
   );
 
-  if (user_access('administer group permissions')) {
-    $roles = og_get_group_roles($node->nid);
-    unset($roles[DRUPAL_AUTHENTICATED_RID]);  // Can't edit authenticated role.
+  if (og_user_access($nid, 'administer group permissions')) {
+    $roles = og_get_group_roles($nid);
+    // Can't edit anonymous and authenticated role.
+    unset($roles[OG_ANONYMOUS_ROLE]);
+    unset($roles[OG_AUTHENTICATED_ROLE]);
+
+    // Flip roles array, so we get the role name.
+    $roles = array_flip($roles);
 
     $add_roles = array();
     foreach ($roles as $key => $value) {
@@ -1695,9 +1701,9 @@ function og_og_user_operations($form = array(), $form_state = array()) {
     $operation = $operation_rid[0];
     if ($operation == 'add_role' || $operation == 'remove_role') {
       $rid = $operation_rid[1];
-      if (user_access('administer permissions')) {
+      if (og_user_access($nid, 'administer group permissions')) {
         $operations[$form_state['values']['operation']] = array(
-          'callback' => 'user_multiple_role_edit',
+          'callback' => 'og_user_multiple_role_edit',
           'callback arguments' => array($operation, $rid),
         );
       }
@@ -1714,7 +1720,7 @@ function og_og_user_operations($form = array(), $form_state = array()) {
 /**
  * Callback function for admin mass unblocking users.
  */
-function user_user_operations_unblock($accounts) {
+function og_user_operations_unblock($accounts) {
   foreach ($accounts as $uid) {
     $account = user_load($uid);
     // Skip unblocking user if they are already unblocked.
@@ -1727,7 +1733,7 @@ function user_user_operations_unblock($accounts) {
 /**
  * Callback function for admin mass blocking users.
  */
-function user_user_operations_block($accounts) {
+function og_user_operations_block($accounts) {
   foreach ($accounts as $uid) {
     $account = user_load($uid);
     // Skip blocking user if they are already blocked.
@@ -1740,7 +1746,7 @@ function user_user_operations_block($accounts) {
 /**
  * Callback function for admin mass adding/deleting a user role.
  */
-function user_multiple_role_edit($accounts, $operation, $rid) {
+function og_user_multiple_role_edit($accounts, $operation, $rid) {
   // The role name is not necessary as user_save() will reload the user
   // object, but some modules' hook_user() may look at this first.
   $role_name = db_query('SELECT name FROM {role} WHERE rid = :rid', array(':rid' => $rid))->fetchField();
@@ -1767,76 +1773,4 @@ function user_multiple_role_edit($accounts, $operation, $rid) {
       }
       break;
   }
-}
-
-function user_multiple_cancel_confirm($form, &$form_state) {
-  $edit = $form_state['input'];
-
-  $form['accounts'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
-  // array_filter() returns only elements with TRUE values.
-  foreach (array_filter($edit['accounts']) as $uid => $value) {
-    $user = db_query('SELECT name FROM {users} WHERE uid = :uid', array(':uid' => $uid))->fetchField();
-    $form['accounts'][$uid] = array('#type' => 'hidden', '#value' => $uid, '#prefix' => '<li>', '#suffix' => check_plain($user) . "</li>\n");
-  }
-
-  $form['operation'] = array('#type' => 'hidden', '#value' => 'cancel');
-
-  module_load_include('inc', 'user', 'user.pages');
-  $form['user_cancel_method'] = array(
-    '#type' => 'item',
-    '#title' => t('When cancelling these accounts'),
-  );
-  $form['user_cancel_method'] += user_cancel_methods();
-  // Remove method descriptions.
-  foreach (element_children($form['user_cancel_method']) as $element) {
-    unset($form['user_cancel_method'][$element]['#description']);
-  }
-
-  // Allow to send the account cancellation confirmation mail.
-  $form['user_cancel_confirm'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Require e-mail confirmation to cancel account.'),
-    '#default_value' => FALSE,
-    '#description' => t('When enabled, the user must confirm the account cancellation via e-mail.'),
-  );
-  // Also allow to send account canceled notification mail, if enabled.
-  $form['user_cancel_notify'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Notify user when account is canceled.'),
-    '#default_value' => FALSE,
-    '#access' => variable_get('user_mail_status_canceled_notify', FALSE),
-    '#description' => t('When enabled, the user will receive an e-mail notification after the account has been cancelled.'),
-  );
-
-  return confirm_form($form,
-                      t('Are you sure you want to cancel these user accounts?'),
-                      'admin/people', t('This action cannot be undone.'),
-                      t('Cancel accounts'), t('Cancel'));
-}
-
-/**
- * Submit handler for mass-account cancellation form.
- *
- * @see user_multiple_cancel_confirm()
- * @see user_cancel_confirm_form_submit()
- */
-function user_multiple_cancel_confirm_submit($form, &$form_state) {
-  global $user;
-
-  if ($form_state['values']['confirm']) {
-    foreach ($form_state['values']['accounts'] as $uid => $value) {
-      // Prevent user administrators from deleting themselves without confirmation.
-      if ($uid == $user->uid) {
-        $admin_form_state = $form_state;
-        unset($admin_form_state['values']['user_cancel_confirm']);
-        $admin_form_state['values']['_account'] = $user;
-        user_cancel_confirm_form_submit(array(), $admin_form_state);
-      }
-      else {
-        user_cancel($form_state['values'], $uid, $form_state['values']['user_cancel_method']);
-      }
-    }
-  }
-  $form_state['redirect'] = 'admin/people';
-  return;
 }
