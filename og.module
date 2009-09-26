@@ -618,6 +618,29 @@ function og_delete_group($nid) {
 }
 
 /**
+ * Get all the objects belonging to a group.
+ * 
+ * @param $nid
+ *   The group node ID.
+ * @param $bundles
+ *   Array with the bundles to include or exclude. The array is keyed with 
+ *   "include" and "exclude".
+ * @param $cursor
+ * 
+ * @return
+ *   Array with the object IDs.
+ */
+function og_get_group_objects($nid, $bundles = array('user'), &$cursor = 0) { 
+  $field = field_info_field('og_audience');
+  $conditions = array(
+    array('value', $nid),
+    array('bundle', $bundles),
+  );
+  
+  return field_attach_query($field['id'], $conditions, FIELD_QUERY_NO_LIMIT, $cursor);  
+}
+
+/**
  * Get the groups a content is associated with.
  *
  * @param $obj_type
@@ -1373,7 +1396,7 @@ function og_get_group_roles($nid) {
  *   Array with the role IDs of the user.
  */
 function og_get_user_roles($nid, $uid) {
-  return db_query("SELECT role, role FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchAllKeyed();
+  return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchAllKeyed();
 }
 
 /**
