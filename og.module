@@ -147,6 +147,18 @@ function og_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
   );
+  
+  // User listing pages.
+  $items['og/%node/admin/people'] = array(
+    'title' => 'People',
+    'description' => 'Find and manage group members.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_user_admin_account', 1),
+    'access callback' => 'og_access',  
+    'access arguments' => array('administer group users', 1),
+    'weight' => -4,
+    'file' => 'og.admin.inc',
+  );  
 
   // Permission administration pages.
   $items['og/%node/admin/people/roles'] = array(
@@ -250,6 +262,10 @@ function og_theme() {
       'arguments' => array('form' => NULL),
       'file' => 'og.admin.inc',
     ),
+    'og_user_admin_account' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'og.admin.inc',
+    ),    
   );
 }
 

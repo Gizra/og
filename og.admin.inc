@@ -7,6 +7,158 @@
  */
 
 /**
+ * Form builder; User administration page.
+ *
+ * @ingroup forms
+ * @see og_user_admin_account_validate()
+ * @see og_user_admin_account_submit()
+ */
+function og_user_admin_account($form, $form_state, $node) {
+  $header = array(
+    array(),
+    array('data' => t('Username'), 'field' => 'u.name'),
+    array('data' => t('Status'), 'field' => 'u.status'),
+    t('Roles'),
+    t('Operations')
+  );
+
+  $query = db_select('users', 'u');
+  $query->leftJoin('og_users_roles', 'ur', 'u.uid = ur.uid');
+  
+  $query->condition('u.uid', 0, '<>');
+  user_build_filter_query($query);
+
+  $count_query = clone $query;
+  $count_query->addExpression('COUNT(DISTINCT u.uid)');
+
+  $query = $query->extend('PagerDefault')->extend('TableSort');
+  $query
+    ->fields('u', array('uid', 'name', 'status', 'created', 'access'))
+    ->limit(50)
+    ->orderByHeader($header)
+    ->setCountQuery($count_query);
+  $result = $query->execute();
+
+  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update options'),
+    '#prefix' => '<div class="container-inline">',
+    '#suffix' => '</div>',
+  );
+  $options = array();
+  foreach (module_invoke_all('og_user_operations') as $operation => $array) {
+    $options[$operation] = $array['label'];
+  }
+  $form['options']['operation'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => 'unblock',
+  );
+  $form['options']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
+
+  $destination = drupal_get_destination();
+
+  $status = array(t('blocked'), t('active'));
+  $roles = user_roles(TRUE);
+  $accounts = array();
+  foreach ($result as $account) {
+    $accounts[$account->uid] = '';
+    $form['name'][$account->uid] = array('#markup' => theme('username', $account));
+    $form['status'][$account->uid] =  array('#markup' => $status[$account->status]);
+    $users_roles = array();
+    $roles_result = db_query('SELECT rid FROM {users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
+    foreach ($roles_result as $user_role) {
+      $users_roles[] = $roles[$user_role->rid];
+    }
+    asort($users_roles);
+    $form['roles'][$account->uid][0] = array('#markup' => theme('item_list', $users_roles));
+    $form['operations'][$account->uid] = array('#markup' => l(t('edit'), "user/$account->uid/edit", array('query' => $destination)));
+  }
+  $form['accounts'] = array(
+    '#type' => 'checkboxes',
+    '#options' => $accounts
+  );
+  $form['pager'] = array('#markup' => theme('pager', NULL));
+
+  return $form;
+}
+
+
+function og_user_admin_account_validate($form, &$form_state) {
+  $form_state['values']['accounts'] = array_filter($form_state['values']['accounts']);
+  if (count($form_state['values']['accounts']) == 0) {
+    form_set_error('', t('No users selected.'));
+  }
+}
+
+/**
+ * Submit the user administration update form.
+ */
+function og_user_admin_account_submit($form, &$form_state) {
+  $operations = module_invoke_all('user_operations', $form, $form_state);
+  $operation = $operations[$form_state['values']['operation']];
+  // Filter out unchecked accounts.
+  $accounts = array_filter($form_state['values']['accounts']);
+  if ($function = $operation['callback']) {
+    // Add in callback arguments if present.
+    if (isset($operation['callback arguments'])) {
+      $args = array_merge(array($accounts), $operation['callback arguments']);
+    }
+    else {
+      $args = array($accounts);
+    }
+    call_user_func_array($function, $args);
+
+    drupal_set_message(t('The update has been performed.'));
+  }
+}
+
+/**
+ * Theme user administration overview.
+ *
+ * @ingroup themeable
+ */
+function theme_og_user_admin_account($form) {
+  // Overview table:
+  $header = array(
+    theme('table_select_header_cell'),
+    array('data' => t('Username'), 'field' => 'u.name'),
+    array('data' => t('Status'), 'field' => 'u.status'),
+    t('Roles'),
+    t('Operations')
+  );
+
+  $output = drupal_render($form['options']);
+  if (!empty($form['name'])) {
+    foreach (element_children($form['name']) as $key) {
+      $rows[] = array(
+        drupal_render($form['accounts'][$key]),
+        drupal_render($form['name'][$key]),
+        drupal_render($form['status'][$key]),
+        drupal_render($form['roles'][$key]),
+        drupal_render($form['operations'][$key]),
+      );
+    }
+  }
+  else {
+    $rows[] = array(array('data' => t('No users available.'), 'colspan' => '7'));
+  }
+
+  $output .= theme('table', $header, $rows);
+  if ($form['pager']['#markup']) {
+    $output .= drupal_render($form['pager']);
+  }
+
+  $output .= drupal_render_children($form);
+
+  return $output;
+}
+
+
+/**
  * Menu callback: administer roles.
  *
  * @ingroup forms
