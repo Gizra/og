@@ -147,7 +147,7 @@ function og_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
   );
-  
+
   // User listing pages.
   $items['og/%node/admin/people'] = array(
     'title arguments' => array('People in group @group', 1),
@@ -155,11 +155,11 @@ function og_menu() {
     'description' => 'Find and manage group members.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_user_admin_account', 1),
-    'access callback' => 'og_access',  
+    'access callback' => 'og_access',
     'access arguments' => array('administer group users', 1),
     'weight' => -4,
     'file' => 'og.admin.inc',
-  );  
+  );
 
   // Permission administration pages.
   $items['og/%node/admin/people/roles'] = array(
@@ -266,7 +266,7 @@ function og_theme() {
     'og_user_admin_account' => array(
       'arguments' => array('form' => NULL),
       'file' => 'og.admin.inc',
-    ),    
+    ),
   );
 }
 
@@ -344,7 +344,7 @@ function og_node_type_delete($info) {
 
 /**
 * Implement hook_node_type_insert().
-* 
+*
 * TODO: USe after http://drupal.org/node/586436 gets in.
 */
 function og_node_type_insert($info) {
@@ -366,19 +366,19 @@ function og_node_insert($node) {
     $role = new stdClass;
     $role->name = OG_ANONYMOUS_ROLE;
     $role->nid = $node->nid;
-    og_user_role_save($role);    
+    og_user_role_save($role);
     $anon_rid = $role->rid;
 
     unset($role->rid);
     $role->name = OG_AUTHENTICATED_ROLE;
-    og_user_role_save($role);    
+    og_user_role_save($role);
     $auth_rid = $role->rid;
 
     unset($role->rid);
     $role->name = 'admin';
-    og_user_role_save($role);    
+    og_user_role_save($role);
     $admin_rid = $role->rid;
-    
+
     // Create default permissions for roles.
     $perms = array(
       OG_ANONYMOUS_ROLE => array('subscribe'),
@@ -386,10 +386,10 @@ function og_node_insert($node) {
       // All permissions.
       OG_ADMINISTRATOR_ROLE => array_keys(og_permissions_get()),
     );
-    
+
     // Allow other modules to change default permissions.
     drupal_alter('og_group_insert', $perms, $node);
-    
+
     og_user_role_grant_permissions($anon_rid, $perms[OG_ANONYMOUS_ROLE]);
     og_user_role_grant_permissions($auth_rid, $perms[OG_AUTHENTICATED_ROLE]);
     og_user_role_grant_permissions($admin_rid, $perms[OG_ADMINISTRATOR_ROLE]);
@@ -444,7 +444,9 @@ function og_og_permission() {
     'add user' => array(
       'title' => t('Add user'),
       'description' => t("Add a new user to the group."),
-    ),    
+    ),
+    'administer group users' => array(
+    )
   );
 }
 
@@ -620,32 +622,32 @@ function og_delete_group($nid) {
 
 /**
  * Get all the objects belonging to a group.
- * 
+ *
  * @param $nid
  *   The group node ID.
  * @param $obj_type
  *   The type of $object; e.g. 'node' or 'user'.
  * @param $count
  * @param $cursor
- * 
+ *
  * @return
- *   Array keyed with the object IDs and the value as array with the field 
+ *   Array keyed with the object IDs and the value as array with the field
  *   values.
  */
-function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) { 
+function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
   $field = field_info_field('og_audience');
-  
+
   $conditions = array(
     array('value', $nid),
     array('type', 'user'),
   );
-  
+
   // Get the objects IDs.
   $result = field_attach_query($field['id'], $conditions, $count, $cursor);
 
   // Prepare objects for loading.
   $objects = array();
-    
+
   foreach ($result['user'] as $key => $value) {
     $object = new stdClass();
     $object->uid = $key;
@@ -653,12 +655,12 @@ function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
   }
 
   field_attach_load('user', $objects, FIELD_LOAD_CURRENT, array('field_id' => $field['id']));
-  
+
   $return = array();
-  
+
   // Get the names of the users.
   $names = db_query("SELECT uid, name FROM {users} WHERE uid IN (:uids)", array(':uids' => array_keys($objects)))->fetchAllKeyed();
-    
+
   // Prepare the return values.
   foreach ($objects as $key => $value) {
     // OG audience may be multiple field, but the group can appear only once,
@@ -668,7 +670,7 @@ function og_get_group_users($nid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
     $return[$key]->uid = $key;
     $return[$key]->name = $names[$key];
   }
-  
+
   return $return;
 }
 
@@ -733,19 +735,19 @@ function og_get_og_types() {
  *   The node type to be checked.
  * @param $type
  *   The grou usage type. Must be "group" or "group post".
- * 
+ *
  * @return
  *   The group type or an "omitted" if node type doesn't participate in
  *   organic groups.
  */
 function og_get_group_type($node_type, $type = 'group') {
   if ($type == 'group') {
-    return variable_get('og_group_type_' . $type, 'omitted');  
+    return variable_get('og_group_type_' . $type, 'omitted');
   }
   elseif ($type == 'group post') {
     return variable_get('og_group_post_type_' . $type, 'omitted');
   }
-  
+
 }
 
 /**
@@ -783,7 +785,7 @@ function og_is_group_post_type($node_type) {
  *   Optioanl; True if the group lists should replace the existing subscrptions
  *   of the user.
  * @param $request
- *   Optioanl; A message created by the requesting user that should be sent to 
+ *   Optioanl; A message created by the requesting user that should be sent to
  *   the group admins.
  */
 function og_subscribe_user($groups = array(), $account = NULL, $replace = FALSE, $request = '') {
@@ -827,7 +829,7 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  *   Optioanl; True if the group lists should replace the existing subscrptions
  *   of the user.
  * @param $request
- *   Optioanl; A message created by the requesting user that should be sent to 
+ *   Optioanl; A message created by the requesting user that should be sent to
  *   the group admins.
  */
 function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE, $request = '') {
@@ -1348,9 +1350,9 @@ function og_user_access($nid, $string, $account = NULL) {
   // in a static variable, if the user is authenticated.
   if (!isset($perm[$nid][$account->uid])) {
     $user_groups = og_get_groups('user', $account);
-    
+
     // Get default roles.
-    $default_roles = og_get_group_default_roles($nid);    
+    $default_roles = og_get_group_default_roles($nid);
     if (!in_array($nid, $user_groups)) {
       // Keep only the anonymous role.
       $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
@@ -1358,7 +1360,7 @@ function og_user_access($nid, $string, $account = NULL) {
     else {
       // Add the authenticated role.
       $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
-      // Get otehr roles assigned to the user in the group.      
+      // Get otehr roles assigned to the user in the group.
       $roles += og_get_user_roles($nid, $account->uid);
     }
 
@@ -1622,9 +1624,9 @@ function og_permissions_get() {
   if (!empty($perms)) {
     return $perms;
   }
-  
+
   $perms = module_invoke_all('og_permission');
-  return $perms;   
+  return $perms;
 }
 
 /**
