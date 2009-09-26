@@ -21,9 +21,12 @@ function og_user_admin_account($form, $form_state, $node) {
     '#suffix' => '</div>',
   );
   $options = array();
-  foreach (module_invoke_all('og_user_operations') as $operation => $array) {
-    $options[$operation] = $array['label'];
+  foreach (module_implements('og_user_operations') as $module) {
+    foreach (module_invoke($module, 'og_user_operations') as $operation => $array) {
+      $options[$operation] = $array['label'];
+    }
   }
+
   $form['options']['operation'] = array(
     '#type' => 'select',
     '#options' => $options,
@@ -33,7 +36,7 @@ function og_user_admin_account($form, $form_state, $node) {
     '#type' => 'submit',
     '#value' => t('Update'),
   );
-  
+
   $result = og_get_group_users($node->nid);
   $destination = drupal_get_destination();
 
