@@ -223,7 +223,7 @@ function theme_field_formatter_og_list_default($element) {
   // index key, which is the group node ID.
   $options = $options['content groups'] + $options['other groups'];
   // Return the group's link.
-  $return = l($options[$element['#item']['value']], 'node/'. $element['#item']['value']);
+  $return = l($options[$element['#item']['value']], 'node/' . $element['#item']['value']);
   return $return;
 }
 

@@ -39,7 +39,7 @@ function og_subscribe($node, $uid = NULL) {
     // Check user isn't already subscribed.
     if (in_array($node->nid, og_get_groups('user', $account))) {
       drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title)));
-      drupal_goto('node/'. $node->nid);
+      drupal_goto('node/' . $node->nid);
     }
     else {
       // Show the user a subscription confirmation.
@@ -64,7 +64,7 @@ function og_confirm_subscribe($form, &$form_state, $node, $account) {
       '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
     );
   }
- return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $node->title)), 'node/'. $node->nid, ' ', t('Join'), t('Cancel'));
+ return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $node->title)), 'node/' . $node->nid, ' ', t('Join'), t('Cancel'));
 }
 
 /**
@@ -84,7 +84,7 @@ function og_confirm_subscribe_submit($form, &$form_state) {
 
   og_subscribe_user(array($group), NULL, FALSE, $request);
 
-  $form_state['redirect'] = node_access('view', 'node/'. $form_state['values']['gid']) ? 'node/'. $form_state['values']['gid'] : '';
+  $form_state['redirect'] = node_access('view', 'node/' . $form_state['values']['gid']) ? 'node/' . $form_state['values']['gid'] : '';
 }
 
 
@@ -94,7 +94,7 @@ function og_confirm_subscribe_submit($form, &$form_state) {
 function og_confirm_unsubscribe($form, &$form_state, $group_node, $account) {
   $form['group_node'] = array('#type' => 'value', '#value' => $group_node);
   $form['account'] = array('#type' => 'value', '#value' => $account);
-  return confirm_form($form, t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $group_node->title)), 'og/users/'. $group_node->nid, ' ', t('Remove'), t('Cancel'));
+  return confirm_form($form, t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $group_node->title)), 'og/users/' . $group_node->nid, ' ', t('Remove'), t('Cancel'));
 }
 
 /**

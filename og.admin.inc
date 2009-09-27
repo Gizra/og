@@ -240,7 +240,7 @@ function og_user_admin_role_submit($form, &$form_state) {
     og_user_role_save($role);
     drupal_set_message(t('The role has been added.'));
   }
-  $form_state['redirect'] = 'og/' . $form_state['values']['nid'] .'/admin/people/roles';
+  $form_state['redirect'] = 'og/' . $form_state['values']['nid'] . '/admin/people/roles';
   return;
 }
 
@@ -417,7 +417,7 @@ function og_admin_settings() {
     '#type' => 'radios',
     '#title' => t('Groups directory control'),
     '#default_value' => variable_get('og_visibility_directory', OG_DIRECTORY_CHOOSE_TRUE),
-    '#description' =>t('Site admins always see the checkbox for adding a group to the <em>groups directory</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'),
+    '#description' => t('Site admins always see the checkbox for adding a group to the <em>groups directory</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'),
     '#options' => $options
   );
 
@@ -432,7 +432,7 @@ function og_admin_settings() {
     '#type' => 'radios',
     '#title' => t('Registration form control'),
     '#default_value' => variable_get('og_visibility_registration', OG_REGISTRATION_CHOOSE_FALSE),
-    '#description' =>t('OG admins always see the checkbox for adding a group to the <em>registration form</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'),
+    '#description' => t('OG admins always see the checkbox for adding a group to the <em>registration form</em>. Note that changing this setting has no effect on existing posts. Re-save those posts to acquire this new setting.'),
     '#options' => $options
   );
 

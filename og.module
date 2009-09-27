@@ -786,7 +786,7 @@ function og_get_og_types() {
 
   $og_types = module_invoke_all('og_types_info');
   // Add a non organic groups type.
-  $og_types['omitted'] = array('type'=> 'omitted', 'description' => t('May not be posted into a group.'));
+  $og_types['omitted'] = array('type' => 'omitted', 'description' => t('May not be posted into a group.'));
 
   return $og_types;
 }
