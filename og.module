@@ -829,6 +829,13 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
   }
 
   og_delete_association('user', $account, $gids);
+
+  // Delete any roles the user had.
+  foreach ($gids as $gid) {
+    foreach ( og_get_user_roles($gid, $account->uid) as $rid) {
+      og_users_roles_revoke($gid, $account->uid, $rid);
+    }
+  }
 }
 
 /**
