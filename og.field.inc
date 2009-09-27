@@ -87,6 +87,8 @@ function og_field_widget_info() {
  * Implement hook_field_widget().
  */
 function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = NULL) {
+  dpm(array($form, $form_state, $field, $instance, $langcode, $items, $delta));
+
   $default_values = array();
   if (!empty($items)) {
     foreach ($items as $item) {
@@ -96,6 +98,10 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
   $element = array(
     '#type' => $instance['widget']['type'],
     '#default_value' => $default_values,
+    // If it's an existing node, then exclude itself, as in some cases a group
+    // node can act also as a group post, and we want to prevent associating
+    // the node to itself.
+    '#exclude' => !empty($form['nid']['#value']) ? $form['nid']['#value'] : array(),
   );
 
   $defaults = array('data' => array(), 'state' => '');
