@@ -861,7 +861,7 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
 
   // Will be used later to keep only groups that are not yet associated with the
   // group.
-  $existing_gids = og_get_groups($obj_type, $object);
+  $existing_gids = og_get_groups($obj_type, $object, array());
 
   // Allow other modules to change the subscribed groups.
   drupal_alter('og_set_association', $groups, $obj_type, $object);
@@ -870,9 +870,7 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
   $save = FALSE;
 
   foreach ($groups as $group) {
-    if (!in_array($group['value'], $existing_gids)) {
-      // Initialize values.
-      $group += array('state' => '', 'data' => array());
+    if (in_array($group['value'], $existing_gids)) {
       $key = 0;
       if ($value = og_get_group_from_object($group['value'], $obj_type, $object, $key)) {
         // Group already exists, so we will replace it. The key was return from
@@ -882,6 +880,8 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
         $object->og_audience[FIELD_LANGUAGE_NONE][$key] = $group;
       }
       else {
+        // Initialize values.
+        $group += array('state' => '', 'data' => array());
         // Add a new record.
         $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
       }
@@ -964,6 +964,11 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   $acting_user = og_load_object('user', $acting_user);
   if (!empty($account)) {
     $account = og_load_object('user', $account);
+  }
+
+  // Check if the user was blocked.
+  if ($value = og_get_group_from_object($node->nid, 'user', $acting_user) && $value['state'] == OG_STATE_BLOCKED) {
+    return FALSE;
   }
 
   $access = module_invoke_all('og_access', $op, $node, $acting_user, $account);
@@ -1732,7 +1737,7 @@ function og_og_user_operations($form = array(), $form_state = array()) {
       'callback' => 'og_user_operations_deny',
     ),
     'block' => array(
-      'label' => t('Reject and block membership from the selected users'),
+      'label' => t('Block membership from the selected users'),
       'callback' => 'og_user_operations_block',
     ),
   );
