@@ -107,13 +107,13 @@ function og_menu() {
     'title' => 'OPML',
   );
 
-  $items['og/%node/unsubscribe/%user'] = array(
+  $items['og/%node/unsubscribe'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_confirm_unsubscribe', 1, 3),
+    'page arguments' => array('og_confirm_unsubscribe', 1),
     'access callback' => 'og_access',
-    'access arguments' => array('unsubscribe', 1 , 3),
+    'access arguments' => array('unsubscribe', 1),
     'title' => 'Leave group',
   );
 

@@ -90,10 +90,14 @@ function og_confirm_subscribe_submit($form, &$form_state) {
 
 /**
  * Confirm OG unsubscription form.
+ *
+ * The unsubscribing user is always the acting user - like this we make sure
+ * no malicious user will unsubscribe another user,
  */
-function og_confirm_unsubscribe($form, &$form_state, $group_node, $account) {
+function og_confirm_unsubscribe($form, &$form_state, $group_node) {
+  global $user;
   $form['group_node'] = array('#type' => 'value', '#value' => $group_node);
-  $form['account'] = array('#type' => 'value', '#value' => $account);
+  $form['account'] = array('#type' => 'value', '#value' => $user);
   return confirm_form($form, t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $group_node->title)), 'og/users/' . $group_node->nid, ' ', t('Remove'), t('Cancel'));
 }
 
