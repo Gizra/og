@@ -47,6 +47,7 @@ function og_user_admin_account($form, $form_state, $node) {
   $accounts = array();
 
   foreach ($result as $account) {
+    // TODO: Lock the group manager?
     $accounts[$account->uid] = '';
     $form['name'][$account->uid] = array('#markup' => theme('username', $account));
     $form['status'][$account->uid] =  array('#markup' => $status[$account->state]);

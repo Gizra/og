@@ -1797,7 +1797,7 @@ function og_user_operations_approve($nid, $accounts) {
   // Intersect account with pending or blocked state users.
   $users = array_keys(og_get_group_users($nid, array(OG_STATE_PENDING, OG_STATE_BLOCKED)));
   $accounts = array_intersect($accounts, $users);
-  $account = user_load_multiple($accounts);
+  $accounts = user_load_multiple($accounts);
   foreach ($accounts as $account) {
     $group = array(
       'value' => $nid,
@@ -1816,7 +1816,7 @@ function og_user_operations_deny($nid, $accounts) {
   // Intersect account with active state users.
   $users = array_keys(og_get_group_users($nid, array(OG_STATE_ACTIVE)));
   $accounts = array_intersect($accounts, $users);
-  $account = user_load_multiple($accounts);
+  $accounts = user_load_multiple($accounts);
 
   foreach ($accounts as $account) {
     og_unsubscribe_user(array($nid), $account);
