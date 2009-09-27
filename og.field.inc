@@ -141,7 +141,7 @@ function og_field_update($obj_type, $object, $field, $instance, $langcode, &$ite
  */
 function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &$items) {
   foreach ($items as &$item) {
-    $item['state'] = !empty($item['state']) ? $item['state'] : '';
+    $item['state'] = !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE;
     $item['data'] = !empty($item['data']) ? $item['data'] : array();
     $alter = array('state' => $item['state'], 'data' => $item['data']);
 

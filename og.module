@@ -491,7 +491,7 @@ function og_og_access($op, $node, $acting_user, $account) {
 function og_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
 
-  if (og_get_group_type($type) != 'omitted') {
+  if (og_is_group_type($type) || og_is_group_post_type($type)) {
     if ($op == 'create') {
 
     }
@@ -500,16 +500,22 @@ function og_node_access($node, $op, $account) {
         if (og_user_access($node->nid, $op . ' group', $account)) {
           return NODE_ACCESS_ALLOW;
         }
+        else {
+          return NODE_ACCESS_DENY;
+        }
       }
       else {
         // We don't have a context, so we need to get all the permissions
-        // of all the groups the user and the group post is members of.
-        $gids = array_diff(array_keys(og_get_groups('user', $account)), array_keys(og_get_groups('node', $node)));
+        // of all the groups. We don't intersect with the user's group, as
+        // groups might allow anonymous members access.
+        $gids = array_keys(og_get_groups('node', $node));
         foreach ($gids as $gid) {
           if (og_user_access($gid, $op . ' group posts', $account)) {
             return NODE_ACCESS_ALLOW;
           }
         }
+        // No access found, so deny.
+        return NODE_ACCESS_DENY;
       }
     }
   }
