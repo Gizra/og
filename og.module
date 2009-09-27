@@ -466,13 +466,21 @@ function og_og_permission() {
       'title' => t('View group posts'),
       'description' => t('View the group posts that belong to the group.'),
     ),
-    'update group posts' => array(
-      'title' => t('Edit group posts'),
-      'description' => t('Edit the group posts that belong to the group.'),
+    'update own group posts' => array(
+      'title' => t('Edit own group posts'),
+      'description' => t('Edit own group posts that belong to the group.'),
     ),
-    'delete group posts' => array(
-      'title' => t('Delete group posts'),
-      'description' => t('Delete the group posts that belong to the group.'),
+    'update any group posts' => array(
+      'title' => t('Edit any group posts'),
+      'description' => t('Edit any group posts that belong to the group.'),
+    ),
+    'delete own group posts' => array(
+      'title' => t('Delete own group posts'),
+      'description' => t('Delete own group posts that belong to the group.'),
+    ),
+    'delete any group posts' => array(
+      'title' => t('Delete any group posts'),
+      'description' => t('Delete any of the group posts that belong to the group.'),
     ),
   );
 }
@@ -498,7 +506,7 @@ function og_og_node_access($node, $op, $account) {
   }
   else {
     if (og_is_group_type($node->type)) {
-      if (og_user_access($node->nid, $op . ' group', $account)) {
+      if (og_user_access($node->nid, $op . ' any group', $account)) {
         return NODE_ACCESS_ALLOW;
       }
     }
@@ -508,7 +516,7 @@ function og_og_node_access($node, $op, $account) {
       // groups might allow anonymous members access.
       $gids = array_keys(og_get_groups('node', $node));
       foreach ($gids as $gid) {
-        if (og_user_access($gid, $op . ' group posts', $account)) {
+        if (og_user_access($gid, $op . ' any group posts', $account) || (og_user_access($gid, $op . ' own group posts', $account) && $node->uid == $account->uid)) {
           return NODE_ACCESS_ALLOW;
         }
       }
