@@ -672,8 +672,8 @@ function og_get_group_users($nid, $states = array(OG_STATE_ACTIVE), $count = FIE
       // so we extract only the value with our requested group.
       $return[$account->uid] = $group;
       // Add back the user ID and user name.
-      $return[$key]->uid = $account->uid;
-      $return[$key]->name = $account->name;
+      $return[$account->uid]->uid = $account->uid;
+      $return[$account->uid]->name = $account->name;
     }
   }
   return $return;

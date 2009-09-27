@@ -45,6 +45,7 @@ function og_user_admin_account($form, $form_state, $node) {
   $status = array('blocked' => t('blocked'), 'pending' => t('pending'), 'active' => t('active'));
   $roles = array_flip(og_get_group_roles($node->nid));
   $accounts = array();
+
   foreach ($result as $account) {
     $accounts[$account->uid] = '';
     $form['name'][$account->uid] = array('#markup' => theme('username', $account));
