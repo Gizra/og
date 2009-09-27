@@ -410,7 +410,7 @@ function og_node_insert($node) {
 * make sure it is registered.
 */
 function og_node_update($node) {
-  if (!og_get_group($node->nid)) {
+  if (og_is_group_type($node->type) && !og_get_group($node->nid)) {
     og_node_insert($node);
   }
 }
@@ -469,6 +469,10 @@ function og_og_permission() {
     'update group posts' => array(
       'title' => t('Edit group posts'),
       'description' => t('Edit the group posts that belong to the group.'),
+    ),
+    'delete group posts' => array(
+      'title' => t('Delete group posts'),
+      'description' => t('Delete the group posts that belong to the group.'),
     ),
   );
 }
