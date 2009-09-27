@@ -1561,6 +1561,50 @@ function og_user_role_delete($rid) {
 }
 
 /**
+ * Grant a group role to a user.
+ *
+ * @param $uid
+ *   The user ID.
+ * @param $rid
+ *   The role ID.
+ */
+function og_users_roles_grant($nid, $uid, $rid) {
+  // Get the existiong user roles.
+  $user_roles = og_get_user_roles($nid, $uid);
+  if (!in_array($rid, $user_roles)) {
+    $role = new stdClass();
+    $role->uid = $uid;
+    $role->rid = $rid;
+
+    drupal_write_record('og_users_roles', $role);
+    og_rules_invoke_event();
+    module_invoke_all('og_users_roles_grant', $nid, $uid, $rid);
+  }
+}
+
+/**
+ * Revoke a group role from a user.
+ *
+ * @param $uid
+ *   The user ID.
+ * @param $rid
+ *   The role ID.
+ */
+function og_users_roles_revoke($nid, $uid, $rid) {
+  // Get the existiong user roles.
+  $user_roles = og_get_user_roles($nid, $uid);
+  if (in_array($rid, $user_roles)) {
+
+    db_delete('og_users_roles')
+      ->condition('uid', $uid)
+      ->condition('rid', $rid)
+      ->execute();
+    module_invoke_all('og_users_roles_revoke', $nid, $uid, $rid);
+  }
+
+}
+
+/**
  * Change permissions for a user role.
  *
  * This function may be used to grant and revoke multiple permissions at once.
@@ -1784,7 +1828,9 @@ function og_user_operations_deny($nid, $accounts) {
 function og_user_multiple_role_edit($nid, $accounts, $operation, $rid) {
   switch ($operation) {
     case 'add_role':
-      foreach ($accounts as $uid) {
+      $accounts = user_load_multiple($accounts);
+      foreach ($accounts as $account) {
+
       }
       break;
     case 'remove_role':

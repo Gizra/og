@@ -41,7 +41,7 @@ function og_schema() {
       'nid' => array('nid'),
     ),
   );
-  
+
   $schema['og_role_permission'] = array(
     'description' => 'Stores the permissions assigned to user roles per group.',
     'fields' => array(
@@ -82,7 +82,7 @@ function og_schema() {
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
-      ),      
+      ),
       'name' => array(
         'type' => 'varchar',
         'length' => 64,
@@ -93,7 +93,7 @@ function og_schema() {
     ),
     'primary key' => array('rid'),
   );
-  
+
   $schema['og_users_roles'] = array(
     'description' => 'Maps users to roles.',
     'fields' => array(
@@ -111,12 +111,6 @@ function og_schema() {
         'default' => 0,
         'description' => 'Primary Key: {role}.rid for role.',
       ),
-      'nid'             => array(
-        'description'     => "The group node ID.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
-      ),      
     ),
     'primary key' => array('uid', 'rid'),
     'indexes' => array(
@@ -126,7 +120,7 @@ function og_schema() {
       'uid' => array('users' => 'uid'),
       'rid' => array('role' => 'rid'),
     ),
-  );  
+  );
 
   return $schema;
 }
