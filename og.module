@@ -877,27 +877,26 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
   $save = FALSE;
 
   foreach ($groups as $group) {
-    if (in_array($group['value'], $existing_gids)) {
-      $key = 0;
-      if ($value = og_get_group_from_object($group['value'], $obj_type, $object, $key)) {
-        // Group already exists, so we will replace it. The key was return from
-        // og_get_group_from_object().
-        // We preserve the data and state values, provided they aren't changed.
-        $group = array_merge($value, $group);
-        $object->og_audience[FIELD_LANGUAGE_NONE][$key] = $group;
-      }
-      else {
-        // Initialize values.
-        $group += array('state' => '', 'data' => array());
-        // Add a new record.
-        $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
-      }
-
-      og_invoke_event();
+    $key = 0;
+    if ($value = og_get_group_from_object($group['value'], $obj_type, $object, $key)) {
+      // Group already exists, so we will replace it. The key was return from
+      // og_get_group_from_object().
+      // We preserve the data and state values, provided they aren't changed.
+      $group = array_merge($value, $group);
+      $object->og_audience[FIELD_LANGUAGE_NONE][$key] = $group;
+      $save = TRUE;
+    }
+    else {
+      // Initialize values.
+      $group += array('state' => '', 'data' => array());
+      // Add a new record.
+      $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
       $save = TRUE;
     }
   }
+
   if ($save) {
+    og_invoke_event();
     call_user_func('field_attach_' . $op, $obj_type, $object);
   }
 }
