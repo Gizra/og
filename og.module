@@ -458,7 +458,7 @@ function og_og_permission() {
       'title' => t('View group'),
       'description' => t('View the group content.'),
     ),
-    'edit group' => array(
+    'update group' => array(
       'title' => t('Edit group'),
       'description' => t('Edit the group content.'),
     ),
@@ -466,7 +466,7 @@ function og_og_permission() {
       'title' => t('View group posts'),
       'description' => t('View the group posts that belong to the group.'),
     ),
-    'edit group posts' => array(
+    'update group posts' => array(
       'title' => t('Edit group posts'),
       'description' => t('Edit the group posts that belong to the group.'),
     ),
