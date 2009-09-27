@@ -173,7 +173,7 @@ function og_approve($node, $account, $token) {
     }
     else {
       og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
-      og_rules_invoke_event();
+      og_invoke_event();
 
       drupal_goto("node/$node->nid");
     }

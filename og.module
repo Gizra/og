@@ -886,7 +886,7 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
         $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
       }
 
-      og_rules_invoke_event();
+      og_invoke_event();
       $save = TRUE;
     }
   }
@@ -916,7 +916,7 @@ function og_delete_association($obj_type, $object, $gids = array()) {
     if (in_array($group['value'], $gids)) {
       unset($object->og_audience[FIELD_LANGUAGE_NONE][$key]);
 
-      og_rules_invoke_event();
+      og_invoke_event();
       $save = TRUE;
     }
   }
@@ -1262,7 +1262,7 @@ function og_get_all_groups_for_form() {
 /**
  * Wrapper function to invoke a Rules event.
  */
-function og_rules_invoke_event() {
+function og_invoke_event() {
   if (module_exists('rules')) {
     // Invoke a rule event.
   }
@@ -1577,7 +1577,7 @@ function og_users_roles_grant($nid, $uid, $rid) {
     $role->rid = $rid;
 
     drupal_write_record('og_users_roles', $role);
-    og_rules_invoke_event();
+    og_invoke_event();
     module_invoke_all('og_users_roles_grant', $nid, $uid, $rid);
   }
 }
