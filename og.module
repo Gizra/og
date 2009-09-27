@@ -233,18 +233,6 @@ function og_menu() {
     'access arguments' => array('add user', 1),
   );
 
-    // Broadcast tab on group node.
-  $items['node/%node/broadcast'] = array(
-    'title' => 'Broadcast',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_broadcast_form', 1),
-    'access callback' => 'og_access',
-    'access arguments' => array('broadcast', 1),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'og.pages.inc',
-    'weight' => 7
-  );
-
   return $items;
 }
 
