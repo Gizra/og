@@ -87,8 +87,6 @@ function og_field_widget_info() {
  * Implement hook_field_widget().
  */
 function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = NULL) {
-  dpm(array($form, $form_state, $field, $instance, $langcode, $items, $delta));
-
   $default_values = array();
   if (!empty($items)) {
     foreach ($items as $item) {
