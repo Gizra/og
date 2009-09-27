@@ -309,7 +309,6 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#title' => t('Group'),
     '#default_value' =>  og_is_group_type($node_type) ? og_get_group_type($node_type, 'group') : 'omitted',
     '#options' => array('omitted' => t('Not a group type')) + $options['group'],
-
   );
 
   $form['og']['og_group_post_type'] = array(
@@ -454,7 +453,23 @@ function og_og_permission() {
     'administer group users' => array(
       'title' => t('Administer group users'),
       'description' => t('Manage or block users, and manage their role assignments in the group.'),
-    )
+    ),
+    'view group' => array(
+      'title' => t('View group'),
+      'description' => t('View the group content.'),
+    ),
+    'edit group' => array(
+      'title' => t('Edit group'),
+      'description' => t('Edit the group content.'),
+    ),
+    'view group posts' => array(
+      'title' => t('View group posts'),
+      'description' => t('View the group posts that belong to the group.'),
+    ),
+    'edit group posts' => array(
+      'title' => t('Edit group posts'),
+      'description' => t('Edit the group posts that belong to the group.'),
+    ),
   );
 }
 
@@ -474,18 +489,15 @@ function og_og_access($op, $node, $acting_user, $account) {
  * Implement hook_node_access()
  */
 function og_node_access($node, $op, $account) {
-  // TODO: Deal with create group inside group.
-  $type = $op == 'create' ? $node : $node->type;
+  $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
+
   if (og_get_group_type($type) != 'omitted') {
     if ($op == 'create') {
 
     }
     else {
-      // Operation should be the same as the permission name.
-      $op = $op . ' ' .  $node->type .' content';
-      // Node argument is a full node object.
       if (og_is_group_type($node->type)) {
-        if (og_user_access($node->nid, $op, $account)) {
+        if (og_user_access($node->nid, $op . ' group', $account)) {
           return NODE_ACCESS_ALLOW;
         }
       }
@@ -494,7 +506,7 @@ function og_node_access($node, $op, $account) {
         // of all the groups the user and the group post is members of.
         $gids = array_diff(array_keys(og_get_groups('user', $account)), array_keys(og_get_groups('node', $node)));
         foreach ($gids as $gid) {
-          if (og_user_access($gid, $op, $account)) {
+          if (og_user_access($gid, $op . ' group posts', $account)) {
             return NODE_ACCESS_ALLOW;
           }
         }
@@ -760,10 +772,10 @@ function og_get_og_types() {
  */
 function og_get_group_type($node_type, $type = 'group') {
   if ($type == 'group') {
-    return variable_get('og_group_type_' . $type, 'omitted');
+    return variable_get('og_group_type_' . $node_type, 'omitted');
   }
   elseif ($type == 'group post') {
-    return variable_get('og_group_post_type_' . $type, 'omitted');
+    return variable_get('og_group_post_type_' . $node_type, 'omitted');
   }
 
 }
