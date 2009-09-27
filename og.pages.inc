@@ -83,7 +83,8 @@ function og_confirm_subscribe_submit($form, &$form_state) {
   );
 
   og_subscribe_user(array($group), NULL, FALSE, $request);
-  $form_state['redirect'] = 'node/'. $form_state['values']['gid'];
+
+  $form_state['redirect'] = node_access('view', 'node/'. $form_state['values']['gid']) ? 'node/'. $form_state['values']['gid'] : '';
 }
 
 
