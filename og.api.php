@@ -14,6 +14,8 @@
 /**
  * Determine if a user has access to a certain operation within a group context.
  *
+ * For content access @see hook_og_node_access().
+ *
  * @param $op
  *   The operation name.
  * @param $node
@@ -51,6 +53,23 @@ function hook_og_access($op, $node, $acting_user, $account = NULL) {
         return OG_ACCESS_IGNORE;
       }
     }
+  }
+}
+
+/**
+ * Own implementation of hook_node_access().
+ *
+ * Having this implementation makes sure that if no organic group module
+ * allowed access to the content, then it will be denied.
+ */
+function hook_og_node_access($node, $op, $account) {
+  // Allow user to edit posts if the title is 'My post'.
+  // For the example we assume the $node is the full node object. If the title
+  // of the node doesn't match, and the user didn't get permission from
+  // somewhere else (e.g. user already has a permission to 'Edit group posts')
+  // Then access will be denied.
+  if ($node->title == 'MY post') {
+    return OG_ACCESS_ALLOW;
   }
 }
 

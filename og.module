@@ -490,39 +490,52 @@ function og_og_access($op, $node, $acting_user, $account) {
 }
 
 /**
+ * Implement hook_og_node_access()
+ */
+function og_og_node_access($node, $op, $account) {
+  if ($op == 'create') {
+
+  }
+  else {
+    if (og_is_group_type($node->type)) {
+      if (og_user_access($node->nid, $op . ' group', $account)) {
+        return NODE_ACCESS_ALLOW;
+      }
+    }
+    else {
+      // We don't have a context, so we need to get all the permissions
+      // of all the groups. We don't intersect with the user's group, as
+      // groups might allow anonymous members access.
+      $gids = array_keys(og_get_groups('node', $node));
+      foreach ($gids as $gid) {
+        if (og_user_access($gid, $op . ' group posts', $account)) {
+          return NODE_ACCESS_ALLOW;
+        }
+      }
+    }
+  }
+}
+
+/**
  * Implement hook_node_access()
  */
 function og_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
 
   if (og_is_group_type($type) || og_is_group_post_type($type)) {
-    if ($op == 'create') {
+    $access = module_invoke_all('og_node_access', $node, $op, $account);
+    if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
+      return NODE_ACCESS_DENY;
+    }
+    elseif (in_array(OG_ACCESS_ALLOW, $access, TRUE)) {
+      return NODE_ACCESS_ALLOW;
+    }
 
-    }
-    else {
-      if (og_is_group_type($node->type)) {
-        if (og_user_access($node->nid, $op . ' group', $account)) {
-          return NODE_ACCESS_ALLOW;
-        }
-        else {
-          return NODE_ACCESS_DENY;
-        }
-      }
-      else {
-        // We don't have a context, so we need to get all the permissions
-        // of all the groups. We don't intersect with the user's group, as
-        // groups might allow anonymous members access.
-        $gids = array_keys(og_get_groups('node', $node));
-        foreach ($gids as $gid) {
-          if (og_user_access($gid, $op . ' group posts', $account)) {
-            return NODE_ACCESS_ALLOW;
-          }
-        }
-        // No access found, so deny.
-        return NODE_ACCESS_DENY;
-      }
-    }
+    // We didn't get any allow access so in the organic groups realm, we decide
+    // to deny access.
+    return NODE_ACCESS_DENY;
   }
+  // Not an organic group node type.
   return NODE_ACCESS_IGNORE;
 }
 
@@ -713,11 +726,13 @@ function og_get_group_users($nid, $states = array(OG_STATE_ACTIVE), $count = FIE
  */
 function og_get_group_from_object($nid, $obj_type, $object, &$key = NULL) {
   $object = og_load_object($obj_type, $object);
-  foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $key_index => $value) {
-    if ($value['value'] == $nid) {
-      // Save the position of the value in the field.
-      $key = $key_index;
-      return $value;
+  if (!empty($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE])) {
+    foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $key_index => $value) {
+      if ($value['value'] == $nid) {
+        // Save the position of the value in the field.
+        $key = $key_index;
+        return $value;
+      }
     }
   }
 }
