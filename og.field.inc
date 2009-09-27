@@ -99,7 +99,7 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
     // If it's an existing node, then exclude itself, as in some cases a group
     // node can act also as a group post, and we want to prevent associating
     // the node to itself.
-    '#exclude' => !empty($form['nid']['#value']) ? $form['nid']['#value'] : array(),
+    '#exclude' => !empty($form['nid']['#value']) ? array($form['nid']['#value']) : array(),
   );
 
   $defaults = array('data' => array(), 'state' => '');
