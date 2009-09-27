@@ -506,7 +506,7 @@ function og_og_node_access($node, $op, $account) {
   }
   else {
     if (og_is_group_type($node->type)) {
-      if (og_user_access($node->nid, $op . ' any group', $account)) {
+      if (og_user_access($node->nid, $op . ' group', $account)) {
         return NODE_ACCESS_ALLOW;
       }
     }
