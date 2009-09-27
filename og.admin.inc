@@ -58,7 +58,6 @@ function og_user_admin_account($form, $form_state, $node) {
       }
       asort($user_roles);
       $form['roles'][$account->uid][0] = array('#markup' => theme('item_list', $user_roles));
-      $form['operations'][$account->uid] = array('#markup' => l(t('edit'), "user/$account->uid/edit", array('query' => $destination)));
     }
   }
   $form['accounts'] = array(
@@ -115,7 +114,6 @@ function theme_og_user_admin_account($form) {
     array('data' => t('Username'), 'field' => 'u.name'),
     array('data' => t('Status'), 'field' => 'u.status'),
     t('Roles'),
-    t('Operations')
   );
 
   $output = drupal_render($form['options']);
@@ -126,7 +124,6 @@ function theme_og_user_admin_account($form) {
         drupal_render($form['name'][$key]),
         drupal_render($form['status'][$key]),
         drupal_render($form['roles'][$key]),
-        drupal_render($form['operations'][$key]),
       );
     }
   }
