@@ -652,24 +652,17 @@ function og_get_group_users($nid, $states = array(OG_STATE_ACTIVE), $count = FIE
 
   // Get the objects IDs.
   if ($result = field_attach_query($field['id'], $conditions, $count, $cursor)) {
-    // Prepare objects for loading.
-    $objects = array();
-
+    $uids = array();
     foreach ($result['user'] as $key => $value) {
-      $object = new stdClass();
-      $object->uid = $key;
-      $objects[$key] = $object;
+      $uids[$key] = $key;
     }
 
-    field_attach_load('user', $objects, FIELD_LOAD_CURRENT, array('field_id' => $field['id']));
-
-
-    // Get the names of the users.
-    $names = db_query("SELECT uid, name FROM {users} WHERE uid IN (:uids)", array(':uids' => array_keys($objects)))->fetchAllKeyed();
+    // Load the users.
+    $accounts = user_load_multiple($uids);
 
     // Prepare the return values.
-    foreach ($objects as $key => $value) {
-      $group = (object)og_get_group_from_object($nid, 'user', $value);
+    foreach ($accounts as $account) {
+      $group = (object)og_get_group_from_object($nid, 'user', $account);
 
       // Check if the user's state is valid.
       if (!empty($states) && !in_array($group->state, $states)) {
@@ -677,10 +670,10 @@ function og_get_group_users($nid, $states = array(OG_STATE_ACTIVE), $count = FIE
       }
       // OG audience may be multiple field, but the group can appear only once,
       // so we extract only the value with our requested group.
-      $return[$key] = $group;
+      $return[$account->uid] = $group;
       // Add back the user ID and user name.
-      $return[$key]->uid = $key;
-      $return[$key]->name = $names[$key];
+      $return[$key]->uid = $account->uid;
+      $return[$key]->name = $account->name;
     }
   }
   return $return;
