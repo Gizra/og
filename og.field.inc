@@ -162,8 +162,6 @@ function og_set_og_audince_field($bundle) {
       'field_name' => 'og_audience',
       'type' => 'og',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      // TODO: Lock only delete.
-      // 'locked' => TRUE,
     );
     $field = field_create_field($field);
   }
