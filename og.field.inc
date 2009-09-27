@@ -195,9 +195,6 @@ function og_set_og_audince_field($bundle) {
  *
  * @param $node_types
  *   Array of the node types that need to have the field attached to.
- * @return
- *   TODO: The node types that have been changed, as some might already have the
- *   fields attached to them.
  */
 function og_group_post_type_set_fields($node_types = array()) {
   foreach ($node_types as $type) {
