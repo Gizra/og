@@ -1829,9 +1829,6 @@ function og_user_operations_approve($nid, $accounts) {
  */
 function og_user_operations_deny($nid, $accounts) {
   $node = node_load($nid);
-  // Intersect account with active state users.
-  $users = array_keys(og_get_group_users($nid, array(OG_STATE_ACTIVE)));
-  $accounts = array_intersect($accounts, $users);
   $accounts = user_load_multiple($accounts);
 
   foreach ($accounts as $account) {

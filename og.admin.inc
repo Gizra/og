@@ -131,7 +131,7 @@ function theme_og_user_admin_account($form) {
     }
   }
   else {
-    $rows[] = array(array('data' => t('No users available.'), 'colspan' => '7'));
+    $rows[] = array(array('data' => t('No users available apart of the group manager.'), 'colspan' => '7'));
   }
 
   $output .= theme('table', $header, $rows);
