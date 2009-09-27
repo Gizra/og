@@ -97,6 +97,7 @@ function og_menu() {
     'page arguments' => array(1),
     'access callback' => 'og_access',
     'access arguments' => array('subscribe', 1),
+    // We don't add the group name, as it might be private.
     'title' => 'Join group'
   );
 
@@ -237,8 +238,8 @@ function og_menu() {
     'title' => 'Broadcast',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_broadcast_form', 1),
-    'access callback' => 'og_broadcast_access',
-    'access arguments' => array(1),
+    'access callback' => 'og_access',
+    'access arguments' => array('broadcast', 1),
     'type' => MENU_LOCAL_TASK,
     'file' => 'og.pages.inc',
     'weight' => 7
