@@ -47,17 +47,19 @@ function og_user_admin_account($form, $form_state, $node) {
   $accounts = array();
 
   foreach ($result as $account) {
-    // TODO: Lock the group manager?
-    $accounts[$account->uid] = '';
-    $form['name'][$account->uid] = array('#markup' => theme('username', $account));
-    $form['status'][$account->uid] =  array('#markup' => $status[$account->state]);
-    $user_roles = array();
-    foreach (og_get_user_roles($node->nid, $account->uid) as $rid) {
-      $user_roles[] = $roles[$rid];
+    // Don't allow editing of the group manager.
+    if ($account->uid != $node->uid) {
+      $accounts[$account->uid] = '';
+      $form['name'][$account->uid] = array('#markup' => theme('username', $account));
+      $form['status'][$account->uid] =  array('#markup' => $status[$account->state]);
+      $user_roles = array();
+      foreach (og_get_user_roles($node->nid, $account->uid) as $rid) {
+        $user_roles[] = $roles[$rid];
+      }
+      asort($user_roles);
+      $form['roles'][$account->uid][0] = array('#markup' => theme('item_list', $user_roles));
+      $form['operations'][$account->uid] = array('#markup' => l(t('edit'), "user/$account->uid/edit", array('query' => $destination)));
     }
-    asort($user_roles);
-    $form['roles'][$account->uid][0] = array('#markup' => theme('item_list', $user_roles));
-    $form['operations'][$account->uid] = array('#markup' => l(t('edit'), "user/$account->uid/edit", array('query' => $destination)));
   }
   $form['accounts'] = array(
     '#type' => 'checkboxes',
