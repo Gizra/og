@@ -204,6 +204,7 @@ function hook_og_group_insert(&$perms, $node) {
   unset($perms[OG_ANONYMOUS_ROLE]);
 }
 
+
 function hook_og_users_roles_grant($nid, $uid, $rid) {
 
 }

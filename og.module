@@ -1575,6 +1575,7 @@ function og_users_roles_grant($nid, $uid, $rid) {
     $role = new stdClass();
     $role->uid = $uid;
     $role->rid = $rid;
+    $role->nid = $nid;
 
     drupal_write_record('og_users_roles', $role);
     og_invoke_event();
@@ -1830,11 +1831,14 @@ function og_user_multiple_role_edit($nid, $accounts, $operation, $rid) {
     case 'add_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
+        og_users_roles_grant($nid, $account->uid, $rid);
 
       }
       break;
     case 'remove_role':
-      foreach ($accounts as $uid) {
+      $accounts = user_load_multiple($accounts);
+      foreach ($accounts as $account) {
+        og_users_roles_revoke($nid, $account->uid, $rid);
       }
       break;
   }
