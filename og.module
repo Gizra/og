@@ -973,7 +973,7 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   }
 
   // Check if the user was blocked.
-  if ($value = og_get_group_from_object($node->nid, 'user', $acting_user) && $value['state'] == OG_STATE_BLOCKED) {
+  if (($value = og_get_group_from_object($node->nid, 'user', $acting_user)) && $value['state'] == OG_STATE_BLOCKED) {
     return FALSE;
   }
 
