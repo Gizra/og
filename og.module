@@ -1089,11 +1089,13 @@ function og_page_activity() {
 // 
 function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
   if ($teaser || !$page) {
-    $node->content['og_description'] = array(
-      '#type' => 'item',
-      '#title' => t('Description'),
-      '#value' => $node->og_description,
+    if (!empty($node->og_description)) {
+      $node->content['og_description'] = array(
+        '#type' => 'item',
+        '#title' => t('Description'),
+        '#value' => check_plain($node->og_description),
       );
+    }
   }
   else {
     $bc[] = array('path' => "og", 'title' => t('Groups'));
