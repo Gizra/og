@@ -2297,7 +2297,7 @@ function og_save_ancestry($node) {
         $ancestry = array(
           'nid' => $node->nid,
           'group_nid' => $gid,
-          'is_public' => $node->og_public,
+          'is_public' => !empty($node->og_public),
         );
         drupal_write_record('og_ancestry', $ancestry);
       }
