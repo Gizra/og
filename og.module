@@ -518,10 +518,6 @@ function og_og_node_access($node, $op, $account) {
  */
 function og_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  if (empty($type)) {
-    dpm($node);
-    dpm($op);
-  }
 
   if (og_is_group_type($type) || og_is_group_post_type($type)) {
     $access = module_invoke_all('og_node_access', $node, $op, $account);
