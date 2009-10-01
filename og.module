@@ -437,11 +437,11 @@ function og_node_view($node, $build_mode) {
       // check the user state.
       if ($group['state'] == OG_STATE_PENDING) {
         $links['og_subscribe']['title'] = t('Re-request group membership');
-        $links['og_subscribe']['href'] = "og/$node->uid/subscribe";
+        $links['og_subscribe']['href'] = "og/$node->nid/subscribe";
       }
       elseif ($group['state'] == OG_STATE_ACTIVE && $node->uid != $user->uid) {
         $links['og_subscribe']['title'] = t('Unsubscribe from group');
-        $links['og_subscribe']['href'] = "og/$node->uid/unsubscribe";
+        $links['og_subscribe']['href'] = "og/$node->nid/unsubscribe";
       }
     }
     else {
@@ -451,7 +451,7 @@ function og_node_view($node, $build_mode) {
       else {
         $links['og_subscribe']['title'] = t('Request group membership');
       }
-      $links['og_subscribe']['href'] = "og/$node->uid/subscribe";
+      $links['og_subscribe']['href'] = "og/$node->nid/subscribe";
     }
 
     if ($links) {
