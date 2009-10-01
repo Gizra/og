@@ -99,7 +99,7 @@ function og_confirm_unsubscribe($form, &$form_state, $group_node) {
   global $user;
   $form['group_node'] = array('#type' => 'value', '#value' => $group_node);
   $form['account'] = array('#type' => 'value', '#value' => $user);
-  return confirm_form($form, t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $group_node->title)), 'og/users/' . $group_node->nid, ' ', t('Remove'), t('Cancel'));
+  return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $group_node->title)), 'og/users/' . $group_node->nid, ' ', t('Remove'), t('Cancel'));
 }
 
 /**

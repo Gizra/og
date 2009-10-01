@@ -423,9 +423,14 @@ function og_node_view($node, $build_mode) {
     $links = array();
     global $user;
     if ($group = og_get_group_from_object($node->nid, 'user', $user)) {
-      // check if the user is pending.
+      // check the user state.
       if ($group['state'] == OG_STATE_PENDING) {
         $links['og_subscribe']['title'] = t('Re-request group membership');
+        $links['og_subscribe']['href'] = "og/$node->uid/subscribe";
+      }
+      elseif ($group['state'] == OG_STATE_ACTIVE) {
+        $links['og_subscribe']['title'] = t('Unsubscribe from group');
+        $links['og_subscribe']['href'] = "og/$node->uid/unsubscribe";
       }
     }
     else {
@@ -435,11 +440,10 @@ function og_node_view($node, $build_mode) {
       else {
         $links['og_subscribe']['title'] = t('Request group membership');
       }
+      $links['og_subscribe']['href'] = "og/$node->uid/subscribe";
     }
 
     if ($links) {
-      $links['og_subscribe']['href'] = "og/$node->uid/subscribe";
-
       $node->content['links']['og'] = array(
         '#theme' => 'links',
         '#links' => $links,
