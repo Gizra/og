@@ -375,8 +375,8 @@ function og_node_insert($node) {
 
     // Create default permissions for roles.
     $perms = array(
-      OG_ANONYMOUS_ROLE => array('subscribe'),
-      OG_AUTHENTICATED_ROLE => array('subscribe', 'unsubscribe'),
+      OG_ANONYMOUS_ROLE => array('subscribe', 'view group', 'view group posts'),
+      OG_AUTHENTICATED_ROLE => array('subscribe', 'unsubscribe', 'view group', 'view group posts'),
       // All permissions.
       OG_ADMINISTRATOR_ROLE => array_keys(og_permissions_get()),
     );
