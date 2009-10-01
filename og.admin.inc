@@ -18,19 +18,19 @@ function og_group_admin_overview($node) {
   $content = array(
     'people' => array(
       'title' => t('People'),
-      'description' => t('Manage the group members'),
+      'description' => t('Manage the group members.'),
       'href' => "og/$node->nid/admin/people",
       'localized_options' => array(),
     ),
     'roles' => array(
       'title' => t('Roles'),
-      'description' => t('Manage the group roles'),
+      'description' => t('Manage the group roles.'),
       'href' => "og/$node->nid/admin/people/roles",
       'localized_options' => array(),
     ),
     'permissions' => array(
       'title' => t('Permissions'),
-      'description' => t('Manage the group permissions'),
+      'description' => t('Manage the group permissions.'),
       'href' => "og/$node->nid/admin/people/permissions",
       'localized_options' => array(),
     ),
