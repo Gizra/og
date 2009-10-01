@@ -205,8 +205,8 @@ function og_menu() {
     'title' => 'Organic groups',
     'page callback' => 'og_group_admin_overview',
     'page arguments' => array(1),
-    'access callback' => 'og_access',
-    'access arguments' => array('administer group users', 1),
+    'access callback' => 'og_organic_groups_tab_access',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
     'file' => 'og.admin.inc',
   );
@@ -246,6 +246,12 @@ function og_menu() {
   return $items;
 }
 
+/**
+ * Return TRUE if a node is a group node and the user has administrator rights.
+ */
+function og_organic_groups_tab_access($node) {
+  return og_is_group_type($node->type) && og_user_access($node->nid, 'administer group users');
+}
 
 /**
  * Implement hook_init().
