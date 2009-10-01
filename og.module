@@ -415,6 +415,42 @@ function og_node_delete($node) {
 }
 
 /**
+* Implement hook_node_view().
+*/
+function og_node_view($node, $build_mode) {
+  if (og_is_group_type($node->type) && og_user_access($node->nid, 'subscribe')) {
+    // Check user association with the group.
+    $links = array();
+    global $user;
+    if ($group = og_get_group_from_object($node->nid, 'user', $user)) {
+      // check if the user is pending.
+      if ($group['state'] == OG_STATE_PENDING) {
+        $links['og_subscribe']['title'] = t('Re-request group membership');
+      }
+    }
+    else {
+      if (og_user_access($node->nid, 'subscribe without approval')) {
+        $links['og_subscribe']['title'] = t('Subscribe to group');
+      }
+      else {
+        $links['og_subscribe']['title'] = t('Request group membership');
+      }
+    }
+
+    if ($links) {
+      $links['og_subscribe']['href'] = "og/$node->uid/subscribe";
+
+      $node->content['links']['og'] = array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#attributes' => array('class' => array('links', 'inline')),
+      );
+    }
+  }
+}
+
+
+/**
  * Implement og_permission
  */
 function og_og_permission() {
