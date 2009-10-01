@@ -552,7 +552,7 @@ function og_og_node_access($node, $op, $account) {
     // groups might allow anonymous members access.
     $gids = array_keys(og_get_groups('node', $node));
     foreach ($gids as $gid) {
-      if (og_user_access($gid, $op . ' any group posts', $account) || (og_user_access($gid, $op . ' own group posts', $account) && $node->uid == $account->uid)) {
+      if (og_user_access($gid, $op . ' group posts', $account) || og_user_access($gid, $op . ' any group posts', $account) || (og_user_access($gid, $op . ' own group posts', $account) && $node->uid == $account->uid)) {
         return NODE_ACCESS_ALLOW;
       }
     }
