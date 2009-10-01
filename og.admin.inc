@@ -37,7 +37,7 @@ function og_group_admin_overview($node) {
   );
 
   //TODO: Convert to a form item
-  return theme('og_admin_overview', $content);
+  return theme('admin_block_content', $content);
 }
 /**
  * Form builder; OG user administration page.
