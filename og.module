@@ -201,6 +201,16 @@ function og_menu() {
     'weight' => -8,
   );
 
+  $items['node/%node/og'] = array(
+    'title' => 'Organic groups',
+    'page callback' => 'og_group_admin_overview',
+    'page arguments' => array(1),
+    'access callback' => 'og_access',
+    'access arguments' => array('administer group users', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'og.admin.inc',
+  );
+
   $items['admin/og'] = array(
     'title' => 'Organic groups',
     'description' => 'Administer the suite of Organic groups modules.',
@@ -235,6 +245,7 @@ function og_menu() {
 
   return $items;
 }
+
 
 /**
  * Implement hook_init().

@@ -7,6 +7,39 @@
  */
 
 /**
+ * Provide an overview of the administrator menu items.
+ *
+ * @param $node
+ *   The group node.
+ */
+function og_group_admin_overview($node) {
+  // Imitite the menu_get_item() content, so we can pass it to
+  // theme_admin_block_content().
+  $content = array(
+    'people' => array(
+      'title' => t('People'),
+      'description' => t('Manage the group members'),
+      'href' => "og/$node->nid/admin/people",
+      'localized_options' => array(),
+    ),
+    'roles' => array(
+      'title' => t('Roles'),
+      'description' => t('Manage the group roles'),
+      'href' => "og/$node->nid/admin/people/roles",
+      'localized_options' => array(),
+    ),
+    'permissions' => array(
+      'title' => t('Permissions'),
+      'description' => t('Manage the group permissions'),
+      'href' => "og/$node->nid/admin/people/permissions",
+      'localized_options' => array(),
+    ),
+  );
+
+  //TODO: Convert to a form item
+  return theme('og_admin_overview', $content);
+}
+/**
  * Form builder; OG user administration page.
  *
  * @ingroup forms
