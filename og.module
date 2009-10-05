@@ -1664,7 +1664,7 @@ function og_user_role_delete($rid) {
   db_delete('og_role_permission')
     ->condition('rid', $rid)
     ->execute();
-  // Update the users who have this role set:
+  // Update the users who have this role set.
   db_delete('og_users_roles')
     ->condition('rid', $rid)
     ->execute();
