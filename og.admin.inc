@@ -13,7 +13,7 @@
  *   The group node.
  */
 function og_group_admin_overview($node) {
-  // Imitite the menu_get_item() content, so we can pass it to
+  // Imitate the menu_get_item() content, so we can pass it to
   // theme_admin_block_content().
   $content = array(
     'people' => array(
@@ -36,8 +36,11 @@ function og_group_admin_overview($node) {
     ),
   );
 
+  $output = theme('system_compact_link');
+  $output .= theme('admin_block_content', $content);
+
   //TODO: Convert to a form item
-  return theme('admin_block_content', $content);
+  return $output;
 }
 /**
  * Form builder; OG user administration page.
@@ -383,7 +386,7 @@ function og_user_admin_permissions_submit($form, &$form_state) {
 
   drupal_set_message(t('The changes have been saved.'));
 
-  // Clear the cached pages and blocks.
+  // TODO: is it needed? Clear the cached pages and blocks.
   cache_clear_all();
 }
 
@@ -427,7 +430,9 @@ function theme_og_user_admin_permissions($form) {
 
 
 /**
- * Menu callback; Organic groups settings form.
+ * Groups permissions on default settings form.
+ *
+ * Allow site admin to set which permissions are available on a per group basis.
  */
 function og_admin_settings() {
   $form['og_settings'] = _og_content_types();
@@ -488,8 +493,6 @@ function og_admin_settings() {
   );
   unset($options);
 
-  // Messages fieldset.
-  // TODO: Move message templates to Rules?
 
   return system_settings_form($form);
 }
