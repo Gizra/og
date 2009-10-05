@@ -1480,11 +1480,6 @@ function og_user_access($nid, $string, $account = NULL) {
     $account = $user;
   }
 
-  // Deny anonymous users.
-  if (!$account->uid) {
-    return FALSE;
-  }
-
   // User #1 has all privileges.
   if ($account->uid == 1) {
     return TRUE;
