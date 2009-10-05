@@ -372,9 +372,14 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
     $form['checkboxes'][$rid] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => isset($status[$rid]) ? $status[$rid] : array());
     $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
   }
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
 
-  $form['#theme'] = array('og_user_admin_permissions');
+  if (!empty($node)) {
+    $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
+  }
+  else {
+    $form['submit'] = array('#type' => 'submit', '#value' => t('Save default permissions'), '#submit' => array('og_user_admin_default_permissions_submit'));
+    $form['#theme'] = array('og_user_admin_permissions');
+  }
 
   return $form;
 }
@@ -387,6 +392,22 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
 function og_user_admin_permissions_submit($form, &$form_state) {
   foreach ($form_state['values']['role_names'] as $rid => $name) {
     og_user_role_change_permissions($rid, $form_state['values'][$rid]);
+  }
+
+  drupal_set_message(t('The changes have been saved.'));
+
+  // TODO: is it needed? Clear the cached pages and blocks.
+  // cache_clear_all();
+}
+
+/**
+ * Save permissions selected on the administer permissions page.
+ *
+ * @see og_user_admin_permissions()
+ */
+function og_user_admin_default_permissions_submit($form, &$form_state) {
+  foreach ($form_state['values']['role_names'] as $rid => $name) {
+    // TODO: Update default permissions.
   }
 
   drupal_set_message(t('The changes have been saved.'));
