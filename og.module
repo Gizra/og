@@ -440,10 +440,11 @@ function og_node_delete($node) {
 * Implement hook_node_view().
 */
 function og_node_view($node, $build_mode) {
-  if (og_is_group_type($node->type) && og_user_access($node->nid, 'subscribe')) {
+  global $user;
+  if (og_is_group_type($node->type) && og_user_access($node->nid, 'subscribe') && $node->uid != $user->uid) {
     // Check user association with the group.
     $links = array();
-    global $user;
+
     if ($group = og_get_group_from_object($node->nid, 'user', $user)) {
       // check the user state.
       if ($group['state'] == OG_STATE_PENDING) {
