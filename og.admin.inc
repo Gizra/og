@@ -374,6 +374,8 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
   }
   $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
 
+  $form['#theme'] = array('og_user_admin_permissions');
+
   return $form;
 }
 
