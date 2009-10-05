@@ -1941,7 +1941,7 @@ function og_user_operations_deny($nid, $accounts) {
 }
 
 /**
- * Callback function for admin mass approving users.
+ * Callback function for admin mass blocking users.
  */
 function og_user_operations_block($nid, $accounts) {
   $node = node_load($nid);
@@ -1960,7 +1960,7 @@ function og_user_operations_block($nid, $accounts) {
 }
 
 /**
- * Callback function for admin mass adding/deleting a user role.
+ * Callback function for admin mass adding/ deleting a user role.
  */
 function og_user_multiple_role_edit($nid, $accounts, $operation, $rid) {
   switch ($operation) {
