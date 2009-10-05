@@ -317,8 +317,16 @@ function theme_og_user_admin_new_role($form) {
  * @see user_admin_permissions_submit()
  * @see theme_user_admin_permissions()
  */
-function og_user_admin_permissions($form, $form_state, $node, $rid = NULL) {
-  if (og_is_group_type($node->type)) {
+function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL) {
+  if (empty($node)) {
+    // Show the defualt permissions that should be assigned to a new group.
+    $role_names = drupal_map_assoc(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE));
+
+    // TODO: Get the default permissions.
+    $role_permissions = array();
+
+  }
+  elseif (!empty($node) && og_is_group_type($node->type)) {
     $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
 
     // Retrieve role names for columns.
@@ -328,50 +336,45 @@ function og_user_admin_permissions($form, $form_state, $node, $rid = NULL) {
     }
     // Fetch permissions for all roles or the one selected role.
     $role_permissions = og_user_role_permissions($role_names);
+  }
 
-    // Store $role_names for use when saving the data.
-    $form['role_names'] = array(
-      '#type' => 'value',
-      '#value' => $role_names,
-    );
-    // Render role/permission overview:
-    $options = array();
-    $hide_descriptions = !system_admin_compact_mode();
-    foreach (module_implements('og_permission') as $module) {
-      if ($permissions = module_invoke($module, 'og_permission')) {
-        $form['permission'][] = array('#markup' => $module, '#id' => $module);
+  // Store $role_names for use when saving the data.
+  $form['role_names'] = array(
+    '#type' => 'value',
+    '#value' => $role_names,
+  );
+  // Render role/permission overview:
+  $options = array();
+  $hide_descriptions = !system_admin_compact_mode();
+  foreach (module_implements('og_permission') as $module) {
+    if ($permissions = module_invoke($module, 'og_permission')) {
+      $form['permission'][] = array('#markup' => $module, '#id' => $module);
 
-        foreach ($permissions as $perm => $perm_item) {
-          $options[$perm] = '';
-          $form['permission'][$perm] = array(
-            '#type' => 'item',
-            '#markup' => $perm_item['title'],
-            '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
-          );
-          foreach ($role_names as $rid => $name) {
-            // Builds arrays for checked boxes for each role
-            if (isset($role_permissions[$rid][$perm])) {
-              $status[$rid][] = $perm;
-            }
+      foreach ($permissions as $perm => $perm_item) {
+        $options[$perm] = '';
+        $form['permission'][$perm] = array(
+          '#type' => 'item',
+          '#markup' => $perm_item['title'],
+          '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
+        );
+        foreach ($role_names as $rid => $name) {
+          // Builds arrays for checked boxes for each role
+          if (isset($role_permissions[$rid][$perm])) {
+            $status[$rid][] = $perm;
           }
         }
       }
     }
-
-    // Have to build checkboxes here after checkbox arrays are built
-    foreach ($role_names as $rid => $name) {
-      $form['checkboxes'][$rid] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => isset($status[$rid]) ? $status[$rid] : array());
-      $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
-    }
-    $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
-
-    return $form;
   }
-  else {
-    // Not a group node.
-    drupal_not_found();
-    exit;
+
+  // Have to build checkboxes here after checkbox arrays are built
+  foreach ($role_names as $rid => $name) {
+    $form['checkboxes'][$rid] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => isset($status[$rid]) ? $status[$rid] : array());
+    $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
   }
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
+
+  return $form;
 }
 
 /**
@@ -387,7 +390,7 @@ function og_user_admin_permissions_submit($form, &$form_state) {
   drupal_set_message(t('The changes have been saved.'));
 
   // TODO: is it needed? Clear the cached pages and blocks.
-  cache_clear_all();
+  // cache_clear_all();
 }
 
 /**
@@ -397,9 +400,12 @@ function og_user_admin_permissions_submit($form, &$form_state) {
  */
 function theme_og_user_admin_permissions($form) {
     // The group ID.
-  $nid = $form['nid']['#value'];
-
-  $roles = og_user_roles($nid);
+  if ($nid = $form['nid']['#value']) {
+    $roles = og_user_roles($nid);
+  }
+  else {
+   $roles = drupal_map_assoc(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE));
+  }
   foreach (element_children($form['permission']) as $key) {
     $row = array();
     // Module name

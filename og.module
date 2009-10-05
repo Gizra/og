@@ -145,6 +145,18 @@ function og_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
   );
+
+  $items['og/%node/add-user'] = array(
+    'page callback' => 'drupal_get_form',
+    'title' => 'Add members',
+    'page arguments' => array('og_add_users', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'og.pages.inc',
+    'weight' => 5,
+    'access callback' => 'og_access',
+    'access arguments' => array('add user', 1),
+  );
+
   $items["og/%node/manage"] = array(
     'page callback' => 'og_manage',
     'page arguments' => array(1),
@@ -221,26 +233,15 @@ function og_menu() {
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
-  $items['admin/og/og'] = array(
+  $items['admin/og/permissions'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_admin_settings'),
-    'title' => 'Organic groups configuration',
+    'page arguments' => array('og_user_admin_default_permissions'),
+    'title' => 'Organic groups default permissions',
     'access arguments' => array('administer site configuration'),
-    'description' => 'Configure organic groups module.',
+    'description' => 'Configure organic groups default permissions when a new group is created.',
     'file' => 'og.admin.inc',
     'file path' => drupal_get_path('module', 'og'),
     'weight' => -5,
-  );
-
-  $items['og/%node/add-user'] = array(
-    'page callback' => 'drupal_get_form',
-    'title' => 'Add members',
-    'page arguments' => array('og_add_users', 1),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'og.pages.inc',
-    'weight' => 5,
-    'access callback' => 'og_access',
-    'access arguments' => array('add user', 1),
   );
 
   return $items;
@@ -287,6 +288,10 @@ function og_theme() {
  */
 function og_forms() {
   $forms['og_user_admin_new_role']['callback'] = 'og_user_admin_role';
+
+  // Form to define the default permissions state for new groups.
+  $forms['og_user_admin_default_permissions']['callback'] = 'og_user_admin_permissions';
+
   return $forms;
 }
 
@@ -1394,6 +1399,7 @@ function og_invoke_event() {
  *
  * This is needed only if a user account is passed, as global $user is only a
  * partial user object.
+ *
  * @param $obj_type
  *   The object type.
  * @param $object
