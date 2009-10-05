@@ -441,7 +441,7 @@ function og_node_delete($node) {
 */
 function og_node_view($node, $build_mode) {
   global $user;
-  if (og_is_group_type($node->type) && og_user_access($node->nid, 'subscribe') && $node->uid != $user->uid) {
+  if (og_is_group_type($node->type) && (og_user_access($node->nid, 'subscribe') || og_user_access($node->nid, 'unsubscribe')) && $node->uid != $user->uid) {
     // Check user association with the group.
     $links = array();
 
