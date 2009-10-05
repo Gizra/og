@@ -320,7 +320,7 @@ function theme_og_user_admin_new_role($form) {
 function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL) {
   if (empty($node)) {
     // Show the defualt permissions that should be assigned to a new group.
-    $role_names = drupal_map_assoc(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE));
+    $role_names = drupal_map_assoc(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE)) + array('hide' => t('hide'));
 
     // TODO: Get the default permissions.
     $role_permissions = array();
@@ -402,11 +402,11 @@ function og_user_admin_permissions_submit($form, &$form_state) {
  */
 function theme_og_user_admin_permissions($form) {
     // The group ID.
-  if ($nid = $form['nid']['#value']) {
-    $roles = og_user_roles($nid);
+  if (!empty($form['nid']['#value'])) {
+    $roles = og_user_roles($form['nid']['#value']);
   }
   else {
-   $roles = drupal_map_assoc(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE));
+   $roles = drupal_map_assoc(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE)) + array('hide' => t('hide'));
   }
   foreach (element_children($form['permission']) as $key) {
     $row = array();
