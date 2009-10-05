@@ -346,22 +346,20 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
   // Render role/permission overview:
   $options = array();
   $hide_descriptions = !system_admin_compact_mode();
-  foreach (module_implements('og_permission') as $module) {
-    if ($permissions = module_invoke($module, 'og_permission')) {
-      $form['permission'][] = array('#markup' => $module, '#id' => $module);
+  foreach (og_permissions_get() as $module => $permissions) {
+    $form['permission'][] = array('#markup' => $module, '#id' => $module);
 
-      foreach ($permissions as $perm => $perm_item) {
-        $options[$perm] = '';
-        $form['permission'][$perm] = array(
-          '#type' => 'item',
-          '#markup' => $perm_item['title'],
-          '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
-        );
-        foreach ($role_names as $rid => $name) {
-          // Builds arrays for checked boxes for each role
-          if (isset($role_permissions[$rid][$perm])) {
-            $status[$rid][] = $perm;
-          }
+    foreach ($permissions as $perm => $perm_item) {
+      $options[$perm] = '';
+      $form['permission'][$perm] = array(
+        '#type' => 'item',
+        '#markup' => $perm_item['title'],
+        '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
+      );
+      foreach ($role_names as $rid => $name) {
+        // Builds arrays for checked boxes for each role
+        if (isset($role_permissions[$rid][$perm])) {
+          $status[$rid][] = $perm;
         }
       }
     }
@@ -411,9 +409,6 @@ function og_user_admin_default_permissions_submit($form, &$form_state) {
   }
 
   drupal_set_message(t('The changes have been saved.'));
-
-  // TODO: is it needed? Clear the cached pages and blocks.
-  // cache_clear_all();
 }
 
 /**

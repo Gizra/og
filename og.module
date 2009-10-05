@@ -175,7 +175,7 @@ function og_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_user_admin_account', 1),
     'access callback' => 'og_access',
-    'access arguments' => array('administer group users', 1),
+    'access arguments' => array('administer group', 1),
     'weight' => -4,
     'file' => 'og.admin.inc',
   );
@@ -251,7 +251,7 @@ function og_menu() {
  * Return TRUE if a node is a group node and the user has administrator rights.
  */
 function og_organic_groups_tab_access($node) {
-  return og_is_group_type($node->type) && og_user_access($node->nid, 'administer group users');
+  return og_is_group_type($node->type) && og_user_access($node->nid, 'administer group');
 }
 
 /**
@@ -501,10 +501,6 @@ function og_og_permission() {
       'title' => t('Add user'),
       'description' => t("Add a new user to the group."),
     ),
-    'administer group users' => array(
-      'title' => t('Administer group users'),
-      'description' => t('Manage or block users, and manage their role assignments in the group.'),
-    ),
     'view group' => array(
       'title' => t('View group'),
       'description' => t('View the group content.'),
@@ -532,6 +528,10 @@ function og_og_permission() {
     'delete any group posts' => array(
       'title' => t('Delete any group posts'),
       'description' => t('Delete any of the group posts that belong to the group.'),
+    ),
+    'administer group' => array(
+      'title' => t('Administer group'),
+      'description' => t('Manage or block users, and manage their role assignments in the group.'),
     ),
   );
 }
@@ -1821,7 +1821,26 @@ function og_permissions_get() {
     return $perms;
   }
 
-  $perms = module_invoke_all('og_permission');
+  foreach (module_implements('og_permission') as $module) {
+    if ($permissions = module_invoke($module, 'og_permission')) {
+      $perms[$module] = $permissions;
+    }
+  }
+
+  if (user_access('administer organic groups')) {
+    $return = array();
+    // Allow user to define which administration permissions a group admin can
+    // set.
+    foreach ($perms as $module => $permissions) {
+      foreach ($permissions as $key => $perm) {
+        $return[t('administer og')]['show ' . $key] = array(
+          'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
+          'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
+        );
+      }
+    }
+    $perms = $perms + $return;
+  }
   return $perms;
 }
 
