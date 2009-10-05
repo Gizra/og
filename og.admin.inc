@@ -350,16 +350,19 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
     $form['permission'][] = array('#markup' => $module, '#id' => $module);
 
     foreach ($permissions as $perm => $perm_item) {
-      $options[$perm] = '';
-      $form['permission'][$perm] = array(
-        '#type' => 'item',
-        '#markup' => $perm_item['title'],
-        '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
-      );
-      foreach ($role_names as $rid => $name) {
-        // Builds arrays for checked boxes for each role
-        if (isset($role_permissions[$rid][$perm])) {
-          $status[$rid][] = $perm;
+      $access = !empty($node) ? og_user_access($node->nid, 'show ' . $perm) : TRUE;
+      if ($access) {
+        $options[$perm] = '';
+        $form['permission'][$perm] = array(
+          '#type' => 'item',
+          '#markup' => $perm_item['title'],
+          '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
+        );
+        foreach ($role_names as $rid => $name) {
+          // Builds arrays for checked boxes for each role
+          if (isset($role_permissions[$rid][$perm])) {
+            $status[$rid][] = $perm;
+          }
         }
       }
     }

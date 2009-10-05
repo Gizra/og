@@ -188,7 +188,7 @@ function og_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_user_admin_new_role', 1),
     'access callback' => 'og_access',
-    'access arguments' => array('administer permissions', 1),
+    'access arguments' => array('administer group', 1),
     'file' => 'og.admin.inc',
     'weight' => -9,
   );
@@ -197,7 +197,7 @@ function og_menu() {
     'title' => 'Edit role',
     'page arguments' => array('og_user_admin_role', 1),
     'access callback' => 'og_access',
-    'access arguments' => array('administer permissions', 1),
+    'access arguments' => array('administer group', 1),
     'type' => MENU_CALLBACK,
   );
 
@@ -208,7 +208,7 @@ function og_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_user_admin_permissions', 1),
     'access callback' => 'og_access',
-    'access arguments' => array('administer permissions', 1),
+    'access arguments' => array('administer group', 1),
     'file' => 'og.admin.inc',
     'weight' => -8,
   );
