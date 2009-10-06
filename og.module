@@ -403,9 +403,6 @@ function og_node_insert($node) {
       OG_ADMINISTRATOR_ROLE => array_keys(og_permissions_get()),
     );
 
-    // Allow other modules to change default permissions.
-    drupal_alter('og_group_insert', $perms, $node);
-
     og_user_role_grant_permissions($anon_rid, $perms[OG_ANONYMOUS_ROLE]);
     og_user_role_grant_permissions($auth_rid, $perms[OG_AUTHENTICATED_ROLE]);
     og_user_role_grant_permissions($admin_rid, $perms[OG_ADMINISTRATOR_ROLE]);
