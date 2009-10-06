@@ -223,7 +223,7 @@ function og_menu() {
     'file' => 'og.admin.inc',
   );
 
-  $items['admin/og'] = array(
+  $items['admin/config/og'] = array(
     'title' => 'Organic groups',
     'description' => 'Administer the suite of Organic groups modules.',
     'position' => 'right',
@@ -233,7 +233,7 @@ function og_menu() {
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
-  $items['admin/og/permissions'] = array(
+  $items['admin/config/og/permissions'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_user_admin_default_permissions'),
     'title' => 'Organic groups default permissions',
