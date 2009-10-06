@@ -377,38 +377,10 @@ function og_node_insert($node) {
     $account = user_load($node->uid);
 
     og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
+    og_set_new_group_roles($node->nid);
 
-    // Create default roles.
-    $role = new stdClass;
-    $role->name = OG_ANONYMOUS_ROLE;
-    $role->nid = $node->nid;
-    og_user_role_save($role);
-    $anon_rid = $role->rid;
-
-    unset($role->rid);
-    $role->name = OG_AUTHENTICATED_ROLE;
-    og_user_role_save($role);
-    $auth_rid = $role->rid;
-
-    unset($role->rid);
-    $role->name = 'admin';
-    og_user_role_save($role);
-    $admin_rid = $role->rid;
-
-    // Create default permissions for roles.
-    $perms = array(
-      OG_ANONYMOUS_ROLE => array('subscribe', 'view group', 'view group posts'),
-      OG_AUTHENTICATED_ROLE => array('subscribe', 'unsubscribe', 'view group', 'view group posts'),
-      // All permissions.
-      OG_ADMINISTRATOR_ROLE => array_keys(og_permissions_get()),
-    );
-
-    og_user_role_grant_permissions($anon_rid, $perms[OG_ANONYMOUS_ROLE]);
-    og_user_role_grant_permissions($auth_rid, $perms[OG_AUTHENTICATED_ROLE]);
-    og_user_role_grant_permissions($admin_rid, $perms[OG_ADMINISTRATOR_ROLE]);
   }
 }
-
 
 /**
 * Implement hook_node_update().
@@ -1840,6 +1812,43 @@ function og_permissions_get() {
     $perms = $perms + $return;
   }
   return $perms;
+}
+
+/**
+ * Add default roles and permissions to a new group.
+ *
+ * @param $nid
+ *   The node ID of the group or 0 for default permissions.
+ */
+function og_set_new_group_roles($nid = 0) {
+  // Create default roles.
+  $role = new stdClass;
+  $role->name = OG_ANONYMOUS_ROLE;
+  $role->nid = $node->nid;
+  og_user_role_save($role);
+  $anon_rid = $role->rid;
+
+  unset($role->rid);
+  $role->name = OG_AUTHENTICATED_ROLE;
+  og_user_role_save($role);
+  $auth_rid = $role->rid;
+
+  unset($role->rid);
+  $role->name = 'admin';
+  og_user_role_save($role);
+  $admin_rid = $role->rid;
+
+  // Create default permissions for roles.
+  $perms = array(
+    OG_ANONYMOUS_ROLE => array('subscribe', 'view group', 'view group posts'),
+    OG_AUTHENTICATED_ROLE => array('subscribe', 'unsubscribe', 'view group', 'view group posts'),
+    // All permissions.
+    OG_ADMINISTRATOR_ROLE => array_keys(og_permissions_get()),
+  );
+
+  og_user_role_grant_permissions($anon_rid, $perms[OG_ANONYMOUS_ROLE]);
+  og_user_role_grant_permissions($auth_rid, $perms[OG_AUTHENTICATED_ROLE]);
+  og_user_role_grant_permissions($admin_rid, $perms[OG_ADMINISTRATOR_ROLE]);
 }
 
 /**
