@@ -11,6 +11,8 @@
  */
 function og_enable() {
   og_set_og_audince_field('user');
+  // Create roles that would be used for the default permissions.
+  og_set_new_group_roles();
 }
 
 /**

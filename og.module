@@ -1824,7 +1824,7 @@ function og_set_new_group_roles($nid = 0) {
   // Create default roles.
   $role = new stdClass;
   $role->name = OG_ANONYMOUS_ROLE;
-  $role->nid = $node->nid;
+  $role->nid = $nid;
   og_user_role_save($role);
   $anon_rid = $role->rid;
 
