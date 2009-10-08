@@ -1962,7 +1962,7 @@ function og_og_user_operations($form = array(), $form_state = array()) {
     ),
   );
 
-  if (og_user_access($nid, 'administer group permissions')) {
+  if (og_user_access($nid, 'administer group')) {
     $roles = og_get_group_roles($nid);
     // Can't edit anonymous and authenticated role.
     unset($roles[OG_ANONYMOUS_ROLE]);
@@ -2002,7 +2002,7 @@ function og_og_user_operations($form = array(), $form_state = array()) {
     $operation = $operation_rid[0];
     if ($operation == 'add_role' || $operation == 'remove_role') {
       $rid = $operation_rid[1];
-      if (og_user_access($nid, 'administer group permissions')) {
+      if (og_user_access($nid, 'administer group')) {
         $operations[$form_state['values']['operation']] = array(
           'callback' => 'og_user_multiple_role_edit',
           'callback arguments' => array($operation, $rid),
