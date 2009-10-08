@@ -403,9 +403,6 @@ function og_user_admin_permissions_submit($form, &$form_state) {
   }
 
   drupal_set_message(t('The changes have been saved.'));
-
-  // TODO: is it needed? Clear the cached pages and blocks.
-  // cache_clear_all();
 }
 
 
