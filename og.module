@@ -1583,7 +1583,8 @@ function og_get_group_roles($nid) {
  *   Array with the role IDs of the user.
  */
 function og_get_user_roles($nid, $uid) {
-  return db_query("SELECT rid FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchCol();
+  //TODO: How to get keyed by rid, wihout this hack?
+  return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchAllKeyed();
 }
 
 /**
