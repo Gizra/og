@@ -82,6 +82,21 @@ define('OG_AUTHENTICATED_ROLE', 'authenticated member');
  */
 define('OG_ADMINISTRATOR_ROLE', 'administrator');
 
+/**
+ * The role ID of the default group non-members.
+ */
+define('OG_ANONYMOUS_DEFAULT_RID', 1);
+
+/**
+ * The role ID of the default group member.
+ */
+define('OG_AUTHENTICATED_DEFAULT_RID', 2);
+
+/**
+ * The role ID of the default group administrator.
+ */
+define('OG_ADMINISTRATOR_DEFAULT_RID', 3);
+
 /*******************************************************************************
  * Hook implementations
  ******************************************************************************/
@@ -1348,11 +1363,21 @@ function og_get_groups_for_form($obj_type, $object) {
   return $return;
 }
 
+/**
+ * Get all groups keyed by group ID and the title ready to be used on forms.
+ */
 function og_get_all_groups_for_form() {
   $return = db_query("SELECT og.nid, n.title FROM {og_groups} og INNER JOIN {node} n ON og.nid = n.nid ORDER BY og.nid")->fetchAllKeyed();
   // Sanitize the result.
   array_walk($return, 'check_plain');
   return $return;
+}
+
+/**
+ * Get all groups IDs.
+ */
+function og_get_all_groups() {
+  return db_query("SELECT nid FROM {og_groups} ORDER BY nid")->fetchCol();
 }
 
 /**
@@ -1499,11 +1524,11 @@ function og_user_access($nid, $string, $account = NULL) {
 
 /**
  * Retrieve an array of roles matching specified conditions.
- *
- * @param $membersonly
- *   Set this to TRUE to exclude the 'anonymous' role.
+ * @param $nid
+ *   The group node ID.
+ * @param $roles
  * @param $permission
- *   A string containing a permission. If set, only roles containing that
+ *   Optioanl; A string containing a permission. If set, only roles containing that
  *   permission are returned.
  *
  * @return
@@ -1511,7 +1536,7 @@ function og_user_access($nid, $string, $account = NULL) {
  *   value. The anonymous and authenticated deault roles are on the top of the
  *   array.
  */
-function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission = NULL) {
+function og_user_roles($nid, $roles = array(), $permission = NULL) {
   if (!empty($permission)) {
     $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.nid = :nid ORDER BY r.name", array(':permission' => $permission, ':nid' => $nid))->fetchAllKeyed();
   }
@@ -1532,7 +1557,7 @@ function og_user_roles($nid, $roles = array(), $membersonly = FALSE, $permission
  *   A keyed array with "anonymous" and "authenticaed".
  */
 function og_get_group_default_roles($nid) {
-  return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid AND (name = :anon OR name = :auth)", array(':nid' => $nid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE))->fetchAllKeyed();
+  return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid AND (name = :anon OR name = :auth OR name = :admin)", array(':nid' => $nid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE, ':admin' => OG_ADMINISTRATOR_ROLE))->fetchAllKeyed();
 }
 
 /**
@@ -1558,7 +1583,7 @@ function og_get_group_roles($nid) {
  *   Array with the role IDs of the user.
  */
 function og_get_user_roles($nid, $uid) {
-  return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchAllKeyed();
+  return db_query("SELECT rid FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchCol();
 }
 
 /**
@@ -1812,6 +1837,57 @@ function og_permissions_get() {
     $perms = $perms + $return;
   }
   return $perms;
+}
+
+/**
+ * Update the permissions of all existing groups.
+ *
+ * @param $permissions
+ *   The name of the permissions that need to be updated. Other permissions will
+ *   not be affected by this operation.
+ *
+ * @return
+ *   The number of groups that were updated.
+ *
+ */
+function og_permissions_bulk_update($roles, $permissions) {
+  // Handle only the permissions that were set to be bulk updated.
+  $permissions = array_filter($permissions);
+
+  // An array with the permissions that need to be set, keyed by the role name.
+  $permissions_to_change = array();
+  // Filter out only the needed permissions from the roles.
+  foreach ($roles as $rid => $perms) {
+    foreach ($perms as $perm => $value) {
+      if (in_array($perm, $permissions)) {
+        switch ($rid) {
+          case 1:
+            $role_name = OG_ANONYMOUS_ROLE;
+            break;
+
+          case 2:
+            $role_name = OG_AUTHENTICATED_ROLE;
+            break;
+
+          case 3:
+            $role_name = OG_ADMINISTRATOR_ROLE;
+            break;
+        }
+
+        $permissions_to_change[$role_name][$perm] = $value;
+      }
+    }
+  }
+
+  // Get all existing group node IDs.
+  $nids = og_get_all_groups();
+  foreach ($nids as $nid) {
+    $rids = og_get_group_default_roles($nid);
+    foreach ($rids as $name => $rid) {
+      og_user_role_change_permissions($rid, $permissions_to_change[$name]);
+    }
+  }
+  return count($nids);
 }
 
 /**

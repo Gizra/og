@@ -318,24 +318,22 @@ function theme_og_user_admin_new_role($form) {
  * @see theme_user_admin_permissions()
  */
 function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL) {
-  if (empty($node)) {
-    // Show the defualt permissions that should be assigned to a new group.
-    $role_names = drupal_map_assoc(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE) + array('bulk_update' => t('Bulk update')));
+  // If no node object is provided then the node ID is 0, which means this
+  // is the default permissions settings.
+  $nid = !empty($node) ? $node->nid : 0;
+  $form['nid'] = array('#type' => 'value', '#value' => $nid);
 
-    // TODO: Get the default permissions.
-    $role_permissions = array();
-
+  // Retrieve role names for columns.
+  $role_names = og_user_roles($nid);
+  if (!empty($rid)) {
+    $role_names = array($rid => $role_names[$rid]);
   }
-  elseif (!empty($node) && og_is_group_type($node->type)) {
-    $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
+  // Fetch permissions for all roles or the one selected role.
+  $role_permissions = og_user_role_permissions($role_names);
 
-    // Retrieve role names for columns.
-    $role_names = og_user_roles($node->nid);
-    if (!empty($rid)) {
-      $role_names = array($rid => $role_names[$rid]);
-    }
-    // Fetch permissions for all roles or the one selected role.
-    $role_permissions = og_user_role_permissions($role_names);
+  if (empty($node)) {
+    // Add the 'bulk update' checkbox to the user roles.
+    $role_names += array(0 => t('bulk update'));
   }
 
   // Store $role_names for use when saving the data.
@@ -374,14 +372,10 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
     $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
   }
 
-  if (!empty($node)) {
-    $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
-  }
-  else {
-    $form['submit'] = array('#type' => 'submit', '#value' => t('Save default permissions'), '#submit' => array('og_user_admin_default_permissions_submit'));
+  if (empty($node)) {
     $form['#theme'] = array('og_user_admin_permissions');
   }
-
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'), '#submit' => array('og_user_admin_permissions_submit'));
   return $form;
 }
 
@@ -392,7 +386,20 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
  */
 function og_user_admin_permissions_submit($form, &$form_state) {
   foreach ($form_state['values']['role_names'] as $rid => $name) {
-    og_user_role_change_permissions($rid, $form_state['values'][$rid]);
+    if (!empty($rid)) {
+      og_user_role_change_permissions($rid, $form_state['values'][$rid]);
+    }
+    else {
+      // Bulk update existing groups.
+      $roles = array(
+        OG_ANONYMOUS_DEFAULT_RID => $form_state['values'][OG_ANONYMOUS_DEFAULT_RID],
+        OG_AUTHENTICATED_DEFAULT_RID => $form_state['values'][OG_AUTHENTICATED_DEFAULT_RID],
+        OG_ADMINISTRATOR_DEFAULT_RID => $form_state['values'][OG_ADMINISTRATOR_DEFAULT_RID],
+      );
+      $count = og_permissions_bulk_update($roles, $form_state['values'][$rid]);
+      drupal_set_message(format_plural($count, 'Group was updated', '@count group were updated.', array('@count' =>$count)));
+
+    }
   }
 
   drupal_set_message(t('The changes have been saved.'));
@@ -401,18 +408,6 @@ function og_user_admin_permissions_submit($form, &$form_state) {
   // cache_clear_all();
 }
 
-/**
- * Save permissions selected on the administer permissions page.
- *
- * @see og_user_admin_permissions()
- */
-function og_user_admin_default_permissions_submit($form, &$form_state) {
-  foreach ($form_state['values']['role_names'] as $rid => $name) {
-    // TODO: Update default permissions.
-  }
-
-  drupal_set_message(t('The changes have been saved.'));
-}
 
 /**
  * Theme the administer permissions page.
@@ -420,12 +415,10 @@ function og_user_admin_default_permissions_submit($form, &$form_state) {
  * @ingroup themeable
  */
 function theme_og_user_admin_permissions($form) {
-    // The group ID.
-  if (!empty($form['nid']['#value'])) {
-    $roles = og_user_roles($form['nid']['#value']);
-  }
-  else {
-   $roles = drupal_map_assoc(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE) + array('bulk_update' => t('Bulk update')));
+  $roles = og_user_roles($form['nid']['#value']);
+  if (empty($form['nid']['#value'])) {
+    // Add the 'bulk update' checkbox to the user roles.
+    $roles += array(0 => t('bulk update'));
   }
   foreach (element_children($form['permission']) as $key) {
     $row = array();
