@@ -93,15 +93,15 @@ function og_user_admin_account($form, $form_state, $node) {
     // Don't allow editing of the group manager.
     if ($account->uid != $node->uid) {
       $accounts[$account->uid] = '';
-      $user_roles = array();
+      $users_roles = array();
       foreach (og_get_user_roles($node->nid, $account->uid) as $rid) {
-        $user_roles[] = $roles[$rid];
+        $users_roles[] = $roles[$rid];
       }
-      asort($user_roles);
+      asort($users_roles);
 
       $options[$account->uid] = array(
         'username' => theme('username', array('account' => $account)),
-        'status' =>  $status[$account->status],
+        'status' =>  $status[$account->state],
         'roles' => theme('item_list', array('items' => $users_roles)),
       );
 
