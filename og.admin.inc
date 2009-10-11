@@ -36,11 +36,10 @@ function og_group_admin_overview($node) {
     ),
   );
 
-  $output = theme('system_compact_link');
-  $output .= theme('admin_block_content', array('content' => $content));
+  $form['system_compact_link'] = array('#markup' => theme('system_compact_link'));
+  $form['admin_block_content'] = array('#markup' => theme('admin_block_content', array('content' => $content)));
 
-  //TODO: Convert to a form item
-  return $output;
+  return $form;
 }
 /**
  * Form builder; OG user administration page.
