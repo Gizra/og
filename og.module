@@ -1939,6 +1939,13 @@ function og_check_token($token, $seed) {
   return drupal_get_token($seed) == $token;
 }
 
+function og_set_breadcrumb($nid, $path = array()) {
+  $node = node_load($nid);
+
+  drupal_set_breadcrumb(array_merge(array(l(t('Home'), NULL), l($node->title[FIELD_LANGUAGE_NONE][0]['value'], 'node/' . $node->nid)), $path)) ;
+
+}
+
 /**
  * Implement hook_og_user_operations().
  */

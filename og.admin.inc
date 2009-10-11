@@ -13,6 +13,7 @@
  *   The group node.
  */
 function og_group_admin_overview($node) {
+  og_set_breadcrumb($node->nid);
   // Imitate the menu_get_item() content, so we can pass it to
   // theme_admin_block_content().
   $content = array(
@@ -49,6 +50,8 @@ function og_group_admin_overview($node) {
  * @see og_user_admin_account_submit()
  */
 function og_user_admin_account($form, $form_state, $node) {
+  //tODO: Remove hardcoded "Organic groups".
+  og_set_breadcrumb($node->nid, array(l(t('Organic groups'), 'node/' . $node->nid . '/og')));
   $header = array(
     'username' => array('data' => t('Username')),
     'status' => array('data' => t('Status')),
