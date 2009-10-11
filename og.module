@@ -291,10 +291,6 @@ function og_theme() {
       'arguments' => array('form' => NULL),
       'file' => 'og.admin.inc',
     ),
-    'og_user_admin_account' => array(
-      'arguments' => array('form' => NULL),
-      'file' => 'og.admin.inc',
-    ),
   );
 }
 
@@ -1223,7 +1219,8 @@ function og_set_context($node = NULL, $determine = FALSE) {
  * Menu callback; Return the title of a menu item based on the group title.
  */
 function og_menu_title_callback($title, $node) {
-  return str_replace('@group', check_plain($node->title), $title);
+  // TODO: Should check the node language.
+  return str_replace('@group', $node->title[FIELD_LANGUAGE_NONE][0]['safe'], $title);
 }
 
 /**

@@ -215,7 +215,8 @@ function og_group_post_type_set_fields($node_types = array()) {
  * @return
  *   A link to the group node.
  */
-function theme_field_formatter_og_list_default($element) {
+function theme_field_formatter_og_list_default($variables) {
+  $element = $variables['element'];
   $field = field_info_field($element['#field_name']);
   $options = og_allowed_values($field);
   // Flatten the options. We don't use array_merge() because we want to keep the

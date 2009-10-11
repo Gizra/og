@@ -37,7 +37,7 @@ function og_group_admin_overview($node) {
   );
 
   $output = theme('system_compact_link');
-  $output .= theme('admin_block_content', $content);
+  $output .= theme('admin_block_content', array('content' => $content));
 
   //TODO: Convert to a form item
   return $output;
@@ -50,6 +50,12 @@ function og_group_admin_overview($node) {
  * @see og_user_admin_account_submit()
  */
 function og_user_admin_account($form, $form_state, $node) {
+  $header = array(
+    'username' => array('data' => t('Username')),
+    'status' => array('data' => t('Status')),
+    'roles' => array('data' => t('Roles')),
+  );
+
   $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
   $form['options'] = array(
     '#type' => 'fieldset',
@@ -70,6 +76,8 @@ function og_user_admin_account($form, $form_state, $node) {
     '#options' => $options,
     '#default_value' => 'unblock',
   );
+
+  $options = array();
   $form['options']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Update'),
@@ -86,21 +94,27 @@ function og_user_admin_account($form, $form_state, $node) {
     // Don't allow editing of the group manager.
     if ($account->uid != $node->uid) {
       $accounts[$account->uid] = '';
-      $form['name'][$account->uid] = array('#markup' => theme('username', $account));
-      $form['status'][$account->uid] =  array('#markup' => $status[$account->state]);
       $user_roles = array();
       foreach (og_get_user_roles($node->nid, $account->uid) as $rid) {
         $user_roles[] = $roles[$rid];
       }
       asort($user_roles);
-      $form['roles'][$account->uid][0] = array('#markup' => theme('item_list', $user_roles));
+
+      $options[$account->uid] = array(
+        'username' => theme('username', array('account' => $account)),
+        'status' =>  $status[$account->status],
+        'roles' => theme('item_list', array('items' => $users_roles)),
+      );
+
     }
   }
   $form['accounts'] = array(
-    '#type' => 'checkboxes',
-    '#options' => $accounts
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $options,
+    '#empty' => t('No people available apart of the group manager.'),
   );
-  $form['pager'] = array('#markup' => theme('pager', NULL));
+  $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
   return $form;
 }
@@ -137,47 +151,6 @@ function og_user_admin_account_submit($form, &$form_state) {
     drupal_set_message(t('The update has been performed.'));
   }
 }
-
-/**
- * Theme user administration overview.
- *
- * @ingroup themeable
- */
-function theme_og_user_admin_account($form) {
-  // Overview table:
-  $header = array(
-    theme('table_select_header_cell'),
-    array('data' => t('Username'), 'field' => 'u.name'),
-    array('data' => t('Status'), 'field' => 'u.status'),
-    t('Roles'),
-  );
-
-  $output = drupal_render($form['options']);
-  if (!empty($form['name'])) {
-    foreach (element_children($form['name']) as $key) {
-      $rows[] = array(
-        drupal_render($form['accounts'][$key]),
-        drupal_render($form['name'][$key]),
-        drupal_render($form['status'][$key]),
-        drupal_render($form['roles'][$key]),
-      );
-    }
-  }
-  else {
-    $node = node_load($form['nid']['#value']);
-    $rows[] = array(array('data' => t('No users available apart of the group manager !manager.', array('!manager' => theme('username', $node))), 'colspan' => '7'));
-  }
-
-  $output .= theme('table', $header, $rows);
-  if ($form['pager']['#markup']) {
-    $output .= drupal_render($form['pager']);
-  }
-
-  $output .= drupal_render_children($form);
-
-  return $output;
-}
-
 
 /**
  * Menu callback: administer roles.
@@ -285,7 +258,8 @@ function og_user_admin_role_submit($form, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_og_user_admin_new_role($form) {
+function theme_og_user_admin_new_role($variables) {
+  $form = $variables['form'];
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
   // The group ID.
   $gid = $form['nid']['#value'];
@@ -411,7 +385,8 @@ function og_user_admin_permissions_submit($form, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_og_user_admin_permissions($form) {
+function theme_og_user_admin_permissions($variables) {
+  $form = $variables['form'];
   $roles = og_user_roles($form['nid']['#value']);
   if (empty($form['nid']['#value'])) {
     // Add the 'bulk update' checkbox to the user roles.
