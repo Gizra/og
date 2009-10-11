@@ -38,7 +38,7 @@ function og_subscribe($node, $uid = NULL) {
 
     // Check user isn't already subscribed.
     if (in_array($node->nid, og_get_groups('user', $account))) {
-      drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title)));
+      drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])));
       drupal_goto('node/' . $node->nid);
     }
     else {
@@ -64,7 +64,7 @@ function og_confirm_subscribe($form, &$form_state, $node, $account) {
       '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
     );
   }
- return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $node->title)), 'node/' . $node->nid, ' ', t('Join'), t('Cancel'));
+ return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])), 'node/' . $node->nid, ' ', t('Join'), t('Cancel'));
 }
 
 /**
@@ -101,10 +101,10 @@ function og_confirm_unsubscribe($form, &$form_state, $node) {
   if ($node->uid != $user->uid) {
     $form['group_node'] = array('#type' => 'value', '#value' => $node);
     $form['account'] = array('#type' => 'value', '#value' => $user);
-    return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $node->title)), 'og/users/' . $node->nid, ' ', t('Remove'), t('Cancel'));
+    return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])), 'og/users/' . $node->nid, ' ', t('Remove'), t('Cancel'));
   }
   else {
-    drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $node->title)));
+    drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])));
     drupal_goto('node/' . $node->nid);
   }
 }
@@ -113,27 +113,27 @@ function og_confirm_unsubscribe($form, &$form_state, $node) {
  * Submit handler; Confirm OG unsubscription.
  */
 function og_confirm_unsubscribe_submit($form, &$form_state) {
-  $group_node = $form_state['values']['group_node'];
+  $node = $form_state['values']['group_node'];
 
-  og_unsubscribe_user(array($group_node->nid), $form_state['values']['account']);
+  og_unsubscribe_user(array($node->nid), $form_state['values']['account']);
 
   // Determine where to go next - Group if accessible, or else site front page.
-  $form_state['redirect'] = og_access('view', $group_node) ? 'node/' . $group_node->nid : '';
+  $form_state['redirect'] = og_access('view', $node) ? 'node/' . $node->nid : '';
 }
 
 /**
  * Add users to group form.
  */
-function og_add_users($form, &$form_state, $group_node) {
+function og_add_users($form, &$form_state, $node) {
   $form['og_add_user'] = array(
     '#type' => 'textfield',
     '#title' => t('Add user'),
     '#autocomplete_path' => 'user/autocomplete',
-    '#description' => t('Add a user to group %group.', array('%group' => $group_node->title)),
+    '#description' => t('Add a user to group %group.', array('%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])),
     '#element_validate' => array('og_add_users_og_names_validate'),
   );
   $form['op'] = array('#type' => 'submit', '#value' => t('Add users'));
-  $form['gid'] = array('#type' => 'value', '#value' => $group_node->nid);
+  $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
   return $form;
 }
 
@@ -181,7 +181,7 @@ function og_approve($node, $account, $token) {
     $user_groups = og_get_groups('user', $account);
 
     if (in_array($node->nid, $user_groups)) {
-      drupal_set_message(t('!name was already approved to group %group.', array('!name' => theme('username', $account), '%group' => $node->title)), 'error');
+      drupal_set_message(t('!name was already approved to group %group.', array('!name' => theme('username', $account), '%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])), 'error');
       return '';
     }
     else {
