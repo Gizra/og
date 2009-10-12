@@ -607,6 +607,7 @@ function og_element_info() {
       '#user_groups' => array(),
       '#other_groups' => array(),
       '#exclude' => array(),
+      '#include' => array('content groups' => array(), 'other groups' => array()),
       '#minimum_for_select_list' => 20,
       '#uid' => NULL,
       '#process' => array('og_elements_process'),
@@ -1227,10 +1228,6 @@ function og_menu_title_callback($title, $node) {
  * Process organic groups audience FAPI element.
  */
 function og_elements_process($element, &$form_state, $form) {
-  $field = $form['#fields'][$element['#field_name']]['field'];
-  $instance = $form['#fields'][$element['#field_name']]['instance'];
-  $field_key  = $element['#columns'][0];
-
   // Allow showing the form element for another user.
   if (!empty($element['uid'])) {
     $account = user_load($element['uid']);
@@ -1239,7 +1236,18 @@ function og_elements_process($element, &$form_state, $form) {
    global $user;
     $account = $user;
   }
-  $content_groups = og_allowed_values($field, $account);
+  if (!empty($element['#field_name'])) {
+    $field = $form['#fields'][$element['#field_name']]['field'];
+    $instance = $form['#fields'][$element['#field_name']]['instance'];
+    $content_groups = og_allowed_values($field, $account);
+    $field_key  = $element['#columns'][0];
+  }
+  else {
+    $content_groups = !empty($element['#include']) ? $element['#include'] : array();
+    // Initialize values.
+    $content_groups += array('content groups' => array(), 'other groups' => array());
+    $field_key  = 'value';
+  }
 
   // Determine if a user may see other groups as-well.
   $opt_group = FALSE;
@@ -1298,7 +1306,10 @@ function og_elements_process($element, &$form_state, $form) {
 
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
-  $form_state['#fields'][$element['#field_name']] = $form['#fields'][$element['#field_name']];
+  // TODO: Do we need this^^?
+  if (!empty($element['#field_name'])) {
+    $form_state['#fields'][$element['#field_name']] = $form['#fields'][$element['#field_name']];
+  }
 
   return $element;
 }

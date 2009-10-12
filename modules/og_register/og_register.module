@@ -1,0 +1,82 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Allow subscribing to groups during the user registration.
+ */
+
+/**
+ * Implement hook_form_FORM_ID_alter().
+ *
+ * Get all the groups that should appear in the user registration, and show them.
+ */
+function og_register_form_user_register_form_alter(&$form, $form_state) {
+  if ($groups = og_register_get_groups()) {
+    $form['og_register'] = array(
+      '#type' => 'og_audience',
+      '#title' => t('Subscribe to group'),
+      '#include' => array('content groups' => $groups),
+    );
+  }
+}
+
+
+/**
+ * Add organic groups register field group node types.
+ *
+ * @param $bundle
+ *   The bundle name.
+ */
+function og_register_create_fields($bundle) {
+  $field = field_info_field('og_register');
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'og_register',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Do not show on registration page', '1|Show on registration page')), 'allowed_values_function' => ''),
+    );
+    $field = field_create_field($field);
+  }
+
+  $instance = field_info_instance('og_register', $bundle);
+  if (empty($instance)) {
+    $instance = array(
+      'field_name' => 'og_register',
+      'bundle' => $bundle,
+      // FIXME: Widget type doesn't work
+      'widget_type' => 'options_onoff',
+      'label' => t('Groups register'),
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+}
+
+/**
+ *  Get all the groups node IDs that should appear in the user registration.
+ */
+function og_register_get_groups($count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
+  $nids = array();
+
+  $field = field_info_field('og_register');
+
+  // Get all the group node IDs.
+  if ($result = field_attach_query($field['id'], array(), $count, $cursor)) {
+    foreach ($result['node'] as $value) {
+      $nids[$value->nid] = $value->nid;
+    }
+  }
+
+  return $nids;
+}
