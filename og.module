@@ -1297,10 +1297,17 @@ function og_elements_process($element, &$form_state, $form) {
     }
   }
 
+  if (!empty($element['#description'])) {
+    $description = $element['#description'];
+  }
+  else {
+    $description = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
+  }
+
   $element[$field_key] = array(
     '#type' => $type,
     '#title' => !empty($element['#title']) ? $element['#title'] : t('Group audience'),
-    '#description' => !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.'),
+    '#description' => $description,
     '#options' => $options,
     '#default_value' => !empty($element['#default_value']) ? $element['#default_value'] : array(),
     '#required' => isset($element['#required']) ? $element['#required'] : $instance['required'],
