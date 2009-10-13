@@ -862,7 +862,7 @@ function og_opml() {
  **/
 // 
 function og_view_group(&$node, $teaser = FALSE, $page = FALSE) {
-  if ($teaser || !$page) {
+  if (isset($node->og_description) && ($teaser || !$page)) {
     $node->content['og_description'] = array(
       '#type' => 'item',
       '#title' => t('Description'),
