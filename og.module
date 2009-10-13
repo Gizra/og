@@ -1330,17 +1330,18 @@ function og_elements_process($element, &$form_state, $form) {
     '#disabled' => empty($groups_count),
   );
 
-  // Set #element_validate in a way that it will not wipe out other
-  // validation functions already set by other modules.
-  if (empty($element['#element_validate'])) {
-    $element['#element_validate'] = array();
-  }
-  array_unshift($element['#element_validate'], 'options_validate');
 
   // Make sure field info will be available to the validator which
   // does not get the values in $form.
   // TODO: Do we need this^^?
   if (!empty($element['#field_name'])) {
+    // Set #element_validate in a way that it will not wipe out other
+    // validation functions already set by other modules.
+    if (empty($element['#element_validate'])) {
+      $element['#element_validate'] = array();
+    }
+    array_unshift($element['#element_validate'], 'options_validate');
+
     $form_state['#fields'][$element['#field_name']] = $form['#fields'][$element['#field_name']];
   }
 
