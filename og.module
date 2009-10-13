@@ -1252,8 +1252,22 @@ function og_elements_process($element, &$form_state, $form) {
   }
   else {
     $content_groups = !empty($element['#includes']) ? $element['#includes'] : array();
+
+
     // Initialize values.
     $content_groups += array('content groups' => array(), 'other groups' => array());
+
+    // Get all the existing groups.
+    if ($all_groups = og_get_all_groups_for_form()) {
+
+      foreach ($content_groups as $key => $value) {
+        foreach ($value as $nid) {
+          // Populate the groups with the group name.
+          $content_groups[$key][$nid] = $all_groups[$nid];
+        }
+      }
+    }
+
     $field_key  = 'value';
 
     // Add values that might be used if no values were set in the element.
