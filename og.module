@@ -580,23 +580,27 @@ function og_node_access($node, $op, $account) {
  *
  * Keyes definition:
  * - read_only: Determine if the form element should allow a user input, or only
- *   show the group audience.
+ *     show the group audience.
  * - opt_group: If TRUE then the group lists will be consisted of "my groups"
- *   and "other groups". This is set automatically to TRUE, by the processing
- *   function, for administrator users.
+ *     and "other groups". This is set automatically to TRUE, by the processing
+ *     function, for administrator users.
  * - opt_group_access_check: If TRUE then the opt_group will be determined
- *   automatically, otherwise, it will use the opt_group value.
+ *     automatically, otherwise, it will use the opt_group value.
  * - user_groups: Array with the group the user is subscribed to keyed by the
- *   group node ID and the group node title.
+ *     group node ID and the group node title.
  * - user_groups: Array with the group the user is not subscribed to keyed by
- *   the group node ID and the group node title.
+ *     the group node ID and the group node title.
  * - exclude: Array with the group node IDs that should be excluded from the
- *   list.
+ *     list.
+ * - include: Array with group IDs that should be included in the selection.
+ *     Array is keyed with 'content group' and 'other groups'.
  * - minimum_for_select_list: The number of groups in the "user_groups" array
- *   that should be the minimum for showing a select list instead of checkboxes
- *   or radios.
+ *     that should be the minimum for showing a select list instead of
+ *     checkboxes or radios.
+ * - multiple: Determine if multiple groups can be selected, or only a single
+ *     one.
  * - uid: The user ID. This can be used in order to created a form element for
- *   a different user than the acting user.
+ *     a different user than the acting user.
  */
 function og_element_info() {
   return array(
@@ -609,6 +613,7 @@ function og_element_info() {
       '#exclude' => array(),
       '#include' => array('content groups' => array(), 'other groups' => array()),
       '#minimum_for_select_list' => 20,
+      '#multiple' => TRUE,
       '#uid' => NULL,
       '#process' => array('og_elements_process'),
     ),
@@ -1220,12 +1225,12 @@ function og_set_context($node = NULL, $determine = FALSE) {
  * Menu callback; Return the title of a menu item based on the group title.
  */
 function og_menu_title_callback($title, $node) {
-  // TODO: Should check the node language.
   return str_replace('@group', $node->title[FIELD_LANGUAGE_NONE][0]['safe'], $title);
 }
 
 /**
  * Process organic groups audience FAPI element.
+ *
  */
 function og_elements_process($element, &$form_state, $form) {
   // Allow showing the form element for another user.
@@ -1236,6 +1241,9 @@ function og_elements_process($element, &$form_state, $form) {
    global $user;
     $account = $user;
   }
+
+  // The element may be called from a field widget, or independently as a regular
+  // form API. So prepare the element accordingly.
   if (!empty($element['#field_name'])) {
     $field = $form['#fields'][$element['#field_name']]['field'];
     $instance = $form['#fields'][$element['#field_name']]['instance'];
@@ -1247,6 +1255,10 @@ function og_elements_process($element, &$form_state, $form) {
     // Initialize values.
     $content_groups += array('content groups' => array(), 'other groups' => array());
     $field_key  = 'value';
+
+    // Add values that might be used if no values were set in the element.
+    $instance['required'] = FALSE;
+    $field['cardinality'] = !empty($element['#multiple']) ? FIELD_CARDINALITY_UNLIMITED : 1;
   }
 
   // Determine if a user may see other groups as-well.
@@ -1290,7 +1302,7 @@ function og_elements_process($element, &$form_state, $form) {
     '#title' => !empty($element['#title']) ? $element['#title'] : t('Group audience'),
     '#description' => !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.'),
     '#options' => $options,
-    '#default_value' => $element['#default_value'],
+    '#default_value' => !empty($element['#default_value']) ? $element['#default_value'] : array(),
     '#required' => isset($element['#required']) ? $element['#required'] : $instance['required'],
     '#multiple' => isset($element['#multiple']) ? $element['#multiple'] : $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED,
     '#attributes' => !empty($element['#attributes']) ? $element['#attributes'] : array('class' => array('og-audience')),
