@@ -1268,7 +1268,7 @@ function og_elements_process($element, &$form_state, $form) {
       }
     }
 
-    $field_key  = 'groups';
+    $field_key  = 'og';
 
     // Add values that might be used if no values were set in the element.
     $instance['required'] = FALSE;
