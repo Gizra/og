@@ -1258,7 +1258,7 @@ function og_elements_process($element, &$form_state, $form) {
     $content_groups += array('content groups' => array(), 'other groups' => array());
 
     // Get all the existing groups.
-    if ($all_groups = og_get_all_groups_for_form()) {
+    if ($all_groups = og_get_all_groups_for_form(array_merge($content_groups['content groups'], $content_groups['other groups']))) {
 
       foreach ($content_groups as $key => $value) {
         foreach ($value as $nid) {
@@ -1385,10 +1385,9 @@ function og_allowed_values($field, $account = NULL) {
 function og_get_groups_for_form($obj_type, $object) {
   $return = array('content groups' => array(), 'other groups' => array());
   // Get all the existing groups.
-  if ($all_groups = og_get_all_groups_for_form()) {
 
-    // Get the groups belonging to the content.
-    $content_groups = og_get_groups($obj_type, $object);
+  // Get the groups belonging to the content.
+  if (($content_groups = og_get_groups($obj_type, $object)) && $all_groups = og_get_all_groups_for_form($content_groups)) {
 
     // TODO: Is it faster to use array_diff & array_intersect?
     foreach ($all_groups as $nid => $name) {
@@ -1407,8 +1406,17 @@ function og_get_groups_for_form($obj_type, $object) {
 /**
  * Get all groups keyed by group ID and the title ready to be used on forms.
  */
-function og_get_all_groups_for_form() {
-  $return = db_query("SELECT og.nid, n.title FROM {og_groups} og INNER JOIN {node} n ON og.nid = n.nid ORDER BY og.nid")->fetchAllKeyed();
+function og_get_all_groups_for_form($nids = array()) {
+  $query = db_select('og_groups', 'og');
+  $query->fields('n', array('nid', 'title'))
+    ->orderBy('n.title', 'ASC')
+    ->join('node', 'n', 'og.nid = n.nid');
+
+  if (!empty($nids)) {
+    $query->condition('n.nid', $nids, 'IN');
+  }
+
+  $return = $query->execute()->fetchAllKeyed();
   // Sanitize the result.
   array_walk($return, 'check_plain');
   return $return;
