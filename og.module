@@ -590,9 +590,9 @@ function og_node_access($node, $op, $account) {
  *     group node ID and the group node title.
  * - user_groups: Array with the group the user is not subscribed to keyed by
  *     the group node ID and the group node title.
- * - exclude: Array with the group node IDs that should be excluded from the
+ * - excludes: Array with the group node IDs that should be excluded from the
  *     list.
- * - include: Array with group IDs that should be included in the selection.
+ * - includes: Array with group IDs that should be included in the selection.
  *     Array is keyed with 'content group' and 'other groups'.
  * - minimum_for_select_list: The number of groups in the "user_groups" array
  *     that should be the minimum for showing a select list instead of
@@ -610,8 +610,8 @@ function og_element_info() {
       '#opt_group_access_check' => TRUE,
       '#user_groups' => array(),
       '#other_groups' => array(),
-      '#exclude' => array(),
-      '#include' => array('content groups' => array(), 'other groups' => array()),
+      '#excludes' => array(),
+      '#includes' => array('content groups' => array(), 'other groups' => array()),
       '#minimum_for_select_list' => 20,
       '#multiple' => TRUE,
       '#uid' => NULL,
@@ -1251,7 +1251,7 @@ function og_elements_process($element, &$form_state, $form) {
     $field_key  = $element['#columns'][0];
   }
   else {
-    $content_groups = !empty($element['#include']) ? $element['#include'] : array();
+    $content_groups = !empty($element['#includes']) ? $element['#includes'] : array();
     // Initialize values.
     $content_groups += array('content groups' => array(), 'other groups' => array());
     $field_key  = 'value';
@@ -1272,22 +1272,22 @@ function og_elements_process($element, &$form_state, $form) {
   }
   // The group options presented to the user.
   $options = array();
-  $element['#exclude'] = drupal_map_assoc($element['#exclude']);
+  $element['#excludes'] = drupal_map_assoc($element['#excludes']);
   if ($opt_group) {
     // Show "My groups" and "Other groups".
     $groups_count = count($content_groups['content groups']) + count($content_groups['other groups']);
     if (!empty($content_groups['content groups'])) {
-      $options += array(t('My groups') => array_diff_key($content_groups['content groups'], $element['#exclude']));
+      $options += array(t('My groups') => array_diff_key($content_groups['content groups'], $element['#excludes']));
     }
     if (!empty($content_groups['other groups'])) {
-      $options += array(t('Other groups') => array_diff_key($content_groups['other groups'], $element['#exclude']));
+      $options += array(t('Other groups') => array_diff_key($content_groups['other groups'], $element['#excludes']));
     }
     $type = 'select';
   }
   else {
     // Show only "My groups".
     $groups_count = count($content_groups['content groups']);
-    $options = array_diff_key($content_groups['content groups'], $element['#exclude']);
+    $options = array_diff_key($content_groups['content groups'], $element['#excludes']);
     // Show a select list if their are a minimum of groups.
     if ($field['cardinality'] == 1) {
       $type = 'radios';

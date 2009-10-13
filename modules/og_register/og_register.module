@@ -16,7 +16,7 @@ function og_register_form_user_register_form_alter(&$form, $form_state) {
     $form['og_register'] = array(
       '#type' => 'og_audience',
       '#title' => t('Subscribe to group'),
-      '#include' => array('content groups' => $groups),
+      '#includes' => array('content groups' => $groups),
     );
   }
 }
