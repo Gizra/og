@@ -14,11 +14,31 @@
 function og_register_form_user_register_form_alter(&$form, $form_state) {
   if ($groups = og_register_get_groups()) {
     $form['og_register'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Groups'),
+    );
+    $form['og_register']['og_register_groups'] = array(
       '#type' => 'og_audience',
       '#title' => t('Subscribe to group'),
       '#includes' => array('content groups' => $groups),
       '#description' => t('Select the groups you wish to subscribe to.'),
     );
+
+    // Add own submit handler.
+    $form['#submit'][] = 'og_register_register_submit';
+  }
+}
+
+/**
+ * Submit handler for the registration form.
+ */
+function og_register_register_submit($form, &$form_state) {
+  if (!empty($form_state['values']['og']) && ($nids = array_filter($form_state['values']['og']))) {
+    $groups = array();
+    foreach ($nids as $nid) {
+      $groups[] = array('value' => $nid);
+    }
+    og_subscribe_user($groups);
   }
 }
 
