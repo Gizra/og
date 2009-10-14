@@ -490,10 +490,6 @@ function og_og_permission() {
       'title' => t('Edit group'),
       'description' => t('Edit the group content.'),
     ),
-    'view group posts' => array(
-      'title' => t('View group posts'),
-      'description' => t('View the group posts that belong to the group.'),
-    ),
     'update own group posts' => array(
       'title' => t('Edit own group posts'),
       'description' => t('Edit own group posts that belong to the group.'),
