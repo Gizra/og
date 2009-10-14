@@ -1,0 +1,142 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Enable access control for private and public groups and group posts.
+ */
+
+/**
+ * The access realm of group non-members.
+ */
+define('OG_ACCESS_ANONYMOUS_REALM', 'og_anonymous');
+
+/**
+ * The access realm of group member.
+ */
+define('OG_ACCESS_AUTHENTICATED_REALM', 'og_authenticated');
+
+/**
+ * The access realm of group member.
+ */
+define('OG_ACCESS_PUBLIC_REALM', 'og_public');
+
+/**
+ * Implement og_permission
+ */
+function og_access_og_permission() {
+  return array(
+    'view group' => array(
+      'title' => t('View group'),
+      'description' => t('View the group content.'),
+    ),
+    'view group posts' => array(
+      'title' => t('View group posts'),
+      'description' => t('View the group posts that belong to the group.'),
+    ),
+    'make group posts public' => array(
+      'title' => t('Make group posts public'),
+      'description' => t('Mark the group posts as public.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_node_grants().
+ */
+function og_access_node_grants($account, $op) {
+  $grants = array();
+  if ($op == 'view') {
+    $grants[OG_ACCESS_PUBLIC_REALM][] = 0; // everyone can see a public node
+    foreach (og_get_groups('user', $account) as $gid => $value) {
+      $grants[OG_ACCESS_AUTHENTICATED_REALM][] = $gid;
+    }
+  }
+
+  return $grants;
+}
+
+
+/**
+ * Implementation of hook_node_access_records.
+ */
+function og_access_node_access_records($node) {
+  $grants = array();
+
+  if (og_is_group_type($node->type)) {
+    // Get default roles.
+    $default_roles = og_get_group_default_roles($node->nid);
+
+
+    // If the group can't be access by non members then hide it, but let
+    // group members view the group.
+    $role_perms = og_user_role_permissions(array($default_roles[OG_ANONYMOUS_ROLE] => OG_ANONYMOUS_ROLE));
+    $access = !empty($role_perms[$default_roles[OG_ANONYMOUS_ROLE]['view group posts']]);
+    if (!$access) {
+      $grants[] = array (
+        'realm' => 'OG_ACCESS_ANONYMOUS_REALM',
+        'gid' => $node->nid,
+        'grant_view' => 0,
+        'grant_update' => 0,
+        'grant_delete' => 0,
+        'priority' => 0,
+      );
+      $grants[] = array (
+        'realm' => 'OG_ACCESS_AUTHENTICATED_REALM',
+        'gid' => $node->nid,
+        'grant_view' => 1,
+        'grant_update' => 0,
+        'grant_delete' => 0,
+        'priority' => 0,
+      );
+
+    }
+  }
+  elseif (og_is_group_post_type($node->type)) {
+
+  }
+
+  return $grants;
+}
+
+
+/**
+ * Add organic groups access field to group posts types.
+ *
+ * @param $bundle
+ *   The bundle name.
+ */
+function og_access_create_fields($bundle) {
+  $field = field_info_field('og_access');
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'og_access',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Do not show to non-privileged users', '1|Show to all site users')), 'allowed_values_function' => ''),
+    );
+    $field = field_create_field($field);
+  }
+
+  $instance = field_info_instance('og_access', $bundle);
+  if (empty($instance)) {
+    $instance = array(
+      'field_name' => 'og_access',
+      'bundle' => $bundle,
+      // FIXME: Widget type doesn't work
+      'widget_type' => 'options_onoff',
+      'label' => t('Post visibility'),
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+}

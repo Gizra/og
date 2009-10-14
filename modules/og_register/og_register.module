@@ -44,7 +44,7 @@ function og_register_register_submit($form, &$form_state) {
 
 
 /**
- * Add organic groups register field group node types.
+ * Add organic groups register field group types.
  *
  * @param $bundle
  *   The bundle name.

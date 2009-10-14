@@ -482,10 +482,6 @@ function og_og_permission() {
       'title' => t('Add user'),
       'description' => t("Add a new user to the group."),
     ),
-    'view group' => array(
-      'title' => t('View group'),
-      'description' => t('View the group content.'),
-    ),
     'update group' => array(
       'title' => t('Edit group'),
       'description' => t('Edit the group content.'),
