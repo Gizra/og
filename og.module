@@ -605,7 +605,7 @@ function og_og_types_info() {
      ),
      'group post' => array(
        'type' => 'group post',
-       'description' => t('Standard group post.'),
+       'description' => t('Standard group post'),
      ),
   );
 }
