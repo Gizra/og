@@ -176,6 +176,7 @@ function og_set_og_audince_field($bundle, $obj_type = 'node') {
     $instance = array(
       'field_name' => 'og_audience',
       'bundle' => $bundle,
+      'object_type' => $obj_type,
       'label' => t('Groups audience'),
       'widget_type' => 'og_audience',
       'display' => array(

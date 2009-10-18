@@ -106,7 +106,7 @@ function og_access_node_access_records($node) {
  * @param $bundle
  *   The bundle name.
  */
-function og_access_create_fields($bundle) {
+function og_access_create_fields($bundle, $obj_type = 'node') {
   $field = field_info_field('og_access');
   if (empty($field)) {
     $field = array(
@@ -118,11 +118,12 @@ function og_access_create_fields($bundle) {
     $field = field_create_field($field);
   }
 
-  $instance = field_info_instance('og_access', $bundle);
+  $instance = field_info_instance($obj_type, 'og_access', $bundle);
   if (empty($instance)) {
     $instance = array(
       'field_name' => 'og_access',
       'bundle' => $bundle,
+      'object_type' => $obj_type,
       // FIXME: Widget type doesn't work
       'widget_type' => 'options_onoff',
       'label' => t('Post visibility'),

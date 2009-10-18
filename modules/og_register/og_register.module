@@ -49,7 +49,7 @@ function og_register_register_submit($form, &$form_state) {
  * @param $bundle
  *   The bundle name.
  */
-function og_register_create_fields($bundle) {
+function og_register_create_fields($bundle, $obj_type = 'node') {
   $field = field_info_field('og_register');
   if (empty($field)) {
     $field = array(
@@ -61,11 +61,12 @@ function og_register_create_fields($bundle) {
     $field = field_create_field($field);
   }
 
-  $instance = field_info_instance('og_register', $bundle);
+  $instance = field_info_instance($obj_type, 'og_register', $bundle);
   if (empty($instance)) {
     $instance = array(
       'field_name' => 'og_register',
       'bundle' => $bundle,
+      'object_type' => $obj_type,
       // FIXME: Widget type doesn't work
       'widget_type' => 'options_onoff',
       'label' => t('Groups register'),
