@@ -351,8 +351,6 @@ function og_node_type_delete($info) {
 
 /**
 * Implement hook_node_type_insert().
-*
-* TODO: USe after http://drupal.org/node/586436 gets in.
 */
 function og_node_type_insert($info) {
   if (og_is_group_post_type($info->type)) {
@@ -607,7 +605,7 @@ function og_og_types_info() {
      ),
      'group post' => array(
        'type' => 'group post',
-       'description' => t('Standard group post (typically only author may edit).'),
+       'description' => t('Standard group post.'),
      ),
   );
 }
