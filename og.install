@@ -10,7 +10,7 @@
  * Implement hook_enable().
  */
 function og_enable() {
-  og_set_og_audince_field('user');
+  og_set_og_audince_field('user', 'user');
   // Create roles that would be used for the default permissions.
   og_set_new_group_roles();
 }

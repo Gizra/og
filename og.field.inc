@@ -157,8 +157,10 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
  *
  * @param $bundle
  *   The bundle name.
+ * @param $obj_type
+ *   Optional; The object type for the instance - 'node' by default.
  */
-function og_set_og_audince_field($bundle) {
+function og_set_og_audince_field($bundle, $obj_type = 'node') {
   $field = field_info_field('og_audience');
   if (empty($field)) {
     $field = array(
@@ -169,7 +171,7 @@ function og_set_og_audince_field($bundle) {
     $field = field_create_field($field);
   }
 
-  $instance = field_info_instance('og_audience', $bundle);
+  $instance = field_info_instance($obj_type, 'og_audience', $bundle);
   if (empty($instance)) {
     $instance = array(
       'field_name' => 'og_audience',
