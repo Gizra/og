@@ -47,7 +47,7 @@ function og_access_og_permission() {
 function og_access_node_grants($account, $op) {
   $grants = array();
   if ($op == 'view') {
-    $grants[OG_ACCESS_PUBLIC_REALM][] = 0; // everyone can see a public node
+    // $grants[OG_ACCESS_PUBLIC_REALM][] = 0; // everyone can see a public node
     foreach (og_get_groups('user', $account) as $gid => $value) {
       $grants[OG_ACCESS_AUTHENTICATED_REALM][] = $gid;
     }
@@ -92,7 +92,7 @@ function og_access_node_access_records($node) {
 
     }
   }
-  elseif (og_is_group_post_type($node->type)) {
+  if (og_is_group_post_type($node->type)) {
 
   }
 

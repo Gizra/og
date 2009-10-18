@@ -339,26 +339,6 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#default_value' =>  og_is_group_post_type($node_type) ? og_get_group_type($node_type, 'group post') : 'omitted',
     '#options' => array('omitted' => t('Not a group post type')) + $options['group post'],
   );
-
-  // Add own submit handler.
-  $form['#submit'][] = 'og_node_type_form_submit';
-}
-
-/**
- * Submit handler; Set the group type.
- *
- * We can't use hook_node_type_insert() to set the group, since variables are
- * saved later on.
- * @see node_type_form_submit().
- */
-function og_node_type_form_submit($form, &$form_state) {
-  $type = $form_state['values']['type'];
-  $og_types = og_get_og_types();
-  $og_type = $og_types[$form_state['values']['og_group_post_type']]['type'];
-
-  if ($og_type == 'group post') {
-    og_group_post_type_set_fields(array($type));
-  }
 }
 
 /**
@@ -375,6 +355,9 @@ function og_node_type_delete($info) {
 * TODO: USe after http://drupal.org/node/586436 gets in.
 */
 function og_node_type_insert($info) {
+  if (og_is_group_post_type($info->type)) {
+    og_group_post_type_set_fields(array($info->type));
+  }
 }
 
 /**
