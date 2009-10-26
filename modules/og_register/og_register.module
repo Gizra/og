@@ -7,6 +7,11 @@
  */
 
 /**
+ * Group public access field.
+ */
+define('OG_REGISTER_FIELD', 'og_register');
+
+/**
  * Implement hook_form_FORM_ID_alter().
  *
  * Get all the groups that should appear in the user registration, and show them.
@@ -91,10 +96,8 @@ function og_register_create_fields($bundle, $obj_type = 'node') {
 function og_register_get_groups($count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
   $nids = array();
 
-  $field = field_info_field('og_register');
-
   // Get all the group node IDs.
-  if ($result = field_attach_query($field['id'], array(), $count, $cursor)) {
+  if (($field = field_info_field(OG_REGISTER_FIELD)) && $result = field_attach_query($field['id'], array(),  array('limit' => $count, 'cursor' => $cursor))) {
     foreach ($result['node'] as $value) {
       $nids[$value->nid] = $value->nid;
     }
