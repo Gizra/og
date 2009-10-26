@@ -9,17 +9,18 @@
 /**
  * The access realm of group non-members.
  */
-define('OG_ACCESS_ANONYMOUS_REALM', 'og_anonymous');
+define('OG_ACCESS_ANONYMOUS_REALM', 'og_access_anonymous');
 
 /**
  * The access realm of group member.
  */
-define('OG_ACCESS_AUTHENTICATED_REALM', 'og_authenticated');
+define('OG_ACCESS_AUTHENTICATED_REALM', 'og_access_authenticated');
 
 /**
- * The access realm of group member.
+ * Group public access field.
  */
-define('OG_ACCESS_PUBLIC_REALM', 'og_public');
+define('OG_ACCESS_FIELD', 'og_access');
+
 
 /**
  * Implement og_permission
@@ -62,19 +63,10 @@ function og_access_node_grants($account, $op) {
  */
 function og_access_node_access_records($node) {
   $grants = array();
-
-  if (og_is_group_type($node->type)) {
-    // Get default roles.
-    $default_roles = og_get_group_default_roles($node->nid);
-
-
-    // If the group can't be access by non members then hide it, but let
-    // group members view the group.
-    $role_perms = og_user_role_permissions(array($default_roles[OG_ANONYMOUS_ROLE] => OG_ANONYMOUS_ROLE));
-    $access = !empty($role_perms[$default_roles[OG_ANONYMOUS_ROLE]['view group posts']]);
-    if (!$access) {
+  if (!og_access_object_is_public('node', $node)) {
+    if (og_is_group_post_type($node->type) || og_is_group_type($node->type)) {
       $grants[] = array (
-        'realm' => 'OG_ACCESS_ANONYMOUS_REALM',
+        'realm' => OG_ACCESS_ANONYMOUS_REALM,
         'gid' => $node->nid,
         'grant_view' => 0,
         'grant_update' => 0,
@@ -82,21 +74,31 @@ function og_access_node_access_records($node) {
         'priority' => 0,
       );
       $grants[] = array (
-        'realm' => 'OG_ACCESS_AUTHENTICATED_REALM',
+        'realm' => OG_ACCESS_AUTHENTICATED_REALM,
         'gid' => $node->nid,
         'grant_view' => 1,
         'grant_update' => 0,
         'grant_delete' => 0,
         'priority' => 0,
       );
-
     }
   }
-  if (og_is_group_post_type($node->type)) {
-
-  }
-
   return $grants;
+}
+
+/**
+ * Check if an object is set as public.
+ *
+ * @param $obj_type
+ *   The object type (e.g. "node" or "user").
+ * @param $object
+ *   The object can be a user, node or any fieldable entity.
+ * @return
+ *  TRUE if the object is private and should appear only to group members.
+ */
+function og_access_object_is_public($obj_type, $object) {
+  og_load_object($obj_type, $object);
+  return !empty($object->{OG_ACCESS_FIELD}[FIELD_LANGUAGE_NONE][0]['value']);
 }
 
 
