@@ -284,11 +284,11 @@ function og_init() {
 function og_theme() {
   return array(
     'og_user_admin_permissions' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
       'file' => 'og.admin.inc',
     ),
     'og_user_admin_new_role' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
       'file' => 'og.admin.inc',
     ),
   );
@@ -699,7 +699,7 @@ function og_get_group_users($nid, $states = array(OG_STATE_ACTIVE), $count = FIE
   );
 
   // Get the objects IDs.
-  if ($result = field_attach_query($field['id'], $conditions, $count, $cursor)) {
+  if ($result = field_attach_query($field['id'], $conditions, array('limit' => $count, 'cursor' => $cursor))) {
     $uids = array();
     foreach ($result['user'] as $key => $value) {
       $uids[$key] = $key;
