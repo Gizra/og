@@ -1268,11 +1268,11 @@ function og_elements_process($element, &$form_state, $form) {
     $groups_count = 0;
     if ($my_groups = array_diff_key($content_groups['content groups'], $element['#excludes'])) {
       $options += array(t('My groups') => $my_groups);
-      $groups_count = $groups_count + $my_groups;
+      $groups_count = $groups_count + count($my_groups);
     }
     if ($other_groups = array_diff_key($content_groups['other groups'], $element['#excludes'])) {
       $options += array(t('Other groups') => $other_groups);
-      $groups_count = $groups_count + $other_groups;
+      $groups_count = $groups_count + count($other_groups);
     }
     $type = 'select';
   }
