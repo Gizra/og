@@ -1946,7 +1946,7 @@ function og_set_new_group_roles($nid = 0) {
   $auth_rid = $role->rid;
 
   unset($role->rid);
-  $role->name = 'admin';
+  $role->name = OG_ADMINISTRATOR_ROLE;
   og_user_role_save($role);
   $admin_rid = $role->rid;
 
