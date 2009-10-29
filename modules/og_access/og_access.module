@@ -115,7 +115,7 @@ function og_access_create_fields($bundle, $obj_type = 'node') {
       'field_name' => 'og_access',
       'type' => 'list_boolean',
       'cardinality' => 1,
-      'settings' => array('allowed_values' => implode("\r\n", array('0|Do not show to non-privileged users', '1|Show to all site users')), 'allowed_values_function' => ''),
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Do not show to non group member', '1|Show to all site users')), 'allowed_values_function' => ''),
     );
     $field = field_create_field($field);
   }
