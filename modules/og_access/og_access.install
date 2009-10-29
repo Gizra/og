@@ -13,6 +13,8 @@
  */
 function og_access_enable() {
   foreach (node_type_get_names() as $type => $name){
-    og_access_create_fields($type);
+    if (og_is_group_post_type($type)) {
+      og_access_create_fields($type);
+    }
   }
 }
