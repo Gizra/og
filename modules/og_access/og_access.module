@@ -23,6 +23,15 @@ define('OG_ACCESS_FIELD', 'og_access');
 
 
 /**
+* Implement hook_node_type_insert().
+*/
+function og_access_node_type_insert($info) {
+  if (og_is_group_post_type($info->type)) {
+    og_access_create_fields($info->type);
+  }
+}
+
+/**
  * Implement og_permission
  */
 function og_access_og_permission() {

@@ -194,20 +194,6 @@ function og_set_og_audince_field($bundle, $obj_type = 'node') {
   }
 }
 
-/**
- * Add fields to group post node types.
- *
- * @param $node_types
- *   Array of the node types that need to have the field attached to.
- */
-function og_group_post_type_set_fields($node_types = array()) {
-  foreach ($node_types as $type) {
-    og_set_og_audince_field($type);
-  }
-}
-
-
-
 /*******************************************************************************
  * Theme functions
  ******************************************************************************/

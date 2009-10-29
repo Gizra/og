@@ -354,7 +354,7 @@ function og_node_type_delete($info) {
 */
 function og_node_type_insert($info) {
   if (og_is_group_post_type($info->type)) {
-    og_group_post_type_set_fields(array($info->type));
+    og_set_og_audince_field($info->type);
   }
 }
 
