@@ -330,7 +330,7 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
         $form['permission'][$perm] = array(
           '#type' => 'item',
           '#markup' => $perm_item['title'],
-          '#description' => $hide_descriptions ? $perm_item['description'] : NULL,
+          '#description' => $hide_descriptions ? $perm_item['description'] : '',
         );
         foreach ($role_names as $rid => $name) {
           // Builds arrays for checked boxes for each role
@@ -352,9 +352,41 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
     $form['#theme'] = array('og_user_admin_permissions');
   }
   $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'), '#submit' => array('og_user_admin_permissions_submit'));
+  $form['#after_build'] = array('og_user_admin_permissions_after_build');
+
   return $form;
 }
 
+/**
+ * Helper function to disable the checkboxes according to their 'roles' state.
+ *
+ * Every permission can decdeclate to which roles it applies, as some don't make
+ * sense if applied to anonymous and authenticated user (e.g. subscribe to group
+ * should appear only to anonymous members).
+ */
+function og_user_admin_permissions_after_build($element) {
+  // Authenticated roles.
+  $auth_rids = array_flip(og_user_roles($element['nid']['#value']));
+  // Remove the anonymous member from the authenticated roles.
+  $anon_rid = array_shift($auth_rids);
+
+  foreach (og_permissions_get() as $module_perms) {
+    foreach ($module_perms as $key => $perm) {
+      $perm['roles'] = drupal_map_assoc($perm['roles']);
+
+      if (empty($perm['roles']) || empty($perm['roles'][OG_ANONYMOUS_ROLE])) {
+        $element['checkboxes'][$anon_rid][$key]['#attributes']['disabled'] = TRUE;
+      }
+      if (empty($perm['roles']) || empty($perm['roles'][OG_AUTHENTICATED_ROLE])) {
+        foreach ($auth_rids as $auth_rid) {
+          $element['checkboxes'][$auth_rid][$key]['#attributes']['disabled'] = TRUE;
+        }
+      }
+    }
+  }
+
+  return $element;
+}
 /**
  * Save permissions selected on the administer permissions page.
  *
