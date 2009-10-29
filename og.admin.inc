@@ -220,16 +220,9 @@ function og_user_admin_role($form, $form_state, $node) {
 
 function og_user_admin_role_validate($form, &$form_state) {
   if ($form_state['values']['name']) {
-    if ($form_state['values']['op'] == t('Save role')) {
-      $role = og_user_role_load($form_state['values']['name'], $form_state['values']['name']);
-      if ($role && $role->rid != $form_state['values']['rid']) {
-        form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
-      }
-    }
-    elseif ($form_state['values']['op'] == t('Add role')) {
-      if (og_user_role_load($form_state['values']['name'])) {
-        form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
-      }
+    $roles = og_user_roles($form_state['values']['nid']);
+    if (in_array($form_state['values']['name'], $roles)) {
+      form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
     }
   }
   else {
