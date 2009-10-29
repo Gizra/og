@@ -26,7 +26,7 @@ define('OG_ACCESS_FIELD', 'og_access');
 * Implement hook_node_type_insert().
 */
 function og_access_node_type_insert($info) {
-  if (og_is_group_post_type($info->type)) {
+  if (og_is_group_type($info->type) || og_is_group_post_type($info->type)) {
     og_access_create_fields($info->type);
   }
 }
@@ -35,7 +35,7 @@ function og_access_node_type_insert($info) {
 * Implement hook_node_type_update().
 */
 function og_access_node_type_update($info) {
-  if (og_is_group_post_type($info->type)) {
+  if (og_is_group_type($info->type) || og_is_group_post_type($info->type)) {
     og_access_create_fields($info->type);
   }
 }
