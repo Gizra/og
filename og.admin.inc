@@ -315,7 +315,6 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
   $hide_descriptions = !system_admin_compact_mode();
   foreach (og_permissions_get() as $module => $permissions) {
     $form['permission'][] = array('#markup' => $module, '#id' => $module);
-
     foreach ($permissions as $perm => $perm_item) {
       $access = !empty($node) ? og_user_access($node->nid, 'show ' . $perm) : TRUE;
       if ($access) {

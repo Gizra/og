@@ -1867,11 +1867,11 @@ function og_permissions_get() {
 
   foreach (module_implements('og_permission') as $module) {
     if ($permissions = module_invoke($module, 'og_permission')) {
-      foreach ($permissions as &$perm) {
+      foreach ($permissions as $key => $perm) {
         // Initialize the roles key, if other modules haven't set it explicetly.
         // This means the permissions can apply to anonymous and authenticaed
         // members as-well.
-        $perm += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE));
+        $permissions[$key] += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE));
       }
       $perms[$module] = $permissions;
     }
@@ -1883,7 +1883,7 @@ function og_permissions_get() {
     // set.
     foreach ($perms as $module => $permissions) {
       foreach ($permissions as $key => $perm) {
-        $return[t('administer og')]['show ' . $key] = array(
+        $return['administer og']['show ' . $key] = array(
           'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
           'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
           // Add all roles, as this option allows setting which permisisons
