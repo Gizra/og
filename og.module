@@ -1961,8 +1961,8 @@ function og_set_new_group_roles($nid = 0) {
 
   // Create default permissions for roles.
   $perms = array(
-    OG_ANONYMOUS_ROLE => array('subscribe', 'view group', 'view group posts'),
-    OG_AUTHENTICATED_ROLE => array('subscribe', 'unsubscribe', 'view group', 'view group posts'),
+    OG_ANONYMOUS_ROLE => array('subscribe', 'subscribe without approval'),
+    OG_AUTHENTICATED_ROLE => array('unsubscribe'),
     // All permissions.
     OG_ADMINISTRATOR_ROLE => array_keys(og_permissions_get()),
   );
