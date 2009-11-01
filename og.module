@@ -560,10 +560,6 @@ function og_node_access($node, $op, $account) {
     elseif (in_array(OG_ACCESS_ALLOW, $access, TRUE)) {
       return NODE_ACCESS_ALLOW;
     }
-
-    // We didn't get any allow access so in the organic groups realm, we decide
-    // to deny access.
-    return NODE_ACCESS_DENY;
   }
   // Not an organic group node type.
   return NODE_ACCESS_IGNORE;
