@@ -12,6 +12,30 @@
  */
 
 /**
+ * Add group permissions.
+ */
+function hook_og_permission() {
+  return array(
+    'subscribe' => array(
+      'title' => t('Subscribe user to group'),
+      'description' => t("Allow user to be a member of a group (approval required)."),
+      'roles' => array(OG_ANONYMOUS_ROLE),
+    ),
+  );
+}
+
+/**
+ * Set the default permissions to be assigned to members, by thier role.
+ */
+function hook_og_permission_default() {
+  return array(
+    OG_ANONYMOUS_ROLE => array('an anonymous permission'),
+    OG_AUTHENTICATED_ROLE => array('an authenticated permission'),
+    OG_ADMINISTRATOR_ROLE => array(),
+  );
+}
+
+/**
  * Determine if a user has access to a certain operation within a group context.
  *
  * For content access @see hook_og_node_access().

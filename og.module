@@ -503,6 +503,17 @@ function og_og_permission() {
 }
 
 /**
+ * Implementation of hook_og_permission_default().
+ */
+function og_og_permission_default() {
+  return array(
+    OG_ANONYMOUS_ROLE => array('subscribe', 'subscribe without approval'),
+    OG_AUTHENTICATED_ROLE => array('unsubscribe', 'update own group posts', 'delete own group posts'),
+    OG_ADMINISTRATOR_ROLE => array('approve and deny subscription', 'add user', 'update group', 'update any group posts', 'delete any group posts', 'administer group'),
+  );
+}
+
+/**
  * Implement hook_og_access().
  */
 function og_og_access($op, $node, $acting_user, $account) {
@@ -1875,13 +1886,28 @@ function og_permissions_get() {
         $return[t('administer og')]['show ' . $key] = array(
           'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
           'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
-          'roles' => $perm['roles'],
+          // Add all roles, as this option allows setting which permisisons
+          // a role has access to.
+          'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
         );
       }
     }
     $perms = $perms + $return;
   }
   return $perms;
+}
+
+/**
+ * Get default permissions as set by implementing modules.
+ *
+ * @return
+ *   Array keyed with the anonymous, authenticated and administror and the
+ *   permissions that should be enabled by default.
+ */
+function og_permissions_default_get() {
+   $perms = module_invoke_all('og_permission_default');
+   $perms += array(OG_ANONYMOUS_ROLE => array(), OG_AUTHENTICATED_ROLE => array(), OG_ADMINISTRATOR_ROLE => array());
+   return $perms;
 }
 
 /**
@@ -1960,12 +1986,7 @@ function og_set_new_group_roles($nid = 0) {
   $admin_rid = $role->rid;
 
   // Create default permissions for roles.
-  $perms = array(
-    OG_ANONYMOUS_ROLE => array('subscribe', 'subscribe without approval'),
-    OG_AUTHENTICATED_ROLE => array('unsubscribe'),
-    // All permissions.
-    OG_ADMINISTRATOR_ROLE => array_keys(og_permissions_get()),
-  );
+  $perms = og_permissions_default_get();
 
   og_user_role_grant_permissions($anon_rid, $perms[OG_ANONYMOUS_ROLE]);
   og_user_role_grant_permissions($auth_rid, $perms[OG_AUTHENTICATED_ROLE]);
