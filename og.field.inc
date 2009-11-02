@@ -88,9 +88,7 @@ function og_field_widget_info() {
 function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   // Select groups if they were passed in the URL, in the form of
   // node/add/post?gids[]=1,2,3
-  if (!empty($_REQUEST['gids'])) {
-    $default_values = !empty($_REQUEST['gids'][0]) ? explode(',', $_REQUEST['gids'][0]) : array();
-  }
+  $default_values = !empty($_REQUEST['gids'][0]) ? explode(',', $_REQUEST['gids'][0]) : array();
 
   if (!empty($items)) {
     foreach ($items as $item) {
