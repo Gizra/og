@@ -353,17 +353,28 @@ function og_node_type_delete($info) {
 * Implement hook_node_type_insert().
 */
 function og_node_type_insert($info) {
-  if (og_is_group_post_type($info->type)) {
-    og_create_fields_group_posts($info->type);
-  }
+  og_node_type_save($info->type);
 }
 
 /**
 * Implement hook_node_type_update().
 */
 function og_node_type_update($info) {
-  if (og_is_group_post_type($info->type)) {
-    og_create_fields_group_posts($info->type);
+  og_node_type_save($info->type);
+}
+
+/**
+ * Add group and group posts fields to new content types.
+ *
+ * @param $bundle_name
+ *   The content type name.
+ */
+function og_node_type_save($bundle_name) {
+  if (og_is_group_type($bundle_name)) {
+    og_create_fields_group($bundle_name);
+  }
+  if (og_is_group_post_type($bundle_name)) {
+    og_create_fields_group_posts($bundle_name);
   }
 }
 
