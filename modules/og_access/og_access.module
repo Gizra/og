@@ -46,7 +46,7 @@ function og_access_node_type_update($info) {
 function og_access_node_grants($account, $op) {
   $grants = array();
   if ($op == 'view') {
-    foreach (og_get_groups('user', $account) as $gid => $value) {
+    foreach (og_get_object_groups('user', $account) as $gid => $value) {
       $grants[OG_ACCESS_AUTHENTICATED_REALM][] = $gid;
     }
   }

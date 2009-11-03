@@ -151,7 +151,7 @@ function og_rules_condition_info() {
  * Condition: User is a group member.
  */
 function og_rules_condition_user_in_group($user, $node, $states, $settings) {
-  return in_array($node->nid, $groups, og_get_groups('user', $user, $states));
+  return in_array($node->nid, $groups, og_get_object_groups('user', $user, $states));
 }
 
 /**

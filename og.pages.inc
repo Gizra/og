@@ -37,7 +37,7 @@ function og_subscribe($node, $uid = NULL) {
     }
 
     // Check user isn't already subscribed.
-    if (in_array($node->nid, og_get_groups('user', $account))) {
+    if (in_array($node->nid, og_get_object_groups('user', $account))) {
       drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])));
       drupal_goto('node/' . $node->nid);
     }
@@ -55,7 +55,7 @@ function og_subscribe($node, $uid = NULL) {
  * Confirm OG membership form.
  */
 function og_confirm_subscribe($form, &$form_state, $node, $account) {
-  $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
+  $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
   $form['account'] = array('#type' => 'value', '#value' => $account);
   if (!og_user_access($node->nid, 'subscribe without approval')) {
     $form['request'] = array(
@@ -72,8 +72,10 @@ function og_confirm_subscribe($form, &$form_state, $node, $account) {
  */
 function og_confirm_subscribe_submit($form, &$form_state) {
   $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
-  $nid = $form_state['values']['gid'];
+  // The group ID.
+  $gid = $form_state['values']['nid'];
 
+  $nid = $form_state['values']['nid'];
   $node = node_load($nid);
 
   $group = array(
@@ -84,8 +86,7 @@ function og_confirm_subscribe_submit($form, &$form_state) {
 
   og_subscribe_user(array($group), NULL, FALSE, $request);
 
-  $node = node_load($form_state['values']['gid']);
-  $form_state['redirect'] = node_access('view', $node) ? 'node/' . $form_state['values']['gid'] : '';
+  $form_state['redirect'] = node_access('view', $node) ? 'node/' . $nid : '';
 }
 
 
@@ -178,7 +179,7 @@ function og_approve($node, $account, $token) {
       return;
     }
 
-    $user_groups = og_get_groups('user', $account);
+    $user_groups = og_get_object_groups('user', $account);
 
     if (in_array($node->nid, $user_groups)) {
       drupal_set_message(t('!name was already approved to group %group.', array('!name' => theme('username', $account), '%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])), 'error');

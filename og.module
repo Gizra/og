@@ -547,7 +547,7 @@ function og_og_node_access($node, $op, $account) {
     // We don't have a context, so we need to get all the permissions
     // of all the groups. We don't intersect with the user's group, as
     // groups might allow anonymous members access.
-    $gids = array_keys(og_get_groups('node', $node));
+    $gids = array_keys(og_get_object_groups('node', $node));
     foreach ($gids as $gid) {
       if (og_user_access($gid, $op . ' group posts', $account) || og_user_access($gid, $op . ' any group posts', $account) || (og_user_access($gid, $op . ' own group posts', $account) && $node->uid == $account->uid)) {
         return NODE_ACCESS_ALLOW;
@@ -816,7 +816,7 @@ function og_get_group_from_object($gid, $obj_type, $object, &$key = NULL) {
  * @return
  *  An array with the group, or an empty array.
  */
-function og_get_groups($obj_type, $object, $states = array(OG_STATE_ACTIVE)) {
+function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIVE)) {
   // Load object to get the fields.
   $object = og_load_object($obj_type, $object);
 
@@ -998,7 +998,7 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
 
   // Will be used later to keep only groups that are not yet associated with the
   // group.
-  $existing_gids = og_get_groups($obj_type, $object, array());
+  $existing_gids = og_get_object_groups($obj_type, $object, array());
 
   // Allow other modules to change the subscribed groups.
   drupal_alter('og_set_association', $groups, $obj_type, $object);
@@ -1185,9 +1185,9 @@ function og_determine_context_by_node($node, $account = NULL) {
   if (og_is_group_type($node->type)) {
     $group_node = $node;
   }
-  elseif (og_is_group_post_type($node->type) && ($groups = og_get_groups('node', $node))) {
+  elseif (og_is_group_post_type($node->type) && ($groups = og_get_object_groups('node', $node))) {
 
-    if ($user_groups = og_get_groups('user', $account)) {
+    if ($user_groups = og_get_object_groups('user', $account)) {
       $gid = current(array_intersect(array_keys($groups), array_keys($user_groups)));
     }
 
@@ -1418,7 +1418,7 @@ function og_get_groups_for_form($obj_type, $object) {
   // Get all the existing groups.
 
   // Get the groups belonging to the content.
-  if (($content_groups = og_get_groups($obj_type, $object)) && $all_groups = og_get_all_groups_for_form($content_groups)) {
+  if (($content_groups = og_get_object_groups($obj_type, $object)) && $all_groups = og_get_all_groups_for_form($content_groups)) {
 
     // TODO: Is it faster to use array_diff & array_intersect?
     foreach ($all_groups as $nid => $name) {
@@ -1438,16 +1438,13 @@ function og_get_groups_for_form($obj_type, $object) {
  * Get all groups keyed by group ID and the title ready to be used on forms.
  */
 function og_get_all_groups_for_form($gids = array()) {
-  $query = db_select('og_groups', 'og');
-  $query->fields('n', array('nid', 'title'))
-    ->orderBy('n.title', 'ASC')
-    ->join('node', 'n', 'og.oid = n.nid');
+  $groups = og_get_groups($gids);
 
-  if (!empty($nids)) {
-    $query->condition('n.nid', $nids, 'IN');
+  foreach ($groups as $obj_type => $values) {
+    $objects = entity_load($obj_type, array_values($values));
   }
 
-  $return = $query->execute()->fetchAllKeyed();
+  dpm($objects);
 
   // Sanitize the result.
   array_walk($return, 'check_plain');
@@ -1457,11 +1454,15 @@ function og_get_all_groups_for_form($gids = array()) {
 /**
  * Get all groups IDs.
  *
+ * @param $gids
+ *   Optional; Array with the group IDs to retreive, or return all groups if
+ *   empty.
+ *
  * @return
  *   Array with the object types as an array keyed by the group ID and the
  *   object ID as the value.
  */
-function og_get_all_gids() {
+function og_get_groups($gids = array()) {
   $return = array();
 
   if ($result =  db_query("SELECT gid, oid, obj_type FROM {og_groups} ORDER BY oid")->fetchAllAssoc('oid')) {
@@ -1586,7 +1587,7 @@ function og_user_access($nid, $string, $account = NULL) {
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable, if the user is authenticated.
   if (!isset($perm[$nid][$account->uid])) {
-    $user_groups = og_get_groups('user', $account);
+    $user_groups = og_get_object_groups('user', $account);
 
     // Get default roles.
     $default_roles = og_get_group_default_roles($nid);

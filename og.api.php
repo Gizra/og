@@ -60,7 +60,7 @@ function hook_og_access($op, $node, $acting_user, $account = NULL) {
     // module to implement it.
     if (og_is_group_post_type($node->type)) {
       // Get the first node group this group post belongs to.
-      $gids = og_get_groups('node', $node);
+      $gids = og_get_object_groups('node', $node);
       $group = node_load($gids[0]);
       if (!empty($group->data['show day'])) {
         $today = date('N');
