@@ -30,7 +30,7 @@ function og_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'content_id' => array(
+      'oid' => array(
         'description' => "The content's ID.",
         'type' => 'int',
         'unsigned' => TRUE,

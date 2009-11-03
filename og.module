@@ -265,8 +265,8 @@ function og_menu() {
 /**
  * Return TRUE if a node is a group node and the user has administrator rights.
  */
-function og_organic_groups_tab_access($content_id, $obj_type) {
-  return og_get_group($content_id, $obj_type) &&  og_user_access($group->gid, 'administer group');
+function og_organic_groups_tab_access($oid, $obj_type) {
+  return og_get_group($oid, $obj_type) &&  og_user_access($group->gid, 'administer group');
 }
 
 /**
@@ -637,19 +637,19 @@ function og_og_types_info() {
 /**
  * Get a group object by the content ID.
  *
- * @param $content_id
+ * @param $oid
  *   The group content ID.
  * @param $obj_type
  *   The group object type. "node" is the default value. Pass "gid" if the the
  *   content ID is equal to the group unique ID.
  */
-function og_get_group($content_id, $obj_type = 'node') {
+function og_get_group($oid, $obj_type = 'node') {
   $group = &drupal_static(__FUNCTION__, array());
 
-  if (empty($group[$obj_type][$content_id])) {
+  if (empty($group[$obj_type][$oid])) {
     $query = db_select('og_groups', 'og_groups');
     $result = $query->fields('og_users_roles', array('uid'))
-      ->condition('content_id', $content_id);
+      ->condition('oid', $oid);
     if ($obj_type != 'gid') {
       $result->condition('obj_type', $obj_type);
     }
@@ -662,25 +662,25 @@ function og_get_group($content_id, $obj_type = 'node') {
     // Allow other modules to change the group object.
     drupal_alter('og_get_group', $result);
 
-    $group[$obj_type][$content_id] = $result;
+    $group[$obj_type][$oid] = $result;
   }
 
-  return $group[$obj_type][$content_id];
+  return $group[$obj_type][$oid];
 }
 
 /**
  * Set a group object.
  *
- * @param $content_id
+ * @param $oid
  *   The group content ID.
  * @param $obj_type
  *   The group content ID. "node" is the default value.
  * @param $data
  *   Optional; An array with data related to the group.
  */
-function og_set_group($content_id, $obj_type = 'node', $data = array()) {
+function og_set_group($oid, $obj_type = 'node', $data = array()) {
   $group = new stdClass();
-  $group->content_id = $content_id;
+  $group->oid = $oid;
   $group->obj_type = $obj_type;
   $group->data = $data;
 
@@ -688,7 +688,7 @@ function og_set_group($content_id, $obj_type = 'node', $data = array()) {
   drupal_alter('og_set_group', $group);
 
   // Delete an existing record.
-  og_delete_group_by_content($content_id, $obj_type);
+  og_delete_group_by_content($oid, $obj_type);
 
   // Write the new record.
   drupal_write_record('og_groups', $group);
@@ -709,14 +709,14 @@ function og_delete_group($gid) {
 /**
  * Delete a group object by it's content ID.
  *
- * @param $content_id
+ * @param $oid
  *   The group content ID.
  * @param $obj_type
  *   The group content ID. "node" is the default value.
  */
-function og_delete_group_by_content($content_id, $obj_type = 'node') {
+function og_delete_group_by_content($oid, $obj_type = 'node') {
   db_delete('og_groups')
-    ->condition('content_id', $content_id)
+    ->condition('oid', $oid)
     ->condition('obj_type', $obj_type)
     ->execute();
 }
