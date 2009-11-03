@@ -105,7 +105,7 @@ define('OG_ADMINISTRATOR_DEFAULT_RID', 3);
  * Implement hook_menu().
  */
 function og_menu() {
-  $items['og/%node/subscribe'] = array(
+  $items['og/%/%/subscribe'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
     'page callback' => 'og_subscribe',
@@ -123,117 +123,117 @@ function og_menu() {
     'title' => 'OPML',
   );
 
-  $items['og/%node/unsubscribe'] = array(
+  $items['og/%/%/unsubscribe'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_confirm_unsubscribe', 1),
+    'page arguments' => array('og_confirm_unsubscribe', 1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('unsubscribe', 1),
+    'access arguments' => array('unsubscribe', 1, 2),
     'title' => 'Leave group',
   );
 
-  $items['og/%node/approve/%user/%'] = array(
+  $items['og/%/%/approve/%user/%'] = array(
     'type' => MENU_CALLBACK,
     'page callback' => 'og_approve',
-    'page arguments' => array(1, 3, 4),
+    'page arguments' => array(1, 2, 3, 4),
     'access callback' => 'og_access',
-    'access arguments' => array('approve membership', 1, 3),
+    'access arguments' => array('approve membership', 1, 2, 3),
     'title' => 'Approve membership request',
     'file' => 'og.pages.inc',
   );
-  $items['og/%node/deny/%user/%'] = array(
+  $items['og/%/%/deny/%user/%'] = array(
     'type' => MENU_CALLBACK,
     'page callback' => 'og_deny',
-    'page arguments' => array(1, 3, 4),
+    'page arguments' => array(1, 2, 3, 4),
     'access callback' => 'og_access',
-    'access arguments' => array('deny membership', 1, 3, 4),
+    'access arguments' => array('deny membership', 1, 2, 3, 4),
     'title' => 'Deny membership request',
   );
 
-  $items['og/%node/invite'] = array(
+  $items['og/%/%/invite'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_invite_form', 1),
+    'page arguments' => array('og_invite_form', 1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('invite', 1),
+    'access arguments' => array('invite', 1, 2),
     'title' => 'Send invitation',
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
   );
 
-  $items['og/%node/add-user'] = array(
+  $items['og/%/%/add-user'] = array(
     'page callback' => 'drupal_get_form',
     'title' => 'Add members',
-    'page arguments' => array('og_add_users', 1),
+    'page arguments' => array('og_add_users', 1, 2),
     'type' => MENU_LOCAL_TASK,
     'file' => 'og.pages.inc',
     'weight' => 5,
     'access callback' => 'og_access',
-    'access arguments' => array('add user', 1),
+    'access arguments' => array('add user', 1, 2),
   );
 
-  $items["og/%node/manage"] = array(
+  $items["og/%/%/manage"] = array(
     'page callback' => 'og_manage',
     'page arguments' => array(1),
     'access callback' => 'og_access',
-    'access arguments' => array('manage', 1),
+    'access arguments' => array('manage', 1, 2),
     'title' => 'Manage membership',
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
   );
 
   // User listing pages.
-  $items['og/%node/admin/people'] = array(
-    'title arguments' => array('People in group @group', 1),
+  $items['og/%/%/admin/people'] = array(
+    'title arguments' => array('People in group @group', 1, 2),
     'title callback' => 'og_menu_title_callback',
     'description' => 'Find and manage group members.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_user_admin_account', 1),
+    'page arguments' => array('og_user_admin_account', 1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('administer group', 1),
+    'access arguments' => array('administer group', 1, 2),
     'weight' => -4,
     'file' => 'og.admin.inc',
   );
 
   // Permission administration pages.
-  $items['og/%node/admin/people/roles'] = array(
-    'title arguments' => array('Roles for group @group', 1),
+  $items['og/%/%/admin/people/roles'] = array(
+    'title arguments' => array('Roles for group @group', 1, 2),
     'title callback' => 'og_menu_title_callback',
     'description' => 'List, edit, or add user roles.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_user_admin_new_role', 1),
+    'page arguments' => array('og_user_admin_new_role', 1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('administer group', 1),
+    'access arguments' => array('administer group', 1, 2),
     'file' => 'og.admin.inc',
     'weight' => -9,
   );
 
-  $items['og/%node/admin/people/roles/edit'] = array(
+  $items['og/%/%/admin/people/roles/edit'] = array(
     'title' => 'Edit role',
-    'page arguments' => array('og_user_admin_role', 1),
+    'page arguments' => array('og_user_admin_role', 1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('administer group', 1),
+    'access arguments' => array('administer group', 1, 2),
     'type' => MENU_CALLBACK,
   );
 
-  $items['og/%node/admin/people/permissions'] = array(
-    'title arguments' => array('Permissions for group @group', 1),
+  $items['og/%/%/admin/people/permissions'] = array(
+    'title arguments' => array('Permissions for group @group', 1, 2),
     'title callback' => 'og_menu_title_callback',
     'description' => 'Determine access to features by selecting permissions for roles.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_user_admin_permissions', 1),
+    'page arguments' => array('og_user_admin_permissions', 1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('administer group', 1),
+    'access arguments' => array('administer group', 1, 2),
     'file' => 'og.admin.inc',
     'weight' => -8,
   );
 
-  $items['node/%node/og'] = array(
+  $items['node/%/%/og'] = array(
     'title' => 'Group',
     'page callback' => 'og_group_admin_overview',
-    'page arguments' => array(1),
+    'page arguments' => array(1, 2),
     'access callback' => 'og_organic_groups_tab_access',
-    'access arguments' => array(1),
+    'access arguments' => array(1, 2),
     'type' => MENU_LOCAL_TASK,
     'file' => 'og.admin.inc',
   );
@@ -265,8 +265,8 @@ function og_menu() {
 /**
  * Return TRUE if a node is a group node and the user has administrator rights.
  */
-function og_organic_groups_tab_access($node) {
-  return og_is_group_type($node->type) && og_user_access($node->nid, 'administer group');
+function og_organic_groups_tab_access($content_id, $obj_type) {
+  return og_get_group($content_id, $obj_type) &&  og_user_access($group->gid, 'administer group');
 }
 
 /**
@@ -639,18 +639,21 @@ function og_og_types_info() {
  *
  * @param $content_id
  *   The group content ID.
- * @param $content_type
- *   The group content ID. "node" is the default value.
+ * @param $obj_type
+ *   The group object type. "node" is the default value. Pass "gid" if the the
+ *   content ID is equal to the group unique ID.
  */
-function og_get_group($content_id, $content_type = 'node') {
+function og_get_group($content_id, $obj_type = 'node') {
   $group = &drupal_static(__FUNCTION__, array());
 
-  if (empty($group[$content_type][$content_id])) {
+  if (empty($group[$obj_type][$content_id])) {
     $query = db_select('og_groups', 'og_groups');
     $result = $query->fields('og_users_roles', array('uid'))
-      ->condition('content_id', $content_id)
-      ->condition('content_type', $content_type)
-      ->execute()
+      ->condition('content_id', $content_id);
+    if ($obj_type != 'gid') {
+      $result->condition('content_type', $obj_type);
+    }
+    $result->execute()
       ->fetchObject();
 
     // Unserialize the data.
@@ -659,38 +662,10 @@ function og_get_group($content_id, $content_type = 'node') {
     // Allow other modules to change the group object.
     drupal_alter('og_get_group', $result);
 
-    $group[$content_type][$content_id] = $result;
+    $group[$obj_type][$content_id] = $result;
   }
 
-  return $group[$content_type][$content_id];
-}
-
-/**
- * Get a group object by the group ID.
- *
- * @param $gid
- *   The group unique ID.
- */
-function og_get_group_by_gid($gid) {
-  $group = &drupal_static(__FUNCTION__, array());
-
-  if (empty($group[$gid])) {
-    $query = db_select('og_groups', 'og_groups');
-    $result = $query->fields('og_users_roles', array('uid'))
-      ->condition('gid', $gid)
-      ->execute()
-      ->fetchObject();
-
-    // Unserialize the data.
-    $result->data = unserialize($result->data);
-
-    // Allow other modules to change the group object.
-    drupal_alter('og_get_group', $result);
-
-    $group[$gid] = $result;
-  }
-
-  return $group[$gid];
+  return $group[$obj_type][$content_id];
 }
 
 /**
@@ -1502,9 +1477,6 @@ function og_load_object($obj_type, $object) {
   }
   return $object;
 }
-
-
-/********************* Role/ Permissions API *************************/
 
 /**
  * Determine the permissions for one or more roles.
