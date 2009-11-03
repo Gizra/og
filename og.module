@@ -1425,11 +1425,11 @@ function og_get_all_groups() {
 }
 
 /**
- * Wrapper function to invoke a Rules event.
+ * Wrapper function to invoke an event.
  */
 function og_invoke_event() {
   if (module_exists('rules')) {
-    // Invoke a rule event.
+    // Invoke a Rules event.
   }
 }
 
