@@ -157,14 +157,14 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
 
 
 /**
- * Add organic groups audience field to fieldable entities.
+ * Add organic groups audience field to fieldable entities that are group posts.
  *
  * @param $bundle
  *   The bundle name.
  * @param $obj_type
- *   Optional; The object type for the instance - 'node' by default.
+ *   The object type for the instance. "node" by default.
  */
-function og_set_og_audince_field($bundle, $obj_type = 'node') {
+function og_create_fields_group_posts($bundle, $obj_type = 'node') {
   $field = field_info_field('og_audience');
   if (empty($field)) {
     $field = array(
@@ -191,6 +191,48 @@ function og_set_og_audince_field($bundle, $obj_type = 'node') {
         'teaser' => array(
           'label' => 'above',
           'type' => 'og_list_default',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Add organic groups register field group types.
+ *
+ * @param $bundle
+ *   The bundle name.
+ */
+function og_create_fields_group($bundle, $obj_type = 'node') {
+  $field = field_info_field('og_group');
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'og_group',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Not a group type', '1|Group type')), 'allowed_values_function' => ''),
+    );
+    $field = field_create_field($field);
+  }
+
+  $instance = field_info_instance($obj_type, 'og_group', $bundle);
+  if (empty($instance)) {
+    $instance = array(
+      'field_name' => 'og_group',
+      'bundle' => $bundle,
+      'object_type' => $obj_type,
+      // FIXME: Widget type doesn't work
+      'widget_type' => 'options_onoff',
+      'label' => t('Group type'),
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
         ),
       ),
     );
