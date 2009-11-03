@@ -31,14 +31,14 @@ function og_schema() {
         'not null' => TRUE,
       ),
       'oid' => array(
-        'description' => "The content's ID.",
+        'description' => "The object ID.",
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
       ),
       'obj_type' => array(
-        'description' => "The content's type (e.g. node, comment, etc').",
+        'description' => "The object type (e.g. node, comment, etc').",
         'type' => 'varchar',
         'length' => '32',
         'not null' => TRUE,
