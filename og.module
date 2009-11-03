@@ -635,71 +635,122 @@ function og_og_types_info() {
  ******************************************************************************/
 
 /**
- * Get a group object.
+ * Get a group object by the content ID.
  *
- * The group object is not the group node. It is the data related to a group,
- * which can be for example the access permissions per group.
- *
- * @param $nid
- *   The group node ID.
+ * @param $content_id
+ *   The group content ID.
+ * @param $content_type
+ *   The group content ID. "node" is the default value.
  */
-function og_get_group($nid) {
+function og_get_group($content_id, $content_type = 'node') {
   $group = &drupal_static(__FUNCTION__, array());
 
-  if (empty($group[$nid])) {
-    $result = db_query("SELECT * FROM {og_groups} WHERE nid = :nid", array(':nid' => $nid))->fetchObject();
+  if (empty($group[$content_type][$content_id])) {
+    $query = db_select('og_groups', 'og_groups');
+    $result = $query->fields('og_users_roles', array('uid'))
+      ->condition('content_id', $content_id)
+      ->condition('content_type', $content_type)
+      ->execute()
+      ->fetchObject();
+
     // Unserialize the data.
     $result->data = unserialize($result->data);
 
     // Allow other modules to change the group object.
     drupal_alter('og_get_group', $result);
 
-    $group[$nid] = $result;
+    $group[$content_type][$content_id] = $result;
   }
 
-  return $group[$nid];
+  return $group[$content_type][$content_id];
+}
+
+/**
+ * Get a group object by the group ID.
+ *
+ * @param $gid
+ *   The group unique ID.
+ */
+function og_get_group_by_gid($gid) {
+  $group = &drupal_static(__FUNCTION__, array());
+
+  if (empty($group[$gid])) {
+    $query = db_select('og_groups', 'og_groups');
+    $result = $query->fields('og_users_roles', array('uid'))
+      ->condition('gid', $gid)
+      ->execute()
+      ->fetchObject();
+
+    // Unserialize the data.
+    $result->data = unserialize($result->data);
+
+    // Allow other modules to change the group object.
+    drupal_alter('og_get_group', $result);
+
+    $group[$gid] = $result;
+  }
+
+  return $group[$gid];
 }
 
 /**
  * Set a group object.
  *
- * @param $nid
- *   The group node ID.
+ * @param $content_id
+ *   The group content ID.
+ * @param $content_type
+ *   The group content ID. "node" is the default value.
  * @param $data
  *   Optional; An array with data related to the group.
  */
-function og_set_group($nid, $data = array()) {
+function og_set_group($content_id, $content_type = 'node', $data = array()) {
   $group = new stdClass();
-  $group->nid = $nid;
+  $group->content_id = $content_id;
+  $group->content_type = $content_type;
   $group->data = $data;
 
   // Allow other modules to change the group object.
   drupal_alter('og_set_group', $group);
 
   // Delete an existing record.
-  og_delete_group($nid);
+  og_delete_group_by_content($content_id, $content_type);
 
   // Write the new record.
   drupal_write_record('og_groups', $group);
 }
 
 /**
- * Delete a group object.
+ * Delete a group object by it's unique ID.
  *
- * @param $nid
- *   The group node ID.
+ * @param $gid
+ *   The group unique ID.
  */
-function og_delete_group($nid) {
+function og_delete_group($gid) {
   db_delete('og_groups')
-    ->condition('nid', $nid)
+    ->condition('gid', $gid)
+    ->execute();
+}
+
+/**
+ * Delete a group object by it's content ID.
+ *
+ * @param $content_id
+ *   The group content ID.
+ * @param $content_type
+ *   The group content ID. "node" is the default value.
+ */
+function og_delete_group_by_content($content_id, $content_type = 'node') {
+  db_delete('og_groups')
+    ->condition('content_id', $content_id)
+    ->condition('content_type', $content_type)
     ->execute();
 }
 
 /**
  * Get all the users belonging to a group.
  *
- * @param $nid
- *   The group node ID.
+ * @param $gid
+ *   The group unique ID.
  * @param $count
  * @param $cursor
  *
@@ -707,13 +758,13 @@ function og_delete_group($nid) {
  *   Array keyed with the object IDs and the value as array with the field
  *   values.
  */
-function og_get_group_users($nid, $states = array(OG_STATE_ACTIVE), $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
+function og_get_group_users($gid, $states = array(OG_STATE_ACTIVE), $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
   $return = array();
 
   $field = field_info_field('og_audience');
 
   $conditions = array(
-    array('value', $nid),
+    array('value', $gid),
     array('type', 'user'),
   );
 
@@ -729,7 +780,7 @@ function og_get_group_users($nid, $states = array(OG_STATE_ACTIVE), $count = FIE
 
     // Prepare the return values.
     foreach ($accounts as $account) {
-      $group = (object)og_get_group_from_object($nid, 'user', $account);
+      $group = (object)og_get_group_from_object($gid, 'user', $account);
 
       // Check if the user's state is valid.
       if (!empty($states) && !in_array($group->state, $states)) {
@@ -752,15 +803,15 @@ function og_get_group_users($nid, $states = array(OG_STATE_ACTIVE), $count = FIE
  * @param $object
  *   The object.
  * @param $nid
- *   The group node ID.
+ *   The group unqie ID.
  * @return
  *   Array with the field's value.
  */
-function og_get_group_from_object($nid, $obj_type, $object, &$key = NULL) {
+function og_get_group_from_object($gid, $obj_type, $object, &$key = NULL) {
   $object = og_load_object($obj_type, $object);
   if (!empty($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE])) {
     foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $key_index => $value) {
-      if ($value['value'] == $nid) {
+      if ($value['value'] == $gid) {
         // Save the position of the value in the field.
         $key = $key_index;
         return $value;
@@ -818,12 +869,12 @@ function og_get_og_types() {
 /**
  * Return all content types which meet a specified organic group type.
  *
- * @param $type
- * Optional; An array with the organic group types, for example "group" or
- * "group_post".
+ * @param $og_types
+ *   Optional; An array with the organic group types, for example "group" or
+ *   "group_post".
  * @return
- * An array keyed with content type and organic group type as value, or all
- * the content types if $type is empty.
+ *   An array keyed with content type and organic group type as value, or all
+ *   the content types if $type is empty.
  */
 function og_get_node_type_by_og_type($og_types = array()) {
   $return = array();
@@ -841,10 +892,12 @@ function og_get_node_type_by_og_type($og_types = array()) {
 }
 
 /**
- * Return the group type (i.e. "group" or "group_post") of a node type.
+ * Return the group type (i.e. "group" or "group_post") of an object.
  *
- * @param $node_type
- *   The node type to be checked.
+ * @param $bundle_name
+ *   The bundle name to be checked.
+ * @param $obj_type
+ *   The object type.
  * @param $type
  *   The grou usage type. Must be "group" or "group post".
  *
@@ -852,14 +905,13 @@ function og_get_node_type_by_og_type($og_types = array()) {
  *   The group type or an "omitted" if node type doesn't participate in
  *   organic groups.
  */
-function og_get_group_type($node_type, $type = 'group') {
+function og_get_group_type($bundle_name, $obj_type = 'node', $type = 'group') {
   if ($type == 'group') {
-    return variable_get('og_group_type_' . $node_type, 'omitted');
+    return field_info_instance($obj_type, 'og_group', $obj_type);
   }
   elseif ($type == 'group post') {
-    return variable_get('og_group_post_type_' . $node_type, 'omitted');
+    return field_info_instance($obj_type, 'og', $obj_type);
   }
-
 }
 
 /**
@@ -870,8 +922,8 @@ function og_get_group_type($node_type, $type = 'group') {
  * @param $node_type
  *   The node type to be checked.
  */
-function og_is_group_type($node_type) {
-  return og_get_group_type($node_type, 'group') != 'omitted';
+function og_is_group_type($bundle_name, $obj_type = 'node') {
+  return og_get_group_type($bundle_name, $obj_type) != 'omitted';
 }
 
 /**
@@ -882,8 +934,8 @@ function og_is_group_type($node_type) {
  * @param $node_type
  *   The node type to be checked.
  */
-function og_is_group_post_type($node_type) {
-  return og_get_group_type($node_type, 'group post') != 'omitted';
+function og_is_group_post_type($bundle_name, $obj_type = 'node') {
+  return og_get_group_type($bundle_name, $obj_type, 'group post') != 'omitted';
 }
 
 /**
@@ -1963,11 +2015,11 @@ function og_permissions_bulk_update($roles, $permissions) {
  * @param $nid
  *   The node ID of the group or 0 for default permissions.
  */
-function og_set_new_group_roles($nid = 0) {
+function og_set_new_group_roles($gid = 0) {
   // Create default roles.
   $role = new stdClass;
   $role->name = OG_ANONYMOUS_ROLE;
-  $role->nid = $nid;
+  $role->gid = $gid;
   og_user_role_save($role);
   $anon_rid = $role->rid;
 
@@ -1992,8 +2044,8 @@ function og_set_new_group_roles($nid = 0) {
 /**
  * Get a private token used to protect links from spoofing - CSRF.
  */
-function og_get_token($nid) {
-  return drupal_get_token($nid);
+function og_get_token($gid) {
+  return drupal_get_token($gid);
 }
 
 /**
@@ -2003,9 +2055,8 @@ function og_check_token($token, $seed) {
   return drupal_get_token($seed) == $token;
 }
 
-function og_set_breadcrumb($nid, $path = array()) {
-  $node = node_load($nid);
-
+function og_set_breadcrumb($gid, $path = array()) {
+  //FIXME: Get the title.
   drupal_set_breadcrumb(array_merge(array(l(t('Home'), NULL), l($node->title[FIELD_LANGUAGE_NONE][0]['value'], 'node/' . $node->nid)), $path)) ;
 
 }
@@ -2014,7 +2065,7 @@ function og_set_breadcrumb($nid, $path = array()) {
  * Implement hook_og_user_operations().
  */
 function og_og_user_operations($form = array(), $form_state = array()) {
-  $nid = $form_state['nid'];
+  $gid = $form_state['gid'];
   $operations = array(
     'unblock' => array(
       'label' => t('Approve membership of the selected users'),
@@ -2030,8 +2081,8 @@ function og_og_user_operations($form = array(), $form_state = array()) {
     ),
   );
 
-  if (og_user_access($nid, 'administer group')) {
-    $roles = og_get_group_roles($nid);
+  if (og_user_access($gid, 'administer group')) {
+    $roles = og_get_group_roles($gid);
     // Can't edit anonymous and authenticated role.
     unset($roles[OG_ANONYMOUS_ROLE]);
     unset($roles[OG_AUTHENTICATED_ROLE]);
@@ -2070,7 +2121,7 @@ function og_og_user_operations($form = array(), $form_state = array()) {
     $operation = $operation_rid[0];
     if ($operation == 'add_role' || $operation == 'remove_role') {
       $rid = $operation_rid[1];
-      if (og_user_access($nid, 'administer group')) {
+      if (og_user_access($gid, 'administer group')) {
         $operations[$form_state['values']['operation']] = array(
           'callback' => 'og_user_multiple_role_edit',
           'callback arguments' => array($operation, $rid),
@@ -2089,15 +2140,14 @@ function og_og_user_operations($form = array(), $form_state = array()) {
 /**
  * Callback function for admin mass approving users.
  */
-function og_user_operations_approve($nid, $accounts) {
-  $node = node_load($nid);
+function og_user_operations_approve($gid, $accounts) {
   // Intersect account with pending or blocked state users.
-  $users = array_keys(og_get_group_users($nid, array(OG_STATE_PENDING, OG_STATE_BLOCKED)));
+  $users = array_keys(og_get_group_users($gid, array(OG_STATE_PENDING, OG_STATE_BLOCKED)));
   $accounts = array_intersect($accounts, $users);
   $accounts = user_load_multiple($accounts);
   foreach ($accounts as $account) {
     $group = array(
-      'value' => $nid,
+      'value' => $gid,
       // Get the state of the group, and decide the user's state accordingly.
       'state' => OG_STATE_ACTIVE,
     );
@@ -2108,27 +2158,25 @@ function og_user_operations_approve($nid, $accounts) {
 /**
  * Callback function for admin mass denying users.
  */
-function og_user_operations_deny($nid, $accounts) {
-  $node = node_load($nid);
+function og_user_operations_deny($gid, $accounts) {
   $accounts = user_load_multiple($accounts);
 
   foreach ($accounts as $account) {
-    og_unsubscribe_user(array($nid), $account);
+    og_unsubscribe_user(array($gid), $account);
   }
 }
 
 /**
  * Callback function for admin mass blocking users.
  */
-function og_user_operations_block($nid, $accounts) {
-  $node = node_load($nid);
+function og_user_operations_block($gid, $accounts) {
   // Intersect account with pending or blocked state users.
   $users = array_keys(og_get_group_users($nid, array(OG_STATE_ACTIVE, OG_STATE_PENDING)));
   $accounts = array_intersect($accounts, $users);
   $accounts = user_load_multiple($accounts);
   foreach ($accounts as $account) {
     $group = array(
-      'value' => $nid,
+      'value' => $gid,
       // Get the state of the group, and decide the user's state accordingly.
       'state' => OG_STATE_BLOCKED,
     );
@@ -2139,19 +2187,19 @@ function og_user_operations_block($nid, $accounts) {
 /**
  * Callback function for admin mass adding/ deleting a user role.
  */
-function og_user_multiple_role_edit($nid, $accounts, $operation, $rid) {
+function og_user_multiple_role_edit($gid, $accounts, $operation, $rid) {
   switch ($operation) {
     case 'add_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
-        og_users_roles_grant($nid, $account->uid, $rid);
+        og_users_roles_grant($gid, $account->uid, $rid);
 
       }
       break;
     case 'remove_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
-        og_users_roles_revoke($nid, $account->uid, $rid);
+        og_users_roles_revoke($gid, $account->uid, $rid);
       }
       break;
   }
