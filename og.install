@@ -94,7 +94,7 @@ function og_schema() {
         'description' => 'Primary Key: Unique role ID.',
       ),
       'gid'               => array(
-        'description'     => "The group's unqiue ID.",
+        'description'     => "The group's unique ID.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
