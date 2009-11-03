@@ -312,12 +312,6 @@ function og_forms() {
 function og_form_node_type_form_alter(&$form, &$form_state) {
   $node_type = $form['#node_type']->type;
 
- // Get all the group usage types options.
-  $options = array();
-  foreach (og_get_og_types() as $key => $value) {
-    $options[$value['type']][$key] = check_plain($value['description']);
-  }
-
   $form['og'] = array(
     '#type' => 'fieldset',
     '#title' => t('Organic groups'),
@@ -329,15 +323,15 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
   $form['og']['og_group_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group'),
-    '#default_value' =>  og_is_group_type($node_type) ? og_get_group_type($node_type, 'group') : 'omitted',
-    '#options' => array('omitted' => t('Not a group type')) + $options['group'],
+    '#default_value' =>  og_is_group_type($node_type) ? 'group' : 'omitted',
+    '#options' => array('omitted' => t('Not a group type'), 'group' => t('Group type')),
   );
 
   $form['og']['og_group_post_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group post'),
-    '#default_value' =>  og_is_group_post_type($node_type) ? og_get_group_type($node_type, 'group post') : 'omitted',
-    '#options' => array('omitted' => t('Not a group post type')) + $options['group post'],
+    '#default_value' =>  og_is_group_post_type($node_type) ? 'group_post' : 'omitted',
+    '#options' => array('omitted' => t('Not a group post type'), 'group_post' => t('Group post type')),
   );
 }
 
@@ -370,11 +364,15 @@ function og_node_type_update($info) {
  *   The content type name.
  */
 function og_node_type_save($bundle_name) {
-  if (og_is_group_type($bundle_name)) {
+  if (variable_get('og_group_type_' . $bundle_name, 'omitted') == 'group') {
     og_create_fields_group($bundle_name);
+    // Delete the variable, as we will rely on the presence of th field.
+    variable_del('og_group_type_' . $bundle_name);
   }
-  if (og_is_group_post_type($bundle_name)) {
+   if (variable_get('og_group_post_type_' . $bundle_name, 'omitted') == 'group_post') {
     og_create_fields_group_posts($bundle_name);
+    // Delete the variable, as we will rely on the presence of th field.
+    variable_del('og_group_post_type_' . $bundle_name);
   }
 }
 
@@ -788,7 +786,7 @@ function og_get_group_users($gid, $states = array(OG_STATE_ACTIVE), $count = FIE
  *
  * @param $object
  *   The object.
- * @param $nid
+ * @param $gid
  *   The group unqie ID.
  * @return
  *   Array with the field's value.
@@ -893,10 +891,10 @@ function og_get_node_type_by_og_type($og_types = array()) {
  */
 function og_get_group_type($bundle_name, $obj_type = 'node', $type = 'group') {
   if ($type == 'group') {
-    return field_info_instance($obj_type, 'og_group', $obj_type);
+    return (bool)field_info_instance($obj_type, 'og_group', $bundle_name);
   }
   elseif ($type == 'group post') {
-    return field_info_instance($obj_type, 'og', $obj_type);
+    return (bool)field_info_instance($obj_type, 'og_audience', $bundle_name);
   }
 }
 
@@ -909,7 +907,7 @@ function og_get_group_type($bundle_name, $obj_type = 'node', $type = 'group') {
  *   The node type to be checked.
  */
 function og_is_group_type($bundle_name, $obj_type = 'node') {
-  return og_get_group_type($bundle_name, $obj_type) != 'omitted';
+  return og_get_group_type($bundle_name, $obj_type);
 }
 
 /**
@@ -921,7 +919,7 @@ function og_is_group_type($bundle_name, $obj_type = 'node') {
  *   The node type to be checked.
  */
 function og_is_group_post_type($bundle_name, $obj_type = 'node') {
-  return og_get_group_type($bundle_name, $obj_type, 'group post') != 'omitted';
+  return og_get_group_type($bundle_name, $obj_type, 'group post');
 }
 
 /**
@@ -1439,17 +1437,18 @@ function og_get_groups_for_form($obj_type, $object) {
 /**
  * Get all groups keyed by group ID and the title ready to be used on forms.
  */
-function og_get_all_groups_for_form($nids = array()) {
+function og_get_all_groups_for_form($gids = array()) {
   $query = db_select('og_groups', 'og');
   $query->fields('n', array('nid', 'title'))
     ->orderBy('n.title', 'ASC')
-    ->join('node', 'n', 'og.nid = n.nid');
+    ->join('node', 'n', 'og.oid = n.nid');
 
   if (!empty($nids)) {
     $query->condition('n.nid', $nids, 'IN');
   }
 
   $return = $query->execute()->fetchAllKeyed();
+
   // Sanitize the result.
   array_walk($return, 'check_plain');
   return $return;
@@ -1457,9 +1456,22 @@ function og_get_all_groups_for_form($nids = array()) {
 
 /**
  * Get all groups IDs.
+ *
+ * @return
+ *   Array with the object types as an array keyed by the group ID and the
+ *   object ID as the value.
  */
-function og_get_all_groups() {
-  return db_query("SELECT nid FROM {og_groups} ORDER BY nid")->fetchCol();
+function og_get_all_gids() {
+  $return = array();
+
+  if ($result =  db_query("SELECT gid, oid, obj_type FROM {og_groups} ORDER BY oid")->fetchAllAssoc('oid')) {
+    // TODO: Is there a way to do it as a part of the query?
+    foreach ($result as $row) {
+      $return[$row->obj_type][$row->gid] = $row->oid;
+
+    }
+  }
+  return $return;
 }
 
 /**
@@ -1982,8 +1994,8 @@ function og_permissions_bulk_update($roles, $permissions) {
   }
 
   // Get all existing group node IDs.
-  $nids = og_get_all_groups();
-  foreach ($nids as $nid) {
+  $gids = og_get_all_gids();
+  foreach ($gids as $gid) {
     $rids = og_get_group_default_roles($nid);
     foreach ($rids as $name => $rid) {
       og_user_role_change_permissions($rid, $permissions_to_change[$name]);
