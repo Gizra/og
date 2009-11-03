@@ -10,7 +10,7 @@
  * Implement hook_enable().
  */
 function og_enable() {
-  og_set_og_audince_field('user', 'user');
+  og_create_fields_group_posts('user', 'user');
   // Create roles that would be used for the default permissions.
   og_set_new_group_roles();
 }
@@ -37,7 +37,7 @@ function og_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'content_type' => array(
+      'obj_type' => array(
         'description' => "The content's type (e.g. node, comment, etc').",
         'type' => 'varchar',
         'length' => '32',

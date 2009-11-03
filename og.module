@@ -354,7 +354,7 @@ function og_node_type_delete($info) {
 */
 function og_node_type_insert($info) {
   if (og_is_group_post_type($info->type)) {
-    og_set_og_audince_field($info->type);
+    og_create_fields_group_posts($info->type);
   }
 }
 
@@ -363,7 +363,7 @@ function og_node_type_insert($info) {
 */
 function og_node_type_update($info) {
   if (og_is_group_post_type($info->type)) {
-    og_set_og_audince_field($info->type);
+    og_create_fields_group_posts($info->type);
   }
 }
 
@@ -651,7 +651,7 @@ function og_get_group($content_id, $obj_type = 'node') {
     $result = $query->fields('og_users_roles', array('uid'))
       ->condition('content_id', $content_id);
     if ($obj_type != 'gid') {
-      $result->condition('content_type', $obj_type);
+      $result->condition('obj_type', $obj_type);
     }
     $result->execute()
       ->fetchObject();
@@ -673,22 +673,22 @@ function og_get_group($content_id, $obj_type = 'node') {
  *
  * @param $content_id
  *   The group content ID.
- * @param $content_type
+ * @param $obj_type
  *   The group content ID. "node" is the default value.
  * @param $data
  *   Optional; An array with data related to the group.
  */
-function og_set_group($content_id, $content_type = 'node', $data = array()) {
+function og_set_group($content_id, $obj_type = 'node', $data = array()) {
   $group = new stdClass();
   $group->content_id = $content_id;
-  $group->content_type = $content_type;
+  $group->obj_type = $obj_type;
   $group->data = $data;
 
   // Allow other modules to change the group object.
   drupal_alter('og_set_group', $group);
 
   // Delete an existing record.
-  og_delete_group_by_content($content_id, $content_type);
+  og_delete_group_by_content($content_id, $obj_type);
 
   // Write the new record.
   drupal_write_record('og_groups', $group);
@@ -711,13 +711,13 @@ function og_delete_group($gid) {
  *
  * @param $content_id
  *   The group content ID.
- * @param $content_type
+ * @param $obj_type
  *   The group content ID. "node" is the default value.
  */
-function og_delete_group_by_content($content_id, $content_type = 'node') {
+function og_delete_group_by_content($content_id, $obj_type = 'node') {
   db_delete('og_groups')
     ->condition('content_id', $content_id)
-    ->condition('content_type', $content_type)
+    ->condition('obj_type', $obj_type)
     ->execute();
 }
 
@@ -953,7 +953,7 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
 
   // Delete any roles the user had.
   foreach ($gids as $gid) {
-    foreach ( og_get_user_roles($gid, $account->uid) as $rid) {
+    foreach (og_get_user_roles($gid, $account->uid) as $rid) {
       og_users_roles_revoke($gid, $account->uid, $rid);
     }
   }
