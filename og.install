@@ -24,23 +24,37 @@ function og_schema() {
   $schema['og_groups'] = array(
     'description'     => 'Store information related to the groups.',
     'fields'          => array(
-      'nid'               => array(
-        'description'     => "The group's node ID.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
+      'gid' => array(
+        'description' => "The group's unique ID.",
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'content_id' => array(
+        'description' => "The content's ID.",
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'content_type' => array(
+        'description' => "The content's type (e.g. node, comment, etc').",
+        'type' => 'varchar',
+        'length' => '32',
+        'not null' => TRUE,
+        'default' => '',
       ),
       'data' => array(
         'type' => 'text',
         'not null' => FALSE,
         'size' => 'big',
         'serialize' => TRUE,
-        'description' => 'A serialized array with the data to the group.',
+        'description' => 'A serialized array with the data related to the group.',
       ),
     ),
-    'primary key' => array('nid'),
+    'primary key' => array('gid'),
     'unique keys' => array(
-      'nid' => array('nid'),
+      'gid' => array('gid'),
     ),
   );
 
@@ -79,8 +93,8 @@ function og_schema() {
         'not null' => TRUE,
         'description' => 'Primary Key: Unique role ID.',
       ),
-      'nid'               => array(
-        'description'     => "The group's node ID.",
+      'gid'               => array(
+        'description'     => "The group's unqiue ID.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
@@ -113,8 +127,8 @@ function og_schema() {
         'default' => 0,
         'description' => 'Primary Key: {role}.rid for role.',
       ),
-      'nid'               => array(
-        'description'     => "The group's node ID.",
+      'gid'               => array(
+        'description'     => "The group's unique ID.",
         'type'            => 'int',
         'size'            => 'normal',
         'not null'        => TRUE,
@@ -126,7 +140,7 @@ function og_schema() {
     ),
     'foreign keys' => array(
       'uid' => array('users' => 'uid'),
-      'rid' => array('role' => 'rid'),
+      'rid' => array('og_role' => 'rid'),
     ),
   );
 
