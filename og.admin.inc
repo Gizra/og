@@ -12,7 +12,7 @@
  * @param $node
  *   The group node.
  */
-function og_group_admin_overview($node) {
+function og_group_admin_overview($oid, $obj_type) {
   og_set_breadcrumb($node->nid);
   // Imitate the menu_get_item() content, so we can pass it to
   // theme_admin_block_content().
