@@ -13,26 +13,26 @@
  *   The group node.
  */
 function og_group_admin_overview($oid, $obj_type) {
-  og_set_breadcrumb($node->nid);
+  og_set_breadcrumb($oid, $obj_type);
   // Imitate the menu_get_item() content, so we can pass it to
   // theme_admin_block_content().
   $content = array(
     'people' => array(
       'title' => t('People'),
       'description' => t('Manage the group members.'),
-      'href' => "og/$node->nid/admin/people",
+      'href' => "og/$oid/$obj_type/admin/people",
       'localized_options' => array(),
     ),
     'roles' => array(
       'title' => t('Roles'),
       'description' => t('Manage the group roles.'),
-      'href' => "og/$node->nid/admin/people/roles",
+      'href' => "og/$oid/$obj_type/admin/people/roles",
       'localized_options' => array(),
     ),
     'permissions' => array(
       'title' => t('Permissions'),
       'description' => t('Manage the group permissions.'),
-      'href' => "og/$node->nid/admin/people/permissions",
+      'href' => "og/$oid/$obj_type/admin/people/permissions",
       'localized_options' => array(),
     ),
   );
@@ -49,16 +49,17 @@ function og_group_admin_overview($oid, $obj_type) {
  * @see og_user_admin_account_validate()
  * @see og_user_admin_account_submit()
  */
-function og_user_admin_account($form, $form_state, $node) {
-  //tODO: Remove hardcoded "Organic groups".
-  og_set_breadcrumb($node->nid, array(l(t('Organic groups'), 'node/' . $node->nid . '/og')));
+function og_user_admin_account($form, $form_state, $oid, $obj_type) {
+  //TODO: Remove hardcoded "Organic groups".
+  // og_set_breadcrumb($oid, $obj_type, array(l(t('Organic groups'), 'node/' . $node->nid . '/og')));
+  $group = og_get_group($oid, $obj_type);
   $header = array(
     'username' => array('data' => t('Username')),
     'status' => array('data' => t('Status')),
     'roles' => array('data' => t('Roles')),
   );
 
-  $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
+  $form['group'] = array('#type' => 'value', '#value' => $group);
   $form['options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Update options'),
@@ -67,7 +68,7 @@ function og_user_admin_account($form, $form_state, $node) {
   );
   $options = array();
   foreach (module_implements('og_user_operations') as $module) {
-    $result = call_user_func($module . '_og_user_operations', array(), array('nid' => $node->nid));
+    $result = call_user_func($module . '_og_user_operations', array(), array('group' => $group));
     foreach ($result as $operation => $array) {
       $options[$operation] = $array['label'];
     }
@@ -85,19 +86,18 @@ function og_user_admin_account($form, $form_state, $node) {
     '#value' => t('Update'),
   );
 
-  $result = og_get_group_users($node->nid, array());
   $destination = drupal_get_destination();
 
   $status = array('blocked' => t('blocked'), 'pending' => t('pending'), 'active' => t('active'));
-  $roles = array_flip(og_get_group_roles($node->nid));
+  $roles = array_flip(og_get_group_roles($group->gid));
   $accounts = array();
 
-  foreach ($result as $account) {
+  foreach (og_get_group_users($group->gid, array()) as $account) {
     // Don't allow editing of the group manager.
     if ($account->uid != $node->uid) {
       $accounts[$account->uid] = '';
       $users_roles = array();
-      foreach (og_get_user_roles($node->nid, $account->uid) as $rid) {
+      foreach (og_get_user_roles($oid, $obj_type, $account->uid) as $rid) {
         $users_roles[] = $roles[$rid];
       }
       asort($users_roles);
@@ -162,15 +162,15 @@ function og_user_admin_account_submit($form, &$form_state) {
  * @see og_user_admin_role_submit()
  * @see theme_og_user_admin_new_role()
  */
-function og_user_admin_role($form, $form_state, $node) {
-  if (og_is_group_type($node->type)) {
-    $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
+function og_user_admin_role($form, $form_state, $oid, $obj_type) {
+  if ($group = og_get_group($oid, $obj_type)) {
+    $form['group'] = array('#type' => 'value', '#value' => $group);
 
     $rid = arg(6);
     if ($rid) {
-      $og_roles = og_get_group_default_roles($node->nid);
+      $og_roles = og_get_group_default_roles($group->gid);
       if (in_array($rid, $og_roles)) {
-        drupal_goto('og/' . $node->nid . '/admin/people/roles');
+        drupal_goto("og/$oid, $obj_type/admin/people/roles");
       }
       // Display the edit role form.
       $role = og_user_role_load($rid);
@@ -257,7 +257,7 @@ function theme_og_user_admin_new_role($variables) {
   $form = $variables['form'];
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
   // The group ID.
-  $gid = $form['nid']['#value'];
+  $gid = $form['group']['#value']->gid;
 
   $og_roles = og_get_group_default_roles($gid);
 

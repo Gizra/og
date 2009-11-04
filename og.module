@@ -647,16 +647,19 @@ function og_og_entity_get_label_info() {
       'table' => 'comment',
       'id' => 'cid',
       'label' => 'subject',
+      'url callback' => 'og_entity_format_url_comment',
     ),
     'node' => array(
       'table' => 'node',
       'id' => 'nid',
       'label' => 'title',
+      'url' => 'node/@id',
     ),
     'user' => array(
       'table' => 'users',
       'id' => 'uid',
       'label' => 'name',
+      'url' => 'user/@id',
     ),
   );
 }
@@ -1278,8 +1281,9 @@ function og_set_context($node = NULL, $determine = FALSE) {
 /**
  * Menu callback; Return the title of a menu item based on the group title.
  */
-function og_menu_title_callback($title, $node) {
-  return str_replace('@group', $node->title[FIELD_LANGUAGE_NONE][0]['safe'], $title);
+function og_menu_title_callback($title, $oid, $obj_type) {
+  $label = check_plain(og_entity_get_label($obj_type, array($oid)));
+  return str_replace('@group', $label, $title);
 }
 
 /**
@@ -1717,7 +1721,7 @@ function og_user_access($nid, $string, $account = NULL) {
  *   value. The anonymous and authenticated deault roles are on the top of the
  *   array.
  */
-function og_user_roles($nid, $roles = array(), $permission = NULL) {
+function og_user_roles($gid, $roles = array(), $permission = NULL) {
   if (!empty($permission)) {
     $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.nid = :nid ORDER BY r.name", array(':permission' => $permission, ':nid' => $nid))->fetchAllKeyed();
   }
@@ -1737,8 +1741,8 @@ function og_user_roles($nid, $roles = array(), $permission = NULL) {
  * @return
  *   A keyed array with "anonymous" and "authenticaed".
  */
-function og_get_group_default_roles($nid) {
-  return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid AND (name = :anon OR name = :auth OR name = :admin)", array(':nid' => $nid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE, ':admin' => OG_ADMINISTRATOR_ROLE))->fetchAllKeyed();
+function og_get_group_default_roles($gid) {
+  return db_query("SELECT name, rid FROM {og_role} WHERE gid = :gid AND (name = :anon OR name = :auth OR name = :admin)", array(':gid' => $gid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE, ':admin' => OG_ADMINISTRATOR_ROLE))->fetchAllKeyed();
 }
 
 /**
@@ -1749,8 +1753,8 @@ function og_get_group_default_roles($nid) {
  * @return
  *   An array keyed with the role name and the role ID as the value.
  */
-function og_get_group_roles($nid) {
-  return db_query("SELECT name, rid FROM {og_role} WHERE nid = :nid", array(':nid' => $nid))->fetchAllKeyed();
+function og_get_group_roles($gid) {
+  return db_query("SELECT name, rid FROM {og_role} WHERE gid = :gid", array(':gid' => $gid))->fetchAllKeyed();
 }
 
 /**
@@ -2140,9 +2144,11 @@ function og_check_token($token, $seed) {
   return drupal_get_token($seed) == $token;
 }
 
-function og_set_breadcrumb($gid, $path = array()) {
-  //FIXME: Get the title.
-  drupal_set_breadcrumb(array_merge(array(l(t('Home'), NULL), l($node->title[FIELD_LANGUAGE_NONE][0]['value'], 'node/' . $node->nid)), $path)) ;
+function og_set_breadcrumb($oid, $obj_type, $path = array()) {
+  $group = og_get_group($oid, $obj_type);
+  $label = og_entity_get_label($obj_type, array($oid));
+  // FIXME
+  // drupal_set_breadcrumb(array_merge(array(l(t('Home'), NULL), l($node->title[FIELD_LANGUAGE_NONE][0]['value'], 'node/' . $node->nid)), $path)) ;
 
 }
 
