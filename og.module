@@ -228,12 +228,12 @@ function og_menu() {
     'weight' => -8,
   );
 
-  $items['node/%/%/og'] = array(
+  $items['node/%/og'] = array(
     'title' => 'Group',
     'page callback' => 'og_group_admin_overview',
-    'page arguments' => array(1, 2),
+    'page arguments' => array(1, 'node'),
     'access callback' => 'og_organic_groups_tab_access',
-    'access arguments' => array(1, 2),
+    'access arguments' => array(1, 'node'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'og.admin.inc',
   );
@@ -265,8 +265,8 @@ function og_menu() {
 /**
  * Return TRUE if a node is a group node and the user has administrator rights.
  */
-function og_organic_groups_tab_access($oid, $obj_type) {
-  return og_get_group($oid, $obj_type) &&  og_user_access($group->gid, 'administer group');
+function og_organic_groups_tab_access($oid, $obj_type = 'gid') {
+  return ($group = og_get_group($oid, $obj_type)) &&  og_user_access($group->gid, 'administer group');
 }
 
 /**
@@ -677,22 +677,25 @@ function og_og_entity_get_label_info() {
  */
 function og_get_group($oid, $obj_type = 'node') {
   $group = &drupal_static(__FUNCTION__, array());
+  $result = array();
 
   if (empty($group[$obj_type][$oid])) {
     $query = db_select('og_groups', 'og_groups');
-    $result = $query->fields('og_users_roles', array('uid'))
+    $query->fields('og_groups')
       ->condition('oid', $oid);
     if ($obj_type != 'gid') {
-      $result->condition('obj_type', $obj_type);
+      // The object type is not a real object - it's actually the group ID.
+      $query->condition('obj_type', $obj_type);
     }
-    $result->execute()
-      ->fetchObject();
+    if ($result = $query->execute()->fetchObject()) {
+      // Unserialize the data.
+      if (!empty($result->data)) {
+        $result->data = unserialize($result->data);
+      }
 
-    // Unserialize the data.
-    $result->data = unserialize($result->data);
-
-    // Allow other modules to change the group object.
-    drupal_alter('og_get_group', $result);
+      // Allow other modules to change the group object.
+      drupal_alter('og_get_group', $result);
+    }
 
     $group[$obj_type][$oid] = $result;
   }
