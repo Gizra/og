@@ -1483,17 +1483,30 @@ function og_get_all_groups_for_form($gids = array()) {
  *   Array keyed with the group unqiue ID and the object label as the value.
  */
 function og_entity_get_label($obj_type, $values = array()) {
+  $return = array();
+
   // Get the table, ID and label of the object type.
-  list($table, $id, $label) = array_values(og_entity_get_label_info($obj_type));
+  if ($data = og_entity_get_label_info($obj_type)) {
+    list($table, $id, $label) = array_values($data);
 
-  // Get the group ID along with the object label.
-  $query = db_select('og_groups', 'og')->fields('og', array('gid'));
-  $query->join($table, $table, "og.oid =  $table.$id");
+    // Get the group ID along with the object label.
+    $query = db_select('og_groups', 'og')->fields('og', array('gid'));
+    $query->join($table, $table, "og.oid =  $table.$id");
 
-  return $query->fields($table, array($label))
-    ->condition($id, array_values($values), 'IN')
-    ->execute()
-    ->fetchAllKeyed();
+    $return = $query->fields($table, array($label))
+      ->condition($id, array_values($values), 'IN')
+      ->execute()
+      ->fetchAllKeyed();
+  }
+  else {
+    // We got an object type that we don't know how to get the label, so we'll
+    // return the group ID as the laebl, prefixed with the object type.
+    $prefix = check_plain($obj_type);
+    foreach ($values as $value) {
+      $return[$value] = $prefix . ' ' . $value;
+    }
+  }
+  return $return;
 }
 
 /**
@@ -1518,7 +1531,10 @@ function og_entity_get_label_info($obj_type = '') {
   // Allow other modules to alter the definitions.
   drupal_alter('og_entity_get_label_info', $data);
 
-  return !empty($obj_type) ? $data[$obj_type] : $data;
+  if (!empty($obj_type)) {
+    return !empty($data[$obj_type]) ? $data[$obj_type] : array();
+  }
+  return $data;
 }
 
 /**
