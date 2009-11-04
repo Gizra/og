@@ -638,6 +638,29 @@ function og_og_types_info() {
   );
 }
 
+/**
+ * Implementation of hook_og_entity_get_label_info().
+ */
+function og_og_entity_get_label_info() {
+  return array(
+    'comment' => array(
+      'table' => 'comment',
+      'id' => 'cid',
+      'label' => 'subject',
+    ),
+    'node' => array(
+      'table' => 'node',
+      'id' => 'nid',
+      'label' => 'title',
+    ),
+    'user' => array(
+      'table' => 'users',
+      'id' => 'uid',
+      'label' => 'name',
+    ),
+  );
+}
+
 
 /*******************************************************************************
  * API functions
@@ -1460,17 +1483,8 @@ function og_get_all_groups_for_form($gids = array()) {
  *   Array keyed with the group unqiue ID and the object label as the value.
  */
 function og_entity_get_label($obj_type, $values = array()) {
-  // TODO: Allow other users to allow getttings other entities.
-  if ($obj_type == 'node') {
-    $table = 'node';
-    $label = 'title';
-    $id = 'nid';
-  }
-  elseif (obj_type == 'user') {
-    $table = 'user';
-    $label = 'name';
-    $id = 'uid';
-  }
+  // Get the table, ID and label of the object type.
+  list($table, $id, $label) = array_values(og_entity_get_label_info($obj_type));
 
   // Get the group ID along with the object label.
   $query = db_select('og_groups', 'og')->fields('og', array('gid'));
@@ -1480,6 +1494,31 @@ function og_entity_get_label($obj_type, $values = array()) {
     ->condition($id, array_values($values), 'IN')
     ->execute()
     ->fetchAllKeyed();
+}
+
+/**
+ * Gather all implementing modules that get a fieldable entity label.
+ *
+ * @return
+ *   Array keyed with the entity name and an array with the table, ID and label
+ *   columns as the value.
+ */
+function og_entity_get_label_info($obj_type = '') {
+  $data = &drupal_static(__FUNCTION__, array());
+
+  if (!empty($obj_type) && !empty($data[$obj_type])) {
+    return $data[$obj_type];
+  }
+  elseif (empty($obj_type) && !empty($data)) {
+    return $data;
+  }
+
+  $data = module_invoke_all('og_entity_get_label_info');
+
+  // Allow other modules to alter the definitions.
+  drupal_alter('og_entity_get_label_info', $data);
+
+  return !empty($obj_type) ? $data[$obj_type] : $data;
 }
 
 /**
