@@ -1457,7 +1457,7 @@ function og_get_all_groups_for_form($gids = array()) {
  * @param $oids
  *   The object IDs.
  * @return
- *   Array keyed with the group ID and the object label as the value.
+ *   Array keyed with the group unqiue ID and the object label as the value.
  */
 function og_entity_get_label($obj_type, $values = array()) {
   // TODO: Allow other users to allow getttings other entities.
@@ -1472,9 +1472,11 @@ function og_entity_get_label($obj_type, $values = array()) {
     $id = 'uid';
   }
 
-  $query = db_select($table, $table);
-  $query->join('og_groups', 'og', "og.oid =  $table.$id");
-  return $query->fields($table, array($id, $label))
+  // Get the group ID along with the object label.
+  $query = db_select('og_groups', 'og')->fields('og', array('gid'));
+  $query->join($table, $table, "og.oid =  $table.$id");
+
+  return $query->fields($table, array($label))
     ->condition($id, array_values($values), 'IN')
     ->execute()
     ->fetchAllKeyed();
