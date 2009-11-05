@@ -1516,6 +1516,35 @@ function og_entity_get_label($obj_type, $values = array()) {
 }
 
 /**
+ * Get the URL of different entities.
+ *
+ * @param $obj_type
+ *   The object type.
+ * @param $oid
+ *   The object ID.
+ *
+ * @return
+ *   URL string, or empty string of URL couldn't be retreived.
+ */
+function og_entity_get_url($obj_type, $oid) {
+  $return = '';
+
+  // Get the table, ID and label of the object type.
+  if ($data = og_entity_get_label_info($obj_type)) {
+    if ($data['url']) {
+      $return = str_replace('@id', $oid, $data['url']);
+    }
+    elseif ($data['url callback']) {
+      $return = call_user_func($data['url callback'], $oid);
+    }
+
+  }
+
+  return $return;
+
+}
+
+/**
  * Gather all implementing modules that get a fieldable entity label.
  *
  * @return
@@ -2144,10 +2173,9 @@ function og_check_token($token, $seed) {
 }
 
 function og_set_breadcrumb($oid, $obj_type, $path = array()) {
-  $group = og_get_group($oid, $obj_type);
-  $label = og_entity_get_label($obj_type, array($oid));
-  // FIXME
-  // drupal_set_breadcrumb(array_merge(array(l(t('Home'), NULL), l($node->title[FIELD_LANGUAGE_NONE][0]['value'], 'node/' . $node->nid)), $path)) ;
+  if (($label = og_entity_get_label($obj_type, array($oid))) && ($url = og_entity_get_url($obj_type, $oid))) {
+    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>'), l(current($label), $url)))) ;
+  }
 
 }
 
