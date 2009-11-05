@@ -382,11 +382,11 @@ function og_node_type_save($bundle_name) {
 function og_node_insert($node) {
   if (og_is_group_type('node', $node->type)) {
     // Add group.
-    og_set_group('node', $node->nid);
+    $group = og_set_group('node', $node->nid);
     // Subscribe the node author to the group.
     $account = user_load($node->uid);
 
-    $group = og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
+    og_subscribe_user(array(array('value' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
     og_set_new_group_roles($group->gid);
   }
 }
@@ -714,6 +714,9 @@ function og_get_group($obj_type, $oid) {
  *   The group content ID. "node" is the default value.
  * @param $data
  *   Optional; An array with data related to the group.
+ *
+ * @return
+ *   The group object populated with the group ID.
  */
 function og_set_group($obj_type, $oid, $data = array()) {
   $group = new stdClass();
@@ -729,6 +732,8 @@ function og_set_group($obj_type, $oid, $data = array()) {
 
   // Write the new record.
   drupal_write_record('og_groups', $group);
+
+  return $group;
 }
 
 /**
@@ -1014,9 +1019,6 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  * @param $request
  *   Optioanl; A message created by the requesting user that should be sent to
  *   the group admins.
- *
- * @return
- *   The group objecy, populated with group ID.
  */
 function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE, $request = '') {
   // Load object to get the fields.
@@ -1060,8 +1062,6 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
     og_invoke_event();
     call_user_func('field_attach_' . $op, $obj_type, $object);
   }
-
-  return $object;
 }
 
 /**
