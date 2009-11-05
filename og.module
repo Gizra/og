@@ -323,14 +323,14 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
   $form['og']['og_group_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group'),
-    '#default_value' =>  og_is_group_type($node_type) ? 'group' : 'omitted',
+    '#default_value' =>  og_is_group_type('node', $node_type) ? 'group' : 'omitted',
     '#options' => array('omitted' => t('Not a group type'), 'group' => t('Group type')),
   );
 
   $form['og']['og_group_post_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group post'),
-    '#default_value' =>  og_is_group_post_type($node_type) ? 'group_post' : 'omitted',
+    '#default_value' =>  og_is_group_post_type('node', $node_type) ? 'group_post' : 'omitted',
     '#options' => array('omitted' => t('Not a group post type'), 'group_post' => t('Group post type')),
   );
 }
@@ -408,7 +408,7 @@ function og_node_update($node) {
 * Implement hook_node_delete().
 */
 function og_node_delete($node) {
-  if ($group = og_get_group('node', $node->nid) && og_is_group_type($node->type)) {
+  if ($group = og_get_group('node', $node->nid) && og_is_group_type('node', $node->type)) {
     // Remove group.
     og_delete_group($group->gid);
   }
@@ -419,7 +419,7 @@ function og_node_delete($node) {
 */
 function og_node_view($node, $build_mode) {
   global $user;
-  if (og_is_group_type($node->type) && $node->uid != $user->uid) {
+  if (og_is_group_type('node', $node->type) && $node->uid != $user->uid) {
     // Check user association with the group.
     $links = array();
 
@@ -525,7 +525,7 @@ function og_og_permission_default() {
  * Implement hook_og_access().
  */
 function og_og_access($op, $node, $acting_user, $account) {
-  if (og_is_group_type($node->type)) {
+  if (og_is_group_type('node', $node->type)) {
     if (og_user_access($node->nid, $op, $acting_user)) {
       return OG_ACCESS_ALLOW;
     }
@@ -537,7 +537,7 @@ function og_og_access($op, $node, $acting_user, $account) {
  * Implement hook_og_node_access()
  */
 function og_og_node_access($node, $op, $account) {
-  if (og_is_group_type($node->type)) {
+  if (og_is_group_type('node', $node->type)) {
     if (og_user_access($node->nid, $op . ' group', $account)) {
       return NODE_ACCESS_ALLOW;
     }
@@ -560,7 +560,7 @@ function og_og_node_access($node, $op, $account) {
  */
 function og_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  if ($op != 'create' && (og_is_group_type($type) || og_is_group_post_type($type))) {
+  if ($op != 'create' && (og_is_group_type('node', $type) || og_is_group_post_type('node', $type))) {
     $access = module_invoke_all('og_node_access', $node, $op, $account);
     if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
       return NODE_ACCESS_DENY;
@@ -1215,7 +1215,7 @@ function og_determine_context_by_node($node, $account = NULL) {
     global $user;
     $account = $user;
   }
-  if (og_is_group_type($node->type)) {
+  if (og_is_group_type('node', $node->type)) {
     $group_node = $node;
   }
   elseif (og_is_group_post_type($node->type) && ($groups = og_get_object_groups('node', $node))) {
@@ -1271,7 +1271,7 @@ function og_set_context($node = NULL, $determine = FALSE) {
     $node = og_determine_context();
   }
 
-  if (!empty($node) && og_is_group_type($node->type)) {
+  if (!empty($node) && og_is_group_type('node', $node->type)) {
     $gid = $node->nid;
   }
 
