@@ -1508,9 +1508,8 @@ function og_entity_get_label($obj_type, $values = array()) {
   else {
     // We got an object type that we don't know how to get the label, so we'll
     // return the group ID as the laebl, prefixed with the object type.
-    $prefix = check_plain($obj_type);
     foreach ($values as $value) {
-      $return[$value] = $prefix . ' ' . $value;
+      $return[$value] = t('@obj_type ID  @value', array('$obj_type' => $obj_type, '@value' => $value));
     }
   }
   return $return;
