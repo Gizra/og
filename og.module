@@ -1281,7 +1281,7 @@ function og_set_context($node = NULL, $determine = FALSE) {
 /**
  * Menu callback; Return the title of a menu item based on the group title.
  */
-function og_menu_title_callback($title, $oid, $obj_type) {
+function og_menu_title_callback($title, $obj_type, $oid) {
   $label = check_plain(current(og_entity_get_label($obj_type, array($oid))));
   return str_replace('@group', $label, $title);
 }
@@ -1751,10 +1751,10 @@ function og_user_access($nid, $string, $account = NULL) {
  */
 function og_user_roles($gid, $roles = array(), $permission = NULL) {
   if (!empty($permission)) {
-    $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.nid = :nid ORDER BY r.name", array(':permission' => $permission, ':nid' => $nid))->fetchAllKeyed();
+    $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
   }
   else {
-    $roles = db_query("SELECT rid, name FROM {og_role} WHERE nid = :nid ORDER BY name = :anon AND name = :auth AND name", array(':nid' => $nid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE))->fetchAllKeyed();
+    $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid ORDER BY name = :anon AND name = :auth AND name", array(':gid' => $gid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE))->fetchAllKeyed();
   }
 
   // Filter to remove unmatched system roles.
@@ -1764,7 +1764,7 @@ function og_user_roles($gid, $roles = array(), $permission = NULL) {
 /**
  * Get the anonymous and authenticated user roles ID of a group.
  *
- * @param $nid
+ * @param $gid
  *   The group ID.
  * @return
  *   A keyed array with "anonymous" and "authenticaed".
@@ -1776,7 +1776,7 @@ function og_get_group_default_roles($gid) {
 /**
  * Get all roles ID of a group.
  *
- * @param $nid
+ * @param $gid
  *   The group ID.
  * @return
  *   An array keyed with the role name and the role ID as the value.
@@ -1788,30 +1788,30 @@ function og_get_group_roles($gid) {
 /**
  * Get all roles ID of a user in a certain group.
  *
- * @param $nid
+ * @param $gid
  *   The group ID.
  * @param $uid
  *   The user ID.
  * @return
  *   Array with the role IDs of the user.
  */
-function og_get_user_roles($nid, $uid) {
+function og_get_user_roles($gid, $uid) {
   //TODO: How to get keyed by rid, wihout this hack?
-  return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND nid = :nid", array(':uid' => $uid, ':nid' => $nid))->fetchAllKeyed();
+  return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
 }
 
 /**
  * Get all the users with certain roles in a group.
  *
- * @param $nid
- *   The group node ID.
+ * @param $gid
+ *   The group unique ID.
  * @param $roles
  *   Array with the roles to query.
  */
-function og_get_users_by_roles($nid, $roles = array()) {
+function og_get_users_by_roles($gid, $roles = array()) {
   $query = db_select('og_users_roles', 'og_users_roles');
   return $query->fields('og_users_roles', array('uid'))
-    ->condition('nid', $nid)
+    ->condition('gid', $gid)
     ->condition('role', $roles, 'IN')
     ->execute()
     ->fetchAll();
@@ -1899,18 +1899,18 @@ function og_user_role_delete($rid) {
  * @param $rid
  *   The role ID.
  */
-function og_users_roles_grant($nid, $uid, $rid) {
+function og_users_roles_grant($gid, $uid, $rid) {
   // Get the existiong user roles.
-  $user_roles = og_get_user_roles($nid, $uid);
+  $user_roles = og_get_user_roles($gid, $uid);
   if (!in_array($rid, $user_roles)) {
     $role = new stdClass();
     $role->uid = $uid;
     $role->rid = $rid;
-    $role->nid = $nid;
+    $role->gid = $gid;
 
     drupal_write_record('og_users_roles', $role);
     og_invoke_event();
-    module_invoke_all('og_users_roles_grant', $nid, $uid, $rid);
+    module_invoke_all('og_users_roles_grant', $gid, $uid, $rid);
   }
 }
 
@@ -1922,16 +1922,16 @@ function og_users_roles_grant($nid, $uid, $rid) {
  * @param $rid
  *   The role ID.
  */
-function og_users_roles_revoke($nid, $uid, $rid) {
+function og_users_roles_revoke($gid, $uid, $rid) {
   // Get the existiong user roles.
-  $user_roles = og_get_user_roles($nid, $uid);
+  $user_roles = og_get_user_roles($gid, $uid);
   if (in_array($rid, $user_roles)) {
 
     db_delete('og_users_roles')
       ->condition('uid', $uid)
       ->condition('rid', $rid)
       ->execute();
-    module_invoke_all('og_users_roles_revoke', $nid, $uid, $rid);
+    module_invoke_all('og_users_roles_revoke', $gid, $uid, $rid);
   }
 
 }
@@ -2118,18 +2118,18 @@ function og_permissions_bulk_update($roles, $permissions) {
   // Get all existing group node IDs.
   $gids = og_get_all_gids();
   foreach ($gids as $gid) {
-    $rids = og_get_group_default_roles($nid);
+    $rids = og_get_group_default_roles($gid);
     foreach ($rids as $name => $rid) {
       og_user_role_change_permissions($rid, $permissions_to_change[$name]);
     }
   }
-  return count($nids);
+  return count($gids);
 }
 
 /**
  * Add default roles and permissions to a new group.
  *
- * @param $nid
+ * @param $gid
  *   The node ID of the group or 0 for default permissions.
  */
 function og_set_new_group_roles($gid = 0) {
@@ -2289,7 +2289,7 @@ function og_user_operations_deny($gid, $accounts) {
  */
 function og_user_operations_block($gid, $accounts) {
   // Intersect account with pending or blocked state users.
-  $users = array_keys(og_get_group_users($nid, array(OG_STATE_ACTIVE, OG_STATE_PENDING)));
+  $users = array_keys(og_get_group_users($gid, array(OG_STATE_ACTIVE, OG_STATE_PENDING)));
   $accounts = array_intersect($accounts, $users);
   $accounts = user_load_multiple($accounts);
   foreach ($accounts as $account) {

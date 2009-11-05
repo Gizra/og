@@ -12,7 +12,7 @@
  * @param $node
  *   The group node.
  */
-function og_group_admin_overview($oid, $obj_type) {
+function og_group_admin_overview($obj_type, $oid) {
   og_set_breadcrumb($oid, $obj_type);
   // Imitate the menu_get_item() content, so we can pass it to
   // theme_admin_block_content().
@@ -162,12 +162,14 @@ function og_user_admin_account_submit($form, &$form_state) {
  * @see og_user_admin_role_submit()
  * @see theme_og_user_admin_new_role()
  */
-function og_user_admin_role($form, $form_state, $oid, $obj_type) {
+function og_user_admin_role($form, $form_state, $obj_type, $oid) {
   if ($group = og_get_group($oid, $obj_type)) {
     $form['group'] = array('#type' => 'value', '#value' => $group);
 
-    $rid = arg(6);
+    $rid = arg(7);
     if ($rid) {
+      og_set_breadcrumb($oid, $obj_type, array(l(t('Group'), "$obj_type/$oid/og")), l(t('Roles'), "og/$obj_type/$oid/admin/people/roles"));
+
       $og_roles = og_get_group_default_roles($group->gid);
       if (in_array($rid, $og_roles)) {
         drupal_goto("og/$oid, $obj_type/admin/people/roles");
@@ -197,6 +199,8 @@ function og_user_admin_role($form, $form_state, $oid, $obj_type) {
       );
     }
     else {
+      og_set_breadcrumb($oid, $obj_type, array(l(t('Group'), "$obj_type/$oid/og")));
+
       $form['name'] = array(
         '#type' => 'textfield',
         '#size' => 32,
@@ -220,7 +224,7 @@ function og_user_admin_role($form, $form_state, $oid, $obj_type) {
 
 function og_user_admin_role_validate($form, &$form_state) {
   if ($form_state['values']['name']) {
-    $roles = og_user_roles($form_state['values']['nid']);
+    $roles = og_user_roles($form_state['values']['group']->gid);
     if (in_array($form_state['values']['name'], $roles)) {
       form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
     }
@@ -231,7 +235,12 @@ function og_user_admin_role_validate($form, &$form_state) {
 }
 
 function og_user_admin_role_submit($form, &$form_state) {
-  $role = (object)$form_state['values'];
+  $group = $form_state['values']['group'];
+  $role->gid = $group->gid;
+  $role->name = $form_state['values']['name'];
+  if (!empty($form_state['values']['rid'])) {
+    $role->rid= $form_state['values']['rid'];
+  }
   if ($form_state['values']['op'] == t('Save role')) {
     og_user_role_save($role);
     drupal_set_message(t('The role has been renamed.'));
@@ -244,7 +253,7 @@ function og_user_admin_role_submit($form, &$form_state) {
     og_user_role_save($role);
     drupal_set_message(t('The role has been added.'));
   }
-  $form_state['redirect'] = 'og/' . $form_state['values']['nid'] . '/admin/people/roles';
+  $form_state['redirect'] = 'og/' . $group->obj_type . '/' . $group->oid . '/admin/people/roles';
   return;
 }
 
@@ -256,15 +265,15 @@ function og_user_admin_role_submit($form, &$form_state) {
 function theme_og_user_admin_new_role($variables) {
   $form = $variables['form'];
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
-  // The group ID.
-  $gid = $form['group']['#value']->gid;
+  // The group object.
+  $group = $form['group']['#value'];
 
-  $og_roles = og_get_group_default_roles($gid);
+  $og_roles = og_get_group_default_roles($group->gid);
 
-  foreach (og_user_roles($gid) as $rid => $name) {
-    $edit_permissions = l(t('edit permissions'), 'og/' . $gid . '/admin/people/permissions/' . $rid);
+  foreach (og_user_roles($group->gid) as $rid => $name) {
+    $edit_permissions = l(t('edit permissions'), 'og/' . $group->obj_type .'/' . $group->oid . '/admin/people/permissions/' . $rid);
     if (!in_array($rid, $og_roles)) {
-      $rows[] = array($name, l(t('edit role'), 'og/' . $gid . '/admin/people/roles/edit/' . $rid), $edit_permissions);
+      $rows[] = array($name, l(t('edit role'), 'og/' . $group->obj_type .'/' . $group->oid . '/admin/people/roles/edit/' . $rid), $edit_permissions);
     }
     else {
       $rows[] = array($name, t('locked'), $edit_permissions);
@@ -289,7 +298,7 @@ function theme_og_user_admin_new_role($variables) {
 function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL) {
   // If no node object is provided then the node ID is 0, which means this
   // is the default permissions settings.
-  $nid = !empty($node) ? $node->nid : 0;
+  $gid = !empty($node) ? $node->gid : 0;
   $form['nid'] = array('#type' => 'value', '#value' => $nid);
 
   // Retrieve role names for columns.
