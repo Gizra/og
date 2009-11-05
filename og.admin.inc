@@ -13,7 +13,7 @@
  *   The group node.
  */
 function og_group_admin_overview($obj_type, $oid) {
-  og_set_breadcrumb($oid, $obj_type);
+  og_set_breadcrumb($obj_type, $oid);
   // Imitate the menu_get_item() content, so we can pass it to
   // theme_admin_block_content().
   $content = array(
@@ -49,10 +49,9 @@ function og_group_admin_overview($obj_type, $oid) {
  * @see og_user_admin_account_validate()
  * @see og_user_admin_account_submit()
  */
-function og_user_admin_account($form, $form_state, $oid, $obj_type) {
-  //TODO: Remove hardcoded "Group".
-  og_set_breadcrumb($oid, $obj_type, array(l(t('Group'), "$obj_type/$oid/og")));
-  $group = og_get_group($oid, $obj_type);
+function og_user_admin_account($form, $form_state, $obj_type, $oid) {
+  og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
+  $group = og_get_group($obj_type, $oid);
   $header = array(
     'username' => array('data' => t('Username')),
     'status' => array('data' => t('Status')),
@@ -97,7 +96,7 @@ function og_user_admin_account($form, $form_state, $oid, $obj_type) {
     if ($account->uid != $node->uid) {
       $accounts[$account->uid] = '';
       $users_roles = array();
-      foreach (og_get_user_roles($oid, $obj_type, $account->uid) as $rid) {
+      foreach (og_get_user_roles($obj_type, $oid, $account->uid) as $rid) {
         $users_roles[] = $roles[$rid];
       }
       asort($users_roles);
@@ -163,16 +162,16 @@ function og_user_admin_account_submit($form, &$form_state) {
  * @see theme_og_user_admin_new_role()
  */
 function og_user_admin_role($form, $form_state, $obj_type, $oid) {
-  if ($group = og_get_group($oid, $obj_type)) {
+  if ($group = og_get_group($obj_type, $oid)) {
     $form['group'] = array('#type' => 'value', '#value' => $group);
 
     $rid = arg(7);
     if ($rid) {
-      og_set_breadcrumb($oid, $obj_type, array(l(t('Group'), "$obj_type/$oid/og")), l(t('Roles'), "og/$obj_type/$oid/admin/people/roles"));
+      og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")), l(t('Roles'), "og/$obj_type/$oid/admin/people/roles"));
 
       $og_roles = og_get_group_default_roles($group->gid);
       if (in_array($rid, $og_roles)) {
-        drupal_goto("og/$oid, $obj_type/admin/people/roles");
+        drupal_goto("og/$obj_type, $oid/admin/people/roles");
       }
       // Display the edit role form.
       $role = og_user_role_load($rid);
@@ -199,7 +198,7 @@ function og_user_admin_role($form, $form_state, $obj_type, $oid) {
       );
     }
     else {
-      og_set_breadcrumb($oid, $obj_type, array(l(t('Group'), "$obj_type/$oid/og")));
+      og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
 
       $form['name'] = array(
         '#type' => 'textfield',

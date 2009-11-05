@@ -265,8 +265,8 @@ function og_menu() {
 /**
  * Return TRUE if a node is a group node and the user has administrator rights.
  */
-function og_organic_groups_tab_access($oid, $obj_type = 'gid') {
-  return ($group = og_get_group($oid, $obj_type)) &&  og_user_access($group->gid, 'administer group');
+function og_organic_groups_tab_access($obj_type, $oid) {
+  return ($group = og_get_group($obj_type, $oid)) &&  og_user_access($group->gid, 'administer group');
 }
 
 /**
@@ -380,15 +380,14 @@ function og_node_type_save($bundle_name) {
 * Implement hook_node_insert().
 */
 function og_node_insert($node) {
-  if (og_is_group_type($node->type)) {
+  if (og_is_group_type('node', $node->type)) {
     // Add group.
-    og_set_group($node->nid);
+    og_set_group('node', $node->nid);
     // Subscribe the node author to the group.
     $account = user_load($node->uid);
 
-    og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
-    og_set_new_group_roles($node->nid);
-
+    $group = og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
+    og_set_new_group_roles($group->gid);
   }
 }
 
@@ -400,7 +399,7 @@ function og_node_insert($node) {
 * make sure it is registered.
 */
 function og_node_update($node) {
-  if (og_is_group_type($node->type) && !og_get_group($node->nid)) {
+  if (og_is_group_type('node', $node->type) && !og_get_group('node', $node->nid)) {
     og_node_insert($node);
   }
 }
@@ -409,9 +408,9 @@ function og_node_update($node) {
 * Implement hook_node_delete().
 */
 function og_node_delete($node) {
-  if (og_is_group_type($node->type)) {
+  if ($group = og_get_group('node', $node->nid) && og_is_group_type($node->type)) {
     // Remove group.
-    og_delete_group($node->nid);
+    og_delete_group($group->gid);
   }
 }
 
@@ -678,7 +677,7 @@ function og_og_entity_get_label_info() {
  *   The group object type. "node" is the default value. Pass "gid" if the the
  *   content ID is equal to the group unique ID.
  */
-function og_get_group($oid, $obj_type = 'node') {
+function og_get_group($obj_type, $oid) {
   $group = &drupal_static(__FUNCTION__, array());
   $result = array();
 
@@ -716,7 +715,7 @@ function og_get_group($oid, $obj_type = 'node') {
  * @param $data
  *   Optional; An array with data related to the group.
  */
-function og_set_group($oid, $obj_type = 'node', $data = array()) {
+function og_set_group($obj_type, $oid, $data = array()) {
   $group = new stdClass();
   $group->oid = $oid;
   $group->obj_type = $obj_type;
@@ -726,7 +725,7 @@ function og_set_group($oid, $obj_type = 'node', $data = array()) {
   drupal_alter('og_set_group', $group);
 
   // Delete an existing record.
-  og_delete_group_by_content($oid, $obj_type);
+  og_delete_group_by_content($obj_type, $oid);
 
   // Write the new record.
   drupal_write_record('og_groups', $group);
@@ -752,7 +751,7 @@ function og_delete_group($gid) {
  * @param $obj_type
  *   The group content ID. "node" is the default value.
  */
-function og_delete_group_by_content($oid, $obj_type = 'node') {
+function og_delete_group_by_content($obj_type, $oid) {
   db_delete('og_groups')
     ->condition('oid', $oid)
     ->condition('obj_type', $obj_type)
@@ -918,7 +917,7 @@ function og_get_node_type_by_og_type($og_types = array()) {
  *   The group type or an "omitted" if node type doesn't participate in
  *   organic groups.
  */
-function og_get_group_type($bundle_name, $obj_type = 'node', $type = 'group') {
+function og_get_group_type($obj_type, $bundle_name, $type = 'group') {
   if ($type == 'group') {
     return (bool)field_info_instance($obj_type, 'og_group', $bundle_name);
   }
@@ -935,8 +934,8 @@ function og_get_group_type($bundle_name, $obj_type = 'node', $type = 'group') {
  * @param $node_type
  *   The node type to be checked.
  */
-function og_is_group_type($bundle_name, $obj_type = 'node') {
-  return og_get_group_type($bundle_name, $obj_type);
+function og_is_group_type($obj_type, $bundle_name) {
+  return og_get_group_type($obj_type, $bundle_name);
 }
 
 /**
@@ -947,8 +946,8 @@ function og_is_group_type($bundle_name, $obj_type = 'node') {
  * @param $node_type
  *   The node type to be checked.
  */
-function og_is_group_post_type($bundle_name, $obj_type = 'node') {
-  return og_get_group_type($bundle_name, $obj_type, 'group post');
+function og_is_group_post_type($obj_type, $bundle_name) {
+  return og_get_group_type($obj_type, $bundle_name, 'group post');
 }
 
 /**
@@ -1015,6 +1014,9 @@ function og_unsubscribe_user($gids = array(), $account = NULL) {
  * @param $request
  *   Optioanl; A message created by the requesting user that should be sent to
  *   the group admins.
+ *
+ * @return
+ *   The group objecy, populated with group ID.
  */
 function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE, $request = '') {
   // Load object to get the fields.
@@ -1058,6 +1060,8 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
     og_invoke_event();
     call_user_func('field_attach_' . $op, $obj_type, $object);
   }
+
+  return $object;
 }
 
 /**
@@ -2172,7 +2176,7 @@ function og_check_token($token, $seed) {
   return drupal_get_token($seed) == $token;
 }
 
-function og_set_breadcrumb($oid, $obj_type, $path = array()) {
+function og_set_breadcrumb($obj_type, $oid, $path = array()) {
   if (($label = og_entity_get_label($obj_type, array($oid))) && ($url = og_entity_get_url($obj_type, $oid))) {
     drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l(current($label), $url)), $path)) ;
   }
