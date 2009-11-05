@@ -2174,7 +2174,7 @@ function og_check_token($token, $seed) {
 
 function og_set_breadcrumb($oid, $obj_type, $path = array()) {
   if (($label = og_entity_get_label($obj_type, array($oid))) && ($url = og_entity_get_url($obj_type, $oid))) {
-    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), $path, array(l(current($label), $url)))) ;
+    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l(current($label), $url)), $path)) ;
   }
 
 }

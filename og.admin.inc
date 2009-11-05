@@ -50,8 +50,8 @@ function og_group_admin_overview($oid, $obj_type) {
  * @see og_user_admin_account_submit()
  */
 function og_user_admin_account($form, $form_state, $oid, $obj_type) {
-  //TODO: Remove hardcoded "Organic groups".
-  // og_set_breadcrumb($oid, $obj_type, array(l(t('Organic groups'), 'node/' . $node->nid . '/og')));
+  //TODO: Remove hardcoded "Group".
+  og_set_breadcrumb($oid, $obj_type, array(l(t('Group'), "$obj_type/$oid/og")));
   $group = og_get_group($oid, $obj_type);
   $header = array(
     'username' => array('data' => t('Username')),
