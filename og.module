@@ -145,9 +145,9 @@ function og_menu() {
   $items['og/%/%/deny/%user/%'] = array(
     'type' => MENU_CALLBACK,
     'page callback' => 'og_deny',
-    'page arguments' => array(1, 2, 3, 4),
+    'page arguments' => array(1, 2, 4, 5),
     'access callback' => 'og_access',
-    'access arguments' => array('deny membership', 1, 2, 3, 4),
+    'access arguments' => array('deny membership', 1, 2, 4, 5),
     'title' => 'Deny membership request',
   );
 
@@ -1282,7 +1282,7 @@ function og_set_context($node = NULL, $determine = FALSE) {
  * Menu callback; Return the title of a menu item based on the group title.
  */
 function og_menu_title_callback($title, $oid, $obj_type) {
-  $label = check_plain(og_entity_get_label($obj_type, array($oid)));
+  $label = check_plain(current(og_entity_get_label($obj_type, array($oid))));
   return str_replace('@group', $label, $title);
 }
 
