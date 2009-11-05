@@ -20,19 +20,19 @@ function og_group_admin_overview($obj_type, $oid) {
     'people' => array(
       'title' => t('People'),
       'description' => t('Manage the group members.'),
-      'href' => "og/$oid/$obj_type/admin/people",
+      'href' => "og/$obj_type/$oid/admin/people",
       'localized_options' => array(),
     ),
     'roles' => array(
       'title' => t('Roles'),
       'description' => t('Manage the group roles.'),
-      'href' => "og/$oid/$obj_type/admin/people/roles",
+      'href' => "og/$obj_type/$oid/admin/people/roles",
       'localized_options' => array(),
     ),
     'permissions' => array(
       'title' => t('Permissions'),
       'description' => t('Manage the group permissions.'),
-      'href' => "og/$oid/$obj_type/admin/people/permissions",
+      'href' => "og/$obj_type/$oid/admin/people/permissions",
       'localized_options' => array(),
     ),
   );
@@ -90,10 +90,12 @@ function og_user_admin_account($form, $form_state, $obj_type, $oid) {
   $status = array('blocked' => t('blocked'), 'pending' => t('pending'), 'active' => t('active'));
   $roles = array_flip(og_get_group_roles($group->gid));
   $accounts = array();
+  // Get the group real object, so we can check the user ID of the object.
+  $object = current(entity_load($obj_type, array($group->oid)));
 
   foreach (og_get_group_users($group->gid, array()) as $account) {
     // Don't allow editing of the group manager.
-    if ($account->uid != $node->uid) {
+    if (empty($object->uid) || $account->uid != $object->uid) {
       $accounts[$account->uid] = '';
       $users_roles = array();
       foreach (og_get_user_roles($obj_type, $oid, $account->uid) as $rid) {
@@ -113,7 +115,7 @@ function og_user_admin_account($form, $form_state, $obj_type, $oid) {
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
-    '#empty' => t('No people available apart of the group manager.'),
+    '#empty' => !empty($object->uid) ? t('No people available apart of the group manager.') : t('No people available.'),
   );
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 

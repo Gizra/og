@@ -1543,9 +1543,7 @@ function og_entity_get_url($obj_type, $oid) {
     }
 
   }
-
   return $return;
-
 }
 
 /**
