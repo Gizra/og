@@ -296,13 +296,19 @@ function theme_og_user_admin_new_role($variables) {
  * @see user_admin_permissions_submit()
  * @see theme_user_admin_permissions()
  */
-function og_user_admin_permissions($form, $form_state, $obj_type, $oid, $rid = NULL) {
+function og_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid = NULL, $rid = NULL) {
   // If no node object is provided then the node ID is 0, which means this
   // is the default permissions settings.
   $group = !empty($oid) ? og_get_group($obj_type, $oid) : array();
   $form['group'] = array('#type' => 'value', '#value' => $group);
 
-  $gid = !empty($group) ? $group->gid : 0;
+  if (!empty($group)) {
+    $gid =  $group->gid;
+    og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
+  }
+  else {
+    $gid = 0;
+  }
 
   // Retrieve role names for columns.
   $role_names = og_user_roles($gid);
@@ -370,7 +376,8 @@ function og_user_admin_permissions($form, $form_state, $obj_type, $oid, $rid = N
  */
 function og_user_admin_permissions_after_build($element) {
   // Authenticated roles.
-  $auth_rids = array_flip(og_user_roles($element['group']['#value']->gid));
+  $gid = !empty($form['group']['#value']->gid) ? $form['group']['#value']->gid : 0;
+  $auth_rids = array_flip(og_user_roles($gid));
   // Remove the anonymous member from the authenticated roles.
   $anon_rid = array_shift($auth_rids);
 
@@ -425,8 +432,9 @@ function og_user_admin_permissions_submit($form, &$form_state) {
  */
 function theme_og_user_admin_permissions($variables) {
   $form = $variables['form'];
-  $gid = $form['group']['#value']->gid;
+  $gid = !empty($form['group']['#value']->gid) ? $form['group']['#value']->gid : 0;
   $roles = og_user_roles($gid);
+
   if (empty($gid)) {
     // Add the 'bulk update' checkbox to the user roles.
     $roles += array(0 => t('bulk update'));
