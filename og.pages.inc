@@ -15,8 +15,8 @@
  *   Optional; The user ID of the subscribing user. If empty the current user
  *   will be used.
  */
-function og_subscribe($node, $uid = NULL) {
-  if (og_is_group_type($node->type)) {
+function og_subscribe($obj_type, $oid, $uid = NULL) {
+  if ($group = og_get_group($obj_type, $oid)) {
     if (empty($uid)) {
       global $user;
       $account = $user;
@@ -37,13 +37,14 @@ function og_subscribe($node, $uid = NULL) {
     }
 
     // Check user isn't already subscribed.
-    if (in_array($node->nid, og_get_object_groups('user', $account))) {
+    if (in_array($group-gnid, og_get_object_groups('user', $account))) {
       drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])));
-      drupal_goto('node/' . $node->nid);
+      // TODO: get url.
+      // drupal_goto('node/' . $node->nid);
     }
     else {
       // Show the user a subscription confirmation.
-      return drupal_get_form('og_confirm_subscribe', $node, $account);
+      return drupal_get_form('og_confirm_subscribe', $group, $account);
     }
   }
   // Not a valid group node.
@@ -54,10 +55,10 @@ function og_subscribe($node, $uid = NULL) {
 /**
  * Confirm OG membership form.
  */
-function og_confirm_subscribe($form, &$form_state, $node, $account) {
-  $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
+function og_confirm_subscribe($form, &$form_state, $group, $account) {
+  $form['group'] = array('#type' => 'value', '#value' => $group);
   $form['account'] = array('#type' => 'value', '#value' => $account);
-  if (!og_user_access($node->nid, 'subscribe without approval')) {
+  if (!og_user_access($group->gid, 'subscribe without approval')) {
     $form['request'] = array(
       '#type' => 'textarea',
       '#title' => t('Additional details'),
@@ -73,19 +74,17 @@ function og_confirm_subscribe($form, &$form_state, $node, $account) {
 function og_confirm_subscribe_submit($form, &$form_state) {
   $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
   // The group ID.
-  $gid = $form_state['values']['nid'];
+  $group = $form_state['values']['group'];
 
-  $nid = $form_state['values']['nid'];
-  $node = node_load($nid);
-
-  $group = array(
-    'value' => $nid,
+  $groups = array(
+    'value' => $group->gid,
     // Get the state of the group, and decide the user's state accordingly.
-    'state' => og_user_access($nid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING,
+    'state' => og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING,
   );
 
-  og_subscribe_user(array($group), NULL, FALSE, $request);
+  og_subscribe_user(array($groups), NULL, FALSE, $request);
 
+  // TODO: get URL.
   $form_state['redirect'] = node_access('view', $node) ? 'node/' . $nid : '';
 }
 
@@ -94,29 +93,34 @@ function og_confirm_subscribe_submit($form, &$form_state) {
  * Confirm OG unsubscription form.
  *
  * The unsubscribing user is always the acting user - like this we make sure
- * no malicious user will unsubscribe another user,
+ * no malicious user will unsubscribe another user. Administrators can reject or
+ * ban another group member from the "people" page.
  */
-function og_confirm_unsubscribe($form, &$form_state, $node) {
-  global $user;
-  // Check the user isn't the manager of the group.
-  if ($node->uid != $user->uid) {
-    $form['group_node'] = array('#type' => 'value', '#value' => $node);
-    $form['account'] = array('#type' => 'value', '#value' => $user);
-    return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])), 'og/users/' . $node->nid, ' ', t('Remove'), t('Cancel'));
+function og_confirm_unsubscribe($form, &$form_state, $obj_type, $oid) {
+  if ($group = og_get_group($obj_type, $oid)) {
+    global $user;
+    // Check the user isn't the manager of the group.
+    if ($node->uid != $user->uid) {
+      $form['group'] = array('#type' => 'value', '#value' => $group);
+      $form['account'] = array('#type' => 'value', '#value' => $user);
+      return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])), 'og/users/' . $node->nid, ' ', t('Remove'), t('Cancel'));
+    }
+    else {
+      drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])));
+      drupal_goto('node/' . $node->nid);
+    }
   }
-  else {
-    drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])));
-    drupal_goto('node/' . $node->nid);
-  }
+  // Not a valid group.
+  drupal_not_found();
 }
 
 /**
  * Submit handler; Confirm OG unsubscription.
  */
 function og_confirm_unsubscribe_submit($form, &$form_state) {
-  $node = $form_state['values']['group_node'];
+  $group = $form_state['values']['group'];
 
-  og_unsubscribe_user(array($node->nid), $form_state['values']['account']);
+  og_unsubscribe_user(array($group->gid), $form_state['values']['account']);
 
   // Determine where to go next - Group if accessible, or else site front page.
   $form_state['redirect'] = og_access('view', $node) ? 'node/' . $node->nid : '';
@@ -125,17 +129,21 @@ function og_confirm_unsubscribe_submit($form, &$form_state) {
 /**
  * Add users to group form.
  */
-function og_add_users($form, &$form_state, $node) {
-  $form['og_add_user'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Add user'),
-    '#autocomplete_path' => 'user/autocomplete',
-    '#description' => t('Add a user to group %group.', array('%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])),
-    '#element_validate' => array('og_add_users_og_names_validate'),
-  );
-  $form['op'] = array('#type' => 'submit', '#value' => t('Add users'));
-  $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
-  return $form;
+function og_add_users($form, &$form_state, $obj_type, $oid) {
+  if ($group = og_get_group($obj_type, $oid)) {
+    $form['og_add_user'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Add user'),
+      '#autocomplete_path' => 'user/autocomplete',
+      '#description' => t('Add a user to group %group.', array('%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])),
+      '#element_validate' => array('og_add_users_og_names_validate'),
+    );
+    $form['op'] = array('#type' => 'submit', '#value' => t('Add users'));
+    $form['group'] = array('#type' => 'value', '#value' => $group);
+    return $form;
+  }
+  // Not a valid group node.
+  drupal_not_found();
 }
 
 /**
@@ -153,47 +161,9 @@ function og_add_users_validate($form, &$form_state) {
  */
 function og_add_users_submit($form, &$form_state) {
   $group = array(
-    'value' => $form_state['values']['gid'],
+    'value' => $form_state['values']['group']->gid,
     'state' => OG_STATE_ACTIVE,
   );
 
   og_subscribe_user(array($group));
-}
-
-/**
- * Allow user to approve another user's membership.
- *
- * @param $node
- *   The node object.
- * @param $account
- *   The user to be approved object.
- * @param $token
- *   A security token.
- * @return
- */
-function og_approve($node, $account, $token) {
-  if (og_is_group_type($node->type)) {
-    if (!og_check_token($token, $node->nid)) {
-      drupal_set_message(t('Bad token. You seem to have followed an invalid link.'), 'error');
-      drupal_access_denied();
-      return;
-    }
-
-    $user_groups = og_get_object_groups('user', $account);
-
-    if (in_array($node->nid, $user_groups)) {
-      drupal_set_message(t('!name was already approved to group %group.', array('!name' => theme('username', $account), '%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])), 'error');
-      return '';
-    }
-    else {
-      og_subscribe_user(array(array('value' => $node->nid, 'state' => OG_STATE_ACTIVE)), $account);
-      og_invoke_event();
-
-      drupal_goto("node/$node->nid");
-    }
-  }
-  else {
-    drupal_not_found();
-    exit;
-  }
 }
