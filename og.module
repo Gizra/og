@@ -1218,7 +1218,7 @@ function og_determine_context_by_node($node, $account = NULL) {
   if (og_is_group_type('node', $node->type)) {
     $group_node = $node;
   }
-  elseif (og_is_group_post_type($node->type) && ($groups = og_get_object_groups('node', $node))) {
+  elseif (og_is_group_post_type('node', $node->type) && ($groups = og_get_object_groups('node', $node))) {
 
     if ($user_groups = og_get_object_groups('user', $account)) {
       $gid = current(array_intersect(array_keys($groups), array_keys($user_groups)));
@@ -2185,7 +2185,7 @@ function og_set_breadcrumb($obj_type, $oid, $path = array()) {
  * Implement hook_og_user_operations().
  */
 function og_og_user_operations($form = array(), $form_state = array()) {
-  $gid = $form_state['gid'];
+  $gid = $form_state['group']->gid;
   $operations = array(
     'unblock' => array(
       'label' => t('Approve membership of the selected users'),
