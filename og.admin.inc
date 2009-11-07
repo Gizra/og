@@ -296,21 +296,23 @@ function theme_og_user_admin_new_role($variables) {
  * @see user_admin_permissions_submit()
  * @see theme_user_admin_permissions()
  */
-function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL) {
+function og_user_admin_permissions($form, $form_state, $obj_type, $oid, $rid = NULL) {
   // If no node object is provided then the node ID is 0, which means this
   // is the default permissions settings.
-  $gid = !empty($node) ? $node->gid : 0;
-  $form['nid'] = array('#type' => 'value', '#value' => $nid);
+  $group = !empty($oid) ? og_get_group($obj_type, $oid) : array();
+  $form['group'] = array('#type' => 'value', '#value' => $group);
+
+  $gid = !empty($group) ? $group->gid : 0;
 
   // Retrieve role names for columns.
-  $role_names = og_user_roles($nid);
+  $role_names = og_user_roles($gid);
   if (!empty($rid)) {
     $role_names = array($rid => $role_names[$rid]);
   }
   // Fetch permissions for all roles or the one selected role.
   $role_permissions = og_user_role_permissions($role_names);
 
-  if (empty($node)) {
+  if (empty($group)) {
     // Add the 'bulk update' checkbox to the user roles.
     $role_names += array(0 => t('bulk update'));
   }
@@ -326,7 +328,7 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
   foreach (og_permissions_get() as $module => $permissions) {
     $form['permission'][] = array('#markup' => $module, '#id' => $module);
     foreach ($permissions as $perm => $perm_item) {
-      $access = !empty($node) ? og_user_access($node->nid, 'show ' . $perm) : TRUE;
+      $access = !empty($group) ? og_user_access($gid, 'show ' . $perm) : TRUE;
       if ($access) {
         $options[$perm] = '';
         $form['permission'][$perm] = array(
@@ -350,7 +352,7 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
     $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
   }
 
-  if (empty($node)) {
+  if (empty($group)) {
     $form['#theme'] = array('og_user_admin_permissions');
   }
   $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'), '#submit' => array('og_user_admin_permissions_submit'));
@@ -368,7 +370,7 @@ function og_user_admin_permissions($form, $form_state, $node = NULL, $rid = NULL
  */
 function og_user_admin_permissions_after_build($element) {
   // Authenticated roles.
-  $auth_rids = array_flip(og_user_roles($element['nid']['#value']));
+  $auth_rids = array_flip(og_user_roles($element['group']['#value']->gid));
   // Remove the anonymous member from the authenticated roles.
   $anon_rid = array_shift($auth_rids);
 
@@ -423,14 +425,15 @@ function og_user_admin_permissions_submit($form, &$form_state) {
  */
 function theme_og_user_admin_permissions($variables) {
   $form = $variables['form'];
-  $roles = og_user_roles($form['nid']['#value']);
-  if (empty($form['nid']['#value'])) {
+  $gid = $form['group']['#value']->gid;
+  $roles = og_user_roles($gid);
+  if (empty($gid)) {
     // Add the 'bulk update' checkbox to the user roles.
     $roles += array(0 => t('bulk update'));
   }
   foreach (element_children($form['permission']) as $key) {
     $row = array();
-    // Module name
+    // Module name.
     if (is_numeric($key)) {
       $row[] = array('data' => drupal_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['role_names']['#value']) + 1);
     }
