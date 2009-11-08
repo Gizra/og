@@ -640,9 +640,9 @@ function og_og_types_info() {
 }
 
 /**
- * Implementation of hook_og_entity_get_label_info().
+ * Implementation of hook_og_entity_get_info().
  */
-function og_og_entity_get_label_info() {
+function og_og_entity_get_info() {
   return array(
     'comment' => array(
       'table' => 'comment',
@@ -1499,7 +1499,7 @@ function og_entity_get_label($obj_type, $values = array()) {
   $return = array();
 
   // Get the table, ID and label of the object type.
-  if ($data = og_entity_get_label_info($obj_type)) {
+  if ($data = og_entity_get_info($obj_type)) {
     list($table, $id, $label) = array_values($data);
 
     // Get the group ID along with the object label.
@@ -1536,7 +1536,7 @@ function og_entity_get_url($obj_type, $oid) {
   $return = '';
 
   // Get the table, ID and label of the object type.
-  if ($data = og_entity_get_label_info($obj_type)) {
+  if ($data = og_entity_get_info($obj_type)) {
     if ($data['url']) {
       $return = str_replace('@id', $oid, $data['url']);
     }
@@ -1555,7 +1555,7 @@ function og_entity_get_url($obj_type, $oid) {
  *   Array keyed with the entity name and an array with the table, ID and label
  *   columns as the value.
  */
-function og_entity_get_label_info($obj_type = '') {
+function og_entity_get_info($obj_type = '') {
   $data = &drupal_static(__FUNCTION__, array());
 
   if (!empty($obj_type) && !empty($data[$obj_type])) {
@@ -1565,10 +1565,10 @@ function og_entity_get_label_info($obj_type = '') {
     return $data;
   }
 
-  $data = module_invoke_all('og_entity_get_label_info');
+  $data = module_invoke_all('og_entity_get_info');
 
   // Allow other modules to alter the definitions.
-  drupal_alter('og_entity_get_label_info', $data);
+  drupal_alter('og_entity_get_info', $data);
 
   if (!empty($obj_type)) {
     return !empty($data[$obj_type]) ? $data[$obj_type] : array();
