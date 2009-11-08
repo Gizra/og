@@ -376,7 +376,7 @@ function og_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid = 
  */
 function og_user_admin_permissions_after_build($element) {
   // Authenticated roles.
-  $gid = !empty($form['group']['#value']->gid) ? $form['group']['#value']->gid : 0;
+  $gid = !empty($element['group']['#value']->gid) ? $element['group']['#value']->gid : 0;
   $auth_rids = array_flip(og_user_roles($gid));
   // Remove the anonymous member from the authenticated roles.
   $anon_rid = array_shift($auth_rids);
