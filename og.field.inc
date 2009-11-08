@@ -268,7 +268,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
 
     if (!empty($data['id'])) {
 
-      if (!empty($object->og_group[FIELD_LANGUAGE_NONE][0]) && !og_get_group($obj_type, $object->{$data['id']})) {
+      if (!empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value']) && !og_get_group($obj_type, $object->{$data['id']})) {
         // Add the group.
         $group = og_set_group($obj_type, $object->{$data['id']});
 
@@ -281,7 +281,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
         og_set_new_group_roles($group->gid);
       }
     }
-    elseif (empty($object->og_group[FIELD_LANGUAGE_NONE][0]) && og_get_group($obj_type, $object->{$data['id']})) {
+    elseif (empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value']) && og_get_group($obj_type, $object->{$data['id']})) {
       // TODO: Delete the group, or maybe set the group state to FALSE?
     }
   }
