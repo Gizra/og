@@ -133,6 +133,20 @@ function og_field_update($obj_type, $object, $field, $instance, $langcode, &$ite
   og_field_write('update', $obj_type, $object, $field, $instance, $langcode, $items);
 }
 
+/**
+ * Implement hook_field_attach_pre_insert().
+ */
+function og_field_attach_pre_insert($obj_type, $object, $skip_fields = array()) {
+  og_field_crud_group($obj_type, $object, $skip_fields);
+}
+
+/**
+ * Implement hook_field_attach_pre_presave().
+ */
+function og_field_attach_pre_update($obj_type, $object, $skip_fields = array()) {
+  og_field_crud_group($obj_type, $object, $skip_fields);
+}
+
 /*******************************************************************************
  * Helper functions
  ******************************************************************************/
@@ -237,6 +251,39 @@ function og_create_fields_group($bundle, $obj_type = 'node') {
       ),
     );
     field_create_instance($instance);
+  }
+}
+
+/**
+ * Add or remove a group, based on the field CRUD.
+ *
+ * @see og_field_attach_pre_insert().
+ * @see og_field_attach_pre_update().
+ */
+function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
+  if(!empty($object->og_group)) {
+    // Get the object ID.
+    $data = og_entity_get_info($obj_type);
+    // Check group doesn't already exist.
+
+    if (!empty($data['id'])) {
+
+      if (!empty($object->og_group[FIELD_LANGUAGE_NONE][0]) && !og_get_group($obj_type, $object->{$data['id']})) {
+        // Add the group.
+        $group = og_set_group($obj_type, $object->{$data['id']});
+
+        if (!empty($object->uid)) {
+          // Subscribe the object author, if exists.
+          $account = user_load($object->uid);
+          og_subscribe_user(array(array('value' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
+        }
+
+        og_set_new_group_roles($group->gid);
+      }
+    }
+    elseif (empty($object->og_group[FIELD_LANGUAGE_NONE][0]) && og_get_group($obj_type, $object->{$data['id']})) {
+      // TODO: Delete the group, or maybe set the group state to FALSE?
+    }
   }
 }
 

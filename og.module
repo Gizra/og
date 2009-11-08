@@ -377,21 +377,6 @@ function og_node_type_save($bundle_name) {
 }
 
 /**
-* Implement hook_node_insert().
-*/
-function og_node_insert($node) {
-  if (og_is_group_type('node', $node->type)) {
-    // Add group.
-    $group = og_set_group('node', $node->nid);
-    // Subscribe the node author to the group.
-    $account = user_load($node->uid);
-
-    og_subscribe_user(array(array('value' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
-    og_set_new_group_roles($group->gid);
-  }
-}
-
-/**
 * Implement hook_node_update().
 *
 * In most cases group will be already registered on og_node_insert() however if
