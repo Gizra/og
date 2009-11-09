@@ -377,19 +377,6 @@ function og_node_type_save($bundle_name) {
 }
 
 /**
-* Implement hook_node_update().
-*
-* In most cases group will be already registered on og_node_insert() however if
-* the content already exists, but wasn't defined as a group node, then we must
-* make sure it is registered.
-*/
-function og_node_update($node) {
-  if (og_is_group_type('node', $node->type) && !og_get_group('node', $node->nid)) {
-    og_node_insert($node);
-  }
-}
-
-/**
 * Implement hook_node_delete().
 */
 function og_node_delete($node) {
@@ -1579,7 +1566,7 @@ function og_get_groups($gids = array()) {
   $query->fields('og_groups');
 
   if (!empty($gids)) {
-    $query->condition('oid', $oid);
+    $query->condition('gid', $gids, 'IN');
   }
 
   $result = $query->orderBy('oid', 'ASC')->execute()->fetchAllAssoc('oid');
