@@ -134,16 +134,16 @@ function og_field_update($obj_type, $object, $field, $instance, $langcode, &$ite
 }
 
 /**
- * Implement hook_field_attach_pre_insert().
+ * Implement hook_field_attach_insert().
  */
-function og_field_attach_pre_insert($obj_type, $object, $skip_fields = array()) {
+function og_field_attach_insert($obj_type, $object, $skip_fields = array()) {
   og_field_crud_group($obj_type, $object, $skip_fields);
 }
 
 /**
- * Implement hook_field_attach_pre_presave().
+ * Implement hook_field_attach_presave().
  */
-function og_field_attach_pre_update($obj_type, $object, $skip_fields = array()) {
+function og_field_attach_update($obj_type, $object, $skip_fields = array()) {
   og_field_crud_group($obj_type, $object, $skip_fields);
 }
 
@@ -265,7 +265,6 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
     // Get the object ID.
     $data = og_entity_get_info($obj_type);
     // Check group doesn't already exist.
-
     if (!empty($data['id'])) {
 
       if (!empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value']) && !og_get_group($obj_type, $object->{$data['id']})) {
