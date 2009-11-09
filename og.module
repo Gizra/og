@@ -228,25 +228,19 @@ function og_menu() {
     'weight' => -8,
   );
 
-  $items['node/%/og'] = array(
-    'title' => 'Group',
-    'page callback' => 'og_group_admin_overview',
-    'page arguments' => array('node', 1),
-    'access callback' => 'og_organic_groups_tab_access',
-    'access arguments' => array('node', 1),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'og.admin.inc',
-  );
-
-  $items['user/%/og'] = array(
-    'title' => 'Group',
-    'page callback' => 'og_group_admin_overview',
-    'page arguments' => array('user', 1),
-    'access callback' => 'og_organic_groups_tab_access',
-    'access arguments' => array('user', 1),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'og.admin.inc',
-  );
+  foreach (entity_get_info() as $entity => $value) {
+    if ($value['fieldable']) {
+      $items["$entity/%/og"] = array(
+        'title' => 'Group',
+        'page callback' => 'og_group_admin_overview',
+        'page arguments' => array('node', 1),
+        'access callback' => 'og_organic_groups_tab_access',
+        'access arguments' => array('node', 1),
+        'type' => MENU_LOCAL_TASK,
+        'file' => 'og.admin.inc',
+      );
+    }
+  }
 
   $items['admin/config/og'] = array(
     'title' => 'Organic groups',
