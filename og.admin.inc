@@ -415,8 +415,9 @@ function og_user_admin_permissions_submit($form, &$form_state) {
         OG_AUTHENTICATED_DEFAULT_RID => $form_state['values'][OG_AUTHENTICATED_DEFAULT_RID],
         OG_ADMINISTRATOR_DEFAULT_RID => $form_state['values'][OG_ADMINISTRATOR_DEFAULT_RID],
       );
-      $count = og_permissions_bulk_update($roles, $form_state['values'][$rid]);
-      drupal_set_message(format_plural($count, 'Group was updated', '@count group were updated.', array('@count' =>$count)));
+      if ($count = og_permissions_bulk_update($roles, $form_state['values'][$rid])) {
+        drupal_set_message(format_plural($count, 'Group was updated', '@count group were updated.', array('@count' =>$count)));
+      }
 
     }
   }

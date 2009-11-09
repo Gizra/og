@@ -1565,8 +1565,8 @@ function og_entity_get_info($obj_type = '') {
  * Get all groups IDs.
  *
  * @param $gids
- *   Optional; Array with the group IDs to retreive, or return all groups if
- *   empty.
+ *   Optional; Array with the group IDs to retreive, or empty to return all
+ *   groups.
  *
  * @return
  *   Array with the object types as an array keyed by the group ID and the
@@ -1575,12 +1575,17 @@ function og_entity_get_info($obj_type = '') {
 function og_get_groups($gids = array()) {
   $return = array();
 
-  if ($result =  db_query("SELECT gid, oid, obj_type FROM {og_groups} ORDER BY oid")->fetchAllAssoc('oid')) {
-    // TODO: Is there a way to do it as a part of the query?
-    foreach ($result as $row) {
-      $return[$row->obj_type][$row->gid] = $row->oid;
+  $query = db_select('og_groups', 'og_groups');
+  $query->fields('og_groups');
 
-    }
+  if (!empty($gids)) {
+    $query->condition('oid', $oid);
+  }
+
+  $result = $query->orderBy('oid', 'ASC')->execute()->fetchAllAssoc('oid');
+
+  foreach ($result as $row) {
+    $return[$row->obj_type][$row->gid] = $row->oid;
   }
   return $return;
 }
@@ -2104,15 +2109,22 @@ function og_permissions_bulk_update($roles, $permissions) {
     }
   }
 
-  // Get all existing group node IDs.
-  $gids = og_get_all_gids();
-  foreach ($gids as $gid) {
-    $rids = og_get_group_default_roles($gid);
-    foreach ($rids as $name => $rid) {
-      og_user_role_change_permissions($rid, $permissions_to_change[$name]);
+  // The number of groups that are bulk updated.
+  $updated_groups = 0;
+
+  if (!empty($permissions_to_change)) {
+    // Get all existing group node IDs.
+    foreach (og_get_groups() as $obj_type => $values) {
+      foreach ($values as $gid) {
+        ++$updated_groups;
+        $rids = og_get_group_default_roles($gid);
+        foreach ($rids as $name => $rid) {
+          og_user_role_change_permissions($rid, $permissions_to_change[$name]);
+        }
+      }
     }
   }
-  return count($gids);
+  return $updated_groups;
 }
 
 /**
