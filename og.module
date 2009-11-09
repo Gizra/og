@@ -238,6 +238,16 @@ function og_menu() {
     'file' => 'og.admin.inc',
   );
 
+  $items['user/%/og'] = array(
+    'title' => 'Group',
+    'page callback' => 'og_group_admin_overview',
+    'page arguments' => array('user', 1),
+    'access callback' => 'og_organic_groups_tab_access',
+    'access arguments' => array('user', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'og.admin.inc',
+  );
+
   $items['admin/config/og'] = array(
     'title' => 'Organic groups',
     'description' => 'Administer the suite of Organic groups modules.',
