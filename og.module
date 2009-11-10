@@ -233,9 +233,9 @@ function og_menu() {
       $items["$entity/%/og"] = array(
         'title' => 'Group',
         'page callback' => 'og_group_admin_overview',
-        'page arguments' => array('node', 1),
+        'page arguments' => array($entity, 1),
         'access callback' => 'og_organic_groups_tab_access',
-        'access arguments' => array('node', 1),
+        'access arguments' => array($entity, 1),
         'type' => MENU_LOCAL_TASK,
         'file' => 'og.admin.inc',
       );
