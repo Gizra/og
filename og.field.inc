@@ -299,13 +299,13 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
  */
 function theme_field_formatter_og_list_default($variables) {
   $element = $variables['element'];
-  $field = field_info_field($element['#field_name']);
-  $options = og_allowed_values($field);
-  // Flatten the options. We don't use array_merge() because we want to keep the
-  // index key, which is the group node ID.
-  $options = $options['content groups'] + $options['other groups'];
-  // Return the group's link.
-  $return = l($options[$element['#item']['value']], 'node/' . $element['#item']['value']);
+  $return = '';
+  if ($group = og_get_group('gid', $element['#item']['value'])) {
+    $label = check_plain(current(og_entity_get_label($group->obj_type, array($group->oid))));
+    // Return the group's link.
+    $return = l($label, "$group->obj_type/$group->oid");
+  }
+
   return $return;
 }
 
