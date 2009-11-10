@@ -1430,7 +1430,7 @@ function og_get_groups_for_form($obj_type, $object) {
   // Get all the existing groups.
 
   // Get the groups belonging to the content.
-  if (($content_groups = og_get_object_groups($obj_type, $object)) && $all_groups = og_get_all_groups_for_form($content_groups)) {
+  if (($content_groups = og_get_object_groups($obj_type, $object)) && $all_groups = og_get_all_groups_for_form()) {
 
     // TODO: Is it faster to use array_diff & array_intersect?
     foreach ($all_groups as $nid => $name) {
@@ -1573,7 +1573,7 @@ function og_get_groups($gids = array()) {
     $query->condition('gid', $gids, 'IN');
   }
 
-  $result = $query->orderBy('oid', 'ASC')->execute()->fetchAllAssoc('oid');
+  $result = $query->execute()->fetchAllAssoc('gid');
 
   foreach ($result as $row) {
     $return[$row->obj_type][$row->gid] = $row->oid;
