@@ -98,7 +98,7 @@ function og_user_admin_account($form, $form_state, $obj_type, $oid) {
     if (empty($object->uid) || $account->uid != $object->uid) {
       $accounts[$account->uid] = '';
       $users_roles = array();
-      foreach (og_get_user_roles($obj_type, $oid, $account->uid) as $rid) {
+      foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
         $users_roles[] = $roles[$rid];
       }
       asort($users_roles);
@@ -134,9 +134,9 @@ function og_user_admin_account_validate($form, &$form_state) {
  * Submit the user administration update form.
  */
 function og_user_admin_account_submit($form, &$form_state) {
-  $nid = $form_state['values']['nid'];
+  $group = $form_state['values']['group'];
 
-  $operations = module_invoke_all('og_user_operations', $form, $form_state + array('nid' => $nid));
+  $operations = module_invoke_all('og_user_operations', $form, $form_state + array('group' => $group));
   $operation = $operations[$form_state['values']['operation']];
   // Filter out unchecked accounts.
   $accounts = array_filter($form_state['values']['accounts']);
@@ -149,7 +149,7 @@ function og_user_admin_account_submit($form, &$form_state) {
     else {
       $args = array($accounts);
     }
-    call_user_func_array($function, array('nid' => $nid) + $args);
+    call_user_func_array($function, array('gid' => $group->gid) + $args);
 
     drupal_set_message(t('The update has been performed.'));
   }
