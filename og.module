@@ -109,9 +109,9 @@ function og_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
     'page callback' => 'og_subscribe',
-    'page arguments' => array(1),
+    'page arguments' => array(1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('subscribe', 1),
+    'access arguments' => array('subscribe', 1, 2),
     // We don't add the group name, as it might be private.
     'title' => 'Join group'
   );
@@ -502,11 +502,9 @@ function og_og_permission_default() {
 /**
  * Implement hook_og_access().
  */
-function og_og_access($op, $node, $acting_user, $account) {
-  if (og_is_group_type('node', $node->type)) {
-    if (og_user_access($node->nid, $op, $acting_user)) {
-      return OG_ACCESS_ALLOW;
-    }
+function og_og_access($op, $group, $acting_user, $account) {
+  if ($group->obj_type == 'node' && og_user_access($group->oid, $op, $acting_user)) {
+    return OG_ACCESS_ALLOW;
   }
   return OG_ACCESS_IGNORE;
 }
@@ -1094,13 +1092,18 @@ function og_delete_association($obj_type, $object, $gids = array()) {
  * @return
  *   TRUE if access is allowed, otherise FALSE.
  */
-function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
+function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_user = NULL) {
   if (empty($acting_user)) {
     global $user;
     $acting_user = $user;
   }
   if (user_access('administer organic groups', $acting_user)) {
     return TRUE;
+  }
+
+  if (!$group = og_get_group($obj_type, $oid)) {
+    // Not a group.
+    return FALSE;
   }
 
   if ($node->uid == $acting_user->uid) {
@@ -1114,7 +1117,7 @@ function og_access($op, $node = NULL, $account = NULL, $acting_user = NULL) {
   }
 
   // Check if the user was blocked.
-  if (($value = og_get_group_from_object($node->nid, 'user', $acting_user)) && $value['state'] == OG_STATE_BLOCKED) {
+  if (($value = og_get_group_from_object($group->gid, 'user', $acting_user)) && $value['state'] == OG_STATE_BLOCKED) {
     return FALSE;
   }
 
@@ -1657,8 +1660,8 @@ function og_user_role_permissions($roles = array()) {
 /**
  * Determine whether the user has a given privilege.
  *
- * @param $nid
- *   The group node ID.
+ * @param $gid
+ *   The group ID.
  * @param $string
  *   The permission, such as "administer nodes", being checked for.
  * @param $account
@@ -1671,9 +1674,14 @@ function og_user_role_permissions($roles = array()) {
  * way, we guarantee consistent behavior, and ensure that the superuser
  * can perform all actions.
  */
-function og_user_access($nid, $string, $account = NULL) {
+function og_user_access($gid, $string, $account = NULL) {
   global $user;
   $perm = &drupal_static(__FUNCTION__, array());
+
+  if (!$group = og_get_group('gid', $gid)) {
+    // Not a group.
+    return FALSE;
+  }
 
   if (!isset($account)) {
     $account = $user;
@@ -1684,20 +1692,20 @@ function og_user_access($nid, $string, $account = NULL) {
     return TRUE;
   }
 
-  // Group member has all privileges.
-  $group = node_load($nid);
-  if ($group->uid == $account->uid) {
+  // Group manager has all privileges.
+  $object= entity_load($group->obj_type, array($group->oid));
+  if (!empty($object->uid) && $object->uid == $account->uid) {
     return TRUE;
   }
 
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable, if the user is authenticated.
-  if (!isset($perm[$nid][$account->uid])) {
+  if (!isset($perm[$gid][$account->uid])) {
     $user_groups = og_get_object_groups('user', $account);
 
     // Get default roles.
-    $default_roles = og_get_group_default_roles($nid);
-    if (!in_array($nid, $user_groups)) {
+    $default_roles = og_get_group_default_roles($gid);
+    if (!in_array($gid, $user_groups)) {
       // Keep only the anonymous role.
       $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
     }
@@ -1705,7 +1713,7 @@ function og_user_access($nid, $string, $account = NULL) {
       // Add the authenticated role.
       $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
       // Get otehr roles assigned to the user in the group.
-      $roles += og_get_user_roles($nid, $account->uid);
+      $roles += og_get_user_roles($gid, $account->uid);
     }
 
     $role_permissions = og_user_role_permissions($roles);
@@ -1713,16 +1721,16 @@ function og_user_access($nid, $string, $account = NULL) {
     foreach ($role_permissions as $one_role) {
       $perms += $one_role;
 
-      $perm[$nid][$account->uid] = $perms;
+      $perm[$gid][$account->uid] = $perms;
     }
   }
-  return isset($perm[$nid][$account->uid][$string]);
+  return isset($perm[$gid][$account->uid][$string]);
 }
 
 
 /**
  * Retrieve an array of roles matching specified conditions.
- * @param $nid
+ * @param $gid
  *   The group node ID.
  * @param $roles
  * @param $permission

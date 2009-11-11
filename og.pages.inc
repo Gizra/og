@@ -37,7 +37,7 @@ function og_subscribe($obj_type, $oid, $uid = NULL) {
     }
 
     // Check user isn't already subscribed.
-    if (in_array($group-gnid, og_get_object_groups('user', $account))) {
+    if (in_array($group->gid, og_get_object_groups('user', $account))) {
       drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])));
       // TODO: get url.
       // drupal_goto('node/' . $node->nid);
@@ -65,7 +65,8 @@ function og_confirm_subscribe($form, &$form_state, $group, $account) {
       '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
     );
   }
- return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])), 'node/' . $node->nid, ' ', t('Join'), t('Cancel'));
+  $label = check_plain(current(og_entity_get_label($group->obj_type, array($group->oid))));
+  return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $label)), "$group->obj_type/$group->oid", ' ', t('Join'), t('Cancel'));
 }
 
 /**
