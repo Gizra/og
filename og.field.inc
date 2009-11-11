@@ -102,6 +102,7 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
   // to itself.
   if (!empty($form['#' . $element['#object_type']])) {
     list($id) = entity_extract_ids($element['#object_type'], $form['#' . $element['#object_type']]);
+    $group = og_get_group($element['#object_type'], $id);
   }
 
   $element += array(
@@ -110,7 +111,7 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
     // If it's an existing group, then exclude itself, as in some cases a group
     // can act also as a group post, and we want to prevent associatingthe group
     // to itself.
-    '#excludes' => !empty($id) ? array($id) : array(),
+    '#excludes' => !empty($group->gid) ? array($group->gid) : array(),
   );
 
   $defaults = array('data' => array(), 'state' => '');
