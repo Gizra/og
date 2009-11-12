@@ -1339,7 +1339,7 @@ function og_elements_process($element, &$form_state, $form) {
 
   if (empty($options)) {
     // There are no group, so don't show any input element.
-    $type = 'markup';
+    $type = 'item';
   }
 
   if (!empty($element['#description'])) {
