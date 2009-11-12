@@ -257,11 +257,11 @@ function og_create_fields_group($bundle, $obj_type = 'node') {
       'display' => array(
         'full' => array(
           'label' => 'above',
-          'type' => 'options_onoff',
+          'type' => 'og_group_subscribe',
         ),
         'teaser' => array(
           'label' => 'above',
-          'type' => 'options_onoff',
+          'type' => 'og_group_subscribe',
         ),
       ),
     );
