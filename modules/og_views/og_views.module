@@ -33,6 +33,13 @@ function og_views_field_formatter_info() {
  */
 function og_views_field_allowed_values() {
   $return = array();
+  foreach (views_get_all_views() as $view_id => $view) {
+    $view_name = check_plain($view->name);
+    foreach($view->display as $display) {
+      $return[$view_id . ' ' .$display->id] = $view_name . ' (' . check_plain($display->display_title) .')';
+    }
+  }
+
   return $return;
 }
 
@@ -87,7 +94,11 @@ function og_views_create_fields_group_posts($bundle, $obj_type = 'node') {
  */
 function theme_field_formatter_og_views_default($variables) {
   $element = $variables['element'];
-
   $output = '';
+  if (!empty($element['#item']['value'])) {
+    $view = explode(' ', $element['#item']['value']);
+    $output = views_embed_view($view[0], $view[1]);
+  }
+
   return $output;
 }
