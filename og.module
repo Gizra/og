@@ -391,49 +391,6 @@ function og_node_delete($node) {
 }
 
 /**
-* Implement hook_node_view().
-*/
-function og_node_view($node, $build_mode) {
-  global $user;
-  $obj_type = 'node';
-  $oid = $node->nid;
-  if (($group = og_get_group($obj_type, $oid)) && $node->uid != $user->uid) {
-    // Check user association with the group.
-    $links = array();
-
-    if ($user_group = og_get_group_from_object($group->gid, 'user', $user)) {
-      // check the user state.
-      if ($user_group['state'] == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
-        $links['og_subscribe']['title'] = t('Re-request group membership');
-        $links['og_subscribe']['href'] = "og/$obj_type/$oid/subscribe";
-      }
-      elseif ($user_group['state'] == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe')) {
-        $links['og_subscribe']['title'] = t('Unsubscribe from group');
-        $links['og_subscribe']['href'] = "og/$obj_type/$oid/unsubscribe";
-      }
-    }
-    else {
-      if (og_user_access($group->gid, 'subscribe without approval')) {
-        $links['og_subscribe']['title'] = t('Subscribe to group');
-      }
-      elseif (og_user_access($group->gid, 'subscribe')) {
-        $links['og_subscribe']['title'] = t('Request group membership');
-      }
-      $links['og_subscribe']['href'] = "og/$obj_type/$oid/subscribe";
-    }
-
-    if (!empty($links['og_subscribe']['title'])) {
-      $node->content['links']['og'] = array(
-        '#theme' => 'links',
-        '#links' => $links,
-        '#attributes' => array('class' => array('links', 'inline')),
-      );
-    }
-  }
-}
-
-
-/**
  * Implement og_permission
  */
 function og_og_permission() {
