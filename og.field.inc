@@ -317,7 +317,7 @@ function theme_field_formatter_og_list_default($variables) {
   $element = $variables['element'];
   $return = '';
   if ($group = og_get_group('gid', $element['#item']['value'])) {
-    $label = check_plain(current(og_entity_get_label($group->obj_type, array($group->oid))));
+    $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
     // Return the group's link.
     $return = l($label, "$group->obj_type/$group->oid");
   }

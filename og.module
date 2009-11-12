@@ -634,6 +634,35 @@ function og_get_group($obj_type, $oid) {
 }
 
 /**
+ * Get all groups IDs.
+ *
+ * @param $gids
+ *   Optional; Array with the group IDs to retreive, or empty to return all
+ *   groups.
+ *
+ * @return
+ *   Array with the object types as an array keyed by the group ID and the
+ *   object ID as the value.
+ */
+function og_get_groups($gids = array()) {
+  $return = array();
+
+  $query = db_select('og_groups', 'og_groups');
+  $query->fields('og_groups');
+
+  if (!empty($gids)) {
+    $query->condition('gid', $gids, 'IN');
+  }
+
+  $result = $query->execute()->fetchAllAssoc('gid');
+
+  foreach ($result as $row) {
+    $return[$row->obj_type][$row->gid] = $row->oid;
+  }
+  return $return;
+}
+
+/**
  * Set a group object.
  *
  * @param $oid
@@ -1308,6 +1337,11 @@ function og_elements_process($element, &$form_state, $form) {
     }
   }
 
+  if (empty($options)) {
+    // There are no group, so don't show any input element.
+    $type = 'markup';
+  }
+
   if (!empty($element['#description'])) {
     $description = $element['#description'];
   }
@@ -1405,7 +1439,16 @@ function og_get_groups_for_form($obj_type, $object) {
  * Get all groups keyed by group ID and the title ready to be used on forms.
  */
 function og_get_all_groups_for_form($gids = array()) {
-  return array_walk(og_entity_get_label_multiple('gid', $gids), 'check_plain');
+  $return = array();
+
+  foreach (og_get_groups($gids) as $obj_type => $values) {
+    $return = $return + og_entity_get_label_multiple($obj_type, $values);
+  }
+
+  // Sanitize the result.
+  array_walk($return, 'check_plain');
+  return $return;
+
 }
 
 /**
@@ -1428,14 +1471,14 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
 
     $table = $entity['base table'];
     $id = $entity['object keys']['id'];
-    $id = $entity['object keys']['label'];
+    $label = $entity['object keys']['label'];
 
     // Get the group ID along with the object label.
     $query = db_select('og_groups', 'og')->fields('og', array('gid'));
     $query->join($table, $table, "og.oid =  $table.$id");
 
     $return = $query->fields($table, array($label))
-      ->condition($id, array_values($values), 'IN')
+      ->condition($id, array_values($oids), 'IN')
       ->execute()
       ->fetchAllKeyed();
   }
@@ -1461,35 +1504,6 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
 function og_entity_get_label($obj_type, $oid) {
   return current(og_entity_get_label_multiple($obj_type, array($oid)));
 
-}
-
-/**
- * Get all groups IDs.
- *
- * @param $gids
- *   Optional; Array with the group IDs to retreive, or empty to return all
- *   groups.
- *
- * @return
- *   Array with the object types as an array keyed by the group ID and the
- *   object ID as the value.
- */
-function og_get_groups($gids = array()) {
-  $return = array();
-
-  $query = db_select('og_groups', 'og_groups');
-  $query->fields('og_groups');
-
-  if (!empty($gids)) {
-    $query->condition('gid', $gids, 'IN');
-  }
-
-  $result = $query->execute()->fetchAllAssoc('gid');
-
-  foreach ($result as $row) {
-    $return[$row->obj_type][$row->gid] = $row->oid;
-  }
-  return $return;
 }
 
 /**
