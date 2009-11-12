@@ -338,7 +338,7 @@ function theme_field_formatter_og_group_subscribe($variables) {
     $obj_type = $element['#object_type'];
     list($id) = entity_extract_ids($obj_type, $element['#object']);
 
-    $object= entity_load($obj_type, array($id));
+    $object= current(entity_load($obj_type, array($id)));
 
     if (($group = og_get_group($obj_type, $id)) && (empty($object->uid) || $object->uid != $user->uid)) {
       // Check user association with the group.

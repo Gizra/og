@@ -1695,7 +1695,7 @@ function og_user_access($gid, $string, $account = NULL) {
   }
 
   // Group manager has all privileges.
-  $object= entity_load($group->obj_type, array($group->oid));
+  $object= current(entity_load($group->obj_type, array($group->oid)));
   if (!empty($object->uid) && $object->uid == $account->uid) {
     return TRUE;
   }

@@ -74,7 +74,7 @@ function og_confirm_subscribe($form, &$form_state, $group, $account) {
  */
 function og_confirm_subscribe_submit($form, &$form_state) {
   $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
-  // The group ID.
+  // The group object.
   $group = $form_state['values']['group'];
 
   $groups = array(
@@ -100,15 +100,18 @@ function og_confirm_subscribe_submit($form, &$form_state) {
 function og_confirm_unsubscribe($form, &$form_state, $obj_type, $oid) {
   if ($group = og_get_group($obj_type, $oid)) {
     global $user;
+
+    $label = check_plain(current(og_entity_get_label($group->obj_type, array($group->oid))));
     // Check the user isn't the manager of the group.
-    if ($node->uid != $user->uid) {
+    $object= current(entity_load($group->obj_type, array($group->oid)));
+    if (!empty($object->uid) && $object->uid != $user->uid) {
       $form['group'] = array('#type' => 'value', '#value' => $group);
       $form['account'] = array('#type' => 'value', '#value' => $user);
-      return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])), 'og/users/' . $node->nid, ' ', t('Remove'), t('Cancel'));
+      return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), "$group->obj_type/$group->oid", ' ', t('Remove'), t('Cancel'));
     }
     else {
-      drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])));
-      drupal_goto('node/' . $node->nid);
+      drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $label)));
+      drupal_goto("$group->obj_type/$group->oid");
     }
   }
   // Not a valid group.
