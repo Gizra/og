@@ -30,11 +30,17 @@ function og_field_info() {
 function og_field_formatter_info() {
   return array(
     'og_list_default' => array(
-      'label' => t('OG default list'),
+      'label' => t('Organic groups default list'),
       'field types' => array('og'),
+    ),
+    'og_group_subscribe' => array(
+      'label' => t('Organic groups subscription'),
+      'field types' => array('list_boolean'),
     ),
   );
 }
+
+
 
 /**
  * Implement hook_field_schema().
@@ -312,6 +318,57 @@ function theme_field_formatter_og_list_default($variables) {
     $label = check_plain(current(og_entity_get_label($group->obj_type, array($group->oid))));
     // Return the group's link.
     $return = l($label, "$group->obj_type/$group->oid");
+  }
+
+  return $return;
+}
+
+/**
+ * Organic group audience list field formatter.
+ *
+ * @return
+ *   A link to the group node.
+ */
+function theme_field_formatter_og_group_subscribe($variables) {
+  $return = '';
+
+  $element = $variables['element'];
+  if ($element['#item']['value']) {
+    global $user;
+    $obj_type = $element['#object_type'];
+    list($id) = entity_extract_ids($obj_type, $element['#object']);
+
+    $object= entity_load($obj_type, array($id));
+
+    if (($group = og_get_group($obj_type, $id)) && (empty($object->uid) || $object->uid != $user->uid)) {
+      // Check user association with the group.
+      $links = array();
+
+      if ($user_group = og_get_group_from_object($group->gid, 'user', $user)) {
+        // check the user state.
+        if ($user_group['state'] == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
+          $links['title'] = t('Re-request group membership');
+          $links['href'] = "og/$obj_type/$id/subscribe";
+        }
+        elseif ($user_group['state'] == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe')) {
+          $links['title'] = t('Unsubscribe from group');
+          $links['href'] = "og/$obj_type/$id/unsubscribe";
+        }
+      }
+      else {
+        if (og_user_access($group->gid, 'subscribe without approval')) {
+          $links['title'] = t('Subscribe to group');
+        }
+        elseif (og_user_access($group->gid, 'subscribe')) {
+          $links['title'] = t('Request group membership');
+        }
+        $links['href'] = "og/$obj_type/$id/subscribe";
+      }
+
+      if (!empty($links['title'])) {
+        $return = l($links['title'], $links['href']);
+      }
+    }
   }
 
   return $return;
