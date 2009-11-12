@@ -570,6 +570,25 @@ function og_og_types_info() {
   );
 }
 
+/**
+ * Implement hook_entity_info_alter().
+ *
+ * Add label information to fieldable entities.
+ */
+function og_entity_info_alter(&$entity_info) {
+  $lables = array(
+    'comment' => 'subject',
+    'node' => 'title',
+    'file' => 'filename',
+    'taxonomy_term' => 'name',
+    'user' => 'name',
+  );
+
+  foreach ($lables as $key => $value) {
+    $entity_info[$key]['object keys']['label'] = $value;
+  }
+}
+
 
 /*******************************************************************************
  * API functions
