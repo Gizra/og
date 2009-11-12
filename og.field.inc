@@ -256,11 +256,11 @@ function og_create_fields_group($bundle, $obj_type = 'node') {
       'label' => t('Group type'),
       'display' => array(
         'full' => array(
-          'label' => 'above',
+          'label' => 'hidden',
           'type' => 'og_group_subscribe',
         ),
         'teaser' => array(
-          'label' => 'above',
+          'label' => 'hidden',
           'type' => 'og_group_subscribe',
         ),
       ),

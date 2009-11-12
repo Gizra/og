@@ -85,8 +85,7 @@ function og_confirm_subscribe_submit($form, &$form_state) {
 
   og_subscribe_user(array($groups), NULL, FALSE, $request);
 
-  // TODO: get URL.
-  $form_state['redirect'] = node_access('view', $node) ? 'node/' . $nid : '';
+  $form_state['redirect'] = "$group->obj_type/$group->oid";
 }
 
 
@@ -127,7 +126,7 @@ function og_confirm_unsubscribe_submit($form, &$form_state) {
   og_unsubscribe_user(array($group->gid), $form_state['values']['account']);
 
   // Determine where to go next - Group if accessible, or else site front page.
-  $form_state['redirect'] = og_access('view', $node) ? 'node/' . $node->nid : '';
+  $form_state['redirect'] = "$group->obj_type/$group->oid";
 }
 
 /**
