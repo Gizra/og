@@ -278,13 +278,15 @@ function og_create_fields_group($bundle, $obj_type = 'node') {
 function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
   if(!empty($object->og_group)) {
     // Get the object ID.
-    $data = og_entity_get_info($obj_type);
-    // Check group doesn't already exist.
-    if (!empty($data['id'])) {
+    list($id) = entity_extract_ids($obj_type, $object);
 
-      if (!empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value']) && !og_get_group($obj_type, $object->{$data['id']})) {
+    // Check group doesn't already exist.
+
+    if (!empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value'])) {
+      if (!og_get_group($obj_type, $id)) {
+
         // Add the group.
-        $group = og_set_group($obj_type, $object->{$data['id']});
+        $group = og_set_group($obj_type, $id);
 
         if (!empty($object->uid)) {
           // Subscribe the object author, if exists.

@@ -570,32 +570,6 @@ function og_og_types_info() {
   );
 }
 
-/**
- * Implementation of hook_og_entity_get_info().
- */
-function og_og_entity_get_info() {
-  return array(
-    'comment' => array(
-      'table' => 'comment',
-      'id' => 'cid',
-      'label' => 'subject',
-      'url callback' => 'og_entity_format_url_comment',
-    ),
-    'node' => array(
-      'table' => 'node',
-      'id' => 'nid',
-      'label' => 'title',
-      'url' => 'node/@id',
-    ),
-    'user' => array(
-      'table' => 'users',
-      'id' => 'uid',
-      'label' => 'name',
-      'url' => 'user/@id',
-    ),
-  );
-}
-
 
 /*******************************************************************************
  * API functions
@@ -1226,7 +1200,7 @@ function og_set_context($node = NULL, $determine = FALSE) {
  * Menu callback; Return the title of a menu item based on the group title.
  */
 function og_menu_title_callback($title, $obj_type, $oid) {
-  $label = check_plain(current(og_entity_get_label($obj_type, array($oid))));
+  $label = check_plain(og_entity_get_label($obj_type, $oid));
   return str_replace('@group', $label, $title);
 }
 
@@ -1412,15 +1386,7 @@ function og_get_groups_for_form($obj_type, $object) {
  * Get all groups keyed by group ID and the title ready to be used on forms.
  */
 function og_get_all_groups_for_form($gids = array()) {
-  $return = array();
-
-  foreach (og_get_groups($gids) as $obj_type => $values) {
-    $return = $return + og_entity_get_label($obj_type, $values);
-  }
-
-  // Sanitize the result.
-  array_walk($return, 'check_plain');
-  return $return;
+  return array_walk(og_entity_get_label_multiple('gid', $gids), 'check_plain');
 }
 
 /**
@@ -1433,12 +1399,17 @@ function og_get_all_groups_for_form($gids = array()) {
  * @return
  *   Array keyed with the group unqiue ID and the object label as the value.
  */
-function og_entity_get_label($obj_type, $values = array()) {
+function og_entity_get_label_multiple($obj_type, $oids = array()) {
   $return = array();
 
+  $entity = entity_get_info($obj_type);
+
   // Get the table, ID and label of the object type.
-  if ($data = og_entity_get_info($obj_type)) {
-    list($table, $id, $label) = array_values($data);
+  if (!empty($entity['object keys']['label'])) {
+
+    $table = $entity['base table'];
+    $id = $entity['object keys']['id'];
+    $id = $entity['object keys']['label'];
 
     // Get the group ID along with the object label.
     $query = db_select('og_groups', 'og')->fields('og', array('gid'));
@@ -1452,66 +1423,25 @@ function og_entity_get_label($obj_type, $values = array()) {
   else {
     // We got an object type that we don't know how to get the label, so we'll
     // return the group ID as the laebl, prefixed with the object type.
-    foreach ($values as $value) {
-      $return[$value] = t('@obj_type ID  @value', array('$obj_type' => $obj_type, '@value' => $value));
+    foreach ($oids as $oid) {
+      $return[$oid] = t('@obj_type ID  @value', array('@obj_type' => $obj_type, '@value' => $oid));
     }
   }
   return $return;
 }
 
 /**
- * Get the URL of different entities.
+ * Wrapper function to get the label of a single entity.
  *
  * @param $obj_type
  *   The object type.
  * @param $oid
  *   The object ID.
- *
- * @return
- *   URL string, or empty string of URL couldn't be retreived.
+ * @return unknown_type
  */
-function og_entity_get_url($obj_type, $oid) {
-  $return = '';
+function og_entity_get_label($obj_type, $oid) {
+  return current(og_entity_get_label_multiple($obj_type, array($oid)));
 
-  // Get the table, ID and label of the object type.
-  if ($data = og_entity_get_info($obj_type)) {
-    if ($data['url']) {
-      $return = str_replace('@id', $oid, $data['url']);
-    }
-    elseif ($data['url callback']) {
-      $return = call_user_func($data['url callback'], $oid);
-    }
-
-  }
-  return $return;
-}
-
-/**
- * Gather all implementing modules that get a fieldable entity label.
- *
- * @return
- *   Array keyed with the entity name and an array with the table, ID and label
- *   columns as the value.
- */
-function og_entity_get_info($obj_type = '') {
-  $data = &drupal_static(__FUNCTION__, array());
-
-  if (!empty($obj_type) && !empty($data[$obj_type])) {
-    return $data[$obj_type];
-  }
-  elseif (empty($obj_type) && !empty($data)) {
-    return $data;
-  }
-
-  $data = module_invoke_all('og_entity_get_info');
-
-  // Allow other modules to alter the definitions.
-  drupal_alter('og_entity_get_info', $data);
-
-  if (!empty($obj_type)) {
-    return !empty($data[$obj_type]) ? $data[$obj_type] : array();
-  }
-  return $data;
 }
 
 /**
@@ -2132,8 +2062,8 @@ function og_check_token($token, $seed) {
 }
 
 function og_set_breadcrumb($obj_type, $oid, $path = array()) {
-  if (($label = og_entity_get_label($obj_type, array($oid))) && ($url = og_entity_get_url($obj_type, $oid))) {
-    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l(current($label), $url)), $path)) ;
+  if ($label = og_entity_get_label($obj_type, $oid)) {
+    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$obj_type/$oid")), $path)) ;
   }
 
 }
