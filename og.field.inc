@@ -297,7 +297,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
         og_set_new_group_roles($group->gid);
       }
     }
-    elseif (empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value']) && og_get_group($obj_type, $object->{$data['id']})) {
+    elseif (empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value']) && og_get_group($obj_type, $id)) {
       // TODO: Delete the group, or maybe set the group state to FALSE?
     }
   }

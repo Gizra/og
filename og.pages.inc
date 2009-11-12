@@ -65,7 +65,7 @@ function og_confirm_subscribe($form, &$form_state, $group, $account) {
       '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
     );
   }
-  $label = check_plain(current(og_entity_get_label($group->obj_type, array($group->oid))));
+  $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
   return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $label)), "$group->obj_type/$group->oid", ' ', t('Join'), t('Cancel'));
 }
 
@@ -100,7 +100,7 @@ function og_confirm_unsubscribe($form, &$form_state, $obj_type, $oid) {
   if ($group = og_get_group($obj_type, $oid)) {
     global $user;
 
-    $label = check_plain(current(og_entity_get_label($group->obj_type, array($group->oid))));
+    $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
     // Check the user isn't the manager of the group.
     $object= current(entity_load($group->obj_type, array($group->oid)));
     if (!empty($object->uid) && $object->uid != $user->uid) {
