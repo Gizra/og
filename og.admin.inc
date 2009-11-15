@@ -17,6 +17,12 @@ function og_group_admin_overview($obj_type, $oid) {
   // Imitate the menu_get_item() content, so we can pass it to
   // theme_admin_block_content().
   $content = array(
+    'add_people' => array(
+      'title' => t('Add people'),
+      'description' => t('Add group members.'),
+      'href' => "og/$obj_type/$oid/add-user",
+      'localized_options' => array(),
+    ),
     'people' => array(
       'title' => t('People'),
       'description' => t('Manage the group members.'),
@@ -42,6 +48,67 @@ function og_group_admin_overview($obj_type, $oid) {
 
   return $form;
 }
+
+/**
+ * Add users to group form.
+ */
+function og_add_users($form, &$form_state, $obj_type, $oid) {
+  og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
+  if ($group = og_get_group($obj_type, $oid)) {
+    $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
+
+    $form['og_user'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Add group member'),
+    );
+    $form['og_user']['og_add_user'] = array(
+      '#type' => 'textfield',
+      '#title' => t('User name'),
+      '#autocomplete_path' => 'user/autocomplete',
+      '#description' => t('Add a user to group %group.', array('%group' => $label)),
+      '#element_validate' => array('og_add_users_og_names_validate'),
+    );
+    $form['og_user']['og_add_user_state'] = array(
+      '#type' => 'select',
+      '#title' => t('Membership state'),
+      '#options' => array(
+        OG_STATE_ACTIVE => t('Active'),
+        OG_STATE_PENDING => t('Pending'),
+        OG_STATE_BLOCKED => t('Blocked'),
+      ),
+      '#description' => t('Select the state of the membership.'),
+    );
+    $form['op'] = array('#type' => 'submit', '#value' => t('Add users'));
+    $form['group'] = array('#type' => 'value', '#value' => $group);
+    return $form;
+  }
+  // Not a valid group node.
+  drupal_not_found();
+}
+
+/**
+ * Validate handler; Add users to group.
+ */
+function og_add_users_validate($form, &$form_state) {
+  $account = user_load_by_name($form_state['values']['og_add_user']);
+  if (!$account) {
+    form_set_error('og_add_user', t('You have entered an invalid user name.'));
+  }
+}
+
+/**
+ * Submit handler; Add users to group.
+ */
+function og_add_users_submit($form, &$form_state) {
+  $account = user_load_by_name($form_state['values']['og_add_user']);
+  $group = array(
+    'value' => $form_state['values']['group']->gid,
+    'state' => $form_state['values']['og_add_user_state'],
+  );
+
+  og_subscribe_user(array($group), $account);
+}
+
 /**
  * Form builder; OG user administration page.
  *

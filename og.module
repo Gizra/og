@@ -166,7 +166,7 @@ function og_menu() {
     'title' => 'Add members',
     'page arguments' => array('og_add_users', 1, 2),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'og.pages.inc',
+    'file' => 'og.admin.inc',
     'weight' => 5,
     'access callback' => 'og_access',
     'access arguments' => array('add user', 1, 2),
