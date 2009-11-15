@@ -59,13 +59,12 @@ function og_add_users($form, &$form_state, $obj_type, $oid) {
 
     $form['og_user'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Add group member'),
+      '#title' => t('Add a group member to %group.', array('%group' => $label)),
     );
     $form['og_user']['og_add_user'] = array(
       '#type' => 'textfield',
       '#title' => t('User name'),
       '#autocomplete_path' => 'user/autocomplete',
-      '#description' => t('Add a user to group %group.', array('%group' => $label)),
       '#element_validate' => array('og_add_users_og_names_validate'),
     );
     $form['og_user']['og_add_user_state'] = array(
