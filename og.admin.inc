@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Admin settings for the organic groups module.
+ * Admin settings for the Organic groups module.
  */
 
 /**
@@ -20,7 +20,7 @@ function og_group_admin_overview($obj_type, $oid) {
     'add_people' => array(
       'title' => t('Add people'),
       'description' => t('Add group members.'),
-      'href' => "og/$obj_type/$oid/add-user",
+      'href' => "og/$obj_type/$oid/admin/people/add-user",
       'localized_options' => array(),
     ),
     'people' => array(

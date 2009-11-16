@@ -161,16 +161,6 @@ function og_menu() {
     'file' => 'og.pages.inc',
   );
 
-  $items['og/%/%/add-user'] = array(
-    'page callback' => 'drupal_get_form',
-    'title' => 'Add members',
-    'page arguments' => array('og_add_users', 1, 2),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'og.admin.inc',
-    'weight' => 5,
-    'access callback' => 'og_access',
-    'access arguments' => array('add user', 1, 2),
-  );
 
   $items["og/%/%/manage"] = array(
     'page callback' => 'og_manage',
@@ -180,6 +170,17 @@ function og_menu() {
     'title' => 'Manage membership',
     'type' => MENU_CALLBACK,
     'file' => 'og.pages.inc',
+  );
+
+  $items['og/%/%/admin/people/add-user'] = array(
+    'page callback' => 'drupal_get_form',
+    'title' => 'Add members',
+    'page arguments' => array('og_add_users', 1, 2),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'og.admin.inc',
+    'weight' => 5,
+    'access callback' => 'og_access',
+    'access arguments' => array('add user', 1, 2),
   );
 
   // User listing pages.
@@ -260,7 +261,15 @@ function og_menu() {
     'description' => 'Configure organic groups default permissions when a new group is created.',
     'file' => 'og.admin.inc',
     'file path' => drupal_get_path('module', 'og'),
-    'weight' => -5,
+  );
+  $items['admin/config/og/settings'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_admin_settings'),
+    'title' => 'Organic groups settings',
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Configure organic groups.',
+    'file' => 'og.admin.inc',
+    'file path' => drupal_get_path('module', 'og'),
   );
 
   return $items;
