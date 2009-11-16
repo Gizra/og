@@ -602,6 +602,28 @@ function og_entity_info_alter(&$entity_info) {
   }
 }
 
+/**
+ * Implement og_get_group_fields().
+ */
+function og_og_get_group_fields() {
+  return array(
+    'group' => array(
+       'og_group' => array(
+         'title' => t('Group type'),
+         'callback' => 'og_create_fields_group',
+         'field' => 'og_group',
+       ),
+      ),
+    'group post' => array(
+       'og_audience' => array(
+         'title' => t('Groups audience'),
+         'callback' => 'og_create_fields_group_posts',
+         'field' => 'og_audience',
+       ),
+    ),
+  );
+}
+
 
 /*******************************************************************************
  * API functions
@@ -1952,6 +1974,10 @@ function og_user_role_revoke_permissions($rid, array $permissions = array()) {
   drupal_static_reset('og_user_role_permissions');
 }
 
+
+/**
+ * Get all permissions defined for organic groups.
+ */
 function og_permissions_get() {
   $perms = &drupal_static(__FUNCTION__, array());
   if (!empty($perms)) {
@@ -2001,6 +2027,20 @@ function og_permissions_default_get() {
    $perms = module_invoke_all('og_permission_default');
    $perms += array(OG_ANONYMOUS_ROLE => array(), OG_AUTHENTICATED_ROLE => array(), OG_ADMINISTRATOR_ROLE => array());
    return $perms;
+}
+
+/**
+ * Get all the modules fields that can be assigned to fieldable enteties.
+ */
+function og_get_group_fields() {
+  $return = array();
+
+  foreach (module_implements('og_get_group_fields') as $module) {
+    if ($info = module_invoke($module, 'og_get_group_fields')) {
+      $return[$module] = $info;
+    }
+  }
+  return $return;
 }
 
 /**
@@ -2255,5 +2295,90 @@ function og_user_multiple_role_edit($gid, $accounts, $operation, $rid) {
         og_users_roles_revoke($gid, $account->uid, $rid);
       }
       break;
+  }
+}
+
+/**
+ * Add organic groups register field group types.
+ *
+ * @param $bundle
+ *   The bundle name.
+ */
+function og_create_fields_group($obj_type, $bundle) {
+  $field = field_info_field('og_group');
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'og_group',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Not a group type', '1|Group type')), 'allowed_values_function' => ''),
+    );
+    $field = field_create_field($field);
+  }
+
+  $instance = field_info_instance($obj_type, 'og_group', $bundle);
+  if (empty($instance)) {
+    $instance = array(
+      'field_name' => 'og_group',
+      'bundle' => $bundle,
+      'object_type' => $obj_type,
+      // FIXME: Widget type doesn't work
+      'widget_type' => 'options_onoff',
+      'label' => t('Group type'),
+      'display' => array(
+        'full' => array(
+          'label' => 'hidden',
+          'type' => 'og_group_subscribe',
+        ),
+        'teaser' => array(
+          'label' => 'hidden',
+          'type' => 'og_group_subscribe',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+}
+
+
+/**
+ * Add organic groups audience field to fieldable entities that are group posts.
+ *
+ * @param $bundle
+ *   The bundle name.
+ * @param $obj_type
+ *   The object type for the instance. "node" by default.
+ */
+function og_create_fields_group_posts($obj_type, $bundle) {
+  $field = field_info_field('og_audience');
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'og_audience',
+      'type' => 'og',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    );
+    $field = field_create_field($field);
+  }
+
+  $instance = field_info_instance($obj_type, 'og_audience', $bundle);
+  if (empty($instance)) {
+    $instance = array(
+      'field_name' => 'og_audience',
+      'bundle' => $bundle,
+      'object_type' => $obj_type,
+      'label' => t('Groups audience'),
+      'widget_type' => 'og_audience',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'og_list_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'og_list_default',
+        ),
+      ),
+    );
+    field_create_instance($instance);
   }
 }

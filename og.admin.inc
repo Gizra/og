@@ -544,10 +544,57 @@ function og_admin_settings() {
   $form = array();
   $options = array();
 
-  $modules = array('og', 'og_views');
+  $fields_info = og_get_group_fields();
+
+  $form['og_group'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Group type'),
+  );
+  $form['og_group']['og_group'] = _og_admin_fields_overview($fields_info, 'group');
+
+  $form['og_group_post'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Group type'),
+  );
+  $form['og_group_post']['og_group_post'] = _og_admin_fields_overview($fields_info, 'group post');
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add group and group post fields to bundles'),
+    '#submit' => array('og_admin_settings_submit'),
+  );
+
+  return $form;
+}
+
+function og_admin_settings_submit($form, &$form_state) {
+  $fields_info = og_get_group_fields();
+  $bundle_info = array();
+  foreach (field_info_bundles() as $entity => $bundles) {
+    foreach ($bundles as $key => $value) {
+        // Get a two dimension array with the bundle as key and the entity
+        // as the value.
+      $bundle_info[$key] = $entity;
+    }
+  }
+
+  foreach (array('group', 'group_post') as $type) {
+    foreach (array_keys($fields_info) as $module) {
+      if (!empty($form_state['values'][$type . '_' .$module]) && $values = array_filter($form_state['values'][$type . '_' .$module])) {
+        foreach ($values as $bundle) {
+          // $return = call_user_func($fields_info[$type][$module], $bundle, $bundle_info[$bundle]);
+        }
+      }
+    }
+  }
+}
+
+function _og_admin_fields_overview($fields_info, $group_type = 'group') {
+  $form = array();
+  $options = array();
 
   foreach(field_info_bundles() as $entity => $bundles) {
-    $form['bundle'][] = array('#markup' => $entity, '#id' => $entity);
+    $form['bundle'][] = array('#markup' => t('@entity entity', array('@entity' => $entity)), '#id' => $entity);
     foreach ($bundles as $key => $value) {
       $options[$key] = '';
       $form['bundle'][$key] = array(
@@ -563,18 +610,23 @@ function og_admin_settings() {
     }
   }
 
+  // Type might be "group post" but for we need it with an underscore for the
+  // form keys.
+  $underscore_group_type = str_replace(' ', '_', $group_type);
+  $form['group_type'] = array('#type' => 'hidden', '#value' => $underscore_group_type );
 
   // Have to build checkboxes here after checkbox arrays are built
-  foreach ($modules as $module) {
-    $form['checkboxes'][$module] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => array());
-    $form['modules'][$module] = array('#markup' => $module, '#tree' => TRUE);
+  foreach ($fields_info as $module => $value) {
+    if (!empty($value[$group_type])) {
+      // A module might have multiple fields option.
+      foreach ($value[$group_type] as $field => $field_value) {
+        // Prefix the key so it will be identfiable in $form_state['values'].
+        $form['checkboxes'][$underscore_group_type  . '_' . $field . '_' . $module] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => array());
+        $form['modules'][$underscore_group_type  . '_' . $field . '_' . $module] = array('#markup' => $module . ' (' . $field_value['title'] . ')', '#tree' => TRUE);
+      }
+    }
   }
   $form['#theme'] = array('og_user_admin_bundles');
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add fields to bundles'),
-    '#submit' => array('og_user_admin_permissions_submit'),
-  );
 
   return $form;
 }
@@ -586,6 +638,9 @@ function og_admin_settings() {
  */
 function theme_og_user_admin_bundles($variables) {
   $form = $variables['form'];
+
+  // "group" or "group_post".
+  $group_type = $form['group_type']['#value'];
 
   $modules = array_keys(element_children($form['modules']));
 
@@ -601,8 +656,8 @@ function theme_og_user_admin_bundles($variables) {
         'data' => drupal_render($form['bundle'][$key]),
         'class' => array('bundle'),
       );
-      foreach (element_children($form['checkboxes']) as $rid) {
-        $row[] = array('data' => drupal_render($form['checkboxes'][$rid][$key]), 'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $key)));
+      foreach (element_children($form['checkboxes']) as $module) {
+        $row[] = array('data' => drupal_render($form['checkboxes'][$module][$key]), 'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $key)));
       }
     }
     $rows[] = $row;
