@@ -34,9 +34,11 @@ function og_views_field_formatter_info() {
 function og_views_field_allowed_values() {
   $return = array();
   foreach (views_get_all_views() as $view_id => $view) {
-    $view_name = check_plain($view->name);
-    foreach($view->display as $display) {
-      $return[$view_id . ' ' .$display->id] = $view_name . ' (' . check_plain($display->display_title) .')';
+    if (empty($view->disabled)) {
+      $view_name = check_plain($view->name);
+      foreach($view->display as $display) {
+        $return[$view_id . ' ' .$display->id] = $view_name . ' (' . check_plain($display->display_title) .')';
+      }
     }
   }
 
@@ -44,14 +46,14 @@ function og_views_field_allowed_values() {
 }
 
 /**
- * Add organic groups Views field to fieldable entities that are group posts.
+ * Add organic groups Views field to fieldable entities that are groups.
  *
  * @param $bundle
  *   The bundle name.
  * @param $obj_type
  *   The object type for the instance. "node" by default.
  */
-function og_views_create_fields_group_posts($bundle, $obj_type = 'node') {
+function og_views_create_fields_group($obj_type, $bundle) {
   $field = field_info_field('og_views');
   if (empty($field)) {
     $field = array(
