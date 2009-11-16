@@ -300,6 +300,10 @@ function og_theme() {
       'render element' => 'form',
       'file' => 'og.admin.inc',
     ),
+    'og_user_admin_bundles' => array(
+      'render element' => 'form',
+      'file' => 'og.admin.inc',
+    ),
     'og_user_admin_new_role' => array(
       'render element' => 'form',
       'file' => 'og.admin.inc',
