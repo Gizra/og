@@ -1208,11 +1208,13 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       }
 
       // Ensure that the number of groups specified as node audience do not exceed group limit
-      $og_groups_filtered = array_filter($node->og_groups);
-      $max_number = variable_get('og_max_groups_' . $node->type,'');
-      if ($og_groups_filtered && $max_number) {
-        if (count($og_groups_filtered) > $max_number && !user_access('administer nodes')) {
-          form_set_error('og_groups', format_plural($max_number, "The audience for this post may not exceed !max_number group.", "The audience for this post may not exceed !max_number groups.", array('!max_number' => $max_number)));
+      if (isset($node->og_groups)) {
+        $og_groups_filtered = array_filter($node->og_groups);
+        $max_number = variable_get('og_max_groups_' . $node->type,'');
+        if ($og_groups_filtered && $max_number) {
+          if (count($og_groups_filtered) > $max_number && !user_access('administer nodes')) {
+            form_set_error('og_groups', format_plural($max_number, "The audience for this post may not exceed !max_number group.", "The audience for this post may not exceed !max_number groups.", array('!max_number' => $max_number)));
+          }
         }
       }
       break;
