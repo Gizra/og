@@ -77,7 +77,7 @@ function og_access_update_6201() {
   
   // Move data from og_ancestry.is_public into og_access_post.og_public.
   // Exactly match what og_access_nodeapi(load) does when determining whether a given post is public.
-  $ret[] = update_sql("INSERT INTO {og_access_post} (nid, og_public) SELECT DISTINCT(nid), (SELECT is_public FROM {og_ancestry} oga_sub WHERE oga_sub.nid = oga.nid LIMIT 1) FROM {og_ancestry} oga");
+  $ret[] = update_sql("INSERT INTO {og_access_post} (nid, og_public) SELECT DISTINCT(nid), (SELECT oga_sub.is_public FROM {og_ancestry} oga_sub WHERE oga_sub.nid = oga.nid LIMIT 1) FROM {og_ancestry} oga");
   
   // Remove old column
   db_drop_field($ret, 'og_ancestry', 'is_public');
