@@ -586,11 +586,14 @@ function og_admin_settings_submit($form, &$form_state) {
       $key[1] = str_replace('_', ' ', $key[1]);
       // Keep only the bundles that should be changed.
       foreach (array_filter($bundles) as $bundle_key => $bundle) {
-        // Get the callback of the field.
-        $function = $fields_info[$key[0]][$key[1]][$key[2]]['callback'];
-        // Add the field.
-        call_user_func($function, $bundle_info[$bundle], $bundle);
-        $messages[] = t('Added field @field to @bundle.', array('@field' => $key[2], '@bundle' => $bundle));
+        // Add the field if it doesn't already exist.
+        if (!field_info_instance($bundle_info[$bundle], $key[2], $bundle)) {
+          // Get the callback of the field.
+          $function = $fields_info[$key[0]][$key[1]][$key[2]]['callback'];
+
+          call_user_func($function, $bundle_info[$bundle], $bundle);
+          $messages[] = t('Added field @field to @bundle.', array('@field' => $key[2], '@bundle' => $bundle));
+        }
       }
     }
   }
