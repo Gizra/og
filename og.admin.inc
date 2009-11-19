@@ -554,7 +554,7 @@ function og_admin_settings() {
 
   $form['og_group_post'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Group type'),
+    '#title' => t('Group post type'),
   );
   $form['og_group_post']['og_group_post'] = _og_admin_fields_overview($fields_info, 'group post');
 
@@ -568,6 +568,7 @@ function og_admin_settings() {
 }
 
 function og_admin_settings_submit($form, &$form_state) {
+  $messages = array();
   $fields_info = og_get_group_fields();
   $bundle_info = array();
   foreach (field_info_bundles() as $entity => $bundles) {
@@ -578,13 +579,27 @@ function og_admin_settings_submit($form, &$form_state) {
     }
   }
 
-  foreach (array('group', 'group_post') as $type) {
-    foreach (array_keys($fields_info) as $module) {
-      if (!empty($form_state['values'][$type . '_' .$module]) && $values = array_filter($form_state['values'][$type . '_' .$module])) {
-        foreach ($values as $bundle) {
-          // $return = call_user_func($fields_info[$type][$module], $bundle, $bundle_info[$bundle]);
-        }
+  foreach ($form_state['values'] as $key => $bundles) {
+    // Key should be [module name] - [group type] - [field name].
+    if (($key = explode('-', $key)) && count($key) == 3 && in_array($key[1], array('group', 'group_post'))) {
+      // If the key is group_post it should be without the hyphen.
+      $key[1] = str_replace('_', ' ', $key[1]);
+      // Keep only the bundles that should be changed.
+      foreach (array_filter($bundles) as $bundle_key => $bundle) {
+        // Get the callback of the field.
+        $function = $fields_info[$key[0]][$key[1]][$key[2]]['callback'];
+        // Add the field.
+        call_user_func($function, $bundle_info[$bundle], $bundle);
+        $messages[] = t('Added field @field to @bundle.', array('@field' => $key[2], '@bundle' => $bundle));
       }
+
+
+    }
+  }
+
+  if (!empty($messages)) {
+    foreach ($messages as $message) {
+      drupal_set_message($message);
     }
   }
 }
@@ -620,9 +635,21 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
     if (!empty($value[$group_type])) {
       // A module might have multiple fields option.
       foreach ($value[$group_type] as $field => $field_value) {
+        // We need to prefix the module with some information, so we'll be able to
+        // later extract it in og_admin_settings_submit() and know which field,
+        // in which bundle should be created.
+        $module_key = array(
+          0 => $module,
+          1 => $underscore_group_type,
+          2 => $field,
+        );
+
+        // We use a hyphen to devide the information, as it's an illegal
+        // charcter for field/ bundle name.
+        $module_key = implode('-', $module_key);
         // Prefix the key so it will be identfiable in $form_state['values'].
-        $form['checkboxes'][$underscore_group_type  . '_' . $field . '_' . $module] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => array());
-        $form['modules'][$underscore_group_type  . '_' . $field . '_' . $module] = array('#markup' => $module . ' (' . $field_value['title'] . ')', '#tree' => TRUE);
+        $form['checkboxes'][$module_key] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => array());
+        $form['modules'][$module_key] = array('#markup' => $module . ' (' . $field_value['title'] . ')', '#tree' => TRUE);
       }
     }
   }
