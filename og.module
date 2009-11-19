@@ -262,12 +262,12 @@ function og_menu() {
     'file' => 'og.admin.inc',
     'file path' => drupal_get_path('module', 'og'),
   );
-  $items['admin/config/og/settings'] = array(
+  $items['admin/config/og/fields'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_admin_settings'),
-    'title' => 'Organic groups settings',
+    'title' => 'Organic groups field settings',
     'access arguments' => array('administer site configuration'),
-    'description' => 'Configure organic groups.',
+    'description' => 'Configure organic groups fields in bundles.',
     'file' => 'og.admin.inc',
     'file path' => drupal_get_path('module', 'og'),
   );
