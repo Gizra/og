@@ -53,6 +53,21 @@ function og_register_form_user_register_form_alter(&$form, $form_state) {
 }
 
 /**
+ * Implement og_get_group_fields().
+ */
+function og_register_og_get_group_fields() {
+  return array(
+    'group' => array(
+      'og_register' => array(
+         'title' => t('Groups register'),
+         'callback' => 'og_register_create_fields',
+         'field' => 'og_register',
+      ),
+    ),
+  );
+}
+
+/**
  * Submit handler for the registration form.
  */
 function og_register_register_submit($form, &$form_state) {
@@ -72,7 +87,7 @@ function og_register_register_submit($form, &$form_state) {
  * @param $bundle
  *   The bundle name.
  */
-function og_register_create_fields($bundle, $obj_type = 'node') {
+function og_register_create_fields($obj_type, $bundle) {
   $field = field_info_field('og_register');
   if (empty($field)) {
     $field = array(

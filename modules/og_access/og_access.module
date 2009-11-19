@@ -76,6 +76,21 @@ function og_access_node_access_records($node) {
 }
 
 /**
+ * Implement og_get_group_fields().
+ */
+function og_access_og_get_group_fields() {
+  return array(
+    'group post' => array(
+      'og_access' => array(
+         'title' => t('Group post visibility'),
+         'callback' => 'og_access_create_fields',
+         'field' => 'og_access',
+      ),
+    ),
+  );
+}
+
+/**
  * Check if an object is set as public.
  *
  * @param $obj_type
@@ -97,7 +112,7 @@ function og_access_object_is_public($obj_type, $object) {
  * @param $bundle
  *   The bundle name.
  */
-function og_access_create_fields($bundle, $obj_type = 'node') {
+function og_access_create_fields($obj_type, $bundle) {
   $field = field_info_field('og_access');
   if (empty($field)) {
     $field = array(
@@ -117,7 +132,7 @@ function og_access_create_fields($bundle, $obj_type = 'node') {
       'object_type' => $obj_type,
       // FIXME: Widget type doesn't work
       'widget_type' => 'options_onoff',
-      'label' => t('Post visibility'),
+      'label' => t('Group post visibility'),
       'display' => array(
         'full' => array(
           'label' => 'above',

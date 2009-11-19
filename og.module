@@ -608,19 +608,19 @@ function og_entity_info_alter(&$entity_info) {
 function og_og_get_group_fields() {
   return array(
     'group' => array(
-       'og_group' => array(
-         'title' => t('Group type'),
-         'callback' => 'og_create_fields_group',
-         'field' => 'og_group',
-       ),
+      'og_group' => array(
+        'title' => t('Group type'),
+        'callback' => 'og_create_fields_group',
+        'field' => 'og_group',
       ),
-    'group post' => array(
-       'og_audience' => array(
-         'title' => t('Groups audience'),
-         'callback' => 'og_create_fields_group_posts',
-         'field' => 'og_audience',
-       ),
     ),
+    'group post' => array(
+      'og_audience' => array(
+        'title' => t('Groups audience'),
+        'callback' => 'og_create_fields_group_posts',
+        'field' => 'og_audience',
+       ),
+     ),
   );
 }
 
