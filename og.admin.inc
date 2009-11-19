@@ -592,8 +592,6 @@ function og_admin_settings_submit($form, &$form_state) {
         call_user_func($function, $bundle_info[$bundle], $bundle);
         $messages[] = t('Added field @field to @bundle.', array('@field' => $key[2], '@bundle' => $bundle));
       }
-
-
     }
   }
 
@@ -606,27 +604,26 @@ function og_admin_settings_submit($form, &$form_state) {
 
 function _og_admin_fields_overview($fields_info, $group_type = 'group') {
   $form = array();
-  $options = array();
+  $options = $status = array();
 
   foreach(field_info_bundles() as $entity => $bundles) {
     $form['bundle'][] = array('#markup' => t('@entity entity', array('@entity' => $entity)), '#id' => $entity);
-    foreach ($bundles as $key => $value) {
-      $options[$key] = '';
-      $form['bundle'][$key] = array(
+    foreach ($bundles as $bundle => $value) {
+      $options[$bundle] = '';
+      $form['bundle'][$bundle] = array(
         '#type' => 'item',
         '#markup' => '-- ' . $value['label'],
       );
-/*      foreach ($modules as $module) {
-        // Builds arrays for checked boxes for each role
-        if (isset($role_permissions[$module][$perm])) {
-          $status[$rid][] = $perm;
-        }
-      }*/
+
+      // Add the fields that exist in the bundle.
+      foreach (array_keys(field_info_fields($entity, $bundle)) as $field) {
+        $status[$field][$bundle] = $bundle;
+      }
     }
   }
 
-  // Type might be "group post" but for we need it with an underscore for the
-  // form keys.
+  // Group type might be "group post" but for we need it with an underscore for
+  // the form keys.
   $underscore_group_type = str_replace(' ', '_', $group_type);
   $form['group_type'] = array('#type' => 'hidden', '#value' => $underscore_group_type );
 
@@ -647,8 +644,7 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
         // We use a hyphen to devide the information, as it's an illegal
         // charcter for field/ bundle name.
         $module_key = implode('-', $module_key);
-        // Prefix the key so it will be identfiable in $form_state['values'].
-        $form['checkboxes'][$module_key] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => array());
+        $form['checkboxes'][$module_key] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => !empty($status[$field]) ? $status[$field] : array());
         $form['modules'][$module_key] = array('#markup' => $module . ' (' . $field_value['title'] . ')', '#tree' => TRUE);
       }
     }
