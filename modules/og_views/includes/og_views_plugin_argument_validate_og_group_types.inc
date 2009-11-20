@@ -1,4 +1,8 @@
 <?php
+#define('OG_VIEWS_DO_NOT_VALIDATE_MEMBERSHIP', 0);
+#define('OG_VIEWS_VALIDATE_GROUP_MEMBER', 1);
+#define('OG_VIEWS_VALIDATE_GROUP_ADMIN', 2);
+
 /**
  * Validate whether an argument is a group node. Borrows heavily form the Node argument validator.
  */
@@ -18,11 +22,18 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
       '#process' => array('views_process_dependency'),
       '#dependency' => array('edit-options-validate-type' => array($this->id)),
     );
+
+    $options = array(
+      OG_VIEWS_DO_NOT_VALIDATE_MEMBERSHIP => t('Do not validate user\'s group membership'),
+      OG_VIEWS_VALIDATE_GROUP_MEMBER => t('Validate current user is a member of a specified group'),
+      OG_VIEWS_VALIDATE_GROUP_ADMIN => t('Validate current user is an admin of a specified group'),
+    );
     
     $form['validate_argument_is_member'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Validate current user is a member of a specified group'),
-      '#default_value' => !empty($this->argument->options['validate_argument_is_member']),
+      '#type' => 'select',
+      '#title' => t('Group membership validation'),
+      '#options' => $options,
+      '#default_value' => isset($this->argument->options['validate_argument_is_member']) ? $this->argument->options['validate_argument_is_member'] : 0,
       '#process' => array('views_process_dependency'),
       '#dependency' => array('edit-options-validate-type' => array($this->id)),
     );
@@ -46,10 +57,8 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
           return FALSE;
         }
         
-        if (!empty($this->argument->options['validate_argument_is_member'])) {
-          if (!og_is_group_member($node->nid)) {
-            return FALSE;
-          }
+        if (!$this->validate_membership($node)) {
+          return FALSE;
         }
 
         // Save the title() handlers some work.
@@ -80,15 +89,9 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
           if (!og_is_group_type($node->type)) {
             return FALSE;
           }
-
-          if (!empty($this->argument->options['validate_argument_is_member'])) {
-            // If user is a member of any of the specified groups, then she has access.
-            if (!$has_membership && og_is_group_member($node->nid)) {
-              $has_membership = TRUE;
-            }
-          }
-          else {
-            $has_membership = TRUE;
+          
+          if (!$has_membership) {
+            $has_membership = $this->validate_membership($node);
           }
 
           $titles[] = check_plain($node->title);
@@ -99,5 +102,24 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
         // If $test is not empty, we did not find a nid.
         return empty($test_nids) && $has_membership;
     }
+  }
+  
+  function validate_membership($node) {
+    if (!empty($this->argument->options['validate_argument_is_member'])) {
+      switch ($this->argument->options['validate_argument_is_member']) {
+        case OG_VIEWS_VALIDATE_GROUP_MEMBER :
+          if (!og_is_group_member($node->nid)) {
+            return FALSE;
+          }
+          break;
+        case OG_VIEWS_VALIDATE_GROUP_ADMIN :
+          if (!og_is_group_admin($node)) {
+            return FALSE;
+          }
+          break;
+      }
+    }
+    
+    return TRUE;
   }
 }
