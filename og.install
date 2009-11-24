@@ -44,6 +44,13 @@ function og_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'state'     => array(
+        'description'     => 'The state of the group (i.e. active or disabled).',
+        'type'            => 'varchar',
+        'length'          => 255,
+        'not null'        => FALSE,
+        'default' => '',
+      ),
       'data' => array(
         'type' => 'text',
         'not null' => FALSE,

@@ -710,10 +710,11 @@ function og_get_groups($gids = array()) {
  * @return
  *   The group object populated with the group ID.
  */
-function og_set_group($obj_type, $oid, $data = array()) {
+function og_set_group($obj_type, $oid, $state = OG_ACTIVE_STATE, $data = array()) {
   $group = new stdClass();
   $group->oid = $oid;
   $group->obj_type = $obj_type;
+  $group->state = $state;
   $group->data = $data;
 
   // Allow other modules to change the group object.
