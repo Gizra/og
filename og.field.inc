@@ -196,7 +196,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
     list($id) = entity_extract_ids($obj_type, $object);
 
     // Check group doesn't already exist.
-    if (!empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value'])) {
+    if (!($group = og_get_group($obj_type, $id))) {
       if (!og_get_group($obj_type, $id)) {
 
         // Add the group.
@@ -211,9 +211,18 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
         og_set_new_group_roles($group->gid);
       }
     }
-    elseif (empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value']) && $group = og_get_group($obj_type, $id)) {
-      // Set the group state to pending.
-      og_set_group($group->obj_type, $group->oid, OG_PENDING_STATE, $group->data);
+    else {
+      $state = '';
+      if ($group->state == OG_ACTIVE_STATE && empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value'])) {
+        $state = OG_PENDING_STATE;
+      }
+      elseif($group->state == OG_PENDING_STATE && !empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value'])) {
+        $state = OG_ACTIVE_STATE;
+      }
+      if ($state) {
+        // Change the group state.
+        og_set_group($group->obj_type, $group->oid, $state, $group->data);
+      }
     }
   }
 }
