@@ -637,8 +637,14 @@ function og_og_get_group_fields() {
  * @param $obj_type
  *   The group object type. "node" is the default value. Pass "gid" if the the
  *   content ID is equal to the group unique ID.
+ * @param $states
+ *   Optional; Array with the states of the group (i.e. OG_ACTIVE_STATE or
+ *   OG_PENDING_STATE).
+ *
+ * @return
+ *   The group object if found, or an empty array.
  */
-function og_get_group($obj_type, $oid) {
+function og_get_group($obj_type, $oid, $states = array(OG_STATE_ACTIVE)) {
   $group = &drupal_static(__FUNCTION__, array());
   $result = array();
 
@@ -651,6 +657,10 @@ function og_get_group($obj_type, $oid) {
     }
     else {
       $query->condition('gid', $oid);
+    }
+    // Query for certain states if they are provided.
+    if (!empty($states)) {
+      $query->condition('state', $states, 'IN');
     }
     if ($result = $query->execute()->fetchObject()) {
       // Unserialize the data.
@@ -674,12 +684,15 @@ function og_get_group($obj_type, $oid) {
  * @param $gids
  *   Optional; Array with the group IDs to retreive, or empty to return all
  *   groups.
+ * @param $states
+ *   Optional; Array with the states of the group (i.e. OG_ACTIVE_STATE or
+ *   OG_PENDING_STATE).
  *
  * @return
  *   Array with the object types as an array keyed by the group ID and the
  *   object ID as the value.
  */
-function og_get_groups($gids = array()) {
+function og_get_groups($gids = array(), $states = array(OG_STATE_ACTIVE)) {
   $return = array();
 
   $query = db_select('og_groups', 'og_groups');
@@ -687,6 +700,11 @@ function og_get_groups($gids = array()) {
 
   if (!empty($gids)) {
     $query->condition('gid', $gids, 'IN');
+  }
+
+  // Query for certain states if they are provided.
+  if (!empty($states)) {
+    $query->condition('state', $states, 'IN');
   }
 
   $result = $query->execute()->fetchAllAssoc('gid');
