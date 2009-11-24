@@ -738,11 +738,9 @@ function og_set_group($obj_type, $oid, $state = OG_ACTIVE_STATE, $data = array()
   // Allow other modules to change the group object.
   drupal_alter('og_set_group', $group);
 
-  // Delete an existing record.
-  og_delete_group_by_content($obj_type, $oid);
-
-  // Write the new record.
-  drupal_write_record('og_groups', $group);
+  // Determine if object already exists and needs update.
+  $update = og_get_group($obj_type, $oid) ? array('gid') : array();
+  drupal_write_record('og_groups', $update);
 
   return $group;
 }

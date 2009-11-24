@@ -184,7 +184,6 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
   }
 }
 
-
 /**
  * Add or remove a group, based on the field CRUD.
  *
@@ -197,7 +196,6 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
     list($id) = entity_extract_ids($obj_type, $object);
 
     // Check group doesn't already exist.
-
     if (!empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value'])) {
       if (!og_get_group($obj_type, $id)) {
 
@@ -213,8 +211,9 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
         og_set_new_group_roles($group->gid);
       }
     }
-    elseif (empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value']) && og_get_group($obj_type, $id)) {
-      // TODO: Delete the group, or maybe set the group state to FALSE?
+    elseif (empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value']) && $group = og_get_group($obj_type, $id)) {
+      // Set the group state to pending.
+      og_set_group($group->obj_type, $group->oid, OG_PENDING_STATE, $group->data);
     }
   }
 }
