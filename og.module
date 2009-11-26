@@ -382,12 +382,12 @@ function og_node_type_update($info) {
  */
 function og_node_type_save($bundle_name) {
   if (variable_get('og_group_type_' . $bundle_name, 'omitted') == 'group') {
-    og_create_fields_group($bundle_name);
+    og_create_fields_group('node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_type_' . $bundle_name);
   }
    if (variable_get('og_group_post_type_' . $bundle_name, 'omitted') == 'group_post') {
-    og_create_fields_group_posts($bundle_name);
+    og_create_fields_group_posts('node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_post_type_' . $bundle_name);
   }

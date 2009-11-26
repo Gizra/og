@@ -196,7 +196,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
     list($id) = entity_extract_ids($obj_type, $object);
 
     // Check group doesn't already exist.
-    if (!($group = og_get_group($obj_type, $id))) {
+    if (!($group = og_get_group($obj_type, $id, array(OG_STATE_ACTIVE, OG_STATE_PENDING)))) {
       // Add the group.
       $group = og_set_group($obj_type, $id);
 
