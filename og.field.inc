@@ -197,19 +197,18 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
 
     // Check group doesn't already exist.
     if (!($group = og_get_group($obj_type, $id))) {
-      if (!og_get_group($obj_type, $id)) {
+      // Add the group.
+      $group = og_set_group($obj_type, $id);
 
-        // Add the group.
-        $group = og_set_group($obj_type, $id);
+      dpm($group);
 
-        if (!empty($object->uid)) {
-          // Subscribe the object author, if exists.
-          $account = user_load($object->uid);
-          og_subscribe_user(array(array('value' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
-        }
-
-        og_set_new_group_roles($group->gid);
+      if (!empty($object->uid)) {
+        // Subscribe the object author, if exists.
+        $account = user_load($object->uid);
+        og_subscribe_user(array(array('value' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
       }
+
+      og_set_new_group_roles($group->gid);
     }
     else {
       $state = '';

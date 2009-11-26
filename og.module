@@ -740,7 +740,7 @@ function og_set_group($obj_type, $oid, $state = OG_STATE_ACTIVE, $data = array()
 
   // Determine if object already exists and needs update.
   $update = og_get_group($obj_type, $oid) ? array('gid') : array();
-  drupal_write_record('og_groups', $update);
+  drupal_write_record('og_groups', $group, $update);
 
   return $group;
 }
