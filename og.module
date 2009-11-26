@@ -638,8 +638,8 @@ function og_og_get_group_fields() {
  *   The group object type. "node" is the default value. Pass "gid" if the the
  *   content ID is equal to the group unique ID.
  * @param $states
- *   Optional; Array with the states of the group (i.e. OG_ACTIVE_STATE or
- *   OG_PENDING_STATE).
+ *   Optional; Array with the states of the group (i.e. OG_STATE_ACTIVE or
+ *   OG_STATE_PENDING).
  *
  * @return
  *   The group object if found, or an empty array.
@@ -685,8 +685,8 @@ function og_get_group($obj_type, $oid, $states = array(OG_STATE_ACTIVE)) {
  *   Optional; Array with the group IDs to retreive, or empty to return all
  *   groups.
  * @param $states
- *   Optional; Array with the states of the group (i.e. OG_ACTIVE_STATE or
- *   OG_PENDING_STATE).
+ *   Optional; Array with the states of the group (i.e. OG_STATE_ACTIVE or
+ *   OG_STATE_PENDING).
  *
  * @return
  *   Array with the object types as an array keyed by the group ID and the
@@ -728,7 +728,7 @@ function og_get_groups($gids = array(), $states = array(OG_STATE_ACTIVE)) {
  * @return
  *   The group object populated with the group ID.
  */
-function og_set_group($obj_type, $oid, $state = OG_ACTIVE_STATE, $data = array()) {
+function og_set_group($obj_type, $oid, $state = OG_STATE_ACTIVE, $data = array()) {
   $group = new stdClass();
   $group->oid = $oid;
   $group->obj_type = $obj_type;
