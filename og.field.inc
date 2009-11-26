@@ -200,8 +200,6 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
       // Add the group.
       $group = og_set_group($obj_type, $id);
 
-      dpm($group);
-
       if (!empty($object->uid)) {
         // Subscribe the object author, if exists.
         $account = user_load($object->uid);
