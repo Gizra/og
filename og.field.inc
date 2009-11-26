@@ -213,11 +213,11 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
     }
     else {
       $state = '';
-      if ($group->state == OG_ACTIVE_STATE && empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value'])) {
-        $state = OG_PENDING_STATE;
+      if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value'])) {
+        $state = OG_STATE_PENDING;
       }
-      elseif($group->state == OG_PENDING_STATE && !empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value'])) {
-        $state = OG_ACTIVE_STATE;
+      elseif($group->state == OG_STATE_PENDING && !empty($object->og_group[FIELD_LANGUAGE_NONE][0]['value'])) {
+        $state = OG_STATE_ACTIVE;
       }
       if ($state) {
         // Change the group state.
