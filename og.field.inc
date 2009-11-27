@@ -104,20 +104,25 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
   }
 
   // If it's an existing group, then exclude itself, as in some cases a group
-  // can act also as a group post, and we want to prevent associatingthe group
+  // can act also as a group post, and we want to prevent associating the group
   // to itself.
   if (!empty($form['#' . $element['#object_type']])) {
     list($id) = entity_extract_ids($element['#object_type'], $form['#' . $element['#object_type']]);
     $group = og_get_group($element['#object_type'], $id);
   }
 
+  $value_key = key($field['columns']);
+
   $element += array(
     '#type' => $instance['widget']['type'],
     '#default_value' => $default_values,
-    // If it's an existing group, then exclude itself, as in some cases a group
-    // can act also as a group post, and we want to prevent associatingthe group
-    // to itself.
+    // Exclude own group.
     '#excludes' => !empty($group->gid) ? array($group->gid) : array(),
+    // Re-use options widget element validation, to correctly transform
+    // submitted values from field => delta to delta => field.
+    // @see options_field_widget().
+    '#value_key' => $value_key,
+    '#element_validate' => array('options_field_widget_validate'),
   );
 
   $defaults = array('data' => array(), 'state' => '');

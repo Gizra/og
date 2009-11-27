@@ -551,6 +551,7 @@ function og_node_access($node, $op, $account) {
 function og_element_info() {
   return array(
     'og_audience' => array(
+      '#input' => TRUE,
       '#read_only' => FALSE,
       '#opt_group' => FALSE,
       '#opt_group_access_check' => TRUE,
@@ -1320,7 +1321,7 @@ function og_elements_process($element, &$form_state, $form) {
     $account = user_load($element['uid']);
   }
   else {
-   global $user;
+    global $user;
     $account = $user;
   }
 
@@ -1334,7 +1335,6 @@ function og_elements_process($element, &$form_state, $form) {
   }
   else {
     $content_groups = !empty($element['#includes']) ? $element['#includes'] : array();
-
 
     // Initialize values.
     $content_groups += array('content groups' => array(), 'other groups' => array());
@@ -1350,7 +1350,7 @@ function og_elements_process($element, &$form_state, $form) {
       }
     }
 
-    $field_key  = 'og';
+    $field_key  = 'og_audience';
 
     // Add values that might be used if no values were set in the element.
     $instance['required'] = FALSE;
@@ -1418,21 +1418,6 @@ function og_elements_process($element, &$form_state, $form) {
     '#attributes' => !empty($element['#attributes']) ? $element['#attributes'] : array('class' => array('og-audience')),
     '#disabled' => empty($groups_count),
   );
-
-
-  // Make sure field info will be available to the validator which
-  // does not get the values in $form.
-  // TODO: Do we need this^^?
-  if (!empty($element['#field_name'])) {
-    // Set #element_validate in a way that it will not wipe out other
-    // validation functions already set by other modules.
-    if (empty($element['#element_validate'])) {
-      $element['#element_validate'] = array();
-    }
-    array_unshift($element['#element_validate'], 'options_validate');
-
-    $form_state['#fields'][$element['#field_name']] = $form['#fields'][$element['#field_name']];
-  }
 
   return $element;
 }
