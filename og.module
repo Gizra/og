@@ -1423,6 +1423,62 @@ function og_elements_process($element, &$form_state, $form) {
 }
 
 /**
+ * Form element validation handler for og audience element.
+ */
+function og_field_widget_validate($element, &$form_state) {
+  $field = $form_state['complete form']['#fields'][$element['#field_name']]['field'];
+  $instance = $form_state['complete form']['#fields'][$element['#field_name']]['instance'];
+
+  // Transpose selections from field => delta to delta => field, turning
+  // multiple selected options into multiple parent elements.
+  $items = _og_options_form_to_storage($element);
+  form_set_value($element, $items, $form_state);
+
+  // Check that we don't exceed the allowed number of values.
+  if ($field['cardinality'] >= 2 && $field['cardinality'] != FIELD_CARDINALITY_UNLIMITED) {
+    if (count($items) > $field['cardinality']) {
+      form_error($element, t('%name: this field cannot hold more than @count values.', array('%name' => t($instance['label']), '@count' => $field['cardinality'])));
+    }
+  }
+}
+
+
+/**
+ * Transforms submitted form values into field storage format.
+ */
+function _og_options_form_to_storage($element) {
+  $values = array_values((array) $element['#value']['value']);
+
+  // On/off checkbox: transform '0 / 1' into the 'on / off' values.
+  if ($element['#type'] == 'checkbox') {
+    $values = array($values[0] ? $element['#on_value'] : $element['#off_value']);
+  }
+
+  // Substitute the '_0' placeholder.
+  if (!empty($element['#zero_placeholder'])) {
+    $index = array_search('_0', $values);
+    if ($index !== FALSE) {
+      $values[$index] = 0;
+    }
+  }
+
+  // Filter out the 'none' option. Use a strict comparison, because
+  // 0 == 'any string'.
+  $index = array_search('_none', $values, TRUE);
+  if ($index !== FALSE) {
+    unset($values[$index]);
+  }
+
+  // Make sure we populate at least an empty value.
+  if (empty($values)) {
+    $values = array(NULL);
+  }
+
+  $result = options_array_transpose(array($element['#value_key'] => $values));
+  return $result;
+}
+
+/**
  * Create an array of allowed values for OG audience field.
  *
  * @return

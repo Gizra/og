@@ -122,7 +122,7 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
     // submitted values from field => delta to delta => field.
     // @see options_field_widget().
     '#value_key' => $value_key,
-    '#element_validate' => array('options_field_widget_validate'),
+    '#element_validate' => array('og_field_widget_validate'),
   );
 
   $defaults = array('data' => array(), 'state' => '');
