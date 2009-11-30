@@ -353,6 +353,15 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
 }
 
 /**
+ * Implement hook_form_FORM_ID_alter().
+ */
+function og_form_alter(&$form, &$form_state) {
+  dpm($form);
+}
+
+
+
+/**
 * Implement hook_node_type_delete().
 */
 function og_node_type_delete($info) {
@@ -548,7 +557,7 @@ function og_node_access($node, $op, $account) {
  * - uid: The user ID. This can be used in order to created a form element for
  *     a different user than the acting user.
  */
-function og_element_info() {
+function __og_element_info() {
   return array(
     'og_audience' => array(
       '#input' => TRUE,
