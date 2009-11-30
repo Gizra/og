@@ -90,54 +90,73 @@ function og_field_widget_info() {
 }
 
 /**
+ * Implement hook_field_widget_settings_form().
+ */
+function og_field_widget_settings_form($field, $instance) {
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+
+  $form['opt_group'] = array(
+    '#type' => 'radios',
+    '#title' => t('Input type'),
+    '#description' => t('Select the input type that should be used to get the groups audience. Note that the <em>Never show "other groups"</em> option will show all groups including the ones the user is a not a member of.'),
+    '#options' => array(
+      'auto' => t('Automatically decide the input according to user permissions (Recommended)'),
+      'never' => t('Never show "other groups"'),
+      'always' => t('Always show "other groups"'),
+    ),
+    '#default_value' => !empty($settings['opt_group']) ? $settings['opt_group'] : 'auto',
+    '#required' => TRUE,
+  );
+
+  $form['minimum_for_select_list'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Minimum for select list'),
+    '#description' => t('The minimum number of groups before showing the group as a dropdown list.'),
+    '#default_value' => !empty($settings['minimum_for_select_list']) ? $settings['minimum_for_select_list'] : 20,
+    '#required' => TRUE,
+    '#element_validate' => array('_element_validate_integer_positive'),
+  );
+
+  return $form;
+}
+
+/**
  * Implement hook_field_widget().
  */
-function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  dpm($element);
+function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+  $element = $base;
+
+  $excludes = array();
   // If it's an existing group, then exclude itself, as in some cases a group
   // can act also as a group post, and we want to prevent associating the group
   // to itself.
   if (!empty($form['#' . $element['#object_type']])) {
     list($id) = entity_extract_ids($element['#object_type'], $form['#' . $element['#object_type']]);
     if ($group = og_get_group($element['#object_type'], $id)) {
-      $element['#excludes'][] = $group->gid;
+      $excludes[$group->gid] = $group->gid;
     }
   }
 
-
-
-  // Allow showing the form element for another user.
-  if (!empty($element['uid'])) {
-    $account = user_load($element['uid']);
-  }
-  else {
-    global $user;
-    $account = $user;
-  }
-
-  $content_groups = og_allowed_values($field, $account);
-  $field_key  = 'value';
+  $content_groups = og_allowed_values($field);
 
   // Determine if a user may see other groups as-well.
   $opt_group = FALSE;
 
-  if (user_access('administer organic groups')) {
+  if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer organic groups'))) {
     $opt_group = TRUE;
   }
-  elseif ($element['#opt_group'] && $element['#opt_group_access_check']) {
-    $opt_group = TRUE;
-  }
+
   // The group options presented to the user.
   $options = array();
-  $element['#excludes'] = drupal_map_assoc($element['#excludes']);
   if ($opt_group) {
     // Show "My groups" and "Other groups".
     $groups_count = 0;
-    if ($my_groups = array_diff_key($content_groups['content groups'], $element['#excludes'])) {
+    if ($my_groups = array_diff_key($content_groups['content groups'], $excludes)) {
       $options += array(t('My groups') => $my_groups);
       $groups_count = $groups_count + count($my_groups);
     }
-    if ($other_groups = array_diff_key($content_groups['other groups'], $element['#excludes'])) {
+    if ($other_groups = array_diff_key($content_groups['other groups'], $excludes)) {
       $options += array(t('Other groups') => $other_groups);
       $groups_count = $groups_count + count($other_groups);
     }
@@ -146,15 +165,16 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
   else {
     // Show only "My groups".
     $groups_count = count($content_groups['content groups']);
-    $options = array_diff_key($content_groups['content groups'], $element['#excludes']);
+    $options = array_diff_key($content_groups['content groups'], $excludes);
     // Show a select list if their are a minimum of groups.
     if ($field['cardinality'] == 1) {
       $type = 'radios';
     }
     else {
-      $type = $groups_count >= $element['#minimum_for_select_list'] ? 'select' : 'checkboxes';
+      $type = $groups_count >= $instance['widget']['settings']['minimum_for_select_list'] ? 'select' : 'checkboxes';
     }
   }
+
 
   if (empty($options)) {
     // There are no group, so don't show any input element.
@@ -178,22 +198,21 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
     }
   }
 
-  $element += array(
+  $element = array(
+    '#input' => TRUE,
     '#type' => $type,
-    '#title' => !empty($element['#title']) ? $element['#title'] : t('Group audience'),
     '#description' => $description,
     '#options' => $options,
     '#default_value' => $default_values,
-    '#required' => isset($element['#required']) ? $element['#required'] : $instance['required'],
     '#multiple' => isset($element['#multiple']) ? $element['#multiple'] : $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED,
-    '#attributes' => !empty($element['#attributes']) ? $element['#attributes'] : array('class' => array('og-audience')),
+    '#attributes' => array('class' => array('og-audience')),
     '#disabled' => empty($groups_count),
     // Re-use options widget element validation, to correctly transform
     // submitted values from field => delta to delta => field.
     // @see options_field_widget().
     '#value_key' => 'value',
-    '#element_validate' => array('og_field_widget_validate'),
-  );
+    '#element_validate' => array('options_field_widget_validate'),
+  ) + $base;
 
   $defaults = array('data' => array(), 'state' => '');
   foreach ($items as $delta => $item) {
