@@ -81,6 +81,7 @@ function og_field_widget_info() {
   return array(
     'og_audience' => array(
       'label' => t('Organic groups audience'),
+      'settings' => array('opt_group' => 'auto', 'minimum_for_select_list' => 20),
       'field types' => array('og'),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
