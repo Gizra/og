@@ -618,9 +618,16 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
         '#markup' => '-- ' . $value['label'],
       );
 
-      // Add the fields that exist in the bundle.
-      foreach (array_keys(field_info_fields($entity, $bundle)) as $field) {
-        $status[$field][$bundle] = $bundle;
+    }
+  }
+
+  // Add the fields that exist in the bundle.
+  foreach (field_info_fields() as $field => $value) {
+    if (!empty($value['bundles'])) {
+      foreach ($value['bundles'] as $entity) {
+        foreach ($entity as $bundle) {
+          $status[$field][$bundle] = $bundle;
+        }
       }
     }
   }
