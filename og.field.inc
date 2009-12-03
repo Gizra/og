@@ -47,7 +47,7 @@ function og_field_formatter_info() {
  */
 function og_field_schema($field) {
   $columns = array(
-    'value' => array(
+    'gid' => array(
       'type' => 'float',
       'unsigned' => TRUE,
       'not null' => FALSE,
@@ -195,7 +195,7 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
 
   if (!empty($items)) {
     foreach ($items as $item) {
-      $default_values[$item['value']] = $item['value'];
+      $default_values[$item['gid']] = $item['gid'];
     }
   }
 
@@ -211,7 +211,7 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
     // Re-use options widget element validation, to correctly transform
     // submitted values from field => delta to delta => field.
     // @see options_field_widget().
-    '#value_key' => 'value',
+    '#value_key' => 'gid',
     '#element_validate' => array('options_field_widget_validate'),
   ) + $base;
 
@@ -305,10 +305,10 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
     }
     else {
       $state = '';
-      if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
+      if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['gid'])) {
         $state = OG_STATE_PENDING;
       }
-      elseif($group->state == OG_STATE_PENDING && !empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
+      elseif($group->state == OG_STATE_PENDING && !empty($object->og_group[LANGUAGE_NONE][0]['gid'])) {
         $state = OG_STATE_ACTIVE;
       }
       if ($state) {
@@ -332,7 +332,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
 function theme_field_formatter_og_list_default($variables) {
   $element = $variables['element'];
   $return = '';
-  if ($group = og_get_group('gid', $element['#item']['value'])) {
+  if ($group = og_get_group('gid', $element['#item']['gid'])) {
     $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
     // Return the group's link.
     $return = l($label, "$group->obj_type/$group->oid");
@@ -351,7 +351,7 @@ function theme_field_formatter_og_group_subscribe($variables) {
   $return = '';
 
   $element = $variables['element'];
-  if ($element['#item']['value']) {
+  if ($element['#item']['gid']) {
     global $user;
     $obj_type = $element['#object_type'];
     list($id) = entity_extract_ids($obj_type, $element['#object']);
