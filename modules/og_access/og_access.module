@@ -102,7 +102,7 @@ function og_access_og_get_group_fields() {
  */
 function og_access_object_is_public($obj_type, $object) {
   og_load_object($obj_type, $object);
-  return !empty($object->{OG_ACCESS_FIELD}[FIELD_LANGUAGE_NONE][0]['value']);
+  return !empty($object->{OG_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']);
 }
 
 

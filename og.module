@@ -794,8 +794,8 @@ function og_get_group_users($gid, $states = array(OG_STATE_ACTIVE), $count = FIE
  */
 function og_get_group_from_object($gid, $obj_type, $object, &$key = NULL) {
   $object = og_load_object($obj_type, $object);
-  if (!empty($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE])) {
-    foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $key_index => $value) {
+  if (!empty($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
+    foreach ($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $key_index => $value) {
       if ($value['value'] == $gid) {
         // Save the position of the value in the field.
         $key = $key_index;
@@ -822,8 +822,8 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
   $object = og_load_object($obj_type, $object);
 
   $groups = array();
-  if (!empty($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE])) {
-    foreach ($object->{OG_AUDIENCE_FIELD}[FIELD_LANGUAGE_NONE] as $group) {
+  if (!empty($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
+    foreach ($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $group) {
       if (!empty($states) && !in_array($group['state'], $states)) {
         // Don't register the group if it's state isn't the one we look for.
         continue;
@@ -1014,14 +1014,14 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
       // og_get_group_from_object().
       // We preserve the data and state values, provided they aren't changed.
       $group = array_merge($value, $group);
-      $object->og_audience[FIELD_LANGUAGE_NONE][$key] = $group;
+      $object->og_audience[LANGUAGE_NONE][$key] = $group;
       $save = TRUE;
     }
     else {
       // Initialize values.
       $group += array('state' => '', 'data' => array());
       // Add a new record.
-      $object->og_audience[FIELD_LANGUAGE_NONE][] = $group;
+      $object->og_audience[LANGUAGE_NONE][] = $group;
       $save = TRUE;
     }
   }
@@ -1049,9 +1049,9 @@ function og_delete_association($obj_type, $object, $gids = array()) {
   // Indicate if the object was changed, and needs to be saved.
   $save = FALSE;
 
-  foreach ($object->og_audience[FIELD_LANGUAGE_NONE] as $key => $group) {
+  foreach ($object->og_audience[LANGUAGE_NONE] as $key => $group) {
     if (in_array($group['value'], $gids)) {
-      unset($object->og_audience[FIELD_LANGUAGE_NONE][$key]);
+      unset($object->og_audience[LANGUAGE_NONE][$key]);
 
       og_invoke_event();
       $save = TRUE;

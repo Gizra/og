@@ -38,7 +38,7 @@ function og_subscribe($obj_type, $oid, $uid = NULL) {
 
     // Check user isn't already subscribed.
     if (in_array($group->gid, og_get_object_groups('user', $account))) {
-      drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title[FIELD_LANGUAGE_NONE][0]['safe'])));
+      drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title[LANGUAGE_NONE][0]['safe'])));
       // TODO: get url.
       // drupal_goto('node/' . $node->nid);
     }
