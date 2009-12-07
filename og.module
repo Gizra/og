@@ -1331,7 +1331,7 @@ function og_get_all_groups_for_form($gids = array()) {
   $return = array();
 
   foreach (og_get_groups($gids) as $obj_type => $values) {
-    $return = $return + og_entity_get_label_multiple($obj_type, $values);
+    $return = array_merge($return, og_entity_get_label_multiple($obj_type, $values));
   }
 
   // Sanitize the result.
@@ -1364,6 +1364,8 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
 
     // Get the group ID along with the object label.
     $query = db_select('og_groups', 'og')->fields('og', array('gid'));
+    $query->condition('gid', array_keys($oids), 'IN');
+
     $query->join($table, $table, "og.oid =  $table.$id");
 
     $return = $query->fields($table, array($label))
