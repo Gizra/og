@@ -9,7 +9,7 @@ class OgTypeTest extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Organic groups content types',
-      'description' => 'Test the organic groups group node and group post creation.',
+      'description' => 'Test the organic groups group node and group content creation.',
       'group' => 'Organic groups',
     );
   }
@@ -27,17 +27,17 @@ class OgTypeTest extends DrupalWebTestCase {
 
     // Assert OG default types exist.
     $this->assertText(t('Group node'), t('Group node option was found.'));
-    $this->assertText(t('group post'), t('Group post option was found.'));
+    $this->assertText(t('group content'), t('group content option was found.'));
 
     // Create group content type.
     $group = $this->drupalCreateContentType(array(), array('og_group_type' => 'group'));
 
     // Create post content type.
-    $group_post = $this->drupalCreateContentType(array(), array('og_group_post_type' => 'group post'));
+    $group_post = $this->drupalCreateContentType(array(), array('og_group_post_type' => 'group content'));
 
-    $this->assertTrue(og_is_group_post_type($group_post->type), t('Content type is group post.'));
+    $this->assertTrue(og_is_group_post_type($group_post->type), t('Content type is group content.'));
 
-    // Assert group post fields were added to the content type.
+    // Assert group content fields were added to the content type.
     $this->drupalGet('node/add/' . $group_post->type);
     $this->assertText(t('Groups audience'), t('Groups audience field was found.'));
   }

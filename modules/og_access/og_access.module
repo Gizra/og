@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Enable access control for private and public groups and group posts.
+ * Enable access control for private and public groups and group content.
  */
 
 /**
@@ -80,9 +80,9 @@ function og_access_node_access_records($node) {
  */
 function og_access_og_get_group_fields() {
   return array(
-    'group post' => array(
+    'group content' => array(
       'og_access' => array(
-         'title' => t('Group post visibility'),
+         'title' => t('group content visibility'),
          'callback' => 'og_access_create_fields',
          'field' => 'og_access',
       ),
@@ -107,7 +107,7 @@ function og_access_object_is_public($obj_type, $object) {
 
 
 /**
- * Add organic groups access field to group posts types.
+ * Add organic groups access field to group content types.
  *
  * @param $bundle
  *   The bundle name.
@@ -132,7 +132,7 @@ function og_access_create_fields($obj_type, $bundle) {
       'object_type' => $obj_type,
       // FIXME: Widget type doesn't work
       'widget_type' => 'options_onoff',
-      'label' => t('Group post visibility'),
+      'label' => t('group content visibility'),
       'display' => array(
         'full' => array(
           'label' => 'above',

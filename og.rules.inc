@@ -134,14 +134,14 @@ function og_rules_condition_info() {
       'module' => 'Organic groups',
     ),
     'og_rules_condition_content_is_group_post' => array(
-      'label' => t('Content is a group post'),
+      'label' => t('Content is a group content'),
       'arguments' => array(
         'group' => array(
           'type' => 'node',
-          'label' => t('Group post'),
+          'label' => t('group content'),
         ),
       ),
-      'help' => t('Evaluates to TRUE if the content is a group post.'),
+      'help' => t('Evaluates to TRUE if the content is a group content.'),
       'module' => 'Organic groups',
     ),
   );
@@ -162,7 +162,7 @@ function og_rules_condition_content_is_group($node, $settings) {
 }
 
 /**
- * Condition: Content is a group post.
+ * Condition: Content is a group content.
  */
 function og_rules_condition_content_is_group_post($node, $settings) {
   return og_is_group_post_type($node->type);

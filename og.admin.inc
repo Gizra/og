@@ -556,11 +556,11 @@ function og_admin_settings() {
     '#type' => 'fieldset',
     '#title' => t('Group post type'),
   );
-  $form['og_group_post']['og_group_post'] = _og_admin_fields_overview($fields_info, 'group post');
+  $form['og_group_post']['og_group_post'] = _og_admin_fields_overview($fields_info, 'group content');
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Add group and group post fields to bundles'),
+    '#value' => t('Add group and group content fields to bundles'),
     '#submit' => array('og_admin_settings_submit'),
   );
 
@@ -632,7 +632,7 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
     }
   }
 
-  // Group type might be "group post" but for we need it with an underscore for
+  // Group type might be "group content" but for we need it with an underscore for
   // the form keys.
   $underscore_group_type = str_replace(' ', '_', $group_type);
   $form['group_type'] = array('#type' => 'hidden', '#value' => $underscore_group_type );

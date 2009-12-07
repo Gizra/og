@@ -54,13 +54,13 @@ function og_field_schema($field) {
       'not null' => FALSE,
     ),
     'data' => array(
-      'description' => 'Serialized additional data about the group post.',
+      'description' => 'Serialized additional data about the group content.',
       'type' => 'text',
       'not null' => FALSE,
       'serialize' => TRUE,
     ),
     'state' => array(
-      'description' => 'The state of the group post.',
+      'description' => 'The state of the group content.',
       'type' => 'varchar',
       'length' => 255,
       'not null' => FALSE,
@@ -131,7 +131,7 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
 
   $excludes = array();
   // If it's an existing group, then exclude itself, as in some cases a group
-  // can act also as a group post, and we want to prevent associating the group
+  // can act also as a group content, and we want to prevent associating the group
   // to itself.
   if (!empty($form['#' . $element['#object_type']])) {
     list($id) = entity_extract_ids($element['#object_type'], $form['#' . $element['#object_type']]);

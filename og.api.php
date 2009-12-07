@@ -43,7 +43,7 @@ function hook_og_permission_default() {
  * @param $op
  *   The operation name.
  * @param $node
- *   The group or group post node object.
+ *   The group or group content node object.
  * @param $acting_user
  *   The user object of the acting user.
  * @param $account
@@ -55,11 +55,11 @@ function hook_og_permission_default() {
  */
 function hook_og_access($op, $node, $acting_user, $account = NULL) {
   if ($op == 'view') {
-    // Show group posts only if they are in a certain day, defined in the
+    // Show group content only if they are in a certain day, defined in the
     // group's data. This data is fictional, and it's up to an implementing
     // module to implement it.
     if (og_is_group_post_type($node->type)) {
-      // Get the first node group this group post belongs to.
+      // Get the first node group this group content belongs to.
       $gids = og_get_object_groups('node', $node);
       $group = node_load($gids[0]);
       if (!empty($group->data['show day'])) {
@@ -90,7 +90,7 @@ function hook_og_node_access($node, $op, $account) {
   // Allow user to edit posts if the title is 'My post'.
   // For the example we assume the $node is the full node object. If the title
   // of the node doesn't match, and the user didn't get permission from
-  // somewhere else (e.g. user already has a permission to 'Edit group posts')
+  // somewhere else (e.g. user already has a permission to 'Edit group content')
   // Then access will be denied.
   if ($node->title == 'MY post') {
     return OG_ACCESS_ALLOW;
@@ -134,7 +134,7 @@ function hook_og_set_group_alter($group) {
 }
 
 /**
- * Return the types of group or group posts available.
+ * Return the types of group or group content available.
  *
  * @return
  *   An array keyed with the type name and it's value is an array with the
@@ -143,11 +143,11 @@ function hook_og_set_group_alter($group) {
  *   - description: Explanation about the type.
  */
 function hook_og_types_info() {
-  // Add a wiki style group post.
+  // Add a wiki style group content.
   return array(
     'wiki' => array(
-      'type' => 'group post',
-      'description' => t('Wiki group post (any group member may edit).'),
+      'type' => 'group content',
+      'description' => t('Wiki group content (any group member may edit).'),
     )
   );
 }
@@ -172,7 +172,7 @@ function hook_og_user_request(&$uids, $node, $group, $account, $request) {
 }
 
 /**
- * Insert state and data, that will be saved with the group post.
+ * Insert state and data, that will be saved with the group content.
  *
  * @param $alter
  *   Array keyed by "state" and "data" passed by reference.
@@ -192,7 +192,7 @@ function hook_og_field_insert(&$alter, $obj_type, $object, $field, $instance, $l
 
 
 /**
- * Update state and data, that will be saved with the group post.
+ * Update state and data, that will be saved with the group content.
  *
  * @param $alter
  *   Array keyed by "state" and "data" passed by reference.
@@ -205,7 +205,7 @@ function hook_og_field_insert(&$alter, $obj_type, $object, $field, $instance, $l
  * @param $items
  */
 function hook_og_field_update (&$alter, $obj_type, $object, $field, $instance, $langcode, $items) {
-  // Reject a group post when it's updated.
+  // Reject a group content when it's updated.
   // It's up to the implementing module to act on the data.
   $alter['state'] = 'updated, approve urgently';
 }

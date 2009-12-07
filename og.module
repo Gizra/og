@@ -28,18 +28,18 @@ define('OG_DELETE_MOVE_NODES', 2);
 define('OG_DELETE_MOVE_NODES_MEMBERSHIPS', 3);
 
 /**
- * Define active group post states.
+ * Define active group content states.
  */
 define('OG_STATE_ACTIVE', 'active');
 
 /**
- * Define pending group post states. The user is subscribed to the group but
+ * Define pending group content states. The user is subscribed to the group but
  * isn't an active member yet.
  */
 define('OG_STATE_PENDING', 'pending');
 
 /**
- * Define blocked group post states. The user is rejected from the group.
+ * Define blocked group content states. The user is rejected from the group.
  */
 define('OG_STATE_BLOCKED', 'blocked');
 
@@ -334,7 +334,7 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#title' => t('Organic groups'),
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
-    '#description' => t('Specify how organic groups should treat content of this type. Content may behave as a group, as group posts, or may not participate in organic groups at all.'),
+    '#description' => t('Specify how organic groups should treat content of this type. Content may behave as a group, as group content, or may not participate in organic groups at all.'),
   );
 
   $form['og']['og_group_type'] = array(
@@ -346,9 +346,9 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
 
   $form['og']['og_group_post_type'] = array(
     '#type' => 'radios',
-    '#title' => t('Group post'),
+    '#title' => t('group content'),
     '#default_value' =>  og_is_group_post_type('node', $node_type) ? 'group_post' : 'omitted',
-    '#options' => array('omitted' => t('Not a group post type'), 'group_post' => t('Group post type')),
+    '#options' => array('omitted' => t('Not a group content type'), 'group_post' => t('group content type')),
   );
 }
 
@@ -375,7 +375,7 @@ function og_node_type_update($info) {
 }
 
 /**
- * Add group and group posts fields to new content types.
+ * Add group and group content fields to new content types.
  *
  * @param $bundle_name
  *   The content type name.
@@ -435,21 +435,21 @@ function og_og_permission() {
       'title' => t('Edit group'),
       'description' => t('Edit the group content.'),
     ),
-    'update own group posts' => array(
-      'title' => t('Edit own group posts'),
-      'description' => t('Edit own group posts that belong to the group.'),
+    'update own group content' => array(
+      'title' => t('Edit own group content'),
+      'description' => t('Edit own group content that belong to the group.'),
     ),
-    'update any group posts' => array(
-      'title' => t('Edit any group posts'),
-      'description' => t('Edit any group posts that belong to the group.'),
+    'update any group content' => array(
+      'title' => t('Edit any group content'),
+      'description' => t('Edit any group content that belong to the group.'),
     ),
-    'delete own group posts' => array(
-      'title' => t('Delete own group posts'),
-      'description' => t('Delete own group posts that belong to the group.'),
+    'delete own group content' => array(
+      'title' => t('Delete own group content'),
+      'description' => t('Delete own group content that belong to the group.'),
     ),
-    'delete any group posts' => array(
-      'title' => t('Delete any group posts'),
-      'description' => t('Delete any of the group posts that belong to the group.'),
+    'delete any group content' => array(
+      'title' => t('Delete any group content'),
+      'description' => t('Delete any of the group content that belong to the group.'),
     ),
     'administer group' => array(
       'title' => t('Administer group'),
@@ -464,8 +464,8 @@ function og_og_permission() {
 function og_og_permission_default() {
   return array(
     OG_ANONYMOUS_ROLE => array('subscribe', 'subscribe without approval'),
-    OG_AUTHENTICATED_ROLE => array('unsubscribe', 'update own group posts', 'delete own group posts'),
-    OG_ADMINISTRATOR_ROLE => array('approve and deny subscription', 'add user', 'update group', 'update any group posts', 'delete any group posts', 'administer group'),
+    OG_AUTHENTICATED_ROLE => array('unsubscribe', 'update own group content', 'delete own group content'),
+    OG_ADMINISTRATOR_ROLE => array('approve and deny subscription', 'add user', 'update group', 'update any group content', 'delete any group content', 'administer group'),
   );
 }
 
@@ -494,7 +494,7 @@ function og_og_node_access($node, $op, $account) {
     // groups might allow anonymous members access.
     $gids = array_keys(og_get_object_groups('node', $node));
     foreach ($gids as $gid) {
-      if (og_user_access($gid, $op . ' group posts', $account) || og_user_access($gid, $op . ' any group posts', $account) || (og_user_access($gid, $op . ' own group posts', $account) && $node->uid == $account->uid)) {
+      if (og_user_access($gid, $op . ' group content', $account) || og_user_access($gid, $op . ' any group content', $account) || (og_user_access($gid, $op . ' own group content', $account) && $node->uid == $account->uid)) {
         return NODE_ACCESS_ALLOW;
       }
     }
@@ -529,9 +529,9 @@ function og_og_types_info() {
        'description' => t('Group node'),
 
      ),
-     'group post' => array(
-       'type' => 'group post',
-       'description' => t('Group post'),
+     'group content' => array(
+       'type' => 'group content',
+       'description' => t('group content'),
      ),
   );
 }
@@ -567,7 +567,7 @@ function og_og_get_group_fields() {
         'field' => 'og_group',
       ),
     ),
-    'group post' => array(
+    'group content' => array(
       'og_audience' => array(
         'title' => t('Groups audience'),
         'callback' => 'og_create_fields_group_posts',
@@ -835,7 +835,7 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
 }
 
 /**
- * Get an array with all the types of group or group posts available.
+ * Get an array with all the types of group or group content available.
  */
 function og_get_og_types() {
   $og_types = &drupal_static(__FUNCTION__, array());
@@ -884,7 +884,7 @@ function og_get_node_type_by_og_type($og_types = array()) {
  * @param $obj_type
  *   The object type.
  * @param $type
- *   The grou usage type. Must be "group" or "group post".
+ *   The grou usage type. Must be "group" or "group content".
  *
  * @return
  *   The group type or an "omitted" if node type doesn't participate in
@@ -894,7 +894,7 @@ function og_get_group_type($obj_type, $bundle_name, $type = 'group') {
   if ($type == 'group') {
     return (bool)field_info_instance($obj_type, 'og_group', $bundle_name);
   }
-  elseif ($type == 'group post') {
+  elseif ($type == 'group content') {
     return (bool)field_info_instance($obj_type, 'og_audience', $bundle_name);
   }
 }
@@ -912,7 +912,7 @@ function og_is_group_type($obj_type, $bundle_name) {
 }
 
 /**
- * Return TRUE if the node type is a "group post" type.
+ * Return TRUE if the node type is a "group content" type.
  *
  * This is a wrapper function around og_get_group_type().
  *
@@ -920,7 +920,7 @@ function og_is_group_type($obj_type, $bundle_name) {
  *   The node type to be checked.
  */
 function og_is_group_post_type($obj_type, $bundle_name) {
-  return og_get_group_type($obj_type, $bundle_name, 'group post');
+  return og_get_group_type($obj_type, $bundle_name, 'group content');
 }
 
 /**
@@ -1167,7 +1167,7 @@ function og_determine_context() {
 /**
  * Get an appropriate group node to be set as the group context.
  *
- * If a group post belongs to multiple group nodes, the logic for determining the
+ * If a group content belongs to multiple group nodes, the logic for determining the
  * group node is:
  * 1) TODO: Are we still writing things to the session ?
  *    The group we showed on the prior page view (if any).
@@ -2193,7 +2193,7 @@ function og_create_fields_group($obj_type, $bundle) {
 
 
 /**
- * Add organic groups audience field to fieldable entities that are group posts.
+ * Add organic groups audience field to fieldable entities that are group content.
  *
  * @param $bundle
  *   The bundle name.
