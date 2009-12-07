@@ -346,9 +346,9 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
 
   $form['og']['og_group_content_type'] = array(
     '#type' => 'radios',
-    '#title' => t('group content'),
+    '#title' => t('Group content'),
     '#default_value' =>  og_is_group_content_type('node', $node_type) ? 'group_content' : 'omitted',
-    '#options' => array('omitted' => t('Not a group content type'), 'group_content' => t('group content type')),
+    '#options' => array('omitted' => t('Not a group content type'), 'group_content' => t('Group content type')),
   );
 }
 
@@ -472,7 +472,7 @@ function og_og_permission_default() {
 /**
  * Implement hook_og_access().
  */
-function og_og_access($op, $group, $acting_user, $account) {
+function og_og_access($op, $group, $account, $acting_user) {
   if ($group->obj_type == 'node' && og_user_access($group->oid, $op, $acting_user)) {
     return OG_ACCESS_ALLOW;
   }
@@ -1098,7 +1098,10 @@ function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_
     return FALSE;
   }
 
-  if ($node->uid == $acting_user->uid) {
+  // Get the group real object, so we can check the user ID of the object.
+  $object = current(entity_load($obj_type, array($oid)));
+
+  if (!empty($object->uid) && $object->uid == $acting_user->uid) {
     // Group manager.
     return TRUE;
   }
@@ -1113,7 +1116,7 @@ function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_
     return FALSE;
   }
 
-  $access = module_invoke_all('og_access', $op, $node, $acting_user, $account);
+  $access = module_invoke_all('og_access', $op, $group, $account, $acting_user);
   if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
     return FALSE;
   }
