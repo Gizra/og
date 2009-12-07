@@ -632,10 +632,12 @@ function og_get_group($obj_type, $oid, $states = array(OG_STATE_ACTIVE)) {
 }
 
 /**
- * Get all groups IDs.
+ * Get all groups IDs with a certain state.
  *
- * @param $gids
- *   Optional; Array with the group IDs to retreive, or empty to return all
+ * @param $obj_type
+ *   The object type.
+ * @param $oids
+ *   Optional; Array with the object IDs to retreive, or empty to return all
  *   groups.
  * @param $states
  *   Optional; Array with the states of the group (i.e. OG_STATE_ACTIVE or
@@ -645,11 +647,15 @@ function og_get_group($obj_type, $oid, $states = array(OG_STATE_ACTIVE)) {
  *   Array with the object types as an array keyed by the group ID and the
  *   object ID as the value.
  */
-function og_get_groups($gids = array(), $states = array(OG_STATE_ACTIVE)) {
+function og_get_groups($obj_type = 'gid', $oids = array(), $states = array(OG_STATE_ACTIVE)) {
   $return = array();
 
   $query = db_select('og_groups', 'og_groups');
   $query->fields('og_groups');
+
+  if ($obj_type != 'gid') {
+    $query->condition('obj_type', $obj_type);
+  }
 
   if (!empty($gids)) {
     $query->condition('gid', $gids, 'IN');
@@ -1330,7 +1336,7 @@ function og_get_groups_for_form($obj_type, $object) {
 function og_get_all_groups_for_form($gids = array()) {
   $return = array();
 
-  foreach (og_get_groups($gids) as $obj_type => $values) {
+  foreach (og_get_groups('gid', $gids) as $obj_type => $values) {
     $return = $return + og_entity_get_label_multiple($obj_type, $values);
   }
 
@@ -1353,6 +1359,10 @@ function og_get_all_groups_for_form($gids = array()) {
 function og_entity_get_label_multiple($obj_type, $oids = array()) {
   $return = array();
 
+  // Get the group IDs.
+  $gids = og_get_groups($obj_type, $oids);
+  $gids = array_keys($gids[$obj_type]);
+
   $entity = entity_get_info($obj_type);
 
   // Get the table, ID and label of the object type.
@@ -1364,12 +1374,12 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
 
     // Get the group ID along with the object label.
     $query = db_select('og_groups', 'og')->fields('og', array('gid'));
-    $query->condition('gid', array_keys($oids), 'IN');
+    $query->condition('gid', $gids, 'IN');
 
     $query->join($table, $table, "og.oid =  $table.$id");
 
     $return = $query->fields($table, array($label))
-      ->condition($id, array_values($oids), 'IN')
+      ->condition($id, $oids, 'IN')
       ->execute()
       ->fetchAllKeyed();
   }
