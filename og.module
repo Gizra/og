@@ -1331,7 +1331,7 @@ function og_get_all_groups_for_form($gids = array()) {
   $return = array();
 
   foreach (og_get_groups($gids) as $obj_type => $values) {
-    $return = array_merge($return, og_entity_get_label_multiple($obj_type, $values));
+    $return = $return + og_entity_get_label_multiple($obj_type, $values);
   }
 
   // Sanitize the result.
@@ -1380,6 +1380,7 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
       $return[$oid] = t('@obj_type ID  @value', array('@obj_type' => $obj_type, '@value' => $oid));
     }
   }
+
   return $return;
 }
 
