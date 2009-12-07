@@ -33,12 +33,12 @@ class OgTypeTest extends DrupalWebTestCase {
     $group = $this->drupalCreateContentType(array(), array('og_group_type' => 'group'));
 
     // Create post content type.
-    $group_post = $this->drupalCreateContentType(array(), array('og_group_post_type' => 'group content'));
+    $group_content = $this->drupalCreateContentType(array(), array('og_group_content_type' => 'group content'));
 
-    $this->assertTrue(og_is_group_post_type($group_post->type), t('Content type is group content.'));
+    $this->assertTrue(og_is_group_content_type($group_content->type), t('Content type is group content.'));
 
     // Assert group content fields were added to the content type.
-    $this->drupalGet('node/add/' . $group_post->type);
+    $this->drupalGet('node/add/' . $group_content->type);
     $this->assertText(t('Groups audience'), t('Groups audience field was found.'));
   }
 }

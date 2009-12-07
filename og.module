@@ -344,11 +344,11 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#options' => array('omitted' => t('Not a group type'), 'group' => t('Group type')),
   );
 
-  $form['og']['og_group_post_type'] = array(
+  $form['og']['og_group_content_type'] = array(
     '#type' => 'radios',
     '#title' => t('group content'),
-    '#default_value' =>  og_is_group_post_type('node', $node_type) ? 'group_post' : 'omitted',
-    '#options' => array('omitted' => t('Not a group content type'), 'group_post' => t('group content type')),
+    '#default_value' =>  og_is_group_content_type('node', $node_type) ? 'group_content' : 'omitted',
+    '#options' => array('omitted' => t('Not a group content type'), 'group_content' => t('group content type')),
   );
 }
 
@@ -357,7 +357,7 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
 */
 function og_node_type_delete($info) {
   variable_del('og_group_type_' . $info->type);
-  variable_del('og_group_post_type_' . $info->type);
+  variable_del('og_group_content_type_' . $info->type);
 }
 
 /**
@@ -386,10 +386,10 @@ function og_node_type_save($bundle_name) {
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_type_' . $bundle_name);
   }
-   if (variable_get('og_group_post_type_' . $bundle_name, 'omitted') == 'group_post') {
-    og_create_fields_group_posts('node', $bundle_name);
+   if (variable_get('og_group_content_type_' . $bundle_name, 'omitted') == 'group_content') {
+    og_create_fields_group_content('node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
-    variable_del('og_group_post_type_' . $bundle_name);
+    variable_del('og_group_content_type_' . $bundle_name);
   }
 }
 
@@ -506,7 +506,7 @@ function og_og_node_access($node, $op, $account) {
  */
 function og_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  if ($op != 'create' && (og_is_group_type('node', $type) || og_is_group_post_type('node', $type))) {
+  if ($op != 'create' && (og_is_group_type('node', $type) || og_is_group_content_type('node', $type))) {
     $access = module_invoke_all('og_node_access', $node, $op, $account);
     if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
       return NODE_ACCESS_DENY;
@@ -570,7 +570,7 @@ function og_og_get_group_fields() {
     'group content' => array(
       'og_audience' => array(
         'title' => t('Groups audience'),
-        'callback' => 'og_create_fields_group_posts',
+        'callback' => 'og_create_fields_group_content',
         'field' => 'og_audience',
        ),
      ),
@@ -856,7 +856,7 @@ function og_get_og_types() {
  *
  * @param $og_types
  *   Optional; An array with the organic group types, for example "group" or
- *   "group_post".
+ *   "group_content".
  * @return
  *   An array keyed with content type and organic group type as value, or all
  *   the content types if $type is empty.
@@ -877,7 +877,7 @@ function og_get_node_type_by_og_type($og_types = array()) {
 }
 
 /**
- * Return the group type (i.e. "group" or "group_post") of an object.
+ * Return the group type (i.e. "group" or "group_content") of an object.
  *
  * @param $bundle_name
  *   The bundle name to be checked.
@@ -919,7 +919,7 @@ function og_is_group_type($obj_type, $bundle_name) {
  * @param $node_type
  *   The node type to be checked.
  */
-function og_is_group_post_type($obj_type, $bundle_name) {
+function og_is_group_content_type($obj_type, $bundle_name) {
   return og_get_group_type($obj_type, $bundle_name, 'group content');
 }
 
@@ -1191,7 +1191,7 @@ function og_determine_context_by_node($node, $account = NULL) {
   if (og_is_group_type('node', $node->type)) {
     $group_node = $node;
   }
-  elseif (og_is_group_post_type('node', $node->type) && ($groups = og_get_object_groups('node', $node))) {
+  elseif (og_is_group_content_type('node', $node->type) && ($groups = og_get_object_groups('node', $node))) {
 
     if ($user_groups = og_get_object_groups('user', $account)) {
       $gid = current(array_intersect(array_keys($groups), array_keys($user_groups)));
@@ -2200,7 +2200,7 @@ function og_create_fields_group($obj_type, $bundle) {
  * @param $obj_type
  *   The object type for the instance. "node" by default.
  */
-function og_create_fields_group_posts($obj_type, $bundle) {
+function og_create_fields_group_content($obj_type, $bundle) {
   $field = field_info_field('og_audience');
   if (empty($field)) {
     $field = array(

@@ -10,7 +10,7 @@
  * Implement hook_enable().
  */
 function og_enable() {
-  og_create_fields_group_posts('user', 'user');
+  og_create_fields_group_content('user', 'user');
   // Create roles that would be used for the default permissions.
   og_set_new_group_roles();
 }

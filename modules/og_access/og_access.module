@@ -26,7 +26,7 @@ define('OG_ACCESS_FIELD', 'og_access');
 * Implement hook_node_type_insert().
 */
 function og_access_node_type_insert($info) {
-  if (og_is_group_type('node', $info->type) || og_is_group_post_type('node', $info->type)) {
+  if (og_is_group_type('node', $info->type) || og_is_group_content_type('node', $info->type)) {
     og_access_create_fields($info->type);
   }
 }
@@ -35,7 +35,7 @@ function og_access_node_type_insert($info) {
 * Implement hook_node_type_update().
 */
 function og_access_node_type_update($info) {
-  if (og_is_group_type('node', $info->type) || og_is_group_post_type('node', $info->type)) {
+  if (og_is_group_type('node', $info->type) || og_is_group_content_type('node', $info->type)) {
     og_access_create_fields($info->type);
   }
 }
@@ -61,7 +61,7 @@ function og_access_node_grants($account, $op) {
 function og_access_node_access_records($node) {
   $grants = array();
   if (!og_access_object_is_public('node', $node)) {
-    if (og_is_group_post_type('node', $node->type) || og_is_group_type('node', $node->type)) {
+    if (og_is_group_content_type('node', $node->type) || og_is_group_type('node', $node->type)) {
       $grants[] = array (
         'realm' => OG_ACCESS_AUTHENTICATED_REALM,
         'gid' => $node->nid,

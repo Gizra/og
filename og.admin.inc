@@ -552,11 +552,11 @@ function og_admin_settings() {
   );
   $form['og_group']['og_group'] = _og_admin_fields_overview($fields_info, 'group');
 
-  $form['og_group_post'] = array(
+  $form['og_group_content'] = array(
     '#type' => 'fieldset',
     '#title' => t('Group post type'),
   );
-  $form['og_group_post']['og_group_post'] = _og_admin_fields_overview($fields_info, 'group content');
+  $form['og_group_content']['og_group_content'] = _og_admin_fields_overview($fields_info, 'group content');
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -581,8 +581,8 @@ function og_admin_settings_submit($form, &$form_state) {
 
   foreach ($form_state['values'] as $key => $bundles) {
     // Key should be [module name] - [group type] - [field name].
-    if (($key = explode('-', $key)) && count($key) == 3 && in_array($key[1], array('group', 'group_post'))) {
-      // If the key is group_post it should be without the hyphen.
+    if (($key = explode('-', $key)) && count($key) == 3 && in_array($key[1], array('group', 'group_content'))) {
+      // If the key is group_content it should be without the hyphen.
       $key[1] = str_replace('_', ' ', $key[1]);
       // Keep only the bundles that should be changed.
       foreach (array_filter($bundles) as $bundle_key => $bundle) {
@@ -672,7 +672,7 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
 function theme_og_user_admin_bundles($variables) {
   $form = $variables['form'];
 
-  // "group" or "group_post".
+  // "group" or "group_content".
   $group_type = $form['group_type']['#value'];
 
   $modules = array_keys(element_children($form['modules']));

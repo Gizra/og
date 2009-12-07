@@ -58,7 +58,7 @@ function hook_og_access($op, $node, $acting_user, $account = NULL) {
     // Show group content only if they are in a certain day, defined in the
     // group's data. This data is fictional, and it's up to an implementing
     // module to implement it.
-    if (og_is_group_post_type($node->type)) {
+    if (og_is_group_content_type($node->type)) {
       // Get the first node group this group content belongs to.
       $gids = og_get_object_groups('node', $node);
       $group = node_load($gids[0]);
@@ -139,7 +139,7 @@ function hook_og_set_group_alter($group) {
  * @return
  *   An array keyed with the type name and it's value is an array with the
  *   following keys:
- *   - type: The type can be "group", "group_post" or "omitted".
+ *   - type: The type can be "group", "group_content" or "omitted".
  *   - description: Explanation about the type.
  */
 function hook_og_types_info() {
