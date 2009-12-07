@@ -749,7 +749,7 @@ function og_get_group_users($gid, $states = array(OG_STATE_ACTIVE), $count = FIE
   $field = field_info_field('og_audience');
 
   $conditions = array(
-    array('value', $gid),
+    array('gid', $gid),
     array('type', 'user'),
   );
 
@@ -796,7 +796,7 @@ function og_get_group_from_object($gid, $obj_type, $object, &$key = NULL) {
   $object = og_load_object($obj_type, $object);
   if (!empty($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
     foreach ($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $key_index => $value) {
-      if ($value['value'] == $gid) {
+      if ($value['gid'] == $gid) {
         // Save the position of the value in the field.
         $key = $key_index;
         return $value;
@@ -828,7 +828,7 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
         // Don't register the group if it's state isn't the one we look for.
         continue;
       }
-      $groups[$group['value']] = $group['value'];
+      $groups[$group['gid']] = $group['gid'];
     }
   }
   return $groups;
@@ -1009,7 +1009,7 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
 
   foreach ($groups as $group) {
     $key = 0;
-    if ($value = og_get_group_from_object($group['value'], $obj_type, $object, $key)) {
+    if ($value = og_get_group_from_object($group['gid'], $obj_type, $object, $key)) {
       // Group already exists, so we will replace it. The key was return from
       // og_get_group_from_object().
       // We preserve the data and state values, provided they aren't changed.
@@ -1050,7 +1050,7 @@ function og_delete_association($obj_type, $object, $gids = array()) {
   $save = FALSE;
 
   foreach ($object->og_audience[LANGUAGE_NONE] as $key => $group) {
-    if (in_array($group['value'], $gids)) {
+    if (in_array($group['gid'], $gids)) {
       unset($object->og_audience[LANGUAGE_NONE][$key]);
 
       og_invoke_event();
@@ -1304,7 +1304,8 @@ function og_get_groups_for_form($obj_type, $object) {
   // Get all the existing groups.
 
   // Get the groups belonging to the content.
-  if (($content_groups = og_get_object_groups($obj_type, $object)) && $all_groups = og_get_all_groups_for_form()) {
+  if ($all_groups = og_get_all_groups_for_form()) {
+    $content_groups = og_get_object_groups($obj_type, $object);
 
     // TODO: Is it faster to use array_diff & array_intersect?
     foreach ($all_groups as $nid => $name) {
@@ -2090,7 +2091,7 @@ function og_user_operations_approve($gid, $accounts) {
   $accounts = user_load_multiple($accounts);
   foreach ($accounts as $account) {
     $group = array(
-      'value' => $gid,
+      'gid' => $gid,
       // Get the state of the group, and decide the user's state accordingly.
       'state' => OG_STATE_ACTIVE,
     );
@@ -2119,7 +2120,7 @@ function og_user_operations_block($gid, $accounts) {
   $accounts = user_load_multiple($accounts);
   foreach ($accounts as $account) {
     $group = array(
-      'value' => $gid,
+      'gid' => $gid,
       // Get the state of the group, and decide the user's state accordingly.
       'state' => OG_STATE_BLOCKED,
     );

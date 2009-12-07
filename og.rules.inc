@@ -65,7 +65,7 @@ function og_rules_action_info() {
  * Action: Subscribe user to group.
  */
 function og_rules_action_subscribe_user($user, $node, $state, $replace, $settings) {
-  $groups = array('value' => $node->nid, 'state' => $state);
+  $groups = array('gid' => $node->nid, 'state' => $state);
   og_set_association('user', $user, $groups, $replace);
 }
 

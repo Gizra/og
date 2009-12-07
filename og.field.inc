@@ -48,6 +48,7 @@ function og_field_formatter_info() {
 function og_field_schema($field) {
   $columns = array(
     'gid' => array(
+      'description' => 'The group unique ID.',
       'type' => 'float',
       'unsigned' => TRUE,
       'not null' => FALSE,
@@ -58,18 +59,18 @@ function og_field_schema($field) {
       'not null' => FALSE,
       'serialize' => TRUE,
     ),
-    'state'     => array(
-      'description'     => 'The state of the group post.',
-      'type'            => 'varchar',
-      'length'          => 255,
-      'not null'        => FALSE,
+    'state' => array(
+      'description' => 'The state of the group post.',
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
       'default' => '',
     ),
   );
   return array(
     'columns' => $columns,
     'indexes' => array(
-      'value' => array('value'),
+      'gid' => array('gid'),
     ),
   );
 }
@@ -226,7 +227,7 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
  * Implement hook_field_is_empty().
  */
 function og_field_is_empty($item, $field) {
-  return empty($item['value']);
+  return empty($item['gid']);
 }
 
 /**
@@ -298,7 +299,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
       if (!empty($object->uid)) {
         // Subscribe the object author, if exists.
         $account = user_load($object->uid);
-        og_subscribe_user(array(array('value' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
+        og_subscribe_user(array(array('gid' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
       }
 
       og_set_new_group_roles($group->gid);
@@ -351,7 +352,7 @@ function theme_field_formatter_og_group_subscribe($variables) {
   $return = '';
 
   $element = $variables['element'];
-  if ($element['#item']['gid']) {
+  if ($element['#item']['value']) {
     global $user;
     $obj_type = $element['#object_type'];
     list($id) = entity_extract_ids($obj_type, $element['#object']);

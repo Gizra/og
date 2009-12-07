@@ -112,8 +112,8 @@ function og_views_create_fields_group($obj_type, $bundle) {
 function theme_field_formatter_og_views_default($variables) {
   $element = $variables['element'];
   $output = '';
-  if (!empty($element['#item']['value'])) {
-    $view = explode(' ', $element['#item']['value']);
+  if (!empty($element['#item']['gid'])) {
+    $view = explode(' ', $element['#item']['gid']);
     $output = views_embed_view($view[0], $view[1]);
   }
 

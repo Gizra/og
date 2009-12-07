@@ -78,7 +78,7 @@ function og_confirm_subscribe_submit($form, &$form_state) {
   $group = $form_state['values']['group'];
 
   $groups = array(
-    'value' => $group->gid,
+    'gid' => $group->gid,
     // Get the state of the group, and decide the user's state accordingly.
     'state' => og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING,
   );

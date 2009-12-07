@@ -101,7 +101,7 @@ function og_add_users_validate($form, &$form_state) {
 function og_add_users_submit($form, &$form_state) {
   $account = user_load_by_name($form_state['values']['og_add_user']);
   $group = array(
-    'value' => $form_state['values']['group']->gid,
+    'gid' => $form_state['values']['group']->gid,
     'state' => $form_state['values']['og_add_user_state'],
   );
 
