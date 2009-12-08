@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Enable users to create and manage groups.
+ * Enable users to create and manage groups with roles and permissions.
  */
 
 // Load all Field module hooks for organic groups.
