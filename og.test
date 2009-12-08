@@ -4,6 +4,33 @@
 /**
  * Test the organic groups content handeling.
  */
+class OgGroupCrud extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups group CRUD',
+      'description' => 'Test the create, update and remove of group objects.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og');
+  }
+
+  /**
+   * Test CRUD of group objects.
+   */
+  function testOgCrud() {
+    // Set a new group.
+    og_set_group('');
+
+  }
+}
+
+/**
+ * Test the organic groups content handeling.
+ */
 class OgTypeTest extends DrupalWebTestCase {
 
   public static function getInfo() {
