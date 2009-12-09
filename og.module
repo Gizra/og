@@ -386,7 +386,7 @@ function og_node_type_save($bundle_name) {
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_type_' . $bundle_name);
   }
-   if (variable_get('og_group_content_type_' . $bundle_name, 'omitted') == 'group_content') {
+  if (variable_get('og_group_content_type_' . $bundle_name, 'omitted') == 'group_content') {
     og_create_fields_group_content('node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_content_type_' . $bundle_name);
@@ -689,22 +689,26 @@ function og_get_groups($obj_type = 'gid', $oids = array(), $states = array(OG_ST
  */
 function og_set_group($obj_type, $oid, $state = OG_STATE_ACTIVE, $data = array()) {
   $group = new stdClass();
-  $group->oid = $oid;
   $group->obj_type = $obj_type;
+  $group->oid = $oid;
   $group->state = $state;
-  $group->data = $data;
-
-  // Allow other modules to change the group object.
-  drupal_alter('og_set_group', $group);
 
   // Determine if object already exists and needs update.
   if ($existing_group = og_get_group($obj_type, $oid)) {
     $group->gid = $existing_group->gid;
+    $group->data = array_merge($existing_group->data, $data);
+
     $update = array('gid');
   }
   else {
     $update = array();
+    $group->data = $data;
+
   }
+
+  // Allow other modules to change the group object.
+  drupal_alter('og_set_group', $group);
+
   drupal_write_record('og_groups', $group, $update);
 
   return $group;
