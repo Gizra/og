@@ -22,9 +22,45 @@ class OgGroupCrud extends DrupalWebTestCase {
    * Test CRUD of group objects.
    */
   function testOgCrud() {
-    // Set a new group.
-    og_set_group('');
+    $groups = array(
+      0 => array('obj_type' => 'node', 'oid' => 1),
+      1 => array('obj_type' => 'node', 'oid' => 2, 'state' => OG_STATE_ACTIVE),
+      2 => array('obj_type' => 'node', 'oid' => 3, 'state' => OG_STATE_PENDING),
+      3 => array('obj_type' => 'node', 'oid' => 4, 'state' => OG_STATE_ACTIVE, 'data' => array('dummy_key' => 'dummy_value')),
+      4 => array('obj_type' => 'user', 'oid' => 1),
+    );
 
+    foreach ($groups as $group) {
+      // Initialize group array.
+      $group += array('state' => OG_STATE_ACTIVE, 'data' => array());
+      // Set a new group.
+      og_set_group($group['obj_type'], $group['oid'], $group['state'], $group['data']);
+    }
+
+    // Get all group IDs.
+    $groups = og_get_groups('gid', array(), array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $this->assertTrue(count($groups['node']) + count($groups['user']) == 5, t('All groups were created.'));
+
+    // Get groups with different selection criteria.
+    $groups = og_get_groups('node', array());
+    $this->assertTrue(count($groups['node']) == 3, t('All active node groups were found.'));
+
+    $groups = og_get_groups('node', array(), array(OG_STATE_PENDING));
+    $this->assertTrue(count($groups['node']) == 1, t('All pending node groups were found.'));
+
+    $groups = og_get_groups('user', array());
+    $this->assertTrue(count($groups['user']) == 1, t('User group was found.'));
+
+    // Get a single group object.
+    $group = og_get_group('node', 4);
+
+    // Test the group has all the expected keys.
+    foreach (array('obj_type', 'oid', 'state', 'data') as $key) {
+      $this->assertTrue(!empty($group->{$key}), t('Group @key key found.', array('@key' => $key)));
+    }
+
+    // Test the data values exist.
+    $this->assertTrue($group->data['dummy_key'] == 'dummy_value', t('Group object data values found.'));
   }
 }
 
@@ -46,7 +82,7 @@ class OgTypeTest extends DrupalWebTestCase {
   }
 
 
-  function testOgType() {
+  function __testOgType() {
     $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
     $this->drupalLogin($admin_user);
 
@@ -100,7 +136,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
   /**
    * Change user permissions and check og_user_access().
    */
-  function testOgUserPermissionChanges() {
+  function __testOgUserPermissionChanges() {
     $account = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
     $this->drupalLogin($account);
 
