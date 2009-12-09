@@ -15,7 +15,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('og', 'og_test');
   }
 
   /**
@@ -61,6 +61,9 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     // Test the data values exist.
     $this->assertTrue($group->data['dummy_key'] == 'dummy_value', t('Group object data values found.'));
+
+    // Test the data values were altered.
+    $this->assertTrue($group->data['alter_key'] == 'alter_value', t('Group object data values were altered.'));
   }
 }
 

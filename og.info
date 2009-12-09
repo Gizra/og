@@ -8,4 +8,4 @@ files[] = og.install
 files[] = og.admin.inc
 files[] = og.pages.inc
 files[] = og.field.inc
-files[] = og.test
+files[] = tests/og.test
