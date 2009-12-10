@@ -399,7 +399,7 @@ function og_node_type_save($bundle_name) {
 function og_node_delete($node) {
   if ($group = og_get_group('node', $node->nid) && og_is_group_type('node', $node->type)) {
     // Remove group.
-    og_delete_group($group->gid);
+    og_delete_groups(array($group->gid));
   }
 }
 
@@ -541,7 +541,7 @@ function og_og_types_info() {
  *
  * Add label information to fieldable entities.
  */
-function og_entity_info_alter(&$entity_info) {
+function __og_entity_info_alter(&$entity_info) {
   $lables = array(
     'comment' => 'subject',
     'node' => 'title',
@@ -715,30 +715,32 @@ function og_set_group($obj_type, $oid, $state = OG_STATE_ACTIVE, $data = array()
 }
 
 /**
- * Delete a group object by it's unique ID.
+ * Delete group objects thier group ID.
  *
- * @param $gid
- *   The group unique ID.
+ * @param $gids
+ *   Array with the group unique ID.
  */
-function og_delete_group($gid) {
+function og_delete_groups($gids = array()) {
   db_delete('og_groups')
-    ->condition('gid', $gid)
+    ->condition('gid', $gids, 'IN')
     ->execute();
 }
 
 /**
- * Delete a group object by it's content ID.
+ * Delete a group object by it's object type and ID.
  *
- * @param $oid
- *   The group content ID.
  * @param $obj_type
- *   The group content ID. "node" is the default value.
+ *   The group object type ID.
+ * @param $oid
+ *   Optional; The group ID. If empty all groups belonging to the object type
+ *   will be deleted.
  */
-function og_delete_group_by_content($obj_type, $oid) {
-  db_delete('og_groups')
-    ->condition('oid', $oid)
-    ->condition('obj_type', $obj_type)
-    ->execute();
+function og_delete_groups_by_object($obj_type, $oids = array()) {
+  $query = db_delete('og_groups')->condition('obj_type', $obj_type);
+  if (!empty($oids)) {
+    $query->condition('oid', $oids);
+  }
+  $query->execute();
 }
 
 /**
