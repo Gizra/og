@@ -176,7 +176,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
   protected $admin_user;
   protected $rid;
 
-  public static function __getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Organic groups role permissions',
       'description' => 'Verify that role permissions can be added and removed via the permissions page of the group.',
@@ -187,41 +187,51 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('og');
 
-
     $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
     $this->drupalLogin($this->admin_user);
 
     // Create group content type.
-    $group_type = $this->drupalCreateContentType(array('og_content_type_usage' => 'group'));
-    $this->group_type= $group_type->type;
+    $group_type = $this->drupalCreateContentType();
+    $this->group_type = $group_type->type;
 
-    $group = $this->drupalCreateNode(array('type' => $group_type->type));
-    $this->group_nid = $group->nid;
+    // Add og_group field.
+    og_create_fields_group('node', $this->group_type);
+
+    $group = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => TRUE));
+    $this->group = og_get_group('node', $group->nid);
   }
 
   /**
    * Change user permissions and check og_user_access().
    */
-  function __testOgUserPermissionChanges() {
-    $account = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLogin($account);
+  function testOgUserPermissionChanges() {
+    $web_user = $this->drupalCreateUser();
+    $this->assertTrue(og_user_access($this->group->gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
 
-    // Get the role ID of the anonymous user.
-    $roles = og_get_group_default_roles($this->group_nid);
-
-    // Add a permission.
-    $this->assertFalse(og_user_access($this->group_nid, 'unsubscribe', $account), t('User does not have "Unsubscribe user from group" permission.'));
-    $edit = array();
-    $edit[$roles[OG_ANONYMOUS_ROLE] . '[unsubscribe]'] = TRUE;
-    $this->drupalPost('og/' . $this->group_nid . '/admin/people/permissions', $edit, t('Save permissions'));
-    $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
-    $this->assertTrue(og_user_access($this->group_nid, 'unsubscribe', $account), t('User now has "Unsubscribe user from group" permission.'));
+    $roles = og_get_group_default_roles($this->group->gid);
 
     // Remove a permission.
     $edit = array();
-    $edit[$rid . '[unsubscribe]'] = FALSE;
-    $this->drupalPost('og/' . $this->group_nid . '/admin/people/permissions', $edit, t('Save permissions'));
-    $this->assertFalse(og_user_access($this->group_nid, 'unsubscribe', $account), t('User no longer has "Unsubscribe user from group" permission.'));
+    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = FALSE;
+    $this->drupalPost('og/' . $this->group->obj_type . '/' . $this->group->oid . '/admin/people/permissions', $edit, t('Save permissions'));
+    $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
+
+    // TODO: Remove - fin dout why doesn't work without.
+    drupal_static_reset('og_user_access');
+    drupal_static_reset('og_user_role_permissions');
+
+    $this->assertFalse(og_user_access($this->group->gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
+
+    // Re-add permission.
+    $edit = array();
+    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = TRUE;
+    $this->drupalPost('og/' . $this->group->obj_type . '/' . $this->group->oid . '/admin/people/permissions', $edit, t('Save permissions'));
+
+    // TODO: Remove - fin dout why doesn't work without.
+    drupal_static_reset('og_user_access');
+    drupal_static_reset('og_user_role_permissions');
+
+    $this->assertTrue(og_user_access($this->group->gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
   }
 
 

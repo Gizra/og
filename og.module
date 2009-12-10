@@ -1470,7 +1470,7 @@ function og_user_access($gid, $string, $account = NULL) {
   global $user;
   $perm = &drupal_static(__FUNCTION__, array());
 
-  if (!isset($account)) {
+  if (empty($account)) {
     $account = $user;
   }
 
@@ -1514,12 +1514,14 @@ function og_user_access($gid, $string, $account = NULL) {
     }
 
     $role_permissions = og_user_role_permissions($roles);
+
     $perms = array();
     foreach ($role_permissions as $one_role) {
       $perms += $one_role;
 
       $perm[$gid][$account->uid] = $perms;
     }
+
   }
   return isset($perm[$gid][$account->uid][$string]);
 }
