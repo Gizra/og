@@ -134,25 +134,6 @@ function hook_og_set_group_alter($group) {
 }
 
 /**
- * Return the types of group or group content available.
- *
- * @return
- *   An array keyed with the type name and it's value is an array with the
- *   following keys:
- *   - type: The type can be "group", "group_content" or "omitted".
- *   - description: Explanation about the type.
- */
-function hook_og_types_info() {
-  // Add a wiki style group content.
-  return array(
-    'wiki' => array(
-      'type' => 'group content',
-      'description' => t('Wiki group content (any group member may edit).'),
-    )
-  );
-}
-
-/**
  * Alter the users which will be notified about a subscription of another user.
  *
  * @param $uids

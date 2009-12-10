@@ -520,23 +520,6 @@ function og_node_access($node, $op, $account) {
 }
 
 /**
- * Implement hook_og_types_info().
- */
-function og_og_types_info() {
-  return array(
-    'group' => array(
-       'type' => 'group',
-       'description' => t('Group node'),
-
-     ),
-     'group content' => array(
-       'type' => 'group content',
-       'description' => t('group content'),
-     ),
-  );
-}
-
-/**
  * Implement hook_entity_info_alter().
  *
  * Add label information to fieldable entities.
@@ -844,48 +827,6 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
     }
   }
   return $groups;
-}
-
-/**
- * Get an array with all the types of group or group content available.
- */
-function og_get_og_types() {
-  $og_types = &drupal_static(__FUNCTION__, array());
-
-  if (!empty($og_types)) {
-    return $og_types;
-  }
-
-  $og_types = module_invoke_all('og_types_info');
-  // Add a non organic groups type.
-  $og_types['omitted'] = array('type' => 'omitted', 'description' => t('May not be posted into a group.'));
-
-  return $og_types;
-}
-
-/**
- * Return all content types which meet a specified organic group type.
- *
- * @param $og_types
- *   Optional; An array with the organic group types, for example "group" or
- *   "group_content".
- * @return
- *   An array keyed with content type and organic group type as value, or all
- *   the content types if $type is empty.
- */
-function og_get_node_type_by_og_type($og_types = array()) {
-  $return = array();
-  if (empty($og_types)) {
-    // All organic groups types.
-    $og_types = array_keys(og_get_og_types());
-  }
-  foreach (node_type_get_types() as $type => $value) {
-     $usage = og_get_group_type($type);
-    if (in_array($usage, $og_types)) {
-      $return[$type] = $usage;
-    }
-  }
-  return $return;
 }
 
 /**
