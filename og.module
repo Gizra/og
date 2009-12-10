@@ -880,7 +880,10 @@ function og_is_group_content_type($obj_type, $bundle_name) {
  * Subscribe a user to groups.
  *
  * @param $groups
- *   Array of the groups to subscribe the user.
+ *   Array of the groups to subscribe the user. The groups keys are:
+ *   - gid: The group ID.
+ *   - state: Optional; Defaults to OG_STATE_ACTIVE.
+ *   - data: Optioanl; Defaults to an empty array().
  * @param $account
  *   Optional; A user object.
  * @param $replace
@@ -972,7 +975,7 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
     }
     else {
       // Initialize values.
-      $group += array('state' => '', 'data' => array());
+      $group += array('state' => OG_STATE_ACTIVE, 'data' => array());
       // Add a new record.
       $object->og_audience[LANGUAGE_NONE][] = $group;
       $save = TRUE;
