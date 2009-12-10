@@ -276,6 +276,19 @@ function og_menu() {
 }
 
 /**
+ * Implements hook_permission().
+ */
+function og_permission() {
+  return array(
+    'administer organic groups' =>  array(
+      'title' => t('Administer organic groups permissions'),
+      'description' => t('Administer all groups and permissions.'),
+    ),
+  );
+}
+
+
+/**
  * Return TRUE if a node is a group node and the user has administrator rights.
  */
 function og_organic_groups_tab_access($obj_type, $oid) {
@@ -404,7 +417,7 @@ function og_node_delete($node) {
 }
 
 /**
- * Implement og_permission
+ * Implement hook_og_permission().
  */
 function og_og_permission() {
   return array(
@@ -520,11 +533,14 @@ function og_node_access($node, $op, $account) {
 }
 
 /**
- * Implement hook_entity_info_alter().
+ * TODO: Implement hook_entity_info_alter().
  *
- * Add label information to fieldable entities.
+ * @see http://drupal.org/node/629484 for discussion.
+ *
+ * Get label information to fieldable entities.
  */
-function __og_entity_info_alter(&$entity_info) {
+function og_entity_label() {
+  $entity_info = array();
   $lables = array(
     'comment' => 'subject',
     'node' => 'title',
@@ -536,6 +552,8 @@ function __og_entity_info_alter(&$entity_info) {
   foreach ($lables as $key => $value) {
     $entity_info[$key]['object keys']['label'] = $value;
   }
+
+  return $entity_info;
 }
 
 /**
@@ -1313,7 +1331,7 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
   $gids = og_get_groups($obj_type, $oids);
   $gids = array_keys($gids[$obj_type]);
 
-  $entity = entity_get_info($obj_type);
+  $entity = array_merge(entity_get_info($obj_type), og_entity_label());
 
   // Get the table, ID and label of the object type.
   if (!empty($entity['object keys']['label'])) {
@@ -1458,6 +1476,11 @@ function og_user_access($gid, $string, $account = NULL) {
 
   // User #1 has all privileges.
   if ($account->uid == 1) {
+    return TRUE;
+  }
+
+  // Administer organic groups permission.
+  if (user_access('administer organic groups', $account)) {
     return TRUE;
   }
 
