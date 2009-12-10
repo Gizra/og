@@ -2,7 +2,7 @@
 // $Id$
 
 /**
- * Test the organic groups content handeling.
+ * Test the organic groups content handling.
  */
 class OgGroupCrud extends DrupalWebTestCase {
 

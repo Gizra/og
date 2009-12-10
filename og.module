@@ -853,7 +853,7 @@ function og_get_group_type($obj_type, $bundle_name, $type = 'group') {
 }
 
 /**
- * Return TRUE if the node type is a "group" type.
+ * Return TRUE if the object type is a "group" type.
  *
  * This is a wrapper function around og_get_group_type().
  *
@@ -865,7 +865,7 @@ function og_is_group_type($obj_type, $bundle_name) {
 }
 
 /**
- * Return TRUE if the node type is a "group content" type.
+ * Return TRUE if the object type is a "group content" type.
  *
  * This is a wrapper function around og_get_group_type().
  *
