@@ -206,9 +206,10 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
    */
   function testOgUserPermissionChanges() {
     $web_user = $this->drupalCreateUser();
-    $this->assertTrue(og_user_access($this->group->gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
+    $gid = $this->group->gid;
+    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
 
-    $roles = og_get_group_default_roles($this->group->gid);
+    $roles = og_get_group_default_roles($gid);
 
     // Remove a permission.
     $edit = array();
@@ -216,47 +217,53 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $this->drupalPost('og/' . $this->group->obj_type . '/' . $this->group->oid . '/admin/people/permissions', $edit, t('Save permissions'));
     $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
 
-    // TODO: Remove - fin dout why doesn't work without.
+    // TODO: Remove - find out why doesn't work without.
     drupal_static_reset('og_user_access');
     drupal_static_reset('og_user_role_permissions');
 
-    $this->assertFalse(og_user_access($this->group->gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
+    $this->assertFalse(og_user_access($gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
 
     // Re-add permission.
     $edit = array();
     $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = TRUE;
     $this->drupalPost('og/' . $this->group->obj_type . '/' . $this->group->oid . '/admin/people/permissions', $edit, t('Save permissions'));
 
-    // TODO: Remove - fin dout why doesn't work without.
+    // TODO: Remove - find out why doesn't work without.
     drupal_static_reset('og_user_access');
     drupal_static_reset('og_user_role_permissions');
 
-    $this->assertTrue(og_user_access($this->group->gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
+    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
   }
 
 
   /**
    * Verify proper permission changes by og_user_role_change_permissions().
    */
-  function __testOgUserRoleChangePermissions() {
-    $rid = $this->rid;
-    $account = $this->admin_user;
+  function testOgUserRoleChangePermissions() {
+    $account = $this->drupalCreateUser();
+    $gid = $this->group->gid;
 
     // Verify current permissions.
-    $this->assertFalse(user_access('administer nodes', $account), t('User does not have "administer nodes" permission.'));
-    $this->assertTrue(user_access('access user profiles', $account), t('User has "access user profiles" permission.'));
-    $this->assertTrue(user_access('administer site configuration', $account), t('User has "administer site configuration" permission.'));
+    $this->assertTrue(og_user_access($gid, 'subscribe', $account), t('User has "subscribe" permission.'));
+    $this->assertTrue(og_user_access($gid, 'subscribe without approval', $account), t('User has "subscribe without approval" permission.'));
+    $this->assertFalse(og_user_access($gid, 'add user', $account), t('User does not have "add user" permission.'));
 
-    // Change permissions.
+    // Change permissions to anonymous member.
+    $roles = og_get_group_default_roles($gid);
+    // Anonymous role ID.
+    $rid = $roles[OG_ANONYMOUS_ROLE];
+
     $permissions = array(
-      'administer nodes' => 1,
-      'access user profiles' => 0,
+      'subscribe' => 0,
+      'add user' => 1,
     );
     og_user_role_change_permissions($rid, $permissions);
 
     // Verify proper permission changes.
-    $this->assertTrue(user_access('administer nodes', $account), t('User now has "administer nodes" permission.'));
-    $this->assertFalse(user_access('access user profiles', $account), t('User no longer has "access user profiles" permission.'));
-    $this->assertTrue(user_access('administer site configuration', $account), t('User still has "administer site configuration" permission.'));
+    $this->assertFalse(og_user_access($gid, 'subscribe', $account), t('User no longer has "subscribe" permission.'));
+    $this->assertTrue(og_user_access($gid, 'subscribe without approval', $account), t('User still has "subscribe without approval" permission.'));
+    $this->assertTrue(og_user_access($gid, 'add user', $account), t('User now has "subscribe without approval" permission.'));
+
+
   }
 }
