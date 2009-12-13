@@ -24,23 +24,6 @@ function og_field_info() {
   );
 }
 
-/**
- * Implement hook_field_formatter_info().
- */
-function og_field_formatter_info() {
-  return array(
-    'og_list_default' => array(
-      'label' => t('Organic groups default list'),
-      'field types' => array('og'),
-    ),
-    'og_group_subscribe' => array(
-      'label' => t('Organic groups subscription'),
-      'field types' => array('list_boolean'),
-    ),
-  );
-}
-
-
 
 /**
  * Implement hook_field_schema().
@@ -74,6 +57,86 @@ function og_field_schema($field) {
     ),
   );
 }
+
+/**
+ * Implement hook_field_formatter_info().
+ */
+function og_field_formatter_info() {
+  return array(
+    'og_list_default' => array(
+      'label' => t('Organic groups default list'),
+      'field types' => array('og'),
+    ),
+    'og_group_subscribe' => array(
+      'label' => t('Organic groups subscription'),
+      'field types' => array('list_boolean'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter().
+ */
+function og_field_formatter($object_type, $object, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  if ($field['field_name'] == 'og_audience') {
+    foreach ($items as $delta => $item) {
+      if ($group = og_get_group('gid', $item['gid'])) {
+        $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
+        $element[$delta] = array(
+          '#type' => 'link',
+          '#title' => $label,
+          '#href' => "$group->obj_type/$group->oid",
+        );
+      }
+    }
+  }
+  elseif ($field['field_name'] == 'og_group') {
+    global $user;
+    list($id) = entity_extract_ids($object_type, $object);
+
+    // Field can have only. a single value
+    $delta = 0;
+    if (($group = og_get_group($object_type, $id)) && (empty($object->uid) || $object->uid != $user->uid)) {
+      // Check user association with the group.
+      $links = array();
+
+      if ($user_group = og_get_group_from_object($group->gid, 'user', $user)) {
+        // check the user state.
+        if ($user_group['state'] == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
+          $links['title'] = t('Re-request group membership');
+          $links['href'] = "og/$object_type/$id/subscribe";
+        }
+        elseif ($user_group['state'] == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe')) {
+          $links['title'] = t('Unsubscribe from group');
+          $links['href'] = "og/$object_type/$id/unsubscribe";
+        }
+      }
+      else {
+        if (og_user_access($group->gid, 'subscribe without approval')) {
+          $links['title'] = t('Subscribe to group');
+        }
+        elseif (og_user_access($group->gid, 'subscribe')) {
+          $links['title'] = t('Request group membership');
+        }
+        $links['href'] = "og/$object_type/$id/subscribe";
+      }
+
+      if (!empty($links['title'])) {
+        $element[$delta] = array(
+          '#type' => 'link',
+          '#title' => $links['title'],
+          '#href' => $links['href'],
+        );
+      }
+    }
+
+  }
+
+  return $element;
+}
+
 
 /**
  * Implement hook_field_widget_info().
@@ -319,77 +382,3 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
     }
   }
 }
-
-/*******************************************************************************
- * Theme functions
- ******************************************************************************/
-
-/**
- * Organic group audience list field formatter.
- *
- * @return
- *   A link to the group node.
- */
-function theme_field_formatter_og_list_default($variables) {
-  $element = $variables['element'];
-  $return = '';
-  if ($group = og_get_group('gid', $element['#item']['gid'])) {
-    $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
-    // Return the group's link.
-    $return = l($label, "$group->obj_type/$group->oid");
-  }
-
-  return $return;
-}
-
-/**
- * Organic group audience list field formatter.
- *
- * @return
- *   A link to the group node.
- */
-function theme_field_formatter_og_group_subscribe($variables) {
-  $return = '';
-
-  $element = $variables['element'];
-  if ($element['#item']['value']) {
-    global $user;
-    $obj_type = $element['#object_type'];
-    list($id) = entity_extract_ids($obj_type, $element['#object']);
-
-    $object= current(entity_load($obj_type, array($id)));
-
-    if (($group = og_get_group($obj_type, $id)) && (empty($object->uid) || $object->uid != $user->uid)) {
-      // Check user association with the group.
-      $links = array();
-
-      if ($user_group = og_get_group_from_object($group->gid, 'user', $user)) {
-        // check the user state.
-        if ($user_group['state'] == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
-          $links['title'] = t('Re-request group membership');
-          $links['href'] = "og/$obj_type/$id/subscribe";
-        }
-        elseif ($user_group['state'] == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe')) {
-          $links['title'] = t('Unsubscribe from group');
-          $links['href'] = "og/$obj_type/$id/unsubscribe";
-        }
-      }
-      else {
-        if (og_user_access($group->gid, 'subscribe without approval')) {
-          $links['title'] = t('Subscribe to group');
-        }
-        elseif (og_user_access($group->gid, 'subscribe')) {
-          $links['title'] = t('Request group membership');
-        }
-        $links['href'] = "og/$obj_type/$id/subscribe";
-      }
-
-      if (!empty($links['title'])) {
-        $return = l($links['title'], $links['href']);
-      }
-    }
-  }
-
-  return $return;
-}
-
