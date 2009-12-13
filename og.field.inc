@@ -253,9 +253,20 @@ function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $it
     $description = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
   }
 
+  $default_values = array();
   // Select groups if they were passed in the URL, in the form of
-  // node/add/post?gids[]=1,2,3
-  $default_values = !empty($_REQUEST['gids'][0]) ? explode(',', $_REQUEST['gids'][0]) : array();
+  // node/add/post?gids_gid[]=1,2,3&gids_node[]=4,5,6
+  // Note that gids_ is the prefix followed by the object type (e.g. "node",
+  // "user") or "gid" to indicate the passed values are group ID.
+  foreach (array_merge(array_keys(entity_get_info()), array('gid')) as $obj_type) {
+    $oids =  !empty($_REQUEST['gids_' . $obj_type][0]) ? explode(',', $_REQUEST['gids_' . $obj_type][0]) : array();
+    if ($oids) {
+      if ($gids = og_get_groups($obj_type, $oids)) {
+        $gids = current($gids);
+        $default_values = array_merge($default_values, $gids);
+      }
+    }
+  }
 
   if (!empty($items)) {
     foreach ($items as $item) {
