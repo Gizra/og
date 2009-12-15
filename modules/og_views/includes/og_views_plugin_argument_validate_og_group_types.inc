@@ -28,13 +28,38 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
       OG_VIEWS_VALIDATE_GROUP_MEMBER => t('Validate current user is a member of a specified group'),
       OG_VIEWS_VALIDATE_GROUP_ADMIN => t('Validate current user is an admin of a specified group'),
     );
-    
+
     $form['validate_argument_is_member'] = array(
       '#type' => 'select',
       '#title' => t('Group membership validation'),
       '#options' => $options,
       '#default_value' => isset($this->argument->options['validate_argument_is_member']) ? $this->argument->options['validate_argument_is_member'] : 0,
       '#process' => array('views_process_dependency'),
+      '#dependency' => array('edit-options-validate-type' => array($this->id)),
+    );
+
+    $options = array();
+    $types = node_get_types();
+    $group_types = og_get_types('group');
+    foreach ($group_types as $type) {
+      $info = $types[$type];
+      $options[$type] = check_plain(t($info->name));
+    }
+
+    $default_types = $this->argument->options['validate_argument_group_node_type'];
+    if (empty($default_types)) {
+      $default_types = array();
+    }
+
+    $form['validate_argument_group_node_type'] = array(
+      '#type' => 'checkboxes',
+      '#prefix' => '<div id="edit-options-validate-argument-group-node-type-wrapper">',
+      '#suffix' => '</div>',
+      '#title' => t('Group node types'),
+      '#options' => $options,
+      '#default_value' => $default_types,
+      '#description' => t('If you wish to validate for specific group node types, check them; if none are checked, all group nodes will pass.'),
+      '#process' => array('expand_checkboxes', 'views_process_dependency'),
       '#dependency' => array('edit-options-validate-type' => array($this->id)),
     );
   }
@@ -53,10 +78,10 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
           return FALSE;
         }
 
-        if (!og_is_group_type($node->type)) {
+        if (!$this->validate_group_node_type($node->type)) {
           return FALSE;
         }
-        
+
         if (!$this->validate_membership($node)) {
           return FALSE;
         }
@@ -68,7 +93,7 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
         if (empty($types)) {
           return TRUE;
         }
-        
+
         return TRUE;
       case 'nids':
         $nids = new stdClass();
@@ -86,10 +111,10 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
 
         $result = db_query("SELECT nid, type, title FROM {node} WHERE nid IN ($placeholders)", $nids->value);
         while ($node = db_fetch_object($result)) {
-          if (!og_is_group_type($node->type)) {
+          if (!$this->validate_group_node_type($node->type)) {
             return FALSE;
           }
-          
+
           if (!$has_membership) {
             $has_membership = $this->validate_membership($node);
           }
@@ -103,7 +128,7 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
         return empty($test_nids) && $has_membership;
     }
   }
-  
+
   function validate_membership($node) {
     if (!empty($this->argument->options['validate_argument_is_member'])) {
       switch ($this->argument->options['validate_argument_is_member']) {
@@ -119,7 +144,20 @@ class og_views_plugin_argument_validate_og_group_types extends views_plugin_argu
           break;
       }
     }
-    
+
     return TRUE;
+  }
+
+  function validate_group_node_type($type) {
+    $types = array();
+    if (!empty($this->argument->options['validate_argument_group_node_type'])) {
+      $types = array_filter($this->argument->options['validate_argument_group_node_type']);
+    }
+    if (empty($types)) {
+      return og_is_group_type($type);
+    }
+    else {
+      return isset($types[$type]);
+    }
   }
 }
