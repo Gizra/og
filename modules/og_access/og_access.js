@@ -11,7 +11,7 @@ Drupal.behaviors.og_access_group_post = function() {
       else {
         cnt = $('.og-audience option:selected').size();      
       }
-      if (cnt > 0 && !$("#edit-og-directory:checked").val()) {
+      if (cnt > 0) {
         $('#edit-og-public').removeAttr("disabled");
       }
       else {
