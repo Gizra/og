@@ -49,6 +49,18 @@ function og_field_schema($field) {
       'not null' => FALSE,
       'default' => '',
     ),
+    'created' => array(
+      'description' => 'The Unix timestamp when the group content was created.',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'changed' => array(
+      'description' => 'The Unix timestamp when the group content was most recently saved.',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
   );
   return array(
     'columns' => $columns,
@@ -345,7 +357,12 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
   foreach ($items as &$item) {
     $item['state'] = !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE;
     $item['data'] = !empty($item['data']) ? $item['data'] : array();
-    $alter = array('state' => $item['state'], 'data' => $item['data']);
+    $item['created'] = !empty($item['created']) ? $item['data'] : time();
+    $item['changed'] = time();
+
+    // Variable that will be altered, should not include the group ID.
+    $alter = $item;
+    unset($alter['gid']);
 
     // Allow other modules to alter the data.
     drupal_alter('og_field_' . $op, $alter, $obj_type, $object, $field, $instance, $langcode, $items);
