@@ -533,15 +533,21 @@ function og_node_access($node, $op, $account) {
 }
 
 /**
- * TODO: Implement hook_entity_info_alter().
- *
- * @see http://drupal.org/node/629484 for discussion.
- *
  * Get label information to fieldable entities.
+ *
+ * TODO: Implement hook_entity_info_alter().
+ * TODO: see  http://drupal.org/node/629484 for discussion.
+ *
+ * @param $entity
+ *   The entity name to populate with the label data.
+ * @return
+ *   The entity info merged with the label data.
+ *
  */
-function og_entity_label() {
-  $entity_info = array();
-  $lables = array(
+function og_entity_label($entity) {
+  $entity_info = entity_get_info($entity);
+
+  $entity_labels = array(
     'comment' => 'subject',
     'node' => 'title',
     'file' => 'filename',
@@ -549,9 +555,7 @@ function og_entity_label() {
     'user' => 'name',
   );
 
-  foreach ($lables as $key => $value) {
-    $entity_info[$key]['object keys']['label'] = $value;
-  }
+  $entity_info['object keys']['label'] = $entity_labels[$entity];
 
   return $entity_info;
 }
@@ -1331,7 +1335,7 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
   $gids = og_get_groups($obj_type, $oids);
   $gids = !empty($gids[$obj_type]) ? array_keys($gids[$obj_type]) : array();
 
-  $entity = array_merge(entity_get_info($obj_type), og_entity_label());
+  $entity = og_entity_label($obj_type);
 
   // Get the table, ID and label of the object type.
   if (!empty($entity['object keys']['label'])) {
