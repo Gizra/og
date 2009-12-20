@@ -329,7 +329,7 @@ function og_ui_user_admin_role_submit($form, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_og_user_admin_new_role($variables) {
+function theme_og_ui_user_admin_new_role($variables) {
   $form = $variables['form'];
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
   // The group object.
@@ -428,7 +428,7 @@ function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid
     $form['#theme'] = array('og_user_admin_permissions');
   }
   $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'), '#submit' => array('og_user_admin_permissions_submit'));
-  $form['#after_build'] = array('og_user_admin_permissions_after_build');
+  $form['#after_build'] = array('og_ui_user_admin_permissions_after_build');
 
   return $form;
 }
@@ -497,7 +497,7 @@ function og_ui_user_admin_permissions_submit($form, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_og_user_admin_permissions($variables) {
+function theme_og_ui_user_admin_permissions($variables) {
   $form = $variables['form'];
   $gid = !empty($form['group']['#value']->gid) ? $form['group']['#value']->gid : 0;
   $roles = og_user_roles($gid);
@@ -669,7 +669,7 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
  *
  * @ingroup themeable
  */
-function theme_og_user_admin_bundles($variables) {
+function theme_og_ui_user_admin_bundles($variables) {
   $form = $variables['form'];
 
   // "group" or "group_content".

@@ -32,33 +32,15 @@ function og_ui_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'og_ui.pages.inc',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_confirm_unsubscribe', 1, 2),
+    'page arguments' => array('og_ui_confirm_unsubscribe', 1, 2),
     'access callback' => 'og_access',
     'access arguments' => array('unsubscribe', 1, 2),
     'title' => 'Leave group',
   );
 
-  $items['og/%/%/approve/%user/%'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'og_approve',
-    'page arguments' => array(1, 2, 3, 4),
-    'access callback' => 'og_access',
-    'access arguments' => array('approve membership', 1, 2, 3),
-    'title' => 'Approve membership request',
-    'file' => 'og_ui.pages.inc',
-  );
-  $items['og/%/%/deny/%user/%'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'og_deny',
-    'page arguments' => array(1, 2, 4, 5),
-    'access callback' => 'og_access',
-    'access arguments' => array('deny membership', 1, 2, 4, 5),
-    'title' => 'Deny membership request',
-  );
-
   $items['og/%/%/invite'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_invite_form', 1, 2),
+    'page arguments' => array('og_ui_invite_form', 1, 2),
     'access callback' => 'og_access',
     'access arguments' => array('invite', 1, 2),
     'title' => 'Send invitation',
@@ -66,21 +48,10 @@ function og_ui_menu() {
     'file' => 'og_ui.pages.inc',
   );
 
-
-  $items["og/%/%/manage"] = array(
-    'page callback' => 'og_manage',
-    'page arguments' => array(1),
-    'access callback' => 'og_access',
-    'access arguments' => array('manage', 1, 2),
-    'title' => 'Manage membership',
-    'type' => MENU_CALLBACK,
-    'file' => 'og_ui.pages.inc',
-  );
-
   $items['og/%/%/admin/people/add-user'] = array(
     'page callback' => 'drupal_get_form',
     'title' => 'Add members',
-    'page arguments' => array('og_add_users', 1, 2),
+    'page arguments' => array('og_ui_add_users', 1, 2),
     'type' => MENU_LOCAL_TASK,
     'file' => 'og_ui.admin.inc',
     'weight' => 5,
@@ -94,7 +65,7 @@ function og_ui_menu() {
     'title callback' => 'og_ui_menu_title_callback',
     'description' => 'Find and manage group members.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_user_admin_account', 1, 2),
+    'page arguments' => array('og_ui_user_admin_account', 1, 2),
     'access callback' => 'og_access',
     'access arguments' => array('administer group', 1, 2),
     'weight' => -4,
@@ -107,7 +78,7 @@ function og_ui_menu() {
     'title callback' => 'og_ui_menu_title_callback',
     'description' => 'List, edit, or add user roles.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_user_admin_new_role', 1, 2),
+    'page arguments' => array('og_ui_user_admin_new_role', 1, 2),
     'access callback' => 'og_access',
     'access arguments' => array('administer group', 1, 2),
     'file' => 'og_ui.admin.inc',
@@ -116,7 +87,7 @@ function og_ui_menu() {
 
   $items['og/%/%/admin/people/roles/edit'] = array(
     'title' => 'Edit role',
-    'page arguments' => array('og_user_admin_role', 1, 2),
+    'page arguments' => array('og_ui_user_admin_role', 1, 2),
     'access callback' => 'og_access',
     'access arguments' => array('administer group', 1, 2),
     'type' => MENU_CALLBACK,
@@ -127,7 +98,7 @@ function og_ui_menu() {
     'title callback' => 'og_ui_menu_title_callback',
     'description' => 'Determine access to features by selecting permissions for roles.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_user_admin_permissions', 1, 2),
+    'page arguments' => array('og_ui_user_admin_permissions', 1, 2),
     'access callback' => 'og_access',
     'access arguments' => array('administer group', 1, 2),
     'file' => 'og_ui.admin.inc',
@@ -138,7 +109,7 @@ function og_ui_menu() {
     if ($value['fieldable']) {
       $items["$entity/%/og"] = array(
         'title' => 'Group',
-        'page callback' => 'og_group_admin_overview',
+        'page callback' => 'og_ui_group_admin_overview',
         'page arguments' => array($entity, 1),
         'access callback' => 'og_ui_organic_groups_tab_access',
         'access arguments' => array($entity, 1),
@@ -160,7 +131,7 @@ function og_ui_menu() {
   );
   $items['admin/config/og/permissions'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_user_admin_default_permissions'),
+    'page arguments' => array('og_ui_user_admin_default_permissions'),
     'title' => 'Organic groups default permissions',
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure organic groups default permissions when a new group is created.',
@@ -169,7 +140,7 @@ function og_ui_menu() {
   );
   $items['admin/config/og/fields'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_admin_settings'),
+    'page arguments' => array('og_ui_admin_settings'),
     'title' => 'Organic groups field settings',
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure organic groups fields in bundles.',
