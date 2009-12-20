@@ -1429,6 +1429,7 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
   $og = array(
     '#type' => 'fieldset',
     '#title' => t('Organic groups'),
+    '#group' => 'additional_settings',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#access' => user_access('administer organic groups'),
@@ -1744,6 +1745,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
   );
 
   if (module_exists('content')) {
+    $form['og_nodeapi']['#group'] = 'additional_settings';
     $form['og_nodeapi']['#weight'] = content_extra_field_weight($form['#node']->type, 'og_nodeapi');
   }
 
