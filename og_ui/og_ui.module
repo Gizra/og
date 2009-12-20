@@ -359,6 +359,7 @@ function og_ui_og_user_operations($form = array(), $form_state = array()) {
   return $operations;
 }
 
+
 /**
  * Callback function for admin mass approving users.
  */

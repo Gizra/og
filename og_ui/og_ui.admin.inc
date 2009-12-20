@@ -59,13 +59,12 @@ function og_ui_add_users($form, &$form_state, $obj_type, $oid) {
 
     $form['og_user'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Add a group member to %group.', array('%group' => $label)),
+      '#title' => t('Add a group member to %group', array('%group' => $label)),
     );
     $form['og_user']['og_add_user'] = array(
       '#type' => 'textfield',
       '#title' => t('User name'),
       '#autocomplete_path' => 'user/autocomplete',
-      '#element_validate' => array('og_add_users_og_names_validate'),
     );
     $form['og_user']['og_add_user_state'] = array(
       '#type' => 'select',
@@ -427,7 +426,7 @@ function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid
   if (empty($group)) {
     $form['#theme'] = array('og_user_admin_permissions');
   }
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'), '#submit' => array('og_user_admin_permissions_submit'));
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'), '#submit' => array('og_ui_user_admin_permissions_submit'));
   $form['#after_build'] = array('og_ui_user_admin_permissions_after_build');
 
   return $form;
