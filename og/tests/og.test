@@ -1,0 +1,269 @@
+<?php
+// $Id$
+
+/**
+ * Test the organic groups group CRUD handling.
+ */
+class OgGroupCrud extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups group CRUD',
+      'description' => 'Test the create, update and remove of group objects.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og', 'og_test');
+  }
+
+  /**
+   * Test CRUD of group objects.
+   */
+  function testOgCrud() {
+    $this->createGroups();
+
+    // Get all group IDs.
+    $groups = og_get_groups('gid', array(), array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $this->assertTrue(count($groups['node']) + count($groups['user']) == 5, t('All groups were created.'));
+
+    // Get groups with different selection criteria.
+    $groups = og_get_groups('node', array());
+    $this->assertTrue(count($groups['node']) == 3, t('All active node groups were found.'));
+
+    $groups = og_get_groups('node', array(), array(OG_STATE_PENDING));
+    $this->assertTrue(count($groups['node']) == 1, t('All pending node groups were found.'));
+
+    $groups = og_get_groups('user', array());
+    $this->assertTrue(count($groups['user']) == 1, t('User group was found.'));
+
+    // Get a single group object.
+    $group = og_get_group('node', 4);
+
+    // Test the group has all the expected keys.
+    foreach (array('obj_type', 'oid', 'state', 'data') as $key) {
+      $this->assertTrue(!empty($group->{$key}), t('Group @key key found.', array('@key' => $key)));
+    }
+
+    // Test the data values exist.
+    $this->assertTrue($group->data['dummy_key'] == 'dummy_value', t('Group object data values found.'));
+
+    // Test the data values were altered.
+    $this->assertTrue($group->data['alter_key'] == 'alter_value', t('Group object data values were altered.'));
+
+    // Delete a group by group ID.
+    og_delete_groups(array(1));
+    $this->assertFalse(og_get_group('gid', 1), t('Deleted group object by group ID.'));
+
+    // Delete a group by object type and object ID.
+    og_delete_groups_by_object('user', array(1));
+    $this->assertFalse(og_get_group('user', 1), t('Deleted group object by object type and object ID.'));
+
+    // Delete all group by object type.
+    og_delete_groups_by_object('node');
+    $this->assertFalse(og_get_groups('node'), t('Deleted group object by object type.'));
+  }
+
+  /**
+   * Test association of group objects.
+   */
+  function testOgAssociation() {
+    $groups = $this->createGroups();
+
+    $web_user = $this->drupalCreateUser(array('access content'));
+
+    // Subscribe user to all groups.
+    og_subscribe_user($groups, $web_user);
+    $user_groups = og_get_object_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+
+
+    $this->assertEqual($user_groups, drupal_map_assoc(array_keys($groups)), t('User was subscribed to all groups.'));
+
+    // Replace groups subscription with a new one.
+    $new_groups = array($groups[1]['gid'] => $groups[1], $groups[2]['gid'] => $groups[2]);
+    og_subscribe_user($new_groups, $web_user, TRUE);
+    $user_groups = og_get_object_groups('user', $web_user);
+
+    $this->assertEqual($user_groups, drupal_map_assoc(array_keys($new_groups)), t('User subscription was replaced with new groups.'));
+
+    // Add another group with pending state.
+    og_subscribe_user(array($groups[3]), $web_user);
+    $user_groups = og_get_object_groups('user', $web_user);
+
+    $this->assertTrue(count($user_groups) == 2, t('Get object groups returned only active groups of the user.'));
+
+    $user_groups = og_get_object_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $this->assertTrue(count($user_groups) == 3, t('Get object groups returned all active and pending groups of the user.'));
+
+    // Unsubscribe user from last group.
+    og_unsubscribe_user(array($groups[3]['gid']), $web_user);
+    $user_groups = og_get_object_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $this->assertTrue(count($user_groups) == 2, t('User was unsubscribed from group.'));
+  }
+
+  /**
+   * Helper function to create groups.
+   *
+   * @return
+   *   The group objects cast to array.
+   */
+  function createGroups() {
+    $return = array();
+    $groups = array(
+      0 => array('obj_type' => 'node', 'oid' => 1),
+      1 => array('obj_type' => 'node', 'oid' => 2, 'state' => OG_STATE_ACTIVE),
+      2 => array('obj_type' => 'node', 'oid' => 3, 'state' => OG_STATE_PENDING),
+      3 => array('obj_type' => 'node', 'oid' => 4, 'state' => OG_STATE_ACTIVE, 'data' => array('dummy_key' => 'dummy_value')),
+      4 => array('obj_type' => 'user', 'oid' => 1),
+    );
+
+    foreach ($groups as $group) {
+      // Initialize group array.
+      $group += array('state' => OG_STATE_ACTIVE, 'data' => array());
+      // Set a new group.
+      $group = og_set_group($group['obj_type'], $group['oid'], $group['state'], $group['data']);
+      $return[$group->gid] = (array)$group;
+    }
+
+    return $return;
+  }
+}
+
+/**
+ * Test the organic groups content handeling.
+ */
+class OgTypeTest extends DrupalWebTestCase {
+
+  public static function __getInfo() {
+    return array(
+      'name' => 'Organic groups content types',
+      'description' => 'Test the organic groups group node and group content creation.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og');
+  }
+
+
+  function __testOgType() {
+    $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
+    $this->drupalLogin($admin_user);
+
+    $this->drupalGet('admin/structure/types/add');
+
+    // Assert OG default types exist.
+    $this->assertText(t('Group node'), t('Group node option was found.'));
+    $this->assertText(t('group content'), t('group content option was found.'));
+
+    // Create group content type.
+    $group = $this->drupalCreateContentType(array(), array('og_group_type' => 'group'));
+
+    // Create post content type.
+    $group_content = $this->drupalCreateContentType(array(), array('og_group_content_type' => 'group content'));
+
+    $this->assertTrue(og_is_group_content_type($group_content->type), t('Content type is group content.'));
+
+    // Assert group content fields were added to the content type.
+    $this->drupalGet('node/add/' . $group_content->type);
+    $this->assertText(t('Groups audience'), t('Groups audience field was found.'));
+  }
+}
+
+class OgUserPermissionsTestCase extends DrupalWebTestCase {
+  protected $admin_user;
+  protected $rid;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups role permissions',
+      'description' => 'Verify that role permissions can be added and removed via the permissions page of the group.',
+      'group' => 'Organic groups'
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og');
+
+    $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
+    $this->drupalLogin($this->admin_user);
+
+    // Create group content type.
+    $group_type = $this->drupalCreateContentType();
+    $this->group_type = $group_type->type;
+
+    // Add og_group field.
+    og_create_fields_group('node', $this->group_type);
+
+    $group = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => TRUE));
+    $this->group = og_get_group('node', $group->nid);
+  }
+
+  /**
+   * Change user permissions and check og_user_access().
+   */
+  function testOgUserPermissionChanges() {
+    $web_user = $this->drupalCreateUser();
+    $gid = $this->group->gid;
+    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
+
+    $roles = og_get_group_default_roles($gid);
+
+    // Remove a permission.
+    $edit = array();
+    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = FALSE;
+    $this->drupalPost('og/' . $this->group->obj_type . '/' . $this->group->oid . '/admin/people/permissions', $edit, t('Save permissions'));
+    $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
+
+    // TODO: Remove - find out why doesn't work without.
+    drupal_static_reset('og_user_access');
+    drupal_static_reset('og_user_role_permissions');
+
+    $this->assertFalse(og_user_access($gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
+
+    // Re-add permission.
+    $edit = array();
+    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = TRUE;
+    $this->drupalPost('og/' . $this->group->obj_type . '/' . $this->group->oid . '/admin/people/permissions', $edit, t('Save permissions'));
+
+    // TODO: Remove - find out why doesn't work without.
+    drupal_static_reset('og_user_access');
+    drupal_static_reset('og_user_role_permissions');
+
+    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
+  }
+
+
+  /**
+   * Verify proper permission changes by og_user_role_change_permissions().
+   */
+  function testOgUserRoleChangePermissions() {
+    $account = $this->drupalCreateUser();
+    $gid = $this->group->gid;
+
+    // Verify current permissions.
+    $this->assertTrue(og_user_access($gid, 'subscribe', $account), t('User has "subscribe" permission.'));
+    $this->assertTrue(og_user_access($gid, 'subscribe without approval', $account), t('User has "subscribe without approval" permission.'));
+    $this->assertFalse(og_user_access($gid, 'add user', $account), t('User does not have "add user" permission.'));
+
+    // Change permissions to anonymous member.
+    $roles = og_get_group_default_roles($gid);
+    // Anonymous role ID.
+    $rid = $roles[OG_ANONYMOUS_ROLE];
+
+    $permissions = array(
+      'subscribe' => 0,
+      'add user' => 1,
+    );
+    og_user_role_change_permissions($rid, $permissions);
+
+    // Verify proper permission changes.
+    $this->assertFalse(og_user_access($gid, 'subscribe', $account), t('User no longer has "subscribe" permission.'));
+    $this->assertTrue(og_user_access($gid, 'subscribe without approval', $account), t('User still has "subscribe without approval" permission.'));
+    $this->assertTrue(og_user_access($gid, 'add user', $account), t('User now has "subscribe without approval" permission.'));
+
+
+  }
+}

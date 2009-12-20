@@ -1,0 +1,20 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the organic groups access.
+ */
+
+/**
+ * Implement hook_enable().
+ *
+ * Add OG access fields to existing group content.
+ */
+function og_access_enable() {
+  foreach (node_type_get_names() as $type => $name){
+    if (og_is_group_content_type($type)) {
+      og_access_create_fields($type);
+    }
+  }
+}

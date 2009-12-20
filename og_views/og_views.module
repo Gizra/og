@@ -1,0 +1,121 @@
+<?php
+// $Id:$
+
+/**
+ * @file
+ * Views integration for the Organic groups module.
+ */
+
+
+/**
+ * Implementation of hook_views_api().
+ */
+function og_views_views_api() {
+  return array(
+    'api' => 2,
+  );
+}
+
+/**
+ * Implement hook_field_formatter_info().
+ */
+function og_views_field_formatter_info() {
+  return array(
+    'og_views_default' => array(
+      'label' => t('Organic groups Views'),
+      'field types' => array('list_text'),
+    ),
+  );
+}
+
+/**
+ * Implement og_get_group_fields().
+ */
+function og_views_og_get_group_fields() {
+  return array(
+    'group' => array(
+      'og_views' => array(
+         'title' => t('Groups views'),
+         'callback' => 'og_views_create_fields_group',
+         'field' => 'og_views',
+      ),
+    ),
+  );
+}
+
+/**
+ * Get all the Views.
+ */
+function og_views_field_allowed_values() {
+  $return = array();
+  foreach (views_get_all_views() as $view_id => $view) {
+    if (empty($view->disabled)) {
+      $view_name = check_plain($view->name);
+      foreach($view->display as $display) {
+        $return[$view_id . ' ' .$display->id] = $view_name . ' (' . check_plain($display->display_title) .')';
+      }
+    }
+  }
+
+  return $return;
+}
+
+/**
+ * Add organic groups Views field to fieldable entities that are groups.
+ *
+ * @param $bundle
+ *   The bundle name.
+ * @param $obj_type
+ *   The object type for the instance. "node" by default.
+ */
+function og_views_create_fields_group($obj_type, $bundle) {
+  $field = field_info_field('og_views');
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'og_views',
+      'type' => 'list_text',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_views_field_allowed_values'),
+    );
+    $field = field_create_field($field);
+  }
+
+  $instance = field_info_instance($obj_type, 'og_views', $bundle);
+  if (empty($instance)) {
+    $instance = array(
+      'field_name' => 'og_views',
+      'bundle' => $bundle,
+      'object_type' => $obj_type,
+      'label' => t('Groups views'),
+      'widget_type' => 'options_select',
+      'display' => array(
+        'full' => array(
+          'label' => 'hidden',
+          'type' => 'og_views_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'og_list_default',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Organic group views field formatter.
+ *
+ * @return
+ *   A rendered Views.
+ */
+function theme_field_formatter_og_views_default($variables) {
+  $element = $variables['element'];
+  $output = '';
+  if (!empty($element['#item']['gid'])) {
+    $view = explode(' ', $element['#item']['gid']);
+    $output = views_embed_view($view[0], $view[1]);
+  }
+
+  return $output;
+}

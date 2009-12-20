@@ -1,0 +1,140 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Allow subscribing to groups during the user registration.
+ */
+
+/**
+ * Group public access field.
+ */
+define('OG_REGISTER_FIELD', 'og_register');
+
+/**
+* Implement hook_node_type_insert().
+*/
+function og_register_node_type_insert($info) {
+  if (og_is_group_type('node', $info->type)) {
+    og_register_create_fields($info->type);
+  }
+}
+
+/**
+* Implement hook_node_type_update().
+*/
+function og_register_node_type_update($info) {
+  if (og_is_group_type('node', $info->type)) {
+    og_register_create_fields($info->type);
+  }
+}
+
+/**
+ * Implement hook_form_FORM_ID_alter().
+ *
+ * Get all the groups that should appear in the user registration, and show them.
+ */
+function og_register_form_user_register_form_alter(&$form, $form_state) {
+  if ($groups = og_register_get_groups()) {
+    $form['og_register'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Groups'),
+    );
+    $form['og_register']['og_register_groups'] = array(
+      '#type' => 'og_audience',
+      '#title' => t('Subscribe to group'),
+      '#includes' => array('content groups' => $groups),
+      '#description' => t('Select the groups you wish to subscribe to.'),
+    );
+
+    // Add own submit handler.
+    $form['#submit'][] = 'og_register_register_submit';
+  }
+}
+
+/**
+ * Implement og_get_group_fields().
+ */
+function og_register_og_get_group_fields() {
+  return array(
+    'group' => array(
+      'og_register' => array(
+         'title' => t('Groups register'),
+         'callback' => 'og_register_create_fields',
+         'field' => 'og_register',
+      ),
+    ),
+  );
+}
+
+/**
+ * Submit handler for the registration form.
+ */
+function og_register_register_submit($form, &$form_state) {
+  if (!empty($form_state['values']['og_audience']) && ($nids = array_filter($form_state['values']['og_audience']))) {
+    $groups = array();
+    foreach ($nids as $nid) {
+      $groups[] = array('gid' => $nid);
+    }
+    og_subscribe_user($groups);
+  }
+}
+
+
+/**
+ * Add organic groups register field group types.
+ *
+ * @param $bundle
+ *   The bundle name.
+ */
+function og_register_create_fields($obj_type, $bundle) {
+  $field = field_info_field('og_register');
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'og_register',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Do not show on registration page', '1|Show on registration page')), 'allowed_values_function' => ''),
+    );
+    $field = field_create_field($field);
+  }
+
+  $instance = field_info_instance($obj_type, 'og_register', $bundle);
+  if (empty($instance)) {
+    $instance = array(
+      'field_name' => 'og_register',
+      'bundle' => $bundle,
+      'object_type' => $obj_type,
+      // FIXME: Widget type doesn't work
+      'widget_type' => 'options_onoff',
+      'label' => t('Groups register'),
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+}
+
+/**
+ *  Get all the groups node IDs that should appear in the user registration.
+ */
+function og_register_get_groups($count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
+  $nids = array();
+
+  // Get all the group node IDs.
+  if (($field = field_info_field(OG_REGISTER_FIELD)) && $result = field_attach_query($field['id'], array(),  array('limit' => $count, 'cursor' => $cursor))) {
+    foreach ($result['node'] as $value) {
+      $nids[$value->nid] = $value->nid;
+    }
+  }
+
+  return $nids;
+}
