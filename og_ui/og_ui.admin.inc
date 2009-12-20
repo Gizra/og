@@ -277,8 +277,8 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
         '#type' => 'submit',
         '#value' => t('Add role'),
       );
-      $form['#submit'][] = 'og_user_admin_role_submit';
-      $form['#validate'][] = 'og_user_admin_role_validate';
+      $form['#submit'][] = 'og_ui_user_admin_role_submit';
+      $form['#validate'][] = 'og_ui_user_admin_role_validate';
     }
     return $form;
   }
