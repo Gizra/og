@@ -1,8 +1,0 @@
-; $Id: form_test.info,v 1.1 2009/01/28 07:43:26 webchick Exp $
-name = "Organic groups tests"
-description = "Test module for the Organic groups tests."
-package = Testing
-version = VERSION
-core = 7.x
-files[] = og_test.module
-hidden = TRUE
