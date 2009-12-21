@@ -227,61 +227,6 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
 }
 
 /**
- * Implement hook_og_permission().
- */
-function og_ui_og_permission() {
-  return array(
-    'subscribe' => array(
-      'title' => t('Subscribe user to group'),
-      'description' => t("Allow user to be a member of a group (approval required)."),
-      'roles' => array(OG_ANONYMOUS_ROLE),
-    ),
-    'subscribe without approval' => array(
-      'title' => t('Subscribe user to group (no approval required).'),
-      'description' => t("Allow user to be a member of a group without an approval of the group administrator."),
-      'roles' => array(OG_ANONYMOUS_ROLE),
-    ),
-    'unsubscribe' => array(
-      'title' => t('Unsubscribe user from group'),
-      'description' => t("Allow user to be remove membership from a group."),
-      'roles' => array(OG_AUTHENTICATED_ROLE),
-    ),
-    'approve and deny subscription' => array(
-      'title' => t('Approve and deny subscription'),
-      'description' => t("Allow user to allow or deny another user's subscription request."),
-    ),
-    'add user' => array(
-      'title' => t('Add user'),
-      'description' => t("Add a new user to the group."),
-    ),
-    'update group' => array(
-      'title' => t('Edit group'),
-      'description' => t('Edit the group content.'),
-    ),
-    'update own group content' => array(
-      'title' => t('Edit own group content'),
-      'description' => t('Edit own group content that belong to the group.'),
-    ),
-    'update any group content' => array(
-      'title' => t('Edit any group content'),
-      'description' => t('Edit any group content that belong to the group.'),
-    ),
-    'delete own group content' => array(
-      'title' => t('Delete own group content'),
-      'description' => t('Delete own group content that belong to the group.'),
-    ),
-    'delete any group content' => array(
-      'title' => t('Delete any group content'),
-      'description' => t('Delete any of the group content that belong to the group.'),
-    ),
-    'administer group' => array(
-      'title' => t('Administer group'),
-      'description' => t('Manage or block users, and manage their role assignments in the group.'),
-    ),
-  );
-}
-
-/**
  * Implement hook_og_user_operations().
  */
 function og_ui_og_user_operations($form = array(), $form_state = array()) {
