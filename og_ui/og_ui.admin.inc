@@ -560,7 +560,7 @@ function og_ui_admin_settings() {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Add group and group content fields to bundles'),
-    '#submit' => array('og_admin_settings_submit'),
+    '#submit' => array('og_ui_admin_settings_submit'),
   );
 
   return $form;
@@ -658,7 +658,7 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
       }
     }
   }
-  $form['#theme'] = array('og_user_admin_bundles');
+  $form['#theme'] = array('og_ui_user_admin_bundles');
 
   return $form;
 }

@@ -13,7 +13,7 @@ function og_ui_menu() {
   $items['og/%/%/subscribe'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'og_ui.pages.inc',
-    'page callback' => 'og_subscribe',
+    'page callback' => 'og_ui_subscribe',
     'page arguments' => array(1, 2),
     'access callback' => 'og_access',
     'access arguments' => array('subscribe', 1, 2),
@@ -21,18 +21,11 @@ function og_ui_menu() {
     'title' => 'Join group'
   );
 
-  $items['og/opml'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'og_opml',
-    'access callback' => 'user_is_logged_in',
-    'title' => 'OPML',
-  );
-
   $items['og/%/%/unsubscribe'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'og_ui.pages.inc',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_ui_confirm_unsubscribe', 1, 2),
+    'page callback' => 'og_ui_unsubscribe',
+    'page arguments' => array(1, 2),
     'access callback' => 'og_access',
     'access arguments' => array('unsubscribe', 1, 2),
     'title' => 'Leave group',
@@ -136,7 +129,6 @@ function og_ui_menu() {
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure organic groups default permissions when a new group is created.',
     'file' => 'og_ui.admin.inc',
-    'file path' => drupal_get_path('module', 'og'),
   );
   $items['admin/config/og/fields'] = array(
     'page callback' => 'drupal_get_form',
@@ -145,7 +137,13 @@ function og_ui_menu() {
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure organic groups fields in bundles.',
     'file' => 'og_ui.admin.inc',
-    'file path' => drupal_get_path('module', 'og'),
+  );
+
+  $items['og/opml'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'og_opml',
+    'access callback' => 'user_is_logged_in',
+    'title' => 'OPML',
   );
 
   return $items;

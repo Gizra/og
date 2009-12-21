@@ -53,7 +53,7 @@ function og_ui_subscribe($obj_type, $oid, $uid = NULL) {
 }
 
 /**
- * Confirm OG membership form.
+ * Confirm subscribe form.
  */
 function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
   $form['group'] = array('#type' => 'value', '#value' => $group);
@@ -96,7 +96,7 @@ function og_ui_confirm_subscribe_submit($form, &$form_state) {
  * no malicious user will unsubscribe another user. Administrators can reject or
  * ban another group member from the "people" page.
  */
-function og_ui_confirm_unsubscribe($form, &$form_state, $obj_type, $oid) {
+function og_ui_unsubscribe($obj_type, $oid) {
   if ($group = og_get_group($obj_type, $oid)) {
     global $user;
 
@@ -104,9 +104,8 @@ function og_ui_confirm_unsubscribe($form, &$form_state, $obj_type, $oid) {
     // Check the user isn't the manager of the group.
     $object= current(entity_load($group->obj_type, array($group->oid)));
     if (!empty($object->uid) && $object->uid != $user->uid) {
-      $form['group'] = array('#type' => 'value', '#value' => $group);
-      $form['account'] = array('#type' => 'value', '#value' => $user);
-      return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), "$group->obj_type/$group->oid", ' ', t('Remove'), t('Cancel'));
+      // Show the user a subscription confirmation.
+      return drupal_get_form('og_ui_confirm_unsubscribe', $group, $user);
     }
     else {
       drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $label)));
@@ -115,6 +114,17 @@ function og_ui_confirm_unsubscribe($form, &$form_state, $obj_type, $oid) {
   }
   // Not a valid group.
   drupal_not_found();
+}
+
+/**
+ * Confirm unsubscribe form.
+ */
+function og_ui_confirm_unsubscribe($form, &$form_state, $group, $account) {
+   $form['group'] = array('#type' => 'value', '#value' => $group);
+   $form['account'] = array('#type' => 'value', '#value' => $account);
+
+   $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
+   return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), "$group->obj_type/$group->oid", ' ', t('Remove'), t('Cancel'));
 }
 
 /**
