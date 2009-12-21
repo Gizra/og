@@ -289,15 +289,15 @@ function og_ui_og_user_operations($form = array(), $form_state = array()) {
   $operations = array(
     'unblock' => array(
       'label' => t('Approve membership of the selected users'),
-      'callback' => 'og_user_operations_approve',
+      'callback' => 'og_ui_user_operations_approve',
     ),
     'deny' => array(
       'label' => t('Deny membership from the selected users'),
-      'callback' => 'og_user_operations_deny',
+      'callback' => 'og_ui_user_operations_deny',
     ),
     'block' => array(
       'label' => t('Block membership from the selected users'),
-      'callback' => 'og_user_operations_block',
+      'callback' => 'og_ui_user_operations_block',
     ),
   );
 

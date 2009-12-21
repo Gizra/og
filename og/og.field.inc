@@ -357,7 +357,7 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
   foreach ($items as &$item) {
     $item['state'] = !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE;
     $item['data'] = !empty($item['data']) ? $item['data'] : array();
-    $item['created'] = !empty($item['created']) ? $item['data'] : time();
+    $item['created'] = !empty($item['created']) ? $item['created'] : time();
     $item['changed'] = time();
 
     // Variable that will be altered, should not include the group ID.
