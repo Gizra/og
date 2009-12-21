@@ -543,7 +543,7 @@ function og_ui_admin_settings() {
   $form = array();
   $options = array();
 
-  $fields_info = og_get_group_fields();
+  $fields_info = og_get_fields();
 
   $form['og_group'] = array(
     '#type' => 'fieldset',
@@ -568,7 +568,7 @@ function og_ui_admin_settings() {
 
 function og_ui_admin_settings_submit($form, &$form_state) {
   $messages = array();
-  $fields_info = og_get_group_fields();
+  $og_fields = og_get_fields();
   $bundle_info = array();
   foreach (field_info_bundles() as $entity => $bundles) {
     foreach ($bundles as $key => $value) {
@@ -583,15 +583,13 @@ function og_ui_admin_settings_submit($form, &$form_state) {
     if (($key = explode('-', $key)) && count($key) == 3 && in_array($key[1], array('group', 'group_content'))) {
       // If the key is group_content it should be without the hyphen.
       $key[1] = str_replace('_', ' ', $key[1]);
+      $field_name = $key[2];
       // Keep only the bundles that should be changed.
       foreach (array_filter($bundles) as $bundle_key => $bundle) {
         // Add the field if it doesn't already exist.
-        if (!field_info_instance($bundle_info[$bundle], $key[2], $bundle)) {
-          // Get the callback of the field.
-          $function = $fields_info[$key[0]][$key[1]][$key[2]]['callback'];
-
-          call_user_func($function, $bundle_info[$bundle], $bundle);
-          $messages[] = t('Added field @field to @bundle.', array('@field' => $key[2], '@bundle' => $bundle));
+        if (!field_info_instance($bundle_info[$bundle], $field_name, $bundle)) {
+          call_user_func('og_create_field', $field_name, $bundle_info[$bundle], $bundle);
+          $messages[] = t('Added field @field to @bundle.', array('@field' => $og_fields[$field_name]['instance']['label'], '@bundle' => $bundle));
         }
       }
     }

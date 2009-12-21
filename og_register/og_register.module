@@ -53,9 +53,9 @@ function og_register_form_user_register_form_alter(&$form, $form_state) {
 }
 
 /**
- * Implement og_get_group_fields().
+ * Implement og_get_fields().
  */
-function og_register_og_get_group_fields() {
+function og_register_og_get_fields() {
   return array(
     'group' => array(
       'og_register' => array(

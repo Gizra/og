@@ -76,9 +76,9 @@ function og_access_node_access_records($node) {
 }
 
 /**
- * Implement og_get_group_fields().
+ * Implement og_get_fields().
  */
-function og_access_og_get_group_fields() {
+function og_access_og_get_fields() {
   return array(
     'group content' => array(
       'og_access' => array(

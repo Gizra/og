@@ -29,9 +29,9 @@ function og_views_field_formatter_info() {
 }
 
 /**
- * Implement og_get_group_fields().
+ * Implement og_get_fields().
  */
-function og_views_og_get_group_fields() {
+function og_views_og_get_fields() {
   return array(
     'group' => array(
       'og_views' => array(
