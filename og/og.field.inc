@@ -87,9 +87,9 @@ function og_field_formatter_info() {
 }
 
 /**
- * Implements hook_field_formatter().
+ * Implements hook_field_formatter_view().
  */
-function og_field_formatter($object_type, $object, $field, $instance, $langcode, $items, $display) {
+function og_field_formatter_view($object_type, $object, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
   if ($field['field_name'] == 'og_audience') {
@@ -199,9 +199,9 @@ function og_field_widget_settings_form($field, $instance) {
 }
 
 /**
- * Implement hook_field_widget().
+ * Implement hook_field_widget_form().
  */
-function og_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
   $element = $base;
 
   $excludes = array();
