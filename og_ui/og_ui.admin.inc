@@ -424,7 +424,7 @@ function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid
   }
 
   if (empty($group)) {
-    $form['#theme'] = array('og_user_admin_permissions');
+    $form['#theme'] = array('og_ui_user_admin_permissions');
   }
   $form['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'), '#submit' => array('og_ui_user_admin_permissions_submit'));
   $form['#after_build'] = array('og_ui_user_admin_permissions_after_build');
@@ -543,19 +543,19 @@ function og_ui_admin_settings() {
   $form = array();
   $options = array();
 
-  $fields_info = og_get_fields();
+  $og_fields = og_get_fields();
 
   $form['og_group'] = array(
     '#type' => 'fieldset',
     '#title' => t('Group type'),
   );
-  $form['og_group']['og_group'] = _og_admin_fields_overview($fields_info, 'group');
+  $form['og_group']['og_group'] = _og_admin_fields_overview($og_fields, 'group');
 
   $form['og_group_content'] = array(
     '#type' => 'fieldset',
     '#title' => t('Group post type'),
   );
-  $form['og_group_content']['og_group_content'] = _og_admin_fields_overview($fields_info, 'group content');
+  $form['og_group_content']['og_group_content'] = _og_admin_fields_overview($og_fields, 'group content');
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -566,42 +566,13 @@ function og_ui_admin_settings() {
   return $form;
 }
 
-function og_ui_admin_settings_submit($form, &$form_state) {
-  $messages = array();
-  $og_fields = og_get_fields();
-  $bundle_info = array();
-  foreach (field_info_bundles() as $entity => $bundles) {
-    foreach ($bundles as $key => $value) {
-        // Get a two dimension array with the bundle as key and the entity
-        // as the value.
-      $bundle_info[$key] = $entity;
-    }
-  }
-
-  foreach ($form_state['values'] as $key => $bundles) {
-    // Key should be [module name] - [group type] - [field name].
-    if (($key = explode('-', $key)) && count($key) == 3 && in_array($key[1], array('group', 'group_content'))) {
-      // If the key is group_content it should be without the hyphen.
-      $key[1] = str_replace('_', ' ', $key[1]);
-      $field_name = $key[2];
-      // Keep only the bundles that should be changed.
-      foreach (array_filter($bundles) as $bundle_key => $bundle) {
-        // Add the field if it doesn't already exist.
-        if (!field_info_instance($bundle_info[$bundle], $field_name, $bundle)) {
-          call_user_func('og_create_field', $field_name, $bundle_info[$bundle], $bundle);
-          $messages[] = t('Added field @field to @bundle.', array('@field' => $og_fields[$field_name]['instance']['label'], '@bundle' => $bundle));
-        }
-      }
-    }
-  }
-
-  if (!empty($messages)) {
-    foreach ($messages as $message) {
-      drupal_set_message($message);
-    }
-  }
-}
-
+/**
+ * Helper function to create tables for group and group content fields.
+ *
+ * @param $fields_info
+ * @param $group_type
+ * @return unknown_type
+ */
 function _og_admin_fields_overview($fields_info, $group_type = 'group') {
   $form = array();
   $options = $status = array();
@@ -629,36 +600,46 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
     }
   }
 
-  // Group type might be "group content" but for we need it with an underscore for
-  // the form keys.
-  $underscore_group_type = str_replace(' ', '_', $group_type);
-  $form['group_type'] = array('#type' => 'hidden', '#value' => $underscore_group_type );
-
   // Have to build checkboxes here after checkbox arrays are built
-  foreach ($fields_info as $module => $value) {
-    if (!empty($value[$group_type])) {
-      // A module might have multiple fields option.
-      foreach ($value[$group_type] as $field => $field_value) {
-        // We need to prefix the module with some information, so we'll be able to
-        // later extract it in og_admin_settings_submit() and know which field,
-        // in which bundle should be created.
-        $module_key = array(
-          0 => $module,
-          1 => $underscore_group_type,
-          2 => $field,
-        );
-
-        // We use a hyphen to devide the information, as it's an illegal
-        // charcter for field/ bundle name.
-        $module_key = implode('-', $module_key);
-        $form['checkboxes'][$module_key] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => !empty($status[$field]) ? $status[$field] : array());
-        $form['modules'][$module_key] = array('#markup' => $module . ' (' . $field_value['title'] . ')', '#tree' => TRUE);
-      }
-    }
+  foreach ($fields_info as $field => $field_value) {
+     $form['checkboxes'][$field] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => !empty($status[$field]) ? $status[$field] : array());
+     $form['modules'][$field] = array('#markup' =>  $field_value['instance']['label'] . ' (' . $field_value['module'] . ')', '#tree' => TRUE);
   }
+
   $form['#theme'] = array('og_ui_user_admin_bundles');
 
   return $form;
+}
+
+function og_ui_admin_settings_submit($form, &$form_state) {
+  $messages = array();
+  $og_fields = og_get_fields();
+  $bundle_info = array();
+  foreach (field_info_bundles() as $entity => $bundles) {
+    foreach ($bundles as $key => $value) {
+        // Get a two dimension array with the bundle as key and the entity
+        // as the value.
+      $bundle_info[$key] = $entity;
+    }
+  }
+
+  foreach ($og_fields as $field_name => $field_value) {
+    if (!empty($form_state['values'][$field_name]) && $bundles = array_filter($form_state['values'][$field_name])) {
+      foreach ($bundles as $key => $bundle) {
+        // Add the field if it doesn't already exist.
+        if (!field_info_instance($bundle_info[$bundle], $field_name, $bundle)) {
+          call_user_func('og_create_field', $field_name, $bundle_info[$bundle], $bundle);
+          $messages[] = t('Added field %field to %bundle.', array('%field' => $og_fields[$field_name]['instance']['label'], '%bundle' => $bundle));
+        }
+      }
+    }
+  }
+
+  if (!empty($messages)) {
+    foreach ($messages as $message) {
+      drupal_set_message($message);
+    }
+  }
 }
 
 /**
@@ -668,9 +649,6 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
  */
 function theme_og_ui_user_admin_bundles($variables) {
   $form = $variables['form'];
-
-  // "group" or "group_content".
-  $group_type = $form['group_type']['#value'];
 
   $modules = array_keys(element_children($form['modules']));
 
