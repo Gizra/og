@@ -91,6 +91,40 @@ function og_access_og_get_fields() {
 }
 
 /**
+ * Implement og_get_fields().
+ */
+function og_access_og_get_fields() {
+  $items['og_access'] = array(
+    'type' => array('group content'),
+    'description' => t('Add organic groups access field to group content types.'),
+    'field' => array(
+      'field_name' => 'og_access',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Do not show to non group member', '1|Show to all site users')), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
+      'label' => t('group content visibility'),
+      // FIXME: Widget type doesn't work
+      'widget_type' => 'options_onoff',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+      ),
+    ),
+  );
+
+  return $items;
+}
+
+
+/**
  * Check if an object is set as public.
  *
  * @param $obj_type
@@ -103,47 +137,4 @@ function og_access_og_get_fields() {
 function og_access_object_is_public($obj_type, $object) {
   og_load_object($obj_type, $object);
   return !empty($object->{OG_ACCESS_FIELD}[LANGUAGE_NONE][0]['gid']);
-}
-
-
-/**
- * Add organic groups access field to group content types.
- *
- * @param $bundle
- *   The bundle name.
- */
-function og_access_create_fields($obj_type, $bundle) {
-  $field = field_info_field('og_access');
-  if (empty($field)) {
-    $field = array(
-      'field_name' => 'og_access',
-      'type' => 'list_boolean',
-      'cardinality' => 1,
-      'settings' => array('allowed_values' => implode("\r\n", array('0|Do not show to non group member', '1|Show to all site users')), 'allowed_values_function' => ''),
-    );
-    $field = field_create_field($field);
-  }
-
-  $instance = field_info_instance($obj_type, 'og_access', $bundle);
-  if (empty($instance)) {
-    $instance = array(
-      'field_name' => 'og_access',
-      'bundle' => $bundle,
-      'object_type' => $obj_type,
-      // FIXME: Widget type doesn't work
-      'widget_type' => 'options_onoff',
-      'label' => t('group content visibility'),
-      'display' => array(
-        'full' => array(
-          'label' => 'above',
-          'type' => 'options_onoff',
-        ),
-        'teaser' => array(
-          'label' => 'above',
-          'type' => 'options_onoff',
-        ),
-      ),
-    );
-    field_create_instance($instance);
-  }
 }

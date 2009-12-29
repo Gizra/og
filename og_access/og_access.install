@@ -14,7 +14,7 @@
 function og_access_enable() {
   foreach (node_type_get_names() as $type => $name){
     if (og_is_group_content_type($type)) {
-      og_access_create_fields($type);
+      og_create_field('og_access', 'node', $type);
     }
   }
 }

@@ -152,12 +152,12 @@ function og_node_type_update($info) {
  */
 function og_node_type_save($bundle_name) {
   if (variable_get('og_group_type_' . $bundle_name, 'omitted') == 'group') {
-    og_create_fields_group('node', $bundle_name);
+    og_create_field('og_group','node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_type_' . $bundle_name);
   }
   if (variable_get('og_group_content_type_' . $bundle_name, 'omitted') == 'group_content') {
-    og_create_fields_group_content('node', $bundle_name);
+    og_create_field('og_audience','node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_content_type_' . $bundle_name);
   }
@@ -336,9 +336,11 @@ function og_og_get_fields() {
       'widget_type' => 'options_onoff',
       'display' => array(
         'full' => array(
+          'label' => 'above',
           'type' => 'og_group_subscribe',
         ),
         'teaser' => array(
+          'label' => 'above',
           'type' => 'og_group_subscribe',
         ),
       ),
@@ -359,16 +361,16 @@ function og_og_get_fields() {
       'widget_type' => 'og_audience',
       'display' => array(
         'full' => array(
+          'label' => 'above',
           'type' => 'og_list_default',
         ),
         'teaser' => array(
+          'label' => 'above',
           'type' => 'og_list_default',
         ),
       ),
     ),
   );
-
-
 
   return $items;
 }
@@ -779,7 +781,7 @@ function og_set_association($obj_type, $object, $groups = array(), $replace = FA
   foreach ($groups as $group) {
     $key = 0;
     if ($value = og_get_group_from_object($group['gid'], $obj_type, $object, $key)) {
-      // Group already exists, so we will replace it. The key was return from
+      // Group already exists, so we will replace it. The key was returned from
       // og_get_group_from_object().
       // We preserve the data and state values, provided they aren't changed.
       $group = array_merge($value, $group);
@@ -1808,16 +1810,17 @@ function og_create_field($field_name, $obj_type, $bundle) {
   else {
     $field = field_info_field($field_name);
     if (empty($field)) {
-      $field = field_create_field($og_field['field']);
+      $field = field_create_field($og_field[$field_name]['field']);
     }
 
     $instance = field_info_instance($obj_type, $field_name, $bundle);
     if (empty($instance)) {
+
       $instance = array(
         'field_name' => $field_name,
         'bundle' => $bundle,
         'object_type' => $obj_type,
-      ) + $og_field['instance'];
+      ) + $og_field[$field_name]['instance'];
 
       field_create_instance($instance);
     }

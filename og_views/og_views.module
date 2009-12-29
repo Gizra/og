@@ -61,31 +61,19 @@ function og_views_field_allowed_values() {
 }
 
 /**
- * Add organic groups Views field to fieldable entities that are groups.
- *
- * @param $bundle
- *   The bundle name.
- * @param $obj_type
- *   The object type for the instance. "node" by default.
+ * Implement og_get_fields().
  */
-function og_views_create_fields_group($obj_type, $bundle) {
-  $field = field_info_field('og_views');
-  if (empty($field)) {
-    $field = array(
+function og_views_og_get_fields() {
+  $items['og_views'] = array(
+    'type' => array('group'),
+    'description' => t('Add organic groups Views field to fieldable entities that are groups.'),
+    'field' => array(
       'field_name' => 'og_views',
       'type' => 'list_text',
       'cardinality' => 1,
       'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_views_field_allowed_values'),
-    );
-    $field = field_create_field($field);
-  }
-
-  $instance = field_info_instance($obj_type, 'og_views', $bundle);
-  if (empty($instance)) {
-    $instance = array(
-      'field_name' => 'og_views',
-      'bundle' => $bundle,
-      'object_type' => $obj_type,
+    ),
+    'instance' => array(
       'label' => t('Groups views'),
       'widget_type' => 'options_select',
       'display' => array(
@@ -98,9 +86,10 @@ function og_views_create_fields_group($obj_type, $bundle) {
           'type' => 'og_list_default',
         ),
       ),
-    );
-    field_create_instance($instance);
-  }
+    ),
+  );
+
+  return $items;
 }
 
 /**
