@@ -543,19 +543,17 @@ function og_ui_admin_settings() {
   $form = array();
   $options = array();
 
-  $og_fields = og_get_fields();
-
   $form['og_group'] = array(
     '#type' => 'fieldset',
     '#title' => t('Group type'),
   );
-  $form['og_group']['og_group'] = _og_admin_fields_overview($og_fields, 'group');
+  $form['og_group']['og_group'] = _og_admin_fields_overview('group');
 
   $form['og_group_content'] = array(
     '#type' => 'fieldset',
     '#title' => t('Group post type'),
   );
-  $form['og_group_content']['og_group_content'] = _og_admin_fields_overview($og_fields, 'group content');
+  $form['og_group_content']['og_group_content'] = _og_admin_fields_overview('group content');
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -569,13 +567,14 @@ function og_ui_admin_settings() {
 /**
  * Helper function to create tables for group and group content fields.
  *
- * @param $fields_info
  * @param $group_type
  * @return unknown_type
  */
-function _og_admin_fields_overview($fields_info, $group_type = 'group') {
+function _og_admin_fields_overview($group_type = 'group') {
   $form = array();
   $options = $status = array();
+
+  $og_fields = og_get_fields();
 
   foreach(field_info_bundles() as $entity => $bundles) {
     $form['bundle'][] = array('#markup' => t('@entity entity', array('@entity' => $entity)), '#id' => $entity);
@@ -601,7 +600,7 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
   }
 
   // Have to build checkboxes here after checkbox arrays are built
-  foreach ($fields_info as $field => $field_value) {
+  foreach ($og_fields as $field => $field_value) {
     if (in_array($group_type, $field_value['type'])) {
       $form['checkboxes'][$field] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => !empty($status[$field]) ? $status[$field] : array());
       $form['modules'][$field] = array('#markup' =>  $field_value['instance']['label'] . ' (' . $field_value['module'] . ')', '#tree' => TRUE);
