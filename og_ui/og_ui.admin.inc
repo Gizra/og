@@ -602,8 +602,10 @@ function _og_admin_fields_overview($fields_info, $group_type = 'group') {
 
   // Have to build checkboxes here after checkbox arrays are built
   foreach ($fields_info as $field => $field_value) {
-     $form['checkboxes'][$field] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => !empty($status[$field]) ? $status[$field] : array());
-     $form['modules'][$field] = array('#markup' =>  $field_value['instance']['label'] . ' (' . $field_value['module'] . ')', '#tree' => TRUE);
+    if (in_array($group_type, $field_value['type'])) {
+      $form['checkboxes'][$field] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => !empty($status[$field]) ? $status[$field] : array());
+      $form['modules'][$field] = array('#markup' =>  $field_value['instance']['label'] . ' (' . $field_value['module'] . ')', '#tree' => TRUE);
+    }
   }
 
   $form['#theme'] = array('og_ui_user_admin_bundles');
