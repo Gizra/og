@@ -337,11 +337,11 @@ function og_og_get_fields() {
       'display' => array(
         'full' => array(
           'label' => 'above',
-          'type' => 'og_group_subscribe',
+          'type' => 'list_default',
         ),
         'teaser' => array(
           'label' => 'above',
-          'type' => 'og_group_subscribe',
+          'type' => 'list_default',
         ),
       ),
     ),
