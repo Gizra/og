@@ -95,7 +95,7 @@ function og_access_og_get_fields() {
  */
 function og_access_og_get_fields() {
   $items['og_access'] = array(
-    'type' => array('group content'),
+    'type' => array('group content', 'group'),
     'description' => t('Add organic groups access field to group content types.'),
     'field' => array(
       'field_name' => 'og_access',
