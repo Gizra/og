@@ -350,7 +350,7 @@ function og_og_get_fields() {
 
   $items['og_audience'] = array(
     'type' => array('group content'),
-    'description' => t('Determine to which groups this group content is assgnied to.'),
+    'description' => t('Determine to which groups this group content is assigned to.'),
     'field' => array(
       'field_name' => 'og_audience',
       'type' => 'og',
