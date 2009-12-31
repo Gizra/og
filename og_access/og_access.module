@@ -79,23 +79,8 @@ function og_access_node_access_records($node) {
  * Implement og_get_fields().
  */
 function og_access_og_get_fields() {
-  return array(
-    'group content' => array(
-      'og_access' => array(
-         'title' => t('group content visibility'),
-         'callback' => 'og_access_create_fields',
-         'field' => 'og_access',
-      ),
-    ),
-  );
-}
-
-/**
- * Implement og_get_fields().
- */
-function og_access_og_get_fields() {
   $items['og_access'] = array(
-    'type' => array('group content', 'group'),
+    'type' => array('group', 'group content'),
     'description' => t('Add organic groups access field to group content types.'),
     'field' => array(
       'field_name' => 'og_access',
