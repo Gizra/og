@@ -433,3 +433,48 @@ function og_ui_user_multiple_role_edit($gid, $accounts, $operation, $rid) {
       break;
   }
 }
+
+/**
+ * Implementation of hook_og_ui_get_group_admin()
+ */
+function og_ui_og_ui_get_group_admin() {
+  $items = array();
+  $items['add_people'] = array(
+    'title' => t('Add people'),
+    'description' => t('Add group members.'),
+    // The final URL will be "og/$obj_type/$oid/admin/people/add-user".
+    // @see og_ui_group_admin_overview().
+    'href' => 'admin/people/add-user',
+  );
+
+  $items['people'] = array(
+    'title' => t('People'),
+    'description' => t('Manage the group members.'),
+    'href' => "admin/people",
+  );
+
+  $items['roles'] = array(
+    'title' => t('Roles'),
+    'description' => t('Manage the group roles.'),
+    'href' => "admin/people/roles",
+  );
+  $items['permissions'] = array(
+    'title' => t('Permissions'),
+    'description' => t('Manage the group permissions.'),
+    'href' => "admin/people/permissions",
+  );
+
+  return $items;
+}
+
+/**
+ * Get all the group admin menu items.
+ */
+function og_ui_get_group_admin() {
+  $data = module_invoke_all('og_ui_get_group_admin');
+
+  // Allow other modules to alter the menu items.
+  drupal_alter('og_ui_get_group_admin', $data);
+
+  return $data;
+}

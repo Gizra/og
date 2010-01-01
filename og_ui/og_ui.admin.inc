@@ -14,37 +14,19 @@
  */
 function og_ui_group_admin_overview($obj_type, $oid) {
   og_set_breadcrumb($obj_type, $oid);
-  // Imitate the menu_get_item() content, so we can pass it to
-  // theme_admin_block_content().
-  $content = array(
-    'add_people' => array(
-      'title' => t('Add people'),
-      'description' => t('Add group members.'),
-      'href' => "og/$obj_type/$oid/admin/people/add-user",
-      'localized_options' => array(),
-    ),
-    'people' => array(
-      'title' => t('People'),
-      'description' => t('Manage the group members.'),
-      'href' => "og/$obj_type/$oid/admin/people",
-      'localized_options' => array(),
-    ),
-    'roles' => array(
-      'title' => t('Roles'),
-      'description' => t('Manage the group roles.'),
-      'href' => "og/$obj_type/$oid/admin/people/roles",
-      'localized_options' => array(),
-    ),
-    'permissions' => array(
-      'title' => t('Permissions'),
-      'description' => t('Manage the group permissions.'),
-      'href' => "og/$obj_type/$oid/admin/people/permissions",
-      'localized_options' => array(),
-    ),
-  );
+
+  $items = og_ui_get_group_admin();
+
+  foreach ($items as &$item) {
+    // Re-format the URL.
+    $item['href'] = "og/$obj_type/$oid/" . $item['href'];
+    // Imitate the menu_get_item() content, so we can pass it to
+    // theme_admin_block_content(), so we add the localized_options key.
+    $item['localized_options'] = array();
+  }
 
   $form['system_compact_link'] = array('#markup' => theme('system_compact_link'));
-  $form['admin_block_content'] = array('#markup' => theme('admin_block_content', array('content' => $content)));
+  $form['admin_block_content'] = array('#markup' => theme('admin_block_content', array('content' => $items)));
 
   return $form;
 }
