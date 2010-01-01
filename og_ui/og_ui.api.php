@@ -11,6 +11,9 @@
  * @{
  */
 
+/**
+ * Add a menu item that should appear in the group admin page.
+ */
 function hook_og_ui_get_group_admin() {
   $items = array();
   $items['add_people'] = array(
@@ -23,8 +26,15 @@ function hook_og_ui_get_group_admin() {
   return $items;
 }
 
+/**
+ * Alter existing group admin menu items.
+ *
+ * @param $data
+ *   The menu items passed by reference.
+ */
 function hook_og_ui_get_group_admin_alter(&$data) {
-
+  // Hijack the add people to use a custom implementation.
+  $items['add_people']['href'] = 'admin/people/custom-add-user';
 }
 
 /**
