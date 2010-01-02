@@ -155,10 +155,15 @@ function og_field_widget_settings_form($field, $instance) {
 
 /**
  * Implement hook_field_widget_form().
+ *
+ * Unlike options_field_widget_form() our widget's logic is a bit different, as
+ * the form element type is a result of the user's access to the groups.
+ * For example a privileged user may see all groups as an optgroup select list,
+ * where the groups are divided to "My groups" and "Other groups". This means
+ * that the $element['#type'] is a result of the options passed to
+ * $element['#options'].
  */
-function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
-  $element = $base;
-
+function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $excludes = array();
   // If it's an existing group, then exclude itself, as in some cases a group
   // can act also as a group content, and we want to prevent associating the group
@@ -170,6 +175,8 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     }
   }
 
+  // Get all the groups a user can see, sanitized with check_plain().
+  // @see og_get_all_groups_for_form().
   $content_groups = og_allowed_values($field);
 
   // Determine if a user may see other groups as-well.
@@ -241,13 +248,34 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     }
   }
 
-  $element = array(
-    '#input' => TRUE,
+  $element['#multiple'] = $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;;
+  // Don't make the field required, if there are no groups.
+  $element['#required'] = $element['#required'] && !empty($options);
+
+  // Prepare the type as expected in _options_properties().
+  if (in_array($type, array('radios', 'checkboxes'))) {
+    $options_type = 'buttons';
+  }
+  else {
+    $options_type = $type;
+  }
+
+  $properties = _options_properties($options_type, $element['#multiple'], $element['#required']);
+
+  // If the element isn't required, and there are some options.
+  if (!$element['#required'] && $type != 'item') {
+    // Use a dummy instance in order to use theme('options_none');
+    $dummy_instance['widget']['type'] = 'options_'. $options_type;
+    $options = array('_none' => theme('options_none', array('instance' => $dummy_instance))) + $options;
+  }
+
+  $element += array(
+    // Input should be TRUE only if there are groups that can be selected.
+    '#input' => $type != 'item',
     '#type' => $type,
     '#description' => $description,
     '#options' => $options,
     '#default_value' => $default_values,
-    '#multiple' => isset($element['#multiple']) ? $element['#multiple'] : $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED,
     '#attributes' => array('class' => array('og-audience')),
     '#disabled' => empty($groups_count),
     // Re-use options widget element validation, to correctly transform
@@ -255,7 +283,8 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     // @see options_field_widget().
     '#value_key' => 'gid',
     '#element_validate' => array('options_field_widget_validate'),
-  ) + $base;
+    '#properties' => $properties,
+  );
 
   $defaults = array('data' => array(), 'state' => '');
   foreach ($items as $delta => $item) {
