@@ -56,21 +56,6 @@ function og_register_form_user_register_form_alter(&$form, $form_state) {
  * Implement og_get_fields().
  */
 function og_register_og_get_fields() {
-  return array(
-    'group' => array(
-      'og_register' => array(
-         'title' => t('Groups register'),
-         'callback' => 'og_register_create_fields',
-         'field' => 'og_register',
-      ),
-    ),
-  );
-}
-
-/**
- * Implement og_get_fields().
- */
-function og_register_og_get_fields() {
   $items['og_register'] = array(
     'type' => array('group'),
     'description' => t('Add organic groups register field group types.'),
