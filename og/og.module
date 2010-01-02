@@ -9,18 +9,6 @@
 // Load all Field module hooks for organic groups.
 require(drupal_get_path('module', 'og') . '/og.field.inc');
 
-// site admin chooses in og_settings() whether group creator can put his group on the registration form
-define('OG_REGISTRATION_NEVER', 0);
-define('OG_REGISTRATION_ALWAYS', 1);
-define('OG_REGISTRATION_CHOOSE_TRUE', 2);
-define('OG_REGISTRATION_CHOOSE_FALSE', 3);
-
-// site admin chooses in og_settings() whether group creator can put his group in the Groups directory
-define('OG_DIRECTORY_NEVER', 0);
-define('OG_DIRECTORY_ALWAYS', 1);
-define('OG_DIRECTORY_CHOOSE_TRUE', 2);
-define('OG_DIRECTORY_CHOOSE_FALSE', 3);
-
 // Dispositioning of content and memberships after deletion of a group node.
 define('OG_DELETE_NOTHING', 0);
 define('OG_DELETE_ORPHANS', 1);
