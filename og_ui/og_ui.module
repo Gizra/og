@@ -108,6 +108,7 @@ function og_ui_menu() {
         'access arguments' => array($entity, 1),
         'type' => MENU_LOCAL_TASK,
         'file' => 'og_ui.admin.inc',
+        'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
       );
     }
   }
