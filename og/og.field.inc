@@ -381,7 +381,6 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
     }
     else {
       $state = '';
-      $group->data = !empty($group->data) ? unserialize($group->data) : array();
       if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
         $state = OG_STATE_PENDING;
       }

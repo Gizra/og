@@ -11,60 +11,35 @@
  * Implementation of hook_rules_action_info().
  */
 function og_rules_action_info() {
-  return array(
-    'og_rules_action_subscribe_user' => array(
-      'label' => t('Subscribe user to group'),
-      'arguments' => array(
-        'user' => array(
-          'type' => 'user',
-          'label' => t('User who will be subscribed'),
-        ),
-        'group' => array(
-          'type' => 'node',
-          'label' => t('Group that user will be subscribed to'),
-        ),
-        'state' => array(
-          'type' => 'string',
-          'label' => t('The subscription state'),
-        ),
-        'replace' => array(
-          'type' => 'boolean',
-          'label' => t('Replace <em>all</em> the user subscription with this one'),
-        ),
+  $items = array();
+
+  $items['og_set_association'] = array(
+    'label' => t('Associate content to group'),
+    'parameter' => array(
+      'group' => array(
+        'type' => 'og',
+        'label' => t('Group, to associate the content to'),
       ),
-      'module' => 'Organic groups',
-    ),
-    'og_rules_action_remove_user' => array(
-      'label' => t('Unsubscribe user from group'),
-      'arguments' => array(
-        'user' => array('type' => 'user',
-        'label' => t('User who will be unsubscribed'),
-        ),
-        'group' => array(
-          'type' => 'node',
-          'label' => t('Group that user will be unsubscribed from'),
-        ),
+      'content' => array(
+        'type' => 'string',
+        'label' => t('Content, to associate to the group'),
       ),
-      'module' => 'Organic groups',
-    ),
-    'og_rules_action_add_group_node' => array(
-      'label' => t('Add group node settings to content'),
-      'arguments' => array(
-        'node' => array(
-          'type' => 'node',
-          'label' => t('Content that will become a group node'),
-        ),
+      'state' => array(
+        'type' => 'string',
+        'label' => t('State'),
+        'description' => t('The state of the association.'),
       ),
-      'help' => t("When creating a group node organic groups module requires some group settings. This action should be used after 'Add new content' action, that adds a <a href=\"@group-node-type\">group node type</a> content, and will result with a new group node.", array('@group-node-type' => url('admin/og/og'))),
-      'module' => 'Organic groups',
     ),
+    'group' => t('Organic groups'),
   );
+
+  return $items;
 }
 
 /**
  * Action: Subscribe user to group.
  */
-function og_rules_action_subscribe_user($user, $node, $state, $replace, $settings) {
+function og_set_association($group, $content, $state, $settings) {
   $groups = array('gid' => $node->nid, 'state' => $state);
   og_set_association('user', $user, $groups, $replace);
 }

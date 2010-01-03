@@ -401,10 +401,9 @@ function og_get_group($obj_type, $oid, $states = array(OG_STATE_ACTIVE)) {
       $query->condition('state', $states, 'IN');
     }
     if ($result = $query->execute()->fetchObject()) {
+
       // Unserialize the data.
-      if (!empty($result->data)) {
-        $result->data = unserialize($result->data);
-      }
+      $result->data = !empty($result->data) ? unserialize($result->data) : array();
 
       // Allow other modules to change the group object.
       drupal_alter('og_get_group', $result);
