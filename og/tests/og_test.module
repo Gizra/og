@@ -1,0 +1,18 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Organic groups tests module.
+ */
+
+/**
+ * Implements hook_og_set_group_alter().
+ */
+function og_test_og_set_group_alter(&$group) {
+  if (!empty($group->data)) {
+    // Add another dummy_key.
+    $group->data['alter_key'] = 'alter_value';
+  }
+}
+
