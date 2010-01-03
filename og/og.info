@@ -1,0 +1,9 @@
+name = Organic groups
+description = "API to allow associating content with group nodes."
+package = "Organic groups"
+core = 7.x
+version = VERSION
+files[] = og.module
+files[] = og.install
+files[] = og.field.inc
+files[] = tests/og.test
