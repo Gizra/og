@@ -54,6 +54,9 @@ function og_views_views_handlers() {
       'og_views_handler_field_og_managelink' => array(
         'parent' => 'views_handler_field',
       ),
+      'og_views_handler_field_boolean_og_private' => array(
+        'parent' => 'views_handler_field_boolean',
+      ),
       'og_views_handler_field_og_is_active' => array(
         'parent' => 'views_handler_field',
       ),
@@ -190,7 +193,7 @@ function og_views_data_og() {
     'help' => t('Is the group home page private or not.'),
     'real field' => 'og_private',
     'field' => array(
-      'handler' => 'views_handler_field_boolean',
+      'handler' => 'og_views_handler_field_boolean_og_private',
       'click sortable' => TRUE
     ),
     'filter' => array(
