@@ -1954,8 +1954,6 @@ function og_node_type($op, $info) {
       variable_del('og_max_groups_'. $info->type);
       break;
     case 'update':
-      $usage = variable_get('og_content_type_usage_'. $info->type, 'omitted');
-      variable_set('og_content_type_usage_'. $info->type, $usage);
       if (isset($info->old_type)) {
         variable_del('og_content_type_usage_'. $info->old_type);
       }
