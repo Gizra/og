@@ -382,7 +382,7 @@ function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid
   $options = array();
   $hide_descriptions = !system_admin_compact_mode();
   foreach (og_permissions_get() as $module => $permissions) {
-    $form['permission'][] = array('#markup' => $module, '#id' => $module);
+    $form['permission'][] = array('#markup' => $module != 'administer' ? $module : t('administer group admins privileges'), '#id' => $module);
     foreach ($permissions as $perm => $perm_item) {
       $access = !empty($group) ? og_user_access($gid, 'show ' . $perm) : TRUE;
       if ($access) {

@@ -77,11 +77,10 @@ OG INSTALLATION DRUPAL 7.x
 11. In order to define default permissions for groups that are newly created or 
     to edit permissions on all existing groups, navigate to the Organic groups 
     default permissions page. Important permissions in this page are the ones 
-    under the administer section (e.g. administer og). These permissions are 
-    what enable group admins to have granular control over their own group. 
-    This means, that if you as the site admin, don't want to allow group admins 
-    to control who can edit nodes in their own group, you need to uncheck those 
-    permissions.
+    under the administer section. These permissions are what enable group admins 
+    to have granular control over their own group. This means, that if you as 
+    the site admin, don't want to allow group admins to control who can edit 
+    nodes in their own group, you need to uncheck those permissions.
 
 DEVELOPERS & SITE BUILDERS
 ----------------------------------------------
