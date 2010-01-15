@@ -499,32 +499,28 @@ function og_set_group($obj_type, $oid, $state = OG_STATE_ACTIVE, $data = array()
   return $group;
 }
 
-/**
- * Delete group objects thier group ID.
- *
- * @param $gids
- *   Array with the group unique ID.
- */
-function og_delete_groups($gids = array()) {
-  db_delete('og_groups')
-    ->condition('gid', $gids, 'IN')
-    ->execute();
-}
 
 /**
  * Delete a group object by it's object type and ID.
  *
  * @param $obj_type
- *   The group object type ID.
+ *   The group object type ID or 'gid' to delete by group ID.
  * @param $oid
  *   Optional; The group ID. If empty all groups belonging to the object type
  *   will be deleted.
  */
-function og_delete_groups_by_object($obj_type, $oids = array()) {
-  $query = db_delete('og_groups')->condition('obj_type', $obj_type);
-  if (!empty($oids)) {
-    $query->condition('oid', $oids);
+function og_delete_groups($obj_type, $oids = array()) {
+  $query = db_delete('og_groups');
+  if ($obj_type != 'gid') {
+    $query->condition('obj_type', $obj_type);
+    if (!empty($oids)) {
+      $query->condition('oid', $oids, 'IN');
+    }
   }
+  else {
+    $query->condition('gid', $oids, 'IN');
+  }
+
   $query->execute();
 }
 

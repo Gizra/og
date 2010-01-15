@@ -16,6 +16,7 @@ class OgGroupCrud extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('og', 'og_test');
+    $this->web_user = $this->drupalCreateUser();
   }
 
   /**
@@ -53,15 +54,15 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue($group->data['alter_key'] == 'alter_value', t('Group object data values were altered.'));
 
     // Delete a group by group ID.
-    og_delete_groups(array(1));
+    og_delete_groups('gid', array(1));
     $this->assertFalse(og_get_group('gid', 1), t('Deleted group object by group ID.'));
 
     // Delete a group by object type and object ID.
-    og_delete_groups_by_object('user', array(1));
+    og_delete_groups('user', array(1));
     $this->assertFalse(og_get_group('user', 1), t('Deleted group object by object type and object ID.'));
 
     // Delete all group by object type.
-    og_delete_groups_by_object('node');
+    og_delete_groups('node');
     $this->assertFalse(og_get_groups('node'), t('Deleted group object by object type.'));
   }
 
@@ -71,7 +72,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   function testOgAssociation() {
     $groups = $this->createGroups();
 
-    $web_user = $this->drupalCreateUser(array('access content'));
+    $web_user = $this->web_user;
 
     // Subscribe user to all groups.
     og_subscribe_user($groups, $web_user);
@@ -195,7 +196,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $this->group_type = $group_type->type;
 
     // Add og_group field.
-    og_create_fields_group('node', $this->group_type);
+    og_create_field('og_group', 'node', $this->group_type);
 
     $group = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => TRUE));
     $this->group = og_get_group('node', $group->nid);
