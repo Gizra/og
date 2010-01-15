@@ -174,13 +174,10 @@ class OgTypeTest extends DrupalWebTestCase {
 }
 
 class OgUserPermissionsTestCase extends DrupalWebTestCase {
-  protected $admin_user;
-  protected $rid;
-
   public static function getInfo() {
     return array(
       'name' => 'Organic groups role permissions',
-      'description' => 'Verify that role permissions can be added and removed via the permissions page of the group.',
+      'description' => 'Verify that role permissions can be added and removed via API.',
       'group' => 'Organic groups'
     );
   }
@@ -200,40 +197,6 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
 
     $group = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => TRUE));
     $this->group = og_get_group('node', $group->nid);
-  }
-
-  /**
-   * Change user permissions and check og_user_access().
-   */
-  function testOgUserPermissionChanges() {
-    $web_user = $this->drupalCreateUser();
-    $gid = $this->group->gid;
-    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
-
-    $roles = og_get_group_default_roles($gid);
-
-    // Remove a permission.
-    $edit = array();
-    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = FALSE;
-    $this->drupalPost('og/' . $this->group->obj_type . '/' . $this->group->oid . '/admin/people/permissions', $edit, t('Save permissions'));
-    $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
-
-    // TODO: Remove - find out why doesn't work without.
-    drupal_static_reset('og_user_access');
-    drupal_static_reset('og_user_role_permissions');
-
-    $this->assertFalse(og_user_access($gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
-
-    // Re-add permission.
-    $edit = array();
-    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = TRUE;
-    $this->drupalPost('og/' . $this->group->obj_type . '/' . $this->group->oid . '/admin/people/permissions', $edit, t('Save permissions'));
-
-    // TODO: Remove - find out why doesn't work without.
-    drupal_static_reset('og_user_access');
-    drupal_static_reset('og_user_role_permissions');
-
-    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
   }
 
 
@@ -264,7 +227,5 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertFalse(og_user_access($gid, 'subscribe', $account), t('User no longer has "subscribe" permission.'));
     $this->assertTrue(og_user_access($gid, 'subscribe without approval', $account), t('User still has "subscribe without approval" permission.'));
     $this->assertTrue(og_user_access($gid, 'add user', $account), t('User now has "subscribe without approval" permission.'));
-
-
   }
 }
