@@ -196,9 +196,8 @@ function og_og_permission() {
  */
 function og_og_permission_default() {
   return array(
-    OG_ANONYMOUS_ROLE => array('subscribe', 'subscribe without approval'),
-    OG_AUTHENTICATED_ROLE => array('unsubscribe', 'update own group content', 'delete own group content'),
-    OG_ADMINISTRATOR_ROLE => array('approve and deny subscription', 'add user', 'update group', 'update any group content', 'delete any group content', 'administer group'),
+    OG_AUTHENTICATED_ROLE => array('update own group content', 'delete own group content'),
+    OG_ADMINISTRATOR_ROLE => array('update group', 'update any group content', 'delete any group content', 'administer group'),
   );
 }
 

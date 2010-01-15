@@ -208,9 +208,9 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $gid = $this->group->gid;
 
     // Verify current permissions.
-    $this->assertTrue(og_user_access($gid, 'subscribe', $account), t('User has "subscribe" permission.'));
-    $this->assertTrue(og_user_access($gid, 'subscribe without approval', $account), t('User has "subscribe without approval" permission.'));
-    $this->assertFalse(og_user_access($gid, 'add user', $account), t('User does not have "add user" permission.'));
+    $this->assertTrue(og_user_access($gid, 'update own group content', $account), t('User has "update own group content" permission.'));
+    $this->assertTrue(og_user_access($gid, 'delete own group content', $account), t('User has "delete own group content" permission.'));
+    $this->assertFalse(og_user_access($gid, 'administer group', $account), t('User does not have "administer group" permission.'));
 
     // Change permissions to anonymous member.
     $roles = og_get_group_default_roles($gid);
@@ -218,14 +218,14 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $rid = $roles[OG_ANONYMOUS_ROLE];
 
     $permissions = array(
-      'subscribe' => 0,
-      'add user' => 1,
+      'delete own group content' => 0,
+      'administer group' => 1,
     );
     og_user_role_change_permissions($rid, $permissions);
 
     // Verify proper permission changes.
-    $this->assertFalse(og_user_access($gid, 'subscribe', $account), t('User no longer has "subscribe" permission.'));
-    $this->assertTrue(og_user_access($gid, 'subscribe without approval', $account), t('User still has "subscribe without approval" permission.'));
-    $this->assertTrue(og_user_access($gid, 'add user', $account), t('User now has "subscribe without approval" permission.'));
+    $this->assertTrue(og_user_access($gid, 'update own group content', $account), t('User still has "update own group content" permission.'));
+    $this->assertFalse(og_user_access($gid, 'delete own group content', $account), t('User no longer has "delete own group content" permission.'));
+    $this->assertTrue(og_user_access($gid, 'administer group', $account), t('User now has "administer group" permission.'));
   }
 }
