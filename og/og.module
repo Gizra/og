@@ -882,8 +882,8 @@ function og_context($account = NULL, $group = NULL) {
 
     $item = menu_get_item();
 
-    // Check the page arguments if one of them is an object, and check if it is a
-    // group or group content, by looking for og_group or og_audience fields.
+    // Check the page arguments if one of them is an object, and check if it is
+    // a group or group content, by looking for og_group or og_audience fields.
     if (!empty($item['page_arguments'])) {
       $obj_type = $item['map'][0];
       foreach ($item['page_arguments'] as $argument) {
@@ -898,7 +898,7 @@ function og_context($account = NULL, $group = NULL) {
           }
           // TODO: Add context based on ?gid_gids[] in URL.
           if (!empty($groups)) {
-            // Get the user's group and try to intesect.
+            // Get the user's group and try to intersect.
             $user_groups = og_get_object_groups('user', $account);
             if ($intersect_gids = array_intersect($groups, $user_groups)) {
               $gid = reset($intersect_gids);
@@ -908,8 +908,8 @@ function og_context($account = NULL, $group = NULL) {
               // if it's a node, as node access might be FALSE.
               $groups = og_get_groups('gid', $groups);
               // For performance reasons we prefer not to use node_access()
-              // so we first check if the group content is associated with non-node
-              // groups.
+              // so we first check if the group content is associated with
+              // non-node groups.
               if (!empty($groups['node'])) {
                 $node_gids = $groups['node'];
                 unset($groups['node']);
@@ -923,6 +923,7 @@ function og_context($account = NULL, $group = NULL) {
                   foreach ($node_gids as $node_gid) {
                     $group = og_get_group('gid', $node_get);
                     $nid = $group->oid;
+                    $node = node_load($nid);
                     if (node_access('view', $node, $account)) {
                       $gid = $group->gid;
                       break;
@@ -945,7 +946,26 @@ function og_context($account = NULL, $group = NULL) {
     }
   }
 
+  if (!empty($context)) {
+   og_context_js($context);
+  }
+
   return $context;
+}
+
+/**
+ * Add the group object of the context to the Drupal javascript object.
+ *
+ * @param $group
+ *   A group object.
+ */
+function og_context_js($group) {
+  // Static variable to indicate if group was already added to javacript.
+  $js = &drupal_static(__FUNCTION__, FALSE);
+  if (empty($js)) {
+    drupal_add_js(array('og' => array('og_context' => $group)), 'setting');
+    $js = TRUE;
+  }
 }
 
 /*******************************************************************************
