@@ -214,7 +214,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     }
   }
 
-
   if (empty($options)) {
     // There are no group, so don't show any input element.
     $type = 'item';
@@ -282,7 +281,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     // submitted values from field => delta to delta => field.
     // @see options_field_widget().
     '#value_key' => 'gid',
-    '#element_validate' => array('options_field_widget_validate'),
+    '#element_validate' => $type != 'item' ? array('options_field_widget_validate') : array(),
     '#properties' => $properties,
   );
 
@@ -367,7 +366,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
     list($id) = entity_extract_ids($obj_type, $object);
 
     // Check group doesn't already exist.
-    if (!($group = og_get_group($obj_type, $id, array(OG_STATE_ACTIVE, OG_STATE_PENDING)))) {
+    if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !($group = og_get_group($obj_type, $id, array(OG_STATE_ACTIVE, OG_STATE_PENDING)))) {
       // Add the group.
       $group = og_set_group($obj_type, $id);
 
@@ -379,7 +378,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
 
       og_set_new_group_roles($group->gid);
     }
-    else {
+    elseif (!empty($group)) {
       $state = '';
       if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
         $state = OG_STATE_PENDING;
