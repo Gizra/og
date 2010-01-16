@@ -316,15 +316,22 @@ function og_field_update($obj_type, $object, $field, $instance, $langcode, &$ite
 /**
  * Implement hook_field_attach_insert().
  */
-function og_field_attach_insert($obj_type, $object, $skip_fields = array()) {
-  og_field_crud_group($obj_type, $object, $skip_fields);
+function og_field_attach_insert($obj_type, $object) {
+  og_field_crud_group('insert', $obj_type, $object);
 }
 
 /**
- * Implement hook_field_attach_presave().
+ * Implement hook_field_attach_update().
  */
-function og_field_attach_update($obj_type, $object, $skip_fields = array()) {
-  og_field_crud_group($obj_type, $object, $skip_fields);
+function og_field_attach_update($obj_type, $object) {
+  og_field_crud_group('update', $obj_type, $object);
+}
+
+/**
+ * Implement hook_field_attach_delete().
+ */
+function og_field_attach_delete($obj_type, $object) {
+  og_field_crud_group('delete', $obj_type, $object);
 }
 
 /*******************************************************************************
@@ -355,18 +362,28 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
 }
 
 /**
- * Add or remove a group, based on the field CRUD.
+ * Create update or delete a group, based on the field CRUD.
  *
- * @see og_field_attach_pre_insert().
- * @see og_field_attach_pre_update().
+ * @see og_field_attach_insert().
+ * @see og_field_attach_update().
+ * @see og_field_attach_delete().
  */
-function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
-  if(!empty($object->og_group)) {
-    // Get the object ID.
-    list($id) = entity_extract_ids($obj_type, $object);
+function og_field_crud_group($op, $obj_type, $object) {
+  // Get the object ID.
+  list($id) = entity_extract_ids($obj_type, $object);
 
-    // Check group doesn't already exist.
-    if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !($group = og_get_group($obj_type, $id, array(OG_STATE_ACTIVE, OG_STATE_PENDING)))) {
+  $group = og_get_group($obj_type, $id, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+
+  if ($op == 'delete') {
+    if ($group) {
+      // Remove group.
+      og_delete_groups('gid', array($group->gid));
+    }
+  }
+  else {
+    // Check group doesn't already exist. We don't check the $op for insert, as
+    // content might have been saved, but not as a group.
+    if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !$group) {
       // Add the group.
       $group = og_set_group($obj_type, $id);
 
@@ -378,7 +395,7 @@ function og_field_crud_group($obj_type, $object, $skip_fields = array()) {
 
       og_set_new_group_roles($group->gid);
     }
-    elseif (!empty($group)) {
+    elseif ($group) {
       $state = '';
       if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
         $state = OG_STATE_PENDING;

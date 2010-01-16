@@ -150,16 +150,6 @@ function og_node_type_save($bundle_name) {
 }
 
 /**
-* Implement hook_node_delete().
-*/
-function og_node_delete($node) {
-  if ($group = og_get_group('node', $node->nid) && og_is_group_type('node', $node->type)) {
-    // Remove group.
-    og_delete_groups(array($group->gid));
-  }
-}
-
-/**
  * Implement hook_og_permission().
  */
 function og_og_permission() {
