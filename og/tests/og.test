@@ -207,15 +207,18 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $account = $this->drupalCreateUser();
     $gid = $this->group->gid;
 
+    // Associate the user to the group.
+    og_subscribe_user(array(array('gid' => $gid)), $account);
+
     // Verify current permissions.
     $this->assertTrue(og_user_access($gid, 'update own group content', $account), t('User has "update own group content" permission.'));
     $this->assertTrue(og_user_access($gid, 'delete own group content', $account), t('User has "delete own group content" permission.'));
     $this->assertFalse(og_user_access($gid, 'administer group', $account), t('User does not have "administer group" permission.'));
 
-    // Change permissions to anonymous member.
+    // Change permissions to authenticated member.
     $roles = og_get_group_default_roles($gid);
     // Anonymous role ID.
-    $rid = $roles[OG_ANONYMOUS_ROLE];
+    $rid = $roles[OG_AUTHENTICATED_ROLE];
 
     $permissions = array(
       'delete own group content' => 0,
