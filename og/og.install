@@ -61,9 +61,6 @@ function og_schema() {
       ),
     ),
     'primary key' => array('gid'),
-    'unique keys' => array(
-      'gid' => array('gid'),
-    ),
   );
 
   $schema['og_role_permission'] = array(
