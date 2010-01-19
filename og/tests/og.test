@@ -195,8 +195,8 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     // Add og_group field.
     og_create_field('og_group', 'node', $this->group_type);
 
-    $group = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => TRUE));
-    $this->group = og_get_group('node', $group->nid);
+    $node = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => array(LANGUAGE_NONE => array(0 => array('value' =>TRUE)))));
+    $this->group = og_get_group('node', $node->nid);
   }
 
 
