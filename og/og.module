@@ -406,12 +406,14 @@ function og_get_groups($obj_type = 'gid', $oids = array(), $states = array(OG_ST
   if ($obj_type != 'gid') {
     $query->condition('obj_type', $obj_type);
   }
-  else {
-    $query->condition('gid', $obj_type);
-  }
 
   if (!empty($oids)) {
-    $query->condition('oid', $oids, 'IN');
+    if ($obj_type != 'gid') {
+      $query->condition('oid', $oids, 'IN');
+    }
+    else {
+      $query->condition('gid', $oids, 'IN');
+    }
   }
 
   // Query for certain states if they are provided.
