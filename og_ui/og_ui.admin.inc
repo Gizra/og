@@ -88,6 +88,7 @@ function og_ui_add_users_submit($form, &$form_state) {
   );
 
   og_subscribe_user(array($group), $account);
+  drupal_set_message(t('%user has been added to group.', array('%user' => $account->name)));
 }
 
 /**
