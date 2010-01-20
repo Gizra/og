@@ -951,10 +951,6 @@ function og_context($account = NULL, $group = NULL) {
     }
   }
 
-  if (!empty($context)) {
-   og_context_js($context);
-  }
-
   return $context;
 }
 
@@ -989,6 +985,9 @@ function og_preprocess_page(&$vars) {
     $vars['classes_array'][] = 'og-context-' . $group->gid;
     $vars['classes_array'][] = 'og-context-' . $group->obj_type;
     $vars['classes_array'][] = 'og-context-' . $group->obj_type . '-' . $group->oid;
+
+    // Add context to JS.
+    og_context_js($group);
   }
 }
 
