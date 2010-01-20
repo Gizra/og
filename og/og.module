@@ -243,6 +243,16 @@ function og_node_access($node, $op, $account) {
 }
 
 /**
+ * Implementation of hook_views_api().
+ */
+function og_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'og') . '/includes',
+  );
+}
+
+/**
  * Get label information to fieldable entities.
  *
  * TODO: Implement hook_entity_info_alter().
