@@ -973,6 +973,24 @@ function og_context_js($group) {
   }
 }
 
+/**
+ * Add context related templates and CSS.
+ */
+function og_preprocess_page(&$vars) {
+  if ($group = og_context()) {
+    // Add template suggestions.
+    $vars['theme_hook_suggestions'][] = 'page__og_context';
+    $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->gid;
+    $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->obj_type . '-' . $group->oid;
+
+    // Add CSS.
+    $vars['classes_array'][] = 'og-context';
+    $vars['classes_array'][] = 'og-context-' . $group->gid;
+    $vars['classes_array'][] = 'og-context-' . $group->obj_type . '-' . $group->oid;
+  }
+}
+
+
 /*******************************************************************************
  * Function callbacks
  ******************************************************************************/
