@@ -988,7 +988,6 @@ function og_preprocess_page(&$vars) {
     $vars['classes_array'][] = 'og-context-' . $group->gid;
     $vars['classes_array'][] = 'og-context-' . $group->obj_type . '-' . $group->oid;
   }
-  dpm($vars);
 }
 
 
