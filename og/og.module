@@ -981,13 +981,14 @@ function og_preprocess_page(&$vars) {
     // Add template suggestions.
     $vars['theme_hook_suggestions'][] = 'page__og_context';
     $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->gid;
-    $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->obj_type . '-' . $group->oid;
+    $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->obj_type . '_' . $group->oid;
 
     // Add CSS.
     $vars['classes_array'][] = 'og-context';
     $vars['classes_array'][] = 'og-context-' . $group->gid;
     $vars['classes_array'][] = 'og-context-' . $group->obj_type . '-' . $group->oid;
   }
+  dpm($vars);
 }
 
 
