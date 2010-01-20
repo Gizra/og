@@ -134,8 +134,6 @@ function og_ui_user_admin_account($form, $form_state, $obj_type, $oid) {
     '#value' => t('Update'),
   );
 
-  $destination = drupal_get_destination();
-
   $status = array('blocked' => t('blocked'), 'pending' => t('pending'), 'active' => t('active'));
   $roles = array_flip(og_get_group_roles($group->gid));
   $accounts = array();
@@ -216,7 +214,10 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
   if ($group = og_get_group($obj_type, $oid)) {
     $form['group'] = array('#type' => 'value', '#value' => $group);
 
-    $rid = arg(7);
+    $item = menu_get_item();
+    // Get the role ID from the URL.
+    $rid = !empty($item['map'][7]) ? $item['map'][7] : 0;
+
     if ($rid) {
       og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")), l(t('Roles'), "og/$obj_type/$oid/admin/people/roles"));
 
@@ -251,14 +252,12 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
     }
     else {
       og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
-
       $form['name'] = array(
         '#type' => 'textfield',
         '#size' => 32,
         '#maxlength' => 64,
       );
-      $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
-      $form['actions']['submit'] = array(
+      $form['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Add role'),
       );
@@ -331,7 +330,8 @@ function theme_og_ui_user_admin_new_role($variables) {
       $rows[] = array($name, t('locked'), $edit_permissions);
     }
   }
-  $rows[] = array(drupal_render($form['name']), array('data' => drupal_render($form['submit']), 'colspan' => 2));
+
+  $rows[] = array(array('data' => drupal_render($form['name']) . drupal_render($form['submit']), 'colspan' => 3, 'class' => 'edit-name'));
 
   $output = drupal_render_children($form);
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
