@@ -1429,6 +1429,9 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Organic groups'),
     '#group' => 'additional_settings',
+    '#attached' => array('js' => array(
+      'vertical-tabs' => drupal_get_path('module', 'og') . '/og.js',
+    )),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#access' => user_access('administer organic groups'),
