@@ -130,6 +130,34 @@ class EntityOg extends EntityDB {
   }
 }
 
+
+/**
+ * Load multiple organic groups entities based on certain conditions.
+ *
+ * @param $gids
+ *   An array of group entity IDs.
+ * @param $conditions
+ *   An array of conditions to match against the {entity} table.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
+ * @return
+ *   An array of test entity objects, indexed by pid.
+ */
+function og_load_multiple($gids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('og', $gids, $conditions, $reset);
+}
+
+/**
+ * Delete multiple organic groups entities.
+ *
+ * @param $gids
+ *   An array of group entity IDs.
+ */
+function og_delete_multiple(array $gids) {
+  entity_get_controller('og')->delete($gids);
+}
+
+
 /**
  * Get a group ID by the object type and object IDs.
  *
@@ -169,13 +197,11 @@ function og_get_group_ids($obj_type, $oids = array()) {
 	  }
   }
 
-  // Add theg cached group IDs.
+  // Add the cached group IDs.
   $gids[$obj_type] += $cache_gids;
 
   return $gids[$obj_type];
 }
-
-
 
 /**
  * Implements hook_permission().
