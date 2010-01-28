@@ -90,6 +90,78 @@ define('OG_ADMINISTRATOR_DEFAULT_RID', 3);
  ******************************************************************************/
 
 /**
+ * Implements hook_entity_info().
+ */
+function og_entity_info() {
+  $return = array(
+    'og' => array(
+      'label' => t('Organic group'),
+      'entity class' => 'EntityDB',
+      'controller class' => 'OgController',
+      'base table' => 'og_groups',
+      'object keys' => array(
+        'id' => 'gid',
+      ),
+    ),
+  );
+  return $return;
+}
+
+/**
+ * Controller class for organic groups.
+ */
+class OgController extends EntityAPIController {
+	function load($ids = array(), $conditions = array()) {
+		$gids = og_get_group_ids($conditions['obj_type'], $ids);
+		
+		// Unset the object type condition.
+		unset($conditions['obj_type']);
+		return parent::load($gids, $conditions);
+	}	
+}
+
+/**
+ * Main class for organic groups entities.
+ */
+class EntityOg extends EntityDB {
+
+  public function __construct(array $values = array(), $entityType = NULL) {
+    parent::__construct($values, 'og');
+  }
+}
+
+/**
+ * Get a group ID by the object type and object IDs.
+ *
+ * @param $oid
+ *   The group content ID.
+ * @param $obj_type
+ *   The group object type. "node" is the default value. Pass "gid" if the the
+ *   content ID is equal to the group unique ID.
+ *
+ * @return
+ *   Array keyed with the object ID and the group ID as the value.
+ */
+function og_get_group_ids($obj_type, $oids = array()) {
+  $gids = array();
+    
+  if ($obj_type == 'gid') {
+  	$gids = drupal_map_assoc($oids);
+  }
+  else {
+	  $query = db_select('og_groups', 'og_groups');
+	  $gids = $query->fields('og_groups', array('oid', 'gid'))
+	  ->condition('obj_type', $obj_type)
+	  ->condition('oid', $oids, 'IN')
+	  ->execute()->fetchAllKeyed();
+  }
+  
+  return $gids;
+}
+
+
+
+/**
  * Implements hook_permission().
  */
 function og_permission() {
