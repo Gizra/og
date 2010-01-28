@@ -93,18 +93,66 @@ define('OG_ADMINISTRATOR_DEFAULT_RID', 3);
  * Implements hook_entity_info().
  */
 function og_entity_info() {
-  $return = array(
-    'og' => array(
-      'label' => t('Organic group'),
-      'entity class' => 'EntityDB',
-      'controller class' => 'OgController',
-      'base table' => 'og_groups',
-      'object keys' => array(
-        'id' => 'gid',
-      ),
+  $return['og'] = array(
+    'label' => t('Organic group'),
+    'entity class' => 'EntityDB',
+    'controller class' => 'OgController',
+    'base table' => 'og_groups',
+    'object keys' => array(
+      'id' => 'gid',
     ),
   );
   return $return;
+}
+
+/**
+ * Implements hook_entity_metadata_info().
+ */
+function og_entity_metadata_info() {
+  $info = array();
+  $properties = &$info['og']['properties'];
+
+  $properties['gid'] = array(
+    'label' => t("Group ID"),
+    'type' => 'integer',
+    'description' => t("The unique ID of the group."),
+    'required' => TRUE,
+  );
+
+  $properties['oid'] = array(
+    'label' => t("Object ID"),
+    'type' => 'integer',
+    'description' => t("The ID of the object."),
+    'required' => TRUE,
+  );
+
+  $properties['obj_type'] = array(
+    'label' => t("Object type"),
+    'type' => 'text',
+    'description' => t("The object type."),
+    'required' => TRUE,
+  );
+
+  $properties['state'] = array(
+    'label' => t("State"),
+    'type' => 'text',
+    'description' => t("The state of the group."),
+    'setter callback' => 'entity_metadata_verbatim_set',
+    'options list' => 'og_group_states',
+    'required' => TRUE,
+  );
+
+  return $info;
+}
+
+/**
+ * Return the states a group can be in.
+ */
+function og_group_states() {
+  return array(
+    OG_STATE_ACTIVE => t('Active'),
+    OG_STATE_PENDING => t('Pending'),
+  );
 }
 
 /**
