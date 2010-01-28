@@ -112,12 +112,12 @@ function og_entity_info() {
  */
 class OgController extends EntityAPIController {
 	function load($ids = array(), $conditions = array()) {
-		$gids = og_get_group_ids($conditions['obj_type'], $ids);
-		
+		$gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
+
 		// Unset the object type condition.
 		unset($conditions['obj_type']);
 		return parent::load($gids, $conditions);
-	}	
+	}
 }
 
 /**
@@ -143,20 +143,36 @@ class EntityOg extends EntityDB {
  *   Array keyed with the object ID and the group ID as the value.
  */
 function og_get_group_ids($obj_type, $oids = array()) {
-  $gids = array();
-    
-  if ($obj_type == 'gid') {
-  	$gids = drupal_map_assoc($oids);
+	$gids = &drupal_static(__FUNCTION__, array());
+
+	$cache_gids = array();
+
+	if (!empty($gids[$obj_type])) {
+		$oids = drupal_map_assoc($oids);
+  	// Check we don't already have the group IDs.
+  	foreach ($gids[$obj_type] as $oid => $gid) {
+  		$cache_gids[$gid] = $gid;
+  		unset($oids[$oid]);
+  	}
+	}
+
+  if (!empty($oids)) {
+	  if ($obj_type == 'gid') {
+	  	$gids[$obj_type] = drupal_map_assoc($oids);
+	  }
+	  else {
+		  $query = db_select('og_groups', 'og_groups');
+		  $gids[$obj_type] = $query->fields('og_groups', array('oid', 'gid'))
+		  ->condition('obj_type', $obj_type)
+		  ->condition('oid', $oids, 'IN')
+		  ->execute()->fetchAllKeyed();
+	  }
   }
-  else {
-	  $query = db_select('og_groups', 'og_groups');
-	  $gids = $query->fields('og_groups', array('oid', 'gid'))
-	  ->condition('obj_type', $obj_type)
-	  ->condition('oid', $oids, 'IN')
-	  ->execute()->fetchAllKeyed();
-  }
-  
-  return $gids;
+
+  // Add theg cached group IDs.
+  $gids[$obj_type] += $cache_gids;
+
+  return $gids[$obj_type];
 }
 
 
