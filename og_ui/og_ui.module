@@ -291,6 +291,49 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
 }
 
 /**
+ * Implement hook_og_permission().
+ */
+function og_ui_og_permission() {
+  return array(
+    'subscribe' => array(
+      'title' => t('Subscribe user to group'),
+      'description' => t("Allow user to be a member of a group (approval required)."),
+      'roles' => array(OG_ANONYMOUS_ROLE),
+    ),
+    'subscribe without approval' => array(
+      'title' => t('Subscribe user to group (no approval required).'),
+      'description' => t("Allow user to be a member of a group without an approval of the group administrator."),
+      'roles' => array(OG_ANONYMOUS_ROLE),
+    ),
+    'unsubscribe' => array(
+      'title' => t('Unsubscribe user from group'),
+      'description' => t("Allow user to be remove membership from a group."),
+      'roles' => array(OG_AUTHENTICATED_ROLE),
+    ),
+    'approve and deny subscription' => array(
+      'title' => t('Approve and deny subscription'),
+      'description' => t("Allow user to allow or deny another user's subscription request."),
+    ),
+    'add user' => array(
+      'title' => t('Add user'),
+      'description' => t("Add a new user to the group."),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_og_permission_default().
+ */
+function og_ui_og_permission_default() {
+  return array(
+    OG_ANONYMOUS_ROLE => array('subscribe', 'subscribe without approval'),
+    OG_AUTHENTICATED_ROLE => array('unsubscribe'),
+  );
+}
+
+
+
+/**
  * Implement hook_og_user_operations().
  */
 function og_ui_og_user_operations($form = array(), $form_state = array()) {

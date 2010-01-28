@@ -150,43 +150,10 @@ function og_node_type_save($bundle_name) {
 }
 
 /**
-* Implement hook_node_delete().
-*/
-function og_node_delete($node) {
-  if ($group = og_get_group('node', $node->nid) && og_is_group_type('node', $node->type)) {
-    // Remove group.
-    og_delete_groups(array($group->gid));
-  }
-}
-
-/**
  * Implement hook_og_permission().
  */
 function og_og_permission() {
   return array(
-    'subscribe' => array(
-      'title' => t('Subscribe user to group'),
-      'description' => t("Allow user to be a member of a group (approval required)."),
-      'roles' => array(OG_ANONYMOUS_ROLE),
-    ),
-    'subscribe without approval' => array(
-      'title' => t('Subscribe user to group (no approval required).'),
-      'description' => t("Allow user to be a member of a group without an approval of the group administrator."),
-      'roles' => array(OG_ANONYMOUS_ROLE),
-    ),
-    'unsubscribe' => array(
-      'title' => t('Unsubscribe user from group'),
-      'description' => t("Allow user to be remove membership from a group."),
-      'roles' => array(OG_AUTHENTICATED_ROLE),
-    ),
-    'approve and deny subscription' => array(
-      'title' => t('Approve and deny subscription'),
-      'description' => t("Allow user to allow or deny another user's subscription request."),
-    ),
-    'add user' => array(
-      'title' => t('Add user'),
-      'description' => t("Add a new user to the group."),
-    ),
     'update group' => array(
       'title' => t('Edit group'),
       'description' => t('Edit the group content.'),
@@ -219,9 +186,8 @@ function og_og_permission() {
  */
 function og_og_permission_default() {
   return array(
-    OG_ANONYMOUS_ROLE => array('subscribe', 'subscribe without approval'),
-    OG_AUTHENTICATED_ROLE => array('unsubscribe', 'update own group content', 'delete own group content'),
-    OG_ADMINISTRATOR_ROLE => array('approve and deny subscription', 'add user', 'update group', 'update any group content', 'delete any group content', 'administer group'),
+    OG_AUTHENTICATED_ROLE => array('update own group content', 'delete own group content'),
+    OG_ADMINISTRATOR_ROLE => array('update group', 'update any group content', 'delete any group content', 'administer group'),
   );
 }
 
@@ -499,32 +465,28 @@ function og_set_group($obj_type, $oid, $state = OG_STATE_ACTIVE, $data = array()
   return $group;
 }
 
-/**
- * Delete group objects thier group ID.
- *
- * @param $gids
- *   Array with the group unique ID.
- */
-function og_delete_groups($gids = array()) {
-  db_delete('og_groups')
-    ->condition('gid', $gids, 'IN')
-    ->execute();
-}
 
 /**
  * Delete a group object by it's object type and ID.
  *
  * @param $obj_type
- *   The group object type ID.
+ *   The group object type ID or 'gid' to delete by group ID.
  * @param $oid
  *   Optional; The group ID. If empty all groups belonging to the object type
  *   will be deleted.
  */
-function og_delete_groups_by_object($obj_type, $oids = array()) {
-  $query = db_delete('og_groups')->condition('obj_type', $obj_type);
-  if (!empty($oids)) {
-    $query->condition('oid', $oids);
+function og_delete_groups($obj_type, $oids = array()) {
+  $query = db_delete('og_groups');
+  if ($obj_type != 'gid') {
+    $query->condition('obj_type', $obj_type);
+    if (!empty($oids)) {
+      $query->condition('oid', $oids, 'IN');
+    }
   }
+  else {
+    $query->condition('gid', $oids, 'IN');
+  }
+
   $query->execute();
 }
 
@@ -910,8 +872,8 @@ function og_context($account = NULL, $group = NULL) {
 
     $item = menu_get_item();
 
-    // Check the page arguments if one of them is an object, and check if it is a
-    // group or group content, by looking for og_group or og_audience fields.
+    // Check the page arguments if one of them is an object, and check if it is
+    // a group or group content, by looking for og_group or og_audience fields.
     if (!empty($item['page_arguments'])) {
       $obj_type = $item['map'][0];
       foreach ($item['page_arguments'] as $argument) {
@@ -926,7 +888,7 @@ function og_context($account = NULL, $group = NULL) {
           }
           // TODO: Add context based on ?gid_gids[] in URL.
           if (!empty($groups)) {
-            // Get the user's group and try to intesect.
+            // Get the user's group and try to intersect.
             $user_groups = og_get_object_groups('user', $account);
             if ($intersect_gids = array_intersect($groups, $user_groups)) {
               $gid = reset($intersect_gids);
@@ -936,8 +898,8 @@ function og_context($account = NULL, $group = NULL) {
               // if it's a node, as node access might be FALSE.
               $groups = og_get_groups('gid', $groups);
               // For performance reasons we prefer not to use node_access()
-              // so we first check if the group content is associated with non-node
-              // groups.
+              // so we first check if the group content is associated with
+              // non-node groups.
               if (!empty($groups['node'])) {
                 $node_gids = $groups['node'];
                 unset($groups['node']);
@@ -951,6 +913,7 @@ function og_context($account = NULL, $group = NULL) {
                   foreach ($node_gids as $node_gid) {
                     $group = og_get_group('gid', $node_get);
                     $nid = $group->oid;
+                    $node = node_load($nid);
                     if (node_access('view', $node, $account)) {
                       $gid = $group->gid;
                       break;
@@ -973,7 +936,26 @@ function og_context($account = NULL, $group = NULL) {
     }
   }
 
+  if (!empty($context)) {
+   og_context_js($context);
+  }
+
   return $context;
+}
+
+/**
+ * Add the group object of the context to the Drupal javascript object.
+ *
+ * @param $group
+ *   A group object.
+ */
+function og_context_js($group) {
+  // Static variable to indicate if group was already added to javacript.
+  $js = &drupal_static(__FUNCTION__, FALSE);
+  if (empty($js)) {
+    drupal_add_js(array('og' => array('og_context' => $group)), 'setting');
+    $js = TRUE;
+  }
 }
 
 /*******************************************************************************
@@ -1583,7 +1565,7 @@ function og_permissions_get() {
     // set.
     foreach ($perms as $module => $permissions) {
       foreach ($permissions as $key => $perm) {
-        $return['administer og']['show ' . $key] = array(
+        $return['administer']['show ' . $key] = array(
           'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
           'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
           // Add all roles, as this option allows setting which permisisons

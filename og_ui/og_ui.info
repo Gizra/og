@@ -7,4 +7,5 @@ version = VERSION
 files[] = og_ui.module
 files[] = og_ui.admin.inc
 files[] = og_ui.pages.inc
+files[] = og_ui.test
 configure = admin/config/og

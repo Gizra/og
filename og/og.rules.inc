@@ -39,7 +39,7 @@ function og_rules_action_info() {
 /**
  * Action: Subscribe user to group.
  */
-function og_set_association($group, $content, $state, $settings) {
+function og_rules_set_association($group, $content, $state, $settings) {
   $groups = array('gid' => $node->nid, 'state' => $state);
   og_set_association('user', $user, $groups, $replace);
 }
