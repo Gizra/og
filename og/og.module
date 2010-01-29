@@ -139,10 +139,25 @@ function og_entity_metadata_info() {
     'description' => t("The state of the group."),
     'setter callback' => 'entity_metadata_verbatim_set',
     'options list' => 'og_group_states',
-    'required' => TRUE,
   );
 
   return $info;
+}
+
+/**
+ * Implements hook_entity_metadata_info_alter()
+ */
+function og_entity_metadata_info_alter(&$info) {
+  $properties = &$info['user']['properties'];
+
+  $properties['og-roles'] = array(
+    'label' => t("Organic groups user roles"),
+    'description' => t("The roles of the user in a group."),
+    'type' => 'list<integer>',
+    'getter callback' => 'og_user_get_properties',
+    'setter callback' => 'og_user_set_properties',
+    'options list' => 'og_user_roles',
+  );
 }
 
 /**
@@ -221,6 +236,8 @@ function og_delete_multiple(array $gids) {
 function og_get_group_ids($obj_type, $oids = array()) {
 	$gids = &drupal_static(__FUNCTION__, array());
 
+	// If there are chached gids, temoprarly save them, so we don't re-query them
+	// from the database.
 	$cache_gids = array();
 
 	if (!empty($gids[$obj_type])) {
