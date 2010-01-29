@@ -95,7 +95,7 @@ define('OG_ADMINISTRATOR_DEFAULT_RID', 3);
 function og_entity_info() {
   $return['og'] = array(
     'label' => t('Organic group'),
-    'entity class' => 'EntityDB',
+    'entity class' => 'EntityOg',
     'controller class' => 'OgController',
     'base table' => 'og_groups',
     'object keys' => array(
@@ -168,7 +168,7 @@ function og_entity_metadata_info_alter(&$info) {
  */
 function og_user_get_properties($account, array $options, $name, $entity_type) {
   switch ($name) {
-    case 'roles':
+    case 'og-roles':
       return isset($account->roles) ? array_keys($account->roles) : array();
   }
 }
@@ -180,7 +180,7 @@ function og_user_get_properties($account, array $options, $name, $entity_type) {
  */
 function og_user_set_properties($account, $name, $value) {
   switch ($name) {
-    case 'roles':
+    case 'og-roles':
       $account->roles = array_intersect_key(user_roles(), array_flip($value));
       break;
   }
@@ -197,6 +197,24 @@ function og_group_states() {
     OG_STATE_PENDING => t('Pending'),
   );
 }
+
+/**
+ * Return the states a group can be in.
+ */
+function og_group_content_states() {
+  return array(
+    OG_STATE_ACTIVE => t('Active'),
+    OG_STATE_PENDING => t('Pending'),
+    OG_STATE_BLOCKED => t('Blocked'),
+  );
+}
+
+/*function test() {
+  $group = og_load_multiple(array(52), array('obj_type' => 'node'));
+
+  $post = node_load(51);
+  $group[2]->set_association('node', $post);
+}*/
 
 /**
  * Controller class for organic groups.
@@ -219,6 +237,98 @@ class EntityOg extends EntityDB {
   public function __construct(array $values = array(), $entityType = NULL) {
     parent::__construct($values, 'og');
   }
+
+  function load($ids = array(), $conditions = array()) {
+    $gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
+
+    // Unset the object type condition.
+    unset($conditions['obj_type']);
+    return parent::load($gids, $conditions);
+  }
+
+
+	/**
+	 * Set an association (e.g. subscribe) an object to a group.
+	 *
+	 * @param $obj_type
+	 *   The object type (e.g. "node" or "user").
+	 * @param $object
+	 *   The object to set the association.
+	 * @param $state
+	 *   The state of the association. Can be OG_STATE_ACTIVE, OG_STATE_PENDING,
+	 *   OG_STATE_BLOCKED.
+	 */
+	public function set_association($obj_type, $object, $state = OG_STATE_ACTIVE) {
+	  // Re-load object to make sure we have the fields.
+	  $object = og_load_object($obj_type, $object);
+
+	  $wrapper = entity_metadata_wrapper($obj_type, $object);
+    // Check if the object is already associated with the group.
+    $existing_field = array();
+    $property = str_replace('_', '-', OG_AUDIENCE_FIELD);
+
+    if ($elements = $wrapper->{$property}->value()) {
+    	foreach ($elements as $key => $value) {
+    		if ($this->gid == $value) {
+    			$existing_field = array(
+    			  'key' => $key,
+    			  'value' => $value,
+    			);
+    		}
+    	}
+    }
+
+    if ($existing_field) {
+      $values = array(
+        'gid' => $this->gid,
+        'state' => $state,
+        'created' => $existing_field['created'],
+        'changed' => time(),
+      );
+    	// Object already associated, check the state has changed.
+    	$wrapper->{$property}[$existing_field['key']]->set($values);
+    }
+    else {
+    	// Associate the object to the group.
+    	$values = array(
+    	  'gid' => $this->gid,
+    	  'state' => $state,
+    	  'created' => time(),
+    	  'changed' => time(),
+    	);
+      $wrapper->{$property}->set($values);
+    }
+	}
+
+	/**
+	 * Delete an association (e.g. unsubscribe) an object to a group.
+	 *
+	 * @param $obj_type
+	 *   The object type (e.g. "node" or "user").
+	 * @param $object
+	 *   The object to set the association.
+	 */
+	function og_delete_association($obj_type, $object, $gids = array()) {
+	  // Load object to get the fields.
+	  $object = og_load_object($obj_type, $object);
+
+	  // Indicate if the object was changed, and needs to be saved.
+	  $save = FALSE;
+
+	  foreach ($object->og_audience[LANGUAGE_NONE] as $key => $group) {
+	    if (in_array($group['gid'], $gids)) {
+	      unset($object->og_audience[LANGUAGE_NONE][$key]);
+
+	      og_invoke_event();
+	      $save = TRUE;
+	    }
+	  }
+
+	  if ($save) {
+	    call_user_func('field_attach_update', $obj_type, $object);
+	  }
+	}
+
 }
 
 

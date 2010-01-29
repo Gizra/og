@@ -20,11 +20,32 @@ function og_field_info() {
       'description' => t('This field stores group nodes.'),
       'default_widget' => 'og_audience',
       'default_formatter' => 'og_list_default',
-      // Entity metadata property.
-      'property_type' => 'decimal',
+      // Entity metadata properties.
+      'property_type' => 'og_audience',
+      'getter callback' => 'entity_metadata_field_verbatim_get',
+      'setter callback' => 'entity_metadata_field_verbatim_set',
+      'data info' => array(
+        'properties' => array(
+          'gid' => array(
+            'type' => 'integer',
+            'label' => t('The group this group content is associated with'),
+          ),
+		      'state' => array(
+		        'type' => 'text',
+		        'label' => t('Group content state'),
+		        'options list' => 'og_group_content_states',
+		      ),
+		      'created' => array(
+		        'type' => 'integer',
+		        'label' => t('Created timestamp'),
+		      ),
+		    ),
+		  ),
     ),
   );
 }
+
+
 
 /**
  * Implement hook_field_schema().
