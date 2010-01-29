@@ -20,10 +20,11 @@ function og_field_info() {
       'description' => t('This field stores group nodes.'),
       'default_widget' => 'og_audience',
       'default_formatter' => 'og_list_default',
+      // Entity metadata property.
+      'property_type' => 'decimal',
     ),
   );
 }
-
 
 /**
  * Implement hook_field_schema().
