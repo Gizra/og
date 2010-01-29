@@ -169,7 +169,7 @@ function og_entity_metadata_info_alter(&$info) {
 function og_user_get_properties($account, array $options, $name, $entity_type) {
   switch ($name) {
     case 'og-roles':
-      return isset($account->roles) ? array_keys($account->roles) : array();
+    	break;
   }
 }
 
@@ -181,7 +181,6 @@ function og_user_get_properties($account, array $options, $name, $entity_type) {
 function og_user_set_properties($account, $name, $value) {
   switch ($name) {
     case 'og-roles':
-      $account->roles = array_intersect_key(user_roles(), array_flip($value));
       break;
   }
 }
@@ -258,7 +257,7 @@ class EntityOg extends EntityDB {
 	 *   The state of the association. Can be OG_STATE_ACTIVE, OG_STATE_PENDING,
 	 *   OG_STATE_BLOCKED.
 	 */
-	public function set_association($obj_type, $object, $state = OG_STATE_ACTIVE) {
+	public function setAssociation($obj_type, $object, $state = OG_STATE_ACTIVE) {
 	  // Re-load object to make sure we have the fields.
 	  $object = og_load_object($obj_type, $object);
 
@@ -308,25 +307,7 @@ class EntityOg extends EntityDB {
 	 * @param $object
 	 *   The object to set the association.
 	 */
-	function og_delete_association($obj_type, $object, $gids = array()) {
-	  // Load object to get the fields.
-	  $object = og_load_object($obj_type, $object);
-
-	  // Indicate if the object was changed, and needs to be saved.
-	  $save = FALSE;
-
-	  foreach ($object->og_audience[LANGUAGE_NONE] as $key => $group) {
-	    if (in_array($group['gid'], $gids)) {
-	      unset($object->og_audience[LANGUAGE_NONE][$key]);
-
-	      og_invoke_event();
-	      $save = TRUE;
-	    }
-	  }
-
-	  if ($save) {
-	    call_user_func('field_attach_update', $obj_type, $object);
-	  }
+	function deleteAssociation($obj_type, $object, $gids = array()) {
 	}
 
 }
