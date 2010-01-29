@@ -160,6 +160,34 @@ function og_entity_metadata_info_alter(&$info) {
   );
 }
 
+
+/**
+ * Callback for getting user properties.
+ *
+ * @todo Get the group object.
+ */
+function og_user_get_properties($account, array $options, $name, $entity_type) {
+  switch ($name) {
+    case 'roles':
+      return isset($account->roles) ? array_keys($account->roles) : array();
+  }
+}
+
+/**
+ * Callback for setting user properties.
+ *
+ * @todo Get the group object.
+ */
+function og_user_set_properties($account, $name, $value) {
+  switch ($name) {
+    case 'roles':
+      $account->roles = array_intersect_key(user_roles(), array_flip($value));
+      break;
+  }
+}
+
+
+
 /**
  * Return the states a group can be in.
  */
