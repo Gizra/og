@@ -208,12 +208,14 @@ function og_group_content_states() {
   );
 }
 
-/*function test() {
+function test() {
   $group = og_load_multiple(array(52), array('obj_type' => 'node'));
 
-  $post = node_load(51);
-  $group[2]->set_association('node', $post);
-}*/
+  $node = node_load(51);
+  $wrapper = entity_metadata_wrapper('node', $node);
+
+  $group[2]->setAssociation('node', $post);
+}
 
 /**
  * Controller class for organic groups.
@@ -268,7 +270,7 @@ class EntityOg extends EntityDB {
 
     if ($elements = $wrapper->{$property}->value()) {
     	foreach ($elements as $key => $value) {
-    		if ($this->gid == $value) {
+    		if ($this->gid == $value['gid']) {
     			$existing_field = array(
     			  'key' => $key,
     			  'value' => $value,
@@ -285,7 +287,9 @@ class EntityOg extends EntityDB {
         'changed' => time(),
       );
     	// Object already associated, check the state has changed.
-    	$wrapper->{$property}[$existing_field['key']]->set($values);
+    	if ($state != $existing_field['state']) {
+    	  $wrapper->{$property}[$existing_field['key']]->state->set($state);
+    	}
     }
     else {
     	// Associate the object to the group.
