@@ -79,6 +79,13 @@ function og_schema() {
         'default' => '',
         'description' => 'A single permission granted to the role identified by rid.',
       ),
+      'module' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "The module declaring the permission.",
+      ),
     ),
     'primary key' => array('rid', 'permission'),
     'indexes' => array(
