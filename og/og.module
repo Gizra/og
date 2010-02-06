@@ -208,15 +208,6 @@ function og_group_content_states() {
   );
 }
 
-function test() {
-  $group = og_load_multiple(array(52), array('obj_type' => 'node'));
-
-  $node = node_load(51);
-  $wrapper = entity_metadata_wrapper('node', $node);
-
-  $group[2]->setAssociation('node', $post);
-}
-
 /**
  * Controller class for organic groups.
  */
