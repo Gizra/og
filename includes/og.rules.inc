@@ -123,9 +123,7 @@ function og_rules_action_info() {
  * Action: Subscribe user to group.
  */
 function og_rules_action_subscribe_user($user, $node, $settings) {
-  if (!og_is_group_member($node->nid, $user)) {
-    og_save_subscription($node->nid, $user->uid, array('is_active' => (int)$settings['is_active']));
-  }
+  og_save_subscription($node->nid, $user->uid, array('is_active' => (int)$settings['is_active']));
 }
 
 /**
@@ -224,8 +222,21 @@ function og_rules_condition_info() {
  * Condition: User is group member.
  */
 function og_rules_condition_user_in_group($user, $node, $settings) {
-  return !empty($node->nid) && og_is_group_member($node->nid, $user);
+  return !empty($node->nid) && og_is_group_member($node->nid, $settings['include_admins'], $user->uid);
 }
+
+/**
+ * Condition: User is group member.
+ */
+function og_rules_condition_user_in_group_form($settings, &$form) {
+  $form['settings']['include_admins'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Include admins'),
+    '#description' => t('When enabled, users with "administer nodes" permission will always be treated as group members.'),
+    '#default_value' => $settings['include_admins'],
+  );
+}
+
 
 /**
  * Condition: Content is a group node.
