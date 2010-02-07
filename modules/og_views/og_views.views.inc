@@ -48,6 +48,9 @@ function og_views_views_handlers() {
       'og_views_handler_field_og_subscribe' => array(
         'parent' => 'views_handler_field',
       ),
+      'og_views_handler_field_og_invite' => array(
+        'parent' => 'views_handler_field',
+      ),
       'og_views_handler_field_og_group_nids' => array(
         'parent' => 'views_handler_field_prerender_list',
       ),
@@ -228,6 +231,13 @@ function og_views_data_og() {
     'help' => t('Displays a link for joining a group when a user is not already a member.'),
     'field' => array(
       'handler' => 'og_views_handler_field_og_subscribe',
+    ),
+  );
+  $data['og']['invite'] = array(
+    'title' => t('Group: Invite link'),
+    'help' => t('Displays a link for inviting users to a group.'),
+    'field' => array(
+      'handler' => 'og_views_handler_field_og_invite',
     ),
   );
   if (module_exists('locale')) {
