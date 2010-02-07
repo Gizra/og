@@ -25,8 +25,8 @@ function og_notifications_help($path, $arg) {
  */
 function og_notifications_menu() {
   $items = array();
-  $items['user/%user/notifications/group'] = array(
-    'title' => 'Group',
+  $items['user/%user/notifications/add/grouptype'] = array(
+    'title' => 'Group notifications',
     'page callback' => 'og_notifications_user_page',
     'page arguments' => array(1),
     'access callback' => 'notifications_content_access',
