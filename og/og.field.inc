@@ -22,20 +22,17 @@ function og_field_info() {
       'default_formatter' => 'og_list_default',
       // Entity metadata properties.
       'property_type' => 'og_audience',
-      'property_callbacks' => array('og_field_og_property_callback'),
+      'property_callbacks' => array('entity_metadata_field_default_property_callback', 'og_field_og_property_callback'),
     ),
   );
 }
 
 function og_field_og_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
-    $name = str_replace('_', '-', $field['field_name']);
+	  $name = str_replace('_', '-', $field['field_name']);
     $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
     // Define a data structure so it's possible to deal with organic groups
     // audinece properly.
-    $property['type'] = 'og_audience';
-    $property['getter callback'] = 'entity_metadata_field_verbatim_get';
-    $property['setter callback'] = 'entity_metadata_field_verbatim_set';
     $property['data info']['properties'] = array(
         'properties' => array(
           'gid' => array(
