@@ -28,7 +28,7 @@ function og_field_info() {
 }
 
 function og_field_og_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
-	  $name = str_replace('_', '-', $field['field_name']);
+    $name = str_replace('_', '-', $field['field_name']);
     $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
     // Define a data structure so it's possible to deal with organic groups
