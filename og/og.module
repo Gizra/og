@@ -106,9 +106,9 @@ function og_entity_info() {
 }
 
 /**
- * Implements hook_entity_metadata_info().
+ * Implements hook_entity_property_info().
  */
-function og_entity_metadata_info() {
+function og_entity_property_info() {
   $info = array();
   $properties = &$info['og']['properties'];
 
@@ -143,23 +143,6 @@ function og_entity_metadata_info() {
 
   return $info;
 }
-
-/**
- * Implements hook_entity_metadata_info_alter()
- */
-function og_entity_metadata_info_alter(&$info) {
-  $properties = &$info['user']['properties'];
-
-  $properties['og-roles'] = array(
-    'label' => t("Organic groups user roles"),
-    'description' => t("The roles of the user in a group."),
-    'type' => 'list<integer>',
-    'getter callback' => 'og_user_get_properties',
-    'setter callback' => 'og_user_set_properties',
-    'options list' => 'og_user_roles',
-  );
-}
-
 
 /**
  * Callback for getting user properties.
