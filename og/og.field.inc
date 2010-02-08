@@ -33,6 +33,8 @@ function og_field_og_property_callback(&$info, $entity_type, $field, $instance, 
 
     // Define a data structure so it's possible to deal with organic groups
     // audinece properly.
+    $property['getter callback'] = 'entity_metadata_field_verbatim_get';
+    $property['setter callback'] = 'entity_metadata_field_verbatim_set';
     $property['data info']['properties'] = array(
         'properties' => array(
           'gid' => array(
