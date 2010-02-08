@@ -22,7 +22,7 @@ function og_field_info() {
       'default_formatter' => 'og_list_default',
       // Entity metadata properties.
       'property_type' => 'og_audience',
-      'property_callbacks' => array('entity_metadata_field_default_property_callback', 'og_field_og_property_callback'),
+      'property_callbacks' => array('og_field_og_property_callback'),
     ),
   );
 }
