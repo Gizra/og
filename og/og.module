@@ -145,32 +145,6 @@ function og_entity_property_info() {
 }
 
 /**
- * Callback for getting user properties.
- *
- * @todo Get the group object.
- */
-function og_user_get_properties($account, array $options, $name, $entity_type) {
-  switch ($name) {
-    case 'og-roles':
-    	break;
-  }
-}
-
-/**
- * Callback for setting user properties.
- *
- * @todo Get the group object.
- */
-function og_user_set_properties($account, $name, $value) {
-  switch ($name) {
-    case 'og-roles':
-      break;
-  }
-}
-
-
-
-/**
  * Return the states a group can be in.
  */
 function og_group_states() {
