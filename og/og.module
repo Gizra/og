@@ -141,6 +141,13 @@ function og_entity_property_info() {
     'options list' => 'og_group_states',
   );
 
+  $properties['created'] = array(
+    'label' => t("Date created"),
+    'type' => 'date',
+    'description' => t("The date the group was created."),
+    'setter callback' => 'entity_metadata_verbatim_set',
+  );
+
   return $info;
 }
 
@@ -179,14 +186,40 @@ class OgController extends EntityAPIController {
 }
 
 /**
+ * Factory method. Return a loaded group object if exists or create a new one.
+ *
+ * @param $oid
+ *   The group content ID.
+ * @param $obj_type
+ *   The group object type. "node" is the default value. Pass "gid" if the the
+ *   content ID is equal to the group unique ID.
+ * @param $states
+ *   Optional; Array with the states of the group (i.e. OG_STATE_ACTIVE or
+ *   OG_STATE_PENDING).
+ *
+ * @return
+ *   The group object if found, or an empty array.
+ */
+function og_get_group($obj_type, $oid) {
+  if ($gids = og_get_group_ids($obj_type, array($oid))) {
+    $group = og_load($gids[$oid]);
+  }
+  else {
+    $group = new EntityOg(array('obj_type' => $obj_type, 'oid' => $oid));
+  }
+  return $group;
+}
+
+/**
  * Main class for organic groups entities.
  */
 class EntityOg extends EntityDB {
 
   public function __construct(array $values = array(), $entityType = NULL) {
-    parent::__construct($values, 'og');
+    // Initialize values.
+    $values += array('state' => OG_STATE_ACTIVE, 'created' => time());
+  	parent::__construct($values, 'og');
   }
-
 
 	/**
 	 * Set an association (e.g. subscribe) an object to a group.
@@ -196,64 +229,101 @@ class EntityOg extends EntityDB {
 	 * @param $object
 	 *   The object to set the association.
 	 * @param $state
-	 *   The state of the association. Can be OG_STATE_ACTIVE, OG_STATE_PENDING,
-	 *   OG_STATE_BLOCKED.
+	 *   The state of the association. Can be:
+	 *   - OG_STATE_ACTIVE
+	 *   - OG_STATE_PENDING
+	 *   - OG_STATE_BLOCKED
+   * @param $save
+   *   Optioanl; TRUE if fields value shoudl be saved. Defaults to TRUE.
+	 *
+	 * @return
+	 *   The object with the fields updated.
 	 */
-	public function setAssociation($obj_type, $object, $state = OG_STATE_ACTIVE) {
-	  // Re-load object to make sure we have the fields.
-	  $object = og_load_object($obj_type, $object);
+	public function group($obj_type, $object, $state = OG_STATE_ACTIVE, $save = TRUE) {
+		$wrapper = $this->get_wrapper($obj_type, $object);
 
-	  $wrapper = entity_metadata_wrapper($obj_type, $object);
     // Check if the object is already associated with the group.
-    $existing_field = array();
     $property = str_replace('_', '-', OG_AUDIENCE_FIELD);
 
-    if ($elements = $wrapper->{$property}->value()) {
-    	foreach ($elements as $key => $value) {
+    $existing_key = FALSE;
+    if ($items = $wrapper->$property->value()) {
+    	foreach ($items as $key => $value) {
     		if ($this->gid == $value['gid']) {
-    			$existing_field = array(
-    			  'key' => $key,
-    			  'value' => $value,
-    			);
+  			  $existing_key = $key;
+   			  break;
     		}
     	}
     }
 
-    if ($existing_field) {
-      $values = array(
-        'gid' => $this->gid,
-        'state' => $state,
-        'created' => $existing_field['created'],
-        'changed' => time(),
-      );
-    	// Object already associated, check the state has changed.
-    	if ($state != $existing_field['state']) {
-    	  $wrapper->{$property}[$existing_field['key']]->state->set($state);
-    	}
+    if ($existing_key === FALSE) {
+    	$op = 'insert';
+    	$wrapper->$property->state->set($state);
+    	$wrapper->$property->created->set(time());
     }
-    else {
-    	// Associate the object to the group.
-    	$values = array(
-    	  'gid' => $this->gid,
-    	  'state' => $state,
-    	  'created' => time(),
-    	  'changed' => time(),
-    	);
-      $wrapper->{$property}->set($values);
+    elseif ($wrapper->$property->get($existing_key)->state->value() != $state) {
+      $op = 'update';
+      $wrapper->$property->get($existing_key)->state->set($state);
     }
+
+    if ($save) {
+      // Save the object.
+    	call_user_func('field_attach_' . $op, $obj_type, $object);
+    }
+
+    return $object;
+	}
+
+  /**
+   * Delete an an association (e.g. unsubscribe) of an object to a group.
+   *
+   * @param $obj_type
+   *   The object type (e.g. "node" or "user").
+   * @param $object
+   *   The object to set the association.
+   * @param $save
+   *   Optioanl; TRUE if fields value shoudl be saved. Defaults to TRUE.
+   *
+   * @return
+   *   The object with the fields updated.
+   */
+	public function ungroup($obj_type, $object, $save = TRUE) {
+		$wrapper = $this->get_wrapper($obj_type, $object);
+    // Check if the object is already associated with the group.
+    $property = str_replace('_', '-', OG_AUDIENCE_FIELD);
+
+    $existing_key = FALSE;
+    if ($items = $wrapper->$property->value()) {
+      foreach ($items as $key => $value) {
+        if ($this->gid == $value['gid']) {
+          $existing_key = $key;
+          break;
+        }
+      }
+    }
+    if ($existing_key !== FALSE) {
+    	unset($wrapper->$property->get($existing_key));
+
+	    if ($save) {
+	      // Save the object.
+	      call_user_func('field_attach_' . $op, $obj_type, $object);
+	    }
+    }
+
+    return $object;
 	}
 
 	/**
-	 * Delete an association (e.g. unsubscribe) an object to a group.
-	 *
+	 * Helper function to get a wrapper of an object.
 	 * @param $obj_type
-	 *   The object type (e.g. "node" or "user").
 	 * @param $object
-	 *   The object to set the association.
+	 * @return unknown_type
 	 */
-	function deleteAssociation($obj_type, $object, $gids = array()) {
-	}
+	private function get_wrapper($obj_type, $object) {
+    // Re-load object to make sure we have the fields.
+    $object = og_load_object($obj_type, $object);
 
+    return entity_metadata_wrapper($obj_type, $object);
+	}
 }
 
 
@@ -271,6 +341,22 @@ class EntityOg extends EntityDB {
  */
 function og_load_multiple($gids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('og', $gids, $conditions, $reset);
+}
+
+/**
+ * Load an organic groups object from the database.
+ *
+ * @param $gid
+ *   The group ID.
+ * @param $reset
+ *   Whether to reset the node_load_multiple cache.
+ *
+ * @return
+ *   A fully-populated group object, or FALSE if none found.
+ */
+function og_load($gid, $reset = FALSE) {
+  $group = og_load_multiple(array($gid), array(), $reset);
+  return $group? reset($group) : FALSE;
 }
 
 /**
@@ -310,6 +396,9 @@ function og_get_group_ids($obj_type, $oids = array()) {
   		$cache_gids[$gid] = $gid;
   		unset($oids[$oid]);
   	}
+	}
+	else {
+		$gids[$obj_type] = array();
 	}
 
   if (!empty($oids)) {
@@ -584,54 +673,6 @@ function og_og_get_fields() {
 /*******************************************************************************
  * API functions
  ******************************************************************************/
-
-/**
- * Get a group object by the content ID.
- *
- * @param $oid
- *   The group content ID.
- * @param $obj_type
- *   The group object type. "node" is the default value. Pass "gid" if the the
- *   content ID is equal to the group unique ID.
- * @param $states
- *   Optional; Array with the states of the group (i.e. OG_STATE_ACTIVE or
- *   OG_STATE_PENDING).
- *
- * @return
- *   The group object if found, or an empty array.
- */
-function og_get_group($obj_type, $oid, $states = array(OG_STATE_ACTIVE)) {
-  $group = &drupal_static(__FUNCTION__, array());
-  $result = array();
-
-  if (empty($group[$obj_type][$oid])) {
-    $query = db_select('og_groups', 'og_groups');
-    $query->fields('og_groups');
-    if ($obj_type != 'gid') {
-      // The object type is not a real object - it's actually the group ID.
-      $query->condition('oid', $oid)->condition('obj_type', $obj_type);
-    }
-    else {
-      $query->condition('gid', $oid);
-    }
-    // Query for certain states if they are provided.
-    if (!empty($states)) {
-      $query->condition('state', $states, 'IN');
-    }
-    if ($result = $query->execute()->fetchObject()) {
-
-      // Unserialize the data.
-      $result->data = !empty($result->data) ? unserialize($result->data) : array();
-
-      // Allow other modules to change the group object.
-      drupal_alter('og_get_group', $result);
-    }
-
-    $group[$obj_type][$oid] = $result;
-  }
-
-  return $group[$obj_type][$oid];
-}
 
 /**
  * Get all groups IDs with a certain state.

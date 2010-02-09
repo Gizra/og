@@ -52,13 +52,12 @@ function og_schema() {
         'not null'        => FALSE,
         'default' => '',
       ),
-      'data' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'size' => 'big',
-        'serialize' => TRUE,
-        'description' => 'A serialized array with the data related to the group.',
-      ),
+	    'created' => array(
+	      'description' => 'The Unix timestamp when the group was created.',
+	      'type' => 'int',
+	      'not null' => TRUE,
+	      'default' => 0,
+	    ),
     ),
     'primary key' => array('gid'),
   );

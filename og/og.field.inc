@@ -68,12 +68,6 @@ function og_field_schema($field) {
       'unsigned' => TRUE,
       'not null' => FALSE,
     ),
-    'data' => array(
-      'description' => 'Serialized additional data about the group content.',
-      'type' => 'text',
-      'not null' => FALSE,
-      'serialize' => TRUE,
-    ),
     'state' => array(
       'description' => 'The state of the group content.',
       'type' => 'varchar',
@@ -83,12 +77,6 @@ function og_field_schema($field) {
     ),
     'created' => array(
       'description' => 'The Unix timestamp when the group content was created.',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-    'changed' => array(
-      'description' => 'The Unix timestamp when the group content was most recently saved.',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
