@@ -187,14 +187,6 @@ class EntityOg extends EntityDB {
     parent::__construct($values, 'og');
   }
 
-  function load($ids = array(), $conditions = array()) {
-    $gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
-
-    // Unset the object type condition.
-    unset($conditions['obj_type']);
-    return parent::load($gids, $conditions);
-  }
-
 
 	/**
 	 * Set an association (e.g. subscribe) an object to a group.
@@ -1139,7 +1131,7 @@ function og_context($account = NULL, $group = NULL) {
 
     // Check the page arguments if one of them is an object, and check if it is
     // a group or group content, by looking for og_group or og_audience fields.
-    if (!empty($item['page_arguments'])) {
+    if (!empty($item['page_arguments']) && !empty($item['map'][0])) {
       $obj_type = $item['map'][0];
       foreach ($item['page_arguments'] as $argument) {
         if (is_object($argument)) {
@@ -1176,7 +1168,7 @@ function og_context($account = NULL, $group = NULL) {
                   // We have only nodes as groups, so check access to them.
                   // TODO: have og_get_group_mulitple().
                   foreach ($node_gids as $node_gid) {
-                    $group = og_get_group('gid', $node_get);
+                    $group = og_get_group('gid', $node_gid);
                     $nid = $group->oid;
                     $node = node_load($nid);
                     if (node_access('view', $node, $account)) {
