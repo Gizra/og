@@ -301,7 +301,7 @@ class EntityOg extends EntityDB {
       }
     }
     if ($existing_key !== FALSE) {
-    	unset($wrapper->$property->get($existing_key));
+    	unset($wrapper->$property[$existing_key]);
 
 	    if ($save) {
 	      // Save the object.
