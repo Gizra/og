@@ -56,6 +56,11 @@ define('OG_ACCESS_IGNORE', NULL);
 define('OG_AUDIENCE_FIELD', 'og_audience');
 
 /**
+ * Group audience field ready to be used with entit-metdata.
+ */
+define('OG_AUDIENCE_FIELD_PROPERTY', 'og-audience');
+
+/**
  * The role name of group non-members.
  */
 define('OG_ANONYMOUS_ROLE', 'anonymous member');
@@ -193,18 +198,18 @@ class OgController extends EntityAPIController {
  * @param $obj_type
  *   The group object type. "node" is the default value. Pass "gid" if the the
  *   content ID is equal to the group unique ID.
- * @param $states
- *   Optional; Array with the states of the group (i.e. OG_STATE_ACTIVE or
- *   OG_STATE_PENDING).
+ * @param $create
+ *   Optional; If no existing group is found, create a new one. Defaults to TRUE.
  *
  * @return
  *   The group object if found, or an empty array.
  */
-function og_get_group($obj_type, $oid) {
+function og_get_group($obj_type, $oid, $create = TRUE) {
+	$group = FALSE;
   if ($gids = og_get_group_ids($obj_type, array($oid))) {
     $group = og_load($gids[$oid]);
   }
-  else {
+  elseif ($create) {
     $group = new EntityOg(array('obj_type' => $obj_type, 'oid' => $oid));
   }
   return $group;
@@ -311,6 +316,80 @@ class EntityOg extends EntityDB {
 
     return $object;
 	}
+
+	/**
+	 * Determine whether the user has a given privilege.
+	 *
+	 * @param $gid
+	 *   The group ID.
+	 * @param $string
+	 *   The permission, such as "administer nodes", being checked for.
+	 * @param $account
+	 *   (optional) The account to check, if not given use currently logged in user.
+	 *
+	 * @return
+	 *   Boolean TRUE if the current user has the requested permission.
+	 *
+	 * All permission checks in OG should go through this function. This
+	 * way, we guarantee consistent behavior, and ensure that the superuser
+	 * can perform all actions.
+	 */
+	function access($string, $account = NULL) {
+	  global $user;
+	  $perm = &drupal_static(__FUNCTION__, array());
+	  $gid = $this->gid;
+
+	  if (empty($account)) {
+	    $account = $user;
+	  }
+
+	    // User #1 has all privileges.
+    if ($account->uid == 1) {
+      return TRUE;
+    }
+
+    // Administer organic groups permission.
+    if (user_access('administer organic groups', $account)) {
+      return TRUE;
+    }
+
+	  // Group manager has all privileges.
+	  $object = current(entity_load($group->obj_type, array($group->oid)));
+	  if (!empty($object->uid) && $object->uid == $account->uid) {
+	    return TRUE;
+	  }
+
+	  // To reduce the number of SQL queries, we cache the user's permissions
+	  // in a static variable.
+	  if (!isset($perm[$gid][$account->uid])) {
+	    $user_groups = og_get_object_groups('user', $account);
+
+	    // Get default roles.
+	    $default_roles = og_get_group_default_roles($gid);
+	    if (!in_array($gid, $user_groups)) {
+	      // Keep only the anonymous role.
+	      $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
+	    }
+	    else {
+	      // Add the authenticated role.
+	      $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
+	      // Get otehr roles assigned to the user in the group.
+	      $roles += og_get_user_roles($gid, $account->uid);
+	    }
+
+	    $role_permissions = og_user_role_permissions($roles);
+
+	    $perms = array();
+	    foreach ($role_permissions as $one_role) {
+	      $perms += $one_role;
+
+	      $perm[$gid][$account->uid] = $perms;
+	    }
+
+	  }
+	  return isset($perm[$gid][$account->uid][$string]);
+	}
+
 
 	/**
 	 * Helper function to get a wrapper of an object.
@@ -870,23 +949,23 @@ function og_get_group_from_object($gid, $obj_type, $object, &$key = NULL) {
  * @param $object
  *   The object can be a user, node or any fieldable entity.
  * @param $states
- *   Optioanl; Array with the state to return. If empty all state will return.
+ *   Optioanl; Array with the state to return. If empty groups of all state will
+ *   return.
  * @return
  *  An array with the group, or an empty array.
  */
 function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIVE)) {
   // Load object to get the fields.
   $object = og_load_object($obj_type, $object);
+  $wrapper = entity_metadata_wrapper($obj_type, $object);
 
   $groups = array();
-  if (!empty($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
-    foreach ($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $group) {
-      if (!empty($states) && !in_array($group['state'], $states)) {
-        // Don't register the group if it's state isn't the one we look for.
-        continue;
-      }
-      $groups[$group['gid']] = $group['gid'];
+  foreach ($wrapper->{OG_AUDIENCE_FIELD_PROPERTY}->value() as $group) {
+    if (!empty($states) && !in_array($group['state'], $states)) {
+      // Don't register the group if it's state isn't the one we look for.
+      continue;
     }
+    $groups[$group['gid']] = $group['gid'];
   }
   return $groups;
 }
