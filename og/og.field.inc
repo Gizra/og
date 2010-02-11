@@ -405,7 +405,7 @@ function og_field_crud_group($op, $obj_type, $object) {
     // content might have been saved, but not as a group.
     if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !empty($group->new)) {
       // Save the group.
-      group_save($group);
+      og_save($group);
 
       if (!empty($object->uid)) {
         // Subscribe the object author, if exists.
@@ -426,7 +426,7 @@ function og_field_crud_group($op, $obj_type, $object) {
       if ($state) {
       	$group->state = $state;
         // Change the group state.
-      	group_save($group);
+      	og_save($group);
       }
     }
   }
