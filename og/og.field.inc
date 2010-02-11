@@ -110,7 +110,7 @@ function og_field_formatter_view($object_type, $object, $field, $instance, $lang
 
   if ($field['field_name'] == 'og_audience') {
     foreach ($items as $delta => $item) {
-      if ($group = og_get_group('gid', $item['gid'])) {
+      if ($group = og_get_group('gid', $item['gid'], FALSE)) {
         $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
         $element[$delta] = array(
           '#type' => 'link',
