@@ -101,7 +101,7 @@ function og_entity_info() {
   $return['og'] = array(
     'label' => t('Organic group'),
     'entity class' => 'EntityOg',
-    'controller class' => 'OgController',
+    'controller class' => 'EntityOg',
     'base table' => 'og_groups',
     'object keys' => array(
       'id' => 'gid',
@@ -177,18 +177,6 @@ function og_group_content_states() {
   );
 }
 
-/**
- * Controller class for organic groups.
- */
-class OgController extends EntityAPIController {
-	function load($ids = array(), $conditions = array()) {
-		$gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
-
-		// Unset the object type condition.
-		unset($conditions['obj_type']);
-		return parent::load($gids, $conditions);
-	}
-}
 
 /**
  * Factory method. Return a loaded group object if exists or create a new one.
@@ -205,7 +193,7 @@ class OgController extends EntityAPIController {
  *   The group object if found, or an empty array.
  */
 function og_get_group($obj_type, $oid, $create = TRUE) {
-	$group = FALSE;
+  $group = FALSE;
   if ($gids = og_get_group_ids($obj_type, array($oid))) {
     $group = og_load($gids[$oid]);
   }
@@ -223,47 +211,58 @@ class EntityOg extends EntityDB {
   public function __construct(array $values = array(), $entityType = NULL) {
     // Initialize values.
     $values += array('state' => OG_STATE_ACTIVE, 'created' => time());
-  	parent::__construct($values, 'og');
+    parent::__construct($values, 'og');
   }
 
-	/**
-	 * Set an association (e.g. subscribe) an object to a group.
-	 *
-	 * @param $obj_type
-	 *   The object type (e.g. "node" or "user").
-	 * @param $object
-	 *   The object to set the association.
-	 * @param $state
-	 *   The state of the association. Can be:
-	 *   - OG_STATE_ACTIVE
-	 *   - OG_STATE_PENDING
-	 *   - OG_STATE_BLOCKED
+  /**
+   * Override EntityDB::load().
+   */
+  function load($ids = array(), $conditions = array()) {
+    $gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
+
+    // Unset the object type condition.
+    unset($conditions['obj_type']);
+    return parent::load($gids, $conditions);
+  }
+
+  /**
+   * Set an association (e.g. subscribe) an object to a group.
+   *
+   * @param $obj_type
+   *   The object type (e.g. "node" or "user").
+   * @param $object
+   *   The object to set the association.
+   * @param $state
+   *   The state of the association. Can be:
+   *   - OG_STATE_ACTIVE
+   *   - OG_STATE_PENDING
+   *   - OG_STATE_BLOCKED
    * @param $save
    *   Optioanl; TRUE if fields value shoudl be saved. Defaults to TRUE.
-	 *
-	 * @return
-	 *   The object with the fields updated.
-	 */
-	public function group($obj_type, $object, $state = OG_STATE_ACTIVE, $save = TRUE) {
-		$wrapper = $this->get_wrapper($obj_type, $object);
+   *
+   * @return
+   *   The object with the fields updated.
+   */
+  public function group($obj_type, $object, $state = OG_STATE_ACTIVE, $save = TRUE) {
+    $wrapper = og_get_wrapper($obj_type, $object);
 
     // Check if the object is already associated with the group.
     $property = str_replace('_', '-', OG_AUDIENCE_FIELD);
 
     $existing_key = FALSE;
     if ($items = $wrapper->$property->value()) {
-    	foreach ($items as $key => $value) {
-    		if ($this->gid == $value['gid']) {
-  			  $existing_key = $key;
-   			  break;
-    		}
-    	}
+      foreach ($items as $key => $value) {
+        if ($this->gid == $value['gid']) {
+          $existing_key = $key;
+          break;
+        }
+      }
     }
 
     if ($existing_key === FALSE) {
-    	$op = 'insert';
-    	$wrapper->$property->state->set($state);
-    	$wrapper->$property->created->set(time());
+      $op = 'insert';
+      $wrapper->$property->state->set($state);
+      $wrapper->$property->created->set(time());
     }
     elseif ($wrapper->$property->get($existing_key)->state->value() != $state) {
       $op = 'update';
@@ -272,11 +271,11 @@ class EntityOg extends EntityDB {
 
     if ($save) {
       // Save the object.
-    	call_user_func('field_attach_' . $op, $obj_type, $object);
+      call_user_func('field_attach_' . $op, $obj_type, $object);
     }
 
     return $object;
-	}
+  }
 
   /**
    * Delete an an association (e.g. unsubscribe) of an object to a group.
@@ -291,8 +290,8 @@ class EntityOg extends EntityDB {
    * @return
    *   The object with the fields updated.
    */
-	public function ungroup($obj_type, $object, $save = TRUE) {
-		$wrapper = $this->get_wrapper($obj_type, $object);
+  public function ungroup($obj_type, $object, $save = TRUE) {
+    $wrapper = og_get_wrapper($obj_type, $object);
     // Check if the object is already associated with the group.
     $property = str_replace('_', '-', OG_AUDIENCE_FIELD);
 
@@ -306,44 +305,52 @@ class EntityOg extends EntityDB {
       }
     }
     if ($existing_key !== FALSE) {
-    	unset($wrapper->$property[$existing_key]);
+      unset($wrapper->$property[$existing_key]);
 
-	    if ($save) {
-	      // Save the object.
-	      call_user_func('field_attach_' . $op, $obj_type, $object);
-	    }
+      if ($save) {
+        // Save the object.
+        call_user_func('field_attach_' . $op, $obj_type, $object);
+      }
+
+      if ($obj_type == 'user') {
+        // Remove roles from user.
+      	foreach (og_get_user_roles($gid, $account->uid) as $rid) {
+		      og_users_roles_revoke($gid, $account->uid, $rid);
+		    }
+
+      }
     }
 
     return $object;
-	}
+  }
 
-	/**
-	 * Determine whether the user has a given privilege.
-	 *
-	 * @param $gid
-	 *   The group ID.
-	 * @param $string
-	 *   The permission, such as "administer nodes", being checked for.
-	 * @param $account
-	 *   (optional) The account to check, if not given use currently logged in user.
-	 *
-	 * @return
-	 *   Boolean TRUE if the current user has the requested permission.
-	 *
-	 * All permission checks in OG should go through this function. This
-	 * way, we guarantee consistent behavior, and ensure that the superuser
-	 * can perform all actions.
-	 */
-	function access($string, $account = NULL) {
-	  global $user;
-	  $perm = &drupal_static(__FUNCTION__, array());
-	  $gid = $this->gid;
+  /**
+   * Determine whether a user has a given privilege.
+   *
+   * @param $gid
+   *   The group ID.
+   * @param $string
+   *   The permission, such as "administer nodes", being checked for.
+   * @param $account
+   *   (optional) The account to check, if not given use currently logged in user.
+   *
+   * @return
+   *   Boolean TRUE if the current user has the requested permission.
+   *
+   * All permission checks in OG should go through this function. This
+   * way, we guarantee consistent behavior, and ensure that the superuser
+   * can perform all actions.
+   */
+  public function access($string, $account = NULL) {
+    global $user;
+    $perm = &drupal_static(__FUNCTION__, array());
+    $gid = $this->gid;
 
-	  if (empty($account)) {
-	    $account = $user;
-	  }
+    if (empty($account)) {
+      $account = $user;
+    }
 
-	    // User #1 has all privileges.
+      // User #1 has all privileges.
     if ($account->uid == 1) {
       return TRUE;
     }
@@ -353,56 +360,187 @@ class EntityOg extends EntityDB {
       return TRUE;
     }
 
-	  // Group manager has all privileges.
-	  $object = current(entity_load($group->obj_type, array($group->oid)));
-	  if (!empty($object->uid) && $object->uid == $account->uid) {
-	    return TRUE;
-	  }
+    // Group manager has all privileges.
+    $object = current(entity_load($group->obj_type, array($group->oid)));
+    if (!empty($object->uid) && $object->uid == $account->uid) {
+      return TRUE;
+    }
 
-	  // To reduce the number of SQL queries, we cache the user's permissions
-	  // in a static variable.
-	  if (!isset($perm[$gid][$account->uid])) {
-	    $user_groups = og_get_object_groups('user', $account);
+    // To reduce the number of SQL queries, we cache the user's permissions
+    // in a static variable.
+    if (!isset($perm[$gid][$account->uid])) {
+      $user_groups = og_get_object_groups('user', $account);
 
-	    // Get default roles.
-	    $default_roles = og_get_group_default_roles($gid);
-	    if (!in_array($gid, $user_groups)) {
-	      // Keep only the anonymous role.
-	      $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
-	    }
-	    else {
-	      // Add the authenticated role.
-	      $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
-	      // Get otehr roles assigned to the user in the group.
-	      $roles += og_get_user_roles($gid, $account->uid);
-	    }
+      // Get default roles.
+      $default_roles = og_get_group_default_roles($gid);
+      if (!in_array($gid, $user_groups)) {
+        // Keep only the anonymous role.
+        $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
+      }
+      else {
+        // Add the authenticated role.
+        $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
+        // Get otehr roles assigned to the user in the group.
+        $roles += og_get_user_roles($gid, $account->uid);
+      }
 
-	    $role_permissions = og_user_role_permissions($roles);
+      $role_permissions = og_user_role_permissions($roles);
 
-	    $perms = array();
-	    foreach ($role_permissions as $one_role) {
-	      $perms += $one_role;
+      $perms = array();
+      foreach ($role_permissions as $one_role) {
+        $perms += $one_role;
 
-	      $perm[$gid][$account->uid] = $perms;
-	    }
+        $perm[$gid][$account->uid] = $perms;
+      }
 
-	  }
-	  return isset($perm[$gid][$account->uid][$string]);
-	}
+    }
+    return isset($perm[$gid][$account->uid][$string]);
+  }
 
 
 	/**
-	 * Helper function to get a wrapper of an object.
-	 * @param $obj_type
-	 * @param $object
-	 * @return unknown_type
+	 * Retrieve an array of roles matching specified conditions.
+	 *
+	 * @param $permission
+	 *   Optioanl; A string containing a permission. If set, only roles containing that
+	 *   permission are returned.
+	 * @param $default_roles
+   *   Optioanl; TRUE of default roles should be returned as-well. Defaults to
+   *   TRUE.
+	 *
+	 * @return
+	 *   An associative array with the role id as the key and the role name as
+	 *   value. The anonymous and authenticated deault roles are on the top of the
+	 *   array.
 	 */
-	private function get_wrapper($obj_type, $object) {
-    // Re-load object to make sure we have the fields.
-    $object = og_load_object($obj_type, $object);
+	public function getRoles($permission = NULL, $default_roles = TRUE) {
+		$gid = $this->gid;
+	  if (!empty($permission)) {
+	    $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
+	  }
+	  else {
+	    $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid ORDER BY name = :anon AND name = :auth AND name", array(':gid' => $gid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE))->fetchAllKeyed();
+	  }
 
-    return entity_metadata_wrapper($obj_type, $object);
+	  if ($default_roles) {
+	  	// TODO.
+	  }
+
+	  return $roles;
 	}
+
+	/**
+	 * Get all the users with certain roles in a group.
+	 *
+	 * @param $roles
+	 *   Array with the roles to query.
+	 */
+	public function getUsersByRole($roles = array()) {
+		$gid = $this->gid;
+	  $query = db_select('og_users_roles', 'og_users_roles');
+	  return $query->fields('og_users_roles', array('uid'))
+	    ->condition('gid', $gid)
+	    ->condition('role', $roles, 'IN')
+	    ->execute()
+	    ->fetchAll();
+	}
+
+
+  /**
+   * Get all roles ID of a user in a certain group.
+   *
+   * @param $gid
+   *   The group ID.
+   * @param $uid
+   *   The user ID.
+   * @return
+   *   Array with the role IDs of the user.
+   */
+  public function getUserRoles($uid) {
+  	$gid = $this->gid;
+    //TODO: How to get keyed by rid, wihout this hack?
+    return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
+  }
+
+	/**
+	 * Grant a group role to a user.
+	 *
+	 * @param $uid
+	 *   The user ID.
+	 * @param $rid
+	 *   The role ID.
+	 */
+	public function roleGrant($uid, $rid) {
+		$gid = $this->gid;
+	  // Get the existiong user roles.
+	  $user_roles = getUserRoles($gid, $uid);
+	  if (!in_array($rid, $user_roles)) {
+	    $role = new stdClass();
+	    $role->uid = $uid;
+	    $role->rid = $rid;
+	    $role->gid = $gid;
+
+	    drupal_write_record('og_users_roles', $role);
+	    module_invoke_all('og_user_roles_grant', $gid, $uid, $rid);
+	  }
+	}
+
+	/**
+	 * Revoke a group role from a user.
+	 *
+	 * @param $uid
+	 *   The user ID.
+	 * @param $rid
+	 *   The role ID.
+	 */
+	function userRoleRevoke($uid, $rid) {
+	  $gid = $this->gid;
+		// Get the existiong user roles.
+	  $user_roles = getUserRoles($gid, $uid);
+	  if (in_array($rid, $user_roles)) {
+
+	    db_delete('og_users_roles')
+	      ->condition('uid', $uid)
+	      ->condition('rid', $rid)
+	      ->execute();
+	    module_invoke_all('og_user_roles_revoke', $gid, $uid, $rid);
+	  }
+
+	}
+
+
+
+	/**
+	 * Get all users belonging to a group.
+	 *
+	 * @param $states
+	 * @param $count
+	 * @param $cursor
+	 *
+	 * @return
+	 *   Array with the users objects.
+	 */
+	function getUsers($count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
+	  $return = array();
+
+	  $field = field_info_field('og_audience');
+
+	  $conditions = array(
+	    array('gid', $gid),
+	    array('type', 'user'),
+	  );
+
+	  // Get the objects IDs.
+	  if ($result = field_attach_query($field['id'], $conditions, array('limit' => $count, 'cursor' => $cursor))) {
+	    $uids = array();
+	    foreach ($result['user'] as $key => $value) {
+	      $uids[$key] = $key;
+	    }
+
+	  // Return the users objects.
+	  return user_load_multiple($uids);
+	}
+
 }
 
 
@@ -462,35 +600,35 @@ function og_delete_multiple(array $gids) {
  *   Array keyed with the object ID and the group ID as the value.
  */
 function og_get_group_ids($obj_type, $oids = array()) {
-	$gids = &drupal_static(__FUNCTION__, array());
+  $gids = &drupal_static(__FUNCTION__, array());
 
-	// If there are chached gids, temoprarly save them, so we don't re-query them
-	// from the database.
-	$cache_gids = array();
+  // If there are chached gids, temoprarly save them, so we don't re-query them
+  // from the database.
+  $cache_gids = array();
 
-	if (!empty($gids[$obj_type])) {
-		$oids = drupal_map_assoc($oids);
-  	// Check we don't already have the group IDs.
-  	foreach ($gids[$obj_type] as $oid => $gid) {
-  		$cache_gids[$gid] = $gid;
-  		unset($oids[$oid]);
-  	}
-	}
-	else {
-		$gids[$obj_type] = array();
-	}
+  if (!empty($gids[$obj_type])) {
+    $oids = drupal_map_assoc($oids);
+    // Check we don't already have the group IDs.
+    foreach ($gids[$obj_type] as $oid => $gid) {
+      $cache_gids[$gid] = $gid;
+      unset($oids[$oid]);
+    }
+  }
+  else {
+    $gids[$obj_type] = array();
+  }
 
   if (!empty($oids)) {
-	  if ($obj_type == 'gid') {
-	  	$gids[$obj_type] = drupal_map_assoc($oids);
-	  }
-	  else {
-		  $query = db_select('og_groups', 'og_groups');
-		  $gids[$obj_type] = $query->fields('og_groups', array('oid', 'gid'))
-		  ->condition('obj_type', $obj_type)
-		  ->condition('oid', $oids, 'IN')
-		  ->execute()->fetchAllKeyed();
-	  }
+    if ($obj_type == 'gid') {
+      $gids[$obj_type] = drupal_map_assoc($oids);
+    }
+    else {
+      $query = db_select('og_groups', 'og_groups');
+      $gids[$obj_type] = $query->fields('og_groups', array('oid', 'gid'))
+      ->condition('obj_type', $obj_type)
+      ->condition('oid', $oids, 'IN')
+      ->execute()->fetchAllKeyed();
+    }
   }
 
   // Add the cached group IDs.
@@ -753,193 +891,6 @@ function og_og_get_fields() {
  * API functions
  ******************************************************************************/
 
-/**
- * Get all groups IDs with a certain state.
- *
- * @param $obj_type
- *   The object type.
- * @param $oids
- *   Optional; Array with the object IDs to retreive, or empty to return all
- *   groups.
- * @param $states
- *   Optional; Array with the states of the group (i.e. OG_STATE_ACTIVE or
- *   OG_STATE_PENDING).
- *
- * @return
- *   Array with the object types as an array keyed by the group ID and the
- *   object ID as the value.
- */
-function og_get_groups($obj_type = 'gid', $oids = array(), $states = array(OG_STATE_ACTIVE)) {
-  $return = array();
-
-  $query = db_select('og_groups', 'og_groups');
-  $query->fields('og_groups');
-
-  if ($obj_type != 'gid') {
-    $query->condition('obj_type', $obj_type);
-  }
-
-  if (!empty($oids)) {
-    if ($obj_type != 'gid') {
-      $query->condition('oid', $oids, 'IN');
-    }
-    else {
-      $query->condition('gid', $oids, 'IN');
-    }
-  }
-
-  // Query for certain states if they are provided.
-  if (!empty($states)) {
-    $query->condition('state', $states, 'IN');
-  }
-
-  $result = $query->execute()->fetchAllAssoc('gid');
-
-  foreach ($result as $row) {
-    $return[$row->obj_type][$row->gid] = $row->oid;
-  }
-  return $return;
-}
-
-/**
- * Set a group object.
- *
- * @param $oid
- *   The group content ID.
- * @param $obj_type
- *   The group content ID. "node" is the default value.
- * @param $data
- *   Optional; An array with data related to the group.
- *
- * @return
- *   The group object populated with the group ID.
- */
-function og_set_group($obj_type, $oid, $state = OG_STATE_ACTIVE, $data = array()) {
-  $group = new stdClass();
-  $group->obj_type = $obj_type;
-  $group->oid = $oid;
-  $group->state = $state;
-
-  // Determine if object already exists and needs update.
-  if ($existing_group = og_get_group($obj_type, $oid)) {
-    $group->gid = $existing_group->gid;
-    $existing_group->data = !empty($existing_group->data) ? unserialize($existing_group->data) : array();
-    $group->data = array_merge($existing_group->data, $data);
-
-    $update = array('gid');
-  }
-  else {
-    $update = array();
-    $group->data = $data;
-
-  }
-
-  // Allow other modules to change the group object.
-  drupal_alter('og_set_group', $group);
-
-  drupal_write_record('og_groups', $group, $update);
-
-  return $group;
-}
-
-
-/**
- * Delete a group object by it's object type and ID.
- *
- * @param $obj_type
- *   The group object type ID or 'gid' to delete by group ID.
- * @param $oid
- *   Optional; The group ID. If empty all groups belonging to the object type
- *   will be deleted.
- */
-function og_delete_groups($obj_type, $oids = array()) {
-  $query = db_delete('og_groups');
-  if ($obj_type != 'gid') {
-    $query->condition('obj_type', $obj_type);
-    if (!empty($oids)) {
-      $query->condition('oid', $oids, 'IN');
-    }
-  }
-  else {
-    $query->condition('gid', $oids, 'IN');
-  }
-
-  $query->execute();
-}
-
-/**
- * Get all the users belonging to a group.
- *
- * @param $gid
- *   The group unique ID.
- * @param $count
- * @param $cursor
- *
- * @return
- *   Array keyed with the object IDs and the value as array with the field
- *   values.
- */
-function og_get_group_users($gid, $states = array(OG_STATE_ACTIVE), $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
-  $return = array();
-
-  $field = field_info_field('og_audience');
-
-  $conditions = array(
-    array('gid', $gid),
-    array('type', 'user'),
-  );
-
-  // Get the objects IDs.
-  if ($result = field_attach_query($field['id'], $conditions, array('limit' => $count, 'cursor' => $cursor))) {
-    $uids = array();
-    foreach ($result['user'] as $key => $value) {
-      $uids[$key] = $key;
-    }
-
-    // Load the users.
-    $accounts = user_load_multiple($uids);
-
-    // Prepare the return values.
-    foreach ($accounts as $account) {
-      $group = (object)og_get_group_from_object($gid, 'user', $account);
-
-      // Check if the user's state is valid.
-      if (!empty($states) && !in_array($group->state, $states)) {
-        continue;
-      }
-      // OG audience may be multiple field, but the group can appear only once,
-      // so we extract only the value with our requested group.
-      $return[$account->uid] = $group;
-      // Add back the user ID and user name.
-      $return[$account->uid]->uid = $account->uid;
-      $return[$account->uid]->name = $account->name;
-    }
-  }
-  return $return;
-}
-
-/**
- * Extract a specific group from an object.
- *
- * @param $object
- *   The object.
- * @param $gid
- *   The group unqie ID.
- * @return
- *   Array with the field's value.
- */
-function og_get_group_from_object($gid, $obj_type, $object, &$key = NULL) {
-  $object = og_load_object($obj_type, $object);
-  if (!empty($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
-    foreach ($object->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $key_index => $value) {
-      if ($value['gid'] == $gid) {
-        // Save the position of the value in the field.
-        $key = $key_index;
-        return $value;
-      }
-    }
-  }
-}
 
 /**
  * Get the groups a content is associated with.
@@ -1017,148 +968,6 @@ function og_is_group_content_type($obj_type, $bundle_name) {
   return og_get_group_type($obj_type, $bundle_name, 'group content');
 }
 
-/**
- * Subscribe a user to groups.
- *
- * @param $groups
- *   Array of the groups to subscribe the user. The groups keys are:
- *   - gid: The group ID.
- *   - state: Optional; Defaults to OG_STATE_ACTIVE.
- *   - data: Optioanl; Defaults to an empty array().
- * @param $account
- *   Optional; A user object.
- * @param $replace
- *   Optioanl; True if the group lists should replace the existing subscrptions
- *   of the user.
- * @param $request
- *   Optioanl; A message created by the requesting user that should be sent to
- *   the group admins.
- */
-function og_subscribe_user($groups = array(), $account = NULL, $replace = FALSE, $request = '') {
-  if (empty($account)) {
-    global $user;
-    $account = $user;
-  }
-  og_set_association('user', $account, $groups, $replace, $request);
-}
-
-/**
- * Unsubscribe a user from groups.
- *
- * @param $gids
- *   Array of the groups to unsubscribe the user.
- * @param $account
- *   Optional; A user object.
- */
-function og_unsubscribe_user($gids = array(), $account = NULL) {
-  if (empty($account)) {
-    global $user;
-    $account = $user;
-  }
-
-  og_delete_association('user', $account, $gids);
-
-  // Delete any roles the user had.
-  foreach ($gids as $gid) {
-    foreach (og_get_user_roles($gid, $account->uid) as $rid) {
-      og_users_roles_revoke($gid, $account->uid, $rid);
-    }
-  }
-}
-
-/**
- * Set an association (e.g. subscribe) an object to a group.
- *
- * @param $obj_type
- *   The object type (e.g. "node" or "user").
- * @param $object
- *   The object to set the association.
- * @param $groups
- *   Keyed array of the groups to subscribe the object. Keys are:
- *   "value" - The group ID.
- *   "state" - Optioanl; The state of the association.
- *   "data" - Optioanl; Array with data related to the association.
- * @param $replace
- *   Optioanl; True if the group lists should replace the existing subscrptions
- *   of the user.
- * @param $request
- *   Optioanl; A message created by the requesting user that should be sent to
- *   the group admins.
- */
-function og_set_association($obj_type, $object, $groups = array(), $replace = FALSE, $request = '') {
-  // Load object to get the fields.
-  $object = og_load_object($obj_type, $object);
-
-  $op = empty($object->og_audience) ? 'insert' : 'update';
-  if ($replace) {
-    unset($object->og_audience);
-  }
-
-  // Will be used later to keep only groups that are not yet associated with the
-  // group.
-  $existing_gids = og_get_object_groups($obj_type, $object, array());
-
-  // Allow other modules to change the subscribed groups.
-  drupal_alter('og_set_association', $groups, $obj_type, $object);
-
-  // Indicate if the object was changed, and needs to be saved.
-  $save = FALSE;
-
-  foreach ($groups as $group) {
-    $key = 0;
-    if ($value = og_get_group_from_object($group['gid'], $obj_type, $object, $key)) {
-      // Group already exists, so we will replace it. The key was returned from
-      // og_get_group_from_object().
-      // We preserve the data and state values, provided they aren't changed.
-      $group = array_merge($value, $group);
-      $object->og_audience[LANGUAGE_NONE][$key] = $group;
-      $save = TRUE;
-    }
-    else {
-      // Initialize values.
-      $group += array('state' => OG_STATE_ACTIVE, 'data' => array());
-      // Add a new record.
-      $object->og_audience[LANGUAGE_NONE][] = $group;
-      $save = TRUE;
-    }
-  }
-
-  if ($save) {
-    og_invoke_event();
-    call_user_func('field_attach_' . $op, $obj_type, $object);
-  }
-}
-
-/**
- * Set an association (e.g. subscribe) an object to a group.
- *
- * @param $obj_type
- *   The object type (e.g. "node" or "user").
- * @param $object
- *   The object to set the association.
- * @param $gids
- *   Array with the group IDs to delete.
- */
-function og_delete_association($obj_type, $object, $gids = array()) {
-  // Load object to get the fields.
-  $object = og_load_object($obj_type, $object);
-
-  // Indicate if the object was changed, and needs to be saved.
-  $save = FALSE;
-
-  foreach ($object->og_audience[LANGUAGE_NONE] as $key => $group) {
-    if (in_array($group['gid'], $gids)) {
-      unset($object->og_audience[LANGUAGE_NONE][$key]);
-
-      og_invoke_event();
-      $save = TRUE;
-    }
-  }
-
-  if ($save) {
-    call_user_func('field_attach_update', $obj_type, $object);
-  }
-}
 
 
 /**
@@ -1566,109 +1375,6 @@ function og_user_role_permissions($roles = array()) {
   return $role_permissions;
 }
 
-/**
- * Determine whether the user has a given privilege.
- *
- * @param $gid
- *   The group ID.
- * @param $string
- *   The permission, such as "administer nodes", being checked for.
- * @param $account
- *   (optional) The account to check, if not given use currently logged in user.
- *
- * @return
- *   Boolean TRUE if the current user has the requested permission.
- *
- * All permission checks in OG should go through this function. This
- * way, we guarantee consistent behavior, and ensure that the superuser
- * can perform all actions.
- */
-function og_user_access($gid, $string, $account = NULL) {
-  global $user;
-  $perm = &drupal_static(__FUNCTION__, array());
-
-  if (empty($account)) {
-    $account = $user;
-  }
-
-  // User #1 has all privileges.
-  if ($account->uid == 1) {
-    return TRUE;
-  }
-
-  // Administer organic groups permission.
-  if (user_access('administer organic groups', $account)) {
-    return TRUE;
-  }
-
-  if (!$group = og_get_group('gid', $gid)) {
-    // Not a group.
-    return FALSE;
-  }
-
-  // Group manager has all privileges.
-  $object= current(entity_load($group->obj_type, array($group->oid)));
-  if (!empty($object->uid) && $object->uid == $account->uid) {
-    return TRUE;
-  }
-
-  // To reduce the number of SQL queries, we cache the user's permissions
-  // in a static variable, if the user is authenticated.
-  if (!isset($perm[$gid][$account->uid])) {
-    $user_groups = og_get_object_groups('user', $account);
-
-    // Get default roles.
-    $default_roles = og_get_group_default_roles($gid);
-    if (!in_array($gid, $user_groups)) {
-      // Keep only the anonymous role.
-      $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
-    }
-    else {
-      // Add the authenticated role.
-      $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
-      // Get otehr roles assigned to the user in the group.
-      $roles += og_get_user_roles($gid, $account->uid);
-    }
-
-    $role_permissions = og_user_role_permissions($roles);
-
-    $perms = array();
-    foreach ($role_permissions as $one_role) {
-      $perms += $one_role;
-
-      $perm[$gid][$account->uid] = $perms;
-    }
-
-  }
-  return isset($perm[$gid][$account->uid][$string]);
-}
-
-
-/**
- * Retrieve an array of roles matching specified conditions.
- * @param $gid
- *   The group node ID.
- * @param $roles
- * @param $permission
- *   Optioanl; A string containing a permission. If set, only roles containing that
- *   permission are returned.
- *
- * @return
- *   An associative array with the role id as the key and the role name as
- *   value. The anonymous and authenticated deault roles are on the top of the
- *   array.
- */
-function og_user_roles($gid, $roles = array(), $permission = NULL) {
-  if (!empty($permission)) {
-    $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
-  }
-  else {
-    $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid ORDER BY name = :anon AND name = :auth AND name", array(':gid' => $gid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE))->fetchAllKeyed();
-  }
-
-  // Filter to remove unmatched system roles.
-  return  array_filter($roles);
-}
 
 /**
  * Get the anonymous and authenticated user roles ID of a group.
@@ -1680,50 +1386,6 @@ function og_user_roles($gid, $roles = array(), $permission = NULL) {
  */
 function og_get_group_default_roles($gid) {
   return db_query("SELECT name, rid FROM {og_role} WHERE gid = :gid AND (name = :anon OR name = :auth OR name = :admin)", array(':gid' => $gid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE, ':admin' => OG_ADMINISTRATOR_ROLE))->fetchAllKeyed();
-}
-
-/**
- * Get all roles ID of a group.
- *
- * @param $gid
- *   The group ID.
- * @return
- *   An array keyed with the role name and the role ID as the value.
- */
-function og_get_group_roles($gid) {
-  return db_query("SELECT name, rid FROM {og_role} WHERE gid = :gid", array(':gid' => $gid))->fetchAllKeyed();
-}
-
-/**
- * Get all roles ID of a user in a certain group.
- *
- * @param $gid
- *   The group ID.
- * @param $uid
- *   The user ID.
- * @return
- *   Array with the role IDs of the user.
- */
-function og_get_user_roles($gid, $uid) {
-  //TODO: How to get keyed by rid, wihout this hack?
-  return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
-}
-
-/**
- * Get all the users with certain roles in a group.
- *
- * @param $gid
- *   The group unique ID.
- * @param $roles
- *   Array with the roles to query.
- */
-function og_get_users_by_roles($gid, $roles = array()) {
-  $query = db_select('og_users_roles', 'og_users_roles');
-  return $query->fields('og_users_roles', array('uid'))
-    ->condition('gid', $gid)
-    ->condition('role', $roles, 'IN')
-    ->execute()
-    ->fetchAll();
 }
 
 
@@ -1800,50 +1462,6 @@ function og_user_role_delete($rid) {
   drupal_static_reset('og_user_role_permissions');
 }
 
-/**
- * Grant a group role to a user.
- *
- * @param $uid
- *   The user ID.
- * @param $rid
- *   The role ID.
- */
-function og_users_roles_grant($gid, $uid, $rid) {
-  // Get the existiong user roles.
-  $user_roles = og_get_user_roles($gid, $uid);
-  if (!in_array($rid, $user_roles)) {
-    $role = new stdClass();
-    $role->uid = $uid;
-    $role->rid = $rid;
-    $role->gid = $gid;
-
-    drupal_write_record('og_users_roles', $role);
-    og_invoke_event();
-    module_invoke_all('og_users_roles_grant', $gid, $uid, $rid);
-  }
-}
-
-/**
- * Revoke a group role from a user.
- *
- * @param $uid
- *   The user ID.
- * @param $rid
- *   The role ID.
- */
-function og_users_roles_revoke($gid, $uid, $rid) {
-  // Get the existiong user roles.
-  $user_roles = og_get_user_roles($gid, $uid);
-  if (in_array($rid, $user_roles)) {
-
-    db_delete('og_users_roles')
-      ->condition('uid', $uid)
-      ->condition('rid', $rid)
-      ->execute();
-    module_invoke_all('og_users_roles_revoke', $gid, $uid, $rid);
-  }
-
-}
 
 /**
  * Change permissions for a user role.
@@ -2154,4 +1772,18 @@ function og_create_field($field_name, $obj_type, $bundle) {
       field_create_instance($instance);
     }
   }
+}
+
+
+/**
+ * Helper function to get a wrapper of an object.
+ * @param $obj_type
+ * @param $object
+ * @return unknown_type
+ */
+function og_get_wrapper($obj_type, $object) {
+  // Re-load object to make sure we have the fields.
+  $object = og_load_object($obj_type, $object);
+
+  return entity_metadata_wrapper($obj_type, $object);
 }
