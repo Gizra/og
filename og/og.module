@@ -337,7 +337,7 @@ function og_get_group_ids($obj_type, $oids = array()) {
  *   The object with the fields updated.
  */
 function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TRUE) {
-	$wrapper = $this->get_wrapper($obj_type, $object);
+	$wrapper = og_get_wrapper($obj_type, $object);
 
 	// Check if the object is already associated with the group.
 	$property = str_replace('_', '-', OG_AUDIENCE_FIELD);
@@ -384,7 +384,7 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
  *   The object with the fields updated.
  */
 function og_ungroup($gid, $obj_type, $object, $save = TRUE) {
-	$wrapper = $this->get_wrapper($obj_type, $object);
+	$wrapper = og_get_wrapper($obj_type, $object);
 	// Check if the object is already associated with the group.
 	$property = str_replace('_', '-', OG_AUDIENCE_FIELD);
 
@@ -898,7 +898,7 @@ function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_
   }
 
   // Check if the user was blocked.
-  if (($value = og_get_group_from_object($group->gid, 'user', $acting_user)) && $value['state'] == OG_STATE_BLOCKED) {
+  if (($state = og_get_object_state($group->gid, 'user', $acting_user)) && $state == OG_STATE_BLOCKED) {
     return FALSE;
   }
 
@@ -911,6 +911,31 @@ function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_
   }
   // No one allowed access, so assume access is denied.
   return FALSE;
+}
+
+/**
+ * Get the state of an object in a group.
+ *
+ * @param $obj_type
+ *   The object type.
+ * @param $object
+ *   The object.
+ * @param $gid
+ *   The group ID.
+ * @return
+ *   The state value, or FALSE is object is not associated with group.
+ */
+function og_get_object_state($gid, $obj_type, $object) {
+	$state = FALSE;
+  $wrapper = og_get_wrapper($obj_type, $object);
+
+  foreach ($wrapper->{OG_AUDIENCE_FIELD_PROPERTY}->value() as $value) {
+    if ($value['gid'] == $gid) {
+      // Save the position of the value in the field.
+      $state = $value['state'];
+    }
+  }
+  return $state;
 }
 
 /**
@@ -1848,13 +1873,14 @@ function og_create_field($field_name, $obj_type, $bundle) {
 
 /**
  * Helper function to get a wrapper of an object.
+ *
  * @param $obj_type
  * @param $object
  * @return unknown_type
  */
 function og_get_wrapper($obj_type, $object) {
-    // Re-load object to make sure we have the fields.
-    $object = og_load_object($obj_type, $object);
+  // Re-load object to make sure we have the fields.
+  $object = og_load_object($obj_type, $object);
 
-    return entity_metadata_wrapper($obj_type, $object);
-  }
+  return entity_metadata_wrapper($obj_type, $object);
+}
