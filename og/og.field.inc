@@ -392,30 +392,30 @@ function og_field_crud_group($op, $obj_type, $object) {
   // Get the object ID.
   list($id) = entity_extract_ids($obj_type, $object);
 
-  $group = og_get_group($obj_type, $id, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+  $group = og_get_group($obj_type, $id);
 
   if ($op == 'delete') {
     if ($group) {
       // Remove group.
-      og_delete_groups('gid', array($group->gid));
+      group_delete(array($group->gid));
     }
   }
   else {
     // Check group doesn't already exist. We don't check the $op for insert, as
     // content might have been saved, but not as a group.
-    if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !$group) {
-      // Add the group.
-      $group = og_set_group($obj_type, $id);
+    if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !empty($group->new)) {
+      // Save the group.
+      group_save($group);
 
       if (!empty($object->uid)) {
         // Subscribe the object author, if exists.
         $account = user_load($object->uid);
-        og_subscribe_user(array(array('gid' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
+        og_group(array(array('gid' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
       }
 
       og_set_new_group_roles($group->gid);
     }
-    elseif ($group) {
+    elseif (empty($group->new)) {
       $state = '';
       if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
         $state = OG_STATE_PENDING;
@@ -424,8 +424,9 @@ function og_field_crud_group($op, $obj_type, $object) {
         $state = OG_STATE_ACTIVE;
       }
       if ($state) {
+      	$group->state = $state;
         // Change the group state.
-        og_set_group($group->obj_type, $group->oid, $state, $group->data);
+      	group_save($group);
       }
     }
   }

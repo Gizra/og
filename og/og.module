@@ -199,6 +199,8 @@ function og_get_group($obj_type, $oid, $create = TRUE) {
   }
   elseif ($create) {
     $group = new EntityOg(array('obj_type' => $obj_type, 'oid' => $oid));
+    // Mark the group as new, and unssaved.
+    $group->new = TRUE;
   }
   return $group;
 }
@@ -260,6 +262,10 @@ function og_load($gid, $reset = FALSE) {
   return $group? reset($group) : FALSE;
 }
 
+function og_save($group) {
+	$group->save();
+}
+
 /**
  * Delete multiple organic groups entities.
  *
@@ -268,6 +274,10 @@ function og_load($gid, $reset = FALSE) {
  */
 function og_delete_multiple(array $gids) {
   entity_get_controller('og')->delete($gids);
+}
+
+function og_delete($gid) {
+  og_delete_multiple(array($gid));
 }
 
 
@@ -975,7 +985,7 @@ function og_context($account = NULL, $group = NULL) {
         if (is_object($argument)) {
          // Check if it's a group.
           list($id) = entity_extract_ids($obj_type, $argument);
-          if ($group = og_get_group($obj_type, $id)) {
+          if ($group = og_get_group($obj_type, $id, FALSE)) {
             $groups = array($group->gid => $group->gid);
           }
           else {
