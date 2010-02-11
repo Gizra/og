@@ -769,9 +769,10 @@ function og_get_group_users($gid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
     foreach ($result['user'] as $key => $value) {
       $uids[$key] = $key;
     }
-
-  // Load the users.
-  return user_load_multiple($uids);
+    // Load the users.
+    $return = user_load_multiple($uids);
+  }
+  return $return;
 }
 
 /**
@@ -987,7 +988,7 @@ function og_context($account = NULL, $group = NULL) {
             else {
               // The user is not a member of any of the groups. Let's check
               // if it's a node, as node access might be FALSE.
-              $groups = og_get_groups('gid', $groups);
+              $groups = og_load_multiple($groups);
               // For performance reasons we prefer not to use node_access()
               // so we first check if the group content is associated with
               // non-node groups.
@@ -1135,7 +1136,7 @@ function og_get_groups_for_form($obj_type, $object) {
 function og_get_all_groups_for_form($gids = array()) {
   $return = array();
 
-  foreach (og_get_groups('gid', $gids) as $obj_type => $values) {
+  foreach (og_load_multiple($gids) as $groups) {
     $return = $return + og_entity_get_label_multiple($obj_type, $values);
   }
 
@@ -1159,7 +1160,7 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
   $return = array();
 
   // Get the group IDs.
-  $gids = og_get_groups($obj_type, $oids);
+  $gids = og_load_multiple(array(), array('obj_type' => $obj_type, 'oid' => $oids));
   $gids = !empty($gids[$obj_type]) ? array_keys($gids[$obj_type]) : array();
 
   $entity = og_entity_label($obj_type);
@@ -1279,84 +1280,6 @@ function og_user_role_permissions($roles = array()) {
 
   return $role_permissions;
 }
-
-/**
- * Determine whether the user has a given privilege.
- *
- * @param $gid
- *   The group ID.
- * @param $string
- *   The permission, such as "administer nodes", being checked for.
- * @param $account
- *   (optional) The account to check, if not given use currently logged in user.
- *
- * @return
- *   Boolean TRUE if the current user has the requested permission.
- *
- * All permission checks in OG should go through this function. This
- * way, we guarantee consistent behavior, and ensure that the superuser
- * can perform all actions.
- */
-function og_user_access($gid, $string, $account = NULL) {
-  global $user;
-  $perm = &drupal_static(__FUNCTION__, array());
-
-  if (empty($account)) {
-    $account = $user;
-  }
-
-  // User #1 has all privileges.
-  if ($account->uid == 1) {
-    return TRUE;
-  }
-
-  // Administer organic groups permission.
-  if (user_access('administer organic groups', $account)) {
-    return TRUE;
-  }
-
-  if (!$group = og_get_group('gid', $gid)) {
-    // Not a group.
-    return FALSE;
-  }
-
-  // Group manager has all privileges.
-  $object= current(entity_load($group->obj_type, array($group->oid)));
-  if (!empty($object->uid) && $object->uid == $account->uid) {
-    return TRUE;
-  }
-
-  // To reduce the number of SQL queries, we cache the user's permissions
-  // in a static variable, if the user is authenticated.
-  if (!isset($perm[$gid][$account->uid])) {
-    $user_groups = og_get_object_groups('user', $account);
-
-    // Get default roles.
-    $default_roles = og_get_group_default_roles($gid);
-    if (!in_array($gid, $user_groups)) {
-      // Keep only the anonymous role.
-      $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
-    }
-    else {
-      // Add the authenticated role.
-      $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
-      // Get otehr roles assigned to the user in the group.
-      $roles += og_get_user_roles($gid, $account->uid);
-    }
-
-    $role_permissions = og_user_role_permissions($roles);
-
-    $perms = array();
-    foreach ($role_permissions as $one_role) {
-      $perms += $one_role;
-
-      $perm[$gid][$account->uid] = $perms;
-    }
-
-  }
-  return isset($perm[$gid][$account->uid][$string]);
-}
-
 
 /**
  * Retrieve an array of roles matching specified conditions.
@@ -1767,7 +1690,7 @@ function og_permissions_bulk_update($roles, $permissions) {
   $updated_groups = 0;
 
   if (!empty($permissions_to_change)) {
-    // Get all existing group node IDs.
+    // Get all existing group IDs.
     foreach (og_get_groups() as $obj_type => $values) {
       foreach ($values as $gid) {
         ++$updated_groups;
