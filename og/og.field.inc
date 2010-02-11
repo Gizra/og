@@ -28,34 +28,31 @@ function og_field_info() {
 }
 
 function og_field_og_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
-    $name = str_replace('_', '-', $field['field_name']);
-    $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+	$name = str_replace('_', '-', $field['field_name']);
+	$property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
-    // Define a data structure so it's possible to deal with organic groups
-    // audinece properly.
-    $property['getter callback'] = 'entity_metadata_field_verbatim_get';
-    $property['setter callback'] = 'entity_metadata_field_verbatim_set';
-    $property['data info']['properties'] = array(
-        'properties' => array(
-          'gid' => array(
-            'type' => 'integer',
-            'label' => t('The group this group content is associated with'),
-          ),
-          'state' => array(
-            'type' => 'text',
-            'label' => t('Group content state'),
-            'options list' => 'og_group_content_states',
-          ),
-          'created' => array(
-            'type' => 'integer',
-            'label' => t('Created timestamp'),
-          ),
-        ),
-      );
+	// Define a data structure so it's possible to deal with organic groups
+	// audinece properly.
+	$property['getter callback'] = 'entity_metadata_field_verbatim_get';
+	$property['setter callback'] = 'entity_metadata_field_verbatim_set';
+	$property['data info']['properties'] = array(
+    'properties' => array(
+      'gid' => array(
+      'type' => 'integer',
+      'label' => t('The group this group content is associated with'),
+		  ),
+	    'state' => array(
+	      'type' => 'text',
+	      'label' => t('Group content state'),
+	      'options list' => 'og_group_content_states',
+		  ),
+	    'created' => array(
+	      'type' => 'integer',
+	      'label' => t('Created timestamp'),
+		  ),
+	  ),
+	);
 }
-
-
-
 
 /**
  * Implement hook_field_schema().
@@ -366,18 +363,7 @@ function og_field_attach_delete($obj_type, $object) {
 function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &$items) {
   foreach ($items as &$item) {
     $item['state'] = !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE;
-    $item['data'] = !empty($item['data']) ? $item['data'] : array();
     $item['created'] = !empty($item['created']) ? $item['created'] : time();
-    $item['changed'] = time();
-
-    // Variable that will be altered, should not include the group ID.
-    $alter = $item;
-    unset($alter['gid']);
-
-    // Allow other modules to alter the data.
-    drupal_alter('og_field_' . $op, $alter, $obj_type, $object, $field, $instance, $langcode, $items);
-    $item['state'] = $alter['state'];
-    $item['data'] = serialize($alter['data']);
   }
 }
 
