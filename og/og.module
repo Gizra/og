@@ -101,7 +101,7 @@ function og_entity_info() {
   $return['og'] = array(
     'label' => t('Organic group'),
     'entity class' => 'EntityOg',
-    'controller class' => 'EntityOg',
+    'controller class' => 'OgController',
     'base table' => 'og_groups',
     'object keys' => array(
       'id' => 'gid',
@@ -204,24 +204,27 @@ function og_get_group($obj_type, $oid, $create = TRUE) {
 }
 
 /**
+ * Controller class for organic groups.
+ */
+class OgController extends EntityAPIController {
+	function load($ids = array(), $conditions = array()) {
+		$gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
+
+		// Unset the object type condition.
+		unset($conditions['obj_type']);
+		return parent::load($gids, $conditions);
+	}
+}
+
+/**
  * Main class for organic groups entities.
  */
 class EntityOg extends EntityDB {
-
   public function __construct(array $values = array(), $entityType = NULL) {
     // Initialize values.
     $values += array('state' => OG_STATE_ACTIVE, 'created' => time());
     parent::__construct($values, 'og');
   }
-
-  function load($ids = array(), $conditions = array()) {
-    $gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
-
-    // Unset the object type condition.
-    unset($conditions['obj_type']);
-    return parent::load($gids, $conditions);
-  }
-
 }
 
 

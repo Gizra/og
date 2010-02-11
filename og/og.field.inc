@@ -190,7 +190,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   // to itself.
   if (!empty($form['#' . $element['#object_type']])) {
     list($id) = entity_extract_ids($element['#object_type'], $form['#' . $element['#object_type']]);
-    if (($group = og_get_group($element['#object_type'], $id))) {
+    if (($group = og_get_group($element['#object_type'], $id, FALSE))) {
       $excludes[$group->gid] = $group->gid;
     }
   }
