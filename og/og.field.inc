@@ -28,30 +28,30 @@ function og_field_info() {
 }
 
 function og_field_og_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
-	$name = str_replace('_', '-', $field['field_name']);
-	$property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+  $name = str_replace('_', '-', $field['field_name']);
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
-	// Define a data structure so it's possible to deal with organic groups
-	// audinece properly.
-	$property['getter callback'] = 'entity_metadata_field_verbatim_get';
-	$property['setter callback'] = 'entity_metadata_field_verbatim_set';
-	$property['data info']['properties'] = array(
+  // Define a data structure so it's possible to deal with organic groups
+  // audinece properly.
+  $property['getter callback'] = 'entity_metadata_field_verbatim_get';
+  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
+  $property['data info']['properties'] = array(
     'properties' => array(
       'gid' => array(
       'type' => 'integer',
       'label' => t('The group this group content is associated with'),
-		  ),
-	    'state' => array(
-	      'type' => 'text',
-	      'label' => t('Group content state'),
-	      'options list' => 'og_group_content_states',
-		  ),
-	    'created' => array(
-	      'type' => 'integer',
-	      'label' => t('Created timestamp'),
-		  ),
-	  ),
-	);
+      ),
+      'state' => array(
+        'type' => 'text',
+        'label' => t('Group content state'),
+        'options list' => 'og_group_content_states',
+      ),
+      'created' => array(
+        'type' => 'integer',
+        'label' => t('Created timestamp'),
+      ),
+    ),
+  );
 }
 
 /**
@@ -396,10 +396,8 @@ function og_field_crud_group($op, $obj_type, $object) {
       if (!empty($object->uid)) {
         // Subscribe the object author, if exists.
         $account = user_load($object->uid);
-        og_group(array(array('gid' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
+        og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
       }
-
-      og_set_new_group_roles($group->gid);
     }
     elseif (empty($group->new)) {
       $state = '';
@@ -410,9 +408,9 @@ function og_field_crud_group($op, $obj_type, $object) {
         $state = OG_STATE_ACTIVE;
       }
       if ($state) {
-      	$group->state = $state;
+        $group->state = $state;
         // Change the group state.
-      	og_save($group);
+        og_save($group);
       }
     }
   }

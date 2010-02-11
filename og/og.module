@@ -209,13 +209,13 @@ function og_get_group($obj_type, $oid, $create = TRUE) {
  * Controller class for organic groups.
  */
 class OgController extends EntityAPIController {
-	function load($ids = array(), $conditions = array()) {
-		$gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
+  function load($ids = array(), $conditions = array()) {
+    $gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
 
-		// Unset the object type condition.
-		unset($conditions['obj_type']);
-		return parent::load($gids, $conditions);
-	}
+    // Unset the object type condition.
+    unset($conditions['obj_type']);
+    return parent::load($gids, $conditions);
+  }
 }
 
 /**
@@ -262,8 +262,23 @@ function og_load($gid, $reset = FALSE) {
   return $group? reset($group) : FALSE;
 }
 
+/**
+ * Save a group object.
+ *
+ * @param $group
+ *   The group object.
+ * @return
+ *   The group object.
+ */
 function og_save($group) {
-	$group->save();
+  $new = !empty($group->new);
+  $group->save();
+
+  if ($new) {
+    og_set_new_group_roles($group->gid);
+  }
+
+  return $group;
 }
 
 /**
@@ -350,37 +365,37 @@ function og_get_group_ids($obj_type, $oids = array()) {
  *   The object with the fields updated.
  */
 function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TRUE) {
-	$wrapper = og_get_wrapper($obj_type, $object);
+  $wrapper = og_get_wrapper($obj_type, $object);
 
-	// Check if the object is already associated with the group.
-	$property = str_replace('_', '-', OG_AUDIENCE_FIELD);
+  // Check if the object is already associated with the group.
+  $property = str_replace('_', '-', OG_AUDIENCE_FIELD);
 
-	$existing_key = FALSE;
-	if ($items = $wrapper->$property->value()) {
-		foreach ($items as $key => $value) {
-			if ($gid == $value['gid']) {
-				$existing_key = $key;
-				break;
-			}
-		}
-	}
+  $existing_key = FALSE;
+  if ($items = $wrapper->$property->value()) {
+    foreach ($items as $key => $value) {
+      if ($gid == $value['gid']) {
+        $existing_key = $key;
+        break;
+      }
+    }
+  }
 
-	if ($existing_key === FALSE) {
-		$op = 'insert';
-		$wrapper->$property->state->set($state);
-		$wrapper->$property->created->set(time());
-	}
-	elseif ($wrapper->$property->get($existing_key)->state->value() != $state) {
-		$op = 'update';
-		$wrapper->$property->get($existing_key)->state->set($state);
-	}
+  if ($existing_key === FALSE) {
+    $op = 'insert';
+    $wrapper->$property->state->set($state);
+    $wrapper->$property->created->set(time());
+  }
+  elseif ($wrapper->$property->get($existing_key)->state->value() != $state) {
+    $op = 'update';
+    $wrapper->$property->get($existing_key)->state->set($state);
+  }
 
-	if ($save) {
-		// Save the object.
-		call_user_func('field_attach_' . $op, $obj_type, $object);
-	}
+  if ($save) {
+    // Save the object.
+    call_user_func('field_attach_' . $op, $obj_type, $object);
+  }
 
-	return $object;
+  return $object;
 }
 
 /**
@@ -397,35 +412,35 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
  *   The object with the fields updated.
  */
 function og_ungroup($gid, $obj_type, $object, $save = TRUE) {
-	$wrapper = og_get_wrapper($obj_type, $object);
-	// Check if the object is already associated with the group.
-	$property = str_replace('_', '-', OG_AUDIENCE_FIELD);
+  $wrapper = og_get_wrapper($obj_type, $object);
+  // Check if the object is already associated with the group.
+  $property = str_replace('_', '-', OG_AUDIENCE_FIELD);
 
-	$existing_key = FALSE;
-	if ($items = $wrapper->$property->value()) {
-		foreach ($items as $key => $value) {
-			if ($gid == $value['gid']) {
-				$existing_key = $key;
-				break;
-			}
-		}
-	}
-	if ($existing_key !== FALSE) {
-		unset($wrapper->$property[$existing_key]);
+  $existing_key = FALSE;
+  if ($items = $wrapper->$property->value()) {
+    foreach ($items as $key => $value) {
+      if ($gid == $value['gid']) {
+        $existing_key = $key;
+        break;
+      }
+    }
+  }
+  if ($existing_key !== FALSE) {
+    unset($wrapper->$property[$existing_key]);
 
-		if ($save) {
-			// Save the field change.
-			call_user_func('field_attach_' . $op, $obj_type, $object);
+    if ($save) {
+      // Save the field change.
+      call_user_func('field_attach_' . $op, $obj_type, $object);
 
-			if ($obj_type == 'user') {
-				foreach (og_get_user_roles($gid, $account->uid) as $rid) {
+      if ($obj_type == 'user') {
+        foreach (og_get_user_roles($gid, $account->uid) as $rid) {
           og_users_roles_revoke($gid, $account->uid, $rid);
         }
-			}
-		}
-	}
+      }
+    }
+  }
 
-	return $object;
+  return $object;
 }
 
 /**
@@ -446,58 +461,58 @@ function og_ungroup($gid, $obj_type, $object, $save = TRUE) {
  * can perform all actions.
  */
 function og_user_access($gid, $string, $account = NULL) {
-	global $user;
-	$perm = &drupal_static(__FUNCTION__, array());
+  global $user;
+  $perm = &drupal_static(__FUNCTION__, array());
 
-	if (empty($account)) {
-		$account = $user;
-	}
+  if (empty($account)) {
+    $account = $user;
+  }
 
-	// User #1 has all privileges.
-	if ($account->uid == 1) {
-		return TRUE;
-	}
+  // User #1 has all privileges.
+  if ($account->uid == 1) {
+    return TRUE;
+  }
 
-	// Administer organic groups permission.
-	if (user_access('administer organic groups', $account)) {
-		return TRUE;
-	}
+  // Administer organic groups permission.
+  if (user_access('administer organic groups', $account)) {
+    return TRUE;
+  }
 
-	// Group manager has all privileges.
-	$object = current(entity_load($group->obj_type, array($group->oid)));
-	if (!empty($object->uid) && $object->uid == $account->uid) {
-		return TRUE;
-	}
+  // Group manager has all privileges.
+  $object = current(entity_load($group->obj_type, array($group->oid)));
+  if (!empty($object->uid) && $object->uid == $account->uid) {
+    return TRUE;
+  }
 
-	// To reduce the number of SQL queries, we cache the user's permissions
-	// in a static variable.
-	if (!isset($perm[$gid][$account->uid])) {
-		$user_groups = og_get_object_groups('user', $account);
+  // To reduce the number of SQL queries, we cache the user's permissions
+  // in a static variable.
+  if (!isset($perm[$gid][$account->uid])) {
+    $user_groups = og_get_object_groups('user', $account);
 
-		// Get default roles.
-		$default_roles = og_get_group_default_roles($gid);
-		if (!in_array($gid, $user_groups)) {
-			// Keep only the anonymous role.
-			$roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
-		}
-		else {
-			// Add the authenticated role.
-			$roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
-			// Get otehr roles assigned to the user in the group.
-			$roles += og_get_user_roles($gid, $account->uid);
-		}
+    // Get default roles.
+    $default_roles = og_get_group_default_roles($gid);
+    if (!in_array($gid, $user_groups)) {
+      // Keep only the anonymous role.
+      $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
+    }
+    else {
+      // Add the authenticated role.
+      $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
+      // Get otehr roles assigned to the user in the group.
+      $roles += og_get_user_roles($gid, $account->uid);
+    }
 
-		$role_permissions = og_user_role_permissions($roles);
+    $role_permissions = og_user_role_permissions($roles);
 
-		$perms = array();
-		foreach ($role_permissions as $one_role) {
-			$perms += $one_role;
+    $perms = array();
+    foreach ($role_permissions as $one_role) {
+      $perms += $one_role;
 
-			$perm[$gid][$account->uid] = $perms;
-		}
+      $perm[$gid][$account->uid] = $perms;
+    }
 
-	}
-	return isset($perm[$gid][$account->uid][$string]);
+  }
+  return isset($perm[$gid][$account->uid][$string]);
 }
 
 
@@ -940,7 +955,7 @@ function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_
  *   The state value, or FALSE is object is not associated with group.
  */
 function og_get_object_state($gid, $obj_type, $object) {
-	$state = FALSE;
+  $state = FALSE;
   $wrapper = og_get_wrapper($obj_type, $object);
 
   foreach ($wrapper->{OG_AUDIENCE_FIELD_PROPERTY}->value() as $value) {
