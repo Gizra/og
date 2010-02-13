@@ -287,12 +287,7 @@ function og_load($gid, $reset = FALSE) {
  *   The group object.
  */
 function og_save($group) {
-  $new = !empty($group->new);
   $group->save();
-
-  if ($new) {
-    og_set_new_group_roles($group->gid);
-  }
 
   return $group;
 }
@@ -1359,8 +1354,12 @@ function og_user_roles($gid, $roles = array(), $permission = NULL) {
  * @return
  *   A keyed array with "anonymous" and "authenticaed".
  */
-function og_get_group_default_roles($gid) {
-  return db_query("SELECT name, rid FROM {og_role} WHERE gid = :gid AND (name = :anon OR name = :auth OR name = :admin)", array(':gid' => $gid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE, ':admin' => OG_ADMINISTRATOR_ROLE))->fetchAllKeyed();
+function og_get_default_roles() {
+  return array(
+    'OG_ANONYMOUS_ROLE' => t('anonymous member'),
+    'OG_AUTHENTICATED_ROLE' =>  t('authenticated member'),
+    'OG_ADMINISTRATOR_ROLE' =>  t('administrator'),
+  );
 }
 
 /**
@@ -1368,15 +1367,21 @@ function og_get_group_default_roles($gid) {
  *
  * @param $gid
  *   The group ID.
+ * @param $include_default
+ *   TRUE if default roles should be included as-well.
  * @return
  *   An array keyed with the role name and the role ID as the value.
  */
-function og_get_group_roles($gid) {
-  return db_query("SELECT name, rid FROM {og_role} WHERE gid = :gid", array(':gid' => $gid))->fetchAllKeyed();
+function og_get_group_roles($gid, $include_default = TRUE) {
+	$roles = array();
+	if ($include_default) {
+		$roles = og_get_default_roles();
+	}
+  $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid", array(':gid' => $gid))->fetchAllKeyed();
 }
 
 /**
- * Get all roles ID of a user in a certain group.
+ * Get all roles of a user in a certain group.
  *
  * @param $gid
  *   The group ID.
@@ -1386,8 +1391,7 @@ function og_get_group_roles($gid) {
  *   Array with the role IDs of the user.
  */
 function og_get_user_roles($gid, $uid) {
-  //TODO: How to get keyed by rid, wihout this hack?
-  return db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
+  return db_query("SELECT rid, name FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
 }
 
 /**
@@ -1396,13 +1400,13 @@ function og_get_user_roles($gid, $uid) {
  * @param $gid
  *   The group unique ID.
  * @param $roles
- *   Array with the roles to query.
+ *   Array with the role IDs to query.
  */
-function og_get_users_by_roles($gid, $roles = array()) {
+function og_get_users_by_roles($gid, $rids = array()) {
   $query = db_select('og_users_roles', 'og_users_roles');
   return $query->fields('og_users_roles', array('uid'))
     ->condition('gid', $gid)
-    ->condition('role', $roles, 'IN')
+    ->condition('rid', $rids, 'IN')
     ->execute()
     ->fetchAll();
 }
@@ -1411,15 +1415,19 @@ function og_get_users_by_roles($gid, $roles = array()) {
 /**
  * Fetch a user role from database.
  *
- * @param $rid
- *   An integer with the role ID.
+ * @param $role
+ *   A string with the role name, or an integer with the role ID.
  * @return
  *   A fully-loaded role object if a role with the given name or ID
  *   exists, FALSE otherwise.
  */
-function og_user_role_load($rid) {
-  $result = db_query("SELECT * FROM {og_role} WHERE rid = :rid", array(':rid' => $rid));
-  return $result->fetchObject();
+function og_user_role_load($role) {
+  $field = is_int($role) ? 'rid' : 'name';
+  return db_select('og_role', 'r')
+    ->fields('r')
+    ->condition($field, $role)
+    ->execute()
+    ->fetchObject();
 }
 /**
  * Save a user role to the database.
@@ -1766,35 +1774,15 @@ function og_permissions_bulk_update($roles, $permissions) {
 }
 
 /**
- * Add default roles and permissions to a new group.
- *
- * @param $gid
- *   The node ID of the group or 0 for default permissions.
+ * Add default permissions to the default roles.
  */
-function og_set_new_group_roles($gid = 0) {
-  // Create default roles.
-  $role = new stdClass;
-  $role->name = OG_ANONYMOUS_ROLE;
-  $role->gid = $gid;
-  og_user_role_save($role);
-  $anon_rid = $role->rid;
-
-  unset($role->rid);
-  $role->name = OG_AUTHENTICATED_ROLE;
-  og_user_role_save($role);
-  $auth_rid = $role->rid;
-
-  unset($role->rid);
-  $role->name = OG_ADMINISTRATOR_ROLE;
-  og_user_role_save($role);
-  $admin_rid = $role->rid;
-
+function og_set_default_permissions() {
   // Create default permissions for roles.
   $perms = og_permissions_default_get();
 
-  og_user_role_grant_permissions($anon_rid, $perms[OG_ANONYMOUS_ROLE]);
-  og_user_role_grant_permissions($auth_rid, $perms[OG_AUTHENTICATED_ROLE]);
-  og_user_role_grant_permissions($admin_rid, $perms[OG_ADMINISTRATOR_ROLE]);
+  og_user_role_grant_permissions(OG_ANONYMOUS_ROLE, $perms[OG_ANONYMOUS_ROLE]);
+  og_user_role_grant_permissions(OG_AUTHENTICATED_ROLE, $perms[OG_AUTHENTICATED_ROLE]);
+  og_user_role_grant_permissions(OG_ADMINISTRATOR_ROLE, $perms[OG_ADMINISTRATOR_ROLE]);
 }
 
 /**
