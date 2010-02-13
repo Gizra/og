@@ -1482,6 +1482,23 @@ function og_user_role_delete($rid) {
 }
 
 /**
+ * Determine the modules that permissions belong to.
+ *
+ * @return
+ *   An associative array in the format $permission => $module.
+ */
+function og_user_permission_get_modules() {
+  $permissions = array();
+  foreach (module_implements('og_permission') as $module) {
+    $perms = module_invoke($module, 'og_permission');
+    foreach ($perms as $key => $value) {
+      $permissions[$key] = $module;
+    }
+  }
+  return $permissions;
+}
+
+/**
  * Grant a group role to a user.
  *
  * @param $uid
@@ -1499,7 +1516,6 @@ function og_users_roles_grant($gid, $uid, $rid) {
     $role->gid = $gid;
 
     drupal_write_record('og_users_roles', $role);
-    og_invoke_event();
     module_invoke_all('og_users_roles_grant', $gid, $uid, $rid);
   }
 }
@@ -1523,7 +1539,6 @@ function og_users_roles_revoke($gid, $uid, $rid) {
       ->execute();
     module_invoke_all('og_users_roles_revoke', $gid, $uid, $rid);
   }
-
 }
 
 /**
@@ -1576,12 +1591,14 @@ function og_user_role_change_permissions($rid, array $permissions = array()) {
  * @see user_role_revoke_permissions()
  */
 function og_user_role_grant_permissions($rid, array $permissions = array()) {
-  // Grant new permissions for the role.
+  $modules = og_user_permission_get_modules();
+	// Grant new permissions for the role.
   foreach ($permissions as $name) {
     db_merge('og_role_permission')
       ->key(array(
         'rid' => $rid,
         'permission' => $name,
+        'module' => $modules[$name],
       ))
       ->execute();
   }
