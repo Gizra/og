@@ -378,18 +378,18 @@ function og_field_crud_group($op, $obj_type, $object) {
   // Get the object ID.
   list($id) = entity_extract_ids($obj_type, $object);
 
-  $group = og_get_group($obj_type, $id);
+  $group = og_get_group($obj_type, $id, TRUE);
 
   if ($op == 'delete') {
     if ($group) {
       // Remove group.
-      group_delete(array($group->gid));
+      og_delete(array($group->gid));
     }
   }
   else {
     // Check group doesn't already exist. We don't check the $op for insert, as
     // content might have been saved, but not as a group.
-    if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !empty($group->new)) {
+    if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !empty($group->is_new)) {
       // Save the group.
       og_save($group);
 
@@ -399,7 +399,7 @@ function og_field_crud_group($op, $obj_type, $object) {
         og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
       }
     }
-    elseif (empty($group->new)) {
+    elseif (empty($group->is_new)) {
       $state = '';
       if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
         $state = OG_STATE_PENDING;

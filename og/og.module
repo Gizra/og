@@ -106,6 +106,8 @@ function og_entity_info() {
     'object keys' => array(
       'id' => 'gid',
     ),
+    // Entity-metadata properties.
+    'creation callback' => 'og_create_group'
   );
   return $return;
 }
@@ -179,7 +181,7 @@ function og_group_content_states() {
 
 
 /**
- * Factory method. Return a loaded group object if exists or create a new one.
+ * Return a loaded group object if exists or create a new one.
  *
  * @param $oid
  *   The group content ID.
@@ -192,16 +194,32 @@ function og_group_content_states() {
  * @return
  *   The group object if found, or an empty array.
  */
-function og_get_group($obj_type, $oid, $create = TRUE) {
+function og_get_group($obj_type, $oid, $create = FALSE) {
   $group = FALSE;
   if ($gids = og_get_group_ids($obj_type, array($oid))) {
     $group = og_load($gids[$oid]);
   }
   elseif ($create) {
-    $group = new EntityOg(array('obj_type' => $obj_type, 'oid' => $oid));
-    // Mark the group as new, and unssaved.
-    $group->new = TRUE;
+    og_create_group(array('obj_type' => $obj_type, 'oid' => $oid));
   }
+  return $group;
+}
+
+/**
+ * Callback to create a new group.
+ */
+function og_create_group($values = array()) {
+  $group = new EntityOg(array(
+    'obj_type' => $values['obj_type'],
+    'oid' => $values['oid'],
+    // Initialize values.
+    'state' => !empty($values['state']) ? $values['state'] : OG_STATE_ACTIVE,
+    'created' => !empty($values['created']) ? $values['created'] : time(),
+    'is_new' => TRUE,
+    // Support specifying custom group ids.
+    'gid' => !empty($values['gid']) ? $values['gid'] : FALSE,
+  ));
+
   return $group;
 }
 
@@ -223,8 +241,6 @@ class OgController extends EntityAPIController {
  */
 class EntityOg extends EntityDB {
   public function __construct(array $values = array(), $entityType = NULL) {
-    // Initialize values.
-    $values += array('state' => OG_STATE_ACTIVE, 'created' => time());
     parent::__construct($values, 'og');
   }
 }
@@ -960,7 +976,7 @@ function og_get_object_state($gid, $obj_type, $object) {
 
   foreach ($wrapper->{OG_AUDIENCE_FIELD_PROPERTY}->value() as $value) {
     if ($value['gid'] == $gid) {
-      // Save the position of the value in the field.
+      // Save the state.
       $state = $value['state'];
     }
   }
