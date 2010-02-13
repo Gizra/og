@@ -200,7 +200,7 @@ function og_get_group($obj_type, $oid, $create = FALSE) {
     $group = og_load($gids[$oid]);
   }
   elseif ($create) {
-    og_create_group(array('obj_type' => $obj_type, 'oid' => $oid));
+    $group = og_create_group(array('obj_type' => $obj_type, 'oid' => $oid));
   }
   return $group;
 }
