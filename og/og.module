@@ -1031,14 +1031,15 @@ function og_get_object_state($gid, $obj_type, $object) {
 /**
  * Get or set group context using the menu system.
  *
- * @param $account
- *   Optional; The user object to determine context form.
  * @param $group
  *   Optional; The group object to set as the context.
+ * @param $account
+ *   Optional; The user object to determine context form.
+ *
  * @return
  *   A group object, or FALSE if no context was found.
  */
-function og_context($account = NULL, $group = NULL) {
+function og_context($group = NULL, $account = NULL) {
   $context = &drupal_static(__FUNCTION__, FALSE);
 
   if (!empty($group)) {
