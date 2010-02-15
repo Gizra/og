@@ -17,7 +17,7 @@ function og_field_info() {
   return array(
     'og' => array(
       'label' => t('Organic groups'),
-      'description' => t('This field stores group nodes.'),
+      'description' => t('This field stores groups associated with the content.'),
       'default_widget' => 'og_audience',
       'default_formatter' => 'og_list_default',
       // Entity metadata properties.
@@ -289,10 +289,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     '#properties' => $properties,
   );
 
-  $defaults = array('state' => OG_STATE_ACTIVE);
-  foreach ($items as $delta => $item) {
-    $items[$delta] = array_merge($defaults, $items[$delta]);
-  }
   return $element;
 }
 
@@ -374,19 +370,19 @@ function og_field_crud_group($op, $obj_type, $object) {
     }
   }
   else {
-    // Check group doesn't already exist. We don't check the $op for insert, as
-    // content might have been saved, but not as a group.
-    if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !empty($group->is_new)) {
+    // Check group doesn't already exist.
+    if (!empty($group->is_new)) {
       // Save the group.
-      og_save($group);
+      $group->save();
 
       if (!empty($object->uid)) {
         // Subscribe the object author, if exists.
+        // TODO: Use metadata to get the user.
         $account = user_load($object->uid);
         og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
       }
     }
-    elseif (empty($group->is_new)) {
+    else {
       $state = '';
       if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
         $state = OG_STATE_PENDING;

@@ -194,9 +194,9 @@ function og_group_content_states() {
  * @return
  *   The group object if found, or an empty array.
  */
-function og_get_group($obj_type, $oid, $create = FALSE) {
+function og_get_group($obj_type, $oid, $create = FALSE, $states = array(OG_STATE_ACTIVE)) {
   $group = FALSE;
-  if ($gids = og_get_group_ids($obj_type, array($oid))) {
+  if ($gids = og_get_group_ids($obj_type, array($oid), $states)) {
     $group = og_load($gids[$oid]);
   }
   elseif ($create) {
@@ -218,7 +218,7 @@ function og_create_group($values = array()) {
     'created' => !empty($values['created']) ? $values['created'] : time(),
     'is_new' => TRUE,
     // Support specifying custom group ids.
-    'gid' => !empty($values['gid']) ? $values['gid'] : FALSE,
+    'gid' => !empty($values['gid']) ? $values['gid'] : NULL,
   ));
 
   return $group;
@@ -399,7 +399,7 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
   $wrapper = og_get_wrapper($obj_type, $object);
   $property = OG_AUDIENCE_FIELD;
 
-  $op = empty($wrapper->$property->value) ? 'insert' : 'update';
+  $op = $wrapper->$property->get(0)->value() ? 'insert' : 'update';
 
   if ($op == 'insert') {
     $values = array(
@@ -777,8 +777,7 @@ function og_og_get_fields() {
     ),
     'instance' => array(
       'label' => t('Group type'),
-      // FIXME: Widget type doesn't work
-      'widget_type' => 'options_onoff',
+      'widget_type' => 'options_buttons',
       'display' => array(
         'full' => array(
           'label' => 'above',
