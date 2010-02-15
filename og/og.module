@@ -399,7 +399,7 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
   $wrapper = og_get_wrapper($obj_type, $object);
   $property = OG_AUDIENCE_FIELD;
 
-  $op = $wrapper->$property->get(0)->value() ? 'insert' : 'update';
+  $op = $wrapper->$property->get(0)->value() ? 'update' : 'insert';
 
   if ($op == 'insert') {
     $values = array(
