@@ -192,10 +192,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     }
   }
 
-  // Get all the groups a user can see, sanitized with check_plain().
-  // @see og_get_all_groups_for_form().
-  $content_groups = og_allowed_values($field);
-
   // Determine if a user may see other groups as-well.
   $opt_group = FALSE;
 
@@ -203,16 +199,19 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     $opt_group = TRUE;
   }
 
+  // Get all the groups a user can see.
+  $audience = og_get_audience_options($opt_group);
+
   // The group options presented to the user.
   $options = array();
   if ($opt_group) {
     // Show "My groups" and "Other groups".
     $groups_count = 0;
-    if ($my_groups = array_diff_key($content_groups['content groups'], $excludes)) {
+    if ($my_groups = array_diff_key($audience['content groups'], $excludes)) {
       $options += array(t('My groups') => $my_groups);
       $groups_count = $groups_count + count($my_groups);
     }
-    if ($other_groups = array_diff_key($content_groups['other groups'], $excludes)) {
+    if ($other_groups = array_diff_key($audience['other groups'], $excludes)) {
       $options += array(t('Other groups') => $other_groups);
       $groups_count = $groups_count + count($other_groups);
     }
@@ -220,8 +219,8 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   }
   else {
     // Show only "My groups".
-    $groups_count = count($content_groups['content groups']);
-    $options = array_diff_key($content_groups['content groups'], $excludes);
+    $groups_count = count($audience['content groups']);
+    $options = array_diff_key($audience['content groups'], $excludes);
     // Show a select list if their are a minimum of groups.
     if ($field['cardinality'] == 1) {
       $type = 'radios';

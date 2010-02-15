@@ -319,10 +319,10 @@ function og_delete($gid) {
  * @return
  *   Array keyed with the object ID and the group ID as the value.
  */
-function og_get_group_ids($obj_type, $oids = array()) {
+function og_get_group_ids($obj_type = 'gid', $oids = array(), $states = array(OG_STATE_ACTIVE)) {
   $gids = &drupal_static(__FUNCTION__, array());
 
-  // If there are chached gids, temoprarly save them, so we don't re-query them
+  // If there are chached gids, temporarily save them, so we don't re-query them
   // from the database.
   $cache_gids = array();
 
@@ -338,16 +338,34 @@ function og_get_group_ids($obj_type, $oids = array()) {
     $gids[$obj_type] = array();
   }
 
+  if ($obj_type == 'gid' && empty($oids)) {
+    // Return all existing groups with a certain state.
+    $query = db_select('og_groups', 'og_groups');
+    $query->fields('og_groups', array('gid'));
+    if (!empty($states)) {
+      $query->condition('state', $states, 'IN');
+    }
+    $result = $query->execute()->fetchAll();
+
+    foreach ($result as $value) {
+      $gids[$obj_type][$value->gid] = $value->gid;
+    }
+
+  }
+
   if (!empty($oids)) {
     if ($obj_type == 'gid') {
       $gids[$obj_type] = drupal_map_assoc($oids);
     }
     else {
       $query = db_select('og_groups', 'og_groups');
-      $gids[$obj_type] = $query->fields('og_groups', array('oid', 'gid'))
+      $query->fields('og_groups', array('oid', 'gid'))
       ->condition('obj_type', $obj_type)
-      ->condition('oid', $oids, 'IN')
-      ->execute()->fetchAllKeyed();
+      ->condition('oid', $oids, 'IN');
+      if (!empty($states)) {
+        $query->condition('state', $states, 'IN');
+      }
+      $gids[$obj_type] = $query->execute()->fetchAllKeyed();
     }
   }
 
@@ -1113,16 +1131,16 @@ function og_preprocess_page(&$vars) {
  ******************************************************************************/
 
 /**
- * Create an array of allowed values for OG audience field.
+ * Get an array of allowed values for OG audience field.
  *
  * @return
  *   Array keyed by "content groups" and "other groups".
  */
-function og_allowed_values($field, $account = NULL) {
-  $allowed_values = &drupal_static(__FUNCTION__, array());
+function og_get_audience_options($opt_group = FALSE, $account = NULL) {
+  $return = &drupal_static(__FUNCTION__, array());
 
-  if (isset($allowed_values[$field['field_name']])) {
-    return $allowed_values[$field['field_name']];
+  if (!empty($return)) {
+    return $return;
   }
 
   if (empty($account)) {
@@ -1130,59 +1148,20 @@ function og_allowed_values($field, $account = NULL) {
 
     $account = $user;
   }
-  $allowed_values[$field['field_name']] = og_get_groups_for_form('user', $account);
-  return $allowed_values[$field['field_name']];
-}
 
-/**
- * Get the groups a content belongs to - ready to be used in a form element.
- *
- * @param $obj_type
- *   The object type (e.g. "node" or "user").
- * @param $object
- *   The object can be a user, node or any fieldable entity.
- * @return
- *   An array keyed by "content groups" and "other groups". Inside them there are
- *   the group's node ID and the sanitized group's name.
- *
- * @see og_get_groups_of_content().
- */
-function og_get_groups_for_form($obj_type, $object) {
-  $return = array('content groups' => array(), 'other groups' => array());
-  // Get all the existing groups.
+  $content_groups = og_get_object_groups('user', $account);
 
-  // Get the groups belonging to the content.
-  if ($all_groups = og_get_all_groups_for_form()) {
-    $content_groups = og_get_object_groups($obj_type, $object);
+  $return['content groups'] = $content_groups;
 
-    // TODO: Is it faster to use array_diff & array_intersect?
-    foreach ($all_groups as $nid => $name) {
-      if (in_array($nid, $content_groups)) {
-        $return['content groups'][$nid] = $name;
-      }
-      else {
-        $return['other groups'][$nid] = $name;
-      }
-    }
+  if ($opt_group) {
+    // Get all existing group.
+    $all_groups = og_get_group_ids();
+
+    $return['other groups'] = array_diff($all_groups, $content_groups);
   }
 
+
   return $return;
-}
-
-/**
- * Get all groups keyed by group ID and the title ready to be used on forms.
- */
-function og_get_all_groups_for_form($gids = array()) {
-  $return = array();
-
-  foreach (og_load_multiple($gids) as $groups) {
-    $return = $return + og_entity_get_label_multiple($obj_type, $values);
-  }
-
-  // Sanitize the result.
-  array_walk($return, 'check_plain');
-  return $return;
-
 }
 
 /**
