@@ -536,6 +536,11 @@ function og_user_access($gid, $string, $account = NULL) {
     return TRUE;
   }
 
+  if (!($group = og_load($gid))) {
+    // Not a group.
+    return FALSE;
+  }
+
   // Group manager has all privileges.
   $object = current(entity_load($group->obj_type, array($group->oid)));
   if (!empty($object->uid) && $object->uid == $account->uid) {
