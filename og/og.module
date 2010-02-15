@@ -323,35 +323,16 @@ function og_delete($gid) {
 function og_get_group_ids($obj_type = 'gid', $oids = array(), $states = array(OG_STATE_ACTIVE)) {
   $gids = &drupal_static(__FUNCTION__, array());
 
-  // If there are chached gids, temporarily save them, so we don't re-query them
-  // from the database.
-  $cache_gids = array();
+  $required_oids= $oids = drupal_map_assoc($oids);
 
   if (!empty($gids[$obj_type])) {
-    $oids = drupal_map_assoc($oids);
     // Check we don't already have the group IDs.
     foreach ($gids[$obj_type] as $oid => $gid) {
-      $cache_gids[$gid] = $gid;
       unset($oids[$oid]);
     }
   }
   else {
     $gids[$obj_type] = array();
-  }
-
-  if ($obj_type == 'gid' && empty($oids)) {
-    // Return all existing groups with a certain state.
-    $query = db_select('og_groups', 'og_groups');
-    $query->fields('og_groups', array('gid'));
-    if (!empty($states)) {
-      $query->condition('state', $states, 'IN');
-    }
-    $result = $query->execute()->fetchAll();
-
-    foreach ($result as $value) {
-      $gids[$obj_type][$value->gid] = $value->gid;
-    }
-
   }
 
   if (!empty($oids)) {
@@ -369,11 +350,31 @@ function og_get_group_ids($obj_type = 'gid', $oids = array(), $states = array(OG
       $gids[$obj_type] = $query->execute()->fetchAllKeyed();
     }
   }
+  // Make sure we return only the ids we were asked for.
+  $return = array_intersect_key($required_oids, $gids[$obj_type]);
 
-  // Add the cached group IDs.
-  $gids[$obj_type] += $cache_gids;
+  return $return;
+}
 
-  return $gids[$obj_type];
+/**
+ * Return all existing groups with a certain state.
+ * @param $states
+ * @return unknown_type
+ */
+function og_get_all_group_ids($states = array(OG_STATE_ACTIVE)) {
+  $return = array();
+  $query = db_select('og_groups', 'og_groups');
+  $query->fields('og_groups', array('gid'));
+  if (!empty($states)) {
+    $query->condition('state', $states, 'IN');
+  }
+  $result = $query->execute()->fetchAll();
+
+  foreach ($result as $value) {
+    $return[$value->gid] = $value->gid;
+  }
+
+  return $return;
 }
 
 /**
@@ -1188,7 +1189,7 @@ function og_get_audience_options($opt_group = FALSE, $account = NULL) {
 
   if ($opt_group) {
     // Get all existing group.
-    $all_groups = og_get_group_ids();
+    $all_groups = og_get_all_group_ids();
 
     $return['other groups'] = array_diff($all_groups, $content_groups);
   }
