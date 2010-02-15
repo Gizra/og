@@ -205,6 +205,7 @@ function og_get_group($obj_type, $oid, $create = FALSE) {
   return $group;
 }
 
+
 /**
  * Callback to create a new group.
  */
@@ -1164,6 +1165,39 @@ function og_get_audience_options($opt_group = FALSE, $account = NULL) {
   return $return;
 }
 
+
+/**
+ * Get labels of a group list.
+ */
+function og_get_groups_label($gids = array()) {
+  $labels = array();
+  $obj_types = og_sort_groups_by_type($gids);
+  foreach ($obj_types as $obj_type => $groups) {
+    $oids = array();
+    foreach ($groups as $group) {
+      $oids[] = $group->oid;
+    }
+    $labels = array_merge($labels, og_entity_get_label_multiple($obj_type, $oids));
+  }
+  return $labels;
+}
+
+/**
+ * Return array of group object keyed by their object type.
+ *
+ * @param $gids
+ *   Array of group ids to sort.
+ */
+function og_sort_groups_by_type($gids = array()) {
+  $return = array();
+  $groups = og_load_multiple($gids);
+  foreach ($groups as $group) {
+    $return[$group->obj_type][$group->gid] = $group;
+  }
+  return $return;
+
+}
+
 /**
  * Get the label (e.g. node title) of different entities.
  *
@@ -1177,22 +1211,17 @@ function og_get_audience_options($opt_group = FALSE, $account = NULL) {
 function og_entity_get_label_multiple($obj_type, $oids = array()) {
   $return = array();
 
-  // Get the group IDs.
-  $gids = og_load_multiple(array(), array('obj_type' => $obj_type, 'oid' => $oids));
-  $gids = !empty($gids[$obj_type]) ? array_keys($gids[$obj_type]) : array();
-
   $entity = og_entity_label($obj_type);
 
   // Get the table, ID and label of the object type.
   if (!empty($entity['object keys']['label'])) {
-
     $table = $entity['base table'];
     $id = $entity['object keys']['id'];
     $label = $entity['object keys']['label'];
 
     // Get the group ID along with the object label.
     $query = db_select('og_groups', 'og')->fields('og', array('gid'));
-    $query->condition('gid', $gids, 'IN');
+    $query->condition('obj_type', $obj_type);
 
     $query->join($table, $table, "og.oid =  $table.$id");
 

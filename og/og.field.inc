@@ -107,7 +107,7 @@ function og_field_formatter_view($object_type, $object, $field, $instance, $lang
 
   if ($field['field_name'] == 'og_audience') {
     foreach ($items as $delta => $item) {
-      if ($group = og_get_group('gid', $item['gid'], FALSE)) {
+      if ($group = og_get_group('gid', $item['gid'])) {
         $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
         $element[$delta] = array(
           '#type' => 'link',
@@ -201,6 +201,11 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
   // Get all the groups a user can see.
   $audience = og_get_audience_options($opt_group);
+  foreach (array('content groups', 'other groups') as $key) {
+    if (!empty($audience[$key])) {
+      $audience[$key] = og_get_groups_label($audience[$key]);
+    }
+  }
 
   // The group options presented to the user.
   $options = array();
