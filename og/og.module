@@ -1210,7 +1210,7 @@ function og_get_groups_label($gids = array()) {
     foreach ($groups as $group) {
       $oids[] = $group->oid;
     }
-    $labels = array_merge($labels, og_entity_get_label_multiple($obj_type, $oids));
+    $labels = $labels + og_entity_get_label_multiple($obj_type, $oids);
   }
   return $labels;
 }
