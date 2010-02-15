@@ -240,11 +240,8 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     $type = 'item';
   }
 
-  if (!empty($element['#description'])) {
-    $description = $element['#description'];
-  }
-  else {
-    $description = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
+  if (empty($element['#description'])) {
+    $element['#description'] = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
   }
 
   $default_values = og_get_context_by_url();
