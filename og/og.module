@@ -399,7 +399,10 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
   $wrapper = og_get_wrapper($obj_type, $object);
   $property = OG_AUDIENCE_FIELD;
 
-  $op = $wrapper->$property->get(0)->value() ? 'update' : 'insert';
+  $object = og_load_object($obj_type, $object);
+
+  // $op = $wraper->$property->get(0)->value() ? 'update' : 'insert';
+  $op = !empty($object->{$property}[LANGUAGE_NONE][0]['gid']) ? 'update' : 'insert';
 
   if ($op == 'insert') {
     $values = array(
@@ -407,7 +410,8 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
       'state' => $state,
       'created' => time(),
     );
-    $wrapper->$property->set($values);
+    // $wrapper->$property[]->state->set($state);
+    $object->{$property}[LANGUAGE_NONE][] = $values;
   }
   else {
 
@@ -427,21 +431,20 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
         'state' => $state,
         'created' => time(),
       );
-      $wrapper->$property->set($values);
+      $object->{$property}[LANGUAGE_NONE][] = $values;
 
     }
     else {
       if ($wrapper->$property->get($existing_key)->state->value() != $state) {
-        $wrapper->$property->get($existing_key)->state->set($state);
+        // $wrapper->$property->get($existing_key)->state->set($state);
+        $object->{$property}[LANGUAGE_NONE][$existing_key]['state'] = $state;
       }
       else {
         // Nothing changed, so don't try to save.
         $save = FALSE;
       }
     }
-
   }
-
 
   if ($save) {
     // Save the object.
