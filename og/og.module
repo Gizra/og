@@ -389,40 +389,63 @@ function og_get_group_ids($obj_type = 'gid', $oids = array(), $states = array(OG
  *   - OG_STATE_PENDING
  *   - OG_STATE_BLOCKED
  * @param $save
- *   Optioanl; TRUE if fields value shoudl be saved. Defaults to TRUE.
+ *   Optional; TRUE if fields value should be saved. Defaults to TRUE.
  *
  * @return
  *   The object with the fields updated.
  */
 function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TRUE) {
   $wrapper = og_get_wrapper($obj_type, $object);
+  $property = OG_AUDIENCE_FIELD;
 
-  // Check if the object is already associated with the group.
-  $property = str_replace('_', '-', OG_AUDIENCE_FIELD);
+  $op = empty($wrapper->$property->value) ? 'insert' : 'update';
 
-  $existing_key = FALSE;
-  if ($items = $wrapper->$property->value()) {
-    foreach ($items as $key => $value) {
-      if ($gid == $value['gid']) {
-        $existing_key = $key;
-        break;
+  if ($op == 'insert') {
+    $values = array(
+      'gid' => $gid,
+      'state' => $state,
+      'created' => time(),
+    );
+    $wrapper->$property->set($values);
+  }
+  else {
+
+    $existing_key = FALSE;
+    if ($items = $wrapper->$property->value()) {
+      foreach ($items as $key => $value) {
+        if ($gid == $value['gid']) {
+          $existing_key = $key;
+          break;
+        }
       }
     }
+
+    if ($existing_key === FALSE) {
+      $values = array(
+        'gid' => $gid,
+        'state' => $state,
+        'created' => time(),
+      );
+      $wrapper->$property->set($values);
+
+    }
+    else {
+      if ($wrapper->$property->get($existing_key)->state->value() != $state) {
+        $wrapper->$property->get($existing_key)->state->set($state);
+      }
+      else {
+        // Nothing changed, so don't try to save.
+        $save = FALSE;
+      }
+    }
+
   }
 
-  if ($existing_key === FALSE) {
-    $op = 'insert';
-    $wrapper->$property->state->set($state);
-    $wrapper->$property->created->set(time());
-  }
-  elseif ($wrapper->$property->get($existing_key)->state->value() != $state) {
-    $op = 'update';
-    $wrapper->$property->get($existing_key)->state->set($state);
-  }
 
   if ($save) {
     // Save the object.
     call_user_func('field_attach_' . $op, $obj_type, $object);
+    drupal_static_reset('og_get_object_groups');
   }
 
   return $object;
@@ -467,6 +490,7 @@ function og_ungroup($gid, $obj_type, $object, $save = TRUE) {
           og_users_roles_revoke($gid, $account->uid, $rid);
         }
       }
+      drupal_static_reset('og_get_object_groups');
     }
   }
 
@@ -847,12 +871,18 @@ function og_get_group_users($gid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
  *  An array with the group, or an empty array.
  */
 function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIVE)) {
+  $groups = &drupal_static(__FUNCTION__, array());
+
+  if (!empty($groups)) {
+    return $groups;
+  }
+
   // Load object to get the fields.
-  $object = og_load_object($obj_type, $object);
-  $wrapper = entity_metadata_wrapper($obj_type, $object);
+  $wrapper = og_get_wrapper($obj_type, $object);
+  $property = OG_AUDIENCE_FIELD;
 
   $groups = array();
-  foreach ($wrapper->{OG_AUDIENCE_FIELD_PROPERTY}->value() as $group) {
+  foreach ($wrapper->$property->value() as $group) {
     if (!empty($states) && !in_array($group['state'], $states)) {
       // Don't register the group if it's state isn't the one we look for.
       continue;
@@ -987,8 +1017,9 @@ function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_
 function og_get_object_state($gid, $obj_type, $object) {
   $state = FALSE;
   $wrapper = og_get_wrapper($obj_type, $object);
+  $property = OG_AUDIENCE_FIELD;
 
-  foreach ($wrapper->{OG_AUDIENCE_FIELD_PROPERTY}->value() as $value) {
+  foreach ($wrapper->$property->value() as $value) {
     if ($value['gid'] == $gid) {
       // Save the state.
       $state = $value['state'];
