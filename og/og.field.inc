@@ -293,7 +293,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     '#properties' => $properties,
   );
 
-  $defaults = array('data' => array(), 'state' => '');
+  $defaults = array('state' => OG_STATE_ACTIVE);
   foreach ($items as $delta => $item) {
     $items[$delta] = array_merge($defaults, $items[$delta]);
   }

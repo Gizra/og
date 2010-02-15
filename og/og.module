@@ -337,7 +337,7 @@ function og_get_group_ids($obj_type = 'gid', $oids = array(), $states = array(OG
 
   if (!empty($oids)) {
     if ($obj_type == 'gid') {
-      $gids[$obj_type] = drupal_map_assoc($oids);
+      $gids[$obj_type] = $gids[$obj_type] + drupal_map_assoc($oids);
     }
     else {
       $query = db_select('og_groups', 'og_groups');
