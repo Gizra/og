@@ -880,13 +880,15 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
     return $groups;
   }
 
-  // Load object to get the fields.
   $wrapper = og_get_wrapper($obj_type, $object);
   $property = OG_AUDIENCE_FIELD;
 
+  $object = og_load_object($obj_type, $object);
+
   $groups = array();
-  if ($wrapper->$property->get(0)->value()) {
-    foreach ($wrapper->$property->value() as $group) {
+  // if ($wrapper->$property->get(0)->value()) {
+  if (!empty($object->{$property}[LANGUAGE_NONE][0])) {
+    foreach ($object->{$property}[LANGUAGE_NONE] as $group) {
       if (!empty($states) && !in_array($group['state'], $states)) {
         // Don't register the group if it's state isn't the one we look for.
         continue;
