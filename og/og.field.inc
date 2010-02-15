@@ -363,6 +363,9 @@ function og_field_crud_group($op, $obj_type, $object) {
 
   $group = og_get_group($obj_type, $id, TRUE);
 
+  $wrapper = og_get_wrapper($obj_type, $object);
+  $property = OG_AUDIENCE_FIELD;
+
   if ($op == 'delete') {
     if ($group) {
       // Remove group.
@@ -371,7 +374,7 @@ function og_field_crud_group($op, $obj_type, $object) {
   }
   else {
     // Check group doesn't already exist.
-    if (!empty($group->is_new)) {
+    if (!$wrapper->$property->value() && !empty($group->is_new)) {
       // Save the group.
       $group->save();
 
@@ -382,7 +385,7 @@ function og_field_crud_group($op, $obj_type, $object) {
         og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
       }
     }
-    else {
+    elseif (!empty($group)) {
       $state = '';
       if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
         $state = OG_STATE_PENDING;

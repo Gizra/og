@@ -412,8 +412,8 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
   else {
 
     $existing_key = FALSE;
-    if ($items = $wrapper->$property->value()) {
-      foreach ($items as $key => $value) {
+    if ($wrapper->$property->get(0)->value()) {
+      foreach ($wrapper->$property->value() as $key => $value) {
         if ($gid == $value['gid']) {
           $existing_key = $key;
           break;
