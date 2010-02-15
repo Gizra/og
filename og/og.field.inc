@@ -183,8 +183,8 @@ function og_field_widget_settings_form($field, $instance) {
 function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $excludes = array();
   // If it's an existing group, then exclude itself, as in some cases a group
-  // can act also as a group content, and we want to prevent associating the group
-  // to itself.
+  // can act also as a group content, but we want to prevent associating the
+  // group to itself.
   if (!empty($form['#' . $element['#object_type']])) {
     list($id) = entity_extract_ids($element['#object_type'], $form['#' . $element['#object_type']]);
     if (($group = og_get_group($element['#object_type'], $id))) {

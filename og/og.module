@@ -323,7 +323,7 @@ function og_delete($gid) {
 function og_get_group_ids($obj_type = 'gid', $oids = array(), $states = array(OG_STATE_ACTIVE)) {
   $gids = &drupal_static(__FUNCTION__, array());
 
-  $required_oids= $oids = drupal_map_assoc($oids);
+  $required_oids = $oids = drupal_map_assoc($oids);
 
   if (!empty($gids[$obj_type])) {
     // Check we don't already have the group IDs.
@@ -351,7 +351,7 @@ function og_get_group_ids($obj_type = 'gid', $oids = array(), $states = array(OG
     }
   }
   // Make sure we return only the ids we were asked for.
-  $return = array_intersect_key($required_oids, $gids[$obj_type]);
+  $return = array_intersect_key($gids[$obj_type], $required_oids);
 
   return $return;
 }
