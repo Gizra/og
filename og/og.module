@@ -1045,7 +1045,7 @@ function og_context($account = NULL, $group = NULL) {
     $context = $group;
   }
 
-  if (empty($context)) {
+  if (empty($context) && get_variable('og_context', TRUE)) {
     if (empty($account)) {
       global $user;
       $account = $user;
