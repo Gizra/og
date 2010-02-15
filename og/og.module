@@ -1257,24 +1257,6 @@ function og_invoke_event() {
 }
 
 /**
- * Return a re-loaded object with its fields.
- *
- * This is needed only if a user account is passed, as global $user is only a
- * partial user object.
- *
- * @param $obj_type
- *   The object type.
- * @param $object
- *   The object.
- */
-function og_load_object($obj_type, $object) {
-  if ($obj_type == 'user') {
-    $object = user_load($object->uid);
-  }
-  return $object;
-}
-
-/**
  * Determine the permissions for one or more roles.
  *
  * @param $roles
@@ -1855,4 +1837,22 @@ function og_get_wrapper($obj_type, $object) {
   $object = og_load_object($obj_type, $object);
 
   return entity_metadata_wrapper($obj_type, $object);
+}
+
+/**
+ * Return a re-loaded object with its fields.
+ *
+ * This is needed only if a user account is passed, as global $user is only a
+ * partial user object.
+ *
+ * @param $obj_type
+ *   The object type.
+ * @param $object
+ *   The object.
+ */
+function og_load_object($obj_type, $object) {
+  if ($obj_type == 'user') {
+    $object = user_load($object->uid);
+  }
+  return $object;
 }
