@@ -105,7 +105,7 @@ function og_field_formatter_info() {
 function og_field_formatter_view($object_type, $object, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-  if ($field['field_name'] == 'og_audience') {
+  if ($field['field_name'] == 'og_audience' && !empty($items[0])) {
     foreach ($items as $delta => $item) {
       if ($group = og_get_group('gid', $item['gid'])) {
         $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
