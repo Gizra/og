@@ -885,13 +885,13 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
   $property = OG_AUDIENCE_FIELD;
 
   $groups = array();
-  if (!empty($wrapper->$property->value)) {
+  if ($wrapper->$property->get(0)->value()) {
     foreach ($wrapper->$property->value() as $group) {
       if (!empty($states) && !in_array($group['state'], $states)) {
         // Don't register the group if it's state isn't the one we look for.
         continue;
       }
-      $groups = $groups + drupal_map_assoc($group['gid']);
+      $groups += drupal_map_assoc(array($group['gid']));
     }
   }
   return $groups;
@@ -1209,16 +1209,13 @@ function og_get_audience_options($opt_group = FALSE, $account = NULL) {
   }
 
   $content_groups = og_get_object_groups('user', $account);
-
   $return['content groups'] = $content_groups;
 
   if ($opt_group) {
     // Get all existing group.
     $all_groups = og_get_all_group_ids();
-
     $return['other groups'] = array_diff($all_groups, $content_groups);
   }
-
 
   return $return;
 }
