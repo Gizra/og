@@ -883,12 +883,14 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
   $property = OG_AUDIENCE_FIELD;
 
   $groups = array();
-  foreach ($wrapper->$property->value() as $group) {
-    if (!empty($states) && !in_array($group['state'], $states)) {
-      // Don't register the group if it's state isn't the one we look for.
-      continue;
+  if (!empty($wrapper->$property->value)) {
+    foreach ($wrapper->$property->value() as $group) {
+      if (!empty($states) && !in_array($group['state'], $states)) {
+        // Don't register the group if it's state isn't the one we look for.
+        continue;
+      }
+      $groups = $groups + drupal_map_assoc($group['gid']);
     }
-    $groups[$group['gid']] = $group['gid'];
   }
   return $groups;
 }

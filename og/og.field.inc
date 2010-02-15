@@ -277,7 +277,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     // Input should be TRUE only if there are groups that can be selected.
     '#input' => $type != 'item',
     '#type' => $type,
-    '#description' => $description,
     '#options' => $options,
     '#default_value' => $default_values,
     '#attributes' => array('class' => array('og-audience')),
