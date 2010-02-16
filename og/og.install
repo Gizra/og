@@ -62,53 +62,20 @@ function og_schema() {
     'primary key' => array('gid'),
   );
 
-  $schema['og_role_permission'] = array(
-    'description' => 'Stores the permissions assigned to user roles per group.',
-    'fields' => array(
-      'rid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Foreign Key: {role}.rid.',
-      ),
-      'permission' => array(
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'A single permission granted to the role identified by rid.',
-      ),
-      'module' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => "The module declaring the permission.",
-      ),
-    ),
-    'primary key' => array('rid', 'permission'),
-    'indexes' => array(
-      'permission' => array('permission'),
-    ),
-    'foreign keys' => array(
-      'rid' => array('role' => 'rid'),
-    ),
-  );
-
   $schema['og_role'] = array(
     'description' => 'Stores user roles per group.',
     'fields' => array(
+      'gid' => array(
+        'description' => "The group's unique ID.",
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ),
       'rid' => array(
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'description' => 'Primary Key: Unique role ID.',
-      ),
-      'gid'               => array(
-        'description'     => "The group's unique ID.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
+        'description' => 'Primary key: Unique role ID.',
       ),
       'name' => array(
         'type' => 'varchar',
@@ -116,6 +83,12 @@ function og_schema() {
         'not null' => TRUE,
         'default' => '',
         'description' => 'Unique role name per group.',
+      ),
+      'permissions' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Serialized permissions.',
+        'serialize' => TRUE,
       ),
     ),
     'primary key' => array('rid'),

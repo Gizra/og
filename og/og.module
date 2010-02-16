@@ -109,6 +109,19 @@ function og_entity_info() {
     // Entity-metadata properties.
     'creation callback' => 'og_create_group'
   );
+
+  $return['og_role'] = array(
+    'label' => t('Organic group role'),
+    'entity class' => 'EntityOgRole',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'og_role',
+    'object keys' => array(
+      'id' => 'rid',
+    ),
+    // Entity-metadata properties.
+    'creation callback' => 'og_create_og_role'
+  );
+
   return $return;
 }
 
@@ -1325,6 +1338,101 @@ function og_invoke_event() {
     // Invoke a Rules event.
   }
 }
+
+
+/**
+ * Callback to create a new group role.
+ */
+function og_create_og_role($values = array()) {
+  $og_role = new EntityOgRole(array(
+    'gid' => $values['gid'],
+    'name' => $values['name'],
+    // Initialize values.
+    'permissions' => !empty($values['permissions']) ? $values['permissions'] : array(),
+    'is_new' => TRUE,
+    // Support specifying custom group ids.
+    'rid' => !empty($values['rid']) ? $values['rid'] : NULL,
+  ));
+
+  return $group;
+}
+
+/**
+ * Main class for group role entities.
+ */
+class EntityOgRole extends EntityDB {
+  public function __construct(array $values = array(), $entityType = NULL) {
+    parent::__construct($values, 'og_role');
+  }
+}
+
+
+/**
+ * Load multiple group roles entities based on certain conditions.
+ *
+ * @param $gids
+ *   An array of group entity IDs.
+ * @param $conditions
+ *   An array of conditions to match against the {entity} table.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
+ * @return
+ *   An array of test entity objects, indexed by pid.
+ */
+function og_role_load_multiple($rids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('og_role', $rids, $conditions, $reset);
+}
+
+/**
+ * Load an organic groups object from the database.
+ *
+ * @param $rid
+ *   The group role ID.
+ * @param $reset
+ *   Whether to reset the node_load_multiple cache.
+ *
+ * @return
+ *   A fully-populated group object, or FALSE if none found.
+ */
+function og_role_load($rid, $reset = FALSE) {
+  $og_role = og_load_multiple(array($rid), array(), $reset);
+  return $og_role ? reset($og_role) : FALSE;
+}
+
+/**
+ * Save a group object.
+ *
+ * @param $og_role
+ *   The group role object.
+ * @return
+ *   The group role object.
+ */
+function og_role_save($og_role) {
+  $og_role->save();
+
+  return $og_role;
+}
+
+/**
+ * Delete multiple group roles entities.
+ *
+ * @param $rids
+ *   An array of group roles entity IDs.
+ */
+function og_role_delete_multiple(array $rids) {
+  entity_get_controller('og_role')->delete($rids);
+}
+
+/**
+ * Delete a group role entity.
+ *
+ * @param $rid
+ *   The group role ID.
+ */
+function og_role_delete($rid) {
+  og_role_delete_multiple(array($rid));
+}
+
 
 /**
  * Determine the permissions for one or more roles.
