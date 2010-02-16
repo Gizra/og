@@ -565,8 +565,6 @@ function og_user_access($gid, $string, $account = NULL) {
   if (!isset($perm[$gid][$account->uid])) {
     $user_groups = og_get_object_groups('user', $account);
 
-    // Get default roles.
-    $default_roles = og_get_group_default_roles($gid);
     if (!in_array($gid, $user_groups)) {
       // Keep only the anonymous role.
       $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
@@ -962,6 +960,20 @@ function og_is_group_type($obj_type, $bundle_name) {
  */
 function og_is_group_content_type($obj_type, $bundle_name) {
   return og_get_group_type($obj_type, $bundle_name, 'group content');
+}
+
+/**
+ * Determine if an object is a group memeber.
+ *
+ * @param $gid
+ * @param $obj_type
+ * @param $object
+ * @return unknown_type
+ */
+function og_is_meber($gid, $obj_type, $object) {
+  $object_groups = og_get_object_groups($obj_type, $object);
+
+  return in_array($gid, $user_groups);
 }
 
 /**
@@ -1482,6 +1494,7 @@ function og_user_role_permissions($roles = array()) {
 
 /**
  * Retrieve an array of roles matching specified conditions.
+ *
  * @param $gid
  *   The group node ID.
  * @param $roles
@@ -1571,83 +1584,6 @@ function og_get_users_by_roles($gid, $rids = array()) {
     ->fetchAll();
 }
 
-
-/**
- * Fetch a user role from database.
- *
- * @param $role
- *   A string with the role name, or an integer with the role ID.
- * @return
- *   A fully-loaded role object if a role with the given name or ID
- *   exists, FALSE otherwise.
- */
-function og_user_role_load($role) {
-  $field = is_int($role) ? 'rid' : 'name';
-  return db_select('og_role', 'r')
-    ->fields('r')
-    ->condition($field, $role)
-    ->execute()
-    ->fetchObject();
-}
-/**
- * Save a user role to the database.
- *
- * @param $role
- *   A role object to modify or add. If $role->rid is not specified, a new
- *   role will be created.
- * @return
- *   Status constant indicating if role was created or updated.
- *   Failure to write the user role record will return FALSE. Otherwise.
- *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation
- *   performed.
- */
-function og_user_role_save($role) {
-  if ($role->name) {
-    // Prevent leading and trailing spaces in role names.
-    $role->name = trim($role->name);
-  }
-  if (!empty($role->rid) && $role->name) {
-    $status = drupal_write_record('og_role', $role, 'rid');
-    module_invoke_all('og_user_role_update', $role);
-  }
-  else {
-    $status = drupal_write_record('og_role', $role);
-    module_invoke_all('og_user_role_insert', $role);
-  }
-
-  // Clear the user access cache.
-  drupal_static_reset('og_user_access');
-  drupal_static_reset('og_user_role_permissions');
-
-  return $status;
-}
-
-/**
- * Delete a user role from database.
- *
- * @param $role
- *   A string with the role name, or an integer with the role ID.
- */
-function og_user_role_delete($rid) {
-  $role = og_user_role_load($rid);
-
-  db_delete('og_role')
-    ->condition('rid', $rid)
-    ->execute();
-  db_delete('og_role_permission')
-    ->condition('rid', $rid)
-    ->execute();
-  // Update the users who have this role set.
-  db_delete('og_users_roles')
-    ->condition('rid', $rid)
-    ->execute();
-
-  module_invoke_all('og_user_role_delete', $role);
-
-  // Clear the user access cache.
-  drupal_static_reset('og_user_access');
-  drupal_static_reset('og_user_role_permissions');
-}
 
 /**
  * Determine the modules that permissions belong to.
