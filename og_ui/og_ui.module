@@ -326,10 +326,10 @@ function og_ui_og_permission() {
  */
 function og_ui_og_default_permissions() {
   return array(
-    'subscribe' => OG_ANONYMOUS_ROLE,
-    'subscribe without approval' => OG_ANONYMOUS_ROLE,
+    'subscribe' => array(OG_ANONYMOUS_RID),
+    'subscribe without approval' => array(OG_ANONYMOUS_RID),
 
-    'unsubscribe' => OG_AUTHENTICATED_ROLE,
+    'unsubscribe' => array(OG_AUTHENTICATED_RID),
   );
 }
 
