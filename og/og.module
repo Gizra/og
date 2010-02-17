@@ -563,28 +563,19 @@ function og_user_access($gid, $string, $account = NULL) {
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable.
   if (!isset($perm[$gid][$account->uid])) {
-    $user_groups = og_get_object_groups('user', $account);
+    $og_role = og_role_load($gid);
 
-    if (!in_array($gid, $user_groups)) {
-      // Keep only the anonymous role.
-      $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
+    $user_rid = og_get_user_roles($gid, $account->uid);
+
+    // Add anonymous or authenticated role.
+    $user_rid = $user_rid + og_is_member($gid, 'user', $account) ? OG_AUTHENTICATED_RID : OG_AUTHENTICATED_RID;
+
+    foreach ($og_role['permissions'] as $key => $value) {
+      if (array_intersect($user_rid, $value)) {
+        // User has permission.
+        $perm[$gid][$account->uid][$key];
+      }
     }
-    else {
-      // Add the authenticated role.
-      $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
-      // Get otehr roles assigned to the user in the group.
-      $roles += og_get_user_roles($gid, $account->uid);
-    }
-
-    $role_permissions = og_user_role_permissions($roles);
-
-    $perms = array();
-    foreach ($role_permissions as $one_role) {
-      $perms += $one_role;
-
-      $perm[$gid][$account->uid] = $perms;
-    }
-
   }
   return isset($perm[$gid][$account->uid][$string]);
 }
@@ -975,7 +966,11 @@ function og_is_group_content_type($obj_type, $bundle_name) {
  * @param $object
  * @return unknown_type
  */
-function og_is_meber($gid, $obj_type, $object) {
+function og_is_member($gid, $obj_type = 'user', $object = NULL) {
+  if ($obj_type == 'user' && empty($object)) {
+    global $user;
+    $object = $user;
+  }
   $object_groups = og_get_object_groups($obj_type, $object);
 
   return in_array($gid, $user_groups);
