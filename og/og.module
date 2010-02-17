@@ -73,7 +73,7 @@ define('OG_AUTHENTICATED_ROLE', 'authenticated member');
 /**
  * The role name of group administrator.
  */
-define('OG_ADMINISTRATOR_ROLE', 'administrator');
+define('OG_ADMINISTRATOR_ROLE', 'administrator member');
 
 /**
  * The role ID of the default group non-members.
@@ -113,7 +113,7 @@ function og_entity_info() {
   $return['og_role'] = array(
     'label' => t('Organic group role'),
     'entity class' => 'EntityOgRole',
-    'controller class' => 'EntityAPIController',
+    'controller class' => 'OgRoleController',
     'base table' => 'og_role',
     'object keys' => array(
       'id' => 'rid',
@@ -1366,8 +1366,29 @@ function og_create_og_role($values = array()) {
     'rid' => !empty($values['rid']) ? $values['rid'] : NULL,
   ));
 
-  return $group;
+  return $og_role;
 }
+
+/**
+ * Controller class for organic groups.
+ */
+class OgRoleController extends EntityAPIController {
+  function load($ids = array(), $conditions = array()) {
+    $group_roles = parent::load($ids, $conditions);
+
+    // If a group role doesn't exist (i.e. returned FALSE), create a new one
+    // based on the default group.
+    foreach ($ids as $id) {
+      if (empty($group_roles) && $id) {
+        $group_roles[$id] = og_role_default_load();
+      }
+    }
+
+    return $group_roles;
+
+  }
+}
+
 
 /**
  * Main class for group role entities.
@@ -1396,7 +1417,7 @@ function og_role_load_multiple($rids = array(), $conditions = array(), $reset = 
 }
 
 /**
- * Load an organic groups object from the database.
+ * Load an group role object from the database.
  *
  * @param $rid
  *   The group role ID.
@@ -1407,7 +1428,7 @@ function og_role_load_multiple($rids = array(), $conditions = array(), $reset = 
  *   A fully-populated group object, or FALSE if none found.
  */
 function og_role_load($rid, $reset = FALSE) {
-  $og_role = og_load_multiple(array($rid), array(), $reset);
+  $og_role = og_role_load_multiple(array($rid), array(), $reset);
   return $og_role ? reset($og_role) : FALSE;
 }
 
@@ -1443,6 +1464,19 @@ function og_role_delete_multiple(array $rids) {
  */
 function og_role_delete($rid) {
   og_role_delete_multiple(array($rid));
+}
+
+/**
+ * Load the default group role object from the database.
+ *
+ * @param $reset
+ *   Whether to reset the node_load_multiple cache.
+ *
+ * @return
+ *   A fully-populated default group role object.
+ */
+function og_role_default_load($reset = FALSE) {
+  return og_role_load(0, $reset);
 }
 
 
@@ -1520,18 +1554,16 @@ function og_user_roles($gid, $roles = array(), $permission = NULL) {
 }
 
 /**
- * Get the anonymous and authenticated user roles ID of a group.
+ * Get the default roles of every group.
  *
- * @param $gid
- *   The group ID.
  * @return
- *   A keyed array with "anonymous" and "authenticaed".
+ *   A keyed array with the role ids and role names.
  */
 function og_get_default_roles() {
   return array(
     'OG_ANONYMOUS_ROLE' => t('anonymous member'),
     'OG_AUTHENTICATED_ROLE' =>  t('authenticated member'),
-    'OG_ADMINISTRATOR_ROLE' =>  t('administrator'),
+    'OG_ADMINISTRATOR_ROLE' =>  t('administrator member'),
   );
 }
 
@@ -1926,7 +1958,6 @@ function og_create_field($field_name, $obj_type, $bundle) {
 
     $instance = field_info_instance($obj_type, $field_name, $bundle);
     if (empty($instance)) {
-
       $instance = array(
         'field_name' => $field_name,
         'bundle' => $bundle,
