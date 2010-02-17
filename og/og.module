@@ -1617,7 +1617,7 @@ function og_get_group_roles($gid, $include_default = TRUE) {
  *   Array with the role IDs of the user.
  */
 function og_get_user_roles($gid, $uid) {
-  return db_query("SELECT rid, name FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
+  return drupal_map_assoc(array_keys(db_query("SELECT rid FROM {og_users_roles} WHERE uid = :uid AND gid = :gid ORDER BY rid", array(':uid' => $uid, ':gid' => $gid))->fetchAllAssoc('rid')));
 }
 
 /**
