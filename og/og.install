@@ -71,12 +71,11 @@ function og_schema() {
         'size' => 'normal',
         'not null' => TRUE,
       ),
-      'name' => array(
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Unique role name per group.',
+      'roles' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Serialized roles.',
+        'serialize' => TRUE,
       ),
       'permissions' => array(
         'type' => 'text',
