@@ -322,12 +322,14 @@ function og_ui_og_permission() {
 }
 
 /**
- * Implementation of hook_og_permission_default().
+ * Implement hook_og_default_permissions().
  */
-function og_ui_og_permission_default() {
+function og_ui_og_default_permissions() {
   return array(
-    OG_ANONYMOUS_ROLE => array('subscribe', 'subscribe without approval'),
-    OG_AUTHENTICATED_ROLE => array('unsubscribe'),
+    'subscribe' => OG_ANONYMOUS_ROLE,
+    'subscribe without approval' => OG_ANONYMOUS_ROLE,
+
+    'unsubscribe' => OG_AUTHENTICATED_ROLE,
   );
 }
 

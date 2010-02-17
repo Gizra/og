@@ -683,12 +683,17 @@ function og_og_permission() {
 }
 
 /**
- * Implementation of hook_og_permission_default().
+ * Implement hook_og_default_permissions().
  */
-function og_og_permission_default() {
+function og_og_default_permissions() {
   return array(
-    OG_AUTHENTICATED_ROLE => array('update own group content', 'delete own group content'),
-    OG_ADMINISTRATOR_ROLE => array('update group', 'update any group content', 'delete any group content', 'administer group'),
+    'update own group content' => OG_AUTHENTICATED_ROLE,
+    'delete own group content' => OG_AUTHENTICATED_ROLE,
+
+    'update group' => OG_ADMINISTRATOR_ROLE,
+    'update any group content' => OG_ADMINISTRATOR_ROLE,
+    'delete any group content' => OG_ADMINISTRATOR_ROLE,
+    'administer group' => OG_ADMINISTRATOR_ROLE,
   );
 }
 
@@ -1481,9 +1486,11 @@ function og_role_default_load($reset = FALSE) {
   if (empty($og_role)) {
     // Default group role wasn't created yet, so we create it now with default
     // permissions.
+    $permissions = og_get_default_permissions();
     $values = array(
       // Force the group ID to be 0.
       'gid' => 0,
+      'roles' => og_get_default_roles(),
       'permissions' => array(),
     );
     $og_role = og_create_og_role($values);
@@ -1575,9 +1582,9 @@ function og_user_roles($gid, $roles = array(), $permission = NULL) {
  */
 function og_get_default_roles() {
   return array(
-    'OG_ANONYMOUS_ROLE' => t('anonymous member'),
-    'OG_AUTHENTICATED_ROLE' =>  t('authenticated member'),
-    'OG_ADMINISTRATOR_ROLE' =>  t('administrator member'),
+    OG_ANONYMOUS_ROLE => t('anonymous member'),
+    OG_AUTHENTICATED_ROLE =>  t('authenticated member'),
+    OG_ADMINISTRATOR_ROLE =>  t('administrator member'),
   );
 }
 
@@ -1829,8 +1836,8 @@ function og_permissions_get() {
  *   Array keyed with the anonymous, authenticated and administror and the
  *   permissions that should be enabled by default.
  */
-function og_permissions_default_get() {
-   $perms = module_invoke_all('og_permission_default');
+function og_get_default_permissions() {
+   $perms = module_invoke_all('og_default_permissions');
    $perms += array(OG_ANONYMOUS_ROLE => array(), OG_AUTHENTICATED_ROLE => array(), OG_ADMINISTRATOR_ROLE => array());
    return $perms;
 }
