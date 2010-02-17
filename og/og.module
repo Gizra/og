@@ -1783,28 +1783,27 @@ function og_permissions_get() {
         // Initialize the roles key, if other modules haven't set it explicetly.
         // This means the permissions can apply to anonymous and authenticaed
         // members as-well.
-        $permissions[$key] += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE));
+        $permissions[$key] += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), 'module' => $module);
+        $perms[$key] = $permissions[$key];
       }
-      $perms[$module] = $permissions;
     }
   }
 
   if (user_access('administer organic groups')) {
-    $return = array();
+    $admin = array();
     // Allow user to define which administration permissions a group admin can
     // set.
-    foreach ($perms as $module => $permissions) {
-      foreach ($permissions as $key => $perm) {
-        $return['administer']['show ' . $key] = array(
-          'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
-          'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
-          // Add all roles, as this option allows setting which permisisons
-          // a role has access to.
-          'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
-        );
-      }
+    foreach ($perms as $key => $perm) {
+      $admin['show ' . $key] = array(
+        'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
+        'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
+        // Add all roles, as this option allows setting which permisisons
+        // a role has access to.
+        'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+        'module' => $perm['module'],
+      );
     }
-    $perms = $perms + $return;
+    $perms = $perms + $admin;
   }
   return $perms;
 }
