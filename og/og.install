@@ -71,12 +71,6 @@ function og_schema() {
         'size' => 'normal',
         'not null' => TRUE,
       ),
-      'rid' => array(
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Primary key: Unique role ID.',
-      ),
       'name' => array(
         'type' => 'varchar',
         'length' => 64,
@@ -91,7 +85,7 @@ function og_schema() {
         'serialize' => TRUE,
       ),
     ),
-    'primary key' => array('rid'),
+    'primary key' => array('gid'),
   );
 
   $schema['og_users_roles'] = array(

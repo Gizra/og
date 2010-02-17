@@ -116,7 +116,7 @@ function og_entity_info() {
     'controller class' => 'OgRoleController',
     'base table' => 'og_role',
     'object keys' => array(
-      'id' => 'rid',
+      'id' => 'gid',
     ),
     // Entity-metadata properties.
     'creation callback' => 'og_create_og_role'
@@ -1412,8 +1412,8 @@ class EntityOgRole extends EntityDB {
  * @return
  *   An array of test entity objects, indexed by pid.
  */
-function og_role_load_multiple($rids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('og_role', $rids, $conditions, $reset);
+function og_role_load_multiple($gids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('og_role', $gids, $conditions, $reset);
 }
 
 /**
@@ -1427,8 +1427,8 @@ function og_role_load_multiple($rids = array(), $conditions = array(), $reset = 
  * @return
  *   A fully-populated group object, or FALSE if none found.
  */
-function og_role_load($rid, $reset = FALSE) {
-  $og_role = og_role_load_multiple(array($rid), array(), $reset);
+function og_role_load($gid, $reset = FALSE) {
+  $og_role = og_role_load_multiple(array($gid), array(), $reset);
   return $og_role ? reset($og_role) : FALSE;
 }
 
@@ -1449,21 +1449,21 @@ function og_role_save($og_role) {
 /**
  * Delete multiple group roles entities.
  *
- * @param $rids
+ * @param $gids
  *   An array of group roles entity IDs.
  */
-function og_role_delete_multiple(array $rids) {
-  entity_get_controller('og_role')->delete($rids);
+function og_role_delete_multiple(array $gids) {
+  entity_get_controller('og_role')->delete($gids);
 }
 
 /**
  * Delete a group role entity.
  *
- * @param $rid
+ * @param $gid
  *   The group role ID.
  */
-function og_role_delete($rid) {
-  og_role_delete_multiple(array($rid));
+function og_role_delete($gid) {
+  og_role_delete_multiple(array($gid));
 }
 
 /**
@@ -1476,7 +1476,21 @@ function og_role_delete($rid) {
  *   A fully-populated default group role object.
  */
 function og_role_default_load($reset = FALSE) {
-  return og_role_load(0, $reset);
+
+  $og_role = og_role_load(0, $reset);
+  if (empty($og_role)) {
+    // Default group role wasn't created yet, so we create it now with default
+    // permissions.
+    $values = array(
+      // Force the group ID to be 0.
+      'gid' => 0,
+      'permissions' => array(),
+    );
+    $og_role = og_create_og_role($values);
+    $og_role = og_role_save($og_role);
+  }
+
+  return $og_role;
 }
 
 
