@@ -672,9 +672,9 @@ function og_og_permission() {
 }
 
 /**
- * Implementation of hook_og_permission_default().
+ * Implement hook_og_default_permissions().
  */
-function og_og_permission_default() {
+function og_og_default_permissions() {
   return array(
     'update own group content' => array(OG_AUTHENTICATED_RID),
     'delete own group content' => array(OG_AUTHENTICATED_RID),
@@ -1413,9 +1413,9 @@ function og_user_roles($gid, $roles = array(), $permission = NULL) {
  */
 function og_get_default_roles() {
   return array(
-    'OG_ANONYMOUS_ROLE' => t('anonymous member'),
-    'OG_AUTHENTICATED_ROLE' =>  t('authenticated member'),
-    'OG_ADMINISTRATOR_ROLE' =>  t('administrator'),
+    OG_ANONYMOUS_RID => t('anonymous member'),
+    OG_AUTHENTICATED_RID =>  t('authenticated member'),
+    OG_ADMINISTRATOR_RID =>  t('administrator member'),
   );
 }
 
@@ -1746,8 +1746,8 @@ function og_permissions_get() {
  *   permissions that should be enabled by default.
  */
 function og_get_default_permissions() {
-   $perms = module_invoke_all('og_default_permissions');
-   return $perms;
+  $perms = module_invoke_all('og_default_permissions');
+  return $perms;
 }
 
 /**

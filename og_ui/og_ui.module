@@ -322,10 +322,11 @@ function og_ui_og_permission() {
 }
 
 /**
- * Implementation of hook_og_permission_default().
+ * Implement hook_og_default_permissions().
  */
-function og_ui_og_permission_default() {
+function og_ui_og_default_permissions() {
   return array(
+<<<<<<< HEAD
 <<<<<<< HEAD
     OG_ANONYMOUS_ROLE => array('subscribe', 'subscribe without approval'),
     OG_AUTHENTICATED_ROLE => array('unsubscribe'),
@@ -335,6 +336,12 @@ function og_ui_og_permission_default() {
 
     'unsubscribe' => array(OG_AUTHENTICATED_RID),
 >>>>>>> 9d35c7f... hook_og_default_permissions() value is array with the role IDs.
+=======
+    'subscribe' => OG_ANONYMOUS_ROLE,
+    'subscribe without approval' => OG_ANONYMOUS_ROLE,
+
+    'unsubscribe' => OG_AUTHENTICATED_ROLE,
+>>>>>>> 776927c... Refactor hook_og_default_permissions() to return arrays keyed by permission name.
   );
 }
 
