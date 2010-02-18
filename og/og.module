@@ -73,22 +73,22 @@ define('OG_AUTHENTICATED_ROLE', 'authenticated member');
 /**
  * The role name of group administrator.
  */
-define('OG_ADMINISTRATOR_ROLE', 'administrator member');
+define('OG_ADMINISTRATOR_ROLE', 'administrator');
 
 /**
  * The role ID of the default group non-members.
  */
-define('OG_ANONYMOUS_RID', 1);
+define('OG_ANONYMOUS_DEFAULT_RID', 1);
 
 /**
  * The role ID of the default group member.
  */
-define('OG_AUTHENTICATED_RID', 2);
+define('OG_AUTHENTICATED_DEFAULT_RID', 2);
 
 /**
  * The role ID of the default group administrator.
  */
-define('OG_ADMINISTRATOR_RID', 3);
+define('OG_ADMINISTRATOR_DEFAULT_RID', 3);
 
 /*******************************************************************************
  * Hook implementations
@@ -109,19 +109,6 @@ function og_entity_info() {
     // Entity-metadata properties.
     'creation callback' => 'og_create_group'
   );
-
-  $return['og_role'] = array(
-    'label' => t('Organic group role'),
-    'entity class' => 'EntityOgRole',
-    'controller class' => 'OgRoleController',
-    'base table' => 'og_role',
-    'object keys' => array(
-      'id' => 'gid',
-    ),
-    // Entity-metadata properties.
-    'creation callback' => 'og_create_og_role'
-  );
-
   return $return;
 }
 
@@ -563,19 +550,30 @@ function og_user_access($gid, $string, $account = NULL) {
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable.
   if (!isset($perm[$gid][$account->uid])) {
-    $og_role = og_role_load($gid);
+    $user_groups = og_get_object_groups('user', $account);
 
-    $user_rid = og_get_user_roles($gid, $account->uid);
-
-    // Add anonymous or authenticated role.
-    $user_rid = $user_rid + og_is_member($gid, 'user', $account) ? OG_AUTHENTICATED_RID : OG_AUTHENTICATED_RID;
-
-    foreach ($og_role['permissions'] as $key => $value) {
-      if (array_intersect($user_rid, $value)) {
-        // User has permission.
-        $perm[$gid][$account->uid][$key];
-      }
+    // Get default roles.
+    $default_roles = og_get_group_default_roles($gid);
+    if (!in_array($gid, $user_groups)) {
+      // Keep only the anonymous role.
+      $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
     }
+    else {
+      // Add the authenticated role.
+      $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
+      // Get otehr roles assigned to the user in the group.
+      $roles += og_get_user_roles($gid, $account->uid);
+    }
+
+    $role_permissions = og_user_role_permissions($roles);
+
+    $perms = array();
+    foreach ($role_permissions as $one_role) {
+      $perms += $one_role;
+
+      $perm[$gid][$account->uid] = $perms;
+    }
+
   }
   return isset($perm[$gid][$account->uid][$string]);
 }
@@ -674,17 +672,12 @@ function og_og_permission() {
 }
 
 /**
- * Implement hook_og_default_permissions().
+ * Implementation of hook_og_permission_default().
  */
-function og_og_default_permissions() {
+function og_og_permission_default() {
   return array(
-    'update own group content' => array(OG_AUTHENTICATED_RID),
-    'delete own group content' => array(OG_AUTHENTICATED_RID),
-
-    'update group' => array(OG_ADMINISTRATOR_RID),
-    'update any group content' => array(OG_ADMINISTRATOR_RID),
-    'delete any group content' => array(OG_ADMINISTRATOR_RID),
-    'administer group' => array(OG_ADMINISTRATOR_RID),
+    OG_AUTHENTICATED_ROLE => array('update own group content', 'delete own group content'),
+    OG_ADMINISTRATOR_ROLE => array('update group', 'update any group content', 'delete any group content', 'administer group'),
   );
 }
 
@@ -956,24 +949,6 @@ function og_is_group_type($obj_type, $bundle_name) {
  */
 function og_is_group_content_type($obj_type, $bundle_name) {
   return og_get_group_type($obj_type, $bundle_name, 'group content');
-}
-
-/**
- * Determine if an object is a group memeber.
- *
- * @param $gid
- * @param $obj_type
- * @param $object
- * @return unknown_type
- */
-function og_is_member($gid, $obj_type = 'user', $object = NULL) {
-  if ($obj_type == 'user' && empty($object)) {
-    global $user;
-    $object = $user;
-  }
-  $object_groups = og_get_object_groups($obj_type, $object);
-
-  return in_array($gid, $user_groups);
 }
 
 /**
@@ -1351,151 +1326,6 @@ function og_invoke_event() {
   }
 }
 
-
-/**
- * Callback to create a new group role.
- */
-function og_create_og_role($values = array()) {
-  $og_role = new EntityOgRole(array(
-    'gid' => $values['gid'],
-    'name' => $values['name'],
-    // Initialize values.
-    'permissions' => !empty($values['permissions']) ? $values['permissions'] : array(),
-    'is_new' => TRUE,
-    // Support specifying custom group ids.
-    'rid' => !empty($values['rid']) ? $values['rid'] : NULL,
-  ));
-
-  return $og_role;
-}
-
-/**
- * Controller class for organic groups.
- */
-class OgRoleController extends EntityAPIController {
-  function load($ids = array(), $conditions = array()) {
-    $group_roles = parent::load($ids, $conditions);
-
-    // If a group role doesn't exist (i.e. returned FALSE), create a new one
-    // based on the default group.
-    foreach ($ids as $id) {
-      if (empty($group_roles) && $id) {
-        $group_roles[$id] = og_role_default_load();
-      }
-    }
-
-    return $group_roles;
-
-  }
-}
-
-
-/**
- * Main class for group role entities.
- */
-class EntityOgRole extends EntityDB {
-  public function __construct(array $values = array(), $entityType = NULL) {
-    parent::__construct($values, 'og_role');
-  }
-}
-
-
-/**
- * Load multiple group roles entities based on certain conditions.
- *
- * @param $gids
- *   An array of group entity IDs.
- * @param $conditions
- *   An array of conditions to match against the {entity} table.
- * @param $reset
- *   A boolean indicating that the internal cache should be reset.
- * @return
- *   An array of test entity objects, indexed by pid.
- */
-function og_role_load_multiple($gids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('og_role', $gids, $conditions, $reset);
-}
-
-/**
- * Load an group role object from the database.
- *
- * @param $rid
- *   The group role ID.
- * @param $reset
- *   Whether to reset the node_load_multiple cache.
- *
- * @return
- *   A fully-populated group object, or FALSE if none found.
- */
-function og_role_load($gid, $reset = FALSE) {
-  $og_role = og_role_load_multiple(array($gid), array(), $reset);
-  return $og_role ? reset($og_role) : FALSE;
-}
-
-/**
- * Save a group object.
- *
- * @param $og_role
- *   The group role object.
- * @return
- *   The group role object.
- */
-function og_role_save($og_role) {
-  $og_role->save();
-
-  return $og_role;
-}
-
-/**
- * Delete multiple group roles entities.
- *
- * @param $gids
- *   An array of group roles entity IDs.
- */
-function og_role_delete_multiple(array $gids) {
-  entity_get_controller('og_role')->delete($gids);
-}
-
-/**
- * Delete a group role entity.
- *
- * @param $gid
- *   The group role ID.
- */
-function og_role_delete($gid) {
-  og_role_delete_multiple(array($gid));
-}
-
-/**
- * Load the default group role object from the database.
- *
- * @param $reset
- *   Whether to reset the node_load_multiple cache.
- *
- * @return
- *   A fully-populated default group role object.
- */
-function og_role_default_load($reset = FALSE) {
-
-  $og_role = og_role_load(0, $reset);
-  if (empty($og_role)) {
-    // Default group role wasn't created yet, so we create it now with default
-    // permissions.
-    $permissions = og_get_default_permissions();
-    $values = array(
-      // Force the group ID to be 0.
-      'gid' => 0,
-      'roles' => og_get_default_roles(),
-      'permissions' => array(),
-    );
-    $og_role = og_create_og_role($values);
-    $og_role = og_role_save($og_role);
-  }
-
-  return $og_role;
-}
-
-
 /**
  * Determine the permissions for one or more roles.
  *
@@ -1544,7 +1374,6 @@ function og_user_role_permissions($roles = array()) {
 
 /**
  * Retrieve an array of roles matching specified conditions.
- *
  * @param $gid
  *   The group node ID.
  * @param $roles
@@ -1570,16 +1399,18 @@ function og_user_roles($gid, $roles = array(), $permission = NULL) {
 }
 
 /**
- * Get the default roles of every group.
+ * Get the anonymous and authenticated user roles ID of a group.
  *
+ * @param $gid
+ *   The group ID.
  * @return
- *   A keyed array with the role ids and role names.
+ *   A keyed array with "anonymous" and "authenticaed".
  */
 function og_get_default_roles() {
   return array(
-    OG_ANONYMOUS_ROLE => t('anonymous member'),
-    OG_AUTHENTICATED_ROLE =>  t('authenticated member'),
-    OG_ADMINISTRATOR_ROLE =>  t('administrator member'),
+    'OG_ANONYMOUS_ROLE' => t('anonymous member'),
+    'OG_AUTHENTICATED_ROLE' =>  t('authenticated member'),
+    'OG_ADMINISTRATOR_ROLE' =>  t('administrator'),
   );
 }
 
@@ -1612,7 +1443,7 @@ function og_get_group_roles($gid, $include_default = TRUE) {
  *   Array with the role IDs of the user.
  */
 function og_get_user_roles($gid, $uid) {
-  return drupal_map_assoc(array_keys(db_query("SELECT rid FROM {og_users_roles} WHERE uid = :uid AND gid = :gid ORDER BY rid", array(':uid' => $uid, ':gid' => $gid))->fetchAllAssoc('rid')));
+  return db_query("SELECT rid, name FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
 }
 
 /**
@@ -1632,6 +1463,83 @@ function og_get_users_by_roles($gid, $rids = array()) {
     ->fetchAll();
 }
 
+
+/**
+ * Fetch a user role from database.
+ *
+ * @param $role
+ *   A string with the role name, or an integer with the role ID.
+ * @return
+ *   A fully-loaded role object if a role with the given name or ID
+ *   exists, FALSE otherwise.
+ */
+function og_user_role_load($role) {
+  $field = is_int($role) ? 'rid' : 'name';
+  return db_select('og_role', 'r')
+    ->fields('r')
+    ->condition($field, $role)
+    ->execute()
+    ->fetchObject();
+}
+/**
+ * Save a user role to the database.
+ *
+ * @param $role
+ *   A role object to modify or add. If $role->rid is not specified, a new
+ *   role will be created.
+ * @return
+ *   Status constant indicating if role was created or updated.
+ *   Failure to write the user role record will return FALSE. Otherwise.
+ *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation
+ *   performed.
+ */
+function og_user_role_save($role) {
+  if ($role->name) {
+    // Prevent leading and trailing spaces in role names.
+    $role->name = trim($role->name);
+  }
+  if (!empty($role->rid) && $role->name) {
+    $status = drupal_write_record('og_role', $role, 'rid');
+    module_invoke_all('og_user_role_update', $role);
+  }
+  else {
+    $status = drupal_write_record('og_role', $role);
+    module_invoke_all('og_user_role_insert', $role);
+  }
+
+  // Clear the user access cache.
+  drupal_static_reset('og_user_access');
+  drupal_static_reset('og_user_role_permissions');
+
+  return $status;
+}
+
+/**
+ * Delete a user role from database.
+ *
+ * @param $role
+ *   A string with the role name, or an integer with the role ID.
+ */
+function og_user_role_delete($rid) {
+  $role = og_user_role_load($rid);
+
+  db_delete('og_role')
+    ->condition('rid', $rid)
+    ->execute();
+  db_delete('og_role_permission')
+    ->condition('rid', $rid)
+    ->execute();
+  // Update the users who have this role set.
+  db_delete('og_users_roles')
+    ->condition('rid', $rid)
+    ->execute();
+
+  module_invoke_all('og_user_role_delete', $role);
+
+  // Clear the user access cache.
+  drupal_static_reset('og_user_access');
+  drupal_static_reset('og_user_role_permissions');
+}
 
 /**
  * Determine the modules that permissions belong to.
@@ -1799,27 +1707,28 @@ function og_permissions_get() {
         // Initialize the roles key, if other modules haven't set it explicetly.
         // This means the permissions can apply to anonymous and authenticaed
         // members as-well.
-        $permissions[$key] += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), 'module' => $module);
-        $perms[$key] = $permissions[$key];
+        $permissions[$key] += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE));
       }
+      $perms[$module] = $permissions;
     }
   }
 
   if (user_access('administer organic groups')) {
-    $admin = array();
+    $return = array();
     // Allow user to define which administration permissions a group admin can
     // set.
-    foreach ($perms as $key => $perm) {
-      $admin['show ' . $key] = array(
-        'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
-        'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
-        // Add all roles, as this option allows setting which permisisons
-        // a role has access to.
-        'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
-        'module' => $perm['module'],
-      );
+    foreach ($perms as $module => $permissions) {
+      foreach ($permissions as $key => $perm) {
+        $return['administer']['show ' . $key] = array(
+          'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
+          'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
+          // Add all roles, as this option allows setting which permisisons
+          // a role has access to.
+          'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE),
+        );
+      }
     }
-    $perms = $perms + $admin;
+    $perms = $perms + $return;
   }
   return $perms;
 }
@@ -1831,8 +1740,9 @@ function og_permissions_get() {
  *   Array keyed with the anonymous, authenticated and administror and the
  *   permissions that should be enabled by default.
  */
-function og_get_default_permissions() {
-   $perms = module_invoke_all('og_default_permissions');
+function og_permissions_default_get() {
+   $perms = module_invoke_all('og_permission_default');
+   $perms += array(OG_ANONYMOUS_ROLE => array(), OG_AUTHENTICATED_ROLE => array(), OG_ADMINISTRATOR_ROLE => array());
    return $perms;
 }
 
@@ -1972,6 +1882,7 @@ function og_create_field($field_name, $obj_type, $bundle) {
 
     $instance = field_info_instance($obj_type, $field_name, $bundle);
     if (empty($instance)) {
+
       $instance = array(
         'field_name' => $field_name,
         'bundle' => $bundle,

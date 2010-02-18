@@ -13,7 +13,7 @@ function og_enable() {
   // Add group audience to users by default.
   og_create_field('og_audience', 'user', 'user');
   // Create roles that would be used for the default permissions.
-  // og_set_new_group_roles();
+  og_set_new_group_roles();
 }
 
 /**
@@ -62,29 +62,63 @@ function og_schema() {
     'primary key' => array('gid'),
   );
 
+  $schema['og_role_permission'] = array(
+    'description' => 'Stores the permissions assigned to user roles per group.',
+    'fields' => array(
+      'rid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Foreign Key: {role}.rid.',
+      ),
+      'permission' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'A single permission granted to the role identified by rid.',
+      ),
+      'module' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "The module declaring the permission.",
+      ),
+    ),
+    'primary key' => array('rid', 'permission'),
+    'indexes' => array(
+      'permission' => array('permission'),
+    ),
+    'foreign keys' => array(
+      'rid' => array('role' => 'rid'),
+    ),
+  );
+
   $schema['og_role'] = array(
     'description' => 'Stores user roles per group.',
     'fields' => array(
-      'gid' => array(
-        'description' => "The group's unique ID.",
-        'type' => 'int',
-        'size' => 'normal',
+      'rid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
         'not null' => TRUE,
+        'description' => 'Primary Key: Unique role ID.',
       ),
-      'roles' => array(
-        'type' => 'text',
-        'size' => 'big',
-        'description' => 'Serialized roles.',
-        'serialize' => TRUE,
+      'gid'               => array(
+        'description'     => "The group's unique ID.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
       ),
-      'permissions' => array(
-        'type' => 'text',
-        'size' => 'big',
-        'description' => 'Serialized permissions.',
-        'serialize' => TRUE,
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Unique role name per group.',
       ),
     ),
-    'primary key' => array('gid'),
+    'primary key' => array('rid'),
   );
 
   $schema['og_users_roles'] = array(
