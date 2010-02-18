@@ -78,17 +78,17 @@ define('OG_ADMINISTRATOR_ROLE', 'administrator');
 /**
  * The role ID of the default group non-members.
  */
-define('OG_ANONYMOUS_DEFAULT_RID', 1);
+define('OG_ANONYMOUS_RID', 1);
 
 /**
  * The role ID of the default group member.
  */
-define('OG_AUTHENTICATED_DEFAULT_RID', 2);
+define('OG_AUTHENTICATED_RID', 2);
 
 /**
  * The role ID of the default group administrator.
  */
-define('OG_ADMINISTRATOR_DEFAULT_RID', 3);
+define('OG_ADMINISTRATOR_RID', 3);
 
 /*******************************************************************************
  * Hook implementations
@@ -676,8 +676,13 @@ function og_og_permission() {
  */
 function og_og_permission_default() {
   return array(
-    OG_AUTHENTICATED_ROLE => array('update own group content', 'delete own group content'),
-    OG_ADMINISTRATOR_ROLE => array('update group', 'update any group content', 'delete any group content', 'administer group'),
+    'update own group content' => array(OG_AUTHENTICATED_RID),
+    'delete own group content' => array(OG_AUTHENTICATED_RID),
+
+    'update group' => array(OG_ADMINISTRATOR_RID),
+    'update any group content' => array(OG_ADMINISTRATOR_RID),
+    'delete any group content' => array(OG_ADMINISTRATOR_RID),
+    'administer group' => array(OG_ADMINISTRATOR_RID),
   );
 }
 
@@ -1740,9 +1745,8 @@ function og_permissions_get() {
  *   Array keyed with the anonymous, authenticated and administror and the
  *   permissions that should be enabled by default.
  */
-function og_permissions_default_get() {
-   $perms = module_invoke_all('og_permission_default');
-   $perms += array(OG_ANONYMOUS_ROLE => array(), OG_AUTHENTICATED_ROLE => array(), OG_ADMINISTRATOR_ROLE => array());
+function og_get_default_permissions() {
+   $perms = module_invoke_all('og_default_permissions');
    return $perms;
 }
 
