@@ -541,10 +541,12 @@ function og_user_access($gid, $string, $account = NULL) {
     return FALSE;
   }
 
-  // Group manager has all privileges.
-  $object = current(entity_load($group->obj_type, array($group->oid)));
-  if (!empty($object->uid) && $object->uid == $account->uid) {
-    return TRUE;
+  // Group manager has all privileges (if variable is TRUE).
+  if (variable_get('og_group_manager_full_access', TRUE)) {
+    $object = current(entity_load($group->obj_type, array($group->oid)));
+    if (!empty($object->uid) && $object->uid == $account->uid) {
+      return TRUE;
+    }
   }
 
   // To reduce the number of SQL queries, we cache the user's permissions
