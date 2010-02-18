@@ -957,6 +957,23 @@ function og_is_group_content_type($obj_type, $bundle_name) {
 }
 
 /**
+ * Return TRUE if object belongs to a group.
+ *
+ * @param $gid
+ * @param $obj_type
+ * @param $object
+ * @return unknown_type
+ */
+function og_is_member($gid, $obj_type = 'user', $object = NULL) {
+  if ($obj_type == 'user' && empty($object)) {
+    global $user;
+    $object = $user;
+  }
+  $groups = og_get_object_groups($obj_type, $object);
+  return in_array($gid, $group);
+}
+
+/**
  * Menu callback; Central access point for all organic groups actions.
  *
  * Function is imittating hook_node_access().
@@ -1379,6 +1396,7 @@ function og_user_role_permissions($roles = array()) {
 
 /**
  * Retrieve an array of roles matching specified conditions.
+ *
  * @param $gid
  *   The group node ID.
  * @param $roles
@@ -1404,19 +1422,30 @@ function og_user_roles($gid, $roles = array(), $permission = NULL) {
 }
 
 /**
- * Get the anonymous and authenticated user roles ID of a group.
+ * Get default roles.
  *
- * @param $gid
- *   The group ID.
  * @return
- *   A keyed array with "anonymous" and "authenticaed".
+ *   A keyed array with "anonymous" and "authenticaed", and other roles defined
+ *   by implementing modules.
  */
 function og_get_default_roles() {
-  return array(
+  $default_roles = array(
     OG_ANONYMOUS_RID => t('anonymous member'),
     OG_AUTHENTICATED_RID =>  t('authenticated member'),
-    OG_ADMINISTRATOR_RID =>  t('administrator member'),
   );
+  // Allow other modules to declare default roles.
+  $roles = module_invoke_all('og_default_roles');
+  // Allow modules to alter the roles, except of the anonymous and
+  // authenticated.
+  drupal_alter('og_default_roles', $roles);
+  return $default_roles + $roles;
+}
+
+/**
+ * Implement hook_og_default_roles()
+ */
+function og_og_default_roles() {
+  return array(OG_ADMINISTRATOR_RID =>  t('administrator member'));
 }
 
 /**
