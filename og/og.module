@@ -1700,7 +1700,7 @@ function og_user_role_revoke_permissions($rid, array $permissions = array()) {
 /**
  * Get all permissions defined for organic groups.
  */
-function og_permissions_get() {
+function og_get_permissions() {
   $perms = &drupal_static(__FUNCTION__, array());
   if (!empty($perms)) {
     return $perms;

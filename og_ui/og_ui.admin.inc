@@ -382,7 +382,7 @@ function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid
   // Render role/permission overview:
   $options = array();
   $hide_descriptions = !system_admin_compact_mode();
-  foreach (og_permissions_get() as $module => $permissions) {
+  foreach (og_get_permissions() as $module => $permissions) {
     $form['permission'][] = array('#markup' => $module != 'administer' ? $module : t('administer group admins privileges'), '#id' => $module);
     foreach ($permissions as $perm => $perm_item) {
       $access = !empty($group) ? og_user_access($gid, 'show ' . $perm) : TRUE;
@@ -437,7 +437,7 @@ function og_ui_user_admin_permissions_after_build($element) {
   // Remove the anonymous member from the authenticated roles.
   $anon_rid = array_shift($auth_rids);
 
-  foreach (og_permissions_get() as $module_perms) {
+  foreach (og_get_permissions() as $module_perms) {
     foreach ($module_perms as $key => $perm) {
       $perm['roles'] = drupal_map_assoc($perm['roles']);
 
