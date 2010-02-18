@@ -88,7 +88,7 @@ function og_views_views_handlers() {
       'og_views_handler_argument_og_uid_nid' => array(
         'parent' => 'views_handler_argument_numeric',
       ),
-      
+
     ),
   );
 }
@@ -103,6 +103,14 @@ function og_views_views_plugins() {
         'title' => t('Group nodes'),
         'handler' => 'og_views_plugin_argument_validate_og_group_types',
         'path' => drupal_get_path('module', 'og_views') . '/includes',
+      ),
+    ),
+    'argument default' => array(
+      'og_group_node' => array(
+        'title' => t('Current group node from context'),
+        'handler' => 'og_views_plugin_argument_default_og_group_node',
+        'path' => drupal_get_path('module', 'og_views') . '/includes',
+        'parent' => 'fixed', // so that the parent class is included
       ),
     ),
   );
@@ -121,8 +129,8 @@ function og_views_views_data() {
     $function = "og_views_data_$table";
     $data += $function();
   }
-  
-  return $data; 
+
+  return $data;
 }
 
 /**
@@ -257,7 +265,7 @@ function og_views_data_og() {
       ),
     );
   }
-  
+
   // Pseudofield which actually operates on node.type
   $data['og']['type_groups'] = array(
     'title' => t('Group types'), // The item it appears as on the UI,
@@ -276,7 +284,7 @@ function og_views_data_og() {
       'help' => t('Restrict to all content types that have been marked as groups.'),
     ),
   );
-  
+
   return $data;
 }
 
@@ -324,7 +332,7 @@ function og_views_data_og_ancestry() {
     'help' => t('The node ID of the node.'),
     'field' => array(
       'handler' => 'views_handler_field_node',
-    ),    
+    ),
   );
   $data['og_ancestry']['picg'] = array(
     'title' => t('OG: Posts in current group'),
@@ -361,7 +369,7 @@ function og_views_data_og_access_post() {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
-  );  
+  );
   return $data;
 }
 
@@ -395,7 +403,7 @@ function og_views_data_og_uid() {
       'handler' => 'og_views_handler_argument_og_uid_nid',
       'help' => t('<strong>Members</strong> are filtered for a specific group.'),
     ),
-  ); 
+  );
   $data['og_uid']['groups'] = array(
     'title' => t('User\'s groups'),
     'help' => t('Groups that a member belongs to.'),
@@ -509,7 +517,7 @@ function og_views_data_og_uid() {
        'handler' => 'views_handler_sort_date',
     ),
   );
-    
+
   return $data;
 }
 
