@@ -78,17 +78,17 @@ define('OG_ADMINISTRATOR_ROLE', 'administrator');
 /**
  * The role ID of the default group non-members.
  */
-define('OG_ANONYMOUS_DEFAULT_RID', 1);
+define('OG_ANONYMOUS_RID', 1);
 
 /**
  * The role ID of the default group member.
  */
-define('OG_AUTHENTICATED_DEFAULT_RID', 2);
+define('OG_AUTHENTICATED_RID', 2);
 
 /**
  * The role ID of the default group administrator.
  */
-define('OG_ADMINISTRATOR_DEFAULT_RID', 3);
+define('OG_ADMINISTRATOR_RID', 3);
 
 /*******************************************************************************
  * Hook implementations
@@ -541,10 +541,12 @@ function og_user_access($gid, $string, $account = NULL) {
     return FALSE;
   }
 
-  // Group manager has all privileges.
-  $object = current(entity_load($group->obj_type, array($group->oid)));
-  if (!empty($object->uid) && $object->uid == $account->uid) {
-    return TRUE;
+  // Group manager has all privileges (if variable is TRUE).
+  if (variable_get('og_group_manager_full_access', TRUE)) {
+    $object = current(entity_load($group->obj_type, array($group->oid)));
+    if (!empty($object->uid) && $object->uid == $account->uid) {
+      return TRUE;
+    }
   }
 
   // To reduce the number of SQL queries, we cache the user's permissions
@@ -672,12 +674,17 @@ function og_og_permission() {
 }
 
 /**
- * Implementation of hook_og_permission_default().
+ * Implement hook_og_default_permissions().
  */
-function og_og_permission_default() {
+function og_og_default_permissions() {
   return array(
-    OG_AUTHENTICATED_ROLE => array('update own group content', 'delete own group content'),
-    OG_ADMINISTRATOR_ROLE => array('update group', 'update any group content', 'delete any group content', 'administer group'),
+    'update own group content' => array(OG_AUTHENTICATED_RID),
+    'delete own group content' => array(OG_AUTHENTICATED_RID),
+
+    'update group' => array(OG_ADMINISTRATOR_RID),
+    'update any group content' => array(OG_ADMINISTRATOR_RID),
+    'delete any group content' => array(OG_ADMINISTRATOR_RID),
+    'administer group' => array(OG_ADMINISTRATOR_RID),
   );
 }
 
@@ -949,6 +956,23 @@ function og_is_group_type($obj_type, $bundle_name) {
  */
 function og_is_group_content_type($obj_type, $bundle_name) {
   return og_get_group_type($obj_type, $bundle_name, 'group content');
+}
+
+/**
+ * Return TRUE if object belongs to a group.
+ *
+ * @param $gid
+ * @param $obj_type
+ * @param $object
+ * @return unknown_type
+ */
+function og_is_member($gid, $obj_type = 'user', $object = NULL) {
+  if ($obj_type == 'user' && empty($object)) {
+    global $user;
+    $object = $user;
+  }
+  $groups = og_get_object_groups($obj_type, $object);
+  return in_array($gid, $group);
 }
 
 /**
@@ -1374,9 +1398,9 @@ function og_user_role_permissions($roles = array()) {
 
 /**
  * Retrieve an array of roles matching specified conditions.
+ *
  * @param $gid
  *   The group node ID.
- * @param $roles
  * @param $permission
  *   Optioanl; A string containing a permission. If set, only roles containing that
  *   permission are returned.
@@ -1386,51 +1410,27 @@ function og_user_role_permissions($roles = array()) {
  *   value. The anonymous and authenticated deault roles are on the top of the
  *   array.
  */
-function og_user_roles($gid, $roles = array(), $permission = NULL) {
+function og_user_roles($gid = 0, $permission = NULL) {
   if (!empty($permission)) {
     $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
   }
   else {
-    $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid ORDER BY name = :anon AND name = :auth AND name", array(':gid' => $gid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE))->fetchAllKeyed();
+    $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid ORDER BY rid", array(':gid' => $gid))->fetchAllKeyed();
   }
 
-  // Filter to remove unmatched system roles.
-  return  array_filter($roles);
+  return  $roles;
 }
 
 /**
- * Get the anonymous and authenticated user roles ID of a group.
+ * Get default roles - roles that belong to non-existent group ID 0.
  *
- * @param $gid
- *   The group ID.
  * @return
- *   A keyed array with "anonymous" and "authenticaed".
+ *   A keyed array with role Id as key and role name as value.
  */
 function og_get_default_roles() {
-  return array(
-    'OG_ANONYMOUS_ROLE' => t('anonymous member'),
-    'OG_AUTHENTICATED_ROLE' =>  t('authenticated member'),
-    'OG_ADMINISTRATOR_ROLE' =>  t('administrator'),
-  );
+  return og_user_roles();
 }
 
-/**
- * Get all roles ID of a group.
- *
- * @param $gid
- *   The group ID.
- * @param $include_default
- *   TRUE if default roles should be included as-well.
- * @return
- *   An array keyed with the role name and the role ID as the value.
- */
-function og_get_group_roles($gid, $include_default = TRUE) {
-	$roles = array();
-	if ($include_default) {
-		$roles = og_get_default_roles();
-	}
-  $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid", array(':gid' => $gid))->fetchAllKeyed();
-}
 
 /**
  * Get all roles of a user in a certain group.
@@ -1695,7 +1695,7 @@ function og_user_role_revoke_permissions($rid, array $permissions = array()) {
 /**
  * Get all permissions defined for organic groups.
  */
-function og_permissions_get() {
+function og_get_permissions() {
   $perms = &drupal_static(__FUNCTION__, array());
   if (!empty($perms)) {
     return $perms;
@@ -1740,10 +1740,9 @@ function og_permissions_get() {
  *   Array keyed with the anonymous, authenticated and administror and the
  *   permissions that should be enabled by default.
  */
-function og_permissions_default_get() {
-   $perms = module_invoke_all('og_permission_default');
-   $perms += array(OG_ANONYMOUS_ROLE => array(), OG_AUTHENTICATED_ROLE => array(), OG_ADMINISTRATOR_ROLE => array());
-   return $perms;
+function og_get_default_permissions() {
+  $perms = module_invoke_all('og_default_permissions');
+  return $perms;
 }
 
 /**

@@ -17,6 +17,19 @@ function og_enable() {
 }
 
 /**
+ * Implement hook_uninstall().
+ */
+function og_uninstall() {
+  $vars = array(
+    'og_context',
+    'og_group_manager_full_access',
+  );
+  foreach ($vars as $var) {
+    variable_del($var);
+  }
+}
+
+/**
  * Implement hook_schema().
  */
 function og_schema() {
