@@ -1411,43 +1411,25 @@ function og_user_role_permissions($roles = array()) {
  *   value. The anonymous and authenticated deault roles are on the top of the
  *   array.
  */
-function og_user_roles($gid, $roles = array(), $permission = NULL) {
+function og_user_roles($gid = 0, $roles = array(), $permission = NULL) {
   if (!empty($permission)) {
     $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
   }
   else {
-    $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid ORDER BY name = :anon AND name = :auth AND name", array(':gid' => $gid, ':anon' => OG_ANONYMOUS_ROLE, ':auth' => OG_AUTHENTICATED_ROLE))->fetchAllKeyed();
+    $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid ORDER BY rid", array(':gid' => $gid))->fetchAllKeyed();
   }
 
-  // Filter to remove unmatched system roles.
-  return  array_filter($roles);
+  return  $roles;
 }
 
 /**
- * Get default roles.
+ * Get default roles -- roles that belong to non-existent group ID 0.
  *
  * @return
- *   A keyed array with "anonymous" and "authenticaed", and other roles defined
- *   by implementing modules.
+ *   A keyed array with role Id as key and role name as value.
  */
 function og_get_default_roles() {
-  $default_roles = array(
-    OG_ANONYMOUS_RID => t('anonymous member'),
-    OG_AUTHENTICATED_RID =>  t('authenticated member'),
-  );
-  // Allow other modules to declare default roles.
-  $roles = module_invoke_all('og_default_roles');
-  // Allow modules to alter the roles, except of the anonymous and
-  // authenticated.
-  drupal_alter('og_default_roles', $roles);
-  return $default_roles + $roles;
-}
-
-/**
- * Implement hook_og_default_roles()
- */
-function og_og_default_roles() {
-  return array(OG_ADMINISTRATOR_RID =>  t('administrator member'));
+  return og_user_roles();
 }
 
 /**
