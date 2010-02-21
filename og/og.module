@@ -1401,7 +1401,6 @@ function og_user_role_permissions($roles = array()) {
  *
  * @param $gid
  *   The group node ID.
- * @param $roles
  * @param $permission
  *   Optioanl; A string containing a permission. If set, only roles containing that
  *   permission are returned.
@@ -1411,7 +1410,7 @@ function og_user_role_permissions($roles = array()) {
  *   value. The anonymous and authenticated deault roles are on the top of the
  *   array.
  */
-function og_user_roles($gid = 0, $roles = array(), $permission = NULL) {
+function og_user_roles($gid = 0, $permission = NULL) {
   if (!empty($permission)) {
     $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
   }
@@ -1423,7 +1422,7 @@ function og_user_roles($gid = 0, $roles = array(), $permission = NULL) {
 }
 
 /**
- * Get default roles -- roles that belong to non-existent group ID 0.
+ * Get default roles - roles that belong to non-existent group ID 0.
  *
  * @return
  *   A keyed array with role Id as key and role name as value.
@@ -1432,23 +1431,6 @@ function og_get_default_roles() {
   return og_user_roles();
 }
 
-/**
- * Get all roles ID of a group.
- *
- * @param $gid
- *   The group ID.
- * @param $include_default
- *   TRUE if default roles should be included as-well.
- * @return
- *   An array keyed with the role name and the role ID as the value.
- */
-function og_get_group_roles($gid, $include_default = TRUE) {
-	$roles = array();
-	if ($include_default) {
-		$roles = og_get_default_roles();
-	}
-  $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid", array(':gid' => $gid))->fetchAllKeyed();
-}
 
 /**
  * Get all roles of a user in a certain group.
