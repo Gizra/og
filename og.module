@@ -38,6 +38,9 @@ function og_help($path, $arg) {
   }
 }
 
+/**
+ * Implementation of hook_menu().
+ */
 function og_menu() {
   // Anon users should be able to get to the join page
   $items['og/subscribe/%node'] = array(
@@ -177,6 +180,9 @@ function og_menu() {
   return $items;
 }
 
+/**
+ * Implementation of hook_menu_alter().
+ */
 function og_menu_alter(&$menu) {
   // If og_access is disabled, we at least add back the edit tab for group admins to edit their posts.
   $menu['node/%node/edit']['access callback'] = 'og_menu_access_node_edit';
@@ -200,6 +206,74 @@ function og_menu_access_node_edit($node) {
 
   // Since the group admin tests failed, check access as usual.
   return node_access('update', $node);
+}
+
+/**
+ * Implementation of hook_hook_info().
+ */
+function og_hook_info() {
+  return array(
+    'og' => array(
+      'og' => array(
+        'user insert' => array(
+          'runs when' => t('New user joins a group'),
+        ),
+        'user update' => array(
+          'runs when' => t('A user changes their subscription to a group'),
+        ),
+        'user delete' => array(
+          'runs when' => t('A user deletes their subscription to a group'),
+        ),
+        'user approve' => array(
+          'runs when' => t('A user has been approved for membership to a group'),
+        ),
+        'user deny' => array(
+          'runs when' => t('A user is denied membership to a group'),
+        ),
+        'user request' => array(
+          'runs when' => t('A user requests membership to a group'),
+        ),
+        'admin new' => array(
+          'runs when' => t('A new user is added as an admin to a group'),
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_activity_info().
+ */
+function og_activity_info() {
+  $info = new stdClass;
+  $info->api = 2;
+  $info->name = 'Organic groups';
+  $info->object_type = 'node';
+  $info->path = drupal_get_path('module', 'og') . '/includes';
+
+  // The array keys are the form labels.
+  $info->objects = array('group administrators' => 'node', 'acting user' => 'user');
+
+  // The one hook and all of its $op's.
+  $info->hooks = array(
+    'og' => array(
+      'user insert',
+      'user update',
+      'user delete',
+      'user approve',
+      'user deny',
+      'user request',
+      'admin new',
+    )
+  );
+
+  // The eid_field is the entity id field. This is used by modules to delete
+  // activities. For Organic groups, the eid_field would be 'nid'. But since
+  // Activity module already handles the deletion of activities when their nodes
+  // are deleted, the eid_field is set to NULL.
+  $info->eid_field = NULL;
+  $info->realms = array('og_member' => 'Organic groups membership');
+  return $info;
 }
 
 /**
@@ -451,12 +525,30 @@ function og_perm() {
 function og_og($op, $gid, $uid, $args) {
   if (module_exists('rules')) {
     if (in_array($op, array('user insert', 'user delete'))) {
-      $op = str_replace(' ', '_', $op);
-      rules_invoke_event('og_'. $op, $uid, $gid);
+      rules_invoke_event('og_'. str_replace(' ', '_', $op), $uid, $gid);
     }
     // Pending member was approved.
     elseif ($op == 'user update' && $args['is_active']) {
       rules_invoke_event('og_user_approved', $uid, $gid);
+    }
+  }
+  if (module_exists('trigger')) {
+    $aids = _trigger_get_hook_aids('og', $op);
+    if (!empty($aids)) {
+      $account = user_load($uid);
+      $group = node_load($gid);
+
+      $context = array(
+        'hook' => 'og',
+        'op' => $op,
+        'node' => $group,
+        'user' => $account,
+        'args' => $args,
+      );
+
+      foreach ($aids as $aid => $action_type) {
+        actions_do($aid, $group, $context);
+      }
     }
   }
 }
@@ -1058,8 +1150,8 @@ function og_get_node_groups($node) {
     while ($row = db_fetch_object($result)) {
       $groups[$row->group_nid] = $row->title;
     }
-    return $groups;
   }
+  return $groups;
 }
 
 // The query for the get_node_groups function. Is reused in og.views.inc

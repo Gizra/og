@@ -147,7 +147,7 @@ function og_create_admin_confirm_submit($form, &$form_state) {
     'body' => _og_mail_text('og_new_admin_body', $variables)
   );
 
-  module_invoke_all('og', 'admin create', $node->nid, $account->uid, $message);
+  module_invoke_all('og', 'admin new', $node->nid, $account->uid, $message);
 
   $form_state['#redirect'] = "og/users/$node->nid";
 }
