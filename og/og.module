@@ -1109,7 +1109,7 @@ function og_get_group_default_access($gid) {
     $property = OG_DEFAULT_ACCESS_FIELD;
 
     $wrapper = &$object->{$property}[LANGUAGE_NONE];
-    $return = !empty($wrapper[0]['value']);
+    $return = empty($wrapper[0]['value']);
   }
 
   return $return;
