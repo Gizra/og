@@ -1922,20 +1922,6 @@ function og_create_field($field_name, $obj_type, $bundle) {
 
 
 /**
- * Helper function to get a wrapper of an object.
- *
- * @param $obj_type
- * @param $object
- * @return unknown_type
- */
-function og_get_wrapper($obj_type, $object) {
-  // Re-load object to make sure we have the fields.
-  $object = og_load_object($obj_type, $object);
-
-  return entity_metadata_wrapper($obj_type, $object);
-}
-
-/**
  * Return a re-loaded object with its fields.
  *
  * This is needed only if a user account is passed, as global $user is only a

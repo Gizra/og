@@ -388,10 +388,10 @@ function og_field_crud_group($op, $obj_type, $object) {
     }
     elseif (!empty($group)) {
       $state = '';
-      if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
+      if ($group->state == OG_STATE_ACTIVE && empty($wrapper[0]['value'])) {
         $state = OG_STATE_PENDING;
       }
-      elseif($group->state == OG_STATE_PENDING && !empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
+      elseif($group->state == OG_STATE_PENDING && !empty($wrapper[0]['value'])) {
         $state = OG_STATE_ACTIVE;
       }
       if ($state) {
