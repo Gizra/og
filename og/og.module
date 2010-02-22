@@ -1478,7 +1478,7 @@ function og_user_roles($gid = 0, $permission = NULL) {
  * @return
  *   A keyed array with role Id as key and role name as value.
  */
-function og_get_default_roles() {
+function og_get_global_roles() {
   return og_user_roles();
 }
 
@@ -1569,27 +1569,30 @@ function og_user_role_save($role) {
  * Delete a user role from database.
  *
  * @param $role
- *   A string with the role name, or an integer with the role ID.
+ *   An integer with the role ID.
  */
 function og_user_role_delete($rid) {
-  $role = og_user_role_load($rid);
+  // Don't allow deleting anonymous/ authenticated global roles.
+  if ($rid > OG_AUTHENTICATED_RID) {
+    $role = og_user_role_load($rid);
 
-  db_delete('og_role')
-    ->condition('rid', $rid)
-    ->execute();
-  db_delete('og_role_permission')
-    ->condition('rid', $rid)
-    ->execute();
-  // Update the users who have this role set.
-  db_delete('og_users_roles')
-    ->condition('rid', $rid)
-    ->execute();
+    db_delete('og_role')
+      ->condition('rid', $rid)
+      ->execute();
+    db_delete('og_role_permission')
+      ->condition('rid', $rid)
+      ->execute();
+    // Update the users who have this role set.
+    db_delete('og_users_roles')
+      ->condition('rid', $rid)
+      ->execute();
 
-  module_invoke_all('og_user_role_delete', $role);
+    module_invoke_all('og_user_role_delete', $role);
 
-  // Clear the user access cache.
-  drupal_static_reset('og_user_access');
-  drupal_static_reset('og_user_role_permissions');
+    // Clear the user access cache.
+    drupal_static_reset('og_user_access');
+    drupal_static_reset('og_user_role_permissions');
+  }
 }
 
 /**
@@ -1615,10 +1618,10 @@ function og_group_delete_user_roles($gid) {
  *   The newly created roles keyed by role ID and role name as the value.
  */
 function og_group_user_roles_override($gid) {
-  $perms = og_get_default_permissions();
+  $perms = og_get_global_permissions();
 
   $rids = array();
-  foreach (og_get_default_roles() as $rid => $name) {
+  foreach (og_get_global_roles() as $rid => $name) {
     $role = new stdClass;
     $role->name = $name;
 
@@ -1830,8 +1833,8 @@ function og_get_permissions() {
  *   Array keyed with the anonymous, authenticated and administror and the
  *   permissions that should be enabled by default.
  */
-function og_get_default_permissions() {
-  $roles = og_get_default_roles();
+function og_get_global_permissions() {
+  $roles = og_get_global_roles();
 
   $perms = og_user_role_permissions($roles);
   return $perms;
@@ -1921,7 +1924,7 @@ function og_permissions_bulk_update($roles, $permissions) {
  */
 function og_set_default_permissions() {
   // Create default permissions for roles.
-  $perms = og_get_default_permissions();
+  $perms = og_get_global_permissions();
 
   og_user_role_grant_permissions(OG_ANONYMOUS_ROLE, $perms[OG_ANONYMOUS_ROLE]);
   og_user_role_grant_permissions(OG_AUTHENTICATED_ROLE, $perms[OG_AUTHENTICATED_ROLE]);
