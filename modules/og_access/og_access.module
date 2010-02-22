@@ -194,8 +194,8 @@ function og_access_alter_nongroup_form(&$form, $form_state, $node) {
         $group_node->nid = $gid;
         og_load_group($group_node);
          if (!empty($group_node->og_private)) {
-           // Try not to show checkbox if admin likes to reduce decisions for node authors.
-           $vis = variable_get('og_visibility', 0) == OG_VISIBLE_BOTH ? OG_VISIBLE_GROUPONLY : OG_VISIBLE_CHOOSE_PRIVATE;
+           // Set visibility to the appropriate private option.
+           $vis = variable_get('og_visibility', 0) == OG_VISIBLE_GROUPONLY ? OG_VISIBLE_GROUPONLY : OG_VISIBLE_CHOOSE_PRIVATE;
           break;
         }
       }
