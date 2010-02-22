@@ -56,9 +56,9 @@ define('OG_ACCESS_IGNORE', NULL);
 define('OG_AUDIENCE_FIELD', 'og_audience');
 
 /**
- * Group audience field ready to be used with entit-metdata.
+ * Group default roles and permissions field.
  */
-define('OG_AUDIENCE_FIELD_PROPERTY', 'og-audience');
+define('OG_DEFAULT_ACCESS_FIELD', 'og_group_default_access');
 
 /**
  * The role name of group non-members.
@@ -1089,6 +1089,28 @@ function og_get_object_state($gid, $obj_type, $object) {
     }
   }
   return $state;
+}
+
+/**
+ * Check if group should use default roles and permissions.
+ *
+ * @param $gid
+ *   The group ID.
+ * @return
+ *   TRUE if group should use default roles and permissions.
+ */
+function og_get_group_default_access($gid) {
+  $return = FALSE;
+  if ($group = og_load($gid)) {
+
+    $object = reset(entity_load($group->obj_type, array($group->oid)));
+    $property = OG_DEFAULT_ACCESS_FIELD;
+
+    $wrapper = &$object->{$property}[LANGUAGE_NONE];
+    $return = !empty($wrapper[0]['value']);
+  }
+
+  return $return;
 }
 
 /**

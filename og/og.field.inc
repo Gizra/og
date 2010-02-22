@@ -381,7 +381,6 @@ function og_field_crud_group($op, $obj_type, $object) {
 
       if (!empty($object->uid)) {
         // Subscribe the object author, if exists.
-        // TODO: Use metadata to get the user.
         $account = user_load($object->uid);
         og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
       }
