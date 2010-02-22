@@ -804,6 +804,31 @@ function og_og_get_fields() {
     ),
   );
 
+  $items['og_group_default_access'] = array(
+    'type' => array('group'),
+    'description' => t('Determine if group should use default roles and permissions.'),
+    'field' => array(
+      'field_name' => 'og_group_default_access',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Use default roles and permissions', '1|Override default roles and permissions')), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
+      'label' => t('Group roles and permissions'),
+      'widget_type' => 'options_buttons',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+      ),
+    ),
+  );
+
 
   $items['og_audience'] = array(
     'type' => array('group content'),
