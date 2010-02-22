@@ -1473,13 +1473,33 @@ function og_user_roles($gid = 0, $permission = NULL) {
 }
 
 /**
- * Get default roles - roles that belong to non-existent group ID 0.
+ * Get global roles - roles that belong to non-existent group ID 0.
  *
  * @return
  *   A keyed array with role Id as key and role name as value.
  */
 function og_get_global_roles() {
   return og_user_roles();
+}
+
+/**
+ * Get roles that should be used by default.
+ */
+function og_get_default_roles() {
+  $roles = module_invoke_all('og_get_default_roles');
+
+  drupal_alter($roles);
+
+  // Add the anonymous and authenticated roles, that shouldn't be alterable.
+  $roles = array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE) + $roles;
+  return $roles;
+}
+
+/**
+ * Implement hook_og_get_default_roles()
+ */
+function og_get_default_roles() {
+  return array(OG_ADMINISTRATOR_ROLE);
 }
 
 
@@ -1827,7 +1847,7 @@ function og_get_permissions() {
 }
 
 /**
- * Get default permissions as set by implementing modules.
+ * Get global permissions.
  *
  * @return
  *   Array keyed with the anonymous, authenticated and administror and the
