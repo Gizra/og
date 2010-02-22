@@ -561,19 +561,7 @@ function og_user_access($gid, $string, $account = NULL) {
   if (!isset($perm[$gid][$account->uid])) {
     $user_groups = og_get_object_groups('user', $account);
 
-    // Get default roles.
-    $default_roles = og_get_group_default_roles($gid);
-    if (!in_array($gid, $user_groups)) {
-      // Keep only the anonymous role.
-      $roles = drupal_map_assoc(array($default_roles[OG_ANONYMOUS_ROLE]));
-    }
-    else {
-      // Add the authenticated role.
-      $roles = drupal_map_assoc(array($default_roles[OG_AUTHENTICATED_ROLE]));
-      // Get otehr roles assigned to the user in the group.
-      $roles += og_get_user_roles($gid, $account->uid);
-    }
-
+    $roles = og_get_user_roles($gid, $account->uid);
     $role_permissions = og_user_role_permissions($roles);
 
     $perms = array();
@@ -1010,7 +998,7 @@ function og_is_member($gid, $obj_type = 'user', $object = NULL) {
     $object = $user;
   }
   $groups = og_get_object_groups($obj_type, $object);
-  return in_array($gid, $group);
+  return in_array($gid, $groups);
 }
 
 /**
@@ -1115,14 +1103,14 @@ function og_get_object_state($gid, $obj_type, $object) {
  * @return
  *   TRUE if group should use default roles and permissions.
  */
-function og_get_group_default_access($gid) {
+function og_is_group_default_access($gid) {
   $return = FALSE;
   if ($object = og_load_object_from_group($gid)) {
 
     $property = OG_DEFAULT_ACCESS_FIELD;
 
     $wrapper = &$object->{$property}[LANGUAGE_NONE];
-    $return = empty($wrapper[0]['value']);
+    $return = !empty($wrapper[0]['value']);
   }
 
   return $return;
@@ -1546,8 +1534,9 @@ function og_set_global_access() {
   if ($existing_roles = og_get_global_roles()) {
     // Remove the anonymous and authenitacted, as they already exist and
     // shouldn't change.
-    unset($existing_roles[OG_ANONYMOUS_RID], $existing_roles[OG_AUTHENTICATED_RID]);
-    unset($roles[OG_ANONYMOUS_RID], $roles[OG_AUTHENTICATED_RID]);
+    // TODO: Remove?
+    // unset($existing_roles[OG_ANONYMOUS_RID], $existing_roles[OG_AUTHENTICATED_RID]);
+    // unset($roles[OG_ANONYMOUS_RID], $roles[OG_AUTHENTICATED_RID]);
 
     // Delete all existing roles.
     foreach ($existing_roles as $rid => $name) {
@@ -1574,15 +1563,41 @@ function og_set_global_access() {
 /**
  * Get all roles of a user in a certain group.
  *
+ * If overriden roles and permissions don't exist
+ *
  * @param $gid
  *   The group ID.
  * @param $uid
  *   The user ID.
+ * @param $include
+ *   Optional; If TRUE also anonymous or authenticated role ID will be returned.
+ *   Defaults to TRUE.
  * @return
  *   Array with the role IDs of the user.
  */
-function og_get_user_roles($gid, $uid) {
-  return db_query("SELECT rid, name FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
+function og_get_user_roles($gid, $uid = NULL, $include = TRUE) {
+  $roles = array();
+
+  if (empty($uid)) {
+    global $user;
+    $uid = $user->uid;
+  }
+
+  if ($include) {
+    // Check if overriden access exists.
+    $query_gid = og_is_group_default_access($gid) ? 0 : $gid;
+
+    $group_roles = og_user_roles($query_gid);
+    $account = user_load($uid);
+
+    $name = og_is_member($gid, 'user', $account) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
+    $rid = array_search($name, $group_roles);
+    $roles[$rid] = $rid;
+  }
+
+  $roles = array_merge($roles, db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed());
+
+  return $roles;
 }
 
 /**
@@ -1690,7 +1705,7 @@ function og_user_role_delete($rid) {
  *   The group ID.
  */
 function og_group_delete_user_roles($gid) {
-  if (!og_get_group_default_access() && $roles = og_user_roles($gid)) {
+  if (!og_is_group_default_access() && $roles = og_user_roles($gid)) {
     foreach ($roles as $rid => $name) {
       og_user_role_delete($rid);
     }
