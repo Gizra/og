@@ -525,6 +525,7 @@ function og_user_access($gid, $string, $account = NULL) {
     // skip any access check.
     return TRUE;
   }
+
   global $user;
   $perm = &drupal_static(__FUNCTION__, array());
 
@@ -680,24 +681,24 @@ function og_og_permission() {
 }
 
 /**
- * Implement hook_og_default_permissions().
+ * Implement hook_og_get_default_permissions().
  */
-function og_og_default_permissions() {
+function og_og_get_default_permissions() {
   return array(
-    'update own group content' => array(OG_AUTHENTICATED_RID),
-    'delete own group content' => array(OG_AUTHENTICATED_RID),
+    'update own group content' => array(OG_AUTHENTICATED_ROLE),
+    'delete own group content' => array(OG_AUTHENTICATED_ROLE),
 
-    'update group' => array(OG_ADMINISTRATOR_RID),
-    'update any group content' => array(OG_ADMINISTRATOR_RID),
-    'delete any group content' => array(OG_ADMINISTRATOR_RID),
-    'administer group' => array(OG_ADMINISTRATOR_RID),
+    'update group' => array(OG_ADMINISTRATOR_ROLE),
+    'update any group content' => array(OG_ADMINISTRATOR_ROLE),
+    'delete any group content' => array(OG_ADMINISTRATOR_ROLE),
+    'administer group' => array(OG_ADMINISTRATOR_ROLE),
   );
 }
 
 /**
  * Implement hook_og_get_default_roles()
  */
-function og_get_default_roles() {
+function og_og_get_default_roles() {
   return array(OG_ADMINISTRATOR_ROLE);
 }
 
@@ -1497,17 +1498,16 @@ function og_get_global_roles() {
 /**
  * Get default roles.
  */
-function og_get_default_roles() {
-  $perms = og_get_default_permissions();
+function og_get_default_roles($include = TRUE) {
+  $roles = module_invoke_all('og_get_default_roles');
 
-  // Extract the default roles.
-  $roles = array();
-  foreach ($perms as $perm => $perm_roles) {
-    $roles = array_merge($roles, $perm_roles);
+  // Allow other modules to alter the roles and permissions.
+  drupal_alter('og_get_default_roles', $roles);
+
+  if ($include) {
+    $roles = array_merge(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), $roles);
   }
 
-  // Add the anonymous and authenticated roles, that shouldn't be alterable.
-  $roles = array_merge($roles, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE));
   return $roles;
 }
 
@@ -1518,9 +1518,57 @@ function og_get_default_permissions() {
   $perms = module_invoke_all('og_get_default_permissions');
 
   // Allow other modules to alter the roles and permissions.
-  drupal_alter($perms);
+  drupal_alter('og_get_default_permissions', $perms);
 
   return $perms;
+}
+
+/**
+ * Set global roles and permissions.
+ *
+ * @return
+ *   Array keyed by role ID and role name as value.
+ */
+function og_set_global_access() {
+  $rids = array();
+
+  $roles = og_get_default_roles();
+  $perms = og_get_default_permissions();
+
+  // Group permissions by role.
+  $permissions = array();
+  foreach ($perms as $name => $perm_roles) {
+    foreach ($perm_roles as $perm_role) {
+      $permissions[$perm_role][$name] = TRUE;
+    }
+  }
+
+  if ($existing_roles = og_get_global_roles()) {
+    // Remove the anonymous and authenitacted, as they already exist and
+    // shouldn't change.
+    unset($existing_roles[OG_ANONYMOUS_RID], $existing_roles[OG_AUTHENTICATED_RID]);
+    unset($roles[OG_ANONYMOUS_RID], $roles[OG_AUTHENTICATED_RID]);
+
+    // Delete all existing roles.
+    foreach ($existing_roles as $rid => $name) {
+      og_user_role_delete($rid);
+    }
+  }
+
+  // Create new roles.
+  foreach ($roles as $name) {
+    $role = new stdClass;
+    $role->name = $name;
+    $role->gid = 0;
+
+    og_user_role_save($role);
+    $rids[$role->rid] = $role->name;
+    if (!empty($permissions[$role->name])) {
+      og_user_role_change_permissions($role->rid, $permissions[$role->name]);
+    }
+  }
+
+  return $rids;
 }
 
 /**
@@ -1664,6 +1712,7 @@ function og_group_user_roles_override($gid) {
   foreach (og_get_global_roles() as $rid => $name) {
     $role = new stdClass;
     $role->name = $name;
+    $role->gid = $gid;
 
     $role = og_user_role_save($role);
     $rids[$role->rid] = $role->name;
