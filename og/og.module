@@ -305,6 +305,9 @@ function og_delete_multiple(array $gids) {
 
 function og_delete($gid) {
   og_delete_multiple(array($gid));
+
+  // Delete roles and permissions.
+  og_group_delete_user_roles($gid);
 }
 
 
@@ -1101,9 +1104,8 @@ function og_get_object_state($gid, $obj_type, $object) {
  */
 function og_get_group_default_access($gid) {
   $return = FALSE;
-  if ($group = og_load($gid)) {
+  if ($object = og_load_object_from_group($gid)) {
 
-    $object = reset(entity_load($group->obj_type, array($group->oid)));
     $property = OG_DEFAULT_ACCESS_FIELD;
 
     $wrapper = &$object->{$property}[LANGUAGE_NONE];
@@ -1591,6 +1593,21 @@ function og_user_role_delete($rid) {
 }
 
 /**
+ * Delete all roles belonging to a group.
+ *
+ * @param $gid
+ *   The group ID.
+ */
+function og_group_delete_user_roles($gid) {
+  if (!og_get_group_default_access() && $roles = og_user_roles($gid)) {
+    foreach ($roles as $rid => $name) {
+      og_user_role_delete($rid);
+    }
+  }
+
+}
+
+/**
  * Determine the modules that permissions belong to.
  *
  * @return
@@ -1790,7 +1807,9 @@ function og_get_permissions() {
  *   permissions that should be enabled by default.
  */
 function og_get_default_permissions() {
-  $perms = module_invoke_all('og_default_permissions');
+  $roles = og_get_default_roles();
+
+  $perms = og_user_role_permissions($roles);
   return $perms;
 }
 
@@ -1878,7 +1897,7 @@ function og_permissions_bulk_update($roles, $permissions) {
  */
 function og_set_default_permissions() {
   // Create default permissions for roles.
-  $perms = og_permissions_default_get();
+  $perms = og_get_default_permissions();
 
   og_user_role_grant_permissions(OG_ANONYMOUS_ROLE, $perms[OG_ANONYMOUS_ROLE]);
   og_user_role_grant_permissions(OG_AUTHENTICATED_ROLE, $perms[OG_AUTHENTICATED_ROLE]);
@@ -1959,4 +1978,20 @@ function og_load_object($obj_type, $object) {
     $object = user_load($object->uid);
   }
   return $object;
+}
+
+/**
+ * Return a loaded object from group.
+ *
+ * @param $gid
+ *   The group ID.
+ */
+function og_load_object_from_group($gid) {
+  $object = FALSE;
+  if ($group = og_load($gid)) {
+    $object = reset(entity_load($group->obj_type, array($group->oid)));
+  }
+
+  return $object;
+
 }
