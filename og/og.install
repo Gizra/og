@@ -21,6 +21,7 @@ function og_uninstall() {
   $vars = array(
     'og_context',
     'og_group_manager_full_access',
+    'og_skip_access',
   );
   foreach ($vars as $var) {
     variable_del($var);
