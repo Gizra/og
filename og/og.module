@@ -396,13 +396,12 @@ function og_get_all_group_ids($states = array(OG_STATE_ACTIVE)) {
  *   The object with the fields updated.
  */
 function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TRUE) {
-  $wrapper = og_get_wrapper($obj_type, $object);
+  $object = og_load_object($obj_type, $object);
   $property = OG_AUDIENCE_FIELD;
 
-  $object = og_load_object($obj_type, $object);
+  $wrapper = &$object->{$property}[LANGUAGE_NONE];
 
-  // $op = $wraper->$property->get(0)->value() ? 'update' : 'insert';
-  $op = !empty($object->{$property}[LANGUAGE_NONE][0]['gid']) ? 'update' : 'insert';
+  $op = !empty($wrapper[0]['gid']) ? 'update' : 'insert';
 
   if ($op == 'insert') {
     $values = array(
@@ -410,14 +409,13 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
       'state' => $state,
       'created' => time(),
     );
-    // $wrapper->$property[]->state->set($state);
-    $object->{$property}[LANGUAGE_NONE][] = $values;
+    $wrapper[] = $values;
   }
   else {
 
     $existing_key = FALSE;
-    if ($wrapper->$property->get(0)->value()) {
-      foreach ($wrapper->$property->value() as $key => $value) {
+    if (!empty($wrapper)) {
+      foreach ($wrapper as $key => $value) {
         if ($gid == $value['gid']) {
           $existing_key = $key;
           break;
@@ -435,9 +433,8 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
 
     }
     else {
-      if ($wrapper->$property->get($existing_key)->state->value() != $state) {
-        // $wrapper->$property->get($existing_key)->state->set($state);
-        $object->{$property}[LANGUAGE_NONE][$existing_key]['state'] = $state;
+      if ($wrapper[$existing_key]['state'] != $state) {
+        $wrapper['state'] = $state;
       }
       else {
         // Nothing changed, so don't try to save.
@@ -469,13 +466,14 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
  *   The object with the fields updated.
  */
 function og_ungroup($gid, $obj_type, $object, $save = TRUE) {
-  $wrapper = og_get_wrapper($obj_type, $object);
-  // Check if the object is already associated with the group.
-  $property = str_replace('_', '-', OG_AUDIENCE_FIELD);
+  $object = og_load_object($obj_type, $object);
+  $property = OG_AUDIENCE_FIELD;
+
+  $wrapper = &$object->{$property}[LANGUAGE_NONE];
 
   $existing_key = FALSE;
-  if ($items = $wrapper->$property->value()) {
-    foreach ($items as $key => $value) {
+  if (!empty($wrapper)) {
+    foreach ($wrapper as $key => $value) {
       if ($gid == $value['gid']) {
         $existing_key = $key;
         break;
@@ -483,7 +481,7 @@ function og_ungroup($gid, $obj_type, $object, $save = TRUE) {
     }
   }
   if ($existing_key !== FALSE) {
-    unset($wrapper->$property[$existing_key]);
+    unset($wrapper[$existing_key]);
 
     if ($save) {
       // Save the field change.
@@ -892,15 +890,14 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
     return $groups;
   }
 
-  $wrapper = og_get_wrapper($obj_type, $object);
+  $object = og_load_object($obj_type, $object);
   $property = OG_AUDIENCE_FIELD;
 
-  $object = og_load_object($obj_type, $object);
+  $wrapper = &$object->{$property}[LANGUAGE_NONE];
 
   $groups = array();
-  // if ($wrapper->$property->get(0)->value()) {
-  if (!empty($object->{$property}[LANGUAGE_NONE][0])) {
-    foreach ($object->{$property}[LANGUAGE_NONE] as $group) {
+  if (!empty($wrapper)) {
+    foreach ($wrapper as $group) {
       if (!empty($states) && !in_array($group['state'], $states)) {
         // Don't register the group if it's state isn't the one we look for.
         continue;
@@ -1052,13 +1049,18 @@ function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_
  */
 function og_get_object_state($gid, $obj_type, $object) {
   $state = FALSE;
-  $wrapper = og_get_wrapper($obj_type, $object);
+
+  $object = og_load_object($obj_type, $object);
   $property = OG_AUDIENCE_FIELD;
 
-  foreach ($wrapper->$property->value() as $value) {
-    if ($value['gid'] == $gid) {
-      // Save the state.
-      $state = $value['state'];
+  $wrapper = &$object->{$property}[LANGUAGE_NONE];
+
+  if (!empty($wrapper)) {
+    foreach ($wrapper as $key => $value) {
+      if ($value['gid'] == $gid) {
+        // Save the state.
+        $state = $value['state'];
+      }
     }
   }
   return $state;

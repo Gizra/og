@@ -358,14 +358,15 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
  * @see og_field_attach_delete().
  */
 function og_field_crud_group($op, $obj_type, $object) {
+  $object = og_load_object($obj_type, $object);
+  $property = OG_AUDIENCE_FIELD;
+
+  $wrapper = &$object->{$property}[LANGUAGE_NONE];
+
   // Get the object ID.
   list($id) = entity_extract_ids($obj_type, $object);
 
   $group = og_get_group($obj_type, $id, TRUE);
-
-  $wrapper = og_get_wrapper($obj_type, $object);
-  $property = OG_AUDIENCE_FIELD;
-
   if ($op == 'delete') {
     if ($group) {
       // Remove group.
@@ -373,8 +374,8 @@ function og_field_crud_group($op, $obj_type, $object) {
     }
   }
   else {
-    // Check group doesn't already exist.
-    if (!$wrapper->$property->value() && !empty($group->is_new)) {
+    // Check group is new.
+    if (empty($wrapper) && !empty($group->is_new)) {
       // Save the group.
       $group->save();
 
