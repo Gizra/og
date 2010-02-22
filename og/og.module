@@ -1604,6 +1604,30 @@ function og_group_delete_user_roles($gid) {
       og_user_role_delete($rid);
     }
   }
+}
+
+/**
+ * Create new roles, based on the default roles and permissions.
+ *
+ * @param $gid
+ *   The group ID.
+ * @return
+ *   The newly created roles keyed by role ID and role name as the value.
+ */
+function og_group_user_roles_override($gid) {
+  $perms = og_get_default_permissions();
+
+  $rids = array();
+  foreach (og_get_default_roles() as $rid => $name) {
+    $role = new stdClass;
+    $role->name = $name;
+
+    $role = og_user_role_save($role);
+    $rids[$role->rid] = $role->name;
+    og_user_role_change_permissions($role->rid, $perms[$rid]);
+  }
+
+  return $rids;
 
 }
 
