@@ -344,6 +344,7 @@ function og_field_attach_delete($obj_type, $object) {
  *   The operation - "insert" or "update".
  */
 function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &$items) {
+  //FIXME: Only $items['gid'] is populated.
   foreach ($items as &$item) {
     $item['state'] = !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE;
     $item['created'] = !empty($item['created']) ? $item['created'] : time();
