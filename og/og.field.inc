@@ -366,7 +366,7 @@ function og_field_crud_group($op, $obj_type, $object) {
   // Get the object ID.
   list($id) = entity_extract_ids($obj_type, $object);
 
-  $group = og_get_group($obj_type, $id, TRUE);
+  $group = og_get_group($obj_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
   if ($op == 'delete') {
     if (!empty($group->gid)) {
       // Remove group.
