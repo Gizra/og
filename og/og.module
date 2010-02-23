@@ -56,6 +56,11 @@ define('OG_ACCESS_IGNORE', NULL);
 define('OG_AUDIENCE_FIELD', 'og_audience');
 
 /**
+ * Group field.
+ */
+define('OG_GROUP_FIELD', 'og_group');
+
+/**
  * Group default roles and permissions field.
  */
 define('OG_DEFAULT_ACCESS_FIELD', 'og_group_default_access');

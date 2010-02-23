@@ -359,7 +359,7 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
  */
 function og_field_crud_group($op, $obj_type, $object) {
   $object = og_load_object($obj_type, $object);
-  $property = OG_AUDIENCE_FIELD;
+  $property = OG_GROUP_FIELD;
 
   $wrapper = &$object->{$property}[LANGUAGE_NONE];
 
@@ -368,24 +368,27 @@ function og_field_crud_group($op, $obj_type, $object) {
 
   $group = og_get_group($obj_type, $id, TRUE);
   if ($op == 'delete') {
-    if ($group) {
+    if (!empty($group->gid)) {
       // Remove group.
       og_delete(array($group->gid));
     }
   }
   else {
     // Check group is new.
-    if (empty($wrapper) && !empty($group->is_new)) {
-      // Save the group.
-      $group->save();
+    if (empty($group->gid)) {
+      if (!empty($wrapper[0]['value'])) {
+        // Save the group.
+        $group->save();
 
-      if (!empty($object->uid)) {
-        // Subscribe the object author, if exists.
-        $account = user_load($object->uid);
-        og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
+        if (!empty($object->uid)) {
+          // Subscribe the object author, if exists.
+          $account = user_load($object->uid);
+          og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
+        }
       }
     }
-    elseif (!empty($group)) {
+    else {
+      // Existing group.
       $state = '';
       if ($group->state == OG_STATE_ACTIVE && empty($wrapper[0]['value'])) {
         $state = OG_STATE_PENDING;
