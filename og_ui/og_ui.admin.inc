@@ -251,17 +251,19 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
     }
     else {
       og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
-      $form['name'] = array(
-        '#type' => 'textfield',
-        '#size' => 32,
-        '#maxlength' => 64,
-      );
-      $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Add role'),
-      );
-      $form['#submit'][] = 'og_ui_user_admin_role_submit';
-      $form['#validate'][] = 'og_ui_user_admin_role_validate';
+      if (!og_is_group_default_access($group->gid)) {
+        $form['name'] = array(
+          '#type' => 'textfield',
+          '#size' => 32,
+          '#maxlength' => 64,
+        );
+        $form['submit'] = array(
+          '#type' => 'submit',
+          '#value' => t('Add role'),
+        );
+        $form['#submit'][] = 'og_ui_user_admin_role_submit';
+        $form['#validate'][] = 'og_ui_user_admin_role_validate';
+      }
     }
     return $form;
   }
@@ -318,15 +320,16 @@ function theme_og_ui_user_admin_new_role($variables) {
   // The group object.
   $group = $form['group']['#value'];
 
-  $og_roles = og_get_group_default_roles($group->gid);
+  $default_roles = og_is_group_default_access($group->gid);
 
   foreach (og_user_roles($group->gid) as $rid => $name) {
-    $edit_permissions = l(t('edit permissions'), 'og/' . $group->obj_type .'/' . $group->oid . '/admin/people/permissions/' . $rid);
-    if (!in_array($rid, $og_roles)) {
+    if (!$default_roles && !in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
       $rows[] = array($name, l(t('edit role'), 'og/' . $group->obj_type .'/' . $group->oid . '/admin/people/roles/edit/' . $rid), $edit_permissions);
     }
     else {
-      $rows[] = array($name, t('locked'), $edit_permissions);
+      $text = !$default_roles ? t('edit permissions') : t('view permissions');
+      $permissions = l($text, 'og/' . $group->obj_type .'/' . $group->oid . '/admin/people/permissions/' . $rid);
+      $rows[] = array($name, t('locked'), $permissions);
     }
   }
 
@@ -411,13 +414,15 @@ function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid
   if (empty($group)) {
     $form['#theme'] = array('og_ui_user_admin_permissions');
   }
-  $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save permissions'),
-    '#submit' => array('og_ui_user_admin_permissions_submit'),
-  );
-  $form['#after_build'] = array('og_ui_user_admin_permissions_after_build');
+  if (!og_is_group_default_access($group->gid)) {
+    $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save permissions'),
+      '#submit' => array('og_ui_user_admin_permissions_submit'),
+    );
+    $form['#after_build'] = array('og_ui_user_admin_permissions_after_build');
+  }
 
   return $form;
 }
@@ -517,8 +522,7 @@ function theme_og_ui_user_admin_permissions($variables) {
   foreach (element_children($form['role_names']) as $rid) {
     $header[] = array('data' => drupal_render($form['role_names'][$rid]), 'class' => array('checkbox'));
   }
-  $output = theme('system_compact_link');
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
   $output .= drupal_render_children($form);
   return $output;
 }

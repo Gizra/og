@@ -1115,7 +1115,7 @@ function og_is_group_default_access($gid) {
     $property = OG_DEFAULT_ACCESS_FIELD;
 
     $wrapper = &$object->{$property}[LANGUAGE_NONE];
-    $return = !empty($wrapper[0]['value']);
+    $return = empty($wrapper[0]['value']);
   }
 
   return $return;
@@ -1500,6 +1500,11 @@ function og_user_role_permissions($roles = array()) {
  *   array.
  */
 function og_user_roles($gid = 0, $permission = NULL) {
+  $roles = array();
+
+  // Check if overriden access exists.
+  $gid = og_is_group_default_access($gid) ? 0 : $gid;
+
   if (!empty($permission)) {
     $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
   }
