@@ -442,7 +442,7 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
     }
     else {
       if ($wrapper[$existing_key]['state'] != $state) {
-        $wrapper['state'] = $state;
+        $wrapper[$existing_key]['state'] = $state;
       }
       else {
         // Nothing changed, so don't try to save.

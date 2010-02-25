@@ -413,49 +413,47 @@ function og_ui_og_user_operations($form = array(), $form_state = array()) {
 /**
  * Callback function for admin mass approving users.
  */
-function og_ui_user_operations_approve($gid, $accounts) {
-  // Intersect account with pending or blocked state users.
-  $users = array_keys(og_get_group_users($gid, array(OG_STATE_PENDING, OG_STATE_BLOCKED)));
-  $accounts = array_intersect($accounts, $users);
-  $accounts = user_load_multiple($accounts);
-  foreach ($accounts as $account) {
-    $group = array(
-      'gid' => $gid,
-      // Get the state of the group, and decide the user's state accordingly.
-      'state' => OG_STATE_ACTIVE,
-    );
-    og_subscribe_user(array($group), $account);
-  }
-}
-
-/**
- * Callback function for admin mass denying users.
- */
-function og_ui_user_operations_deny($gid, $accounts) {
-  $accounts = user_load_multiple($accounts);
-
-  foreach ($accounts as $account) {
-    og_unsubscribe_user(array($gid), $account);
-  }
+function og_ui_user_operations_approve($gid, $uids) {
+  _og_ui_user_operations_set_state($gid, $uids, OG_STATE_ACTIVE);
 }
 
 /**
  * Callback function for admin mass blocking users.
  */
-function og_ui_user_operations_block($gid, $accounts) {
-  // Intersect account with pending or blocked state users.
-  $users = array_keys(og_get_group_users($gid, array(OG_STATE_ACTIVE, OG_STATE_PENDING)));
-  $accounts = array_intersect($accounts, $users);
-  $accounts = user_load_multiple($accounts);
+function og_ui_user_operations_block($gid, $uids) {
+  _og_ui_user_operations_set_state($gid, $uids, OG_STATE_BLOCKED);
+}
+
+
+/**
+ * Set the state of a user in a group.
+ *
+ * @param $gid
+ *   Group ID
+ * @param $uids
+ *   Uset IDs
+ * @param $state
+ *   The state to set the user in the group.
+ */
+function _og_ui_user_operations_set_state($gid, $uids, $state) {
+  $accounts = user_load_multiple($uids);
   foreach ($accounts as $account) {
-    $group = array(
-      'gid' => $gid,
-      // Get the state of the group, and decide the user's state accordingly.
-      'state' => OG_STATE_BLOCKED,
-    );
-    og_subscribe_user(array($group), $account);
+    og_group($gid, 'user', $account, $state);
   }
 }
+
+
+/**
+ * Callback function for admin mass denying users.
+ */
+function og_ui_user_operations_deny($gid, $uids) {
+  $accounts = user_load_multiple($uids);
+
+  foreach ($accounts as $account) {
+    og_ungroup($gid, 'user', $account);
+  }
+}
+
 
 /**
  * Callback function for admin mass adding/ deleting a user role.
