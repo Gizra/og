@@ -50,11 +50,7 @@ function og_ui_add_users($form, &$form_state, $obj_type, $oid) {
     $form['og_user']['og_add_user_state'] = array(
       '#type' => 'select',
       '#title' => t('Membership state'),
-      '#options' => array(
-        OG_STATE_ACTIVE => t('Active'),
-        OG_STATE_PENDING => t('Pending'),
-        OG_STATE_BLOCKED => t('Blocked'),
-      ),
+      '#options' => og_group_content_states(),
       '#description' => t('Select the state of the membership.'),
     );
     $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
@@ -81,12 +77,8 @@ function og_ui_add_users_validate($form, &$form_state) {
  */
 function og_ui_add_users_submit($form, &$form_state) {
   $account = user_load_by_name($form_state['values']['og_add_user']);
-  $group = array(
-    'gid' => $form_state['values']['group']->gid,
-    'state' => $form_state['values']['og_add_user_state'],
-  );
 
-  og_subscribe_user(array($group), $account);
+  og_group($form_state['values']['group']->gid, 'user', $account, $form_state['values']['og_add_user_state']);
   drupal_set_message(t('%user has been added to group.', array('%user' => $account->name)));
 }
 
@@ -133,16 +125,15 @@ function og_ui_user_admin_account($form, $form_state, $obj_type, $oid) {
     '#value' => t('Update'),
   );
 
-  $status = array('blocked' => t('blocked'), 'pending' => t('pending'), 'active' => t('active'));
-  $roles = array_flip(og_get_group_roles($group->gid));
-  $accounts = array();
+  $status = og_group_content_states();
+  $roles = og_user_roles($group->gid);
   // Get the group real object, so we can check the user ID of the object.
-  $object = current(entity_load($obj_type, array($group->oid)));
+  $object = og_load_object_from_group($group->gid);
 
-  foreach (og_get_group_users($group->gid, array()) as $account) {
+  // TODO: Add count limit to the list.
+  foreach (og_get_group_users($group->gid) as $account) {
     // Don't allow editing of the group manager.
     if (empty($object->uid) || $account->uid != $object->uid) {
-      $accounts[$account->uid] = '';
       $users_roles = array();
       foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
         $users_roles[] = $roles[$rid];
@@ -151,7 +142,7 @@ function og_ui_user_admin_account($form, $form_state, $obj_type, $oid) {
 
       $options[$account->uid] = array(
         'username' => theme('username', array('account' => $account)),
-        'status' =>  $status[$account->state],
+        'status' =>  og_get_object_state($group->gid, 'user', $account),
         'roles' => theme('item_list', array('items' => $users_roles)),
       );
 

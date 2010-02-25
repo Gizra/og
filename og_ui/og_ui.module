@@ -356,25 +356,23 @@ function og_ui_og_user_operations($form = array(), $form_state = array()) {
   );
 
   if (og_user_access($gid, 'administer group')) {
-    $roles = og_get_group_roles($gid);
-    // Can't edit anonymous and authenticated role.
-    unset($roles[OG_ANONYMOUS_ROLE]);
-    unset($roles[OG_AUTHENTICATED_ROLE]);
-
-    // Flip roles array, so we get the role name.
-    $roles = array_flip($roles);
+    $roles = og_user_roles($gid);
 
     $add_roles = array();
-    foreach ($roles as $key => $value) {
-      $add_roles['add_role-' . $key] = $value;
+    foreach ($roles as $rid => $name) {
+      if (!in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
+        $add_roles['add_role-' . $rid] = strip_tags($name);
+      }
     }
 
     $remove_roles = array();
-    foreach ($roles as $key => $value) {
-      $remove_roles['remove_role-' . $key] = $value;
+    foreach ($roles as $rid => $name) {
+      if (!in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
+        $remove_roles['remove_role-' . $rid] = strip_tags($name);
+      }
     }
 
-    if (count($roles)) {
+    if ($add_roles) {
       $role_operations = array(
         t('Add a role to the selected users') => array(
           'label' => $add_roles,
