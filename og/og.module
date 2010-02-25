@@ -295,7 +295,6 @@ function og_load($gid, $reset = FALSE) {
 function og_save($group) {
   $group->save();
 
-  og_group_user_roles_override($group->gid);
   return $group;
 }
 
@@ -1767,7 +1766,7 @@ function og_group_delete_user_roles($gid) {
  */
 function og_group_user_roles_override($gid) {
   $rids = FALSE;
-  if(!og_is_group_default_access($gid) && ((bool) db_query_range('SELECT 1 FROM {og_role} WHERE gid = :gid', 0, 1, array(':gid' => $gid))->fetchField())) {
+  if(!og_is_group_default_access($gid) && !((bool) db_query_range('SELECT 1 FROM {og_role} WHERE gid = :gid', 0, 1, array(':gid' => $gid))->fetchField())) {
     // Make sure roles doesn't exist already by looking for a row with the group
     // ID in {og_role} table.
     $perms = og_get_global_permissions();
@@ -1778,14 +1777,13 @@ function og_group_user_roles_override($gid) {
       $role->name = $name;
       $role->gid = $gid;
 
-      $role = og_user_role_save($role);
+      og_user_role_save($role);
       $rids[$role->rid] = $role->name;
       og_user_role_change_permissions($role->rid, $perms[$rid]);
     }
   }
 
   return $rids;
-
 }
 
 /**

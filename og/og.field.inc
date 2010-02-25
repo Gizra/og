@@ -390,16 +390,19 @@ function og_field_crud_group($op, $obj_type, $object) {
     }
     else {
       // Existing group.
-      $state = '';
+      $save = FALSE;
+
       if ($group->state == OG_STATE_ACTIVE && empty($wrapper[0]['value'])) {
-        $state = OG_STATE_PENDING;
+        $group->state = OG_STATE_PENDING;
       }
       elseif($group->state == OG_STATE_PENDING && !empty($wrapper[0]['value'])) {
-        $state = OG_STATE_ACTIVE;
+        $group->state = OG_STATE_ACTIVE;
       }
-      if ($state) {
-        $group->state = $state;
-        // Change the group state.
+
+      // Add overriden roles and permissions, if needed.
+      og_group_user_roles_override($group->gid);
+
+      if ($save) {
         og_save($group);
       }
     }
