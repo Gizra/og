@@ -493,11 +493,11 @@ function og_ungroup($gid, $obj_type, $object, $save = TRUE) {
 
     if ($save) {
       // Save the field change.
-      call_user_func('field_attach_' . $op, $obj_type, $object);
+      call_user_func('field_attach_update', $obj_type, $object);
 
       if ($obj_type == 'user') {
-        foreach (og_get_user_roles($gid, $account->uid) as $rid) {
-          og_users_roles_revoke($gid, $account->uid, $rid);
+        foreach (og_get_user_roles($gid, $object->uid) as $rid) {
+          og_users_roles_revoke($gid, $object->uid, $rid);
         }
       }
       drupal_static_reset('og_get_object_groups');
