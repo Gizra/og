@@ -379,7 +379,7 @@ function og_field_crud_group($op, $obj_type, $object) {
     if (empty($group->gid)) {
       if (!empty($wrapper[0]['value'])) {
         // Save the group.
-        $group->save();
+        og_save($group);
 
         if (!empty($object->uid)) {
           // Subscribe the object author, if exists.

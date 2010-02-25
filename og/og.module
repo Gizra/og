@@ -295,8 +295,10 @@ function og_load($gid, $reset = FALSE) {
 function og_save($group) {
   $group->save();
 
+  og_group_user_roles_override($group->gid);
   return $group;
 }
+
 
 /**
  * Delete multiple organic groups entities.
@@ -1760,20 +1762,26 @@ function og_group_delete_user_roles($gid) {
  * @param $gid
  *   The group ID.
  * @return
- *   The newly created roles keyed by role ID and role name as the value.
+ *   The newly created roles keyed by role ID and role name as the value. Or
+ *   FALSE if no roles were created.
  */
 function og_group_user_roles_override($gid) {
-  $perms = og_get_global_permissions();
+  $rids = FALSE;
+  if(!og_is_group_default_access($gid) && ((bool) db_query_range('SELECT 1 FROM {og_role} WHERE gid = :gid', 0, 1, array(':gid' => $gid))->fetchField())) {
+    // Make sure roles doesn't exist already by looking for a row with the group
+    // ID in {og_role} table.
+    $perms = og_get_global_permissions();
 
-  $rids = array();
-  foreach (og_get_global_roles() as $rid => $name) {
-    $role = new stdClass;
-    $role->name = $name;
-    $role->gid = $gid;
+    $rids = array();
+    foreach (og_get_global_roles() as $rid => $name) {
+      $role = new stdClass;
+      $role->name = $name;
+      $role->gid = $gid;
 
-    $role = og_user_role_save($role);
-    $rids[$role->rid] = $role->name;
-    og_user_role_change_permissions($role->rid, $perms[$rid]);
+      $role = og_user_role_save($role);
+      $rids[$role->rid] = $role->name;
+      og_user_role_change_permissions($role->rid, $perms[$rid]);
+    }
   }
 
   return $rids;

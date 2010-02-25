@@ -421,8 +421,8 @@ function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid
 /**
  * Helper function to disable the checkboxes according to their 'roles' state.
  *
- * Every permission can decdeclate to which roles it applies, as some don't make
- * sense if applied to anonymous and authenticated user (e.g. subscribe to group
+ * Every permission can declare to which roles it applies, as some don't make
+ * sense if applied to anonymous or authenticated user (e.g. subscribe to group
  * should appear only to anonymous members).
  */
 function og_ui_user_admin_permissions_after_build($element) {
