@@ -25,7 +25,6 @@ function og_ui_group_admin_overview($obj_type, $oid) {
     $item['localized_options'] = array();
   }
 
-  $form['system_compact_link'] = array('#markup' => theme('system_compact_link'));
   $form['admin_block_content'] = array('#markup' => theme('admin_block_content', array('content' => $items)));
 
   return $form;
