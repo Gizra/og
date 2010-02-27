@@ -211,8 +211,8 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
     if ($rid) {
       og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")), l(t('Roles'), "og/$obj_type/$oid/admin/people/roles"));
 
-      $og_roles = og_get_group_default_roles($group->gid);
-      if (in_array($rid, $og_roles)) {
+      $og_roles = og_user_roles($group->gid);
+      if (!in_array($rid, array_keys($og_roles))) {
         drupal_goto("og/$obj_type, $oid/admin/people/roles");
       }
       // Display the edit role form.
@@ -266,14 +266,12 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
 }
 
 function og_ui_user_admin_role_validate($form, &$form_state) {
-  if ($form_state['values']['name']) {
+  if (!empty($form_state['values']['name'])) {
     $roles = og_user_roles($form_state['values']['group']->gid);
-    if (in_array($form_state['values']['name'], $roles)) {
+    $role = og_user_role_load($form_state['values']['rid']);
+    if ($role->name != $form_state['values']['name'] && in_array($form_state['values']['name'], $roles)) {
       form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
     }
-  }
-  else {
-    form_set_error('name', t('You must specify a valid role name.'));
   }
 }
 
