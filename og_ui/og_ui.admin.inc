@@ -15,7 +15,8 @@
 function og_ui_group_admin_overview($obj_type, $oid) {
   og_set_breadcrumb($obj_type, $oid);
 
-  $items = og_ui_get_group_admin();
+  $group = og_get_group($obj_type, $oid);
+  $items = og_ui_get_group_admin($group->gid);
 
   foreach ($items as &$item) {
     // Re-format the URL.
