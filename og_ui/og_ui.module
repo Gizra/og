@@ -154,15 +154,15 @@ function og_ui_menu() {
 /**
  * Return TRUE if a node is a group node and the user has administrator rights.
  */
-function og_ui_organic_groups_tab_access($obj_type, $oid) {
-  return ($group = og_get_group($obj_type, $oid)) &&  og_user_access($group->gid, 'administer group');
+function og_ui_organic_groups_tab_access($entity_type, $eid) {
+  return ($group = og_get_group($entity_type, $eid)) &&  og_user_access($group->gid, 'administer group');
 }
 
 /**
  * Menu callback; Return the title of a menu item based on the group title.
  */
-function og_ui_menu_title_callback($title, $obj_type, $oid) {
-  $label = check_plain(og_entity_get_label($obj_type, $oid));
+function og_ui_menu_title_callback($title, $entity_type, $eid) {
+  $label = check_plain(og_entity_get_label($entity_type, $eid));
   return str_replace('@group', $label, $title);
 }
 
@@ -202,16 +202,16 @@ function og_ui_field_formatter_info() {
 /**
  * Implements hook_field_formatter_view().
  */
-function og_ui_field_formatter_view($object_type, $object, $field, $instance, $langcode, $items, $display) {
+function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
   if ($field['field_name'] == 'og_group') {
     global $user;
-    list($id) = entity_extract_ids($object_type, $object);
+    list($id) = entity_extract_ids($entity_type, $entity);
 
     // Field can have only a single value.
     $delta = 0;
-    if (($group = og_get_group($object_type, $id)) && (empty($object->uid) || $object->uid != $user->uid)) {
+    if (($group = og_get_group($entity_type, $id)) && (empty($entity->uid) || $entity->uid != $user->uid)) {
       // Check user association with the group.
       $links = array();
 
@@ -219,11 +219,11 @@ function og_ui_field_formatter_view($object_type, $object, $field, $instance, $l
         // check the user state.
         if ($state == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
           $links['title'] = t('Re-request group membership');
-          $links['href'] = "og/$object_type/$id/subscribe";
+          $links['href'] = "og/$entity_type/$id/subscribe";
         }
         elseif ($user_group['state'] == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe')) {
           $links['title'] = t('Unsubscribe from group');
-          $links['href'] = "og/$object_type/$id/unsubscribe";
+          $links['href'] = "og/$entity_type/$id/unsubscribe";
         }
       }
       else {
@@ -233,7 +233,7 @@ function og_ui_field_formatter_view($object_type, $object, $field, $instance, $l
         elseif (og_user_access($group->gid, 'subscribe')) {
           $links['title'] = t('Request group membership');
         }
-        $links['href'] = "og/$object_type/$id/subscribe";
+        $links['href'] = "og/$entity_type/$id/subscribe";
       }
 
       if (!empty($links['title'])) {
@@ -487,7 +487,7 @@ function og_ui_og_ui_get_group_admin($gid) {
   $items['add_people'] = array(
     'title' => t('Add people'),
     'description' => t('Add group members.'),
-    // The final URL will be "og/$obj_type/$oid/admin/people/add-user".
+    // The final URL will be "og/$entity_type/$eid/admin/people/add-user".
     // @see og_ui_group_admin_overview().
     'href' => 'admin/people/add-user',
   );

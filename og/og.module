@@ -131,14 +131,14 @@ function og_entity_property_info() {
     'required' => TRUE,
   );
 
-  $properties['oid'] = array(
+  $properties['eid'] = array(
     'label' => t("Object ID"),
     'type' => 'integer',
     'description' => t("The ID of the object."),
     'required' => TRUE,
   );
 
-  $properties['obj_type'] = array(
+  $properties['entity_type'] = array(
     'label' => t("Object type"),
     'type' => 'text',
     'description' => t("The object type."),
@@ -188,9 +188,9 @@ function og_group_content_states() {
 /**
  * Return a loaded group object if exists or create a new one.
  *
- * @param $oid
+ * @param $eid
  *   The group content ID.
- * @param $obj_type
+ * @param $entity_type
  *   The group object type. "node" is the default value. Pass "gid" if the the
  *   content ID is equal to the group unique ID.
  * @param $create
@@ -199,13 +199,13 @@ function og_group_content_states() {
  * @return
  *   The group object if found, or an empty array.
  */
-function og_get_group($obj_type, $oid, $create = FALSE, $states = array(OG_STATE_ACTIVE)) {
+function og_get_group($entity_type, $eid, $create = FALSE, $states = array(OG_STATE_ACTIVE)) {
   $group = FALSE;
-  if ($gids = og_get_group_ids($obj_type, array($oid), $states)) {
-    $group = og_load($gids[$oid]);
+  if ($gids = og_get_group_ids($entity_type, array($eid), $states)) {
+    $group = og_load($gids[$eid]);
   }
   elseif ($create) {
-    $group = og_create_group(array('obj_type' => $obj_type, 'oid' => $oid));
+    $group = og_create_group(array('entity_type' => $entity_type, 'eid' => $eid));
   }
   return $group;
 }
@@ -216,8 +216,8 @@ function og_get_group($obj_type, $oid, $create = FALSE, $states = array(OG_STATE
  */
 function og_create_group($values = array()) {
   $group = new EntityOg(array(
-    'obj_type' => $values['obj_type'],
-    'oid' => $values['oid'],
+    'entity_type' => $values['entity_type'],
+    'eid' => $values['eid'],
     // Initialize values.
     'state' => !empty($values['state']) ? $values['state'] : OG_STATE_ACTIVE,
     'created' => !empty($values['created']) ? $values['created'] : time(),
@@ -234,10 +234,10 @@ function og_create_group($values = array()) {
  */
 class OgController extends EntityAPIController {
   function load($ids = array(), $conditions = array()) {
-    $gids = og_get_group_ids(!empty($conditions['obj_type']) ? $conditions['obj_type'] : 'gid', $ids);
+    $gids = og_get_group_ids(!empty($conditions['entity_type']) ? $conditions['entity_type'] : 'gid', $ids);
 
     // Unset the object type condition.
-    unset($conditions['obj_type']);
+    unset($conditions['entity_type']);
     return parent::load($gids, $conditions);
   }
 }
@@ -320,47 +320,47 @@ function og_delete($gid) {
 /**
  * Get a group ID by the object type and object IDs.
  *
- * @param $oid
+ * @param $eid
  *   The group content ID.
- * @param $obj_type
+ * @param $entity_type
  *   The group object type. "node" is the default value. Pass "gid" if the the
  *   content ID is equal to the group unique ID.
  *
  * @return
  *   Array keyed with the object ID and the group ID as the value.
  */
-function og_get_group_ids($obj_type = 'gid', $oids = array(), $states = array(OG_STATE_ACTIVE)) {
+function og_get_group_ids($entity_type = 'gid', $eids = array(), $states = array(OG_STATE_ACTIVE)) {
   $gids = &drupal_static(__FUNCTION__, array());
 
-  $required_oids = $oids = drupal_map_assoc($oids);
+  $required_eids = $eids = drupal_map_assoc($eids);
 
-  if (!empty($gids[$obj_type])) {
+  if (!empty($gids[$entity_type])) {
     // Check we don't already have the group IDs.
-    foreach ($gids[$obj_type] as $oid => $gid) {
-      unset($oids[$oid]);
+    foreach ($gids[$entity_type] as $eid => $gid) {
+      unset($eids[$eid]);
     }
   }
   else {
-    $gids[$obj_type] = array();
+    $gids[$entity_type] = array();
   }
 
-  if (!empty($oids)) {
-    if ($obj_type == 'gid') {
-      $gids[$obj_type] = $gids[$obj_type] + drupal_map_assoc($oids);
+  if (!empty($eids)) {
+    if ($entity_type == 'gid') {
+      $gids[$entity_type] = $gids[$entity_type] + drupal_map_assoc($eids);
     }
     else {
       $query = db_select('og_groups', 'og_groups');
-      $query->fields('og_groups', array('oid', 'gid'))
-      ->condition('obj_type', $obj_type)
-      ->condition('oid', $oids, 'IN');
+      $query->fields('og_groups', array('eid', 'gid'))
+      ->condition('entity_type', $entity_type)
+      ->condition('eid', $eids, 'IN');
       if (!empty($states)) {
         $query->condition('state', $states, 'IN');
       }
-      $gids[$obj_type] = $query->execute()->fetchAllKeyed();
+      $gids[$entity_type] = $query->execute()->fetchAllKeyed();
     }
   }
   // Make sure we return only the ids we were asked for.
-  $return = array_intersect_key($gids[$obj_type], $required_oids);
+  $return = array_intersect_key($gids[$entity_type], $required_eids);
 
   return $return;
 }
@@ -389,9 +389,9 @@ function og_get_all_group_ids($states = array(OG_STATE_ACTIVE)) {
 /**
  * Set an association (e.g. subscribe) an object to a group.
  *
- * @param $obj_type
+ * @param $entity_type
  *   The object type (e.g. "node" or "user").
- * @param $object
+ * @param $entity
  *   The object to set the association.
  * @param $state
  *   The state of the association. Can be:
@@ -404,11 +404,11 @@ function og_get_all_group_ids($states = array(OG_STATE_ACTIVE)) {
  * @return
  *   The object with the fields updated.
  */
-function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TRUE) {
-  $object = og_load_object($obj_type, $object);
+function og_group($gid, $entity_type, $entity, $state = OG_STATE_ACTIVE, $save = TRUE) {
+  $entity = og_load_object($entity_type, $entity);
   $property = OG_AUDIENCE_FIELD;
 
-  $wrapper = &$object->{$property}[LANGUAGE_NONE];
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
   $op = !empty($wrapper[0]['gid']) ? 'update' : 'insert';
 
@@ -438,7 +438,7 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
         'state' => $state,
         'created' => time(),
       );
-      $object->{$property}[LANGUAGE_NONE][] = $values;
+      $entity->{$property}[LANGUAGE_NONE][] = $values;
 
     }
     else {
@@ -454,19 +454,19 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
 
   if ($save) {
     // Save the object.
-    call_user_func('field_attach_' . $op, $obj_type, $object);
+    call_user_func('field_attach_' . $op, $entity_type, $entity);
     drupal_static_reset('og_get_object_groups');
   }
 
-  return $object;
+  return $entity;
 }
 
 /**
  * Delete an an association (e.g. unsubscribe) of an object to a group.
  *
- * @param $obj_type
+ * @param $entity_type
  *   The object type (e.g. "node" or "user").
- * @param $object
+ * @param $entity
  *   The object to set the association.
  * @param $save
  *   Optioanl; TRUE if fields value shoudl be saved. Defaults to TRUE.
@@ -474,11 +474,11 @@ function og_group($gid, $obj_type, $object, $state = OG_STATE_ACTIVE, $save = TR
  * @return
  *   The object with the fields updated.
  */
-function og_ungroup($gid, $obj_type, $object, $save = TRUE) {
-  $object = og_load_object($obj_type, $object);
+function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
+  $entity = og_load_object($entity_type, $entity);
   $property = OG_AUDIENCE_FIELD;
 
-  $wrapper = &$object->{$property}[LANGUAGE_NONE];
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
   $existing_key = FALSE;
   if (!empty($wrapper)) {
@@ -494,18 +494,18 @@ function og_ungroup($gid, $obj_type, $object, $save = TRUE) {
 
     if ($save) {
       // Save the field change.
-      call_user_func('field_attach_update', $obj_type, $object);
+      call_user_func('field_attach_update', $entity_type, $entity);
 
-      if ($obj_type == 'user') {
-        foreach (og_get_user_roles($gid, $object->uid) as $rid) {
-          og_users_roles_revoke($gid, $object->uid, $rid);
+      if ($entity_type == 'user') {
+        foreach (og_get_user_roles($gid, $entity->uid) as $rid) {
+          og_users_roles_revoke($gid, $entity->uid, $rid);
         }
       }
       drupal_static_reset('og_get_object_groups');
     }
   }
 
-  return $object;
+  return $entity;
 }
 
 /**
@@ -556,8 +556,8 @@ function og_user_access($gid, $string, $account = NULL) {
 
   // Group manager has all privileges (if variable is TRUE).
   if (variable_get('og_group_manager_full_access', TRUE)) {
-    $object = current(entity_load($group->obj_type, array($group->oid)));
-    if (!empty($object->uid) && $object->uid == $account->uid) {
+    $entity = current(entity_load($group->entity_type, array($group->eid)));
+    if (!empty($entity->uid) && $entity->uid == $account->uid) {
       return TRUE;
     }
   }
@@ -700,7 +700,7 @@ function og_og_get_default_roles() {
  * Implement hook_og_access().
  */
 function og_og_access($op, $group, $account, $acting_user) {
-  if ($group->obj_type == 'node' && og_user_access($group->oid, $op, $acting_user)) {
+  if ($group->entity_type == 'node' && og_user_access($group->eid, $op, $acting_user)) {
     return OG_ACCESS_ALLOW;
   }
   return OG_ACCESS_IGNORE;
@@ -908,9 +908,9 @@ function og_get_group_users($gid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
 /**
  * Get the groups a content is associated with.
  *
- * @param $obj_type
+ * @param $entity_type
  *   The object type (e.g. "node" or "user").
- * @param $object
+ * @param $entity
  *   The object can be a user, node or any fieldable entity.
  * @param $states
  *   Optioanl; Array with the state to return. If empty groups of all state will
@@ -918,17 +918,17 @@ function og_get_group_users($gid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
  * @return
  *  An array with the group, or an empty array.
  */
-function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIVE)) {
+function og_get_object_groups($entity_type, $entity, $states = array(OG_STATE_ACTIVE)) {
   $groups = &drupal_static(__FUNCTION__, array());
 
   if (!empty($groups)) {
     return $groups;
   }
 
-  $object = og_load_object($obj_type, $object);
+  $entity = og_load_object($entity_type, $entity);
   $property = OG_AUDIENCE_FIELD;
 
-  $wrapper = &$object->{$property}[LANGUAGE_NONE];
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
   $groups = array();
   if (!empty($wrapper)) {
@@ -948,7 +948,7 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
  *
  * @param $bundle_name
  *   The bundle name to be checked.
- * @param $obj_type
+ * @param $entity_type
  *   The object type.
  * @param $type
  *   The grou usage type. Must be "group" or "group content".
@@ -957,12 +957,12 @@ function og_get_object_groups($obj_type, $object, $states = array(OG_STATE_ACTIV
  *   The group type or an "omitted" if node type doesn't participate in
  *   organic groups.
  */
-function og_get_group_type($obj_type, $bundle_name, $type = 'group') {
+function og_get_group_type($entity_type, $bundle_name, $type = 'group') {
   if ($type == 'group') {
-    return (bool)field_info_instance($obj_type, 'og_group', $bundle_name);
+    return (bool)field_info_instance($entity_type, 'og_group', $bundle_name);
   }
   elseif ($type == 'group content') {
-    return (bool)field_info_instance($obj_type, 'og_audience', $bundle_name);
+    return (bool)field_info_instance($entity_type, 'og_audience', $bundle_name);
   }
 }
 
@@ -974,8 +974,8 @@ function og_get_group_type($obj_type, $bundle_name, $type = 'group') {
  * @param $node_type
  *   The node type to be checked.
  */
-function og_is_group_type($obj_type, $bundle_name) {
-  return og_get_group_type($obj_type, $bundle_name);
+function og_is_group_type($entity_type, $bundle_name) {
+  return og_get_group_type($entity_type, $bundle_name);
 }
 
 /**
@@ -986,24 +986,24 @@ function og_is_group_type($obj_type, $bundle_name) {
  * @param $node_type
  *   The node type to be checked.
  */
-function og_is_group_content_type($obj_type, $bundle_name) {
-  return og_get_group_type($obj_type, $bundle_name, 'group content');
+function og_is_group_content_type($entity_type, $bundle_name) {
+  return og_get_group_type($entity_type, $bundle_name, 'group content');
 }
 
 /**
  * Return TRUE if object belongs to a group.
  *
  * @param $gid
- * @param $obj_type
- * @param $object
+ * @param $entity_type
+ * @param $entity
  * @return unknown_type
  */
-function og_is_member($gid, $obj_type = 'user', $object = NULL) {
-  if ($obj_type == 'user' && empty($object)) {
+function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
+  if ($entity_type == 'user' && empty($entity)) {
     global $user;
-    $object = $user;
+    $entity = $user;
   }
-  $groups = og_get_object_groups($obj_type, $object);
+  $groups = og_get_object_groups($entity_type, $entity);
   return in_array($gid, $groups);
 }
 
@@ -1027,7 +1027,7 @@ function og_is_member($gid, $obj_type = 'user', $object = NULL) {
  * @return
  *   TRUE if access is allowed, otherise FALSE.
  */
-function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_user = NULL) {
+function og_access($op, $entity_type = NULL, $eid = NULL, $account = NULL, $acting_user = NULL) {
   if (empty($acting_user)) {
     global $user;
     $acting_user = $user;
@@ -1036,15 +1036,15 @@ function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_
     return TRUE;
   }
 
-  if (!$group = og_get_group($obj_type, $oid)) {
+  if (!$group = og_get_group($entity_type, $eid)) {
     // Not a group.
     return FALSE;
   }
 
   // Get the group real object, so we can check the user ID of the object.
-  $object = current(entity_load($obj_type, array($oid)));
+  $entity = current(entity_load($entity_type, array($eid)));
 
-  if (!empty($object->uid) && $object->uid == $acting_user->uid) {
+  if (!empty($entity->uid) && $entity->uid == $acting_user->uid) {
     // Group manager.
     return TRUE;
   }
@@ -1073,22 +1073,22 @@ function og_access($op, $obj_type = NULL, $oid = NULL, $account = NULL, $acting_
 /**
  * Get the state of an object in a group.
  *
- * @param $obj_type
+ * @param $entity_type
  *   The object type.
- * @param $object
+ * @param $entity
  *   The object.
  * @param $gid
  *   The group ID.
  * @return
  *   The state value, or FALSE is object is not associated with group.
  */
-function og_get_object_state($gid, $obj_type, $object) {
+function og_get_object_state($gid, $entity_type, $entity) {
   $state = FALSE;
 
-  $object = og_load_object($obj_type, $object);
+  $entity = og_load_object($entity_type, $entity);
   $property = OG_AUDIENCE_FIELD;
 
-  $wrapper = &$object->{$property}[LANGUAGE_NONE];
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
   if (!empty($wrapper)) {
     foreach ($wrapper as $key => $value) {
@@ -1111,11 +1111,11 @@ function og_get_object_state($gid, $obj_type, $object) {
  */
 function og_is_group_default_access($gid) {
   $return = FALSE;
-  if ($object = og_load_object_from_group($gid)) {
+  if ($entity = og_load_object_from_group($gid)) {
 
     $property = OG_DEFAULT_ACCESS_FIELD;
 
-    $wrapper = &$object->{$property}[LANGUAGE_NONE];
+    $wrapper = &$entity->{$property}[LANGUAGE_NONE];
     $return = empty($wrapper[0]['value']);
   }
 
@@ -1123,11 +1123,11 @@ function og_is_group_default_access($gid) {
 }
 
 function og_get_entity_from_context() {
-  $object = FALSE;
+  $entity = FALSE;
 
   $item = menu_get_item();
 
-  return $object;
+  return $entity;
 
 }
 
@@ -1183,16 +1183,16 @@ function og_context($group = NULL, $account = NULL) {
     // Check the page arguments if one of them is an object, and check if it is
     // a group or group content.
     if (!empty($item['page_arguments']) && !empty($item['map'][0])) {
-      $obj_type = $item['map'][0];
+      $entity_type = $item['map'][0];
       foreach ($item['page_arguments'] as $argument) {
         if (is_object($argument)) {
          // Check if it's a group.
-          list($id) = entity_extract_ids($obj_type, $argument);
-          if ($group = og_get_group($obj_type, $id, FALSE)) {
+          list($id) = entity_extract_ids($entity_type, $argument);
+          if ($group = og_get_group($entity_type, $id, FALSE)) {
             $groups = array($group->gid => $group->gid);
           }
           else {
-            $groups = og_get_object_groups($obj_type, $argument);
+            $groups = og_get_object_groups($entity_type, $argument);
           }
           // TODO: Add context based on ?gid_gids[] in URL.
           if (!empty($groups)) {
@@ -1220,7 +1220,7 @@ function og_context($group = NULL, $account = NULL) {
                   // TODO: have og_get_group_mulitple().
                   foreach ($node_gids as $node_gid) {
                     $group = og_get_group('gid', $node_gid);
-                    $nid = $group->oid;
+                    $nid = $group->eid;
                     $node = node_load($nid);
                     if (node_access('view', $node, $account)) {
                       $gid = $group->gid;
@@ -1270,14 +1270,14 @@ function og_preprocess_page(&$vars) {
     // Add template suggestions.
     $vars['theme_hook_suggestions'][] = 'page__og_context';
     $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->gid;
-    $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->obj_type;
-    $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->obj_type . '_' . $group->oid;
+    $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->entity_type;
+    $vars['theme_hook_suggestions'][] = 'page__og_context_' . $group->entity_type . '_' . $group->eid;
 
     // Add CSS.
     $vars['classes_array'][] = 'og-context';
     $vars['classes_array'][] = 'og-context-' . $group->gid;
-    $vars['classes_array'][] = 'og-context-' . $group->obj_type;
-    $vars['classes_array'][] = 'og-context-' . $group->obj_type . '-' . $group->oid;
+    $vars['classes_array'][] = 'og-context-' . $group->entity_type;
+    $vars['classes_array'][] = 'og-context-' . $group->entity_type . '-' . $group->eid;
 
     // Add context to JS.
     og_context_js($group);
@@ -1298,10 +1298,10 @@ function og_preprocess_page(&$vars) {
  */
 function og_get_context_by_url() {
   $return = array();
-  foreach (array_merge(array_keys(entity_get_info()), array('gid')) as $obj_type) {
-    $oids =  !empty($_REQUEST['gids_' . $obj_type][0]) ? explode(',', $_REQUEST['gids_' . $obj_type][0]) : array();
-    if ($oids) {
-      if ($gids = og_get_groups($obj_type, $oids)) {
+  foreach (array_merge(array_keys(entity_get_info()), array('gid')) as $entity_type) {
+    $eids =  !empty($_REQUEST['gids_' . $entity_type][0]) ? explode(',', $_REQUEST['gids_' . $entity_type][0]) : array();
+    if ($eids) {
+      if ($gids = og_get_groups($entity_type, $eids)) {
         $gids = current($gids);
         $return = $return + $gids;
       }
@@ -1347,13 +1347,13 @@ function og_get_audience_options($opt_group = FALSE, $account = NULL) {
  */
 function og_get_groups_label($gids = array()) {
   $labels = array();
-  $obj_types = og_sort_groups_by_type($gids);
-  foreach ($obj_types as $obj_type => $groups) {
-    $oids = array();
+  $entity_types = og_sort_groups_by_type($gids);
+  foreach ($entity_types as $entity_type => $groups) {
+    $eids = array();
     foreach ($groups as $group) {
-      $oids[] = $group->oid;
+      $eids[] = $group->eid;
     }
-    $labels = $labels + og_entity_get_label_multiple($obj_type, $oids);
+    $labels = $labels + og_entity_get_label_multiple($entity_type, $eids);
   }
   return $labels;
 }
@@ -1368,7 +1368,7 @@ function og_sort_groups_by_type($gids = array()) {
   $return = array();
   $groups = og_load_multiple($gids);
   foreach ($groups as $group) {
-    $return[$group->obj_type][$group->gid] = $group;
+    $return[$group->entity_type][$group->gid] = $group;
   }
   return $return;
 
@@ -1377,17 +1377,17 @@ function og_sort_groups_by_type($gids = array()) {
 /**
  * Get the label (e.g. node title) of different entities.
  *
- * @param $obj_type
+ * @param $entity_type
  *   The object type.
- * @param $oids
+ * @param $eids
  *   The object IDs.
  * @return
  *   Array keyed with the group unqiue ID and the object label as the value.
  */
-function og_entity_get_label_multiple($obj_type, $oids = array()) {
+function og_entity_get_label_multiple($entity_type, $eids = array()) {
   $return = array();
 
-  $entity = og_entity_label($obj_type);
+  $entity = og_entity_label($entity_type);
 
   // Get the table, ID and label of the object type.
   if (!empty($entity['object keys']['label'])) {
@@ -1397,20 +1397,20 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
 
     // Get the group ID along with the object label.
     $query = db_select('og_groups', 'og')->fields('og', array('gid'));
-    $query->condition('obj_type', $obj_type);
+    $query->condition('entity_type', $entity_type);
 
-    $query->join($table, $table, "og.oid =  $table.$id");
+    $query->join($table, $table, "og.eid =  $table.$id");
 
     $return = $query->fields($table, array($label))
-      ->condition($id, $oids, 'IN')
+      ->condition($id, $eids, 'IN')
       ->execute()
       ->fetchAllKeyed();
   }
   else {
     // We got an object type that we don't know how to get the label, so we'll
     // return the group ID as the laebl, prefixed with the object type.
-    foreach ($oids as $oid) {
-      $return[$oid] = t('@obj_type ID  @value', array('@obj_type' => $obj_type, '@value' => $oid));
+    foreach ($eids as $eid) {
+      $return[$eid] = t('@entity_type ID  @value', array('@entity_type' => $entity_type, '@value' => $eid));
     }
   }
 
@@ -1420,14 +1420,14 @@ function og_entity_get_label_multiple($obj_type, $oids = array()) {
 /**
  * Wrapper function to get the label of a single entity.
  *
- * @param $obj_type
+ * @param $entity_type
  *   The object type.
- * @param $oid
+ * @param $eid
  *   The object ID.
  * @return unknown_type
  */
-function og_entity_get_label($obj_type, $oid) {
-  return current(og_entity_get_label_multiple($obj_type, array($oid)));
+function og_entity_get_label($entity_type, $eid) {
+  return current(og_entity_get_label_multiple($entity_type, array($eid)));
 
 }
 
@@ -2063,7 +2063,7 @@ function og_permissions_bulk_update($roles, $permissions) {
 
   if (!empty($permissions_to_change)) {
     // Get all existing group IDs.
-    foreach (og_get_groups() as $obj_type => $values) {
+    foreach (og_get_groups() as $entity_type => $values) {
       foreach ($values as $gid) {
         ++$updated_groups;
         $rids = og_get_group_default_roles($gid);
@@ -2102,9 +2102,9 @@ function og_check_token($token, $seed) {
   return drupal_get_token($seed) == $token;
 }
 
-function og_set_breadcrumb($obj_type, $oid, $path = array()) {
-  if ($label = og_entity_get_label($obj_type, $oid)) {
-    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$obj_type/$oid")), $path)) ;
+function og_set_breadcrumb($entity_type, $eid, $path = array()) {
+  if ($label = og_entity_get_label($entity_type, $eid)) {
+    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$eid")), $path)) ;
   }
 }
 
@@ -2113,17 +2113,17 @@ function og_set_breadcrumb($obj_type, $oid, $path = array()) {
  *
  * @param $field_name
  *   The field name
- * @param $obj_type
+ * @param $entity_type
  *   The object type
  * @param $bundle
  *   The bundle name.
  */
-function og_create_field($field_name, $obj_type, $bundle) {
+function og_create_field($field_name, $entity_type, $bundle) {
   $og_field = og_get_fields($field_name);
 
   if (!empty($og_field['callback'])) {
     // Field has own implementation for creating the fields.
-    call_user_func($og_field['callback'], $field_name, $obj_type, $bundle);
+    call_user_func($og_field['callback'], $field_name, $entity_type, $bundle);
   }
   else {
     $field = field_info_field($field_name);
@@ -2131,13 +2131,13 @@ function og_create_field($field_name, $obj_type, $bundle) {
       $field = field_create_field($og_field[$field_name]['field']);
     }
 
-    $instance = field_info_instance($obj_type, $field_name, $bundle);
+    $instance = field_info_instance($entity_type, $field_name, $bundle);
     if (empty($instance)) {
 
       $instance = array(
         'field_name' => $field_name,
         'bundle' => $bundle,
-        'object_type' => $obj_type,
+        'object_type' => $entity_type,
       ) + $og_field[$field_name]['instance'];
 
       field_create_instance($instance);
@@ -2152,16 +2152,16 @@ function og_create_field($field_name, $obj_type, $bundle) {
  * This is needed only if a user account is passed, as global $user is only a
  * partial user object.
  *
- * @param $obj_type
+ * @param $entity_type
  *   The object type.
- * @param $object
+ * @param $entity
  *   The object.
  */
-function og_load_object($obj_type, $object) {
-  if ($obj_type == 'user') {
-    $object = user_load($object->uid);
+function og_load_object($entity_type, $entity) {
+  if ($entity_type == 'user') {
+    $entity = user_load($entity->uid);
   }
-  return $object;
+  return $entity;
 }
 
 /**
@@ -2171,11 +2171,11 @@ function og_load_object($obj_type, $object) {
  *   The group ID.
  */
 function og_load_object_from_group($gid) {
-  $object = FALSE;
+  $entity = FALSE;
   if ($group = og_load($gid)) {
-    $object = reset(entity_load($group->obj_type, array($group->oid)));
+    $entity = reset(entity_load($group->entity_type, array($group->eid)));
   }
 
-  return $object;
+  return $entity;
 
 }

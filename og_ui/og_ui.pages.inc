@@ -15,8 +15,8 @@
  *   Optional; The user ID of the subscribing user. If empty the current user
  *   will be used.
  */
-function og_ui_subscribe($obj_type, $oid, $uid = NULL) {
-  if ($group = og_get_group($obj_type, $oid)) {
+function og_ui_subscribe($entity_type, $eid, $uid = NULL) {
+  if ($group = og_get_group($entity_type, $eid)) {
     if (empty($uid)) {
       global $user;
       $account = $user;
@@ -65,8 +65,8 @@ function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
       '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
     );
   }
-  $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
-  return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $label)), "$group->obj_type/$group->oid", ' ', t('Join'), t('Cancel'));
+  $label = check_plain(og_entity_get_label($group->entity_type, $group->eid));
+  return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $label)), "$group->entity_type/$group->eid", ' ', t('Join'), t('Cancel'));
 }
 
 /**
@@ -85,7 +85,7 @@ function og_ui_confirm_subscribe_submit($form, &$form_state) {
 
   og_subscribe_user(array($groups), NULL, FALSE, $request);
 
-  $form_state['redirect'] = "$group->obj_type/$group->oid";
+  $form_state['redirect'] = "$group->entity_type/$group->eid";
 }
 
 
@@ -96,20 +96,20 @@ function og_ui_confirm_subscribe_submit($form, &$form_state) {
  * no malicious user will unsubscribe another user. Administrators can reject or
  * ban another group member from the "people" page.
  */
-function og_ui_unsubscribe($obj_type, $oid) {
-  if ($group = og_get_group($obj_type, $oid)) {
+function og_ui_unsubscribe($entity_type, $eid) {
+  if ($group = og_get_group($entity_type, $eid)) {
     global $user;
 
-    $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
+    $label = check_plain(og_entity_get_label($group->entity_type, $group->eid));
     // Check the user isn't the manager of the group.
-    $object= current(entity_load($group->obj_type, array($group->oid)));
-    if (!empty($object->uid) && $object->uid != $user->uid) {
+    $entity= current(entity_load($group->entity_type, array($group->eid)));
+    if (!empty($entity->uid) && $entity->uid != $user->uid) {
       // Show the user a subscription confirmation.
       return drupal_get_form('og_ui_confirm_unsubscribe', $group, $user);
     }
     else {
       drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $label)));
-      drupal_goto("$group->obj_type/$group->oid");
+      drupal_goto("$group->entity_type/$group->eid");
     }
   }
   // Not a valid group.
@@ -123,8 +123,8 @@ function og_ui_confirm_unsubscribe($form, &$form_state, $group, $account) {
    $form['group'] = array('#type' => 'value', '#value' => $group);
    $form['account'] = array('#type' => 'value', '#value' => $account);
 
-   $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
-   return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), "$group->obj_type/$group->oid", ' ', t('Remove'), t('Cancel'));
+   $label = check_plain(og_entity_get_label($group->entity_type, $group->eid));
+   return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), "$group->entity_type/$group->eid", ' ', t('Remove'), t('Cancel'));
 }
 
 /**
@@ -136,5 +136,5 @@ function og_ui_confirm_unsubscribe_submit($form, &$form_state) {
   og_unsubscribe_user(array($group->gid), $form_state['values']['account']);
 
   // Determine where to go next - Group if accessible, or else site front page.
-  $form_state['redirect'] = "$group->obj_type/$group->oid";
+  $form_state['redirect'] = "$group->entity_type/$group->eid";
 }

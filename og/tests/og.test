@@ -43,7 +43,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $group = og_get_group('node', 4);
 
     // Test the group has all the expected keys.
-    foreach (array('obj_type', 'oid', 'state', 'data') as $key) {
+    foreach (array('entity_type', 'eid', 'state', 'data') as $key) {
       $this->assertTrue(!empty($group->{$key}), t('Group @key key found.', array('@key' => $key)));
     }
 
@@ -112,18 +112,18 @@ class OgGroupCrud extends DrupalWebTestCase {
   function createGroups() {
     $return = array();
     $groups = array(
-      0 => array('obj_type' => 'node', 'oid' => 1),
-      1 => array('obj_type' => 'node', 'oid' => 2, 'state' => OG_STATE_ACTIVE),
-      2 => array('obj_type' => 'node', 'oid' => 3, 'state' => OG_STATE_PENDING),
-      3 => array('obj_type' => 'node', 'oid' => 4, 'state' => OG_STATE_ACTIVE, 'data' => array('dummy_key' => 'dummy_value')),
-      4 => array('obj_type' => 'user', 'oid' => 1),
+      0 => array('entity_type' => 'node', 'eid' => 1),
+      1 => array('entity_type' => 'node', 'eid' => 2, 'state' => OG_STATE_ACTIVE),
+      2 => array('entity_type' => 'node', 'eid' => 3, 'state' => OG_STATE_PENDING),
+      3 => array('entity_type' => 'node', 'eid' => 4, 'state' => OG_STATE_ACTIVE, 'data' => array('dummy_key' => 'dummy_value')),
+      4 => array('entity_type' => 'user', 'eid' => 1),
     );
 
     foreach ($groups as $group) {
       // Initialize group array.
       $group += array('state' => OG_STATE_ACTIVE, 'data' => array());
       // Set a new group.
-      $group = og_set_group($group['obj_type'], $group['oid'], $group['state'], $group['data']);
+      $group = og_set_group($group['entity_type'], $group['eid'], $group['state'], $group['data']);
       $return[$group->gid] = (array)$group;
     }
 

@@ -112,14 +112,14 @@ function og_access_og_get_fields() {
 /**
  * Check if an object is set as public.
  *
- * @param $obj_type
+ * @param $entity_type
  *   The object type (e.g. "node" or "user").
- * @param $object
+ * @param $entity
  *   The object can be a user, node or any fieldable entity.
  * @return
  *  TRUE if the object is private and should appear only to group members.
  */
-function og_access_object_is_public($obj_type, $object) {
-  og_load_object($obj_type, $object);
-  return !empty($object->{OG_ACCESS_FIELD}[LANGUAGE_NONE][0]['gid']);
+function og_access_object_is_public($entity_type, $entity) {
+  og_load_object($entity_type, $entity);
+  return !empty($entity->{OG_ACCESS_FIELD}[LANGUAGE_NONE][0]['gid']);
 }

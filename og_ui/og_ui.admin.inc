@@ -12,15 +12,15 @@
  * @param $node
  *   The group node.
  */
-function og_ui_group_admin_overview($obj_type, $oid) {
-  og_set_breadcrumb($obj_type, $oid);
+function og_ui_group_admin_overview($entity_type, $eid) {
+  og_set_breadcrumb($entity_type, $eid);
 
-  $group = og_get_group($obj_type, $oid);
+  $group = og_get_group($entity_type, $eid);
   $items = og_ui_get_group_admin($group->gid);
 
   foreach ($items as &$item) {
     // Re-format the URL.
-    $item['href'] = "og/$obj_type/$oid/" . $item['href'];
+    $item['href'] = "og/$entity_type/$eid/" . $item['href'];
     // Imitate the menu_get_item() content, so we can pass it to
     // theme_admin_block_content(), so we add the localized_options key.
     $item['localized_options'] = array();
@@ -34,10 +34,10 @@ function og_ui_group_admin_overview($obj_type, $oid) {
 /**
  * Add users to group form.
  */
-function og_ui_add_users($form, &$form_state, $obj_type, $oid) {
-  og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
-  if ($group = og_get_group($obj_type, $oid)) {
-    $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
+function og_ui_add_users($form, &$form_state, $entity_type, $eid) {
+  og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")));
+  if ($group = og_get_group($entity_type, $eid)) {
+    $label = check_plain(og_entity_get_label($group->entity_type, $group->eid));
 
     $form['og_user'] = array(
       '#type' => 'fieldset',
@@ -90,9 +90,9 @@ function og_ui_add_users_submit($form, &$form_state) {
  * @see og_user_admin_account_validate()
  * @see og_user_admin_account_submit()
  */
-function og_ui_user_admin_account($form, $form_state, $obj_type, $oid) {
-  og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
-  $group = og_get_group($obj_type, $oid);
+function og_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
+  og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")));
+  $group = og_get_group($entity_type, $eid);
   $header = array(
     'username' => array('data' => t('Username')),
     'status' => array('data' => t('Status')),
@@ -129,12 +129,12 @@ function og_ui_user_admin_account($form, $form_state, $obj_type, $oid) {
   $status = og_group_content_states();
   $roles = og_user_roles($group->gid);
   // Get the group real object, so we can check the user ID of the object.
-  $object = og_load_object_from_group($group->gid);
+  $entity = og_load_object_from_group($group->gid);
 
   // TODO: Add count limit to the list.
   foreach (og_get_group_users($group->gid) as $account) {
     // Don't allow editing of the group manager.
-    if (empty($object->uid) || $account->uid != $object->uid) {
+    if (empty($entity->uid) || $account->uid != $entity->uid) {
       $users_roles = array();
       foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
         $users_roles[] = $roles[$rid];
@@ -153,7 +153,7 @@ function og_ui_user_admin_account($form, $form_state, $obj_type, $oid) {
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
-    '#empty' => !empty($object->uid) ? t('No people available apart of the group manager.') : t('No people available.'),
+    '#empty' => !empty($entity->uid) ? t('No people available apart of the group manager.') : t('No people available.'),
   );
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
@@ -201,8 +201,8 @@ function og_ui_user_admin_account_submit($form, &$form_state) {
  * @see og_user_admin_role_submit()
  * @see theme_og_user_admin_new_role()
  */
-function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
-  if ($group = og_get_group($obj_type, $oid)) {
+function og_ui_user_admin_role($form, $form_state, $entity_type, $eid) {
+  if ($group = og_get_group($entity_type, $eid)) {
     $form['group'] = array('#type' => 'value', '#value' => $group);
 
     $item = menu_get_item();
@@ -210,11 +210,11 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
     $rid = !empty($item['map'][7]) ? $item['map'][7] : 0;
 
     if ($rid) {
-      og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")), l(t('Roles'), "og/$obj_type/$oid/admin/people/roles"));
+      og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")), l(t('Roles'), "og/$entity_type/$eid/admin/people/roles"));
 
       $og_roles = og_user_roles($group->gid);
       if (!in_array($rid, array_keys($og_roles))) {
-        drupal_goto("og/$obj_type, $oid/admin/people/roles");
+        drupal_goto("og/$entity_type, $eid/admin/people/roles");
       }
       // Display the edit role form.
       $role = og_user_role_load($rid);
@@ -242,7 +242,7 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
       );
     }
     else {
-      og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
+      og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")));
       if (!og_is_group_default_access($group->gid)) {
         $form['name'] = array(
           '#type' => 'textfield',
@@ -299,7 +299,7 @@ function og_ui_user_admin_role_submit($form, &$form_state) {
     og_user_role_save($role);
     drupal_set_message(t('The role has been added.'));
   }
-  $form_state['redirect'] = 'og/' . $group->obj_type . '/' . $group->oid . '/admin/people/roles';
+  $form_state['redirect'] = 'og/' . $group->entity_type . '/' . $group->eid . '/admin/people/roles';
   return;
 }
 
@@ -318,10 +318,10 @@ function theme_og_ui_user_admin_new_role($variables) {
 
   foreach (og_user_roles($group->gid) as $rid => $name) {
     $text = !$default_roles ? t('edit permissions') : t('view permissions');
-    $permissions = l($text, 'og/' . $group->obj_type .'/' . $group->oid . '/admin/people/permissions/' . $rid);
+    $permissions = l($text, 'og/' . $group->entity_type .'/' . $group->eid . '/admin/people/permissions/' . $rid);
 
     if (!$default_roles && !in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
-      $rows[] = array($name, l(t('edit role'), 'og/' . $group->obj_type .'/' . $group->oid . '/admin/people/roles/edit/' . $rid), $permissions);
+      $rows[] = array($name, l(t('edit role'), 'og/' . $group->entity_type .'/' . $group->eid . '/admin/people/roles/edit/' . $rid), $permissions);
     }
     else {
       $rows[] = array($name, t('locked'), $permissions);
@@ -344,15 +344,15 @@ function theme_og_ui_user_admin_new_role($variables) {
  * @see user_admin_permissions_submit()
  * @see theme_user_admin_permissions()
  */
-function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid = NULL, $rid = NULL) {
+function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $eid = NULL, $rid = NULL) {
   // If no node object is provided then the node ID is 0, which means this
   // is the default permissions settings.
-  $group = !empty($oid) ? og_get_group($obj_type, $oid) : array();
+  $group = !empty($eid) ? og_get_group($entity_type, $eid) : array();
   $form['group'] = array('#type' => 'value', '#value' => $group);
 
   if (!empty($group)) {
     $gid =  $group->gid;
-    og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
+    og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")));
   }
   else {
     $gid = 0;

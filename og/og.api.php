@@ -158,14 +158,14 @@ function hook_og_user_request(&$uids, $node, $group, $account, $request) {
  * @param $alter
  *   Array keyed by "state" and "data" passed by reference.
  *   The data passed by reference.
- * @param $obj_type
- * @param $object
+ * @param $entity_type
+ * @param $entity
  * @param $field
  * @param $instance
  * @param $langcode
  * @param $items
  */
-function hook_og_field_insert(&$alter, $obj_type, $object, $field, $instance, $langcode, $items) {
+function hook_og_field_insert(&$alter, $entity_type, $entity, $field, $instance, $langcode, $items) {
   // Add timestamp for the subscription.
   // It's up to the implementing module to act on the data.
   $alter['data']['timestamp'] = time();
@@ -178,14 +178,14 @@ function hook_og_field_insert(&$alter, $obj_type, $object, $field, $instance, $l
  * @param $alter
  *   Array keyed by "state" and "data" passed by reference.
  *   The data passed by reference.
- * @param $obj_type
- * @param $object
+ * @param $entity_type
+ * @param $entity
  * @param $field
  * @param $instance
  * @param $langcode
  * @param $items
  */
-function hook_og_field_update (&$alter, $obj_type, $object, $field, $instance, $langcode, $items) {
+function hook_og_field_update (&$alter, $entity_type, $entity, $field, $instance, $langcode, $items) {
   // Reject a group content when it's updated.
   // It's up to the implementing module to act on the data.
   $alter['state'] = 'updated, approve urgently';

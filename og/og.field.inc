@@ -102,17 +102,17 @@ function og_field_formatter_info() {
 /**
  * Implements hook_field_formatter_view().
  */
-function og_field_formatter_view($object_type, $object, $field, $instance, $langcode, $items, $display) {
+function og_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
   if ($field['field_name'] == 'og_audience' && !empty($items[0])) {
     foreach ($items as $delta => $item) {
       if ($group = og_get_group('gid', $item['gid'])) {
-        $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
+        $label = check_plain(og_entity_get_label($group->entity_type, $group->eid));
         $element[$delta] = array(
           '#type' => 'link',
           '#title' => $label,
-          '#href' => "$group->obj_type/$group->oid",
+          '#href' => "$group->entity_type/$group->eid",
         );
       }
     }
@@ -302,36 +302,36 @@ function og_field_is_empty($item, $field) {
 /**
  * Implement hook_field_insert().
  */
-function og_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
-  og_field_write('insert', $obj_type, $object, $field, $instance, $langcode, $items);
+function og_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  og_field_write('insert', $entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
  * Implement hook_field_update().
  */
-function og_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
-  og_field_write('update', $obj_type, $object, $field, $instance, $langcode, $items);
+function og_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  og_field_write('update', $entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
  * Implement hook_field_attach_insert().
  */
-function og_field_attach_insert($obj_type, $object) {
-  og_field_crud_group('insert', $obj_type, $object);
+function og_field_attach_insert($entity_type, $entity) {
+  og_field_crud_group('insert', $entity_type, $entity);
 }
 
 /**
  * Implement hook_field_attach_update().
  */
-function og_field_attach_update($obj_type, $object) {
-  og_field_crud_group('update', $obj_type, $object);
+function og_field_attach_update($entity_type, $entity) {
+  og_field_crud_group('update', $entity_type, $entity);
 }
 
 /**
  * Implement hook_field_attach_delete().
  */
-function og_field_attach_delete($obj_type, $object) {
-  og_field_crud_group('delete', $obj_type, $object);
+function og_field_attach_delete($entity_type, $entity) {
+  og_field_crud_group('delete', $entity_type, $entity);
 }
 
 /*******************************************************************************
@@ -343,7 +343,7 @@ function og_field_attach_delete($obj_type, $object) {
  * @param $op
  *   The operation - "insert" or "update".
  */
-function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &$items) {
+function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode, &$items) {
   //FIXME: Only $items['gid'] is populated.
   foreach ($items as &$item) {
     $item['state'] = !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE;
@@ -358,16 +358,16 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
  * @see og_field_attach_update().
  * @see og_field_attach_delete().
  */
-function og_field_crud_group($op, $obj_type, $object) {
-  $object = og_load_object($obj_type, $object);
+function og_field_crud_group($op, $entity_type, $entity) {
+  $entity = og_load_object($entity_type, $entity);
   $property = OG_GROUP_FIELD;
 
-  $wrapper = &$object->{$property}[LANGUAGE_NONE];
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
   // Get the object ID.
-  list($id) = entity_extract_ids($obj_type, $object);
+  list($id) = entity_extract_ids($entity_type, $entity);
 
-  $group = og_get_group($obj_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+  $group = og_get_group($entity_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
   if ($op == 'delete') {
     if (!empty($group->gid)) {
       // Remove group.
@@ -382,9 +382,9 @@ function og_field_crud_group($op, $obj_type, $object) {
         og_save($group);
         og_group_user_roles_override($group->gid);
 
-        if (!empty($object->uid)) {
+        if (!empty($entity->uid)) {
           // Subscribe the object author, if exists.
-          $account = user_load($object->uid);
+          $account = user_load($entity->uid);
           og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
         }
       }
