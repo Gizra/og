@@ -765,7 +765,7 @@ function og_entity_label($entity) {
     'user' => 'name',
   );
 
-  $entity_info['entity keys']['label'] = $entity_labels[$entity];
+  $entity_info['object keys']['label'] = $entity_labels[$entity];
 
   return $entity_info;
 }
