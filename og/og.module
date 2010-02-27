@@ -1107,38 +1107,6 @@ function og_is_group_default_access($gid) {
   return $return;
 }
 
-function og_get_entity_from_context() {
-  $entity = FALSE;
-
-  $item = menu_get_item();
-
-  return $entity;
-
-}
-
-/**
- * Get all the context handlers.
- */
-function og_get_context_handlers() {
-  $handlers = module_invoke_all('og_context_handlers');
-
-  // Allow other modules to alter the handlers.
-  drupal_alter('og_context_handlers', $handlers);
-
-  return $handlers;
-}
-
-/**
- * Implement hook_og_context_handlers()
- *
- * Handle core enteties.
- */
-function og_og_context_handlers() {
-  $items = array();
-
-  return $items;
-}
-
 /**
  * Get or set group context using the menu system.
  *
