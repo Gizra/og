@@ -378,7 +378,6 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
   );
   // Render role/permission overview:
   $options = array();
-  $hide_descriptions = !system_admin_compact_mode();
   foreach (og_get_permissions() as $module => $permissions) {
     $form['permission'][] = array('#markup' => $module != 'administer' ? $module : t('administer group admins privileges'), '#id' => $module);
     foreach ($permissions as $perm => $perm_item) {
@@ -388,7 +387,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
         $form['permission'][$perm] = array(
           '#type' => 'item',
           '#markup' => $perm_item['title'],
-          '#description' => $hide_descriptions ? $perm_item['description'] : '',
+          '#description' => $perm_item['description'],
         );
         foreach ($role_names as $rid => $name) {
           // Builds arrays for checked boxes for each role
@@ -409,7 +408,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
   if (empty($group)) {
     $form['#theme'] = array('og_ui_user_admin_permissions');
   }
-  if (!og_is_group_default_access($group->gid)) {
+  if ($gid == 0 || !og_is_group_default_access($group->gid)) {
     $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -528,7 +527,7 @@ function theme_og_ui_user_admin_permissions($variables) {
  *
  * Allow site admin to set which permissions are available on a per group basis.
  */
-function og_ui_admin_settings() {
+function og_ui_field_settings() {
   $form = array();
   $options = array();
 
@@ -548,7 +547,7 @@ function og_ui_admin_settings() {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Add group and group content fields to bundles'),
-    '#submit' => array('og_ui_admin_settings_submit'),
+    '#submit' => array('og_ui_field_settings_submit'),
   );
 
   return $form;
@@ -602,7 +601,7 @@ function _og_admin_fields_overview($group_type = 'group') {
   return $form;
 }
 
-function og_ui_admin_settings_submit($form, &$form_state) {
+function og_ui_field_settings_submit($form, &$form_state) {
   $messages = array();
   $og_fields = og_get_fields();
   $bundle_info = array();

@@ -78,22 +78,7 @@ define('OG_AUTHENTICATED_ROLE', 'authenticated member');
 /**
  * The role name of group administrator.
  */
-define('OG_ADMINISTRATOR_ROLE', 'administrator');
-
-/**
- * The role ID of the default group non-members.
- */
-define('OG_ANONYMOUS_RID', 1);
-
-/**
- * The role ID of the default group member.
- */
-define('OG_AUTHENTICATED_RID', 2);
-
-/**
- * The role ID of the default group administrator.
- */
-define('OG_ADMINISTRATOR_RID', 3);
+define('OG_ADMINISTRATOR_ROLE', 'administrator member');
 
 /*******************************************************************************
  * Hook implementations

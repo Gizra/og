@@ -7,9 +7,9 @@
  */
 
 /**
- * Implement hook_enable().
+ * Implement hook_install().
  */
-function og_enable() {
+function og_install() {
   // Add group audience to users by default.
   og_create_field('og_audience', 'user', 'user');
 
