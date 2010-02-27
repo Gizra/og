@@ -10,7 +10,7 @@
  * Manage user subscription to a group.
  *
  * @param $node
- *   The group node object.
+ *   The group node entity.
  * @param $uid
  *   Optional; The user ID of the subscribing user. If empty the current user
  *   will be used.
@@ -37,7 +37,7 @@ function og_ui_subscribe($entity_type, $eid, $uid = NULL) {
     }
 
     // Check user isn't already subscribed.
-    if (in_array($group->gid, og_get_object_groups('user', $account))) {
+    if (in_array($group->gid, og_get_entity_groups('user', $account))) {
       drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title[LANGUAGE_NONE][0]['safe'])));
       // TODO: get url.
       // drupal_goto('node/' . $node->nid);
@@ -74,7 +74,7 @@ function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
  */
 function og_ui_confirm_subscribe_submit($form, &$form_state) {
   $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
-  // The group object.
+  // The group entity.
   $group = $form_state['values']['group'];
 
   $groups = array(

@@ -215,7 +215,7 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
       // Check user association with the group.
       $links = array();
 
-      if ($state = og_get_object_state($group->gid, 'user', $user)) {
+      if ($state = og_get_entity_state($group->gid, 'user', $user)) {
         // check the user state.
         if ($state == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
           $links['title'] = t('Re-request group membership');

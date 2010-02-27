@@ -9,7 +9,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Organic groups group CRUD',
-      'description' => 'Test the create, update and remove of group objects.',
+      'description' => 'Test the create, update and remove of group entitys.',
       'group' => 'Organic groups',
     );
   }
@@ -20,7 +20,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   }
 
   /**
-   * Test CRUD of group objects.
+   * Test CRUD of group entitys.
    */
   function testOgCrud() {
     $this->createGroups();
@@ -39,7 +39,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $groups = og_get_groups('user', array());
     $this->assertTrue(count($groups['user']) == 1, t('User group was found.'));
 
-    // Get a single group object.
+    // Get a single group entity.
     $group = og_get_group('node', 4);
 
     // Test the group has all the expected keys.
@@ -48,26 +48,26 @@ class OgGroupCrud extends DrupalWebTestCase {
     }
 
     // Test the data values exist.
-    $this->assertTrue($group->data['dummy_key'] == 'dummy_value', t('Group object data values found.'));
+    $this->assertTrue($group->data['dummy_key'] == 'dummy_value', t('Group entity data values found.'));
 
     // Test the data values were altered.
-    $this->assertTrue($group->data['alter_key'] == 'alter_value', t('Group object data values were altered.'));
+    $this->assertTrue($group->data['alter_key'] == 'alter_value', t('Group entity data values were altered.'));
 
     // Delete a group by group ID.
     og_delete_groups('gid', array(1));
-    $this->assertFalse(og_get_group('gid', 1), t('Deleted group object by group ID.'));
+    $this->assertFalse(og_get_group('gid', 1), t('Deleted group entity by group ID.'));
 
-    // Delete a group by object type and object ID.
+    // Delete a group by entity type and entity ID.
     og_delete_groups('user', array(1));
-    $this->assertFalse(og_get_group('user', 1), t('Deleted group object by object type and object ID.'));
+    $this->assertFalse(og_get_group('user', 1), t('Deleted group entity by entity type and entity ID.'));
 
-    // Delete all group by object type.
+    // Delete all group by entity type.
     og_delete_groups('node');
-    $this->assertFalse(og_get_groups('node'), t('Deleted group object by object type.'));
+    $this->assertFalse(og_get_groups('node'), t('Deleted group entity by entity type.'));
   }
 
   /**
-   * Test association of group objects.
+   * Test association of group entitys.
    */
   function testOgAssociation() {
     $groups = $this->createGroups();
@@ -76,7 +76,7 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     // Subscribe user to all groups.
     og_subscribe_user($groups, $web_user);
-    $user_groups = og_get_object_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $user_groups = og_get_entity_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
 
 
     $this->assertEqual($user_groups, drupal_map_assoc(array_keys($groups)), t('User was subscribed to all groups.'));
@@ -84,22 +84,22 @@ class OgGroupCrud extends DrupalWebTestCase {
     // Replace groups subscription with a new one.
     $new_groups = array($groups[1]['gid'] => $groups[1], $groups[2]['gid'] => $groups[2]);
     og_subscribe_user($new_groups, $web_user, TRUE);
-    $user_groups = og_get_object_groups('user', $web_user);
+    $user_groups = og_get_entity_groups('user', $web_user);
 
     $this->assertEqual($user_groups, drupal_map_assoc(array_keys($new_groups)), t('User subscription was replaced with new groups.'));
 
     // Add another group with pending state.
     og_subscribe_user(array($groups[3]), $web_user);
-    $user_groups = og_get_object_groups('user', $web_user);
+    $user_groups = og_get_entity_groups('user', $web_user);
 
-    $this->assertTrue(count($user_groups) == 2, t('Get object groups returned only active groups of the user.'));
+    $this->assertTrue(count($user_groups) == 2, t('Get entity groups returned only active groups of the user.'));
 
-    $user_groups = og_get_object_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
-    $this->assertTrue(count($user_groups) == 3, t('Get object groups returned all active and pending groups of the user.'));
+    $user_groups = og_get_entity_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $this->assertTrue(count($user_groups) == 3, t('Get entity groups returned all active and pending groups of the user.'));
 
     // Unsubscribe user from last group.
     og_unsubscribe_user(array($groups[3]['gid']), $web_user);
-    $user_groups = og_get_object_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $user_groups = og_get_entity_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
     $this->assertTrue(count($user_groups) == 2, t('User was unsubscribed from group.'));
   }
 
@@ -107,7 +107,7 @@ class OgGroupCrud extends DrupalWebTestCase {
    * Helper function to create groups.
    *
    * @return
-   *   The group objects cast to array.
+   *   The group entitys cast to array.
    */
   function createGroups() {
     $return = array();

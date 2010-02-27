@@ -47,14 +47,14 @@ function og_schema() {
         'not null' => TRUE,
       ),
       'eid' => array(
-        'description' => "The object ID.",
+        'description' => "The entity ID.",
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
       ),
       'entity_type' => array(
-        'description' => "The object type (e.g. node, comment, etc').",
+        'description' => "The entity type (e.g. node, comment, etc').",
         'type' => 'varchar',
         'length' => '32',
         'not null' => TRUE,

@@ -43,9 +43,9 @@ function hook_og_permission_default() {
  * @param $op
  *   The operation name.
  * @param $node
- *   The group or group content node object.
+ *   The group or group content node entity.
  * @param $acting_user
- *   The user object of the acting user.
+ *   The user entity of the acting user.
  * @param $account
  *   Optional; The account related to the operation.
  * @return
@@ -60,7 +60,7 @@ function hook_og_access($op, $node, $acting_user, $account = NULL) {
     // module to implement it.
     if (og_is_group_content_type($node->type)) {
       // Get the first node group this group content belongs to.
-      $gids = og_get_object_groups('node', $node);
+      $gids = og_get_entity_groups('node', $node);
       $group = node_load($gids[0]);
       if (!empty($group->data['show day'])) {
         $today = date('N');
@@ -88,7 +88,7 @@ function hook_og_access($op, $node, $acting_user, $account = NULL) {
  */
 function hook_og_node_access($node, $op, $account) {
   // Allow user to edit posts if the title is 'My post'.
-  // For the example we assume the $node is the full node object. If the title
+  // For the example we assume the $node is the full node entity. If the title
   // of the node doesn't match, and the user didn't get permission from
   // somewhere else (e.g. user already has a permission to 'Edit group content')
   // Then access will be denied.
@@ -101,7 +101,7 @@ function hook_og_node_access($node, $op, $account) {
  * Alter a group that is being fetched.
  *
  * @param $group
- *   An object with the following keys:
+ *   An entity with the following keys:
  *   - nid:
  *       The node ID of the group.
  *   - data:
@@ -122,7 +122,7 @@ function hook_og_get_group_alter($group) {
  * Alter a group that is being saved.
  *
  * @param $group
- *   An object with the following keys:
+ *   An entity with the following keys:
  *   - nid:
  *       The node ID of the group.
  *   - data:
@@ -141,9 +141,9 @@ function hook_og_set_group_alter($group) {
  * @param $node
  *   The group node, the user has subscribed to.
  * @param $group
- *   The group object.
+ *   The group entity.
  * @param $account
- *   The subscribing user object.
+ *   The subscribing user entity.
  * @param $request
  *   Optional; The request text the subscribing user has entered.
  */
@@ -192,14 +192,14 @@ function hook_og_field_update (&$alter, $entity_type, $entity, $field, $instance
 }
 
 /**
- * Alter the groups an object is associated with.
+ * Alter the groups an entity is associated with.
  *
  * User subscription for example is passed through here, allows modules to
  * change them. Also user unsubscription is using this function. To identify
  * the type of action, we get the $op argument.
  *
  * @param $edit
- *   An array with the groups the object will be associated with, passed by
+ *   An array with the groups the entity will be associated with, passed by
  *   reference.
  * @param $account
  *   The user being subscribed.

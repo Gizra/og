@@ -46,7 +46,7 @@ function og_access_node_type_update($info) {
 function og_access_node_grants($account, $op) {
   $grants = array();
   if ($op == 'view') {
-    foreach (og_get_object_groups('user', $account) as $gid => $value) {
+    foreach (og_get_entity_groups('user', $account) as $gid => $value) {
       $grants[OG_ACCESS_AUTHENTICATED_REALM][] = $gid;
     }
   }
@@ -60,7 +60,7 @@ function og_access_node_grants($account, $op) {
  */
 function og_access_node_access_records($node) {
   $grants = array();
-  if (!og_access_object_is_public('node', $node)) {
+  if (!og_access_entity_is_public('node', $node)) {
     if (og_is_group_content_type('node', $node->type) || og_is_group_type('node', $node->type)) {
       $grants[] = array (
         'realm' => OG_ACCESS_AUTHENTICATED_REALM,
@@ -110,16 +110,16 @@ function og_access_og_get_fields() {
 
 
 /**
- * Check if an object is set as public.
+ * Check if an entity is set as public.
  *
  * @param $entity_type
- *   The object type (e.g. "node" or "user").
+ *   The entity type (e.g. "node" or "user").
  * @param $entity
- *   The object can be a user, node or any fieldable entity.
+ *   The entity can be a user, node or any fieldable entity.
  * @return
- *  TRUE if the object is private and should appear only to group members.
+ *  TRUE if the entity is private and should appear only to group members.
  */
-function og_access_object_is_public($entity_type, $entity) {
-  og_load_object($entity_type, $entity);
+function og_access_entity_is_public($entity_type, $entity) {
+  og_load_entity($entity_type, $entity);
   return !empty($entity->{OG_ACCESS_FIELD}[LANGUAGE_NONE][0]['gid']);
 }

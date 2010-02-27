@@ -86,12 +86,12 @@ DEVELOPERS & SITE BUILDERS
 ----------------------------------------------
 - You may craft your own URLs which produce useful behavior. For example, 
   node/add/group-content?node_gids[]=4 will add a select the group with node ID 
-  4, in the node form. The prefixed object can change to indicate other object 
+  4, in the node form. The prefixed entity can change to indicate other entity 
   types allowing crafting the URL and you can have multiple variables, for 
   example, node/add/group-content?node_gids[]=4&user_gids[]=3&gid_gids[]=5,6,7
   The above URL will select the group with node ID 4, and the group with user ID
   3, and the groups with the unique group ID 5, 6 and 7.
-  Note that the actaul object of group ID 5, 6 and 7 can be any entity (e.g. 
+  Note that the actaul entity of group ID 5, 6 and 7 can be any entity (e.g. 
   nodes or users).    
 - TODO: The current group context is available to javascript code at 
   Drupal.settings.og. This is useful for enriching ad tags and analytics calls 

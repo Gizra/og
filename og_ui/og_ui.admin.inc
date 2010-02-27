@@ -128,8 +128,8 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
 
   $status = og_group_content_states();
   $roles = og_user_roles($group->gid);
-  // Get the group real object, so we can check the user ID of the object.
-  $entity = og_load_object_from_group($group->gid);
+  // Get the group real entity, so we can check the user ID of the entity.
+  $entity = og_load_entity_from_group($group->gid);
 
   // TODO: Add count limit to the list.
   foreach (og_get_group_users($group->gid) as $account) {
@@ -143,7 +143,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
 
       $options[$account->uid] = array(
         'username' => theme('username', array('account' => $account)),
-        'status' =>  og_get_object_state($group->gid, 'user', $account),
+        'status' =>  og_get_entity_state($group->gid, 'user', $account),
         'roles' => theme('item_list', array('items' => $users_roles)),
       );
 
@@ -311,7 +311,7 @@ function og_ui_user_admin_role_submit($form, &$form_state) {
 function theme_og_ui_user_admin_new_role($variables) {
   $form = $variables['form'];
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
-  // The group object.
+  // The group entity.
   $group = $form['group']['#value'];
 
   $default_roles = og_is_group_default_access($group->gid);
@@ -345,7 +345,7 @@ function theme_og_ui_user_admin_new_role($variables) {
  * @see theme_user_admin_permissions()
  */
 function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $eid = NULL, $rid = NULL) {
-  // If no node object is provided then the node ID is 0, which means this
+  // If no node entity is provided then the node ID is 0, which means this
   // is the default permissions settings.
   $group = !empty($eid) ? og_get_group($entity_type, $eid) : array();
   $form['group'] = array('#type' => 'value', '#value' => $group);

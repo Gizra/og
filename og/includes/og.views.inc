@@ -40,8 +40,8 @@ function og_views_data() {
   );
 
   $data['og_groups']['entity_type'] = array(
-    'title' => t("Group's object type"),
-    'help' => t('The object type of the group.'),
+    'title' => t("Group's entity type"),
+    'help' => t('The entity type of the group.'),
     'field' => array(
       'handler' => 'views_handler_field_xss',
      ),
@@ -57,8 +57,8 @@ function og_views_data() {
   );
 
   $data['og_groups']['eid'] = array(
-    'title' => t("Group's object ID"),
-    'help' => t('The object ID of the group.'),
+    'title' => t("Group's entity ID"),
+    'help' => t('The entity ID of the group.'),
     'field' => array(
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,

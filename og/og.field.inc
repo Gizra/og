@@ -185,9 +185,9 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   // If it's an existing group, then exclude itself, as in some cases a group
   // can act also as a group content, but we want to prevent associating the
   // group to itself.
-  if (!empty($form['#' . $element['#object_type']])) {
-    list($id) = entity_extract_ids($element['#object_type'], $form['#' . $element['#object_type']]);
-    if (($group = og_get_group($element['#object_type'], $id))) {
+  if (!empty($form['#' . $element['#entity_type']])) {
+    list($id) = entity_extract_ids($element['#entity_type'], $form['#' . $element['#entity_type']]);
+    if (($group = og_get_group($element['#entity_type'], $id))) {
       $excludes[$group->gid] = $group->gid;
     }
   }
@@ -359,12 +359,12 @@ function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode
  * @see og_field_attach_delete().
  */
 function og_field_crud_group($op, $entity_type, $entity) {
-  $entity = og_load_object($entity_type, $entity);
+  $entity = og_load_entity($entity_type, $entity);
   $property = OG_GROUP_FIELD;
 
   $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
-  // Get the object ID.
+  // Get the entity ID.
   list($id) = entity_extract_ids($entity_type, $entity);
 
   $group = og_get_group($entity_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
@@ -383,7 +383,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
         og_group_user_roles_override($group->gid);
 
         if (!empty($entity->uid)) {
-          // Subscribe the object author, if exists.
+          // Subscribe the entity author, if exists.
           $account = user_load($entity->uid);
           og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
         }
