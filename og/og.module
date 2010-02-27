@@ -1665,16 +1665,15 @@ function og_get_users_by_roles($gid, $rids = array()) {
  * Fetch a user role from database.
  *
  * @param $role
- *   A string with the role name, or an integer with the role ID.
+ *   An integer with the role ID.
  * @return
  *   A fully-loaded role object if a role with the given name or ID
  *   exists, FALSE otherwise.
  */
-function og_user_role_load($role) {
-  $field = is_int($role) ? 'rid' : 'name';
+function og_user_role_load($rid) {
   return db_select('og_role', 'r')
     ->fields('r')
-    ->condition($field, $role)
+    ->condition('rid', $rid)
     ->execute()
     ->fetchObject();
 }
