@@ -1,6 +1,7 @@
 name = Organic groups
 description = "API to allow associating content with group nodes."
 package = "Organic groups"
+dependencies[] = entity
 core = 7.x
 version = VERSION
 files[] = og.module
