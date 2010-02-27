@@ -12,6 +12,9 @@
 function og_enable() {
   // Add group audience to users by default.
   og_create_field('og_audience', 'user', 'user');
+
+  // Set default roles and permissions.
+  og_set_global_access();
 }
 
 /**
