@@ -1580,12 +1580,6 @@ function og_set_global_access() {
   }
 
   if ($existing_roles = og_get_global_roles()) {
-    // Remove the anonymous and authenitacted, as they already exist and
-    // shouldn't change.
-    // TODO: Remove?
-    // unset($existing_roles[OG_ANONYMOUS_RID], $existing_roles[OG_AUTHENTICATED_RID]);
-    // unset($roles[OG_ANONYMOUS_RID], $roles[OG_AUTHENTICATED_RID]);
-
     // Delete all existing roles.
     foreach ($existing_roles as $rid => $name) {
       og_user_role_delete($rid);
