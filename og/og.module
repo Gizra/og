@@ -2004,64 +2004,6 @@ function og_get_fields() {
 }
 
 /**
- * Update the permissions of all existing groups.
- *
- * @param $permissions
- *   The name of the permissions that need to be updated. Other permissions will
- *   not be affected by this operation.
- *
- * @return
- *   The number of groups that were updated.
- *
- */
-function og_permissions_bulk_update($roles, $permissions) {
-  // Handle only the permissions that were set to be bulk updated.
-  $permissions = array_filter($permissions);
-
-  // An array with the permissions that need to be set, keyed by the role name.
-  $permissions_to_change = array();
-  // Filter out only the needed permissions from the roles.
-  foreach ($roles as $rid => $perms) {
-    foreach ($perms as $perm => $value) {
-      if (in_array($perm, $permissions)) {
-        switch ($rid) {
-          case 1:
-            $role_name = OG_ANONYMOUS_ROLE;
-            break;
-
-          case 2:
-            $role_name = OG_AUTHENTICATED_ROLE;
-            break;
-
-          case 3:
-            $role_name = OG_ADMINISTRATOR_ROLE;
-            break;
-        }
-
-        $permissions_to_change[$role_name][$perm] = $value;
-      }
-    }
-  }
-
-  // The number of groups that are bulk updated.
-  $updated_groups = 0;
-
-  if (!empty($permissions_to_change)) {
-    // Get all existing group IDs.
-    foreach (og_get_groups() as $entity_type => $values) {
-      foreach ($values as $gid) {
-        ++$updated_groups;
-        $rids = og_get_group_default_roles($gid);
-        foreach ($rids as $name => $rid) {
-          og_user_role_change_permissions($rid, $permissions_to_change[$name]);
-        }
-      }
-    }
-  }
-  return $updated_groups;
-}
-
-/**
  * Get a private token used to protect links from spoofing - CSRF.
  */
 function og_get_token($gid) {

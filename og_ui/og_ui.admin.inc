@@ -366,11 +366,6 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
   // Fetch permissions for all roles or the one selected role.
   $role_permissions = og_user_role_permissions($role_names);
 
-  if (empty($group)) {
-    // Add the 'bulk update' checkbox to the user roles.
-    $role_names += array(0 => t('bulk update'));
-  }
-
   // Store $role_names for use when saving the data.
   $form['role_names'] = array(
     '#type' => 'value',
@@ -459,21 +454,7 @@ function og_ui_user_admin_permissions_after_build($element) {
  */
 function og_ui_user_admin_permissions_submit($form, &$form_state) {
   foreach ($form_state['values']['role_names'] as $rid => $name) {
-    if (!empty($rid)) {
-      og_user_role_change_permissions($rid, $form_state['values'][$rid]);
-    }
-    else {
-      // Bulk update existing groups.
-      $roles = array(
-        OG_ANONYMOUS_DEFAULT_RID => $form_state['values'][OG_ANONYMOUS_DEFAULT_RID],
-        OG_AUTHENTICATED_DEFAULT_RID => $form_state['values'][OG_AUTHENTICATED_DEFAULT_RID],
-        OG_ADMINISTRATOR_DEFAULT_RID => $form_state['values'][OG_ADMINISTRATOR_DEFAULT_RID],
-      );
-      if ($count = og_permissions_bulk_update($roles, $form_state['values'][$rid])) {
-        drupal_set_message(format_plural($count, 'Group was updated', '@count groups were updated.', array('@count' =>$count)));
-      }
-
-    }
+    og_user_role_change_permissions($rid, $form_state['values'][$rid]);
   }
 
   drupal_set_message(t('The changes have been saved.'));
