@@ -412,7 +412,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
     $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Save permissions'),
+      '#value' => $gid == 0 ? t('Save global permissions') : t('Save permissions'),
       '#submit' => array('og_ui_user_admin_permissions_submit'),
     );
     $form['#after_build'] = array('og_ui_user_admin_permissions_after_build');
@@ -470,7 +470,7 @@ function og_ui_user_admin_permissions_submit($form, &$form_state) {
         OG_ADMINISTRATOR_DEFAULT_RID => $form_state['values'][OG_ADMINISTRATOR_DEFAULT_RID],
       );
       if ($count = og_permissions_bulk_update($roles, $form_state['values'][$rid])) {
-        drupal_set_message(format_plural($count, 'Group was updated', '@count group were updated.', array('@count' =>$count)));
+        drupal_set_message(format_plural($count, 'Group was updated', '@count groups were updated.', array('@count' =>$count)));
       }
 
     }

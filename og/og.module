@@ -2062,18 +2062,6 @@ function og_permissions_bulk_update($roles, $permissions) {
 }
 
 /**
- * Add default permissions to the default roles.
- */
-function og_set_default_permissions() {
-  // Create default permissions for roles.
-  $perms = og_get_global_permissions();
-
-  og_user_role_grant_permissions(OG_ANONYMOUS_ROLE, $perms[OG_ANONYMOUS_ROLE]);
-  og_user_role_grant_permissions(OG_AUTHENTICATED_ROLE, $perms[OG_AUTHENTICATED_ROLE]);
-  og_user_role_grant_permissions(OG_ADMINISTRATOR_ROLE, $perms[OG_ADMINISTRATOR_ROLE]);
-}
-
-/**
  * Get a private token used to protect links from spoofing - CSRF.
  */
 function og_get_token($gid) {
