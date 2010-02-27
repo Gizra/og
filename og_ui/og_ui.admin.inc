@@ -268,8 +268,12 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
 function og_ui_user_admin_role_validate($form, &$form_state) {
   if (!empty($form_state['values']['name'])) {
     $roles = og_user_roles($form_state['values']['group']->gid);
-    $role = og_user_role_load($form_state['values']['rid']);
-    if ($role->name != $form_state['values']['name'] && in_array($form_state['values']['name'], $roles)) {
+    $unique_name = TRUE;
+    if (!empty($form_state['values']['rid'])) {
+      $role = og_user_role_load($form_state['values']['rid']);
+      $unique_name = $role->name != $form_state['values']['name'];
+    }
+    if ($unique_name && in_array($form_state['values']['name'], $roles)) {
       form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
     }
   }

@@ -313,7 +313,7 @@ function og_delete($gid) {
   og_delete_multiple(array($gid));
 
   // Delete roles and permissions.
-  og_group_delete_user_roles($gid);
+  og_group_delete_user_roles($gid, NULL, TRUE);
 }
 
 
@@ -1494,17 +1494,22 @@ function og_user_role_permissions($roles = array()) {
  * @param $permission
  *   Optioanl; A string containing a permission. If set, only roles containing that
  *   permission are returned.
+ * @param $force_group
+ *   Optioanl; If TRUE then the roles of the group will be retrieved by the
+ *   group ID, even if the group is set to have default roles and permissions.
  *
  * @return
  *   An associative array with the role id as the key and the role name as
  *   value. The anonymous and authenticated deault roles are on the top of the
  *   array.
  */
-function og_user_roles($gid = 0, $permission = NULL) {
+function og_user_roles($gid = 0, $permission = NULL, $force_group = FALSE) {
   $roles = array();
 
   // Check if overriden access exists.
-  $gid = og_is_group_default_access($gid) ? 0 : $gid;
+  if (!$force_group) {
+    $gid = og_is_group_default_access($gid) ? 0 : $gid;
+  }
 
   if (!empty($permission)) {
     $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
@@ -1747,7 +1752,7 @@ function og_user_role_delete($rid) {
  *   The group ID.
  */
 function og_group_delete_user_roles($gid) {
-  if (!og_is_group_default_access() && $roles = og_user_roles($gid)) {
+  if ($roles = og_user_roles($gid, NULL, TRUE)) {
     foreach ($roles as $rid => $name) {
       og_user_role_delete($rid);
     }
@@ -1759,11 +1764,14 @@ function og_group_delete_user_roles($gid) {
  *
  * @param $gid
  *   The group ID.
+ * @param $revert
+ *   Optional; If TRUE and group should roles and permissions should be reverted
+ *   then delete the overriden roles. Defaults to TRUE.
  * @return
  *   The newly created roles keyed by role ID and role name as the value. Or
  *   FALSE if no roles were created.
  */
-function og_group_user_roles_override($gid) {
+function og_group_user_roles_override($gid, $revert = FALSE) {
   $rids = FALSE;
   if(!og_is_group_default_access($gid) && !((bool) db_query_range('SELECT 1 FROM {og_role} WHERE gid = :gid', 0, 1, array(':gid' => $gid))->fetchField())) {
     // Make sure roles doesn't exist already by looking for a row with the group
@@ -1780,6 +1788,10 @@ function og_group_user_roles_override($gid) {
       $rids[$role->rid] = $role->name;
       og_user_role_change_permissions($role->rid, $perms[$rid]);
     }
+  }
+  elseif ($revert) {
+    // Delete overriden roles and permissions.
+    og_group_delete_user_roles($gid);
   }
 
   return $rids;

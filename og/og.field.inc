@@ -380,6 +380,7 @@ function og_field_crud_group($op, $obj_type, $object) {
       if (!empty($wrapper[0]['value'])) {
         // Save the group.
         og_save($group);
+        og_group_user_roles_override($group->gid);
 
         if (!empty($object->uid)) {
           // Subscribe the object author, if exists.
@@ -400,7 +401,7 @@ function og_field_crud_group($op, $obj_type, $object) {
       }
 
       // Add overriden roles and permissions, if needed.
-      og_group_user_roles_override($group->gid);
+      og_group_user_roles_override($group->gid, TRUE);
 
       if ($save) {
         og_save($group);
