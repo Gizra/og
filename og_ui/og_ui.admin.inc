@@ -546,17 +546,19 @@ function _og_admin_fields_overview($group_type = 'group') {
 
   $og_fields = og_get_fields();
 
-  foreach(field_info_bundles() as $entity => $bundles) {
-    $form['bundle'][] = array('#markup' => t('@entity entity', array('@entity' => $entity)), '#id' => $entity);
-    foreach ($bundles as $bundle => $value) {
-      $options[$bundle] = '';
-      $form['bundle'][$bundle] = array(
-        '#type' => 'item',
-        '#markup' => '-- ' . $value['label'],
-      );
-
+  foreach (entity_get_info() as $entity => $entity_value) {
+    if (!empty($entity_value['fieldable'])) {
+      $form['bundle'][] = array('#markup' => t('@entity entity', array('@entity' => $entity_value['label'])), '#id' => $entity);
+      foreach($entity_value['bundles'] as $bundle => $bundle_value) {
+        $options[$bundle] = '';
+        $form['bundle'][$bundle] = array(
+          '#type' => 'item',
+          '#markup' => '-- ' . check_plain($bundle_value['label']),
+        );
+      }
     }
   }
+
 
   // Add the fields that exist in the bundle.
   foreach (field_info_fields() as $field => $value) {
