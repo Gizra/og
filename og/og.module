@@ -1148,8 +1148,7 @@ function og_determine_context() {
     }
 
     if ($invoke && ($return = call_user_func($handler['callback']))) {
-      $context = $return;
-      break;
+      $context = array_merge($context, $return);
     }
   }
 
@@ -1162,11 +1161,15 @@ function og_determine_context() {
 function og_og_context_handlers() {
   $items = array();
 
+  $items['session'] = array(
+    'callback' => 'og_context_handler_session',
+    'menu' => FALSE,
+  );
+
+
   $items['url'] = array(
     'callback' => 'og_context_handler_url',
     'menu' => FALSE,
-    'weight' => -100,
-
   );
 
   $items['node'] = array(
@@ -1188,12 +1191,25 @@ function og_og_context_handlers() {
 }
 
 /**
+ * Context handler; Get groups from user's session.
+ */
+function og_context_handler_session() {
+  $context = array();
+
+  if (!empty($_SESSION['og_context'])) {
+    $context = drupal_map_assoc(array($_SESSION['og_context']));
+  }
+
+  return $context;
+}
+
+/**
  * Context handler; Get groups from URL.
  */
 function og_context_handler_url() {
-  $context = FALSE;
+  $context = array();
   if ($gids = og_get_context_by_url()) {
-    $context = og_load(reset($gids));
+    $context = $gids;
   }
 
   return $context;
@@ -1232,14 +1248,14 @@ function og_context_handler_user_edit() {
  *   Optional; The position that sohuld be used in menu_get_object().
  */
 function _og_context_handler_entity($entity_type = 'node', $entity = NULL, $position = 1) {
-  $context = FALSE;
+  $context = array();
 
   if (empty($entity)) {
     $entity = menu_get_object($entity_type, $position);
   }
 
   if ($gids = og_get_entity_groups($entity_type, $entity)) {
-    $context = og_load(reset($gids));
+    $context = $gids;
   }
 
   return $context;
@@ -1268,6 +1284,11 @@ function og_context($group = NULL, $account = NULL) {
 
     // Get context from context handlers.
     $context = og_determine_context();
+
+    if ($context) {
+      // Save the group ID in the user's session,
+      $_SESSION['og_context'] = $context->gid;
+    }
   }
 
   return $context;
