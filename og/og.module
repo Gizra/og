@@ -1108,6 +1108,103 @@ function og_is_group_default_access($gid) {
 }
 
 /**
+ * Get all the context handlers.
+ */
+function og_get_context_handlers() {
+  $handlers = module_invoke_all('og_context_handlers');
+
+  // Assign default values.
+  foreach ($handlers as &$handler) {
+    $handler += array(
+      'menu' => TRUE,
+      'menu path' => array(),
+      'weight' => 0,
+    );
+  }
+
+
+  // Allow other modules to alter the handlers.
+  drupal_alter('og_context_handlers', $handlers);
+
+  // TODO: Sort handlers by weight.
+
+  return $handlers;
+}
+
+function og_invoke_context() {
+  $context = FALSE;
+
+  $item = menu_get_item();
+
+  foreach (og_get_context_handlers() as $handler) {
+    $invoke = FALSE;
+    if ($handler['menu']) {
+      if (in_array($item['path'], $handler['menu path'])) {
+        $invoke = TRUE;
+      }
+    }
+    else {
+      $invoke = TRUE;
+    }
+
+    if ($invoke && ($return = call_user_func($handler['callback']))) {
+      $context = $return;
+      break;
+    }
+  }
+  return $context;
+}
+
+/**
+ * Implement hook_og_context_handlers()
+ */
+function og_og_context_handlers() {
+  $items = array();
+
+  $items['url'] = array(
+    'callback' => 'og_context_handler_url',
+    'menu' => FALSE,
+    'weight' => -100,
+
+  );
+
+  $items['node'] = array(
+    'callback' => 'og_context_handler_node',
+    'menu path' => array('node/%', 'node/%/edit'),
+  );
+
+  return $items;
+}
+
+/**
+ * Context handler; Get groups from URL.
+ */
+function og_context_handler_url() {
+  $context = FALSE;
+  if ($gids = og_get_context_by_url()) {
+    $context = og_load(reset($gids));
+  }
+
+  return $context;
+}
+
+/**
+ * Context handler; Get groups from existing node.
+ */
+function og_context_handler_node() {
+  $context = FALSE;
+  $node = menu_get_object();
+  if ($gids = og_get_entity_groups('node', $node)) {
+
+    $context = og_load(reset($gids));
+  }
+
+  return $context;
+}
+
+
+
+/**
  * Get or set group context using the menu system.
  *
  * @param $group
@@ -1131,70 +1228,8 @@ function og_context($group = NULL, $account = NULL) {
       $account = $user;
     }
 
-    $item = menu_get_item();
-
-    // Check the page arguments if one of them is an object, and check if it is
-    // a group or group content.
-    if (!empty($item['page_arguments']) && !empty($item['map'][0])) {
-      $entity_type = $item['map'][0];
-      foreach ($item['page_arguments'] as $argument) {
-        if (is_object($argument)) {
-         // Check if it's a group.
-          list($id) = entity_extract_ids($entity_type, $argument);
-          if ($group = og_get_group($entity_type, $id, FALSE)) {
-            $groups = array($group->gid => $group->gid);
-          }
-          else {
-            $groups = og_get_entity_groups($entity_type, $argument);
-          }
-          // TODO: Add context based on ?gid_gids[] in URL.
-          if (!empty($groups)) {
-            // Get the user's group and try to intersect.
-            $user_groups = og_get_entity_groups('user', $account);
-            if ($intersect_gids = array_intersect($groups, $user_groups)) {
-              $gid = reset($intersect_gids);
-            }
-            else {
-              // The user is not a member of any of the groups. Let's check
-              // if it's a node, as node access might be FALSE.
-              $groups = og_load_multiple($groups);
-              // For performance reasons we prefer not to use node_access()
-              // so we first check if the group content is associated with
-              // non-node groups.
-              if (!empty($groups['node'])) {
-                $node_gids = $groups['node'];
-                unset($groups['node']);
-                if (!empty($groups)) {
-                  $gids = reset($groups);
-                  $gid = reset($gid);
-                }
-                else {
-                  // We have only nodes as groups, so check access to them.
-                  // TODO: have og_get_group_mulitple().
-                  foreach ($node_gids as $node_gid) {
-                    $group = og_get_group('gid', $node_gid);
-                    $nid = $group->eid;
-                    $node = node_load($nid);
-                    if (node_access('view', $node, $account)) {
-                      $gid = $group->gid;
-                      break;
-                    }
-                  }
-                }
-              }
-            }
-
-            if (!empty($gid)) {
-              $group = og_get_group('gid', $gid);
-            }
-          }
-        }
-      }
-
-      if (!empty($group)) {
-        $context = $group;
-      }
-    }
+    // Get context from context handlers.
+    $context = og_invoke_context();
   }
 
   return $context;
@@ -1244,6 +1279,7 @@ function og_preprocess_page(&$vars) {
 
 /**
  * Select groups if they were passed in the URL.
+ *
  * You can pass a URL in in the form of
  * node/add/post?gids_gid[]=1,2,3&gids_node[]=4,5,6
  * Note that gids_ is the prefix followed by the entity type (e.g. "node",
