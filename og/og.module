@@ -1118,7 +1118,7 @@ function og_get_context_handlers() {
     $handler += array(
       'menu' => TRUE,
       'menu path' => array(),
-      'weight' => 0,
+      'priority' => FALSE,
     );
   }
 
@@ -1134,6 +1134,8 @@ function og_get_context_handlers() {
 function og_determine_context() {
   $context = FALSE;
 
+  $priority = $gids = array();
+
   $item = menu_get_item();
 
   foreach (og_get_context_handlers() as $handler) {
@@ -1148,7 +1150,20 @@ function og_determine_context() {
     }
 
     if ($invoke && ($return = call_user_func($handler['callback']))) {
-      $context = array_merge($context, $return);
+      if ($handler['priority']) {
+        $priority = array_merge($priority, $return);
+      }
+
+      $gids = array_merge($gids, $return);
+    }
+  }
+  if ($gids) {
+    // Check if we have priority groups.
+    if ($priority && ($priority_gids = array_intersect($gids, $priority))) {
+      $context = og_load(reset($priority_gids));
+    }
+    else {
+      $context = og_load(reset($gids));
     }
   }
 
@@ -1164,6 +1179,7 @@ function og_og_context_handlers() {
   $items['session'] = array(
     'callback' => 'og_context_handler_session',
     'menu' => FALSE,
+    'priority' => TRUE,
   );
 
 
