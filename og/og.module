@@ -1122,11 +1122,8 @@ function og_get_context_handlers() {
     );
   }
 
-
   // Allow other modules to alter the handlers.
   drupal_alter('og_context_handlers', $handlers);
-
-  // TODO: Sort handlers by weight.
 
   return $handlers;
 }
