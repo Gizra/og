@@ -1131,7 +1131,7 @@ function og_get_context_handlers() {
   return $handlers;
 }
 
-function og_invoke_context() {
+function og_determine_context() {
   $context = FALSE;
 
   $item = menu_get_item();
@@ -1152,6 +1152,7 @@ function og_invoke_context() {
       break;
     }
   }
+
   return $context;
 }
 
@@ -1173,6 +1174,11 @@ function og_og_context_handlers() {
     'menu path' => array('node/%', 'node/%/edit'),
   );
 
+  $items['user'] = array(
+    'callback' => 'og_context_handler_user',
+    'menu path' => array('user/%', 'user/%/edit'),
+  );
+
   return $items;
 }
 
@@ -1192,16 +1198,34 @@ function og_context_handler_url() {
  * Context handler; Get groups from existing node.
  */
 function og_context_handler_node() {
-  $context = FALSE;
-  $node = menu_get_object();
-  if ($gids = og_get_entity_groups('node', $node)) {
+  return _og_context_handler_entity();
+}
 
+/**
+ * Context handler; Get groups from existing node.
+ */
+function og_context_handler_user() {
+  return _og_context_handler_entity('user');
+}
+
+/**
+ * Helper function to get group context from an entity.
+ *
+ * @param $entity_type
+ *   The entity type.
+ * @param $position
+ *   The position that sohuld be used in menu_get_object().
+ */
+function _og_context_handler_entity($entity_type = 'node', $position = 1) {
+  $context = FALSE;
+  $entity = menu_get_object($entity_type, $position);
+
+  if ($gids = og_get_entity_groups($entity_type, $entity)) {
     $context = og_load(reset($gids));
   }
 
   return $context;
 }
-
 
 
 /**
@@ -1225,7 +1249,7 @@ function og_context($group = NULL, $account = NULL) {
   if (empty($context) && variable_get('og_context', TRUE)) {
 
     // Get context from context handlers.
-    $context = og_invoke_context();
+    $context = og_determine_context();
   }
 
   return $context;
