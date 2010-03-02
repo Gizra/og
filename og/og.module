@@ -1223,10 +1223,6 @@ function og_context($group = NULL, $account = NULL) {
   }
 
   if (empty($context) && variable_get('og_context', TRUE)) {
-    if (empty($account)) {
-      global $user;
-      $account = $user;
-    }
 
     // Get context from context handlers.
     $context = og_invoke_context();
