@@ -1128,10 +1128,23 @@ function og_get_context_handlers() {
   return $handlers;
 }
 
+/**
+ * Determine the best matching context of a viewed content.
+ *
+ * The context is determined by using handlers, and trying to find the best
+ * matching context by giving a score to each returned group context. The score
+ * is measured by the amount of times a single group was returned by different
+ * handlers.
+ * After accumilating all context results, we try to find if there is a matching
+ * "priority" context. An example for a priority context is the "session"
+ * handler; If we already presented a certain context to a user on the last page
+ * we try to keep the same context if possible.
+ * @see og_og_context_handlers().
+ */
 function og_determine_context() {
   $context = FALSE;
 
-  $priority = $gids = array();
+  $score = $priority = $gids = array();
 
   $item = menu_get_item();
 
@@ -1148,10 +1161,16 @@ function og_determine_context() {
 
     if ($invoke && ($return = call_user_func($handler['callback']))) {
       if ($handler['priority']) {
-        $priority = array_merge($priority, $return);
+        $priority += $return;
       }
+      else {
+        // Keep score of the returning groups.
+        foreach ($gids as $gid) {
+          $score[$gid] = !empty($score[$gid]) ? $score[$gid] + 1 : 1;
+        }
 
-      $gids = array_merge($gids, $return);
+        $gids += $return;
+      }
     }
   }
   if ($gids) {
@@ -1160,7 +1179,10 @@ function og_determine_context() {
       $context = og_load(reset($priority_gids));
     }
     else {
-      $context = og_load(reset($gids));
+      // Get the group with the best score.
+      sort($gids);
+      $gid = key(array_shift($gids));
+      $context = og_load($gid);
     }
   }
 
@@ -1268,8 +1290,9 @@ function _og_context_handler_entity($entity_type = 'node', $entity = NULL, $posi
   }
 
   // Check if the entity is itself a group.
-  if ($group = og_get_group($entity_type, $entity)) {
-    $context = $group->gid;
+  list($id) = entity_extract_ids($entity_type, $entity);
+  if ($group = og_get_group($entity_type, $id)) {
+    $context = drupal_map_assoc(array($group->gid));
   }
 
   elseif ($gids = og_get_entity_groups($entity_type, $entity)) {
