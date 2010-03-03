@@ -1180,8 +1180,8 @@ function og_determine_context() {
     }
     else {
       // Get the group with the best score.
-      sort($gids);
-      $gid = key(array_shift($gids));
+      $max = max($gids);
+      $gid = array_search($max, $gids);
       $context = og_load($gid);
     }
   }
