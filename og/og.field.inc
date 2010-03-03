@@ -359,7 +359,6 @@ function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode
  * @see og_field_attach_delete().
  */
 function og_field_crud_group($op, $entity_type, $entity) {
-  $entity = og_load_entity($entity_type, $entity);
   $property = OG_GROUP_FIELD;
 
   $wrapper = &$entity->{$property}[LANGUAGE_NONE];
