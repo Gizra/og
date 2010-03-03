@@ -936,7 +936,7 @@ function og_get_entity_groups($entity_type, $entity, $states = array(OG_STATE_AC
  * @param $entity_type
  *   The entity type.
  * @param $type
- *   The grou usage type. Must be "group" or "group content".
+ *   The group usage type. Must be "group" or "group content".
  *
  * @return
  *   The group type or an "omitted" if node type doesn't participate in
@@ -1267,7 +1267,12 @@ function _og_context_handler_entity($entity_type = 'node', $entity = NULL, $posi
     $entity = menu_get_object($entity_type, $position);
   }
 
-  if ($gids = og_get_entity_groups($entity_type, $entity)) {
+  // Check if the entity is itself a group.
+  if ($group = og_get_group($entity_type, $entity)) {
+    $context = $group->gid;
+  }
+
+  elseif ($gids = og_get_entity_groups($entity_type, $entity)) {
     $context = $gids;
   }
 
