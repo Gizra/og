@@ -1354,15 +1354,17 @@ function og_context_js($group) {
 }
 
 /**
- * Page preprocess; Add context related templates and CSS.
+ * Implement hook_preprocess_html().
+ *
+ * HTML preprocess; Add context related templates and CSS.
  */
-function og_preprocess_page(&$variables) {
+function og_preprocess_html(&$variables) {
   if ($group = og_context()) {
     // Add template suggestions.
     $variables['theme_hook_suggestions'][] = 'page__og_context';
-    $variables['theme_hook_suggestions'][] = 'page__og_context_' . $group->gid;
-    $variables['theme_hook_suggestions'][] = 'page__og_context_' . $group->entity_type;
-    $variables['theme_hook_suggestions'][] = 'page__og_context_' . $group->entity_type . '_' . $group->eid;
+    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->gid;
+    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->entity_type;
+    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->entity_type . '_' . $group->eid;
 
     // Add CSS.
     $clean_html = drupal_html_class('og-context-' . $group->entity_type);
