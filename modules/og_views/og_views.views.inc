@@ -54,31 +54,35 @@ function og_views_views_handlers() {
       'og_views_handler_field_og_group_nids' => array(
         'parent' => 'views_handler_field_prerender_list',
       ),
-      'og_views_handler_field_og_managelink' => array(
-        'parent' => 'views_handler_field',
-      ),
       'og_views_handler_field_boolean_og_private' => array(
         'parent' => 'views_handler_field_boolean',
       ),
-      'og_views_handler_field_og_is_active' => array(
+      'og_views_handler_field_autosubscribe' => array(
         'parent' => 'views_handler_field',
+      ),
+      // {og_uid} fields
+      'og_views_handler_field_og_is_active' => array(
+        'parent' => 'og_views_handler_field_og_uid',
       ),
       'og_views_handler_field_og_is_admin' => array(
-        'parent' => 'views_handler_field',
+        'parent' => 'og_views_handler_field_og_uid',
       ),
       'og_views_handler_field_og_is_manager' => array(
-        'parent' => 'views_handler_field',
+        'parent' => 'og_views_handler_field_og_uid',
       ),
       'og_views_handler_field_og_managelinkadmin' => array(
-        'parent' => 'views_handler_field',
+        'parent' => 'og_views_handler_field_og_uid',
       ),
       'og_views_handler_field_og_managelinkmy' => array(
-        'parent' => 'views_handler_field',
+        'parent' => 'og_views_handler_field_og_uid',
+      ),
+      'og_views_handler_field_og_managelink' => array(
+        'parent' => 'og_views_handler_field_og_uid',
       ),
       'og_views_handler_field_og_uid_groups' => array(
         'parent' => 'views_handler_field_prerender_list',
       ),
-      'og_views_handler_field_autosubscribe' => array(
+      'og_views_handler_field_og_uid' => array(
         'parent' => 'views_handler_field',
       ),
       // argument
@@ -429,6 +433,7 @@ function og_views_data_og_uid() {
   $data['og_uid']['managelinkadmin'] = array(
     'title' => t('OG: Admin manage link'),
     'help' => t('A link to the <em>Admin create or remove</em> page.'),
+    'real field' => 'uid',
     'field' => array(
       'handler' => 'og_views_handler_field_og_managelinkadmin',
       'click sortable' => FALSE,
@@ -437,6 +442,7 @@ function og_views_data_og_uid() {
   $data['og_uid']['managelinkmy'] = array(
     'title' => t('OG: Edit membership link'),
     'help' => t('A link to the <em>My membership</em> page.'),
+    'real field' => 'uid',
     'field' => array(
       'handler' => 'og_views_handler_field_og_managelinkmy',
       'click sortable' => FALSE,
@@ -445,6 +451,7 @@ function og_views_data_og_uid() {
   $data['og_uid']['managelink'] = array(
     'title' => t('OG: Approve/Deny/Remove membership link'),
     'help' => t('A link to approve/deny/remove a group member.'),
+    'real field' => 'uid',
     'field' => array(
       'handler' => 'og_views_handler_field_og_managelink',
       'click sortable' => FALSE,
@@ -483,8 +490,8 @@ function og_views_data_og_uid() {
   $data['og_uid']['is_manager'] = array(
     'title' => t('OG: Is the group manager'),
     'help' => t('Add <em>manager</em> text if user is the group manager.'),
+    'real field' => 'uid',
     'field' => array(
-      'field' => 'uid',
       'handler' => 'og_views_handler_field_og_is_manager',
       'click sortable' => FALSE,
     ),

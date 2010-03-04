@@ -4,17 +4,20 @@
  *
  * @ingroup views_field_handlers
  */
-class og_views_handler_field_og_is_manager extends views_handler_field {
-  
-  function render($values) {
-    $member = $values->uid;
-    
-    // Tried to use additional fields to get node.uid but ultimately just used this.
-    $node = node_load($values->og_uid_nid);
-    $manager = $node->uid;
+class og_views_handler_field_og_is_manager extends og_views_handler_field_og_uid {
+  function construct() {
+    parent::construct();
+    $this->additional_fields['nid'] = array('table' => 'og_uid', 'field' => 'nid');
+  }
 
-    if ($member == $manager) {
-      return '<em>'. t('Manager'). '</em>'; 
+  function render($values) {
+    if (isset($values->{$this->field_alias})) {
+      $node = node_load($values->{$this->aliases['nid']});
+      $manager = $node->uid;
+      $member = $values->{$this->field_alias};
+      if ($member == $manager) {
+        return '<em>'. t('Manager'). '</em>'; 
+      }
     }
   }
 }
