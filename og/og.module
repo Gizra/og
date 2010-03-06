@@ -1681,7 +1681,7 @@ function og_set_global_access($force = TRUE) {
       }
     }
 
-    if ($existing_roles = og_get_global_roles()) {
+    if ($existing_roles) {
       // Delete all existing roles.
       foreach ($existing_roles as $rid => $name) {
         og_user_role_delete($rid);
@@ -1740,7 +1740,7 @@ function og_get_user_roles($gid, $uid = NULL, $include = TRUE) {
     $roles[$rid] = $rid;
   }
 
-  $roles = array_merge($roles, db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed());
+  $roles = $roles + db_query("SELECT rid, rid FROM {og_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
 
   return $roles;
 }
