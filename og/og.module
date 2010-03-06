@@ -1657,40 +1657,48 @@ function og_get_default_permissions() {
 /**
  * Set global roles and permissions.
  *
+ * @param $force
+ *   TRUE if existing global roles should be deleted and new ones created
+ *   instead.
+ *
  * @return
  *   Array keyed by role ID and role name as value.
  */
-function og_set_global_access() {
+function og_set_global_access($force = TRUE) {
   $rids = array();
 
   $roles = og_get_default_roles();
   $perms = og_get_default_permissions();
 
-  // Group permissions by role.
-  $permissions = array();
-  foreach ($perms as $name => $perm_roles) {
-    foreach ($perm_roles as $perm_role) {
-      $permissions[$perm_role][$name] = TRUE;
+  $existing_roles = og_get_global_roles();
+
+  if (!$existing_roles || $force) {
+    // Group permissions by role.
+    $permissions = array();
+    foreach ($perms as $name => $perm_roles) {
+      foreach ($perm_roles as $perm_role) {
+        $permissions[$perm_role][$name] = TRUE;
+      }
     }
-  }
 
-  if ($existing_roles = og_get_global_roles()) {
-    // Delete all existing roles.
-    foreach ($existing_roles as $rid => $name) {
-      og_user_role_delete($rid);
+    if ($existing_roles = og_get_global_roles()) {
+      // Delete all existing roles.
+      foreach ($existing_roles as $rid => $name) {
+        og_user_role_delete($rid);
+      }
     }
-  }
 
-  // Create new roles.
-  foreach ($roles as $name) {
-    $role = new stdClass;
-    $role->name = $name;
-    $role->gid = 0;
+    // Create new roles.
+    foreach ($roles as $name) {
+      $role = new stdClass;
+      $role->name = $name;
+      $role->gid = 0;
 
-    og_user_role_save($role);
-    $rids[$role->rid] = $role->name;
-    if (!empty($permissions[$role->name])) {
-      og_user_role_change_permissions($role->rid, $permissions[$role->name]);
+      og_user_role_save($role);
+      $rids[$role->rid] = $role->name;
+      if (!empty($permissions[$role->name])) {
+        og_user_role_change_permissions($role->rid, $permissions[$role->name]);
+      }
     }
   }
 

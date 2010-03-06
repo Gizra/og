@@ -7,14 +7,6 @@
  */
 
 /**
- * Implement hook_install().
- */
-function og_install() {
-  // Set default roles and permissions.
-  og_set_global_access();
-}
-
-/**
  * Implement hook_enable().
  *
  * Add group audience to users by default. This can't be in hook_install() as
@@ -22,6 +14,9 @@ function og_install() {
  */
 function og_enable() {
   og_create_field('og_audience', 'user', 'user');
+
+  // Set default roles and permissions.
+  og_set_global_access();
 }
 
 
