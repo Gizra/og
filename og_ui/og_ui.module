@@ -221,7 +221,7 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
           $links['title'] = t('Re-request group membership');
           $links['href'] = "og/$entity_type/$id/subscribe";
         }
-        elseif ($user_group['state'] == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe')) {
+        elseif ($state == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe')) {
           $links['title'] = t('Unsubscribe from group');
           $links['href'] = "og/$entity_type/$id/unsubscribe";
         }

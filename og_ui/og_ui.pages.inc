@@ -74,16 +74,12 @@ function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
  */
 function og_ui_confirm_subscribe_submit($form, &$form_state) {
   $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
-  // The group entity.
+
   $group = $form_state['values']['group'];
+  $account = $form_state['values']['account'];
+  $state = og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
 
-  $groups = array(
-    'gid' => $group->gid,
-    // Get the state of the group, and decide the user's state accordingly.
-    'state' => og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING,
-  );
-
-  og_subscribe_user(array($groups), NULL, FALSE, $request);
+  og_group($group->gid, 'user', $account, $state);
 
   $form_state['redirect'] = "$group->entity_type/$group->eid";
 }
@@ -132,8 +128,9 @@ function og_ui_confirm_unsubscribe($form, &$form_state, $group, $account) {
  */
 function og_ui_confirm_unsubscribe_submit($form, &$form_state) {
   $group = $form_state['values']['group'];
+  $account = $form_state['values']['account'];
 
-  og_unsubscribe_user(array($group->gid), $form_state['values']['account']);
+  og_ungroup($group->gid, 'user', $account);
 
   // Determine where to go next - Group if accessible, or else site front page.
   $form_state['redirect'] = "$group->entity_type/$group->eid";
