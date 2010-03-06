@@ -137,7 +137,11 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
     if (empty($entity->uid) || $account->uid != $entity->uid) {
       $users_roles = array();
       foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
-        $users_roles[] = $roles[$rid];
+        if ($roles[$rid] != OG_AUTHENTICATED_ROLE) {
+          // Show the user's roles, except of the authenticated role, that all
+          // group members have.
+          $users_roles[] = $roles[$rid];
+        }
       }
       asort($users_roles);
 
