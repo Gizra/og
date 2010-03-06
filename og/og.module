@@ -659,9 +659,9 @@ function og_og_permission() {
 }
 
 /**
- * Implement hook_og_get_default_permissions().
+ * Implement hook_og_default_permissions().
  */
-function og_og_get_default_permissions() {
+function og_og_default_permissions() {
   return array(
     'update own group content' => array(OG_AUTHENTICATED_ROLE),
     'delete own group content' => array(OG_AUTHENTICATED_ROLE),
@@ -674,9 +674,9 @@ function og_og_get_default_permissions() {
 }
 
 /**
- * Implement hook_og_get_default_roles()
+ * Implement hook_og_default_roles()
  */
-function og_og_get_default_roles() {
+function og_og_default_roles() {
   return array(OG_ADMINISTRATOR_ROLE);
 }
 
@@ -1630,10 +1630,10 @@ function og_get_global_roles() {
  * Get default roles.
  */
 function og_get_default_roles($include = TRUE) {
-  $roles = module_invoke_all('og_get_default_roles');
+  $roles = module_invoke_all('og_default_roles');
 
   // Allow other modules to alter the roles and permissions.
-  drupal_alter('og_get_default_roles', $roles);
+  drupal_alter('og_default_roles', $roles);
 
   if ($include) {
     $roles = array_merge(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), $roles);
@@ -1646,10 +1646,10 @@ function og_get_default_roles($include = TRUE) {
  * Get default permissions.
  */
 function og_get_default_permissions() {
-  $perms = module_invoke_all('og_get_default_permissions');
+  $perms = module_invoke_all('og_default_permissions');
 
   // Allow other modules to alter the roles and permissions.
-  drupal_alter('og_get_default_permissions', $perms);
+  drupal_alter('og_default_permissions', $perms);
 
   return $perms;
 }
