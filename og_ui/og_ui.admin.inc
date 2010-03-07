@@ -94,9 +94,10 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
   og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")));
   $group = og_get_group($entity_type, $eid);
   $header = array(
-    'username' => array('data' => t('Username')),
-    'status' => array('data' => t('Status')),
+    'username' => array('data' => t('Username'), 'field' => 'u.name'),
+    'status' => array('data' => t('Status'), 'field' => 'og.og_audience_state'),
     'roles' => array('data' => t('Roles')),
+    'member_for' => array('data' => t('Member for'), 'field' => 'og.og_audience_created', 'sort' => 'desc'),
   );
 
   $form['group'] = array('#type' => 'value', '#value' => $group);
@@ -131,34 +132,67 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
   // Get the group real entity, so we can check the user ID of the entity.
   $entity = og_load_entity_from_group($group->gid);
 
-  // TODO: Add count limit to the list.
-  foreach (og_get_group_users($group->gid) as $account) {
-    // Don't allow editing of the group manager.
-    if (empty($entity->uid) || $account->uid != $entity->uid) {
-      $users_roles = array();
-      foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
-        if ($roles[$rid] != OG_AUTHENTICATED_ROLE) {
-          // Show the user's roles, except of the authenticated role, that all
-          // group members have.
-          $users_roles[] = $roles[$rid];
-        }
-      }
-      asort($users_roles);
 
-      $options[$account->uid] = array(
-        'username' => theme('username', array('account' => $account)),
-        'status' =>  og_get_entity_state($group->gid, 'user', $account),
-        'roles' => theme('item_list', array('items' => $users_roles)),
-      );
+  $query = db_select('field_data_og_audience', 'og');
+  $query
+    ->condition('og.og_audience_gid', $group->gid)
+    ->condition('og.bundle', 'user');
+  user_build_filter_query($query);
 
-    }
+  $count_query = clone $query;
+  $count_query->addExpression('COUNT(og.bundle)');
+
+  $query = $query->extend('PagerDefault')->extend('TableSort');
+  $query->join('users', 'u', 'u.uid =  og.entity_id');
+  $query
+    ->fields('og', array('entity_id', 'og_audience_state', 'og_audience_created'))
+    ->fields('u', array('name'))
+    ->limit(10)
+    ->orderByHeader($header)
+    ->setCountQuery($count_query);
+  $result = $query->execute()->fetchAll();
+
+  $uids[] = array();
+  foreach ($result as $row) {
+    $uids[] = $row->entity_id;
   }
-  $form['accounts'] = array(
-    '#type' => 'tableselect',
-    '#header' => $header,
-    '#options' => $options,
-    '#empty' => !empty($entity->uid) ? t('No people available apart of the group manager.') : t('No people available.'),
-  );
+
+  if ($uids) {
+    $states = og_group_content_states();
+    // We load all the accounts as it's will happen in og_get_user_roles() and
+    // we prefer loading all accounts at once.
+    $accounts = user_load_multiple($uids);
+
+    foreach ($result as $row) {
+      $account = $accounts[$row->entity_id];
+      // Don't allow editing of the group manager.
+      if (empty($entity->uid) || $account->uid != $entity->uid) {
+        $users_roles = array();
+        foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
+          if (!in_array($roles[$rid], array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
+            // Show the user's roles, except of the authenticated role, that all
+            // group members have, or anonymous that blocked members have.
+            $users_roles[] = $roles[$rid];
+          }
+        }
+        asort($users_roles);
+
+        $options[$account->uid] = array(
+          'username' => theme('username', array('account' => $account)),
+          'status' =>  $states[$row->og_audience_state],
+          'roles' => theme('item_list', array('items' => $users_roles)),
+          'member_for' => format_interval(REQUEST_TIME - $row->og_audience_created),
+        );
+
+      }
+    }
+    $form['accounts'] = array(
+      '#type' => 'tableselect',
+      '#header' => $header,
+      '#options' => $options,
+      '#empty' => !empty($entity->uid) ? t('No people available apart of the group manager.') : t('No people available.'),
+    );
+  }
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
   return $form;
