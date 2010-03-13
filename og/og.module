@@ -2160,8 +2160,8 @@ function og_create_field($field_name, $entity_type, $bundle) {
   }
   else {
     // Make sure an inactive field doesn't exist.
-    $prior_field = field_read_field($field['field_name'], array('include_inactive' => TRUE));
-    if (!empty($prior_field)) {
+    $prior_field = field_read_field($field_name, array('include_inactive' => TRUE));
+    if (empty($prior_field)) {
       $field = field_info_field($field_name);
       if (empty($field)) {
         $field = field_create_field($og_field[$field_name]['field']);
