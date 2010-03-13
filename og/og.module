@@ -684,7 +684,7 @@ function og_og_default_roles() {
  * Implement hook_og_access().
  */
 function og_og_access($op, $group, $account, $acting_user) {
-  if (og_user_access($group->eid, $op, $acting_user)) {
+  if (og_user_access($group->gid, $op, $acting_user)) {
     return OG_ACCESS_ALLOW;
   }
   return OG_ACCESS_IGNORE;

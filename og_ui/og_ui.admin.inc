@@ -132,12 +132,10 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
   // Get the group real entity, so we can check the user ID of the entity.
   $entity = og_load_entity_from_group($group->gid);
 
-
   $query = db_select('field_data_og_audience', 'og');
   $query
     ->condition('og.og_audience_gid', $group->gid)
     ->condition('og.bundle', 'user');
-  user_build_filter_query($query);
 
   $count_query = clone $query;
   $count_query->addExpression('COUNT(og.bundle)');
@@ -152,7 +150,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
     ->setCountQuery($count_query);
   $result = $query->execute()->fetchAll();
 
-  $uids[] = array();
+  $uids = array();
   foreach ($result as $row) {
     $uids[] = $row->entity_id;
   }
