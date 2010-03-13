@@ -185,13 +185,15 @@ function og_group_content_states() {
  *   content ID is equal to the group unique ID.
  * @param $create
  *   Optional; If no existing group is found, create a new one. Defaults to TRUE.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
  *
  * @return
  *   The group entity if found, or an empty array.
  */
-function og_get_group($entity_type, $eid, $create = FALSE, $states = array(OG_STATE_ACTIVE)) {
+function og_get_group($entity_type, $eid, $create = FALSE, $states = array(OG_STATE_ACTIVE), $reset = FALSE) {
   $group = FALSE;
-  if ($gids = og_get_group_ids($entity_type, array($eid), $states)) {
+  if ($gids = og_get_group_ids($entity_type, array($eid), $states, $reset)) {
     $group = og_load($gids[$eid]);
   }
   elseif ($create) {
@@ -251,6 +253,7 @@ class EntityOg extends EntityDB {
  *   An array of conditions to match against the {entity} table.
  * @param $reset
  *   A boolean indicating that the internal cache should be reset.
+ *
  * @return
  *   An array of test entity entitys, indexed by pid.
  */
@@ -316,12 +319,18 @@ function og_delete($gid) {
  *   The group entity type. Defaults to "gid" which is the group ID.
  * @param $states
  *   Array of states the group must be in.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
  *
  * @return
  *   Array keyed with the entity ID and the group ID as the value.
  */
-function og_get_group_ids($entity_type = 'gid', $eids = array(), $states = array(OG_STATE_ACTIVE)) {
+function og_get_group_ids($entity_type = 'gid', $eids = array(), $states = array(OG_STATE_ACTIVE), $reset = FALSE) {
   $gids = &drupal_static(__FUNCTION__, array());
+
+  if ($reset) {
+    $gids = array();
+  }
 
   $required_eids = $eids = drupal_map_assoc($eids);
 

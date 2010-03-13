@@ -23,7 +23,7 @@ class OgGroupCrud extends DrupalWebTestCase {
    * Test CRUD of group entitys.
    */
   function testOgCrud() {
-    $group = og_get_group(array('entity_type' => 'foo', 'eid' => 1), TRUE);
+    $group = og_get_group('foo', 1, TRUE);
 
     // Assert is new property.
     $this->assertTrue($group->is_new, t('New group has "is new" property.'));
@@ -44,21 +44,22 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTRUE(!empty($group->gid), t('Group ID was set for saved group.'));
 
     // Set a new state for the group.
+    $group = og_get_group('foo', 1);
     $group->state = OG_STATE_PENDING;
 
     $group = og_save($group);
 
     // Reload group to make sure state was updated.
-    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING));
-    debug($group);
+    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
+
     $this->assertTRUE($group->state == OG_STATE_PENDING, t('Group was updated.'));
 
     // Assert group isn't loaded, when state is pending and state isn't
     // specifically stated.
+    drupal_static_reset('og_get_group_ids');
     $group = og_get_group('foo', 1);
 
-    debug($group);
-    $this->assertFALSE($group, t('Pending state group was not loaded'));
+    $this->assertFALSE($group, t('Pending state group was not loaded, as it was not requested.'));
 
 /*    $groups = array(
       0 => array('entity_type' => 'node', 'eid' => 1),
