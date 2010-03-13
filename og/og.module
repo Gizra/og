@@ -300,6 +300,8 @@ function og_save($group) {
  */
 function og_delete_multiple(array $gids) {
   entity_get_controller('og')->delete($gids);
+
+  og_invalidate_cache($gids);
 }
 
 function og_delete($gid) {
@@ -309,7 +311,27 @@ function og_delete($gid) {
   og_group_delete_user_roles($gid, NULL, TRUE);
 }
 
+function og_invalidate_cache($gids = array()) {
+  // Reset static cache.
+  $caches = array(
+    'og_user_access',
+    'og_get_group_ids',
+    'og_get_entity_groups',
+    'og_context',
+    'og_context_js',
+    'og_get_audience_options',
+  );
+  foreach ($caches as $cache) {
+    drupal_static_reset($cache);
+  }
 
+  if ($gids && !empty($_SESSION['og_context']) && in_array($_SESSION['og_context'], $gids)) {
+    // Remove group's context.
+    $_SESSION['og_context'] = NULL;
+  }
+
+
+}
 /**
  * Get group IDs by the entity type and entity IDs.
  *

@@ -35,13 +35,13 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue($group->created, t('Group creating time was added to group.'));
 
     // Assert group ID not set.
-    $this->assertTRUE(empty($group->gid), t('Group ID not set for unsaved group.'));
+    $this->assertTrue(empty($group->gid), t('Group ID not set for unsaved group.'));
 
     // Save the group.
     $group = og_save($group);
 
     // Assert group ID was set.
-    $this->assertTRUE(!empty($group->gid), t('Group ID was set for saved group.'));
+    $this->assertTrue(!empty($group->gid), t('Group ID was set for saved group.'));
 
     // Set a new state for the group.
     $group = og_get_group('foo', 1);
@@ -49,62 +49,22 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     $group = og_save($group);
 
-    // Reload group to make sure state was updated.
-    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
-
-    $this->assertTRUE($group->state == OG_STATE_PENDING, t('Group was updated.'));
-
     // Assert group isn't loaded, when state is pending and state isn't
     // specifically stated.
     drupal_static_reset('og_get_group_ids');
     $group = og_get_group('foo', 1);
 
-    $this->assertFALSE($group, t('Pending state group was not loaded, as it was not requested.'));
+    $this->assertFalse($group, t('Pending state group was not loaded, as it was not requested.'));
 
-/*    $groups = array(
-      0 => array('entity_type' => 'node', 'eid' => 1),
-      1 => array('entity_type' => 'node', 'eid' => 2, 'state' => OG_STATE_ACTIVE),
-      2 => array('entity_type' => 'node', 'eid' => 3, 'state' => OG_STATE_PENDING),
-      3 => array('entity_type' => 'node', 'eid' => 4, 'state' => OG_STATE_ACTIVE, 'data' => array('dummy_key' => 'dummy_value')),
-      4 => array('entity_type' => 'user', 'eid' => 1),
-    );
+    // Reload group to make sure state was updated.
+    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
 
-    foreach ($group as $group)
-    $this->createGroups();
+    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group was updated.'));
 
-    // Get all group IDs.
-    $groups = og_get_groups('gid', array(), array(OG_STATE_ACTIVE, OG_STATE_PENDING));
-    $this->assertTrue(count($groups['node']) + count($groups['user']) == 5, t('All groups were created.'));
+    og_delete($group->gid);
+    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
 
-    // Get groups with different selection criteria.
-    $groups = og_get_groups('node', array());
-    $this->assertTrue(count($groups['node']) == 3, t('All active node groups were found.'));
-
-    $groups = og_get_groups('node', array(), array(OG_STATE_PENDING));
-    $this->assertTrue(count($groups['node']) == 1, t('All pending node groups were found.'));
-
-    $groups = og_get_groups('user', array());
-    $this->assertTrue(count($groups['user']) == 1, t('User group was found.'));
-
-    // Get a single group entity.
-    $group = og_get_group('node', 4);
-
-    // Test the group has all the expected keys.
-    foreach (array('entity_type', 'eid', 'state', 'data') as $key) {
-      $this->assertTrue(!empty($group->{$key}), t('Group @key key found.', array('@key' => $key)));
-    }
-
-    // Delete a group by group ID.
-    og_delete_groups('gid', array(1));
-    $this->assertFalse(og_get_group('gid', 1), t('Deleted group entity by group ID.'));
-
-    // Delete a group by entity type and entity ID.
-    og_delete_groups('user', array(1));
-    $this->assertFalse(og_get_group('user', 1), t('Deleted group entity by entity type and entity ID.'));
-
-    // Delete all group by entity type.
-    og_delete_groups('node');
-    $this->assertFalse(og_get_groups('node'), t('Deleted group entity by entity type.'));*/
+    $this->assertFalse($group, t('Group was deleted.'));
   }
 
   /**
