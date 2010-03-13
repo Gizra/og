@@ -1664,7 +1664,7 @@ function og_get_default_permissions() {
  * @return
  *   Array keyed by role ID and role name as value.
  */
-function og_set_global_access($force = TRUE) {
+function og_set_global_access($force = FALSE) {
   $rids = array();
 
   $roles = og_get_default_roles();
@@ -1819,27 +1819,24 @@ function og_user_role_save($role) {
  *   An integer with the role ID.
  */
 function og_user_role_delete($rid) {
-  // Don't allow deleting anonymous/ authenticated global roles.
-  if ($rid > OG_AUTHENTICATED_RID) {
-    $role = og_user_role_load($rid);
+  $role = og_user_role_load($rid);
 
-    db_delete('og_role')
-      ->condition('rid', $rid)
-      ->execute();
-    db_delete('og_role_permission')
-      ->condition('rid', $rid)
-      ->execute();
-    // Update the users who have this role set.
-    db_delete('og_users_roles')
-      ->condition('rid', $rid)
-      ->execute();
+  db_delete('og_role')
+    ->condition('rid', $rid)
+    ->execute();
+  db_delete('og_role_permission')
+    ->condition('rid', $rid)
+    ->execute();
+  // Update the users who have this role set.
+  db_delete('og_users_roles')
+    ->condition('rid', $rid)
+    ->execute();
 
-    module_invoke_all('og_user_role_delete', $role);
+  module_invoke_all('og_user_role_delete', $role);
 
-    // Clear the user access cache.
-    drupal_static_reset('og_user_access');
-    drupal_static_reset('og_user_role_permissions');
-  }
+  // Clear the user access cache.
+  drupal_static_reset('og_user_access');
+  drupal_static_reset('og_user_role_permissions');
 }
 
 /**
