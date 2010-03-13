@@ -173,6 +173,11 @@ function og_group_content_states() {
 /**
  * Return a loaded group entity if exists or create a new one.
  *
+ * This is a wrapper function around og_load() that allows passing the group's
+ * entity type and entity ID, and the correct group will be loaded according.
+ * If no group exists and $create option is set to TRUE and new group entity
+ * will be created.
+ *
  * @param $eid
  *   The group content ID.
  * @param $entity_type
@@ -303,13 +308,14 @@ function og_delete($gid) {
 
 
 /**
- * Get a group ID by the entity type and entity IDs.
+ * Get group IDs by the entity type and entity IDs.
  *
  * @param $eid
  *   The group content ID.
  * @param $entity_type
- *   The group entity type. "node" is the default value. Pass "gid" if the the
- *   content ID is equal to the group unique ID.
+ *   The group entity type. Defaults to "gid" which is the group ID.
+ * @param $states
+ *   Array of states the group must be in.
  *
  * @return
  *   Array keyed with the entity ID and the group ID as the value.
@@ -352,8 +358,9 @@ function og_get_group_ids($entity_type = 'gid', $eids = array(), $states = array
 
 /**
  * Return all existing groups with a certain state.
+ *
  * @param $states
- * @return unknown_type
+ *   Array of states the group must be in.
  */
 function og_get_all_group_ids($states = array(OG_STATE_ACTIVE)) {
   $return = array();

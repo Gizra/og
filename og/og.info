@@ -7,4 +7,6 @@ version = VERSION
 files[] = og.module
 files[] = og.install
 files[] = og.field.inc
+
+; Test files.
 files[] = tests/og.test
