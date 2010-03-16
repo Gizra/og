@@ -1342,6 +1342,7 @@ function _og_context_handler_entity($entity_type = 'node', $entity = NULL, $posi
  *   A group entity, or FALSE if no context was found.
  */
 function og_context($group = NULL, $account = NULL) {
+  global $user;
   $context = &drupal_static(__FUNCTION__, FALSE);
 
   if (!empty($group)) {
@@ -1353,8 +1354,8 @@ function og_context($group = NULL, $account = NULL) {
     // Get context from context handlers.
     $context = og_determine_context();
 
-    if ($context) {
-      // Save the group ID in the user's session,
+    if ($user->uid && $context) {
+      // Save the group ID in the authenticated user's session,
       $_SESSION['og_context'] = $context->gid;
     }
   }
