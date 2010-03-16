@@ -729,43 +729,29 @@ function og_og_access($op, $group, $account, $acting_user) {
 }
 
 /**
- * Implement hook_og_node_access()
- */
-function og_og_node_access($node, $op, $account) {
-  if (og_is_group_type('node', $node->type)) {
-    $group = og_get_group('node', $node->nid);
-    if (og_user_access($group->gid, $op . ' group', $account)) {
-      return NODE_ACCESS_ALLOW;
-    }
-  }
-  else {
-    // We don't have a context, so we need to get all the permissions
-    // of all the groups. We don't intersect with the user's group, as
-    // groups might allow anonymous members access.
-    $gids = array_keys(og_get_entity_groups('node', $node));
-    foreach ($gids as $gid) {
-      if (og_user_access($gid, $op . ' group content', $account) || og_user_access($gid, $op . ' any group content', $account) || (og_user_access($gid, $op . ' own group content', $account) && $node->uid == $account->uid)) {
-        return NODE_ACCESS_ALLOW;
-      }
-    }
-  }
-}
-
-/**
  * Implement hook_node_access()
  */
 function og_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  if ($op != 'create' && (og_is_group_type('node', $type) || og_is_group_content_type('node', $type))) {
-    $access = module_invoke_all('og_node_access', $node, $op, $account);
-    if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
-      return NODE_ACCESS_DENY;
+  if (in_array($op, array('update', 'delete'))) {
+    if (($group = og_get_group('node', $node->nid))) {
+      return og_user_access($group->gid, $op . ' group', $account) ? NODE_ACCESS_ALLOW : NODE_ACCESS_DENY;
     }
-    elseif (in_array(OG_ACCESS_ALLOW, $access, TRUE)) {
-      return NODE_ACCESS_ALLOW;
+    elseif ($gids = og_get_entity_groups('node', $node)) {
+      // We don't have a context, so we need to get all the permissions
+      // of all the groups. We don't intersect with the user's group, as
+      // groups might allow anonymous members access.
+      $return = NODE_ACCESS_DENY;
+      foreach ($gids as $gid) {
+        if (og_user_access($gid, $op . ' group content', $account) || og_user_access($gid, $op . ' any group content', $account) || (og_user_access($gid, $op . ' own group content', $account) && $node->uid == $account->uid)) {
+          $return =  NODE_ACCESS_ALLOW;
+          break;
+        }
+      }
+      return $return;
     }
   }
-  // Not an organic group node type.
+  // Not an organic group type or node creation which still has no groups.
   return NODE_ACCESS_IGNORE;
 }
 
