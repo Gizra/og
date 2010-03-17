@@ -377,8 +377,8 @@ function theme_og_ui_user_admin_new_role($variables) {
  * Menu callback: administer permissions.
  *
  * @ingroup forms
- * @see user_admin_permissions_submit()
- * @see theme_user_admin_permissions()
+ * @see og_ui_user_admin_permissions_submit()
+ * @see theme_og_ui_user_admin_permissions()
  */
 function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $eid = NULL, $rid = NULL) {
   // If no node entity is provided then the node ID is 0, which means this
