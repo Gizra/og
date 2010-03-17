@@ -475,7 +475,7 @@ function og_group($gid, $entity_type, $entity, $state = OG_STATE_ACTIVE, $save =
   }
 
   if ($save) {
-    // Save the entity.
+    // Call the field attachers.
     call_user_func('field_attach_' . $op, $entity_type, $entity);
     drupal_static_reset('og_get_entity_groups');
   }
