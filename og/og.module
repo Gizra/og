@@ -207,17 +207,13 @@ function og_get_group($entity_type, $eid, $create = FALSE, $states = array(OG_ST
  * Callback to create a new group.
  */
 function og_create_group($values = array()) {
-  $group = new EntityOg(array(
-    'entity_type' => $values['entity_type'],
-    'eid' => $values['eid'],
-    // Initialize values.
-    'state' => !empty($values['state']) ? $values['state'] : OG_STATE_ACTIVE,
-    'created' => !empty($values['created']) ? $values['created'] : time(),
-    // Support specifying custom group ids.
-    'gid' => !empty($values['gid']) ? $values['gid'] : NULL,
-  ));
+  // Initialize values.
+  $values += array(
+    'state' => OG_STATE_ACTIVE,
+    'created' => time(),
+  );
 
-  return $group;
+  return entity_create('og', $values);
 }
 
 /**
