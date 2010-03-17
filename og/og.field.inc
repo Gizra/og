@@ -394,9 +394,11 @@ function og_field_crud_group($op, $entity_type, $entity) {
 
       if ($group->state == OG_STATE_ACTIVE && empty($wrapper[0]['value'])) {
         $group->state = OG_STATE_PENDING;
+        $save = TRUE;
       }
       elseif($group->state == OG_STATE_PENDING && !empty($wrapper[0]['value'])) {
         $group->state = OG_STATE_ACTIVE;
+        $save = TRUE;
       }
 
       // Add overriden roles and permissions, if needed.
