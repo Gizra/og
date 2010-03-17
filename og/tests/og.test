@@ -70,38 +70,36 @@ class OgGroupCrud extends DrupalWebTestCase {
   /**
    * Test association of enteties to groups.
    */
-  function __testOgGrouping() {
-    $groups = $this->createGroups();
+  function testOgFieldOgGroup() {
 
-    $web_user = $this->web_user;
+    $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
+    $this->drupalLogin($admin_user);
 
-    // Subscribe user to all groups.
-    og_subscribe_user($groups, $web_user);
-    $user_groups = og_get_entity_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    // Create group content type.
+    $type = $this->drupalCreateContentType(array(), array('og_group_type' => 'group'));
+    $type = $type->type;
 
+    // Create a node and set the group field to TRUE.
+    $og_group[LANGUAGE_NONE][0]['value'] = TRUE;
+    $node = $this->drupalCreateNode(array('type' => $type, OG_GROUP_FIELD => $og_group));
 
-    $this->assertEqual($user_groups, drupal_map_assoc(array_keys($groups)), t('User was subscribed to all groups.'));
+    // Assert a group was created.
+    $group = og_get_group('node', $node->nid);
 
-    // Replace groups subscription with a new one.
-    $new_groups = array($groups[1]['gid'] => $groups[1], $groups[2]['gid'] => $groups[2]);
-    og_subscribe_user($new_groups, $web_user, TRUE);
-    $user_groups = og_get_entity_groups('user', $web_user);
+    $this->assertTrue(!empty($group->gid), t('Group was created.'));
 
-    $this->assertEqual($user_groups, drupal_map_assoc(array_keys($new_groups)), t('User subscription was replaced with new groups.'));
+    // Assert the group's state and the entity state is active.
+    $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Group entity state is active.'));
 
-    // Add another group with pending state.
-    og_subscribe_user(array($groups[3]), $web_user);
-    $user_groups = og_get_entity_groups('user', $web_user);
+    // Edit the node progrmatically, and set the group state to pending.
+    $node->OG_GROUP_FIELD[LANGUAGE_NONE][0]['value'] = FALSE;
+    node_save($node);
 
-    $this->assertTrue(count($user_groups) == 2, t('Get entity groups returned only active groups of the user.'));
+    // Reset the group.
+    $group = og_get_group('node', $node->nid, FALSE, array(OG_STATE_PENDING), TRUE);
 
-    $user_groups = og_get_entity_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
-    $this->assertTrue(count($user_groups) == 3, t('Get entity groups returned all active and pending groups of the user.'));
-
-    // Unsubscribe user from last group.
-    og_unsubscribe_user(array($groups[3]['gid']), $web_user);
-    $user_groups = og_get_entity_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
-    $this->assertTrue(count($user_groups) == 2, t('User was unsubscribed from group.'));
+    // Assert the group's state is pending.
+    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group entity was changed to pending.'));
   }
 }
 

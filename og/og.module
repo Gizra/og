@@ -194,7 +194,7 @@ function og_group_content_states() {
 function og_get_group($entity_type, $eid, $create = FALSE, $states = array(OG_STATE_ACTIVE), $reset = FALSE) {
   $group = FALSE;
   if ($gids = og_get_group_ids($entity_type, array($eid), $states, $reset)) {
-    $group = og_load($gids[$eid]);
+    $group = og_load($gids[$eid], $reset);
   }
   elseif ($create) {
     $group = og_create_group(array('entity_type' => $entity_type, 'eid' => $eid));
