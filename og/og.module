@@ -1070,11 +1070,8 @@ function og_access($op, $entity_type = NULL, $eid = NULL, $account = NULL, $acti
   if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
     return FALSE;
   }
-  elseif (in_array(OG_ACCESS_ALLOW, $access, TRUE)) {
-    return TRUE;
-  }
-  // No one allowed access, so assume access is denied.
-  return FALSE;
+  // No one denied access, so assume access is allowed.
+  return TRUE;
 }
 
 /**
