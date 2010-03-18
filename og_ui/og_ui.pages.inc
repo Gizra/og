@@ -16,9 +16,9 @@
  *   will be used.
  */
 function og_ui_subscribe($entity_type, $eid, $uid = NULL) {
+  global $user;
   if ($group = og_get_group($entity_type, $eid)) {
     if (empty($uid)) {
-      global $user;
       $account = $user;
 
       if (!$account->uid) {
@@ -38,9 +38,31 @@ function og_ui_subscribe($entity_type, $eid, $uid = NULL) {
 
     // Check user isn't already subscribed.
     if (in_array($group->gid, og_get_entity_groups('user', $account))) {
-      drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title[LANGUAGE_NONE][0]['safe'])));
-      // TODO: get url.
-      // drupal_goto('node/' . $node->nid);
+      $params = array(
+        '@user' => $account->name,
+        // TODO: Use entity_label.
+        '@group' => 'dummy - @todo: Use entity_label()',
+      );
+
+      $message = $account->uid == $user->uid ? t('You are already a member the group @group.', $params) : t('@user is already a member the group @group.', $params);
+      drupal_set_message($message);
+
+      // Redirect back to entity, if access is allowed. Access is checked only
+      // for nodes.
+      $uri = array();
+      $entity = reset(entity_load($entity_type, array($eid)));
+      if ($entity_type == 'node') {
+        if (!node_access('view', $entity, $account)) {
+          $uri = array(
+            'path' => '<front>',
+            'options' => array(),
+          );
+        }
+      }
+      if (!$uri) {
+        $uri = entity_uri($entity_type, $entity);
+      }
+      drupal_goto($uri['path'], $uri['options']);
     }
     else {
       // Show the user a subscription confirmation.
