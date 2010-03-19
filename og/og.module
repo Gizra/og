@@ -919,7 +919,7 @@ function og_get_group_users($gid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
  *   Optioanl; Array with the state to return. If empty groups of all state will
  *   return.
  * @return
- *  An array with the group, or an empty array.
+ *  An array with the group IDs, or an empty array.
  */
 function og_get_entity_groups($entity_type, $entity, $states = array(OG_STATE_ACTIVE)) {
   $groups = &drupal_static(__FUNCTION__, array());
@@ -1021,8 +1021,13 @@ function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
  *
  * @param $op
  *   The operation name.
- * @param $node
- *   Optioanl; The node entity.
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity
+ *   The entity object.
+ * @param $strict
+ *   Determine if access is allowed or denied if no other module denied access.
+ *   Defaults to TRUE, which will deny access.
  * @param $account
  *   Optioanl; The user related to the action. For example if the operation is
  *   "subscribe" then the account will be the subscribing user.
@@ -1034,7 +1039,7 @@ function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
  * @return
  *   TRUE if access is allowed, otherise FALSE.
  */
-function og_access($op, $entity_type = NULL, $eid = NULL, $account = NULL, $acting_user = NULL) {
+function og_access($op, $entity_type = NULL, $eid = NULL, $strict = TRUE, $account = NULL, $acting_user = NULL) {
   if (empty($acting_user)) {
     global $user;
     $acting_user = $user;
@@ -1070,8 +1075,9 @@ function og_access($op, $entity_type = NULL, $eid = NULL, $account = NULL, $acti
   if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
     return FALSE;
   }
-  // No one denied access, so assume access is allowed.
-  return TRUE;
+  // No one denied access, so assume access is allowed or denied according to
+  // $strict value.
+  return !$strict;
 }
 
 /**
@@ -1080,7 +1086,7 @@ function og_access($op, $entity_type = NULL, $eid = NULL, $account = NULL, $acti
  * @param $entity_type
  *   The entity type.
  * @param $entity
- *   The entity.
+ *   The entity object.
  * @param $gid
  *   The group ID.
  * @return

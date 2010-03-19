@@ -16,7 +16,7 @@ function og_ui_menu() {
     'page callback' => 'og_ui_subscribe',
     'page arguments' => array(1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('subscribe', 1, 2),
+    'access arguments' => array('subscribe', 1, 2, FALSE),
     // We don't add the group name, as it might be private.
     'title' => 'Join group'
   );
@@ -27,7 +27,7 @@ function og_ui_menu() {
     'page callback' => 'og_ui_unsubscribe',
     'page arguments' => array(1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('unsubscribe', 1, 2),
+    'access arguments' => array('unsubscribe', 1, 2, FALSE),
     'title' => 'Leave group',
   );
 
