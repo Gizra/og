@@ -47,22 +47,9 @@ function og_ui_subscribe($entity_type, $eid, $uid = NULL) {
       $message = $account->uid == $user->uid ? t('You are already a member the group @group.', $params) : t('@user is already a member the group @group.', $params);
       drupal_set_message($message);
 
-      // Redirect back to entity, if access is allowed. Access is checked only
-      // for nodes.
-      $uri = array();
+
       $entity = reset(entity_load($entity_type, array($eid)));
-      if ($entity_type == 'node') {
-        if (!node_access('view', $entity, $account)) {
-          $uri = array(
-            'path' => '<front>',
-            'options' => array(),
-          );
-        }
-      }
-      if (!$uri) {
-        $uri = entity_uri($entity_type, $entity);
-      }
-      drupal_goto($uri['path'], $uri['options']);
+      _og_ui_redirect($entity_type, $entity);
     }
     else {
       // Show the user a subscription confirmation.
@@ -120,18 +107,46 @@ function og_ui_unsubscribe($entity_type, $eid) {
 
     $label = check_plain(og_entity_get_label($group->entity_type, $group->eid));
     // Check the user isn't the manager of the group.
-    $entity= current(entity_load($group->entity_type, array($group->eid)));
+    $entity= reset(entity_load($group->entity_type, array($group->eid)));
     if (!empty($entity->uid) && $entity->uid != $user->uid) {
-      // Show the user a subscription confirmation.
-      return drupal_get_form('og_ui_confirm_unsubscribe', $group, $user);
+      $user_groups = og_get_entity_groups('user', $user);
+      if (!empty($user_groups[$group->gid])) {
+        // Show the user a subscription confirmation.
+        return drupal_get_form('og_ui_confirm_unsubscribe', $group, $user);
+      }
     }
     else {
       drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $label)));
-      drupal_goto("$group->entity_type/$group->eid");
     }
+    _og_ui_redirect($entity_type, $entity);
   }
   // Not a valid group.
   drupal_not_found();
+}
+
+/**
+ * Helper function; Redirect back to entity, if access is allowed.
+ * @param $entity_type
+ * @param $entity
+ * @return unknown_type
+ */
+function _og_ui_redirect($entity_type, $entity, $account = NULL) {
+  // Redirect back to entity, if access is allowed. Access is checked only
+  // for nodes.
+  $uri = array();
+
+  if ($entity_type == 'node') {
+    if (!node_access('view', $entity, $account)) {
+      $uri = array(
+        'path' => '<front>',
+        'options' => array(),
+      );
+    }
+  }
+  if (!$uri) {
+    $uri = entity_uri($entity_type, $entity);
+  }
+  drupal_goto($uri['path'], $uri['options']);
 }
 
 /**
