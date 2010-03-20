@@ -213,7 +213,7 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
  *
  * @param $entity_type
  * @param $entity
- * @param $render
+ * @param $account
  * @return unknown_type
  */
 function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {

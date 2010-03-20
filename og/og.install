@@ -34,6 +34,7 @@ function og_uninstall() {
   }
 }
 
+
 /**
  * Implement hook_schema().
  */

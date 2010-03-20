@@ -152,6 +152,27 @@ function og_group_content_states() {
 
 
 /**
+ * Implement hook_modules_enabled().
+ */
+function og_modules_enabled($modules) {
+  foreach ($modules as $module) {
+    // Add default roles and permissions, if existing and not set yet.
+    og_set_global_access_module($module);
+  }
+}
+
+/**
+ * Implements hook_modules_uninstalled().
+ */
+function og_modules_uninstalled($modules) {
+  foreach ($modules as $module) {
+    // Delete module's permissions.
+    og_permissions_delete_by_module($module);
+  }
+}
+
+
+/**
  * Return a loaded group entity if exists or create a new one.
  *
  * This is a wrapper function around og_load() that allows passing the group's
@@ -284,7 +305,7 @@ function og_delete($gid) {
   og_delete_multiple(array($gid));
 
   // Delete roles and permissions.
-  og_group_delete_user_roles($gid, NULL, TRUE);
+  og_delete_user_roles_by_group($gid, NULL, TRUE);
 }
 
 function og_invalidate_cache($gids = array()) {
@@ -1648,11 +1669,8 @@ function og_set_global_access($force = FALSE) {
 
     // Create new roles.
     foreach ($roles as $name) {
-      $role = new stdClass;
-      $role->name = $name;
-      $role->gid = 0;
+      $role = og_create_global_role($name);
 
-      og_user_role_save($role);
       $rids[$role->rid] = $role->name;
       if (!empty($permissions[$role->name])) {
         og_user_role_change_permissions($role->rid, $permissions[$role->name]);
@@ -1661,6 +1679,73 @@ function og_set_global_access($force = FALSE) {
   }
 
   return $rids;
+}
+
+/**
+ * Add default roles and permissions of a module to the global roles.
+ *
+ * @param $module
+ *   The module name.
+ * @return
+ *   Array with the global roles, as new records might have been added.
+ */
+function og_set_global_access_module($module = '') {
+  $default_roles = og_get_default_roles();
+  $default_perm = og_get_default_permissions();
+
+  $global_roles = og_get_global_roles();
+
+  if ($module_roles = module_invoke($module, 'og_default_roles')) {
+    $global_roles_assoc = drupal_map_assoc($global_roles);
+    foreach ($module_roles as $name) {
+      if (empty($global_roles_assoc[$name])) {
+        // Add a new global role.
+        $role = og_create_global_role($name);
+        $global_roles[$role->rid] = $name;
+      }
+    }
+  }
+
+
+  if (($module_perms = module_invoke($module, 'og_default_permissions')) &&
+    // Check module's permissions were not applied yet.
+    !((bool) db_query_range('SELECT 1 FROM {og_role_permission} WHERE module = :module', 0, 1, array(':module' => $module))->fetchField())) {
+
+    // Group permissions by role.
+    $permissions = array();
+    foreach ($module_perms as $name => $perm_roles) {
+      foreach ($perm_roles as $perm_role) {
+        $permissions[$perm_role][$name] = TRUE;
+      }
+    }
+
+    // Iterate over existing roles, and add the module's permissions.
+    foreach ($global_roles as $rid => $name) {
+      if (!empty($permissions[$name])) {
+        og_user_role_change_permissions($rid, $permissions[$name]);
+      }
+    }
+  }
+
+  return $global_roles;
+}
+
+/**
+ * Add a new global role - a role associated to group ID 0.
+ *
+ * @param $name
+ *   The orle name.
+ *
+ * @return
+ *   The role object populated iwth the role ID.
+ */
+function og_create_global_role($name) {
+  $role = new stdClass;
+  $role->name = $name;
+  $role->gid = 0;
+
+  og_user_role_save($role);
+  return $role;
 }
 
 /**
@@ -1803,12 +1888,27 @@ function og_user_role_delete($rid) {
  * @param $gid
  *   The group ID.
  */
-function og_group_delete_user_roles($gid) {
+function og_delete_user_roles_by_group($gid) {
   if ($roles = og_user_roles($gid, NULL, TRUE)) {
     foreach ($roles as $rid => $name) {
       og_user_role_delete($rid);
     }
   }
+}
+
+
+/**
+ * Delete all permissions defined by a module.
+ *
+ * @see og_modules_uninstalled()
+ *
+ * @param $module
+ *   The module name.
+ */
+function og_permissions_delete_by_module($module) {
+   db_delete('og_role_permission')
+     ->condition('module', $modules, 'IN')
+     ->execute();
 }
 
 /**
@@ -1843,7 +1943,7 @@ function og_group_user_roles_override($gid, $revert = FALSE) {
   }
   elseif ($revert) {
     // Delete overriden roles and permissions.
-    og_group_delete_user_roles($gid);
+    og_delete_user_roles_by_group($gid);
   }
 
   return $rids;
