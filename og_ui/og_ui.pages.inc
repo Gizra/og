@@ -24,10 +24,10 @@ function og_ui_subscribe($entity_type, $eid, $uid = NULL) {
       if (!$account->uid) {
         $dest = drupal_get_destination();
         if (variable_get('user_register', 1)) {
-          drupal_set_message(t('In order to join this group, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
+          drupal_set_message(t('In order to join any group, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
         }
         else {
-          drupal_set_message(t('In order to join this group, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest)))));
+          drupal_set_message(t('In order to join any group, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest)))));
         }
         drupal_goto('user');
       }
@@ -40,21 +40,22 @@ function og_ui_subscribe($entity_type, $eid, $uid = NULL) {
     if (in_array($group->gid, og_get_entity_groups('user', $account))) {
       $params = array(
         '@user' => $account->name,
-        // TODO: Use entity_label.
+        // TODO: Use entity_label, but check user has permissions to see title.
         '@group' => 'dummy - @todo: Use entity_label()',
       );
 
-      $message = $account->uid == $user->uid ? t('You are already a member the group @group.', $params) : t('@user is already a member the group @group.', $params);
+      $message = $account->uid == $user->uid ? t('You are already a member of the group @group.', $params) : t('@user is already a member of the group @group.', $params);
       drupal_set_message($message);
 
 
       $entity = reset(entity_load($entity_type, array($eid)));
       _og_ui_redirect($entity_type, $entity);
     }
-    else {
+    elseif (og_user_access($group->gid, 'subscribe', $account) || og_user_access($group->gid, 'subscribe without approval', $account)) {
       // Show the user a subscription confirmation.
       return drupal_get_form('og_ui_confirm_subscribe', $group, $account);
     }
+    drupal_access_denied();
   }
   // Not a valid group node.
   drupal_not_found();

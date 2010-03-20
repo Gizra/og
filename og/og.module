@@ -31,25 +31,6 @@ define('OG_STATE_PENDING', 'pending');
  */
 define('OG_STATE_BLOCKED', 'blocked');
 
-
-/**
- * Modules should return this value from hook_og_access() to allow access to a
- * group menu item.
- */
-define('OG_ACCESS_ALLOW', 'allow');
-
-/**
- * Modules should return this value from hook_og_access() to deny access to a
- * group menu item.
- */
-define('OG_ACCESS_DENY', 'deny');
-
-/**
- * Modules should return this value from hook_og_access() to not affect group
- * menu item access.
- */
-define('OG_ACCESS_IGNORE', NULL);
-
 /**
  * Group audience field.
  */
@@ -714,16 +695,6 @@ function og_og_default_roles() {
 }
 
 /**
- * Implement hook_og_access().
- */
-function og_og_access($op, $group, $account, $acting_user) {
-  if (og_user_access($group->gid, $op, $acting_user)) {
-    return OG_ACCESS_ALLOW;
-  }
-  return OG_ACCESS_IGNORE;
-}
-
-/**
  * Implement hook_node_access()
  */
 function og_node_access($node, $op, $account) {
@@ -1019,65 +990,29 @@ function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
  *
  * Function is imittating hook_node_access().
  *
- * @param $op
- *   The operation name.
+ * @param $perm
+ *   The permissions name.
  * @param $entity_type
  *   The entity type.
  * @param $entity
  *   The entity object.
- * @param $strict
- *   Determine if access is allowed or denied if no other module denied access.
- *   Defaults to TRUE, which will deny access.
  * @param $account
  *   Optioanl; The user related to the action. For example if the operation is
  *   "subscribe" then the account will be the subscribing user.
- * @param $acting_user
- *   Optioanl; The acting user. For example if the operation is
- *   "subscribe" then the acting user might be the admin who should approve
- *   or deny - according to this user access is decided.
- *   If this field is empty the current user is used.
+ *
  * @return
  *   TRUE if access is allowed, otherise FALSE.
  */
-function og_access($op, $entity_type = NULL, $eid = NULL, $strict = TRUE, $account = NULL, $acting_user = NULL) {
-  if (empty($acting_user)) {
+function og_access($perm, $entity_type = NULL, $eid = NULL, $account = NULL) {
+  if (empty($account)) {
     global $user;
-    $acting_user = $user;
-  }
-  if (user_access('administer organic groups', $acting_user)) {
-    return TRUE;
+    $account = $user;
   }
 
-  if (!$group = og_get_group($entity_type, $eid)) {
-    // Not a group.
-    return FALSE;
+  if ($group = og_get_group($entity_type, $eid)) {
+    return og_user_access($group->gid, $perm, $account);
   }
-
-  // Get the group real entity, so we can check the user ID of the entity.
-  $entity = current(entity_load($entity_type, array($eid)));
-
-  if (!empty($entity->uid) && $entity->uid == $acting_user->uid) {
-    // Group manager.
-    return TRUE;
-  }
-
-  $acting_user = og_load_entity('user', $acting_user);
-  if (!empty($account)) {
-    $account = og_load_entity('user', $account);
-  }
-
-  // Check if the user was blocked.
-  if (($state = og_get_entity_state($group->gid, 'user', $acting_user)) && $state == OG_STATE_BLOCKED) {
-    return FALSE;
-  }
-
-  $access = module_invoke_all('og_access', $op, $group, $account, $acting_user);
-  if (in_array(OG_ACCESS_DENY, $access, TRUE)) {
-    return FALSE;
-  }
-  // No one denied access, so assume access is allowed or denied according to
-  // $strict value.
-  return !$strict;
+  return FALSE;
 }
 
 /**

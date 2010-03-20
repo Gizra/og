@@ -15,8 +15,11 @@ function og_ui_menu() {
     'file' => 'og_ui.pages.inc',
     'page callback' => 'og_ui_subscribe',
     'page arguments' => array(1, 2),
-    'access callback' => 'og_access',
-    'access arguments' => array('subscribe', 1, 2, FALSE),
+    // Function will take care of permissions, as we want to show "you are
+    // already a member of the group" to group members, however it is not
+    // possible to give authenticated member the "subscribe" permissions.
+    'access callback' => 'user_is_logged_in',
+
     // We don't add the group name, as it might be private.
     'title' => 'Join group'
   );
@@ -27,7 +30,7 @@ function og_ui_menu() {
     'page callback' => 'og_ui_unsubscribe',
     'page arguments' => array(1, 2),
     'access callback' => 'og_access',
-    'access arguments' => array('unsubscribe', 1, 2, FALSE),
+    'access arguments' => array('unsubscribe', 1, 2),
     'title' => 'Leave group',
   );
 
