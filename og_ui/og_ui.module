@@ -107,8 +107,8 @@ function og_ui_menu() {
         'title' => 'Group',
         'page callback' => 'og_ui_group_admin_overview',
         'page arguments' => array($entity, 1),
-        'access callback' => 'og_ui_organic_groups_tab_access',
-        'access arguments' => array($entity, 1),
+        'access callback' => 'og_user_access_by_entity',
+        'access arguments' => array('administer group', $entity, 1),
         'type' => MENU_LOCAL_TASK,
         'file' => 'og_ui.admin.inc',
         'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -151,14 +151,6 @@ function og_ui_menu() {
   );
 
   return $items;
-}
-
-
-/**
- * Return TRUE if a node is a group node and the user has administrator rights.
- */
-function og_ui_organic_groups_tab_access($entity_type, $eid) {
-  return ($group = og_get_group($entity_type, $eid)) &&  og_user_access($group->gid, 'administer group');
 }
 
 /**
