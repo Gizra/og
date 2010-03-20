@@ -29,7 +29,7 @@ function og_ui_menu() {
     'file' => 'og_ui.pages.inc',
     'page callback' => 'og_ui_unsubscribe',
     'page arguments' => array(1, 2),
-    'access callback' => 'og_access',
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('unsubscribe', 1, 2),
     'title' => 'Leave group',
   );
@@ -37,7 +37,7 @@ function og_ui_menu() {
   $items['og/%/%/invite'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_invite_form', 1, 2),
-    'access callback' => 'og_access',
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('invite', 1, 2),
     'title' => 'Send invitation',
     'type' => MENU_CALLBACK,
@@ -51,7 +51,7 @@ function og_ui_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'og_ui.admin.inc',
     'weight' => 5,
-    'access callback' => 'og_access',
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('add user', 1, 2),
   );
 
@@ -62,7 +62,7 @@ function og_ui_menu() {
     'description' => 'Find and manage group members.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_user_admin_account', 1, 2),
-    'access callback' => 'og_access',
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
     'weight' => -4,
     'file' => 'og_ui.admin.inc',
@@ -75,7 +75,7 @@ function og_ui_menu() {
     'description' => 'List, edit, or add user roles.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_user_admin_new_role', 1, 2),
-    'access callback' => 'og_access',
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
     'file' => 'og_ui.admin.inc',
     'weight' => -9,
@@ -84,7 +84,7 @@ function og_ui_menu() {
   $items['og/%/%/admin/people/roles/edit'] = array(
     'title' => 'Edit role',
     'page arguments' => array('og_ui_user_admin_role', 1, 2),
-    'access callback' => 'og_access',
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
     'type' => MENU_CALLBACK,
   );
@@ -95,7 +95,7 @@ function og_ui_menu() {
     'description' => 'Determine access to features by selecting permissions for roles.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_user_admin_permissions', 1, 2),
-    'access callback' => 'og_access',
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
     'file' => 'og_ui.admin.inc',
     'weight' => -8,

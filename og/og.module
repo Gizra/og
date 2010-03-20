@@ -986,9 +986,9 @@ function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
 }
 
 /**
- * Menu callback; Central access point for all organic groups actions.
+ * Wrapper of og_user_access(); Gets entity ID instead of group ID.
  *
- * Function is imittating hook_node_access().
+ * Can be used as a menu callback.
  *
  * @param $perm
  *   The permissions name.
@@ -1003,7 +1003,7 @@ function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
  * @return
  *   TRUE if access is allowed, otherise FALSE.
  */
-function og_access($perm, $entity_type = NULL, $eid = NULL, $account = NULL) {
+function og_user_access_by_entity($perm, $entity_type = NULL, $eid = NULL, $account = NULL) {
   if (empty($account)) {
     global $user;
     $account = $user;
