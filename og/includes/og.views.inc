@@ -93,3 +93,43 @@ function og_views_data() {
 
   return $data;
 }
+
+/**
+ * Implementation of hook_views_handlers().
+ */
+function og_views_handlers() {
+  return array(
+    'info' => array(
+      'path' => drupal_get_path('module', 'og') .'/includes',
+    ),
+    'handlers' => array(
+    ),
+  );
+}
+
+
+/**
+ * Implementation of hook_views_plugins().
+ */
+function og_views_plugins() {
+  return array(
+    'argument default' => array(
+      'og_context' => array(
+        'title' => t('Current group from context'),
+        'handler' => 'og_plugin_argument_default_og_context',
+        'path' => drupal_get_path('module', 'og') . '/includes',
+        'parent' => 'fixed', // so that the parent class is included
+      ),
+    ),
+  );
+}
+
+
+/**
+ * Implementation of hook_views_query_substitutions().
+ */
+function og_views_query_substitutions($view) {
+  $group = og_context();
+  // return -1 instead of 0 to avoid matching all content without a group.
+  return array('***CURRENT_GID***' => $group ? $group->gid : -1);
+}

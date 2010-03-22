@@ -10,3 +10,7 @@ files[] = og.field.inc
 
 ; Test files.
 files[] = tests/og.test
+
+; Views handlers and plugins
+files[] = includes/og.views.inc
+files[] = includes/og_plugin_argument_default_og_context.inc
