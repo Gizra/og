@@ -7,10 +7,13 @@ version = VERSION
 files[] = og.module
 files[] = og.install
 files[] = og.field.inc
+files[] = includes/og.views.inc
 
 ; Test files.
 files[] = tests/og.test
 
-; Views handlers and plugins
-files[] = includes/og.views.inc
+; Views plugins
 files[] = includes/og_plugin_argument_default_og_context.inc
+
+; Views filters
+files[] = includes/og_handler_filter_group_state.inc

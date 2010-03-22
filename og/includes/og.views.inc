@@ -84,7 +84,10 @@ function og_views_data() {
       'handler' => 'views_handler_sort',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_string',
+      'handler' => 'og_handler_filter_group_state',
+      'numeric' => TRUE,
+      'allow empty' => FALSE,
+      'help' => t('Select the state of the group.'),
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -103,6 +106,10 @@ function og_views_handlers() {
       'path' => drupal_get_path('module', 'og') .'/includes',
     ),
     'handlers' => array(
+      // filter
+      'og_handler_filter_group_state' => array(
+        'parent' => 'views_handler_filter_in_operator',
+      ),
     ),
   );
 }
