@@ -1,0 +1,33 @@
+<p>Changes since DRUPAL-6--2-0:</p>
+<ul>
+  <li><a href="/node/431944">#431944</a> by ifoundthetao | gpk: Fixed Public Audience checkbox still visible with all private group settings.</li>
+  <li><a href="/node/669224">#669224</a> by greggles: Added move the og notifications addition form to a more appropriate place.</li>
+  <li><a href="/node/534870">#534870</a>: Split menu callbacks into pages.inc. Add userpage key to hook_notifications/subscription types.</li>
+  <li><a href="/node/659556">#659556</a> by marcp. Unnecessary selector in og_access.js</li>
+  <li><a href="/node/442238">#442238</a> by Scott Reynolds - Activity Integration with OG.</li>
+  <li><a href="/node/578858">#578858</a>. Use #pre_render instead.</li>
+  <li><a href="/node/586422">#586422</a> by gpk, lesmana | Amitaibu: Fixed Regression: 'Public' checkbox is unchecked when editing a node that is not in any groups.</li>
+  <li><a href="/node/602294">#602294</a> by Dave Reid. PHP notice: Undefined property: stdClass::</li>
+  <li><a href="/node/673824">#673824</a> by stella: Added 'Group: Private' field - add Private/Public display option.</li>
+  <li><a href="/node/475536">#475536</a> : Patch by hefox - Checking of category for user_profile_form.</li>
+  <li><a href="/node/711354">#711354</a> by Damien Tournoud  : Added Add a 'current group from context' default argument handler.</li>
+  <li><a href="/node/691646">#691646</a> by stella: Added Allow text of 'edit membership' field to be editable.</li>
+  <li><a href="/node/328758">#328758</a> by stella : Add 'invite to group' link in views.</li>
+  <li><a href="/node/555310">#555310</a> by rob.carter. fi upgrade to og2 in og_access.install</li>
+  <li><a href="/node/569502">#569502</a> by crea | Amitaibu: Added New Rules actions: add group to audience, remove group from audience.</li>
+  <li><a href="/node/644098">#644098</a> by crea: Fixed Use personal messages for user leaving a group (removing himself).</li>
+  <li><a href="/node/620032">#620032</a> by crea : Fixed Rules integration calls og_is_group_member() with wrong arguments, and allow checking if a user is a group admin.</li>
+  <li><a href="/node/639294">#639294</a> by marcp. More granular argument validation for OG Group Nodes.</li>
+  <li><a href="/node/569356">#569356</a> by greggles. 'new groups' shows moderated posts</li>
+  <li><a href="/node/658572">#658572</a> by jcmarco | Dave Reid: Changed Add support for vertical tabs.</li>
+  <li><a href="/node/362493">#362493</a> Fixed og_nodeapi() presave might filter out groups.</li>
+  <li><a href="/node/496468">#496468</a> by c4rl. allow admins to specify maximum audience per content type. can disable crossposting by setting this to 1.</li>
+  <li><a href="/node/701420">#701420</a> by yhahn, jmiccolis: Fixed managelink field handler has unpredictable results outside of a group context.</li>
+  <li><a href="/node/602754">#602754</a> by marcp. Add 'Manager of the current group' to Group nodes validator in Views.</li>
+  <li><a href="/node/656386">#656386</a> by alex_b: Fixed Redundant variable_set().</li>
+  <li><a href="/node/569110">#569110</a> by greggles, jcmarco, crea. SQL rewrite bug.</li>
+  <li><a href="/node/679770">#679770</a> by gordon: Added Additional Vertical Tabs JS.</li>
+  <li><a href="/node/534870">#534870</a> : Group subscriptions management - account for unpublished groups.</li>
+  <li><a href="/node/581822">#581822</a> by markus_petrux. og_nodeapi('validate') warning</li>
+  <li><a href="/node/555524">#555524</a> by NickSI | greggles: Fixed Filter 'OG: Is member an admin in a group' does not remember selected condition.</li>
+</ul>
