@@ -74,7 +74,7 @@ function og_entity_info() {
     'entity class' => 'EntityOg',
     'controller class' => 'OgController',
     'base table' => 'og_groups',
-    'object keys' => array(
+    'entity keys' => array(
       'id' => 'gid',
     ),
     // Entity-metadata properties.
@@ -775,7 +775,7 @@ function og_entity_label($entity) {
     'user' => 'name',
   );
 
-  $entity_info['object keys']['label'] = $entity_labels[$entity];
+  $entity_info['entity keys']['label'] = $entity_labels[$entity];
 
   return $entity_info;
 }
@@ -1488,10 +1488,10 @@ function og_entity_get_label_multiple($entity_type, $eids = array()) {
   $entity = og_entity_label($entity_type);
 
   // Get the table, ID and label of the object type.
-  if (!empty($entity['object keys']['label'])) {
+  if (!empty($entity['entity keys']['label'])) {
     $table = $entity['base table'];
-    $id = $entity['object keys']['id'];
-    $label = $entity['object keys']['label'];
+    $id = $entity['entity keys']['id'];
+    $label = $entity['entity keys']['label'];
 
     // Get the group ID along with the entity label.
     $query = db_select('og_groups', 'og')->fields('og', array('gid'));
