@@ -872,14 +872,14 @@ function og_og_get_fields() {
  *
  * @param $gid
  *   The group ID.
- * @param $count
- * @param $cursor
+ * @param $options
+ *   Options as passed to field_attach_query().
  *
  * @return
- *   Users entitys.
+ *   Array with user IDs.
  */
-function og_get_group_users($gid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
-  $return = array();
+function og_get_group_users($gid, $options = array()) {
+  $uids = array();
 
   $field = field_info_field('og_audience');
 
@@ -890,14 +890,11 @@ function og_get_group_users($gid, $count = FIELD_QUERY_NO_LIMIT, &$cursor = 0) {
 
   // Get the entitys IDs.
   if ($result = field_attach_query($field['id'], $conditions, array('limit' => $count, 'cursor' => $cursor))) {
-    $uids = array();
     foreach ($result['user'] as $key => $value) {
       $uids[$key] = $key;
     }
-    // Load the users.
-    $return = user_load_multiple($uids);
   }
-  return $return;
+  return $uids;
 }
 
 /**
