@@ -2237,23 +2237,21 @@ function og_create_field($field_name, $entity_type, $bundle) {
   else {
     // Make sure an inactive field doesn't exist.
     $prior_field = field_read_field($field_name, array('include_inactive' => TRUE));
-    if (empty($prior_field)) {
-      $field = field_info_field($field_name);
-      if (empty($field)) {
-        $field = field_create_field($og_field[$field_name]['field']);
-      }
+    $field = field_info_field($field_name);
+    if (empty($field) && empty($prior_field)) {
+      $field = field_create_field($og_field[$field_name]['field']);
+    }
 
-      $instance = field_info_instance($entity_type, $field_name, $bundle);
-      if (empty($instance)) {
+    $instance = field_info_instance($entity_type, $field_name, $bundle);
+    if (empty($instance)) {
 
-        $instance = array(
-          'field_name' => $field_name,
-          'bundle' => $bundle,
-          'object_type' => $entity_type,
-        ) + $og_field[$field_name]['instance'];
+      $instance = array(
+        'field_name' => $field_name,
+        'bundle' => $bundle,
+        'entity_type' => $entity_type,
+      ) + $og_field[$field_name]['instance'];
 
-        field_create_instance($instance);
-      }
+      field_create_instance($instance);
     }
   }
 }
