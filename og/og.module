@@ -889,7 +889,7 @@ function og_get_group_users($gid, $options = array()) {
   );
 
   // Get the entitys IDs.
-  if ($result = field_attach_query($field['id'], $conditions, array('limit' => $count, 'cursor' => $cursor))) {
+  if ($result = field_attach_query($field['id'], $conditions, $options)) {
     foreach ($result['user'] as $key => $value) {
       $uids[$key] = $key;
     }
