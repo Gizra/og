@@ -185,9 +185,9 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   // If it's an existing group, then exclude itself, as in some cases a group
   // can act also as a group content, but we want to prevent associating the
   // group to itself.
-  if (!empty($form['#' . $element['#object_type']])) {
-    list($id) = entity_extract_ids($element['#object_type'], $form['#' . $element['#object_type']]);
-    if (($group = og_get_group($element['#object_type'], $id))) {
+  if (!empty($form['#' . $element['#entity_type']])) {
+    list($id) = entity_extract_ids($element['#entity_type'], $form['#' . $element['#entity_type']]);
+    if (($group = og_get_group($element['#entity_type'], $id))) {
       $excludes[$group->gid] = $group->gid;
     }
   }
