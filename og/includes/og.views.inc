@@ -98,7 +98,7 @@ function og_views_data() {
     'title' => t('Members count'),
     'field' => array(
       'handler' => 'og_handler_field_group_member_count',
-      'click sortable' => TRUE,
+      'click sortable' => FALSE,
       'help' => t('Number of authenticated and approved members for a group. Excludes memberships which are pending approval or blocked.'),
     ),
   );

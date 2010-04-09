@@ -6,8 +6,4 @@ class og_handler_field_group_member_count extends views_handler_field_numeric {
 
     $this->field_alias = $this->query->add_field(NULL, "($sql)", 'member_count');
   }
-
-  function render($values) {
-    return $values->{$this->field_alias};
-  }
 }
