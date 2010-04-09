@@ -872,29 +872,27 @@ function og_og_get_fields() {
  *
  * @param $gid
  *   The group ID.
+ * @param $consitions
+ *   Conditions that will be passed to field_attach_query().
  * @param $options
- *   Options as passed to field_attach_query().
+ *   Options that will be passed to field_attach_query().
  *
  * @return
- *   Array with user IDs.
+ *   The field_attach_query().
  */
-function og_get_group_users($gid, $options = array()) {
-  $uids = array();
+function og_get_group_users($gid, $conditions = array(), $options = array()) {
+  $result = FALSE;
 
   $field = field_info_field('og_audience');
 
-  $conditions = array(
+  $conditions += array(
     array('gid', $gid),
     array('type', 'user'),
   );
 
   // Get the entitys IDs.
-  if ($result = field_attach_query($field['id'], $conditions, $options)) {
-    foreach ($result['user'] as $key => $value) {
-      $uids[$key] = $key;
-    }
-  }
-  return $uids;
+  $result = field_attach_query($field['id'], $conditions, $options);
+  return $result;
 }
 
 /**

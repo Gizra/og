@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_views_data().
+ * Implement hook_views_data().
  */
 function og_views_data() {
   $data = array();
@@ -94,29 +94,37 @@ function og_views_data() {
     ),
   );
 
+  $data['og_groups']['member_count'] = array(
+    'title' => t('Members count'),
+    'field' => array(
+      'handler' => 'og_handler_field_group_member_count',
+      'click sortable' => TRUE,
+      'help' => t('Number of authenticated and approved members for a group. Excludes memberships which are pending approval or blocked.'),
+    ),
+  );
+
   return $data;
 }
 
 /**
- * Implementation of hook_views_handlers().
+ * Implement hook_views_handlers().
  */
 function og_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'og') .'/includes',
+    // Field
+    'og_handler_field_group_member_count' => array(
+      'parent' => 'views_handler_field_numeric',
     ),
-    'handlers' => array(
-      // filter
-      'og_handler_filter_group_state' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
+    // Filter
+    'og_handler_filter_group_state' => array(
+      'parent' => 'views_handler_filter_in_operator',
     ),
   );
 }
 
 
 /**
- * Implementation of hook_views_plugins().
+ * Implement hook_views_plugins().
  */
 function og_views_plugins() {
   return array(
@@ -133,7 +141,7 @@ function og_views_plugins() {
 
 
 /**
- * Implementation of hook_views_query_substitutions().
+ * Implement hook_views_query_substitutions().
  */
 function og_views_query_substitutions($view) {
   $group = og_context();

@@ -13,7 +13,10 @@ files[] = includes/og.views.inc
 files[] = tests/og.test
 
 ; Views plugins
-files[] = includes/og_plugin_argument_default_og_context.inc
+files[] = includes/views/og_plugin_argument_default_og_context.inc
+
+; Views fields
+files[] = includes/views/og_handler_field_group_member_count.inc
 
 ; Views filters
-files[] = includes/og_handler_filter_group_state.inc
+files[] = includes/views/og_handler_filter_group_state.inc
