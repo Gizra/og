@@ -8,6 +8,6 @@ class og_handler_field_group_member_count extends views_handler_field_numeric {
   }
 
   function render($values) {
-    return $values->member_count;
+    return $values->{$this->field_alias};
   }
 }
