@@ -5,12 +5,12 @@
  */
 function og_views_default_views() {
   /*
-   * View 'og_list'
+   * View 'group_list'
    */
   $view = new view;
-  $view->name = 'og_list';
+  $view->name = 'group_list';
   $view->description = 'Show active groups that are nodes';
-  $view->tag = 'organic groups';
+  $view->tag = 'group';
   $view->view_php = '';
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
