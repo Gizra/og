@@ -868,34 +868,6 @@ function og_og_get_fields() {
  ******************************************************************************/
 
 /**
- * Get users belonging to a group.
- *
- * @param $gid
- *   The group ID.
- * @param $consitions
- *   Conditions that will be passed to field_attach_query().
- * @param $options
- *   Options that will be passed to field_attach_query().
- *
- * @return
- *   The field_attach_query().
- */
-function og_get_group_users($gid, $conditions = array(), $options = array()) {
-  $result = FALSE;
-
-  $field = field_info_field('og_audience');
-
-  $conditions += array(
-    array('gid', $gid),
-    array('type', 'user'),
-  );
-
-  // Get the entitys IDs.
-  $result = field_attach_query($field['id'], $conditions, $options);
-  return $result;
-}
-
-/**
  * Get the groups a content is associated with.
  *
  * @param $entity_type
