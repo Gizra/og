@@ -163,9 +163,6 @@ function og_views_plugins() {
 function og_views_data_alter(&$data) {
   $items = module_invoke_all('og_views_relationship');
 
-  // Allow other modules to alter data.
-  drupal_alter('og_views_relationship', $items, $data);
-
   foreach ($items as $item) {
     $entity = entity_get_info($item['entity']);
     $title = t('@entity group', array('@entity' => ucfirst($entity['label'])));
