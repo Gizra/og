@@ -35,7 +35,7 @@ function og_ui_group_admin_overview($entity_type, $eid) {
  * Add users to group form.
  */
 function og_ui_add_users($form, &$form_state, $entity_type, $eid) {
-  og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")));
+  og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")));
   if ($group = og_get_group($entity_type, $eid)) {
     $label = check_plain(og_entity_get_label($group->entity_type, $group->eid));
 
@@ -91,7 +91,7 @@ function og_ui_add_users_submit($form, &$form_state) {
  * @see og_user_admin_account_submit()
  */
 function og_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
-  og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")));
+  og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")));
   $group = og_get_group($entity_type, $eid);
   $header = array(
     'username' => array('data' => t('Username'), 'field' => 'u.name'),
@@ -246,7 +246,7 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $eid) {
     $rid = !empty($item['map'][7]) ? $item['map'][7] : 0;
 
     if ($rid) {
-      og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")), l(t('Roles'), "og/$entity_type/$eid/admin/people/roles"));
+      og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")), l(t('Roles'), "og/$entity_type/$eid/admin/people/roles"));
 
       $og_roles = og_user_roles($group->gid);
       if (!in_array($rid, array_keys($og_roles))) {
@@ -278,7 +278,7 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $eid) {
       );
     }
     else {
-      og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")));
+      og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")));
       if (!og_is_group_default_access($group->gid)) {
         $form['name'] = array(
           '#type' => 'textfield',
@@ -388,7 +388,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
 
   if (!empty($group)) {
     $gid =  $group->gid;
-    og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/og")));
+    og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")));
   }
   else {
     $gid = 0;
