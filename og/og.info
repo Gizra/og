@@ -8,6 +8,7 @@ files[] = og.module
 files[] = og.install
 files[] = og.field.inc
 files[] = includes/og.views.inc
+files[] = includes/og.rules.inc
 
 ; Test files.
 files[] = tests/og.test
