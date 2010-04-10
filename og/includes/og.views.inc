@@ -119,6 +119,10 @@ function og_views_handlers() {
     'og_handler_filter_group_state' => array(
       'parent' => 'views_handler_filter_in_operator',
     ),
+    // Relationship
+    'og_handler_relationship' => array(
+      'parent' => 'views_handler_relationship',
+    ),
   );
 }
 
@@ -138,6 +142,40 @@ function og_views_plugins() {
     ),
   );
 }
+
+/**
+ * Implement hook_views_data_alter().
+ */
+function og_views_data_alter(&$data) {
+  $items['node'] = array(
+    'entity' => 'node',
+    'views table' => 'node',
+    'join field' => 'nid',
+    'title field' => 'title',
+  );
+
+  foreach ($items as $item) {
+    $title = t('@entity group', array('@entity' => $item['entity']));
+    // TODO: add help.
+    $help = t('@entity group', array('@entity' => $item['entity']));
+
+    // Add the flag relationship.
+    $data[$item['views table']]['og_rel'] = array(
+      'group' => t('Organic groups'),
+      'title' => $title,
+      'help' => $help,
+      'relationship' => array(
+        'entity' => $item['entity'],
+        'handler' => 'og_handler_relationship',
+        'label' => t('organic groups'),
+        'base' => 'og_groups',
+        'base field' => 'eid',
+        'relationship field' => $item['join field'],
+      ),
+    );
+  }
+}
+
 
 
 /**

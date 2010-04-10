@@ -21,3 +21,6 @@ files[] = includes/views/og_handler_field_group_member_count.inc
 
 ; Views filters
 files[] = includes/views/og_handler_filter_group_state.inc
+
+; Views realtionships
+files[] = includes/views/og_handler_relationship.inc
