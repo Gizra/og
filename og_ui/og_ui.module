@@ -10,7 +10,7 @@
  * Implement hook_menu().
  */
 function og_ui_menu() {
-  $items['og/%/%/subscribe'] = array(
+  $items['group/%/%/subscribe'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'og_ui.pages.inc',
     'page callback' => 'og_ui_subscribe',
@@ -24,7 +24,7 @@ function og_ui_menu() {
     'title' => 'Join group'
   );
 
-  $items['og/%/%/unsubscribe'] = array(
+  $items['group/%/%/unsubscribe'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'og_ui.pages.inc',
     'page callback' => 'og_ui_unsubscribe',
@@ -34,7 +34,7 @@ function og_ui_menu() {
     'title' => 'Leave group',
   );
 
-  $items['og/%/%/invite'] = array(
+  $items['group/%/%/invite'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_invite_form', 1, 2),
     'access callback' => 'og_user_access_by_entity',
@@ -44,7 +44,7 @@ function og_ui_menu() {
     'file' => 'og_ui.pages.inc',
   );
 
-  $items['og/%/%/admin/people/add-user'] = array(
+  $items['group/%/%/admin/people/add-user'] = array(
     'page callback' => 'drupal_get_form',
     'title' => 'Add members',
     'page arguments' => array('og_ui_add_users', 1, 2),
@@ -56,7 +56,7 @@ function og_ui_menu() {
   );
 
   // User listing pages.
-  $items['og/%/%/admin/people'] = array(
+  $items['group/%/%/admin/people'] = array(
     'title arguments' => array('People in group @group', 1, 2),
     'title callback' => 'og_ui_menu_title_callback',
     'description' => 'Find and manage group members.',
@@ -69,7 +69,7 @@ function og_ui_menu() {
   );
 
   // Permission administration pages.
-  $items['og/%/%/admin/people/roles'] = array(
+  $items['group/%/%/admin/people/roles'] = array(
     'title arguments' => array('Roles for group @group', 1, 2),
     'title callback' => 'og_ui_menu_title_callback',
     'description' => 'List, edit, or add user roles.',
@@ -81,7 +81,7 @@ function og_ui_menu() {
     'weight' => -9,
   );
 
-  $items['og/%/%/admin/people/roles/edit'] = array(
+  $items['group/%/%/admin/people/roles/edit'] = array(
     'title' => 'Edit role',
     'page arguments' => array('og_ui_user_admin_role', 1, 2),
     'access callback' => 'og_user_access_by_entity',
@@ -89,7 +89,7 @@ function og_ui_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['og/%/%/admin/people/permissions'] = array(
+  $items['group/%/%/admin/people/permissions'] = array(
     'title arguments' => array('Permissions for group @group', 1, 2),
     'title callback' => 'og_ui_menu_title_callback',
     'description' => 'Determine access to features by selecting permissions for roles.',
@@ -103,7 +103,7 @@ function og_ui_menu() {
 
   foreach (entity_get_info() as $entity => $value) {
     if ($value['fieldable']) {
-      $items["$entity/%/og"] = array(
+      $items["$entity/%/group"] = array(
         'title' => 'Group',
         'page callback' => 'og_ui_group_admin_overview',
         'page arguments' => array($entity, 1),
@@ -116,7 +116,7 @@ function og_ui_menu() {
     }
   }
 
-  $items['admin/config/og'] = array(
+  $items['admin/config/group'] = array(
     'title' => 'Organic groups',
     'description' => 'Administer the suite of Organic groups modules.',
     'position' => 'right',
@@ -126,7 +126,7 @@ function og_ui_menu() {
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
-  $items['admin/config/og/permissions'] = array(
+  $items['admin/config/group/permissions'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_user_admin_global_permissions'),
     'title' => 'Organic groups global permissions',
@@ -134,20 +134,13 @@ function og_ui_menu() {
     'description' => 'Configure organic groups global permissions.',
     'file' => 'og_ui.admin.inc',
   );
-  $items['admin/config/og/fields'] = array(
+  $items['admin/config/group/fields'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_field_settings'),
     'title' => 'Organic groups field settings',
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure organic groups fields in bundles.',
     'file' => 'og_ui.admin.inc',
-  );
-
-  $items['og/opml'] = array(
-    'type' => MENU_CALLBACK,
-    'page callback' => 'og_opml',
-    'access callback' => 'user_is_logged_in',
-    'title' => 'OPML',
   );
 
   return $items;
