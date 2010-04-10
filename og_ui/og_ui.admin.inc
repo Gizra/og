@@ -20,7 +20,7 @@ function og_ui_group_admin_overview($entity_type, $eid) {
 
   foreach ($items as &$item) {
     // Re-format the URL.
-    $item['href'] = "og/$entity_type/$eid/" . $item['href'];
+    $item['href'] = "group/$entity_type/$eid/" . $item['href'];
     // Imitate the menu_get_item() content, so we can pass it to
     // theme_admin_block_content(), so we add the localized_options key.
     $item['localized_options'] = array();
