@@ -7,7 +7,7 @@
  */
 
 /**
- * Implement hook_views_data().
+ * Implements hook_views_data().
  */
 function og_views_data() {
   $data = array();
@@ -94,6 +94,21 @@ function og_views_data() {
     ),
   );
 
+  $data['og_groups']['created'] = array(
+    'title' => t('Group date'),
+    'help' => t('The date the group was created.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
   $data['og_groups']['member_count'] = array(
     'title' => t('Members count'),
     'field' => array(
@@ -107,7 +122,7 @@ function og_views_data() {
 }
 
 /**
- * Implement hook_views_handlers().
+ * Implements hook_views_handlers().
  */
 function og_views_handlers() {
   return array(
@@ -126,9 +141,8 @@ function og_views_handlers() {
   );
 }
 
-
 /**
- * Implement hook_views_plugins().
+ * Implements hook_views_plugins().
  */
 function og_views_plugins() {
   return array(
@@ -144,7 +158,7 @@ function og_views_plugins() {
 }
 
 /**
- * Implement hook_views_data_alter().
+ * Implements hook_views_data_alter().
  */
 function og_views_data_alter(&$data) {
   $items = module_invoke_all('og_views_relationship');
@@ -172,15 +186,4 @@ function og_views_data_alter(&$data) {
       ),
     );
   }
-}
-
-
-
-/**
- * Implement hook_views_query_substitutions().
- */
-function og_views_query_substitutions($view) {
-  $group = og_context();
-  // return -1 instead of 0 to avoid matching all content without a group.
-  return array('***CURRENT_GID***' => $group ? $group->gid : -1);
 }
