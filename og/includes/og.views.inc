@@ -147,19 +147,17 @@ function og_views_plugins() {
  * Implement hook_views_data_alter().
  */
 function og_views_data_alter(&$data) {
-  $items['node'] = array(
-    'entity' => 'node',
-    'views table' => 'node',
-    'join field' => 'nid',
-    'title field' => 'title',
-  );
+  $items = module_invoke_all('og_views_relationship');
+
+  // Allow other modules to alter data.
+  drupal_alter('og_views_relationship', $items, $data);
 
   foreach ($items as $item) {
-    $title = t('@entity group', array('@entity' => $item['entity']));
-    // TODO: add help.
-    $help = t('@entity group', array('@entity' => $item['entity']));
+    $entity = entity_get_info($item['entity']);
+    $title = t('@entity group', array('@entity' => ucfirst($entity['label'])));
+    $help = t('Add information on groups that belong to the @entity entity.', array('@entity' => ucfirst($entity['label'])));
 
-    // Add the flag relationship.
+    // Add the organic groups relationship.
     $data[$item['views table']]['og_rel'] = array(
       'group' => t('Organic groups'),
       'title' => $title,

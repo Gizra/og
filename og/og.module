@@ -171,6 +171,35 @@ function og_modules_uninstalled($modules) {
   }
 }
 
+/**
+ * Implements hook_og_views_relationship().
+ *
+ * Add relationship information for all core's enteties.
+ */
+function og_og_views_relationship() {
+  $items = array();
+
+  $items['node'] = array(
+    'entity' => 'node',
+    'views table' => 'node',
+    'join field' => 'nid',
+  );
+
+  $items['comment'] = array(
+    'entity' => 'comment',
+    'views table' => 'comment',
+    'join field' => 'cid',
+  );
+
+  $items['user'] = array(
+    'entity' => 'user',
+    'views table' => 'users',
+    'join field' => 'uid',
+  );
+
+
+  return $items;
+}
 
 /**
  * Return a loaded group entity if exists or create a new one.
