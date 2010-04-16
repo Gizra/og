@@ -337,7 +337,7 @@ function og_ui_user_admin_role_submit($form, &$form_state) {
     og_user_role_save($role);
     drupal_set_message(t('The role has been added.'));
   }
-  $form_state['redirect'] = 'og/' . $group->entity_type . '/' . $group->eid . '/admin/people/roles';
+  $form_state['redirect'] = 'group/' . $group->entity_type . '/' . $group->eid . '/admin/people/roles';
   return;
 }
 
@@ -359,7 +359,7 @@ function theme_og_ui_user_admin_new_role($variables) {
     $permissions = l($text, 'og/' . $group->entity_type .'/' . $group->eid . '/admin/people/permissions/' . $rid);
 
     if (!$default_roles && !in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
-      $rows[] = array($name, l(t('edit role'), 'og/' . $group->entity_type .'/' . $group->eid . '/admin/people/roles/edit/' . $rid), $permissions);
+      $rows[] = array($name, l(t('edit role'), 'group/' . $group->entity_type .'/' . $group->eid . '/admin/people/roles/edit/' . $rid), $permissions);
     }
     else {
       $rows[] = array($name, t('locked'), $permissions);
