@@ -2242,7 +2242,7 @@ function og_create_field($field_name, $entity_type, $bundle) {
     }
 
     $instance = field_info_instance($entity_type, $field_name, $bundle);
-    if (empty($instance)) {
+    if (empty($instance) && empty($prior_field)) {
 
       $instance = array(
         'field_name' => $field_name,
