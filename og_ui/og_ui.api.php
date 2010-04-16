@@ -19,7 +19,7 @@ function hook_og_ui_get_group_admin() {
   $items['add_people'] = array(
     'title' => t('Add people'),
     'description' => t('Add group members.'),
-    // The final URL will be "og/$entity_type/$eid/admin/people/add-user".
+    // The final URL will be "group/$entity_type/$eid/admin/people/add-user".
     'href' => 'admin/people/add-user',
   );
 

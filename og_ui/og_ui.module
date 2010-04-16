@@ -225,11 +225,11 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
 
       if ($state == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
         $links['title'] = t('Re-request group membership');
-        $links['href'] = "og/$entity_type/$id/subscribe";
+        $links['href'] = "group/$entity_type/$id/subscribe";
       }
       elseif ($state == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe', $account)) {
         $links['title'] = t('Unsubscribe from group');
-        $links['href'] = "og/$entity_type/$id/unsubscribe";
+        $links['href'] = "group/$entity_type/$id/unsubscribe";
       }
     }
     else {
@@ -239,7 +239,7 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
       elseif (og_user_access($group->gid, 'subscribe')) {
         $links['title'] = t('Request group membership');
       }
-      $links['href'] = "og/$entity_type/$id/subscribe";
+      $links['href'] = "group/$entity_type/$id/subscribe";
     }
 
     if (!empty($links['title'])) {
@@ -490,7 +490,7 @@ function og_ui_og_ui_get_group_admin($gid) {
   $items['add_people'] = array(
     'title' => t('Add people'),
     'description' => t('Add group members.'),
-    // The final URL will be "og/$entity_type/$eid/admin/people/add-user".
+    // The final URL will be "group/$entity_type/$eid/admin/people/add-user".
     // @see og_ui_group_admin_overview().
     'href' => 'admin/people/add-user',
   );

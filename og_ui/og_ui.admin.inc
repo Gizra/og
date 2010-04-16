@@ -248,11 +248,11 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $eid) {
     $rid = !empty($item['map'][7]) ? $item['map'][7] : 0;
 
     if ($rid) {
-      og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")), l(t('Roles'), "og/$entity_type/$eid/admin/people/roles"));
+      og_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")), l(t('Roles'), "group/$entity_type/$eid/admin/people/roles"));
 
       $og_roles = og_user_roles($group->gid);
       if (!in_array($rid, array_keys($og_roles))) {
-        drupal_goto("og/$entity_type, $eid/admin/people/roles");
+        drupal_goto("group/$entity_type, $eid/admin/people/roles");
       }
       // Display the edit role form.
       $role = og_user_role_load($rid);
