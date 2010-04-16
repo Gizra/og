@@ -9,8 +9,10 @@
 /**
  * Provide an overview of the administrator menu items.
  *
- * @param $node
- *   The group node.
+ * @param $entity_type
+ *   The entity type.
+ * @param $eid
+ *   The entity ID.
  */
 function og_ui_group_admin_overview($entity_type, $eid) {
   og_set_breadcrumb($entity_type, $eid);
@@ -507,10 +509,6 @@ function theme_og_ui_user_admin_permissions($variables) {
   $gid = !empty($form['group']['#value']->gid) ? $form['group']['#value']->gid : 0;
   $roles = og_user_roles($gid);
 
-  if (empty($gid)) {
-    // Add the 'bulk update' checkbox to the user roles.
-    $roles += array(0 => t('bulk update'));
-  }
   foreach (element_children($form['permission']) as $key) {
     $row = array();
     // Module name.
