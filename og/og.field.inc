@@ -346,8 +346,8 @@ function og_field_attach_delete($entity_type, $entity) {
 function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode, &$items) {
   //FIXME: Only $items['gid'] is populated.
   foreach ($items as &$item) {
-    $item['state'] = !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE;
-    $item['created'] = !empty($item['created']) ? $item['created'] : time();
+    // Set default values.
+    $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
   }
 }
 
