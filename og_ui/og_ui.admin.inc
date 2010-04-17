@@ -449,23 +449,33 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
       '#value' => $gid == 0 ? t('Save global permissions') : t('Save permissions'),
       '#submit' => array('og_ui_user_admin_permissions_submit'),
     );
-    $form['#after_build'] = array('og_ui_user_admin_permissions_after_build');
   }
+
+  $form['#after_build'][] = 'og_ui_user_admin_permissions_after_build';
 
   return $form;
 }
 
 /**
- * Helper function to disable the checkboxes according to their 'roles' state.
+ * Helper function to disable the permissions checkboxes.
  *
  * Every permission can declare to which roles it applies, as some don't make
  * sense if applied to anonymous or authenticated user (e.g. subscribe to group
  * should appear only to anonymous members).
+ * A second case for disabling is when using deafult roles and permissions, and
+ * the user is browsing a group's permissions page.
+ *
+ *
  */
 function og_ui_user_admin_permissions_after_build($element) {
-  // Authenticated roles.
   $gid = !empty($element['group']['#value']->gid) ? $element['group']['#value']->gid : 0;
+
+  // Indicate if all checkbes should be disabled.
+  $disable = $gid && og_is_group_default_access($gid);
+
+  // Authenticated roles.
   $auth_rids = array_flip(og_user_roles($gid));
+
   // Remove the anonymous member from the authenticated roles.
   $anon_rid = array_shift($auth_rids);
 
@@ -473,10 +483,10 @@ function og_ui_user_admin_permissions_after_build($element) {
     foreach ($module_perms as $key => $perm) {
       $perm['roles'] = drupal_map_assoc($perm['roles']);
 
-      if (empty($perm['roles']) || empty($perm['roles'][OG_ANONYMOUS_ROLE])) {
+      if ($disable || (empty($perm['roles']) || empty($perm['roles'][OG_ANONYMOUS_ROLE]))) {
         $element['checkboxes'][$anon_rid][$key]['#attributes']['disabled'] = TRUE;
       }
-      if (empty($perm['roles']) || empty($perm['roles'][OG_AUTHENTICATED_ROLE])) {
+      if ($disable || (empty($perm['roles']) || empty($perm['roles'][OG_AUTHENTICATED_ROLE]))) {
         foreach ($auth_rids as $auth_rid) {
           $element['checkboxes'][$auth_rid][$key]['#attributes']['disabled'] = TRUE;
         }
