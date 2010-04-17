@@ -320,6 +320,7 @@ function og_ui_user_admin_role_validate($form, &$form_state) {
 
 function og_ui_user_admin_role_submit($form, &$form_state) {
   $group = $form_state['values']['group'];
+  $role = new stdClass;
   $role->gid = $group->gid;
   $role->name = $form_state['values']['name'];
   if (!empty($form_state['values']['rid'])) {
