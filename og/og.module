@@ -2203,13 +2203,6 @@ function og_get_fields() {
 }
 
 /**
- * Get a private token used to protect links from spoofing - CSRF.
- */
-function og_get_token($gid) {
-  return drupal_get_token($gid);
-}
-
-/**
  * Check to see if a token value matches the specified node.
  */
 function og_check_token($token, $seed) {
