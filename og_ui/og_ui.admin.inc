@@ -357,7 +357,7 @@ function theme_og_ui_user_admin_new_role($variables) {
 
   foreach (og_user_roles($group->gid) as $rid => $name) {
     $text = !$default_roles ? t('edit permissions') : t('view permissions');
-    $permissions = l($text, 'og/' . $group->entity_type .'/' . $group->eid . '/admin/people/permissions/' . $rid);
+    $permissions = l($text, 'group/' . $group->entity_type .'/' . $group->eid . '/admin/people/permissions/' . $rid);
 
     if (!$default_roles && !in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
       $rows[] = array($name, l(t('edit role'), 'group/' . $group->entity_type .'/' . $group->eid . '/admin/people/roles/edit/' . $rid), $permissions);
