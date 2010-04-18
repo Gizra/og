@@ -29,9 +29,9 @@ function og_views_field_formatter_info() {
 }
 
 /**
- * Implement og_get_fields().
+ * Implement og_fields_info().
  */
-function og_views_og_get_fields() {
+function og_views_og_fields_info() {
   $items['og_views'] = array(
     'type' => array('group'),
     'description' => t('Add organic groups Views field to fieldable entities that are groups.'),

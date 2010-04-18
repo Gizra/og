@@ -816,9 +816,9 @@ function og_entity_label($entity) {
 }
 
 /**
- * Implement og_get_fields().
+ * Implement og_fields_info().
  */
-function og_og_get_fields() {
+function og_og_fields_info() {
   $items['og_group'] = array(
     'type' => array('group'),
     'description' => t('Determine if this should be a group.'),
@@ -2177,15 +2177,15 @@ function og_get_global_permissions() {
 /**
  * Get all the modules fields that can be assigned to fieldable enteties.
  */
-function og_get_fields() {
+function og_fields_info() {
   $return = &drupal_static(__FUNCTION__, array());
 
   if (!empty($return)) {
     return $return;
   }
 
-  foreach (module_implements('og_get_fields') as $module) {
-    if ($fields = module_invoke($module, 'og_get_fields')) {
+  foreach (module_implements('og_fields_info') as $module) {
+    if ($fields = module_invoke($module, 'og_fields_info')) {
       foreach ($fields as $key => $field) {
         // Add the module information.
         $return[$key] = array_merge($field, array('module' => $module));
@@ -2221,7 +2221,7 @@ function og_set_breadcrumb($entity_type, $eid, $path = array()) {
 function og_create_field($field_name, $entity_type, $bundle) {
   _field_info_collate_fields(TRUE);
   _field_info_collate_types(TRUE);
-  $og_field = og_get_fields($field_name);
+  $og_field = og_fields_info($field_name);
 
   if (!empty($og_field['callback'])) {
     // Field has own implementation for creating the fields.

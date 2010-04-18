@@ -587,7 +587,7 @@ function _og_admin_fields_overview($group_type = 'group') {
   $form = array();
   $options = $status = array();
 
-  $og_fields = og_get_fields();
+  $og_fields = og_fields_info();
 
   foreach (entity_get_info() as $entity => $entity_value) {
     if (!empty($entity_value['fieldable'])) {
@@ -629,7 +629,7 @@ function _og_admin_fields_overview($group_type = 'group') {
 
 function og_ui_field_settings_submit($form, &$form_state) {
   $messages = array();
-  $og_fields = og_get_fields();
+  $og_fields = og_fields_info();
   $bundle_info = array();
   foreach (field_info_bundles() as $entity => $bundles) {
     foreach ($bundles as $key => $value) {
