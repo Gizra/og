@@ -834,11 +834,11 @@ function og_og_fields_info() {
       'display' => array(
         'full' => array(
           'label' => 'above',
-          'type' => 'list_default',
+          'type' => 'og_group_subscribe',
         ),
         'teaser' => array(
           'label' => 'above',
-          'type' => 'list_default',
+          'type' => 'og_group_subscribe',
         ),
       ),
     ),
