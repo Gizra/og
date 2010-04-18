@@ -68,7 +68,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   }
 
   /**
-   * Test association of enteties to groups.
+   * Test creation of groups upon creation of enteties with group field.
    */
   function testOgFieldOgGroup() {
 
@@ -96,7 +96,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     node_save($node);
 
     // Reset the group.
-    $group = og_get_group('node', $node->nid, FALSE, array(OG_STATE_PENDING), TRUE);
+    $group = og_load($group->gid, TRUE);
 
     // Assert the group's state is pending.
     $this->assertTrue($group->state == OG_STATE_PENDING, t('Group entity was changed to pending.'));

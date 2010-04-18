@@ -464,8 +464,6 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
  * should appear only to anonymous members).
  * A second case for disabling is when using deafult roles and permissions, and
  * the user is browsing a group's permissions page.
- *
- *
  */
 function og_ui_user_admin_permissions_after_build($element) {
   $gid = !empty($element['group']['#value']->gid) ? $element['group']['#value']->gid : 0;
