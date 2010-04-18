@@ -92,7 +92,8 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Group entity state is active.'));
 
     // Edit the node progrmatically, and set the group state to pending.
-    $node->OG_GROUP_FIELD[LANGUAGE_NONE][0]['value'] = FALSE;
+    $property = OG_GROUP_FIELD;
+    $node->{$property}[LANGUAGE_NONE][0]['value'] = 0;
     node_save($node);
 
     // Reset the group.
