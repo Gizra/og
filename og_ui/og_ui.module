@@ -219,35 +219,44 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
 
   list($id) = entity_extract_ids($entity_type, $entity);
 
-  if (($group = og_get_group($entity_type, $id)) && (empty($entity->uid) || $entity->uid != $user->uid)) {
-    // check the user state.
-    if ($state = og_get_entity_state($group->gid, 'user', $account)) {
-
-      if ($state == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
-        $links['title'] = t('Re-request group membership');
-        $links['href'] = "group/$entity_type/$id/subscribe";
-      }
-      elseif ($state == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe', $account)) {
-        $links['title'] = t('Unsubscribe from group');
-        $links['href'] = "group/$entity_type/$id/unsubscribe";
-      }
+  if (($group = og_get_group($entity_type, $id))) {
+    if (!empty($entity->uid) && ($entity->uid == $user->uid)) {
+      // User is the group manager.
+      $return = array(
+        '#type' => 'item',
+        '#markup' => t('You are the group manager'),
+      );
     }
     else {
-      if (og_user_access($group->gid, 'subscribe without approval', $account)) {
-        $links['title'] = t('Subscribe to group');
-      }
-      elseif (og_user_access($group->gid, 'subscribe')) {
-        $links['title'] = t('Request group membership');
-      }
-      $links['href'] = "group/$entity_type/$id/subscribe";
-    }
+      // check the user state.
+      if ($state = og_get_entity_state($group->gid, 'user', $account)) {
 
-    if (!empty($links['title'])) {
-      $return = array(
-        '#type' => 'link',
-        '#title' => $links['title'],
-        '#href' => $links['href'],
-      );
+        if ($state == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
+          $links['title'] = t('Re-request group membership');
+          $links['href'] = "group/$entity_type/$id/subscribe";
+        }
+        elseif ($state == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe', $account)) {
+          $links['title'] = t('Unsubscribe from group');
+          $links['href'] = "group/$entity_type/$id/unsubscribe";
+        }
+      }
+      else {
+        if (og_user_access($group->gid, 'subscribe without approval', $account)) {
+          $links['title'] = t('Subscribe to group');
+        }
+        elseif (og_user_access($group->gid, 'subscribe')) {
+          $links['title'] = t('Request group membership');
+        }
+        $links['href'] = "group/$entity_type/$id/subscribe";
+      }
+
+      if (!empty($links['title'])) {
+        $return = array(
+          '#type' => 'link',
+          '#title' => $links['title'],
+          '#href' => $links['href'],
+        );
+      }
     }
   }
 
