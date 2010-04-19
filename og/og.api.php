@@ -146,11 +146,11 @@ function hook_og_user_role_delete($role) {
 }
 
 
-function hook_og_users_roles_grant($nid, $uid, $rid) {
+function hook_og_users_roles_grant($gid, $uid, $rid) {
 
 }
 
-function hook_og_users_roles_revoke($nid, $uid, $rid) {
+function hook_og_users_roles_revoke($gid, $uid, $rid) {
 
 }
 
