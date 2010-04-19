@@ -64,12 +64,11 @@ function og_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-      'state'     => array(
-        'description'     => 'The state of the group (i.e. active or disabled).',
-        'type'            => 'varchar',
-        'length'          => 255,
-        'not null'        => FALSE,
-        'default' => '',
+      'state' => array(
+        'description' => 'The state of the group (i.e. active or disabled).',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
       ),
 	    'created' => array(
 	      'description' => 'The Unix timestamp when the group was created.',

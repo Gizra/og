@@ -18,18 +18,18 @@ define('OG_DELETE_MOVE_NODES_MEMBERSHIPS', 3);
 /**
  * Define active group content states.
  */
-define('OG_STATE_ACTIVE', 'active');
+define('OG_STATE_ACTIVE', 1);
 
 /**
  * Define pending group content states. The user is subscribed to the group but
  * isn't an active member yet.
  */
-define('OG_STATE_PENDING', 'pending');
+define('OG_STATE_PENDING', 2);
 
 /**
  * Define blocked group content states. The user is rejected from the group.
  */
-define('OG_STATE_BLOCKED', 'blocked');
+define('OG_STATE_BLOCKED', 3);
 
 /**
  * Group audience field.
