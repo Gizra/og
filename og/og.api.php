@@ -114,6 +114,38 @@ function hook_og_default_permissions_alter(&$perms) {
   $perms['foo'][] = 'super admin';
 }
 
+/**
+ * Allow modules to act upon new group role.
+ *
+ * @param $role
+ *   The group role object.
+ */
+function hook_og_user_role_insert($role) {
+}
+
+/**
+ * Allow modules to act upon existing group role update.
+ *
+ * @param $role
+ *   The group role object.
+ */
+function hook_og_user_role_update($role) {
+
+}
+
+/**
+ * Allow modules to act upon existing group role deletion.
+ *
+ * @param $role
+ *   The deleted group role object. The object is actually a dummy, as the data
+ *   is already deleted from the database. However, we pass the object to allow
+ *   implementing modules to properly identify the deleted role.
+ */
+function hook_og_user_role_delete($role) {
+
+}
+
+
 function hook_og_users_roles_grant($nid, $uid, $rid) {
 
 }
