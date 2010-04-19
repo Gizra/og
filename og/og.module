@@ -130,28 +130,6 @@ function og_entity_property_info() {
 }
 
 /**
- * Return the states a group can be in.
- */
-function og_group_states() {
-  return array(
-    OG_STATE_ACTIVE => t('Active'),
-    OG_STATE_PENDING => t('Pending'),
-  );
-}
-
-/**
- * Return the states a group can be in.
- */
-function og_group_content_states() {
-  return array(
-    OG_STATE_ACTIVE => t('Active'),
-    OG_STATE_PENDING => t('Pending'),
-    OG_STATE_BLOCKED => t('Blocked'),
-  );
-}
-
-
-/**
  * Implement hook_modules_enabled().
  */
 function og_modules_enabled($modules) {
@@ -197,9 +175,232 @@ function og_og_views_relationship() {
     'join field' => 'uid',
   );
 
+  //TODO: Add all enteties.
 
   return $items;
 }
+
+/**
+ * Implements hook_permission().
+ */
+function og_permission() {
+  return array(
+    'administer organic groups' =>  array(
+      'title' => t('Administer organic groups permissions'),
+      'description' => t('Administer all groups and permissions.'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_init().
+ */
+function og_init() {
+  og_context();
+}
+
+/**
+ * Implement hook_og_permission().
+ */
+function og_og_permission() {
+  return array(
+    'update group' => array(
+      'title' => t('Edit group'),
+      'description' => t('Edit the group content.'),
+    ),
+    'update own group content' => array(
+      'title' => t('Edit own group content'),
+      'description' => t('Edit own group content that belong to the group.'),
+    ),
+    'update any group content' => array(
+      'title' => t('Edit any group content'),
+      'description' => t('Edit any group content that belong to the group.'),
+    ),
+    'delete own group content' => array(
+      'title' => t('Delete own group content'),
+      'description' => t('Delete own group content that belong to the group.'),
+    ),
+    'delete any group content' => array(
+      'title' => t('Delete any group content'),
+      'description' => t('Delete any of the group content that belong to the group.'),
+    ),
+    'administer group' => array(
+      'title' => t('Administer group'),
+      'description' => t('Manage or block users, and manage their role assignments in the group.'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_og_default_permissions().
+ */
+function og_og_default_permissions() {
+  return array(
+    'update own group content' => array(OG_AUTHENTICATED_ROLE),
+    'delete own group content' => array(OG_AUTHENTICATED_ROLE),
+
+    'update group' => array(OG_ADMINISTRATOR_ROLE),
+    'update any group content' => array(OG_ADMINISTRATOR_ROLE),
+    'delete any group content' => array(OG_ADMINISTRATOR_ROLE),
+    'administer group' => array(OG_ADMINISTRATOR_ROLE),
+  );
+}
+
+/**
+ * Implement hook_og_default_roles()
+ */
+function og_og_default_roles() {
+  return array(OG_ADMINISTRATOR_ROLE);
+}
+
+/**
+ * Implement hook_node_access()
+ */
+function og_node_access($node, $op, $account) {
+  $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
+  if (in_array($op, array('update', 'delete'))) {
+    if (($group = og_get_group('node', $node->nid))) {
+      return og_user_access($group->gid, $op . ' group', $account) ? NODE_ACCESS_ALLOW : NODE_ACCESS_DENY;
+    }
+    elseif ($gids = og_get_entity_groups('node', $node)) {
+      // We don't have a context, so we need to get all the permissions
+      // of all the groups. We don't intersect with the user's group, as
+      // groups might allow anonymous members access.
+      $return = NODE_ACCESS_DENY;
+      foreach ($gids as $gid) {
+        if (og_user_access($gid, $op . ' group content', $account) || og_user_access($gid, $op . ' any group content', $account) || (og_user_access($gid, $op . ' own group content', $account) && $node->uid == $account->uid)) {
+          $return =  NODE_ACCESS_ALLOW;
+          break;
+        }
+      }
+      return $return;
+    }
+  }
+  // Not an organic group type or node creation which still has no groups.
+  return NODE_ACCESS_IGNORE;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function og_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'og') . '/includes',
+  );
+}
+
+/**
+ * Implement og_fields_info().
+ */
+function og_og_fields_info() {
+  $items['og_group'] = array(
+    'type' => array('group'),
+    'description' => t('Determine if this should be a group.'),
+    'field' => array(
+      'field_name' => 'og_group',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Not a group type', '1|Group type')), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
+      'label' => t('Group type'),
+      'widget_type' => 'options_buttons',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'og_group_subscribe',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'og_group_subscribe',
+        ),
+      ),
+    ),
+  );
+
+  $items['og_group_default_access'] = array(
+    'type' => array('group'),
+    'description' => t('Determine if group should use default roles and permissions.'),
+    'field' => array(
+      'field_name' => 'og_group_default_access',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Use default roles and permissions', '1|Override default roles and permissions')), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
+      'label' => t('Group roles and permissions'),
+      'widget_type' => 'options_buttons',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+      ),
+    ),
+  );
+
+
+  $items['og_audience'] = array(
+    'type' => array('group content'),
+    'description' => t('Determine to which groups this group content is assigned to.'),
+    'field' => array(
+      'field_name' => 'og_audience',
+      'type' => 'og',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    ),
+    'instance' => array(
+      'label' => t('Groups audience'),
+      'widget_type' => 'og_audience',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'og_list_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'og_list_default',
+        ),
+      ),
+    ),
+  );
+
+  return $items;
+}
+
+
+/**
+* Implement hook_node_type_delete().
+*
+* We immediately delete those variables as they are only used to indicate a
+* content type should be a group or a group content. However, the actual
+* indication for it is in the field API. This is just a workaround, specifically
+* for the node entity, to allow users to define groups via the "content type"
+* edit.
+*/
+function og_node_type_delete($info) {
+  variable_del('og_group_type_' . $info->type);
+  variable_del('og_group_content_type_' . $info->type);
+}
+
+/**
+* Implement hook_node_type_insert().
+*/
+function og_node_type_insert($info) {
+  og_node_type_save($info->type);
+}
+
+/**
+* Implement hook_node_type_update().
+*/
+function og_node_type_update($info) {
+  og_node_type_save($info->type);
+}
+
 
 /**
  * Return a loaded group entity if exists or create a new one.
@@ -636,46 +837,6 @@ function og_user_access($gid, $string, $account = NULL) {
 }
 
 
-/**
- * Implements hook_permission().
- */
-function og_permission() {
-  return array(
-    'administer organic groups' =>  array(
-      'title' => t('Administer organic groups permissions'),
-      'description' => t('Administer all groups and permissions.'),
-    ),
-  );
-}
-
-/**
- * Implement hook_init().
- */
-function og_init() {
-  og_context();
-}
-
-/**
-* Implement hook_node_type_delete().
-*/
-function og_node_type_delete($info) {
-  variable_del('og_group_type_' . $info->type);
-  variable_del('og_group_content_type_' . $info->type);
-}
-
-/**
-* Implement hook_node_type_insert().
-*/
-function og_node_type_insert($info) {
-  og_node_type_save($info->type);
-}
-
-/**
-* Implement hook_node_type_update().
-*/
-function og_node_type_update($info) {
-  og_node_type_save($info->type);
-}
 
 /**
  * Add group and group content fields to new content types.
@@ -696,96 +857,6 @@ function og_node_type_save($bundle_name) {
   }
 }
 
-/**
- * Implement hook_og_permission().
- */
-function og_og_permission() {
-  return array(
-    'update group' => array(
-      'title' => t('Edit group'),
-      'description' => t('Edit the group content.'),
-    ),
-    'update own group content' => array(
-      'title' => t('Edit own group content'),
-      'description' => t('Edit own group content that belong to the group.'),
-    ),
-    'update any group content' => array(
-      'title' => t('Edit any group content'),
-      'description' => t('Edit any group content that belong to the group.'),
-    ),
-    'delete own group content' => array(
-      'title' => t('Delete own group content'),
-      'description' => t('Delete own group content that belong to the group.'),
-    ),
-    'delete any group content' => array(
-      'title' => t('Delete any group content'),
-      'description' => t('Delete any of the group content that belong to the group.'),
-    ),
-    'administer group' => array(
-      'title' => t('Administer group'),
-      'description' => t('Manage or block users, and manage their role assignments in the group.'),
-    ),
-  );
-}
-
-/**
- * Implement hook_og_default_permissions().
- */
-function og_og_default_permissions() {
-  return array(
-    'update own group content' => array(OG_AUTHENTICATED_ROLE),
-    'delete own group content' => array(OG_AUTHENTICATED_ROLE),
-
-    'update group' => array(OG_ADMINISTRATOR_ROLE),
-    'update any group content' => array(OG_ADMINISTRATOR_ROLE),
-    'delete any group content' => array(OG_ADMINISTRATOR_ROLE),
-    'administer group' => array(OG_ADMINISTRATOR_ROLE),
-  );
-}
-
-/**
- * Implement hook_og_default_roles()
- */
-function og_og_default_roles() {
-  return array(OG_ADMINISTRATOR_ROLE);
-}
-
-/**
- * Implement hook_node_access()
- */
-function og_node_access($node, $op, $account) {
-  $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-  if (in_array($op, array('update', 'delete'))) {
-    if (($group = og_get_group('node', $node->nid))) {
-      return og_user_access($group->gid, $op . ' group', $account) ? NODE_ACCESS_ALLOW : NODE_ACCESS_DENY;
-    }
-    elseif ($gids = og_get_entity_groups('node', $node)) {
-      // We don't have a context, so we need to get all the permissions
-      // of all the groups. We don't intersect with the user's group, as
-      // groups might allow anonymous members access.
-      $return = NODE_ACCESS_DENY;
-      foreach ($gids as $gid) {
-        if (og_user_access($gid, $op . ' group content', $account) || og_user_access($gid, $op . ' any group content', $account) || (og_user_access($gid, $op . ' own group content', $account) && $node->uid == $account->uid)) {
-          $return =  NODE_ACCESS_ALLOW;
-          break;
-        }
-      }
-      return $return;
-    }
-  }
-  // Not an organic group type or node creation which still has no groups.
-  return NODE_ACCESS_IGNORE;
-}
-
-/**
- * Implementation of hook_views_api().
- */
-function og_views_api() {
-  return array(
-    'api' => 2,
-    'path' => drupal_get_path('module', 'og') . '/includes',
-  );
-}
 
 /**
  * Get label information to fieldable entities.
@@ -813,88 +884,6 @@ function og_entity_label($entity) {
   $entity_info['entity keys']['label'] = $entity_labels[$entity];
 
   return $entity_info;
-}
-
-/**
- * Implement og_fields_info().
- */
-function og_og_fields_info() {
-  $items['og_group'] = array(
-    'type' => array('group'),
-    'description' => t('Determine if this should be a group.'),
-    'field' => array(
-      'field_name' => 'og_group',
-      'type' => 'list_boolean',
-      'cardinality' => 1,
-      'settings' => array('allowed_values' => implode("\r\n", array('0|Not a group type', '1|Group type')), 'allowed_values_function' => ''),
-    ),
-    'instance' => array(
-      'label' => t('Group type'),
-      'widget_type' => 'options_buttons',
-      'display' => array(
-        'full' => array(
-          'label' => 'above',
-          'type' => 'og_group_subscribe',
-        ),
-        'teaser' => array(
-          'label' => 'above',
-          'type' => 'og_group_subscribe',
-        ),
-      ),
-    ),
-  );
-
-  $items['og_group_default_access'] = array(
-    'type' => array('group'),
-    'description' => t('Determine if group should use default roles and permissions.'),
-    'field' => array(
-      'field_name' => 'og_group_default_access',
-      'type' => 'list_boolean',
-      'cardinality' => 1,
-      'settings' => array('allowed_values' => implode("\r\n", array('0|Use default roles and permissions', '1|Override default roles and permissions')), 'allowed_values_function' => ''),
-    ),
-    'instance' => array(
-      'label' => t('Group roles and permissions'),
-      'widget_type' => 'options_buttons',
-      'display' => array(
-        'full' => array(
-          'label' => 'above',
-          'type' => 'list_default',
-        ),
-        'teaser' => array(
-          'label' => 'above',
-          'type' => 'list_default',
-        ),
-      ),
-    ),
-  );
-
-
-  $items['og_audience'] = array(
-    'type' => array('group content'),
-    'description' => t('Determine to which groups this group content is assigned to.'),
-    'field' => array(
-      'field_name' => 'og_audience',
-      'type' => 'og',
-      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-    ),
-    'instance' => array(
-      'label' => t('Groups audience'),
-      'widget_type' => 'og_audience',
-      'display' => array(
-        'full' => array(
-          'label' => 'above',
-          'type' => 'og_list_default',
-        ),
-        'teaser' => array(
-          'label' => 'above',
-          'type' => 'og_list_default',
-        ),
-      ),
-    ),
-  );
-
-  return $items;
 }
 
 
@@ -2282,5 +2271,26 @@ function og_load_entity_from_group($gid) {
   }
 
   return $entity;
+}
 
+
+/**
+ * Return the states a group can be in.
+ */
+function og_group_states() {
+  return array(
+    OG_STATE_ACTIVE => t('Active'),
+    OG_STATE_PENDING => t('Pending'),
+  );
+}
+
+/**
+ * Return the states a group can be in.
+ */
+function og_group_content_states() {
+  return array(
+    OG_STATE_ACTIVE => t('Active'),
+    OG_STATE_PENDING => t('Pending'),
+    OG_STATE_BLOCKED => t('Blocked'),
+  );
 }
