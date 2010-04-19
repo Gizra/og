@@ -372,6 +372,68 @@ function og_og_fields_info() {
   return $items;
 }
 
+/**
+ * Implement hook_og_context_handlers()
+ */
+function og_og_context_handlers() {
+  $items = array();
+
+  $items['session'] = array(
+    'callback' => 'og_context_handler_session',
+    'menu' => FALSE,
+    'priority' => TRUE,
+  );
+
+  $items['url'] = array(
+    'callback' => 'og_context_handler_url',
+    'menu' => FALSE,
+  );
+
+  $items['node'] = array(
+    'callback' => 'og_context_handler_node',
+    'menu path' => array('node/%', 'node/%/edit'),
+  );
+
+  $items['user_view'] = array(
+    'callback' => 'og_context_handler_user_view',
+    'menu path' => array('user/%'),
+  );
+
+  $items['user_edit'] = array(
+    'callback' => 'og_context_handler_user_edit',
+    'menu path' => array('user/%/edit'),
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implement hook_preprocess_html().
+ *
+ * HTML preprocess; Add context related templates and CSS.
+ */
+function og_preprocess_html(&$variables) {
+  if ($group = og_context()) {
+    // Add template suggestions.
+    $variables['theme_hook_suggestions'][] = 'page__og_context';
+    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->gid;
+    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->entity_type;
+    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->entity_type . '_' . $group->eid;
+
+    // Add CSS.
+    $clean_html = drupal_html_class('og-context-' . $group->entity_type);
+    $variables['classes_array'][] = 'og-context';
+    $variables['classes_array'][] = 'og-context-' . $group->gid;
+    $variables['classes_array'][] = $clean_html;
+    $variables['classes_array'][] = $clean_html . '-' . $group->eid;
+
+    // Add context to JS.
+    og_context_js($group);
+  }
+}
+
+
 
 /**
 * Implement hook_node_type_delete().
@@ -1074,7 +1136,6 @@ function og_get_entity_state($gid, $entity_type, $entity) {
   if (!empty($wrapper)) {
     foreach ($wrapper as $key => $value) {
       if ($value['gid'] == $gid) {
-        // Save the state.
         $state = $value['state'];
       }
     }
@@ -1185,41 +1246,6 @@ function og_determine_context() {
   return $context;
 }
 
-/**
- * Implement hook_og_context_handlers()
- */
-function og_og_context_handlers() {
-  $items = array();
-
-  $items['session'] = array(
-    'callback' => 'og_context_handler_session',
-    'menu' => FALSE,
-    'priority' => TRUE,
-  );
-
-
-  $items['url'] = array(
-    'callback' => 'og_context_handler_url',
-    'menu' => FALSE,
-  );
-
-  $items['node'] = array(
-    'callback' => 'og_context_handler_node',
-    'menu path' => array('node/%', 'node/%/edit'),
-  );
-
-  $items['user_view'] = array(
-    'callback' => 'og_context_handler_user_view',
-    'menu path' => array('user/%'),
-  );
-
-  $items['user_edit'] = array(
-    'callback' => 'og_context_handler_user_edit',
-    'menu path' => array('user/%/edit'),
-  );
-
-  return $items;
-}
 
 /**
  * Context handler; Get groups from user's session.
@@ -1347,35 +1373,6 @@ function og_context_js($group) {
   }
 }
 
-/**
- * Implement hook_preprocess_html().
- *
- * HTML preprocess; Add context related templates and CSS.
- */
-function og_preprocess_html(&$variables) {
-  if ($group = og_context()) {
-    // Add template suggestions.
-    $variables['theme_hook_suggestions'][] = 'page__og_context';
-    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->gid;
-    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->entity_type;
-    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->entity_type . '_' . $group->eid;
-
-    // Add CSS.
-    $clean_html = drupal_html_class('og-context-' . $group->entity_type);
-    $variables['classes_array'][] = 'og-context';
-    $variables['classes_array'][] = 'og-context-' . $group->gid;
-    $variables['classes_array'][] = $clean_html;
-    $variables['classes_array'][] = $clean_html . '-' . $group->eid;
-
-    // Add context to JS.
-    og_context_js($group);
-  }
-}
-
-
-/*******************************************************************************
- * Function callbacks
- ******************************************************************************/
 
 /**
  * Select groups if they were passed in the URL.
@@ -1518,15 +1515,6 @@ function og_entity_get_label_multiple($entity_type, $eids = array()) {
 function og_entity_get_label($entity_type, $eid) {
   return current(og_entity_get_label_multiple($entity_type, array($eid)));
 
-}
-
-/**
- * Wrapper function to invoke an event.
- */
-function og_invoke_event() {
-  if (module_exists('rules')) {
-    // Invoke a Rules event.
-  }
 }
 
 /**
@@ -1751,8 +1739,7 @@ function og_set_global_access_module($module = '') {
  * Add a new global role - a role associated to group ID 0.
  *
  * @param $name
- *   The orle name.
- *
+ *   The role name.
  * @return
  *   The role object populated iwth the role ID.
  */
