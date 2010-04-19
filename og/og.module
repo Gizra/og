@@ -1639,7 +1639,7 @@ function og_get_global_roles() {
 function og_get_default_roles($include = TRUE) {
   $roles = module_invoke_all('og_default_roles');
 
-  // Allow other modules to alter the roles and permissions.
+  // Allow other modules to alter the defult roles.
   drupal_alter('og_default_roles', $roles);
 
   if ($include) {
