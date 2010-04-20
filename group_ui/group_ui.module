@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Organic groups UI.
+ * Group UI.
  */
 
 /**
@@ -117,8 +117,8 @@ function group_ui_menu() {
   }
 
   $items['admin/config/group'] = array(
-    'title' => 'Organic groups',
-    'description' => 'Administer the suite of Organic groups modules.',
+    'title' => 'Group',
+    'description' => 'Administer the suite of Group modules.',
     'position' => 'right',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
@@ -129,7 +129,7 @@ function group_ui_menu() {
   $items['admin/config/group/permissions'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('group_ui_user_admin_global_permissions'),
-    'title' => 'Organic groups global permissions',
+    'title' => 'Group global permissions',
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure organic groups global permissions.',
     'file' => 'group_ui.admin.inc',
@@ -137,7 +137,7 @@ function group_ui_menu() {
   $items['admin/config/group/fields'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('group_ui_field_settings'),
-    'title' => 'Organic groups field settings',
+    'title' => 'Group field settings',
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure organic groups fields in bundles.',
     'file' => 'group_ui.admin.inc',
@@ -181,7 +181,7 @@ function group_ui_theme() {
 function group_ui_field_formatter_info() {
   return array(
     'group_group_subscribe' => array(
-      'label' => t('Organic groups subscription'),
+      'label' => t('Group subscription'),
       'field types' => array('list_boolean'),
     ),
   );
@@ -283,7 +283,7 @@ function group_ui_form_node_type_form_alter(&$form, &$form_state) {
 
   $form['group'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Organic groups'),
+    '#title' => t('Group'),
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
     '#description' => t('Specify how organic groups should treat content of this type. Content may behave as a group, as group content, or may not participate in organic groups at all.'),

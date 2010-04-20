@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Page callbacks for Organic groups module.
+ * Page callbacks for Group module.
  */
 
 /**

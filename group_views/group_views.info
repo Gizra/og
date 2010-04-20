@@ -1,7 +1,7 @@
 ; $Id:$
-name = Organic groups Views integration
+name = Group Views integration
 description = "Use Views to search and display organic groups."
-package = "Organic groups"
+package = "Group"
 dependencies[] = group
 dependencies[] = views
 core = 7.x

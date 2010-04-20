@@ -8,9 +8,9 @@ class OgGroupCrud extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups group CRUD',
+      'name' => 'Group group CRUD',
       'description' => 'Test the create, update and remove of group entitys.',
-      'group' => 'Organic groups',
+      'group' => 'Group',
     );
   }
 
@@ -111,9 +111,9 @@ class OgTypeTest extends DrupalWebTestCase {
 
   public static function __getInfo() {
     return array(
-      'name' => 'Organic groups content types',
+      'name' => 'Group content types',
       'description' => 'Test the organic groups group node and group content creation.',
-      'group' => 'Organic groups',
+      'group' => 'Group',
     );
   }
 
@@ -149,9 +149,9 @@ class OgTypeTest extends DrupalWebTestCase {
 class OgUserPermissionsTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups role permissions',
+      'name' => 'Group role permissions',
       'description' => 'Verify that role permissions can be added and removed via API.',
-      'group' => 'Organic groups'
+      'group' => 'Group'
     );
   }
 

@@ -1,6 +1,6 @@
-name = Organic groups
+name = Group
 description = "API to allow associating content with group nodes."
-package = "Organic groups"
+package = "Group"
 dependencies[] = entity
 core = 7.x
 version = VERSION

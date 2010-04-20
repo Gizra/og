@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Rules module functionality for the Organic groups module.
+ * Rules module functionality for the Group module.
  */
 
 
@@ -30,7 +30,7 @@ function group_rules_action_info() {
         'description' => t('The state of the association.'),
       ),
     ),
-    'group' => t('Organic groups'),
+    'group' => t('Group'),
   );
 
   return $items;
@@ -72,7 +72,7 @@ function group_rules_action_add_group_node_form($settings, &$form) {
   $group_form = group_group_form($node, array());
   $form['settings']['group_fieldset'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Organic groups form settings'),
+    '#title' => t('Group form settings'),
   );
   $form['settings']['group_fieldset']['group_settings'] = $group_form;
 }
@@ -95,7 +95,7 @@ function group_rules_condition_info() {
         ),
       ),
       'help' => t('Evaluates to TRUE if the user is an approved member of the group. If the user is a pending member this condition will return FALSE.'),
-      'module' => 'Organic groups',
+      'module' => 'Group',
     ),
     'group_rules_condition_content_is_group' => array(
       'label' => t('Content is a group'),
@@ -106,7 +106,7 @@ function group_rules_condition_info() {
         ),
       ),
       'help' => t('Evaluates to TRUE if the content is a group.'),
-      'module' => 'Organic groups',
+      'module' => 'Group',
     ),
     'group_rules_condition_content_is_group_content' => array(
       'label' => t('Content is a group content'),
@@ -117,7 +117,7 @@ function group_rules_condition_info() {
         ),
       ),
       'help' => t('Evaluates to TRUE if the content is a group content.'),
-      'module' => 'Organic groups',
+      'module' => 'Group',
     ),
   );
 }

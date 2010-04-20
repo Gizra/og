@@ -180,7 +180,7 @@ if (module_exists('group')) {
   /**
    * Implements hook_update_N()
    *
-   * Upgrade path from Organic groups for Drupal 6 to Group for Drupal 7.
+   * Upgrade path from Group for Drupal 6 to Group for Drupal 7.
    */
   function group_update_7000() {
 

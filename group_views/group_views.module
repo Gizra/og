@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Views integration for the Organic groups module.
+ * Views integration for the Group module.
  */
 
 
@@ -22,7 +22,7 @@ function group_views_views_api() {
 function group_views_field_formatter_info() {
   return array(
     'group_views_default' => array(
-      'label' => t('Organic groups Views'),
+      'label' => t('Group Views'),
       'field types' => array('list_text'),
     ),
   );

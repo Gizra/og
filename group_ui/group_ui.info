@@ -1,6 +1,6 @@
-name = Organic groups UI
-description = "Organic groups UI."
-package = "Organic groups"
+name = Group UI
+description = "Group UI."
+package = "Group"
 dependencies[] = group
 core = 7.x
 version = VERSION

@@ -1,6 +1,6 @@
-name = Organic groups register
+name = Group register
 description = "Allow subscribing to groups during the user registration."
-package = "Organic groups"
+package = "Group"
 dependencies[] = group
 core = 7.x
 version = VERSION

@@ -51,7 +51,7 @@ different set of actions, in different group contexts.
 
 OG INSTALLATION DRUPAL 7.x
 --------------------------------------------
-1. Enable the Organic groups and the Organic groups UI modules.
+1. Enable the Group and the Group UI modules.
 2. Create a new content type via admin/structure/types/add. Call it "Group", and 
    define it to be of Group type.
 3. Create a second content type. Call it "Group content", and set it to be of 
@@ -75,7 +75,7 @@ OG INSTALLATION DRUPAL 7.x
 10. In order to associate other entities with group or group content, navigate 
     to Organic Groups field settings", in admin/config/og/fields. 
 11. In order to define default permissions for groups that are newly created or 
-    to edit permissions on all existing groups, navigate to the Organic groups 
+    to edit permissions on all existing groups, navigate to the Group 
     default permissions page. Important permissions in this page are the ones 
     under the administer section. These permissions are what enable group admins 
     to have granular control over their own group. This means, that if you as 

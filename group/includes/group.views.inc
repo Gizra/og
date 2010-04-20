@@ -12,12 +12,12 @@
 function group_views_data() {
   $data = array();
 
-  $data['group_groups']['table']['group'] = t('Organic groups');
+  $data['group_groups']['table']['group'] = t('Group');
 
   // Advertise this table as a possible base table
   $data['group_groups']['table']['base'] = array(
     'field' => 'gid',
-    'title' => t('Organic groups'),
+    'title' => t('Group'),
     'help' => t("Groups can be different entities that have other content associated with them."),
   );
 
@@ -170,7 +170,7 @@ function group_views_data_alter(&$data) {
 
     // Add the organic groups relationship.
     $data[$item['views table']]['group_rel'] = array(
-      'group' => t('Organic groups'),
+      'group' => t('Group'),
       'title' => $title,
       'help' => $help,
       'relationship' => array(

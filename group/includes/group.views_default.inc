@@ -44,7 +44,7 @@ function group_views_default_views() {
   );
   $handler->display->display_options['style_options']['override'] = 1;
   $handler->display->display_options['style_options']['sticky'] = 0;
-  /* Relationship: Organic groups: Node group */
+  /* Relationship: Group: Node group */
   $handler->display->display_options['relationships']['group_rel']['id'] = 'group_rel';
   $handler->display->display_options['relationships']['group_rel']['table'] = 'node';
   $handler->display->display_options['relationships']['group_rel']['field'] = 'group_rel';
@@ -63,7 +63,7 @@ function group_views_default_views() {
   $handler->display->display_options['fields']['title']['hide_empty'] = 0;
   $handler->display->display_options['fields']['title']['empty_zero'] = 0;
   $handler->display->display_options['fields']['title']['link_to_node'] = 1;
-  /* Field: Organic groups: Group date */
+  /* Field: Group: Group date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'group_groups';
   $handler->display->display_options['fields']['created']['field'] = 'created';
@@ -79,7 +79,7 @@ function group_views_default_views() {
   $handler->display->display_options['fields']['created']['hide_empty'] = 0;
   $handler->display->display_options['fields']['created']['empty_zero'] = 0;
   $handler->display->display_options['fields']['created']['date_format'] = 'time ago';
-  /* Filter: Organic groups: Group's state */
+  /* Filter: Group: Group's state */
   $handler->display->display_options['filters']['state']['id'] = 'state';
   $handler->display->display_options['filters']['state']['table'] = 'group_groups';
   $handler->display->display_options['filters']['state']['field'] = 'state';
@@ -88,7 +88,7 @@ function group_views_default_views() {
     'active' => 'active',
   );
   $handler->display->display_options['filters']['state']['expose']['operator'] = 'state_op';
-  $handler->display->display_options['filters']['state']['expose']['label'] = 'Organic groups: Group\'s state';
+  $handler->display->display_options['filters']['state']['expose']['label'] = 'Group: Group\'s state';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page_1');

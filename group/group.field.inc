@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Field module functionality for the Organic groups module.
+ * Field module functionality for the Group module.
  */
 
 /*******************************************************************************
@@ -16,7 +16,7 @@
 function og_field_info() {
   return array(
     'og' => array(
-      'label' => t('Organic groups'),
+      'label' => t('Group'),
       'description' => t('This field stores groups associated with the content.'),
       'default_widget' => 'og_audience',
       'default_formatter' => 'og_list_default',
@@ -93,7 +93,7 @@ function og_field_schema($field) {
 function og_field_formatter_info() {
   return array(
     'og_list_default' => array(
-      'label' => t('Organic groups default list'),
+      'label' => t('Group default list'),
       'field types' => array('og'),
     ),
   );
@@ -128,7 +128,7 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
 function og_field_widget_info() {
   return array(
     'og_audience' => array(
-      'label' => t('Organic groups audience'),
+      'label' => t('Group audience'),
       'settings' => array('opt_group' => 'auto', 'minimum_for_select_list' => 20),
       'field types' => array('og'),
       'behaviors' => array(
