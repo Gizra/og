@@ -1,0 +1,125 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Enable access control for private and public groups and group content.
+ */
+
+/**
+ * The access realm of group non-members.
+ */
+define('GROUP_ACCESS_ANONYMOUS_REALM', 'group_access_anonymous');
+
+/**
+ * The access realm of group member.
+ */
+define('GROUP_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
+
+/**
+ * Group public access field.
+ */
+define('GROUP_ACCESS_FIELD', 'group_access');
+
+
+/**
+* Implement hook_node_type_insert().
+*/
+function group_access_node_type_insert($info) {
+  if (group_is_group_type('node', $info->type) || group_is_group_content_type('node', $info->type)) {
+    group_access_create_fields($info->type);
+  }
+}
+
+/**
+* Implement hook_node_type_update().
+*/
+function group_access_node_type_update($info) {
+  if (group_is_group_type('node', $info->type) || group_is_group_content_type('node', $info->type)) {
+    group_access_create_fields($info->type);
+  }
+}
+
+/**
+ * Implementation of hook_node_grants().
+ */
+function group_access_node_grants($account, $op) {
+  $grants = array();
+  if ($op == 'view') {
+    foreach (group_get_entity_groups('user', $account) as $gid => $value) {
+      $grants[GROUP_ACCESS_AUTHENTICATED_REALM][] = $gid;
+    }
+  }
+
+  return $grants;
+}
+
+
+/**
+ * Implementation of hook_node_access_records.
+ */
+function group_access_node_access_records($node) {
+  $grants = array();
+  if (!group_access_entity_is_public('node', $node)) {
+    if (group_is_group_content_type('node', $node->type) || group_is_group_type('node', $node->type)) {
+      $grants[] = array (
+        'realm' => GROUP_ACCESS_AUTHENTICATED_REALM,
+        'gid' => $node->nid,
+        'grant_view' => 1,
+        'grant_update' => 0,
+        'grant_delete' => 0,
+        'priority' => 0,
+      );
+    }
+  }
+  return $grants;
+}
+
+/**
+ * Implement group_fields_info().
+ */
+function group_access_group_fields_info() {
+  $items['group_access'] = array(
+    'type' => array('group', 'group content'),
+    'description' => t('Add organic groups access field to group content types.'),
+    'field' => array(
+      'field_name' => 'group_access',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Do not show to non group member', '1|Show to all site users')), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
+      'label' => t('group content visibility'),
+      // FIXME: Widget type doesn't work
+      'widget_type' => 'options_onoff',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+      ),
+    ),
+  );
+
+  return $items;
+}
+
+
+/**
+ * Check if an entity is set as public.
+ *
+ * @param $entity_type
+ *   The entity type (e.g. "node" or "user").
+ * @param $entity
+ *   The entity can be a user, node or any fieldable entity.
+ * @return
+ *  TRUE if the entity is private and should appear only to group members.
+ */
+function group_access_entity_is_public($entity_type, $entity) {
+  group_load_entity($entity_type, $entity);
+  return !empty($entity->{GROUP_ACCESS_FIELD}[LANGUAGE_NONE][0]['gid']);
+}

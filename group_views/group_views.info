@@ -1,0 +1,8 @@
+; $Id:$
+name = Organic groups Views integration
+description = "Use Views to search and display organic groups."
+package = "Organic groups"
+dependencies[] = group
+dependencies[] = views
+core = 7.x
+files[] = group_views.module

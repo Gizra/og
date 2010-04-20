@@ -1,0 +1,26 @@
+name = Organic groups
+description = "API to allow associating content with group nodes."
+package = "Organic groups"
+dependencies[] = entity
+core = 7.x
+version = VERSION
+files[] = group.module
+files[] = group.install
+files[] = group.field.inc
+files[] = includes/group.views.inc
+files[] = includes/group.rules.inc
+
+; Test files.
+files[] = tests/group.test
+
+; Views plugins
+files[] = includes/views/group_plugin_argument_default_group_context.inc
+
+; Views fields
+files[] = includes/views/group_handler_field_group_member_count.inc
+
+; Views filters
+files[] = includes/views/group_handler_filter_group_state.inc
+
+; Views realtionships
+files[] = includes/views/group_handler_relationship.inc

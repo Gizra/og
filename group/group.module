@@ -1,0 +1,2283 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Enable users to create and manage groups with roles and permissions.
+ */
+
+// Load all Field module hooks for organic groups.
+require(drupal_get_path('module', 'group') . '/group.field.inc');
+
+// Dispositioning of content and memberships after deletion of a group node.
+define('GROUP_DELETE_NOTHING', 0);
+define('GROUP_DELETE_ORPHANS', 1);
+define('GROUP_DELETE_MOVE_NODES', 2);
+define('GROUP_DELETE_MOVE_NODES_MEMBERSHIPS', 3);
+
+/**
+ * Define active group content states.
+ */
+define('GROUP_STATE_ACTIVE', 1);
+
+/**
+ * Define pending group content states. The user is subscribed to the group but
+ * isn't an active member yet.
+ */
+define('GROUP_STATE_PENDING', 2);
+
+/**
+ * Define blocked group content states. The user is rejected from the group.
+ */
+define('GROUP_STATE_BLOCKED', 3);
+
+/**
+ * Group audience field.
+ */
+define('GROUP_AUDIENCE_FIELD', 'group_audience');
+
+/**
+ * Group field.
+ */
+define('GROUP_GROUP_FIELD', 'group_group');
+
+/**
+ * Group default roles and permissions field.
+ */
+define('GROUP_DEFAULT_ACCESS_FIELD', 'group_group_default_access');
+
+/**
+ * The role name of group non-members.
+ */
+define('GROUP_ANONYMOUS_ROLE', 'anonymous member');
+
+/**
+ * The role name of group member.
+ */
+define('GROUP_AUTHENTICATED_ROLE', 'authenticated member');
+
+/**
+ * The role name of group administrator.
+ */
+define('GROUP_ADMINISTRATOR_ROLE', 'administrator member');
+
+/*******************************************************************************
+ * Hook implementations
+ ******************************************************************************/
+
+/**
+ * Implements hook_entity_info().
+ */
+function group_entity_info() {
+  $return['group'] = array(
+    'label' => t('Organic group'),
+    'entity class' => 'EntityOg',
+    'controller class' => 'OgController',
+    'base table' => 'group_groups',
+    'entity keys' => array(
+      'id' => 'gid',
+    ),
+    // Entity-metadata properties.
+    'creation callback' => 'group_create_group'
+  );
+  return $return;
+}
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function group_entity_property_info() {
+  $info = array();
+  $properties = &$info['group']['properties'];
+
+  $properties['gid'] = array(
+    'label' => t("Group ID"),
+    'type' => 'integer',
+    'description' => t("The unique ID of the group."),
+    'required' => TRUE,
+  );
+
+  $properties['eid'] = array(
+    'label' => t("Object ID"),
+    'type' => 'integer',
+    'description' => t("The ID of the entity."),
+    'required' => TRUE,
+  );
+
+  $properties['entity_type'] = array(
+    'label' => t("Object type"),
+    'type' => 'text',
+    'description' => t("The entity type."),
+    'required' => TRUE,
+  );
+
+  $properties['state'] = array(
+    'label' => t("State"),
+    'type' => 'text',
+    'description' => t("The state of the group."),
+    'setter callback' => 'entity_metadata_verbatim_set',
+    'options list' => 'group_group_states',
+  );
+
+  $properties['created'] = array(
+    'label' => t("Date created"),
+    'type' => 'date',
+    'description' => t("The date the group was created."),
+    'setter callback' => 'entity_metadata_verbatim_set',
+  );
+
+  return $info;
+}
+
+/**
+ * Implement hook_modules_enabled().
+ */
+function group_modules_enabled($modules) {
+  foreach ($modules as $module) {
+    // Add default roles and permissions, if existing and not set yet.
+    group_set_global_access_module($module);
+  }
+}
+
+/**
+ * Implements hook_modules_uninstalled().
+ */
+function group_modules_uninstalled($modules) {
+  foreach ($modules as $module) {
+    // Delete module's permissions.
+    group_permissions_delete_by_module($module);
+  }
+}
+
+/**
+ * Implements hook_group_views_relationship().
+ *
+ * Add relationship information for all core's enteties.
+ */
+function group_group_views_relationship() {
+  $items = array();
+
+  $items['node'] = array(
+    'entity' => 'node',
+    'views table' => 'node',
+    'join field' => 'nid',
+  );
+
+  $items['comment'] = array(
+    'entity' => 'comment',
+    'views table' => 'comment',
+    'join field' => 'cid',
+  );
+
+  $items['user'] = array(
+    'entity' => 'user',
+    'views table' => 'users',
+    'join field' => 'uid',
+  );
+
+  //TODO: Add all enteties.
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function group_permission() {
+  return array(
+    'administer organic groups' =>  array(
+      'title' => t('Administer organic groups permissions'),
+      'description' => t('Administer all groups and permissions.'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_init().
+ */
+function group_init() {
+  group_context();
+}
+
+/**
+ * Implement hook_group_permission().
+ */
+function group_group_permission() {
+  return array(
+    'update group' => array(
+      'title' => t('Edit group'),
+      'description' => t('Edit the group content.'),
+    ),
+    'update own group content' => array(
+      'title' => t('Edit own group content'),
+      'description' => t('Edit own group content that belong to the group.'),
+    ),
+    'update any group content' => array(
+      'title' => t('Edit any group content'),
+      'description' => t('Edit any group content that belong to the group.'),
+    ),
+    'delete own group content' => array(
+      'title' => t('Delete own group content'),
+      'description' => t('Delete own group content that belong to the group.'),
+    ),
+    'delete any group content' => array(
+      'title' => t('Delete any group content'),
+      'description' => t('Delete any of the group content that belong to the group.'),
+    ),
+    'administer group' => array(
+      'title' => t('Administer group'),
+      'description' => t('Manage or block users, and manage their role assignments in the group.'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_group_default_permissions().
+ */
+function group_group_default_permissions() {
+  return array(
+    'update own group content' => array(GROUP_AUTHENTICATED_ROLE),
+    'delete own group content' => array(GROUP_AUTHENTICATED_ROLE),
+
+    'update group' => array(GROUP_ADMINISTRATOR_ROLE),
+    'update any group content' => array(GROUP_ADMINISTRATOR_ROLE),
+    'delete any group content' => array(GROUP_ADMINISTRATOR_ROLE),
+    'administer group' => array(GROUP_ADMINISTRATOR_ROLE),
+  );
+}
+
+/**
+ * Implement hook_group_default_roles()
+ */
+function group_group_default_roles() {
+  return array(GROUP_ADMINISTRATOR_ROLE);
+}
+
+/**
+ * Implement hook_node_access()
+ */
+function group_node_access($node, $op, $account) {
+  $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
+  if (in_array($op, array('update', 'delete'))) {
+    if (($group = group_get_group('node', $node->nid))) {
+      return group_user_access($group->gid, $op . ' group', $account) ? NODE_ACCESS_ALLOW : NODE_ACCESS_DENY;
+    }
+    elseif ($gids = group_get_entity_groups('node', $node)) {
+      // We don't have a context, so we need to get all the permissions
+      // of all the groups. We don't intersect with the user's group, as
+      // groups might allow anonymous members access.
+      $return = NODE_ACCESS_DENY;
+      foreach ($gids as $gid) {
+        if (group_user_access($gid, $op . ' group content', $account) || group_user_access($gid, $op . ' any group content', $account) || (group_user_access($gid, $op . ' own group content', $account) && $node->uid == $account->uid)) {
+          $return =  NODE_ACCESS_ALLOW;
+          break;
+        }
+      }
+      return $return;
+    }
+  }
+  // Not an organic group type or node creation which still has no groups.
+  return NODE_ACCESS_IGNORE;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function group_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'group') . '/includes',
+  );
+}
+
+/**
+ * Implement group_fields_info().
+ */
+function group_group_fields_info() {
+  $items['group_group'] = array(
+    'type' => array('group'),
+    'description' => t('Determine if this should be a group.'),
+    'field' => array(
+      'field_name' => 'group_group',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Not a group type', '1|Group type')), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
+      'label' => t('Group type'),
+      'widget_type' => 'options_buttons',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'group_group_subscribe',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'group_group_subscribe',
+        ),
+      ),
+    ),
+  );
+
+  $items['group_group_default_access'] = array(
+    'type' => array('group'),
+    'description' => t('Determine if group should use default roles and permissions.'),
+    'field' => array(
+      'field_name' => 'group_group_default_access',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Use default roles and permissions', '1|Override default roles and permissions')), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
+      'label' => t('Group roles and permissions'),
+      'widget_type' => 'options_buttons',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+      ),
+    ),
+  );
+
+
+  $items['group_audience'] = array(
+    'type' => array('group content'),
+    'description' => t('Determine to which groups this group content is assigned to.'),
+    'field' => array(
+      'field_name' => 'group_audience',
+      'type' => 'group',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    ),
+    'instance' => array(
+      'label' => t('Groups audience'),
+      'widget_type' => 'group_audience',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'group_list_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'group_list_default',
+        ),
+      ),
+    ),
+  );
+
+  return $items;
+}
+
+/**
+ * Implement hook_group_context_handlers()
+ */
+function group_group_context_handlers() {
+  $items = array();
+
+  $items['session'] = array(
+    'callback' => 'group_context_handler_session',
+    'menu' => FALSE,
+    'priority' => TRUE,
+  );
+
+  $items['url'] = array(
+    'callback' => 'group_context_handler_url',
+    'menu' => FALSE,
+  );
+
+  $items['node'] = array(
+    'callback' => 'group_context_handler_node',
+    'menu path' => array('node/%', 'node/%/edit'),
+  );
+
+  $items['user_view'] = array(
+    'callback' => 'group_context_handler_user_view',
+    'menu path' => array('user/%'),
+  );
+
+  $items['user_edit'] = array(
+    'callback' => 'group_context_handler_user_edit',
+    'menu path' => array('user/%/edit'),
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implement hook_preprocess_html().
+ *
+ * HTML preprocess; Add context related templates and CSS.
+ */
+function group_preprocess_html(&$variables) {
+  if ($group = group_context()) {
+    // Add template suggestions.
+    $variables['theme_hook_suggestions'][] = 'page__group_context';
+    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->gid;
+    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type;
+    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type . '_' . $group->eid;
+
+    // Add CSS.
+    $clean_html = drupal_html_class('group-context-' . $group->entity_type);
+    $variables['classes_array'][] = 'group-context';
+    $variables['classes_array'][] = 'group-context-' . $group->gid;
+    $variables['classes_array'][] = $clean_html;
+    $variables['classes_array'][] = $clean_html . '-' . $group->eid;
+
+    // Add context to JS.
+    group_context_js($group);
+  }
+}
+
+
+
+/**
+* Implement hook_node_type_delete().
+*
+* We immediately delete those variables as they are only used to indicate a
+* content type should be a group or a group content. However, the actual
+* indication for it is in the field API. This is just a workaround, specifically
+* for the node entity, to allow users to define groups via the "content type"
+* edit.
+*/
+function group_node_type_delete($info) {
+  variable_del('group_group_type_' . $info->type);
+  variable_del('group_group_content_type_' . $info->type);
+}
+
+/**
+* Implement hook_node_type_insert().
+*/
+function group_node_type_insert($info) {
+  group_node_type_save($info->type);
+}
+
+/**
+* Implement hook_node_type_update().
+*/
+function group_node_type_update($info) {
+  group_node_type_save($info->type);
+}
+
+
+/**
+ * Return a loaded group entity if exists or create a new one.
+ *
+ * This is a wrapper function around group_load() that allows passing the group's
+ * entity type and entity ID, and the correct group will be loaded according.
+ * If no group exists and $create option is set to TRUE and new group entity
+ * will be created.
+ *
+ * @param $eid
+ *   The group content ID.
+ * @param $entity_type
+ *   The group entity type. "node" is the default value. Pass "gid" if the the
+ *   content ID is equal to the group unique ID.
+ * @param $create
+ *   Optional; If no existing group is found, create a new one. Defaults to TRUE.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
+ *
+ * @return
+ *   The group entity if found, or an empty array.
+ */
+function group_get_group($entity_type, $eid, $create = FALSE, $states = array(GROUP_STATE_ACTIVE), $reset = FALSE) {
+  $group = FALSE;
+  if ($gids = group_get_group_ids($entity_type, array($eid), $states, $reset)) {
+    $group = group_load($gids[$eid], $reset);
+  }
+  elseif ($create) {
+    $group = group_create_group(array('entity_type' => $entity_type, 'eid' => $eid));
+  }
+  return $group;
+}
+
+
+/**
+ * Callback to create a new group.
+ */
+function group_create_group($values = array()) {
+  // Initialize values.
+  $values += array(
+    'state' => GROUP_STATE_ACTIVE,
+    'created' => time(),
+  );
+
+  return entity_create('group', $values);
+}
+
+/**
+ * Controller class for organic groups.
+ */
+class OgController extends EntityAPIController {
+  function load($ids = array(), $conditions = array()) {
+    $gids = group_get_group_ids(!empty($conditions['entity_type']) ? $conditions['entity_type'] : 'group', $ids);
+
+    // Unset the entity type condition.
+    unset($conditions['entity_type']);
+    return parent::load($gids, $conditions);
+  }
+}
+
+/**
+ * Main class for organic groups entities.
+ */
+class EntityOg extends EntityDB {
+  public function __construct(array $values = array(), $entityType = NULL) {
+    parent::__construct($values, 'group');
+  }
+}
+
+
+/**
+ * Load multiple organic groups entities based on certain conditions.
+ *
+ * @param $gids
+ *   An array of group entity IDs.
+ * @param $conditions
+ *   An array of conditions to match against the {entity} table.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
+ *
+ * @return
+ *   An array of test entity entitys, indexed by pid.
+ */
+function group_load_multiple($gids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('group', $gids, $conditions, $reset);
+}
+
+/**
+ * Load an organic groups entity from the database.
+ *
+ * @param $gid
+ *   The group ID.
+ * @param $reset
+ *   Whether to reset the node_load_multiple cache.
+ *
+ * @return
+ *   A fully-populated group entity, or FALSE if none found.
+ */
+function group_load($gid, $reset = FALSE) {
+  $group = group_load_multiple(array($gid), array(), $reset);
+  return $group? reset($group) : FALSE;
+}
+
+/**
+ * Save a group entity.
+ *
+ * @param $group
+ *   The group entity.
+ * @return
+ *   The group entity.
+ */
+function group_save($group) {
+  $group->save();
+
+  return $group;
+}
+
+
+/**
+ * Delete multiple organic groups entities.
+ *
+ * @param $gids
+ *   An array of group entity IDs.
+ */
+function group_delete_multiple(array $gids) {
+  entity_get_controller('group')->delete($gids);
+
+  group_invalidate_cache($gids);
+}
+
+function group_delete($gid) {
+  group_delete_multiple(array($gid));
+
+  // Delete roles and permissions.
+  group_delete_user_roles_by_group($gid, NULL, TRUE);
+}
+
+function group_invalidate_cache($gids = array()) {
+  // Reset static cache.
+  $caches = array(
+    'group_user_access',
+    'group_get_group_ids',
+    'group_get_entity_groups',
+    'group_context',
+    'group_context_js',
+    'group_get_audience_options',
+  );
+  foreach ($caches as $cache) {
+    drupal_static_reset($cache);
+  }
+
+  if ($gids && !empty($_SESSION['group_context']) && in_array($_SESSION['group_context'], $gids)) {
+    // Remove group's context.
+    $_SESSION['group_context'] = NULL;
+  }
+
+
+}
+/**
+ * Get group IDs by the entity type and entity IDs.
+ *
+ * @param $eid
+ *   The group content ID.
+ * @param $entity_type
+ *   The group entity type. Defaults to "group", that will return the group ID.
+ * @param $states
+ *   Array of states the group must be in.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
+ *
+ * @return
+ *   Array keyed with the entity ID and the group ID as the value.
+ */
+function group_get_group_ids($entity_type = 'group', $eids = array(), $states = array(GROUP_STATE_ACTIVE), $reset = FALSE) {
+  $gids = &drupal_static(__FUNCTION__, array());
+
+  if ($reset) {
+    $gids = array();
+  }
+
+  $required_eids = $eids = drupal_map_assoc($eids);
+
+  if (!empty($gids[$entity_type])) {
+    // Check we don't already have the group IDs.
+    foreach ($gids[$entity_type] as $eid => $gid) {
+      unset($eids[$eid]);
+    }
+  }
+  else {
+    $gids[$entity_type] = array();
+  }
+
+  if (!empty($eids)) {
+    if ($entity_type == 'group') {
+      $gids[$entity_type] = $gids[$entity_type] + drupal_map_assoc($eids);
+    }
+    else {
+      $query = db_select('group_groups', 'group_groups');
+      $query->fields('group_groups', array('eid', 'gid'))
+      ->condition('entity_type', $entity_type)
+      ->condition('eid', $eids, 'IN');
+      if (!empty($states)) {
+        $query->condition('state', $states, 'IN');
+      }
+      $gids[$entity_type] = $query->execute()->fetchAllKeyed();
+    }
+  }
+  // Make sure we return only the ids we were asked for.
+  $return = array_intersect_key($gids[$entity_type], $required_eids);
+
+  return $return;
+}
+
+/**
+ * Return all existing groups with a certain state.
+ *
+ * @param $states
+ *   Array of states the group must be in.
+ */
+function group_get_all_group_ids($states = array(GROUP_STATE_ACTIVE)) {
+  $return = array();
+  $query = db_select('group_groups', 'group_groups');
+  $query->fields('group_groups', array('gid'));
+  if (!empty($states)) {
+    $query->condition('state', $states, 'IN');
+  }
+  $result = $query->execute()->fetchAll();
+
+  foreach ($result as $value) {
+    $return[$value->gid] = $value->gid;
+  }
+
+  return $return;
+}
+
+/**
+ * Set an association (e.g. subscribe) an entity to a group.
+ *
+ * @param $entity_type
+ *   The entity type (e.g. "node" or "user").
+ * @param $entity
+ *   The entity to set the association.
+ * @param $state
+ *   The state of the association. Can be:
+ *   - GROUP_STATE_ACTIVE
+ *   - GROUP_STATE_PENDING
+ *   - GROUP_STATE_BLOCKED
+ * @param $save
+ *   Optional; TRUE if fields value should be saved. Defaults to TRUE.
+ *
+ * @return
+ *   The entity with the fields updated.
+ */
+function group_group($gid, $entity_type, $entity, $state = GROUP_STATE_ACTIVE, $save = TRUE) {
+  $entity = group_load_entity($entity_type, $entity);
+  $property = GROUP_AUDIENCE_FIELD;
+
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
+
+  $op = !empty($wrapper[0]['gid']) ? 'update' : 'insert';
+
+
+  list($id) = entity_extract_ids($entity_type, $entity);
+  // Check if the entity is new or an existing one.
+  // TODO: make sure is_new is on all entity types.
+  $op = empty($entity->is_new) ? 'update' : 'insert';
+
+  if ($op == 'insert') {
+    $values = array(
+      'gid' => $gid,
+      'state' => $state,
+      'created' => time(),
+    );
+    $wrapper[] = $values;
+  }
+  else {
+    $existing_key = FALSE;
+    if (!empty($wrapper)) {
+      foreach ($wrapper as $key => $value) {
+        if ($gid == $value['gid']) {
+          $existing_key = $key;
+          break;
+        }
+      }
+    }
+
+    if ($existing_key === FALSE) {
+      $values = array(
+        'gid' => $gid,
+        'state' => $state,
+        'created' => time(),
+      );
+      $entity->{$property}[LANGUAGE_NONE][] = $values;
+
+    }
+    else {
+      if ($wrapper[$existing_key]['state'] != $state) {
+        $wrapper[$existing_key]['state'] = $state;
+      }
+      else {
+        // Nothing changed, so don't try to save.
+        $save = FALSE;
+      }
+    }
+  }
+
+  if ($save) {
+    // Call the field attachers.
+    call_user_func('field_attach_' . $op, $entity_type, $entity);
+    drupal_static_reset('group_get_entity_groups');
+  }
+
+  return $entity;
+}
+
+/**
+ * Delete an an association (e.g. unsubscribe) of an entity to a group.
+ *
+ * @param $entity_type
+ *   The entity type (e.g. "node" or "user").
+ * @param $entity
+ *   The entity to set the association.
+ * @param $save
+ *   Optioanl; TRUE if fields value shoudl be saved. Defaults to TRUE.
+ *
+ * @return
+ *   The entity with the fields updated.
+ */
+function group_ungroup($gid, $entity_type, $entity, $save = TRUE) {
+  $entity = group_load_entity($entity_type, $entity);
+  $property = GROUP_AUDIENCE_FIELD;
+
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
+
+  $existing_key = FALSE;
+  if (!empty($wrapper)) {
+    foreach ($wrapper as $key => $value) {
+      if ($gid == $value['gid']) {
+        $existing_key = $key;
+        break;
+      }
+    }
+  }
+  if ($existing_key !== FALSE) {
+    unset($wrapper[$existing_key]);
+
+    if ($save) {
+      // Save the field change.
+      call_user_func('field_attach_update', $entity_type, $entity);
+
+      if ($entity_type == 'user') {
+        foreach (group_get_user_roles($gid, $entity->uid) as $rid) {
+          group_users_roles_revoke($gid, $entity->uid, $rid);
+        }
+      }
+      drupal_static_reset('group_get_entity_groups');
+    }
+  }
+
+  return $entity;
+}
+
+/**
+ * Determine whether a user has a given privilege.
+ *
+ * @param $gid
+ *   The group ID.
+ * @param $string
+ *   The permission, such as "administer nodes", being checked for.
+ * @param $account
+ *   (optional) The account to check, if not given use currently lgroupged in user.
+ *
+ * @return
+ *   Boolean TRUE if the current user has the requested permission.
+ *
+ * All permission checks in GROUP should go through this function. This
+ * way, we guarantee consistent behavior, and ensure that the superuser
+ * can perform all actions.
+ */
+function group_user_access($gid, $string, $account = NULL) {
+  if (variable_get('group_skip_access', FALSE)) {
+    // User access should always return TRUE, as organic groups is requested to
+    // skip any access check.
+    return TRUE;
+  }
+
+  global $user;
+  $perm = &drupal_static(__FUNCTION__, array());
+
+  if (empty($account)) {
+    $account = $user;
+  }
+
+  // User #1 has all privileges.
+  if ($account->uid == 1) {
+    return TRUE;
+  }
+
+  // Administer organic groups permission.
+  if (user_access('administer organic groups', $account)) {
+    return TRUE;
+  }
+
+  if (!($group = group_load($gid))) {
+    // Not a group.
+    return FALSE;
+  }
+
+  // Group manager has all privileges (if variable is TRUE).
+  if (variable_get('group_group_manager_full_access', TRUE)) {
+    $entity = current(entity_load($group->entity_type, array($group->eid)));
+    if (!empty($entity->uid) && $entity->uid == $account->uid) {
+      return TRUE;
+    }
+  }
+
+  // To reduce the number of SQL queries, we cache the user's permissions
+  // in a static variable.
+  if (!isset($perm[$gid][$account->uid])) {
+    $user_groups = group_get_entity_groups('user', $account);
+
+    $roles = group_get_user_roles($gid, $account->uid);
+    $role_permissions = group_user_role_permissions($roles);
+
+    $perms = array();
+    foreach ($role_permissions as $one_role) {
+      $perms += $one_role;
+
+      $perm[$gid][$account->uid] = $perms;
+    }
+
+  }
+  return isset($perm[$gid][$account->uid][$string]);
+}
+
+
+
+/**
+ * Add group and group content fields to new content types.
+ *
+ * @param $bundle_name
+ *   The content type name.
+ */
+function group_node_type_save($bundle_name) {
+  if (variable_get('group_group_type_' . $bundle_name, 'omitted') == 'group') {
+    group_create_field('group_group','node', $bundle_name);
+    // Delete the variable, as we will rely on the presence of th field.
+    variable_del('group_group_type_' . $bundle_name);
+  }
+  if (variable_get('group_group_content_type_' . $bundle_name, 'omitted') == 'group_content') {
+    group_create_field('group_audience','node', $bundle_name);
+    // Delete the variable, as we will rely on the presence of th field.
+    variable_del('group_group_content_type_' . $bundle_name);
+  }
+}
+
+
+/**
+ * Get label information to fieldable entities.
+ *
+ * TODO: Implement hook_entity_info_alter().
+ * TODO: see  http://drupal.org/node/629484 for discussion.
+ *
+ * @param $entity
+ *   The entity name to populate with the label data.
+ * @return
+ *   The entity info merged with the label data.
+ *
+ */
+function group_entity_label($entity) {
+  $entity_info = entity_get_info($entity);
+
+  $entity_labels = array(
+    'comment' => 'subject',
+    'node' => 'title',
+    'file' => 'filename',
+    'taxonomy_term' => 'name',
+    'user' => 'name',
+  );
+
+  $entity_info['entity keys']['label'] = $entity_labels[$entity];
+
+  return $entity_info;
+}
+
+
+/*******************************************************************************
+ * API functions
+ ******************************************************************************/
+
+/**
+ * Get the groups a content is associated with.
+ *
+ * @param $entity_type
+ *   The entity type (e.g. "node" or "user").
+ * @param $entity
+ *   The entity can be a user, node or any fieldable entity.
+ * @param $states
+ *   Optioanl; Array with the state to return. If empty groups of all state will
+ *   return.
+ * @return
+ *  An array with the group IDs, or an empty array.
+ */
+function group_get_entity_groups($entity_type, $entity, $states = array(GROUP_STATE_ACTIVE)) {
+  $groups = &drupal_static(__FUNCTION__, array());
+
+  // Get the entity ID.
+  list($id) = entity_extract_ids($entity_type, $entity);
+
+  if (!empty($groups[$entity_type][$id])) {
+    return $groups[$entity_type][$id];
+  }
+
+  $entity = group_load_entity($entity_type, $entity);
+  $property = GROUP_AUDIENCE_FIELD;
+
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
+
+  $gids = array();
+  if (!empty($wrapper)) {
+    foreach ($wrapper as $group) {
+      if (!empty($states) && !in_array($group['state'], $states)) {
+        // Don't register the group if it's state isn't the one we look for.
+        continue;
+      }
+      $gids += drupal_map_assoc(array($group['gid']));
+    }
+  }
+  $groups[$entity_type][$id] = $gids;
+  return $groups[$entity_type][$id];
+}
+
+/**
+ * Return the group type (i.e. "group" or "group_content") of an entity.
+ *
+ * @param $bundle_name
+ *   The bundle name to be checked.
+ * @param $entity_type
+ *   The entity type.
+ * @param $type
+ *   The group usage type. Must be "group" or "group content".
+ *
+ * @return
+ *   The group type or an "omitted" if node type doesn't participate in
+ *   organic groups.
+ */
+function group_get_group_type($entity_type, $bundle_name, $type = 'group') {
+  if ($type == 'group') {
+    return (bool)field_info_instance($entity_type, 'group_group', $bundle_name);
+  }
+  elseif ($type == 'group content') {
+    return (bool)field_info_instance($entity_type, 'group_audience', $bundle_name);
+  }
+}
+
+/**
+ * Return TRUE if the entity type is a "group" type.
+ *
+ * This is a wrapper function around group_get_group_type().
+ *
+ * @param $node_type
+ *   The node type to be checked.
+ */
+function group_is_group_type($entity_type, $bundle_name) {
+  return group_get_group_type($entity_type, $bundle_name);
+}
+
+/**
+ * Return TRUE if the entity type is a "group content" type.
+ *
+ * This is a wrapper function around group_get_group_type().
+ *
+ * @param $node_type
+ *   The node type to be checked.
+ */
+function group_is_group_content_type($entity_type, $bundle_name) {
+  return group_get_group_type($entity_type, $bundle_name, 'group content');
+}
+
+/**
+ * Return all the enteties that are a group.
+ *
+ * @return
+ *   Array keyed with the entity type machine name and the entity human readable
+ *   name as the value, or an empty array if no enteties are defined as group.
+ */
+function group_get_all_group_entity() {
+  $return = array();
+
+  foreach (entity_get_info() as $entity_type => $entity_value) {
+    if (!empty($entity_value['fieldable'])) {
+      foreach ($entity_value['bundles'] as $bundle => $bundle_value) {
+        if (group_is_group_type($entity_type, $bundle)) {
+          $return[$entity_type] = check_plain($entity_value['label']);
+          // At least one bundle of the entity can be a group, so break.
+          break;
+        }
+      }
+    }
+  }
+  return $return;
+}
+
+/**
+ * Return TRUE if entity belongs to a group.
+ *
+ * @param $gid
+ * @param $entity_type
+ * @param $entity
+ * @return unknown_type
+ */
+function group_is_member($gid, $entity_type = 'user', $entity = NULL) {
+  if ($entity_type == 'user' && empty($entity)) {
+    global $user;
+    $entity = $user;
+  }
+  $groups = group_get_entity_groups($entity_type, $entity);
+  return in_array($gid, $groups);
+}
+
+/**
+ * Wrapper of group_user_access(); Gets entity ID instead of group ID.
+ *
+ * Can be used as a menu callback.
+ *
+ * @param $perm
+ *   The permissions name.
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity
+ *   The entity object.
+ * @param $account
+ *   Optioanl; The user related to the action. For example if the operation is
+ *   "subscribe" then the account will be the subscribing user.
+ *
+ * @return
+ *   TRUE if access is allowed, otherise FALSE.
+ */
+function group_user_access_by_entity($perm, $entity_type = NULL, $eid = NULL, $account = NULL) {
+  if (empty($account)) {
+    global $user;
+    $account = $user;
+  }
+
+  if ($group = group_get_group($entity_type, $eid)) {
+    return group_user_access($group->gid, $perm, $account);
+  }
+  return FALSE;
+}
+
+/**
+ * Get the state of an entity in a group.
+ *
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity
+ *   The entity object.
+ * @param $gid
+ *   The group ID.
+ * @return
+ *   The state value, or FALSE is entity is not associated with group.
+ */
+function group_get_entity_state($gid, $entity_type, $entity) {
+  $state = FALSE;
+
+  $entity = group_load_entity($entity_type, $entity);
+  $property = GROUP_AUDIENCE_FIELD;
+
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
+
+  if (!empty($wrapper)) {
+    foreach ($wrapper as $key => $value) {
+      if ($value['gid'] == $gid) {
+        $state = $value['state'];
+      }
+    }
+  }
+  return $state;
+}
+
+/**
+ * Check if group should use default roles and permissions.
+ *
+ * @param $gid
+ *   The group ID.
+ * @return
+ *   TRUE if group should use default roles and permissions.
+ */
+function group_is_group_default_access($gid) {
+  $return = FALSE;
+  if ($entity = group_load_entity_from_group($gid)) {
+
+    $property = GROUP_DEFAULT_ACCESS_FIELD;
+
+    $wrapper = &$entity->{$property}[LANGUAGE_NONE];
+    $return = empty($wrapper[0]['value']);
+  }
+
+  return $return;
+}
+
+/**
+ * Get all the context handlers.
+ */
+function group_get_context_handlers() {
+  $handlers = module_invoke_all('group_context_handlers');
+
+  // Assign default values.
+  foreach ($handlers as &$handler) {
+    $handler += array(
+      'menu' => TRUE,
+      'menu path' => array(),
+      'priority' => FALSE,
+    );
+  }
+
+  // Allow other modules to alter the handlers.
+  drupal_alter('group_context_handlers', $handlers);
+
+  return $handlers;
+}
+
+/**
+ * Determine the best matching context of a viewed content.
+ *
+ * The context is determined by using handlers, and trying to find the best
+ * matching context by giving a score to each returned group context. The score
+ * is measured by the amount of times a single group was returned by different
+ * handlers.
+ * After accumilating all context results, we try to find if there is a matching
+ * "priority" context. An example for a priority context is the "session"
+ * handler; If we already presented a certain context to a user on the last page
+ * we try to keep the same context if possible.
+ * @see group_group_context_handlers().
+ */
+function group_determine_context() {
+  $context = FALSE;
+
+  $score = $priority = $gids = array();
+
+  $item = menu_get_item();
+
+  foreach (group_get_context_handlers() as $handler) {
+    $invoke = FALSE;
+    if ($handler['menu']) {
+      if (in_array($item['path'], $handler['menu path'])) {
+        $invoke = TRUE;
+      }
+    }
+    else {
+      $invoke = TRUE;
+    }
+
+    if ($invoke && ($return = call_user_func($handler['callback']))) {
+      if ($handler['priority']) {
+        $priority += $return;
+      }
+      else {
+        // Keep score of the returning groups.
+        foreach ($gids as $gid) {
+          $score[$gid] = !empty($score[$gid]) ? $score[$gid] + 1 : 1;
+        }
+
+        $gids += $return;
+      }
+    }
+  }
+  if ($gids) {
+    // Check if we have priority groups.
+    if ($priority && ($priority_gids = array_intersect($gids, $priority))) {
+      $context = group_load(reset($priority_gids));
+    }
+    else {
+      // Get the group with the best score.
+      $max = max($gids);
+      $gid = array_search($max, $gids);
+      $context = group_load($gid);
+    }
+  }
+
+  return $context;
+}
+
+
+/**
+ * Context handler; Get groups from user's session.
+ */
+function group_context_handler_session() {
+  $context = array();
+
+  if (!empty($_SESSION['group_context'])) {
+    $context = drupal_map_assoc(array($_SESSION['group_context']));
+  }
+
+  return $context;
+}
+
+/**
+ * Context handler; Get groups from URL.
+ */
+function group_context_handler_url() {
+  $context = array();
+  if ($gids = group_get_context_by_url()) {
+    $context = $gids;
+  }
+
+  return $context;
+}
+
+/**
+ * Context handler; Get groups from existing node.
+ */
+function group_context_handler_node() {
+  return _group_context_handler_entity();
+}
+
+/**
+ * Context handler; Get groups from user view.
+ */
+function group_context_handler_user_view() {
+  global $user;
+  return _group_context_handler_entity('user', $user);
+}
+
+/**
+ * Context handler; Get groups from user edit.
+ */
+function group_context_handler_user_edit() {
+  return _group_context_handler_entity('user');
+}
+
+/**
+ * Helper function to get group context from an entity.
+ *
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity
+ *   Optional; The entity object.
+ * @param $position
+ *   Optional; The position that sohuld be used in menu_get_object().
+ */
+function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $position = 1) {
+  $context = array();
+
+  if (empty($entity)) {
+    $entity = menu_get_object($entity_type, $position);
+  }
+
+  // Check if the entity is itself a group.
+  list($id) = entity_extract_ids($entity_type, $entity);
+  if ($group = group_get_group($entity_type, $id)) {
+    $context = drupal_map_assoc(array($group->gid));
+  }
+
+  elseif ($gids = group_get_entity_groups($entity_type, $entity)) {
+    $context = $gids;
+  }
+
+  return $context;
+}
+
+
+/**
+ * Get or set group context using the menu system.
+ *
+ * @param $group
+ *   Optional; The group entity to set as the context.
+ * @param $account
+ *   Optional; The user entity to determine context form.
+ *
+ * @return
+ *   A group entity, or FALSE if no context was found.
+ */
+function group_context($group = NULL, $account = NULL) {
+  global $user;
+  $context = &drupal_static(__FUNCTION__, FALSE);
+
+  if (!empty($group)) {
+    $context = $group;
+  }
+
+  if (empty($context) && variable_get('group_context', TRUE)) {
+
+    // Get context from context handlers.
+    $context = group_determine_context();
+
+    if ($user->uid && $context) {
+      // Save the group ID in the authenticated user's session,
+      $_SESSION['group_context'] = $context->gid;
+    }
+  }
+
+  return $context;
+}
+
+/**
+ * Add the group entity of the context to the Drupal javascript entity.
+ *
+ * @param $group
+ *   A group entity.
+ */
+function group_context_js($group) {
+  // Static variable to indicate if group was already added to javacript.
+  $js = &drupal_static(__FUNCTION__, FALSE);
+  if (empty($js)) {
+    drupal_add_js(array('group' => array('group_context' => $group)), 'setting');
+    $js = TRUE;
+  }
+}
+
+
+/**
+ * Select groups if they were passed in the URL.
+ *
+ * You can pass a URL in in the form of
+ * node/add/post?gids_gid[]=1,2,3&gids_node[]=4,5,6
+ * Note that gids_ is the prefix followed by the entity type (e.g. "node",
+ * "user") or "gid" to indicate the passed values are group ID.
+ */
+function group_get_context_by_url() {
+  $return = array();
+  foreach (array_merge(array_keys(entity_get_info()), array('gid')) as $entity_type) {
+    $eids =  !empty($_REQUEST['gids_' . $entity_type][0]) ? explode(',', $_REQUEST['gids_' . $entity_type][0]) : array();
+    if ($eids) {
+      if ($gids = group_get_groups($entity_type, $eids)) {
+        $gids = current($gids);
+        $return = $return + $gids;
+      }
+    }
+  }
+  return $return;
+}
+
+/**
+ * Get an array of allowed values for GROUP audience field.
+ *
+ * @return
+ *   Array keyed by "content groups" and "other groups".
+ */
+function group_get_audience_options($opt_group = FALSE, $account = NULL) {
+  $return = &drupal_static(__FUNCTION__, array());
+
+  if (!empty($return)) {
+    return $return;
+  }
+
+  if (empty($account)) {
+    global $user;
+
+    $account = $user;
+  }
+
+  $content_groups = group_get_entity_groups('user', $account);
+  $return['content groups'] = $content_groups;
+
+  if ($opt_group) {
+    // Get all existing group.
+    $all_groups = group_get_all_group_ids();
+    $return['other groups'] = array_diff($all_groups, $content_groups);
+  }
+
+  return $return;
+}
+
+
+/**
+ * Get labels of a group list.
+ */
+function group_get_groups_label($gids = array()) {
+  $labels = array();
+  $entity_types = group_sort_groups_by_type($gids);
+  foreach ($entity_types as $entity_type => $groups) {
+    $eids = array();
+    foreach ($groups as $group) {
+      $eids[] = $group->eid;
+    }
+    $labels = $labels + group_entity_get_label_multiple($entity_type, $eids);
+  }
+  return $labels;
+}
+
+/**
+ * Return array of group entity keyed by their entity type.
+ *
+ * @param $gids
+ *   Array of group ids to sort.
+ */
+function group_sort_groups_by_type($gids = array()) {
+  $return = array();
+  $groups = group_load_multiple($gids);
+  foreach ($groups as $group) {
+    $return[$group->entity_type][$group->gid] = $group;
+  }
+  return $return;
+
+}
+
+/**
+ * Get the label (e.g. node title) of different entities.
+ *
+ * @param $entity_type
+ *   The entity type.
+ * @param $eids
+ *   The entity IDs.
+ * @return
+ *   Array keyed with the group unqiue ID and the entity label as the value.
+ */
+function group_entity_get_label_multiple($entity_type, $eids = array()) {
+  $return = array();
+
+  $entity = group_entity_label($entity_type);
+
+  // Get the table, ID and label of the object type.
+  if (!empty($entity['entity keys']['label'])) {
+    $table = $entity['base table'];
+    $id = $entity['entity keys']['id'];
+    $label = $entity['entity keys']['label'];
+
+    // Get the group ID along with the entity label.
+    $query = db_select('group_groups', 'group')->fields('group', array('gid'));
+    $query->condition('entity_type', $entity_type);
+
+    $query->join($table, $table, "group.eid =  $table.$id");
+
+    $return = $query->fields($table, array($label))
+      ->condition($id, $eids, 'IN')
+      ->execute()
+      ->fetchAllKeyed();
+  }
+  else {
+    // We got an entity type that we don't know how to get the label, so we'll
+    // return the group ID as the laebl, prefixed with the entity type.
+    foreach ($eids as $eid) {
+      $return[$eid] = t('@entity_type ID  @value', array('@entity_type' => $entity_type, '@value' => $eid));
+    }
+  }
+
+  return $return;
+}
+
+/**
+ * Wrapper function to get the label of a single entity.
+ *
+ * @param $entity_type
+ *   The entity type.
+ * @param $eid
+ *   The entity ID.
+ * @return unknown_type
+ */
+function group_entity_get_label($entity_type, $eid) {
+  return current(group_entity_get_label_multiple($entity_type, array($eid)));
+
+}
+
+/**
+ * Determine the permissions for one or more roles.
+ *
+ * @param $roles
+ *   An array whose keys are the role IDs of interest, such as $user->roles.
+ *
+ * @return
+ *   An array indexed by role ID. Each value is an array whose keys are the
+ *   permission strings for the given role ID.
+ */
+function group_user_role_permissions($roles = array()) {
+  $cache = &drupal_static(__FUNCTION__, array());
+
+  $role_permissions = $fetch = array();
+
+  if ($roles) {
+    foreach ($roles as $rid => $name) {
+      if (isset($cache[$rid])) {
+        $role_permissions[$rid] = $cache[$rid];
+      }
+      else {
+        // Add this rid to the list of those needing to be fetched.
+        $fetch[] = $rid;
+        // Prepare in case no permissions are returned.
+        $cache[$rid] = array();
+      }
+    }
+
+    if ($fetch) {
+      // Get from the database permissions that were not in the static variable.
+      // Only role IDs with at least one permission assigned will return rows.
+      $result = db_query("SELECT rid, permission FROM {group_role_permission} WHERE rid IN (:fetch)", array(':fetch' => $fetch));
+
+      foreach ($result as $row) {
+        $cache[$row->rid][$row->permission] = TRUE;
+      }
+      foreach ($fetch as $rid) {
+        // For every rid, we know we at least assigned an empty array.
+        $role_permissions[$rid] = $cache[$rid];
+      }
+    }
+  }
+
+  return $role_permissions;
+}
+
+/**
+ * Retrieve an array of roles matching specified conditions.
+ *
+ * @param $gid
+ *   The group node ID.
+ * @param $permission
+ *   Optioanl; A string containing a permission. If set, only roles containing that
+ *   permission are returned.
+ * @param $force_group
+ *   Optioanl; If TRUE then the roles of the group will be retrieved by the
+ *   group ID, even if the group is set to have default roles and permissions.
+ *   The group might be set to "Default access" but infact there are inactive
+ *   group roles. Thus, we are forcing the function to return the overriden
+ *   roles. @see group_delete_user_roles_by_group().
+ * @return
+ *   An associative array with the role id as the key and the role name as
+ *   value. The anonymous and authenticated deault roles are on the top of the
+ *   array.
+ */
+function group_user_roles($gid = 0, $permission = NULL, $force_group = FALSE) {
+  $roles = array();
+
+  // Check if overriden access exists.
+  if (!$force_group) {
+    $gid = group_is_group_default_access($gid) ? 0 : $gid;
+  }
+
+  if (!empty($permission)) {
+    $roles = db_query("SELECT r.rid, r.name FROM {group_role} r INNER JOIN {group_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
+  }
+  else {
+    $roles = db_query("SELECT rid, name FROM {group_role} WHERE gid = :gid ORDER BY rid", array(':gid' => $gid))->fetchAllKeyed();
+  }
+
+  return  $roles;
+}
+
+/**
+ * Get global roles - roles that belong to non-existent group ID 0.
+ *
+ * @return
+ *   A keyed array with role Id as key and role name as value.
+ */
+function group_get_global_roles() {
+  return group_user_roles();
+}
+
+/**
+ * Get default roles.
+ */
+function group_get_default_roles($include = TRUE) {
+  $roles = module_invoke_all('group_default_roles');
+
+  // Allow other modules to alter the defult roles.
+  drupal_alter('group_default_roles', $roles);
+
+  if ($include) {
+    $roles = array_merge(array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE), $roles);
+  }
+
+  return $roles;
+}
+
+/**
+ * Get default permissions.
+ */
+function group_get_default_permissions() {
+  $perms = module_invoke_all('group_default_permissions');
+
+  // Allow other modules to alter the roles and permissions.
+  drupal_alter('group_default_permissions', $perms);
+
+  return $perms;
+}
+
+/**
+ * Set global roles and permissions.
+ *
+ * @param $force
+ *   TRUE if existing global roles should be deleted and new ones created
+ *   instead.
+ *
+ * @return
+ *   Array keyed by role ID and role name as value.
+ */
+function group_set_global_access($force = FALSE) {
+  $rids = array();
+
+  $roles = group_get_default_roles();
+  $perms = group_get_default_permissions();
+
+  $existing_roles = group_get_global_roles();
+
+  if (!$existing_roles || $force) {
+    // Group permissions by role.
+    $permissions = array();
+    foreach ($perms as $name => $perm_roles) {
+      foreach ($perm_roles as $perm_role) {
+        $permissions[$perm_role][$name] = TRUE;
+      }
+    }
+
+    if ($existing_roles) {
+      // Delete all existing roles.
+      foreach ($existing_roles as $rid => $name) {
+        group_user_role_delete($rid);
+      }
+    }
+
+    // Create new roles.
+    foreach ($roles as $name) {
+      $role = group_create_global_role($name);
+
+      $rids[$role->rid] = $role->name;
+      if (!empty($permissions[$role->name])) {
+        group_user_role_change_permissions($role->rid, $permissions[$role->name]);
+      }
+    }
+  }
+
+  return $rids;
+}
+
+/**
+ * Add default roles and permissions of a module to the global roles.
+ *
+ * @param $module
+ *   The module name.
+ * @return
+ *   Array with the global roles, as new records might have been added.
+ */
+function group_set_global_access_module($module = '') {
+  $default_roles = group_get_default_roles();
+  $default_perm = group_get_default_permissions();
+
+  $global_roles = group_get_global_roles();
+
+  if ($module_roles = module_invoke($module, 'group_default_roles')) {
+    $global_roles_assoc = drupal_map_assoc($global_roles);
+    foreach ($module_roles as $name) {
+      if (empty($global_roles_assoc[$name])) {
+        // Add a new global role.
+        $role = group_create_global_role($name);
+        $global_roles[$role->rid] = $name;
+      }
+    }
+  }
+
+
+  if (($module_perms = module_invoke($module, 'group_default_permissions')) &&
+    // Check module's permissions were not applied yet.
+    !((bool) db_query_range('SELECT 1 FROM {group_role_permission} WHERE module = :module', 0, 1, array(':module' => $module))->fetchField())) {
+
+    // Group permissions by role.
+    $permissions = array();
+    foreach ($module_perms as $name => $perm_roles) {
+      foreach ($perm_roles as $perm_role) {
+        $permissions[$perm_role][$name] = TRUE;
+      }
+    }
+
+    // Iterate over existing roles, and add the module's permissions.
+    foreach ($global_roles as $rid => $name) {
+      if (!empty($permissions[$name])) {
+        group_user_role_change_permissions($rid, $permissions[$name]);
+      }
+    }
+  }
+
+  return $global_roles;
+}
+
+/**
+ * Add a new global role - a role associated to group ID 0.
+ *
+ * @param $name
+ *   The role name.
+ * @return
+ *   The role object populated iwth the role ID.
+ */
+function group_create_global_role($name) {
+  $role = new stdClass;
+  $role->name = $name;
+  $role->gid = 0;
+
+  group_user_role_save($role);
+  return $role;
+}
+
+/**
+ * Get all roles of a user in a certain group.
+ *
+ * If overriden roles and permissions don't exist
+ *
+ * @param $gid
+ *   The group ID.
+ * @param $uid
+ *   The user ID.
+ * @param $include
+ *   Optional; If TRUE also anonymous or authenticated role ID will be returned.
+ *   Defaults to TRUE.
+ * @return
+ *   Array with the role IDs of the user.
+ */
+function group_get_user_roles($gid, $uid = NULL, $include = TRUE) {
+  $roles = array();
+
+  if (empty($uid)) {
+    global $user;
+    $uid = $user->uid;
+  }
+
+  if ($include) {
+    // Check if overriden access exists.
+    $query_gid = group_is_group_default_access($gid) ? 0 : $gid;
+
+    $group_roles = group_user_roles($query_gid);
+    $account = user_load($uid);
+
+    $name = group_is_member($gid, 'user', $account) ? GROUP_AUTHENTICATED_ROLE : GROUP_ANONYMOUS_ROLE;
+    $rid = array_search($name, $group_roles);
+    $roles[$rid] = $rid;
+  }
+
+  $roles = $roles + db_query("SELECT rid, rid FROM {group_users_roles} WHERE uid = :uid AND gid = :gid", array(':uid' => $uid, ':gid' => $gid))->fetchAllKeyed();
+
+  return $roles;
+}
+
+/**
+ * Get all the users with certain roles in a group.
+ *
+ * @param $gid
+ *   The group unique ID.
+ * @param $roles
+ *   Array with the role IDs to query.
+ */
+function group_get_users_by_roles($gid, $rids = array()) {
+  $query = db_select('group_users_roles', 'group_users_roles');
+  return $query->fields('group_users_roles', array('uid'))
+    ->condition('gid', $gid)
+    ->condition('rid', $rids, 'IN')
+    ->execute()
+    ->fetchAll();
+}
+
+
+/**
+ * Fetch a user role from database.
+ *
+ * @param $role
+ *   An integer with the role ID.
+ * @return
+ *   A fully-loaded role object if a role with the given name or ID
+ *   exists, FALSE otherwise.
+ */
+function group_user_role_load($rid) {
+  return db_select('group_role', 'r')
+    ->fields('r')
+    ->condition('rid', $rid)
+    ->execute()
+    ->fetchObject();
+}
+/**
+ * Save a user role to the database.
+ *
+ * @param $role
+ *   A role object to modify or add. If $role->rid is not specified, a new
+ *   role will be created.
+ * @return
+ *   Status constant indicating if role was created or updated.
+ *   Failure to write the user role record will return FALSE. Otherwise.
+ *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation
+ *   performed.
+ */
+function group_user_role_save($role) {
+  if ($role->name) {
+    // Prevent leading and trailing spaces in role names.
+    $role->name = trim($role->name);
+  }
+  if (!empty($role->rid) && $role->name) {
+    $status = drupal_write_record('group_role', $role, 'rid');
+    module_invoke_all('group_user_role_update', $role);
+  }
+  else {
+    $status = drupal_write_record('group_role', $role);
+    module_invoke_all('group_user_role_insert', $role);
+  }
+
+  // Clear the user access cache.
+  drupal_static_reset('group_user_access');
+  drupal_static_reset('group_user_role_permissions');
+
+  return $status;
+}
+
+/**
+ * Delete a user role from database.
+ *
+ * @param $role
+ *   An integer with the role ID.
+ */
+function group_user_role_delete($rid) {
+  $role = group_user_role_load($rid);
+
+  db_delete('group_role')
+    ->condition('rid', $rid)
+    ->execute();
+  db_delete('group_role_permission')
+    ->condition('rid', $rid)
+    ->execute();
+  // Update the users who have this role set.
+  db_delete('group_users_roles')
+    ->condition('rid', $rid)
+    ->execute();
+
+  module_invoke_all('group_user_role_delete', $role);
+
+  // Clear the user access cache.
+  drupal_static_reset('group_user_access');
+  drupal_static_reset('group_user_role_permissions');
+}
+
+/**
+ * Delete all roles belonging to a group.
+ *
+ * @param $gid
+ *   The group ID.
+ */
+function group_delete_user_roles_by_group($gid) {
+  // Check if group has overriden roles defined.
+  if ($roles = group_user_roles($gid, NULL, TRUE)) {
+    foreach ($roles as $rid => $name) {
+      group_user_role_delete($rid);
+    }
+  }
+}
+
+
+/**
+ * Delete all permissions defined by a module.
+ *
+ * @see group_modules_uninstalled()
+ *
+ * @param $module
+ *   The module name.
+ */
+function group_permissions_delete_by_module($module) {
+   db_delete('group_role_permission')
+     ->condition('module', $modules, 'IN')
+     ->execute();
+}
+
+/**
+ * Create new roles, based on the default roles and permissions.
+ *
+ * @param $gid
+ *   The group ID.
+ * @return
+ *   The newly created roles keyed by role ID and role name as the value. Or
+ *   FALSE if no roles were created.
+ */
+function group_group_user_roles_override($gid) {
+  $rids = array();
+  // Make sure roles doesn't exist already by looking for a row with the group
+  // ID in {group_role} table.
+  $perms = group_get_global_permissions();
+
+  foreach (group_get_global_roles() as $rid => $name) {
+    $role = new stdClass;
+    $role->name = $name;
+    $role->gid = $gid;
+
+    group_user_role_save($role);
+    $rids[$role->rid] = $role->name;
+    group_user_role_change_permissions($role->rid, $perms[$rid]);
+  }
+
+  return $rids;
+}
+
+/**
+ * Determine the modules that permissions belong to.
+ *
+ * @return
+ *   An associative array in the format $permission => $module.
+ */
+function group_user_permission_get_modules() {
+  $permissions = array();
+  foreach (module_implements('group_permission') as $module) {
+    $perms = module_invoke($module, 'group_permission');
+    foreach ($perms as $key => $value) {
+      $permissions[$key] = $module;
+    }
+  }
+  return $permissions;
+}
+
+/**
+ * Grant a group role to a user.
+ *
+ * @param $uid
+ *   The user ID.
+ * @param $rid
+ *   The role ID.
+ */
+function group_users_roles_grant($gid, $uid, $rid) {
+  // Get the existiong user roles.
+  $user_roles = group_get_user_roles($gid, $uid);
+  if (!in_array($rid, $user_roles)) {
+    $role = new stdClass();
+    $role->uid = $uid;
+    $role->rid = $rid;
+    $role->gid = $gid;
+
+    drupal_write_record('group_users_roles', $role);
+    module_invoke_all('group_users_roles_grant', $gid, $uid, $rid);
+  }
+}
+
+/**
+ * Revoke a group role from a user.
+ *
+ * @param $uid
+ *   The user ID.
+ * @param $rid
+ *   The role ID.
+ */
+function group_users_roles_revoke($gid, $uid, $rid) {
+  // Get the existiong user roles.
+  $user_roles = group_get_user_roles($gid, $uid);
+  if (in_array($rid, $user_roles)) {
+
+    db_delete('group_users_roles')
+      ->condition('uid', $uid)
+      ->condition('rid', $rid)
+      ->execute();
+    module_invoke_all('group_users_roles_revoke', $gid, $uid, $rid);
+  }
+}
+
+/**
+ * Change permissions for a user role.
+ *
+ * This function may be used to grant and revoke multiple permissions at once.
+ * For example, when a form exposes checkboxes to configure permissions for a
+ * role, the submitted values may be directly passed on in a form submit
+ * handler.
+ *
+ * @param $rid
+ *   The ID of a user role to alter.
+ * @param $permissions
+ *   An array of permissions, where the key holds the permission name and the
+ *   value is an integer or boolean that determines whether to grant or revoke
+ *   the permission:
+ *   @code
+ *     array(
+ *       'administer nodes' => 0,
+ *       'access user profiles' => 1,
+ *     )
+ *   @endcode
+ *   Existing permissions are not changed, unless specified in $permissions.
+ *
+ * @see group_user_role_grant_permissions()
+ * @see group_user_role_revoke_permissions()
+ */
+function group_user_role_change_permissions($rid, array $permissions = array()) {
+  // Grant new permissions for the role.
+  $grant = array_filter($permissions);
+  if (!empty($grant)) {
+    group_user_role_grant_permissions($rid, array_keys($grant));
+  }
+  // Revoke permissions for the role.
+  $revoke = array_diff_assoc($permissions, $grant);
+  if (!empty($revoke)) {
+    group_user_role_revoke_permissions($rid, array_keys($revoke));
+  }
+}
+
+/**
+ * Grant permissions to a user role.
+ *
+ * @param $rid
+ *   The ID of a user role to alter.
+ * @param $permissions
+ *   A list of permission names to grant.
+ *
+ * @see user_role_change_permissions()
+ * @see user_role_revoke_permissions()
+ */
+function group_user_role_grant_permissions($rid, array $permissions = array()) {
+  $modules = group_user_permission_get_modules();
+	// Grant new permissions for the role.
+  foreach ($permissions as $name) {
+    db_merge('group_role_permission')
+      ->key(array(
+        'rid' => $rid,
+        'permission' => $name,
+        'module' => $modules[$name],
+      ))
+      ->execute();
+  }
+
+  // Clear the user access cache.
+  drupal_static_reset('group_user_access');
+  drupal_static_reset('group_user_role_permissions');
+}
+
+/**
+ * Revoke permissions from a user role.
+ *
+ * @param $rid
+ *   The ID of a user role to alter.
+ * @param $permissions
+ *   A list of permission names to revoke.
+ *
+ * @see user_role_change_permissions()
+ * @see user_role_grant_permissions()
+ */
+function group_user_role_revoke_permissions($rid, array $permissions = array()) {
+  // Revoke permissions for the role.
+  db_delete('group_role_permission')
+    ->condition('rid', $rid)
+    ->condition('permission', $permissions, 'IN')
+    ->execute();
+
+  // Clear the user access cache.
+  drupal_static_reset('group_user_access');
+  drupal_static_reset('group_user_role_permissions');
+}
+
+
+/**
+ * Get all permissions defined for organic groups.
+ */
+function group_get_permissions() {
+  $perms = &drupal_static(__FUNCTION__, array());
+  if (!empty($perms)) {
+    return $perms;
+  }
+
+  foreach (module_implements('group_permission') as $module) {
+    if ($permissions = module_invoke($module, 'group_permission')) {
+      foreach ($permissions as $key => $perm) {
+        // Initialize the roles key, if other modules haven't set it explicetly.
+        // This means the permissions can apply to anonymous and authenticaed
+        // members as-well.
+        $permissions[$key] += array('roles' => array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE));
+      }
+      $perms[$module] = $permissions;
+    }
+  }
+
+  if (user_access('administer organic groups')) {
+    $return = array();
+    // Allow user to define which administration permissions a group admin can
+    // set.
+    foreach ($perms as $module => $permissions) {
+      foreach ($permissions as $key => $perm) {
+        $return['administer']['show ' . $key] = array(
+          'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
+          'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
+          // Add all roles, as this option allows setting which permisisons
+          // a role has access to.
+          'roles' => array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE, GROUP_ADMINISTRATOR_ROLE),
+        );
+      }
+    }
+    $perms = $perms + $return;
+  }
+  return $perms;
+}
+
+/**
+ * Get global permissions.
+ *
+ * @return
+ *   Array keyed with the anonymous, authenticated and administror and the
+ *   permissions that should be enabled by default.
+ */
+function group_get_global_permissions() {
+  $roles = group_get_global_roles();
+
+  $perms = group_user_role_permissions($roles);
+  return $perms;
+}
+
+/**
+ * Get all the modules fields that can be assigned to fieldable enteties.
+ */
+function group_fields_info() {
+  $return = &drupal_static(__FUNCTION__, array());
+
+  if (!empty($return)) {
+    return $return;
+  }
+
+  foreach (module_implements('group_fields_info') as $module) {
+    if ($fields = module_invoke($module, 'group_fields_info')) {
+      foreach ($fields as $key => $field) {
+        // Add the module information.
+        $return[$key] = array_merge($field, array('module' => $module));
+      }
+    }
+  }
+  return $return;
+}
+
+/**
+ * Check to see if a token value matches the specified node.
+ */
+function group_check_token($token, $seed) {
+  return drupal_get_token($seed) == $token;
+}
+
+function group_set_breadcrumb($entity_type, $eid, $path = array()) {
+  if ($label = group_entity_get_label($entity_type, $eid)) {
+    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$eid")), $path)) ;
+  }
+}
+
+/**
+ * Create a field in a bundle.
+ *
+ * @param $field_name
+ *   The field name
+ * @param $entity_type
+ *   The entity type
+ * @param $bundle
+ *   The bundle name.
+ */
+function group_create_field($field_name, $entity_type, $bundle) {
+  _field_info_collate_fields(TRUE);
+  _field_info_collate_types(TRUE);
+  $group_field = group_fields_info($field_name);
+
+  if (!empty($group_field['callback'])) {
+    // Field has own implementation for creating the fields.
+    call_user_func($group_field['callback'], $field_name, $entity_type, $bundle);
+  }
+  else {
+    // Make sure an inactive field doesn't exist.
+    $prior_field = field_read_field($field_name, array('include_inactive' => TRUE));
+    $field = field_info_field($field_name);
+    if (empty($field) && empty($prior_field)) {
+      $field = field_create_field($group_field[$field_name]['field']);
+    }
+
+    $instance = field_info_instance($entity_type, $field_name, $bundle);
+    if (empty($instance) && (!$prior_field || $field)) {
+
+      $instance = array(
+        'field_name' => $field_name,
+        'bundle' => $bundle,
+        'entity_type' => $entity_type,
+      ) + $group_field[$field_name]['instance'];
+
+      field_create_instance($instance);
+    }
+  }
+}
+
+
+/**
+ * Return a re-loaded entity with its fields.
+ *
+ * This is needed only if a user account is passed, as global $user is only a
+ * partial user entity.
+ *
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity
+ *   The entity.
+ */
+function group_load_entity($entity_type, $entity) {
+  if ($entity_type == 'user') {
+    $entity = user_load($entity->uid);
+  }
+  return $entity;
+}
+
+/**
+ * Return a loaded entity from group.
+ *
+ * @param $gid
+ *   The group ID.
+ */
+function group_load_entity_from_group($gid) {
+  $entity = FALSE;
+  if ($group = group_load($gid)) {
+    $entity = entity_load($group->entity_type, array($group->eid));
+    $entity = reset($entity);
+  }
+
+  return $entity;
+}
+
+
+/**
+ * Return the states a group can be in.
+ */
+function group_group_states() {
+  return array(
+    GROUP_STATE_ACTIVE => t('Active'),
+    GROUP_STATE_PENDING => t('Pending'),
+  );
+}
+
+/**
+ * Return the states a group can be in.
+ */
+function group_group_content_states() {
+  return array(
+    GROUP_STATE_ACTIVE => t('Active'),
+    GROUP_STATE_PENDING => t('Pending'),
+    GROUP_STATE_BLOCKED => t('Blocked'),
+  );
+}
