@@ -2281,3 +2281,4 @@ function group_group_content_states() {
     GROUP_STATE_BLOCKED => t('Blocked'),
   );
 }
+
