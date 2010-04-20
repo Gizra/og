@@ -13,21 +13,21 @@
 /**
  * Implement hook_field_info().
  */
-function og_field_info() {
+function group_field_info() {
   return array(
-    'og' => array(
+    'group' => array(
       'label' => t('Group'),
       'description' => t('This field stores groups associated with the content.'),
-      'default_widget' => 'og_audience',
-      'default_formatter' => 'og_list_default',
+      'default_widget' => 'group_audience',
+      'default_formatter' => 'group_list_default',
       // Entity metadata properties.
-      'property_type' => 'og_audience',
-      'property_callbacks' => array('og_field_og_property_callback'),
+      'property_type' => 'group_audience',
+      'property_callbacks' => array('group_field_group_property_callback'),
     ),
   );
 }
 
-function og_field_og_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
+function group_field_group_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
   $name = str_replace('_', '-', $field['field_name']);
   $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
@@ -44,7 +44,7 @@ function og_field_og_property_callback(&$info, $entity_type, $field, $instance, 
       'state' => array(
         'type' => 'text',
         'label' => t('Group content state'),
-        'options list' => 'og_group_content_states',
+        'options list' => 'group_group_content_states',
       ),
       'created' => array(
         'type' => 'integer',
@@ -57,7 +57,7 @@ function og_field_og_property_callback(&$info, $entity_type, $field, $instance, 
 /**
  * Implement hook_field_schema().
  */
-function og_field_schema($field) {
+function group_field_schema($field) {
   $columns = array(
     'gid' => array(
       'description' => 'The group unique ID.',
@@ -90,11 +90,11 @@ function og_field_schema($field) {
 /**
  * Implement hook_field_formatter_info().
  */
-function og_field_formatter_info() {
+function group_field_formatter_info() {
   return array(
-    'og_list_default' => array(
+    'group_list_default' => array(
       'label' => t('Group default list'),
-      'field types' => array('og'),
+      'field types' => array('group'),
     ),
   );
 }
@@ -102,13 +102,13 @@ function og_field_formatter_info() {
 /**
  * Implements hook_field_formatter_view().
  */
-function og_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+function group_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-  if ($field['field_name'] == 'og_audience' && !empty($items[0])) {
+  if ($field['field_name'] == 'group_audience' && !empty($items[0])) {
     foreach ($items as $delta => $item) {
-      if ($group = og_get_group('og', $item['gid'])) {
-        $label = check_plain(og_entity_get_label($group->entity_type, $group->etid));
+      if ($group = group_get_group('group', $item['gid'])) {
+        $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
         $element[$delta] = array(
           '#type' => 'link',
           '#title' => $label,
@@ -125,12 +125,12 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
 /**
  * Implement hook_field_widget_info().
  */
-function og_field_widget_info() {
+function group_field_widget_info() {
   return array(
-    'og_audience' => array(
+    'group_audience' => array(
       'label' => t('Group audience'),
       'settings' => array('opt_group' => 'auto', 'minimum_for_select_list' => 20),
-      'field types' => array('og'),
+      'field types' => array('group'),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
       ),
@@ -141,7 +141,7 @@ function og_field_widget_info() {
 /**
  * Implement hook_field_widget_settings_form().
  */
-function og_field_widget_settings_form($field, $instance) {
+function group_field_widget_settings_form($field, $instance) {
   $widget = $instance['widget'];
   $settings = $widget['settings'];
 
@@ -173,21 +173,21 @@ function og_field_widget_settings_form($field, $instance) {
 /**
  * Implement hook_field_widget_form().
  *
- * Unlike options_field_widget_form() our widget's logic is a bit different, as
+ * Unlike options_field_widget_form() our widget's lgroupic is a bit different, as
  * the form element type is a result of the user's access to the groups.
  * For example a privileged user may see all groups as an optgroup select list,
  * where the groups are divided to "My groups" and "Other groups". This means
  * that the $element['#type'] is a result of the options passed to
  * $element['#options'].
  */
-function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+function group_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $excludes = array();
   // If it's an existing group, then exclude itself, as in some cases a group
   // can act also as a group content, but we want to prevent associating the
   // group to itself.
   if (!empty($form['#' . $element['#entity_type']])) {
     list($id) = entity_extract_ids($element['#entity_type'], $form['#' . $element['#entity_type']]);
-    if (($group = og_get_group($element['#entity_type'], $id))) {
+    if (($group = group_get_group($element['#entity_type'], $id))) {
       $excludes[$group->gid] = $group->gid;
     }
   }
@@ -200,10 +200,10 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   }
 
   // Get all the groups a user can see.
-  $audience = og_get_audience_options($opt_group);
+  $audience = group_get_audience_options($opt_group);
   foreach (array('content groups', 'other groups') as $key) {
     if (!empty($audience[$key])) {
-      $audience[$key] = og_get_groups_label($audience[$key]);
+      $audience[$key] = group_get_groups_label($audience[$key]);
     }
   }
 
@@ -244,7 +244,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     $element['#description'] = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
   }
 
-  $default_values = og_get_context_by_url();
+  $default_values = group_get_context_by_url();
 
   if (!empty($items)) {
     foreach ($items as $item) {
@@ -279,7 +279,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     '#type' => $type,
     '#options' => $options,
     '#default_value' => $default_values,
-    '#attributes' => array('class' => array('og-audience')),
+    '#attributes' => array('class' => array('group-audience')),
     '#disabled' => empty($groups_count),
     // Re-use options widget element validation, to correctly transform
     // submitted values from field => delta to delta => field.
@@ -295,43 +295,43 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 /**
  * Implement hook_field_is_empty().
  */
-function og_field_is_empty($item, $field) {
+function group_field_is_empty($item, $field) {
   return empty($item['gid']);
 }
 
 /**
  * Implement hook_field_insert().
  */
-function og_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  og_field_write('insert', $entity_type, $entity, $field, $instance, $langcode, $items);
+function group_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  group_field_write('insert', $entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
  * Implement hook_field_update().
  */
-function og_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  og_field_write('update', $entity_type, $entity, $field, $instance, $langcode, $items);
+function group_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  group_field_write('update', $entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
  * Implement hook_field_attach_insert().
  */
-function og_field_attach_insert($entity_type, $entity) {
-  og_field_crud_group('insert', $entity_type, $entity);
+function group_field_attach_insert($entity_type, $entity) {
+  group_field_crud_group('insert', $entity_type, $entity);
 }
 
 /**
  * Implement hook_field_attach_update().
  */
-function og_field_attach_update($entity_type, $entity) {
-  og_field_crud_group('update', $entity_type, $entity);
+function group_field_attach_update($entity_type, $entity) {
+  group_field_crud_group('update', $entity_type, $entity);
 }
 
 /**
  * Implement hook_field_attach_delete().
  */
-function og_field_attach_delete($entity_type, $entity) {
-  og_field_crud_group('delete', $entity_type, $entity);
+function group_field_attach_delete($entity_type, $entity) {
+  group_field_crud_group('delete', $entity_type, $entity);
 }
 
 /*******************************************************************************
@@ -343,7 +343,7 @@ function og_field_attach_delete($entity_type, $entity) {
  * @param $op
  *   The operation - "insert" or "update".
  */
-function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode, &$items) {
+function group_field_write($op, $entity_type, $entity, $field, $instance, $langcode, &$items) {
   //FIXME: Only $items['gid'] is populated.
   foreach ($items as &$item) {
     // Set default values.
@@ -354,11 +354,11 @@ function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode
 /**
  * Create update or delete a group, based on the field CRUD.
  *
- * @see og_field_attach_insert().
- * @see og_field_attach_update().
- * @see og_field_attach_delete().
+ * @see group_field_attach_insert().
+ * @see group_field_attach_update().
+ * @see group_field_attach_delete().
  */
-function og_field_crud_group($op, $entity_type, $entity) {
+function group_field_crud_group($op, $entity_type, $entity) {
   $property = OG_GROUP_FIELD;
 
   $wrapper = &$entity->{$property}[LANGUAGE_NONE];
@@ -366,11 +366,11 @@ function og_field_crud_group($op, $entity_type, $entity) {
   // Get the entity ID.
   list($id) = entity_extract_ids($entity_type, $entity);
 
-  $group = og_get_group($entity_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+  $group = group_get_group($entity_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
   if ($op == 'delete') {
     if (!empty($group->gid)) {
       // Remove group.
-      og_delete(array($group->gid));
+      group_delete(array($group->gid));
     }
   }
   else {
@@ -378,12 +378,12 @@ function og_field_crud_group($op, $entity_type, $entity) {
     if (empty($group->gid)) {
       if (!empty($wrapper[0]['value'])) {
         // Save the group.
-        og_save($group);
-        og_group_user_roles_override($group->gid);
+        group_save($group);
+        group_group_user_roles_override($group->gid);
 
         // Subscribe the entity author, if exists.
         if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
-          og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
+          group_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
         }
       }
     }
@@ -410,18 +410,18 @@ function og_field_crud_group($op, $entity_type, $entity) {
 
         if ($entity->{$property} != $original_entity->{$property}) {
           if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
-            og_group_user_roles_override($group->gid);
+            group_group_user_roles_override($group->gid);
           }
           else {
             // If the field is set to be using default access and there are
             // already overriden roles we delete them.
-            og_delete_user_roles_by_group($group->gid);
+            group_delete_user_roles_by_group($group->gid);
           }
         }
       }
 
       if ($save) {
-        og_save($group);
+        group_save($group);
       }
     }
   }
