@@ -180,9 +180,107 @@ if (module_exists('group')) {
   /**
    * Implements hook_update_N()
    *
-   * Upgrade path from Organic groups for Drupal 6 to Group for Drupal 7.
+   * Upgrade path from Organic groups for Drupal 6 to Group for Drupal 7:
+   * - Add group fields to nodes.
+   * - Move Organic groups' data into the fields of group.
+   * - Delete Organic groups' variables.
    */
-  function group_update_7000() {
+  function group_update_7000(&$context) {
+    // Indicate if fields should be added to content types.
+    static $upgrade = FALSE;
+
+    $content_type = array();
+
+    // If this is the first time this functions is called in the batch process,
+    // create fields for the content types.
+    if (!$upgrade) {
+      $upgrade = TRUE;
+      foreach (node_type_get_types() as $type) {
+        // check if the variable exists.
+        if ($type_usage = variable_get('og_content_type_usage_' . $type->type)) {
+          switch ($type_usage) {
+            case 'group':
+              $content_type['group'] = $type->type;
+              break;
+
+            case 'group_post':
+            case 'wiki':
+              $content_type['group content'] = $type->type;
+              break;
+
+          }
+        }
+      }
+
+      if ($content_type) {
+        // Add group and group content fields to content types.
+        $fields = array(
+          'group' => GROUP_GROUP_FIELD,
+          'group content' => GROUP_AUDIENCE_FIELD,
+        );
+        foreach ($fields as $key => $field_name) {
+          foreach ($content_type[$key] as $type) {
+            group_create_field($field_name, 'node', $type);
+          }
+        }
+
+        // Initialize state for future calls.
+        $context['last'] = 0;
+        $context['count'] = 0;
+
+        //TODO: Do same for group and group content.
+        $query = db_select('og_ancestry', 'oga');
+        $context['total'] = $query->countQuery()->execute()->fetchField();
+      }
+    }
+
+    if ($upgrade) {
+
+      $found = FALSE;
+      if ($context['total']) {
+        // Operate on every revision of every node, in batches.
+        $batch_size = 200;
+        $query = db_select('node_revision', 'nr');
+        $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+        $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
+        $query
+          ->fields('nr', array('nid', 'vid'))
+          ->fields('n', array('type'))
+          ->condition('nr.vid', $context['last'], '>')
+          ->orderBy('nr.vid', 'ASC')
+          ->range(0, $batch_size);
+        $revisions = $query->execute();
+
+        foreach ($revisions as $revision) {
+          $found = TRUE;
+
+          $node = (object) array(
+            'nid' => $revision->nid,
+            'vid' => $revision->vid,
+            'type' => $revision->type,
+          );
+
+          // Set field values.
+          $property = GROUP_GROUP_FIELD;
+          $node->{$property}[LANGUAGE_NONE][0]['value'] = TRUE;
+
+          field_attach_update('node', $node);
+
+          $context['last'] = $revision->vid;
+          $context['count'] += 1;
+      }
+
+      $context['#finished'] = min(0.99, $context['count'] / $context['total']);
+    }
+
+    if (!$found) {
+      // All nodes are processed.
+
+      // We're done.
+      $context['#finished'] = 1;
+      return t("!number groups and group content converted to use new Group fields.", array('!number' => $context['total']));
+    }
+
 
   }
 }
