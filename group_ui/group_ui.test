@@ -40,7 +40,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     // Remove a permission.
     $edit = array();
     $edit[$roles[GROUP_ANONYMOUS_ROLE] . '[subscribe]'] = FALSE;
-    $this->drupalPost('group/' . $this->group->entity_type . '/' . $this->group->eid . '/admin/people/permissions', $edit, t('Save permissions'));
+    $this->drupalPost('group/' . $this->group->entity_type . '/' . $this->group->etid . '/admin/people/permissions', $edit, t('Save permissions'));
     $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
 
     // TODO: Remove - find out why doesn't work without.
@@ -52,7 +52,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     // Re-add permission.
     $edit = array();
     $edit[$roles[GROUP_ANONYMOUS_ROLE] . '[subscribe]'] = TRUE;
-    $this->drupalPost('group/' . $this->group->entity_type . '/' . $this->group->eid . '/admin/people/permissions', $edit, t('Save permissions'));
+    $this->drupalPost('group/' . $this->group->entity_type . '/' . $this->group->etid . '/admin/people/permissions', $edit, t('Save permissions'));
 
     // TODO: Remove - find out why doesn't work without.
     drupal_static_reset('group_user_access');

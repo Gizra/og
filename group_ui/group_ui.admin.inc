@@ -11,18 +11,18 @@
  *
  * @param $entity_type
  *   The entity type.
- * @param $eid
+ * @param $etid
  *   The entity ID.
  */
-function group_ui_group_admin_overview($entity_type, $eid) {
-  group_set_breadcrumb($entity_type, $eid);
+function group_ui_group_admin_overview($entity_type, $etid) {
+  group_set_breadcrumb($entity_type, $etid);
 
-  $group = group_get_group($entity_type, $eid);
+  $group = group_get_group($entity_type, $etid);
   $items = group_ui_get_group_admin($group->gid);
 
   foreach ($items as &$item) {
     // Re-format the URL.
-    $item['href'] = "group/$entity_type/$eid/" . $item['href'];
+    $item['href'] = "group/$entity_type/$etid/" . $item['href'];
     // Imitate the menu_get_item() content, so we can pass it to
     // theme_admin_block_content(), so we add the localized_options key.
     $item['localized_options'] = array();
@@ -36,10 +36,10 @@ function group_ui_group_admin_overview($entity_type, $eid) {
 /**
  * Add users to group form.
  */
-function group_ui_add_users($form, &$form_state, $entity_type, $eid) {
-  group_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")));
-  if ($group = group_get_group($entity_type, $eid)) {
-    $label = check_plain(group_entity_get_label($group->entity_type, $group->eid));
+function group_ui_add_users($form, &$form_state, $entity_type, $etid) {
+  group_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
+  if ($group = group_get_group($entity_type, $etid)) {
+    $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
 
     $form['group_user'] = array(
       '#type' => 'fieldset',
@@ -92,9 +92,9 @@ function group_ui_add_users_submit($form, &$form_state) {
  * @see group_user_admin_account_validate()
  * @see group_user_admin_account_submit()
  */
-function group_ui_user_admin_account($form, $form_state, $entity_type, $eid) {
-  group_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")));
-  $group = group_get_group($entity_type, $eid);
+function group_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
+  group_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
+  $group = group_get_group($entity_type, $etid);
   $header = array(
     'username' => array('data' => t('Username'), 'field' => 'u.name'),
     'status' => array('data' => t('Status'), 'field' => 'group.group_audience_state'),
@@ -239,8 +239,8 @@ function group_ui_user_admin_account_submit($form, &$form_state) {
  * @see group_user_admin_role_submit()
  * @see theme_group_user_admin_new_role()
  */
-function group_ui_user_admin_role($form, $form_state, $entity_type, $eid) {
-  if ($group = group_get_group($entity_type, $eid)) {
+function group_ui_user_admin_role($form, $form_state, $entity_type, $etid) {
+  if ($group = group_get_group($entity_type, $etid)) {
     $form['group'] = array('#type' => 'value', '#value' => $group);
 
     $item = menu_get_item();
@@ -248,11 +248,11 @@ function group_ui_user_admin_role($form, $form_state, $entity_type, $eid) {
     $rid = !empty($item['map'][7]) ? $item['map'][7] : 0;
 
     if ($rid) {
-      group_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")), l(t('Roles'), "group/$entity_type/$eid/admin/people/roles"));
+      group_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")), l(t('Roles'), "group/$entity_type/$etid/admin/people/roles"));
 
       $group_roles = group_user_roles($group->gid);
       if (!in_array($rid, array_keys($group_roles))) {
-        drupal_goto("group/$entity_type, $eid/admin/people/roles");
+        drupal_goto("group/$entity_type, $etid/admin/people/roles");
       }
       // Display the edit role form.
       $role = group_user_role_load($rid);
@@ -280,7 +280,7 @@ function group_ui_user_admin_role($form, $form_state, $entity_type, $eid) {
       );
     }
     else {
-      group_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")));
+      group_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
       if (!group_is_group_default_access($group->gid)) {
         $form['name'] = array(
           '#type' => 'textfield',
@@ -338,7 +338,7 @@ function group_ui_user_admin_role_submit($form, &$form_state) {
     group_user_role_save($role);
     drupal_set_message(t('The role has been added.'));
   }
-  $form_state['redirect'] = 'group/' . $group->entity_type . '/' . $group->eid . '/admin/people/roles';
+  $form_state['redirect'] = 'group/' . $group->entity_type . '/' . $group->etid . '/admin/people/roles';
   return;
 }
 
@@ -357,10 +357,10 @@ function theme_group_ui_user_admin_new_role($variables) {
 
   foreach (group_user_roles($group->gid) as $rid => $name) {
     $text = !$default_roles ? t('edit permissions') : t('view permissions');
-    $permissions = l($text, 'group/' . $group->entity_type .'/' . $group->eid . '/admin/people/permissions/' . $rid);
+    $permissions = l($text, 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/permissions/' . $rid);
 
     if (!$default_roles && !in_array($name, array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE))) {
-      $rows[] = array($name, l(t('edit role'), 'group/' . $group->entity_type .'/' . $group->eid . '/admin/people/roles/edit/' . $rid), $permissions);
+      $rows[] = array($name, l(t('edit role'), 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/roles/edit/' . $rid), $permissions);
     }
     else {
       $rows[] = array($name, t('locked'), $permissions);
@@ -383,15 +383,15 @@ function theme_group_ui_user_admin_new_role($variables) {
  * @see group_ui_user_admin_permissions_submit()
  * @see theme_group_ui_user_admin_permissions()
  */
-function group_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $eid = NULL, $rid = NULL) {
+function group_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $etid = NULL, $rid = NULL) {
   // If no node entity is provided then the node ID is 0, which means this
   // is the default permissions settings.
-  $group = !empty($eid) ? group_get_group($entity_type, $eid) : array();
+  $group = !empty($etid) ? group_get_group($entity_type, $etid) : array();
   $form['group'] = array('#type' => 'value', '#value' => $group);
 
   if (!empty($group)) {
     $gid =  $group->gid;
-    group_set_breadcrumb($entity_type, $eid, array(l(t('Group'), "$entity_type/$eid/group")));
+    group_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
   }
   else {
     $gid = 0;

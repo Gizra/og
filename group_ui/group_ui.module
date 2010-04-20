@@ -149,8 +149,8 @@ function group_ui_menu() {
 /**
  * Menu callback; Return the title of a menu item based on the group title.
  */
-function group_ui_menu_title_callback($title, $entity_type, $eid) {
-  $label = check_plain(group_entity_get_label($entity_type, $eid));
+function group_ui_menu_title_callback($title, $entity_type, $etid) {
+  $label = check_plain(group_entity_get_label($entity_type, $etid));
   return str_replace('@group', $label, $title);
 }
 
@@ -499,7 +499,7 @@ function group_ui_group_ui_get_group_admin($gid) {
   $items['add_people'] = array(
     'title' => t('Add people'),
     'description' => t('Add group members.'),
-    // The final URL will be "group/$entity_type/$eid/admin/people/add-user".
+    // The final URL will be "group/$entity_type/$etid/admin/people/add-user".
     // @see group_ui_group_admin_overview().
     'href' => 'admin/people/add-user',
   );

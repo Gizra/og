@@ -15,9 +15,9 @@
  *   Optional; The user ID of the subscribing user. If empty the current user
  *   will be used.
  */
-function group_ui_subscribe($entity_type, $eid, $uid = NULL) {
+function group_ui_subscribe($entity_type, $etid, $uid = NULL) {
   global $user;
-  if ($group = group_get_group($entity_type, $eid)) {
+  if ($group = group_get_group($entity_type, $etid)) {
     if (empty($uid)) {
       $account = $user;
 
@@ -48,7 +48,7 @@ function group_ui_subscribe($entity_type, $eid, $uid = NULL) {
       drupal_set_message($message);
 
 
-      $entity = reset(entity_load($entity_type, array($eid)));
+      $entity = reset(entity_load($entity_type, array($etid)));
       _group_ui_redirect($entity_type, $entity);
     }
     elseif (group_user_access($group->gid, 'subscribe', $account) || group_user_access($group->gid, 'subscribe without approval', $account)) {
@@ -75,8 +75,8 @@ function group_ui_confirm_subscribe($form, &$form_state, $group, $account) {
       '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
     );
   }
-  $label = check_plain(group_entity_get_label($group->entity_type, $group->eid));
-  return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $label)), "$group->entity_type/$group->eid", ' ', t('Join'), t('Cancel'));
+  $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
+  return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $label)), "$group->entity_type/$group->etid", ' ', t('Join'), t('Cancel'));
 }
 
 /**
@@ -91,7 +91,7 @@ function group_ui_confirm_subscribe_submit($form, &$form_state) {
 
   group_group($group->gid, 'user', $account, $state);
 
-  $form_state['redirect'] = "$group->entity_type/$group->eid";
+  $form_state['redirect'] = "$group->entity_type/$group->etid";
 }
 
 
@@ -102,13 +102,13 @@ function group_ui_confirm_subscribe_submit($form, &$form_state) {
  * no malicious user will unsubscribe another user. Administrators can reject or
  * ban another group member from the "people" page.
  */
-function group_ui_unsubscribe($entity_type, $eid) {
-  if ($group = group_get_group($entity_type, $eid)) {
+function group_ui_unsubscribe($entity_type, $etid) {
+  if ($group = group_get_group($entity_type, $etid)) {
     global $user;
 
-    $label = check_plain(group_entity_get_label($group->entity_type, $group->eid));
+    $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
     // Check the user isn't the manager of the group.
-    $entity= reset(entity_load($group->entity_type, array($group->eid)));
+    $entity= reset(entity_load($group->entity_type, array($group->etid)));
     if (!empty($entity->uid) && $entity->uid != $user->uid) {
       $user_groups = group_get_entity_groups('user', $user);
       if (!empty($user_groups[$group->gid])) {
@@ -157,8 +157,8 @@ function group_ui_confirm_unsubscribe($form, &$form_state, $group, $account) {
    $form['group'] = array('#type' => 'value', '#value' => $group);
    $form['account'] = array('#type' => 'value', '#value' => $account);
 
-   $label = check_plain(group_entity_get_label($group->entity_type, $group->eid));
-   return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), "$group->entity_type/$group->eid", ' ', t('Remove'), t('Cancel'));
+   $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
+   return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), "$group->entity_type/$group->etid", ' ', t('Remove'), t('Cancel'));
 }
 
 /**
@@ -171,5 +171,5 @@ function group_ui_confirm_unsubscribe_submit($form, &$form_state) {
   group_ungroup($group->gid, 'user', $account);
 
   // Determine where to go next - Group if accessible, or else site front page.
-  $form_state['redirect'] = "$group->entity_type/$group->eid";
+  $form_state['redirect'] = "$group->entity_type/$group->etid";
 }

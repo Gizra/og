@@ -56,7 +56,7 @@ function group_views_data() {
     ),
   );
 
-  $data['group_groups']['eid'] = array(
+  $data['group_groups']['etid'] = array(
     'title' => t("Group's entity ID"),
     'help' => t('The entity ID of the group.'),
     'field' => array(
@@ -178,7 +178,7 @@ function group_views_data_alter(&$data) {
         'handler' => 'group_handler_relationship',
         'label' => t('organic groups'),
         'base' => 'group_groups',
-        'base field' => 'eid',
+        'base field' => 'etid',
         'relationship field' => $item['join field'],
       ),
     );

@@ -97,7 +97,7 @@ function group_entity_property_info() {
     'required' => TRUE,
   );
 
-  $properties['eid'] = array(
+  $properties['etid'] = array(
     'label' => t("Object ID"),
     'type' => 'integer',
     'description' => t("The ID of the entity."),
@@ -419,14 +419,14 @@ function group_preprocess_html(&$variables) {
     $variables['theme_hook_suggestions'][] = 'page__group_context';
     $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->gid;
     $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type;
-    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type . '_' . $group->eid;
+    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type . '_' . $group->etid;
 
     // Add CSS.
     $clean_html = drupal_html_class('group-context-' . $group->entity_type);
     $variables['classes_array'][] = 'group-context';
     $variables['classes_array'][] = 'group-context-' . $group->gid;
     $variables['classes_array'][] = $clean_html;
-    $variables['classes_array'][] = $clean_html . '-' . $group->eid;
+    $variables['classes_array'][] = $clean_html . '-' . $group->etid;
 
     // Add context to JS.
     group_context_js($group);
@@ -472,7 +472,7 @@ function group_node_type_update($info) {
  * If no group exists and $create option is set to TRUE and new group entity
  * will be created.
  *
- * @param $eid
+ * @param $etid
  *   The group content ID.
  * @param $entity_type
  *   The group entity type. "node" is the default value. Pass "gid" if the the
@@ -485,13 +485,13 @@ function group_node_type_update($info) {
  * @return
  *   The group entity if found, or an empty array.
  */
-function group_get_group($entity_type, $eid, $create = FALSE, $states = array(GROUP_STATE_ACTIVE), $reset = FALSE) {
+function group_get_group($entity_type, $etid, $create = FALSE, $states = array(GROUP_STATE_ACTIVE), $reset = FALSE) {
   $group = FALSE;
-  if ($gids = group_get_group_ids($entity_type, array($eid), $states, $reset)) {
-    $group = group_load($gids[$eid], $reset);
+  if ($gids = group_get_group_ids($entity_type, array($etid), $states, $reset)) {
+    $group = group_load($gids[$etid], $reset);
   }
   elseif ($create) {
-    $group = group_create_group(array('entity_type' => $entity_type, 'eid' => $eid));
+    $group = group_create_group(array('entity_type' => $entity_type, 'etid' => $etid));
   }
   return $group;
 }
@@ -624,7 +624,7 @@ function group_invalidate_cache($gids = array()) {
 /**
  * Get group IDs by the entity type and entity IDs.
  *
- * @param $eid
+ * @param $etid
  *   The group content ID.
  * @param $entity_type
  *   The group entity type. Defaults to "group", that will return the group ID.
@@ -636,34 +636,34 @@ function group_invalidate_cache($gids = array()) {
  * @return
  *   Array keyed with the entity ID and the group ID as the value.
  */
-function group_get_group_ids($entity_type = 'group', $eids = array(), $states = array(GROUP_STATE_ACTIVE), $reset = FALSE) {
+function group_get_group_ids($entity_type = 'group', $etids = array(), $states = array(GROUP_STATE_ACTIVE), $reset = FALSE) {
   $gids = &drupal_static(__FUNCTION__, array());
 
   if ($reset) {
     $gids = array();
   }
 
-  $required_eids = $eids = drupal_map_assoc($eids);
+  $required_etids = $etids = drupal_map_assoc($etids);
 
   if (!empty($gids[$entity_type])) {
     // Check we don't already have the group IDs.
-    foreach ($gids[$entity_type] as $eid => $gid) {
-      unset($eids[$eid]);
+    foreach ($gids[$entity_type] as $etid => $gid) {
+      unset($etids[$etid]);
     }
   }
   else {
     $gids[$entity_type] = array();
   }
 
-  if (!empty($eids)) {
+  if (!empty($etids)) {
     if ($entity_type == 'group') {
-      $gids[$entity_type] = $gids[$entity_type] + drupal_map_assoc($eids);
+      $gids[$entity_type] = $gids[$entity_type] + drupal_map_assoc($etids);
     }
     else {
       $query = db_select('group_groups', 'group_groups');
-      $query->fields('group_groups', array('eid', 'gid'))
+      $query->fields('group_groups', array('etid', 'gid'))
       ->condition('entity_type', $entity_type)
-      ->condition('eid', $eids, 'IN');
+      ->condition('etid', $etids, 'IN');
       if (!empty($states)) {
         $query->condition('state', $states, 'IN');
       }
@@ -671,7 +671,7 @@ function group_get_group_ids($entity_type = 'group', $eids = array(), $states = 
     }
   }
   // Make sure we return only the ids we were asked for.
-  $return = array_intersect_key($gids[$entity_type], $required_eids);
+  $return = array_intersect_key($gids[$entity_type], $required_etids);
 
   return $return;
 }
@@ -873,7 +873,7 @@ function group_user_access($gid, $string, $account = NULL) {
 
   // Group manager has all privileges (if variable is TRUE).
   if (variable_get('group_group_manager_full_access', TRUE)) {
-    $entity = current(entity_load($group->entity_type, array($group->eid)));
+    $entity = current(entity_load($group->entity_type, array($group->etid)));
     if (!empty($entity->uid) && $entity->uid == $account->uid) {
       return TRUE;
     }
@@ -1101,13 +1101,13 @@ function group_is_member($gid, $entity_type = 'user', $entity = NULL) {
  * @return
  *   TRUE if access is allowed, otherise FALSE.
  */
-function group_user_access_by_entity($perm, $entity_type = NULL, $eid = NULL, $account = NULL) {
+function group_user_access_by_entity($perm, $entity_type = NULL, $etid = NULL, $account = NULL) {
   if (empty($account)) {
     global $user;
     $account = $user;
   }
 
-  if ($group = group_get_group($entity_type, $eid)) {
+  if ($group = group_get_group($entity_type, $etid)) {
     return group_user_access($group->gid, $perm, $account);
   }
   return FALSE;
@@ -1385,9 +1385,9 @@ function group_context_js($group) {
 function group_get_context_by_url() {
   $return = array();
   foreach (array_merge(array_keys(entity_get_info()), array('gid')) as $entity_type) {
-    $eids =  !empty($_REQUEST['gids_' . $entity_type][0]) ? explode(',', $_REQUEST['gids_' . $entity_type][0]) : array();
-    if ($eids) {
-      if ($gids = group_get_groups($entity_type, $eids)) {
+    $etids =  !empty($_REQUEST['gids_' . $entity_type][0]) ? explode(',', $_REQUEST['gids_' . $entity_type][0]) : array();
+    if ($etids) {
+      if ($gids = group_get_groups($entity_type, $etids)) {
         $gids = current($gids);
         $return = $return + $gids;
       }
@@ -1435,11 +1435,11 @@ function group_get_groups_label($gids = array()) {
   $labels = array();
   $entity_types = group_sort_groups_by_type($gids);
   foreach ($entity_types as $entity_type => $groups) {
-    $eids = array();
+    $etids = array();
     foreach ($groups as $group) {
-      $eids[] = $group->eid;
+      $etids[] = $group->etid;
     }
-    $labels = $labels + group_entity_get_label_multiple($entity_type, $eids);
+    $labels = $labels + group_entity_get_label_multiple($entity_type, $etids);
   }
   return $labels;
 }
@@ -1465,12 +1465,12 @@ function group_sort_groups_by_type($gids = array()) {
  *
  * @param $entity_type
  *   The entity type.
- * @param $eids
+ * @param $etids
  *   The entity IDs.
  * @return
  *   Array keyed with the group unqiue ID and the entity label as the value.
  */
-function group_entity_get_label_multiple($entity_type, $eids = array()) {
+function group_entity_get_label_multiple($entity_type, $etids = array()) {
   $return = array();
 
   $entity = group_entity_label($entity_type);
@@ -1485,18 +1485,18 @@ function group_entity_get_label_multiple($entity_type, $eids = array()) {
     $query = db_select('group_groups', 'group')->fields('group', array('gid'));
     $query->condition('entity_type', $entity_type);
 
-    $query->join($table, $table, "group.eid =  $table.$id");
+    $query->join($table, $table, "group.etid =  $table.$id");
 
     $return = $query->fields($table, array($label))
-      ->condition($id, $eids, 'IN')
+      ->condition($id, $etids, 'IN')
       ->execute()
       ->fetchAllKeyed();
   }
   else {
     // We got an entity type that we don't know how to get the label, so we'll
     // return the group ID as the laebl, prefixed with the entity type.
-    foreach ($eids as $eid) {
-      $return[$eid] = t('@entity_type ID  @value', array('@entity_type' => $entity_type, '@value' => $eid));
+    foreach ($etids as $etid) {
+      $return[$etid] = t('@entity_type ID  @value', array('@entity_type' => $entity_type, '@value' => $etid));
     }
   }
 
@@ -1508,12 +1508,12 @@ function group_entity_get_label_multiple($entity_type, $eids = array()) {
  *
  * @param $entity_type
  *   The entity type.
- * @param $eid
+ * @param $etid
  *   The entity ID.
  * @return unknown_type
  */
-function group_entity_get_label($entity_type, $eid) {
-  return current(group_entity_get_label_multiple($entity_type, array($eid)));
+function group_entity_get_label($entity_type, $etid) {
+  return current(group_entity_get_label_multiple($entity_type, array($etid)));
 
 }
 
@@ -2178,9 +2178,9 @@ function group_check_token($token, $seed) {
   return drupal_get_token($seed) == $token;
 }
 
-function group_set_breadcrumb($entity_type, $eid, $path = array()) {
-  if ($label = group_entity_get_label($entity_type, $eid)) {
-    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$eid")), $path)) ;
+function group_set_breadcrumb($entity_type, $etid, $path = array()) {
+  if ($label = group_entity_get_label($entity_type, $etid)) {
+    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$etid")), $path)) ;
   }
 }
 
@@ -2253,7 +2253,7 @@ function group_load_entity($entity_type, $entity) {
 function group_load_entity_from_group($gid) {
   $entity = FALSE;
   if ($group = group_load($gid)) {
-    $entity = entity_load($group->entity_type, array($group->eid));
+    $entity = entity_load($group->entity_type, array($group->etid));
     $entity = reset($entity);
   }
 

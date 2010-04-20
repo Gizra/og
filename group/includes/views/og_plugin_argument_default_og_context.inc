@@ -37,7 +37,7 @@ class group_plugin_argument_default_group_context extends views_plugin_argument_
         $return = $group->gid;
       }
       elseif ($this->options['argument'] == $group->entity_type) {
-        $return = $group->eid;
+        $return = $group->etid;
       }
       return $return;
     }
