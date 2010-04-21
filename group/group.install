@@ -190,8 +190,8 @@ if (module_exists('group')) {
 
     // If this is the first time this functions is called in the batch process,
     // create fields for the content types.
-    if (empty($context['count'])) {
-      $upgrade = TRUE;
+    if (!isset($context['total'])) {
+
       foreach (node_type_get_types() as $type) {
         // check if the variable exists.
         if ($type_usage = variable_get('og_content_type_usage_' . $type->type)) {
@@ -220,79 +220,110 @@ if (module_exists('group')) {
             group_create_field($field_name, 'node', $type);
           }
         }
+      }
 
-        // Initialize state for future calls.
-        $context['last'] = 0;
-        $context['count'] = 0;
+      // Initialize state for future calls.
+      $context['last'] = 0;
+      $context['count'] = 0;
 
-        //TODO: Do same for group and group content.
-        $query = db_select('og', 'og');
-        $group_total = $query->countQuery()->execute()->fetchField();
+      // Hold the information about the callbacks that upgrade the different
+      // fields.
+      $context['group upgrade'] = array('group', 'group_content', 'user');
 
-        $query = db_select('og_ancestry', 'oga');
-        $group_content_total = $query->countQuery()->execute()->fetchField();
+      //TODO: Do same for group and group content.
+      $query = db_select('og', 'og');
+      $group_total = $query->countQuery()->execute()->fetchField();
 
-        $query = db_select('og_uid', 'ogu');
-        $group_user_total = $query->countQuery()->execute()->fetchField();
+      $query = db_select('og_ancestry', 'oga');
+      $group_content_total = $query->countQuery()->execute()->fetchField();
 
-        $context['group_total'] = $group_total;
-        $context['group_content_total'] = $group_content_total;
-        $context['group_user_total'] = $group_user_total;
+      $query = db_select('og_uid', 'ogu');
+      $group_user_total = $query->countQuery()->execute()->fetchField();
 
-        $context = array(
-          'group_total' => $group_total,
-          'group_content_total' => $group_content_total,
-          'group_user_total' => $group_user_total,
+      $context = array(
+        'group_total' => $group_total,
+        'group_content_total' => $group_content_total,
+        'group_user_total' => $group_user_total,
 
-          // Sum of all groups to be converted.
-          'total' => $group_total + $group_content_total + $group_user_total,
-        );
+        // Sum of all groups to be converted.
+        'total' => $group_total + $group_content_total + $group_user_total,
+      );
+    }
+    else {
+      $found = FALSE;
+      if ($context['total']) {
+        $callback = reset($context['group upgrade']);
+        $found = call_user_func('_group_upgrade_' . $callback, $context);
 
+        if (!$found) {
+          // Continue to the next upgrade element.
+          array_shift($context['group upgrade']);
+        }
+
+        $context['#finished'] = min(0.99, $context['count'] / $context['total']);
       }
     }
+    if (empty($context['group upgrade'])) {
+      // All nodes are processed.
 
-    $found = FALSE;
-    if ($context['total']) {
-      // Operate on every revision of every node, in batches.
-      $batch_size = 200;
-      $query = db_select('node_revision', 'nr');
-      $query->innerJoin('node', 'n', 'n.vid = nr.vid');
-      $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
-      $query
-        ->fields('nr', array('nid', 'vid'))
-        ->fields('n', array('type'))
-        ->condition('nr.vid', $context['last'], '>')
-        ->orderBy('nr.vid', 'ASC')
-        ->range(0, $batch_size);
-      $revisions = $query->execute();
+      // We're done.
+      $context['#finished'] = 1;
+      return t("!number groups and group content converted to use new Group fields.", array('!number' => $context['total']));
+    }
+  }
+}
 
-      foreach ($revisions as $revision) {
-        $found = TRUE;
+function _group_upgrade_group(&$context) {
+  // Operate on every revision of every node, in batches.
+  $batch_size = 200;
+  $query = db_select('node_revision', 'nr');
+  $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+  $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
+  $query
+    ->fields('nr', array('nid', 'vid'))
+    ->fields('n', array('type', 'created'))
+    ->condition('nr.vid', $context['last'], '>')
+    ->orderBy('nr.vid', 'ASC')
+    ->range(0, $batch_size);
+  $revisions = $query->execute();
 
-        $node = (object) array(
-          'nid' => $revision->nid,
-          'vid' => $revision->vid,
-          'type' => $revision->type,
-        );
+  // Holds the node IDs with their earliest revision and timestamp, to create a
+  // group entity.
+  $nids = array();
+  foreach ($revisions as $revision) {
+    $found = TRUE;
 
-        // Set field values.
-        $property = GROUP_GROUP_FIELD;
-        $node->{$property}[LANGUAGE_NONE][0]['value'] = TRUE;
+    $node = (object) array(
+      'nid' => $revision->nid,
+      'vid' => $revision->vid,
+      'type' => $revision->type,
+    );
 
-        field_attach_update('node', $node);
-
-        $context['last'] = $revision->vid;
-        $context['count'] += 1;
+    if (empty($nids[$revision->nid]) || $nids[$revision->nid] > $revision->created) {
+      $nids[$revision->nid] = $revision->created;
     }
 
-    $context['#finished'] = min(0.99, $context['count'] / $context['total']);
+    // Set field values.
+    $property = GROUP_GROUP_FIELD;
+    $node->{$property}[LANGUAGE_NONE][0]['value'] = TRUE;
+
+    field_attach_update('node', $node);
+
+    $context['last'] = $revision->vid;
+    $context['count'] += 1;
   }
 
-  if (!$found) {
-    // All nodes are processed.
-
-    // We're done.
-    $context['#finished'] = 1;
-    return t("!number groups and group content converted to use new Group fields.", array('!number' => $context['total']));
+  if ($nids) {
+    foreach ($nids as $nid => $created) {
+      // Create a new group if doesn't exist.
+      $group = group_get_group('node', $nid, TRUE);
+      if (!empty($group->is_new)) {
+        $group->created = $created;
+        group_save($group);
+      }
+    }
   }
+
+  return $found;
+
 }
