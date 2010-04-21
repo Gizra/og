@@ -186,7 +186,9 @@ if (module_exists('group')) {
    * - Delete Organic groups' variables.
    */
   function group_update_7000(&$context) {
-    $content_type = array();
+    $context['#finished'] = 0;
+
+    $content_type = array('group' => array(), 'group content' => array());
 
     // If this is the first time this functions is called in the batch process,
     // create fields for the content types.
@@ -197,12 +199,12 @@ if (module_exists('group')) {
         if ($type_usage = variable_get('og_content_type_usage_' . $type->type)) {
           switch ($type_usage) {
             case 'group':
-              $content_type['group'] = $type->type;
+              $content_type['group'][] = $type->type;
               break;
 
-            case 'group_post':
-            case 'wiki':
-              $content_type['group content'] = $type->type;
+            case 'group_post_standard':
+            case 'group_post_wiki':
+              $content_type['group content'][] = $type->type;
               break;
 
           }
@@ -230,7 +232,6 @@ if (module_exists('group')) {
       // fields.
       $context['group upgrade'] = array('group', 'group_content', 'user');
 
-      //TODO: Do same for group and group content.
       $query = db_select('og', 'og');
       $group_total = $query->countQuery()->execute()->fetchField();
 
@@ -240,17 +241,16 @@ if (module_exists('group')) {
       $query = db_select('og_uid', 'ogu');
       $group_user_total = $query->countQuery()->execute()->fetchField();
 
-      $context = array(
+      $context += array(
         'group_total' => $group_total,
         'group_content_total' => $group_content_total,
         'group_user_total' => $group_user_total,
+      );
 
         // Sum of all groups to be converted.
-        'total' => $group_total + $group_content_total + $group_user_total,
-      );
+      $context['total'] = $group_total + $group_content_total + $group_user_total;
     }
     else {
-      $found = FALSE;
       if ($context['total']) {
         $callback = reset($context['group upgrade']);
         $found = call_user_func('_group_upgrade_' . $callback, $context);
@@ -274,6 +274,8 @@ if (module_exists('group')) {
 }
 
 function _group_upgrade_group(&$context) {
+  $found = FALSE;
+
   // Operate on every revision of every node, in batches.
   $batch_size = 200;
   $query = db_select('node_revision', 'nr');
