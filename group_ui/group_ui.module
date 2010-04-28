@@ -342,6 +342,8 @@ function group_ui_group_default_permissions() {
   return array(
     'subscribe' => array(GROUP_ANONYMOUS_ROLE),
     'unsubscribe' => array(GROUP_AUTHENTICATED_ROLE),
+    'approve and deny subscription' => array(GROUP_ADMINISTRATOR_ROLE),
+    'add user' => array(GROUP_ADMINISTRATOR_ROLE),
   );
 }
 
