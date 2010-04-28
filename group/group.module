@@ -2179,6 +2179,8 @@ function group_check_token($token, $seed) {
 }
 
 function group_set_breadcrumb($entity_type, $etid, $path = array()) {
+  // FIXME: Implement after http://drupal.org/node/629484.
+  return ;
   if ($label = group_entity_get_label($entity_type, $etid)) {
     drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$etid")), $path)) ;
   }
