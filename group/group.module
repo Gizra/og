@@ -310,6 +310,8 @@ function group_group_fields_info() {
       'label' => t('Group type'),
       'widget_type' => 'options_buttons',
       'required' => TRUE,
+      // Make the group type default.
+      'default_value' => array(0 => array('value' => 1)),
       'display' => array(
         'full' => array(
           'label' => 'above',
