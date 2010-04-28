@@ -17,7 +17,7 @@ class group_plugin_argument_default_group_context extends views_plugin_argument_
   }
 
   function options_form(&$form, &$form_state) {
-    $options = array('gid' => t('Original group entity')) + group_get_all_group_entity();
+    $options = array('group' => t('Group')) + group_get_all_group_entity();
     $form['argument'] = array(
       '#type' => 'select',
       '#title' => t('Entity type'),
@@ -33,7 +33,7 @@ class group_plugin_argument_default_group_context extends views_plugin_argument_
   function get_argument() {
     $return = FALSE;
     if ($group = group_context()) {
-      if ($this->options['argument'] == 'gid') {
+      if ($this->options['argument'] == 'group') {
         $return = $group->gid;
       }
       elseif ($this->options['argument'] == $group->entity_type) {

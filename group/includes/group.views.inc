@@ -150,7 +150,7 @@ function group_views_plugins() {
       'group_context' => array(
         'title' => t('Current group from context'),
         'handler' => 'group_plugin_argument_default_group_context',
-        'path' => drupal_get_path('module', 'group') . '/includes',
+        'path' => drupal_get_path('module', 'group') . '/includes/views',
         'parent' => 'fixed', // so that the parent class is included
       ),
     ),
@@ -168,7 +168,7 @@ function group_views_data_alter(&$data) {
     $title = t('@entity group', array('@entity' => ucfirst($entity['label'])));
     $help = t('Add information on groups that belong to the @entity entity.', array('@entity' => ucfirst($entity['label'])));
 
-    // Add the organic groups relationship.
+    // Add the group relationship.
     $data[$item['views table']]['group_rel'] = array(
       'group' => t('Group'),
       'title' => $title,
@@ -176,7 +176,7 @@ function group_views_data_alter(&$data) {
       'relationship' => array(
         'entity' => $item['entity'],
         'handler' => 'group_handler_relationship',
-        'label' => t('organic groups'),
+        'label' => t('group'),
         'base' => 'group_groups',
         'base field' => 'etid',
         'relationship field' => $item['join field'],
