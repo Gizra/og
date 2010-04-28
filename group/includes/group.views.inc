@@ -190,4 +190,8 @@ function group_views_data_alter(&$data) {
 
   // Override the group audience gid field argument.
   $data['field_data_group_audience']['group_audience_gid']['argument']['handler'] = 'group_handler_argument_group_audience_gid';
+
+  foreach (array('field', 'filter', 'sort', 'argument') as $type) {
+    $data['field_data_group_audience']['group_audience_created'][$type]['handler'] = 'views_handler_' . $type . '_date';
+  }
 }
