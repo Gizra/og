@@ -138,6 +138,10 @@ function group_views_handlers() {
     'group_handler_relationship' => array(
       'parent' => 'views_handler_relationship',
     ),
+    // Arguments
+    'group_handler_argument_group_audience_gid' => array(
+      'parent' => 'views_handler_argument_numeric',
+    ),
   );
 }
 
@@ -183,4 +187,7 @@ function group_views_data_alter(&$data) {
       ),
     );
   }
+
+  // Override the group audience gid field argument.
+  $data['field_data_group_audience']['group_audience_gid']['argument']['handler'] = 'group_handler_argument_group_audience_gid';
 }

@@ -42,5 +42,4 @@ class group_plugin_argument_default_group_context extends views_plugin_argument_
       return $return;
     }
   }
-
 }

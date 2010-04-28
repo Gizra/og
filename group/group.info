@@ -24,3 +24,6 @@ files[] = includes/views/group_handler_filter_group_state.inc
 
 ; Views realtionships
 files[] = includes/views/group_handler_relationship.inc
+
+; Views arguments
+files[] = includes/views/group_handler_argument_group_audience_gid.inc
