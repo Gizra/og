@@ -17,8 +17,8 @@ function group_ui_menu() {
     'page arguments' => array(1, 2),
     // Function will take care of permissions, as we want to show "you are
     // already a member of the group" to group members, however it is not
-    // possible to give authenticated member the "subscribe" permissions.
-    'access callback' => 'user_is_lgroupged_in',
+    // possible to give authenticated group members the "subscribe" permissions.
+    'access callback' => 'user_is_logged_in',
 
     // We don't add the group name, as it might be private.
     'title' => 'Join group'
