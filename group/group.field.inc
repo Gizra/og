@@ -347,7 +347,7 @@ function group_field_write($op, $entity_type, $entity, $field, $instance, $langc
   //FIXME: Only $items['gid'] is populated.
   foreach ($items as &$item) {
     // Set default values.
-    $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
+    $item += array('state' => GROUP_STATE_ACTIVE, 'created' => time());
   }
 }
 
@@ -359,14 +359,14 @@ function group_field_write($op, $entity_type, $entity, $field, $instance, $langc
  * @see group_field_attach_delete().
  */
 function group_field_crud_group($op, $entity_type, $entity) {
-  $property = OG_GROUP_FIELD;
+  $property = GROUP_GROUP_FIELD;
 
   $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
   // Get the entity ID.
   list($id) = entity_extract_ids($entity_type, $entity);
 
-  $group = group_get_group($entity_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+  $group = group_get_group($entity_type, $id, TRUE, array(GROUP_STATE_ACTIVE, GROUP_STATE_PENDING));
   if ($op == 'delete') {
     if (!empty($group->gid)) {
       // Remove group.
@@ -383,7 +383,7 @@ function group_field_crud_group($op, $entity_type, $entity) {
 
         // Subscribe the entity author, if exists.
         if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
-          group_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
+          group_group($group->gid, 'user', $account, GROUP_STATE_ACTIVE);
         }
       }
     }
@@ -391,19 +391,19 @@ function group_field_crud_group($op, $entity_type, $entity) {
       // Existing group.
       $save = FALSE;
 
-      if ($group->state == OG_STATE_ACTIVE && empty($wrapper[0]['value'])) {
-        $group->state = OG_STATE_PENDING;
+      if ($group->state == GROUP_STATE_ACTIVE && empty($wrapper[0]['value'])) {
+        $group->state = GROUP_STATE_PENDING;
         $save = TRUE;
       }
-      elseif($group->state == OG_STATE_PENDING && !empty($wrapper[0]['value'])) {
-        $group->state = OG_STATE_ACTIVE;
+      elseif($group->state == GROUP_STATE_PENDING && !empty($wrapper[0]['value'])) {
+        $group->state = GROUP_STATE_ACTIVE;
         $save = TRUE;
       }
 
       // Determine if field has changed and roles should be overriden, or
       // reverted, by comparing the default access field of the entity being
       // saved, and its original state.
-      $property = OG_DEFAULT_ACCESS_FIELD;
+      $property = GROUP_DEFAULT_ACCESS_FIELD;
       if (!empty($entity->{$property})) {
         $original_entity = entity_load($entity_type, array($id));
         $original_entity = reset($original_entity);

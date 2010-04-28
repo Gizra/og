@@ -36,7 +36,7 @@ TERMS AND DEFINITIONS
   a group or with a group content. This means that you can associate different 
   users (as group content) to a certain user (as a group).
 
-OG ARCHITECTURE
+GROUP ARCHITECTURE
 --------------------------
 At the lowest level the module associates content types with groups. Above this 
 level is the role and permissions layer, which operates at the group level.
@@ -49,7 +49,7 @@ As is the case with Drupal itself, in Organic Groups different permissions can
 be assigned to different user roles. This allows group members to perform a 
 different set of actions, in different group contexts.
 
-OG INSTALLATION DRUPAL 7.x
+GROUP INSTALLATION DRUPAL 7.x
 --------------------------------------------
 1. Enable the Group and the Group UI modules.
 2. Create a new content type via admin/structure/types/add. Call it "Group", and 
