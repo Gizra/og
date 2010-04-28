@@ -1486,10 +1486,10 @@ function group_entity_get_label_multiple($entity_type, $etids = array()) {
     $label = $entity['entity keys']['label'];
 
     // Get the group ID along with the entity label.
-    $query = db_select('group_groups', 'group')->fields('group', array('gid'));
+    $query = db_select('group_groups', 'group_groups')->fields('group_groups', array('gid'));
     $query->condition('entity_type', $entity_type);
 
-    $query->join($table, $table, "group.etid =  $table.$id");
+    $query->join($table, $table, "group_groups.etid =  $table.$id");
 
     $return = $query->fields($table, array($label))
       ->condition($id, $etids, 'IN')
