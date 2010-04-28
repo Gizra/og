@@ -347,8 +347,6 @@ function group_ui_group_default_permissions() {
   );
 }
 
-
-
 /**
  * Implement hook_group_user_operations().
  */

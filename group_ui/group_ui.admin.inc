@@ -134,6 +134,7 @@ function group_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   // Get the group real entity, so we can check the user ID of the entity.
   $entity = group_load_entity_from_group($group->gid);
 
+  //TODO: Use field_attach_query(), when query can return object,
   $query = db_select('field_data_group_audience', 'group');
   $query
     ->condition('group.group_audience_gid', $group->gid)
@@ -324,7 +325,7 @@ function group_ui_user_admin_role_submit($form, &$form_state) {
   $role->gid = $group->gid;
   $role->name = $form_state['values']['name'];
   if (!empty($form_state['values']['rid'])) {
-    $role->rid= $form_state['values']['rid'];
+    $role->rid = $form_state['values']['rid'];
   }
   if ($form_state['values']['op'] == t('Save role')) {
     group_user_role_save($role);
