@@ -81,7 +81,6 @@ function group_access_node_access_records($node) {
           // array('etid', $etid),
         );
 
-
         $result = field_attach_query($field['id'], $conditions);
 
         // There are no public groups.
@@ -91,7 +90,6 @@ function group_access_node_access_records($node) {
       }
     }
   }
-
 
   if ($access) {
     $grants[] = array (
