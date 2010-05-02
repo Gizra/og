@@ -7,11 +7,6 @@
  */
 
 /**
- * The access realm of group non-members.
- */
-define('GROUP_ACCESS_ANONYMOUS_REALM', 'group_access_anonymous');
-
-/**
  * The access realm of group member.
  */
 define('GROUP_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
@@ -21,24 +16,11 @@ define('GROUP_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
  */
 define('GROUP_ACCESS_FIELD', 'group_access');
 
-
 /**
-* Implement hook_node_type_insert().
-*/
-function group_access_node_type_insert($info) {
-  if (group_is_group_type('node', $info->type) || group_is_group_content_type('node', $info->type)) {
-    group_access_create_fields($info->type);
-  }
-}
+ * Group public access field.
+ */
+define('GROUP_CONTENT_ACCESS_FIELD', 'group_content_access');
 
-/**
-* Implement hook_node_type_update().
-*/
-function group_access_node_type_update($info) {
-  if (group_is_group_type('node', $info->type) || group_is_group_content_type('node', $info->type)) {
-    group_access_create_fields($info->type);
-  }
-}
 
 /**
  * Implementation of hook_node_grants().
@@ -60,17 +42,63 @@ function group_access_node_grants($account, $op) {
  */
 function group_access_node_access_records($node) {
   $grants = array();
-  if (!group_access_entity_is_public('node', $node)) {
-    if (group_is_group_content_type('node', $node->type) || group_is_group_type('node', $node->type)) {
-      $grants[] = array (
-        'realm' => GROUP_ACCESS_AUTHENTICATED_REALM,
-        'gid' => $node->nid,
-        'grant_view' => 1,
-        'grant_update' => 0,
-        'grant_delete' => 0,
-        'priority' => 0,
-      );
+
+  $access = FALSE;
+
+  $property = GROUP_CONTENT_ACCESS_FIELD;
+
+  if (group_is_group_type('node', $node->type) && !group_access_entity_is_public('node', $node)) {
+    $access = TRUE;
+  }
+  // Group content without access field.
+  elseif (group_is_group_content_type('node', $node->type) && !isset($node->{$property})) {
+    if ($field = field_info_field(GROUP_ACCESS_FIELD)) {
+
+      // Access should be determined by its groups. If group content belongs to
+      // several groups, and one of them is public, then the group content will be
+      // public as-well.
+      $gids = group_get_entity_groups('node', $node);
+
+      $groups = group_load_multiple($gids);
+
+      // Get all groups under their entity.
+      $list = array();
+      foreach ($groups as $group) {
+        $list[$group->entity_type][$group->gid] = $group->gid;
+      }
+
+      foreach ($list as $entity_type => $entity_gids) {
+        // Get the entity types ID.
+        // TODO: This is SQL specific - is there no better way?
+        $etid = _field_sql_storage_etid($entity_type);
+
+        $conditions = array(
+          array('group_access_value', 1),
+          array('entity_id', $entity_gids),
+          // FIXME: field_attach_query() returns an error on etid.
+          // array('etid', $etid),
+        );
+
+
+        $result = field_attach_query($field['id'], $conditions);
+
+        // There are no public groups.
+        if (empty($result)) {
+          $access = TRUE;
+        }
+      }
     }
+  }
+
+  if ($access) {
+    $grants[] = array (
+      'realm' => GROUP_ACCESS_AUTHENTICATED_REALM,
+      'gid' => $node->nid,
+      'grant_view' => 1,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+    );
   }
   return $grants;
 }
@@ -79,19 +107,49 @@ function group_access_node_access_records($node) {
  * Implement group_fields_info().
  */
 function group_access_group_fields_info() {
-  $items['group_access'] = array(
-    'type' => array('group', 'group content'),
-    'description' => t('Add organic groups access field to group content types.'),
+  $items[GROUP_ACCESS_FIELD] = array(
+    'type' => array('group'),
+    'description' => t('Add organic groups access field to group types.'),
     'field' => array(
-      'field_name' => 'group_access',
+      'field_name' => GROUP_ACCESS_FIELD,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array('allowed_values' => implode("\r\n", array('0|Do not show to non group member', '1|Show to all site users')), 'allowed_values_function' => ''),
     ),
     'instance' => array(
+      'label' => t('group visibility'),
+      'required' => TRUE,
+      // Make the group type default.
+      'default_value' => array(0 => array('value' => 1)),
+      'widget_type' => 'options_buttons',
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'options_onoff',
+        ),
+      ),
+    ),
+  );
+
+  $items[GROUP_CONTENT_ACCESS_FIELD] = array(
+    'type' => array('group content'),
+    'description' => t('Add organic groups access field to group-content types, that may override the group settings.'),
+    'field' => array(
+      'field_name' => GROUP_CONTENT_ACCESS_FIELD,
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => implode("\r\n", array('0|Use group defaults', '1|Override group defaults')), 'allowed_values_function' => ''),
+    ),
+    'instance' => array(
       'label' => t('group content visibility'),
-      // FIXME: Widget type doesn't work
-      'widget_type' => 'options_onoff',
+      'required' => TRUE,
+      // Make the group type default.
+      'default_value' => array(0 => array('value' => 0)),
+      'widget_type' => 'options_buttons',
       'display' => array(
         'full' => array(
           'label' => 'above',
