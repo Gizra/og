@@ -44,7 +44,7 @@ define('GROUP_GROUP_FIELD', 'group_group');
 /**
  * Group default roles and permissions field.
  */
-define('GROUP_DEFAULT_ACCESS_FIELD', 'group_group_default_access');
+define('GROUP_DEFAULT_ACCESS_FIELD', 'group_roles_permissions');
 
 /**
  * The role name of group non-members.
@@ -325,11 +325,11 @@ function group_group_fields_info() {
     ),
   );
 
-  $items['group_group_default_access'] = array(
+  $items['group_roles_permissions'] = array(
     'type' => array('group'),
     'description' => t('Determine if group should use default roles and permissions.'),
     'field' => array(
-      'field_name' => 'group_group_default_access',
+      'field_name' => 'group_roles_permissions',
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array('allowed_values' => implode("\r\n", array('0|Use default roles and permissions', '1|Override default roles and permissions')), 'allowed_values_function' => ''),
