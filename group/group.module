@@ -1962,6 +1962,9 @@ function group_user_permission_get_modules() {
     $perms = module_invoke($module, 'group_permission');
     foreach ($perms as $key => $value) {
       $permissions[$key] = $module;
+
+      // Add the administration permissions as-well.
+      $permissions['show ' . $key] = $module;
     }
   }
   return $permissions;
@@ -2185,8 +2188,7 @@ function group_check_token($token, $seed) {
 }
 
 function group_set_breadcrumb($entity_type, $etid, $path = array()) {
-  // FIXME: Implement after http://drupal.org/node/629484.
-  return ;
+  // FIXME: Implement better logic after http://drupal.org/node/629484.
   if ($label = group_entity_get_label($entity_type, $etid)) {
     drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$etid")), $path)) ;
   }
