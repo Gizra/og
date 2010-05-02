@@ -411,10 +411,13 @@ function group_ui_user_admin_permissions($form, $form_state, $entity_type = NULL
     '#type' => 'value',
     '#value' => $role_names,
   );
+
   // Render role/permission overview:
   $options = array();
+  $module_info = system_get_info('module');
+
   foreach (group_get_permissions() as $module => $permissions) {
-    $form['permission'][] = array('#markup' => $module != 'administer' ? $module : t('administer group admins privileges'), '#id' => $module);
+    $form['permission'][] = array('#markup' => $module != 'administer' ? $module_info[$module]['name'] : t('Administer group admins privileges'), '#id' => $module);
     foreach ($permissions as $perm => $perm_item) {
       $access = !empty($group) ? group_user_access($gid, 'show ' . $perm) : TRUE;
       if ($access) {
