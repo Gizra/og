@@ -337,6 +337,9 @@ function group_group_fields_info() {
     'instance' => array(
       'label' => t('Group roles and permissions'),
       'widget_type' => 'options_buttons',
+      'required' => TRUE,
+      // Use default role and permissions as default value.
+      'default_value' => array(0 => array('value' => 0)),
       'display' => array(
         'full' => array(
           'label' => 'above',
