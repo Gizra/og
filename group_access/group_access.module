@@ -63,7 +63,7 @@ function group_access_node_access_records($node) {
     // Group or group content that is explicitly set to be unpublic.
     $access = TRUE;
   }
-  elseif (!empty($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
+  elseif (isset($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
     switch ($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
       case GROUP_CONTENT_ACCESS_GROUP_DEFAULT:
         if ($field = field_info_field(GROUP_ACCESS_FIELD)) {
@@ -83,7 +83,7 @@ function group_access_node_access_records($node) {
           foreach ($list as $entity_type => $entity_gids) {
             // Get the entity types ID.
             $conditions = array(
-              array('group_access_value', 1),
+              array('group_access_value', 0),
               array('entity_id', $entity_gids),
               // Use the "magic" column type to get the etid.
               array('type', $entity_type),
@@ -97,6 +97,10 @@ function group_access_node_access_records($node) {
             }
           }
         }
+        break;
+
+      case GROUP_CONTENT_ACCESS_PUBLIC:
+        // Do nothing.
         break;
 
       case GROUP_CONTENT_ACCESS_PRIVATE:
