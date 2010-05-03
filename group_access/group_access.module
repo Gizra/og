@@ -22,14 +22,19 @@ define('GROUP_ACCESS_FIELD', 'group_access');
 define('GROUP_CONTENT_ACCESS_FIELD', 'group_content_access');
 
 /**
- * Group public access field.
+ * Define group content access by it's group defaults.
  */
 define('GROUP_CONTENT_ACCESS_GROUP_DEFAULT', 0);
 
+/**
+ * Define group content access private regardless of its group definition.
+ */
 define('GROUP_CONTENT_ACCESS_PRIVATE', 1);
 
+/**
+ * Define group content access public regardless of its group definition.
+ */
 define('GROUP_CONTENT_ACCESS_PUBLIC', 2);
-
 
 /**
  * Implementation of hook_node_grants().
