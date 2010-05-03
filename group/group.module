@@ -1019,10 +1019,10 @@ function group_get_entity_groups($entity_type, $entity, $states = array(GROUP_ST
  */
 function group_get_group_type($entity_type, $bundle_name, $type = 'group') {
   if ($type == 'group') {
-    return (bool)field_info_instance($entity_type, 'group_group', $bundle_name);
+    return (bool)field_info_instance($entity_type, GROUP_GROUP_FIELD, $bundle_name);
   }
   elseif ($type == 'group content') {
-    return (bool)field_info_instance($entity_type, 'group_audience', $bundle_name);
+    return (bool)field_info_instance($entity_type, GROUP_AUDIENCE_FIELD, $bundle_name);
   }
 }
 
@@ -1160,13 +1160,14 @@ function group_get_entity_state($gid, $entity_type, $entity) {
  *   TRUE if group should use default roles and permissions.
  */
 function group_is_group_default_access($gid) {
-  $return = FALSE;
+  $return = TRUE;
   if ($entity = group_load_entity_from_group($gid)) {
 
     $property = GROUP_DEFAULT_ACCESS_FIELD;
 
-    $wrapper = &$entity->{$property}[LANGUAGE_NONE];
-    $return = empty($wrapper[0]['value']);
+    if (!empty($entity->{$property}[LANGUAGE_NONE]) && $wrapper = $entity->{$property}[LANGUAGE_NONE]) {
+      $return = empty($wrapper[0]['value']);
+    }
   }
 
   return $return;

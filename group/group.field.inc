@@ -377,9 +377,8 @@ function group_field_crud_group($op, $entity_type, $entity) {
     // Check group is new.
     if (empty($group->gid)) {
       if (!empty($wrapper[0]['value'])) {
-        // Save the group.
+        // Save the group to get the group ID.
         group_save($group);
-        group_group_user_roles_override($group->gid);
 
         // Subscribe the entity author, if exists.
         if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
@@ -400,28 +399,28 @@ function group_field_crud_group($op, $entity_type, $entity) {
         $save = TRUE;
       }
 
-      // Determine if field has changed and roles should be overriden, or
-      // reverted, by comparing the default access field of the entity being
-      // saved, and its original state.
-      $property = GROUP_DEFAULT_ACCESS_FIELD;
-      if (!empty($entity->{$property})) {
-        $original_entity = entity_load($entity_type, array($id));
-        $original_entity = reset($original_entity);
-
-        if ($entity->{$property} != $original_entity->{$property}) {
-          if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
-            group_group_user_roles_override($group->gid);
-          }
-          else {
-            // If the field is set to be using default access and there are
-            // already overriden roles we delete them.
-            group_delete_user_roles_by_group($group->gid);
-          }
-        }
-      }
-
       if ($save) {
         group_save($group);
+      }
+    }
+
+    // Determine if field has changed and roles should be overridden, or
+    // reverted, by comparing the default access field of the entity being
+    // saved, and its original state.
+    $property = GROUP_DEFAULT_ACCESS_FIELD;
+    if (!empty($entity->{$property})) {
+      $original_entity = entity_load($entity_type, array($id));
+      $original_entity = reset($original_entity);
+
+      if ($entity->{$property} != $original_entity->{$property}) {
+        if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
+          group_group_user_roles_override($group->gid);
+        }
+        else {
+          // If the field is set to be using default access and there are
+          // already overridden roles we delete them.
+          group_delete_user_roles_by_group($group->gid);
+        }
       }
     }
   }

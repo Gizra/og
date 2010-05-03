@@ -354,13 +354,13 @@ function theme_group_ui_user_admin_new_role($variables) {
   // The group entity.
   $group = $form['group']['#value'];
 
-  $default_roles = group_is_group_default_access($group->gid);
+  $default_access = group_is_group_default_access($group->gid);
 
   foreach (group_user_roles($group->gid) as $rid => $name) {
-    $text = !$default_roles ? t('edit permissions') : t('view permissions');
+    $text = !$default_access ? t('edit permissions') : t('view permissions');
     $permissions = l($text, 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/permissions/' . $rid);
 
-    if (!$default_roles && !in_array($name, array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE))) {
+    if (!$default_access && !in_array($name, array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE))) {
       $rows[] = array($name, l(t('edit role'), 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/roles/edit/' . $rid), $permissions);
     }
     else {
