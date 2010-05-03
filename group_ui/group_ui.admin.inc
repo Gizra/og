@@ -417,21 +417,18 @@ function group_ui_user_admin_permissions($form, $form_state, $entity_type = NULL
   $module_info = system_get_info('module');
 
   foreach (group_get_permissions() as $module => $permissions) {
-    $form['permission'][] = array('#markup' => $module != 'administer' ? $module_info[$module]['name'] : t('Administer group admins privileges'), '#id' => $module);
+    $form['permission'][] = array('#markup' => $module_info[$module]['name'], '#id' => $module);
     foreach ($permissions as $perm => $perm_item) {
-      $access = !empty($group) ? group_user_access($gid, 'show ' . $perm) : TRUE;
-      if ($access) {
-        $options[$perm] = '';
-        $form['permission'][$perm] = array(
-          '#type' => 'item',
-          '#markup' => $perm_item['title'],
-          '#description' => $perm_item['description'],
-        );
-        foreach ($role_names as $rid => $name) {
-          // Builds arrays for checked boxes for each role
-          if (isset($role_permissions[$rid][$perm])) {
-            $status[$rid][] = $perm;
-          }
+      $options[$perm] = '';
+      $form['permission'][$perm] = array(
+        '#type' => 'item',
+        '#markup' => $perm_item['title'],
+        '#description' => $perm_item['description'],
+      );
+      foreach ($role_names as $rid => $name) {
+        // Builds arrays for checked boxes for each role
+        if (isset($role_permissions[$rid][$perm])) {
+          $status[$rid][] = $perm;
         }
       }
     }

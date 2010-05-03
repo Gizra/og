@@ -1965,9 +1965,6 @@ function group_user_permission_get_modules() {
     $perms = module_invoke($module, 'group_permission');
     foreach ($perms as $key => $value) {
       $permissions[$key] = $module;
-
-      // Add the administration permissions as-well.
-      $permissions['show ' . $key] = $module;
     }
   }
   return $permissions;
@@ -2126,24 +2123,6 @@ function group_get_permissions() {
       }
       $perms[$module] = $permissions;
     }
-  }
-
-  if (user_access('administer organic groups')) {
-    $return = array();
-    // Allow user to define which administration permissions a group admin can
-    // set.
-    foreach ($perms as $module => $permissions) {
-      foreach ($permissions as $key => $perm) {
-        $return['administer']['show ' . $key] = array(
-          'title' => t('Show %perm', array('%perm' => strtolower($perm['title']))),
-          'description' => t("Allow setting the %perm permission in the group permissions page.", array('%perm' => strtolower($perm['title']))),
-          // Add all roles, as this option allows setting which permisisons
-          // a role has access to.
-          'roles' => array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE, GROUP_ADMINISTRATOR_ROLE),
-        );
-      }
-    }
-    $perms = $perms + $return;
   }
   return $perms;
 }
