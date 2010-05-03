@@ -294,11 +294,11 @@ function group_views_api() {
  * Implement group_fields_info().
  */
 function group_group_fields_info() {
-  $items['group_group'] = array(
+  $items[GROUP_GROUP_FIELD] = array(
     'type' => array('group'),
     'description' => t('Determine if this should be a group.'),
     'field' => array(
-      'field_name' => 'group_group',
+      'field_name' => GROUP_GROUP_FIELD,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array(
@@ -325,11 +325,11 @@ function group_group_fields_info() {
     ),
   );
 
-  $items['group_roles_permissions'] = array(
+  $items[GROUP_DEFAULT_ACCESS_FIELD] = array(
     'type' => array('group'),
     'description' => t('Determine if group should use default roles and permissions.'),
     'field' => array(
-      'field_name' => 'group_roles_permissions',
+      'field_name' => GROUP_DEFAULT_ACCESS_FIELD,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array('allowed_values' => implode("\r\n", array('0|Use default roles and permissions', '1|Override default roles and permissions')), 'allowed_values_function' => ''),
@@ -353,11 +353,11 @@ function group_group_fields_info() {
     ),
   );
 
-  $items['group_audience'] = array(
+  $items[GROUP_AUDIENCE_FIELD] = array(
     'type' => array('group content'),
     'description' => t('Determine to which groups this group content is assigned to.'),
     'field' => array(
-      'field_name' => 'group_audience',
+      'field_name' => GROUP_AUDIENCE_FIELD,
       'type' => 'group',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
     ),
