@@ -353,7 +353,6 @@ function group_group_fields_info() {
     ),
   );
 
-
   $items['group_audience'] = array(
     'type' => array('group content'),
     'description' => t('Determine to which groups this group content is assigned to.'),
