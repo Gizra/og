@@ -1764,8 +1764,6 @@ function group_create_global_role($name) {
 /**
  * Get all roles of a user in a certain group.
  *
- * If overriden roles and permissions don't exist
- *
  * @param $gid
  *   The group ID.
  * @param $uid
