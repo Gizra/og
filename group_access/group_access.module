@@ -61,7 +61,7 @@ function group_access_node_access_records($node) {
 
   $property = GROUP_CONTENT_ACCESS_FIELD;
 
-  if (group_is_group_type('node', $node->type) && !group_access_group_is_public('node', $node)) {
+  if (group_is_group_type('node', $node->type) && !empty($node->{GROUP_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
     // Group or group content that is explicitly set to be unpublic.
     $access = TRUE;
   }
@@ -201,20 +201,4 @@ function group_access_group_fields_info() {
   );
 
   return $items;
-}
-
-
-/**
- * Check if an group is set as public.
- *
- * @param $entity_type
- *   The entity type (e.g. "node" or "user").
- * @param $entity
- *   The entity can be a user, node or any fieldable entity.
- * @return
- *  TRUE if the entity is private and should appear only to group members.
- */
-function group_access_group_is_public($entity_type, $entity) {
-  group_load_entity($entity_type, $entity);
-  return !empty($entity->{GROUP_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']);
 }
