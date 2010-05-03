@@ -81,7 +81,7 @@ function group_access_node_access_records($node) {
           // Get all groups under their entity.
           $list = array();
           foreach ($groups as $group) {
-            $list[$group->entity_type][$group->gid] = $group->gid;
+            $list[$group->entity_type][$group->etid] = $group->etid;
           }
 
           foreach ($list as $entity_type => $entity_gids) {
