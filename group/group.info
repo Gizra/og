@@ -18,9 +18,11 @@ files[] = includes/views/group_plugin_argument_default_group_context.inc
 
 ; Views fields
 files[] = includes/views/group_handler_field_group_member_count.inc
+files[] = includes/views/group_handler_field_group_audience_state
 
 ; Views filters
 files[] = includes/views/group_handler_filter_group_state.inc
+files[] = includes/views/group_handler_filter_group_audience_state
 
 ; Views realtionships
 files[] = includes/views/group_handler_relationship.inc

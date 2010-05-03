@@ -130,8 +130,14 @@ function group_views_handlers() {
     'group_handler_field_group_member_count' => array(
       'parent' => 'views_handler_field_numeric',
     ),
+    'group_handler_field_group_audience_state' => array(
+      'parent' => 'views_handler_field',
+    ),
     // Filter
     'group_handler_filter_group_state' => array(
+      'parent' => 'views_handler_filter_in_operator',
+    ),
+    'group_handler_filter_group_audience_state' => array(
       'parent' => 'views_handler_filter_in_operator',
     ),
     // Relationship
@@ -188,10 +194,16 @@ function group_views_data_alter(&$data) {
     );
   }
 
-  // Override the group audience gid field argument.
+  // Override group audience - "gid" (group ID) field argument.
   $data['field_data_group_audience']['group_audience_gid']['argument']['handler'] = 'group_handler_argument_group_audience_gid';
 
+  // Override group audience - "created".
   foreach (array('field', 'filter', 'sort', 'argument') as $type) {
     $data['field_data_group_audience']['group_audience_created'][$type]['handler'] = 'views_handler_' . $type . '_date';
   }
+
+  // Override group audience - "state" filter and add a field.
+
+  $data['field_data_group_audience']['group_audience_state']['filter']['handler'] = 'group_handler_filter_group_audience_state';
+  $data['field_data_group_audience']['group_audience_state']['field']['handler'] = 'group_handler_field_group_audience_state';
 }
