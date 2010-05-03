@@ -64,7 +64,7 @@ function group_access_node_access_records($node) {
     $access = TRUE;
   }
   elseif (!empty($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
-    switch ($node->{$property}[LANGUAGE_NONE][0]['value']) {
+    switch ($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
       case GROUP_CONTENT_ACCESS_GROUP_DEFAULT:
         if ($field = field_info_field(GROUP_ACCESS_FIELD)) {
           // Access should be determined by its groups. If group content belongs to
