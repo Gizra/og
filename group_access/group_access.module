@@ -27,14 +27,15 @@ define('GROUP_CONTENT_ACCESS_FIELD', 'group_content_access');
 define('GROUP_CONTENT_ACCESS_GROUP_DEFAULT', 0);
 
 /**
- * Define group content access private regardless of its group definition.
- */
-define('GROUP_CONTENT_ACCESS_PRIVATE', 1);
-
-/**
  * Define group content access public regardless of its group definition.
  */
-define('GROUP_CONTENT_ACCESS_PUBLIC', 2);
+define('GROUP_CONTENT_ACCESS_PUBLIC', 1);
+
+/**
+ * Define group content access private regardless of its group definition.
+ */
+define('GROUP_CONTENT_ACCESS_PRIVATE', 2);
+
 
 /**
  * Implementation of hook_node_grants().
@@ -58,22 +59,12 @@ function group_access_node_access_records($node) {
   $grants = array();
 
   $access = FALSE;
-
-  $property = GROUP_CONTENT_ACCESS_FIELD;
-
-  if (group_is_group_type('node', $node->type) && !empty($node->{GROUP_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
+  if (!empty($node->{GROUP_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
     // Group or group content that is explicitly set to be unpublic.
     $access = TRUE;
   }
-  elseif (group_is_group_content_type('node', $node->type)) {
-    if (!isset($node->{$property})) {
-      $option = GROUP_CONTENT_ACCESS_GROUP_DEFAULT;
-    }
-    else {
-      $option = $node->{$property}[LANGUAGE_NONE][0]['value'];
-    }
-
-    switch ($option) {
+  elseif (!empty($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
+    switch ($node->{$property}[LANGUAGE_NONE][0]['value']) {
       case GROUP_CONTENT_ACCESS_GROUP_DEFAULT:
         if ($field = field_info_field(GROUP_ACCESS_FIELD)) {
           // Access should be determined by its groups. If group content belongs to
@@ -112,9 +103,6 @@ function group_access_node_access_records($node) {
         $access = TRUE;
         break;
 
-      case GROUP_CONTENT_ACCESS_PUBLIC:
-        // DO nothing.
-        break;
     }
   }
 
@@ -136,8 +124,8 @@ function group_access_node_access_records($node) {
  */
 function group_access_group_fields_info() {
   $allowed_values = array(
-    '0|Private - accessible only to group members',
-    '1|Public - accessible to all site users',
+    '0|Public - accessible to all site users',
+    '1|Private - accessible only to group members',
   );
   $items[GROUP_ACCESS_FIELD] = array(
     'type' => array('group'),
@@ -151,8 +139,8 @@ function group_access_group_fields_info() {
     'instance' => array(
       'label' => t('group visibility'),
       'required' => TRUE,
-      // Make the group type default.
-      'default_value' => array(0 => array('value' => 1)),
+      // Default to public.
+      'default_value' => array(0 => array('value' => 0)),
       'widget_type' => 'options_buttons',
       'display' => array(
         'full' => array(
@@ -169,8 +157,9 @@ function group_access_group_fields_info() {
 
   $allowed_values = array(
     '0|Use group defaults',
-    '1|Private - accessible only to group members',
-    '2|Public - accessible to all site users',
+    '1|Public - accessible to all site users',
+    '2|Private - accessible only to group members',
+
   );
   $items[GROUP_CONTENT_ACCESS_FIELD] = array(
     'type' => array('group content'),
