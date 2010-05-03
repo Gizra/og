@@ -82,7 +82,6 @@ function group_access_node_access_records($node) {
         // There are no public groups.
         if (empty($result)) {
           $access = TRUE;
-          break;
         }
       }
     }
