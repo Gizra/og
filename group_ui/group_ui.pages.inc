@@ -108,7 +108,8 @@ function group_ui_unsubscribe($entity_type, $etid) {
 
     $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
     // Check the user isn't the manager of the group.
-    $entity= reset(entity_load($group->entity_type, array($group->etid)));
+    $entity= entity_load($group->entity_type, array($group->etid));
+    $entity = reset($entity);
     if (!empty($entity->uid) && $entity->uid != $user->uid) {
       $user_groups = group_get_entity_groups('user', $user);
       if (!empty($user_groups[$group->gid])) {
