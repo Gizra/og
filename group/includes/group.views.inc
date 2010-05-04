@@ -118,53 +118,6 @@ function group_views_data() {
     ),
   );
 
-  // ----------------------------------------------------------------------
-  // group_users_roles table
-
-  $data['group_users_roles']['table']['group']  = t('Group');
-
-  // Explain how this table joins to others.
-  $data['group_users_roles']['table']['join'] = array(
-     // Directly links to users table.
-    'users' => array(
-      'left_field' => 'uid',
-      'field' => 'uid',
-    ),
-    'node' => array(
-      'left_field' => 'uid',
-      'field' => 'uid',
-    ),
-    'node_revisions' => array(
-      'left_table' => 'node',
-      'left_field' => 'uid',
-      'field' => 'uid',
-    ),
-  );
-
-  // ----------------------------------------------------------------------
-  // group_users_roles table
-
-  $data['group_users_roles']['rid'] = array(
-    'title' => t('Group roles'),
-    'help' => t('Group roles that a user belongs to.'),
-    'field' => array(
-      'handler' => 'group_handler_field_user_roles',
-      'no group by' => TRUE,
-    ),
-/*    'filter' => array(
-      'handler' => 'views_handler_filter_user_roles',
-      'numeric' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_users_roles_rid',
-      'name table' => 'role',
-      'name field' => 'name',
-      'empty field name' => t('No group role'),
-      'numeric' => TRUE,
-    ),*/
-  );
-
-
   return $data;
 }
 
@@ -244,7 +197,8 @@ function group_views_data_alter(&$data) {
     );
   }
 
-  //TODO: Maybe move field overrides to field_views_data_alter().
+  // TODO: Maybe move field overrides to field_views_data_alter().
+  // TODO: Override also field revisions table.
 
   // Override group audience - "gid" (group ID) field argument.
   $data['field_data_group_audience']['group_audience_gid']['argument']['handler'] = 'group_handler_argument_group_audience_gid';
