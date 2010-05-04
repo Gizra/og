@@ -67,9 +67,10 @@ function group_access_node_access_records($node) {
     switch ($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
       case GROUP_CONTENT_ACCESS_GROUP_DEFAULT:
         if ($field = field_info_field(GROUP_ACCESS_FIELD)) {
-          // Access should be determined by its groups. If group content belongs to
-          // several groups, and one of them is public, then the group content will
-          // be public as-well.
+          // Access should be determined by its groups. If group content belongs
+          // to several groups, and one of them is private, then the group
+          // content will private as-well.
+          // TODO: Expose setting to change logic?
           $gids = group_get_entity_groups('node', $node);
 
           $groups = group_load_multiple($gids);
@@ -83,7 +84,7 @@ function group_access_node_access_records($node) {
           foreach ($list as $entity_type => $entity_gids) {
             // Get the entity types ID.
             $conditions = array(
-              array('group_access_value', 0),
+              array('group_access_value', 1),
               array('entity_id', $entity_gids),
               // Use the "magic" column type to get the etid.
               array('type', $entity_type),
