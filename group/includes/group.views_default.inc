@@ -85,7 +85,7 @@ function group_views_default_views() {
   $handler->display->display_options['filters']['state']['field'] = 'state';
   $handler->display->display_options['filters']['state']['relationship'] = 'group_rel';
   $handler->display->display_options['filters']['state']['value'] = array(
-    'active' => 'active',
+    '1' => '1',
   );
   $handler->display->display_options['filters']['state']['expose']['operator'] = 'state_op';
   $handler->display->display_options['filters']['state']['expose']['label'] = 'Group: Group\'s state';
@@ -104,6 +104,7 @@ function group_views_default_views() {
     'page_1' => 'page_1',
     'default' => 0,
   );
+
 
   $views[$view->name] = $view;
 
