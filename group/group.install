@@ -178,7 +178,9 @@ function group_schema() {
 
 if (module_exists('group')) {
   /**
-   * Implements hook_update_N()
+   * Upgrade from Organic groups to Group.
+   *
+   * Pattern taken from node_update_7006().
    *
    * Upgrade path from Organic groups for Drupal 6 to Group for Drupal 7:
    * - Add group fields to nodes.
@@ -204,10 +206,15 @@ if (module_exists('group')) {
 
             case 'group_post_standard':
             case 'group_post_wiki':
+              // The type of the group content is now determined via the
+              // group permissions. We only care about adding the group content
+              // fields to the node.
               $content_type['group content'][] = $type->type;
               break;
 
           }
+
+          // TODO: Delete variable.
         }
       }
 
@@ -294,7 +301,7 @@ function _group_upgrade_group(&$context) {
   $revisions = $query->execute();
 
   // Holds the node IDs with their earliest revision and timestamp, to create a
-  // group entity.
+  // group entity with the earliest timestamp.
   $nids = array();
   foreach ($revisions as $revision) {
     $found = TRUE;
@@ -310,8 +317,8 @@ function _group_upgrade_group(&$context) {
     }
 
     // Set field values.
-    $property = GROUP_GROUP_FIELD;
-    $node->{$property}[LANGUAGE_NONE][0]['value'] = TRUE;
+    // TODO: Can we use TRUE instead of 1?
+    $node->{GROUP_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
 
     field_attach_update('node', $node);
 
@@ -320,5 +327,4 @@ function _group_upgrade_group(&$context) {
   }
 
   return $found;
-
 }

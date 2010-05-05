@@ -212,7 +212,7 @@ function group_group_permission() {
   return $perms + array(
     'update group' => array(
       'title' => t('Edit group'),
-      'description' => t('Edit the group content.'),
+      'description' => t('Edit the group.'),
     ),
     'administer group' => array(
       'title' => t('Administer group'),
