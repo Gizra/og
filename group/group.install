@@ -163,7 +163,7 @@ function group_schema() {
         'not null'        => TRUE,
       ),
     ),
-    'primary key' => array('uid', 'rid'),
+    'primary key' => array('uid', 'rid', 'gid'),
     'indexes' => array(
       'rid' => array('rid'),
     ),
@@ -254,7 +254,7 @@ if (module_exists('group')) {
         'group_user_total' => $group_user_total,
       );
 
-        // Sum of all groups to be converted.
+        // Sum of all enteties to be converted.
       $context['total'] = $group_total + $group_content_total + $group_user_total;
     }
     else {
@@ -268,10 +268,11 @@ if (module_exists('group')) {
 
         if (!$found) {
           // Continue to the next upgrade element.
+          $context['last'] = 0;
           array_shift($context['group upgrade']);
         }
 
-        $context['#finished'] = min(0.99, $context['count'] / $context['total']);
+        $context['#finished'] = min(0.99, $context['count'] / ($context['group'] + $context['group content']));
       }
     }
     if (empty($context['group upgrade'])) {
@@ -284,6 +285,9 @@ if (module_exists('group')) {
   }
 }
 
+/**
+ * Helper function; Upgrade "group" nodes.
+ */
 function _group_upgrade_group(&$context) {
   $found = FALSE;
 
@@ -338,6 +342,57 @@ function _group_upgrade_group(&$context) {
         $context['count'] += 1;
       }
     }
+  }
+
+  return $found;
+}
+
+/**
+ * Helper function; Upgrade "group content" nodes.
+ */
+function _group_upgrade_group_content(&$context) {
+  $found = FALSE;
+
+
+  return $found;
+
+}
+
+/**
+ * Helper function; Upgrade user subscription to groups.
+ */
+function _group_upgrade_user(&$context) {
+  static $rid = 0;
+  if (!$rid) {
+    // Get the administrator role ID.
+    $roles = array_flip(group_get_global_roles());
+    $rid = $roles[GROUP_ADMINISTRATOR_ROLE];
+  }
+
+  $found = FALSE;
+
+  // Operate on every revision of every node, in batches.
+  $batch_size = 200;
+  $query = db_select('og_uid', 'ogu');
+  $query
+    ->fields('ogu')
+    ->condition('ogu.nid', $context['last'], '>')
+    ->orderBy('ogu.nid', 'ASC')
+    ->range(0, $batch_size);
+  $accounts = $query->execute();
+
+  foreach ($accounts as $account) {
+    $group = group_get_group('node', $account->nid);
+    $state = $account->is_active ? GROUP_STATE_ACTIVE : GROUP_STATE_PENDING;
+
+    group_group($group->gid, 'user', $account, $state);
+
+    if ($account->is_admin) {
+      group_users_roles_grant($group->gid, $account->uid, $rid);
+    }
+    $context['last'] = $account->nid;
+    // User subscribed to group.
+    $context['count'] += 1;
   }
 
   return $found;
