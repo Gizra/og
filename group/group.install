@@ -353,6 +353,30 @@ function _group_upgrade_group(&$context) {
 function _group_upgrade_group_content(&$context) {
   $found = FALSE;
 
+  // Operate on users in batches.
+  $batch_size = 200;
+  $query = db_select('node_revision', 'nr');
+  $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+  $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
+  $query
+    ->fields('nr', array('nid', 'vid'))
+    ->fields('n', array('type', 'created'))
+    ->fields('oga', array('group_nid'))
+    ->condition('nr.vid', $context['last'], '>')
+    ->orderBy('nr.vid', 'ASC')
+    ->range(0, $batch_size);
+  $revisions = $query->execute();
+
+  foreach ($revisions as $revision) {
+    $group = group_get_group('node', $revision->group_nid);
+
+    group_group($group->gid, 'node', $revision);
+
+    $context['last'] = $account->nid;
+    // User subscribed to group.
+    $context['count'] += 1;
+  }
+
 
   return $found;
 
@@ -371,7 +395,7 @@ function _group_upgrade_user(&$context) {
 
   $found = FALSE;
 
-  // Operate on every revision of every node, in batches.
+  // Operate on users in batches.
   $batch_size = 200;
   $query = db_select('og_uid', 'ogu');
   $query
