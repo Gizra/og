@@ -419,6 +419,8 @@ function group_ui_user_admin_permissions($form, $form_state, $entity_type = NULL
   foreach (group_get_permissions() as $module => $permissions) {
     $form['permission'][] = array('#markup' => $module_info[$module]['name'], '#id' => $module);
     foreach ($permissions as $perm => $perm_item) {
+      // Initialize values.
+      $perm_item += array('description' => '');
       $options[$perm] = '';
       $form['permission'][$perm] = array(
         '#type' => 'item',

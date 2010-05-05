@@ -203,26 +203,16 @@ function group_init() {
  * Implement hook_group_permission().
  */
 function group_group_permission() {
-  return array(
+  // Generate standard node permissions for all applicable node types.
+  $perms = array();
+  foreach (node_permissions_get_configured_types() as $type) {
+    $perms = group_list_permissions($type);
+  }
+
+  return $perms + array(
     'update group' => array(
       'title' => t('Edit group'),
       'description' => t('Edit the group content.'),
-    ),
-    'update own group content' => array(
-      'title' => t('Edit own group content'),
-      'description' => t('Edit own group content that belong to the group.'),
-    ),
-    'update any group content' => array(
-      'title' => t('Edit any group content'),
-      'description' => t('Edit any group content that belong to the group.'),
-    ),
-    'delete own group content' => array(
-      'title' => t('Delete own group content'),
-      'description' => t('Delete own group content that belong to the group.'),
-    ),
-    'delete any group content' => array(
-      'title' => t('Delete any group content'),
-      'description' => t('Delete any of the group content that belong to the group.'),
     ),
     'administer group' => array(
       'title' => t('Administer group'),
@@ -235,13 +225,22 @@ function group_group_permission() {
  * Implement hook_group_default_permissions().
  */
 function group_group_default_permissions() {
-  return array(
-    'update own group content' => array(GROUP_AUTHENTICATED_ROLE),
-    'delete own group content' => array(GROUP_AUTHENTICATED_ROLE),
+  // Create default permissions for group content nodes if they already exist.
+  $perms = array();
+  foreach (node_permissions_get_configured_types() as $type) {
+    if (group_is_group_content_type('node', $type)) {
+      $info = node_type_get_type($type);
+      $type = check_plain($info->type);
 
+      $perms["update own $type content"] = array(GROUP_AUTHENTICATED_ROLE);
+      $perms["delete own $type content"] = array(GROUP_AUTHENTICATED_ROLE);
+
+      $perms["update any $type content"] = array(GROUP_ADMINISTRATOR_ROLE);
+      $perms["delete any $type content"] = array(GROUP_ADMINISTRATOR_ROLE);
+    }
+  }
+  return $perms + array(
     'update group' => array(GROUP_ADMINISTRATOR_ROLE),
-    'update any group content' => array(GROUP_ADMINISTRATOR_ROLE),
-    'delete any group content' => array(GROUP_ADMINISTRATOR_ROLE),
     'administer group' => array(GROUP_ADMINISTRATOR_ROLE),
   );
 }
@@ -268,7 +267,11 @@ function group_node_access($node, $op, $account) {
       // groups might allow anonymous members access.
       $return = NODE_ACCESS_DENY;
       foreach ($gids as $gid) {
-        if (group_user_access($gid, $op . ' group content', $account) || group_user_access($gid, $op . ' any group content', $account) || (group_user_access($gid, $op . ' own group content', $account) && $node->uid == $account->uid)) {
+        if (group_user_access($gid, "administer group", $account) ||
+        // Any content.
+        group_user_access($gid, "$op any $type content", $account) ||
+        // Users own content.
+        (group_user_access($gid, "$op own $type content", $account) && $node->uid == $account->uid)) {
           $return =  NODE_ACCESS_ALLOW;
           break;
         }
@@ -2272,3 +2275,37 @@ function group_group_content_states() {
   );
 }
 
+/**
+ * Helper function to generate standard node permission list for a given type.
+ *
+ * @param $type
+ *   The machine-readable name of the node type.
+ * @return array
+ *   An array of permission names and descriptions.
+ */
+function group_list_permissions($type) {
+  $perms = array();
+
+  // Check type is of group content.
+  if (group_is_group_content_type('node', $type)) {
+    $info = node_type_get_type($type);
+    $type = check_plain($info->type);
+
+    // Build standard list of node permissions for this type.
+    $perms = array(
+      "edit own $type content" => array(
+        'title' => t('Edit own %type_name content', array('%type_name' => $info->name)),
+      ),
+      "edit any $type content" => array(
+        'title' => t('Edit any %type_name content', array('%type_name' => $info->name)),
+      ),
+      "delete own $type content" => array(
+        'title' => t('Delete own %type_name content', array('%type_name' => $info->name)),
+      ),
+      "delete any $type content" => array(
+        'title' => t('Delete any %type_name content', array('%type_name' => $info->name)),
+      ),
+    );
+  }
+  return $perms;
+}
