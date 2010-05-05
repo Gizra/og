@@ -322,7 +322,22 @@ function _group_upgrade_group(&$context) {
     field_attach_update('node', $node);
 
     $context['last'] = $revision->vid;
-    $context['count'] += 1;
+  }
+
+  // Update group enteties with the correct "created" timestamp. The group
+  // enteties were already created in the above field_attach_update(), but we
+  // didn't have a chance alter it.
+  if ($nids) {
+    foreach ($nids as $nid => $created) {
+      // Make sure the created value wasn't altered already.
+      if (($group = group_get_group('node', $nid, TRUE)) && $group->created != $created) {
+        $group->created = $created;
+        group_save($group);
+
+        // New group created, so add it to the total count.
+        $context['count'] += 1;
+      }
+    }
   }
 
   return $found;
