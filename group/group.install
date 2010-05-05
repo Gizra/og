@@ -377,9 +377,7 @@ function _group_upgrade_group_content(&$context) {
     $context['count'] += 1;
   }
 
-
   return $found;
-
 }
 
 /**
