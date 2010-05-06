@@ -100,16 +100,7 @@ DEVELOPERS & SITE BUILDERS
 
 CREDITS
 ----------------------------
-- Originally authored by with versions 5 and 6 maintained by Moshe Weitzman -  
+- Organic groups authored by with versions 5 and 6 maintained by Moshe Weitzman -  
   <weitzman AT tejasa DOT com>
-- Version 7 and current project maintainer by Amitai Burstein (Amitaibu) - 
-  gizra.com
-
-- Contributors: Gerhard Killesreiter, Angie Byron, Derek Wright, Thomas Ilsche, 
-  Ted Serbinski, damien_vancouver
-
-- Sponsors:
-  Bryght - http://www.bryght.com
-  Broadband Mechanics - http://www.broadbandmechanics.com/
-  Finnish Broadcasting Company - http://www.yle.fi/fbc/
-  Post Carbon Institute - http://www.postcarbon.org/
+- Group module author and current project maintainer of Organic group is Amitai 
+  Burstein (Amitaibu) - gizra.com
