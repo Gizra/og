@@ -243,18 +243,42 @@ function group_ui_subscribe_link($entity_type, $entity, $account = NULL) {
       else {
         if (group_user_access($group->gid, 'subscribe without approval', $account)) {
           $links['title'] = t('Subscribe to group');
+          $url = "group/$entity_type/$id/subscribe";
+          if ($account->uid) {
+            $links['href'] = $url;
+          }
+          else {
+            $links['href'] = 'user/login';
+            $links['options'] = array('query' => array('destination' => $url));
+          }
         }
         elseif (group_user_access($group->gid, 'subscribe')) {
           $links['title'] = t('Request group membership');
+          $url = "group/$entity_type/$id/subscribe";
+          if ($account->uid) {
+            $links['href'] = $url;
+          }
+          else {
+            $links['href'] = 'user/login';
+            $links['options'] = array('query' => array('destination' => $url));
+          }
         }
-        $links['href'] = "group/$entity_type/$id/subscribe";
+        else {
+          $return = array(
+            '#type' => 'item',
+            '#markup' => t('This is a closed group. Only a group administrator can add you.'),
+          );
+        }
+
       }
 
       if (!empty($links['title'])) {
+        $links += array('options' => array());
         $return = array(
           '#type' => 'link',
           '#title' => $links['title'],
           '#href' => $links['href'],
+          '#options' => $links['options'],
         );
       }
     }
