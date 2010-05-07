@@ -14,8 +14,8 @@ define('GROUP_REGISTER_FIELD', 'group_register');
 /**
  * Implement hook_form_FORM_ID_alter().
  *
- * Get all the groups that should appear in the user registration, and show
- * them.
+ * Get all the groups that should appear in the user registration, and if they
+ * exist, attach the user's field to the form.
  */
 function group_register_form_user_register_form_alter(&$form, $form_state) {
   global $user;
