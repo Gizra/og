@@ -83,7 +83,7 @@ function group_views_field_allowed_values() {
  * Organic group views field formatter.
  *
  * @return
- *   A rendered Views.
+ *   A rendered View.
  */
 function theme_field_formatter_group_views_default($variables) {
   $element = $variables['element'];

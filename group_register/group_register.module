@@ -76,7 +76,7 @@ function group_register_group_fields_info() {
  *  Get all the groups node IDs that should appear in the user registration.
  */
 function group_register_get_groups() {
-  static $gids = array();
+  $gids = &drupal_static(__FUNCTION__, array());
 
   if (!$gids && $field = field_info_field(GROUP_REGISTER_FIELD)) {
     $conditions = array(
