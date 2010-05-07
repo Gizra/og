@@ -7,7 +7,7 @@
  */
 
 /**
- * Group public access field.
+ * Group register field.
  */
 define('GROUP_REGISTER_FIELD', 'group_register');
 
