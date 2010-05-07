@@ -10,6 +10,7 @@
  * Implement hook_menu().
  */
 function group_ui_menu() {
+  $items = array();
   $items['group/%/%/subscribe'] = array(
     'type' => MENU_CALLBACK,
     'file' => 'group_ui.pages.inc',
