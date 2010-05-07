@@ -13,7 +13,7 @@ define('GROUP_VIEWS_FIELD', 'group_views');
 
 
 /**
- * Implementation of hook_views_api().
+ * Implements of hook_views_api().
  */
 function group_views_views_api() {
   return array(
@@ -51,12 +51,12 @@ function group_views_group_fields_info() {
       'widget_type' => 'options_select',
       'display' => array(
         'full' => array(
-          'label' => 'hidden',
+          'label' => 'above',
           'type' => 'group_views_default',
         ),
         'teaser' => array(
           'label' => 'above',
-          'type' => 'group_list_default',
+          'type' => 'group_views_default',
         ),
       ),
     ),
@@ -71,6 +71,9 @@ function group_views_group_fields_info() {
  */
 function group_views_field_allowed_values() {
   $return = array();
+
+  // Add "global" views option.
+  $return['__global'] = t('Use site-wide Views definition');
   foreach (views_get_all_views() as $view_id => $view) {
     if (empty($view->disabled)) {
       $view_name = check_plain($view->name);
@@ -83,21 +86,19 @@ function group_views_field_allowed_values() {
   return $return;
 }
 
-
 /**
- * Organic group views field formatter.
- *
- * @return
- *   A rendered View.
+ * Implements hook_field_formatter_view().
  */
-function theme_field_formatter_group_views_default($variables) {
-  $element = $variables['element'];
-  $output = '';
-  if (!empty($element['#item']['gid'])) {
-    $view = explode(' ', $element['#item']['gid']);
-    // Get the correct view, and view-display.
-    $output = views_embed_view($view[0], $view[1]);
+function group_views_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  if ($field['field_name'] == GROUP_VIEWS_FIELD && !empty($entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'])) {
+
+    $view = $entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'] == '__global' ? variable_get('group_views_global_view', '') : $entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'];
+    if ($view = explode(' ', $view)) {
+      $element[0] = views_embed_view($view[0], $view[1]);
+    }
   }
 
-  return $output;
+  return $element;
 }
