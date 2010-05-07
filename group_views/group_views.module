@@ -116,7 +116,6 @@ function group_views_field_formatter_view($entity_type, $entity, $field, $instan
   $element = array();
 
   if ($field['field_name'] == GROUP_VIEWS_FIELD && !empty($entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'])) {
-
     $view = $entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'] == '__global' ? variable_get('group_views_global_view', '') : $entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'];
     if ($view = explode(' ', $view)) {
       $element[0] = views_embed_view($view[0], $view[1]);

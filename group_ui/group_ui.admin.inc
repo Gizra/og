@@ -240,14 +240,12 @@ function group_ui_user_admin_account_submit($form, &$form_state) {
  * @see group_user_admin_role_submit()
  * @see theme_group_user_admin_new_role()
  */
-function group_ui_user_admin_role($form, $form_state, $entity_type, $etid) {
+function group_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0) {
   if ($group = group_get_group($entity_type, $etid)) {
     $form['group'] = array('#type' => 'value', '#value' => $group);
 
     $item = menu_get_item();
     // Get the role ID from the URL.
-    $rid = !empty($item['map'][7]) ? $item['map'][7] : 0;
-
     if ($rid) {
       group_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")), l(t('Roles'), "group/$entity_type/$etid/admin/people/roles"));
 
