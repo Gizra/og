@@ -188,99 +188,101 @@ if (module_exists('group')) {
    * - Delete Organic groups' variables.
    */
   function group_update_7000(&$context) {
-    $context['#finished'] = 0;
+    if (db_table_exists('og')) {
+      $context['#finished'] = 0;
 
-    $content_type = array('group' => array(), 'group content' => array());
+      $content_type = array('group' => array(), 'group content' => array());
 
-    // If this is the first time this functions is called in the batch process,
-    // create fields for the content types.
-    if (!isset($context['total'])) {
+      // If this is the first time this functions is called in the batch process,
+      // create fields for the content types.
+      if (!isset($context['total'])) {
 
-      foreach (node_type_get_types() as $type) {
-        // check if the variable exists.
-        if ($type_usage = variable_get('og_content_type_usage_' . $type->type)) {
-          switch ($type_usage) {
-            case 'group':
-              $content_type['group'][] = $type->type;
-              break;
+        foreach (node_type_get_types() as $type) {
+          // check if the variable exists.
+          if ($type_usage = variable_get('og_content_type_usage_' . $type->type)) {
+            switch ($type_usage) {
+              case 'group':
+                $content_type['group'][] = $type->type;
+                break;
 
-            case 'group_post_standard':
-            case 'group_post_wiki':
-              // The type of the group content is now determined via the
-              // group permissions. We only care about adding the group content
-              // fields to the node.
-              $content_type['group content'][] = $type->type;
-              break;
+              case 'group_post_standard':
+              case 'group_post_wiki':
+                // The type of the group content is now determined via the
+                // group permissions. We only care about adding the group content
+                // fields to the node.
+                $content_type['group content'][] = $type->type;
+                break;
 
+            }
+
+            // TODO: Delete variable.
           }
-
-          // TODO: Delete variable.
         }
-      }
 
-      if ($content_type) {
-        // Add group and group content fields to content types.
-        $fields = array(
-          'group' => GROUP_GROUP_FIELD,
-          'group content' => GROUP_AUDIENCE_FIELD,
+        if ($content_type) {
+          // Add group and group content fields to content types.
+          $fields = array(
+            'group' => GROUP_GROUP_FIELD,
+            'group content' => GROUP_AUDIENCE_FIELD,
+          );
+          foreach ($fields as $key => $field_name) {
+            foreach ($content_type[$key] as $type) {
+              group_create_field($field_name, 'node', $type);
+            }
+          }
+        }
+
+        // Initialize state for future calls.
+        $context['last'] = 0;
+        $context['count'] = 0;
+
+        // Hold the information about the callbacks that upgrade the different
+        // fields.
+        $context['group upgrade'] = array('group', 'group_content', 'user');
+
+        $query = db_select('og', 'og');
+        $group_total = $query->countQuery()->execute()->fetchField();
+
+        $query = db_select('og_ancestry', 'oga');
+        $group_content_total = $query->countQuery()->execute()->fetchField();
+
+        $query = db_select('og_uid', 'ogu');
+        $group_user_total = $query->countQuery()->execute()->fetchField();
+
+        $context += array(
+          'group_total' => $group_total,
+          'group_content_total' => $group_content_total,
+          'group_user_total' => $group_user_total,
         );
-        foreach ($fields as $key => $field_name) {
-          foreach ($content_type[$key] as $type) {
-            group_create_field($field_name, 'node', $type);
+
+          // Sum of all enteties to be converted.
+        $context['total'] = $group_total + $group_content_total + $group_user_total;
+      }
+      else {
+        if ($context['total']) {
+          $callback = reset($context['group upgrade']);
+          $callback =  '_group_upgrade_' . $callback;
+
+          // We don't use call_user_func, as we want to pass $context by
+          // reference.
+          $found = $callback($context);
+
+          if (!$found) {
+            // Continue to the next upgrade element.
+            $context['last'] = 0;
+            array_shift($context['group upgrade']);
           }
+
+          $context['#finished'] = min(0.99, $context['count'] / ($context['group'] + $context['group content']));
         }
       }
+      if (empty($context['group upgrade'])) {
+        // All nodes are processed.
 
-      // Initialize state for future calls.
-      $context['last'] = 0;
-      $context['count'] = 0;
-
-      // Hold the information about the callbacks that upgrade the different
-      // fields.
-      $context['group upgrade'] = array('group', 'group_content', 'user');
-
-      $query = db_select('og', 'og');
-      $group_total = $query->countQuery()->execute()->fetchField();
-
-      $query = db_select('og_ancestry', 'oga');
-      $group_content_total = $query->countQuery()->execute()->fetchField();
-
-      $query = db_select('og_uid', 'ogu');
-      $group_user_total = $query->countQuery()->execute()->fetchField();
-
-      $context += array(
-        'group_total' => $group_total,
-        'group_content_total' => $group_content_total,
-        'group_user_total' => $group_user_total,
-      );
-
-        // Sum of all enteties to be converted.
-      $context['total'] = $group_total + $group_content_total + $group_user_total;
-    }
-    else {
-      if ($context['total']) {
-        $callback = reset($context['group upgrade']);
-        $callback =  '_group_upgrade_' . $callback;
-
-        // We don't use call_user_func, as we want to pass $context by
-        // reference.
-        $found = $callback($context);
-
-        if (!$found) {
-          // Continue to the next upgrade element.
-          $context['last'] = 0;
-          array_shift($context['group upgrade']);
-        }
-
-        $context['#finished'] = min(0.99, $context['count'] / ($context['group'] + $context['group content']));
+        // We're done.
+        $context['#finished'] = 1;
+        return t("!number groups and group content converted to use new Group fields.", array('!number' => $context['total']));
       }
-    }
-    if (empty($context['group upgrade'])) {
-      // All nodes are processed.
-
-      // We're done.
-      $context['#finished'] = 1;
-      return t("!number groups and group content converted to use new Group fields.", array('!number' => $context['total']));
     }
   }
 }
