@@ -1,0 +1,19 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the Group access module.
+ */
+
+/**
+ * Implement hook_uninstall().
+ */
+function group_access_uninstall() {
+  $vars = array(
+    'group_access_group_defaults_fallback',
+  );
+  foreach ($vars as $var) {
+    variable_del($var);
+  }
+}
