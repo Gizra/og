@@ -1919,6 +1919,18 @@ function group_delete_user_roles_by_group($gid) {
   }
 }
 
+/**
+ * Get the role names of role IDs.
+ *
+ * @param $rids
+ *   Array with role IDs.
+ * @return
+ *  Array keyed by the role ID, and the role name as the value.
+ */
+function group_get_user_roles_name($rids = array()) {
+  return db_query("SELECT rid, name FROM {group_role} WHERE rid IN (:rids)", array(':rids' => $rids))->fetchAllKeyed();
+}
+
 
 /**
  * Delete all permissions defined by a module.

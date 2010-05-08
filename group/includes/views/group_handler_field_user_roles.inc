@@ -19,14 +19,28 @@ class group_handler_field_user_roles extends views_handler_field_prerender_list 
       );
     }
 
-    // Array of all the group IDs we will need to get a role name.
-    $gids = array();
+    // Array of all the role IDss we will need to get a role name.
+    $all_rids = array();
     if ($list) {
       foreach ($list as $value) {
         $rids = group_get_user_roles($value['gid'], $value['uid']);
-        $gids[$value['gid']] = $value['gid'];
         foreach ($rids as $rid) {
-          $this->items[$value['gid']][$value['uid']][$rid] = array('rid' => $rid);
+          $this->items[$value['gid']][$value['uid']][$rid]['rid'] = $rid;
+        }
+        $all_rids = array_merge($all_rids, $rids);
+      }
+
+      // Get the name of all the roles we need to show.
+      $all_rids = group_get_user_roles_name($all_rids);
+
+      // Sanitize each role name once.
+      array_walk($all_rids, 'check_plain');
+
+      foreach ($this->items as $gid => $gid_value) {
+        foreach ($gid_value as $uid => $uid_value) {
+          foreach ($uid_value as $rid => $value) {
+            $this->items[$gid][$uid][$rid]['role'] = $all_rids[$rid];
+          }
         }
       }
     }
@@ -34,7 +48,7 @@ class group_handler_field_user_roles extends views_handler_field_prerender_list 
 
 
   /**
-   * We override this function as $this->items is an array with the:
+   * We override this function as $this->items is an array keyed by:
    * - Group ID
    * -- User ID
    * --- Role ID
@@ -87,7 +101,7 @@ class group_handler_field_user_roles extends views_handler_field_prerender_list 
 
 
   function render_item($rid, $item) {
-    return $item['rid'];
+    return $item['role'];
   }
 
   function document_self_tokens(&$tokens) {
