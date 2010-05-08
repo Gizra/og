@@ -7,23 +7,15 @@ class group_handler_field_user_roles extends views_handler_field_prerender_list 
   function construct() {
     parent::construct();
     $this->additional_fields['uid'] = array('table' => 'users', 'field' => 'uid');
-    //$this->additional_fields['gid'] = array('table' => 'group_groups', 'field' => 'gid');
-  }
-
-  function query() {
-    $this->add_additional_fields();
-    $this->field_alias = $this->aliases['uid'];
   }
 
   function pre_render($values) {
     $list = array();
     $this->items = array();
-    dpm($values);
-    return;
-    foreach ($values as $result) {
+    foreach ($values as $value) {
       $list[] = array(
-        'uid' => $result->{$this->aliases['uid']},
-        'gid' => $result->{$this->aliases['gid']},
+        'uid' => $value->{$this->aliases['uid']},
+        'gid' => $value->{$this->field_alias},
       );
     }
 
@@ -34,20 +26,68 @@ class group_handler_field_user_roles extends views_handler_field_prerender_list 
         $rids = group_get_user_roles($value['gid'], $value['uid']);
         $gids[$value['gid']] = $value['gid'];
         foreach ($rids as $rid) {
-          $this->items[$role->uid][$role->rid]['rid'] = $role->rid;
+          $this->items[$value['gid']][$value['uid']][$rid] = array('rid' => $rid);
         }
-      }
-      // Get all the role ID names.
-
-      foreach ($all_rids as $role) {
-        $this->items[$role->uid][$role->rid]['role'] = check_plain($role->name);
-
       }
     }
   }
 
-  function render_item($count, $item) {
-    return $item['group role'];
+
+  /**
+   * We override this function as $this->items is an array with the:
+   * - Group ID
+   * -- User ID
+   * --- Role ID
+   */
+  function advanced_render($values) {
+    if ($this->allow_advanced_render() && method_exists($this, 'render_item')) {
+      $raw_items = $this->get_items($values);
+    }
+    else {
+      $this->last_render = $value = $this->render($values);
+      $this->original_value = $value;
+    }
+
+    if ($this->allow_advanced_render()) {
+      $tokens = NULL;
+      if (method_exists($this, 'render_item')) {
+        $items = array();
+        // Override parent logic -- make sure we get an item per group, per
+        // user, and not try to get the roles per group only.
+        $uid = $values->{$this->aliases['uid']};
+        if (!empty($raw_items[$uid])) {
+          foreach ($raw_items[$uid] as $count => $item) {
+            $this->last_render = $this->render_item($count, $item);
+            $this->original_value = $this->last_render;
+
+            $alter = $item + $this->options['alter'];
+            $items[] = $this->render_text($alter);
+          }
+        }
+
+        $value = $this->render_items($items);
+      }
+      else {
+        $value = $this->render_text($this->options['alter']);
+      }
+
+      // This happens here so that render_as_link can get the unaltered value of
+      // this field as a token rather than the altered value.
+      $this->last_render = $value;
+    }
+
+    if (empty($this->last_render)) {
+      if (($this->last_render !== 0 && $this->last_render !== '0') || !empty($this->options['empty_zero'])) {
+        $this->last_render = $this->options['empty'];
+      }
+    }
+
+    return $this->last_render;
+  }
+
+
+  function render_item($rid, $item) {
+    return $item['rid'];
   }
 
   function document_self_tokens(&$tokens) {

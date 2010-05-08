@@ -118,6 +118,19 @@ function group_views_data() {
     ),
   );
 
+  $data['field_data_group_audience']['user_roles'] = array(
+    'group' => t('Group'),
+    'title' => t('Group user roles'),
+    'help' => t('Show all the groups a user belongs to in a group.'),
+    // This is a dummy field, so point it to a real field that we need - the
+    // group ID
+    'real field' => 'group_audience_gid',
+    'field' => array(
+      'handler' => 'group_handler_field_user_roles',
+    ),
+  );
+
+
   return $data;
 }
 
@@ -202,6 +215,8 @@ function group_views_data_alter(&$data) {
 
   // Override group audience - "gid" (group ID) field argument.
   $data['field_data_group_audience']['group_audience_gid']['argument']['handler'] = 'group_handler_argument_group_audience_gid';
+
+  $data['field_data_group_audience']['group_audience_gid']['field']['handler'] = 'views_handler_field_numeric';
 
   // Override group audience - "created".
   foreach (array('field', 'filter', 'sort', 'argument') as $type) {
