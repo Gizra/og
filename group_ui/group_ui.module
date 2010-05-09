@@ -132,7 +132,7 @@ function group_ui_menu() {
     'page arguments' => array('group_ui_user_admin_global_permissions'),
     'title' => 'Group global permissions',
     'access arguments' => array('administer site configuration'),
-    'description' => 'Configure organic groups global permissions.',
+    'description' => 'Configure Group global permissions.',
     'file' => 'group_ui.admin.inc',
   );
   $items['admin/config/group/fields'] = array(
@@ -140,7 +140,7 @@ function group_ui_menu() {
     'page arguments' => array('group_ui_field_settings'),
     'title' => 'Group field settings',
     'access arguments' => array('administer site configuration'),
-    'description' => 'Configure organic groups fields in bundles.',
+    'description' => 'Configure Group fields in bundles.',
     'file' => 'group_ui.admin.inc',
   );
 
@@ -311,7 +311,7 @@ function group_ui_form_node_type_form_alter(&$form, &$form_state) {
     '#title' => t('Group'),
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
-    '#description' => t('Specify how organic groups should treat content of this type. Content may behave as a group, as group content, or may not participate in organic groups at all.'),
+    '#description' => t('Specify how Group should treat content of this type. Content may behave as a group, as group content, or may not participate in Group at all.'),
   );
 
   $form['group']['group_group_type'] = array(

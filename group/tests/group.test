@@ -2,7 +2,7 @@
 // $Id$
 
 /**
- * Test the organic groups group CRUD handling.
+ * Test the Group group CRUD handling.
  */
 class OgGroupCrud extends DrupalWebTestCase {
 
@@ -105,14 +105,14 @@ class OgGroupCrud extends DrupalWebTestCase {
 }
 
 /**
- * Test the organic groups content handeling.
+ * Test the Group content handeling.
  */
 class OgTypeTest extends DrupalWebTestCase {
 
   public static function __getInfo() {
     return array(
       'name' => 'Group content types',
-      'description' => 'Test the organic groups group node and group content creation.',
+      'description' => 'Test the Group group node and group content creation.',
       'group' => 'Group',
     );
   }

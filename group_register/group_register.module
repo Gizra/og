@@ -45,7 +45,7 @@ function group_register_group_fields_info() {
   );
   $items[GROUP_REGISTER_FIELD] = array(
     'type' => array('group'),
-    'description' => t('Add organic groups register field group types.'),
+    'description' => t('Add Group register field group types.'),
     'field' => array(
       'field_name' => GROUP_REGISTER_FIELD,
       'type' => 'list_boolean',

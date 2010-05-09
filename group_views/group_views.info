@@ -1,6 +1,6 @@
 ; $Id:$
 name = Group Views integration
-description = "Use Views to search and display organic groups."
+description = "Use Views to search and display Group."
 package = "Group"
 dependencies[] = group
 dependencies[] = views

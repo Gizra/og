@@ -31,7 +31,7 @@ function group_field_group_property_callback(&$info, $entity_type, $field, $inst
   $name = str_replace('_', '-', $field['field_name']);
   $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
-  // Define a data structure so it's possible to deal with organic groups
+  // Define a data structure so it's possible to deal with Group
   // audinece properly.
   $property['getter callback'] = 'entity_metadata_field_verbatim_get';
   $property['setter callback'] = 'entity_metadata_field_verbatim_set';
@@ -195,7 +195,7 @@ function group_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   // Determine if a user may see other groups as-well.
   $opt_group = FALSE;
 
-  if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer organic groups'))) {
+  if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer group'))) {
     $opt_group = TRUE;
   }
 

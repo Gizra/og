@@ -6,7 +6,7 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
-// Load all Field module hooks for organic groups.
+// Load all Field module hooks for Group.
 require(drupal_get_path('module', 'group') . '/group.field.inc');
 
 // Dispositioning of content and memberships after deletion of a group node.
@@ -185,8 +185,8 @@ function group_group_views_relationship() {
  */
 function group_permission() {
   return array(
-    'administer organic groups' =>  array(
-      'title' => t('Administer organic groups permissions'),
+    'administer group' =>  array(
+      'title' => t('Administer Group permissions'),
       'description' => t('Administer all groups and permissions.'),
     ),
   );
@@ -523,7 +523,7 @@ function group_create_group($values = array()) {
 }
 
 /**
- * Controller class for organic groups.
+ * Controller class for Group.
  */
 class OgController extends EntityAPIController {
   function load($ids = array(), $conditions = array()) {
@@ -536,7 +536,7 @@ class OgController extends EntityAPIController {
 }
 
 /**
- * Main class for organic groups entities.
+ * Main class for Group entities.
  */
 class EntityOg extends EntityDB {
   public function __construct(array $values = array(), $entityType = NULL) {
@@ -546,7 +546,7 @@ class EntityOg extends EntityDB {
 
 
 /**
- * Load multiple organic groups entities based on certain conditions.
+ * Load multiple Group entities based on certain conditions.
  *
  * @param $gids
  *   An array of group entity IDs.
@@ -563,7 +563,7 @@ function group_load_multiple($gids = array(), $conditions = array(), $reset = FA
 }
 
 /**
- * Load an organic groups entity from the database.
+ * Load an Group entity from the database.
  *
  * @param $gid
  *   The group ID.
@@ -594,7 +594,7 @@ function group_save($group) {
 
 
 /**
- * Delete multiple organic groups entities.
+ * Delete multiple Group entities.
  *
  * @param $gids
  *   An array of group entity IDs.
@@ -856,7 +856,7 @@ function group_ungroup($gid, $entity_type, $entity, $save = TRUE) {
  */
 function group_user_access($gid, $string, $account = NULL) {
   if (variable_get('group_skip_access', FALSE)) {
-    // User access should always return TRUE, as organic groups is requested to
+    // User access should always return TRUE, as Group is requested to
     // skip any access check.
     return TRUE;
   }
@@ -873,8 +873,8 @@ function group_user_access($gid, $string, $account = NULL) {
     return TRUE;
   }
 
-  // Administer organic groups permission.
-  if (user_access('administer organic groups', $account)) {
+  // Administer Group permission.
+  if (user_access('administer group', $account)) {
     return TRUE;
   }
 
@@ -1019,7 +1019,7 @@ function group_get_entity_groups($entity_type, $entity, $states = array(GROUP_ST
  *
  * @return
  *   The group type or an "omitted" if node type doesn't participate in
- *   organic groups.
+ *   Group.
  */
 function group_get_group_type($entity_type, $bundle_name, $type = 'group') {
   if ($type == 'group') {
@@ -2126,7 +2126,7 @@ function group_user_role_revoke_permissions($rid, array $permissions = array()) 
 
 
 /**
- * Get all permissions defined for organic groups.
+ * Get all permissions defined for Group.
  */
 function group_get_permissions() {
   $perms = &drupal_static(__FUNCTION__, array());

@@ -57,7 +57,7 @@ function group_views_field_formatter_info() {
 function group_views_group_fields_info() {
   $items[GROUP_VIEWS_FIELD] = array(
     'type' => array('group'),
-    'description' => t('Add organic groups Views field to fieldable entities that are groups.'),
+    'description' => t('Add Group Views field to fieldable entities that are groups.'),
     'field' => array(
       'field_name' => GROUP_VIEWS_FIELD,
       'type' => 'list_text',
