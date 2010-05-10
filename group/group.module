@@ -1393,17 +1393,14 @@ function group_context_js($group) {
  * You can pass a URL in in the form of
  * node/add/post?gids_gid[]=1,2,3&gids_node[]=4,5,6
  * Note that gids_ is the prefix followed by the entity type (e.g. "node",
- * "user") or "gid" to indicate the passed values are group ID.
+ * "user") or "group" to indicate the passed values are group ID.
  */
 function group_get_context_by_url() {
   $return = array();
-  foreach (array_merge(array_keys(entity_get_info()), array('gid')) as $entity_type) {
+  foreach (array_keys(entity_get_info()) as $entity_type) {
     $etids =  !empty($_REQUEST['gids_' . $entity_type][0]) ? explode(',', $_REQUEST['gids_' . $entity_type][0]) : array();
     if ($etids) {
-      if ($gids = group_get_groups($entity_type, $etids)) {
-        $gids = current($gids);
-        $return = $return + $gids;
-      }
+      $return = array_merge($return, group_get_group_ids($entity_type, $etids));
     }
   }
   return $return;
