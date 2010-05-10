@@ -1952,7 +1952,7 @@ function group_permissions_delete_by_module($module) {
  *   The newly created roles keyed by role ID and role name as the value. Or
  *   FALSE if no roles were created.
  */
-function group_group_user_roles_override($gid) {
+function group_user_roles_override($gid) {
   $rids = array();
   // Make sure roles doesn't exist already by looking for a row with the group
   // ID in {group_role} table.

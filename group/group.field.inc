@@ -414,7 +414,7 @@ function group_field_crud_group($op, $entity_type, $entity) {
 
       if ($entity->{$property} != $original_entity->{$property}) {
         if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
-          group_group_user_roles_override($group->gid);
+          group_user_roles_override($group->gid);
         }
         else {
           // If the field is set to be using default access and there are
