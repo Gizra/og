@@ -64,6 +64,13 @@ function group_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'label' => array(
+        'description' => "The entity label (e.g. node's title).",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'state' => array(
         'description' => 'The state of the group (i.e. active or disabled).',
         'type' => 'int',

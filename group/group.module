@@ -517,6 +517,7 @@ function group_create_group($values = array()) {
   $values += array(
     'state' => GROUP_STATE_ACTIVE,
     'created' => time(),
+    'label' => entity_callback($values['entity_type'], $values['entity']),
   );
 
   return entity_create('group', $values);
@@ -929,35 +930,6 @@ function group_node_type_save($bundle_name) {
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('group_group_content_type_' . $bundle_name);
   }
-}
-
-
-/**
- * Get label information to fieldable entities.
- *
- * TODO: Implement hook_entity_info_alter().
- * TODO: see  http://drupal.org/node/629484 for discussion.
- *
- * @param $entity
- *   The entity name to populate with the label data.
- * @return
- *   The entity info merged with the label data.
- *
- */
-function group_entity_label($entity) {
-  $entity_info = entity_get_info($entity);
-
-  $entity_labels = array(
-    'comment' => 'subject',
-    'node' => 'title',
-    'file' => 'filename',
-    'taxonomy_term' => 'name',
-    'user' => 'name',
-  );
-
-  $entity_info['entity keys']['label'] = $entity_labels[$entity];
-
-  return $entity_info;
 }
 
 
