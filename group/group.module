@@ -1418,17 +1418,31 @@ function group_get_audience_options($opt_group = FALSE, $account = NULL) {
 
 
 /**
- * Get labels of a group list.
+ * Get labels out of a list of group IDs.
+ *
+ * @param $gids
+ *   The group IDs.
+ *
+ * @return
+ *   Array keyed with the group ID, and the entity label as the value,
+ *   sanitized.
  */
 function group_get_groups_label($gids = array()) {
   $labels = array();
-  $entity_types = group_sort_groups_by_type($gids);
-  foreach ($entity_types as $entity_type => $groups) {
-    $etids = array();
-    foreach ($groups as $group) {
-      $etids[] = $group->etid;
+  $groups = group_load_multiple($gids);
+  foreach ($groups as $group) {
+    if (!empty($group->label)) {
+      $labels[$group->gid] = check_plain($group->label);
     }
-    $labels = $labels + group_entity_get_label_multiple($entity_type, $etids);
+    else {
+      $entity = entity_get_info($group->entity_type);
+      $param = array(
+        'gid' => $group->gid,
+        'entity' => $entity->label,
+        'etid' => $group->etid,
+      );
+      $labels[$group->gid] = t('Group @gid - @entity ID @etid', $param);
+    }
   }
   return $labels;
 }
@@ -1446,63 +1460,6 @@ function group_sort_groups_by_type($gids = array()) {
     $return[$group->entity_type][$group->gid] = $group;
   }
   return $return;
-
-}
-
-/**
- * Get the label (e.g. node title) of different entities.
- *
- * @param $entity_type
- *   The entity type.
- * @param $etids
- *   The entity IDs.
- * @return
- *   Array keyed with the group unqiue ID and the entity label as the value.
- */
-function group_entity_get_label_multiple($entity_type, $etids = array()) {
-  $return = array();
-
-  $entity = group_entity_label($entity_type);
-
-  // Get the table, ID and label of the object type.
-  if (!empty($entity['entity keys']['label'])) {
-    $table = $entity['base table'];
-    $id = $entity['entity keys']['id'];
-    $label = $entity['entity keys']['label'];
-
-    // Get the group ID along with the entity label.
-    $query = db_select('group_groups', 'group_groups')->fields('group_groups', array('gid'));
-    $query->condition('entity_type', $entity_type);
-
-    $query->join($table, $table, "group_groups.etid =  $table.$id");
-
-    $return = $query->fields($table, array($label))
-      ->condition($id, $etids, 'IN')
-      ->execute()
-      ->fetchAllKeyed();
-  }
-  else {
-    // We got an entity type that we don't know how to get the label, so we'll
-    // return the group ID as the laebl, prefixed with the entity type.
-    foreach ($etids as $etid) {
-      $return[$etid] = t('@entity_type ID  @value', array('@entity_type' => $entity_type, '@value' => $etid));
-    }
-  }
-
-  return $return;
-}
-
-/**
- * Wrapper function to get the label of a single entity.
- *
- * @param $entity_type
- *   The entity type.
- * @param $etid
- *   The entity ID.
- * @return unknown_type
- */
-function group_entity_get_label($entity_type, $etid) {
-  return current(group_entity_get_label_multiple($entity_type, array($etid)));
 
 }
 
@@ -2160,8 +2117,8 @@ function group_check_token($token, $seed) {
 }
 
 function group_set_breadcrumb($entity_type, $etid, $path = array()) {
-  // FIXME: Implement better logic after http://drupal.org/node/629484.
-  if ($label = group_entity_get_label($entity_type, $etid)) {
+  $entity = entity_load($entity_type, array($etid));
+  if ($label = entity_label($entity_type, $entity)) {
     drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$etid")), $path)) ;
   }
 }
@@ -2297,4 +2254,11 @@ function group_list_permissions($type) {
     );
   }
   return $perms;
+}
+
+// Temporary function until http://drupal.org/node/629484 is committed.
+if (!function_exists('entity_label')) {
+  function entity_label($entity_type, $entity) {
+    return 'label for ' . $entity_type;
+  }
 }

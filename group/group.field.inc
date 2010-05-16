@@ -108,6 +108,7 @@ function group_field_formatter_view($entity_type, $entity, $field, $instance, $l
   if ($field['field_name'] == 'group_audience' && !empty($items[0])) {
     foreach ($items as $delta => $item) {
       if ($group = group_get_group('group', $item['gid'])) {
+        $entity = group_load_entity_from_group($group->gid);
         $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
         $element[$delta] = array(
           '#type' => 'link',
