@@ -1439,10 +1439,9 @@ function group_label_multiple($gids = array()) {
     else {
       $entity = entity_get_info($group->entity_type);
       $param = array(
-        'gid' => $group->gid,
-        // TODO: Check_plain needed here?
-        'entity' => check_plain($entity->label),
-        'etid' => $group->etid,
+        '@gid' => $group->gid,
+        '@entity' => $entity['label'],
+        '@etid' => $group->etid,
       );
       $labels[$group->gid] = t('Group @gid - @entity ID @etid', $param);
     }
