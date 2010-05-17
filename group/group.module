@@ -517,7 +517,7 @@ function group_create_group($values = array()) {
   $values += array(
     'state' => GROUP_STATE_ACTIVE,
     'created' => time(),
-    'label' => entity_callback($values['entity_type'], $values['entity']),
+    'label' => entity_label($values['entity_type'], $values['entity']),
   );
 
   return entity_create('group', $values);
