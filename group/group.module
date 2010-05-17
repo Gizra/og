@@ -513,11 +513,13 @@ function group_get_group($entity_type, $etid, $create = FALSE, $states = array(G
  * Callback to create a new group.
  */
 function group_create_group($values = array()) {
+  $entity = entity_load($values['entity_type'], array($values['etid']));
+  $entity = current($entity);
   // Initialize values.
   $values += array(
     'state' => GROUP_STATE_ACTIVE,
     'created' => time(),
-    'label' => entity_label($values['entity_type'], $values['entity']),
+    'label' => entity_label($values['entity_type'], $entity),
   );
 
   return entity_create('group', $values);
