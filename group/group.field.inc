@@ -402,6 +402,14 @@ function group_field_crud_group($op, $entity_type, $entity) {
         $save = TRUE;
       }
 
+      // Check if the entity label has changed.
+      $label = entity_label($entity_type, $entity);
+
+      if ($group->label != $label) {
+        $group->label = $label;
+        $save = TRUE;
+      }
+
       if ($save) {
         group_save($group);
       }
