@@ -108,12 +108,14 @@ function group_field_formatter_view($entity_type, $entity, $field, $instance, $l
   if ($field['field_name'] == 'group_audience' && !empty($items[0])) {
     foreach ($items as $delta => $item) {
       if ($group = group_get_group('group', $item['gid'])) {
-        $entity = group_load_entity_from_group($group->gid);
-        $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
+        $label = group_label($group->gid);
+        $entity = entity_load($group->entity_type, array($group->etid));
+        $entity = current($entity);
+        $uri = entity_uri($entity_type, $entity);
         $element[$delta] = array(
           '#type' => 'link',
           '#title' => $label,
-          '#href' => "$group->entity_type/$group->etid",
+          '#href' => $uri['path'],
         );
       }
     }
@@ -204,7 +206,7 @@ function group_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   $audience = group_get_audience_options($opt_group);
   foreach (array('content groups', 'other groups') as $key) {
     if (!empty($audience[$key])) {
-      $audience[$key] = group_get_groups_label($audience[$key]);
+      $audience[$key] = group_label_multiple($audience[$key]);
     }
   }
 
