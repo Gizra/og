@@ -559,7 +559,7 @@ class EntityOg extends EntityDB {
  *   A boolean indicating that the internal cache should be reset.
  *
  * @return
- *   An array of test entity entitys, indexed by pid.
+ *   An array of group entities, indexed by group ID.
  */
 function group_load_multiple($gids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('group', $gids, $conditions, $reset);
