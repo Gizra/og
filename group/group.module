@@ -9,12 +9,6 @@
 // Load all Field module hooks for Group.
 require(drupal_get_path('module', 'group') . '/group.field.inc');
 
-// Dispositioning of content and memberships after deletion of a group node.
-define('GROUP_DELETE_NOTHING', 0);
-define('GROUP_DELETE_ORPHANS', 1);
-define('GROUP_DELETE_MOVE_NODES', 2);
-define('GROUP_DELETE_MOVE_NODES_MEMBERSHIPS', 3);
-
 /**
  * Define active group content states.
  */
