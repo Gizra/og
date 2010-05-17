@@ -75,7 +75,7 @@ function group_ui_confirm_subscribe($form, &$form_state, $group, $account) {
       '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
     );
   }
-  $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
+  $label = group_label($group->gid);
   return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $label)), "$group->entity_type/$group->etid", ' ', t('Join'), t('Cancel'));
 }
 
@@ -105,8 +105,7 @@ function group_ui_confirm_subscribe_submit($form, &$form_state) {
 function group_ui_unsubscribe($entity_type, $etid) {
   if ($group = group_get_group($entity_type, $etid)) {
     global $user;
-
-    $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
+    $label = group_label($group->gid);
     // Check the user isn't the manager of the group.
     $entity= entity_load($group->entity_type, array($group->etid));
     $entity = reset($entity);
@@ -158,7 +157,7 @@ function group_ui_confirm_unsubscribe($form, &$form_state, $group, $account) {
    $form['group'] = array('#type' => 'value', '#value' => $group);
    $form['account'] = array('#type' => 'value', '#value' => $account);
 
-   $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
+   $label = group_label($group->gid);
    return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), "$group->entity_type/$group->etid", ' ', t('Remove'), t('Cancel'));
 }
 

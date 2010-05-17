@@ -39,7 +39,7 @@ function group_ui_group_admin_overview($entity_type, $etid) {
 function group_ui_add_users($form, &$form_state, $entity_type, $etid) {
   group_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
   if ($group = group_get_group($entity_type, $etid)) {
-    $label = check_plain(group_entity_get_label($group->entity_type, $group->etid));
+    $label = group_label($group->gid);
 
     $form['group_user'] = array(
       '#type' => 'fieldset',

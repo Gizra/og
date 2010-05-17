@@ -151,7 +151,8 @@ function group_ui_menu() {
  * Menu callback; Return the title of a menu item based on the group title.
  */
 function group_ui_menu_title_callback($title, $entity_type, $etid) {
-  $label = check_plain(group_entity_get_label($entity_type, $etid));
+  $group = group_get_group($entity_type, $etid);
+  $label = group_label($group->gid);
   return str_replace('@group', $label, $title);
 }
 
