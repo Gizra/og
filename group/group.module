@@ -1424,10 +1424,10 @@ function group_get_audience_options($opt_group = FALSE, $account = NULL) {
  *   The group IDs.
  *
  * @return
- *   Array keyed with the group ID, and the entity label as the value,
- *   sanitized.
+ *   Array keyed with the group ID, and the entity label as the value, or else
+ *   the group ID with the entity type and entity ID, sanitized.
  */
-function group_get_groups_label($gids = array()) {
+function group_label_multiple($gids = array()) {
   $labels = array();
   $groups = group_load_multiple($gids);
   foreach ($groups as $group) {
@@ -1438,7 +1438,8 @@ function group_get_groups_label($gids = array()) {
       $entity = entity_get_info($group->entity_type);
       $param = array(
         'gid' => $group->gid,
-        'entity' => $entity->label,
+        // TODO: Check_plain needed here?
+        'entity' => check_plain($entity->label),
         'etid' => $group->etid,
       );
       $labels[$group->gid] = t('Group @gid - @entity ID @etid', $param);
@@ -1448,20 +1449,20 @@ function group_get_groups_label($gids = array()) {
 }
 
 /**
- * Return array of group entity keyed by their entity type.
+ * Wrapper function; Get the label of a single group.
  *
- * @param $gids
- *   Array of group ids to sort.
+ * @param $gid
+ *   The group ID.
+ *
+ * @return
+ *   The label of the group if found, or else the group ID with the entity type
+ *   and entity ID, sanitized.
  */
-function group_sort_groups_by_type($gids = array()) {
-  $return = array();
-  $groups = group_load_multiple($gids);
-  foreach ($groups as $group) {
-    $return[$group->entity_type][$group->gid] = $group;
-  }
-  return $return;
-
+function group_label($gid) {
+  $labels = group_label_multiple(array($gid));
+  return $labels[$gid];
 }
+
 
 /**
  * Determine the permissions for one or more roles.
