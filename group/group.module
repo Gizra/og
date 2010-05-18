@@ -78,6 +78,20 @@ function group_entity_info() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function group_menu() {
+  $items = array();
+  $items['group/autocomplete'] = array(
+    'title' => 'group autocomplete',
+    'page callback' => 'group_field_audience_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+  return $items;
+}
+
+/**
  * Implements hook_entity_property_info().
  */
 function group_entity_property_info() {
@@ -690,26 +704,38 @@ function group_get_group_ids($entity_type = 'group', $etids = array(), $states =
  *
  * @param $states
  *   Array of states the group must be in.
- * @param $count
- *   If TRUE the function will return the total numer of groups in the desired
- *   states. Defaults to FALSE.
+ * @param $options
+ *   - return query: If TRUE the return value will be the $query object.
+ *     Defaults to FALSE.
+ *   - count: If TRUE the function will return the total numer of groups in the desired
+ *     states. Defaults to FALSE.
  */
-function group_get_all_group($states = array(GROUP_STATE_ACTIVE), $count = FALSE) {
+function group_get_all_group($states = array(GROUP_STATE_ACTIVE), $options = array()) {
+  // Initialize values.
+  $options += array('count' => FALSE, 'return query' => FALSE);
   $return = array();
   $query = db_select('group_groups', 'group_groups');
+  $query->addMetaData('id', 'group_get_all_group');
   $query->fields('group_groups', array('gid'));
   if (!empty($states)) {
+    // Get only the groups with the correct state.
     $query->condition('state', $states, 'IN');
   }
-  if (!$count) {
+  if ($options['return query']) {
+    // Return the query itself.
+    $return = $query;
+  }
+  elseif ($options['count']) {
+    // Return the total number of groups found.
+    $return = $query->countQuery()->execute()->fetchField();
+  }
+  else {
+    // Return the group IDs.
     $result = $query->execute()->fetchAll();
 
     foreach ($result as $value) {
       $return[$value->gid] = $value->gid;
     }
-  }
-  else {
-    $return = $query->countQuery()->execute()->fetchField();
   }
 
   return $return;
