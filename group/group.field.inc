@@ -607,7 +607,7 @@ function __group_field_validate($entity_type, $entity, $field, $instance, $langc
   }
   // Prevent performance hog if there are no ids to check.
   if ($ids) {
-    $refs = group_field_audience_potential_groups($field, '', NULL, $ids);
+    $refs = group_field_audience_potential_groups('', NULL, $ids);
     foreach ($items as $delta => $item) {
       if (is_array($item)) {
         if (!empty($item['nid']) && !isset($refs[$item['nid']])) {
@@ -706,7 +706,7 @@ function group_field_audience_autocomplete_validate($element, &$form_state, $for
     else {
       // No explicit nid (the submitted value was not populated by autocomplete
       // selection). Get the nid of a referencable node from the entered title.
-      $reference = group_field_audience_potential_groups($field, $value, 'equals', NULL, 1);
+      $reference = group_field_audience_potential_groups($value, 'equals', NULL, 1);
       if ($reference) {
         // @todo The best thing would be to present the user with an
         // additional form, allowing the user to choose between valid
@@ -777,7 +777,7 @@ function group_field_audience_potential_groups($string = '', $match = 'contains'
     . ($string !== '' ? $string : implode('-', $ids))
     . ':' . $limit;
   if (!isset($results[$cid])) {
-    $references = group_field_audience_potential_groups_standard($field, $string, $match, $ids, $limit);
+    $references = group_field_audience_potential_groups_standard($string, $match, $ids, $limit);
 
     // Store the results.
     $results[$cid] = !empty($references) ? $references : array();
@@ -789,11 +789,10 @@ function group_field_audience_potential_groups($string = '', $match = 'contains'
 /**
  * Helper function for group_field_audience_potential_groups().
  */
-function group_field_audience_potential_groups_standard($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
+function group_field_audience_potential_groups_standard($string = '', $match = 'contains', $ids = array(), $limit = NULL) {
   $query = group_get_all_group(array(GROUP_STATE_ACTIVE), array('return query' => TRUE));
 
   $query->addField('group_groups', 'label');
-
   if ($string !== '') {
     $args = array();
     switch ($match) {
@@ -825,7 +824,7 @@ function group_field_audience_potential_groups_standard($field, $string = '', $m
     $query->range(0, $limit);
   }
 
-  $gids = $query->execute()->fetchAllKeyed('gid');
+  $gids = $query->execute()->fetchAllKeyed();
   $groups = group_load_multiple($gids);
   foreach ($groups as $group) {
     $label = group_label($gid);
@@ -845,7 +844,7 @@ function group_field_audience_autocomplete($field_name, $string = '') {
   $match = isset($field['widget']['autocomplete_match']) ? $field['widget']['autocomplete_match'] : 'contains';
   $matches = array();
 
-  $references = group_field_audience_potential_groups($field, $string, $match, array(), 10);
+  $references = group_field_audience_potential_groups($string, $match, array(), 10);
   foreach ($references as $id => $row) {
     // Add a class wrapper for a few required CSS overrides.
     $matches[$row['title'] . " [gid:$id]"] = '<div class="group-autocomplete">' . $row['rendered'] . '</div>';
