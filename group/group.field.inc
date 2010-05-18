@@ -254,16 +254,8 @@ function group_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     $opt_group = TRUE;
   }
 
-  // Get all the groups a user can see.
-  $audience = group_field_audience_options($opt_group);
-  foreach (array('content groups', 'other groups') as $key) {
-    if (!empty($audience[$key])) {
-      $audience[$key] = group_label_multiple($audience[$key]);
-    }
-  }
-
   // Determine which widget should be used.
-  if ($widget['type'] = 'group_audience') {
+  if ($widget['type'] == 'group_audience') {
     // Get the group count a user may see.
     $count = group_field_audience_count($opt_group);
     if ($count >= $instance['widget']['settings']['minimum_for_autocomplete']) {
@@ -288,6 +280,14 @@ function group_field_widget_form(&$form, &$form_state, $field, $instance, $langc
       break;
 
     case 'group_audience':
+      // Get all the groups a user can see.
+      $audience = group_field_audience_options($opt_group);
+      foreach (array('content groups', 'other groups') as $key) {
+        if (!empty($audience[$key])) {
+          $audience[$key] = group_label_multiple($audience[$key]);
+        }
+      }
+
       // The group options presented to the user.
       $options = array();
       if ($opt_group) {
@@ -562,11 +562,7 @@ function group_field_audience_options($opt_group = FALSE, $account = NULL) {
 function group_field_audience_count($opt_group = FALSE, $account = NULL) {
   $count = &drupal_static(__FUNCTION__, FALSE);
 
-  if ($count !== FALSE) {
-    if (!empty($return)) {
-      return $return;
-    }
-
+  if ($count === FALSE) {
     if (empty($account)) {
       global $user;
 
@@ -574,7 +570,7 @@ function group_field_audience_count($opt_group = FALSE, $account = NULL) {
     }
     // If opt_group is TRUE then get the count of all the groups that are
     // active, otherwise only the ones the user belongs to.
-    $count = $opt_groups ? count(group_get_all_group(array(GROUP_STATE_ACTIVE), array('count' => TRUE))) : count(group_get_entity_groups('user', $account));
+    $count = $opt_group ? group_get_all_group(array(GROUP_STATE_ACTIVE), array('count' => TRUE)) : count(group_get_entity_groups('user', $account));
   }
 
   return $count;

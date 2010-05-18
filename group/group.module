@@ -721,6 +721,7 @@ function group_get_all_group($states = array(GROUP_STATE_ACTIVE), $options = arr
     // Get only the groups with the correct state.
     $query->condition('state', $states, 'IN');
   }
+
   if ($options['return query']) {
     // Return the query itself.
     $return = $query;
