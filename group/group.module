@@ -690,18 +690,26 @@ function group_get_group_ids($entity_type = 'group', $etids = array(), $states =
  *
  * @param $states
  *   Array of states the group must be in.
+ * @param $count
+ *   If TRUE the function will return the total numer of groups in the desired
+ *   states. Defaults to FALSE.
  */
-function group_get_all_group_ids($states = array(GROUP_STATE_ACTIVE)) {
+function group_get_all_group_ids($states = array(GROUP_STATE_ACTIVE), $count = FALSE) {
   $return = array();
   $query = db_select('group_groups', 'group_groups');
   $query->fields('group_groups', array('gid'));
   if (!empty($states)) {
     $query->condition('state', $states, 'IN');
   }
-  $result = $query->execute()->fetchAll();
+  if (!$count) {
+    $result = $query->execute()->fetchAll();
 
-  foreach ($result as $value) {
-    $return[$value->gid] = $value->gid;
+    foreach ($result as $value) {
+      $return[$value->gid] = $value->gid;
+    }
+  }
+  else {
+    $return = $query->countQuery()->execute()->fetchField();
   }
 
   return $return;
