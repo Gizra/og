@@ -694,7 +694,7 @@ function group_get_group_ids($entity_type = 'group', $etids = array(), $states =
  *   If TRUE the function will return the total numer of groups in the desired
  *   states. Defaults to FALSE.
  */
-function group_get_all_group_ids($states = array(GROUP_STATE_ACTIVE), $count = FALSE) {
+function group_get_all_group($states = array(GROUP_STATE_ACTIVE), $count = FALSE) {
   $return = array();
   $query = db_select('group_groups', 'group_groups');
   $query->fields('group_groups', array('gid'));
@@ -1409,7 +1409,7 @@ function group_get_audience_options($opt_group = FALSE, $account = NULL) {
 
   if ($opt_group) {
     // Get all existing group.
-    $all_groups = group_get_all_group_ids();
+    $all_groups = group_get_all_group();
     $return['other groups'] = array_diff($all_groups, $content_groups);
   }
 
