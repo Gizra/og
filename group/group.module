@@ -617,7 +617,7 @@ function group_invalidate_cache($gids = array()) {
     'group_get_entity_groups',
     'group_context',
     'group_context_js',
-    'group_get_audience_options',
+    'group_field_audience_options',
   );
   foreach ($caches as $cache) {
     drupal_static_reset($cache);
@@ -1381,45 +1381,6 @@ function group_get_context_by_url() {
   }
   return $return;
 }
-
-/**
- * Get an array of allowed values for GROUP audience field.
- *
- * @return
- *   Array keyed by "content groups" and "other groups".
- */
-function group_get_audience_options($opt_group = FALSE, $account = NULL) {
-  $return = &drupal_static(__FUNCTION__, array());
-
-  if (!empty($return)) {
-    return $return;
-  }
-
-  if (empty($account)) {
-    global $user;
-
-    $account = $user;
-  }
-
-  //Initialize values
-  $return = array('content groups' => array(), 'other groups' => array());
-
-  $content_groups = group_get_entity_groups('user', $account);
-  $return['content groups'] = $content_groups;
-
-  if ($opt_group) {
-    // Get all existing group.
-    $all_groups = group_get_all_group();
-    $return['other groups'] = array_diff($all_groups, $content_groups);
-  }
-
-  // Let other modules change the list.
-  // TODO: Is it possible to do it in a more general way?
-  drupal_alter('group_audience_options', $return, $opt_group, $account);
-
-  return $return;
-}
-
 
 /**
  * Get labels out of a list of group IDs.

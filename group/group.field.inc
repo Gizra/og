@@ -337,9 +337,6 @@ function group_field_attach_delete($entity_type, $entity) {
   group_field_crud_group('delete', $entity_type, $entity);
 }
 
-/*******************************************************************************
- * Helper functions
- ******************************************************************************/
 /**
  * Insert or update a field record.
  *
@@ -435,4 +432,70 @@ function group_field_crud_group($op, $entity_type, $entity) {
       }
     }
   }
+}
+
+
+/**
+ * Get an array of allowed values for GROUP audience field.
+ *
+ * @return
+ *   Array keyed by "content groups" and "other groups".
+ */
+function group_field_audience_options($opt_group = FALSE, $account = NULL) {
+  $return = &drupal_static(__FUNCTION__, array());
+
+  if (!empty($return)) {
+    return $return;
+  }
+
+  if (empty($account)) {
+    global $user;
+
+    $account = $user;
+  }
+
+  //Initialize values
+  $return = array('content groups' => array(), 'other groups' => array());
+
+  $content_groups = group_get_entity_groups('user', $account);
+  $return['content groups'] = $content_groups;
+
+  if ($opt_group) {
+    // Get all existing group.
+    $all_groups = group_get_all_group();
+    $return['other groups'] = array_diff($all_groups, $content_groups);
+  }
+
+  // Let other modules change the list.
+  // TODO: Is it possible to do it in a more general way?
+  drupal_alter('group_audience_options', $return, $opt_group, $account);
+
+  return $return;
+}
+
+/**
+ * Return the number of groups a user may see in the group audience field.
+ */
+function group_field_audience_count($opt_group = FALSE, $account = NULL) {
+  $count = &drupal_static(__FUNCTION__, FALSE);
+
+  if ($count !== FALSE) {
+    if (!empty($return)) {
+      return $return;
+    }
+
+    if (empty($account)) {
+      global $user;
+
+      $account = $user;
+    }
+    // If opt_group is TRUE then get the count of all the groups that are
+    // active, otherwise only the ones the user belongs to.
+    $count = $opt_groups ? count(group_get_all_group(array(GROUP_STATE_ACTIVE), TRUE)) : count(group_get_entity_groups('user', $account));
+  }
+
+  return $count;
+}
+
+
 }
