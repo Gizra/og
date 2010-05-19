@@ -777,10 +777,10 @@ function group_field_audience_potential_groups($string = '', $match = 'contains'
     . ($string !== '' ? $string : implode('-', $ids))
     . ':' . $limit;
   if (!isset($results[$cid])) {
-    $references = group_field_audience_potential_groups_standard($string, $match, $ids, $limit);
+    $groups = group_field_audience_potential_groups_standard($string, $match, $ids, $limit);
 
     // Store the results.
-    $results[$cid] = !empty($references) ? $references : array();
+    $results[$cid] = !empty($groups) ? $groups : array();
   }
 
   return $results[$cid];
@@ -825,12 +825,10 @@ function group_field_audience_potential_groups_standard($string = '', $match = '
   }
 
   $gids = $query->execute()->fetchAllKeyed();
-  $groups = group_load_multiple($gids);
+  $groups = group_load_multiple(array_keys($gids));
   foreach ($groups as $group) {
-    $label = group_label($gid);
-    $return[$group->gid] = array(
-      'title'    => $label,
-    );
+    $label = group_label($group->gid);
+    $return[$group->gid] = $label;
   }
   return $return;
 }
@@ -844,10 +842,10 @@ function group_field_audience_autocomplete($field_name, $string = '') {
   $match = isset($field['widget']['autocomplete_match']) ? $field['widget']['autocomplete_match'] : 'contains';
   $matches = array();
 
-  $references = group_field_audience_potential_groups($string, $match, array(), 10);
-  foreach ($references as $id => $row) {
+  $groups = group_field_audience_potential_groups($string, $match, array(), 10);
+  foreach ($groups as $gid => $label) {
     // Add a class wrapper for a few required CSS overrides.
-    $matches[$row['title'] . " [gid:$id]"] = '<div class="group-autocomplete">' . $row['rendered'] . '</div>';
+    $matches[$label . " [gid:$gid]"] = '<div class="group-autocomplete">' . $label . '</div>';
   }
   drupal_json_output($matches);
 }
