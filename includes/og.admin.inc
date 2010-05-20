@@ -42,8 +42,8 @@ function og_admin_settings() {
   $options = array(
     t("New groups don't appear in the groups directory. Administrators control the directory exclusively."),
     t('New groups always appear in the groups directory.'),
-    t('Group creator chooses whether her group appears in the directory. Defaults to <em>in directory</em>.'),
-    t('Group creator chooses whether her group appears in the directory. Defaults to <em>not in directory</em>.'),
+    t('Group creator chooses whether the new group appears in the directory. Defaults to <em>in directory</em>.'),
+    t('Group creator chooses whether the new group appears in the directory. Defaults to <em>not in directory</em>.'),
   );
   $form['og_settings']['group_details']['og_visibility_directory'] = array(
     '#type' => 'radios',
@@ -57,8 +57,8 @@ function og_admin_settings() {
   $options = array(
     t("New groups don't appear on the registration form. Administrators control the form exclusively."),
     t('New groups always appear on the registration form.'),
-    t('Group creator chooses whether her group appears on the registration form. Defaults to <em>on form</em>.'),
-    t('Group creator chooses whether her group appears on the registration form. Defaults to <em>not on form</em>.'),
+    t('Group creator chooses whether the new group appears on the registration form. Defaults to <em>on form</em>.'),
+    t('Group creator chooses whether the new group appears on the registration form. Defaults to <em>not on form</em>.'),
   );
   $form['og_settings']['group_details']['og_visibility_registration'] = array(
     '#type' => 'radios',

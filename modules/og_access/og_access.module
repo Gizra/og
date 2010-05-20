@@ -94,8 +94,8 @@ function og_access_settings() {
   $options = array(
     t('New group home pages and default audience are always public.'),
     t('New group home pages and default audience are always private.'),
-    t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to <em>private</em>.'),
-    t('Group administrator chooses whether her group homepage and audience are private or not. Defaults to <em>public</em>.'),
+    t('Group administrator chooses whether the new group homepage and audience are private or not. Defaults to <em>private</em>.'),
+    t('Group administrator chooses whether the new group homepage and audience are private or not. Defaults to <em>public</em>.'),
   );
   $form['og_private_groups'] = array(
     '#type' => 'radios',
