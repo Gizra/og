@@ -1398,9 +1398,6 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
                           ),
           );
         }
-
-        $node->body .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
-        $node->teaser .= '<div class="og_rss_groups">'. theme('links', $append). '</div>';
         return $ret;
       }
       break;
