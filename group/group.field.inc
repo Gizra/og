@@ -236,24 +236,6 @@ function group_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   $widget = $instance['widget'];
 
 
-  $excludes = array();
-  // If it's an existing group, then exclude itself, as in some cases a group
-  // can act also as a group content, but we want to prevent associating the
-  // group to itself.
-  if (!empty($form['#' . $element['#entity_type']])) {
-    list($id) = entity_extract_ids($element['#entity_type'], $form['#' . $element['#entity_type']]);
-    if (($group = group_get_group($element['#entity_type'], $id))) {
-      $excludes[$group->gid] = $group->gid;
-    }
-  }
-
-  // Determine if a user may see other groups as-well.
-  $opt_group = FALSE;
-
-  if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer group'))) {
-    $opt_group = TRUE;
-  }
-
   // TODO: Re-add after http://drupal.org/node/806830
   // Determine which widget should be used.
 /*  if ($widget['type'] == 'group_audience') {
@@ -281,6 +263,24 @@ function group_field_widget_form(&$form, &$form_state, $field, $instance, $langc
       break;
 
     case 'group_audience':
+      $excludes = array();
+      // If it's an existing group, then exclude itself, as in some cases a group
+      // can act also as a group content, but we want to prevent associating the
+      // group to itself.
+      if (!empty($form['#' . $element['#entity_type']])) {
+        list($id) = entity_extract_ids($element['#entity_type'], $form['#' . $element['#entity_type']]);
+        if (($group = group_get_group($element['#entity_type'], $id))) {
+          $excludes[$group->gid] = $group->gid;
+        }
+      }
+
+      // Determine if a user may see other groups as-well.
+      $opt_group = FALSE;
+
+      if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer group'))) {
+        $opt_group = TRUE;
+      }
+
       // Get all the groups a user can see.
       $audience = group_field_audience_options($opt_group);
       foreach (array('content groups', 'other groups') as $key) {
