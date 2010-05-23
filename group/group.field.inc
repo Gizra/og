@@ -625,45 +625,6 @@ function __group_field_validate($entity_type, $entity, $field, $instance, $langc
 
 
 /**
- * Helper function for widgets and formatters.
- *
- * Store node titles collected in the curent request.
- */
-function _node_reference_get_node_titles($nids, $known_titles = array()) {
-  $titles = &drupal_static(__FUNCTION__, array());
-
-  // Save titles we receive.
-  $titles += $known_titles;
-
-  // Collect nids to retrieve from database.
-  $nids_query = array();
-  foreach ($nids as $nid) {
-    if (!isset($titles[$nid])) {
-      $nids_query[] = $nid;
-    }
-  }
-  if ($nids_query) {
-    $query = db_select('node', 'n')
-      ->fields('n', array('nid', 'title'))
-      ->condition('n.nid', $nids)
-      // @todo Node access should be checked in hook_field_sanitize() or
-      // hook_field_prepare_view().
-      ->addTag('node_access');
-    $titles += $query->execute()->fetchAllKeyed();
-  }
-
-  // Build the results array.
-  $return = array();
-  foreach ($nids as $nid) {
-    $return[$nid] = isset($titles[$nid]) ? $titles[$nid] : '';
-  }
-
-  return $return;
-}
-
-
-
-/**
  * Value callback for a node_reference autocomplete element.
  *
  * Replace the node nid with a node title.
@@ -681,7 +642,7 @@ function group_field_audience_autocomplete_value($element, $input = FALSE, $form
 }
 
 /**
- * Validation callback for a node_reference autocomplete element.
+ * TODO: Validation callback for a node_reference autocomplete element.
  */
 function group_field_audience_autocomplete_validate($element, &$form_state, $form) {
   $field = $form_state['field'][$element['#field_name']][$element['#language']]['field'];
@@ -727,14 +688,14 @@ function group_field_audience_autocomplete_validate($element, &$form_state, $for
 }
 
 /**
- * Implements hook_field_widget_error().
+ * TODO: Implements hook_field_widget_error().
  */
 function __group_field_widget_error($element, $error, $form, &$form_state) {
   form_error($element['nid'], $error['message']);
 }
 
 /**
- * Fetch an array of all candidate referenced nodes.
+ * Fetch an array of all candidate groups.
  *
  * This info is used in various places (allowed values, autocomplete
  * results, input validation...). Some of them only need the nids,
@@ -760,12 +721,8 @@ function __group_field_widget_error($element, $error, $form, &$form_state) {
  * @return
  *   An array of valid nodes in the form:
  *   array(
- *     nid => array(
- *       'title' => The node title,
- *       'rendered' => The text to display in widgets (can be HTML)
- *     ),
- *     ...
- *   )
+ *     gid => 'rendered' -- The text to display in widgets (can be HTML)
+ *   );
  *  @todo Check whether we still need the 'rendered' value (hook_options_list()
  *  does not need it anymore). Should probably be clearer after the 'Views'
  *  mode is ported.
