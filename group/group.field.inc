@@ -231,9 +231,9 @@ function group_field_widget_settings_form($field, $instance) {
  * that the $element['#type'] is a result of the options passed to
  * $element['#options'].
  */
-function group_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+function group_field_widget_form(&$form, &$form_state, $field, &$instance, $langcode, $items, $delta, $base) {
   $element = $base;
-  $widget = $instance['widget'];
+  $widget = &$instance['widget'];
 
 
   $excludes = array();
