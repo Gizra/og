@@ -231,9 +231,9 @@ function group_field_widget_settings_form($field, $instance) {
  * that the $element['#type'] is a result of the options passed to
  * $element['#options'].
  */
-function group_field_widget_form(&$form, &$form_state, $field, &$instance, $langcode, $items, $delta, $base) {
+function group_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
   $element = $base;
-  $widget = &$instance['widget'];
+  $widget = $instance['widget'];
 
 
   $excludes = array();
@@ -254,14 +254,15 @@ function group_field_widget_form(&$form, &$form_state, $field, &$instance, $lang
     $opt_group = TRUE;
   }
 
+  // TODO: Re-add after http://drupal.org/node/806830
   // Determine which widget should be used.
-  if ($widget['type'] == 'group_audience') {
+/*  if ($widget['type'] == 'group_audience') {
     // Get the group count a user may see.
     $count = group_field_audience_count($opt_group);
     if ($count >= $instance['widget']['settings']['minimum_for_autocomplete']) {
       $widget['type'] = 'group_audience_autocomplete';
     }
-  }
+  }*/
 
   switch ($widget['type']) {
     case 'group_audience_autocomplete':
