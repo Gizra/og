@@ -190,14 +190,15 @@ function group_field_widget_settings_form($field, $instance) {
       '#element_validate' => array('_element_validate_integer_positive'),
     );
 
-    $form['minimum_for_autocomplete'] = array(
+    // TODO: Re-add after http://drupal.org/node/806830
+/*    $form['minimum_for_autocomplete'] = array(
       '#type' => 'textfield',
       '#title' => t('Minimum for autocomplete'),
       '#description' => t('The minimum number of groups before showing the group as autocomplete.'),
       '#default_value' => $settings['minimum_for_autocomplete'],
       '#required' => TRUE,
       '#element_validate' => array('_element_validate_integer_positive'),
-    );
+    );*/
   }
 
   $form['autocomplete_match'] = array(
