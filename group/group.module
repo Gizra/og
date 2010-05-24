@@ -1471,7 +1471,7 @@ function group_user_role_permissions($roles = array()) {
   $role_permissions = $fetch = array();
 
   if ($roles) {
-    foreach ($roles as $rid => $name) {
+    foreach ($roles as $rid) {
       if (isset($cache[$rid])) {
         $role_permissions[$rid] = $cache[$rid];
       }
@@ -1515,6 +1515,7 @@ function group_user_role_permissions($roles = array()) {
  *   The group might be set to "Default access" but infact there are inactive
  *   group roles. Thus, we are forcing the function to return the overriden
  *   roles. @see group_delete_user_roles_by_group().
+ *
  * @return
  *   An associative array with the role id as the key and the role name as
  *   value. The anonymous and authenticated deault roles are on the top of the

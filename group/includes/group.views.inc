@@ -138,7 +138,7 @@ function group_views_data() {
     // group ID
     'real field' => 'group_audience_gid',
     'field' => array(
-      'handler' => 'group_handler_filter_group_permissions',
+      'handler' => 'group_handler_field_group_permissions',
     ),
   );
 
@@ -161,14 +161,14 @@ function group_views_handlers() {
     'group_handler_field_user_roles' => array(
       'parent' => 'views_handler_field_prerender_list',
     ),
+    'group_handler_field_group_permissions' => array(
+      'parent' => 'views_handler_field_prerender_list',
+    ),
     // Filter
     'group_handler_filter_group_state' => array(
       'parent' => 'views_handler_filter_in_operator',
     ),
     'group_handler_filter_group_audience_state' => array(
-      'parent' => 'views_handler_filter_in_operator',
-    ),
-    'group_handler_filter_group_permissions' => array(
       'parent' => 'views_handler_filter_in_operator',
     ),
     // Relationship
