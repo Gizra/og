@@ -130,6 +130,18 @@ function group_views_data() {
     ),
   );
 
+  $data['field_data_group_audience']['group_permissions'] = array(
+    'group' => t('Group'),
+    'title' => t('Group permissions'),
+    'help' => t('Filter by group permissions.'),
+    // This is a dummy field, so point it to a real field that we need - the
+    // group ID
+    'real field' => 'group_audience_gid',
+    'field' => array(
+      'handler' => 'group_handler_filter_group_permissions',
+    ),
+  );
+
 
   return $data;
 }
@@ -154,6 +166,9 @@ function group_views_handlers() {
       'parent' => 'views_handler_filter_in_operator',
     ),
     'group_handler_filter_group_audience_state' => array(
+      'parent' => 'views_handler_filter_in_operator',
+    ),
+    'group_handler_filter_group_permissions' => array(
       'parent' => 'views_handler_filter_in_operator',
     ),
     // Relationship

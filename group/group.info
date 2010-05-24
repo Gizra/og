@@ -24,6 +24,7 @@ files[] = includes/views/group_handler_field_user_roles.inc
 ; Views filters
 files[] = includes/views/group_handler_filter_group_state.inc
 files[] = includes/views/group_handler_filter_group_audience_state.inc
+files[] = includes/views/group_handler_filter_group_permissions.inc
 
 ; Views realtionships
 files[] = includes/views/group_handler_relationship.inc
