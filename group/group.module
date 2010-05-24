@@ -240,10 +240,10 @@ function group_group_default_permissions() {
       $info = node_type_get_type($type);
       $type = check_plain($info->type);
 
-      $perms["update own $type content"] = array(GROUP_AUTHENTICATED_ROLE);
+      $perms["edit own $type content"] = array(GROUP_AUTHENTICATED_ROLE);
       $perms["delete own $type content"] = array(GROUP_AUTHENTICATED_ROLE);
 
-      $perms["update any $type content"] = array(GROUP_ADMINISTRATOR_ROLE);
+      $perms["edit any $type content"] = array(GROUP_ADMINISTRATOR_ROLE);
       $perms["delete any $type content"] = array(GROUP_ADMINISTRATOR_ROLE);
     }
   }
@@ -1987,8 +1987,8 @@ function group_user_role_change_permissions($rid, array $permissions = array()) 
  */
 function group_user_role_grant_permissions($rid, array $permissions = array()) {
   $modules = array();
-  foreach (group_get_permissions() as $key => $value) {
-    $modules[$key] = $value['module'];
+  foreach (group_get_permissions() as $name => $value) {
+    $modules[$name] = $value['module'];
   }
 	// Grant new permissions for the role.
   foreach ($permissions as $name) {

@@ -402,7 +402,7 @@ function group_ui_user_admin_permissions($form, $form_state, $entity_type = NULL
     $role_names = array($rid => $role_names[$rid]);
   }
   // Fetch permissions for all roles or the one selected role.
-  $role_permissions = group_user_role_permissions($role_names);
+  $role_permissions = group_user_role_permissions(array_keys($role_names));
 
   // Store $role_names for use when saving the data.
   $form['role_names'] = array(
