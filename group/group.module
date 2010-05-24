@@ -1893,23 +1893,6 @@ function group_user_roles_override($gid) {
 }
 
 /**
- * Determine the modules that permissions belong to.
- *
- * @return
- *   An associative array in the format $permission => $module.
- */
-function group_user_permission_get_modules() {
-  $permissions = array();
-  foreach (module_implements('group_permission') as $module) {
-    $perms = module_invoke($module, 'group_permission');
-    foreach ($perms as $key => $value) {
-      $permissions[$key] = $module;
-    }
-  }
-  return $permissions;
-}
-
-/**
  * Grant a group role to a user.
  *
  * @param $uid
@@ -2002,7 +1985,10 @@ function group_user_role_change_permissions($rid, array $permissions = array()) 
  * @see user_role_revoke_permissions()
  */
 function group_user_role_grant_permissions($rid, array $permissions = array()) {
-  $modules = group_user_permission_get_modules();
+  $modules = array();
+  foreach (group_get_permissions() as $key => $value) {
+    $modules[$key] = $value['module'];
+  }
 	// Grant new permissions for the role.
   foreach ($permissions as $name) {
     db_merge('group_role_permission')
@@ -2045,6 +2031,10 @@ function group_user_role_revoke_permissions($rid, array $permissions = array()) 
 
 /**
  * Get all permissions defined for Group.
+ *
+ * @return
+ *  Array keyed with the permissions name and the value of the permissions.
+ *  TODO: Write the values.
  */
 function group_get_permissions() {
   $perms = &drupal_static(__FUNCTION__, array());
@@ -2059,8 +2049,11 @@ function group_get_permissions() {
         // This means the permissions can apply to anonymous and authenticaed
         // members as-well.
         $permissions[$key] += array('roles' => array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE));
+
+        // Add the module information.
+        $permissions[$key]['module'] = $module;
       }
-      $perms[$module] = $permissions;
+      $perms = array_merge($perms, $permissions);
     }
   }
   return $perms;

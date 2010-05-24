@@ -414,22 +414,24 @@ function group_ui_user_admin_permissions($form, $form_state, $entity_type = NULL
   $options = array();
   $module_info = system_get_info('module');
 
-  foreach (group_get_permissions() as $module => $permissions) {
-    $form['permission'][] = array('#markup' => $module_info[$module]['name'], '#id' => $module);
-    foreach ($permissions as $perm => $perm_item) {
-      // Initialize values.
-      $perm_item += array('description' => '');
-      $options[$perm] = '';
-      $form['permission'][$perm] = array(
-        '#type' => 'item',
-        '#markup' => $perm_item['title'],
-        '#description' => $perm_item['description'],
-      );
-      foreach ($role_names as $rid => $name) {
-        // Builds arrays for checked boxes for each role
-        if (isset($role_permissions[$rid][$perm])) {
-          $status[$rid][] = $perm;
-        }
+  $module = '';
+  foreach (group_get_permissions() as $perm => $perm_item) {
+    if ($perm_item['module'] != $module) {
+      $module =$perm_item['module'];
+      $form['permission'][] = array('#markup' => $module_info[$module]['name'], '#id' => $module);
+    }
+    // Initialize values.
+    $perm_item += array('description' => '');
+    $options[$perm] = '';
+    $form['permission'][$perm] = array(
+      '#type' => 'item',
+      '#markup' => $perm_item['title'],
+      '#description' => $perm_item['description'],
+    );
+    foreach ($role_names as $rid => $name) {
+      // Builds arrays for checked boxes for each role
+      if (isset($role_permissions[$rid][$perm])) {
+        $status[$rid][] = $perm;
       }
     }
   }
@@ -478,17 +480,15 @@ function group_ui_user_admin_permissions_after_build($element) {
   // Remove the anonymous member from the authenticated roles.
   $anon_rid = array_shift($auth_rids);
 
-  foreach (group_get_permissions() as $module_perms) {
-    foreach ($module_perms as $key => $perm) {
-      $perm['roles'] = drupal_map_assoc($perm['roles']);
+  foreach (group_get_permissions() as $key => $perm) {
+    $perm['roles'] = drupal_map_assoc($perm['roles']);
 
-      if ($disable || (empty($perm['roles']) || empty($perm['roles'][GROUP_ANONYMOUS_ROLE]))) {
-        $element['checkboxes'][$anon_rid][$key]['#attributes']['disabled'] = TRUE;
-      }
-      if ($disable || (empty($perm['roles']) || empty($perm['roles'][GROUP_AUTHENTICATED_ROLE]))) {
-        foreach ($auth_rids as $auth_rid) {
-          $element['checkboxes'][$auth_rid][$key]['#attributes']['disabled'] = TRUE;
-        }
+    if ($disable || (empty($perm['roles']) || empty($perm['roles'][GROUP_ANONYMOUS_ROLE]))) {
+      $element['checkboxes'][$anon_rid][$key]['#attributes']['disabled'] = TRUE;
+    }
+    if ($disable || (empty($perm['roles']) || empty($perm['roles'][GROUP_AUTHENTICATED_ROLE]))) {
+      foreach ($auth_rids as $auth_rid) {
+        $element['checkboxes'][$auth_rid][$key]['#attributes']['disabled'] = TRUE;
       }
     }
   }
