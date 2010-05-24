@@ -35,8 +35,9 @@ class group_handler_field_group_permissions extends views_handler_field_prerende
         $perms = group_user_role_permissions($all_rids);
         foreach ($list as $value) {
           foreach ($value['rids'] as $rid) {
-            foreach ($perms[$rid] as $perm => $perm_value);
-            $this->items[$value['gid']][$value['uid']][$perm]['perm'] = $all_perms[$perm]['title'];
+            foreach ($perms[$rid] as $perm => $perm_value) {
+              $this->items[$value['gid']][$value['uid']][$perm]['perm'] = $all_perms[$perm]['title'];
+            }
           }
         }
       }
