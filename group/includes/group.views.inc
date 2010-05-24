@@ -151,6 +151,10 @@ function group_views_data() {
  */
 function group_views_handlers() {
   return array(
+    // Base class field.
+    'group_handler_field_prerender_list' => array(
+     'parent' => 'views_handler_field_prerender_list',
+    ),
     // Field
     'group_handler_field_group_member_count' => array(
       'parent' => 'views_handler_field_numeric',
@@ -159,10 +163,10 @@ function group_views_handlers() {
       'parent' => 'views_handler_field',
     ),
     'group_handler_field_user_roles' => array(
-      'parent' => 'views_handler_field_prerender_list',
+      'parent' => 'group_handler_field_prerender_list',
     ),
     'group_handler_field_group_permissions' => array(
-      'parent' => 'views_handler_field_prerender_list',
+      'parent' => 'group_handler_field_prerender_list',
     ),
     // Filter
     'group_handler_filter_group_state' => array(
