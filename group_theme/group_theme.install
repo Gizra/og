@@ -3,17 +3,5 @@
 
 /**
  * @file
- * Install, update, and uninstall functions for the Group views module.
+ * Install, update, and uninstall functions for the Group theme module.
  */
-
-/**
- * Implement hook_uninstall().
- */
-function group_views_uninstall() {
-  $vars = array(
-    'group_views_global_view',
-  );
-  foreach ($vars as $var) {
-    variable_del($var);
-  }
-}
