@@ -125,7 +125,7 @@ function group_access_node_access_records($node) {
 }
 
 /**
- * Implement group_fields_info().
+ * Implement hook_group_fields_info().
  */
 function group_access_group_fields_info() {
   $allowed_values = array(

@@ -12,18 +12,6 @@
 define('GROUP_THEME_FIELD', 'group_theme');
 
 /**
- * Implement hook_field_formatter_info().
- */
-function group_theme_field_formatter_info() {
-  return array(
-    'group_theme_default' => array(
-      'label' => t('Group theme'),
-      'field types' => array('list_text'),
-    ),
-  );
-}
-
-/**
  * Implement group_fields_info().
  */
 function group_theme_group_fields_info() {
@@ -37,16 +25,16 @@ function group_theme_group_fields_info() {
       'settings' => array('allowed_values' => '', 'allowed_values_function' => 'group_theme_field_allowed_values'),
     ),
     'instance' => array(
-      'label' => t('Groups views'),
+      'label' => t('Groups theme'),
       'widget_type' => 'options_select',
       'display' => array(
         'full' => array(
           'label' => 'above',
-          'type' => 'group_theme_default',
+          'type' => 'list_default',
         ),
         'teaser' => array(
           'label' => 'above',
-          'type' => 'group_theme_default',
+          'type' => 'list_default',
         ),
       ),
     ),
