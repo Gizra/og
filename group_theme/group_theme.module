@@ -27,6 +27,9 @@ function group_theme_group_fields_info() {
     'instance' => array(
       'label' => t('Groups theme'),
       'widget_type' => 'options_select',
+      'required' => TRUE,
+      // Use default theme as default value.
+      'default_value' => array(0 => array('value' => '__default')),
       'display' => array(
         'full' => array(
           'label' => 'above',
@@ -68,6 +71,7 @@ function group_theme_custom_theme() {
 function group_theme_field_allowed_values() {
   $return = array('__default' => t('Use site-wide theme definition'));
 
+  module_load_include('inc', 'system', 'system.admin');
   $themes = list_themes();
   uasort($themes, 'system_sort_modules_by_info_name');
 
