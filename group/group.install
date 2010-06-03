@@ -244,24 +244,24 @@ if (module_exists('group')) {
         $query = db_select('node_revision', 'nr');
         $query->innerJoin('node', 'n', 'n.vid = nr.vid');
         $query->innerJoin('og', 'og', 'n.nid = og.nid');
-        $sandbox['group_total'] = $query->countQuery()->execute()->fetchField();
+        $sandbox['group total'] = $query->countQuery()->execute()->fetchField();
 
         $query = db_select('node_revision', 'nr');
         $query->innerJoin('node', 'n', 'n.vid = nr.vid');
         $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
-        $sandbox['group_content_total'] = $query
+        $sandbox['group content total'] = $query
           ->countQuery()
           ->execute()
           ->fetchField();
 
         $query = db_select('og_uid', 'ogu');
-        $sandbox['group_user_total'] = $query
+        $sandbox['group user total'] = $query
           ->countQuery()
           ->execute()
           ->fetchField();
 
           // Sum of all enteties and revisions to be converted.
-        $sandbox['total'] = $sandbox['group_total'] + $sandbox['group_content_total'] + $sandbox['group_user_total'];
+        $sandbox['total'] = $sandbox['group total'] + $sandbox['group content total'] + $sandbox['group user total'];
       }
       else {
         if ($sandbox['total']) {
@@ -278,13 +278,11 @@ if (module_exists('group')) {
             array_shift($sandbox['group upgrade']);
           }
 
-          $sandbox['#finished'] = min(0.99, $sandbox['count'] / ($sandbox['group'] + $sandbox['group content']));
+          $sandbox['#finished'] = min(0.99, $sandbox['count'] / $sandbox['total']);
         }
       }
       if (empty($sandbox['group upgrade'])) {
-        // All nodes are processed.
-
-        // We're done.
+        // All nodes and users are processed.
         $sandbox['#finished'] = 1;
         return t("!number groups and group content converted to use new Group fields.", array('!number' => $sandbox['total']));
       }
