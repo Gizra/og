@@ -60,6 +60,48 @@ function group_language_init() {
     // (i.e. use the default site language).
     if (!empty($entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value']) && $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'] != '__default') {
 
+      // Get a list of enabled languages.
+      $languages = locale_language_list();
+
+      // Set to true if the url holds a language designator.
+      $url_set = FALSE;
+
+      // Check whether the URL holds a language domain/ prefix.
+      switch (variable_get('language_negotiation', LANGUAGE_NEGOTIATION_NONE)) {
+        case LANGUAGE_NEGOTIATION_DOMAIN:
+          foreach ($languages as $language) {
+            $parts = parse_url($language->domain);
+            if (!empty($parts['host']) && ($_SERVER['HTTP_HOST'] == $parts['host'])) {
+              $url_set = TRUE;
+              break;
+            }
+          }
+          break;
+
+        case LANGUAGE_NEGOTIATION_PATH:
+          // Uses $_REQUEST as language_initialize() removes prefix from $_GET.
+          if (!empty($_REQUEST['q'])) {
+            $refix = explode('/', $_REQUEST['q']);
+            $prefix = array_shift($args);
+          }
+
+          // Search prefix within enabled languages.
+          foreach ($languages as $language) {
+            if (!empty($language->prefix) && $language->prefix == $prefix) {
+              $url_set = TRUE;
+              break;
+            }
+          }
+          break;
+      }
+
+      if (!$url_set) {
+        global $user, $language;
+
+        $user_language = user_preferred_language($user, $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value']);
+        // Set the global language.
+        $language = $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'];
+      }
     }
   }
 }
