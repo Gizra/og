@@ -6,84 +6,86 @@
  * Install, update, and uninstall functions for the Group theme module.
  */
 
+if (module_exists('group_theme')) {
+  /**
+   * Upgrade from Organic groups' theme to Group theme.
+   */
+  function group_theme_update_7000(&$sandbox) {
+    if (db_table_exists('og')) {
+      $sandbox['#finished'] = 0;
 
-/**
- * Upgrade from Organic groups' theme to Group theme.
- */
-function group_theme_update_7000(&$sandbox) {
-  if (db_table_exists('og')) {
-    $sandbox['#finished'] = 0;
+      if (!isset($sandbox['total'])) {
+        // Initialize state for future calls.
+        $sandbox['last'] = 0;
+        $sandbox['count'] = 0;
 
-    if (!isset($sandbox['total'])) {
-      // Initialize state for future calls.
-      $sandbox['last'] = 0;
-      $sandbox['count'] = 0;
+        // Get the group types. Group update has ran already, so we can use
+        // Group's API.
+        // @see group_theme_update_dependencies()
+        $groups = FALSE;
+        foreach (node_type_get_types() as $type) {
+          if (group_is_group_type('node', $type->type)) {
+            // Add group theme field to the content type.
+            group_create_field(GROUP_THEME_FIELD, 'node', $type->type);
+            $groups = TRUE;
 
-      // Get the group types. Group update has ran already, so we can use
-      // Group's API.
-      // @see group_theme_update_dependencies()
-      $groups = FALSE;
-      foreach (node_type_get_types() as $type) {
-        if (group_is_group_type('node', $type->type)) {
-          // Add group theme field to the content type.
-          group_create_field(GROUP_THEME_FIELD, 'node', $type->type);
-          $groups = TRUE;
-
-        }
-      }
-
-      if ($groups) {
-        $query = db_select('node_revision', 'nr');
-        $query->innerJoin('node', 'n', 'n.vid = nr.vid');
-        $query->innerJoin('og', 'og', 'n.nid = og.nid');
-
-        $sandbox['total'] = $query
-          ->isNotNull('og.og_theme')
-          ->countQuery()
-          ->execute()
-          ->fetchField();
-      }
-    }
-    else {
-      $found = FALSE;
-      if ($sandbox['total']) {
-        // Operate on every revision of every node, in batches.
-        $batch_size = 200;
-        $query = db_select('node_revision', 'nr');
-        $query->innerJoin('node', 'n', 'n.vid = nr.vid');
-        $query->innerJoin('og', 'og', 'n.nid = og.nid');
-        $query
-          ->fields('nr', array('nid', 'vid'))
-          ->fields('n', array('type', 'created'))
-          ->condition('nr.vid', $sandbox['last'], '>')
-          ->isNotNull('og.og_theme')
-          ->orderBy('nr.vid', 'ASC')
-          ->range(0, $batch_size);
-        $revisions = $query->execute();
-
-        foreach ($revisions as $revision) {
-          // Create a dummy node object.
-          $node = (object) array(
-            'nid' => $revision->nid,
-            'vid' => $revision->vid,
-            'type' => $revision->type,
-          );
-
-          // Set field values.
-          $node->{GROUP_THEME_FIELD}[LANGUAGE_NONE][0]['value'] = TRUE;
-
-          field_attach_update('node', $node);
-
-          $sandbox['last'] = $revision->vid;
-          $sandbox['count'] += 1;
+          }
         }
 
-        $sandbox['#finished'] = min(0.99, $sandbox['count'] / $sandbox['total']);
-      }
+        if ($groups) {
+          $query = db_select('node_revision', 'nr');
+          $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+          $query->innerJoin('og', 'og', 'n.nid = og.nid');
 
-      if (!$found) {
-        // All nodes are processed.
-        $sandbox['#finished'] = 1;
+          $sandbox['total'] = $query
+            ->isNotNull('og.og_theme')
+            ->countQuery()
+            ->execute()
+            ->fetchField();
+        }
+      }
+      else {
+        $found = FALSE;
+        if ($sandbox['total']) {
+          // Operate on every revision of every node, in batches.
+          $batch_size = 200;
+          $query = db_select('node_revision', 'nr');
+          $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+          $query->innerJoin('og', 'og', 'n.nid = og.nid');
+          $query
+            ->fields('nr', array('nid', 'vid'))
+            ->fields('n', array('type'))
+            ->fields('og', array('og_theme'))
+            ->condition('nr.vid', $sandbox['last'], '>')
+            ->isNotNull('og.og_theme')
+            ->orderBy('nr.vid', 'ASC')
+            ->range(0, $batch_size);
+          $revisions = $query->execute();
+
+          foreach ($revisions as $revision) {
+            // Create a dummy node object.
+            $node = (object) array(
+              'nid' => $revision->nid,
+              'vid' => $revision->vid,
+              'type' => $revision->type,
+            );
+
+            // Set field values.
+            $node->{GROUP_THEME_FIELD}[LANGUAGE_NONE][0]['value'] = $revision->og_theme;
+
+            field_attach_update('node', $node);
+
+            $sandbox['last'] = $revision->vid;
+            $sandbox['count'] += 1;
+          }
+
+          $sandbox['#finished'] = min(0.99, $sandbox['count'] / $sandbox['total']);
+        }
+
+        if (!$found) {
+          // All nodes are processed.
+          $sandbox['#finished'] = 1;
+        }
       }
     }
   }
