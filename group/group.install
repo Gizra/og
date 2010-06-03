@@ -14,9 +14,6 @@
  */
 function group_enable() {
   group_create_field('group_audience', 'user', 'user');
-
-  // Set default roles and permissions.
-  group_set_global_access();
 }
 
 
