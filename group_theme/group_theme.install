@@ -22,15 +22,27 @@ function group_theme_update_7000(&$sandbox) {
       // Get the group types. Group update has ran already, so we can use
       // Group's API.
       // @see group_theme_update_dependencies()
-      $query = db_select('node_revision', 'nr');
-      $query->innerJoin('node', 'n', 'n.vid = nr.vid');
-      $query->innerJoin('og', 'og', 'n.nid = og.nid');
+      $groups = FALSE;
+      foreach (node_type_get_types() as $type) {
+        if (group_is_group_type('node', $type)) {
+          // Add group theme field to the content type.
+          group_create_field(GROUP_THEME_FIELD, 'node', $type);
+          $groups = TRUE;
 
-      $sandbox['total'] = $query
-        ->isNotNull('og.og_theme')
-        ->countQuery()
-        ->execute()
-        ->fetchField();
+        }
+      }
+
+      if ($groups) {
+        $query = db_select('node_revision', 'nr');
+        $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+        $query->innerJoin('og', 'og', 'n.nid = og.nid');
+
+        $sandbox['total'] = $query
+          ->isNotNull('og.og_theme')
+          ->countQuery()
+          ->execute()
+          ->fetchField();
+      }
     }
     else {
       $found = FALSE;
@@ -71,8 +83,6 @@ function group_theme_update_7000(&$sandbox) {
 
       if (!$found) {
         // All nodes are processed.
-
-        // We're done.
         $sandbox['#finished'] = 1;
       }
     }
