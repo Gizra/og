@@ -5,3 +5,4 @@ package = "Group"
 dependencies[] = group
 core = 7.x
 files[] = group_theme.module
+files[] = group_theme.install

@@ -1,0 +1,9 @@
+; $Id:$
+name = Group language
+description = "Associate language interface to a group."
+package = "Group"
+dependencies[] = group
+dependencies[] = locale
+core = 7.x
+files[] = group_language.module
+files[] = group_language.install

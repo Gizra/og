@@ -1,0 +1,80 @@
+<?php
+// $Id:$
+
+/**
+ * @file
+ * Associate language interface to a group.
+ */
+
+/**
+ * Group language field.
+ */
+define('GROUP_LANGUAGE_FIELD', 'group_language');
+
+/**
+ * Implement group_fields_info().
+ */
+function group_language_group_fields_info() {
+  $items[GROUP_LANGUAGE_FIELD] = array(
+    'type' => array('group'),
+    'description' => t('Associate language interface to a group.'),
+    'field' => array(
+      'field_name' => GROUP_LANGUAGE_FIELD,
+      'type' => 'list_text',
+      'cardinality' => 1,
+      'settings' => array('allowed_values' => '', 'allowed_values_function' => 'group_language_field_allowed_values'),
+    ),
+    'instance' => array(
+      'label' => t('Groups language interface'),
+      'widget_type' => 'options_select',
+      'required' => TRUE,
+      // Use default language as default value.
+      'default_value' => array(0 => array('value' => '__default')),
+      'display' => array(
+        'full' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'type' => 'list_default',
+        ),
+      ),
+    ),
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_init().
+ *
+ * Change the language, based on a group context.
+ */
+function group_language_init() {
+  if ($group = group_context()) {
+    // Load the entity.
+    $entity = group_load_entity_from_group($group->gid);
+
+    // Check if a language field exists, and it isn't defined as "default"
+    // (i.e. use the default site language).
+    if (!empty($entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value']) && $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'] != '__default') {
+
+    }
+  }
+}
+
+
+/**
+ * Return all enabled themes.
+ */
+function group_language_field_allowed_values() {
+  $return = array('__default' => t('Use site-wide language interface definition'));
+
+  foreach (locale_language_list() as $key => $value) {
+    $return[$key] = check_plain($value);
+  }
+
+  return $return;
+}
+
