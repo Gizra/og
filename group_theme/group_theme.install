@@ -24,9 +24,9 @@ function group_theme_update_7000(&$sandbox) {
       // @see group_theme_update_dependencies()
       $groups = FALSE;
       foreach (node_type_get_types() as $type) {
-        if (group_is_group_type('node', $type)) {
+        if (group_is_group_type('node', $type->type)) {
           // Add group theme field to the content type.
-          group_create_field(GROUP_THEME_FIELD, 'node', $type);
+          group_create_field(GROUP_THEME_FIELD, 'node', $type->type);
           $groups = TRUE;
 
         }
