@@ -7,7 +7,7 @@
  */
 
 /**
- * Group register field.
+ * Group theme field.
  */
 define('GROUP_THEME_FIELD', 'group_theme');
 
