@@ -186,23 +186,20 @@ function group_schema() {
 if (module_exists('group')) {
   /**
    * Upgrade from Organic groups to Group.
-   *
-   * Pattern taken from node_update_7006().
-   *
-   * Upgrade path from Organic groups for Drupal 6 to Group for Drupal 7:
-   * - Add group fields to nodes.
-   * - Move Organic groups' data into the fields of group.
-   * - Delete Organic groups' variables.
    */
-  function group_update_7000(&$context) {
+  function group_update_7000(&$sandbox) {
+    // Pattern taken from node_update_7006().
+    // - Add group fields to nodes.
+    // - Move Organic groups' data into the fields of group.
+    // - Delete Organic groups' variables.
     if (db_table_exists('og')) {
-      $context['#finished'] = 0;
+      $sandbox['#finished'] = 0;
 
       $content_type = array('group' => array(), 'group content' => array());
 
       // If this is the first time this functions is called in the batch process,
       // create fields for the content types.
-      if (!isset($context['total'])) {
+      if (!isset($sandbox['total'])) {
 
         foreach (node_type_get_types() as $type) {
           // check if the variable exists.
@@ -240,55 +237,59 @@ if (module_exists('group')) {
         }
 
         // Initialize state for future calls.
-        $context['last'] = 0;
-        $context['count'] = 0;
+        $sandbox['last'] = 0;
+        $sandbox['count'] = 0;
 
         // Hold the information about the callbacks that upgrade the different
         // fields.
-        $context['group upgrade'] = array('group', 'group_content', 'user');
+        $sandbox['group upgrade'] = array('group', 'group_content', 'user');
 
-        $query = db_select('og', 'og');
-        $group_total = $query->countQuery()->execute()->fetchField();
+        $query = db_select('node_revision', 'nr');
+        $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+        $query->innerJoin('og', 'og', 'n.nid = og.nid');
+        $sandbox['group_total'] = $query->countQuery()->execute()->fetchField();
 
-        $query = db_select('og_ancestry', 'oga');
-        $group_content_total = $query->countQuery()->execute()->fetchField();
+        $query = db_select('node_revision', 'nr');
+        $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+        $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
+        $sandbox['group_content_total'] = $query
+          ->countQuery()
+          ->execute()
+          ->fetchField();
 
         $query = db_select('og_uid', 'ogu');
-        $group_user_total = $query->countQuery()->execute()->fetchField();
+        $sandbox['group_user_total'] = $query
+          ->countQuery()
+          ->execute()
+          ->fetchField();
 
-        $context += array(
-          'group_total' => $group_total,
-          'group_content_total' => $group_content_total,
-          'group_user_total' => $group_user_total,
-        );
-
-          // Sum of all enteties to be converted.
-        $context['total'] = $group_total + $group_content_total + $group_user_total;
+          // Sum of all enteties and revisions to be converted.
+        $sandbox['total'] = $sandbox['group_total'] + $sandbox['group_content_total'] + $sandbox['group_user_total'];
       }
       else {
-        if ($context['total']) {
-          $callback = reset($context['group upgrade']);
+        if ($sandbox['total']) {
+          $callback = reset($sandbox['group upgrade']);
           $callback =  '_group_upgrade_' . $callback;
 
-          // We don't use call_user_func, as we want to pass $context by
+          // We don't use call_user_func, as we want to pass $sandbox by
           // reference.
-          $found = $callback($context);
+          $found = $callback($sandbox);
 
           if (!$found) {
             // Continue to the next upgrade element.
-            $context['last'] = 0;
-            array_shift($context['group upgrade']);
+            $sandbox['last'] = 0;
+            array_shift($sandbox['group upgrade']);
           }
 
-          $context['#finished'] = min(0.99, $context['count'] / ($context['group'] + $context['group content']));
+          $sandbox['#finished'] = min(0.99, $sandbox['count'] / ($sandbox['group'] + $sandbox['group content']));
         }
       }
-      if (empty($context['group upgrade'])) {
+      if (empty($sandbox['group upgrade'])) {
         // All nodes are processed.
 
         // We're done.
-        $context['#finished'] = 1;
-        return t("!number groups and group content converted to use new Group fields.", array('!number' => $context['total']));
+        $sandbox['#finished'] = 1;
+        return t("!number groups and group content converted to use new Group fields.", array('!number' => $sandbox['total']));
       }
     }
   }
@@ -297,7 +298,7 @@ if (module_exists('group')) {
 /**
  * Helper function; Upgrade "group" nodes.
  */
-function _group_upgrade_group(&$context) {
+function _group_upgrade_group(&$sandbox) {
   $found = FALSE;
 
   // Operate on every revision of every node, in batches.
@@ -308,7 +309,7 @@ function _group_upgrade_group(&$context) {
   $query
     ->fields('nr', array('nid', 'vid'))
     ->fields('n', array('type', 'created'))
-    ->condition('nr.vid', $context['last'], '>')
+    ->condition('nr.vid', $sandbox['last'], '>')
     ->orderBy('nr.vid', 'ASC')
     ->range(0, $batch_size);
   $revisions = $query->execute();
@@ -318,7 +319,7 @@ function _group_upgrade_group(&$context) {
   $nids = array();
   foreach ($revisions as $revision) {
     $found = TRUE;
-
+    // Create a dummy node object.
     $node = (object) array(
       'nid' => $revision->nid,
       'vid' => $revision->vid,
@@ -334,7 +335,7 @@ function _group_upgrade_group(&$context) {
 
     field_attach_update('node', $node);
 
-    $context['last'] = $revision->vid;
+    $sandbox['last'] = $revision->vid;
   }
 
   // Update group enteties with the correct "created" timestamp. The group
@@ -348,7 +349,7 @@ function _group_upgrade_group(&$context) {
         group_save($group);
 
         // New group created, so add it to the total count.
-        $context['count'] += 1;
+        $sandbox['count'] += 1;
       }
     }
   }
@@ -359,7 +360,7 @@ function _group_upgrade_group(&$context) {
 /**
  * Helper function; Upgrade "group content" nodes.
  */
-function _group_upgrade_group_content(&$context) {
+function _group_upgrade_group_content(&$sandbox) {
   $found = FALSE;
 
   // Operate on users in batches.
@@ -371,7 +372,7 @@ function _group_upgrade_group_content(&$context) {
     ->fields('nr', array('nid', 'vid'))
     ->fields('n', array('type', 'created'))
     ->fields('oga', array('group_nid'))
-    ->condition('nr.vid', $context['last'], '>')
+    ->condition('nr.vid', $sandbox['last'], '>')
     ->orderBy('nr.vid', 'ASC')
     ->range(0, $batch_size);
   $revisions = $query->execute();
@@ -381,9 +382,9 @@ function _group_upgrade_group_content(&$context) {
 
     group_group($group->gid, 'node', $revision);
 
-    $context['last'] = $account->nid;
+    $sandbox['last'] = $account->nid;
     // User subscribed to group.
-    $context['count'] += 1;
+    $sandbox['count'] += 1;
   }
 
   return $found;
@@ -392,7 +393,7 @@ function _group_upgrade_group_content(&$context) {
 /**
  * Helper function; Upgrade user subscription to groups.
  */
-function _group_upgrade_user(&$context) {
+function _group_upgrade_user(&$sandbox) {
   static $rid = 0;
   if (!$rid) {
     // Get the administrator role ID.
@@ -407,7 +408,7 @@ function _group_upgrade_user(&$context) {
   $query = db_select('og_uid', 'ogu');
   $query
     ->fields('ogu')
-    ->condition('ogu.nid', $context['last'], '>')
+    ->condition('ogu.nid', $sandbox['last'], '>')
     ->orderBy('ogu.nid', 'ASC')
     ->range(0, $batch_size);
   $accounts = $query->execute();
@@ -421,9 +422,9 @@ function _group_upgrade_user(&$context) {
     if ($account->is_admin) {
       group_users_roles_grant($group->gid, $account->uid, $rid);
     }
-    $context['last'] = $account->nid;
+    $sandbox['last'] = $account->nid;
     // User subscribed to group.
-    $context['count'] += 1;
+    $sandbox['count'] += 1;
   }
 
   return $found;
