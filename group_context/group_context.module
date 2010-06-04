@@ -173,7 +173,7 @@ function group_context_group_context_negotiation_info() {
  * Implement hook_init().
  */
 function group_context_init() {
-  // group_context();
+  group_context();
 }
 
 
@@ -211,48 +211,53 @@ function group_get_context_handlers() {
  * we try to keep the same context if possible.
  * @see group_group_context_handlers().
  */
-function group_context_determine_context() {
+function group_context_determine_context($item = NULL) {
   $context = FALSE;
 
-  $score = $priority = $gids = array();
+  if ($enabled_providers = variable_get("language_negotiation_group_context", array())) {
+    $score = $priority = $gids = array();
 
-  $item = menu_get_item();
-
-  foreach (group_get_context_handlers() as $handler) {
-    $invoke = FALSE;
-    if ($handler['menu']) {
-      if (in_array($item['path'], $handler['menu path'])) {
-        $invoke = TRUE;
-      }
-    }
-    else {
-      $invoke = TRUE;
+    if (empty($item)) {
+      $item = menu_get_item();
     }
 
-    if ($invoke && ($return = call_user_func($handler['callback']))) {
-      if ($handler['priority']) {
-        $priority += $return;
+
+    foreach ($enabled_providers() as $handler) {
+      $invoke = FALSE;
+      if ($handler['menu']) {
+        if (in_array($item['path'], $handler['menu path'])) {
+          $invoke = TRUE;
+        }
       }
       else {
-        // Keep score of the returning groups.
-        foreach ($gids as $gid) {
-          $score[$gid] = !empty($score[$gid]) ? $score[$gid] + 1 : 1;
-        }
+        $invoke = TRUE;
+      }
 
-        $gids += $return;
+      if ($invoke && ($return = call_user_func($handler['callback']))) {
+        if (variable_get('group_context_break_on_first_context', TRUE)) {
+          $context = $return;
+        }
+        else {
+          // Keep score of the returning groups.
+          foreach ($gids as $gid) {
+            $score[$gid] = !empty($score[$gid]) ? $score[$gid] + 1 : 1;
+          }
+
+          $gids += $return;
+        }
       }
     }
-  }
-  if ($gids) {
-    // Check if we have priority groups.
-    if ($priority && ($priority_gids = array_intersect($gids, $priority))) {
-      $context = group_load(reset($priority_gids));
-    }
-    else {
-      // Get the group with the best score.
-      $max = max($gids);
-      $gid = array_search($max, $gids);
-      $context = group_load($gid);
+    if ($gids) {
+      // Check if we have priority groups.
+      if ($priority && ($priority_gids = array_intersect($gids, $priority))) {
+        $context = group_load(reset($priority_gids));
+      }
+      else {
+        // Get the group with the best score.
+        $max = max($gids);
+        $gid = array_search($max, $gids);
+        $context = group_load($gid);
+      }
     }
   }
 
@@ -357,12 +362,11 @@ function group_context($group = NULL, $account = NULL) {
     $context = $group;
   }
 
-  if (empty($context) && variable_get('group_context', TRUE)) {
+  if (empty($context)) {
 
     // Get context from context handlers.
-    $context = group_context_determine_context();
-
-    if ($user->uid && $context) {
+    if (($context = group_context_determine_context()) && $user->uid) {
+      // TODO: Add option to save session for anonymous users as-well?
       // Save the group ID in the authenticated user's session,
       $_SESSION['group_context'] = $context->gid;
     }
