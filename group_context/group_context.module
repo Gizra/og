@@ -43,7 +43,7 @@ function group_context_theme() {
  * @param $language_providers
  *   An array of language provider ids.
  */
-function group_context_negotiation_set($type, $language_providers) {
+function group_context_negotiation_set($type, $group_context_providers) {
   // Save only the necessary fields.
   $provider_fields = array('callbacks', 'file', 'cache');
 
@@ -62,19 +62,14 @@ function group_context_negotiation_set($type, $language_providers) {
   foreach ($providers_weight as $id => $weight) {
     if (isset($defined_providers[$id])) {
       $provider = $defined_providers[$id];
-      // If the provider does not express any preference about types, make it
-      // available for any configurable type.
-      $types = array_flip(isset($provider['types']) ? $provider['types'] : $default_types);
-      // Check if the provider is defined and has the right type.
-      if (isset($types[$type])) {
-        $provider_data = array();
-        foreach ($provider_fields as $field) {
-          if (isset($provider[$field])) {
-            $provider_data[$field] = $provider[$field];
-          }
+
+      $provider_data = array();
+      foreach ($provider_fields as $field) {
+        if (isset($provider[$field])) {
+          $provider_data[$field] = $provider[$field];
         }
-        $negotiation[$id] = $provider_data;
       }
+      $negotiation[$id] = $provider_data;
     }
   }
 
