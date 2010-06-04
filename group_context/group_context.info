@@ -1,0 +1,8 @@
+; $Id:$
+name = Group context
+description = "Get a group from a viewed page."
+package = "Group"
+dependencies[] = group
+core = 7.x
+files[] = group_context.module
+files[] = group_context.install
