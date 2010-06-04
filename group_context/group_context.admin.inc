@@ -51,7 +51,7 @@ function _group_context_configure_form_table(&$form) {
 
   $group_context_providers = $form['#group_context_providers'];
   $enabled_providers = variable_get("group_context_negotiation_$type", array());
-  $providers_weight = variable_get("locale_group_context_providers_weight_$type", array());
+  $providers_weight = variable_get("group_context_providers_weight_$type", array());
 
   // Add missing data to the providers lists.
   foreach ($group_context_providers as $id => $provider) {
