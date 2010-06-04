@@ -8,10 +8,177 @@
 
 
 /**
+ * Implements hook_menu().
+ */
+function group_context_menu() {
+  $items['admin/config/group/context'] = array(
+    'title' => 'Group context',
+    'description' => 'Group context detection and selection',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('group_context_configure_form'),
+    'access arguments' => array('administer group'),
+    'file' => 'group_context.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function group_context_theme() {
+  return array(
+    'group_context_configure_form' => array(
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
+ * Save a list of language providers.
+ *
+ * @param $type
+ *   The language negotiation type.
+ * @param $language_providers
+ *   An array of language provider ids.
+ */
+function group_context_negotiation_set($type, $language_providers) {
+  // Save only the necessary fields.
+  $provider_fields = array('callbacks', 'file', 'cache');
+
+  $negotiation = array();
+  $providers_weight = array();
+  $defined_providers = group_context_negotiation_info();
+
+  // Initialize the providers weight list.
+  foreach ($group_context_providers as $id => $provider) {
+    $providers_weight[$id] = group_context_provider_weight($provider);
+  }
+
+  // Order providers list by weight.
+  asort($providers_weight);
+
+  foreach ($providers_weight as $id => $weight) {
+    if (isset($defined_providers[$id])) {
+      $provider = $defined_providers[$id];
+      // If the provider does not express any preference about types, make it
+      // available for any configurable type.
+      $types = array_flip(isset($provider['types']) ? $provider['types'] : $default_types);
+      // Check if the provider is defined and has the right type.
+      if (isset($types[$type])) {
+        $provider_data = array();
+        foreach ($provider_fields as $field) {
+          if (isset($provider[$field])) {
+            $provider_data[$field] = $provider[$field];
+          }
+        }
+        $negotiation[$id] = $provider_data;
+      }
+    }
+  }
+
+  variable_set("group_context_negotiation_$type", $negotiation);
+}
+
+
+/**
+ * Return the passed group context provider weight or a default value.
+ *
+ * @param $provider
+ *   A group context provider data structure.
+ *
+ * @return
+ *   A numeric weight.
+ */
+function group_context_provider_weight($provider) {
+  $default = is_numeric($provider) ? $provider : 0;
+  return isset($provider['weight']) && is_numeric($provider['weight']) ? $provider['weight'] : $default;
+}
+
+
+
+
+/**
+ * Return all the defined group context providers.
+ *
+ * @return
+ *   An array of group context providers.
+ */
+function group_context_negotiation_info() {
+  $group_context_providers = &drupal_static(__FUNCTION__);
+
+  if (!isset($group_context_providers)) {
+    // Collect all the module-defined group_context negotiation providers.
+    $group_context_providers = module_invoke_all('group_context_negotiation_info');
+
+    // Let other modules alter the list of group_context providers.
+    drupal_alter('group_context_negotiation_info', $group_context_providers);
+  }
+
+  // Assign default values.
+  foreach ($group_context_providers as &$group_context_provider) {
+    $group_context_provider += array(
+      'menu' => TRUE,
+      'menu path' => array(),
+    );
+  }
+
+  return $group_context_providers;
+}
+
+/**
+ * Implements hook_group_context_negotiation_info().
+ */
+function group_context_group_context_negotiation_info() {
+  $providers = array();
+
+  $providers['session'] = array(
+    'name' => t('Session'),
+    'description' => t("Use the group context that was detected in previous pages, as long as it matches the viewed one as-well."),
+    'callback' => 'group_context_handler_session',
+    'menu' => FALSE,
+  );
+
+  $providers['url'] = array(
+    'name' => t('URL'),
+    'description' => t("URL."),
+    'callback' => 'group_context_handler_url',
+    'menu' => FALSE,
+  );
+
+  $providers['node'] = array(
+    'name' => t('Node'),
+    'description' => t("Node."),
+    'callback' => 'group_context_handler_node',
+    'menu path' => array('node/%', 'node/%/edit'),
+  );
+
+  $providers['user-view'] = array(
+    'name' => t('User view'),
+    'description' => t("User view."),
+    'callback' => 'group_context_handler_user_view',
+    'menu path' => array('user/%'),
+  );
+
+  $providers['user-edit'] = array(
+    'name' => t('User edit'),
+    'description' => t("User edit."),
+    'callback' => 'group_context_handler_user_edit',
+    'menu path' => array('user/%/edit'),
+  );
+
+  return $providers;
+}
+
+
+
+
+/**
  * Implement hook_init().
  */
 function group_context_init() {
-  group_context();
+  // group_context();
 }
 
 
@@ -153,7 +320,7 @@ function group_context_handler_user_edit() {
  * @param $entity
  *   Optional; The entity object.
  * @param $position
- *   Optional; The position that sohuld be used in menu_get_object().
+ *   Optional; The position that should be used in menu_get_object().
  */
 function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $position = 1) {
   $context = array();
