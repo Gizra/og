@@ -47,63 +47,47 @@ function group_language_group_fields_info() {
 }
 
 /**
- * Implements hook_init().
- *
- * Change the language, based on a group context.
+ * Implements hook_language_negotiation_info().
  */
-function group_language_init() {
+function group_language_language_negotiation_info() {
+  $providers = array();
+
+  $providers['group-language'] = array(
+    'callbacks' => array('language' => 'group_language_from_group_context'),
+    'weight' => -5,
+    'name' => t('Group'),
+    'description' => t("Follow the Group context's language preference."),
+    'file' => drupal_get_path('module', 'group_language') .'/group_language.module',
+  );
+
+  return $providers;
+}
+
+/**
+ * Identify language from a request/session parameter.
+ *
+ * @param $languages
+ *   An array of valid language objects.
+ *
+ * @return
+ *   A valid language code on success, FALSE otherwise.
+ */
+function group_language_from_group_context($languages) {
+  // We need a full bootstrap in order to get the group context.
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+
   if ($group = group_context()) {
     // Load the entity.
     $entity = group_load_entity_from_group($group->gid);
 
-    // Check if a language field exists, and it isn't defined as "default"
+    // Check if a theme field exists, and it isn't defined as "default"
     // (i.e. use the default site language).
     if (!empty($entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value']) && $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'] != '__default') {
-
-      // Get a list of enabled languages.
-      $languages = locale_language_list();
-
-      // Set to true if the url holds a language designator.
-      $url_set = FALSE;
-
-      // Check whether the URL holds a language domain/ prefix.
-      switch (variable_get('language_negotiation', LANGUAGE_NEGOTIATION_NONE)) {
-        case LANGUAGE_NEGOTIATION_DOMAIN:
-          foreach ($languages as $language) {
-            $parts = parse_url($language->domain);
-            if (!empty($parts['host']) && ($_SERVER['HTTP_HOST'] == $parts['host'])) {
-              $url_set = TRUE;
-              break;
-            }
-          }
-          break;
-
-        case LANGUAGE_NEGOTIATION_PATH:
-          // Uses $_REQUEST as language_initialize() removes prefix from $_GET.
-          if (!empty($_REQUEST['q'])) {
-            $refix = explode('/', $_REQUEST['q']);
-            $prefix = array_shift($args);
-          }
-
-          // Search prefix within enabled languages.
-          foreach ($languages as $language) {
-            if (!empty($language->prefix) && $language->prefix == $prefix) {
-              $url_set = TRUE;
-              break;
-            }
-          }
-          break;
-      }
-
-      if (!$url_set) {
-        global $user, $language;
-
-        $user_language = user_preferred_language($user, $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value']);
-        // Set the global language.
-        $language = $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'];
-      }
+      // TODO: Check language is valid.
+      return $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'];
     }
   }
+  return FALSE;
 }
 
 

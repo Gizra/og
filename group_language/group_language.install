@@ -8,7 +8,7 @@
 
 if (module_exists('group_language')) {
   /**
-   * Upgrade from Organic groups' theme to Group theme.
+   * Upgrade from Organic groups' language to Group language.
    */
   function group_language_update_7000(&$sandbox) {
     if (db_table_exists('og')) {
