@@ -346,7 +346,11 @@ function group_context_handler_url() {
  * Context handler; Get groups from existing node.
  */
 function group_context_handler_node() {
-  return _group_context_handler_entity();
+  // menu_get_object() doesn't play nicely if the path is node/%/foo, so we load
+  // it ourself here.
+  $item = menu_get_item();
+  $node = node_load($item['map'][1]);
+  return _group_context_handler_entity('node', $node);
 }
 
 /**
