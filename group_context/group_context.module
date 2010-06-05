@@ -104,9 +104,6 @@ function group_context_group_context_negotiation_info() {
   return $providers;
 }
 
-
-
-
 /**
  * Implement hook_init().
  */
@@ -115,6 +112,17 @@ function group_context_init() {
     group_context();
   }
 }
+
+/**
+ * Implementation of hook_views_api().
+ */
+function group_context_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'group_context') . '/includes',
+  );
+}
+
 
 /**
  * Get or set group context using the menu system.
