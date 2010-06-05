@@ -70,14 +70,13 @@ function group_context_group_context_negotiation_info() {
     'name' => t('Session'),
     'description' => t("Use the group context that was detected in previous pages, as long as it matches the viewed one as-well."),
     'callback' => 'group_context_handler_session',
-    'menu' => FALSE,
+    'weight' => -10,
   );
 
   $providers['url'] = array(
     'name' => t('URL'),
     'description' => t("URL."),
     'callback' => 'group_context_handler_url',
-    'menu' => FALSE,
   );
 
   $providers['node'] = array(
