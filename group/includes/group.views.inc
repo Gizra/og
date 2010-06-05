@@ -186,21 +186,6 @@ function group_views_handlers() {
   );
 }
 
-/**
- * Implements hook_views_plugins().
- */
-function group_views_plugins() {
-  return array(
-    'argument default' => array(
-      'group_context' => array(
-        'title' => t('Current group from context'),
-        'handler' => 'group_plugin_argument_default_group_context',
-        'path' => drupal_get_path('module', 'group') . '/includes/views',
-        'parent' => 'fixed', // so that the parent class is included
-      ),
-    ),
-  );
-}
 
 /**
  * Implements hook_views_data_alter().
