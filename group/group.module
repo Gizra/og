@@ -554,7 +554,6 @@ function group_delete($gid) {
   group_delete_user_roles_by_group($gid, NULL, TRUE);
 }
 
-//TODO: Let other Group modules invalidate cache.
 function group_invalidate_cache($gids = array()) {
   // Reset static cache.
   $caches = array(
@@ -565,6 +564,9 @@ function group_invalidate_cache($gids = array()) {
     'group_context_js',
     'group_field_audience_options',
   );
+
+  // Let other Group modules invalidate cache.
+  drupal_alter('group_invalidate_cache', $caches, $gids);
   foreach ($caches as $cache) {
     drupal_static_reset($cache);
   }

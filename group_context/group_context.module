@@ -114,12 +114,22 @@ function group_context_init() {
 }
 
 /**
- * Implementation of hook_views_api().
+ * Implements hook_views_api().
  */
 function group_context_views_api() {
   return array(
     'api' => 2,
     'path' => drupal_get_path('module', 'group_context') . '/includes',
+  );
+}
+
+/**
+ * Implements hook_group_invalidate_cache_alter().
+ */
+function group_context_group_invalidate_cache_alter(&$caches, $gids = array()) {
+  $caches += array(
+    'group_context',
+    'group_context_js',
   );
 }
 
