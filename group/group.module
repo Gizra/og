@@ -560,13 +560,12 @@ function group_invalidate_cache($gids = array()) {
     'group_user_access',
     'group_get_group_ids',
     'group_get_entity_groups',
-    'group_context',
-    'group_context_js',
     'group_field_audience_options',
   );
 
   // Let other Group modules invalidate cache.
   drupal_alter('group_invalidate_cache', $caches, $gids);
+
   foreach ($caches as $cache) {
     drupal_static_reset($cache);
   }
