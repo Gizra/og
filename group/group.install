@@ -7,7 +7,7 @@
  */
 
 /**
- * Implement hook_enable().
+ * Implements hook_enable().
  *
  * Add group audience to users by default. This can't be in hook_install() as
  * the field isn't known yet.
@@ -18,7 +18,7 @@ function group_enable() {
 
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function group_uninstall() {
   $vars = array(
@@ -33,7 +33,7 @@ function group_uninstall() {
 
 
 /**
- * Implement hook_schema().
+ * Implements hook_schema().
  */
 function group_schema() {
   $schema = array();
