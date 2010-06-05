@@ -60,141 +60,6 @@ function group_context_preprocess_html(&$variables) {
   }
 }
 
-
-/**
- * Get or set group context using the menu system.
- *
- * @param $group
- *   Optional; The group entity to set as the context.
- * @param $account
- *   Optional; The user entity to determine context form.
- *
- * @return
- *   A group entity, or FALSE if no context was found.
- */
-function group_context($group = NULL, $account = NULL) {
-  global $user;
-  $context = &drupal_static(__FUNCTION__, FALSE);
-
-  if (!empty($group)) {
-    $context = $group;
-  }
-
-  if (empty($context)) {
-
-    // Get context from context handlers.
-    if (($context = group_context_determine_context()) && $user->uid) {
-      // TODO: Add option to save session for anonymous users as-well?
-      // Save the group ID in the authenticated user's session,
-      $_SESSION['group_context'] = $context->gid;
-    }
-  }
-
-  return $context;
-}
-
-/**
- * Add the group entity of the context to the Drupal javascript entity.
- *
- * @param $group
- *   A group entity.
- */
-function group_context_add_js($group) {
-  // Static variable to indicate if group was already added to javacript.
-  $js = &drupal_static(__FUNCTION__, FALSE);
-  if (empty($js)) {
-    drupal_add_js(array('group' => array('group_context' => $group)), 'setting');
-    $js = TRUE;
-  }
-}
-
-/**
- * Save a list of language providers.
- *
- * @param $type
- *   The language negotiation type.
- * @param $language_providers
- *   An array of language provider ids.
- */
-function group_context_negotiation_set($type, $group_context_providers) {
-  // Save only the necessary fields.
-  $provider_fields = array('callbacks', 'file', 'cache');
-
-  $negotiation = array();
-  $providers_weight = array();
-  $defined_providers = group_context_negotiation_info();
-
-  // Initialize the providers weight list.
-  foreach ($group_context_providers as $id => $provider) {
-    $providers_weight[$id] = group_context_provider_weight($provider);
-  }
-
-  // Order providers list by weight.
-  asort($providers_weight);
-
-  foreach ($providers_weight as $id => $weight) {
-    if (isset($defined_providers[$id])) {
-      $provider = $defined_providers[$id];
-
-      $provider_data = array();
-      foreach ($provider_fields as $field) {
-        if (isset($provider[$field])) {
-          $provider_data[$field] = $provider[$field];
-        }
-      }
-      $negotiation[$id] = $provider_data;
-    }
-  }
-
-  variable_set("group_context_negotiation_$type", $negotiation);
-}
-
-
-/**
- * Return the passed group context provider weight or a default value.
- *
- * @param $provider
- *   A group context provider data structure.
- *
- * @return
- *   A numeric weight.
- */
-function group_context_provider_weight($provider) {
-  $default = is_numeric($provider) ? $provider : 0;
-  return isset($provider['weight']) && is_numeric($provider['weight']) ? $provider['weight'] : $default;
-}
-
-
-
-
-/**
- * Return all the defined group context providers.
- *
- * @return
- *   An array of group context providers.
- */
-function group_context_negotiation_info() {
-  $group_context_providers = &drupal_static(__FUNCTION__);
-
-  if (!isset($group_context_providers)) {
-    // Collect all the module-defined group_context negotiation providers.
-    $group_context_providers = module_invoke_all('group_context_negotiation_info');
-
-    // Let other modules alter the list of group_context providers.
-    drupal_alter('group_context_negotiation_info', $group_context_providers);
-  }
-
-  // Assign default values.
-  foreach ($group_context_providers as &$group_context_provider) {
-    $group_context_provider += array(
-      'menu' => TRUE,
-      'menu path' => array(),
-    );
-  }
-
-  return $group_context_providers;
-}
-
 /**
  * Implements hook_group_context_negotiation_info().
  */
@@ -249,26 +114,137 @@ function group_context_init() {
   group_context();
 }
 
+/**
+ * Get or set group context using the menu system.
+ *
+ * @param $group
+ *   Optional; The group entity to set as the context.
+ * @param $account
+ *   Optional; The user entity to determine context form.
+ *
+ * @return
+ *   A group entity, or FALSE if no context was found.
+ */
+function group_context($group = NULL, $account = NULL) {
+  global $user;
+  $context = &drupal_static(__FUNCTION__, FALSE);
+
+  if (!empty($group)) {
+    $context = $group;
+  }
+
+  if (empty($context)) {
+    // Get context from context handlers.
+    if (($context = group_context_determine_context()) && $user->uid) {
+      // TODO: Add option to save session for anonymous users as-well?
+      // Save the group ID in the authenticated user's session,
+      $_SESSION['group_context'] = $context->gid;
+    }
+  }
+
+  return $context;
+}
 
 /**
- * Get all the context handlers.
+ * Add the group entity of the context to the Drupal javascript entity.
+ *
+ * @param $group
+ *   A group entity.
  */
-function group_get_context_handlers() {
-  $handlers = module_invoke_all('group_context_handlers');
+function group_context_add_js($group) {
+  // Static variable to indicate if group was already added to javascript.
+  $js = &drupal_static(__FUNCTION__, FALSE);
+
+  if (empty($js)) {
+    drupal_add_js(array('group' => array('group_context' => $group)), 'setting');
+    $js = TRUE;
+  }
+}
+
+/**
+ * Return all the defined group context providers.
+ *
+ * @return
+ *   An array of group context providers.
+ */
+function group_context_negotiation_info() {
+  $group_context_providers = &drupal_static(__FUNCTION__);
+
+  if (!isset($group_context_providers)) {
+    // Collect all the module-defined group_context negotiation providers.
+    $group_context_providers = module_invoke_all('group_context_negotiation_info');
+
+    // Let other modules alter the list of group_context providers.
+    drupal_alter('group_context_negotiation_info', $group_context_providers);
+  }
 
   // Assign default values.
-  foreach ($handlers as &$handler) {
-    $handler += array(
+  foreach ($group_context_providers as &$group_context_provider) {
+    $group_context_provider += array(
       'menu path' => array(),
-      'priority' => FALSE,
     );
   }
 
-  // Allow other modules to alter the handlers.
-  drupal_alter('group_context_handlers', $handlers);
-
-  return $handlers;
+  return $group_context_providers;
 }
+
+
+/**
+ * Save a list of language providers.
+ *
+ * @param $type
+ *   The language negotiation type.
+ * @param $language_providers
+ *   An array of language provider ids.
+ */
+function group_context_negotiation_set($type, $group_context_providers) {
+  // Save only the necessary fields.
+  $provider_fields = array('callbacks');
+
+  $negotiation = array();
+  $providers_weight = array();
+  $defined_providers = group_context_negotiation_info();
+
+  // Initialize the providers weight list.
+  foreach ($group_context_providers as $id => $provider) {
+    $providers_weight[$id] = group_context_provider_weight($provider);
+  }
+
+  // Order providers list by weight.
+  asort($providers_weight);
+
+  foreach ($providers_weight as $id => $weight) {
+    if (isset($defined_providers[$id])) {
+      $provider = $defined_providers[$id];
+
+      $provider_data = array();
+      foreach ($provider_fields as $field) {
+        if (isset($provider[$field])) {
+          $provider_data[$field] = $provider[$field];
+        }
+      }
+      $negotiation[$id] = $provider_data;
+    }
+  }
+
+  variable_set("group_context_negotiation_$type", $negotiation);
+}
+
+
+/**
+ * Return the passed group context provider weight or a default value.
+ *
+ * @param $provider
+ *   A group context provider data structure.
+ *
+ * @return
+ *   A numeric weight.
+ */
+function group_context_provider_weight($provider) {
+  $default = is_numeric($provider) ? $provider : 0;
+  return isset($provider['weight']) && is_numeric($provider['weight']) ? $provider['weight'] : $default;
+}
+
 
 /**
  * Determine the best matching context of a viewed page.
@@ -397,5 +373,3 @@ function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $p
 
   return $context;
 }
-
-
