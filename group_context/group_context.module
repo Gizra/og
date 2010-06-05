@@ -36,6 +36,32 @@ function group_context_theme() {
 }
 
 /**
+ * Implement hook_preprocess_html().
+ *
+ * HTML preprocess; Add context related templates and CSS.
+ */
+function group_context_preprocess_html(&$variables) {
+  if ($group = group_context()) {
+    // Add template suggestions.
+    $variables['theme_hook_suggestions'][] = 'page__group_context';
+    $variables['theme_hook_suggestions'][] = 'page__group_context__group_' . $group->gid;
+    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type;
+    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type . '_' . $group->etid;
+
+    // Add CSS.
+    $clean_html = drupal_html_class('group-context-' . $group->entity_type);
+    $variables['classes_array'][] = 'group-context';
+    $variables['classes_array'][] = 'group-context-group-' . $group->gid;
+    $variables['classes_array'][] = $clean_html;
+    $variables['classes_array'][] = $clean_html . '-' . $group->etid;
+
+    // Add context to JS.
+    group_context_add_js($group);
+  }
+}
+
+
+/**
  * Get or set group context using the menu system.
  *
  * @param $group
@@ -65,6 +91,21 @@ function group_context($group = NULL, $account = NULL) {
   }
 
   return $context;
+}
+
+/**
+ * Add the group entity of the context to the Drupal javascript entity.
+ *
+ * @param $group
+ *   A group entity.
+ */
+function group_context_add_js($group) {
+  // Static variable to indicate if group was already added to javacript.
+  $js = &drupal_static(__FUNCTION__, FALSE);
+  if (empty($js)) {
+    drupal_add_js(array('group' => array('group_context' => $group)), 'setting');
+    $js = TRUE;
+  }
 }
 
 /**
@@ -358,43 +399,3 @@ function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $p
 }
 
 
-/**
- * Add the group entity of the context to the Drupal javascript entity.
- *
- * @param $group
- *   A group entity.
- */
-function group_context_add_js($group) {
-  // Static variable to indicate if group was already added to javacript.
-  $js = &drupal_static(__FUNCTION__, FALSE);
-  if (empty($js)) {
-    drupal_add_js(array('group' => array('group_context' => $group)), 'setting');
-    $js = TRUE;
-  }
-}
-
-
-/**
- * Implement hook_preprocess_html().
- *
- * HTML preprocess; Add context related templates and CSS.
- */
-function group_context_preprocess_html(&$variables) {
-  if ($group = group_context()) {
-    // Add template suggestions.
-    $variables['theme_hook_suggestions'][] = 'page__group_context';
-    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->gid;
-    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type;
-    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type . '_' . $group->etid;
-
-    // Add CSS.
-    $clean_html = drupal_html_class('group-context-' . $group->entity_type);
-    $variables['classes_array'][] = 'group-context';
-    $variables['classes_array'][] = 'group-context-' . $group->gid;
-    $variables['classes_array'][] = $clean_html;
-    $variables['classes_array'][] = $clean_html . '-' . $group->etid;
-
-    // Add context to JS.
-    group_context_add_js($group);
-  }
-}
