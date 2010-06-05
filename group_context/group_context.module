@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Associate theme to a group.
+ * Get a group from a viewed page.
  */
 
 
@@ -111,7 +111,9 @@ function group_context_group_context_negotiation_info() {
  * Implement hook_init().
  */
 function group_context_init() {
-  group_context();
+  if (variable_get('group_context_hook_init', TRUE)) {
+    group_context();
+  }
 }
 
 /**
