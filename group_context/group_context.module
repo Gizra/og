@@ -347,7 +347,7 @@ function group_context_handler_url() {
  */
 function group_context_handler_node() {
   // menu_get_object() doesn't play nicely if the path is node/%/foo, so we load
-  // it ourself here.
+  // it ourself.
   $item = menu_get_item();
   $node = node_load($item['map'][1]);
   return _group_context_handler_entity('node', $node);
