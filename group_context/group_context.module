@@ -380,15 +380,16 @@ function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $p
   if (empty($entity)) {
     $entity = menu_get_object($entity_type, $position);
   }
+  if ($entity) {
+    // Check if the entity is itself a group.
+    list($id) = entity_extract_ids($entity_type, $entity);
+    if ($group = group_get_group($entity_type, $id)) {
+      $context = drupal_map_assoc(array($group->gid));
+    }
 
-  // Check if the entity is itself a group.
-  list($id) = entity_extract_ids($entity_type, $entity);
-  if ($group = group_get_group($entity_type, $id)) {
-    $context = drupal_map_assoc(array($group->gid));
-  }
-
-  elseif ($gids = group_get_entity_groups($entity_type, $entity)) {
-    $context = $gids;
+    elseif ($gids = group_get_entity_groups($entity_type, $entity)) {
+      $context = $gids;
+    }
   }
 
   return $context;
