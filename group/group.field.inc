@@ -13,6 +13,15 @@
 function group_field_widget_properties_alter(&$widget, $context) {
   $field = $context['field'];
   if ($field['field_name'] == GROUP_AUDIENCE_FIELD) {
+    $instance = $context['instance'];
+    // Determine if a user may see other groups as-well.
+    $opt_group = FALSE;
+
+    if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer group'))) {
+      $opt_group = TRUE;
+    }
+
+    $widget['type'] = $instance['widget']['settings']['minimum_for_autocomplete'] <= group_field_audience_count($opt_group) ? 'group_audience_autocomplete' : 'group_audience';
   }
 }
 
