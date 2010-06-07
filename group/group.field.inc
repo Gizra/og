@@ -10,6 +10,12 @@
  * Hook implementations
  ******************************************************************************/
 
+function group_field_widget_properties_alter(&$widget, $context) {
+  $field = $context['field'];
+  if ($field['field_name'] == GROUP_AUDIENCE_FIELD) {
+  }
+}
+
 /**
  * Implement hook_field_info().
  */
@@ -136,12 +142,16 @@ function group_field_widget_info() {
   );
 
   return array(
-    'group_audience' => array(
+    'group_audience_switcher' => array(
       'label' => t('Group audience'),
-      'settings' => array('opt_group' => 'auto', 'minimum_for_select_list' => 20),
+      'settings' => array(
+        'opt_group' => 'auto',
+        'minimum_for_select_list' => 20,
+        'minimum_for_autocomplete' => 50,
+      ),
       'field types' => array('group'),
       'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
       ),
       'settings' => array(
         'opt_group' => 'auto',
@@ -190,15 +200,14 @@ function group_field_widget_settings_form($field, $instance) {
       '#element_validate' => array('_element_validate_integer_positive'),
     );
 
-    // TODO: Re-add after http://drupal.org/node/806830
-/*    $form['minimum_for_autocomplete'] = array(
+    $form['minimum_for_autocomplete'] = array(
       '#type' => 'textfield',
       '#title' => t('Minimum for autocomplete'),
       '#description' => t('The minimum number of groups before showing the group as autocomplete.'),
       '#default_value' => $settings['minimum_for_autocomplete'],
       '#required' => TRUE,
       '#element_validate' => array('_element_validate_integer_positive'),
-    );*/
+    );
   }
 
   $form['autocomplete_match'] = array(
@@ -236,22 +245,11 @@ function group_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   $element = $base;
   $widget = $instance['widget'];
 
-
-  // TODO: Re-add after http://drupal.org/node/806830
-  // Determine which widget should be used.
-/*  if ($widget['type'] == 'group_audience') {
-    // Get the group count a user may see.
-    $count = group_field_audience_count($opt_group);
-    if ($count >= $instance['widget']['settings']['minimum_for_autocomplete']) {
-      $widget['type'] = 'group_audience_autocomplete';
-    }
-  }*/
-
   switch ($widget['type']) {
     case 'group_audience_autocomplete':
       $element += array(
         '#type' => 'textfield',
-        '#default_value' => isset($items[$delta]['nid']) ? $items[$delta]['nid'] : NULL,
+        '#default_value' => isset($items[$delta]['gid']) ? $items[$delta]['gid'] : NULL,
         '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'],
         '#size' => $instance['widget']['settings']['size'],
         // TODO: Add element validate.
