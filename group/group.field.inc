@@ -142,7 +142,7 @@ function group_field_widget_info() {
   );
 
   return array(
-    'group_audience_switcher' => array(
+    'group_audience' => array(
       'label' => t('Group audience'),
       'settings' => array(
         'opt_group' => 'auto',
