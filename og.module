@@ -496,14 +496,52 @@ function og_exit() {
 
 /**
  *  Set the language for the page based on group's language. Will have no effect
- * if user has set a personal language.
+ * if user has set a personal language or a URL language domain/prefix.
  * @param string $node
  *   A group node object.
+ * @see language_initialize().
  */
 function og_set_language($node) {
+  // If group specifies language, and the URL does not:
   if ($node->og_language) {
-    $map = language_list();
-    $og_language = $map[$node->og_language];
+    // Configured presentation language mode.
+    $mode = variable_get('language_negotiation', LANGUAGE_NEGOTIATION_NONE);
+    // Get a list of enabled languages.
+    $languages = language_list('enabled');
+    $languages = $languages[1];
+
+    // Set to true if the url holds a language designator.
+    $url_set = FALSE;
+    // Check whether the URL holds a language domain/prefix.
+    switch ($mode) {
+      case LANGUAGE_NEGOTIATION_DOMAIN:
+        foreach ($languages as $language) {
+          $parts = parse_url($language->domain);
+          if (!empty($parts['host']) && ($_SERVER['HTTP_HOST'] == $parts['host'])) {
+            $url_set = TRUE;
+            break;
+          }
+        }
+        break;
+      case LANGUAGE_NEGOTIATION_PATH:
+        // Uses $_REQUEST as language_initialize removes prefix from $_GET
+        $args = isset($_REQUEST['q']) ? explode('/', $_REQUEST['q']) : array();
+        $prefix = array_shift($args);
+        // Search prefix within enabled languages.
+        foreach ($languages as $language) {
+          if (!empty($language->prefix) && $language->prefix == $prefix) {
+            $url_set = TRUE;
+            break;
+          }
+        }
+        break;
+    }
+
+    if ($url_set) {
+      return;
+    }
+
+    $og_language = $languages[$node->og_language];
     global $user;
     $user_language = user_preferred_language($user, $og_language);
     if ($og_language == $user_language) {
