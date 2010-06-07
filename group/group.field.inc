@@ -151,7 +151,7 @@ function group_field_widget_info() {
       ),
       'field types' => array('group'),
       'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
       ),
       'settings' => array(
         'opt_group' => 'auto',
