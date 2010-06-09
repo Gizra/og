@@ -261,8 +261,7 @@ function group_field_widget_form(&$form, &$form_state, $field, $instance, $langc
         '#default_value' => isset($items[$delta]['gid']) ? $items[$delta]['gid'] : NULL,
         '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'],
         '#size' => $instance['widget']['settings']['size'],
-        // TODO: Add element validate.
-        // '#element_validate' => array('group_field_audience_autocomplete_validate'),
+        '#element_validate' => array('group_field_audience_autocomplete_validate'),
         '#value_callback' => 'group_field_audience_autocomplete_value',
       );
 
@@ -650,56 +649,52 @@ function group_field_audience_autocomplete_value($element, $input = FALSE, $form
 }
 
 /**
- * TODO: Validation callback for a node_reference autocomplete element.
+ * Validation callback for a group audience autocomplete element.
  */
 function group_field_audience_autocomplete_validate($element, &$form_state, $form) {
   $field = $form_state['field'][$element['#field_name']][$element['#language']]['field'];
   $instance = $form_state['field'][$element['#field_name']][$element['#language']]['instance'];
 
   $value = $element['#value'];
-  $nid = NULL;
+  $gid = NULL;
 
   if (!empty($value)) {
-    // Check whether we have an explicit "[nid:n]" input.
-    preg_match('/^(?:\s*|(.*) )?\[\s*nid\s*:\s*(\d+)\s*\]$/', $value, $matches);
+    // Check whether we have an explicit "[gid:n]" input.
+    preg_match('/^(?:\s*|(.*) )?\[\s*gid\s*:\s*(\d+)\s*\]$/', $value, $matches);
     if (!empty($matches)) {
-      // Explicit nid. Check that the 'title' part matches the actual title for
+      // Explicit gid. Check that the 'title' part matches the actual title for
       // the nid.
-      list(, $title, $nid) = $matches;
-      if (!empty($title)) {
-        $titles = _node_reference_get_node_titles(array($nid));
-        if ($title != $titles[$nid]) {
-          form_error($element, t('%name: title mismatch. Please check your selection.', array('%name' => $instance['label'])));
+      list(, $label, $gid) = $matches;
+      if (!empty($label)) {
+        if ($label != group_label($gid)) {
+          form_error($element, t('%name: label mismatch. Please check your selection.', array('%name' => $instance['label'])));
         }
       }
     }
     else {
-      // No explicit nid (the submitted value was not populated by autocomplete
-      // selection). Get the nid of a referencable node from the entered title.
-      $reference = group_field_audience_potential_groups($value, 'equals', NULL, 1);
-      if ($reference) {
-        // @todo The best thing would be to present the user with an
-        // additional form, allowing the user to choose between valid
-        // candidates with the same title. ATM, we pick the first
-        // matching candidate...
-        $nid = key($reference);
+      // No explicit gid (the submitted value was not populated by autocomplete
+      // selection). Get the gid of a referencable node from the entered title.
+      if ($reference = group_field_audience_potential_groups($value, 'equals', NULL, 1)) {
+        $gid = key($reference);
       }
       else {
-        form_error($element, t('%name: found no valid post with that title.', array('%name' => $instance['label'])));
+        form_error($element, t('%name: found no valid group with that label.', array('%name' => $instance['label'])));
       }
     }
   }
 
   // Set the element's value as the node id that was extracted from the entered
   // input.
-  form_set_value($element, $nid, $form_state);
+  form_set_value($element, $gid, $form_state);
 }
 
 /**
- * TODO: Implements hook_field_widget_error().
+ * Implements hook_field_widget_error().
+ *
+ * TODO: Se where this is needed.
  */
-function __group_field_widget_error($element, $error, $form, &$form_state) {
-  form_error($element['nid'], $error['message']);
+function group_field_widget_error($element, $error, $form, &$form_state) {
+  form_error($element['gid'], $error['message']);
 }
 
 /**
