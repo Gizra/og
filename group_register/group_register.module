@@ -82,7 +82,12 @@ function group_register_get_groups() {
     $conditions = array(
       array('group_register_value', 1),
     );
-    if ($result = field_attach_query($field['id'], $conditions)) {
+    $query = new EntityFieldQuery;
+    $result = $query
+      ->fieldCondition(GROUP_REGISTER_FIELD, 'value', 1, '=')
+      ->execute();
+
+    if ($result) {
       foreach ($result as $entity_type => $ids) {
         $ids = array_keys($ids);
 
