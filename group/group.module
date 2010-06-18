@@ -1815,11 +1815,16 @@ function group_fields_info() {
   foreach (module_implements('group_fields_info') as $module) {
     if ($fields = module_invoke($module, 'group_fields_info')) {
       foreach ($fields as $key => $field) {
+        // Add default values.
+        $field += array('entity type' => array());
+
         // Add the module information.
         $return[$key] = array_merge($field, array('module' => $module));
+
       }
     }
   }
+
   return $return;
 }
 
