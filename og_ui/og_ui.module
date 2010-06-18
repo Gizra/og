@@ -9,7 +9,7 @@
 /**
  * Implement hook_menu().
  */
-function group_ui_menu() {
+function og_ui_menu() {
   $items = array();
   $items['group/%/%/subscribe'] = array(
     'type' => MENU_CALLBACK,
@@ -150,16 +150,16 @@ function group_ui_menu() {
 /**
  * Menu callback; Return the title of a menu item based on the group title.
  */
-function group_ui_menu_title_callback($title, $entity_type, $etid) {
-  $group = group_get_group($entity_type, $etid);
-  $label = group_label($group->gid);
+function og_ui_menu_title_callback($title, $entity_type, $etid) {
+  $group = og_get_group($entity_type, $etid);
+  $label = og_label($group->gid);
   return str_replace('@group', $label, $title);
 }
 
 /**
  * Implement hook_theme().
  */
-function group_ui_theme() {
+function og_ui_theme() {
   return array(
     'group_ui_user_admin_permissions' => array(
       'render element' => 'form',
@@ -180,7 +180,7 @@ function group_ui_theme() {
 /**
  * Implement hook_field_formatter_info().
  */
-function group_ui_field_formatter_info() {
+function og_ui_field_formatter_info() {
   return array(
     'group_group_subscribe' => array(
       'label' => t('Group subscription'),
@@ -192,10 +192,10 @@ function group_ui_field_formatter_info() {
 /**
  * Implements hook_field_formatter_view().
  */
-function group_ui_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-  if ($field['field_name'] == 'group_group' && $links = group_ui_subscribe_link($entity_type, $entity)) {
+  if ($field['field_name'] == 'group_group' && $links = og_ui_subscribe_link($entity_type, $entity)) {
     $element[0] = $links;
   }
 
@@ -211,7 +211,7 @@ function group_ui_field_formatter_view($entity_type, $entity, $field, $instance,
  * @param $account
  * @return unknown_type
  */
-function group_ui_subscribe_link($entity_type, $entity, $account = NULL) {
+function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
   $return = array();
 
   if (empty($account)) {
@@ -221,7 +221,7 @@ function group_ui_subscribe_link($entity_type, $entity, $account = NULL) {
 
   list($id) = entity_extract_ids($entity_type, $entity);
 
-  if (($group = group_get_group($entity_type, $id))) {
+  if (($group = og_get_group($entity_type, $id))) {
     if (!empty($entity->uid) && ($entity->uid == $user->uid)) {
       // User is the group manager.
       $return = array(
@@ -231,19 +231,19 @@ function group_ui_subscribe_link($entity_type, $entity, $account = NULL) {
     }
     else {
       // check the user state.
-      if ($state = group_get_entity_state($group->gid, 'user', $account)) {
+      if ($state = og_get_entity_state($group->gid, 'user', $account)) {
 
-        if ($state == GROUP_STATE_PENDING && group_user_access($group->gid, 'subscribe')) {
+        if ($state == GROUP_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
           $links['title'] = t('Re-request group membership');
           $links['href'] = "group/$entity_type/$id/subscribe";
         }
-        elseif ($state == GROUP_STATE_ACTIVE && group_user_access($group->gid, 'unsubscribe', $account)) {
+        elseif ($state == GROUP_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe', $account)) {
           $links['title'] = t('Unsubscribe from group');
           $links['href'] = "group/$entity_type/$id/unsubscribe";
         }
       }
       else {
-        if (group_user_access($group->gid, 'subscribe without approval', $account)) {
+        if (og_user_access($group->gid, 'subscribe without approval', $account)) {
           $links['title'] = t('Subscribe to group');
           $url = "group/$entity_type/$id/subscribe";
           if ($account->uid) {
@@ -254,7 +254,7 @@ function group_ui_subscribe_link($entity_type, $entity, $account = NULL) {
             $links['options'] = array('query' => array('destination' => $url));
           }
         }
-        elseif (group_user_access($group->gid, 'subscribe')) {
+        elseif (og_user_access($group->gid, 'subscribe')) {
           $links['title'] = t('Request group membership');
           $url = "group/$entity_type/$id/subscribe";
           if ($account->uid) {
@@ -292,7 +292,7 @@ function group_ui_subscribe_link($entity_type, $entity, $account = NULL) {
 /**
  * Implement hook_forms().
  */
-function group_ui_forms() {
+function og_ui_forms() {
   $forms['group_ui_user_admin_new_role']['callback'] = 'group_ui_user_admin_role';
 
   // Form to define the default permissions state for new groups.
@@ -304,7 +304,7 @@ function group_ui_forms() {
 /**
  * Implement hook_form_FORM_ID_alter().
  */
-function group_ui_form_node_type_form_alter(&$form, &$form_state) {
+function og_ui_form_node_type_form_alter(&$form, &$form_state) {
   $node_type = $form['#node_type']->type;
 
   $form['group'] = array(
@@ -318,14 +318,14 @@ function group_ui_form_node_type_form_alter(&$form, &$form_state) {
   $form['group']['group_group_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group'),
-    '#default_value' =>  group_is_group_type('node', $node_type) ? 'group' : 'omitted',
+    '#default_value' =>  og_is_group_type('node', $node_type) ? 'group' : 'omitted',
     '#options' => array('omitted' => t('Not a group type'), 'group' => t('Group type')),
   );
 
   $form['group']['group_group_content_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group content'),
-    '#default_value' =>  group_is_group_content_type('node', $node_type) ? 'group_content' : 'omitted',
+    '#default_value' =>  og_is_group_content_type('node', $node_type) ? 'group_content' : 'omitted',
     '#options' => array('omitted' => t('Not a group content type'), 'group_content' => t('Group content type')),
   );
 }
@@ -333,7 +333,7 @@ function group_ui_form_node_type_form_alter(&$form, &$form_state) {
 /**
  * Implement hook_group_permission().
  */
-function group_ui_group_permission() {
+function og_ui_group_permission() {
   return array(
     'subscribe' => array(
       'title' => t('Subscribe user to group'),
@@ -364,7 +364,7 @@ function group_ui_group_permission() {
 /**
  * Implement hook_group_default_permissions().
  */
-function group_ui_group_default_permissions() {
+function og_ui_group_default_permissions() {
   return array(
     'subscribe' => array(GROUP_ANONYMOUS_ROLE),
     'unsubscribe' => array(GROUP_AUTHENTICATED_ROLE),
@@ -376,7 +376,7 @@ function group_ui_group_default_permissions() {
 /**
  * Implement hook_group_user_operations().
  */
-function group_ui_group_user_operations($form = array(), $form_state = array()) {
+function og_ui_group_user_operations($form = array(), $form_state = array()) {
   $gid = $form_state['group']->gid;
   $operations = array(
     'unblock' => array(
@@ -393,8 +393,8 @@ function group_ui_group_user_operations($form = array(), $form_state = array()) 
     ),
   );
 
-  if (group_user_access($gid, 'administer group')) {
-    $roles = group_user_roles($gid);
+  if (og_user_access($gid, 'administer group')) {
+    $roles = og_user_roles($gid);
 
     $add_roles = array();
     foreach ($roles as $rid => $name) {
@@ -431,7 +431,7 @@ function group_ui_group_user_operations($form = array(), $form_state = array()) 
     $operation = $operation_rid[0];
     if ($operation == 'add_role' || $operation == 'remove_role') {
       $rid = $operation_rid[1];
-      if (group_user_access($gid, 'administer group')) {
+      if (og_user_access($gid, 'administer group')) {
         $operations[$form_state['values']['operation']] = array(
           'callback' => 'group_ui_user_multiple_role_edit',
           'callback arguments' => array($operation, $rid),
@@ -451,14 +451,14 @@ function group_ui_group_user_operations($form = array(), $form_state = array()) 
 /**
  * Callback function for admin mass approving users.
  */
-function group_ui_user_operations_approve($gid, $uids) {
+function og_ui_user_operations_approve($gid, $uids) {
   _group_ui_user_operations_set_state($gid, $uids, GROUP_STATE_ACTIVE);
 }
 
 /**
  * Callback function for admin mass blocking users.
  */
-function group_ui_user_operations_block($gid, $uids) {
+function og_ui_user_operations_block($gid, $uids) {
   _group_ui_user_operations_set_state($gid, $uids, GROUP_STATE_BLOCKED);
 }
 
@@ -476,7 +476,7 @@ function group_ui_user_operations_block($gid, $uids) {
 function _group_ui_user_operations_set_state($gid, $uids, $state) {
   $accounts = user_load_multiple($uids);
   foreach ($accounts as $account) {
-    group_group($gid, 'user', $account, $state);
+    og_group($gid, 'user', $account, $state);
   }
 }
 
@@ -484,11 +484,11 @@ function _group_ui_user_operations_set_state($gid, $uids, $state) {
 /**
  * Callback function for admin mass denying users.
  */
-function group_ui_user_operations_deny($gid, $uids) {
+function og_ui_user_operations_deny($gid, $uids) {
   $accounts = user_load_multiple($uids);
 
   foreach ($accounts as $account) {
-    group_ungroup($gid, 'user', $account);
+    og_ungroup($gid, 'user', $account);
   }
 }
 
@@ -496,19 +496,19 @@ function group_ui_user_operations_deny($gid, $uids) {
 /**
  * Callback function for admin mass adding/ deleting a user role.
  */
-function group_ui_user_multiple_role_edit($gid, $accounts, $operation, $rid) {
+function og_ui_user_multiple_role_edit($gid, $accounts, $operation, $rid) {
   switch ($operation) {
     case 'add_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
-        group_users_roles_grant($gid, $account->uid, $rid);
+        og_users_roles_grant($gid, $account->uid, $rid);
 
       }
       break;
     case 'remove_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
-        group_users_roles_revoke($gid, $account->uid, $rid);
+        og_users_roles_revoke($gid, $account->uid, $rid);
       }
       break;
   }
@@ -517,16 +517,16 @@ function group_ui_user_multiple_role_edit($gid, $accounts, $operation, $rid) {
 /**
  * Implementation of hook_group_ui_get_group_admin()
  */
-function group_ui_group_ui_get_group_admin($gid) {
+function og_ui_group_ui_get_group_admin($gid) {
   $items = array();
 
-  $default_access = group_is_group_default_access($gid);
+  $default_access = og_is_group_default_access($gid);
 
   $items['add_people'] = array(
     'title' => t('Add people'),
     'description' => t('Add group members.'),
     // The final URL will be "group/$entity_type/$etid/admin/people/add-user".
-    // @see group_ui_group_admin_overview().
+    // @see og_ui_group_admin_overview().
     'href' => 'admin/people/add-user',
   );
 
@@ -553,7 +553,7 @@ function group_ui_group_ui_get_group_admin($gid) {
 /**
  * Get all the group admin menu items.
  */
-function group_ui_get_group_admin($gid) {
+function og_ui_get_group_admin($gid) {
   $data = module_invoke_all('group_ui_get_group_admin', $gid);
 
   // Allow other modules to alter the menu items.

@@ -9,7 +9,7 @@
 /**
  * Implements hook_views_plugins().
  */
-function group_context_views_plugins() {
+function og_context_views_plugins() {
   return array(
     'argument default' => array(
       'group_context' => array(

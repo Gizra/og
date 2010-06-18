@@ -15,9 +15,9 @@
  *   Optional; The user ID of the subscribing user. If empty the current user
  *   will be used.
  */
-function group_ui_subscribe($entity_type, $etid, $uid = NULL) {
+function og_ui_subscribe($entity_type, $etid, $uid = NULL) {
   global $user;
-  if ($group = group_get_group($entity_type, $etid)) {
+  if ($group = og_get_group($entity_type, $etid)) {
     if (empty($uid)) {
       $account = $user;
 
@@ -37,7 +37,7 @@ function group_ui_subscribe($entity_type, $etid, $uid = NULL) {
     }
 
     // Check user isn't already subscribed.
-    if (in_array($group->gid, group_get_entity_groups('user', $account))) {
+    if (in_array($group->gid, og_get_entity_groups('user', $account))) {
       $params = array(
         '@user' => $account->name,
         // TODO: Use entity_label, but check user has permissions to see title.
@@ -51,7 +51,7 @@ function group_ui_subscribe($entity_type, $etid, $uid = NULL) {
       $entity = reset(entity_load($entity_type, array($etid)));
       _group_ui_redirect($entity_type, $entity);
     }
-    elseif (group_user_access($group->gid, 'subscribe', $account) || group_user_access($group->gid, 'subscribe without approval', $account)) {
+    elseif (og_user_access($group->gid, 'subscribe', $account) || og_user_access($group->gid, 'subscribe without approval', $account)) {
       // Show the user a subscription confirmation.
       return drupal_get_form('group_ui_confirm_subscribe', $group, $account);
     }
@@ -65,7 +65,7 @@ function group_ui_subscribe($entity_type, $etid, $uid = NULL) {
 /**
  * Confirm subscribe form.
  */
-function group_ui_confirm_subscribe($form, &$form_state, $group, $account) {
+function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
   $form['group'] = array('#type' => 'value', '#value' => $group);
   $form['account'] = array('#type' => 'value', '#value' => $account);
   if (!group_user_access($group->gid, 'subscribe without approval')) {
@@ -75,21 +75,21 @@ function group_ui_confirm_subscribe($form, &$form_state, $group, $account) {
       '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
     );
   }
-  $label = group_label($group->gid);
+  $label = og_label($group->gid);
   return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $label)), "$group->entity_type/$group->etid", ' ', t('Join'), t('Cancel'));
 }
 
 /**
  * Submit handler; Confirm GROUP membership.
  */
-function group_ui_confirm_subscribe_submit($form, &$form_state) {
+function og_ui_confirm_subscribe_submit($form, &$form_state) {
   $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
 
   $group = $form_state['values']['group'];
   $account = $form_state['values']['account'];
-  $state = group_user_access($group->gid, 'subscribe without approval') ? GROUP_STATE_ACTIVE : GROUP_STATE_PENDING;
+  $state = og_user_access($group->gid, 'subscribe without approval') ? GROUP_STATE_ACTIVE : GROUP_STATE_PENDING;
 
-  group_group($group->gid, 'user', $account, $state);
+  og_group($group->gid, 'user', $account, $state);
 
   $form_state['redirect'] = "$group->entity_type/$group->etid";
 }
@@ -102,15 +102,15 @@ function group_ui_confirm_subscribe_submit($form, &$form_state) {
  * no malicious user will unsubscribe another user. Administrators can reject or
  * ban another group member from the "people" page.
  */
-function group_ui_unsubscribe($entity_type, $etid) {
-  if ($group = group_get_group($entity_type, $etid)) {
+function og_ui_unsubscribe($entity_type, $etid) {
+  if ($group = og_get_group($entity_type, $etid)) {
     global $user;
-    $label = group_label($group->gid);
+    $label = og_label($group->gid);
     // Check the user isn't the manager of the group.
     $entity= entity_load($group->entity_type, array($group->etid));
     $entity = reset($entity);
     if (!empty($entity->uid) && $entity->uid != $user->uid) {
-      $user_groups = group_get_entity_groups('user', $user);
+      $user_groups = og_get_entity_groups('user', $user);
       if (!empty($user_groups[$group->gid])) {
         // Show the user a subscription confirmation.
         return drupal_get_form('group_ui_confirm_unsubscribe', $group, $user);
@@ -153,22 +153,22 @@ function _group_ui_redirect($entity_type, $entity, $account = NULL) {
 /**
  * Confirm unsubscribe form.
  */
-function group_ui_confirm_unsubscribe($form, &$form_state, $group, $account) {
+function og_ui_confirm_unsubscribe($form, &$form_state, $group, $account) {
    $form['group'] = array('#type' => 'value', '#value' => $group);
    $form['account'] = array('#type' => 'value', '#value' => $account);
 
-   $label = group_label($group->gid);
+   $label = og_label($group->gid);
    return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), "$group->entity_type/$group->etid", ' ', t('Remove'), t('Cancel'));
 }
 
 /**
  * Submit handler; Confirm GROUP unsubscription.
  */
-function group_ui_confirm_unsubscribe_submit($form, &$form_state) {
+function og_ui_confirm_unsubscribe_submit($form, &$form_state) {
   $group = $form_state['values']['group'];
   $account = $form_state['values']['account'];
 
-  group_ungroup($group->gid, 'user', $account);
+  og_ungroup($group->gid, 'user', $account);
 
   // Determine where to go next - Group if accessible, or else site front page.
   $form_state['redirect'] = "$group->entity_type/$group->etid";

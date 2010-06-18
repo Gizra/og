@@ -1,5 +1,5 @@
 <?php
-class group_handler_field_group_member_count extends views_handler_field_numeric {
+class og_handler_field_group_member_count extends views_handler_field_numeric {
   function init(&$view, $options) {
     parent::init($view, $options);
     $this->additional_fields['gid'] = array('table' => 'group_groups', 'field' => 'gid');

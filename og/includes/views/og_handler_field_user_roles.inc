@@ -3,7 +3,7 @@
 /**
  * Field handler to provide a list of group roles.
  */
-class group_handler_field_user_roles extends group_handler_field_prerender_list {
+class og_handler_field_user_roles extends og_handler_field_prerender_list {
   function construct() {
     parent::construct();
     $this->additional_fields['uid'] = array('table' => 'users', 'field' => 'uid');
@@ -23,7 +23,7 @@ class group_handler_field_user_roles extends group_handler_field_prerender_list 
     $all_rids = array();
     if ($list) {
       foreach ($list as $value) {
-        $rids = group_get_user_roles($value['gid'], $value['uid']);
+        $rids = og_get_user_roles($value['gid'], $value['uid']);
         foreach ($rids as $rid) {
           $this->items[$value['gid']][$value['uid']][$rid]['rid'] = $rid;
         }
@@ -31,7 +31,7 @@ class group_handler_field_user_roles extends group_handler_field_prerender_list 
       }
 
       // Get the name of all the roles we need to show.
-      $all_rids = group_get_user_roles_name($all_rids);
+      $all_rids = og_get_user_roles_name($all_rids);
 
       // Sanitize each role name once.
       array_walk($all_rids, 'check_plain');

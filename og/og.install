@@ -12,15 +12,15 @@
  * Add group audience to users by default. This can't be in hook_install() as
  * the field isn't known yet.
  */
-function group_enable() {
-  group_create_field('group_audience', 'user', 'user');
+function og_enable() {
+  og_create_field('group_audience', 'user', 'user');
 }
 
 
 /**
  * Implements hook_uninstall().
  */
-function group_uninstall() {
+function og_uninstall() {
   $vars = array(
     'group_context',
     'group_group_manager_full_access',
@@ -35,7 +35,7 @@ function group_uninstall() {
 /**
  * Implements hook_schema().
  */
-function group_schema() {
+function og_schema() {
   $schema = array();
 
   $schema['group_groups'] = array(
@@ -184,7 +184,7 @@ if (module_exists('group')) {
   /**
    * Upgrade from Organic groups to Group.
    */
-  function group_update_7000(&$sandbox) {
+  function og_update_7000(&$sandbox) {
     // Pattern taken from node_update_7006().
     // - Add group fields to nodes.
     // - Move Organic groups' data into the fields of group.
@@ -228,7 +228,7 @@ if (module_exists('group')) {
           );
           foreach ($fields as $key => $field_name) {
             foreach ($content_type[$key] as $type) {
-              group_create_field($field_name, 'node', $type);
+              og_create_field($field_name, 'node', $type);
             }
           }
         }
@@ -339,9 +339,9 @@ function _group_upgrade_group(&$sandbox) {
   if ($nids) {
     foreach ($nids as $nid => $created) {
       // Make sure the created value wasn't altered already.
-      if (($group = group_get_group('node', $nid, TRUE)) && $group->created != $created) {
+      if (($group = og_get_group('node', $nid, TRUE)) && $group->created != $created) {
         $group->created = $created;
-        group_save($group);
+        og_save($group);
 
         // New group created, so add it to the total count.
         $sandbox['count'] += 1;
@@ -373,9 +373,9 @@ function _group_upgrade_group_content(&$sandbox) {
   $revisions = $query->execute();
 
   foreach ($revisions as $revision) {
-    $group = group_get_group('node', $revision->group_nid);
+    $group = og_get_group('node', $revision->group_nid);
 
-    group_group($group->gid, 'node', $revision);
+    og_group($group->gid, 'node', $revision);
 
     $sandbox['last'] = $account->nid;
     // User subscribed to group.
@@ -392,7 +392,7 @@ function _group_upgrade_user(&$sandbox) {
   static $rid = 0;
   if (!$rid) {
     // Get the administrator role ID.
-    $roles = array_flip(group_get_global_roles());
+    $roles = array_flip(og_get_global_roles());
     $rid = $roles[GROUP_ADMINISTRATOR_ROLE];
   }
 
@@ -409,13 +409,13 @@ function _group_upgrade_user(&$sandbox) {
   $accounts = $query->execute();
 
   foreach ($accounts as $account) {
-    $group = group_get_group('node', $account->nid);
+    $group = og_get_group('node', $account->nid);
     $state = $account->is_active ? GROUP_STATE_ACTIVE : GROUP_STATE_PENDING;
 
-    group_group($group->gid, 'user', $account, $state);
+    og_group($group->gid, 'user', $account, $state);
 
     if ($account->is_admin) {
-      group_users_roles_grant($group->gid, $account->uid, $rid);
+      og_users_roles_grant($group->gid, $account->uid, $rid);
     }
     $sandbox['last'] = $account->nid;
     // User subscribed to group.

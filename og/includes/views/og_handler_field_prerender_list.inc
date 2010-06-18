@@ -3,7 +3,7 @@
 /**
  * Field handler to provide a list of group permissions.
  */
-class group_handler_field_prerender_list extends views_handler_field_prerender_list {
+class og_handler_field_prerender_list extends views_handler_field_prerender_list {
   /**
    * We override this function as $this->items is an array keyed by:
    * - Group ID

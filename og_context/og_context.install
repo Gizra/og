@@ -9,7 +9,7 @@
 /**
  * Implements hook_uninstall().
  */
-function group_context_uninstall() {
+function og_context_uninstall() {
   $vars = array(
     'group_context_hook_init',
     'group_context_negotiation_group_context',

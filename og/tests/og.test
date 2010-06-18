@@ -23,7 +23,7 @@ class OgGroupCrud extends DrupalWebTestCase {
    * Test CRUD of group entitys.
    */
   function testOgCrud() {
-    $group = group_get_group('foo', 1, TRUE);
+    $group = og_get_group('foo', 1, TRUE);
 
     // Assert is new property.
     $this->assertTrue($group->is_new, t('New group has "is new" property.'));
@@ -38,31 +38,31 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue(empty($group->gid), t('Group ID not set for unsaved group.'));
 
     // Save the group.
-    $group = group_save($group);
+    $group = og_save($group);
 
     // Assert group ID was set.
     $this->assertTrue(!empty($group->gid), t('Group ID was set for saved group.'));
 
     // Set a new state for the group.
-    $group = group_get_group('foo', 1);
+    $group = og_get_group('foo', 1);
     $group->state = GROUP_STATE_PENDING;
 
-    $group = group_save($group);
+    $group = og_save($group);
 
     // Assert group isn't loaded, when state is pending and state isn't
     // specifically stated.
     drupal_static_reset('group_get_group_ids');
-    $group = group_get_group('foo', 1);
+    $group = og_get_group('foo', 1);
 
     $this->assertFalse($group, t('Pending state group was not loaded, as it was not requested.'));
 
     // Reload group to make sure state was updated.
-    $group = group_get_group('foo', 1, FALSE, array(GROUP_STATE_PENDING), TRUE);
+    $group = og_get_group('foo', 1, FALSE, array(GROUP_STATE_PENDING), TRUE);
 
     $this->assertTrue($group->state == GROUP_STATE_PENDING, t('Group was updated.'));
 
-    group_delete($group->gid);
-    $group = group_get_group('foo', 1, FALSE, array(GROUP_STATE_PENDING), TRUE);
+    og_delete($group->gid);
+    $group = og_get_group('foo', 1, FALSE, array(GROUP_STATE_PENDING), TRUE);
 
     $this->assertFalse($group, t('Group was deleted.'));
   }
@@ -84,7 +84,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $node = $this->drupalCreateNode(array('type' => $type, GROUP_GROUP_FIELD => $group_group));
 
     // Assert a group was created.
-    $group = group_get_group('node', $node->nid);
+    $group = og_get_group('node', $node->nid);
 
     $this->assertTrue(!empty($group->gid), t('Group was created.'));
 
@@ -97,7 +97,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     node_save($node);
 
     // Reset the group.
-    $group = group_load($group->gid, TRUE);
+    $group = og_load($group->gid, TRUE);
 
     // Assert the group's state is pending.
     $this->assertTrue($group->state == GROUP_STATE_PENDING, t('Group entity was changed to pending.'));
@@ -138,7 +138,7 @@ class OgTypeTest extends DrupalWebTestCase {
     // Create post content type.
     $group_content = $this->drupalCreateContentType(array(), array('group_group_content_type' => 'group content'));
 
-    $this->assertTrue(group_is_group_content_type($group_content->type), t('Content type is group content.'));
+    $this->assertTrue(og_is_group_content_type($group_content->type), t('Content type is group content.'));
 
     // Assert group content fields were added to the content type.
     $this->drupalGet('node/add/' . $group_content->type);
@@ -165,31 +165,31 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $group_type = $this->drupalCreateContentType();
     $this->group_type = $group_type->type;
 
-    // Add group_group field.
-    group_create_field('group_group', 'node', $this->group_type);
+    // Add og_group field.
+    og_create_field('group_group', 'node', $this->group_type);
 
     $node = $this->drupalCreateNode(array('type' => $group_type->type, 'group_group' => array(LANGUAGE_NONE => array(0 => array('value' =>TRUE)))));
-    $this->group = group_get_group('node', $node->nid);
+    $this->group = og_get_group('node', $node->nid);
   }
 
 
   /**
-   * Verify proper permission changes by group_user_role_change_permissions().
+   * Verify proper permission changes by og_user_role_change_permissions().
    */
   function testOgUserRoleChangePermissions() {
     $account = $this->drupalCreateUser();
     $gid = $this->group->gid;
 
     // Associate the user to the group.
-    group_subscribe_user(array(array('gid' => $gid)), $account);
+    og_subscribe_user(array(array('gid' => $gid)), $account);
 
     // Verify current permissions.
-    $this->assertTrue(group_user_access($gid, 'update own group content', $account), t('User has "update own group content" permission.'));
-    $this->assertTrue(group_user_access($gid, 'delete own group content', $account), t('User has "delete own group content" permission.'));
-    $this->assertFalse(group_user_access($gid, 'administer group', $account), t('User does not have "administer group" permission.'));
+    $this->assertTrue(og_user_access($gid, 'update own group content', $account), t('User has "update own group content" permission.'));
+    $this->assertTrue(og_user_access($gid, 'delete own group content', $account), t('User has "delete own group content" permission.'));
+    $this->assertFalse(og_user_access($gid, 'administer group', $account), t('User does not have "administer group" permission.'));
 
     // Change permissions to authenticated member.
-    $roles = group_get_group_default_roles($gid);
+    $roles = og_get_group_default_roles($gid);
     // Anonymous role ID.
     $rid = $roles[GROUP_AUTHENTICATED_ROLE];
 
@@ -197,11 +197,11 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
       'delete own group content' => 0,
       'administer group' => 1,
     );
-    group_user_role_change_permissions($rid, $permissions);
+    og_user_role_change_permissions($rid, $permissions);
 
     // Verify proper permission changes.
-    $this->assertTrue(group_user_access($gid, 'update own group content', $account), t('User still has "update own group content" permission.'));
-    $this->assertFalse(group_user_access($gid, 'delete own group content', $account), t('User no longer has "delete own group content" permission.'));
-    $this->assertTrue(group_user_access($gid, 'administer group', $account), t('User now has "administer group" permission.'));
+    $this->assertTrue(og_user_access($gid, 'update own group content', $account), t('User still has "update own group content" permission.'));
+    $this->assertFalse(og_user_access($gid, 'delete own group content', $account), t('User no longer has "delete own group content" permission.'));
+    $this->assertTrue(og_user_access($gid, 'administer group', $account), t('User now has "administer group" permission.'));
   }
 }

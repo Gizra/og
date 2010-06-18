@@ -9,7 +9,7 @@
 /**
  * Implements hook_views_data().
  */
-function group_views_data() {
+function og_views_data() {
   $data = array();
 
   $data['group_groups']['table']['group'] = t('Group');
@@ -149,7 +149,7 @@ function group_views_data() {
 /**
  * Implements hook_views_handlers().
  */
-function group_views_handlers() {
+function og_views_handlers() {
   return array(
     // Base class field.
     'group_handler_field_prerender_list' => array(
@@ -190,7 +190,7 @@ function group_views_handlers() {
 /**
  * Implements hook_views_data_alter().
  */
-function group_views_data_alter(&$data) {
+function og_views_data_alter(&$data) {
   $items = module_invoke_all('group_views_relationship');
 
   foreach ($items as $item) {

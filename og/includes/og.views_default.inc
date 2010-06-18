@@ -3,7 +3,7 @@
 /**
  * Implements of hook_views_default_views().
  */
-function group_views_default_views() {
+function og_views_default_views() {
   /*
    * View 'group_list'
    */
@@ -147,12 +147,12 @@ function group_views_default_views() {
   $handler->display->display_options['fields']['name']['empty_zero'] = 0;
   $handler->display->display_options['fields']['name']['link_to_user'] = 1;
   $handler->display->display_options['fields']['name']['overwrite_anonymous'] = 0;
-  /* Sort criterion: Fields: group_audience (group_audience) - created */
+  /* Sort criterion: Fields: og_audience (og_audience) - created */
   $handler->display->display_options['sorts']['group_audience_created']['id'] = 'group_audience_created';
   $handler->display->display_options['sorts']['group_audience_created']['table'] = 'field_data_group_audience';
   $handler->display->display_options['sorts']['group_audience_created']['field'] = 'group_audience_created';
   $handler->display->display_options['sorts']['group_audience_created']['order'] = 'DESC';
-  /* Argument: Fields: group_audience (group_audience) - gid */
+  /* Argument: Fields: og_audience (og_audience) - gid */
   $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
   $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
   $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
@@ -167,7 +167,7 @@ function group_views_default_views() {
   $handler->display->display_options['filters']['status']['table'] = 'users';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = '1';
-  /* Filter: Fields: group_audience (group_audience) - state */
+  /* Filter: Fields: og_audience (og_audience) - state */
   $handler->display->display_options['filters']['group_audience_state']['id'] = 'group_audience_state';
   $handler->display->display_options['filters']['group_audience_state']['table'] = 'field_data_group_audience';
   $handler->display->display_options['filters']['group_audience_state']['field'] = 'group_audience_state';
@@ -208,7 +208,7 @@ function group_views_default_views() {
   $handler->display->display_options['sorts']['created']['table'] = 'node';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-  /* Argument: Fields: group_audience (group_audience) - gid */
+  /* Argument: Fields: og_audience (og_audience) - gid */
   $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
   $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
   $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';

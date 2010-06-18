@@ -10,7 +10,7 @@
 /**
  * Implements hook_menu().
  */
-function group_context_menu() {
+function og_context_menu() {
   $items['admin/config/group/context'] = array(
     'title' => 'Group context',
     'description' => 'Group context detection and selection',
@@ -27,7 +27,7 @@ function group_context_menu() {
 /**
  * Implements hook_theme().
  */
-function group_context_theme() {
+function og_context_theme() {
   return array(
     'group_context_configure_form' => array(
       'render element' => 'form',
@@ -40,8 +40,8 @@ function group_context_theme() {
  *
  * HTML preprocess; Add context related templates and CSS.
  */
-function group_context_preprocess_html(&$variables) {
-  if ($group = group_context()) {
+function og_context_preprocess_html(&$variables) {
+  if ($group = og_context()) {
     // Add template suggestions.
     $variables['theme_hook_suggestions'][] = 'page__group_context';
     $variables['theme_hook_suggestions'][] = 'page__group_context__group_' . $group->gid;
@@ -56,14 +56,14 @@ function group_context_preprocess_html(&$variables) {
     $variables['classes_array'][] = $clean_html . '-' . $group->etid;
 
     // Add context to JS.
-    group_context_add_js($group);
+    og_context_add_js($group);
   }
 }
 
 /**
  * Implements hook_group_context_negotiation_info().
  */
-function group_context_group_context_negotiation_info() {
+function og_context_group_context_negotiation_info() {
   $providers = array();
 
   $providers['session'] = array(
@@ -106,16 +106,16 @@ function group_context_group_context_negotiation_info() {
 /**
  * Implement hook_init().
  */
-function group_context_init() {
+function og_context_init() {
   if (variable_get('group_context_hook_init', TRUE)) {
-    group_context();
+    og_context();
   }
 }
 
 /**
  * Implements hook_views_api().
  */
-function group_context_views_api() {
+function og_context_views_api() {
   return array(
     'api' => 2,
     'path' => drupal_get_path('module', 'group_context') . '/includes',
@@ -125,7 +125,7 @@ function group_context_views_api() {
 /**
  * Implements hook_group_invalidate_cache_alter().
  */
-function group_context_group_invalidate_cache_alter(&$caches, $gids = array()) {
+function og_context_group_invalidate_cache_alter(&$caches, $gids = array()) {
   $caches += array(
     'group_context',
     'group_context_js',
@@ -144,7 +144,7 @@ function group_context_group_invalidate_cache_alter(&$caches, $gids = array()) {
  * @return
  *   A group entity, or FALSE if no context was found.
  */
-function group_context($group = NULL, $account = NULL) {
+function og_context($group = NULL, $account = NULL) {
   global $user;
   $context = &drupal_static(__FUNCTION__, FALSE);
 
@@ -154,7 +154,7 @@ function group_context($group = NULL, $account = NULL) {
 
   if (empty($context)) {
     // Get context from context handlers.
-    if (($context = group_context_determine_context()) && $user->uid) {
+    if (($context = og_context_determine_context()) && $user->uid) {
       // TODO: Add option to save session for anonymous users as-well?
       // Save the group ID in the authenticated user's session,
       $_SESSION['group_context'] = $context->gid;
@@ -170,7 +170,7 @@ function group_context($group = NULL, $account = NULL) {
  * @param $group
  *   A group entity.
  */
-function group_context_add_js($group) {
+function og_context_add_js($group) {
   // Static variable to indicate if group was already added to javascript.
   $js = &drupal_static(__FUNCTION__, FALSE);
 
@@ -186,14 +186,14 @@ function group_context_add_js($group) {
  * @return
  *   An array of group context providers.
  */
-function group_context_negotiation_info() {
+function og_context_negotiation_info() {
   $group_context_providers = &drupal_static(__FUNCTION__);
 
   if (!isset($group_context_providers)) {
-    // Collect all the module-defined group_context negotiation providers.
+    // Collect all the module-defined og_context negotiation providers.
     $group_context_providers = module_invoke_all('group_context_negotiation_info');
 
-    // Let other modules alter the list of group_context providers.
+    // Let other modules alter the list of og_context providers.
     drupal_alter('group_context_negotiation_info', $group_context_providers);
   }
 
@@ -216,17 +216,17 @@ function group_context_negotiation_info() {
  * @param $language_providers
  *   An array of language provider ids.
  */
-function group_context_negotiation_set($type, $group_context_providers) {
+function og_context_negotiation_set($type, $group_context_providers) {
   // Save only the necessary fields.
   $provider_fields = array('callbacks');
 
   $negotiation = array();
   $providers_weight = array();
-  $defined_providers = group_context_negotiation_info();
+  $defined_providers = og_context_negotiation_info();
 
   // Initialize the providers weight list.
   foreach ($group_context_providers as $id => $provider) {
-    $providers_weight[$id] = group_context_provider_weight($provider);
+    $providers_weight[$id] = og_context_provider_weight($provider);
   }
 
   // Order providers list by weight.
@@ -259,7 +259,7 @@ function group_context_negotiation_set($type, $group_context_providers) {
  * @return
  *   A numeric weight.
  */
-function group_context_provider_weight($provider) {
+function og_context_provider_weight($provider) {
   $default = is_numeric($provider) ? $provider : 0;
   return isset($provider['weight']) && is_numeric($provider['weight']) ? $provider['weight'] : $default;
 }
@@ -272,7 +272,7 @@ function group_context_provider_weight($provider) {
  *   Optional; A menu item that context should be extracted from. If empty
  *   defaults to the current menu item by using menu_get_item().
  */
-function group_context_determine_context($item = NULL) {
+function og_context_determine_context($item = NULL) {
   $context = FALSE;
 
   if ($enabled_providers = array_keys(variable_get("group_context_negotiation_group_context", array()))) {
@@ -282,7 +282,7 @@ function group_context_determine_context($item = NULL) {
       $item = menu_get_item();
     }
 
-    foreach (group_context_negotiation_info() as $name => $provider) {
+    foreach (og_context_negotiation_info() as $name => $provider) {
       if (in_array($name, $enabled_providers)) {
         $invoke = FALSE;
         if (!empty($provider['menu path'])) {
@@ -304,7 +304,7 @@ function group_context_determine_context($item = NULL) {
 
         if ($invoke && ($gids = call_user_func($provider['callback']))) {
           $gid = reset($gids);
-          $context = group_load($gid);
+          $context = og_load($gid);
           // We found the first context, so we can break.
           break;
         }
@@ -319,7 +319,7 @@ function group_context_determine_context($item = NULL) {
 /**
  * Context handler; Get groups from user's session.
  */
-function group_context_handler_session() {
+function og_context_handler_session() {
   $context = array();
 
   if (!empty($_SESSION['group_context'])) {
@@ -332,9 +332,9 @@ function group_context_handler_session() {
 /**
  * Context handler; Get groups from URL.
  */
-function group_context_handler_url() {
+function og_context_handler_url() {
   $context = array();
-  if ($gids = group_get_context_by_url()) {
+  if ($gids = og_get_context_by_url()) {
     $context = $gids;
   }
 
@@ -344,7 +344,7 @@ function group_context_handler_url() {
 /**
  * Context handler; Get groups from existing node.
  */
-function group_context_handler_node() {
+function og_context_handler_node() {
   // menu_get_object() doesn't play nicely if the path is node/%/foo, so we load
   // it ourself.
   $item = menu_get_item();
@@ -355,7 +355,7 @@ function group_context_handler_node() {
 /**
  * Context handler; Get groups from user view.
  */
-function group_context_handler_user_view() {
+function og_context_handler_user_view() {
   global $user;
   return _group_context_handler_entity('user', $user);
 }
@@ -363,7 +363,7 @@ function group_context_handler_user_view() {
 /**
  * Context handler; Get groups from user edit.
  */
-function group_context_handler_user_edit() {
+function og_context_handler_user_edit() {
   return _group_context_handler_entity('user');
 }
 
@@ -386,11 +386,11 @@ function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $p
   if ($entity) {
     // Check if the entity is itself a group.
     list($id) = entity_extract_ids($entity_type, $entity);
-    if ($group = group_get_group($entity_type, $id)) {
+    if ($group = og_get_group($entity_type, $id)) {
       $context = drupal_map_assoc(array($group->gid));
     }
 
-    elseif ($gids = group_get_entity_groups($entity_type, $entity)) {
+    elseif ($gids = og_get_entity_groups($entity_type, $entity)) {
       $context = $gids;
     }
   }
