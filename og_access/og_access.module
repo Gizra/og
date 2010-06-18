@@ -40,10 +40,10 @@ define('GROUP_CONTENT_ACCESS_PRIVATE', 2);
 /**
  * Implementation of hook_node_grants().
  */
-function group_access_node_grants($account, $op) {
+function og_access_node_grants($account, $op) {
   $grants = array();
   if ($op == 'view') {
-    foreach (group_get_entity_groups('user', $account) as $gid => $value) {
+    foreach (og_get_entity_groups('user', $account) as $gid => $value) {
       $grants[GROUP_ACCESS_AUTHENTICATED_REALM][] = $gid;
     }
   }
@@ -55,7 +55,7 @@ function group_access_node_grants($account, $op) {
 /**
  * Implementation of hook_node_access_records.
  */
-function group_access_node_access_records($node) {
+function og_access_node_access_records($node) {
   $grants = array();
 
   $access = FALSE;
@@ -67,10 +67,12 @@ function group_access_node_access_records($node) {
     switch ($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
       case GROUP_CONTENT_ACCESS_GROUP_DEFAULT:
         if ($field = field_info_field(GROUP_ACCESS_FIELD)) {
-          // Access should be determined by its groups.
-          $gids = group_get_entity_groups('node', $node);
+          // Access should be determined by its groups. If group content belongs
+          // to several groups, and one of them is private, then the group
+          // content will private as-well.
+          $gids = og_get_entity_groups('node', $node);
 
-          $groups = group_load_multiple($gids);
+          $groups = og_load_multiple($gids);
 
           // Get all groups under their entity.
           $list = array();
@@ -148,7 +150,7 @@ function group_access_node_access_records($node) {
 /**
  * Implement hook_group_fields_info().
  */
-function group_access_group_fields_info() {
+function og_access_group_fields_info() {
   $allowed_values = array(
     '0|Public - accessible to all site users',
     '1|Private - accessible only to group members',

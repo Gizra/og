@@ -12,9 +12,9 @@
 define('GROUP_LANGUAGE_FIELD', 'group_language');
 
 /**
- * Implement group_fields_info().
+ * Implement og_fields_info().
  */
-function group_language_group_fields_info() {
+function og_language_group_fields_info() {
   $items[GROUP_LANGUAGE_FIELD] = array(
     'type' => array('group'),
     'description' => t('Associate language interface to a group.'),
@@ -49,7 +49,7 @@ function group_language_group_fields_info() {
 /**
  * Implements hook_language_negotiation_info().
  */
-function group_language_language_negotiation_info() {
+function og_language_language_negotiation_info() {
   $providers = array();
 
   $providers['group-language'] = array(
@@ -72,13 +72,13 @@ function group_language_language_negotiation_info() {
  * @return
  *   A valid language code on success, FALSE otherwise.
  */
-function group_language_from_group_context($languages) {
+function og_language_from_group_context($languages) {
   // We need a full bootstrap in order to get the group context.
   drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
-  if ($group = group_context()) {
+  if ($group = og_context()) {
     // Load the entity.
-    $entity = group_load_entity_from_group($group->gid);
+    $entity = og_load_entity_from_group($group->gid);
 
     // Check if a theme field exists, and it isn't defined as "default"
     // (i.e. use the default site language).
@@ -94,7 +94,7 @@ function group_language_from_group_context($languages) {
 /**
  * Return all enabled themes.
  */
-function group_language_field_allowed_values() {
+function og_language_field_allowed_values() {
   $return = array('__default' => t('Use site-wide language interface definition'));
 
   foreach (locale_language_list() as $key => $value) {

@@ -14,7 +14,7 @@ define('GROUP_VIEWS_FIELD', 'group_views');
 /**
  * Implements hook_menu().
  */
-function group_views_menu() {
+function og_views_menu() {
   $items = array();
 
   $items['admin/config/group/group-views'] = array(
@@ -33,7 +33,7 @@ function group_views_menu() {
 /**
  * Implements of hook_views_api().
  */
-function group_views_views_api() {
+function og_views_views_api() {
   return array(
     'api' => 2,
   );
@@ -42,7 +42,7 @@ function group_views_views_api() {
 /**
  * Implement hook_field_formatter_info().
  */
-function group_views_field_formatter_info() {
+function og_views_field_formatter_info() {
   return array(
     'group_views_default' => array(
       'label' => t('Group Views'),
@@ -52,9 +52,9 @@ function group_views_field_formatter_info() {
 }
 
 /**
- * Implement group_fields_info().
+ * Implement og_fields_info().
  */
-function group_views_group_fields_info() {
+function og_views_group_fields_info() {
   $items[GROUP_VIEWS_FIELD] = array(
     'type' => array('group'),
     'description' => t('Add Group Views field to fieldable entities that are groups.'),
@@ -90,7 +90,7 @@ function group_views_group_fields_info() {
  * @param $include_global
  *   TRUE if the "global" option should be added to the Views list.
  */
-function group_views_field_allowed_values($include_global = TRUE) {
+function og_views_field_allowed_values($include_global = TRUE) {
   $return = array();
 
   // Add "global" views option.
@@ -112,7 +112,7 @@ function group_views_field_allowed_values($include_global = TRUE) {
 /**
  * Implements hook_field_formatter_view().
  */
-function group_views_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+function og_views_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
   if ($field['field_name'] == GROUP_VIEWS_FIELD && !empty($entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'])) {

@@ -11,7 +11,7 @@
  *
  * @ingroup views
  */
-class group_handler_relationship extends views_handler_relationship {
+class og_handler_relationship extends views_handler_relationship {
   /**
    * Called to implement a relationship in a query.
    */

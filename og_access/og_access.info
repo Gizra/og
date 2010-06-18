@@ -4,4 +4,4 @@ package = "Group"
 dependencies[] = group
 core = 7.x
 version = VERSION
-files[] = group_access.module
+files[] = og_access.module

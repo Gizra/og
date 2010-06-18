@@ -2,7 +2,7 @@
 name = Group theme
 description = "Associate theme to a group."
 package = "Group"
-dependencies[] = group_context
+dependencies[] = og_context
 core = 7.x
-files[] = group_theme.module
-files[] = group_theme.install
+files[] = og_theme.module
+files[] = og_theme.install

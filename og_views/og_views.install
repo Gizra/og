@@ -9,7 +9,7 @@
 /**
  * Implement hook_uninstall().
  */
-function group_views_uninstall() {
+function og_views_uninstall() {
   $vars = array(
     'group_views_global_view',
   );

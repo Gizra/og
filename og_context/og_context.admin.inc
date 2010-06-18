@@ -14,12 +14,12 @@
 /**
  * Setting for language negotiation options
  */
-function group_context_configure_form() {
+function og_context_configure_form() {
 
   $form = array(
     '#submit' => array('group_context_configure_form_submit'),
     '#theme' => 'group_context_configure_form',
-    '#group_context_providers' => group_context_negotiation_info(),
+    '#group_context_providers' => og_context_negotiation_info(),
   );
 
   _group_context_configure_form_table($form);
@@ -56,7 +56,7 @@ function _group_context_configure_form_table(&$form) {
   // Add missing data to the providers lists.
   foreach ($group_context_providers as $id => $provider) {
     if (!isset($providers_weight[$id])) {
-      $providers_weight[$id] = group_context_provider_weight($provider);
+      $providers_weight[$id] = og_context_provider_weight($provider);
     }
   }
 
@@ -158,9 +158,9 @@ function theme_group_context_configure_form($variables) {
 }
 
 /**
- * Submit handler for group_context negotiation settings.
+ * Submit handler for og_context negotiation settings.
  */
-function group_context_configure_form_submit($form, &$form_state) {
+function og_context_configure_form_submit($form, &$form_state) {
   $type = 'group_context';
 
   $negotiation = array();
@@ -175,7 +175,7 @@ function group_context_configure_form_submit($form, &$form_state) {
     }
   }
 
-  group_context_negotiation_set($type, $negotiation);
+  og_context_negotiation_set($type, $negotiation);
   variable_set("group_context_providers_weight_$type", $providers_weight);
 
   $form_state['redirect'] = 'admin/config/group/context';

@@ -42,7 +42,7 @@ function hook_group_permission() {
  *     context handler that returns the group context that is stored in the
  *     $_SESSION. By giving it a priority, we make sure that even if viewing
  *     different pages, the user will see the same group context.
- *     @see group_context_handler_session().
+ *     @see og_context_handler_session().
  */
 function hook_group_context_handlers() {
   $items = array();
@@ -169,7 +169,7 @@ function hook_group_users_roles_revoke($gid, $uid, $rid) {
  *   The user object.
  */
 function hook_group_audience_options_alter(&$options, $opt_group, $account) {
-  if (!$account->uid && $gids = group_register_get_groups()) {
+  if (!$account->uid && $gids = og_register_get_groups()) {
     $options['content groups'] = array_merge($options['content groups'], $gids);
   }
 }

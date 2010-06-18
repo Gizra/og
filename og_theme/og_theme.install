@@ -10,7 +10,7 @@ if (module_exists('group_theme')) {
   /**
    * Upgrade from Organic groups' theme to Group theme.
    */
-  function group_theme_update_7000(&$sandbox) {
+  function og_theme_update_7000(&$sandbox) {
     if (db_table_exists('og')) {
       $sandbox['#finished'] = 0;
 
@@ -21,12 +21,12 @@ if (module_exists('group_theme')) {
 
         // Get the group types. Group update has ran already, so we can use
         // Group's API.
-        // @see group_theme_update_dependencies()
+        // @see og_theme_update_dependencies()
         $groups = FALSE;
         foreach (node_type_get_types() as $type) {
-          if (group_is_group_type('node', $type->type)) {
+          if (og_is_group_type('node', $type->type)) {
             // Add group theme field to the content type.
-            group_create_field(GROUP_THEME_FIELD, 'node', $type->type);
+            og_create_field(GROUP_THEME_FIELD, 'node', $type->type);
             $groups = TRUE;
 
           }
@@ -94,7 +94,7 @@ if (module_exists('group_theme')) {
 /**
  * Implements hook_update_dependencies().
  */
-function group_theme_update_dependencies() {
+function og_theme_update_dependencies() {
   $dependencies['group_theme'][7000] = array(
     'group' => 7000,
   );

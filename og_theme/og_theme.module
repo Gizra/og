@@ -12,9 +12,9 @@
 define('GROUP_THEME_FIELD', 'group_theme');
 
 /**
- * Implement group_fields_info().
+ * Implement og_fields_info().
  */
-function group_theme_group_fields_info() {
+function og_theme_group_fields_info() {
   $items[GROUP_THEME_FIELD] = array(
     'type' => array('group'),
     'description' => t('Associate theme to a group.'),
@@ -51,10 +51,10 @@ function group_theme_group_fields_info() {
  *
  * Change the theme, based on a group context.
  */
-function group_theme_custom_theme() {
-  if ($group = group_context()) {
+function og_theme_custom_theme() {
+  if ($group = og_context()) {
     // Load the entity.
-    $entity = group_load_entity_from_group($group->gid);
+    $entity = og_load_entity_from_group($group->gid);
 
     // Check if a theme field exists, and it isn't defined as "default"
     // (i.e. use the default site theme).
@@ -68,7 +68,7 @@ function group_theme_custom_theme() {
 /**
  * Return all enabled themes.
  */
-function group_theme_field_allowed_values() {
+function og_theme_field_allowed_values() {
   $return = array('__default' => t('Use site-wide theme definition'));
 
   module_load_include('inc', 'system', 'system.admin');

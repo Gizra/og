@@ -9,7 +9,7 @@
 /**
  * Implement hook_uninstall().
  */
-function group_access_uninstall() {
+function og_access_uninstall() {
   $vars = array(
     'group_access_strict_private',
   );

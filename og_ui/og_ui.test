@@ -20,22 +20,22 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     $group_type = $this->drupalCreateContentType();
     $this->group_type = $group_type->type;
 
-    // Add group_group field.
-    group_create_field('group_group', 'node', $this->group_type);
+    // Add og_group field.
+    og_create_field('group_group', 'node', $this->group_type);
 
     $node = $this->drupalCreateNode(array('type' => $group_type->type, 'group_group' => array(LANGUAGE_NONE => array(0 => array('value' =>TRUE)))));
-    $this->group = group_get_group('node', $node->nid);
+    $this->group = og_get_group('node', $node->nid);
   }
 
   /**
-   * Change user permissions and check group_user_access().
+   * Change user permissions and check og_user_access().
    */
   function testOgUiUserPermissionChanges() {
     $web_user = $this->drupalCreateUser();
     $gid = $this->group->gid;
-    $this->assertTrue(group_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
+    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
 
-    $roles = group_get_group_default_roles($gid);
+    $roles = og_get_group_default_roles($gid);
 
     // Remove a permission.
     $edit = array();
@@ -47,7 +47,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     drupal_static_reset('group_user_access');
     drupal_static_reset('group_user_role_permissions');
 
-    $this->assertFalse(group_user_access($gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
+    $this->assertFalse(og_user_access($gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
 
     // Re-add permission.
     $edit = array();
@@ -58,6 +58,6 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     drupal_static_reset('group_user_access');
     drupal_static_reset('group_user_role_permissions');
 
-    $this->assertTrue(group_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
+    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
   }
 }
