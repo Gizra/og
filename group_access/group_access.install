@@ -11,7 +11,7 @@
  */
 function group_access_uninstall() {
   $vars = array(
-    'group_access_group_defaults_fallback',
+    'group_access_strict_private',
   );
   foreach ($vars as $var) {
     variable_del($var);

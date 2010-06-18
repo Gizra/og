@@ -67,9 +67,7 @@ function group_access_node_access_records($node) {
     switch ($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
       case GROUP_CONTENT_ACCESS_GROUP_DEFAULT:
         if ($field = field_info_field(GROUP_ACCESS_FIELD)) {
-          // Access should be determined by its groups. If group content belongs
-          // to several groups, and one of them is private, then the group
-          // content will private as-well.
+          // Access should be determined by its groups.
           $gids = group_get_entity_groups('node', $node);
 
           $groups = group_load_multiple($gids);
@@ -80,22 +78,43 @@ function group_access_node_access_records($node) {
             $list[$group->entity_type][$group->etid] = $group->etid;
           }
 
+          // If group content belongs to several groups, and one of them is
+          // private, then this variable decides what should happen -- if the
+          // group content will private as-well or become public.
+          // By default, if one group is private then the group content will be
+          // private.
+          $strict_private = variable_get('group_access_strict_private', 1);
+          $strict_private = 0;
+
+          $total_count = 0;
+
           foreach ($list as $entity_type => $entity_gids) {
-            // Get the entity types ID.
-            $conditions = array(
-              // TODO: document variable.
-              array('group_access_value', variable_get('group_access_group_defaults_fallback', 0)),
-              array('entity_id', $entity_gids),
-              // Use the "magic" column type to get the etid.
-              array('type', $entity_type),
-            );
+            $query = new EntityFieldQuery;
+            $count = $query
+              ->entityCondition('entity_type', $entity_type)
+              ->entityCondition('entity_id', $entity_gids, 'IN')
+              ->fieldCondition(GROUP_ACCESS_FIELD, 'value', 1, '=')
+              ->count()
+              ->execute();
 
-            $result = field_attach_query($field['id'], $conditions);
-
-            // There are no public groups.
-            if (empty($result)) {
-              $access = TRUE;
+            if ($strict_private) {
+              // There is at least one private group and 'strict private' is
+              // TRUE so this group content should be private.
+              if ($count) {
+                $access = TRUE;
+                break;
+              }
             }
+            else {
+              // 'strict private' is FALSE so count all the groups, and only if
+              // all of them are private then this group content should be
+              // private.
+              $total_count += $count;
+            }
+          }
+          if ($total_count == count($gids)) {
+            // All groups are private.
+            $access = TRUE;
           }
         }
         break;
@@ -110,6 +129,8 @@ function group_access_node_access_records($node) {
 
     }
   }
+
+  //TODO: Add a case where the group has access field but group content doesn't.
 
   if ($access) {
     $grants[] = array (
