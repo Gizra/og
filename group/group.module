@@ -566,6 +566,8 @@ function group_invalidate_cache($gids = array()) {
   );
 
   // Let other Group modules invalidate cache.
+  // TODO: Is there a better way? we want group_context to invalidate cache
+  // as-well.
   drupal_alter('group_invalidate_cache', $caches, $gids);
 
   foreach ($caches as $cache) {
@@ -751,7 +753,7 @@ function group_group($gid, $entity_type, $entity, $state = GROUP_STATE_ACTIVE, $
   if ($save) {
     // Call the field attachers.
     call_user_func('field_attach_' . $op, $entity_type, $entity);
-    drupal_static_reset('group_get_entity_groups');
+    group_invalidate_cache();
   }
 
   return $entity;
@@ -797,7 +799,7 @@ function group_ungroup($gid, $entity_type, $entity, $save = TRUE) {
           group_users_roles_revoke($gid, $entity->uid, $rid);
         }
       }
-      drupal_static_reset('group_get_entity_groups');
+      group_invalidate_cache();
     }
   }
 
