@@ -93,6 +93,8 @@ function group_menu() {
 
 /**
  * Implements hook_entity_property_info().
+ *
+ * Entity metadata hook.
  */
 function group_entity_property_info() {
   $info = array();
@@ -280,7 +282,7 @@ function group_node_access($node, $op, $account) {
       return $return;
     }
   }
-  // Not an organic group type or node creation which still has no groups.
+  // Not an group type or node creation which still has no groups.
   return NODE_ACCESS_IGNORE;
 }
 
@@ -392,7 +394,7 @@ function group_group_fields_info() {
 * content type should be a group or a group content. However, the actual
 * indication for it is in the field API. This is just a workaround, specifically
 * for the node entity, to allow users to define groups via the "content type"
-* edit.
+* page.
 */
 function group_node_type_delete($info) {
   variable_del('group_group_type_' . $info->type);
@@ -454,7 +456,7 @@ function group_get_group($entity_type, $etid, $create = FALSE, $states = array(G
 function group_create_group($values = array()) {
   $entity = entity_load($values['entity_type'], array($values['etid']));
   $entity = current($entity);
-  // Initialize values.
+  // Add default values.
   $values += array(
     'state' => GROUP_STATE_ACTIVE,
     'created' => time(),
