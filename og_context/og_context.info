@@ -2,7 +2,7 @@
 name = Group context
 description = "Get a group from a viewed page."
 package = "Group"
-dependencies[] = group
+dependencies[] = og
 core = 7.x
 files[] = og_context.module
 files[] = og_context.install

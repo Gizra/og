@@ -1,7 +1,7 @@
 name = Group access control
 description = "Enable access control for private and public groups and group content."
 package = "Group"
-dependencies[] = group
+dependencies[] = og
 core = 7.x
 version = VERSION
 files[] = og_access.module

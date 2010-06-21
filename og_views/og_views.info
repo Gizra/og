@@ -2,7 +2,7 @@
 name = Group Views integration
 description = "Use Views to search and display Group."
 package = "Group"
-dependencies[] = group
+dependencies[] = og
 dependencies[] = views
 core = 7.x
 files[] = og_views.module
