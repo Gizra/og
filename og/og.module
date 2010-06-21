@@ -369,7 +369,7 @@ function og_group_fields_info() {
     ),
     'instance' => array(
       'label' => t('Groups audience'),
-      'widget_type' => 'og_audience',
+      'widget_type' => OG_AUDIENCE_FIELD,
       'display' => array(
         'full' => array(
           'label' => 'above',
@@ -889,12 +889,12 @@ function og_user_access($gid, $string, $account = NULL) {
  */
 function og_node_type_save($bundle_name) {
   if (variable_get('og_group_type_' . $bundle_name, 'omitted') == 'group') {
-    og_create_field('og_group','node', $bundle_name);
+    og_create_field(OG_GROUP_FIELD,'node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_type_' . $bundle_name);
   }
   if (variable_get('og_group_content_type_' . $bundle_name, 'omitted') == 'og_content') {
-    og_create_field('og_audience','node', $bundle_name);
+    og_create_field(OG_AUDIENCE_FIELD,'node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_content_type_' . $bundle_name);
   }
