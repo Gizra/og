@@ -280,7 +280,7 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0
     }
     else {
       og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
-      if (!group_is_group_default_access($group->gid)) {
+      if (!og_is_group_default_access($group->gid)) {
         $form['name'] = array(
           '#type' => 'textfield',
           '#size' => 32,
@@ -346,7 +346,7 @@ function og_ui_user_admin_role_submit($form, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_group_ui_user_admin_new_role($variables) {
+function theme_og_ui_user_admin_new_role($variables) {
   $form = $variables['form'];
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
   // The group entity.
@@ -445,7 +445,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
   if (empty($group)) {
     $form['#theme'] = array('og_ui_user_admin_permissions');
   }
-  if ($gid == 0 || !group_is_group_default_access($group->gid)) {
+  if ($gid == 0 || !og_is_group_default_access($group->gid)) {
     $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -514,7 +514,7 @@ function og_ui_user_admin_permissions_submit($form, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_group_ui_user_admin_permissions($variables) {
+function theme_og_ui_user_admin_permissions($variables) {
   $form = $variables['form'];
   $gid = !empty($form['group']['#value']->gid) ? $form['group']['#value']->gid : 0;
   $roles = og_user_roles($gid);
@@ -664,7 +664,7 @@ function og_ui_field_settings_submit($form, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_group_ui_user_admin_bundles($variables) {
+function theme_og_ui_user_admin_bundles($variables) {
   $form = $variables['form'];
 
   $modules = array_keys(element_children($form['modules']));

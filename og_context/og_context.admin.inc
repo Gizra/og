@@ -101,7 +101,7 @@ function _group_context_configure_form_table(&$form) {
  *
  * @ingroup themeable
  */
-function theme_group_context_configure_form($variables) {
+function theme_og_context_configure_form($variables) {
   $form = $variables['form'];
   $output = '';
 
