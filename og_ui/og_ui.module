@@ -333,7 +333,7 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
 /**
  * Implement hook_og_permission().
  */
-function og_ui_group_permission() {
+function og_ui_og_permission() {
   return array(
     'subscribe' => array(
       'title' => t('Subscribe user to group'),
@@ -364,7 +364,7 @@ function og_ui_group_permission() {
 /**
  * Implement hook_og_default_permissions().
  */
-function og_ui_group_default_permissions() {
+function og_ui_og_default_permissions() {
   return array(
     'subscribe' => array(OG_ANONYMOUS_ROLE),
     'unsubscribe' => array(OG_AUTHENTICATED_ROLE),
@@ -376,7 +376,7 @@ function og_ui_group_default_permissions() {
 /**
  * Implement hook_og_user_operations().
  */
-function og_ui_group_user_operations($form = array(), $form_state = array()) {
+function og_ui_og_user_operations($form = array(), $form_state = array()) {
   $gid = $form_state['group']->gid;
   $operations = array(
     'unblock' => array(
@@ -517,7 +517,7 @@ function og_ui_user_multiple_role_edit($gid, $accounts, $operation, $rid) {
 /**
  * Implementation of hook_og_ui_get_group_admin()
  */
-function og_ui_group_ui_get_group_admin($gid) {
+function og_ui_og_ui_get_group_admin($gid) {
   $items = array();
 
   $default_access = og_is_group_default_access($gid);

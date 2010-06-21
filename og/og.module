@@ -205,7 +205,7 @@ function og_permission() {
 /**
  * Implement hook_og_permission().
  */
-function og_group_permission() {
+function og_og_permission() {
   // Generate standard node permissions for all applicable node types.
   $perms = array();
   foreach (node_permissions_get_configured_types() as $type) {
@@ -227,7 +227,7 @@ function og_group_permission() {
 /**
  * Implement hook_og_default_permissions().
  */
-function og_group_default_permissions() {
+function og_og_default_permissions() {
   // Create default permissions for group content nodes if they already exist.
   $perms = array();
   foreach (node_permissions_get_configured_types() as $type) {
@@ -251,7 +251,7 @@ function og_group_default_permissions() {
 /**
  * Implement hook_og_default_roles()
  */
-function og_group_default_roles() {
+function og_og_default_roles() {
   return array(OG_ADMINISTRATOR_ROLE);
 }
 

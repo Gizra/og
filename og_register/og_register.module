@@ -29,7 +29,7 @@ function og_register_form_user_register_form_alter(&$form, $form_state) {
 /**
  * Implements hook_og_audience_alter().
  */
-function og_register_group_audience_options_alter(&$options, $opt_group, $account) {
+function og_register_og_audience_options_alter(&$options, $opt_group, $account) {
   if (!$account->uid && $gids = og_register_get_groups()) {
     $options['content groups'] = array_merge($options['content groups'], $gids);
   }
