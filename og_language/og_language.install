@@ -26,7 +26,7 @@ if (module_exists('group_language')) {
         foreach (node_type_get_types() as $type) {
           if (og_is_group_type('node', $type->type)) {
             // Add group theme field to the content type.
-            og_create_field(GROUP_LANGUAGE_FIELD, 'node', $type->type);
+            og_create_field(OG_LANGUAGE_FIELD, 'node', $type->type);
             $groups = TRUE;
 
           }
@@ -71,7 +71,7 @@ if (module_exists('group_language')) {
             );
 
             // Set field values.
-            $node->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'] = $revision->og_language;
+            $node->{OG_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'] = $revision->og_language;
 
             field_attach_update('node', $node);
 

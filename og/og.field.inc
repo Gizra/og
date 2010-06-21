@@ -12,7 +12,7 @@
 
 function og_field_widget_properties_alter(&$widget, $context) {
   $field = $context['field'];
-  if ($field['field_name'] == GROUP_AUDIENCE_FIELD) {
+  if ($field['field_name'] == OG_AUDIENCE_FIELD) {
     $instance = $context['instance'];
     // Determine if a user may see other groups as-well.
     $opt_group = FALSE;
@@ -438,7 +438,7 @@ function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode
   //FIXME: Only $items['gid'] is populated.
   foreach ($items as &$item) {
     // Set default values.
-    $item += array('state' => GROUP_STATE_ACTIVE, 'created' => time());
+    $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
   }
 }
 
@@ -450,14 +450,14 @@ function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode
  * @see og_field_attach_delete().
  */
 function og_field_crud_group($op, $entity_type, $entity) {
-  $property = GROUP_GROUP_FIELD;
+  $property = OG_OG_FIELD;
 
   $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
   // Get the entity ID.
   list($id) = entity_extract_ids($entity_type, $entity);
 
-  $group = og_get_group($entity_type, $id, TRUE, array(GROUP_STATE_ACTIVE, GROUP_STATE_PENDING));
+  $group = og_get_group($entity_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
   if ($op == 'delete') {
     if (!empty($group->gid)) {
       // Remove group.
@@ -473,7 +473,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
 
         // Subscribe the entity author, if exists.
         if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
-          og_group($group->gid, 'user', $account, GROUP_STATE_ACTIVE);
+          og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
         }
       }
     }
@@ -481,12 +481,12 @@ function og_field_crud_group($op, $entity_type, $entity) {
       // Existing group.
       $save = FALSE;
 
-      if ($group->state == GROUP_STATE_ACTIVE && empty($wrapper[0]['value'])) {
-        $group->state = GROUP_STATE_PENDING;
+      if ($group->state == OG_STATE_ACTIVE && empty($wrapper[0]['value'])) {
+        $group->state = OG_STATE_PENDING;
         $save = TRUE;
       }
-      elseif($group->state == GROUP_STATE_PENDING && !empty($wrapper[0]['value'])) {
-        $group->state = GROUP_STATE_ACTIVE;
+      elseif($group->state == OG_STATE_PENDING && !empty($wrapper[0]['value'])) {
+        $group->state = OG_STATE_ACTIVE;
         $save = TRUE;
       }
 
@@ -506,7 +506,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
     // Determine if field has changed and roles should be overridden, or
     // reverted, by comparing the default access field of the entity being
     // saved, and its original state.
-    $property = GROUP_DEFAULT_ACCESS_FIELD;
+    $property = OG_DEFAULT_ACCESS_FIELD;
     if (!empty($entity->{$property})) {
       $original_entity = entity_load($entity_type, array($id));
       $original_entity = reset($original_entity);
@@ -527,7 +527,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
 
 
 /**
- * Get an array of allowed values for GROUP audience field.
+ * Get an array of allowed values for OG audience field.
  *
  * @return
  *   Array keyed by "content groups" and "other groups".
@@ -578,7 +578,7 @@ function og_field_audience_count($opt_group = FALSE, $account = NULL) {
     }
     // If opt_group is TRUE then get the count of all the groups that are
     // active, otherwise only the ones the user belongs to.
-    $count = $opt_group ? og_get_all_group(array(GROUP_STATE_ACTIVE), array('count' => TRUE)) : count(og_get_entity_groups('user', $account));
+    $count = $opt_group ? og_get_all_group(array(OG_STATE_ACTIVE), array('count' => TRUE)) : count(og_get_entity_groups('user', $account));
   }
 
   return $count;
@@ -751,7 +751,7 @@ function og_field_audience_potential_groups($string = '', $match = 'contains', $
  * Helper function for og_field_audience_potential_groups().
  */
 function og_field_audience_potential_groups_standard($string = '', $match = 'contains', $ids = array(), $limit = NULL) {
-  $query = og_get_all_group(array(GROUP_STATE_ACTIVE), array('return query' => TRUE));
+  $query = og_get_all_group(array(OG_STATE_ACTIVE), array('return query' => TRUE));
 
   $query->addField('group_groups', 'label');
   if ($string !== '') {

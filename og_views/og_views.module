@@ -9,7 +9,7 @@
 /**
  * Group register field.
  */
-define('GROUP_VIEWS_FIELD', 'group_views');
+define('OG_VIEWS_FIELD', 'group_views');
 
 /**
  * Implements hook_menu().
@@ -55,11 +55,11 @@ function og_views_field_formatter_info() {
  * Implement og_fields_info().
  */
 function og_views_group_fields_info() {
-  $items[GROUP_VIEWS_FIELD] = array(
+  $items[OG_VIEWS_FIELD] = array(
     'type' => array('group'),
     'description' => t('Add Group Views field to fieldable entities that are groups.'),
     'field' => array(
-      'field_name' => GROUP_VIEWS_FIELD,
+      'field_name' => OG_VIEWS_FIELD,
       'type' => 'list_text',
       'cardinality' => 1,
       'settings' => array('allowed_values' => '', 'allowed_values_function' => 'group_views_field_allowed_values'),
@@ -115,8 +115,8 @@ function og_views_field_allowed_values($include_global = TRUE) {
 function og_views_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-  if ($field['field_name'] == GROUP_VIEWS_FIELD && !empty($entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'])) {
-    $view = $entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'] == '__global' ? variable_get('group_views_global_view', 'group_nodes') : $entity->{GROUP_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'];
+  if ($field['field_name'] == OG_VIEWS_FIELD && !empty($entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'])) {
+    $view = $entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'] == '__global' ? variable_get('group_views_global_view', 'group_nodes') : $entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'];
     if ($view = explode(' ', $view)) {
       $element[0] = array('#markup' => views_embed_view($view[0], !empty($view[1]) ? $view[1] : 'default'));
     }

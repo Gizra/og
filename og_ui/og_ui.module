@@ -233,11 +233,11 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
       // check the user state.
       if ($state = og_get_entity_state($group->gid, 'user', $account)) {
 
-        if ($state == GROUP_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
+        if ($state == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
           $links['title'] = t('Re-request group membership');
           $links['href'] = "group/$entity_type/$id/subscribe";
         }
-        elseif ($state == GROUP_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe', $account)) {
+        elseif ($state == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe', $account)) {
           $links['title'] = t('Unsubscribe from group');
           $links['href'] = "group/$entity_type/$id/unsubscribe";
         }
@@ -338,17 +338,17 @@ function og_ui_group_permission() {
     'subscribe' => array(
       'title' => t('Subscribe user to group'),
       'description' => t("Allow user to be a member of a group (approval required)."),
-      'roles' => array(GROUP_ANONYMOUS_ROLE),
+      'roles' => array(OG_ANONYMOUS_ROLE),
     ),
     'subscribe without approval' => array(
       'title' => t('Subscribe user to group (no approval required).'),
       'description' => t("Allow user to be a member of a group without an approval of the group administrator."),
-      'roles' => array(GROUP_ANONYMOUS_ROLE),
+      'roles' => array(OG_ANONYMOUS_ROLE),
     ),
     'unsubscribe' => array(
       'title' => t('Unsubscribe user from group'),
       'description' => t("Allow user to be remove membership from a group."),
-      'roles' => array(GROUP_AUTHENTICATED_ROLE),
+      'roles' => array(OG_AUTHENTICATED_ROLE),
     ),
     'approve and deny subscription' => array(
       'title' => t('Approve and deny subscription'),
@@ -366,10 +366,10 @@ function og_ui_group_permission() {
  */
 function og_ui_group_default_permissions() {
   return array(
-    'subscribe' => array(GROUP_ANONYMOUS_ROLE),
-    'unsubscribe' => array(GROUP_AUTHENTICATED_ROLE),
-    'approve and deny subscription' => array(GROUP_ADMINISTRATOR_ROLE),
-    'add user' => array(GROUP_ADMINISTRATOR_ROLE),
+    'subscribe' => array(OG_ANONYMOUS_ROLE),
+    'unsubscribe' => array(OG_AUTHENTICATED_ROLE),
+    'approve and deny subscription' => array(OG_ADMINISTRATOR_ROLE),
+    'add user' => array(OG_ADMINISTRATOR_ROLE),
   );
 }
 
@@ -398,14 +398,14 @@ function og_ui_group_user_operations($form = array(), $form_state = array()) {
 
     $add_roles = array();
     foreach ($roles as $rid => $name) {
-      if (!in_array($name, array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE))) {
+      if (!in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
         $add_roles['add_role-' . $rid] = strip_tags($name);
       }
     }
 
     $remove_roles = array();
     foreach ($roles as $rid => $name) {
-      if (!in_array($name, array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE))) {
+      if (!in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
         $remove_roles['remove_role-' . $rid] = strip_tags($name);
       }
     }
@@ -438,7 +438,7 @@ function og_ui_group_user_operations($form = array(), $form_state = array()) {
         );
       }
       else {
-        watchdgroup('security', 'Detected malicious attempt to alter protected user fields.', array(), WATCHDGROUP_WARNING);
+        watchdgroup('security', 'Detected malicious attempt to alter protected user fields.', array(), WATCHDOG_WARNING);
         return;
       }
     }
@@ -452,14 +452,14 @@ function og_ui_group_user_operations($form = array(), $form_state = array()) {
  * Callback function for admin mass approving users.
  */
 function og_ui_user_operations_approve($gid, $uids) {
-  _group_ui_user_operations_set_state($gid, $uids, GROUP_STATE_ACTIVE);
+  _group_ui_user_operations_set_state($gid, $uids, OG_STATE_ACTIVE);
 }
 
 /**
  * Callback function for admin mass blocking users.
  */
 function og_ui_user_operations_block($gid, $uids) {
-  _group_ui_user_operations_set_state($gid, $uids, GROUP_STATE_BLOCKED);
+  _group_ui_user_operations_set_state($gid, $uids, OG_STATE_BLOCKED);
 }
 
 

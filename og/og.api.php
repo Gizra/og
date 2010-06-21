@@ -19,7 +19,7 @@ function hook_group_permission() {
     'subscribe' => array(
       'title' => t('Subscribe user to group'),
       'description' => t("Allow user to be a member of a group (approval required)."),
-      'roles' => array(GROUP_ANONYMOUS_ROLE),
+      'roles' => array(OG_ANONYMOUS_ROLE),
     ),
   );
 }
@@ -97,7 +97,7 @@ function hook_group_default_roles_alter(&$roles) {
  */
 function hook_group_default_permissions() {
   return array(
-    'foo' => array(GROUP_AUTHENTICATED_ROLE),
+    'foo' => array(OG_AUTHENTICATED_ROLE),
   );
 }
 

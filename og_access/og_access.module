@@ -9,32 +9,32 @@
 /**
  * The access realm of group member.
  */
-define('GROUP_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
+define('OG_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
 
 /**
  * Group public access field.
  */
-define('GROUP_ACCESS_FIELD', 'group_access');
+define('OG_ACCESS_FIELD', 'group_access');
 
 /**
  * Group public access field.
  */
-define('GROUP_CONTENT_ACCESS_FIELD', 'group_content_access');
+define('OG_CONTENT_ACCESS_FIELD', 'group_content_access');
 
 /**
  * Define group content access by it's group defaults.
  */
-define('GROUP_CONTENT_ACCESS_GROUP_DEFAULT', 0);
+define('OG_CONTENT_ACCESS_OG_DEFAULT', 0);
 
 /**
  * Define group content access public regardless of its group definition.
  */
-define('GROUP_CONTENT_ACCESS_PUBLIC', 1);
+define('OG_CONTENT_ACCESS_PUBLIC', 1);
 
 /**
  * Define group content access private regardless of its group definition.
  */
-define('GROUP_CONTENT_ACCESS_PRIVATE', 2);
+define('OG_CONTENT_ACCESS_PRIVATE', 2);
 
 
 /**
@@ -44,7 +44,7 @@ function og_access_node_grants($account, $op) {
   $grants = array();
   if ($op == 'view') {
     foreach (og_get_entity_groups('user', $account) as $gid => $value) {
-      $grants[GROUP_ACCESS_AUTHENTICATED_REALM][] = $gid;
+      $grants[OG_ACCESS_AUTHENTICATED_REALM][] = $gid;
     }
   }
 
@@ -59,14 +59,14 @@ function og_access_node_access_records($node) {
   $grants = array();
 
   $access = FALSE;
-  if (!empty($node->{GROUP_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
+  if (!empty($node->{OG_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
     // Group or group content that is explicitly set to be unpublic.
     $access = TRUE;
   }
-  elseif (isset($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
-    switch ($node->{GROUP_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
-      case GROUP_CONTENT_ACCESS_GROUP_DEFAULT:
-        if ($field = field_info_field(GROUP_ACCESS_FIELD)) {
+  elseif (isset($node->{OG_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
+    switch ($node->{OG_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
+      case OG_CONTENT_ACCESS_OG_DEFAULT:
+        if ($field = field_info_field(OG_ACCESS_FIELD)) {
           // Access should be determined by its groups. If group content belongs
           // to several groups, and one of them is private, then the group
           // content will private as-well.
@@ -121,11 +121,11 @@ function og_access_node_access_records($node) {
         }
         break;
 
-      case GROUP_CONTENT_ACCESS_PUBLIC:
+      case OG_CONTENT_ACCESS_PUBLIC:
         // Do nothing.
         break;
 
-      case GROUP_CONTENT_ACCESS_PRIVATE:
+      case OG_CONTENT_ACCESS_PRIVATE:
         $access = TRUE;
         break;
 
@@ -136,7 +136,7 @@ function og_access_node_access_records($node) {
 
   if ($access) {
     $grants[] = array (
-      'realm' => GROUP_ACCESS_AUTHENTICATED_REALM,
+      'realm' => OG_ACCESS_AUTHENTICATED_REALM,
       'gid' => $node->nid,
       'grant_view' => 1,
       'grant_update' => 0,
@@ -155,13 +155,13 @@ function og_access_group_fields_info() {
     '0|Public - accessible to all site users',
     '1|Private - accessible only to group members',
   );
-  $items[GROUP_ACCESS_FIELD] = array(
+  $items[OG_ACCESS_FIELD] = array(
     'type' => array('group'),
     'description' => t('Add Group access field to group types.'),
     // Private access can be done only on node entity.
     'entity' => array('node'),
     'field' => array(
-      'field_name' => GROUP_ACCESS_FIELD,
+      'field_name' => OG_ACCESS_FIELD,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
@@ -191,13 +191,13 @@ function og_access_group_fields_info() {
     '2|Private - accessible only to group members',
 
   );
-  $items[GROUP_CONTENT_ACCESS_FIELD] = array(
+  $items[OG_CONTENT_ACCESS_FIELD] = array(
     'type' => array('group content'),
     'description' => t('Add Group access field to group-content types, that may override the group settings.'),
     // Private access can be done only on node entity.
     'entity' => array('node'),
     'field' => array(
-      'field_name' => GROUP_CONTENT_ACCESS_FIELD,
+      'field_name' => OG_CONTENT_ACCESS_FIELD,
       'type' => 'list_number',
       'cardinality' => 1,
       'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),

@@ -86,7 +86,7 @@ function og_ui_add_users_submit($form, &$form_state) {
 }
 
 /**
- * Form builder; GROUP user administration page.
+ * Form builder; OG user administration page.
  *
  * @ingroup forms
  * @see og_user_admin_account_validate()
@@ -170,7 +170,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
       if (empty($entity->uid) || $account->uid != $entity->uid) {
         $users_roles = array();
         foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
-          if (!in_array($roles[$rid], array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE))) {
+          if (!in_array($roles[$rid], array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
             // Show the user's roles, except of the authenticated role, that all
             // group members have, or anonymous that blocked members have.
             $users_roles[] = $roles[$rid];
@@ -358,7 +358,7 @@ function theme_group_ui_user_admin_new_role($variables) {
     $text = !$default_access ? t('edit permissions') : t('view permissions');
     $permissions = l($text, 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/permissions/' . $rid);
 
-    if (!$default_access && !in_array($name, array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE))) {
+    if (!$default_access && !in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
       $rows[] = array($name, l(t('edit role'), 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/roles/edit/' . $rid), $permissions);
     }
     else {
@@ -483,10 +483,10 @@ function og_ui_user_admin_permissions_after_build($element) {
   foreach (og_get_permissions() as $key => $perm) {
     $perm['roles'] = drupal_map_assoc($perm['roles']);
 
-    if ($disable || (empty($perm['roles']) || empty($perm['roles'][GROUP_ANONYMOUS_ROLE]))) {
+    if ($disable || (empty($perm['roles']) || empty($perm['roles'][OG_ANONYMOUS_ROLE]))) {
       $element['checkboxes'][$anon_rid][$key]['#attributes']['disabled'] = TRUE;
     }
-    if ($disable || (empty($perm['roles']) || empty($perm['roles'][GROUP_AUTHENTICATED_ROLE]))) {
+    if ($disable || (empty($perm['roles']) || empty($perm['roles'][OG_AUTHENTICATED_ROLE]))) {
       foreach ($auth_rids as $auth_rid) {
         $element['checkboxes'][$auth_rid][$key]['#attributes']['disabled'] = TRUE;
       }
