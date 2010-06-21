@@ -8,7 +8,7 @@
 /**
  * Field group audience - "state" field handler.
  */
-class og_handler_field_group_audience_state extends views_handler_field {
+class og_handler_field_og_audience_state extends views_handler_field {
 
   function render($values) {
     $states = og_group_content_states();

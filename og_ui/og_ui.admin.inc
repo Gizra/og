@@ -97,9 +97,9 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   $group = og_get_group($entity_type, $etid);
   $header = array(
     'username' => array('data' => t('Username'), 'field' => 'u.name'),
-    'status' => array('data' => t('Status'), 'field' => 'og_audience.group_audience_state'),
+    'status' => array('data' => t('Status'), 'field' => 'og_audience.og_audience_state'),
     'roles' => array('data' => t('Roles')),
-    'member_for' => array('data' => t('Member for'), 'field' => 'og_audience.group_audience_created', 'sort' => 'desc'),
+    'member_for' => array('data' => t('Member for'), 'field' => 'og_audience.og_audience_created', 'sort' => 'desc'),
   );
 
   $form['group'] = array('#type' => 'value', '#value' => $group);
@@ -111,7 +111,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   );
   $options = array();
   foreach (module_implements('og_user_operations') as $module) {
-    $result = call_user_func($module . '_group_user_operations', array(), array('group' => $group));
+    $result = call_user_func($module . '_og_user_operations', array(), array('group' => $group));
     foreach ($result as $operation => $array) {
       $options[$operation] = $array['label'];
     }
@@ -135,9 +135,9 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   $entity = og_load_entity_from_group($group->gid);
 
   //TODO: Use field_attach_query(), when query can return object,
-  $query = db_select('field_data_group_audience', 'og_audience');
+  $query = db_select('field_data_og_audience', 'og_audience');
   $query
-    ->condition('og_audience.group_audience_gid', $group->gid)
+    ->condition('og_audience.og_audience_gid', $group->gid)
     ->condition('og_audience.bundle', 'user');
 
   $count_query = clone $query;
@@ -180,9 +180,9 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
 
         $options[$account->uid] = array(
           'username' => theme('username', array('account' => $account)),
-          'status' =>  $states[$row->group_audience_state],
+          'status' =>  $states[$row->og_audience_state],
           'roles' => theme('item_list', array('items' => $users_roles)),
-          'member_for' => format_interval(REQUEST_TIME - $row->group_audience_created),
+          'member_for' => format_interval(REQUEST_TIME - $row->og_audience_created),
         );
 
       }

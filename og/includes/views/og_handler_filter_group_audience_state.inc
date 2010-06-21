@@ -8,7 +8,7 @@
 /**
  * Field group audience - "state" filter handler.
  */
-class og_handler_filter_group_audience_state extends views_handler_filter_in_operator {
+class og_handler_filter_og_audience_state extends views_handler_filter_in_operator {
   function get_value_options() {
     if (!isset($this->value_options)) {
       $this->value_title = t('Group content state');

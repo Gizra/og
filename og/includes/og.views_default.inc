@@ -149,12 +149,12 @@ function og_views_default_views() {
   $handler->display->display_options['fields']['name']['overwrite_anonymous'] = 0;
   /* Sort criterion: Fields: og_audience (og_audience) - created */
   $handler->display->display_options['sorts']['og_audience_created']['id'] = 'og_audience_created';
-  $handler->display->display_options['sorts']['og_audience_created']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['sorts']['og_audience_created']['table'] = 'field_data_og_audience';
   $handler->display->display_options['sorts']['og_audience_created']['field'] = 'og_audience_created';
   $handler->display->display_options['sorts']['og_audience_created']['order'] = 'DESC';
   /* Argument: Fields: og_audience (og_audience) - gid */
   $handler->display->display_options['arguments']['og_audience_gid']['id'] = 'og_audience_gid';
-  $handler->display->display_options['arguments']['og_audience_gid']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['arguments']['og_audience_gid']['table'] = 'field_data_og_audience';
   $handler->display->display_options['arguments']['og_audience_gid']['field'] = 'og_audience_gid';
   $handler->display->display_options['arguments']['og_audience_gid']['default_action'] = 'default';
   $handler->display->display_options['arguments']['og_audience_gid']['style_plugin'] = 'default_summary';
@@ -169,7 +169,7 @@ function og_views_default_views() {
   $handler->display->display_options['filters']['status']['value'] = '1';
   /* Filter: Fields: og_audience (og_audience) - state */
   $handler->display->display_options['filters']['og_audience_state']['id'] = 'og_audience_state';
-  $handler->display->display_options['filters']['og_audience_state']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['filters']['og_audience_state']['table'] = 'field_data_og_audience';
   $handler->display->display_options['filters']['og_audience_state']['field'] = 'og_audience_state';
   $handler->display->display_options['filters']['og_audience_state']['value'] = array(
     '1' => '1',
@@ -210,7 +210,7 @@ function og_views_default_views() {
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
   /* Argument: Fields: og_audience (og_audience) - gid */
   $handler->display->display_options['arguments']['og_audience_gid']['id'] = 'og_audience_gid';
-  $handler->display->display_options['arguments']['og_audience_gid']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['arguments']['og_audience_gid']['table'] = 'field_data_og_audience';
   $handler->display->display_options['arguments']['og_audience_gid']['field'] = 'og_audience_gid';
   $handler->display->display_options['arguments']['og_audience_gid']['default_action'] = 'default';
   $handler->display->display_options['arguments']['og_audience_gid']['style_plugin'] = 'default_summary';
