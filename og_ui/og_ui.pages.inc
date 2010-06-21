@@ -68,7 +68,7 @@ function og_ui_subscribe($entity_type, $etid, $uid = NULL) {
 function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
   $form['group'] = array('#type' => 'value', '#value' => $group);
   $form['account'] = array('#type' => 'value', '#value' => $account);
-  if (!group_user_access($group->gid, 'subscribe without approval')) {
+  if (!og_user_access($group->gid, 'subscribe without approval')) {
     $form['request'] = array(
       '#type' => 'textarea',
       '#title' => t('Additional details'),
