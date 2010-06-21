@@ -130,6 +130,11 @@ function og_context_og_invalidate_cache_alter(&$caches, $gids = array()) {
     'og_context',
     'og_context_js',
   );
+
+  if ($gids && !empty($_SESSION['og_context']) && in_array($_SESSION['og_context'], $gids)) {
+    // Remove group's context.
+    $_SESSION['og_context'] = NULL;
+  }
 }
 
 

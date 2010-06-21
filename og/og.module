@@ -573,13 +573,6 @@ function og_invalidate_cache($gids = array()) {
   foreach ($caches as $cache) {
     drupal_static_reset($cache);
   }
-
-  if ($gids && !empty($_SESSION['og_context']) && in_array($_SESSION['og_context'], $gids)) {
-    // Remove group's context.
-    $_SESSION['og_context'] = NULL;
-  }
-
-
 }
 /**
  * Get group IDs by the entity type and entity IDs.
