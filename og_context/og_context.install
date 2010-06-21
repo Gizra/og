@@ -11,7 +11,6 @@
  */
 function og_context_uninstall() {
   $vars = array(
-    'og_context_hook_init',
     'og_context_negotiation_group_context',
     'og_context_providers_weight_group_context',
   );

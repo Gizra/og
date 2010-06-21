@@ -107,9 +107,7 @@ function og_context_og_context_negotiation_info() {
  * Implement hook_init().
  */
 function og_context_init() {
-  if (variable_get('og_context_hook_init', TRUE)) {
-    og_context();
-  }
+  og_context();
 }
 
 /**
