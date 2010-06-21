@@ -9,7 +9,7 @@
 /**
  * Group register field.
  */
-define('GROUP_REGISTER_FIELD', 'group_register');
+define('OG_REGISTER_FIELD', 'group_register');
 
 /**
  * Implement hook_form_FORM_ID_alter().
@@ -43,11 +43,11 @@ function og_register_group_fields_info() {
     '0|Do not show on registration page',
     '1|Show on registration page',
   );
-  $items[GROUP_REGISTER_FIELD] = array(
+  $items[OG_REGISTER_FIELD] = array(
     'type' => array('group'),
     'description' => t('Add Group register field group types.'),
     'field' => array(
-      'field_name' => GROUP_REGISTER_FIELD,
+      'field_name' => OG_REGISTER_FIELD,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
@@ -78,7 +78,7 @@ function og_register_group_fields_info() {
 function og_register_get_groups() {
   $gids = &drupal_static(__FUNCTION__, array());
 
-  if (!$gids && $field = field_info_field(GROUP_REGISTER_FIELD)) {
+  if (!$gids && $field = field_info_field(OG_REGISTER_FIELD)) {
     $conditions = array(
       array('group_register_value', 1),
     );

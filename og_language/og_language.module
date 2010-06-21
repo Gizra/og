@@ -9,17 +9,17 @@
 /**
  * Group language field.
  */
-define('GROUP_LANGUAGE_FIELD', 'group_language');
+define('OG_LANGUAGE_FIELD', 'group_language');
 
 /**
  * Implement og_fields_info().
  */
 function og_language_group_fields_info() {
-  $items[GROUP_LANGUAGE_FIELD] = array(
+  $items[OG_LANGUAGE_FIELD] = array(
     'type' => array('group'),
     'description' => t('Associate language interface to a group.'),
     'field' => array(
-      'field_name' => GROUP_LANGUAGE_FIELD,
+      'field_name' => OG_LANGUAGE_FIELD,
       'type' => 'list_text',
       'cardinality' => 1,
       'settings' => array('allowed_values' => '', 'allowed_values_function' => 'group_language_field_allowed_values'),
@@ -82,9 +82,9 @@ function og_language_from_group_context($languages) {
 
     // Check if a theme field exists, and it isn't defined as "default"
     // (i.e. use the default site language).
-    if (!empty($entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value']) && $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'] != '__default') {
+    if (!empty($entity->{OG_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value']) && $entity->{OG_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'] != '__default') {
       // TODO: Check language is valid.
-      return $entity->{GROUP_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'];
+      return $entity->{OG_LANGUAGE_FIELD}[LANGUAGE_NONE][0]['value'];
     }
   }
   return FALSE;

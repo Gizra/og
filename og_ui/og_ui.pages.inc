@@ -80,14 +80,14 @@ function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
 }
 
 /**
- * Submit handler; Confirm GROUP membership.
+ * Submit handler; Confirm OG membership.
  */
 function og_ui_confirm_subscribe_submit($form, &$form_state) {
   $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
 
   $group = $form_state['values']['group'];
   $account = $form_state['values']['account'];
-  $state = og_user_access($group->gid, 'subscribe without approval') ? GROUP_STATE_ACTIVE : GROUP_STATE_PENDING;
+  $state = og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
 
   og_group($group->gid, 'user', $account, $state);
 
@@ -96,7 +96,7 @@ function og_ui_confirm_subscribe_submit($form, &$form_state) {
 
 
 /**
- * Confirm GROUP unsubscription form.
+ * Confirm OG unsubscription form.
  *
  * The unsubscribing user is always the acting user - like this we make sure
  * no malicious user will unsubscribe another user. Administrators can reject or
@@ -162,7 +162,7 @@ function og_ui_confirm_unsubscribe($form, &$form_state, $group, $account) {
 }
 
 /**
- * Submit handler; Confirm GROUP unsubscription.
+ * Submit handler; Confirm OG unsubscription.
  */
 function og_ui_confirm_unsubscribe_submit($form, &$form_state) {
   $group = $form_state['values']['group'];

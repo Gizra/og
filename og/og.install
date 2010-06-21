@@ -223,8 +223,8 @@ if (module_exists('group')) {
         if ($content_type) {
           // Add group and group content fields to content types.
           $fields = array(
-            'group' => GROUP_GROUP_FIELD,
-            'group content' => GROUP_AUDIENCE_FIELD,
+            'group' => OG_OG_FIELD,
+            'group content' => OG_AUDIENCE_FIELD,
           );
           foreach ($fields as $key => $field_name) {
             foreach ($content_type[$key] as $type) {
@@ -326,7 +326,7 @@ function _group_upgrade_group(&$sandbox) {
     }
 
     // Set field values.
-    $node->{GROUP_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = TRUE;
+    $node->{OG_OG_FIELD}[LANGUAGE_NONE][0]['value'] = TRUE;
 
     field_attach_update('node', $node);
 
@@ -393,7 +393,7 @@ function _group_upgrade_user(&$sandbox) {
   if (!$rid) {
     // Get the administrator role ID.
     $roles = array_flip(og_get_global_roles());
-    $rid = $roles[GROUP_ADMINISTRATOR_ROLE];
+    $rid = $roles[OG_ADMINISTRATOR_ROLE];
   }
 
   $found = FALSE;
@@ -410,7 +410,7 @@ function _group_upgrade_user(&$sandbox) {
 
   foreach ($accounts as $account) {
     $group = og_get_group('node', $account->nid);
-    $state = $account->is_active ? GROUP_STATE_ACTIVE : GROUP_STATE_PENDING;
+    $state = $account->is_active ? OG_STATE_ACTIVE : OG_STATE_PENDING;
 
     og_group($group->gid, 'user', $account, $state);
 

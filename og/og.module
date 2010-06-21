@@ -7,53 +7,53 @@
  */
 
 // Load all Field module hooks for Group.
-require(drupal_get_path('module', 'group') . '/group.field.inc');
+require(drupal_get_path('module', 'og') . '/og.field.inc');
 
 /**
  * Define active group content states.
  */
-define('GROUP_STATE_ACTIVE', 1);
+define('OG_STATE_ACTIVE', 1);
 
 /**
  * Define pending group content states. The user is subscribed to the group but
  * isn't an active member yet.
  */
-define('GROUP_STATE_PENDING', 2);
+define('OG_STATE_PENDING', 2);
 
 /**
  * Define blocked group content states. The user is rejected from the group.
  */
-define('GROUP_STATE_BLOCKED', 3);
+define('OG_STATE_BLOCKED', 3);
 
 /**
  * Group audience field.
  */
-define('GROUP_AUDIENCE_FIELD', 'group_audience');
+define('OG_AUDIENCE_FIELD', 'group_audience');
 
 /**
  * Group field.
  */
-define('GROUP_GROUP_FIELD', 'group_group');
+define('OG_OG_FIELD', 'group_group');
 
 /**
  * Group default roles and permissions field.
  */
-define('GROUP_DEFAULT_ACCESS_FIELD', 'group_roles_permissions');
+define('OG_DEFAULT_ACCESS_FIELD', 'group_roles_permissions');
 
 /**
  * The role name of group non-members.
  */
-define('GROUP_ANONYMOUS_ROLE', 'anonymous member');
+define('OG_ANONYMOUS_ROLE', 'anonymous member');
 
 /**
  * The role name of group member.
  */
-define('GROUP_AUTHENTICATED_ROLE', 'authenticated member');
+define('OG_AUTHENTICATED_ROLE', 'authenticated member');
 
 /**
  * The role name of group administrator.
  */
-define('GROUP_ADMINISTRATOR_ROLE', 'administrator member');
+define('OG_ADMINISTRATOR_ROLE', 'administrator member');
 
 /*******************************************************************************
  * Hook implementations
@@ -233,16 +233,16 @@ function og_group_default_permissions() {
       $info = node_type_get_type($type);
       $type = check_plain($info->type);
 
-      $perms["edit own $type content"] = array(GROUP_AUTHENTICATED_ROLE);
-      $perms["delete own $type content"] = array(GROUP_AUTHENTICATED_ROLE);
+      $perms["edit own $type content"] = array(OG_AUTHENTICATED_ROLE);
+      $perms["delete own $type content"] = array(OG_AUTHENTICATED_ROLE);
 
-      $perms["edit any $type content"] = array(GROUP_ADMINISTRATOR_ROLE);
-      $perms["delete any $type content"] = array(GROUP_ADMINISTRATOR_ROLE);
+      $perms["edit any $type content"] = array(OG_ADMINISTRATOR_ROLE);
+      $perms["delete any $type content"] = array(OG_ADMINISTRATOR_ROLE);
     }
   }
   return $perms + array(
-    'update group' => array(GROUP_ADMINISTRATOR_ROLE),
-    'administer group' => array(GROUP_ADMINISTRATOR_ROLE),
+    'update group' => array(OG_ADMINISTRATOR_ROLE),
+    'administer group' => array(OG_ADMINISTRATOR_ROLE),
   );
 }
 
@@ -250,7 +250,7 @@ function og_group_default_permissions() {
  * Implement hook_group_default_roles()
  */
 function og_group_default_roles() {
-  return array(GROUP_ADMINISTRATOR_ROLE);
+  return array(OG_ADMINISTRATOR_ROLE);
 }
 
 /**
@@ -298,11 +298,11 @@ function og_views_api() {
  * Implement og_fields_info().
  */
 function og_group_fields_info() {
-  $items[GROUP_GROUP_FIELD] = array(
+  $items[OG_OG_FIELD] = array(
     'type' => array('group'),
     'description' => t('Determine if this should be a group.'),
     'field' => array(
-      'field_name' => GROUP_GROUP_FIELD,
+      'field_name' => OG_OG_FIELD,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array(
@@ -329,11 +329,11 @@ function og_group_fields_info() {
     ),
   );
 
-  $items[GROUP_DEFAULT_ACCESS_FIELD] = array(
+  $items[OG_DEFAULT_ACCESS_FIELD] = array(
     'type' => array('group'),
     'description' => t('Determine if group should use default roles and permissions.'),
     'field' => array(
-      'field_name' => GROUP_DEFAULT_ACCESS_FIELD,
+      'field_name' => OG_DEFAULT_ACCESS_FIELD,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array('allowed_values' => implode("\r\n", array('0|Use default roles and permissions', '1|Override default roles and permissions')), 'allowed_values_function' => ''),
@@ -357,11 +357,11 @@ function og_group_fields_info() {
     ),
   );
 
-  $items[GROUP_AUDIENCE_FIELD] = array(
+  $items[OG_AUDIENCE_FIELD] = array(
     'type' => array('group content'),
     'description' => t('Determine to which groups this group content is assigned to.'),
     'field' => array(
-      'field_name' => GROUP_AUDIENCE_FIELD,
+      'field_name' => OG_AUDIENCE_FIELD,
       'type' => 'group',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
     ),
@@ -436,7 +436,7 @@ function og_node_type_update($info) {
  * @return
  *   The group entity if found, or an empty array.
  */
-function og_get_group($entity_type, $etid, $create = FALSE, $states = array(GROUP_STATE_ACTIVE), $reset = FALSE) {
+function og_get_group($entity_type, $etid, $create = FALSE, $states = array(OG_STATE_ACTIVE), $reset = FALSE) {
   $group = FALSE;
   if ($gids = og_get_group_ids($entity_type, array($etid), $states, $reset)) {
     $group = og_load($gids[$etid], $reset);
@@ -456,7 +456,7 @@ function og_create_group($values = array()) {
   $entity = current($entity);
   // Initialize values.
   $values += array(
-    'state' => GROUP_STATE_ACTIVE,
+    'state' => OG_STATE_ACTIVE,
     'created' => time(),
     'label' => entity_label($values['entity_type'], $entity),
   );
@@ -592,7 +592,7 @@ function og_invalidate_cache($gids = array()) {
  * @return
  *   Array keyed with the entity ID and the group ID as the value.
  */
-function og_get_group_ids($entity_type = 'group', $etids = array(), $states = array(GROUP_STATE_ACTIVE), $reset = FALSE) {
+function og_get_group_ids($entity_type = 'group', $etids = array(), $states = array(OG_STATE_ACTIVE), $reset = FALSE) {
   $gids = &drupal_static(__FUNCTION__, array());
 
   if ($reset) {
@@ -643,7 +643,7 @@ function og_get_group_ids($entity_type = 'group', $etids = array(), $states = ar
  *   - count: If TRUE the function will return the total numer of groups in the desired
  *     states. Defaults to FALSE.
  */
-function og_get_all_group($states = array(GROUP_STATE_ACTIVE), $options = array()) {
+function og_get_all_group($states = array(OG_STATE_ACTIVE), $options = array()) {
   // Initialize values.
   $options += array('count' => FALSE, 'return query' => FALSE);
   $return = array();
@@ -684,18 +684,18 @@ function og_get_all_group($states = array(GROUP_STATE_ACTIVE), $options = array(
  *   The entity to set the association.
  * @param $state
  *   The state of the association. Can be:
- *   - GROUP_STATE_ACTIVE
- *   - GROUP_STATE_PENDING
- *   - GROUP_STATE_BLOCKED
+ *   - OG_STATE_ACTIVE
+ *   - OG_STATE_PENDING
+ *   - OG_STATE_BLOCKED
  * @param $save
  *   Optional; TRUE if fields value should be saved. Defaults to TRUE.
  *
  * @return
  *   The entity with the fields updated.
  */
-function og_group($gid, $entity_type, $entity, $state = GROUP_STATE_ACTIVE, $save = TRUE) {
+function og_group($gid, $entity_type, $entity, $state = OG_STATE_ACTIVE, $save = TRUE) {
   $entity = og_load_entity($entity_type, $entity);
-  $property = GROUP_AUDIENCE_FIELD;
+  $property = OG_AUDIENCE_FIELD;
 
   $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
@@ -770,7 +770,7 @@ function og_group($gid, $entity_type, $entity, $state = GROUP_STATE_ACTIVE, $sav
  */
 function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
   $entity = og_load_entity($entity_type, $entity);
-  $property = GROUP_AUDIENCE_FIELD;
+  $property = OG_AUDIENCE_FIELD;
 
   $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
@@ -815,7 +815,7 @@ function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
  * @return
  *   Boolean TRUE if the current user has the requested permission.
  *
- * All permission checks in GROUP should go through this function. This
+ * All permission checks in OG should go through this function. This
  * way, we guarantee consistent behavior, and ensure that the superuser
  * can perform all actions.
  */
@@ -914,7 +914,7 @@ function og_node_type_save($bundle_name) {
  * @return
  *  An array with the group IDs, or an empty array.
  */
-function og_get_entity_groups($entity_type, $entity, $states = array(GROUP_STATE_ACTIVE)) {
+function og_get_entity_groups($entity_type, $entity, $states = array(OG_STATE_ACTIVE)) {
   $groups = &drupal_static(__FUNCTION__, array());
 
   // Get the entity ID.
@@ -925,7 +925,7 @@ function og_get_entity_groups($entity_type, $entity, $states = array(GROUP_STATE
   }
 
   $entity = og_load_entity($entity_type, $entity);
-  $property = GROUP_AUDIENCE_FIELD;
+  $property = OG_AUDIENCE_FIELD;
 
   $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
@@ -959,10 +959,10 @@ function og_get_entity_groups($entity_type, $entity, $states = array(GROUP_STATE
  */
 function og_get_group_type($entity_type, $bundle_name, $type = 'group') {
   if ($type == 'group') {
-    return (bool)field_info_instance($entity_type, GROUP_GROUP_FIELD, $bundle_name);
+    return (bool)field_info_instance($entity_type, OG_OG_FIELD, $bundle_name);
   }
   elseif ($type == 'group content') {
-    return (bool)field_info_instance($entity_type, GROUP_AUDIENCE_FIELD, $bundle_name);
+    return (bool)field_info_instance($entity_type, OG_AUDIENCE_FIELD, $bundle_name);
   }
 }
 
@@ -1077,7 +1077,7 @@ function og_get_entity_state($gid, $entity_type, $entity) {
   $state = FALSE;
 
   $entity = og_load_entity($entity_type, $entity);
-  $property = GROUP_AUDIENCE_FIELD;
+  $property = OG_AUDIENCE_FIELD;
 
   $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
@@ -1103,7 +1103,7 @@ function og_is_group_default_access($gid) {
   $return = TRUE;
   if ($entity = og_load_entity_from_group($gid)) {
 
-    $property = GROUP_DEFAULT_ACCESS_FIELD;
+    $property = OG_DEFAULT_ACCESS_FIELD;
 
     if (!empty($entity->{$property}[LANGUAGE_NONE]) && $wrapper = $entity->{$property}[LANGUAGE_NONE]) {
       $return = empty($wrapper[0]['value']);
@@ -1283,7 +1283,7 @@ function og_get_default_roles($include = TRUE) {
   drupal_alter('group_default_roles', $roles);
 
   if ($include) {
-    $roles = array_merge(array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE), $roles);
+    $roles = array_merge(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), $roles);
   }
 
   return $roles;
@@ -1443,7 +1443,7 @@ function og_get_user_roles($gid, $uid = NULL, $include = TRUE) {
     $group_roles = og_user_roles($query_gid);
     $account = user_load($uid);
 
-    $name = og_is_member($gid, 'user', $account) ? GROUP_AUTHENTICATED_ROLE : GROUP_ANONYMOUS_ROLE;
+    $name = og_is_member($gid, 'user', $account) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
     $rid = array_search($name, $group_roles);
     $roles[$rid] = $rid;
   }
@@ -1773,7 +1773,7 @@ function og_get_permissions() {
         // Initialize the roles key, if other modules haven't set it explicetly.
         // This means the permissions can apply to anonymous and authenticaed
         // members as-well.
-        $permissions[$key] += array('roles' => array(GROUP_ANONYMOUS_ROLE, GROUP_AUTHENTICATED_ROLE));
+        $permissions[$key] += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE));
 
         // Add the module information.
         $permissions[$key]['module'] = $module;
@@ -1915,8 +1915,8 @@ function og_load_entity_from_group($gid) {
  */
 function og_group_states() {
   return array(
-    GROUP_STATE_ACTIVE => t('Active'),
-    GROUP_STATE_PENDING => t('Pending'),
+    OG_STATE_ACTIVE => t('Active'),
+    OG_STATE_PENDING => t('Pending'),
   );
 }
 
@@ -1925,9 +1925,9 @@ function og_group_states() {
  */
 function og_group_content_states() {
   return array(
-    GROUP_STATE_ACTIVE => t('Active'),
-    GROUP_STATE_PENDING => t('Pending'),
-    GROUP_STATE_BLOCKED => t('Blocked'),
+    OG_STATE_ACTIVE => t('Active'),
+    OG_STATE_PENDING => t('Pending'),
+    OG_STATE_BLOCKED => t('Blocked'),
   );
 }
 

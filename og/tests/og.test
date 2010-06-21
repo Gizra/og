@@ -29,7 +29,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue($group->is_new, t('New group has "is new" property.'));
 
     // Assert default state.
-    $this->assertTrue($group->state == GROUP_STATE_ACTIVE, t('Default state property is active.'));
+    $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Default state property is active.'));
 
     // Assert default creation time.
     $this->assertTrue($group->created, t('Group creating time was added to group.'));
@@ -45,7 +45,7 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     // Set a new state for the group.
     $group = og_get_group('foo', 1);
-    $group->state = GROUP_STATE_PENDING;
+    $group->state = OG_STATE_PENDING;
 
     $group = og_save($group);
 
@@ -57,12 +57,12 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertFalse($group, t('Pending state group was not loaded, as it was not requested.'));
 
     // Reload group to make sure state was updated.
-    $group = og_get_group('foo', 1, FALSE, array(GROUP_STATE_PENDING), TRUE);
+    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
 
-    $this->assertTrue($group->state == GROUP_STATE_PENDING, t('Group was updated.'));
+    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group was updated.'));
 
     og_delete($group->gid);
-    $group = og_get_group('foo', 1, FALSE, array(GROUP_STATE_PENDING), TRUE);
+    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
 
     $this->assertFalse($group, t('Group was deleted.'));
   }
@@ -81,7 +81,7 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     // Create a node and set the group field to TRUE.
     $group_group[LANGUAGE_NONE][0]['value'] = TRUE;
-    $node = $this->drupalCreateNode(array('type' => $type, GROUP_GROUP_FIELD => $group_group));
+    $node = $this->drupalCreateNode(array('type' => $type, OG_OG_FIELD => $group_group));
 
     // Assert a group was created.
     $group = og_get_group('node', $node->nid);
@@ -89,10 +89,10 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue(!empty($group->gid), t('Group was created.'));
 
     // Assert the group's state and the entity state is active.
-    $this->assertTrue($group->state == GROUP_STATE_ACTIVE, t('Group entity state is active.'));
+    $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Group entity state is active.'));
 
     // Edit the node prgrouprmatically, and set the group state to pending.
-    $property = GROUP_GROUP_FIELD;
+    $property = OG_OG_FIELD;
     $node->{$property}[LANGUAGE_NONE][0]['value'] = 0;
     node_save($node);
 
@@ -100,7 +100,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $group = og_load($group->gid, TRUE);
 
     // Assert the group's state is pending.
-    $this->assertTrue($group->state == GROUP_STATE_PENDING, t('Group entity was changed to pending.'));
+    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group entity was changed to pending.'));
   }
 }
 
@@ -128,7 +128,7 @@ class OgTypeTest extends DrupalWebTestCase {
 
     $this->drupalGet('admin/structure/types/add');
 
-    // Assert GROUP default types exist.
+    // Assert OG default types exist.
     $this->assertText(t('Group node'), t('Group node option was found.'));
     $this->assertText(t('group content'), t('group content option was found.'));
 
@@ -191,7 +191,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     // Change permissions to authenticated member.
     $roles = og_get_group_default_roles($gid);
     // Anonymous role ID.
-    $rid = $roles[GROUP_AUTHENTICATED_ROLE];
+    $rid = $roles[OG_AUTHENTICATED_ROLE];
 
     $permissions = array(
       'delete own group content' => 0,
