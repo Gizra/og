@@ -753,7 +753,7 @@ function og_field_audience_potential_groups($string = '', $match = 'contains', $
 function og_field_audience_potential_groups_standard($string = '', $match = 'contains', $ids = array(), $limit = NULL) {
   $query = og_get_all_group(array(OG_STATE_ACTIVE), array('return query' => TRUE));
 
-  $query->addField('og_groups', 'label');
+  $query->addField('og', 'label');
   if ($string !== '') {
     $args = array();
     switch ($match) {

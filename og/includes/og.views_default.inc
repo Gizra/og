@@ -65,7 +65,7 @@ function og_views_default_views() {
   $handler->display->display_options['fields']['title']['link_to_node'] = 1;
   /* Field: Group: Group date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
-  $handler->display->display_options['fields']['created']['table'] = 'og_groups';
+  $handler->display->display_options['fields']['created']['table'] = 'og';
   $handler->display->display_options['fields']['created']['field'] = 'created';
   $handler->display->display_options['fields']['created']['relationship'] = 'og_rel';
   $handler->display->display_options['fields']['created']['label'] = 'Since';
@@ -81,7 +81,7 @@ function og_views_default_views() {
   $handler->display->display_options['fields']['created']['date_format'] = 'time ago';
   /* Filter: Group: Group's state */
   $handler->display->display_options['filters']['state']['id'] = 'state';
-  $handler->display->display_options['filters']['state']['table'] = 'og_groups';
+  $handler->display->display_options['filters']['state']['table'] = 'og';
   $handler->display->display_options['filters']['state']['field'] = 'state';
   $handler->display->display_options['filters']['state']['relationship'] = 'og_rel';
   $handler->display->display_options['filters']['state']['value'] = array(

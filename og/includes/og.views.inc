@@ -12,16 +12,16 @@
 function og_views_data() {
   $data = array();
 
-  $data['og_groups']['table']['group'] = t('Group');
+  $data['og']['table']['group'] = t('Group');
 
   // Advertise this table as a possible base table
-  $data['og_groups']['table']['base'] = array(
+  $data['og']['table']['base'] = array(
     'field' => 'gid',
     'title' => t('Group'),
     'help' => t("Groups can be different entities that have other content associated with them."),
   );
 
-  $data['og_groups']['gid'] = array(
+  $data['og']['gid'] = array(
     'title' => t('Group ID'),
     'help' => t('The group unique ID.'),
     'field' => array(
@@ -39,7 +39,7 @@ function og_views_data() {
     ),
   );
 
-  $data['og_groups']['entity_type'] = array(
+  $data['og']['entity_type'] = array(
     'title' => t("Group's entity type"),
     'help' => t('The entity type of the group.'),
     'field' => array(
@@ -56,7 +56,7 @@ function og_views_data() {
     ),
   );
 
-  $data['og_groups']['etid'] = array(
+  $data['og']['etid'] = array(
     'title' => t("Group's entity ID"),
     'help' => t('The entity ID of the group.'),
     'field' => array(
@@ -74,7 +74,7 @@ function og_views_data() {
     ),
   );
 
-  $data['og_groups']['state'] = array(
+  $data['og']['state'] = array(
     'title' => t("Group's state"),
     'help' => t('The state of the group.'),
     'field' => array(
@@ -94,7 +94,7 @@ function og_views_data() {
     ),
   );
 
-  $data['og_groups']['created'] = array(
+  $data['og']['created'] = array(
     'title' => t('Group date'),
     'help' => t('The date the group was created.'),
     'field' => array(
@@ -109,7 +109,7 @@ function og_views_data() {
     ),
   );
 
-  $data['og_groups']['member_count'] = array(
+  $data['og']['member_count'] = array(
     'title' => t('Members count'),
     'field' => array(
       'handler' => 'og_handler_field_group_member_count',
@@ -207,7 +207,7 @@ function og_views_data_alter(&$data) {
         'entity' => $item['entity'],
         'handler' => 'og_handler_relationship',
         'label' => t('group'),
-        'base' => 'og_groups',
+        'base' => 'og',
         'base field' => 'etid',
         'relationship field' => $item['join field'],
       ),

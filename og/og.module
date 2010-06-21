@@ -67,7 +67,7 @@ function og_entity_info() {
     'label' => t('Organic group'),
     'entity class' => 'EntityOg',
     'controller class' => 'OgController',
-    'base table' => 'og_groups',
+    'base table' => 'og',
     'entity keys' => array(
       'id' => 'gid',
     ),
@@ -620,8 +620,8 @@ function og_get_group_ids($entity_type = 'group', $etids = array(), $states = ar
       $gids[$entity_type] = $gids[$entity_type] + drupal_map_assoc($etids);
     }
     else {
-      $query = db_select('og_groups', 'og_groups');
-      $query->fields('og_groups', array('etid', 'gid'))
+      $query = db_select('og', 'og');
+      $query->fields('og', array('etid', 'gid'))
       ->condition('entity_type', $entity_type)
       ->condition('etid', $etids, 'IN');
       if (!empty($states)) {
@@ -651,9 +651,9 @@ function og_get_all_group($states = array(OG_STATE_ACTIVE), $options = array()) 
   // Initialize values.
   $options += array('count' => FALSE, 'return query' => FALSE);
   $return = array();
-  $query = db_select('og_groups', 'og_groups');
+  $query = db_select('og', 'og');
   $query->addMetaData('id', 'og_get_all_group');
-  $query->fields('og_groups', array('gid'));
+  $query->fields('og', array('gid'));
   if (!empty($states)) {
     // Get only the groups with the correct state.
     $query->condition('state', $states, 'IN');

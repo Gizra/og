@@ -38,7 +38,7 @@ function og_uninstall() {
 function og_schema() {
   $schema = array();
 
-  $schema['og_groups'] = array(
+  $schema['og'] = array(
     'description'     => 'Store information related to the groups.',
     'fields'          => array(
       'gid' => array(
