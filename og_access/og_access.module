@@ -24,7 +24,7 @@ define('OG_CONTENT_ACCESS_FIELD', 'og_content_access');
 /**
  * Define group content access by it's group defaults.
  */
-define('OG_CONTENT_ACCESS_OG_DEFAULT', 0);
+define('OG_CONTENT_ACCESS_DEFAULT', 0);
 
 /**
  * Define group content access public regardless of its group definition.
@@ -65,7 +65,7 @@ function og_access_node_access_records($node) {
   }
   elseif (isset($node->{OG_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
     switch ($node->{OG_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
-      case OG_CONTENT_ACCESS_OG_DEFAULT:
+      case OG_CONTENT_ACCESS_DEFAULT:
         if ($field = field_info_field(OG_ACCESS_FIELD)) {
           // Access should be determined by its groups. If group content belongs
           // to several groups, and one of them is private, then the group
