@@ -43,15 +43,15 @@ function og_context_theme() {
 function og_context_preprocess_html(&$variables) {
   if ($group = og_context()) {
     // Add template suggestions.
-    $variables['theme_hook_suggestions'][] = 'page__group_context';
-    $variables['theme_hook_suggestions'][] = 'page__group_context__group_' . $group->gid;
-    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type;
-    $variables['theme_hook_suggestions'][] = 'page__group_context__' . $group->entity_type . '_' . $group->etid;
+    $variables['theme_hook_suggestions'][] = 'page__og_context';
+    $variables['theme_hook_suggestions'][] = 'page__og_context__group_' . $group->gid;
+    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->entity_type;
+    $variables['theme_hook_suggestions'][] = 'page__og_context__' . $group->entity_type . '_' . $group->etid;
 
     // Add CSS.
-    $clean_html = drupal_html_class('group-context-' . $group->entity_type);
-    $variables['classes_array'][] = 'group-context';
-    $variables['classes_array'][] = 'group-context-group-' . $group->gid;
+    $clean_html = drupal_html_class('og-context-' . $group->entity_type);
+    $variables['classes_array'][] = 'og-context';
+    $variables['classes_array'][] = 'og-context-group-' . $group->gid;
     $variables['classes_array'][] = $clean_html;
     $variables['classes_array'][] = $clean_html . '-' . $group->etid;
 
@@ -178,7 +178,7 @@ function og_context_add_js($group) {
   $js = &drupal_static(__FUNCTION__, FALSE);
 
   if (empty($js)) {
-    drupal_add_js(array('group' => array('og_context' => $group)), 'setting');
+    drupal_add_js(array('og' => array('og_context' => $group)), 'setting');
     $js = TRUE;
   }
 }
