@@ -251,7 +251,7 @@ function og_context_negotiation_set($type, $group_context_providers) {
     }
   }
 
-  variable_set("group_context_negotiation_$type", $negotiation);
+  variable_set("og_context_negotiation_$type", $negotiation);
 }
 
 
@@ -280,7 +280,7 @@ function og_context_provider_weight($provider) {
 function og_context_determine_context($item = NULL) {
   $context = FALSE;
 
-  if ($enabled_providers = array_keys(variable_get("group_context_negotiation_group_context", array()))) {
+  if ($enabled_providers = array_keys(variable_get("og_context_negotiation_group_context", array()))) {
 
 
     if (empty($item)) {
