@@ -1214,7 +1214,7 @@ function og_user_role_permissions($roles = array()) {
     if ($fetch) {
       // Get from the database permissions that were not in the static variable.
       // Only role IDs with at least one permission assigned will return rows.
-      $result = db_query("SELECT rid, permission FROM {group_role_permission} WHERE rid IN (:fetch)", array(':fetch' => $fetch));
+      $result = db_query("SELECT rid, permission FROM {og_role_permission} WHERE rid IN (:fetch)", array(':fetch' => $fetch));
 
       foreach ($result as $row) {
         $cache[$row->rid][$row->permission] = TRUE;
@@ -1258,10 +1258,10 @@ function og_user_roles($gid = 0, $permission = NULL, $force_group = FALSE) {
   }
 
   if (!empty($permission)) {
-    $roles = db_query("SELECT r.rid, r.name FROM {group_role} r INNER JOIN {group_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
+    $roles = db_query("SELECT r.rid, r.name FROM {og_role} r INNER JOIN {og_role_permission} p ON r.rid = p.rid WHERE p.permission = :permission AND r.gid = :gid ORDER BY r.name", array(':permission' => $permission, ':gid' => $gid))->fetchAllKeyed();
   }
   else {
-    $roles = db_query("SELECT rid, name FROM {group_role} WHERE gid = :gid ORDER BY rid", array(':gid' => $gid))->fetchAllKeyed();
+    $roles = db_query("SELECT rid, name FROM {og_role} WHERE gid = :gid ORDER BY rid", array(':gid' => $gid))->fetchAllKeyed();
   }
 
   return  $roles;
@@ -1381,7 +1381,7 @@ function og_set_global_access_module($module = '') {
 
   if (($module_perms = module_invoke($module, 'og_default_permissions')) &&
     // Check module's permissions were not applied yet.
-    !((bool) db_query_range('SELECT 1 FROM {group_role_permission} WHERE module = :module', 0, 1, array(':module' => $module))->fetchField())) {
+    !((bool) db_query_range('SELECT 1 FROM {og_role_permission} WHERE module = :module', 0, 1, array(':module' => $module))->fetchField())) {
 
     // Group permissions by role.
     $permissions = array();
@@ -1575,7 +1575,7 @@ function og_delete_user_roles_by_group($gid) {
  *  Array keyed by the role ID, and the role name as the value.
  */
 function og_get_user_roles_name($rids = array()) {
-  return db_query("SELECT rid, name FROM {group_role} WHERE rid IN (:rids)", array(':rids' => $rids))->fetchAllKeyed();
+  return db_query("SELECT rid, name FROM {og_role} WHERE rid IN (:rids)", array(':rids' => $rids))->fetchAllKeyed();
 }
 
 
@@ -1605,7 +1605,7 @@ function og_permissions_delete_by_module($module) {
 function og_user_roles_override($gid) {
   $rids = array();
   // Make sure roles doesn't exist already by looking for a row with the group
-  // ID in {group_role} table.
+  // ID in {og_role} table.
   $perms = og_get_global_permissions();
 
   foreach (og_get_global_roles() as $rid => $name) {

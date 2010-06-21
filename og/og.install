@@ -158,7 +158,7 @@ function og_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-        'description' => 'Primary Key: {group_role}.rid for role.',
+        'description' => 'Primary Key: {og_role}.rid for role.',
       ),
       'gid'               => array(
         'description'     => "The group's unique ID.",
