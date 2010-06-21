@@ -13,7 +13,7 @@
  * the field isn't known yet.
  */
 function og_enable() {
-  og_create_field('og_audience', 'user', 'user');
+  og_create_field(OG_AUDIENCE_FIELD, 'user', 'user');
 }
 
 

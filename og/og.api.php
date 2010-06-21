@@ -14,7 +14,7 @@
 /**
  * Add group permissions.
  */
-function hook_group_permission() {
+function hook_og_permission() {
   return array(
     'subscribe' => array(
       'title' => t('Subscribe user to group'),
@@ -44,7 +44,7 @@ function hook_group_permission() {
  *     different pages, the user will see the same group context.
  *     @see og_context_handler_session().
  */
-function hook_group_context_handlers() {
+function hook_og_context_handlers() {
   $items = array();
 
   $items['foo'] = array(
@@ -58,7 +58,7 @@ function hook_group_context_handlers() {
 /**
  * Alter the group context handlers.
  */
-function hook_group_context_handlers_alter(&$items) {
+function hook_og_context_handlers_alter(&$items) {
   // Add another menu path that should invoke this handler.
   $items['foo']['menu path'][] = 'foo/%/baz';
 }
@@ -69,7 +69,7 @@ function hook_group_context_handlers_alter(&$items) {
  *
  * A global role, is a role that is assigned by default to all new groups.
  */
-function hook_group_default_roles() {
+function hook_og_default_roles() {
   return array('super admin');
 }
 
@@ -81,7 +81,7 @@ function hook_group_default_roles() {
  * @param $roles
  *   Array with the default roles name.
  */
-function hook_group_default_roles_alter(&$roles) {
+function hook_og_default_roles_alter(&$roles) {
   // Remove a default role.
   unset($roles['super admin']);
 }
@@ -89,13 +89,13 @@ function hook_group_default_roles_alter(&$roles) {
 /**
  * Set the default permissions to be assigned to members, by their role.
  *
- * Roles should be defined via hook_group_default_roles().
+ * Roles should be defined via hook_og_default_roles().
  *
  * @return
  *   Array keyed with the permission name and the roles it applied to as the
  *   value.
  */
-function hook_group_default_permissions() {
+function hook_og_default_permissions() {
   return array(
     'foo' => array(OG_AUTHENTICATED_ROLE),
   );
@@ -108,9 +108,9 @@ function hook_group_default_permissions() {
  *   Array keyed with the permission name and the roles it applied to as the
  *   value.
  */
-function hook_group_default_permissions_alter(&$perms) {
+function hook_og_default_permissions_alter(&$perms) {
   // Add the permission to 'super admin' role, that should be defined
-  // via hook_group_default_roles().
+  // via hook_og_default_roles().
   $perms['foo'][] = 'super admin';
 }
 
@@ -120,7 +120,7 @@ function hook_group_default_permissions_alter(&$perms) {
  * @param $role
  *   The group role object.
  */
-function hook_group_user_role_insert($role) {
+function hook_og_user_role_insert($role) {
 }
 
 /**
@@ -129,7 +129,7 @@ function hook_group_user_role_insert($role) {
  * @param $role
  *   The group role object.
  */
-function hook_group_user_role_update($role) {
+function hook_og_user_role_update($role) {
 
 }
 
@@ -141,16 +141,16 @@ function hook_group_user_role_update($role) {
  *   is already deleted from the database. However, we pass the object to allow
  *   implementing modules to properly identify the deleted role.
  */
-function hook_group_user_role_delete($role) {
+function hook_og_user_role_delete($role) {
 
 }
 
 
-function hook_group_users_roles_grant($gid, $uid, $rid) {
+function hook_og_users_roles_grant($gid, $uid, $rid) {
 
 }
 
-function hook_group_users_roles_revoke($gid, $uid, $rid) {
+function hook_og_users_roles_revoke($gid, $uid, $rid) {
 
 }
 
@@ -168,7 +168,7 @@ function hook_group_users_roles_revoke($gid, $uid, $rid) {
  * @param $account
  *   The user object.
  */
-function hook_group_audience_options_alter(&$options, $opt_group, $account) {
+function hook_og_audience_options_alter(&$options, $opt_group, $account) {
   if (!$account->uid && $gids = og_register_get_groups()) {
     $options['content groups'] = array_merge($options['content groups'], $gids);
   }

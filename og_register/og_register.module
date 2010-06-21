@@ -27,7 +27,7 @@ function og_register_form_user_register_form_alter(&$form, $form_state) {
 
 
 /**
- * Implements hook_group_audience_alter().
+ * Implements hook_og_audience_alter().
  */
 function og_register_group_audience_options_alter(&$options, $opt_group, $account) {
   if (!$account->uid && $gids = og_register_get_groups()) {

@@ -61,7 +61,7 @@ function og_context_preprocess_html(&$variables) {
 }
 
 /**
- * Implements hook_group_context_negotiation_info().
+ * Implements hook_og_context_negotiation_info().
  */
 function og_context_group_context_negotiation_info() {
   $providers = array();
@@ -123,7 +123,7 @@ function og_context_views_api() {
 }
 
 /**
- * Implements hook_group_invalidate_cache_alter().
+ * Implements hook_og_invalidate_cache_alter().
  */
 function og_context_group_invalidate_cache_alter(&$caches, $gids = array()) {
   $caches += array(

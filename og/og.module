@@ -160,11 +160,11 @@ function og_modules_uninstalled($modules) {
 }
 
 /**
- * Implements hook_group_views_relationship().
+ * Implements hook_og_views_relationship().
  *
  * Add relationship information for all core's enteties.
  */
-function og_group_views_relationship() {
+function og_og_views_relationship() {
   $items = array();
 
   $items['node'] = array(
@@ -203,7 +203,7 @@ function og_permission() {
 }
 
 /**
- * Implement hook_group_permission().
+ * Implement hook_og_permission().
  */
 function og_group_permission() {
   // Generate standard node permissions for all applicable node types.
@@ -225,7 +225,7 @@ function og_group_permission() {
 }
 
 /**
- * Implement hook_group_default_permissions().
+ * Implement hook_og_default_permissions().
  */
 function og_group_default_permissions() {
   // Create default permissions for group content nodes if they already exist.
@@ -249,7 +249,7 @@ function og_group_default_permissions() {
 }
 
 /**
- * Implement hook_group_default_roles()
+ * Implement hook_og_default_roles()
  */
 function og_group_default_roles() {
   return array(OG_ADMINISTRATOR_ROLE);
@@ -297,9 +297,9 @@ function og_views_api() {
 }
 
 /**
- * Implement og_fields_info().
+ * Implements hook_og_fields_info().
  */
-function og_group_fields_info() {
+function og_og_fields_info() {
   $items[OG_GROUP_FIELD] = array(
     'type' => array('group'),
     'description' => t('Determine if this should be a group.'),
