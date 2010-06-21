@@ -64,7 +64,7 @@ define('OG_ADMINISTRATOR_ROLE', 'administrator member');
  */
 function og_entity_info() {
   $return['group'] = array(
-    'label' => t('Organic group'),
+    'label' => t('Group'),
     'entity class' => 'EntityOg',
     'controller class' => 'OgController',
     'base table' => 'og',
