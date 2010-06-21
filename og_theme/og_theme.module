@@ -9,7 +9,7 @@
 /**
  * Group theme field.
  */
-define('OG_THEME_FIELD', 'group_theme');
+define('OG_THEME_FIELD', 'og_theme');
 
 /**
  * Implement og_fields_info().
@@ -22,7 +22,7 @@ function og_theme_group_fields_info() {
       'field_name' => OG_THEME_FIELD,
       'type' => 'list_text',
       'cardinality' => 1,
-      'settings' => array('allowed_values' => '', 'allowed_values_function' => 'group_theme_field_allowed_values'),
+      'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_theme_field_allowed_values'),
     ),
     'instance' => array(
       'label' => t('Groups theme'),

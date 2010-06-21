@@ -5,10 +5,10 @@
  */
 function og_views_default_views() {
   /*
-   * View 'group_list'
+   * View 'og_list'
    */
   $view = new view;
-  $view->name = 'group_list';
+  $view->name = 'og_list';
   $view->description = 'Show active groups that are nodes';
   $view->tag = 'group';
   $view->view_php = '';
@@ -45,10 +45,10 @@ function og_views_default_views() {
   $handler->display->display_options['style_options']['override'] = 1;
   $handler->display->display_options['style_options']['sticky'] = 0;
   /* Relationship: Group: Node group */
-  $handler->display->display_options['relationships']['group_rel']['id'] = 'group_rel';
-  $handler->display->display_options['relationships']['group_rel']['table'] = 'node';
-  $handler->display->display_options['relationships']['group_rel']['field'] = 'group_rel';
-  $handler->display->display_options['relationships']['group_rel']['required'] = 0;
+  $handler->display->display_options['relationships']['og_rel']['id'] = 'og_rel';
+  $handler->display->display_options['relationships']['og_rel']['table'] = 'node';
+  $handler->display->display_options['relationships']['og_rel']['field'] = 'og_rel';
+  $handler->display->display_options['relationships']['og_rel']['required'] = 0;
   /* Field: Node: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
@@ -65,9 +65,9 @@ function og_views_default_views() {
   $handler->display->display_options['fields']['title']['link_to_node'] = 1;
   /* Field: Group: Group date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
-  $handler->display->display_options['fields']['created']['table'] = 'group_groups';
+  $handler->display->display_options['fields']['created']['table'] = 'og_groups';
   $handler->display->display_options['fields']['created']['field'] = 'created';
-  $handler->display->display_options['fields']['created']['relationship'] = 'group_rel';
+  $handler->display->display_options['fields']['created']['relationship'] = 'og_rel';
   $handler->display->display_options['fields']['created']['label'] = 'Since';
   $handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
@@ -81,9 +81,9 @@ function og_views_default_views() {
   $handler->display->display_options['fields']['created']['date_format'] = 'time ago';
   /* Filter: Group: Group's state */
   $handler->display->display_options['filters']['state']['id'] = 'state';
-  $handler->display->display_options['filters']['state']['table'] = 'group_groups';
+  $handler->display->display_options['filters']['state']['table'] = 'og_groups';
   $handler->display->display_options['filters']['state']['field'] = 'state';
-  $handler->display->display_options['filters']['state']['relationship'] = 'group_rel';
+  $handler->display->display_options['filters']['state']['relationship'] = 'og_rel';
   $handler->display->display_options['filters']['state']['value'] = array(
     '1' => '1',
   );
@@ -109,10 +109,10 @@ function og_views_default_views() {
   $views[$view->name] = $view;
 
   /*
-   * View 'group_members'
+   * View 'og_members'
    */
   $view = new view;
-  $view->name = 'group_members';
+  $view->name = 'og_members';
   $view->description = 'Newest group members';
   $view->tag = 'group';
   $view->view_php = '';
@@ -148,30 +148,30 @@ function og_views_default_views() {
   $handler->display->display_options['fields']['name']['link_to_user'] = 1;
   $handler->display->display_options['fields']['name']['overwrite_anonymous'] = 0;
   /* Sort criterion: Fields: og_audience (og_audience) - created */
-  $handler->display->display_options['sorts']['group_audience_created']['id'] = 'group_audience_created';
-  $handler->display->display_options['sorts']['group_audience_created']['table'] = 'field_data_group_audience';
-  $handler->display->display_options['sorts']['group_audience_created']['field'] = 'group_audience_created';
-  $handler->display->display_options['sorts']['group_audience_created']['order'] = 'DESC';
+  $handler->display->display_options['sorts']['og_audience_created']['id'] = 'og_audience_created';
+  $handler->display->display_options['sorts']['og_audience_created']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['sorts']['og_audience_created']['field'] = 'og_audience_created';
+  $handler->display->display_options['sorts']['og_audience_created']['order'] = 'DESC';
   /* Argument: Fields: og_audience (og_audience) - gid */
-  $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
-  $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
-  $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'default';
-  $handler->display->display_options['arguments']['group_audience_gid']['style_plugin'] = 'default_summary';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'group_context';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_options']['argument'] = 'group';
-  $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
+  $handler->display->display_options['arguments']['og_audience_gid']['id'] = 'og_audience_gid';
+  $handler->display->display_options['arguments']['og_audience_gid']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['arguments']['og_audience_gid']['field'] = 'og_audience_gid';
+  $handler->display->display_options['arguments']['og_audience_gid']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['og_audience_gid']['style_plugin'] = 'default_summary';
+  $handler->display->display_options['arguments']['og_audience_gid']['default_argument_type'] = 'og_context';
+  $handler->display->display_options['arguments']['og_audience_gid']['default_argument_options']['argument'] = 'group';
+  $handler->display->display_options['arguments']['og_audience_gid']['break_phrase'] = 0;
+  $handler->display->display_options['arguments']['og_audience_gid']['not'] = 0;
   /* Filter: User: Active */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'users';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = '1';
   /* Filter: Fields: og_audience (og_audience) - state */
-  $handler->display->display_options['filters']['group_audience_state']['id'] = 'group_audience_state';
-  $handler->display->display_options['filters']['group_audience_state']['table'] = 'field_data_group_audience';
-  $handler->display->display_options['filters']['group_audience_state']['field'] = 'group_audience_state';
-  $handler->display->display_options['filters']['group_audience_state']['value'] = array(
+  $handler->display->display_options['filters']['og_audience_state']['id'] = 'og_audience_state';
+  $handler->display->display_options['filters']['og_audience_state']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['filters']['og_audience_state']['field'] = 'og_audience_state';
+  $handler->display->display_options['filters']['og_audience_state']['value'] = array(
     '1' => '1',
   );
 
@@ -181,10 +181,10 @@ function og_views_default_views() {
   $views[$view->name] = $view;
 
   /*
-   * View 'group_nodes'.
+   * View 'og_nodes'.
    */
   $view = new view;
-  $view->name = 'group_nodes';
+  $view->name = 'og_nodes';
   $view->description = 'Show all nodes of a group.';
   $view->tag = 'group';
   $view->view_php = '';
@@ -209,16 +209,16 @@ function og_views_default_views() {
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
   /* Argument: Fields: og_audience (og_audience) - gid */
-  $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
-  $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
-  $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'default';
-  $handler->display->display_options['arguments']['group_audience_gid']['style_plugin'] = 'default_summary';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'group_context';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_options']['argument'] = 'group';
-  $handler->display->display_options['arguments']['group_audience_gid']['validate_fail'] = 'empty';
-  $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
+  $handler->display->display_options['arguments']['og_audience_gid']['id'] = 'og_audience_gid';
+  $handler->display->display_options['arguments']['og_audience_gid']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['arguments']['og_audience_gid']['field'] = 'og_audience_gid';
+  $handler->display->display_options['arguments']['og_audience_gid']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['og_audience_gid']['style_plugin'] = 'default_summary';
+  $handler->display->display_options['arguments']['og_audience_gid']['default_argument_type'] = 'og_context';
+  $handler->display->display_options['arguments']['og_audience_gid']['default_argument_options']['argument'] = 'group';
+  $handler->display->display_options['arguments']['og_audience_gid']['validate_fail'] = 'empty';
+  $handler->display->display_options['arguments']['og_audience_gid']['break_phrase'] = 0;
+  $handler->display->display_options['arguments']['og_audience_gid']['not'] = 0;
   /* Filter: Node: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';

@@ -9,7 +9,7 @@
 /**
  * Group register field.
  */
-define('OG_REGISTER_FIELD', 'group_register');
+define('OG_REGISTER_FIELD', 'og_register');
 
 /**
  * Implement hook_form_FORM_ID_alter().
@@ -80,7 +80,7 @@ function og_register_get_groups() {
 
   if (!$gids && $field = field_info_field(OG_REGISTER_FIELD)) {
     $conditions = array(
-      array('group_register_value', 1),
+      array('og_register_value', 1),
     );
     $query = new EntityFieldQuery;
     $result = $query

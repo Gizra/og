@@ -13,7 +13,7 @@
  * the field isn't known yet.
  */
 function og_enable() {
-  og_create_field('group_audience', 'user', 'user');
+  og_create_field('og_audience', 'user', 'user');
 }
 
 
@@ -22,9 +22,9 @@ function og_enable() {
  */
 function og_uninstall() {
   $vars = array(
-    'group_context',
-    'group_group_manager_full_access',
-    'group_skip_access',
+    'og_context',
+    'og_group_manager_full_access',
+    'og_skip_access',
   );
   foreach ($vars as $var) {
     variable_del($var);
@@ -38,7 +38,7 @@ function og_uninstall() {
 function og_schema() {
   $schema = array();
 
-  $schema['group_groups'] = array(
+  $schema['og_groups'] = array(
     'description'     => 'Store information related to the groups.',
     'fields'          => array(
       'gid' => array(
@@ -84,7 +84,7 @@ function og_schema() {
     'primary key' => array('gid'),
   );
 
-  $schema['group_role_permission'] = array(
+  $schema['og_role_permission'] = array(
     'description' => 'Stores the permissions assigned to user roles per group.',
     'fields' => array(
       'rid' => array(
@@ -117,7 +117,7 @@ function og_schema() {
     ),
   );
 
-  $schema['group_role'] = array(
+  $schema['og_role'] = array(
     'description' => 'Stores user roles per group.',
     'fields' => array(
       'rid' => array(
@@ -143,7 +143,7 @@ function og_schema() {
     'primary key' => array('rid'),
   );
 
-  $schema['group_users_roles'] = array(
+  $schema['og_users_roles'] = array(
     'description' => 'Maps users to roles.',
     'fields' => array(
       'uid' => array(
@@ -173,7 +173,7 @@ function og_schema() {
     ),
     'foreign keys' => array(
       'uid' => array('users' => 'uid'),
-      'rid' => array('group_role' => 'rid'),
+      'rid' => array('og_role' => 'rid'),
     ),
   );
 
@@ -206,8 +206,8 @@ if (module_exists('group')) {
                 $content_type['group'][] = $type->type;
                 break;
 
-              case 'group_post_standard':
-              case 'group_post_wiki':
+              case 'og_post_standard':
+              case 'og_post_wiki':
                 // The type of the group content is now determined via the
                 // group permissions. We only care about adding the group content
                 // fields to the node.
@@ -223,7 +223,7 @@ if (module_exists('group')) {
         if ($content_type) {
           // Add group and group content fields to content types.
           $fields = array(
-            'group' => OG_OG_FIELD,
+            'group' => OG_GROUP_FIELD,
             'group content' => OG_AUDIENCE_FIELD,
           );
           foreach ($fields as $key => $field_name) {
@@ -239,7 +239,7 @@ if (module_exists('group')) {
 
         // Hold the information about the callbacks that upgrade the different
         // fields.
-        $sandbox['group upgrade'] = array('group', 'group_content', 'user');
+        $sandbox['group upgrade'] = array('group', 'og_content', 'user');
 
         $query = db_select('node_revision', 'nr');
         $query->innerJoin('node', 'n', 'n.vid = nr.vid');
@@ -326,7 +326,7 @@ function _group_upgrade_group(&$sandbox) {
     }
 
     // Set field values.
-    $node->{OG_OG_FIELD}[LANGUAGE_NONE][0]['value'] = TRUE;
+    $node->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = TRUE;
 
     field_attach_update('node', $node);
 
@@ -366,7 +366,7 @@ function _group_upgrade_group_content(&$sandbox) {
   $query
     ->fields('nr', array('nid', 'vid'))
     ->fields('n', array('type', 'created'))
-    ->fields('oga', array('group_nid'))
+    ->fields('oga', array('og_nid'))
     ->condition('nr.vid', $sandbox['last'], '>')
     ->orderBy('nr.vid', 'ASC')
     ->range(0, $batch_size);

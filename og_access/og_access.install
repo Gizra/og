@@ -11,7 +11,7 @@
  */
 function og_access_uninstall() {
   $vars = array(
-    'group_access_strict_private',
+    'og_access_strict_private',
   );
   foreach ($vars as $var) {
     variable_del($var);

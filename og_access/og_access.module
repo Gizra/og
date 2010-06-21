@@ -9,17 +9,17 @@
 /**
  * The access realm of group member.
  */
-define('OG_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
+define('OG_ACCESS_AUTHENTICATED_REALM', 'og_access_authenticated');
 
 /**
  * Group public access field.
  */
-define('OG_ACCESS_FIELD', 'group_access');
+define('OG_ACCESS_FIELD', 'og_access');
 
 /**
  * Group public access field.
  */
-define('OG_CONTENT_ACCESS_FIELD', 'group_content_access');
+define('OG_CONTENT_ACCESS_FIELD', 'og_content_access');
 
 /**
  * Define group content access by it's group defaults.
@@ -95,7 +95,7 @@ function og_access_node_access_records($node) {
             $count = $query
               ->entityCondition('entity_type', $entity_type)
               ->entityCondition('entity_id', $entity_gids, 'IN')
-              ->fieldCondition(GROUP_ACCESS_FIELD, 'value', 1, '=')
+              ->fieldCondition(OG_ACCESS_FIELD, 'value', 1, '=')
               ->count()
               ->execute();
 

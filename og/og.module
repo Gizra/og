@@ -28,17 +28,17 @@ define('OG_STATE_BLOCKED', 3);
 /**
  * Group audience field.
  */
-define('OG_AUDIENCE_FIELD', 'group_audience');
+define('OG_AUDIENCE_FIELD', 'og_audience');
 
 /**
  * Group field.
  */
-define('OG_OG_FIELD', 'group_group');
+define('OG_GROUP_FIELD', 'og_group');
 
 /**
  * Group default roles and permissions field.
  */
-define('OG_DEFAULT_ACCESS_FIELD', 'group_roles_permissions');
+define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
 
 /**
  * The role name of group non-members.
@@ -67,12 +67,12 @@ function og_entity_info() {
     'label' => t('Organic group'),
     'entity class' => 'EntityOg',
     'controller class' => 'OgController',
-    'base table' => 'group_groups',
+    'base table' => 'og_groups',
     'entity keys' => array(
       'id' => 'gid',
     ),
     // Entity-metadata properties.
-    'creation callback' => 'group_create_group'
+    'creation callback' => 'og_create_group'
   );
   return $return;
 }
@@ -84,7 +84,7 @@ function og_menu() {
   $items = array();
   $items['group/autocomplete'] = array(
     'title' => 'group autocomplete',
-    'page callback' => 'group_field_audience_autocomplete',
+    'page callback' => 'og_field_audience_autocomplete',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
@@ -126,7 +126,7 @@ function og_entity_property_info() {
     'type' => 'text',
     'description' => t("The state of the group."),
     'setter callback' => 'entity_metadata_verbatim_set',
-    'options list' => 'group_group_states',
+    'options list' => 'og_group_states',
   );
 
   $properties['created'] = array(
@@ -292,7 +292,7 @@ function og_node_access($node, $op, $account) {
 function og_views_api() {
   return array(
     'api' => 2,
-    'path' => drupal_get_path('module', 'group') . '/includes',
+    'path' => drupal_get_path('module', 'og') . '/includes',
   );
 }
 
@@ -300,11 +300,11 @@ function og_views_api() {
  * Implement og_fields_info().
  */
 function og_group_fields_info() {
-  $items[OG_OG_FIELD] = array(
+  $items[OG_GROUP_FIELD] = array(
     'type' => array('group'),
     'description' => t('Determine if this should be a group.'),
     'field' => array(
-      'field_name' => OG_OG_FIELD,
+      'field_name' => OG_GROUP_FIELD,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array(
@@ -321,11 +321,11 @@ function og_group_fields_info() {
       'display' => array(
         'full' => array(
           'label' => 'above',
-          'type' => 'group_group_subscribe',
+          'type' => 'og_group_subscribe',
         ),
         'teaser' => array(
           'label' => 'above',
-          'type' => 'group_group_subscribe',
+          'type' => 'og_group_subscribe',
         ),
       ),
     ),
@@ -369,15 +369,15 @@ function og_group_fields_info() {
     ),
     'instance' => array(
       'label' => t('Groups audience'),
-      'widget_type' => 'group_audience',
+      'widget_type' => 'og_audience',
       'display' => array(
         'full' => array(
           'label' => 'above',
-          'type' => 'group_list_default',
+          'type' => 'og_list_default',
         ),
         'teaser' => array(
           'label' => 'above',
-          'type' => 'group_list_default',
+          'type' => 'og_list_default',
         ),
       ),
     ),
@@ -397,8 +397,8 @@ function og_group_fields_info() {
 * page.
 */
 function og_node_type_delete($info) {
-  variable_del('group_group_type_' . $info->type);
-  variable_del('group_group_content_type_' . $info->type);
+  variable_del('og_group_type_' . $info->type);
+  variable_del('og_group_content_type_' . $info->type);
 }
 
 /**
@@ -559,24 +559,24 @@ function og_delete($gid) {
 function og_invalidate_cache($gids = array()) {
   // Reset static cache.
   $caches = array(
-    'group_user_access',
-    'group_get_group_ids',
-    'group_get_entity_groups',
-    'group_field_audience_options',
+    'og_user_access',
+    'og_get_group_ids',
+    'og_get_entity_groups',
+    'og_field_audience_options',
   );
 
   // Let other Group modules invalidate cache.
   // TODO: Is there a better way? we want group_context to invalidate cache
   // as-well.
-  drupal_alter('group_invalidate_cache', $caches, $gids);
+  drupal_alter('og_invalidate_cache', $caches, $gids);
 
   foreach ($caches as $cache) {
     drupal_static_reset($cache);
   }
 
-  if ($gids && !empty($_SESSION['group_context']) && in_array($_SESSION['group_context'], $gids)) {
+  if ($gids && !empty($_SESSION['og_context']) && in_array($_SESSION['og_context'], $gids)) {
     // Remove group's context.
-    $_SESSION['group_context'] = NULL;
+    $_SESSION['og_context'] = NULL;
   }
 
 
@@ -620,8 +620,8 @@ function og_get_group_ids($entity_type = 'group', $etids = array(), $states = ar
       $gids[$entity_type] = $gids[$entity_type] + drupal_map_assoc($etids);
     }
     else {
-      $query = db_select('group_groups', 'group_groups');
-      $query->fields('group_groups', array('etid', 'gid'))
+      $query = db_select('og_groups', 'og_groups');
+      $query->fields('og_groups', array('etid', 'gid'))
       ->condition('entity_type', $entity_type)
       ->condition('etid', $etids, 'IN');
       if (!empty($states)) {
@@ -651,9 +651,9 @@ function og_get_all_group($states = array(OG_STATE_ACTIVE), $options = array()) 
   // Initialize values.
   $options += array('count' => FALSE, 'return query' => FALSE);
   $return = array();
-  $query = db_select('group_groups', 'group_groups');
-  $query->addMetaData('id', 'group_get_all_group');
-  $query->fields('group_groups', array('gid'));
+  $query = db_select('og_groups', 'og_groups');
+  $query->addMetaData('id', 'og_get_all_group');
+  $query->fields('og_groups', array('gid'));
   if (!empty($states)) {
     // Get only the groups with the correct state.
     $query->condition('state', $states, 'IN');
@@ -753,7 +753,7 @@ function og_group($gid, $entity_type, $entity, $state = OG_STATE_ACTIVE, $save =
   if ($save) {
     // Call the field attachers.
     call_user_func('field_attach_' . $op, $entity_type, $entity);
-    group_invalidate_cache();
+    og_invalidate_cache();
   }
 
   return $entity;
@@ -799,7 +799,7 @@ function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
           og_users_roles_revoke($gid, $entity->uid, $rid);
         }
       }
-      group_invalidate_cache();
+      og_invalidate_cache();
     }
   }
 
@@ -824,7 +824,7 @@ function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
  * can perform all actions.
  */
 function og_user_access($gid, $string, $account = NULL) {
-  if (variable_get('group_skip_access', FALSE)) {
+  if (variable_get('og_skip_access', FALSE)) {
     // User access should always return TRUE, as Group is requested to
     // skip any access check.
     return TRUE;
@@ -853,7 +853,7 @@ function og_user_access($gid, $string, $account = NULL) {
   }
 
   // Group manager has all privileges (if variable is TRUE).
-  if (variable_get('group_group_manager_full_access', TRUE)) {
+  if (variable_get('og_group_manager_full_access', TRUE)) {
     $entity = current(entity_load($group->entity_type, array($group->etid)));
     if (!empty($entity->uid) && $entity->uid == $account->uid) {
       return TRUE;
@@ -888,15 +888,15 @@ function og_user_access($gid, $string, $account = NULL) {
  *   The content type name.
  */
 function og_node_type_save($bundle_name) {
-  if (variable_get('group_group_type_' . $bundle_name, 'omitted') == 'group') {
-    og_create_field('group_group','node', $bundle_name);
+  if (variable_get('og_group_type_' . $bundle_name, 'omitted') == 'group') {
+    og_create_field('og_group','node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
-    variable_del('group_group_type_' . $bundle_name);
+    variable_del('og_group_type_' . $bundle_name);
   }
-  if (variable_get('group_group_content_type_' . $bundle_name, 'omitted') == 'group_content') {
-    og_create_field('group_audience','node', $bundle_name);
+  if (variable_get('og_group_content_type_' . $bundle_name, 'omitted') == 'og_content') {
+    og_create_field('og_audience','node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
-    variable_del('group_group_content_type_' . $bundle_name);
+    variable_del('og_group_content_type_' . $bundle_name);
   }
 }
 
@@ -963,7 +963,7 @@ function og_get_entity_groups($entity_type, $entity, $states = array(OG_STATE_AC
  */
 function og_get_group_type($entity_type, $bundle_name, $type = 'group') {
   if ($type == 'group') {
-    return (bool)field_info_instance($entity_type, OG_OG_FIELD, $bundle_name);
+    return (bool)field_info_instance($entity_type, OG_GROUP_FIELD, $bundle_name);
   }
   elseif ($type == 'group content') {
     return (bool)field_info_instance($entity_type, OG_AUDIENCE_FIELD, $bundle_name);
@@ -1281,10 +1281,10 @@ function og_get_global_roles() {
  * Get default roles.
  */
 function og_get_default_roles($include = TRUE) {
-  $roles = module_invoke_all('group_default_roles');
+  $roles = module_invoke_all('og_default_roles');
 
   // Allow other modules to alter the defult roles.
-  drupal_alter('group_default_roles', $roles);
+  drupal_alter('og_default_roles', $roles);
 
   if ($include) {
     $roles = array_merge(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), $roles);
@@ -1297,10 +1297,10 @@ function og_get_default_roles($include = TRUE) {
  * Get default permissions.
  */
 function og_get_default_permissions() {
-  $perms = module_invoke_all('group_default_permissions');
+  $perms = module_invoke_all('og_default_permissions');
 
   // Allow other modules to alter the roles and permissions.
-  drupal_alter('group_default_permissions', $perms);
+  drupal_alter('og_default_permissions', $perms);
 
   return $perms;
 }
@@ -1367,7 +1367,7 @@ function og_set_global_access_module($module = '') {
 
   $global_roles = og_get_global_roles();
 
-  if ($module_roles = module_invoke($module, 'group_default_roles')) {
+  if ($module_roles = module_invoke($module, 'og_default_roles')) {
     $global_roles_assoc = drupal_map_assoc($global_roles);
     foreach ($module_roles as $name) {
       if (empty($global_roles_assoc[$name])) {
@@ -1379,7 +1379,7 @@ function og_set_global_access_module($module = '') {
   }
 
 
-  if (($module_perms = module_invoke($module, 'group_default_permissions')) &&
+  if (($module_perms = module_invoke($module, 'og_default_permissions')) &&
     // Check module's permissions were not applied yet.
     !((bool) db_query_range('SELECT 1 FROM {group_role_permission} WHERE module = :module', 0, 1, array(':module' => $module))->fetchField())) {
 
@@ -1466,8 +1466,8 @@ function og_get_user_roles($gid, $uid = NULL, $include = TRUE) {
  *   Array with the role IDs to query.
  */
 function og_get_users_by_roles($gid, $rids = array()) {
-  $query = db_select('group_users_roles', 'group_users_roles');
-  return $query->fields('group_users_roles', array('uid'))
+  $query = db_select('og_users_roles', 'og_users_roles');
+  return $query->fields('og_users_roles', array('uid'))
     ->condition('gid', $gid)
     ->condition('rid', $rids, 'IN')
     ->execute()
@@ -1485,7 +1485,7 @@ function og_get_users_by_roles($gid, $rids = array()) {
  *   exists, FALSE otherwise.
  */
 function og_user_role_load($rid) {
-  return db_select('group_role', 'r')
+  return db_select('og_role', 'r')
     ->fields('r')
     ->condition('rid', $rid)
     ->execute()
@@ -1509,17 +1509,17 @@ function og_user_role_save($role) {
     $role->name = trim($role->name);
   }
   if (!empty($role->rid) && $role->name) {
-    $status = drupal_write_record('group_role', $role, 'rid');
-    module_invoke_all('group_user_role_update', $role);
+    $status = drupal_write_record('og_role', $role, 'rid');
+    module_invoke_all('og_user_role_update', $role);
   }
   else {
-    $status = drupal_write_record('group_role', $role);
-    module_invoke_all('group_user_role_insert', $role);
+    $status = drupal_write_record('og_role', $role);
+    module_invoke_all('og_user_role_insert', $role);
   }
 
   // Clear the user access cache.
-  drupal_static_reset('group_user_access');
-  drupal_static_reset('group_user_role_permissions');
+  drupal_static_reset('og_user_access');
+  drupal_static_reset('og_user_role_permissions');
 
   return $status;
 }
@@ -1533,22 +1533,22 @@ function og_user_role_save($role) {
 function og_user_role_delete($rid) {
   $role = og_user_role_load($rid);
 
-  db_delete('group_role')
+  db_delete('og_role')
     ->condition('rid', $rid)
     ->execute();
-  db_delete('group_role_permission')
+  db_delete('og_role_permission')
     ->condition('rid', $rid)
     ->execute();
   // Update the users who have this role set.
-  db_delete('group_users_roles')
+  db_delete('og_users_roles')
     ->condition('rid', $rid)
     ->execute();
 
-  module_invoke_all('group_user_role_delete', $role);
+  module_invoke_all('og_user_role_delete', $role);
 
   // Clear the user access cache.
-  drupal_static_reset('group_user_access');
-  drupal_static_reset('group_user_role_permissions');
+  drupal_static_reset('og_user_access');
+  drupal_static_reset('og_user_role_permissions');
 }
 
 /**
@@ -1588,7 +1588,7 @@ function og_get_user_roles_name($rids = array()) {
  *   The module name.
  */
 function og_permissions_delete_by_module($module) {
-   db_delete('group_role_permission')
+   db_delete('og_role_permission')
      ->condition('module', $modules, 'IN')
      ->execute();
 }
@@ -1638,8 +1638,8 @@ function og_users_roles_grant($gid, $uid, $rid) {
     $role->rid = $rid;
     $role->gid = $gid;
 
-    drupal_write_record('group_users_roles', $role);
-    module_invoke_all('group_users_roles_grant', $gid, $uid, $rid);
+    drupal_write_record('og_users_roles', $role);
+    module_invoke_all('og_users_roles_grant', $gid, $uid, $rid);
   }
 }
 
@@ -1656,11 +1656,11 @@ function og_users_roles_revoke($gid, $uid, $rid) {
   $user_roles = og_get_user_roles($gid, $uid);
   if (in_array($rid, $user_roles)) {
 
-    db_delete('group_users_roles')
+    db_delete('og_users_roles')
       ->condition('uid', $uid)
       ->condition('rid', $rid)
       ->execute();
-    module_invoke_all('group_users_roles_revoke', $gid, $uid, $rid);
+    module_invoke_all('og_users_roles_revoke', $gid, $uid, $rid);
   }
 }
 
@@ -1720,7 +1720,7 @@ function og_user_role_grant_permissions($rid, array $permissions = array()) {
   }
 	// Grant new permissions for the role.
   foreach ($permissions as $name) {
-    db_merge('group_role_permission')
+    db_merge('og_role_permission')
       ->key(array(
         'rid' => $rid,
         'permission' => $name,
@@ -1730,8 +1730,8 @@ function og_user_role_grant_permissions($rid, array $permissions = array()) {
   }
 
   // Clear the user access cache.
-  drupal_static_reset('group_user_access');
-  drupal_static_reset('group_user_role_permissions');
+  drupal_static_reset('og_user_access');
+  drupal_static_reset('og_user_role_permissions');
 }
 
 /**
@@ -1747,14 +1747,14 @@ function og_user_role_grant_permissions($rid, array $permissions = array()) {
  */
 function og_user_role_revoke_permissions($rid, array $permissions = array()) {
   // Revoke permissions for the role.
-  db_delete('group_role_permission')
+  db_delete('og_role_permission')
     ->condition('rid', $rid)
     ->condition('permission', $permissions, 'IN')
     ->execute();
 
   // Clear the user access cache.
-  drupal_static_reset('group_user_access');
-  drupal_static_reset('group_user_role_permissions');
+  drupal_static_reset('og_user_access');
+  drupal_static_reset('og_user_role_permissions');
 }
 
 
@@ -1771,8 +1771,8 @@ function og_get_permissions() {
     return $perms;
   }
 
-  foreach (module_implements('group_permission') as $module) {
-    if ($permissions = module_invoke($module, 'group_permission')) {
+  foreach (module_implements('og_permission') as $module) {
+    if ($permissions = module_invoke($module, 'og_permission')) {
       foreach ($permissions as $key => $perm) {
         // Initialize the roles key, if other modules haven't set it explicetly.
         // This means the permissions can apply to anonymous and authenticaed
@@ -1812,8 +1812,8 @@ function og_fields_info() {
     return $return;
   }
 
-  foreach (module_implements('group_fields_info') as $module) {
-    if ($fields = module_invoke($module, 'group_fields_info')) {
+  foreach (module_implements('og_fields_info') as $module) {
+    if ($fields = module_invoke($module, 'og_fields_info')) {
       foreach ($fields as $key => $field) {
         // Add default values.
         $field += array('entity type' => array());

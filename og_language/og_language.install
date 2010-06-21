@@ -6,7 +6,7 @@
  * Install, update, and uninstall functions for the Group language module.
  */
 
-if (module_exists('group_language')) {
+if (module_exists('og_language')) {
   /**
    * Upgrade from Organic groups' language to Group language.
    */
@@ -95,7 +95,7 @@ if (module_exists('group_language')) {
  * Implements hook_update_dependencies().
  */
 function og_language_update_dependencies() {
-  $dependencies['group_language'][7000] = array(
+  $dependencies['og_language'][7000] = array(
     'group' => 7000,
   );
   return $dependencies;
