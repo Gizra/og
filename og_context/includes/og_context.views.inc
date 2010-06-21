@@ -12,10 +12,10 @@
 function og_context_views_plugins() {
   return array(
     'argument default' => array(
-      'group_context' => array(
+      'og_context' => array(
         'title' => t('Current group from context'),
-        'handler' => 'group_context_plugin_argument_default_group_context',
-        'path' => drupal_get_path('module', 'group_context') . '/includes/views',
+        'handler' => 'og_context_plugin_argument_default_group_context',
+        'path' => drupal_get_path('module', 'og_context') . '/includes/views',
         'parent' => 'fixed', // so that the parent class is included
       ),
     ),

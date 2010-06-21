@@ -13,8 +13,8 @@ function og_ui_menu() {
   $items = array();
   $items['group/%/%/subscribe'] = array(
     'type' => MENU_CALLBACK,
-    'file' => 'group_ui.pages.inc',
-    'page callback' => 'group_ui_subscribe',
+    'file' => 'og_ui.pages.inc',
+    'page callback' => 'og_ui_subscribe',
     'page arguments' => array(1, 2),
     // Function will take care of permissions, as we want to show "you are
     // already a member of the group" to group members, however it is not
@@ -27,78 +27,78 @@ function og_ui_menu() {
 
   $items['group/%/%/unsubscribe'] = array(
     'type' => MENU_CALLBACK,
-    'file' => 'group_ui.pages.inc',
-    'page callback' => 'group_ui_unsubscribe',
+    'file' => 'og_ui.pages.inc',
+    'page callback' => 'og_ui_unsubscribe',
     'page arguments' => array(1, 2),
-    'access callback' => 'group_user_access_by_entity',
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('unsubscribe', 1, 2),
     'title' => 'Leave group',
   );
 
   $items['group/%/%/invite'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('group_ui_invite_form', 1, 2),
-    'access callback' => 'group_user_access_by_entity',
+    'page arguments' => array('og_ui_invite_form', 1, 2),
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('invite', 1, 2),
     'title' => 'Send invitation',
     'type' => MENU_CALLBACK,
-    'file' => 'group_ui.pages.inc',
+    'file' => 'og_ui.pages.inc',
   );
 
   $items['group/%/%/admin/people/add-user'] = array(
     'page callback' => 'drupal_get_form',
     'title' => 'Add members',
-    'page arguments' => array('group_ui_add_users', 1, 2),
+    'page arguments' => array('og_ui_add_users', 1, 2),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'group_ui.admin.inc',
+    'file' => 'og_ui.admin.inc',
     'weight' => 5,
-    'access callback' => 'group_user_access_by_entity',
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('add user', 1, 2),
   );
 
   // User listing pages.
   $items['group/%/%/admin/people'] = array(
     'title arguments' => array('People in group @group', 1, 2),
-    'title callback' => 'group_ui_menu_title_callback',
+    'title callback' => 'og_ui_menu_title_callback',
     'description' => 'Find and manage group members.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('group_ui_user_admin_account', 1, 2),
-    'access callback' => 'group_user_access_by_entity',
+    'page arguments' => array('og_ui_user_admin_account', 1, 2),
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
     'weight' => -4,
-    'file' => 'group_ui.admin.inc',
+    'file' => 'og_ui.admin.inc',
   );
 
   // Permission administration pages.
   $items['group/%/%/admin/people/roles'] = array(
     'title arguments' => array('Roles for group @group', 1, 2),
-    'title callback' => 'group_ui_menu_title_callback',
+    'title callback' => 'og_ui_menu_title_callback',
     'description' => 'List, edit, or add user roles.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('group_ui_user_admin_new_role', 1, 2),
-    'access callback' => 'group_user_access_by_entity',
+    'page arguments' => array('og_ui_user_admin_new_role', 1, 2),
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
-    'file' => 'group_ui.admin.inc',
+    'file' => 'og_ui.admin.inc',
     'weight' => -9,
   );
 
   $items['group/%/%/admin/people/roles/edit'] = array(
     'title' => 'Edit role',
-    'page arguments' => array('group_ui_user_admin_role', 1, 2),
-    'access callback' => 'group_user_access_by_entity',
+    'page arguments' => array('og_ui_user_admin_role', 1, 2),
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
     'type' => MENU_CALLBACK,
   );
 
   $items['group/%/%/admin/people/permissions'] = array(
     'title arguments' => array('Permissions for group @group', 1, 2),
-    'title callback' => 'group_ui_menu_title_callback',
+    'title callback' => 'og_ui_menu_title_callback',
     'description' => 'Determine access to features by selecting permissions for roles.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('group_ui_user_admin_permissions', 1, 2),
-    'access callback' => 'group_user_access_by_entity',
+    'page arguments' => array('og_ui_user_admin_permissions', 1, 2),
+    'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
-    'file' => 'group_ui.admin.inc',
+    'file' => 'og_ui.admin.inc',
     'weight' => -8,
   );
 
@@ -106,12 +106,12 @@ function og_ui_menu() {
     if ($value['fieldable']) {
       $items["$entity/%/group"] = array(
         'title' => 'Group',
-        'page callback' => 'group_ui_group_admin_overview',
+        'page callback' => 'og_ui_group_admin_overview',
         'page arguments' => array($entity, 1),
-        'access callback' => 'group_user_access_by_entity',
+        'access callback' => 'og_user_access_by_entity',
         'access arguments' => array('administer group', $entity, 1),
         'type' => MENU_LOCAL_TASK,
-        'file' => 'group_ui.admin.inc',
+        'file' => 'og_ui.admin.inc',
         'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
       );
     }
@@ -129,19 +129,19 @@ function og_ui_menu() {
   );
   $items['admin/config/group/permissions'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('group_ui_user_admin_global_permissions'),
+    'page arguments' => array('og_ui_user_admin_global_permissions'),
     'title' => 'Group global permissions',
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure Group global permissions.',
-    'file' => 'group_ui.admin.inc',
+    'file' => 'og_ui.admin.inc',
   );
   $items['admin/config/group/fields'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('group_ui_field_settings'),
+    'page arguments' => array('og_ui_field_settings'),
     'title' => 'Group field settings',
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure Group fields in bundles.',
-    'file' => 'group_ui.admin.inc',
+    'file' => 'og_ui.admin.inc',
   );
 
   return $items;
@@ -161,17 +161,17 @@ function og_ui_menu_title_callback($title, $entity_type, $etid) {
  */
 function og_ui_theme() {
   return array(
-    'group_ui_user_admin_permissions' => array(
+    'og_ui_user_admin_permissions' => array(
       'render element' => 'form',
-      'file' => 'group_ui.admin.inc',
+      'file' => 'og_ui.admin.inc',
     ),
-    'group_ui_user_admin_bundles' => array(
+    'og_ui_user_admin_bundles' => array(
       'render element' => 'form',
-      'file' => 'group_ui.admin.inc',
+      'file' => 'og_ui.admin.inc',
     ),
-    'group_ui_user_admin_new_role' => array(
+    'og_ui_user_admin_new_role' => array(
       'render element' => 'form',
-      'file' => 'group_ui.admin.inc',
+      'file' => 'og_ui.admin.inc',
     ),
   );
 }
@@ -182,7 +182,7 @@ function og_ui_theme() {
  */
 function og_ui_field_formatter_info() {
   return array(
-    'group_group_subscribe' => array(
+    'og_group_subscribe' => array(
       'label' => t('Group subscription'),
       'field types' => array('list_boolean'),
     ),
@@ -195,7 +195,7 @@ function og_ui_field_formatter_info() {
 function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-  if ($field['field_name'] == 'group_group' && $links = og_ui_subscribe_link($entity_type, $entity)) {
+  if ($field['field_name'] == 'og_group' && $links = og_ui_subscribe_link($entity_type, $entity)) {
     $element[0] = $links;
   }
 
@@ -293,10 +293,10 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
  * Implement hook_forms().
  */
 function og_ui_forms() {
-  $forms['group_ui_user_admin_new_role']['callback'] = 'group_ui_user_admin_role';
+  $forms['og_ui_user_admin_new_role']['callback'] = 'og_ui_user_admin_role';
 
   // Form to define the default permissions state for new groups.
-  $forms['group_ui_user_admin_global_permissions']['callback'] = 'group_ui_user_admin_permissions';
+  $forms['og_ui_user_admin_global_permissions']['callback'] = 'og_ui_user_admin_permissions';
 
   return $forms;
 }
@@ -315,18 +315,18 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
     '#description' => t('Specify how Group should treat content of this type. Content may behave as a group, as group content, or may not participate in Group at all.'),
   );
 
-  $form['group']['group_group_type'] = array(
+  $form['group']['og_group_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group'),
     '#default_value' =>  og_is_group_type('node', $node_type) ? 'group' : 'omitted',
     '#options' => array('omitted' => t('Not a group type'), 'group' => t('Group type')),
   );
 
-  $form['group']['group_group_content_type'] = array(
+  $form['group']['og_group_content_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group content'),
-    '#default_value' =>  og_is_group_content_type('node', $node_type) ? 'group_content' : 'omitted',
-    '#options' => array('omitted' => t('Not a group content type'), 'group_content' => t('Group content type')),
+    '#default_value' =>  og_is_group_content_type('node', $node_type) ? 'og_content' : 'omitted',
+    '#options' => array('omitted' => t('Not a group content type'), 'og_content' => t('Group content type')),
   );
 }
 
@@ -381,15 +381,15 @@ function og_ui_group_user_operations($form = array(), $form_state = array()) {
   $operations = array(
     'unblock' => array(
       'label' => t('Approve membership of the selected users'),
-      'callback' => 'group_ui_user_operations_approve',
+      'callback' => 'og_ui_user_operations_approve',
     ),
     'deny' => array(
       'label' => t('Deny membership from the selected users'),
-      'callback' => 'group_ui_user_operations_deny',
+      'callback' => 'og_ui_user_operations_deny',
     ),
     'block' => array(
       'label' => t('Block membership from the selected users'),
-      'callback' => 'group_ui_user_operations_block',
+      'callback' => 'og_ui_user_operations_block',
     ),
   );
 
@@ -433,7 +433,7 @@ function og_ui_group_user_operations($form = array(), $form_state = array()) {
       $rid = $operation_rid[1];
       if (og_user_access($gid, 'administer group')) {
         $operations[$form_state['values']['operation']] = array(
-          'callback' => 'group_ui_user_multiple_role_edit',
+          'callback' => 'og_ui_user_multiple_role_edit',
           'callback arguments' => array($operation, $rid),
         );
       }
@@ -554,10 +554,10 @@ function og_ui_group_ui_get_group_admin($gid) {
  * Get all the group admin menu items.
  */
 function og_ui_get_group_admin($gid) {
-  $data = module_invoke_all('group_ui_get_group_admin', $gid);
+  $data = module_invoke_all('og_ui_get_group_admin', $gid);
 
   // Allow other modules to alter the menu items.
-  drupal_alter('group_ui_get_group_admin', $data, $gid);
+  drupal_alter('og_ui_get_group_admin', $data, $gid);
 
   return $data;
 }

@@ -17,8 +17,8 @@
 function og_context_configure_form() {
 
   $form = array(
-    '#submit' => array('group_context_configure_form_submit'),
-    '#theme' => 'group_context_configure_form',
+    '#submit' => array('og_context_configure_form_submit'),
+    '#theme' => 'og_context_configure_form',
     '#group_context_providers' => og_context_negotiation_info(),
   );
 
@@ -37,7 +37,7 @@ function og_context_configure_form() {
  * Helper function to build a group context provider table.
  */
 function _group_context_configure_form_table(&$form) {
-  $type = 'group_context';
+  $type = 'og_context';
 
   $table_form = array(
     '#title' => t('Group context detection'),
@@ -89,7 +89,7 @@ function _group_context_configure_form_table(&$form) {
     $table_form['operation'][$id] = $config_op;
   }
 
-  $form['group_context'] = $table_form;
+  $form['og_context'] = $table_form;
 }
 
 /**
@@ -105,7 +105,7 @@ function theme_group_context_configure_form($variables) {
   $form = $variables['form'];
   $output = '';
 
-  $type = 'group_context';
+  $type = 'og_context';
   $rows = array();
   $title = '<label>' . $form[$type]['#title'] . '</label>';
   $description = '<div class="description">' . $form[$type]['#description'] . '</div>';
@@ -161,7 +161,7 @@ function theme_group_context_configure_form($variables) {
  * Submit handler for og_context negotiation settings.
  */
 function og_context_configure_form_submit($form, &$form_state) {
-  $type = 'group_context';
+  $type = 'og_context';
 
   $negotiation = array();
   $enabled_providers = $form_state['values'][$type]['enabled'];

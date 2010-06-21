@@ -11,7 +11,7 @@
  */
 function og_access_uninstall() {
   $vars = array(
-    'group_access_group_defaults_fallback',
+    'og_access_group_defaults_fallback',
   );
   foreach ($vars as $var) {
     variable_del($var);

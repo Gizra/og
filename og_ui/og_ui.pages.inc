@@ -53,7 +53,7 @@ function og_ui_subscribe($entity_type, $etid, $uid = NULL) {
     }
     elseif (og_user_access($group->gid, 'subscribe', $account) || og_user_access($group->gid, 'subscribe without approval', $account)) {
       // Show the user a subscription confirmation.
-      return drupal_get_form('group_ui_confirm_subscribe', $group, $account);
+      return drupal_get_form('og_ui_confirm_subscribe', $group, $account);
     }
     drupal_access_denied();
   }
@@ -113,7 +113,7 @@ function og_ui_unsubscribe($entity_type, $etid) {
       $user_groups = og_get_entity_groups('user', $user);
       if (!empty($user_groups[$group->gid])) {
         // Show the user a subscription confirmation.
-        return drupal_get_form('group_ui_confirm_unsubscribe', $group, $user);
+        return drupal_get_form('og_ui_confirm_unsubscribe', $group, $user);
       }
     }
     else {

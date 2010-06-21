@@ -9,7 +9,7 @@
 /**
  * Group register field.
  */
-define('OG_VIEWS_FIELD', 'group_views');
+define('OG_VIEWS_FIELD', 'og_views');
 
 /**
  * Implements hook_menu().
@@ -19,11 +19,11 @@ function og_views_menu() {
 
   $items['admin/config/group/group-views'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('group_views_settings'),
+    'page arguments' => array('og_views_settings'),
     'title' => 'Group views settings',
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure group views.',
-    'file' => 'group_views.admin.inc',
+    'file' => 'og_views.admin.inc',
   );
 
   return $items;
@@ -44,7 +44,7 @@ function og_views_views_api() {
  */
 function og_views_field_formatter_info() {
   return array(
-    'group_views_default' => array(
+    'og_views_default' => array(
       'label' => t('Group Views'),
       'field types' => array('list_text'),
     ),
@@ -62,7 +62,7 @@ function og_views_group_fields_info() {
       'field_name' => OG_VIEWS_FIELD,
       'type' => 'list_text',
       'cardinality' => 1,
-      'settings' => array('allowed_values' => '', 'allowed_values_function' => 'group_views_field_allowed_values'),
+      'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_views_field_allowed_values'),
     ),
     'instance' => array(
       'label' => t('Groups views'),
@@ -70,11 +70,11 @@ function og_views_group_fields_info() {
       'display' => array(
         'full' => array(
           'label' => 'above',
-          'type' => 'group_views_default',
+          'type' => 'og_views_default',
         ),
         'teaser' => array(
           'label' => 'above',
-          'type' => 'group_views_default',
+          'type' => 'og_views_default',
         ),
       ),
     ),
@@ -116,7 +116,7 @@ function og_views_field_formatter_view($entity_type, $entity, $field, $instance,
   $element = array();
 
   if ($field['field_name'] == OG_VIEWS_FIELD && !empty($entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'])) {
-    $view = $entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'] == '__global' ? variable_get('group_views_global_view', 'group_nodes') : $entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'];
+    $view = $entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'] == '__global' ? variable_get('og_views_global_view', 'og_nodes') : $entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'];
     if ($view = explode(' ', $view)) {
       $element[0] = array('#markup' => views_embed_view($view[0], !empty($view[1]) ? $view[1] : 'default'));
     }

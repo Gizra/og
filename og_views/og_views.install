@@ -11,7 +11,7 @@
  */
 function og_views_uninstall() {
   $vars = array(
-    'group_views_global_view',
+    'og_views_global_view',
   );
   foreach ($vars as $var) {
     variable_del($var);

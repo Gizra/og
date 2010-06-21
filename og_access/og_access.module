@@ -9,17 +9,17 @@
 /**
  * The access realm of group member.
  */
-define('OG_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
+define('OG_ACCESS_AUTHENTICATED_REALM', 'og_access_authenticated');
 
 /**
  * Group public access field.
  */
-define('OG_ACCESS_FIELD', 'group_access');
+define('OG_ACCESS_FIELD', 'og_access');
 
 /**
  * Group public access field.
  */
-define('OG_CONTENT_ACCESS_FIELD', 'group_content_access');
+define('OG_CONTENT_ACCESS_FIELD', 'og_content_access');
 
 /**
  * Define group content access by it's group defaults.
@@ -84,7 +84,7 @@ function og_access_node_access_records($node) {
             // Get the entity types ID.
             $conditions = array(
               // TODO: document variable.
-              array('group_access_value', variable_get('group_access_group_defaults_fallback', 0)),
+              array('og_access_value', variable_get('og_access_group_defaults_fallback', 0)),
               array('entity_id', $entity_gids),
               // Use the "magic" column type to get the etid.
               array('type', $entity_type),

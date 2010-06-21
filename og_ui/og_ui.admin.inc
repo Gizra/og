@@ -41,16 +41,16 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
   if ($group = og_get_group($entity_type, $etid)) {
     $label = og_label($group->gid);
 
-    $form['group_user'] = array(
+    $form['og_user'] = array(
       '#type' => 'fieldset',
       '#title' => t('Add a group member to %group', array('%group' => $label)),
     );
-    $form['group_user']['group_add_user'] = array(
+    $form['og_user']['og_add_user'] = array(
       '#type' => 'textfield',
       '#title' => t('User name'),
       '#autocomplete_path' => 'user/autocomplete',
     );
-    $form['group_user']['group_add_user_state'] = array(
+    $form['og_user']['og_add_user_state'] = array(
       '#type' => 'select',
       '#title' => t('Membership state'),
       '#options' => og_group_content_states(),
@@ -69,9 +69,9 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
  * Validate handler; Add users to group.
  */
 function og_ui_add_users_validate($form, &$form_state) {
-  $account = user_load_by_name($form_state['values']['group_add_user']);
+  $account = user_load_by_name($form_state['values']['og_add_user']);
   if (!$account) {
-    form_set_error('group_add_user', t('You have entered an invalid user name.'));
+    form_set_error('og_add_user', t('You have entered an invalid user name.'));
   }
 }
 
@@ -79,9 +79,9 @@ function og_ui_add_users_validate($form, &$form_state) {
  * Submit handler; Add users to group.
  */
 function og_ui_add_users_submit($form, &$form_state) {
-  $account = user_load_by_name($form_state['values']['group_add_user']);
+  $account = user_load_by_name($form_state['values']['og_add_user']);
 
-  og_group($form_state['values']['group']->gid, 'user', $account, $form_state['values']['group_add_user_state']);
+  og_group($form_state['values']['group']->gid, 'user', $account, $form_state['values']['og_add_user_state']);
   drupal_set_message(t('%user has been added to group.', array('%user' => $account->name)));
 }
 
@@ -97,9 +97,9 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   $group = og_get_group($entity_type, $etid);
   $header = array(
     'username' => array('data' => t('Username'), 'field' => 'u.name'),
-    'status' => array('data' => t('Status'), 'field' => 'group_audience.group_audience_state'),
+    'status' => array('data' => t('Status'), 'field' => 'og_audience.group_audience_state'),
     'roles' => array('data' => t('Roles')),
-    'member_for' => array('data' => t('Member for'), 'field' => 'group_audience.group_audience_created', 'sort' => 'desc'),
+    'member_for' => array('data' => t('Member for'), 'field' => 'og_audience.group_audience_created', 'sort' => 'desc'),
   );
 
   $form['group'] = array('#type' => 'value', '#value' => $group);
@@ -110,7 +110,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
     '#suffix' => '</div>',
   );
   $options = array();
-  foreach (module_implements('group_user_operations') as $module) {
+  foreach (module_implements('og_user_operations') as $module) {
     $result = call_user_func($module . '_group_user_operations', array(), array('group' => $group));
     foreach ($result as $operation => $array) {
       $options[$operation] = $array['label'];
@@ -135,10 +135,10 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   $entity = og_load_entity_from_group($group->gid);
 
   //TODO: Use field_attach_query(), when query can return object,
-  $query = db_select('field_data_group_audience', 'group_audience');
+  $query = db_select('field_data_group_audience', 'og_audience');
   $query
-    ->condition('group_audience.group_audience_gid', $group->gid)
-    ->condition('group_audience.bundle', 'user');
+    ->condition('og_audience.group_audience_gid', $group->gid)
+    ->condition('og_audience.bundle', 'user');
 
   $count_query = clone $query;
   $count_query->addExpression('COUNT(og_audience.bundle)');
@@ -146,7 +146,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   $query = $query->extend('PagerDefault')->extend('TableSort');
   $query->join('users', 'u', 'u.uid =  og_audience.entity_id');
   $query
-    ->fields('group_audience', array('entity_id', 'group_audience_state', 'group_audience_created'))
+    ->fields('og_audience', array('entity_id', 'og_audience_state', 'og_audience_created'))
     ->fields('u', array('name'))
     ->limit(10)
     ->orderByHeader($header)
@@ -213,7 +213,7 @@ function og_ui_user_admin_account_validate($form, &$form_state) {
 function og_ui_user_admin_account_submit($form, &$form_state) {
   $group = $form_state['values']['group'];
 
-  $operations = module_invoke_all('group_user_operations', $form, $form_state + array('group' => $group));
+  $operations = module_invoke_all('og_user_operations', $form, $form_state + array('group' => $group));
   $operation = $operations[$form_state['values']['operation']];
   // Filter out unchecked accounts.
   $accounts = array_filter($form_state['values']['accounts']);
@@ -290,8 +290,8 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0
           '#type' => 'submit',
           '#value' => t('Add role'),
         );
-        $form['#submit'][] = 'group_ui_user_admin_role_submit';
-        $form['#validate'][] = 'group_ui_user_admin_role_validate';
+        $form['#submit'][] = 'og_ui_user_admin_role_submit';
+        $form['#validate'][] = 'og_ui_user_admin_role_validate';
       }
     }
     return $form;
@@ -443,18 +443,18 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
   }
 
   if (empty($group)) {
-    $form['#theme'] = array('group_ui_user_admin_permissions');
+    $form['#theme'] = array('og_ui_user_admin_permissions');
   }
   if ($gid == 0 || !group_is_group_default_access($group->gid)) {
     $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $gid == 0 ? t('Save global permissions') : t('Save permissions'),
-      '#submit' => array('group_ui_user_admin_permissions_submit'),
+      '#submit' => array('og_ui_user_admin_permissions_submit'),
     );
   }
 
-  $form['#after_build'][] = 'group_ui_user_admin_permissions_after_build';
+  $form['#after_build'][] = 'og_ui_user_admin_permissions_after_build';
 
   return $form;
 }
@@ -556,23 +556,23 @@ function og_ui_field_settings() {
   $form = array();
   $options = array();
 
-  $form['group_group'] = array(
+  $form['og_group'] = array(
     '#type' => 'fieldset',
     '#title' => t('Group type'),
   );
-  $form['group_group']['group_group'] = _group_admin_fields_overview('group');
+  $form['og_group']['og_group'] = _group_admin_fields_overview('group');
 
-  $form['group_group_content'] = array(
+  $form['og_group_content'] = array(
     '#type' => 'fieldset',
     '#title' => t('Group post type'),
   );
-  $form['group_group_content']['group_group_content'] = _group_admin_fields_overview('group content');
+  $form['og_group_content']['og_group_content'] = _group_admin_fields_overview('group content');
 
   $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Add group and group content fields to bundles'),
-    '#submit' => array('group_ui_field_settings_submit'),
+    '#submit' => array('og_ui_field_settings_submit'),
   );
 
   return $form;
@@ -623,7 +623,7 @@ function _group_admin_fields_overview($group_type = 'group') {
     }
   }
 
-  $form['#theme'] = array('group_ui_user_admin_bundles');
+  $form['#theme'] = array('og_ui_user_admin_bundles');
 
   return $form;
 }
@@ -645,7 +645,7 @@ function og_ui_field_settings_submit($form, &$form_state) {
       foreach ($bundles as $key => $bundle) {
         // Add the field if it doesn't already exist.
         if (!field_info_instance($bundle_info[$bundle], $field_name, $bundle)) {
-          call_user_func('group_create_field', $field_name, $bundle_info[$bundle], $bundle);
+          call_user_func('og_create_field', $field_name, $bundle_info[$bundle], $bundle);
           $messages[] = t('Added field %field to %bundle.', array('%field' => $group_fields[$field_name]['instance']['label'], '%bundle' => $bundle));
         }
       }
