@@ -14,8 +14,8 @@
  */
 function og_enable() {
   og_create_field(OG_AUDIENCE_FIELD, 'user', 'user');
+  og_set_global_access(TRUE);
 }
-
 
 /**
  * Implements hook_uninstall().
