@@ -144,10 +144,8 @@ function og_entity_property_info() {
  */
 function og_modules_enabled($modules) {
   foreach ($modules as $module) {
-    if ($module != 'og') {
-      // Add default roles and permissions, if existing and not set yet.
-      og_set_global_access_module($module);
-    }
+    // Add default roles and permissions, if existing and not set yet.
+    og_set_global_access_module($module);
   }
 }
 
