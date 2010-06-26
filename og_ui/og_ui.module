@@ -438,7 +438,7 @@ function og_ui_og_user_operations($form = array(), $form_state = array()) {
         );
       }
       else {
-        watchdgroup('security', 'Detected malicious attempt to alter protected user fields.', array(), WATCHDOG_WARNING);
+        watchdog('security', 'Detected malicious attempt to alter protected user fields.', array(), WATCHDOG_WARNING);
         return;
       }
     }
