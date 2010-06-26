@@ -109,15 +109,6 @@ function og_views_data() {
     ),
   );
 
-  $data['og']['member_count'] = array(
-    'title' => t('Members count'),
-    'field' => array(
-      'handler' => 'og_handler_field_group_member_count',
-      'click sortable' => FALSE,
-      'help' => t('Number of authenticated and approved members for a group. Excludes memberships which are pending approval or blocked.'),
-    ),
-  );
-
   $data['field_data_og_audience']['user_roles'] = array(
     'group' => t('Group'),
     'title' => t('Group user roles'),
@@ -156,9 +147,6 @@ function og_views_handlers() {
      'parent' => 'views_handler_field_prerender_list',
     ),
     // Field
-    'og_handler_field_group_member_count' => array(
-      'parent' => 'views_handler_field_numeric',
-    ),
     'og_handler_field_og_audience_state' => array(
       'parent' => 'views_handler_field',
     ),
