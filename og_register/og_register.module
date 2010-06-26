@@ -9,7 +9,7 @@
 /**
  * Group register field.
  */
-define('OG_REGISTER_FIELD', 'og_register');
+define('OG_REGISTER_FIELD', 'group_register');
 
 /**
  * Implement hook_form_FORM_ID_alter().

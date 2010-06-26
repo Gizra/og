@@ -9,17 +9,17 @@
 /**
  * The access realm of group member.
  */
-define('OG_ACCESS_AUTHENTICATED_REALM', 'og_access_authenticated');
+define('OG_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
 
 /**
  * Group public access field.
  */
-define('OG_ACCESS_FIELD', 'og_access');
+define('OG_ACCESS_FIELD', 'group_access');
 
 /**
  * Group public access field.
  */
-define('OG_CONTENT_ACCESS_FIELD', 'og_content_access');
+define('OG_CONTENT_ACCESS_FIELD', 'group_content_access');
 
 /**
  * Define group content access by it's group defaults.

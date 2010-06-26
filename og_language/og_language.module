@@ -9,7 +9,7 @@
 /**
  * Group language field.
  */
-define('OG_LANGUAGE_FIELD', 'og_language');
+define('OG_LANGUAGE_FIELD', 'group_language');
 
 /**
  * Implement og_fields_info().

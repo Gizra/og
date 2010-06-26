@@ -9,7 +9,7 @@
 /**
  * Group theme field.
  */
-define('OG_THEME_FIELD', 'og_theme');
+define('OG_THEME_FIELD', 'group_theme');
 
 /**
  * Implement og_fields_info().

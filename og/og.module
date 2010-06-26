@@ -28,12 +28,12 @@ define('OG_STATE_BLOCKED', 3);
 /**
  * Group audience field.
  */
-define('OG_AUDIENCE_FIELD', 'og_audience');
+define('OG_AUDIENCE_FIELD', 'group_audience');
 
 /**
  * Group field.
  */
-define('OG_GROUP_FIELD', 'og_group');
+define('OG_GROUP_FIELD', 'group_group');
 
 /**
  * Group default roles and permissions field.
