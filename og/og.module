@@ -1355,15 +1355,20 @@ function og_set_global_access($force = FALSE) {
  *   Array with the global roles, as new records might have been added.
  */
 function og_set_global_access_module($module = '') {
+  $global_roles = og_get_global_roles();
+
   $default_roles = og_get_default_roles();
   $default_perm = og_get_default_permissions();
 
-  $global_roles = og_get_global_roles();
-
   if ($module_roles = module_invoke($module, 'og_default_roles')) {
+    if (empty($global_roles)) {
+      // There are no roles, so we need to add the default ones, including the
+      // anonymous and authenticated memebers.
+      $module_roles = array_merge(drupal_map_assoc($default_roles), drupal_map_assoc($module_roles));
+    }
     $global_roles_assoc = drupal_map_assoc($global_roles);
     foreach ($module_roles as $name) {
-      if (empty($global_roles_assoc[$name])) {
+      if (empty($global_roles_assoc[$name]) || empty($global_roles)) {
         // Add a new global role.
         $role = og_create_global_role($name);
         $global_roles[$role->rid] = $name;
