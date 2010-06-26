@@ -21,7 +21,7 @@ function og_field_widget_properties_alter(&$widget, $context) {
       $opt_group = TRUE;
     }
 
-    $widget['type'] = $instance['widget']['settings']['minimum_for_autocomplete'] <= og_field_audience_count($opt_group) ? 'og_audience_autocomplete' : 'og_audience';
+    $widget['type'] = $instance['widget']['settings']['minimum_for_autocomplete'] <= og_field_audience_count($opt_group) ? OG_AUDIENCE_AUTOCOMPLETE_WIDGET : OG_AUDIENCE_WIDGET;
   }
 }
 
@@ -33,10 +33,10 @@ function og_field_info() {
     'group' => array(
       'label' => t('Group'),
       'description' => t('This field stores groups associated with the content.'),
-      'default_widget' => 'og_audience',
+      'default_widget' => OG_AUDIENCE_WIDGET,
       'default_formatter' => 'og_list_default',
       // Entity metadata properties.
-      'property_type' => 'og_audience',
+      'property_type' => OG_AUDIENCE_FIELD,
       'property_callbacks' => array('og_field_group_property_callback'),
     ),
   );
@@ -120,7 +120,7 @@ function og_field_formatter_info() {
 function og_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-  if ($field['field_name'] == 'og_audience' && !empty($items[0])) {
+  if ($field['field_name'] == OG_AUDIENCE_FIELD && !empty($items[0])) {
     foreach ($items as $delta => $item) {
       if ($group = og_get_group('group', $item['gid'])) {
         $label = og_label($group->gid);
@@ -151,7 +151,7 @@ function og_field_widget_info() {
   );
 
   return array(
-    'og_audience' => array(
+    OG_AUDIENCE_WIDGET => array(
       'label' => t('Group audience'),
       'settings' => array(
         'opt_group' => 'auto',
@@ -168,7 +168,7 @@ function og_field_widget_info() {
         'minimum_for_autocomplete' => 50,
       ) + $autocomplete_settings,
     ),
-    'og_audience_autocomplete' => array(
+    OG_AUDIENCE_AUTOCOMPLETE_WIDGET => array(
       'label'       => t('Autocomplete text field'),
       'description' => t('Display the list of referenceable groups as a textfield with autocomplete behaviour.'),
       'field types' => array('group'),
@@ -185,7 +185,7 @@ function og_field_widget_settings_form($field, $instance) {
   $defaults = field_info_widget_settings($widget['type']);
   $settings = array_merge($defaults, $widget['settings']);
 
-  if ($widget['type'] == 'og_audience') {
+  if ($widget['type'] == OG_AUDIENCE_WIDGET) {
 
     $form['opt_group'] = array(
       '#type' => 'radios',
@@ -255,7 +255,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   $widget = $instance['widget'];
 
   switch ($widget['type']) {
-    case 'og_audience_autocomplete':
+    case OG_AUDIENCE_AUTOCOMPLETE_WIDGET:
       $element += array(
         '#type' => 'textfield',
         '#default_value' => isset($items[$delta]['gid']) ? $items[$delta]['gid'] : NULL,
@@ -269,7 +269,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
       break;
 
-    case 'og_audience':
+    case OG_AUDIENCE_WIDGET:
       $excludes = array();
       // If it's an existing group, then exclude itself, as in some cases a group
       // can act also as a group content, but we want to prevent associating the
