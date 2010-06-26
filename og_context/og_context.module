@@ -219,7 +219,8 @@ function og_context_negotiation_info() {
  * @param $language_providers
  *   An array of language provider ids.
  */
-function og_context_negotiation_set($type, $group_context_providers) {
+function og_context_negotiation_set($group_context_providers) {
+  $type = 'group_context';
   // Save only the necessary fields.
   $provider_fields = array('callbacks');
 
@@ -348,11 +349,21 @@ function og_context_handler_url() {
  * Context handler; Get groups from existing node.
  */
 function og_context_handler_node() {
+  $return = array();
   // menu_get_object() doesn't play nicely if the path is node/%/foo, so we load
   // it ourself.
   $item = menu_get_item();
-  $node = node_load($item['map'][1]);
-  return _group_context_handler_entity('node', $node);
+  if (!empty($item['map'][1])) {
+    if (is_object($item['map'][1])) {
+      $node = $item['map'][1];
+    }
+    else {
+      $node = node_load($item['map'][1]);
+    }
+    $return = _group_context_handler_entity('node', $node);
+  }
+  $node = is_object($item['map'][1]) ? $item['map'][1] : node_load($item['map'][1]);
+  return $return;
 }
 
 /**
