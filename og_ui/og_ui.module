@@ -195,7 +195,7 @@ function og_ui_field_formatter_info() {
 function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-  if ($field['field_name'] == 'og_group' && $links = og_ui_subscribe_link($entity_type, $entity)) {
+  if ($field['field_name'] == OG_GROUP_FIELD && $links = og_ui_subscribe_link($entity_type, $entity)) {
     $element[0] = $links;
   }
 
