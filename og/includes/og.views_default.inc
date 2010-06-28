@@ -14,7 +14,7 @@ function og_views_default_views() {
   $view->view_php = '';
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
-  $view->api_version = 3.0-alpha1;
+  $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Defaults */
@@ -118,7 +118,7 @@ function og_views_default_views() {
   $view->view_php = '';
   $view->base_table = 'users';
   $view->is_cacheable = FALSE;
-  $view->api_version = 3.0-alpha1;
+  $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Defaults */
@@ -147,31 +147,31 @@ function og_views_default_views() {
   $handler->display->display_options['fields']['name']['empty_zero'] = 0;
   $handler->display->display_options['fields']['name']['link_to_user'] = 1;
   $handler->display->display_options['fields']['name']['overwrite_anonymous'] = 0;
-  /* Sort criterion: Fields: og_audience (og_audience) - created */
-  $handler->display->display_options['sorts']['og_audience_created']['id'] = 'og_audience_created';
-  $handler->display->display_options['sorts']['og_audience_created']['table'] = 'field_data_og_audience';
-  $handler->display->display_options['sorts']['og_audience_created']['field'] = 'og_audience_created';
-  $handler->display->display_options['sorts']['og_audience_created']['order'] = 'DESC';
-  /* Argument: Fields: og_audience (og_audience) - gid */
-  $handler->display->display_options['arguments']['og_audience_gid']['id'] = 'og_audience_gid';
-  $handler->display->display_options['arguments']['og_audience_gid']['table'] = 'field_data_og_audience';
-  $handler->display->display_options['arguments']['og_audience_gid']['field'] = 'og_audience_gid';
-  $handler->display->display_options['arguments']['og_audience_gid']['default_action'] = 'default';
-  $handler->display->display_options['arguments']['og_audience_gid']['style_plugin'] = 'default_summary';
-  $handler->display->display_options['arguments']['og_audience_gid']['default_argument_type'] = 'og_context';
-  $handler->display->display_options['arguments']['og_audience_gid']['default_argument_options']['argument'] = 'group';
-  $handler->display->display_options['arguments']['og_audience_gid']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['og_audience_gid']['not'] = 0;
+  /* Sort criterion: Fields: group_audience (group_audience) - created */
+  $handler->display->display_options['sorts']['group_audience_created']['id'] = 'group_audience_created';
+  $handler->display->display_options['sorts']['group_audience_created']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['sorts']['group_audience_created']['field'] = 'group_audience_created';
+  $handler->display->display_options['sorts']['group_audience_created']['order'] = 'DESC';
+  /* Argument: Fields: group_audience (group_audience) - gid */
+  $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
+  $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['group_audience_gid']['style_plugin'] = 'default_summary';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'og_context';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_options']['argument'] = 'group';
+  $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
+  $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
   /* Filter: User: Active */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'users';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = '1';
-  /* Filter: Fields: og_audience (og_audience) - state */
-  $handler->display->display_options['filters']['og_audience_state']['id'] = 'og_audience_state';
-  $handler->display->display_options['filters']['og_audience_state']['table'] = 'field_data_og_audience';
-  $handler->display->display_options['filters']['og_audience_state']['field'] = 'og_audience_state';
-  $handler->display->display_options['filters']['og_audience_state']['value'] = array(
+  /* Filter: Fields: group_audience (group_audience) - state */
+  $handler->display->display_options['filters']['group_audience_state']['id'] = 'group_audience_state';
+  $handler->display->display_options['filters']['group_audience_state']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['filters']['group_audience_state']['field'] = 'group_audience_state';
+  $handler->display->display_options['filters']['group_audience_state']['value'] = array(
     '1' => '1',
   );
 
@@ -190,7 +190,7 @@ function og_views_default_views() {
   $view->view_php = '';
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
-  $view->api_version = 3.0-alpha1;
+  $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Defaults */
@@ -208,17 +208,17 @@ function og_views_default_views() {
   $handler->display->display_options['sorts']['created']['table'] = 'node';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-  /* Argument: Fields: og_audience (og_audience) - gid */
-  $handler->display->display_options['arguments']['og_audience_gid']['id'] = 'og_audience_gid';
-  $handler->display->display_options['arguments']['og_audience_gid']['table'] = 'field_data_og_audience';
-  $handler->display->display_options['arguments']['og_audience_gid']['field'] = 'og_audience_gid';
-  $handler->display->display_options['arguments']['og_audience_gid']['default_action'] = 'default';
-  $handler->display->display_options['arguments']['og_audience_gid']['style_plugin'] = 'default_summary';
-  $handler->display->display_options['arguments']['og_audience_gid']['default_argument_type'] = 'og_context';
-  $handler->display->display_options['arguments']['og_audience_gid']['default_argument_options']['argument'] = 'group';
-  $handler->display->display_options['arguments']['og_audience_gid']['validate_fail'] = 'empty';
-  $handler->display->display_options['arguments']['og_audience_gid']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['og_audience_gid']['not'] = 0;
+  /* Argument: Fields: group_audience (group_audience) - gid */
+  $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
+  $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['group_audience_gid']['style_plugin'] = 'default_summary';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'og_context';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_options']['argument'] = 'group';
+  $handler->display->display_options['arguments']['group_audience_gid']['validate_fail'] = 'empty';
+  $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
+  $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
   /* Filter: Node: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
