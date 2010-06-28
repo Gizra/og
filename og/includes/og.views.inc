@@ -109,25 +109,25 @@ function og_views_data() {
     ),
   );
 
-  $data['field_data_og_audience']['user_roles'] = array(
+  $data['field_data_group_audience']['user_roles'] = array(
     'group' => t('Group'),
     'title' => t('Group user roles'),
     'help' => t('Show all the groups a user belongs to in a group.'),
     // This is a dummy field, so point it to a real field that we need - the
     // group ID
-    'real field' => 'og_audience_gid',
+    'real field' => 'group_audience_gid',
     'field' => array(
       'handler' => 'og_handler_field_user_roles',
     ),
   );
 
-  $data['field_data_og_audience']['og_permissions'] = array(
+  $data['field_data_group_audience']['og_permissions'] = array(
     'group' => t('Group'),
     'title' => t('Group permissions'),
     'help' => t('Filter by group permissions.'),
     // This is a dummy field, so point it to a real field that we need - the
     // group ID
-    'real field' => 'og_audience_gid',
+    'real field' => 'group_audience_gid',
     'field' => array(
       'handler' => 'og_handler_field_group_permissions',
     ),
@@ -147,7 +147,7 @@ function og_views_handlers() {
      'parent' => 'views_handler_field_prerender_list',
     ),
     // Field
-    'og_handler_field_og_audience_state' => array(
+    'og_handler_field_group_audience_state' => array(
       'parent' => 'views_handler_field',
     ),
     'og_handler_field_user_roles' => array(
@@ -160,7 +160,7 @@ function og_views_handlers() {
     'og_handler_filter_group_state' => array(
       'parent' => 'views_handler_filter_in_operator',
     ),
-    'og_handler_filter_og_audience_state' => array(
+    'og_handler_filter_group_audience_state' => array(
       'parent' => 'views_handler_filter_in_operator',
     ),
     // Relationship
@@ -168,7 +168,7 @@ function og_views_handlers() {
       'parent' => 'views_handler_relationship',
     ),
     // Arguments
-    'og_handler_argument_og_audience_gid' => array(
+    'og_handler_argument_group_audience_gid' => array(
       'parent' => 'views_handler_argument_numeric',
     ),
   );
@@ -206,17 +206,17 @@ function og_views_data_alter(&$data) {
   // TODO: Override also field revisions table.
 
   // Override group audience - "gid" (group ID) field argument.
-  $data['field_data_og_audience']['og_audience_gid']['argument']['handler'] = 'og_handler_argument_og_audience_gid';
+  $data['field_data_group_audience']['group_audience_gid']['argument']['handler'] = 'og_handler_argument_group_audience_gid';
 
-  $data['field_data_og_audience']['og_audience_gid']['field']['handler'] = 'views_handler_field_numeric';
+  $data['field_data_group_audience']['group_audience_gid']['field']['handler'] = 'views_handler_field_numeric';
 
   // Override group audience - "created".
   foreach (array('field', 'filter', 'sort', 'argument') as $type) {
-    $data['field_data_og_audience']['og_audience_created'][$type]['handler'] = 'views_handler_' . $type . '_date';
+    $data['field_data_group_audience']['group_audience_created'][$type]['handler'] = 'views_handler_' . $type . '_date';
   }
 
   // Override group audience - "state" filter and add a field.
 
-  $data['field_data_og_audience']['og_audience_state']['filter']['handler'] = 'og_handler_filter_og_audience_state';
-  $data['field_data_og_audience']['og_audience_state']['field']['handler'] = 'og_handler_field_og_audience_state';
+  $data['field_data_group_audience']['group_audience_state']['filter']['handler'] = 'og_handler_filter_group_audience_state';
+  $data['field_data_group_audience']['group_audience_state']['field']['handler'] = 'og_handler_field_group_audience_state';
 }
