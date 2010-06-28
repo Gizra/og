@@ -4,31 +4,31 @@ package = "Group"
 dependencies[] = entity
 core = 7.x
 version = VERSION
-files[] = group.module
-files[] = group.install
-files[] = group.field.inc
-files[] = includes/group.views.inc
-files[] = includes/group.rules.inc
+files[] = og.module
+files[] = og.install
+files[] = og.field.inc
+files[] = includes/og.views.inc
+files[] = includes/og.rules.inc
 
 ; Test files.
 files[] = tests/group.test
 
 ; Views plugins
-files[] = includes/views/group_plugin_argument_default_group_context.inc
+files[] = includes/views/og_plugin_argument_default_group_context.inc
 
 ; Views fields
-files[] = includes/views/group_handler_field_group_member_count.inc
-files[] = includes/views/group_handler_field_group_audience_state.inc
-files[] = includes/views/group_handler_field_prerender_list.inc
-files[] = includes/views/group_handler_field_user_roles.inc
-files[] = includes/views/group_handler_field_group_permissions.inc
+files[] = includes/views/og_handler_field_group_member_count.inc
+files[] = includes/views/og_handler_field_group_audience_state.inc
+files[] = includes/views/og_handler_field_prerender_list.inc
+files[] = includes/views/og_handler_field_user_roles.inc
+files[] = includes/views/og_handler_field_group_permissions.inc
 
 ; Views filters
-files[] = includes/views/group_handler_filter_group_state.inc
-files[] = includes/views/group_handler_filter_group_audience_state.inc
+files[] = includes/views/og_handler_filter_group_state.inc
+files[] = includes/views/og_handler_filter_group_audience_state.inc
 
 ; Views realtionships
-files[] = includes/views/group_handler_relationship.inc
+files[] = includes/views/og_handler_relationship.inc
 
 ; Views arguments
-files[] = includes/views/group_handler_argument_group_audience_gid.inc
+files[] = includes/views/og_handler_argument_group_audience_gid.inc
