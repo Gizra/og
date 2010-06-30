@@ -139,6 +139,13 @@ function og_entity_property_info() {
     'options list' => 'og_group_states',
   );
 
+  $properties['label'] = array(
+    'label' => t("Label"),
+    'type' => 'text',
+    'description' => t("The label of the entity."),
+    'required' => TRUE,
+  );
+
   $properties['created'] = array(
     'label' => t("Date created"),
     'type' => 'date',
