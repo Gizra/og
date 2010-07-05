@@ -20,6 +20,7 @@ function og_language_group_fields_info() {
     'description' => t('Associate language interface to a group.'),
     'field' => array(
       'field_name' => OG_LANGUAGE_FIELD,
+      'no_ui' => TRUE,
       'type' => 'list_text',
       'cardinality' => 1,
       'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_language_field_allowed_values'),

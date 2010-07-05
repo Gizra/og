@@ -60,6 +60,7 @@ function og_views_group_fields_info() {
     'description' => t('Add Group Views field to fieldable entities that are groups.'),
     'field' => array(
       'field_name' => OG_VIEWS_FIELD,
+      'no_ui' => TRUE,
       'type' => 'list_text',
       'cardinality' => 1,
       'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_views_field_allowed_values'),

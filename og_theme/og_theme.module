@@ -20,6 +20,7 @@ function og_theme_group_fields_info() {
     'description' => t('Associate theme to a group.'),
     'field' => array(
       'field_name' => OG_THEME_FIELD,
+      'no_ui' => TRUE,
       'type' => 'list_text',
       'cardinality' => 1,
       'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_theme_field_allowed_values'),

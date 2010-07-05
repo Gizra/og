@@ -322,6 +322,7 @@ function og_og_fields_info() {
     'description' => t('Determine if this should be a group.'),
     'field' => array(
       'field_name' => OG_GROUP_FIELD,
+      'no_ui' => TRUE,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array(
@@ -353,6 +354,7 @@ function og_og_fields_info() {
     'description' => t('Determine if group should use default roles and permissions.'),
     'field' => array(
       'field_name' => OG_DEFAULT_ACCESS_FIELD,
+      'no_ui' => TRUE,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array('allowed_values' => implode("\r\n", array('0|Use default roles and permissions', '1|Override default roles and permissions')), 'allowed_values_function' => ''),
@@ -381,6 +383,7 @@ function og_og_fields_info() {
     'description' => t('Determine to which groups this group content is assigned to.'),
     'field' => array(
       'field_name' => OG_AUDIENCE_FIELD,
+      'no_ui' => TRUE,
       'type' => 'group',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
     ),

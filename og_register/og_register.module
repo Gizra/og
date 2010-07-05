@@ -48,6 +48,7 @@ function og_register_group_fields_info() {
     'description' => t('Add Group register field group types.'),
     'field' => array(
       'field_name' => OG_REGISTER_FIELD,
+      'no_ui' => TRUE,
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
