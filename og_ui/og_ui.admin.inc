@@ -624,7 +624,7 @@ function og_ui_field_settings_build($group_type = 'group') {
     if (!empty($field['bundles'])) {
       foreach ($field['bundles'] as $entity_type => $bundles) {
         foreach ($bundles as $bundle) {
-          $field_enabled[$field_name][] = $entity_type . '_' . $bundle;
+          $field_enabled[$field_name][$entity_type . '_' . $bundle] = TRUE;
         }
       }
     }
@@ -645,8 +645,6 @@ function og_ui_field_settings_build($group_type = 'group') {
       );
     }
   }
-
-  dpm($form);
 
   return $form;
 }
