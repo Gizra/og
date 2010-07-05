@@ -188,7 +188,7 @@ function og_ui_theme() {
       'render element' => 'form',
       'file' => 'og_ui.admin.inc',
     ),
-    'og_ui_user_admin_bundles' => array(
+    'og_ui_field_settings' => array(
       'render element' => 'form',
       'file' => 'og_ui.admin.inc',
     ),

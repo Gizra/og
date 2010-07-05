@@ -550,30 +550,34 @@ function theme_og_ui_user_admin_permissions($variables) {
 /**
  * Groups permissions on default settings form.
  *
- * Allow site admin to set which permissions are available on a per group basis.
+ * Allow site admin to add or remove group fields from fieldable enteies.
  */
-function og_ui_field_settings() {
+function og_ui_field_settings($form, &$form_state, $type = 'group') {
   $form = array();
   $options = array();
 
-  $form['og_group'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Group type'),
-  );
-  $form['og_group']['og_group'] = _group_admin_fields_overview('group');
+  $machine_type = str_replace(' ', '_', $type);
 
-  $form['og_group_content'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Group post type'),
+  $form['group_type'] = array(
+    '#type' => 'value',
+    '#value' => $type,
   );
-  $form['og_group_content']['og_group_content'] = _group_admin_fields_overview('group content');
+
+  $form[$machine_type] = array(
+    '#type' => 'fieldset',
+    '#title' => $type == 'group' ? t('Group type') : t('Group content type'),
+  );
+
+  $form[$machine_type][$machine_type] = _group_admin_fields_overview($type);
 
   $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Add group and group content fields to bundles'),
+    '#value' => $type == 'group' ? t('Add group fields') : t('Add group content fields'),
     '#submit' => array('og_ui_field_settings_submit'),
   );
+
+  $form['#theme'] = array('og_ui_field_settings');
 
   return $form;
 }
@@ -664,7 +668,7 @@ function og_ui_field_settings_submit($form, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_og_ui_user_admin_bundles($variables) {
+function theme_og_ui_field_settings($variables) {
   $form = $variables['form'];
 
   $modules = array_keys(element_children($form['modules']));
