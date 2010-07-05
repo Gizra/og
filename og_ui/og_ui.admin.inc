@@ -611,8 +611,6 @@ function og_ui_field_settings_build($group_type = 'group') {
           '#markup' => check_plain($bundle['label']),
           '#entity_type' => $entity_type,
           '#bundle_name' => $bundle_name,
-          // Field enabled hasn't been determined yet.
-          '#field_enabled' => FALSE,
         );
       }
     }
@@ -624,10 +622,9 @@ function og_ui_field_settings_build($group_type = 'group') {
   foreach (field_info_fields() as $field_name => $field) {
     $field_enabled[$field_name] = array();
     if (!empty($field['bundles'])) {
-      foreach ($field['bundles'] as $entity_type) {
-        foreach ($entity_type as $bundle_name) {
-          $form['entity'][$entity_type]['bundle']['#field_enabled'] = TRUE;
-          $field_enabled[$field_name][] = $entity_type . '_' . $bundle_name;
+      foreach ($field['bundles'] as $entity_type => $bundles) {
+        foreach ($bundles as $bundle) {
+          $field_enabled[$field_name][] = $entity_type . '_' . $bundle;
         }
       }
     }
@@ -648,6 +645,8 @@ function og_ui_field_settings_build($group_type = 'group') {
       );
     }
   }
+
+  dpm($form);
 
   return $form;
 }
