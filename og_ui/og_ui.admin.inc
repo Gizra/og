@@ -577,8 +577,6 @@ function og_ui_field_settings($form, &$form_state, $type = 'group') {
     '#submit' => array('og_ui_field_settings_submit'),
   );
 
-  $form['#theme'] = array('og_ui_field_settings');
-
   return $form;
 }
 
@@ -646,6 +644,8 @@ function og_ui_field_settings_build($group_type = 'group') {
     }
   }
 
+  $form['#theme'] = array('og_ui_field_settings');
+
   return $form;
 }
 
@@ -689,23 +689,24 @@ function theme_og_ui_field_settings($variables) {
   $form = $variables['form'];
   $type = $form['group_type']['#value'];
 
+  $element = $form[$type][$type];
+
   $row = $rows = array();
 
   // Build the modules row.
-  foreach (array_keys(element_children($form['modules'])) as $module) {
+  foreach (element_children($element['modules']) as $module) {
     $row[] = array(
       // TODO: Change with module namme.
-      'data' => check_plain($module),
+      'data' => drupal_render($element['modules'][$module]),
       'class' => array('module'),
-      'id' => 'module-' . $module,
     );
   }
 
   $rows[] = $row;
 
   // Build the bundle rows.
-  foreach (element_children($form['entity']) as $entity_type => $value) {
-    foreach ($value['bundle'] as $bundle) {
+  foreach (element_children($element['entity']) as $entity_type) {
+    foreach ($element['entity'][$entity_type]['bundle'] as $bundle) {
 
       $row = array();
 
@@ -715,7 +716,7 @@ function theme_og_ui_field_settings($variables) {
         'id' => 'bundle-' . $bundle['#entity_type'] . '-' . $bundle['#bundle_name'],
       );
 
-      foreach (element_children($form['checkboxes']) as $module) {
+      foreach (element_children($element['checkboxes']) as $module) {
         // $row[] = array('data' => drupal_render($form['checkboxes'][$module][$key]), 'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $key)));
       }
 
@@ -726,7 +727,7 @@ function theme_og_ui_field_settings($variables) {
   // Build the header.
   $header[] = '';
 
-  foreach (element_children($form['modules']) as $module) {
+  foreach (element_children($element['modules']) as $module) {
     $header[] = array('data' => drupal_render($form['modules'][$module]), 'class' => array());
   }
 
