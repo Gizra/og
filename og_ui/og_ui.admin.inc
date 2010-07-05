@@ -568,7 +568,7 @@ function og_ui_field_settings($form, &$form_state, $type = 'group') {
     '#title' => $type == 'group' ? t('Group type') : t('Group content type'),
   );
 
-  $form[$machine_type][$machine_type] = _group_admin_fields_overview($type);
+  $form[$machine_type][$machine_type] = og_ui_field_settings_build($type);
 
   $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
   $form['actions']['submit'] = array(
@@ -583,51 +583,71 @@ function og_ui_field_settings($form, &$form_state, $type = 'group') {
 }
 
 /**
- * Helper function to create tables for group and group content fields.
+ * Helper function to build the data for group and group content fields.
  *
  * @param $group_type
  * @return unknown_type
  */
-function _group_admin_fields_overview($group_type = 'group') {
+function og_ui_field_settings_build($group_type = 'group') {
   $form = array();
-  $options = $status = array();
+  $options = array();
 
   $group_fields = og_fields_info();
 
-  foreach (entity_get_info() as $entity => $entity_value) {
-    if (!empty($entity_value['fieldable'])) {
-      $form['bundle'][] = array('#markup' => t('@entity entity', array('@entity' => $entity_value['label'])), '#id' => $entity);
-      foreach($entity_value['bundles'] as $bundle => $bundle_value) {
-        $options[$bundle] = '';
-        $form['bundle'][$bundle] = array(
+  foreach (entity_get_info() as $entity_type => $entity) {
+    if (!empty($entity['fieldable'])) {
+      $form['entity'][$entity_type]['entity'] = array(
+        '#markup' => t('@entity entity', array('@entity' => $entity['label'])),
+        '#id' => check_plain($entity_type),
+      );
+
+      foreach($entity['bundles'] as $bundle_name => $bundle) {
+        // Get all the bundles that should have a checkbox. The name can't be
+        // just the bundle name as it might be the same in two different
+        // enteties.
+        $options[$entity_type . '_' .$bundle_name] = '';
+        $form['entity'][$entity_type]['bundle'] = array(
           '#type' => 'item',
-          '#markup' => '-- ' . check_plain($bundle_value['label']),
+          '#markup' => check_plain($bundle['label']),
+          '#entity_type' => $entity_type,
+          '#bundle_name' => $bundle_name,
+          // Field enabled hasn't been determined yet.
+          '#field_enabled' => FALSE,
         );
       }
     }
   }
 
+  $field_enabled = array();
 
   // Add the fields that exist in the bundle.
-  foreach (field_info_fields() as $field => $value) {
-    if (!empty($value['bundles'])) {
-      foreach ($value['bundles'] as $entity) {
-        foreach ($entity as $bundle) {
-          $status[$field][$bundle] = $bundle;
+  foreach (field_info_fields() as $field_name => $field) {
+    $field_enabled[$field_name] = array();
+    if (!empty($field['bundles'])) {
+      foreach ($field['bundles'] as $entity_type) {
+        foreach ($entity_type as $bundle_name) {
+          $form['entity'][$entity_type]['bundle']['#field_enabled'] = TRUE;
+          $field_enabled[$field_name][] = $entity_type . '_' . $bundle_name;
         }
       }
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
-  foreach ($group_fields as $field => $field_value) {
-    if (in_array($group_type, $field_value['type'])) {
-      $form['checkboxes'][$field] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => !empty($status[$field]) ? $status[$field] : array());
-      $form['modules'][$field] = array('#markup' =>  $field_value['instance']['label'] . ' (' . $field_value['module'] . ')', '#tree' => TRUE);
+  // Build checkboxes here after checkbox arrays are built.
+  foreach ($group_fields as $field_name => $field) {
+    if (in_array($group_type, $field['type'])) {
+      $form['checkboxes'][$field_name] = array(
+        '#type' => 'checkboxes',
+        '#options' => $options,
+        '#default_value' => $field_enabled[$field_name],
+      );
+
+      $form['modules'][$field_name] = array(
+        '#markup' =>  check_plain($field['instance']['label'] . ' (' . $field['module'] . ')'),
+        '#tree' => TRUE,
+      );
     }
   }
-
-  $form['#theme'] = array('og_ui_user_admin_bundles');
 
   return $form;
 }
@@ -670,32 +690,50 @@ function og_ui_field_settings_submit($form, &$form_state) {
  */
 function theme_og_ui_field_settings($variables) {
   $form = $variables['form'];
+  $type = $form['group_type']['#value'];
 
-  $modules = array_keys(element_children($form['modules']));
+  $row = $rows = array();
 
-  foreach (element_children($form['bundle']) as $key) {
-    $row = array();
-    // Module name.
-    if (is_numeric($key)) {
-      $row[] = array('data' => drupal_render($form['bundle'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['bundle'][$key]['#id'], 'colspan' => count($modules) + 1);
-    }
-    else {
-      // bundle row.
+  // Build the modules row.
+  foreach (array_keys(element_children($form['modules'])) as $module) {
+    $row[] = array(
+      // TODO: Change with module namme.
+      'data' => check_plain($module),
+      'class' => array('module'),
+      'id' => 'module-' . $module,
+    );
+  }
+
+  $rows[] = $row;
+
+  // Build the bundle rows.
+  foreach (element_children($form['entity']) as $entity_type => $value) {
+    foreach ($value['bundle'] as $bundle) {
+
+      $row = array();
+
       $row[] = array(
-        'data' => drupal_render($form['bundle'][$key]),
+        'data' => drupal_render($bundle),
         'class' => array('bundle'),
+        'id' => 'bundle-' . $bundle['#entity_type'] . '-' . $bundle['#bundle_name'],
       );
+
       foreach (element_children($form['checkboxes']) as $module) {
-        $row[] = array('data' => drupal_render($form['checkboxes'][$module][$key]), 'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $key)));
+        // $row[] = array('data' => drupal_render($form['checkboxes'][$module][$key]), 'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $key)));
       }
+
+      $rows[] = $row;
     }
-    $rows[] = $row;
   }
-  $header[] = (t('bundle'));
+
+  // Build the header.
+  $header[] = '';
+
   foreach (element_children($form['modules']) as $module) {
-    $header[] = array('data' => drupal_render($form['modules'][$module]), 'class' => array('checkbox'));
+    $header[] = array('data' => drupal_render($form['modules'][$module]), 'class' => array());
   }
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'bundles')));
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $type)));
   $output .= drupal_render_children($form);
   return $output;
 }
