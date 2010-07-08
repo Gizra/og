@@ -187,13 +187,15 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
 
       }
     }
-    $form['accounts'] = array(
-      '#type' => 'tableselect',
-      '#header' => $header,
-      '#options' => $options,
-      '#empty' => !empty($entity->uid) ? t('No people available apart of the group manager.') : t('No people available.'),
-    );
   }
+
+  $form['accounts'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $options,
+    '#empty' => !empty($entity->uid) ? t('No people available apart of the group manager.') : t('No people available.'),
+  );
+
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
   return $form;
