@@ -419,7 +419,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
   $module = '';
   foreach (og_get_permissions() as $perm => $perm_item) {
     if ($perm_item['module'] != $module) {
-      $module =$perm_item['module'];
+      $module = $perm_item['module'];
       $form['permission'][] = array('#markup' => $module_info[$module]['name'], '#id' => $module);
     }
     // Initialize values.
@@ -606,7 +606,7 @@ function og_ui_field_settings_build($group_type = 'group') {
         // just the bundle name as it might be the same in two different
         // enteties.
         $options[$entity_type . '_' .$bundle_name] = '';
-        $form['entity'][$entity_type]['bundle'] = array(
+        $form['entity'][$entity_type]['bundle'][$bundle_name] = array(
           '#type' => 'item',
           '#markup' => check_plain($bundle['label']),
           '#entity_type' => $entity_type,
@@ -708,18 +708,22 @@ function theme_og_ui_field_settings($variables) {
 
   // Build the bundle rows.
   foreach (element_children($element['entity']) as $entity_type) {
-    foreach ($element['entity'][$entity_type]['bundle'] as $bundle) {
+    // $rows[] = array('data' => t('@entity entity', array('@entity' => $entity_type)));
+
+    foreach (element_children($element['entity'][$entity_type]['bundle']) as $bundle) {
 
       $row = array();
 
       $row[] = array(
-        'data' => drupal_render($bundle),
+        'data' => drupal_render($element['entity'][$entity_type]['bundle'][$bundle]),
         'class' => array('bundle'),
-        'id' => 'bundle-' . $bundle['#entity_type'] . '-' . $bundle['#bundle_name'],
       );
 
       foreach (element_children($element['checkboxes']) as $module) {
-        // $row[] = array('data' => drupal_render($form['checkboxes'][$module][$key]), 'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $key)));
+        $row[] = array(
+          'data' => drupal_render($element['checkboxes'][$module][$entity_type . '_' . $bundle]),
+          'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $key)),
+        );
       }
 
       $rows[] = $row;
