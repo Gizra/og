@@ -646,8 +646,6 @@ function og_ui_field_settings_build($group_type = 'group') {
     }
   }
 
-  $form['#theme'] = array('og_ui_field_settings');
-
   return $form;
 }
 
@@ -695,17 +693,6 @@ function theme_og_ui_field_settings($variables) {
 
   $row = $rows = array();
 
-  // Build the modules row.
-  foreach (element_children($element['modules']) as $module) {
-    $row[] = array(
-      // TODO: Change with module namme.
-      'data' => drupal_render($element['modules'][$module]),
-      'class' => array('module'),
-    );
-  }
-
-  $rows[] = $row;
-
   // Build the bundle rows.
   foreach (element_children($element['entity']) as $entity_type) {
     // $rows[] = array('data' => t('@entity entity', array('@entity' => $entity_type)));
@@ -722,7 +709,7 @@ function theme_og_ui_field_settings($variables) {
       foreach (element_children($element['checkboxes']) as $module) {
         $row[] = array(
           'data' => drupal_render($element['checkboxes'][$module][$entity_type . '_' . $bundle]),
-          'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $key)),
+          'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $bundle)),
         );
       }
 
@@ -734,7 +721,7 @@ function theme_og_ui_field_settings($variables) {
   $header[] = '';
 
   foreach (element_children($element['modules']) as $module) {
-    $header[] = array('data' => drupal_render($form['modules'][$module]), 'class' => array());
+    $header[] = array('data' => drupal_render($element['modules'][$module]), 'class' => array());
   }
 
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $type)));
