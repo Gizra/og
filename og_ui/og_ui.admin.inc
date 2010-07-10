@@ -616,22 +616,23 @@ function og_ui_field_settings($form, &$form_state, $type = 'group') {
       '#weight' => 99,
     );
 
-    foreach ($field_enabled as $entity_type => $bundle) {
-      foreach ($bundle as $fields_name) {
-        $bundle_name = key($bundle);
-        $form['group_fields_' . $entity_type . '_' . $bundle_name] = array(
+    foreach ($field_enabled as $entity_type => $bundles) {
+      foreach ($bundles as $bundle => $fields) {
+        $options = array();
+        $form['group_fields_' . $entity_type . '_' . $bundle] = array(
           '#type' => 'fieldset',
-          '#title' => t('@bundle - @entity entity', array('@bundle' => $bundle_name, '@entity' => $entity_info[$entity_type]['label'])),
+          '#title' => t('@bundle - @entity entity', array('@bundle' => $bundle, '@entity' => $entity_info[$entity_type]['label'])),
           '#collapsible' => TRUE,
           '#group' => 'group_fields',
         );
-        foreach ($fields_name as $field) {
-          $form['group_fields_' . $entity_type . '_' . $bundle_name][$field_name] = array(
-            '#type' => 'checkbox',
-            '#title' => check_plain($field_name),
-            '#default_value' => TRUE,
-          );
+        foreach ($fields as $field_name) {
+          $options[] = array('data' => check_plain($group_fields[$field_name]['instance']['label']));
         }
+
+        $form['group_fields_' . $entity_type . '_' . $bundle]['fields'] = array(
+          '#markup' => theme('item_list', array('items' => $options)),
+        );
+
       }
 
     }
