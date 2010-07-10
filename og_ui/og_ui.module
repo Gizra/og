@@ -146,6 +146,17 @@ function og_ui_menu() {
     'type' => MENU_NORMAL_ITEM,
   );
 
+  $items['admin/config/group/fields/%/%/%field_ui_menu/delete'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_ui_field_delete_form', 6),
+    'load arguments' => array(4, 5, 5, '%map'),
+    'title' => 'Delete',
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Delete a group field from a bundle.',
+    'file' => 'og_ui.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
   return $items;
 }
 

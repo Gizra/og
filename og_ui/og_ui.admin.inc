@@ -622,11 +622,15 @@ function og_ui_field_settings($form, &$form_state) {
           '#group' => 'group_fields',
         );
         foreach ($fields as $field_name) {
-          $options[] = array('data' => check_plain($group_fields[$field_name]['instance']['label']));
+          $options[] = array(
+            check_plain($group_fields[$field_name]['instance']['label']),
+            l(t('Delete'), "admin/config/group/fields/$entity_type/$bundle/$field_name/delete"),
+          );
         }
 
+        $header = array(t('Field'), t('Operations'));
         $form['group_fields_' . $entity_type . '_' . $bundle]['fields'] = array(
-          '#markup' => theme('item_list', array('items' => $options)),
+          '#markup' => theme('table', array('header' => $header, 'rows' => $options)),
         );
 
       }
@@ -689,4 +693,19 @@ function og_ui_field_settings_submit($form, &$form_state) {
   );
 
   drupal_set_message(t('Added field %field to %bundle.', $params));
+}
+
+
+/**
+ * Menu callback; present a form for removing a field instance from a bundle.
+ */
+function og_ui_field_delete_form($form, &$form_state, $instance) {
+  module_load_include('inc', 'field_ui', 'field_ui.admin');
+  $output = field_ui_field_delete_form($form, &$form_state, $instance);
+
+  $output['actions']['cancel'] = array(
+    '#markup' => l(t('Cancel'), 'admin/config/group/fields'),
+  );
+
+  return $output;
 }
