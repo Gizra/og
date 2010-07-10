@@ -561,7 +561,8 @@ function og_ui_field_settings($form, &$form_state) {
   $options = array();
   foreach (entity_get_info() as $entity_type => $entity) {
     foreach($entity['bundles'] as $bundle_name => $bundle) {
-      $options[$entity_type][$bundle_name] = filter_xss($bundle['label']);
+      // Prefix the bundle name with the entity type.
+      $options[$entity_type][$entity_type . '__' .$bundle_name] = filter_xss($bundle['label']);
     }
   }
 
@@ -645,9 +646,37 @@ function og_ui_field_settings($form, &$form_state) {
   return $form;
 }
 
+function og_ui_field_settings_validate($form, &$form_state) {
+  $bundle = preg_replace('/^.*__/i', '', $form_state['values']['bundles']);
+  $entity_type = str_replace('__' . $bundle, '', $form_state['values']['bundles']);
+
+  // Check if field can be attached to entity.
+  $group_field = og_fields_info($form_state['values']['fields']);
+  $bundles = field_info_bundles($entity_type);
+  $entity_info = entity_get_info($entity_type);
+
+  $params = array(
+    '@field' => $group_field['instance']['label'],
+    '@bundle' => $bundles[$bundle]['label'],
+    '@entity' => $entity_info['label'],
+  );
+
+  // Check if field doesn't exist already.
+  if (($field = field_info_field($form_state['values']['fields'])) && !empty($field['bundles'][$entity_type]) && in_array($bundle, drupal_map_assoc($field['bundles'][$entity_type]))) {
+    form_set_error('bundles', t('Field @field already exists in @bundle', $params));
+  }
+
+  if (!empty($group_field['entity']) && !in_array($entity_type, $group_field['entity'])) {
+    form_set_error('bundles', t('Field @field can only be attached to @entity entity bundles.', $params));
+  }
+
+}
+
 function og_ui_field_settings_submit($form, &$form_state) {
-  $messages = array();
+
   $group_fields = og_fields_info();
+
+
   $bundle_info = array();
   foreach (field_info_bundles() as $entity => $bundles) {
     foreach ($bundles as $key => $value) {
@@ -666,12 +695,6 @@ function og_ui_field_settings_submit($form, &$form_state) {
           $messages[] = t('Added field %field to %bundle.', array('%field' => $group_fields[$field_name]['instance']['label'], '%bundle' => $bundle));
         }
       }
-    }
-  }
-
-  if (!empty($messages)) {
-    foreach ($messages as $message) {
-      drupal_set_message($message);
     }
   }
 }

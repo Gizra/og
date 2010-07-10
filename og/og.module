@@ -1775,27 +1775,25 @@ function og_get_global_permissions() {
 /**
  * Get all the modules fields that can be assigned to fieldable enteties.
  */
-function og_fields_info() {
+function og_fields_info($field_name = NULL) {
   $return = &drupal_static(__FUNCTION__, array());
 
-  if (!empty($return)) {
-    return $return;
-  }
+  if (empty($return)) {
+    foreach (module_implements('og_fields_info') as $module) {
+      if ($fields = module_invoke($module, 'og_fields_info')) {
+        foreach ($fields as $key => $field) {
+          // Add default values.
+          $field += array('entity type' => array());
 
-  foreach (module_implements('og_fields_info') as $module) {
-    if ($fields = module_invoke($module, 'og_fields_info')) {
-      foreach ($fields as $key => $field) {
-        // Add default values.
-        $field += array('entity type' => array());
+          // Add the module information.
+          $return[$key] = array_merge($field, array('module' => $module));
 
-        // Add the module information.
-        $return[$key] = array_merge($field, array('module' => $module));
-
+        }
       }
     }
   }
 
-  return $return;
+  return empty($field_name) ? $return : $return[$field_name];
 }
 
 /**
