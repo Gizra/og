@@ -668,7 +668,7 @@ function og_ui_field_settings_validate($form, &$form_state) {
 
   // Check if field doesn't exist already.
   if (($field = field_info_field($form_state['values']['fields'])) && !empty($field['bundles'][$entity_type]) && in_array($bundle, drupal_map_assoc($field['bundles'][$entity_type]))) {
-    form_set_error('bundles', t('Field %field already exists in %bundle', $params));
+    form_set_error('bundles', t('Field %field already exists in %bundle.', $params));
   }
 
   if (!empty($group_field['entity']) && !in_array($entity_type, $group_field['entity'])) {
