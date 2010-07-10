@@ -565,32 +565,6 @@ function og_ui_field_settings($form, &$form_state, $type = 'group') {
     '#value' => $type,
   );
 
-  $form[$machine_type] = array(
-    '#type' => 'fieldset',
-    '#title' => $type == 'group' ? t('Group type') : t('Group content type'),
-  );
-
-  $form[$machine_type][$machine_type] = og_ui_field_settings_build($type);
-
-  $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => $type == 'group' ? t('Add group fields') : t('Add group content fields'),
-    '#submit' => array('og_ui_field_settings_submit'),
-  );
-
-  return $form;
-}
-
-/**
- * Helper function to build the data for group and group content fields.
- *
- * @param $group_type
- * @return unknown_type
- */
-function og_ui_field_settings_build($group_type = 'group') {
-  $form = array();
-
   $options = array();
   foreach (entity_get_info() as $entity_type => $entity) {
     foreach($entity['bundles'] as $bundle_name => $bundle) {
@@ -617,16 +591,63 @@ function og_ui_field_settings_build($group_type = 'group') {
     '#options' => $options,
   );
 
+  $field_enabled = array();
+
+  $group_fields = og_fields_info();
+
+  $group_fields_name = array_keys($group_fields);
+
+  $entity_info = entity_get_info();
+
   // Get the fields that exist in the bundle.
   foreach (field_info_fields() as $field_name => $field) {
-    if (!empty($field['bundles'])) {
+    if (in_array($field_name, $group_fields_name) && !empty($field['bundles'])) {
       foreach ($field['bundles'] as $entity_type => $bundles) {
         foreach ($bundles as $bundle) {
-          $field_enabled[$field_name][$entity_type] = $bundle;
+          $field_enabled[$entity_type][$bundle][] = $field_name;
         }
       }
     }
   }
+
+  if ($field_enabled) {
+    $form['group_fields'] = array(
+      '#type' => 'vertical_tabs',
+      '#weight' => 99,
+    );
+
+    foreach ($field_enabled as $entity_type => $bundle) {
+      foreach ($bundle as $fields_name) {
+        $bundle_name = key($bundle);
+        $form['group_fields_' . $entity_type . '_' . $bundle_name] = array(
+          '#type' => 'fieldset',
+          '#title' => t('@bundle - @entity entity', array('@bundle' => $bundle_name, '@entity' => $entity_info[$entity_type]['label'])),
+          '#collapsible' => TRUE,
+          '#group' => 'group_fields',
+        );
+        foreach ($fields_name as $field) {
+          $form['group_fields_' . $entity_type . '_' . $bundle_name][$field_name] = array(
+            '#type' => 'checkbox',
+            '#title' => check_plain($field_name),
+            '#default_value' => TRUE,
+          );
+        }
+      }
+
+    }
+  }
+  else {
+    $form['group_fields'] = array(
+      '#markup' => t('There are no Group fields attached to any bundle yet.'),
+    );
+  }
+
+  $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => $type == 'group' ? t('Add group fields') : t('Add group content fields'),
+    '#submit' => array('og_ui_field_settings_submit'),
+  );
 
   return $form;
 }
@@ -668,45 +689,5 @@ function og_ui_field_settings_submit($form, &$form_state) {
  * @ingroup themeable
  */
 function theme_og_ui_field_settings($variables) {
-  $form = $variables['form'];
-  $type = $form['group_type']['#value'];
-
-  $element = $form[$type][$type];
-
-  $row = $rows = array();
-
-  // Build the bundle rows.
-  foreach (element_children($element['entity']) as $entity_type) {
-    // $rows[] = array('data' => t('@entity entity', array('@entity' => $entity_type)));
-
-    foreach (element_children($element['entity'][$entity_type]['bundle']) as $bundle) {
-
-      $row = array();
-
-      $row[] = array(
-        'data' => drupal_render($element['entity'][$entity_type]['bundle'][$bundle]),
-        'class' => array('bundle'),
-      );
-
-      foreach (element_children($element['checkboxes']) as $module) {
-        $row[] = array(
-          'data' => drupal_render($element['checkboxes'][$module][$entity_type . '_' . $bundle]),
-          'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $bundle)),
-        );
-      }
-
-      $rows[] = $row;
-    }
-  }
-
-  // Build the header.
-  $header[] = '';
-
-  foreach (element_children($element['modules']) as $module) {
-    $header[] = array('data' => drupal_render($element['modules'][$module]), 'class' => array());
-  }
-
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $type)));
-  $output .= drupal_render_children($form);
-  return $output;
+ return '';
 }
