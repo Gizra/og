@@ -614,9 +614,10 @@ function og_ui_field_settings($form, &$form_state) {
     foreach ($field_enabled as $entity_type => $bundles) {
       foreach ($bundles as $bundle => $fields) {
         $options = array();
+        $bundles = field_info_bundles($entity_type);
         $form['group_fields_' . $entity_type . '_' . $bundle] = array(
           '#type' => 'fieldset',
-          '#title' => t('@bundle - @entity entity', array('@bundle' => $bundle, '@entity' => $entity_info[$entity_type]['label'])),
+          '#title' => t('@bundle - @entity entity', array('@bundle' => $bundles[$bundle]['label'], '@entity' => $entity_info[$entity_type]['label'])),
           '#collapsible' => TRUE,
           '#group' => 'group_fields',
         );
@@ -656,45 +657,36 @@ function og_ui_field_settings_validate($form, &$form_state) {
   $entity_info = entity_get_info($entity_type);
 
   $params = array(
-    '@field' => $group_field['instance']['label'],
-    '@bundle' => $bundles[$bundle]['label'],
-    '@entity' => $entity_info['label'],
+    '%field' => $group_field['instance']['label'],
+    '%bundle' => $bundles[$bundle]['label'],
+    '%entity' => $entity_info['label'],
   );
 
   // Check if field doesn't exist already.
   if (($field = field_info_field($form_state['values']['fields'])) && !empty($field['bundles'][$entity_type]) && in_array($bundle, drupal_map_assoc($field['bundles'][$entity_type]))) {
-    form_set_error('bundles', t('Field @field already exists in @bundle', $params));
+    form_set_error('bundles', t('Field %field already exists in %bundle', $params));
   }
 
   if (!empty($group_field['entity']) && !in_array($entity_type, $group_field['entity'])) {
-    form_set_error('bundles', t('Field @field can only be attached to @entity entity bundles.', $params));
+    form_set_error('bundles', t('Field %field can only be attached to %entity entity bundles.', $params));
   }
 
 }
 
 function og_ui_field_settings_submit($form, &$form_state) {
+  $bundle = preg_replace('/^.*__/i', '', $form_state['values']['bundles']);
+  $entity_type = str_replace('__' . $bundle, '', $form_state['values']['bundles']);
+  $field_name = $form_state['values']['fields'];
 
-  $group_fields = og_fields_info();
+  og_create_field($field_name, $entity_type, $bundle);
 
+  $group_field = og_fields_info($field_name);
+  $bundles = field_info_bundles($entity_type);
 
-  $bundle_info = array();
-  foreach (field_info_bundles() as $entity => $bundles) {
-    foreach ($bundles as $key => $value) {
-        // Get a two dimension array with the bundle as key and the entity
-        // as the value.
-      $bundle_info[$key] = $entity;
-    }
-  }
+  $params = array(
+    '%field' => $group_field['instance']['label'],
+    '%bundle' => $bundles[$bundle]['label'],
+  );
 
-  foreach ($group_fields as $field_name => $field_value) {
-    if (!empty($form_state['values'][$field_name]) && $bundles = array_filter($form_state['values'][$field_name])) {
-      foreach ($bundles as $key => $bundle) {
-        // Add the field if it doesn't already exist.
-        if (!field_info_instance($bundle_info[$bundle], $field_name, $bundle)) {
-          call_user_func('og_create_field', $field_name, $bundle_info[$bundle], $bundle);
-          $messages[] = t('Added field %field to %bundle.', array('%field' => $group_fields[$field_name]['instance']['label'], '%bundle' => $bundle));
-        }
-      }
-    }
-  }
+  drupal_set_message(t('Added field %field to %bundle.', $params));
 }

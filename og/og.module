@@ -1836,7 +1836,7 @@ function og_create_field($field_name, $entity_type, $bundle) {
     $prior_field = field_read_field($field_name, array('include_inactive' => TRUE));
     $field = field_info_field($field_name);
     if (empty($field) && empty($prior_field)) {
-      $field = field_create_field($group_field[$field_name]['field']);
+      $field = field_create_field($group_field['field']);
     }
 
     $instance = field_info_instance($entity_type, $field_name, $bundle);
@@ -1846,7 +1846,7 @@ function og_create_field($field_name, $entity_type, $bundle) {
         'field_name' => $field_name,
         'bundle' => $bundle,
         'entity_type' => $entity_type,
-      ) + $group_field[$field_name]['instance'];
+      ) + $group_field['instance'];
 
       field_create_instance($instance);
     }
