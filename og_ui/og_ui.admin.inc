@@ -554,16 +554,9 @@ function theme_og_ui_user_admin_permissions($variables) {
  *
  * Allow site admin to add or remove group fields from fieldable enteies.
  */
-function og_ui_field_settings($form, &$form_state, $type = 'group') {
+function og_ui_field_settings($form, &$form_state) {
   $form = array();
   $options = array();
-
-  $machine_type = str_replace(' ', '_', $type);
-
-  $form['group_type'] = array(
-    '#type' => 'value',
-    '#value' => $type,
-  );
 
   $options = array();
   foreach (entity_get_info() as $entity_type => $entity) {
@@ -616,6 +609,7 @@ function og_ui_field_settings($form, &$form_state, $type = 'group') {
       '#weight' => 99,
     );
 
+    // Show all teh group fields of each bundle.
     foreach ($field_enabled as $entity_type => $bundles) {
       foreach ($bundles as $bundle => $fields) {
         $options = array();
@@ -634,7 +628,6 @@ function og_ui_field_settings($form, &$form_state, $type = 'group') {
         );
 
       }
-
     }
   }
   else {
@@ -646,8 +639,7 @@ function og_ui_field_settings($form, &$form_state, $type = 'group') {
   $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => $type == 'group' ? t('Add group fields') : t('Add group content fields'),
-    '#submit' => array('og_ui_field_settings_submit'),
+    '#value' => t('Add field'),
   );
 
   return $form;
@@ -682,13 +674,4 @@ function og_ui_field_settings_submit($form, &$form_state) {
       drupal_set_message($message);
     }
   }
-}
-
-/**
- * Theme the administer bundles page.
- *
- * @ingroup themeable
- */
-function theme_og_ui_field_settings($variables) {
- return '';
 }

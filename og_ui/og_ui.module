@@ -138,34 +138,13 @@ function og_ui_menu() {
 
   $items['admin/config/group/fields'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_ui_field_settings', 'group'),
+    'page arguments' => array('og_ui_field_settings'),
     'title' => 'Group field settings',
     'access arguments' => array('administer site configuration'),
     'description' => 'Configure Group fields in bundles.',
     'file' => 'og_ui.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
-
-  $items['admin/config/group/fields/group'] = array(
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_ui_field_settings', 'group'),
-    'title' => 'Group field settings',
-    'access arguments' => array('administer site configuration'),
-    'description' => 'Configure Group fields in bundles.',
-    'file' => 'og_ui.admin.inc',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-
-  $items['admin/config/group/fields/group-content'] = array(
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_ui_field_settings', 'group content'),
-    'title' => 'Group content field settings',
-    'access arguments' => array('administer site configuration'),
-    'description' => 'Configure Group fields in bundles.',
-    'file' => 'og_ui.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-  );
-
 
   return $items;
 }
@@ -185,10 +164,6 @@ function og_ui_menu_title_callback($title, $entity_type, $etid) {
 function og_ui_theme() {
   return array(
     'og_ui_user_admin_permissions' => array(
-      'render element' => 'form',
-      'file' => 'og_ui.admin.inc',
-    ),
-    'og_ui_field_settings' => array(
       'render element' => 'form',
       'file' => 'og_ui.admin.inc',
     ),
