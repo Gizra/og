@@ -168,7 +168,7 @@ function og_access_og_fields_info() {
       'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
     ),
     'instance' => array(
-      'label' => t('group visibility'),
+      'label' => t('Group visibility'),
       'required' => TRUE,
       // Default to public.
       'default_value' => array(0 => array('value' => 0)),
@@ -205,7 +205,7 @@ function og_access_og_fields_info() {
       'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
     ),
     'instance' => array(
-      'label' => t('group content visibility'),
+      'label' => t('Group content visibility'),
       'required' => TRUE,
       // Make the group type default.
       'default_value' => array(0 => array('value' => 0)),
