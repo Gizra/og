@@ -560,9 +560,11 @@ function og_ui_field_settings($form, &$form_state) {
 
   $options = array();
   foreach (entity_get_info() as $entity_type => $entity) {
-    foreach($entity['bundles'] as $bundle_name => $bundle) {
-      // Prefix the bundle name with the entity type.
-      $options[$entity_type][$entity_type . '__' .$bundle_name] = filter_xss($bundle['label']);
+    if (!empty($entity['fieldable']) && $entity_type != 'group') {
+      foreach($entity['bundles'] as $bundle_name => $bundle) {
+        // Prefix the bundle name with the entity type.
+        $options[$entity_type][$entity_type . '__' .$bundle_name] = check_plain($bundle['label']);
+      }
     }
   }
 
