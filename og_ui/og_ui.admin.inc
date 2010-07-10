@@ -590,59 +590,41 @@ function og_ui_field_settings($form, &$form_state, $type = 'group') {
  */
 function og_ui_field_settings_build($group_type = 'group') {
   $form = array();
+
   $options = array();
-
-  $group_fields = og_fields_info();
-
   foreach (entity_get_info() as $entity_type => $entity) {
-    if (!empty($entity['fieldable'])) {
-      $form['entity'][$entity_type]['entity'] = array(
-        '#markup' => t('@entity entity', array('@entity' => $entity['label'])),
-        '#id' => check_plain($entity_type),
-      );
-
-      foreach($entity['bundles'] as $bundle_name => $bundle) {
-        // Get all the bundles that should have a checkbox. The name can't be
-        // just the bundle name as it might be the same in two different
-        // enteties.
-        $options[$entity_type . '_' .$bundle_name] = '';
-        $form['entity'][$entity_type]['bundle'][$bundle_name] = array(
-          '#type' => 'item',
-          '#markup' => check_plain($bundle['label']),
-          '#entity_type' => $entity_type,
-          '#bundle_name' => $bundle_name,
-        );
-      }
+    foreach($entity['bundles'] as $bundle_name => $bundle) {
+      $options[$entity_type][$bundle_name] = filter_xss($bundle['label']);
     }
   }
 
-  $field_enabled = array();
+  $form['bundles'] = array(
+    '#title' => t('Bundles'),
+    '#type' => 'select',
+    '#options' => $options,
+  );
 
-  // Add the fields that exist in the bundle.
+  $options = array();
+  foreach (og_fields_info() as $field_name => $field) {
+    foreach ($field['type'] as $type) {
+      $options[$type][$field_name] = filter_xss($field['instance']['label']);
+    }
+  }
+
+  $form['fields'] = array(
+    '#title' => t('Fields'),
+    '#type' => 'select',
+    '#options' => $options,
+  );
+
+  // Get the fields that exist in the bundle.
   foreach (field_info_fields() as $field_name => $field) {
-    $field_enabled[$field_name] = array();
     if (!empty($field['bundles'])) {
       foreach ($field['bundles'] as $entity_type => $bundles) {
         foreach ($bundles as $bundle) {
-          $field_enabled[$field_name][$entity_type . '_' . $bundle] = TRUE;
+          $field_enabled[$field_name][$entity_type] = $bundle;
         }
       }
-    }
-  }
-
-  // Build checkboxes here after checkbox arrays are built.
-  foreach ($group_fields as $field_name => $field) {
-    if (in_array($group_type, $field['type'])) {
-      $form['checkboxes'][$field_name] = array(
-        '#type' => 'checkboxes',
-        '#options' => $options,
-        '#default_value' => $field_enabled[$field_name],
-      );
-
-      $form['modules'][$field_name] = array(
-        '#markup' =>  check_plain($field['instance']['label'] . ' (' . $field['module'] . ')'),
-        '#tree' => TRUE,
-      );
     }
   }
 
