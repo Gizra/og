@@ -709,3 +709,10 @@ function og_ui_field_delete_form($form, &$form_state, $instance) {
 
   return $output;
 }
+
+
+function og_ui_field_delete_form_submit($form, &$form_state) {
+  module_load_include('inc', 'field_ui', 'field_ui.admin');
+  field_ui_field_delete_form_submit($form, $form_state);
+  $form_state['redirect'] = 'admin/config/group/fields';
+}
