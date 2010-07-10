@@ -626,11 +626,12 @@ function og_ui_field_settings($form, &$form_state) {
         foreach ($fields as $field_name) {
           $options[] = array(
             check_plain($group_fields[$field_name]['instance']['label']),
+            filter_xss($group_fields[$field_name]['description']),
             l(t('Delete'), "admin/config/group/fields/$entity_type/$bundle/$field_name/delete"),
           );
         }
 
-        $header = array(t('Field'), t('Operations'));
+        $header = array(t('Field'), t('Description'), t('Operations'));
         $form['group_fields_' . $entity_type . '_' . $bundle]['fields'] = array(
           '#markup' => theme('table', array('header' => $header, 'rows' => $options)),
         );
