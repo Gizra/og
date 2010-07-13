@@ -1651,8 +1651,8 @@ function og_node_delete_group_form(&$form) {
     // Memberships should move before the group node is deleted.
     // Group nodes wait until afterwards so that our custom redirect works.
     array_unshift($form['#submit'], 'og_node_delete_move_memberships');
-    $form['#submit'][] = 'og_node_delete_confirm_submit';
   }
+  $form['#submit'][] = 'og_node_delete_confirm_submit';
   $form['actions']['submit']['#value'] = t('Delete group');
 }
 
