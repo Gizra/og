@@ -1711,8 +1711,11 @@ function og_node_delete_confirm_submit($form, &$form_state) {
   }
 }
 
-// Submit handler for group node delete form.
-// Move memberships to target group after a deletion of a group node. No access control.
+/**
+ * Submit handler for group node delete form.
+ *
+ * Move memberships to target group after a deletion of a group node. No access control.
+ */
 function og_node_delete_move_memberships($form, &$form_state) {
   if ($form_state['values']['verb'] == OG_DELETE_MOVE_NODES_MEMBERSHIPS) {
     $deleted_group_nid = $form_state['values']['nid'];
