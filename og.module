@@ -475,10 +475,7 @@ function og_init() {
 
   // Set group context and language if needed.
   if ($group_node = og_determine_context()) {
-    og_set_theme($group_node);
     og_set_group_context($group_node);
-    // TODOL: is this too late for menu links and such?
-    og_set_language($group_node);
   }
 }
 
@@ -696,7 +693,8 @@ function og_get_group_context() {
 }
 
 /**
- * API function; Set the group context for the current request.
+ * API function; Set the group context for the current request, including theme
+ * and language if they are configured for the group.
  * Modules may set this as needed.
  * This context is originally set during og_determine_context().
  * @param $node
@@ -717,6 +715,8 @@ function og_set_group_context($node = NULL, $clear = FALSE) {
 
   if (!empty($node) && og_is_group_type($node->type)) {
     $stored_group_node = $node;
+    og_set_theme($node);
+    og_set_language($node);
   }
   return !empty($stored_group_node) ? $stored_group_node : NULL;
 }
