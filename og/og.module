@@ -1945,9 +1945,53 @@ function og_list_permissions($type) {
   return $perms;
 }
 
-// Temporary function until http://drupal.org/node/629484 is committed.
+// Temporary hack until http://drupal.org/node/629484 is committed.
 if (!function_exists('entity_label')) {
+
+  /**
+   * Implements hook_entity_info_alter().
+   */
+  function og_entity_info_alter(&$entity_info) {
+    $entity_info['node']['entity keys']['label'] = 'title';
+    $entity_info['user']['label callback'] = 'user_label';
+
+  }
+
+   /**
+   * Returns the label of an entity.
+   *
+   * @param $entity_type
+   *   The entity type; e.g. 'node' or 'user'.
+   * @param $entity
+   *   The entity for which to generate a path.
+   *
+   * @return
+   *   A string with the entity label (e.g. node title), or FALSE if not found.
+   */
   function entity_label($entity_type, $entity) {
-    return 'label for ' . $entity_type;
+    $label = FALSE;
+    $info = entity_get_info($entity_type);
+    if (isset($info['label callback']) && function_exists($info['label callback'])) {
+      $label = $info['label callback']($entity);
+    }
+    elseif (!empty($info['entity keys']['label']) && isset($entity->{$info['entity keys']['label']})) {
+      $label = $entity->{$info['entity keys']['label']};
+    }
+
+    return $label;
+  }
+
+   /**
+   * Entity label callback.
+   *
+   * @param $account
+   *   The user object.
+   * @return
+   *   The user name, using format_username().
+   *
+   * @see entity_label()
+   */
+  function user_label($account) {
+    return format_username($account);
   }
 }
