@@ -496,7 +496,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
       }
 
       // Check if the entity label has changed.
-      $label = entity_label($entity_type, $entity);
+      $label = og_entity_label($entity_type, $entity);
 
       if ($group->label != $label) {
         $group->label = $label;
