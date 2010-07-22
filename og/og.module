@@ -480,7 +480,7 @@ function og_create_group($values = array()) {
   $values += array(
     'state' => OG_STATE_ACTIVE,
     'created' => time(),
-    'label' => entity_label($values['entity_type'], $entity),
+    'label' => og_entity_label($values['entity_type'], $entity),
   );
 
   return entity_create('group', $values);
@@ -1806,9 +1806,8 @@ function og_check_token($token, $seed) {
 function og_set_breadcrumb($entity_type, $etid, $path = array()) {
   if ($entity = entity_load($entity_type, array($etid))) {
     $entity = reset($entity);
-    if ($label = entity_label($entity_type, $entity)) {
-      drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$etid")), $path)) ;
-    }
+    $label = og_entity_label($entity_type, $entity);
+    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$etid")), $path)) ;
   }
 }
 
@@ -1852,6 +1851,8 @@ function og_create_field($field_name, $entity_type, $bundle) {
     }
   }
 }
+
+
 
 
 /**
@@ -1908,6 +1909,23 @@ function og_group_content_states() {
     OG_STATE_PENDING => t('Pending'),
     OG_STATE_BLOCKED => t('Blocked'),
   );
+}
+
+/**
+ * Wrapper function for entity_label() to return some text if label isn't found.
+ *
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity
+ *   The entity object.
+ */
+function og_entity_label($entity_type, $entity) {
+  $label = entity_label($entity_type, $entity);
+  if (!$label) {
+    list($id) = entity_extract_ids($entity_type, $entity);
+    $label = t('Entity @entity_type ID @id', array('@entity_type' => $entity_type, '@id' => $id));
+  }
+  return $label;
 }
 
 /**
