@@ -3,15 +3,15 @@
 
 /**
  * @file
- * Install, update, and uninstall functions for the Group access module.
+ * Install, update, and uninstall functions for the Group views module.
  */
 
 /**
  * Implement hook_uninstall().
  */
-function og_access_uninstall() {
+function og_views_uninstall() {
   $vars = array(
-    'og_access_strict_private',
+    'og_views_global_view',
   );
   foreach ($vars as $var) {
     variable_del($var);

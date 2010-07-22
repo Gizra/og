@@ -3,27 +3,71 @@
 
 /**
  * @file
- * Field module functionality for the Organic groups module.
+ * Field module functionality for the Group module.
  */
 
 /*******************************************************************************
  * Hook implementations
  ******************************************************************************/
 
+function og_field_widget_properties_alter(&$widget, $context) {
+  $field = $context['field'];
+  if ($field['field_name'] == OG_AUDIENCE_FIELD) {
+    $instance = $context['instance'];
+    // Determine if a user may see other groups as-well.
+    $opt_group = FALSE;
+
+    if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer group'))) {
+      $opt_group = TRUE;
+    }
+
+    $widget['type'] = $instance['widget']['settings']['minimum_for_autocomplete'] <= og_field_audience_count($opt_group) ? OG_AUDIENCE_AUTOCOMPLETE_WIDGET : OG_AUDIENCE_WIDGET;
+  }
+}
+
 /**
  * Implement hook_field_info().
  */
 function og_field_info() {
   return array(
-    'og' => array(
-      'label' => t('Organic groups'),
-      'description' => t('This field stores group nodes.'),
-      'default_widget' => 'og_audience',
+    'group' => array(
+      'label' => t('Group'),
+      'description' => t('This field stores groups associated with the content.'),
+      'default_widget' => OG_AUDIENCE_WIDGET,
       'default_formatter' => 'og_list_default',
+      // Entity metadata properties.
+      'property_type' => OG_AUDIENCE_FIELD,
+      'property_callbacks' => array('og_field_group_property_callback'),
     ),
   );
 }
 
+function og_field_group_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $name = str_replace('_', '-', $field['field_name']);
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+
+  // Define a data structure so it's possible to deal with Group
+  // audinece properly.
+  $property['getter callback'] = 'entity_metadata_field_verbatim_get';
+  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
+  $property['data info']['properties'] = array(
+    'properties' => array(
+      'gid' => array(
+      'type' => 'integer',
+      'label' => t('The group this group content is associated with'),
+      ),
+      'state' => array(
+        'type' => 'text',
+        'label' => t('Group content state'),
+        'options list' => 'og_group_content_states',
+      ),
+      'created' => array(
+        'type' => 'integer',
+        'label' => t('Created timestamp'),
+      ),
+    ),
+  );
+}
 
 /**
  * Implement hook_field_schema().
@@ -36,12 +80,6 @@ function og_field_schema($field) {
       'unsigned' => TRUE,
       'not null' => FALSE,
     ),
-    'data' => array(
-      'description' => 'Serialized additional data about the group content.',
-      'type' => 'text',
-      'not null' => FALSE,
-      'serialize' => TRUE,
-    ),
     'state' => array(
       'description' => 'The state of the group content.',
       'type' => 'varchar',
@@ -51,12 +89,6 @@ function og_field_schema($field) {
     ),
     'created' => array(
       'description' => 'The Unix timestamp when the group content was created.',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-    'changed' => array(
-      'description' => 'The Unix timestamp when the group content was most recently saved.',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
@@ -76,8 +108,8 @@ function og_field_schema($field) {
 function og_field_formatter_info() {
   return array(
     'og_list_default' => array(
-      'label' => t('Organic groups default list'),
-      'field types' => array('og'),
+      'label' => t('Group default list'),
+      'field types' => array('group'),
     ),
   );
 }
@@ -85,17 +117,20 @@ function og_field_formatter_info() {
 /**
  * Implements hook_field_formatter_view().
  */
-function og_field_formatter_view($object_type, $object, $field, $instance, $langcode, $items, $display) {
+function og_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-  if ($field['field_name'] == 'og_audience') {
+  if ($field['field_name'] == OG_AUDIENCE_FIELD && !empty($items[0])) {
     foreach ($items as $delta => $item) {
-      if ($group = og_get_group('gid', $item['gid'])) {
-        $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
+      if ($group = og_get_group('group', $item['gid'])) {
+        $label = og_label($group->gid);
+        $entity = entity_load($group->entity_type, array($group->etid));
+        $entity = current($entity);
+        $uri = entity_uri($entity_type, $entity);
         $element[$delta] = array(
           '#type' => 'link',
           '#title' => $label,
-          '#href' => "$group->obj_type/$group->oid",
+          '#href' => $uri['path'],
         );
       }
     }
@@ -109,14 +144,35 @@ function og_field_formatter_view($object_type, $object, $field, $instance, $lang
  * Implement hook_field_widget_info().
  */
 function og_field_widget_info() {
+  $autocomplete_settings = array(
+    'autocomplete_match' => 'contains',
+    'size' => 60,
+    'autocomplete_path' => 'group/autocomplete',
+  );
+
   return array(
-    'og_audience' => array(
-      'label' => t('Organic groups audience'),
-      'settings' => array('opt_group' => 'auto', 'minimum_for_select_list' => 20),
-      'field types' => array('og'),
+    OG_AUDIENCE_WIDGET => array(
+      'label' => t('Group audience'),
+      'settings' => array(
+        'opt_group' => 'auto',
+        'minimum_for_select_list' => 20,
+        'minimum_for_autocomplete' => 50,
+      ),
+      'field types' => array('group'),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
       ),
+      'settings' => array(
+        'opt_group' => 'auto',
+        'minimum_for_select_list' => 20,
+        'minimum_for_autocomplete' => 50,
+      ) + $autocomplete_settings,
+    ),
+    OG_AUDIENCE_AUTOCOMPLETE_WIDGET => array(
+      'label'       => t('Autocomplete text field'),
+      'description' => t('Display the list of referenceable groups as a textfield with autocomplete behaviour.'),
+      'field types' => array('group'),
+      'settings'    => $autocomplete_settings,
     ),
   );
 }
@@ -125,29 +181,60 @@ function og_field_widget_info() {
  * Implement hook_field_widget_settings_form().
  */
 function og_field_widget_settings_form($field, $instance) {
-  $widget = $instance['widget'];
-  $settings = $widget['settings'];
+  $widget   = $instance['widget'];
+  $defaults = field_info_widget_settings($widget['type']);
+  $settings = array_merge($defaults, $widget['settings']);
 
-  $form['opt_group'] = array(
-    '#type' => 'radios',
-    '#title' => t('Input type'),
-    '#description' => t('Select the input type that should be used to get the groups audience. Note that the <em>Never show "other groups"</em> option will show all groups including the ones the user is a not a member of.'),
-    '#options' => array(
-      'auto' => t('Automatically decide the input according to user permissions (Recommended)'),
-      'never' => t('Never show "other groups"'),
-      'always' => t('Always show "other groups"'),
+  if ($widget['type'] == OG_AUDIENCE_WIDGET) {
+
+    $form['opt_group'] = array(
+      '#type' => 'radios',
+      '#title' => t('Input type'),
+      '#description' => t('Select the input type that should be used to get the groups audience. Note that the <em>Never show "other groups"</em> option will show all groups including the ones the user is a not a member of.'),
+      '#options' => array(
+        'auto' => t('Automatically decide the input according to user permissions (Recommended)'),
+        'never' => t('Never show "other groups"'),
+        'always' => t('Always show "other groups"'),
+      ),
+      '#default_value' => $settings['opt_group'],
+      '#required' => TRUE,
+    );
+
+    $form['minimum_for_select_list'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Minimum for select list'),
+      '#description' => t('The minimum number of groups before showing the group as a dropdown list.'),
+      '#default_value' => $settings['minimum_for_select_list'],
+      '#required' => TRUE,
+      '#element_validate' => array('_element_validate_integer_positive'),
+    );
+
+    $form['minimum_for_autocomplete'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Minimum for autocomplete'),
+      '#description' => t('The minimum number of groups before showing the group as autocomplete.'),
+      '#default_value' => $settings['minimum_for_autocomplete'],
+      '#required' => TRUE,
+      '#element_validate' => array('_element_validate_integer_positive'),
+    );
+  }
+
+  $form['autocomplete_match'] = array(
+    '#type'             => 'select',
+    '#title'            => t('Autocomplete matching'),
+    '#default_value'    => $settings['autocomplete_match'],
+    '#options'          => array(
+      'starts_with'     => t('Starts with'),
+      'contains'        => t('Contains'),
     ),
-    '#default_value' => !empty($settings['opt_group']) ? $settings['opt_group'] : 'auto',
-    '#required' => TRUE,
+    '#description'      => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
   );
-
-  $form['minimum_for_select_list'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Minimum for select list'),
-    '#description' => t('The minimum number of groups before showing the group as a dropdown list.'),
-    '#default_value' => !empty($settings['minimum_for_select_list']) ? $settings['minimum_for_select_list'] : 20,
-    '#required' => TRUE,
+  $form['size'] = array(
+    '#type'             => 'textfield',
+    '#title'            => t('Size of textfield'),
+    '#default_value'    => $settings['size'],
     '#element_validate' => array('_element_validate_integer_positive'),
+    '#required'         => TRUE,
   );
 
   return $form;
@@ -163,133 +250,140 @@ function og_field_widget_settings_form($field, $instance) {
  * that the $element['#type'] is a result of the options passed to
  * $element['#options'].
  */
-function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $excludes = array();
-  // If it's an existing group, then exclude itself, as in some cases a group
-  // can act also as a group content, and we want to prevent associating the group
-  // to itself.
-  if (!empty($form['#' . $element['#object_type']])) {
-    list($id) = entity_extract_ids($element['#object_type'], $form['#' . $element['#object_type']]);
-    if ($group = og_get_group($element['#object_type'], $id)) {
-      $excludes[$group->gid] = $group->gid;
-    }
-  }
+function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+  $element = $base;
+  $widget = $instance['widget'];
 
-  // Get all the groups a user can see, sanitized with check_plain().
-  // @see og_get_all_groups_for_form().
-  $content_groups = og_allowed_values($field);
+  switch ($widget['type']) {
+    case OG_AUDIENCE_AUTOCOMPLETE_WIDGET:
+      $element += array(
+        '#type' => 'textfield',
+        '#default_value' => isset($items[$delta]['gid']) ? $items[$delta]['gid'] : NULL,
+        '#autocomplete_path' => $instance['widget']['settings']['autocomplete_path'] . '/' . $field['field_name'],
+        '#size' => $instance['widget']['settings']['size'],
+        '#element_validate' => array('og_field_audience_autocomplete_validate'),
+        '#value_callback' => 'og_field_audience_autocomplete_value',
+      );
 
-  // Determine if a user may see other groups as-well.
-  $opt_group = FALSE;
+      $return = array('gid' => $element);
 
-  if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer organic groups'))) {
-    $opt_group = TRUE;
-  }
+      break;
 
-  // The group options presented to the user.
-  $options = array();
-  if ($opt_group) {
-    // Show "My groups" and "Other groups".
-    $groups_count = 0;
-    if ($my_groups = array_diff_key($content_groups['content groups'], $excludes)) {
-      $options += array(t('My groups') => $my_groups);
-      $groups_count = $groups_count + count($my_groups);
-    }
-    if ($other_groups = array_diff_key($content_groups['other groups'], $excludes)) {
-      $options += array(t('Other groups') => $other_groups);
-      $groups_count = $groups_count + count($other_groups);
-    }
-    $type = 'select';
-  }
-  else {
-    // Show only "My groups".
-    $groups_count = count($content_groups['content groups']);
-    $options = array_diff_key($content_groups['content groups'], $excludes);
-    // Show a select list if their are a minimum of groups.
-    if ($field['cardinality'] == 1) {
-      $type = 'radios';
-    }
-    else {
-      $type = $groups_count >= $instance['widget']['settings']['minimum_for_select_list'] ? 'select' : 'checkboxes';
-    }
-  }
-
-  if (empty($options)) {
-    // There are no group, so don't show any input element.
-    $type = 'item';
-  }
-
-  if (!empty($element['#description'])) {
-    $description = $element['#description'];
-  }
-  else {
-    $description = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
-  }
-
-  $default_values = array();
-  // Select groups if they were passed in the URL, in the form of
-  // node/add/post?gids_gid[]=1,2,3&gids_node[]=4,5,6
-  // Note that gids_ is the prefix followed by the object type (e.g. "node",
-  // "user") or "gid" to indicate the passed values are group ID.
-  foreach (array_merge(array_keys(entity_get_info()), array('gid')) as $obj_type) {
-    $oids =  !empty($_REQUEST['gids_' . $obj_type][0]) ? explode(',', $_REQUEST['gids_' . $obj_type][0]) : array();
-    if ($oids) {
-      if ($gids = og_get_groups($obj_type, $oids)) {
-        $gids = current($gids);
-        $default_values = array_merge($default_values, $gids);
+    case OG_AUDIENCE_WIDGET:
+      $excludes = array();
+      // If it's an existing group, then exclude itself, as in some cases a group
+      // can act also as a group content, but we want to prevent associating the
+      // group to itself.
+      if (!empty($form['#' . $element['#entity_type']])) {
+        list($id) = entity_extract_ids($element['#entity_type'], $form['#' . $element['#entity_type']]);
+        if (($group = og_get_group($element['#entity_type'], $id))) {
+          $excludes[$group->gid] = $group->gid;
+        }
       }
-    }
+
+      // Determine if a user may see other groups as-well.
+      $opt_group = FALSE;
+
+      if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer group'))) {
+        $opt_group = TRUE;
+      }
+
+      // Get all the groups a user can see.
+      $audience = og_field_audience_options($opt_group);
+      foreach (array('content groups', 'other groups') as $key) {
+        if (!empty($audience[$key])) {
+          $audience[$key] = og_label_multiple($audience[$key]);
+        }
+      }
+
+      // The group options presented to the user.
+      $options = array();
+      if ($opt_group) {
+        // Show "My groups" and "Other groups".
+        $groups_count = 0;
+        if ($my_groups = array_diff_key($audience['content groups'], $excludes)) {
+          $options += array(t('My groups') => $my_groups);
+          $groups_count = $groups_count + count($my_groups);
+        }
+        if ($other_groups = array_diff_key($audience['other groups'], $excludes)) {
+          $options += array(t('Other groups') => $other_groups);
+          $groups_count = $groups_count + count($other_groups);
+        }
+        $type = 'select';
+      }
+      else {
+        // Show only "My groups".
+        $groups_count = count($audience['content groups']);
+        $options = array_diff_key($audience['content groups'], $excludes);
+        // Show a select list if their are a minimum of groups.
+        if ($field['cardinality'] == 1) {
+          $type = 'radios';
+        }
+        else {
+          $type = $groups_count >= $instance['widget']['settings']['minimum_for_select_list'] ? 'select' : 'checkboxes';
+        }
+      }
+
+      if (empty($options)) {
+        // There are no group, so don't show any input element.
+        $type = 'item';
+      }
+
+      if (empty($element['#description'])) {
+        $element['#description'] = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
+      }
+
+      $default_values = og_get_context_by_url();
+
+      if (!empty($items)) {
+        foreach ($items as $item) {
+          $default_values[$item['gid']] = $item['gid'];
+        }
+      }
+
+      $element['#multiple'] = $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;;
+      // Don't make the field required, if there are no groups.
+      $element['#required'] = $element['#required'] && !empty($options);
+
+      // Prepare the type as expected in _options_properties().
+      if (in_array($type, array('radios', 'checkboxes'))) {
+        $options_type = 'buttons';
+      }
+      else {
+        $options_type = $type;
+      }
+
+      $properties = _options_properties($options_type, $element['#multiple'], $element['#required']);
+
+      // If the element isn't required, and there are some options.
+      if (!$element['#required'] && $type != 'item') {
+        // Use a dummy instance in order to use theme('options_none');
+        $dummy_instance['widget']['type'] = 'options_'. $options_type;
+        $options = array('_none' => theme('options_none', array('instance' => $dummy_instance))) + $options;
+      }
+
+      $element += array(
+        // Input should be TRUE only if there are groups that can be selected.
+        '#input' => $type != 'item',
+        '#type' => $type,
+        '#options' => $options,
+        '#default_value' => $default_values,
+        '#attributes' => array('class' => array('group-audience')),
+        '#disabled' => empty($groups_count),
+        // Re-use options widget element validation, to correctly transform
+        // submitted values from field => delta to delta => field.
+        // @see options_field_widget().
+        '#value_key' => 'gid',
+        '#element_validate' => $type != 'item' ? array('options_field_widget_validate') : array(),
+        '#properties' => $properties,
+      );
+
+      $return = $element;
+      break;
   }
 
-  if (!empty($items)) {
-    foreach ($items as $item) {
-      $default_values[$item['gid']] = $item['gid'];
-    }
-  }
 
-  $element['#multiple'] = $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;;
-  // Don't make the field required, if there are no groups.
-  $element['#required'] = $element['#required'] && !empty($options);
-
-  // Prepare the type as expected in _options_properties().
-  if (in_array($type, array('radios', 'checkboxes'))) {
-    $options_type = 'buttons';
-  }
-  else {
-    $options_type = $type;
-  }
-
-  $properties = _options_properties($options_type, $element['#multiple'], $element['#required']);
-
-  // If the element isn't required, and there are some options.
-  if (!$element['#required'] && $type != 'item') {
-    // Use a dummy instance in order to use theme('options_none');
-    $dummy_instance['widget']['type'] = 'options_'. $options_type;
-    $options = array('_none' => theme('options_none', array('instance' => $dummy_instance))) + $options;
-  }
-
-  $element += array(
-    // Input should be TRUE only if there are groups that can be selected.
-    '#input' => $type != 'item',
-    '#type' => $type,
-    '#description' => $description,
-    '#options' => $options,
-    '#default_value' => $default_values,
-    '#attributes' => array('class' => array('og-audience')),
-    '#disabled' => empty($groups_count),
-    // Re-use options widget element validation, to correctly transform
-    // submitted values from field => delta to delta => field.
-    // @see options_field_widget().
-    '#value_key' => 'gid',
-    '#element_validate' => $type != 'item' ? array('options_field_widget_validate') : array(),
-    '#properties' => $properties,
-  );
-
-  $defaults = array('data' => array(), 'state' => '');
-  foreach ($items as $delta => $item) {
-    $items[$delta] = array_merge($defaults, $items[$delta]);
-  }
-  return $element;
+  return $return;
 }
 
 /**
@@ -302,62 +396,49 @@ function og_field_is_empty($item, $field) {
 /**
  * Implement hook_field_insert().
  */
-function og_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
-  og_field_write('insert', $obj_type, $object, $field, $instance, $langcode, $items);
+function og_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  og_field_write('insert', $entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
  * Implement hook_field_update().
  */
-function og_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
-  og_field_write('update', $obj_type, $object, $field, $instance, $langcode, $items);
+function og_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  og_field_write('update', $entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
  * Implement hook_field_attach_insert().
  */
-function og_field_attach_insert($obj_type, $object) {
-  og_field_crud_group('insert', $obj_type, $object);
+function og_field_attach_insert($entity_type, $entity) {
+  og_field_crud_group('insert', $entity_type, $entity);
 }
 
 /**
  * Implement hook_field_attach_update().
  */
-function og_field_attach_update($obj_type, $object) {
-  og_field_crud_group('update', $obj_type, $object);
+function og_field_attach_update($entity_type, $entity) {
+  og_field_crud_group('update', $entity_type, $entity);
 }
 
 /**
  * Implement hook_field_attach_delete().
  */
-function og_field_attach_delete($obj_type, $object) {
-  og_field_crud_group('delete', $obj_type, $object);
+function og_field_attach_delete($entity_type, $entity) {
+  og_field_crud_group('delete', $entity_type, $entity);
 }
 
-/*******************************************************************************
- * Helper functions
- ******************************************************************************/
 /**
  * Insert or update a field record.
  *
  * @param $op
  *   The operation - "insert" or "update".
  */
-function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &$items) {
+function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode, &$items) {
+  //FIXME: Only $items['gid'] is populated.
   foreach ($items as &$item) {
-    $item['state'] = !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE;
-    $item['data'] = !empty($item['data']) ? $item['data'] : array();
-    $item['created'] = !empty($item['created']) ? $item['created'] : time();
-    $item['changed'] = time();
-
-    // Variable that will be altered, should not include the group ID.
-    $alter = $item;
-    unset($alter['gid']);
-
-    // Allow other modules to alter the data.
-    drupal_alter('og_field_' . $op, $alter, $obj_type, $object, $field, $instance, $langcode, $items);
-    $item['state'] = $alter['state'];
-    $item['data'] = serialize($alter['data']);
+    // Set default values.
+    $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
   }
 }
 
@@ -368,45 +449,364 @@ function og_field_write($op, $obj_type, $object, $field, $instance, $langcode, &
  * @see og_field_attach_update().
  * @see og_field_attach_delete().
  */
-function og_field_crud_group($op, $obj_type, $object) {
-  // Get the object ID.
-  list($id) = entity_extract_ids($obj_type, $object);
+function og_field_crud_group($op, $entity_type, $entity) {
+  $property = OG_GROUP_FIELD;
 
-  $group = og_get_group($obj_type, $id, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
+  // Get the entity ID.
+  list($id) = entity_extract_ids($entity_type, $entity);
+
+  $group = og_get_group($entity_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
   if ($op == 'delete') {
-    if ($group) {
+    if (!empty($group->gid)) {
       // Remove group.
-      og_delete_groups('gid', array($group->gid));
+      og_delete(array($group->gid));
     }
   }
   else {
-    // Check group doesn't already exist. We don't check the $op for insert, as
-    // content might have been saved, but not as a group.
-    if (!empty($object->og_group[LANGUAGE_NONE][0]['value']) && !$group) {
-      // Add the group.
-      $group = og_set_group($obj_type, $id);
+    // Check group is new.
+    if (empty($group->gid)) {
+      if (!empty($wrapper[0]['value'])) {
+        // Save the group to get the group ID.
+        og_save($group);
 
-      if (!empty($object->uid)) {
-        // Subscribe the object author, if exists.
-        $account = user_load($object->uid);
-        og_subscribe_user(array(array('gid' => $group->gid, 'state' => OG_STATE_ACTIVE)), $account);
+        // Subscribe the entity author, if exists.
+        if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
+          og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
+        }
       }
-
-      og_set_new_group_roles($group->gid);
     }
-    elseif ($group) {
-      $state = '';
-      if ($group->state == OG_STATE_ACTIVE && empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
-        $state = OG_STATE_PENDING;
+    else {
+      // Existing group.
+      $save = FALSE;
+
+      if ($group->state == OG_STATE_ACTIVE && empty($wrapper[0]['value'])) {
+        $group->state = OG_STATE_PENDING;
+        $save = TRUE;
       }
-      elseif($group->state == OG_STATE_PENDING && !empty($object->og_group[LANGUAGE_NONE][0]['value'])) {
-        $state = OG_STATE_ACTIVE;
+      elseif($group->state == OG_STATE_PENDING && !empty($wrapper[0]['value'])) {
+        $group->state = OG_STATE_ACTIVE;
+        $save = TRUE;
       }
-      if ($state) {
-        // Change the group state.
-        og_set_group($group->obj_type, $group->oid, $state, $group->data);
+
+      // Check if the entity label has changed.
+      $label = entity_label($entity_type, $entity);
+
+      if ($group->label != $label) {
+        $group->label = $label;
+        $save = TRUE;
+      }
+
+      if ($save) {
+        og_save($group);
+      }
+    }
+
+    // Determine if field has changed and roles should be overridden, or
+    // reverted, by comparing the default access field of the entity being
+    // saved, and its original state.
+    $property = OG_DEFAULT_ACCESS_FIELD;
+    if (!empty($entity->{$property})) {
+      $original_entity = entity_load($entity_type, array($id));
+      $original_entity = reset($original_entity);
+
+      if ($entity->{$property} != $original_entity->{$property}) {
+        if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
+          og_user_roles_override($group->gid);
+        }
+        else {
+          // If the field is set to be using default access and there are
+          // already overridden roles we delete them.
+          og_delete_user_roles_by_group($group->gid);
+        }
       }
     }
   }
+}
+
+
+/**
+ * Get an array of allowed values for OG audience field.
+ *
+ * @return
+ *   Array keyed by "content groups" and "other groups".
+ */
+function og_field_audience_options($opt_group = FALSE, $account = NULL) {
+  $return = &drupal_static(__FUNCTION__, array());
+
+  if (!empty($return)) {
+    return $return;
+  }
+
+  if (empty($account)) {
+    global $user;
+
+    $account = $user;
+  }
+
+  //Initialize values
+  $return = array('content groups' => array(), 'other groups' => array());
+
+  $content_groups = og_get_entity_groups('user', $account);
+  $return['content groups'] = $content_groups;
+
+  if ($opt_group) {
+    // Get all existing group.
+    $all_groups = og_get_all_group();
+    $return['other groups'] = array_diff($all_groups, $content_groups);
+  }
+
+  // Let other modules change the list.
+  // TODO: Is it possible to do it in a more general way?
+  drupal_alter('og_audience_options', $return, $opt_group, $account);
+
+  return $return;
+}
+
+/**
+ * Return the number of groups a user may see in the group audience field.
+ */
+function og_field_audience_count($opt_group = FALSE, $account = NULL) {
+  $count = &drupal_static(__FUNCTION__, FALSE);
+
+  if ($count === FALSE) {
+    if (empty($account)) {
+      global $user;
+
+      $account = $user;
+    }
+    // If opt_group is TRUE then get the count of all the groups that are
+    // active, otherwise only the ones the user belongs to.
+    $count = $opt_group ? og_get_all_group(array(OG_STATE_ACTIVE), array('count' => TRUE)) : count(og_get_entity_groups('user', $account));
+  }
+
+  return $count;
+}
+
+
+
+/**
+ * Implements hook_field_validate().
+ *
+ * FIXME: Adapt this function to Group.
+ *
+ * Possible error codes:
+ * - 'invalid_nid': nid is not valid for the field (not a valid node id, or the node is not referenceable).
+ */
+function __group_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  // Extract nids to check.
+  $ids = array();
+
+  // First check non-numeric "nid's to avoid losing time with them.
+  foreach ($items as $delta => $item) {
+    if (is_array($item) && !empty($item['nid'])) {
+      if (is_numeric($item['nid'])) {
+        $ids[] = $item['nid'];
+      }
+      else {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'invalid_nid',
+          'message' => t("%name: invalid input.",
+             array('%name' => $instance['label'])),
+        );
+      }
+    }
+  }
+  // Prevent performance hog if there are no ids to check.
+  if ($ids) {
+    $refs = og_field_audience_potential_groups('', NULL, $ids);
+    foreach ($items as $delta => $item) {
+      if (is_array($item)) {
+        if (!empty($item['nid']) && !isset($refs[$item['nid']])) {
+          $errors[$field['field_name']][$langcode][$delta][] = array(
+            'error' => 'invalid_nid',
+            'message' => t("%name: this post can't be referenced.",
+              array('%name' => $instance['label'])),
+          );
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * Value callback for a node_reference autocomplete element.
+ *
+ * Replace the node nid with a node title.
+ */
+function og_field_audience_autocomplete_value($element, $input = FALSE, $form_state) {
+  if ($input === FALSE) {
+    // We're building the displayed 'default value': expand the raw nid into
+    // "Group title [gid:n]".
+    if (!empty($element['#default_value']) && $group = og_load($element['#default_value'])) {
+      $value = og_label($group->gid);
+      $value .= ' [gid:' . $group->gid . ']';
+      return $value;
+    }
+  }
+}
+
+/**
+ * Validation callback for a group audience autocomplete element.
+ */
+function og_field_audience_autocomplete_validate($element, &$form_state, $form) {
+  $field = $form_state['field'][$element['#field_name']][$element['#language']]['field'];
+  $instance = $form_state['field'][$element['#field_name']][$element['#language']]['instance'];
+
+  $value = $element['#value'];
+  $gid = NULL;
+
+  if (!empty($value)) {
+    // Check whether we have an explicit "[gid:n]" input.
+    preg_match('/^(?:\s*|(.*) )?\[\s*gid\s*:\s*(\d+)\s*\]$/', $value, $matches);
+    if (!empty($matches)) {
+      // Explicit gid. Check that the 'title' part matches the actual title for
+      // the nid.
+      list(, $label, $gid) = $matches;
+      if (!empty($label)) {
+        if ($label != og_label($gid)) {
+          form_error($element, t('%name: label mismatch. Please check your selection.', array('%name' => $instance['label'])));
+        }
+      }
+    }
+    else {
+      // No explicit gid (the submitted value was not populated by autocomplete
+      // selection). Get the gid of a referencable node from the entered title.
+      if ($reference = og_field_audience_potential_groups($value, 'equals', NULL, 1)) {
+        $gid = key($reference);
+      }
+      else {
+        form_error($element, t('%name: found no valid group with that label.', array('%name' => $instance['label'])));
+      }
+    }
+  }
+
+  // Set the element's value as the node id that was extracted from the entered
+  // input.
+  form_set_value($element, $gid, $form_state);
+}
+
+/**
+ * Implements hook_field_widget_error().
+ *
+ * TODO: Se where this is needed.
+ */
+function og_field_widget_error($element, $error, $form, &$form_state) {
+  form_error($element['gid'], $error['message']);
+}
+
+/**
+ * Fetch an array of all candidate groups.
+ *
+ * This info is used in various places (allowed values, autocomplete
+ * results, input validation...). Some of them only need the nids,
+ * others nid + titles, others yet nid + titles + rendered row (for
+ * display in widgets).
+ *
+ * The array we return contains all the potentially needed information,
+ * and lets consumers use the parts they actually need.
+ *
+ * @param $field
+ *   The field description.
+ * @param $string
+ *   Optional string to filter titles on (used by autocomplete).
+ * @param $match
+ *   Operator to match filtered name against, can be any of:
+ *   'contains', 'equals', 'starts_with'
+ * @param $ids
+ *   Optional node ids to lookup (the $string and $match arguments will be
+ *   ignored).
+ * @param $limit
+ *   If non-zero, limit the size of the result set.
+ *
+ * @return
+ *   An array of valid nodes in the form:
+ *   array(
+ *     gid => 'rendered' -- The text to display in widgets (can be HTML)
+ *   );
+ *  @todo Check whether we still need the 'rendered' value (hook_options_list()
+ *  does not need it anymore). Should probably be clearer after the 'Views'
+ *  mode is ported.
+ */
+function og_field_audience_potential_groups($string = '', $match = 'contains', $ids = array(), $limit = NULL) {
+  $results = &drupal_static(__FUNCTION__, array());
+
+  // Create unique id for static cache.
+  $cid = $match . ':'
+    . ($string !== '' ? $string : implode('-', $ids))
+    . ':' . $limit;
+  if (!isset($results[$cid])) {
+    $groups = og_field_audience_potential_groups_standard($string, $match, $ids, $limit);
+
+    // Store the results.
+    $results[$cid] = !empty($groups) ? $groups : array();
+  }
+
+  return $results[$cid];
+}
+
+/**
+ * Helper function for og_field_audience_potential_groups().
+ */
+function og_field_audience_potential_groups_standard($string = '', $match = 'contains', $ids = array(), $limit = NULL) {
+  $query = og_get_all_group(array(OG_STATE_ACTIVE), array('return query' => TRUE));
+
+  $query->addField('og', 'label');
+  if ($string !== '') {
+    $args = array();
+    switch ($match) {
+      case 'contains':
+        $title_clause = 'label LIKE :match';
+        $args['match'] = '%' . $string . '%';
+        break;
+
+      case 'starts_with':
+        $title_clause = 'label LIKE :match';
+        $args['match'] = $string . '%';
+        break;
+
+      case 'equals':
+      default: // no match type or incorrect match type: use "="
+        $title_clause = 'label = :match';
+        $args['match'] = $string;
+        break;
+    }
+    $query->where($title_clause, $args);
+  }
+  elseif ($ids) {
+    $query->condition('gid', $ids, 'IN');
+  }
+
+  $query->orderBy('label');
+
+  if ($limit) {
+    $query->range(0, $limit);
+  }
+
+  $gids = $query->execute()->fetchAllKeyed();
+  $groups = og_load_multiple(array_keys($gids));
+  foreach ($groups as $group) {
+    $label = og_label($group->gid);
+    $return[$group->gid] = $label;
+  }
+  return $return;
+}
+
+/**
+ * Menu callback for the autocomplete results.
+ */
+function og_field_audience_autocomplete($field_name, $string = '') {
+  $field = field_info_field($field_name);
+
+  $match = isset($field['widget']['autocomplete_match']) ? $field['widget']['autocomplete_match'] : 'contains';
+  $matches = array();
+
+  $groups = og_field_audience_potential_groups($string, $match, array(), 10);
+  foreach ($groups as $gid => $label) {
+    // Add a class wrapper for a few required CSS overrides.
+    $matches[$label . " [gid:$gid]"] = '<div class="group-autocomplete">' . $label . '</div>';
+  }
+  drupal_json_output($matches);
 }

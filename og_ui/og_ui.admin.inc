@@ -3,29 +3,31 @@
 
 /**
  * @file
- * Admin settings for the Organic groups module.
+ * Admin settings for the Group module.
  */
 
 /**
  * Provide an overview of the administrator menu items.
  *
- * @param $node
- *   The group node.
+ * @param $entity_type
+ *   The entity type.
+ * @param $etid
+ *   The entity ID.
  */
-function og_ui_group_admin_overview($obj_type, $oid) {
-  og_set_breadcrumb($obj_type, $oid);
+function og_ui_group_admin_overview($entity_type, $etid) {
+  og_set_breadcrumb($entity_type, $etid);
 
-  $items = og_ui_get_group_admin();
+  $group = og_get_group($entity_type, $etid);
+  $items = og_ui_get_group_admin($group->gid);
 
   foreach ($items as &$item) {
     // Re-format the URL.
-    $item['href'] = "og/$obj_type/$oid/" . $item['href'];
+    $item['href'] = "group/$entity_type/$etid/" . $item['href'];
     // Imitate the menu_get_item() content, so we can pass it to
     // theme_admin_block_content(), so we add the localized_options key.
     $item['localized_options'] = array();
   }
 
-  $form['system_compact_link'] = array('#markup' => theme('system_compact_link'));
   $form['admin_block_content'] = array('#markup' => theme('admin_block_content', array('content' => $items)));
 
   return $form;
@@ -34,10 +36,10 @@ function og_ui_group_admin_overview($obj_type, $oid) {
 /**
  * Add users to group form.
  */
-function og_ui_add_users($form, &$form_state, $obj_type, $oid) {
-  og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
-  if ($group = og_get_group($obj_type, $oid)) {
-    $label = check_plain(og_entity_get_label($group->obj_type, $group->oid));
+function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
+  og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
+  if ($group = og_get_group($entity_type, $etid)) {
+    $label = og_label($group->gid);
 
     $form['og_user'] = array(
       '#type' => 'fieldset',
@@ -51,11 +53,7 @@ function og_ui_add_users($form, &$form_state, $obj_type, $oid) {
     $form['og_user']['og_add_user_state'] = array(
       '#type' => 'select',
       '#title' => t('Membership state'),
-      '#options' => array(
-        OG_STATE_ACTIVE => t('Active'),
-        OG_STATE_PENDING => t('Pending'),
-        OG_STATE_BLOCKED => t('Blocked'),
-      ),
+      '#options' => og_group_content_states(),
       '#description' => t('Select the state of the membership.'),
     );
     $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
@@ -82,12 +80,9 @@ function og_ui_add_users_validate($form, &$form_state) {
  */
 function og_ui_add_users_submit($form, &$form_state) {
   $account = user_load_by_name($form_state['values']['og_add_user']);
-  $group = array(
-    'gid' => $form_state['values']['group']->gid,
-    'state' => $form_state['values']['og_add_user_state'],
-  );
 
-  og_subscribe_user(array($group), $account);
+  og_group($form_state['values']['group']->gid, 'user', $account, $form_state['values']['og_add_user_state']);
+  drupal_set_message(t('%user has been added to group.', array('%user' => $account->name)));
 }
 
 /**
@@ -97,13 +92,14 @@ function og_ui_add_users_submit($form, &$form_state) {
  * @see og_user_admin_account_validate()
  * @see og_user_admin_account_submit()
  */
-function og_ui_user_admin_account($form, $form_state, $obj_type, $oid) {
-  og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
-  $group = og_get_group($obj_type, $oid);
+function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
+  og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
+  $group = og_get_group($entity_type, $etid);
   $header = array(
-    'username' => array('data' => t('Username')),
-    'status' => array('data' => t('Status')),
+    'username' => array('data' => t('Username'), 'field' => 'u.name'),
+    'status' => array('data' => t('Status'), 'field' => 'group_audience.group_audience_state'),
     'roles' => array('data' => t('Roles')),
+    'member_for' => array('data' => t('Member for'), 'field' => 'group_audience.group_audience_created', 'sort' => 'desc'),
   );
 
   $form['group'] = array('#type' => 'value', '#value' => $group);
@@ -133,38 +129,73 @@ function og_ui_user_admin_account($form, $form_state, $obj_type, $oid) {
     '#value' => t('Update'),
   );
 
-  $destination = drupal_get_destination();
+  $status = og_group_content_states();
+  $roles = og_user_roles($group->gid);
+  // Get the group real entity, so we can check the user ID of the entity.
+  $entity = og_load_entity_from_group($group->gid);
 
-  $status = array('blocked' => t('blocked'), 'pending' => t('pending'), 'active' => t('active'));
-  $roles = array_flip(og_get_group_roles($group->gid));
-  $accounts = array();
-  // Get the group real object, so we can check the user ID of the object.
-  $object = current(entity_load($obj_type, array($group->oid)));
+  //TODO: Use field_attach_query(), when query can return object,
+  $query = db_select('field_data_group_audience', 'group_audience');
+  $query
+    ->condition('group_audience.group_audience_gid', $group->gid)
+    ->condition('group_audience.bundle', 'user');
 
-  foreach (og_get_group_users($group->gid, array()) as $account) {
-    // Don't allow editing of the group manager.
-    if (empty($object->uid) || $account->uid != $object->uid) {
-      $accounts[$account->uid] = '';
-      $users_roles = array();
-      foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
-        $users_roles[] = $roles[$rid];
+  $count_query = clone $query;
+  $count_query->addExpression('COUNT(group_audience.bundle)');
+
+  $query = $query->extend('PagerDefault')->extend('TableSort');
+  $query->join('users', 'u', 'u.uid =  group_audience.entity_id');
+  $query
+    ->fields('group_audience', array('entity_id', 'group_audience_state', 'group_audience_created'))
+    ->fields('u', array('name'))
+    ->limit(10)
+    ->orderByHeader($header)
+    ->setCountQuery($count_query);
+  $result = $query->execute()->fetchAll();
+
+  $uids = array();
+  foreach ($result as $row) {
+    $uids[] = $row->entity_id;
+  }
+
+  if ($uids) {
+    $states = og_group_content_states();
+    // We load all the accounts as it's will happen in og_get_user_roles() and
+    // we prefer loading all accounts at once.
+    $accounts = user_load_multiple($uids);
+
+    foreach ($result as $row) {
+      $account = $accounts[$row->entity_id];
+      // Don't allow editing of the group manager.
+      if (empty($entity->uid) || $account->uid != $entity->uid) {
+        $users_roles = array();
+        foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
+          if (!in_array($roles[$rid], array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
+            // Show the user's roles, except of the authenticated role, that all
+            // group members have, or anonymous that blocked members have.
+            $users_roles[] = $roles[$rid];
+          }
+        }
+        asort($users_roles);
+
+        $options[$account->uid] = array(
+          'username' => theme('username', array('account' => $account)),
+          'status' =>  $states[$row->group_audience_state],
+          'roles' => theme('item_list', array('items' => $users_roles)),
+          'member_for' => format_interval(REQUEST_TIME - $row->group_audience_created),
+        );
+
       }
-      asort($users_roles);
-
-      $options[$account->uid] = array(
-        'username' => theme('username', array('account' => $account)),
-        'status' =>  $status[$account->state],
-        'roles' => theme('item_list', array('items' => $users_roles)),
-      );
-
     }
   }
+
   $form['accounts'] = array(
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
-    '#empty' => !empty($object->uid) ? t('No people available apart of the group manager.') : t('No people available.'),
+    '#empty' => !empty($entity->uid) ? t('No people available apart of the group manager.') : t('No people available.'),
   );
+
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
   return $form;
@@ -209,19 +240,20 @@ function og_ui_user_admin_account_submit($form, &$form_state) {
  * @ingroup forms
  * @see og_user_admin_role_validate()
  * @see og_user_admin_role_submit()
- * @see theme_og_user_admin_new_role()
+ * @see theme_group_user_admin_new_role()
  */
-function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
-  if ($group = og_get_group($obj_type, $oid)) {
+function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0) {
+  if ($group = og_get_group($entity_type, $etid)) {
     $form['group'] = array('#type' => 'value', '#value' => $group);
 
-    $rid = arg(7);
+    $item = menu_get_item();
+    // Get the role ID from the URL.
     if ($rid) {
-      og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")), l(t('Roles'), "og/$obj_type/$oid/admin/people/roles"));
+      og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")), l(t('Roles'), "group/$entity_type/$etid/admin/people/roles"));
 
-      $og_roles = og_get_group_default_roles($group->gid);
-      if (in_array($rid, $og_roles)) {
-        drupal_goto("og/$obj_type, $oid/admin/people/roles");
+      $group_roles = og_user_roles($group->gid);
+      if (!in_array($rid, array_keys($group_roles))) {
+        drupal_goto("group/$entity_type, $etid/admin/people/roles");
       }
       // Display the edit role form.
       $role = og_user_role_load($rid);
@@ -249,20 +281,20 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
       );
     }
     else {
-      og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
-
-      $form['name'] = array(
-        '#type' => 'textfield',
-        '#size' => 32,
-        '#maxlength' => 64,
-      );
-      $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
-      $form['actions']['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Add role'),
-      );
-      $form['#submit'][] = 'og_ui_user_admin_role_submit';
-      $form['#validate'][] = 'og_ui_user_admin_role_validate';
+      og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
+      if (!og_is_group_default_access($group->gid)) {
+        $form['name'] = array(
+          '#type' => 'textfield',
+          '#size' => 32,
+          '#maxlength' => 64,
+        );
+        $form['submit'] = array(
+          '#type' => 'submit',
+          '#value' => t('Add role'),
+        );
+        $form['#submit'][] = 'og_ui_user_admin_role_submit';
+        $form['#validate'][] = 'og_ui_user_admin_role_validate';
+      }
     }
     return $form;
   }
@@ -274,23 +306,26 @@ function og_ui_user_admin_role($form, $form_state, $obj_type, $oid) {
 }
 
 function og_ui_user_admin_role_validate($form, &$form_state) {
-  if ($form_state['values']['name']) {
+  if (!empty($form_state['values']['name'])) {
     $roles = og_user_roles($form_state['values']['group']->gid);
-    if (in_array($form_state['values']['name'], $roles)) {
+    $unique_name = TRUE;
+    if (!empty($form_state['values']['rid'])) {
+      $role = og_user_role_load($form_state['values']['rid']);
+      $unique_name = $role->name != $form_state['values']['name'];
+    }
+    if ($unique_name && in_array($form_state['values']['name'], $roles)) {
       form_set_error('name', t('The role name %name already exists. Please choose another role name.', array('%name' => $form_state['values']['name'])));
     }
-  }
-  else {
-    form_set_error('name', t('You must specify a valid role name.'));
   }
 }
 
 function og_ui_user_admin_role_submit($form, &$form_state) {
   $group = $form_state['values']['group'];
+  $role = new stdClass();
   $role->gid = $group->gid;
   $role->name = $form_state['values']['name'];
   if (!empty($form_state['values']['rid'])) {
-    $role->rid= $form_state['values']['rid'];
+    $role->rid = $form_state['values']['rid'];
   }
   if ($form_state['values']['op'] == t('Save role')) {
     og_user_role_save($role);
@@ -304,7 +339,7 @@ function og_ui_user_admin_role_submit($form, &$form_state) {
     og_user_role_save($role);
     drupal_set_message(t('The role has been added.'));
   }
-  $form_state['redirect'] = 'og/' . $group->obj_type . '/' . $group->oid . '/admin/people/roles';
+  $form_state['redirect'] = 'group/' . $group->entity_type . '/' . $group->etid . '/admin/people/roles';
   return;
 }
 
@@ -316,21 +351,24 @@ function og_ui_user_admin_role_submit($form, &$form_state) {
 function theme_og_ui_user_admin_new_role($variables) {
   $form = $variables['form'];
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
-  // The group object.
+  // The group entity.
   $group = $form['group']['#value'];
 
-  $og_roles = og_get_group_default_roles($group->gid);
+  $default_access = og_is_group_default_access($group->gid);
 
   foreach (og_user_roles($group->gid) as $rid => $name) {
-    $edit_permissions = l(t('edit permissions'), 'og/' . $group->obj_type .'/' . $group->oid . '/admin/people/permissions/' . $rid);
-    if (!in_array($rid, $og_roles)) {
-      $rows[] = array($name, l(t('edit role'), 'og/' . $group->obj_type .'/' . $group->oid . '/admin/people/roles/edit/' . $rid), $edit_permissions);
+    $text = !$default_access ? t('edit permissions') : t('view permissions');
+    $permissions = l($text, 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/permissions/' . $rid);
+
+    if (!$default_access && !in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
+      $rows[] = array($name, l(t('edit role'), 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/roles/edit/' . $rid), $permissions);
     }
     else {
-      $rows[] = array($name, t('locked'), $edit_permissions);
+      $rows[] = array($name, t('locked'), $permissions);
     }
   }
-  $rows[] = array(drupal_render($form['name']), array('data' => drupal_render($form['submit']), 'colspan' => 2));
+
+  $rows[] = array(array('data' => drupal_render($form['name']) . drupal_render($form['submit']), 'colspan' => 3, 'class' => 'edit-name'));
 
   $output = drupal_render_children($form);
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
@@ -343,18 +381,18 @@ function theme_og_ui_user_admin_new_role($variables) {
  * Menu callback: administer permissions.
  *
  * @ingroup forms
- * @see user_admin_permissions_submit()
- * @see theme_user_admin_permissions()
+ * @see og_ui_user_admin_permissions_submit()
+ * @see theme_group_ui_user_admin_permissions()
  */
-function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid = NULL, $rid = NULL) {
-  // If no node object is provided then the node ID is 0, which means this
+function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $etid = NULL, $rid = NULL) {
+  // If no node entity is provided then the node ID is 0, which means this
   // is the default permissions settings.
-  $group = !empty($oid) ? og_get_group($obj_type, $oid) : array();
+  $group = !empty($etid) ? og_get_group($entity_type, $etid) : array();
   $form['group'] = array('#type' => 'value', '#value' => $group);
 
   if (!empty($group)) {
     $gid =  $group->gid;
-    og_set_breadcrumb($obj_type, $oid, array(l(t('Group'), "$obj_type/$oid/og")));
+    og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
   }
   else {
     $gid = 0;
@@ -366,38 +404,36 @@ function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid
     $role_names = array($rid => $role_names[$rid]);
   }
   // Fetch permissions for all roles or the one selected role.
-  $role_permissions = og_user_role_permissions($role_names);
-
-  if (empty($group)) {
-    // Add the 'bulk update' checkbox to the user roles.
-    $role_names += array(0 => t('bulk update'));
-  }
+  $role_permissions = og_user_role_permissions(array_keys($role_names));
 
   // Store $role_names for use when saving the data.
   $form['role_names'] = array(
     '#type' => 'value',
     '#value' => $role_names,
   );
+
   // Render role/permission overview:
   $options = array();
-  $hide_descriptions = !system_admin_compact_mode();
-  foreach (og_permissions_get() as $module => $permissions) {
-    $form['permission'][] = array('#markup' => $module != 'administer' ? $module : t('administer group admins privileges'), '#id' => $module);
-    foreach ($permissions as $perm => $perm_item) {
-      $access = !empty($group) ? og_user_access($gid, 'show ' . $perm) : TRUE;
-      if ($access) {
-        $options[$perm] = '';
-        $form['permission'][$perm] = array(
-          '#type' => 'item',
-          '#markup' => $perm_item['title'],
-          '#description' => $hide_descriptions ? $perm_item['description'] : '',
-        );
-        foreach ($role_names as $rid => $name) {
-          // Builds arrays for checked boxes for each role
-          if (isset($role_permissions[$rid][$perm])) {
-            $status[$rid][] = $perm;
-          }
-        }
+  $module_info = system_get_info('module');
+
+  $module = '';
+  foreach (og_get_permissions() as $perm => $perm_item) {
+    if ($perm_item['module'] != $module) {
+      $module = $perm_item['module'];
+      $form['permission'][] = array('#markup' => $module_info[$module]['name'], '#id' => $module);
+    }
+    // Initialize values.
+    $perm_item += array('description' => '');
+    $options[$perm] = '';
+    $form['permission'][$perm] = array(
+      '#type' => 'item',
+      '#markup' => $perm_item['title'],
+      '#description' => $perm_item['description'],
+    );
+    foreach ($role_names as $rid => $name) {
+      // Builds arrays for checked boxes for each role
+      if (isset($role_permissions[$rid][$perm])) {
+        $status[$rid][] = $perm;
       }
     }
   }
@@ -411,42 +447,50 @@ function og_ui_user_admin_permissions($form, $form_state, $obj_type = NULL, $oid
   if (empty($group)) {
     $form['#theme'] = array('og_ui_user_admin_permissions');
   }
-  $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save permissions'),
-    '#submit' => array('og_ui_user_admin_permissions_submit'),
-  );
-  $form['#after_build'] = array('og_ui_user_admin_permissions_after_build');
+  if ($gid == 0 || !og_is_group_default_access($group->gid)) {
+    $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => $gid == 0 ? t('Save global permissions') : t('Save permissions'),
+      '#submit' => array('og_ui_user_admin_permissions_submit'),
+    );
+  }
+
+  $form['#after_build'][] = 'og_ui_user_admin_permissions_after_build';
 
   return $form;
 }
 
 /**
- * Helper function to disable the checkboxes according to their 'roles' state.
+ * Helper function to disable the permissions checkboxes.
  *
- * Every permission can decdeclate to which roles it applies, as some don't make
- * sense if applied to anonymous and authenticated user (e.g. subscribe to group
+ * Every permission can declare to which roles it applies, as some don't make
+ * sense if applied to anonymous or authenticated user (e.g. subscribe to group
  * should appear only to anonymous members).
+ * A second case for disabling is when using deafult roles and permissions, and
+ * the user is browsing a group's permissions page.
  */
 function og_ui_user_admin_permissions_after_build($element) {
-  // Authenticated roles.
   $gid = !empty($element['group']['#value']->gid) ? $element['group']['#value']->gid : 0;
+
+  // Indicate if all checkbes should be disabled.
+  $disable = $gid && og_is_group_default_access($gid);
+
+  // Authenticated roles.
   $auth_rids = array_flip(og_user_roles($gid));
+
   // Remove the anonymous member from the authenticated roles.
   $anon_rid = array_shift($auth_rids);
 
-  foreach (og_permissions_get() as $module_perms) {
-    foreach ($module_perms as $key => $perm) {
-      $perm['roles'] = drupal_map_assoc($perm['roles']);
+  foreach (og_get_permissions() as $key => $perm) {
+    $perm['roles'] = drupal_map_assoc($perm['roles']);
 
-      if (empty($perm['roles']) || empty($perm['roles'][OG_ANONYMOUS_ROLE])) {
-        $element['checkboxes'][$anon_rid][$key]['#attributes']['disabled'] = TRUE;
-      }
-      if (empty($perm['roles']) || empty($perm['roles'][OG_AUTHENTICATED_ROLE])) {
-        foreach ($auth_rids as $auth_rid) {
-          $element['checkboxes'][$auth_rid][$key]['#attributes']['disabled'] = TRUE;
-        }
+    if ($disable || (empty($perm['roles']) || empty($perm['roles'][OG_ANONYMOUS_ROLE]))) {
+      $element['checkboxes'][$anon_rid][$key]['#attributes']['disabled'] = TRUE;
+    }
+    if ($disable || (empty($perm['roles']) || empty($perm['roles'][OG_AUTHENTICATED_ROLE]))) {
+      foreach ($auth_rids as $auth_rid) {
+        $element['checkboxes'][$auth_rid][$key]['#attributes']['disabled'] = TRUE;
       }
     }
   }
@@ -460,21 +504,7 @@ function og_ui_user_admin_permissions_after_build($element) {
  */
 function og_ui_user_admin_permissions_submit($form, &$form_state) {
   foreach ($form_state['values']['role_names'] as $rid => $name) {
-    if (!empty($rid)) {
-      og_user_role_change_permissions($rid, $form_state['values'][$rid]);
-    }
-    else {
-      // Bulk update existing groups.
-      $roles = array(
-        OG_ANONYMOUS_DEFAULT_RID => $form_state['values'][OG_ANONYMOUS_DEFAULT_RID],
-        OG_AUTHENTICATED_DEFAULT_RID => $form_state['values'][OG_AUTHENTICATED_DEFAULT_RID],
-        OG_ADMINISTRATOR_DEFAULT_RID => $form_state['values'][OG_ADMINISTRATOR_DEFAULT_RID],
-      );
-      if ($count = og_permissions_bulk_update($roles, $form_state['values'][$rid])) {
-        drupal_set_message(format_plural($count, 'Group was updated', '@count group were updated.', array('@count' =>$count)));
-      }
-
-    }
+    og_user_role_change_permissions($rid, $form_state['values'][$rid]);
   }
 
   drupal_set_message(t('The changes have been saved.'));
@@ -491,10 +521,6 @@ function theme_og_ui_user_admin_permissions($variables) {
   $gid = !empty($form['group']['#value']->gid) ? $form['group']['#value']->gid : 0;
   $roles = og_user_roles($gid);
 
-  if (empty($gid)) {
-    // Add the 'bulk update' checkbox to the user roles.
-    $roles += array(0 => t('bulk update'));
-  }
   foreach (element_children($form['permission']) as $key) {
     $row = array();
     // Module name.
@@ -517,8 +543,7 @@ function theme_og_ui_user_admin_permissions($variables) {
   foreach (element_children($form['role_names']) as $rid) {
     $header[] = array('data' => drupal_render($form['role_names'][$rid]), 'class' => array('checkbox'));
   }
-  $output = theme('system_compact_link');
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
   $output .= drupal_render_children($form);
   return $output;
 }
@@ -527,146 +552,170 @@ function theme_og_ui_user_admin_permissions($variables) {
 /**
  * Groups permissions on default settings form.
  *
- * Allow site admin to set which permissions are available on a per group basis.
+ * Allow site admin to add or remove group fields from fieldable enteies.
  */
-function og_ui_admin_settings() {
+function og_ui_field_settings($form, &$form_state) {
   $form = array();
   $options = array();
 
-  $form['og_group'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Group type'),
-  );
-  $form['og_group']['og_group'] = _og_admin_fields_overview('group');
+  $options = array();
+  foreach (entity_get_info() as $entity_type => $entity) {
+    if (!empty($entity['fieldable']) && $entity_type != 'group') {
+      foreach($entity['bundles'] as $bundle_name => $bundle) {
+        // Prefix the bundle name with the entity type.
+        $options[$entity_type][$entity_type . '__' .$bundle_name] = check_plain($bundle['label']);
+      }
+    }
+  }
 
-  $form['og_group_content'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Group post type'),
+  $form['bundles'] = array(
+    '#title' => t('Bundles'),
+    '#type' => 'select',
+    '#options' => $options,
   );
-  $form['og_group_content']['og_group_content'] = _og_admin_fields_overview('group content');
+
+  $options = array();
+  foreach (og_fields_info() as $field_name => $field) {
+    foreach ($field['type'] as $type) {
+      $options[$type][$field_name] = filter_xss($field['instance']['label']);
+    }
+  }
+
+  $form['fields'] = array(
+    '#title' => t('Fields'),
+    '#type' => 'select',
+    '#options' => $options,
+  );
+
+  $field_enabled = array();
+
+  $group_fields = og_fields_info();
+
+  $group_fields_name = array_keys($group_fields);
+
+  $entity_info = entity_get_info();
+
+  // Get the fields that exist in the bundle.
+  foreach (field_info_fields() as $field_name => $field) {
+    if (in_array($field_name, $group_fields_name) && !empty($field['bundles'])) {
+      foreach ($field['bundles'] as $entity_type => $bundles) {
+        foreach ($bundles as $bundle) {
+          $field_enabled[$entity_type][$bundle][] = $field_name;
+        }
+      }
+    }
+  }
+
+  if ($field_enabled) {
+    $form['group_fields'] = array(
+      '#type' => 'vertical_tabs',
+      '#weight' => 99,
+    );
+
+    // Show all teh group fields of each bundle.
+    foreach ($field_enabled as $entity_type => $bundles) {
+      foreach ($bundles as $bundle => $fields) {
+        $options = array();
+        $bundles = field_info_bundles($entity_type);
+        $form['group_fields_' . $entity_type . '_' . $bundle] = array(
+          '#type' => 'fieldset',
+          '#title' => t('@bundle - @entity entity', array('@bundle' => $bundles[$bundle]['label'], '@entity' => $entity_info[$entity_type]['label'])),
+          '#collapsible' => TRUE,
+          '#group' => 'group_fields',
+        );
+        foreach ($fields as $field_name) {
+          $options[] = array(
+            check_plain($group_fields[$field_name]['instance']['label']),
+            filter_xss($group_fields[$field_name]['description']),
+            l(t('Delete'), "admin/config/group/fields/$entity_type/$bundle/$field_name/delete"),
+          );
+        }
+
+        $header = array(t('Field'), t('Description'), t('Operations'));
+        $form['group_fields_' . $entity_type . '_' . $bundle]['fields'] = array(
+          '#markup' => theme('table', array('header' => $header, 'rows' => $options)),
+        );
+
+      }
+    }
+  }
+  else {
+    $form['group_fields'] = array(
+      '#markup' => t('There are no Group fields attached to any bundle yet.'),
+    );
+  }
 
   $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Add group and group content fields to bundles'),
-    '#submit' => array('og_ui_admin_settings_submit'),
+    '#value' => t('Add field'),
   );
 
   return $form;
 }
 
-/**
- * Helper function to create tables for group and group content fields.
- *
- * @param $group_type
- * @return unknown_type
- */
-function _og_admin_fields_overview($group_type = 'group') {
-  $form = array();
-  $options = $status = array();
+function og_ui_field_settings_validate($form, &$form_state) {
+  $bundle = preg_replace('/^.*__/i', '', $form_state['values']['bundles']);
+  $entity_type = str_replace('__' . $bundle, '', $form_state['values']['bundles']);
 
-  $og_fields = og_get_fields();
+  // Check if field can be attached to entity.
+  $group_field = og_fields_info($form_state['values']['fields']);
+  $bundles = field_info_bundles($entity_type);
+  $entity_info = entity_get_info($entity_type);
 
-  foreach(field_info_bundles() as $entity => $bundles) {
-    $form['bundle'][] = array('#markup' => t('@entity entity', array('@entity' => $entity)), '#id' => $entity);
-    foreach ($bundles as $bundle => $value) {
-      $options[$bundle] = '';
-      $form['bundle'][$bundle] = array(
-        '#type' => 'item',
-        '#markup' => '-- ' . $value['label'],
-      );
+  $params = array(
+    '%field' => $group_field['instance']['label'],
+    '%bundle' => $bundles[$bundle]['label'],
+    '%entity' => $entity_info['label'],
+  );
 
-    }
+  // Check if field doesn't exist already.
+  if (($field = field_info_field($form_state['values']['fields'])) && !empty($field['bundles'][$entity_type]) && in_array($bundle, drupal_map_assoc($field['bundles'][$entity_type]))) {
+    form_set_error('bundles', t('Field %field already exists in %bundle.', $params));
   }
 
-  // Add the fields that exist in the bundle.
-  foreach (field_info_fields() as $field => $value) {
-    if (!empty($value['bundles'])) {
-      foreach ($value['bundles'] as $entity) {
-        foreach ($entity as $bundle) {
-          $status[$field][$bundle] = $bundle;
-        }
-      }
-    }
+  if (!empty($group_field['entity']) && !in_array($entity_type, $group_field['entity'])) {
+    form_set_error('bundles', t('Field %field can only be attached to %entity entity bundles.', $params));
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
-  foreach ($og_fields as $field => $field_value) {
-    if (in_array($group_type, $field_value['type'])) {
-      $form['checkboxes'][$field] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => !empty($status[$field]) ? $status[$field] : array());
-      $form['modules'][$field] = array('#markup' =>  $field_value['instance']['label'] . ' (' . $field_value['module'] . ')', '#tree' => TRUE);
-    }
-  }
-
-  $form['#theme'] = array('og_ui_user_admin_bundles');
-
-  return $form;
 }
 
-function og_ui_admin_settings_submit($form, &$form_state) {
-  $messages = array();
-  $og_fields = og_get_fields();
-  $bundle_info = array();
-  foreach (field_info_bundles() as $entity => $bundles) {
-    foreach ($bundles as $key => $value) {
-        // Get a two dimension array with the bundle as key and the entity
-        // as the value.
-      $bundle_info[$key] = $entity;
-    }
-  }
+function og_ui_field_settings_submit($form, &$form_state) {
+  $bundle = preg_replace('/^.*__/i', '', $form_state['values']['bundles']);
+  $entity_type = str_replace('__' . $bundle, '', $form_state['values']['bundles']);
+  $field_name = $form_state['values']['fields'];
 
-  foreach ($og_fields as $field_name => $field_value) {
-    if (!empty($form_state['values'][$field_name]) && $bundles = array_filter($form_state['values'][$field_name])) {
-      foreach ($bundles as $key => $bundle) {
-        // Add the field if it doesn't already exist.
-        if (!field_info_instance($bundle_info[$bundle], $field_name, $bundle)) {
-          call_user_func('og_create_field', $field_name, $bundle_info[$bundle], $bundle);
-          $messages[] = t('Added field %field to %bundle.', array('%field' => $og_fields[$field_name]['instance']['label'], '%bundle' => $bundle));
-        }
-      }
-    }
-  }
+  og_create_field($field_name, $entity_type, $bundle);
 
-  if (!empty($messages)) {
-    foreach ($messages as $message) {
-      drupal_set_message($message);
-    }
-  }
+  $group_field = og_fields_info($field_name);
+  $bundles = field_info_bundles($entity_type);
+
+  $params = array(
+    '%field' => $group_field['instance']['label'],
+    '%bundle' => $bundles[$bundle]['label'],
+  );
+
+  drupal_set_message(t('Added field %field to %bundle.', $params));
 }
 
+
 /**
- * Theme the administer bundles page.
- *
- * @ingroup themeable
+ * Menu callback; present a form for removing a field instance from a bundle.
  */
-function theme_og_ui_user_admin_bundles($variables) {
-  $form = $variables['form'];
+function og_ui_field_delete_form($form, &$form_state, $instance) {
+  module_load_include('inc', 'field_ui', 'field_ui.admin');
+  $output = field_ui_field_delete_form($form, &$form_state, $instance);
 
-  $modules = array_keys(element_children($form['modules']));
+  $output['actions']['cancel'] = array(
+    '#markup' => l(t('Cancel'), 'admin/config/group/fields'),
+  );
 
-  foreach (element_children($form['bundle']) as $key) {
-    $row = array();
-    // Module name.
-    if (is_numeric($key)) {
-      $row[] = array('data' => drupal_render($form['bundle'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['bundle'][$key]['#id'], 'colspan' => count($modules) + 1);
-    }
-    else {
-      // bundle row.
-      $row[] = array(
-        'data' => drupal_render($form['bundle'][$key]),
-        'class' => array('bundle'),
-      );
-      foreach (element_children($form['checkboxes']) as $module) {
-        $row[] = array('data' => drupal_render($form['checkboxes'][$module][$key]), 'class' => array('checkbox'), 'title' => t('@bundle bundle', array('@bundle' => $key)));
-      }
-    }
-    $rows[] = $row;
-  }
-  $header[] = (t('bundle'));
-  foreach (element_children($form['modules']) as $module) {
-    $header[] = array('data' => drupal_render($form['modules'][$module]), 'class' => array('checkbox'));
-  }
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'bundles')));
-  $output .= drupal_render_children($form);
   return $output;
+}
+
+
+function og_ui_field_delete_form_submit($form, &$form_state) {
+  module_load_include('inc', 'field_ui', 'field_ui.admin');
+  field_ui_field_delete_form_submit($form, $form_state);
+  $form_state['redirect'] = 'admin/config/group/fields';
 }

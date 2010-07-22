@@ -36,7 +36,7 @@ TERMS AND DEFINITIONS
   a group or with a group content. This means that you can associate different 
   users (as group content) to a certain user (as a group).
 
-OG ARCHITECTURE
+GROUP ARCHITECTURE
 --------------------------
 At the lowest level the module associates content types with groups. Above this 
 level is the role and permissions layer, which operates at the group level.
@@ -49,9 +49,9 @@ As is the case with Drupal itself, in Organic Groups different permissions can
 be assigned to different user roles. This allows group members to perform a 
 different set of actions, in different group contexts.
 
-OG INSTALLATION DRUPAL 7.x
+GROUP INSTALLATION DRUPAL 7.x
 --------------------------------------------
-1. Enable the Organic groups and the Organic groups UI modules.
+1. Enable the Group and the Group UI modules.
 2. Create a new content type via admin/structure/types/add. Call it "Group", and 
    define it to be of Group type.
 3. Create a second content type. Call it "Group content", and set it to be of 
@@ -75,7 +75,7 @@ OG INSTALLATION DRUPAL 7.x
 10. In order to associate other entities with group or group content, navigate 
     to Organic Groups field settings", in admin/config/og/fields. 
 11. In order to define default permissions for groups that are newly created or 
-    to edit permissions on all existing groups, navigate to the Organic groups 
+    to edit permissions on all existing groups, navigate to the Group 
     default permissions page. Important permissions in this page are the ones 
     under the administer section. These permissions are what enable group admins 
     to have granular control over their own group. This means, that if you as 
@@ -86,12 +86,12 @@ DEVELOPERS & SITE BUILDERS
 ----------------------------------------------
 - You may craft your own URLs which produce useful behavior. For example, 
   node/add/group-content?node_gids[]=4 will add a select the group with node ID 
-  4, in the node form. The prefixed object can change to indicate other object 
+  4, in the node form. The prefixed entity can change to indicate other entity 
   types allowing crafting the URL and you can have multiple variables, for 
   example, node/add/group-content?node_gids[]=4&user_gids[]=3&gid_gids[]=5,6,7
   The above URL will select the group with node ID 4, and the group with user ID
   3, and the groups with the unique group ID 5, 6 and 7.
-  Note that the actaul object of group ID 5, 6 and 7 can be any entity (e.g. 
+  Note that the actaul entity of group ID 5, 6 and 7 can be any entity (e.g. 
   nodes or users).    
 - TODO: The current group context is available to javascript code at 
   Drupal.settings.og. This is useful for enriching ad tags and analytics calls 
@@ -100,16 +100,7 @@ DEVELOPERS & SITE BUILDERS
 
 CREDITS
 ----------------------------
-- Originally authored by with versions 5 and 6 maintained by Moshe Weitzman -  
+- Organic groups authored by with versions 5 and 6 maintained by Moshe Weitzman -  
   <weitzman AT tejasa DOT com>
-- Version 7 and current project maintainer by Amitai Burstein (Amitaibu) - 
-  gizra.com
-
-- Contributors: Gerhard Killesreiter, Angie Byron, Derek Wright, Thomas Ilsche, 
-  Ted Serbinski, damien_vancouver
-
-- Sponsors:
-  Bryght - http://www.bryght.com
-  Broadband Mechanics - http://www.broadbandmechanics.com/
-  Finnish Broadcasting Company - http://www.yle.fi/fbc/
-  Post Carbon Institute - http://www.postcarbon.org/
+- Group module author and current project maintainer of Organic group is Amitai 
+  Burstein (Amitaibu) - gizra.com

@@ -3,26 +3,42 @@
 
 /**
  * @file
- * Install, update, and uninstall functions for the organic groups module.
+ * Install, update, and uninstall functions for the Group module.
  */
 
 /**
- * Implement hook_enable().
+ * Implements hook_enable().
+ *
+ * Add group audience to users by default. This can't be in hook_install() as
+ * the field isn't known yet.
  */
 function og_enable() {
-  // Add group audience to users by default.
-  og_create_field('og_audience', 'user', 'user');
-  // Create roles that would be used for the default permissions.
-  og_set_new_group_roles();
+  og_create_field(OG_AUDIENCE_FIELD, 'user', 'user');
 }
 
+
 /**
- * Implement hook_schema().
+ * Implements hook_uninstall().
+ */
+function og_uninstall() {
+  $vars = array(
+    'og_context',
+    'og_group_manager_full_access',
+    'og_skip_access',
+  );
+  foreach ($vars as $var) {
+    variable_del($var);
+  }
+}
+
+
+/**
+ * Implements hook_schema().
  */
 function og_schema() {
   $schema = array();
 
-  $schema['og_groups'] = array(
+  $schema['og'] = array(
     'description'     => 'Store information related to the groups.',
     'fields'          => array(
       'gid' => array(
@@ -31,39 +47,41 @@ function og_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'oid' => array(
-        'description' => "The object ID.",
+      'etid' => array(
+        'description' => "The entity ID.",
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
       ),
-      'obj_type' => array(
-        'description' => "The object type (e.g. node, comment, etc').",
+      'entity_type' => array(
+        'description' => "The entity type (e.g. node, comment, etc').",
         'type' => 'varchar',
         'length' => '32',
         'not null' => TRUE,
         'default' => '',
       ),
-      'state'     => array(
-        'description'     => 'The state of the group (i.e. active or disabled).',
-        'type'            => 'varchar',
-        'length'          => 255,
-        'not null'        => FALSE,
+      'label' => array(
+        'description' => "The entity label (e.g. node's title).",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
         'default' => '',
       ),
-      'data' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'size' => 'big',
-        'serialize' => TRUE,
-        'description' => 'A serialized array with the data related to the group.',
+      'state' => array(
+        'description' => 'The state of the group (i.e. active or disabled).',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
       ),
+	    'created' => array(
+	      'description' => 'The Unix timestamp when the group was created.',
+	      'type' => 'int',
+	      'not null' => TRUE,
+	      'default' => 0,
+	    ),
     ),
     'primary key' => array('gid'),
-    'unique keys' => array(
-      'gid' => array('gid'),
-    ),
   );
 
   $schema['og_role_permission'] = array(
@@ -81,6 +99,13 @@ function og_schema() {
         'not null' => TRUE,
         'default' => '',
         'description' => 'A single permission granted to the role identified by rid.',
+      ),
+      'module' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "The module declaring the permission.",
       ),
     ),
     'primary key' => array('rid', 'permission'),
@@ -142,7 +167,7 @@ function og_schema() {
         'not null'        => TRUE,
       ),
     ),
-    'primary key' => array('uid', 'rid'),
+    'primary key' => array('uid', 'rid', 'gid'),
     'indexes' => array(
       'rid' => array('rid'),
     ),
@@ -153,4 +178,249 @@ function og_schema() {
   );
 
   return $schema;
+}
+
+if (module_exists('group')) {
+  /**
+   * Upgrade from Organic groups to Group.
+   */
+  function og_update_7000(&$sandbox) {
+    // Pattern taken from node_update_7006().
+    // - Add group fields to nodes.
+    // - Move Organic groups' data into the fields of group.
+    // - Delete Organic groups' variables.
+    if (db_table_exists('og')) {
+      $sandbox['#finished'] = 0;
+
+      $content_type = array('group' => array(), 'group content' => array());
+
+      // If this is the first time this functions is called in the batch process,
+      // create fields for the content types.
+      if (!isset($sandbox['total'])) {
+
+        foreach (node_type_get_types() as $type) {
+          // check if the variable exists.
+          if ($type_usage = variable_get('og_content_type_usage_' . $type->type)) {
+            switch ($type_usage) {
+              case 'group':
+                $content_type['group'][] = $type->type;
+                break;
+
+              case 'og_post_standard':
+              case 'og_post_wiki':
+                // The type of the group content is now determined via the
+                // group permissions. We only care about adding the group content
+                // fields to the node.
+                $content_type['group content'][] = $type->type;
+                break;
+
+            }
+
+            // TODO: Delete variable.
+          }
+        }
+
+        if ($content_type) {
+          // Add group and group content fields to content types.
+          $fields = array(
+            'group' => OG_GROUP_FIELD,
+            'group content' => OG_AUDIENCE_FIELD,
+          );
+          foreach ($fields as $key => $field_name) {
+            foreach ($content_type[$key] as $type) {
+              og_create_field($field_name, 'node', $type);
+            }
+          }
+        }
+
+        // Initialize state for future calls.
+        $sandbox['last'] = 0;
+        $sandbox['count'] = 0;
+
+        // Hold the information about the callbacks that upgrade the different
+        // fields.
+        $sandbox['group upgrade'] = array('group', 'og_content', 'user');
+
+        $query = db_select('node_revision', 'nr');
+        $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+        $query->innerJoin('og', 'og', 'n.nid = og.nid');
+        $sandbox['group total'] = $query->countQuery()->execute()->fetchField();
+
+        $query = db_select('node_revision', 'nr');
+        $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+        $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
+        $sandbox['group content total'] = $query
+          ->countQuery()
+          ->execute()
+          ->fetchField();
+
+        $query = db_select('og_uid', 'ogu');
+        $sandbox['group user total'] = $query
+          ->countQuery()
+          ->execute()
+          ->fetchField();
+
+          // Sum of all enteties and revisions to be converted.
+        $sandbox['total'] = $sandbox['group total'] + $sandbox['group content total'] + $sandbox['group user total'];
+      }
+      else {
+        if ($sandbox['total']) {
+          $callback = reset($sandbox['group upgrade']);
+          $callback =  '_group_upgrade_' . $callback;
+
+          // We don't use call_user_func, as we want to pass $sandbox by
+          // reference.
+          $found = $callback($sandbox);
+
+          if (!$found) {
+            // Continue to the next upgrade element.
+            $sandbox['last'] = 0;
+            array_shift($sandbox['group upgrade']);
+          }
+
+          $sandbox['#finished'] = min(0.99, $sandbox['count'] / $sandbox['total']);
+        }
+      }
+      if (empty($sandbox['group upgrade'])) {
+        // All nodes and users are processed.
+        $sandbox['#finished'] = 1;
+        return t("!number groups and group content converted to use new Group fields.", array('!number' => $sandbox['total']));
+      }
+    }
+  }
+}
+
+/**
+ * Helper function; Upgrade "group" nodes.
+ */
+function _group_upgrade_group(&$sandbox) {
+  $found = FALSE;
+
+  // Operate on every revision of every node, in batches.
+  $batch_size = 200;
+  $query = db_select('node_revision', 'nr');
+  $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+  $query->innerJoin('og', 'og', 'n.nid = og.nid');
+  $query
+    ->fields('nr', array('nid', 'vid'))
+    ->fields('n', array('type', 'created'))
+    ->condition('nr.vid', $sandbox['last'], '>')
+    ->orderBy('nr.vid', 'ASC')
+    ->range(0, $batch_size);
+  $revisions = $query->execute();
+
+  // Holds the node IDs with their earliest revision and timestamp, to create a
+  // group entity with the earliest timestamp.
+  $nids = array();
+  foreach ($revisions as $revision) {
+    $found = TRUE;
+    // Create a dummy node object.
+    $node = (object) array(
+      'nid' => $revision->nid,
+      'vid' => $revision->vid,
+      'type' => $revision->type,
+    );
+
+    if (empty($nids[$revision->nid]) || $nids[$revision->nid] > $revision->created) {
+      $nids[$revision->nid] = $revision->created;
+    }
+
+    // Set field values.
+    $node->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = TRUE;
+
+    field_attach_update('node', $node);
+
+    $sandbox['last'] = $revision->vid;
+  }
+
+  // Update group enteties with the correct "created" timestamp. The group
+  // enteties were already created in the above field_attach_update(), but we
+  // didn't have a chance alter it.
+  if ($nids) {
+    foreach ($nids as $nid => $created) {
+      // Make sure the created value wasn't altered already.
+      if (($group = og_get_group('node', $nid, TRUE)) && $group->created != $created) {
+        $group->created = $created;
+        og_save($group);
+
+        // New group created, so add it to the total count.
+        $sandbox['count'] += 1;
+      }
+    }
+  }
+
+  return $found;
+}
+
+/**
+ * Helper function; Upgrade "group content" nodes.
+ */
+function _group_upgrade_group_content(&$sandbox) {
+  $found = FALSE;
+
+  // Operate on users in batches.
+  $batch_size = 200;
+  $query = db_select('node_revision', 'nr');
+  $query->innerJoin('node', 'n', 'n.vid = nr.vid');
+  $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
+  $query
+    ->fields('nr', array('nid', 'vid'))
+    ->fields('n', array('type', 'created'))
+    ->fields('oga', array('og_nid'))
+    ->condition('nr.vid', $sandbox['last'], '>')
+    ->orderBy('nr.vid', 'ASC')
+    ->range(0, $batch_size);
+  $revisions = $query->execute();
+
+  foreach ($revisions as $revision) {
+    $group = og_get_group('node', $revision->group_nid);
+
+    og_group($group->gid, 'node', $revision);
+
+    $sandbox['last'] = $account->nid;
+    // User subscribed to group.
+    $sandbox['count'] += 1;
+  }
+
+  return $found;
+}
+
+/**
+ * Helper function; Upgrade user subscription to groups.
+ */
+function _group_upgrade_user(&$sandbox) {
+  static $rid = 0;
+  if (!$rid) {
+    // Get the administrator role ID.
+    $roles = array_flip(og_get_global_roles());
+    $rid = $roles[OG_ADMINISTRATOR_ROLE];
+  }
+
+  $found = FALSE;
+
+  // Operate on users in batches.
+  $batch_size = 200;
+  $query = db_select('og_uid', 'ogu');
+  $query
+    ->fields('ogu')
+    ->condition('ogu.nid', $sandbox['last'], '>')
+    ->orderBy('ogu.nid', 'ASC')
+    ->range(0, $batch_size);
+  $accounts = $query->execute();
+
+  foreach ($accounts as $account) {
+    $group = og_get_group('node', $account->nid);
+    $state = $account->is_active ? OG_STATE_ACTIVE : OG_STATE_PENDING;
+
+    og_group($group->gid, 'user', $account, $state);
+
+    if ($account->is_admin) {
+      og_users_roles_grant($group->gid, $account->uid, $rid);
+    }
+    $sandbox['last'] = $account->nid;
+    // User subscribed to group.
+    $sandbox['count'] += 1;
+  }
+
+  return $found;
 }

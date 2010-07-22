@@ -3,11 +3,11 @@
 
 /**
  * @file
- * Hooks provided by the Organic groups module.
+ * Hooks provided by the Group module.
  */
 
 /**
- * @addtogroup hooks
+ * @addtgrouproup hooks
  * @{
  */
 
@@ -25,230 +25,155 @@ function hook_og_permission() {
 }
 
 /**
- * Set the default permissions to be assigned to members, by thier role.
- */
-function hook_og_permission_default() {
-  return array(
-    OG_ANONYMOUS_ROLE => array('an anonymous permission'),
-    OG_AUTHENTICATED_ROLE => array('an authenticated permission'),
-    OG_ADMINISTRATOR_ROLE => array(),
-  );
-}
-
-/**
- * Determine if a user has access to a certain operation within a group context.
+ * Define group context handlers.
  *
- * For content access @see hook_og_node_access().
- *
- * @param $op
- *   The operation name.
- * @param $node
- *   The group or group content node object.
- * @param $acting_user
- *   The user object of the acting user.
- * @param $account
- *   Optional; The account related to the operation.
  * @return
- *   OG_ACCESS_ALLOW  - if operation is allowed;
- *   OG_ACCESS_DENY   - if it should be denied;
- *   OG_ACCESS_IGNORE - if you don't care about this operation.
+ *   Array keyed with the context handler name and an array of properties:
+ *   - callback: The callback function that should return a an array of group
+ *     IDs.
+ *   - menu: TRUE indicates that the handler will try to find a context by the
+ *     current menu item. Defaults to TRUE.
+ *   - menu path: If "menu" property is TRUE, this property is required.
+ *     An array of path the handler should be invoked. For example,
+ *     if the user is viewing a node, the menu system is "node/%", and all
+ *     group context handlers with this matching path, will be invoked.
+ *   - priority: Optional; Indicate if the context result of this handler should
+ *     be treated as a priority. A use case can be for example, the "session"
+ *     context handler that returns the group context that is stored in the
+ *     $_SESSION. By giving it a priority, we make sure that even if viewing
+ *     different pages, the user will see the same group context.
+ *     @see og_context_handler_session().
  */
-function hook_og_access($op, $node, $acting_user, $account = NULL) {
-  if ($op == 'view') {
-    // Show group content only if they are in a certain day, defined in the
-    // group's data. This data is fictional, and it's up to an implementing
-    // module to implement it.
-    if (og_is_group_content_type($node->type)) {
-      // Get the first node group this group content belongs to.
-      $gids = og_get_object_groups('node', $node);
-      $group = node_load($gids[0]);
-      if (!empty($group->data['show day'])) {
-        $today = date('N');
-        if ($group->data['show day'] == $today) {
-          return OG_ACCESS_ALLOW;
-        }
-        else {
-          return OG_ACCESS_DENY;
-        }
-      }
-      else {
-        // The group doesn't have a day definition, so we don't care about this
-        // operation.
-        return OG_ACCESS_IGNORE;
-      }
-    }
-  }
+function hook_og_context_handlers() {
+  $items = array();
+
+  $items['foo'] = array(
+    'callback' => 'foo_context_handler_bar',
+    'menu path' => array('foo/%', 'foo/%/bar'),
+  );
+
+  return $items;
 }
 
 /**
- * Own implementation of hook_node_access().
- *
- * Having this implementation makes sure that if no organic group module
- * allowed access to the content, then it will be denied.
+ * Alter the group context handlers.
  */
-function hook_og_node_access($node, $op, $account) {
-  // Allow user to edit posts if the title is 'My post'.
-  // For the example we assume the $node is the full node object. If the title
-  // of the node doesn't match, and the user didn't get permission from
-  // somewhere else (e.g. user already has a permission to 'Edit group content')
-  // Then access will be denied.
-  if ($node->title == 'MY post') {
-    return OG_ACCESS_ALLOW;
-  }
-}
-
-/**
- * Alter a group that is being fetched.
- *
- * @param $group
- *   An object with the following keys:
- *   - nid:
- *       The node ID of the group.
- *   - data:
- *       Optional; An array of data related to the association. The data is per
- *       per group, and it's up to an implementing module to act on the data.
- */
-function hook_og_get_group_alter($group) {
-  // Set the theme according to the user name.
-  global $user;
-  if ($user->name == 'foo') {
-    // An implementing module should act on this data and change the theme
-    // accordingly.
-    $group->data['theme'] = 'MY_THEME';
-  }
-}
-
-/**
- * Alter a group that is being saved.
- *
- * @param $group
- *   An object with the following keys:
- *   - nid:
- *       The node ID of the group.
- *   - data:
- *       Optional; An array of data related to the association. The data is per
- *       per group, and it's up to an implementing module to act on the data.
- */
-function hook_og_set_group_alter($group) {
-
-}
-
-/**
- * Alter the users which will be notified about a subscription of another user.
- *
- * @param $uids
- *   An array with the users ID, passed by reference.
- * @param $node
- *   The group node, the user has subscribed to.
- * @param $group
- *   The group object.
- * @param $account
- *   The subscribing user object.
- * @param $request
- *   Optional; The request text the subscribing user has entered.
- */
-function hook_og_user_request(&$uids, $node, $group, $account, $request) {
-  // Add user ID 1 to the list of notified users.
-  $uids[] = 1;
-}
-
-/**
- * Insert state and data, that will be saved with the group content.
- *
- * @param $alter
- *   Array keyed by "state" and "data" passed by reference.
- *   The data passed by reference.
- * @param $obj_type
- * @param $object
- * @param $field
- * @param $instance
- * @param $langcode
- * @param $items
- */
-function hook_og_field_insert(&$alter, $obj_type, $object, $field, $instance, $langcode, $items) {
-  // Add timestamp for the subscription.
-  // It's up to the implementing module to act on the data.
-  $alter['data']['timestamp'] = time();
+function hook_og_context_handlers_alter(&$items) {
+  // Add another menu path that should invoke this handler.
+  $items['foo']['menu path'][] = 'foo/%/baz';
 }
 
 
 /**
- * Update state and data, that will be saved with the group content.
+ * Set a default role that will be used as a global role.
  *
- * @param $alter
- *   Array keyed by "state" and "data" passed by reference.
- *   The data passed by reference.
- * @param $obj_type
- * @param $object
- * @param $field
- * @param $instance
- * @param $langcode
- * @param $items
+ * A global role, is a role that is assigned by default to all new groups.
  */
-function hook_og_field_update (&$alter, $obj_type, $object, $field, $instance, $langcode, $items) {
-  // Reject a group content when it's updated.
-  // It's up to the implementing module to act on the data.
-  $alter['state'] = 'updated, approve urgently';
+function hook_og_default_roles() {
+  return array('super admin');
 }
 
 /**
- * Alter the groups an object is associated with.
+ * Alter the default roles.
  *
- * User subscription for example is passed through here, allows modules to
- * change them. Also user unsubscription is using this function. To identify
- * the type of action, we get the $op argument.
+ * The anonymous and authenticated member roles are not alterable.
  *
- * @param $edit
- *   An array with the groups the object will be associated with, passed by
- *   reference.
- * @param $account
- *   The user being subscribed.
-  @param $op
- *   Optional; The operation that is being done (e.g. "subscribe user" or
- *   "unsubscribe content").
+ * @param $roles
+ *   Array with the default roles name.
  */
-function hook_og_set_association_alter(&$gids, $account, $op = '') {
-  if ($op == 'subscribe user') {
-    //   Subscribe the user to another group.
-    $gids[] = 1;
-  }
-}
-
-
-function hook_og_users_roles_grant($nid, $uid, $rid) {
-
-}
-
-function hook_og_users_roles_revoke($nid, $uid, $rid) {
-
+function hook_og_default_roles_alter(&$roles) {
+  // Remove a default role.
+  unset($roles['super admin']);
 }
 
 /**
- * Define the table, ID and label columns of a fieldable entity.
+ * Set the default permissions to be assigned to members, by their role.
  *
- * This is used so groups can appear in the OG audience field with their
- * sanitized name.
+ * Roles should be defined via hook_og_default_roles().
+ *
+ * @return
+ *   Array keyed with the permission name and the roles it applied to as the
+ *   value.
  */
-function hook_og_entity_get_info() {
+function hook_og_default_permissions() {
   return array(
-    'my_entity' => array(
-      'table' => 'foo',
-      'id' => 'bar',
-      'label' => 'baz',
-    ),
+    'foo' => array(OG_AUTHENTICATED_ROLE),
   );
 }
 
 /**
- * Alter get entity label definitions.
+ * Alter the default permissions.
  *
+ * @param $perms
+ *   Array keyed with the permission name and the roles it applied to as the
+ *   value.
  */
-function hook_og_entity_get_info_alter(&$data) {
-  if (!empty($data['my_entity'])) {
-    $data['my_entity']['table'] = 'new_foo';
+function hook_og_default_permissions_alter(&$perms) {
+  // Add the permission to 'super admin' role, that should be defined
+  // via hook_og_default_roles().
+  $perms['foo'][] = 'super admin';
+}
+
+/**
+ * Allow modules to act upon new group role.
+ *
+ * @param $role
+ *   The group role object.
+ */
+function hook_og_user_role_insert($role) {
+}
+
+/**
+ * Allow modules to act upon existing group role update.
+ *
+ * @param $role
+ *   The group role object.
+ */
+function hook_og_user_role_update($role) {
+
+}
+
+/**
+ * Allow modules to act upon existing group role deletion.
+ *
+ * @param $role
+ *   The deleted group role object. The object is actually a dummy, as the data
+ *   is already deleted from the database. However, we pass the object to allow
+ *   implementing modules to properly identify the deleted role.
+ */
+function hook_og_user_role_delete($role) {
+
+}
+
+
+function hook_og_users_roles_grant($gid, $uid, $rid) {
+
+}
+
+function hook_og_users_roles_revoke($gid, $uid, $rid) {
+
+}
+
+/**
+ * Allow modules to alter the groups that appear in the group audience field.
+ *
+ * @param $options
+ *   Array passed by reference with the keys:
+ *   - "content groups": Array with the group IDs that will appear to the user.
+ *   - "other groups": Array with the group IDs that do not belong to the user,
+ *     but if the user is an administrator they will see those groups as-well.
+ * @param $opt_group
+ *   TRUE if user should see also the "other groups" in the group audience
+ *   field.
+ * @param $account
+ *   The user object.
+ */
+function hook_og_audience_options_alter(&$options, $opt_group, $account) {
+  if (!$account->uid && $gids = og_register_get_groups()) {
+    $options['content groups'] = array_merge($options['content groups'], $gids);
   }
 }
 
 /**
- * @} End of "addtogroup hooks".
+ * @} End of "addtgrouproup hooks".
  */

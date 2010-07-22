@@ -1,11 +1,11 @@
-name = Organic groups UI
-description = "Organic groups UI."
-package = "Organic groups"
-dependency[] = og
+name = Group UI
+description = "Group UI."
+package = "Group"
+dependencies[] = og
 core = 7.x
 version = VERSION
 files[] = og_ui.module
 files[] = og_ui.admin.inc
 files[] = og_ui.pages.inc
 files[] = og_ui.test
-configure = admin/config/og
+configure = admin/config/group

@@ -1,0 +1,63 @@
+<?php
+// $Id$
+
+class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Group UI role permissions',
+      'description' => 'Verify that role permissions can be added and removed via the permissions page of the group.',
+      'group' => 'Group UI'
+    );
+  }
+
+  function setUp() {
+    parent::setUp('group', 'og_ui');
+
+    $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
+    $this->drupalLgroupin($this->admin_user);
+
+    // Create group content type.
+    $group_type = $this->drupalCreateContentType();
+    $this->group_type = $group_type->type;
+
+    // Add og_group field.
+    og_create_field('og_group', 'node', $this->group_type);
+
+    $node = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => array(LANGUAGE_NONE => array(0 => array('value' =>TRUE)))));
+    $this->group = og_get_group('node', $node->nid);
+  }
+
+  /**
+   * Change user permissions and check og_user_access().
+   */
+  function testOgUiUserPermissionChanges() {
+    $web_user = $this->drupalCreateUser();
+    $gid = $this->group->gid;
+    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
+
+    $roles = og_get_group_default_roles($gid);
+
+    // Remove a permission.
+    $edit = array();
+    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = FALSE;
+    $this->drupalPost('group/' . $this->group->entity_type . '/' . $this->group->etid . '/admin/people/permissions', $edit, t('Save permissions'));
+    $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
+
+    // TODO: Remove - find out why doesn't work without.
+    drupal_static_reset('og_user_access');
+    drupal_static_reset('og_user_role_permissions');
+
+    $this->assertFalse(og_user_access($gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
+
+    // Re-add permission.
+    $edit = array();
+    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = TRUE;
+    $this->drupalPost('group/' . $this->group->entity_type . '/' . $this->group->etid . '/admin/people/permissions', $edit, t('Save permissions'));
+
+    // TODO: Remove - find out why doesn't work without.
+    drupal_static_reset('og_user_access');
+    drupal_static_reset('og_user_role_permissions');
+
+    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
+  }
+}

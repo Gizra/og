@@ -1,0 +1,11 @@
+; $Id$
+name = Group context
+description = "Get a group from a viewed page."
+package = "Group"
+dependencies[] = og
+core = 7.x
+files[] = og_context.module
+files[] = og_context.install
+
+; Views defualt arguments
+files[] = includes/views/og_context_plugin_argument_default_group_context.inc

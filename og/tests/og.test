@@ -2,156 +2,129 @@
 // $Id$
 
 /**
- * Test the organic groups group CRUD handling.
+ * Test the Group group CRUD handling.
  */
 class OgGroupCrud extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups group CRUD',
-      'description' => 'Test the create, update and remove of group objects.',
-      'group' => 'Organic groups',
+      'name' => 'Group group CRUD',
+      'description' => 'Test the create, update and remove of group entitys.',
+      'group' => 'Group',
     );
   }
 
   function setUp() {
-    parent::setUp('og', 'og_test');
+    parent::setUp('entity', 'group');
     $this->web_user = $this->drupalCreateUser();
   }
 
   /**
-   * Test CRUD of group objects.
+   * Test CRUD of group entitys.
    */
   function testOgCrud() {
-    $this->createGroups();
+    $group = og_get_group('foo', 1, TRUE);
 
-    // Get all group IDs.
-    $groups = og_get_groups('gid', array(), array(OG_STATE_ACTIVE, OG_STATE_PENDING));
-    $this->assertTrue(count($groups['node']) + count($groups['user']) == 5, t('All groups were created.'));
+    // Assert is new property.
+    $this->assertTrue($group->is_new, t('New group has "is new" property.'));
 
-    // Get groups with different selection criteria.
-    $groups = og_get_groups('node', array());
-    $this->assertTrue(count($groups['node']) == 3, t('All active node groups were found.'));
+    // Assert default state.
+    $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Default state property is active.'));
 
-    $groups = og_get_groups('node', array(), array(OG_STATE_PENDING));
-    $this->assertTrue(count($groups['node']) == 1, t('All pending node groups were found.'));
+    // Assert default creation time.
+    $this->assertTrue($group->created, t('Group creating time was added to group.'));
 
-    $groups = og_get_groups('user', array());
-    $this->assertTrue(count($groups['user']) == 1, t('User group was found.'));
+    // Assert group ID not set.
+    $this->assertTrue(empty($group->gid), t('Group ID not set for unsaved group.'));
 
-    // Get a single group object.
-    $group = og_get_group('node', 4);
+    // Save the group.
+    $group = og_save($group);
 
-    // Test the group has all the expected keys.
-    foreach (array('obj_type', 'oid', 'state', 'data') as $key) {
-      $this->assertTrue(!empty($group->{$key}), t('Group @key key found.', array('@key' => $key)));
-    }
+    // Assert group ID was set.
+    $this->assertTrue(!empty($group->gid), t('Group ID was set for saved group.'));
 
-    // Test the data values exist.
-    $this->assertTrue($group->data['dummy_key'] == 'dummy_value', t('Group object data values found.'));
+    // Set a new state for the group.
+    $group = og_get_group('foo', 1);
+    $group->state = OG_STATE_PENDING;
 
-    // Test the data values were altered.
-    $this->assertTrue($group->data['alter_key'] == 'alter_value', t('Group object data values were altered.'));
+    $group = og_save($group);
 
-    // Delete a group by group ID.
-    og_delete_groups('gid', array(1));
-    $this->assertFalse(og_get_group('gid', 1), t('Deleted group object by group ID.'));
+    // Assert group isn't loaded, when state is pending and state isn't
+    // specifically stated.
+    drupal_static_reset('og_get_group_ids');
+    $group = og_get_group('foo', 1);
 
-    // Delete a group by object type and object ID.
-    og_delete_groups('user', array(1));
-    $this->assertFalse(og_get_group('user', 1), t('Deleted group object by object type and object ID.'));
+    $this->assertFalse($group, t('Pending state group was not loaded, as it was not requested.'));
 
-    // Delete all group by object type.
-    og_delete_groups('node');
-    $this->assertFalse(og_get_groups('node'), t('Deleted group object by object type.'));
+    // Reload group to make sure state was updated.
+    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
+
+    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group was updated.'));
+
+    og_delete($group->gid);
+    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
+
+    $this->assertFalse($group, t('Group was deleted.'));
   }
 
   /**
-   * Test association of group objects.
+   * Test creation of groups upon creation of enteties with group field.
    */
-  function testOgAssociation() {
-    $groups = $this->createGroups();
+  function testOgFieldOgGroup() {
 
-    $web_user = $this->web_user;
+    $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
+    $this->drupalLgroupin($admin_user);
 
-    // Subscribe user to all groups.
-    og_subscribe_user($groups, $web_user);
-    $user_groups = og_get_object_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    // Create group content type.
+    $type = $this->drupalCreateContentType(array(), array('og_group_type' => 'group'));
+    $type = $type->type;
 
+    // Create a node and set the group field to TRUE.
+    $group_group[LANGUAGE_NONE][0]['value'] = TRUE;
+    $node = $this->drupalCreateNode(array('type' => $type, OG_GROUP_FIELD => $group_group));
 
-    $this->assertEqual($user_groups, drupal_map_assoc(array_keys($groups)), t('User was subscribed to all groups.'));
+    // Assert a group was created.
+    $group = og_get_group('node', $node->nid);
 
-    // Replace groups subscription with a new one.
-    $new_groups = array($groups[1]['gid'] => $groups[1], $groups[2]['gid'] => $groups[2]);
-    og_subscribe_user($new_groups, $web_user, TRUE);
-    $user_groups = og_get_object_groups('user', $web_user);
+    $this->assertTrue(!empty($group->gid), t('Group was created.'));
 
-    $this->assertEqual($user_groups, drupal_map_assoc(array_keys($new_groups)), t('User subscription was replaced with new groups.'));
+    // Assert the group's state and the entity state is active.
+    $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Group entity state is active.'));
 
-    // Add another group with pending state.
-    og_subscribe_user(array($groups[3]), $web_user);
-    $user_groups = og_get_object_groups('user', $web_user);
+    // Edit the node prgrouprmatically, and set the group state to pending.
+    $property = OG_GROUP_FIELD;
+    $node->{$property}[LANGUAGE_NONE][0]['value'] = 0;
+    node_save($node);
 
-    $this->assertTrue(count($user_groups) == 2, t('Get object groups returned only active groups of the user.'));
+    // Reset the group.
+    $group = og_load($group->gid, TRUE);
 
-    $user_groups = og_get_object_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
-    $this->assertTrue(count($user_groups) == 3, t('Get object groups returned all active and pending groups of the user.'));
-
-    // Unsubscribe user from last group.
-    og_unsubscribe_user(array($groups[3]['gid']), $web_user);
-    $user_groups = og_get_object_groups('user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
-    $this->assertTrue(count($user_groups) == 2, t('User was unsubscribed from group.'));
-  }
-
-  /**
-   * Helper function to create groups.
-   *
-   * @return
-   *   The group objects cast to array.
-   */
-  function createGroups() {
-    $return = array();
-    $groups = array(
-      0 => array('obj_type' => 'node', 'oid' => 1),
-      1 => array('obj_type' => 'node', 'oid' => 2, 'state' => OG_STATE_ACTIVE),
-      2 => array('obj_type' => 'node', 'oid' => 3, 'state' => OG_STATE_PENDING),
-      3 => array('obj_type' => 'node', 'oid' => 4, 'state' => OG_STATE_ACTIVE, 'data' => array('dummy_key' => 'dummy_value')),
-      4 => array('obj_type' => 'user', 'oid' => 1),
-    );
-
-    foreach ($groups as $group) {
-      // Initialize group array.
-      $group += array('state' => OG_STATE_ACTIVE, 'data' => array());
-      // Set a new group.
-      $group = og_set_group($group['obj_type'], $group['oid'], $group['state'], $group['data']);
-      $return[$group->gid] = (array)$group;
-    }
-
-    return $return;
+    // Assert the group's state is pending.
+    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group entity was changed to pending.'));
   }
 }
 
 /**
- * Test the organic groups content handeling.
+ * Test the Group content handeling.
  */
 class OgTypeTest extends DrupalWebTestCase {
 
   public static function __getInfo() {
     return array(
-      'name' => 'Organic groups content types',
-      'description' => 'Test the organic groups group node and group content creation.',
-      'group' => 'Organic groups',
+      'name' => 'Group content types',
+      'description' => 'Test the Group group node and group content creation.',
+      'group' => 'Group',
     );
   }
 
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('entity', 'group');
   }
 
 
   function __testOgType() {
     $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLogin($admin_user);
+    $this->drupalLgroupin($admin_user);
 
     $this->drupalGet('admin/structure/types/add');
 
@@ -176,17 +149,17 @@ class OgTypeTest extends DrupalWebTestCase {
 class OgUserPermissionsTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups role permissions',
+      'name' => 'Group role permissions',
       'description' => 'Verify that role permissions can be added and removed via API.',
-      'group' => 'Organic groups'
+      'group' => 'Group'
     );
   }
 
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('group');
 
     $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLogin($this->admin_user);
+    $this->drupalLgroupin($this->admin_user);
 
     // Create group content type.
     $group_type = $this->drupalCreateContentType();
@@ -195,8 +168,8 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     // Add og_group field.
     og_create_field('og_group', 'node', $this->group_type);
 
-    $group = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => TRUE));
-    $this->group = og_get_group('node', $group->nid);
+    $node = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => array(LANGUAGE_NONE => array(0 => array('value' =>TRUE)))));
+    $this->group = og_get_group('node', $node->nid);
   }
 
 
