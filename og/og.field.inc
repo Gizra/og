@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Field module functionality for the Group module.
+ * Field module functionality for the Organic groups module.
  */
 
 /*******************************************************************************
