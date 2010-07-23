@@ -41,6 +41,8 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
   if ($group = og_get_group($entity_type, $etid)) {
     $label = og_label($group->gid);
 
+    $form['group'] = array('#type' => 'value', '#value' => $group);
+
     $form['og_user'] = array(
       '#type' => 'fieldset',
       '#title' => t('Add a group member to %group', array('%group' => $label)),
@@ -56,9 +58,9 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
       '#options' => og_group_content_states(),
       '#description' => t('Select the state of the membership.'),
     );
-    $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
+    $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Add users'));
-    $form['group'] = array('#type' => 'value', '#value' => $group);
+
     return $form;
   }
   // Not a valid group node.
@@ -270,7 +272,7 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0
         '#type' => 'value',
         '#value' => $rid,
       );
-      $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
+      $form['actions'] = array('#type' => 'actions');
       $form['actions']['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Save role'),
@@ -288,7 +290,8 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0
           '#size' => 32,
           '#maxlength' => 64,
         );
-        $form['submit'] = array(
+        $form['actions'] = array('#type' => 'actions');
+        $form['actions']['submit'] = array(
           '#type' => 'submit',
           '#value' => t('Add role'),
         );
@@ -448,7 +451,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
     $form['#theme'] = array('og_ui_user_admin_permissions');
   }
   if ($gid == 0 || !og_is_group_default_access($group->gid)) {
-    $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
+    $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $gid == 0 ? t('Save global permissions') : t('Save permissions'),
@@ -645,7 +648,7 @@ function og_ui_field_settings($form, &$form_state) {
     );
   }
 
-  $form['actions'] = array('#type' => 'container', '#attributes' => array('class' => array('form-actions')));
+  $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Add field'),
