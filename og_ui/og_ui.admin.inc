@@ -136,7 +136,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   // Get the group real entity, so we can check the user ID of the entity.
   $entity = og_load_entity_from_group($group->gid);
 
-  //TODO: Use field_attach_query(), when query can return object,
+  //TODO: Use listing API when we can add a pager to it.
   $query = db_select('field_data_group_audience', 'group_audience');
   $query
     ->condition('group_audience.group_audience_gid', $group->gid)
