@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Hooks provided by the Group module.
+ * Hooks provided by the Organic groups module.
  */
 
 /**
