@@ -247,7 +247,7 @@ function og_update_7000(&$sandbox) {
 
       // Hold the information about the callbacks that upgrade the different
       // fields.
-      $sandbox['group upgrade'] = array('group', 'og_content', 'user');
+      $sandbox['group upgrade'] = array('group', 'group_content', 'user');
 
       $query = db_select('node_revision', 'nr');
       $query->innerJoin('node', 'n', 'n.vid = nr.vid');
@@ -274,7 +274,7 @@ function og_update_7000(&$sandbox) {
     else {
       if ($sandbox['total']) {
         $callback = reset($sandbox['group upgrade']);
-        $callback =  '_group_upgrade_' . $callback;
+        $callback =  '_og_upgrade_' . $callback;
 
         // We don't use call_user_func, as we want to pass $sandbox by
         // reference.
@@ -300,7 +300,7 @@ function og_update_7000(&$sandbox) {
 /**
  * Helper function; Upgrade "group" nodes.
  */
-function _group_upgrade_group(&$sandbox) {
+function _og_upgrade_group(&$sandbox) {
   $found = FALSE;
 
   // Operate on every revision of every node, in batches.
@@ -362,7 +362,7 @@ function _group_upgrade_group(&$sandbox) {
 /**
  * Helper function; Upgrade "group content" nodes.
  */
-function _group_upgrade_group_content(&$sandbox) {
+function _og_upgrade_group_content(&$sandbox) {
   $found = FALSE;
 
   // Operate on users in batches.
@@ -395,7 +395,7 @@ function _group_upgrade_group_content(&$sandbox) {
 /**
  * Helper function; Upgrade user subscription to groups.
  */
-function _group_upgrade_user(&$sandbox) {
+function _og_upgrade_user(&$sandbox) {
   static $rid = 0;
   if (!$rid) {
     // Get the administrator role ID.
