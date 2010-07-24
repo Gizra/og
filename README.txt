@@ -16,8 +16,8 @@ TERMS AND DEFINITIONS
   associated with it.
 - GROUP CONTENT: Content such as nodes or users, which are associated with a 
   group.
-- GROUP ADMIN: Is a privileged user with permission allowing it to administer 
-  particular activities within a group.
+- GROUP ADMIN: Is a privileged user with permission to administer particular 
+  activities within a group.
 - SITE ADMIN: Compared to group admin, a site admin is granted access to all 
   groups operating within a site. The site admin can specify the permissions 
   group admins are granted in order to control their group related activities, 
@@ -51,6 +51,10 @@ different set of actions, in different group contexts.
 
 INSTALLATION DRUPAL 7.x
 --------------------------------------------
+Note that the following guide is here to get you started. Names for content 
+types, groups and group content given here are suggestions and are given to 
+provide a quick way to get started with Organic groups.
+
 1. Enable the Group and the Group UI modules.
 2. Create a new content type via admin/structure/types/add. Call it "Group", and 
    define it to be of Group type.
