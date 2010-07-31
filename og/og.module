@@ -1212,7 +1212,7 @@ function og_user_role_permissions($roles = array()) {
   $role_permissions = $fetch = array();
 
   if ($roles) {
-    foreach ($roles as $rid) {
+    foreach ($roles as $rid => $name) {
       if (isset($cache[$rid])) {
         $role_permissions[$rid] = $cache[$rid];
       }
