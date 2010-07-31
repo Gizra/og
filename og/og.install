@@ -214,8 +214,8 @@ function og_update_7000(&$sandbox) {
               $content_type['group'][] = $type->type;
               break;
 
-            case 'og_post_standard':
-            case 'og_post_wiki':
+            case 'group_post_standard':
+            case 'group_post_wiki':
               // The type of the group content is now determined via the
               // group permissions. We only care about adding the group content
               // fields to the node.
