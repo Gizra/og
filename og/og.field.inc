@@ -517,7 +517,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
       $original_entity = reset($original_entity);
 
       // If the group is new or the access type changed.
-      if ($group->is_new || $entity->{$property} != $original_entity->{$property}) {
+      if (!empty($group->is_new) || $entity->{$property} != $original_entity->{$property}) {
         if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
           og_user_roles_override($group->gid);
         }
