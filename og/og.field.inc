@@ -512,20 +512,15 @@ function og_field_crud_group($op, $entity_type, $entity) {
     // reverted, by comparing the default access field of the entity being
     // saved, and its original state.
     $property = OG_DEFAULT_ACCESS_FIELD;
+    // The field exists.
     if (!empty($entity->{$property})) {
-      $original_entity = entity_load($entity_type, array($id));
-      $original_entity = reset($original_entity);
-
-      // If the group is new or the access type changed.
-      if (!empty($group->is_new) || $entity->{$property} != $original_entity->{$property}) {
-        if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
-          og_user_roles_override($group->gid);
-        }
-        elseif (empty($group->is_new)) {
-          // If the field is set to be using default access and there are
-          // already overridden roles we delete them.
-          og_delete_user_roles_by_group($group->gid);
-        }
+      if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
+        og_user_roles_override($group->gid);
+      }
+      elseif (empty($group->is_new)) {
+        // If the field is set to be using default access and there are
+        // already overridden roles we delete them.
+        og_delete_user_roles_by_group($group->gid);
       }
     }
   }
