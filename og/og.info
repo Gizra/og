@@ -1,5 +1,5 @@
 name = Group
-description = "API to allow associating content with group nodes."
+description = "API to allow associating content with groups."
 package = "Group"
 dependencies[] = entity
 core = 7.x
