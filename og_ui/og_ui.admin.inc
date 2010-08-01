@@ -407,7 +407,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
     $role_names = array($rid => $role_names[$rid]);
   }
   // Fetch permissions for all roles or the one selected role.
-  $role_permissions = og_user_role_permissions(array_keys($role_names));
+  $role_permissions = og_user_role_permissions($role_names);
 
   // Store $role_names for use when saving the data.
   $form['role_names'] = array(
@@ -441,7 +441,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
+  // Have to build checkboxes here after checkbox arrays are built.
   foreach ($role_names as $rid => $name) {
     $form['checkboxes'][$rid] = array('#type' => 'checkboxes', '#options' => $options, '#default_value' => isset($status[$rid]) ? $status[$rid] : array());
     $form['role_names'][$rid] = array('#markup' => $name, '#tree' => TRUE);
