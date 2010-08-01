@@ -1255,7 +1255,7 @@ function og_user_role_permissions($roles = array()) {
  *   group ID, even if the group is set to have default roles and permissions.
  *   The group might be set to "Default access" but infact there are inactive
  *   group roles. Thus, we are forcing the function to return the overriden
- *   roles. @see og_delete_user_roles_by_group().
+ *   roles. see og_delete_user_roles_by_group().
  *
  * @return
  *   An associative array with the role id as the key and the role name as
@@ -1573,6 +1573,17 @@ function og_permissions_delete_by_module($module) {
  *   FALSE if no roles were created.
  */
 function og_user_roles_override($gid) {
+  // Check if roles aren't already overriden. We can't use
+  // og_is_group_default_access() as the field is already set, so we
+  // check to see if there are new roles in the database and compare
+  // them with the default roles.
+  // TODO: We can add a key to the $group object that will indicate this
+  // if performance will be poor.
+
+  if ($roles = og_user_roles($gid, NULL, TRUE)) {
+    return;
+  }
+
   $rids = array();
   // Make sure roles doesn't exist already by looking for a row with the group
   // ID in {og_role} table.
