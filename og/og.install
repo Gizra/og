@@ -382,7 +382,8 @@ function _og_upgrade_group_content(&$sandbox) {
   foreach ($revisions as $revision) {
     $group = og_get_group('node', $revision->group_nid);
 
-    og_group($group->gid, 'node', $revision);
+    $node = node_load($revision->nid, $revision->vid);
+    og_group($group->gid, 'node', $node);
 
     $sandbox['last'] = $account->nid;
     // User subscribed to group.
