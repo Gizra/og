@@ -26,3 +26,24 @@ function og_access_schema() {
     db_rename_table('og_access_post', 'd6_og_access_post');
   }
 }
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function og_access_update_dependencies() {
+  $dependencies = array();
+  $dependencies['og_access'][7000] = array(
+    'og' => 7000,
+  );
+
+  return $dependencies;
+
+}
+
+
+/**
+ * Upgrade from Organic groups access 6 to 7.
+ */
+function og_access_update_7000(&$sandbox) {
+
+}
