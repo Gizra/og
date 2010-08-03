@@ -42,7 +42,7 @@ function og_schema() {
   if (db_field_exists('og', 'nid')) {
     // Rename the old table, so we can populate the new {og} table using API
     // functions, that assume the new DB structure.
-    db_rename_table('og', 'og_old');
+    db_rename_table('og', 'd6_og');
   }
 
 
@@ -251,7 +251,7 @@ function og_update_7000(&$sandbox) {
 
       $query = db_select('node_revision', 'nr');
       $query->innerJoin('node', 'n', 'n.vid = nr.vid');
-      $query->innerJoin('og_old', 'og', 'n.nid = og.nid');
+      $query->innerJoin('d6_og', 'og', 'n.nid = og.nid');
       $sandbox['group total'] = $query->countQuery()->execute()->fetchField();
 
       $query = db_select('node_revision', 'nr');
@@ -307,7 +307,7 @@ function _og_upgrade_group(&$sandbox) {
   $batch_size = 200;
   $query = db_select('node_revision', 'nr');
   $query->innerJoin('node', 'n', 'n.vid = nr.vid');
-  $query->innerJoin('og_old', 'og', 'n.nid = og.nid');
+  $query->innerJoin('d6_og', 'og', 'n.nid = og.nid');
   $query
     ->fields('nr', array('nid', 'vid'))
     ->fields('n', array('type', 'created'))
