@@ -38,13 +38,13 @@ function og_uninstall() {
 function og_schema() {
   $schema = array();
 
-  // TODO: Move to og_update_7000 function.
   if (db_field_exists('og', 'nid')) {
     // Rename the old table, so we can populate the new {og} table using API
     // functions, that assume the new DB structure.
     db_rename_table('og', 'd6_og');
+    db_rename_table('og_ancestry', 'd6_og_ancestry');
+    db_rename_table('og_uid', 'd6_og_uid');
   }
-
 
   $schema['og'] = array(
     'description'     => 'Store information related to the groups.',
@@ -197,7 +197,7 @@ function og_update_7000(&$sandbox) {
   // - Move Organic groups' data into the corresponding fields.
   // - Populate {og} table with the new relevant data.
   // - Delete Organic groups' variables.
-  if (db_table_exists('og')) {
+  if (db_table_exists('d6_og')) {
     $sandbox['#finished'] = 0;
 
     $content_type = array('group' => array(), 'group content' => array());
@@ -256,13 +256,13 @@ function og_update_7000(&$sandbox) {
 
       $query = db_select('node_revision', 'nr');
       $query->innerJoin('node', 'n', 'n.vid = nr.vid');
-      $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
+      $query->innerJoin('d6_og_ancestry', 'oga', 'n.nid = oga.nid');
       $sandbox['group content total'] = $query
         ->countQuery()
         ->execute()
         ->fetchField();
 
-      $query = db_select('og_uid', 'ogu');
+      $query = db_select('d6_og_uid', 'ogu');
       $sandbox['group user total'] = $query
         ->countQuery()
         ->execute()
@@ -369,7 +369,7 @@ function _og_upgrade_group_content(&$sandbox) {
   $batch_size = 200;
   $query = db_select('node_revision', 'nr');
   $query->innerJoin('node', 'n', 'n.vid = nr.vid');
-  $query->innerJoin('og_ancestry', 'oga', 'n.nid = oga.nid');
+  $query->innerJoin('d6_og_ancestry', 'oga', 'n.nid = oga.nid');
   $query
     ->fields('nr', array('nid', 'vid'))
     ->fields('n', array('type', 'created'))
@@ -408,7 +408,7 @@ function _og_upgrade_user(&$sandbox) {
 
   // Operate on users in batches.
   $batch_size = 200;
-  $query = db_select('og_uid', 'ogu');
+  $query = db_select('d6_og_uid', 'ogu');
   $query
     ->fields('ogu')
     ->condition('ogu.nid', $sandbox['last'], '>')
