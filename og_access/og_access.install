@@ -3,11 +3,11 @@
 
 /**
  * @file
- * Install, update, and uninstall functions for the Group access module.
+ * Install, update, and uninstall functions for the Organic groups access module.
  */
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function og_access_uninstall() {
   $vars = array(
@@ -15,5 +15,14 @@ function og_access_uninstall() {
   );
   foreach ($vars as $var) {
     variable_del($var);
+  }
+}
+
+/**
+ * Implements hook_schema();
+ */
+function og_access_schema() {
+  if (db_table_exists('og_access_post')) {
+    db_rename_table('og_access_post', 'd6_og_access_post');
   }
 }
