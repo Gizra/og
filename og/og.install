@@ -38,7 +38,7 @@ function og_uninstall() {
 function og_schema() {
   $schema = array();
 
-  if (db_table_exists('og')) {
+  if (db_field_exists('og', 'nid') && !db_table_exists('d6_og')) {
     // Rename the old table, so we can populate the new {og} table using API
     // functions, that assume the new DB structure.
     db_rename_table('og', 'd6_og');
