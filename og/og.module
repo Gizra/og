@@ -845,27 +845,11 @@ function og_user_access($gid, $string, $account = NULL) {
   }
 
   global $user;
+  $perm = &drupal_static(__FUNCTION__, array());
+
   if (empty($account)) {
     $account = $user;
   }
-
-  // Check if custom access callback exists.
-  if ($func = variable_get('og_user_access_callback', FALSE)) {
-    if (function_exists($func)) {
-      return $func($gid, $string, $account);
-    }
-    else {
-      if (user_access('administer group')) {
-        // The custom access callback doesn't exist, so let privileged users
-        // know about it.
-        drupal_set_message(t('The custom group access callback %func specified in "og_user_access_callback" variable does not exist.', array('%func' => $func)), 'error');
-      }
-
-      return FALSE;
-    }
-  }
-
-  $perm = &drupal_static(__FUNCTION__, array());
 
   // User #1 has all privileges.
   if ($account->uid == 1) {
