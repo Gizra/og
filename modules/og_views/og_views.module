@@ -38,7 +38,6 @@ function og_menu_access_picture($gid) {
 
 /**
  * A menu callback. Extracts the nid from $node and passes along to views_page().
- *
  */
 function og_views_users_faces($view_name, $display, $node) {
   $arg = $node->nid;
@@ -69,6 +68,9 @@ function og_views_feed($node) {
   print $view->render();
 }
 
+/**
+ * Implementation of hook_block().
+ */
 function og_views_block($op = 'list', $delta = 0, $edit = array()) {
   if ($op == 'list') {
     $blocks[0]['info'] = t('Group search');
@@ -141,8 +143,11 @@ function og_views_block_search_form($groupnode) {
   return $block['content'];
 }
 
-// An implementation of hook_og_links_alter().
-// Hyperlink the members count to the members listing.
+/**
+ * Implementation of hook_og_links_alter().
+ *
+ * Hyperlink the members count to the members listing.
+ */
 function og_views_og_links_alter(&$links, $node) {
   if (isset($links['subscribers'])) {
     $txt = strip_tags($links['subscribers']);
@@ -150,6 +155,9 @@ function og_views_og_links_alter(&$links, $node) {
   }
 }
 
+/**
+ * Implementation of hook_nodeapi().
+ */
 function og_views_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'view':
@@ -161,7 +169,7 @@ function og_views_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 }
 
 /**
- * Implementation of hook_form_TAG_alter().
+ * Implementation of hook_form_FORM-ID_alter().
  */
 function og_views_form_og_admin_settings_alter(&$form, $form_state) {
   $views = views_get_all_views();
@@ -214,7 +222,7 @@ function og_views_view_group($node, $teaser, $page) {
       // Otherwise show it to everybody.
       og_home_empty($node);
     }
-    
+
     drupal_set_title(filter_xss_admin($view->build_info['title']));
     drupal_add_feed(url("node/$node->nid/feed"), drupal_get_title());
   }
@@ -224,7 +232,7 @@ function og_views_view_group($node, $teaser, $page) {
 }
 
 /**
- * An implementation of hook_views_pre_view().
+ * Implementation of hook_views_pre_view().
  */
 function og_views_views_pre_view(&$view, &$display_id, &$args) {
   if ($view->name == 'og_my') {
