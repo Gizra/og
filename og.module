@@ -25,6 +25,9 @@ define('OG_DELETE_ORPHANS', 1);
 define('OG_DELETE_MOVE_NODES', 2);
 define('OG_DELETE_MOVE_NODES_MEMBERSHIPS', 3);
 
+/**
+ * Implementation of hook_help().
+ */
 function og_help($path, $arg) {
   if ($path) {
     switch ($path) {
