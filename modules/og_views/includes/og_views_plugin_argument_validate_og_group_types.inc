@@ -1,7 +1,7 @@
 <?php
-#define('OG_VIEWS_DO_NOT_VALIDATE_MEMBERSHIP', 0);
-#define('OG_VIEWS_VALIDATE_GROUP_MEMBER', 1);
-#define('OG_VIEWS_VALIDATE_GROUP_ADMIN', 2);
+define('OG_VIEWS_DO_NOT_VALIDATE_MEMBERSHIP', 0);
+define('OG_VIEWS_VALIDATE_GROUP_MEMBER', 1);
+define('OG_VIEWS_VALIDATE_GROUP_ADMIN', 2);
 
 /**
  * Validate whether an argument is a group node.
