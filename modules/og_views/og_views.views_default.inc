@@ -1,10 +1,6 @@
 <?php
 // $Id$
 
-<?php
-// $Id: og_views.views_default.inc,v 1.4.4.1 2009/05/10 18:31:59 
-weitzman Exp $
-
 /**
  * Implementation of hook_views_default_views().
  */
@@ -20,8 +16,7 @@ function og_views_views_default_views() {
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('fields', array(
     'title' => array(
@@ -299,8 +294,7 @@ disabled initially */
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('sorts', array(
     'sticky' => array(
@@ -443,8 +437,7 @@ disabled initially */
   $view->base_table = 'users';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('fields', array(
     'name' => array(
@@ -676,8 +669,7 @@ disabled initially */
   $view->base_table = 'users';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('relationships', array(
     'nid' => array(
@@ -918,8 +910,7 @@ disabled initially */
   $handler->override_option('title', 'Group admins');
   $handler->override_option('block_description', 'Group admins');
   $handler->override_option('block_caching', -1);
-  $handler = $view->new_display('block', 'Block Admins, Members', 
-'block_1');
+  $handler = $view->new_display('block', 'Block Admins, Members', 'block_1');
   $handler->override_option('block_description', 'Group members');
   $handler->override_option('block_caching', -1);
   $views[$view->name] = $view;
@@ -935,8 +926,7 @@ disabled initially */
   $view->base_table = 'users';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('fields', array(
     'picture' => array(
@@ -1096,15 +1086,13 @@ disabled initially */
    */
   $view = new view;
   $view->name = 'og_my';
-  $view->description = 'List user\'s subscribed groups and provide link 
-to manage subscription';
+  $view->description = 'List user\'s subscribed groups and provide link to manage subscription';
   $view->tag = 'og';
   $view->view_php = '';
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('fields', array(
     'title' => array(
@@ -1308,8 +1296,7 @@ disabled initially */
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('relationships', array(
     'group_nid' => array(
@@ -1445,8 +1432,7 @@ disabled initially */
     'type' => 'none',
   ));
   $handler->override_option('title', 'Recent posts in my groups');
-  $handler->override_option('empty', 'There are no posts in your 
-groups.');
+  $handler->override_option('empty', 'There are no posts in your groups.');
   $handler->override_option('empty_format', '1');
   $handler->override_option('items_per_page', 25);
   $handler->override_option('use_pager', '1');
@@ -1550,15 +1536,13 @@ groups.');
    */
   $view = new view;
   $view->name = 'og_recent_type_term';
-  $view->description = 'Recent posts for current term filtered by node 
-type and/or taxonomy term';
+  $view->description = 'Recent posts for current term filtered by node type and/or taxonomy term';
   $view->tag = 'og';
   $view->view_php = '';
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('fields', array(
     'title' => array(
@@ -1733,8 +1717,7 @@ disabled initially */
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('sorts', array(
     'score' => array(
@@ -1970,8 +1953,7 @@ disabled initially */
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('fields', array(
     'type' => array(
@@ -2199,8 +2181,7 @@ disabled initially */
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('relationships', array(
     'group_nid' => array(
@@ -2348,8 +2329,7 @@ disabled initially */
     'type' => 'none',
   ));
   $handler->override_option('title', 'Unread posts in my groups');
-  $handler->override_option('empty', 'There are no new posts in your 
-groups.');
+  $handler->override_option('empty', 'There are no new posts in your groups.');
   $handler->override_option('empty_format', '1');
   $handler->override_option('items_per_page', 25);
   $handler->override_option('use_pager', '1');
@@ -2455,8 +2435,7 @@ groups.');
   $view->base_table = 'node';
   $view->is_cacheable = FALSE;
   $view->api_version = 2;
-  $view->disabled = FALSE; /* Edit this to true to make a default view 
-disabled initially */
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->override_option('fields', array(
     'type' => array(
