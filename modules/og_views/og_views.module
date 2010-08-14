@@ -37,7 +37,7 @@ function og_menu_access_picture($gid) {
 }
 
 /**
- * A menu callback. Extracts the nid from $node and passes along to views_page().
+ * A menu callback. Extracts the nid from node and passes along to views_page().
  */
 function og_views_users_faces($view_name, $display, $node) {
   $arg = $node->nid;
@@ -55,7 +55,7 @@ function og_views_views_api() {
 }
 
 /**
- * Menu callback. Render group feed.
+ * Menu callback; Render group feed.
  */
 function og_views_feed($node) {
   $view = views_get_view(variable_get('og_home_page_view', 'og_ghp_ron'));
@@ -190,11 +190,13 @@ function og_views_form_og_admin_settings_alter(&$form, $form_state) {
 }
 
 /**
- * Implementation of hook_form_alter().
+ * Implementation of hook_form_FORM-ID_alter().
  */
-function og_views_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id == 'views_exposed_form' && $form_state['view']->name == 'og_search') {
+function og_views_form_views_exposed_form_alter(&$form, $form_state) {
+  if ($form_state['view']->name == 'og_search' && $form_state['view']->current_display == 'default' && $node = og_get_group_context()) {
     $form['submit']['#value'] = t('Search group');
+    // Redirect to the Views page.
+    $form['#action'] = url('og/search/' . $node->nid);
   }
 }
 
