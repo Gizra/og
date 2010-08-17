@@ -397,7 +397,9 @@ function og_is_group_admin($node, $account = NULL) {
   return og_is_group_type($node->type) && (user_access('administer nodes', $account) || !empty($account->og_groups[$node->nid]['is_admin']));
 }
 
-// An implementation of hook_theme().
+/**
+ * Implementation of hook_theme().
+ */
 function og_theme() {
   return array(
     'opml_icon' => array('arguments' => array('url')),
