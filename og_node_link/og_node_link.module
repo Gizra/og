@@ -128,10 +128,5 @@ function og_node_link_og_default_permissions() {
  * Add access check on the field.
  */
 function og_node_link_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
-  list($id) = entity_extract_ids($entity_type, $entity);
-  if (!empty($form[OG_NODE_LINK_FIELD]) && !empty($id) && $group = og_get_group($entity_type, $id)) {
-    $perm = 'edit '. OG_NODE_LINK_FIELD .' field';
-    // Existing entity and the field exists.
-    $form[OG_NODE_LINK_FIELD][LANGUAGE_NONE]['#access'] = og_user_access($group->gid, $perm);
-  }
+  og_field_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, OG_NODE_LINK_FIELD);
 }

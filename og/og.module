@@ -893,6 +893,34 @@ function og_user_access($gid, $string, $account = NULL) {
   return isset($perm[$gid][$account->uid][$string]);
 }
 
+/**
+ * Helper function to check if a user has access to a field.
+ *
+ * @see hook_field_attach_form().
+
+ * @param $entity_type
+ * @param $entity
+ * @param $form
+ * @param $form_state
+ * @param $langcode
+ * @param $field_name
+ *   The name of the field that the access is checked for.
+  @param $perm
+ *   Optional; The group permission name. If empty then the field name will be
+ *   used as 'Edit field-name field'. (where "field-name" is the $field_name
+ *   value).
+ * @return unknown_type
+ */
+function og_field_attach_form_access($entity_type, $entity, &$form, $form_state, $langcode, $field_name, $perm = '') {
+  list($id) = entity_extract_ids($entity_type, $entity);
+  if (!empty($form[$field_name]) && !empty($id) && $group = og_get_group($entity_type, $id)) {
+    // Existing entity and the field exists.
+    if (!$perm) {
+      $perm = 'edit ' . $field_name . ' field';
+    }
+    $form[$field_name][LANGUAGE_NONE]['#access'] = og_user_access($group->gid, $perm);
+  }
+}
 
 
 /**
