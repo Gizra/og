@@ -100,3 +100,35 @@ function og_register_get_groups() {
 
   return $gids;
 }
+
+/**
+ * Implement hook_og_permission().
+ */
+function og_register_og_permission() {
+  $perm = 'edit '. GROUP_REGISTER_FIELD .' field';
+  return array(
+    $perm => array(
+      'title' => t('Edit group register field'),
+      'description' => t('Access the group register field for existing groups.'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_og_default_permissions().
+ */
+function og_register_og_default_permissions() {
+  $perm = 'edit '. GROUP_REGISTER_FIELD .' field';
+  return array(
+    $perm => array(OG_ADMINISTRATOR_ROLE),
+  );
+}
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Add access check on the field.
+ */
+function og_register_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
+  og_field_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, GROUP_REGISTER_FIELD);
+}
