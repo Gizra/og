@@ -920,7 +920,7 @@ function og_user_access($gid, $string, $account = NULL) {
  */
 function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
   // Add field access permissions.
-  foreach (og_fields_info() as $field_nam => $value) {
+  foreach (og_fields_info() as $field_name => $value) {
     if (!empty($value['field access'])) {
       og_field_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, $field_name);
     }
@@ -952,12 +952,13 @@ function og_field_attach_form_access($entity_type, $entity, &$form, $form_state,
   if (!empty($form[$field_name]) && !empty($id)) {
     // Existing entity and the field exists.
     $access = FALSE;
-    if (!$perm) {
-      $perm = 'edit ' . $field_name . ' field';
-    }
 
     // Determine if the field belongs to a group or group content.
     $field = og_fields_info($field_name);
+
+    if (!$perm) {
+      $perm = $field['field access']['permission'];
+    }
 
     if (in_array('group', $field['type']) && $group = og_get_group($entity_type, $id)) {
       $access = og_user_access($group->gid, $perm);
@@ -1890,7 +1891,6 @@ function og_fields_info($field_name = NULL) {
 
           // Add the module information.
           $return[$key] = array_merge($field, array('module' => $module));
-
         }
       }
     }
@@ -1954,9 +1954,6 @@ function og_create_field($field_name, $entity_type, $bundle) {
     }
   }
 }
-
-
-
 
 /**
  * Return a re-loaded entity with its fields.
