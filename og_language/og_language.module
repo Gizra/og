@@ -105,3 +105,35 @@ function og_language_field_allowed_values() {
   return $return;
 }
 
+
+/**
+ * Implement hook_og_permission().
+ */
+function og_language_og_permission() {
+  $perm = 'edit '. OG_LANGUAGE_FIELD .' field';
+  return array(
+    $perm => array(
+      'title' => t('Edit group language field'),
+      'description' => t('Access the group language field for existing groups.'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_og_default_permissions().
+ */
+function og_language_og_default_permissions() {
+  $perm = 'edit '. OG_LANGUAGE_FIELD .' field';
+  return array(
+    $perm => array(OG_ADMINISTRATOR_ROLE),
+  );
+}
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Add access check on the field.
+ */
+function og_language_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
+  og_field_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, OG_LANGUAGE_FIELD);
+}
