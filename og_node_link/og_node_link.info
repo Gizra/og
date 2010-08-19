@@ -2,6 +2,6 @@
 name = Group node link
 description = "Add content creation links field."
 package = "Group"
-dependencies[] = og
+dependencies[] = og_context
 core = 7.x
 files[] = og_node_link.module

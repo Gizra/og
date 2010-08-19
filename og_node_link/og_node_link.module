@@ -18,7 +18,7 @@ define('OG_NODE_LINK_FIELD', 'og_links');
 function og_node_link_field_formatter_info() {
   return array(
     'og_node_link_default' => array(
-      'label' => t('Group links'),
+      'label' => t('Group content links'),
       'field types' => array('list_text'),
     ),
   );
@@ -39,7 +39,7 @@ function og_node_link_og_fields_info() {
       'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_node_link_field_allowed_values'),
     ),
     'instance' => array(
-      'label' => t('Group links'),
+      'label' => t('Group content links'),
       'widget_type' => 'options_select',
       'display' => array(
         'full' => array(
@@ -78,7 +78,7 @@ function og_node_link_field_allowed_values() {
  */
 function og_node_link_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
-  if ($field['field_name'] == OG_NODE_LINK_FIELD && !empty($entity->{OG_NODE_LINK_FIELD}[LANGUAGE_NONE][0]['value']) && $group = og_context()) {
+  if ($field['field_name'] == OG_NODE_LINK_FIELD && !empty($entity->{OG_NODE_LINK_FIELD}[LANGUAGE_NONE][0]['value'])) {
   	// Get the allowed links.
   	$links = array();
   	foreach ($entity->{OG_NODE_LINK_FIELD}[LANGUAGE_NONE] as $delta => $value) {
@@ -89,7 +89,8 @@ function og_node_link_field_formatter_view($entity_type, $entity, $field, $insta
           '#type' => 'link',
           '#title' => check_plain(node_type_get_name($node_type)),
           '#href' => 'node/add/' . $node_type,
-          '#query' => array('group_gid[]' => $group->gid),
+          // We know the entity is a node.
+          '#options' => array('query' => array('gids_node[]' => $entity->nid)),
         );
       }
   	}
