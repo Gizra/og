@@ -300,7 +300,8 @@ function og_node_access($node, $op, $account) {
       return $return;
     }
   }
-  // Not an group type or node creation which still has no groups.
+  // Not a group type or the operation is node creation which still has no
+  // groups so we can't check it yet.
   return NODE_ACCESS_IGNORE;
 }
 
