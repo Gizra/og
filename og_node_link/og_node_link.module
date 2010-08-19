@@ -98,3 +98,40 @@ function og_node_link_field_formatter_view($entity_type, $entity, $field, $insta
 
   return $element;
 }
+
+/**
+ * Implement hook_og_permission().
+ */
+function og_node_link_og_permission() {
+  $perm = 'edit '. OG_NODE_LINK_FIELD .' field';
+  return array(
+    $perm => array(
+      'title' => t('Edit group node link field'),
+      'description' => t('Access the group node link field for existing groups.'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_og_default_permissions().
+ */
+function og_node_link_og_default_permissions() {
+  $perm = 'edit '. OG_NODE_LINK_FIELD .' field';
+  return array(
+    $perm => array(OG_ADMINISTRATOR_ROLE),
+  );
+}
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Add access check on the field.
+ */
+function og_node_link_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
+  list($id) = entity_extract_ids($entity_type, $entity);
+  if (!empty($form[OG_NODE_LINK_FIELD]) && !empty($id) && $group = og_get_group($entity_type, $id)) {
+    $perm = 'edit '. OG_NODE_LINK_FIELD .' field';
+    // Existing entity and the field exists.
+    $form[OG_NODE_LINK_FIELD][LANGUAGE_NONE]['#access'] = og_user_access($group->gid, $perm);
+  }
+}
