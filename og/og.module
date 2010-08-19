@@ -924,11 +924,14 @@ function og_field_attach_form_access($entity_type, $entity, &$form, $form_state,
       $perm = 'edit ' . $field_name . ' field';
     }
 
-    if ($group = og_get_group($entity_type, $id)) {
+    // Determine if the field belongs to a group or group content.
+    $field = og_fields_info($field_name);
+
+    if (in_array('group', $field['type']) && $group = og_get_group($entity_type, $id)) {
       $access = og_user_access($group->gid, $perm);
     }
     // If there is no access, check if this is a group content.
-    if (!$access && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
+    if (!$access && in_array('group content', $field['type']) && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
       foreach ($gids as $gid) {
         if (og_user_access($gid, $perm)) {
           $access = TRUE;
