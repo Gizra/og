@@ -226,7 +226,7 @@ function og_og_permission() {
   // Generate standard node permissions for all applicable node types.
   $perms = array();
   foreach (node_permissions_get_configured_types() as $type) {
-    $perms = og_list_permissions($type);
+    $perms = array_merge($perms, og_list_permissions($type));
   }
 
   return $perms + array(
