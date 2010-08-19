@@ -225,20 +225,29 @@ function og_permission() {
 function og_og_permission() {
   // Generate standard node permissions for all applicable node types.
   $perms = array();
+
+  $perms['update group'] = array(
+    'title' => t('Edit group'),
+    'description' => t('Edit the group.'),
+  );
+  $perms['administer group'] = array(
+    'title' => t('Administer group'),
+    'description' => t('Manage or block users, and manage their role assignments in the group.'),
+  );
+
   foreach (node_permissions_get_configured_types() as $type) {
     $perms = array_merge($perms, og_list_permissions($type));
   }
 
-  return $perms + array(
-    'update group' => array(
-      'title' => t('Edit group'),
-      'description' => t('Edit the group.'),
-    ),
-    'administer group' => array(
-      'title' => t('Administer group'),
-      'description' => t('Manage or block users, and manage their role assignments in the group.'),
-    ),
-  );
+  // Add field access permissions.
+  foreach (og_fields_info() as $field_name => $value) {
+    if (!empty($value['field access'])) {
+      $perms[$value['field access']['permission']]['title'] = $value['field access']['title'];
+      $perms[$value['field access']['permission']]['description'] = $value['field access']['description'];
+    }
+  }
+
+  return $perms;
 }
 
 /**
@@ -247,6 +256,10 @@ function og_og_permission() {
 function og_og_default_permissions() {
   // Create default permissions for group content nodes if they already exist.
   $perms = array();
+
+  $perms['update group'] = array(OG_ADMINISTRATOR_ROLE);
+  $perms['administer group'] = array(OG_ADMINISTRATOR_ROLE);
+
   foreach (node_permissions_get_configured_types() as $type) {
     if (og_is_group_content_type('node', $type)) {
       $info = node_type_get_type($type);
@@ -259,10 +272,15 @@ function og_og_default_permissions() {
       $perms["delete any $type content"] = array(OG_ADMINISTRATOR_ROLE);
     }
   }
-  return $perms + array(
-    'update group' => array(OG_ADMINISTRATOR_ROLE),
-    'administer group' => array(OG_ADMINISTRATOR_ROLE),
-  );
+
+  // Add field access permissions.
+  foreach (og_fields_info() as $field_name => $value) {
+    if (!empty($value['field access'])) {
+      $perm[$value['permission']]= $value['default permission'];
+    }
+  }
+
+  return $perms;
 }
 
 /**
@@ -893,6 +911,20 @@ function og_user_access($gid, $string, $account = NULL) {
 
   }
   return isset($perm[$gid][$account->uid][$string]);
+}
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Add access check on the field.
+ */
+function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
+  // Add field access permissions.
+  foreach (og_fields_info() as $field_nam => $value) {
+    if (!empty($value['field access'])) {
+      og_field_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, $field_name);
+    }
+  }
 }
 
 /**
@@ -1844,7 +1876,17 @@ function og_fields_info($field_name = NULL) {
       if ($fields = module_invoke($module, 'og_fields_info')) {
         foreach ($fields as $key => $field) {
           // Add default values.
-          $field += array('entity type' => array());
+          $field += array(
+            'entity type' => array(),
+            'field access' => array(),
+          );
+
+          if (!empty($field['field access'])) {
+            $field['field access'] += array(
+              'permission' => 'edit ' . $key . ' field',
+              'default permission' => array(OG_ADMINISTRATOR_ROLE),
+            );
+          }
 
           // Add the module information.
           $return[$key] = array_merge($field, array('module' => $module));

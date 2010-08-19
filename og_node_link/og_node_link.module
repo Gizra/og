@@ -31,6 +31,11 @@ function og_node_link_og_fields_info() {
   $items[OG_NODE_LINK_FIELD] = array(
     'type' => array('group'),
     'description' => t('Add content creation links based on group context.'),
+    // Define field access.
+    'field access' => array(
+      'title' => t('Edit group node link field'),
+      'description' => t('Access the group node link field for existing groups.'),
+    ),
     'field' => array(
       'field_name' => OG_NODE_LINK_FIELD,
       'no_ui' => TRUE,
@@ -97,36 +102,4 @@ function og_node_link_field_formatter_view($entity_type, $entity, $field, $insta
   }
 
   return $element;
-}
-
-/**
- * Implement hook_og_permission().
- */
-function og_node_link_og_permission() {
-  $perm = 'edit '. OG_NODE_LINK_FIELD .' field';
-  return array(
-    $perm => array(
-      'title' => t('Edit group node link field'),
-      'description' => t('Access the group node link field for existing groups.'),
-    ),
-  );
-}
-
-/**
- * Implement hook_og_default_permissions().
- */
-function og_node_link_og_default_permissions() {
-  $perm = 'edit '. OG_NODE_LINK_FIELD .' field';
-  return array(
-    $perm => array(OG_ADMINISTRATOR_ROLE),
-  );
-}
-
-/**
- * Implements hook_field_attach_form().
- *
- * Add access check on the field.
- */
-function og_node_link_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
-  og_field_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, OG_NODE_LINK_FIELD);
 }
