@@ -1,0 +1,7 @@
+; $Id:$
+name = Group links
+description = "Add content creation links based on group context."
+package = "Group"
+dependencies[] = og_context
+core = 7.x
+files[] = og_links.module
