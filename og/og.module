@@ -280,6 +280,7 @@ function og_node_access($node, $op, $account) {
   if (in_array($op, array('update', 'delete'))) {
     if (($group = og_get_group('node', $node->nid))) {
       // The node is a group.
+      // TODO: Fix this to return correct value.
       return og_user_access($group->gid, $op . ' group', $account) ? NODE_ACCESS_ALLOW : NODE_ACCESS_DENY;
     }
     elseif ($gids = og_get_entity_groups('node', $node)) {
@@ -913,13 +914,29 @@ function og_user_access($gid, $string, $account = NULL) {
  * @return unknown_type
  */
 function og_field_attach_form_access($entity_type, $entity, &$form, $form_state, $langcode, $field_name, $perm = '') {
+  global $user;
+  $account = $user;
   list($id) = entity_extract_ids($entity_type, $entity);
-  if (!empty($form[$field_name]) && !empty($id) && $group = og_get_group($entity_type, $id)) {
+  if (!empty($form[$field_name]) && !empty($id)) {
     // Existing entity and the field exists.
+    $access = FALSE;
     if (!$perm) {
       $perm = 'edit ' . $field_name . ' field';
     }
-    $form[$field_name][LANGUAGE_NONE]['#access'] = og_user_access($group->gid, $perm);
+
+    if ($group = og_get_group($entity_type, $id)) {
+      $access = og_user_access($group->gid, $perm);
+    }
+    // If there is no access, check if this is a group content.
+    if (!$access && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
+      foreach ($gids as $gid) {
+        if (og_user_access($gid, $perm)) {
+          $access = TRUE;
+          break;
+        }
+      }
+    }
+    $form[$field_name][LANGUAGE_NONE]['#access'] = $access;
   }
 }
 
