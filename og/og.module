@@ -1143,7 +1143,7 @@ function og_is_group_default_access($gid) {
 function og_get_context_by_url() {
   $return = array();
   foreach (array_keys(entity_get_info()) as $entity_type) {
-    $etids =  !empty($_REQUEST['gids_' . $entity_type][0]) ? explode(',', $_REQUEST['gids_' . $entity_type][0]) : array();
+    $etids =  !empty($_GET['gids_' . $entity_type][0]) ? explode(',', $_GET['gids_' . $entity_type][0]) : array();
     if ($etids) {
       $return = array_merge($return, og_get_group_ids($entity_type, $etids));
     }
