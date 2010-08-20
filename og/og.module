@@ -1882,6 +1882,7 @@ function og_fields_info($field_name = NULL) {
             'field access' => array(),
           );
 
+          // Add default values to field access.
           if (!empty($field['field access'])) {
             $field['field access'] += array(
               'permission' => 'edit ' . $key . ' field',
