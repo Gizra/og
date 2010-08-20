@@ -1906,6 +1906,16 @@ function og_check_token($token, $seed) {
   return drupal_get_token($seed) == $token;
 }
 
+/**
+ * Set breadcrumbs according to a given group.
+ *
+ * @param $entity_type
+ *   The entity type.
+ * @param $etid
+ *   The entity ID.
+ * @param $path
+ *   Optional; The path to append to the breadcrumb.
+ */
 function og_set_breadcrumb($entity_type, $etid, $path = array()) {
   if ($entity = entity_load($entity_type, array($etid))) {
     $entity = reset($entity);
