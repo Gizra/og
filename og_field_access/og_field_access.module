@@ -89,8 +89,8 @@ function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_
   // Add field access permissions.
   foreach (og_fields_info() as $field_name => $value) {
     if (!empty($value['allow field access']) && !empty($value['field access'])) {
-      foreach ($value['field access'] as $perm_key => $perm_value) {
-        og_field_access_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, $field_name, $perm_key);
+      foreach ($value['field access'] as $perm_value) {
+        og_field_access_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, $field_name, $perm_value['permission']);
       }
     }
   }
