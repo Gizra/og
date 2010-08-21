@@ -239,19 +239,13 @@ function og_og_permission() {
     $perms = array_merge($perms, og_list_permissions($type));
   }
 
-  // Add field access permissions.
-  foreach (og_fields_info() as $field_name => $value) {
-    if (!empty($value['field access'])) {
-      $perms[$value['field access']['permission']]['title'] = $value['field access']['title'];
-      $perms[$value['field access']['permission']]['description'] = $value['field access']['description'];
-    }
-  }
-
   return $perms;
 }
 
 /**
  * Implement hook_og_default_permissions().
+ *
+ * TODO: Deprecate this hook and move logic to hook_og_permissions().
  */
 function og_og_default_permissions() {
   // Create default permissions for group content nodes if they already exist.
@@ -270,13 +264,6 @@ function og_og_default_permissions() {
 
       $perms["edit any $type content"] = array(OG_ADMINISTRATOR_ROLE);
       $perms["delete any $type content"] = array(OG_ADMINISTRATOR_ROLE);
-    }
-  }
-
-  // Add field access permissions.
-  foreach (og_fields_info() as $field_name => $value) {
-    if (!empty($value['field access'])) {
-      $perm[$value['permission']]= $value['default permission'];
     }
   }
 
@@ -1858,6 +1845,10 @@ function og_get_permissions() {
       $perms = array_merge($perms, $permissions);
     }
   }
+
+  // Allow other modules to alter the permissions.
+  drupal_alter('og_permission', $perms);
+
   return $perms;
 }
 

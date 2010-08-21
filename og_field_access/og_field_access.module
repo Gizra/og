@@ -42,3 +42,30 @@ function og_field_access_og_fields_info_alter(&$fields_info) {
     }
   }
 }
+
+/**
+ * Implements hook_og_permission_alter().
+ */
+function og_field_access_og_permission_alter(&$perms) {
+  foreach (og_fields_info() as $field_name => $value) {
+    if (!empty($value['allow field access']) && !empty($value['field access'])) {
+      foreach ($value['field access'] as $perm) {
+        $perms[$perm['permission']]['title'] = $perm['title'];
+        $perms[$perm['permission']]['description'] = $perm['description'];
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_og_default_permissions_alter().
+ */
+function og_field_access_og_default_permissions_alter(&$perms) {
+  foreach (og_fields_info() as $field_name => $value) {
+    if (!empty($value['allow field access']) && !empty($value['field access'])) {
+      foreach ($value['field access'] as $perm) {
+        $perms[$perm['permission']]= $perm['default permission'];
+      }
+    }
+  }
+}

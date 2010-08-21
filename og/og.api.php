@@ -25,6 +25,16 @@ function hook_og_permission() {
 }
 
 /**
+ * Alter the organic groups permissions.
+ *
+ * @param $perms
+ *   The permissions passed by reference.
+ */
+function hook_og_permission_alter(&$perms) {
+
+}
+
+/**
  * Define group context handlers.
  *
  * @return
