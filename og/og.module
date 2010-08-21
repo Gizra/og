@@ -1835,7 +1835,7 @@ function og_get_permissions() {
     if ($permissions = module_invoke($module, 'og_permission')) {
       foreach ($permissions as $key => $perm) {
         // Initialize the roles key, if other modules haven't set it explicetly.
-        // This means the permissions can apply to anonymous and authenticaed
+        // This means the permissions can apply to anonymous and authenticated
         // members as-well.
         $permissions[$key] += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE));
 
