@@ -1888,22 +1888,16 @@ function og_fields_info($field_name = NULL) {
           // Add default values.
           $field += array(
             'entity type' => array(),
-            'field access' => array(),
           );
-
-          // Add default values to field access.
-          if (!empty($field['field access'])) {
-            $field['field access'] += array(
-              'permission' => 'edit ' . $key . ' field',
-              'default permission' => array(OG_ADMINISTRATOR_ROLE),
-            );
-          }
 
           // Add the module information.
           $return[$key] = array_merge($field, array('module' => $module));
         }
       }
     }
+
+    // Allow other modules to alter the field info.
+    drupal_alter('og_fields_info', $return);
   }
 
   return empty($field_name) ? $return : $return[$field_name];

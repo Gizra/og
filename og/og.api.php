@@ -175,5 +175,21 @@ function hook_og_audience_options_alter(&$options, $opt_group, $account) {
 }
 
 /**
+ * TODO
+ */
+function hook_og_fields_info() {
+
+}
+
+/**
+ * TODO
+ */
+function hook_og_fields_info_alter(&$fields_info) {
+
+}
+
+
+
+/**
  * @} End of "addtgrouproup hooks".
  */
