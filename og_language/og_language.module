@@ -18,11 +18,6 @@ function og_language_group_fields_info() {
   $items[OG_LANGUAGE_FIELD] = array(
     'type' => array('group'),
     'description' => t('Associate language interface to a group.'),
-    // Define field access.
-    'field access' => array(
-      'title' => t('Edit group language field'),
-      'description' => t('Access the group language field for existing groups.'),
-    ),
     'field' => array(
       'field_name' => OG_LANGUAGE_FIELD,
       'no_ui' => TRUE,

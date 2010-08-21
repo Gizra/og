@@ -18,11 +18,6 @@ function og_theme_group_fields_info() {
   $items[OG_THEME_FIELD] = array(
     'type' => array('group'),
     'description' => t('Associate theme to a group.'),
-    // Define field access.
-    'field access' => array(
-      'title' => t('Edit group theme field'),
-      'description' => t('Access the group theme field for existing groups.'),
-    ),
     'field' => array(
       'field_name' => OG_THEME_FIELD,
       'no_ui' => TRUE,

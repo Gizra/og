@@ -46,11 +46,6 @@ function og_register_group_fields_info() {
   $items[OG_REGISTER_FIELD] = array(
     'type' => array('group'),
     'description' => t('Add Group register field group types.'),
-    // Define field access.
-    'field access' => array(
-      'title' => t('Edit group register field'),
-      'description' => t('Access the group register field for existing groups.'),
-    ),
     'field' => array(
       'field_name' => OG_REGISTER_FIELD,
       'no_ui' => TRUE,
