@@ -88,16 +88,33 @@ function og_field_access_og_default_permissions_alter(&$perms) {
 function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
   // Add field access permissions.
   foreach (og_fields_info() as $field_name => $value) {
-    if (!empty($value['allow field access']) && !empty($value['field access'])) {
-      foreach ($value['field access'] as $perm_value) {
-        og_field_access_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, $field_name, $perm_value['permission']);
-      }
+    if (!empty($value['allow field access']) && !empty($value['field access']['edit'])) {
+      og_field_access_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, $field_name, $value['field access']['edit']['permission']);
     }
   }
 }
 
 /**
- * Helper function to check if a user has access to a field.
+ * Implements hook_field_attach_view().
+ *
+ * Add access check on the field.
+ */
+function og_field_access_field_attach_view_alter(&$output, $context) {
+	$entity_type = $context['entity_type'];
+	$entity = $context['entity'];
+	$form = &$output;
+
+	$form_state = $langcode = array();
+
+  foreach (og_fields_info() as $field_name => $value) {
+    if (!empty($value['allow field access']) && !empty($value['field access']['view'])) {
+      og_field_access_attach_view_access($entity_type, $entity, $form, $field_name, $value['field access']['view']['permission']);
+    }
+  }
+}
+
+/**
+ * Helper function to check if a user has access to edit a field.
  *
  * @see hook_field_attach_form().
 
@@ -135,5 +152,45 @@ function og_field_access_attach_form_access($entity_type, $entity, &$form, $form
       }
     }
     $form[$field_name][LANGUAGE_NONE]['#access'] = $access;
+  }
+}
+
+/**
+ * Helper function to check if a user has access to view a field.
+ *
+ * @see hook_field_attach_form().
+
+ * @param $entity_type
+ * @param $entity
+ * @param $form
+ * @param $field_name
+ *   The name of the field that the access is checked for.
+  @param $perm_key
+ *   The group permission name.
+ */
+function og_field_access_attach_view_access($entity_type, $entity, &$form, $field_name, $perm) {
+  global $user;
+  $account = $user;
+  list($id) = entity_extract_ids($entity_type, $entity);
+  if (!empty($form[$field_name]) && !empty($id)) {
+    // Existing entity and the field exists.
+    $access = FALSE;
+
+    $field = og_fields_info($field_name);
+
+
+    if (in_array('group', $field['type']) && $group = og_get_group($entity_type, $id)) {
+      $access = og_user_access($group->gid, $perm);
+    }
+    // If there is no access, check if this is a group content.
+    if (!$access && in_array('group content', $field['type']) && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
+      foreach ($gids as $gid) {
+        if (og_user_access($gid, $perm)) {
+          $access = TRUE;
+          break;
+        }
+      }
+    }
+    $form[$field_name]['#access'] = $access;
   }
 }
