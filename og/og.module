@@ -1573,7 +1573,7 @@ function og_get_user_roles_name($rids = array()) {
  */
 function og_permissions_delete_by_module($module) {
    db_delete('og_role_permission')
-     ->condition('module', $modules, 'IN')
+     ->condition('module', $module, 'IN')
      ->execute();
 }
 
