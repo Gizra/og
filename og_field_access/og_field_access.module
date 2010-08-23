@@ -1,0 +1,44 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Provide field access based on group.
+ */
+
+/**
+ * Implements hook_og_fields_info_alter().
+ *
+ * Add default access fields values to fields, if they haven't provided
+ * themselves.
+ */
+function og_field_access_og_fields_info_alter(&$fields_info) {
+  // Add field access defaults.
+  foreach ($field_info as $field_name => &$value) {
+    $value += array('allow field access' => TRUE);
+
+    if ($value['allow field access']) {
+      $label = $value['instance']['label'];
+      $value += array(
+        'field access' => array(
+          'view' => array(
+            'permission' => 'view ' . $key . ' field',
+            'default permission' => array(
+              OG_ANONYMOUS_ROLE,
+              OG_AUTHENTICATED_ROLE,
+              OG_ADMINISTRATOR_ROLE,
+            ),
+            'title' => t('View @label field', array('@label' => $label)),
+            'description' => t('View the @label field for existing groups.', array('@label' => $label)),
+          ),
+          'edit' => array(
+            'permission' => 'edit ' . $key . ' field',
+            'default permission' => array(OG_ADMINISTRATOR_ROLE),
+            'title' => t('Edit @label field', array('@label' => $label)),
+            'description' => t('Edit the @label field for existing groups.', array('@label' => $label)),
+          ),
+        ),
+      );
+    }
+  }
+}

@@ -1,0 +1,7 @@
+; $Id$
+name = Group field access
+description = "Provide field access based on group."
+package = "Group"
+dependencies[] = og
+core = 7.x
+files[] = og_field_access.module
