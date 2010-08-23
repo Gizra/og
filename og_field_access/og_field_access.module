@@ -52,6 +52,9 @@ function og_field_access_og_permission_alter(&$perms) {
       foreach ($value['field access'] as $perm) {
         $perms[$perm['permission']]['title'] = $perm['title'];
         $perms[$perm['permission']]['description'] = $perm['description'];
+        // Add the module information, so the permissions will be assigned with
+        // the correct module name, and not be associated with og_field_access.
+        $perms[$perm['permission']]['description'] = $value['module'];
       }
     }
   }
