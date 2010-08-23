@@ -97,34 +97,6 @@ function hook_og_default_roles_alter(&$roles) {
 }
 
 /**
- * Set the default permissions to be assigned to members, by their role.
- *
- * Roles should be defined via hook_og_default_roles().
- *
- * @return
- *   Array keyed with the permission name and the roles it applied to as the
- *   value.
- */
-function hook_og_default_permissions() {
-  return array(
-    'foo' => array(OG_AUTHENTICATED_ROLE),
-  );
-}
-
-/**
- * Alter the default permissions.
- *
- * @param $perms
- *   Array keyed with the permission name and the roles it applied to as the
- *   value.
- */
-function hook_og_default_permissions_alter(&$perms) {
-  // Add the permission to 'super admin' role, that should be defined
-  // via hook_og_default_roles().
-  $perms['foo'][] = 'super admin';
-}
-
-/**
  * Allow modules to act upon new group role.
  *
  * @param $role

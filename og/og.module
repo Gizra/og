@@ -229,10 +229,12 @@ function og_og_permission() {
   $perms['update group'] = array(
     'title' => t('Edit group'),
     'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
+    'default role' => array(OG_ADMINISTRATOR_ROLE),
   );
   $perms['administer group'] = array(
     'title' => t('Administer group'),
     'description' => t('Manage or block users, and manage their role assignments in the group.'),
+    'default role' => array(OG_ADMINISTRATOR_ROLE),
   );
 
   foreach (node_permissions_get_configured_types() as $type) {
@@ -242,33 +244,6 @@ function og_og_permission() {
   return $perms;
 }
 
-/**
- * Implement hook_og_default_permissions().
- *
- * TODO: Deprecate this hook and move logic to hook_og_permissions().
- */
-function og_og_default_permissions() {
-  // Create default permissions for group content nodes if they already exist.
-  $perms = array();
-
-  $perms['update group'] = array(OG_ADMINISTRATOR_ROLE);
-  $perms['administer group'] = array(OG_ADMINISTRATOR_ROLE);
-
-  foreach (node_permissions_get_configured_types() as $type) {
-    if (og_is_group_content_type('node', $type)) {
-      $info = node_type_get_type($type);
-      $type = check_plain($info->type);
-
-      $perms["edit own $type content"] = array(OG_AUTHENTICATED_ROLE);
-      $perms["delete own $type content"] = array(OG_AUTHENTICATED_ROLE);
-
-      $perms["edit any $type content"] = array(OG_ADMINISTRATOR_ROLE);
-      $perms["delete any $type content"] = array(OG_ADMINISTRATOR_ROLE);
-    }
-  }
-
-  return $perms;
-}
 
 /**
  * Implement hook_og_default_roles()
@@ -1265,8 +1240,8 @@ function og_user_role_permissions($roles = array()) {
  * @param $gid
  *   The group node ID.
  * @param $permission
- *   Optioanl; A string containing a permission. If set, only roles containing that
- *   permission are returned.
+ *   Optional; A string containing a permission. If set, only roles containing
+ *   that permission are returned.
  * @param $force_group
  *   Optioanl; If TRUE then the roles of the group will be retrieved by the
  *   group ID, even if the group is set to have default roles and permissions.
@@ -1311,78 +1286,99 @@ function og_get_global_roles() {
  * Get default roles.
  */
 function og_get_default_roles($include = TRUE) {
-  $roles = module_invoke_all('og_default_roles');
+  $roles = array();
+  foreach (module_implements('og_default_roles') as $module) {
+    $roles[$module] = module_invoke($module, 'og_default_roles');
+  }
 
   // Allow other modules to alter the defult roles.
   drupal_alter('og_default_roles', $roles);
 
   if ($include) {
-    $roles = array_merge(array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), $roles);
+    $roles = array_merge(array('og' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE)), $roles);
   }
 
   return $roles;
 }
 
 /**
- * Get default permissions.
- */
-function og_get_default_permissions() {
-  $perms = module_invoke_all('og_default_permissions');
-
-  // Allow other modules to alter the roles and permissions.
-  drupal_alter('og_default_permissions', $perms);
-
-  return $perms;
-}
-
-/**
- * Add default roles and permissions of a module to the global roles.
+ * Add default roles and permissions of a module to the global permissions.
+ *
+ * This function is called whenever a module is enabled. Calling this function
+ * directly will re-assign permissions to thier default roles.
  *
  * @param $module
  *   The module name.
  * @return
  *   Array with the global roles, as new records might have been added.
  */
-function og_set_global_access_module($module = '') {
-  $global_roles = og_get_global_roles();
-
+function og_set_global_access_module($module) {
   $default_roles = og_get_default_roles();
-  $default_perm = og_get_default_permissions();
+  $global_roles = og_get_global_roles();
+  $permissions = og_get_permissions();
 
-  if ($module_roles = module_invoke($module, 'og_default_roles')) {
-    if (empty($global_roles)) {
-      // There are no roles, so we need to add the default ones, including the
-      // anonymous and authenticated memebers.
-      $module_roles = array_merge(drupal_map_assoc($default_roles), drupal_map_assoc($module_roles));
+  // The roles that should be added.
+  $roles_to_add = array();
+
+  if (empty($global_roles)) {
+    // Add all the roles, there are no roles defined yet. This is probably
+    // becuase OG is only being installed.
+    $roles_to_add = $default_roles;
+  }
+  elseif (!empty($default_roles[$module])) {
+    // Diff the roles that should be added with the ones already defined as
+    // global roles.
+    $roles_to_add = array_diff($default_roles[$module], $global_roles);
+  }
+
+  // Add a new global role.
+  if (!empty($roles_to_add)) {
+    foreach ($roles_to_add as $name) {
+      $role = og_create_global_role($name);
+      $global_roles[$role->rid] = $name;
     }
-    $global_roles_assoc = drupal_map_assoc($global_roles);
-    foreach ($module_roles as $name) {
-      if (empty($global_roles_assoc[$name]) || empty($global_roles)) {
-        // Add a new global role.
-        $role = og_create_global_role($name);
-        $global_roles[$role->rid] = $name;
+  }
+
+  // If there are permissions defined, make sure they were not applied already,
+  // as it might happen if a module was disabled and re-enabled.
+  $perms_to_add = array();
+  $perms_to_add_by_rid = array();
+
+  foreach ($permissions as $key => $value) {
+    if ($value['module'] == $module) {
+      $perms_to_add[$key] = $value;
+    }
+  }
+
+  if ($perms_to_add) {
+    // Get the assigned permissions of the global roles.
+    $global_roles_perms = og_user_role_permissions($global_roles);
+
+    // Get the roles keyed by thier name.
+    $global_roles_flip = array_flip($global_roles);
+    foreach ($perms_to_add as $key => $value) {
+      if (!empty($value['default role'])) {
+        // Don't try to assign permissions that are already assigned.
+        foreach ($value['default role'] as $role) {
+          $rid = $global_roles_flip[$role];
+          if (empty($global_roles_perms[$rid][$key])) {
+            // Get the  permissions to be added in the form:
+            // array(
+            //   '1' => array( // '1' is the role ID.
+            //     'perm_foo' => 'perm_foo',
+            //     'perm_bar' => 'perm_bar',
+            //    ),
+            // );
+            $perms_to_add_by_rid[$rid][$key] = $key;
+          }
+        }
       }
     }
   }
 
-
-  if (($module_perms = module_invoke($module, 'og_default_permissions')) &&
-    // Check module's permissions were not applied yet.
-    !((bool) db_query_range('SELECT 1 FROM {og_role_permission} WHERE module = :module', 0, 1, array(':module' => $module))->fetchField())) {
-
-    // Group permissions by role.
-    $permissions = array();
-    foreach ($module_perms as $name => $perm_roles) {
-      foreach ($perm_roles as $perm_role) {
-        $permissions[$perm_role][$name] = TRUE;
-      }
-    }
-
-    // Iterate over existing roles, and add the module's permissions.
-    foreach ($global_roles as $rid => $name) {
-      if (!empty($permissions[$name])) {
-        og_user_role_change_permissions($rid, $permissions[$name]);
-      }
+  if ($perms_to_add_by_rid) {
+    foreach ($perms_to_add_by_rid as $rid => $perms) {
+      og_user_role_change_permissions($rid, $perms);
     }
   }
 
@@ -1772,13 +1768,14 @@ function og_get_permissions() {
   foreach (module_implements('og_permission') as $module) {
     if ($permissions = module_invoke($module, 'og_permission')) {
       foreach ($permissions as $key => $perm) {
-        // Initialize the roles key, if other modules haven't set it explicetly.
-        // This means the permissions can apply to anonymous and authenticated
-        // members as-well.
-        $permissions[$key] += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE));
-
-        // Add the module information.
-        $permissions[$key]['module'] = $module;
+        $permissions[$key] += array(
+          // Initialize the roles key, if other modules haven't set it explicetly.
+          // This means the permissions can apply to anonymous and authenticated
+          // members as-well.
+          'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE),
+          'default role' => array(),
+          'module' => $module,
+        );
       }
       $perms = array_merge($perms, $permissions);
     }
@@ -2002,6 +1999,11 @@ function og_list_permissions($type) {
         'title' => t('Delete any %type_name content', array('%type_name' => $info->name)),
       ),
     );
+
+    // Add default permissions.
+    foreach ($perms as $key => $value) {
+      $perms[$key]['default role'] = array(OG_AUTHENTICATED_ROLE);
+    }
   }
   return $perms;
 }
