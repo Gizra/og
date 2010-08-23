@@ -430,8 +430,8 @@ function og_node_type_update($info) {
  *
  * This is a wrapper function around og_load() that allows passing the group's
  * entity type and entity ID, and the correct group will be loaded according.
- * If no group exists and $create option is set to TRUE and new group entity
- * will be created.
+ * If no group exists and $create option is set to TRUE a new group entity will
+ * be created.
  *
  * @param $etid
  *   The group content ID.
@@ -547,7 +547,7 @@ function og_save($group) {
 
 
 /**
- * Delete multiple Group entities.
+ * Delete multiple group entities.
  *
  * @param $gids
  *   An array of group entity IDs.
@@ -558,6 +558,13 @@ function og_delete_multiple(array $gids) {
   og_invalidate_cache($gids);
 }
 
+/**
+ * Delete a group entity.
+ *
+ * @param $gid
+ *   The group ID.
+ */
+
 function og_delete($gid) {
   og_delete_multiple(array($gid));
 
@@ -565,6 +572,12 @@ function og_delete($gid) {
   og_delete_user_roles_by_group($gid, NULL, TRUE);
 }
 
+/**
+ * Invalidate cache.
+ *
+ * @param $gids
+ *   Array with group IDs that their cache should be invalidated.
+ */
 function og_invalidate_cache($gids = array()) {
   // Reset static cache.
   $caches = array(
