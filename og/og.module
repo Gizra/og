@@ -228,7 +228,7 @@ function og_og_permission() {
 
   $perms['update group'] = array(
     'title' => t('Edit group'),
-    'description' => t('Edit the group.'),
+    'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
   );
   $perms['administer group'] = array(
     'title' => t('Administer group'),
