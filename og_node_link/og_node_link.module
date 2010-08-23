@@ -7,9 +7,14 @@
  */
 
 /**
- * Group register field.
+ * Group node link field.
  */
-define('OG_NODE_LINK_FIELD', 'og_links');
+define('OG_NODE_LINK_FIELD', 'og_node_link');
+
+/**
+ * Define the permissions name for the view field.
+ */
+define ('OG_NODE_LINK_PERMISSION', 'view og_node_link field');
 
 
 /**
@@ -65,9 +70,9 @@ function og_node_link_field_allowed_values() {
   $options = array();
 
   foreach (node_type_get_types() as $node) {
-  	if (og_is_group_content_type('node', $node->type)) {
-  		$options[$node->type] = check_plain($node->name);
-  	}
+    if (og_is_group_content_type('node', $node->type)) {
+      $options[$node->type] = check_plain($node->name);
+    }
   }
 
   return $options;
@@ -79,21 +84,33 @@ function og_node_link_field_allowed_values() {
 function og_node_link_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
   if ($field['field_name'] == OG_NODE_LINK_FIELD && !empty($entity->{OG_NODE_LINK_FIELD}[LANGUAGE_NONE][0]['value'])) {
-  	// Get the allowed links.
-  	$links = array();
-  	foreach ($entity->{OG_NODE_LINK_FIELD}[LANGUAGE_NONE] as $delta => $value) {
-  		$node_type = $value['value'];
-      // Check if the user can create a this node type.
-      if (node_access('create', $node_type)) {
-        $element[$delta] = array(
-          '#type' => 'link',
-          '#title' => check_plain(node_type_get_name($node_type)),
-          '#href' => 'node/add/' . $node_type,
-          // We know the entity is a node.
-          '#options' => array('query' => array('gids_node[]' => $entity->nid)),
-        );
+
+    $access = TRUE;
+
+    if (module_exists('og_field_access')) {
+      // Check if user has view field permissions.
+      list($id) = entity_extract_ids($entity_type, $entity);
+      $group = og_get_group($entity_type, $id);
+      $access = og_user_access($group->gid, OG_NODE_LINK_PERMISSION);
+    }
+
+    if ($access) {
+      // Get the allowed links.
+      $links = array();
+      foreach ($entity->{OG_NODE_LINK_FIELD}[LANGUAGE_NONE] as $delta => $value) {
+        $node_type = $value['value'];
+        // Check if the user can create a this node type.
+        if (node_access('create', $node_type)) {
+          $element[$delta] = array(
+            '#type' => 'link',
+            '#title' => check_plain(node_type_get_name($node_type)),
+            '#href' => 'node/add/' . $node_type,
+            // We know the entity is a node.
+            '#options' => array('query' => array('gids_node[]' => $entity->nid)),
+          );
+        }
       }
-  	}
+    }
   }
 
   return $element;
