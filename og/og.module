@@ -1295,7 +1295,8 @@ function og_get_default_roles($include = TRUE) {
   drupal_alter('og_default_roles', $roles);
 
   if ($include) {
-    $roles = array_merge(array('og' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE)), $roles);
+    $roles['og'][] = OG_ANONYMOUS_ROLE;
+    $roles['og'][] = OG_AUTHENTICATED_ROLE;
   }
 
   return $roles;
@@ -1323,7 +1324,7 @@ function og_set_global_access_module($module) {
   if (empty($global_roles)) {
     // Add all the roles, there are no roles defined yet. This is probably
     // becuase OG is only being installed.
-    $roles_to_add = $default_roles;
+    $roles_to_add = reset($default_roles);
   }
   elseif (!empty($default_roles[$module])) {
     // Diff the roles that should be added with the ones already defined as
