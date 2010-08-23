@@ -263,7 +263,6 @@ function og_node_access($node, $op, $account) {
     if (og_is_group_type('node', $type) && $group = og_get_group('node', $node->nid)) {
       $return = NODE_ACCESS_DENY;
       // The node is a group.
-      // TODO: Fix this to return correct value.
       if (og_user_access($group->gid, $op . ' group', $account)) {
         $return = NODE_ACCESS_ALLOW;
       }
@@ -1025,9 +1024,14 @@ function og_get_all_group_entity() {
  * Return TRUE if entity belongs to a group.
  *
  * @param $gid
+ *   The group ID.
  * @param $entity_type
+ *   The entity type.
  * @param $entity
- * @return unknown_type
+ *   The entity object. If empty the current user will be used.
+ *
+ * @return
+ *   TRUE if the entity (e.g. the user) belongs to a group.
  */
 function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
   if ($entity_type == 'user' && empty($entity)) {
