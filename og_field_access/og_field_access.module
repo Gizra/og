@@ -50,11 +50,18 @@ function og_field_access_og_permission_alter(&$perms) {
   foreach (og_fields_info() as $field_name => $value) {
     if (!empty($value['allow field access']) && !empty($value['field access'])) {
       foreach ($value['field access'] as $perm) {
-        $perms[$perm['permission']]['title'] = $perm['title'];
-        $perms[$perm['permission']]['description'] = $perm['description'];
+        $key = $perm['permission'];
+        $perms[$key]['title'] = $perm['title'];
+        $perms[$key]['description'] = $perm['description'];
+
+        // Initialize the roles key, if other modules haven't set it explicetly.
+        // This means the permissions can apply to anonymous and authenticated
+        // members as-well.
+        $perms[$key] += array('roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE));
+
         // Add the module information, so the permissions will be assigned with
         // the correct module name, and not be associated with og_field_access.
-        $perms[$perm['permission']]['description'] = $value['module'];
+        $perms[$perm['permission']]['module'] = $value['module'];
       }
     }
   }
