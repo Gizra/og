@@ -170,10 +170,8 @@ function og_modules_enabled($modules) {
  * Implements hook_modules_uninstalled().
  */
 function og_modules_uninstalled($modules) {
-  foreach ($modules as $module) {
-    // Delete module's permissions.
-    og_permissions_delete_by_module($module);
-  }
+  // Delete module's permissions.
+  og_permissions_delete_by_module($modules);
 }
 
 /**
@@ -1569,11 +1567,11 @@ function og_get_user_roles_name($rids = array()) {
  * @see og_modules_uninstalled()
  *
  * @param $module
- *   The module name.
+ *   Array with the modules name.
  */
-function og_permissions_delete_by_module($module) {
+function og_permissions_delete_by_module($modules = array()) {
    db_delete('og_role_permission')
-     ->condition('module', $module, 'IN')
+     ->condition('module', $modules, 'IN')
      ->execute();
 }
 
