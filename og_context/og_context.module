@@ -75,7 +75,7 @@ function og_context_og_context_negotiation_info() {
 
   $providers['url'] = array(
     'name' => t('URL'),
-    'description' => t("URL."),
+    'description' => t("Select groups if they were passed in the URL (e.g. node/add/post?gids_node[]=4,5,6)."),
     'callback' => 'og_context_handler_url',
   );
 
