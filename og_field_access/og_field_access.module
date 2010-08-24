@@ -54,7 +54,7 @@ function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_
   $fields = field_info_instances($entity_type, $form['#bundle']);
   if ($fields) {
     foreach ($fields as $field_name => $value) {
-      og_field_access_check_access($entity_type, $entity, $form, $field_name, 'edit');
+      og_field_access_check_access($entity_type, $entity, $form, $field_name, $form_state, $langcode, 'edit');
     }
   }
 }
@@ -68,7 +68,7 @@ function og_field_access_field_attach_view_alter(&$result, $context) {
   $field_name = element_children($fields);
   $field_name = reset($field_name);
 
-  og_field_access_check_access($context['entity_type'], $context['entity'], $result, $field_name, 'view');
+  og_field_access_check_access($context['entity_type'], $context['entity'], $result, array(), array(), $field_name, 'view');
 }
 
 
@@ -83,7 +83,7 @@ function og_field_access_field_attach_view_alter(&$result, $context) {
  * @param $field_name
  *   The name of the field that the edit access is checked for.
  */
-function og_field_access_check_access($entity_type, $entity, &$form, $field_name, $op) {
+function og_field_access_check_access($entity_type, $entity, &$form, $form_state, $langcode, $field_name, $op) {
   global $user;
   $account = $user;
   list($id) = entity_extract_ids($entity_type, $entity);
@@ -107,7 +107,7 @@ function og_field_access_check_access($entity_type, $entity, &$form, $field_name
     }
 
     if ($op == 'edit') {
-      $element = &$form[$field_name][LANGUAGE_NONE]['#access'];
+      $element = &$form[$field_name][$langcode]['#access'];
     }
     else {
       $element = &$form[$field_name]['#access'];
