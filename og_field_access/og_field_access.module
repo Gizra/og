@@ -29,7 +29,7 @@ function og_field_access_og_permission_alter(&$perms) {
               'module' => 'og_field_access',
             );
 
-          $perm = 'edit ' . $label . ' field';
+          $perm = 'edit ' . $field_name . ' field';
           $perms[$perm] = array(
             'title' => t('Edit @label field', array('@label' => $label)),
             'description' => t('Edit the @label field for existing groups.', array('@label' => $label)),
@@ -43,18 +43,18 @@ function og_field_access_og_permission_alter(&$perms) {
   }
 }
 
+
 /**
  * Implements hook_field_attach_form().
  *
  * Add access check on the field.
  */
 function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
-  // Add field access permissions.
-  foreach (og_fields_info() as $field_name => $value) {
-    if (!empty($value['allow field access']) && !empty($value['field access'])) {
-      foreach ($value['field access'] as $perm_value) {
-        og_field_access_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, $field_name, $perm_value['permission']);
-      }
+  // Check field access permissions for the specific bundle.
+  $fields = field_info_instances($entity_type, $form['#bundle']);
+  if ($fields) {
+    foreach ($fields as $field_name => $value) {
+      og_field_access_attach_form_access($entity_type, $entity, $form, $form_state, $langcode, $field_name);
     }
   }
 }
@@ -70,11 +70,9 @@ function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_
  * @param $form_state
  * @param $langcode
  * @param $field_name
- *   The name of the field that the access is checked for.
-  @param $perm_key
- *   The group permission name.
+ *   The name of the field that the edit access is checked for.
  */
-function og_field_access_attach_form_access($entity_type, $entity, &$form, $form_state, $langcode, $field_name, $perm) {
+function og_field_access_attach_form_access($entity_type, $entity, &$form, $form_state, $langcode, $field_name) {
   global $user;
   $account = $user;
   list($id) = entity_extract_ids($entity_type, $entity);
@@ -82,14 +80,13 @@ function og_field_access_attach_form_access($entity_type, $entity, &$form, $form
     // Existing entity and the field exists.
     $access = FALSE;
 
-    $field = og_fields_info($field_name);
+    $perm = 'edit ' . $field_name . ' field';
 
-
-    if (in_array('group', $field['type']) && $group = og_get_group($entity_type, $id)) {
+    if (og_is_group_type($entity_type, $form['#bundle']) && $group = og_get_group($entity_type, $id)) {
       $access = og_user_access($group->gid, $perm);
     }
     // If there is no access, check if this is a group content.
-    if (!$access && in_array('group content', $field['type']) && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
+    if (!$access && og_is_group_content_type($entity_type, $form['#bundle']) && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
       foreach ($gids as $gid) {
         if (og_user_access($gid, $perm)) {
           $access = TRUE;
