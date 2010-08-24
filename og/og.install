@@ -82,12 +82,12 @@ function og_schema() {
         'not null' => TRUE,
         'default' => 1,
       ),
-	    'created' => array(
-	      'description' => 'The Unix timestamp when the group was created.',
-	      'type' => 'int',
-	      'not null' => TRUE,
-	      'default' => 0,
-	    ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the group was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('gid'),
   );
