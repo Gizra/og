@@ -1731,7 +1731,7 @@ function og_user_role_grant_permissions($rid, array $permissions = array()) {
   foreach (og_get_permissions() as $name => $value) {
     $modules[$name] = $value['module'];
   }
-	// Grant new permissions for the role.
+  // Grant new permissions for the role.
   foreach ($permissions as $name) {
     db_merge('og_role_permission')
       ->key(array(
