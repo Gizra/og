@@ -596,6 +596,7 @@ function og_invalidate_cache($gids = array()) {
     drupal_static_reset($cache);
   }
 }
+
 /**
  * Get group IDs by the entity type and entity IDs.
  *
@@ -1394,6 +1395,7 @@ function og_set_global_access_module($module) {
 
   if ($perms_to_add_by_rid) {
     foreach ($perms_to_add_by_rid as $rid => $perms) {
+      // Assign the permissions to the roles.
       og_user_role_change_permissions($rid, $perms);
     }
   }
@@ -1785,9 +1787,9 @@ function og_get_permissions() {
     if ($permissions = module_invoke($module, 'og_permission')) {
       foreach ($permissions as $key => $perm) {
         $permissions[$key] += array(
-          // Initialize the roles key, if other modules haven't set it explicetly.
-          // This means the permissions can apply to anonymous and authenticated
-          // members as-well.
+          // Initialize the roles key, if other modules haven't set it
+          // explicetly. This means the permissions can apply to anonymous and
+          // authenticated members as-well.
           'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE),
           'default role' => array(),
           'module' => $module,
