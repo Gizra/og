@@ -85,23 +85,19 @@ function og_node_link_field_formatter_view($entity_type, $entity, $field, $insta
   $element = array();
   if ($field['field_name'] == OG_NODE_LINK_FIELD && !empty($entity->{OG_NODE_LINK_FIELD}[LANGUAGE_NONE][0]['value'])) {
 
-    $access = TRUE;
-
-    if ($access) {
-      // Get the allowed links.
-      $links = array();
-      foreach ($entity->{OG_NODE_LINK_FIELD}[LANGUAGE_NONE] as $delta => $value) {
-        $node_type = $value['value'];
-        // Check if the user can create a this node type.
-        if (node_access('create', $node_type)) {
-          $element[$delta] = array(
-            '#type' => 'link',
-            '#title' => check_plain(node_type_get_name($node_type)),
-            '#href' => 'node/add/' . $node_type,
-            // We know the entity is a node.
-            '#options' => array('query' => array('gids_node[]' => $entity->nid)),
-          );
-        }
+    // Get the allowed links.
+    $links = array();
+    foreach ($entity->{OG_NODE_LINK_FIELD}[LANGUAGE_NONE] as $delta => $value) {
+      $node_type = $value['value'];
+      // Check if the user can create a this node type.
+      if (node_access('create', $node_type)) {
+        $element[$delta] = array(
+          '#type' => 'link',
+          '#title' => check_plain(node_type_get_name($node_type)),
+          '#href' => 'node/add/' . $node_type,
+          // We know the entity is a node.
+          '#options' => array('query' => array('gids_node[]' => $entity->nid)),
+        );
       }
     }
   }
