@@ -358,7 +358,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         $options_type = $type;
       }
 
-      $properties = _options_properties($options_type, $element['#multiple'], $element['#required']);
+      $properties = _options_properties($options_type, $element['#multiple'], $element['#required'], $options);
 
       // If the element isn't required, and there are some options.
       if (!$element['#required'] && $type != 'item') {
