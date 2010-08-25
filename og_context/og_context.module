@@ -81,21 +81,21 @@ function og_context_og_context_negotiation_info() {
 
   $providers['node'] = array(
     'name' => t('Node'),
-    'description' => t("Node."),
+    'description' => t("Determine context by checking if a node is a group or a group content."),
     'callback' => 'og_context_handler_node',
     'menu path' => array('node/%', 'node/%/edit'),
   );
 
   $providers['user-view'] = array(
     'name' => t('User view'),
-    'description' => t("User view."),
+    'description' => t("Determine context by checking if a user is a group or a group content on the 'user view' page."),
     'callback' => 'og_context_handler_user_view',
     'menu path' => array('user/%'),
   );
 
   $providers['user-edit'] = array(
     'name' => t('User edit'),
-    'description' => t("User edit."),
+    'description' => t("Determine context by checking if a user is a group or a group content on the 'user edit' page."),
     'callback' => 'og_context_handler_user_edit',
     'menu path' => array('user/%/edit'),
   );
