@@ -15,11 +15,10 @@ class og_handler_argument_group_audience_gid extends views_handler_argument_nume
    */
   function title() {
     $title = '';
-    if ($entity = entity_load($this->options['og_type'], array($this->argument))) {
-      $entity = current($entity);
+    if ($group = og_context()) {
 
-      // FIXME: Implement when http://drupal.org/node/629484
-      $title = '@placeholder';
+      // TODO: Use wrapper function.
+      $title = check_plain($group->label);
     }
 
     return $title;

@@ -35,7 +35,7 @@ function og_views_data() {
       'handler' => 'views_handler_filter_numeric',
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
+      'handler' => 'og_handler_argument_group_audience_gid',
     ),
   );
 
