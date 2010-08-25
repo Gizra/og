@@ -929,7 +929,7 @@ function og_node_type_save($bundle_name) {
  * @param $entity
  *   The entity can be a user, node or any fieldable entity.
  * @param $states
- *   Optioanl; Array with the state to return. If empty groups of all state will
+ *   Optional; Array with the state to return. If empty groups of all state will
  *   return.
  * @return
  *  An array with the group IDs, or an empty array.
@@ -959,6 +959,7 @@ function og_get_entity_groups($entity_type, $entity, $states = array(OG_STATE_AC
       $gids += drupal_map_assoc(array($group['gid']));
     }
   }
+
   $groups[$entity_type][$id] = $gids;
   return $groups[$entity_type][$id];
 }

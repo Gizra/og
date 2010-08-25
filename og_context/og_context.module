@@ -362,7 +362,6 @@ function og_context_handler_node() {
     }
     $return = _group_context_handler_entity('node', $node);
   }
-  $node = is_object($item['map'][1]) ? $item['map'][1] : node_load($item['map'][1]);
   return $return;
 }
 
