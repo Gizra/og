@@ -131,7 +131,8 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
         $label = og_label($group->gid);
         $entity = entity_load($group->entity_type, array($group->etid));
         $entity = current($entity);
-        $uri = entity_uri($entity_type, $entity);
+        // Get the entity type of the group entity.
+        $uri = entity_uri($group->entity_type, $entity);
         $element[$delta] = array(
           '#type' => 'link',
           '#title' => $label,
