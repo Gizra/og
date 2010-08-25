@@ -65,10 +65,13 @@ function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_
 function og_field_access_field_attach_view_alter(&$result, $context) {
   // Clone the result so it won't be changed in element_children().
   $fields = $result;
-  $field_name = element_children($fields);
-  $field_name = reset($field_name);
+  if ($field_names = element_children($fields)) {
+    foreach ($field_names as $field_name) {
+      og_field_access_check_access($context['entity_type'], $context['entity'], $result, array(), array(), $field_name, 'view');
+    }
+  }
 
-  og_field_access_check_access($context['entity_type'], $context['entity'], $result, array(), array(), $field_name, 'view');
+
 }
 
 
