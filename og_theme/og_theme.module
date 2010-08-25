@@ -5,7 +5,6 @@
  * @file
  * Associate theme to a group.
  */
-
 /**
  * Group theme field.
  */
@@ -14,7 +13,7 @@ define('OG_THEME_FIELD', 'group_theme');
 /**
  * Implement og_fields_info().
  */
-function og_theme_group_fields_info() {
+function og_theme_og_fields_info() {
   $items[OG_THEME_FIELD] = array(
     'type' => array('group'),
     'description' => t('Associate theme to a group.'),

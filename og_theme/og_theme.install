@@ -96,7 +96,7 @@ if (module_exists('og_theme')) {
  */
 function og_theme_update_dependencies() {
   $dependencies['og_theme'][7000] = array(
-    'group' => 7000,
+    'og' => 7000,
   );
   return $dependencies;
 }
