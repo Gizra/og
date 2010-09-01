@@ -450,7 +450,12 @@ function og_node_type_update($info) {
 function og_get_group($entity_type, $etid, $create = FALSE, $states = array(OG_STATE_ACTIVE), $reset = FALSE) {
   $group = FALSE;
   if ($gids = og_get_group_ids($entity_type, array($etid), $states, $reset)) {
-    $group = og_load($gids[$etid], $reset);
+    // We don't use the entity ID directly, as it might change. For example, if
+    // a node is a translation of another node that is a group, we need to load
+    // the other node. og_get_group_ids() returns the correct entity ID as the
+    // key, so we will use that.
+    $correct_etid = key($gids);
+    $group = og_load($gids[$correct_etid], $reset);
   }
   elseif ($create) {
     $group = og_create_group(array('entity_type' => $entity_type, 'etid' => $etid));
@@ -632,6 +637,24 @@ function og_get_group_ids($entity_type = 'group', $etids = array(), $states = ar
   }
 
   if (!empty($etids)) {
+
+    if (module_exists('translation') && $entity_type == 'node') {
+      // If a node is a translation of another node that is a group, we should
+      // mark it as a group as-well.
+      $query = db_select('node', 'node');
+      $query->fields('node', array('tnid', 'tnid'))
+        ->condition('nid', $etids, 'IN');
+
+      // Add the real group node IDs to the entity IDs that will be queried
+      // against the {og} table.
+      if ($result = $query->execute()->fetchAllKeyed()) {
+        $etids = drupal_map_assoc(array_merge($etids, $result));
+
+        // Add the result also to the required entity IDs, so they are returned.
+        $required_etids = drupal_map_assoc(array_merge($required_etids, $result));
+      }
+    }
+
     if ($entity_type == 'group') {
       $gids[$entity_type] = $gids[$entity_type] + drupal_map_assoc($etids);
     }
