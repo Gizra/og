@@ -66,13 +66,6 @@ function og_context_preprocess_html(&$variables) {
 function og_context_og_context_negotiation_info() {
   $providers = array();
 
-  $providers['session'] = array(
-    'name' => t('Session'),
-    'description' => t("Use the group context that was detected in previous pages, as long as it matches the viewed one as-well."),
-    'callback' => 'og_context_handler_session',
-    'weight' => -10,
-  );
-
   $providers['url'] = array(
     'name' => t('URL'),
     'description' => t("Select groups if they were passed in the URL (e.g. node/add/post?gids_node[]=4,5,6)."),
@@ -299,35 +292,29 @@ function og_context_determine_context($item = NULL) {
           }
         }
         else {
-          // Context isn't determined by the menu item (e.g. session handler
-          // checks previous group context).
+          // Context isn't determined by the menu item.
           $invoke = TRUE;
         }
 
         $gids = array();
 
         if ($invoke && ($gids = call_user_func($provider['callback']))) {
-          $gid = reset($gids);
+          // Check if one of the group IDs already exists in the session, and if
+          // so use it.
+          if (!empty($_SESSION['og_context']) && in_array($_SESSION['og_context'], $gids)) {
+            $gid = $_SESSION['og_context'];
+          }
+          else {
+            // Grab the first group ID.
+            $gid = reset($gids);
+          }
+
           $context = og_load($gid);
           // We found the first context, so we can break.
           break;
         }
       }
     }
-  }
-
-  return $context;
-}
-
-
-/**
- * Context handler; Get groups from user's session.
- */
-function og_context_handler_session() {
-  $context = array();
-
-  if (!empty($_SESSION['og_context'])) {
-    $context = drupal_map_assoc(array($_SESSION['og_context']));
   }
 
   return $context;
