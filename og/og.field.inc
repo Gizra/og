@@ -481,73 +481,79 @@ function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode
 function og_field_crud_group($op, $entity_type, $entity) {
   $property = OG_GROUP_FIELD;
 
-  $wrapper = &$entity->{$property}[LANGUAGE_NONE];
+  if (!empty($entity->{$property}) && empty($entity->og_skip_group_create)) {
+    $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
-  // Get the entity ID.
-  list($id) = entity_extract_ids($entity_type, $entity);
+    // Get the entity ID.
+    list($id) = entity_extract_ids($entity_type, $entity);
 
-  $group = og_get_group($entity_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
-  if ($op == 'delete') {
-    if (!empty($group->gid)) {
-      // Remove group.
-      og_delete(array($group->gid));
-    }
-  }
-  else {
-    // Check group is new.
-    if (empty($group->gid)) {
-      if (!empty($wrapper[0]['value'])) {
-        // Save the group to get the group ID.
-        og_save($group);
-
-        // Subscribe the entity author, if exists.
-        if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
-          og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
-        }
+    $group = og_get_group($entity_type, $id, TRUE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    if ($op == 'delete') {
+      if (!empty($group->gid)) {
+        // Remove group.
+        og_delete(array($group->gid));
       }
     }
     else {
-      // Existing group.
-      $save = FALSE;
+      // Check group is new.
+      if (empty($group->gid)) {
+        if (!empty($wrapper[0]['value'])) {
+          // Save the group to get the group ID.
+          og_save($group);
 
-      if ($group->state == OG_STATE_ACTIVE && empty($wrapper[0]['value'])) {
-        $group->state = OG_STATE_PENDING;
-        $save = TRUE;
+          // Subscribe the entity author, if exists.
+          if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
+            og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
+          }
+        }
       }
-      elseif($group->state == OG_STATE_PENDING && !empty($wrapper[0]['value'])) {
-        $group->state = OG_STATE_ACTIVE;
-        $save = TRUE;
+      else {
+        // Existing group.
+        $save = FALSE;
+
+        if ($group->state == OG_STATE_ACTIVE && empty($wrapper[0]['value'])) {
+          $group->state = OG_STATE_PENDING;
+          $save = TRUE;
+        }
+        elseif($group->state == OG_STATE_PENDING && !empty($wrapper[0]['value'])) {
+          $group->state = OG_STATE_ACTIVE;
+          $save = TRUE;
+        }
+
+        // Check if the entity label has changed.
+        $label = og_entity_label($entity_type, $entity);
+
+        if ($group->label != $label) {
+          $group->label = $label;
+          $save = TRUE;
+        }
+
+        if ($save) {
+          og_save($group);
+        }
       }
 
-      // Check if the entity label has changed.
-      $label = og_entity_label($entity_type, $entity);
-
-      if ($group->label != $label) {
-        $group->label = $label;
-        $save = TRUE;
-      }
-
-      if ($save) {
-        og_save($group);
-      }
-    }
-
-    // Determine if field has changed and roles should be overridden, or
-    // reverted, by comparing the default access field of the entity being
-    // saved, and its original state.
-    $property = OG_DEFAULT_ACCESS_FIELD;
-    // The field exists.
-    if (!empty($entity->{$property})) {
-      if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
-        og_user_roles_override($group->gid);
-      }
-      elseif (empty($group->is_new)) {
-        // If the field is set to be using default access and there are
-        // already overridden roles we delete them.
-        og_delete_user_roles_by_group($group->gid);
+      // Determine if field has changed and roles should be overridden, or
+      // reverted, by comparing the default access field of the entity being
+      // saved, and its original state.
+      $property = OG_DEFAULT_ACCESS_FIELD;
+      // The field exists.
+      if (!empty($entity->{$property})) {
+        if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
+          og_user_roles_override($group->gid);
+        }
+        elseif (empty($group->is_new)) {
+          // If the field is set to be using default access and there are
+          // already overridden roles we delete them.
+          og_delete_user_roles_by_group($group->gid);
+        }
       }
     }
   }
+
+  // Clear the skip group creation from the entity, in case it was set in
+  // og_group().
+  unset($entity->og_skip_group_create);
 }
 
 
