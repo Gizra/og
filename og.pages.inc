@@ -392,7 +392,7 @@ function og_add_users($form_state, $group_node) {
     '#cols' => 70,
     // No autocomplete b/c user_autocomplete can't handle commas like taxonomy. pls improve core.
     // '#autocomplete_path' => 'user/autocomplete',
-    '#description' => t('Add one or more usernames in order to associate users with this group. Multiple usernames should be separated by a comma.'),
+    '#description' => t('Add one or more usernames in order to associate users with this group. Separate multiple usernames by commas or new lines.'),
     '#required' => TRUE,
   );
   $form['op'] = array('#type' => 'submit', '#value' => t('Add users'));
@@ -404,7 +404,7 @@ function og_add_users($form_state, $group_node) {
  * VAlidate hanler for the add users form.
  */
 function og_add_users_validate($form, $form_state) {
-  $names = explode(',', $form_state['values']['og_names']);
+  $names = preg_split('/[\r\n,]+/', $form_state['values']['og_names']);
   foreach ($names as $name) {
     $account = user_load(array('name' => trim($name)));
     if (isset($account->uid)) {
@@ -423,7 +423,7 @@ function og_add_users_validate($form, $form_state) {
 
 function og_add_users_submit($form, &$form_state) {
   // Safest option is to do a select, filter existing members, then insert.
-  $names = explode(',', $form_state['values']['og_names']);
+  $names = preg_split('/[\r\n,]+/', $form_state['values']['og_names']);
   foreach ($names as $name) {
     $account = user_load(array('name' => trim($name)));
     if ($account->uid) {
