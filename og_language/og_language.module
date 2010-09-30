@@ -93,7 +93,7 @@ function og_language_from_group_context($languages) {
 
 
 /**
- * Return all enabled themes.
+ * Return all enabled languages.
  */
 function og_language_field_allowed_values() {
   $return = array('__default' => t('Use site-wide language interface definition'));
