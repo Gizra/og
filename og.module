@@ -290,7 +290,7 @@ function og_menu_access_unsubscribe($group_node, $account = NULL) {
   global $user;
 
   if (empty($account)) {
-    $account = $user;
+    $account = drupal_clone($user);
   }
 
   // Unsubscribee must already be a member or pending member.
@@ -384,7 +384,7 @@ function og_is_group_member($gid, $include_admins = TRUE, $uid = NULL) {
 function og_is_group_admin($node, $account = NULL) {
   if (empty($account)) {
     global $user;
-    $account = $user;
+    $account = drupal_clone($user);
   }
 
   // Modules can cause us to arrive here before og_init() has fired.
@@ -656,7 +656,7 @@ function og_determine_context() {
 function og_determine_context_get_group($node, $account = NULL) {
   if (empty($account)) {
     global $user;
-    $account = $user;
+    $account = drupal_clone($user);
   }
   if (og_is_group_type($node->type)) {
     $group_node = $node;

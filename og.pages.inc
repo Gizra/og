@@ -269,7 +269,7 @@ function og_subscribe($node, $uid = NULL) {
   global $user;
   if (is_null($uid)) {
     if ($user->uid) {
-      $account = $user;
+      $account = drupal_clone($user);
     }
     else {
       $dest = drupal_get_destination();
