@@ -21,7 +21,7 @@ function og_register_form_user_register_form_alter(&$form, $form_state) {
   global $user;
   if ($gids = og_register_get_groups()) {
     $entity = $user;
-    field_attach_form('user', $entity, &$form, &$form_state);
+    field_attach_form('user', $entity, $form, $form_state);
   }
 }
 

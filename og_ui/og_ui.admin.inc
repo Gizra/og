@@ -707,7 +707,7 @@ function og_ui_field_settings_submit($form, &$form_state) {
  */
 function og_ui_field_delete_form($form, &$form_state, $instance) {
   module_load_include('inc', 'field_ui', 'field_ui.admin');
-  $output = field_ui_field_delete_form($form, &$form_state, $instance);
+  $output = field_ui_field_delete_form($form, $form_state, $instance);
 
   $output['actions']['cancel'] = array(
     '#markup' => l(t('Cancel'), 'admin/config/group/fields'),
