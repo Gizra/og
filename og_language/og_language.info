@@ -1,7 +1,7 @@
 ; $Id:$
-name = Group language
+name = Organic groups language
 description = "Associate language interface to a group."
-package = "Group"
+package = "Organic groups"
 dependencies[] = og_context
 dependencies[] = locale
 core = 7.x
