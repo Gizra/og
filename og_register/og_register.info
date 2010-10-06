@@ -1,8 +1,8 @@
-name = Group register
+; $Id$
+name = Organic groups register
 description = "Allow subscribing to groups during the user registration."
-package = "Group"
+package = "Organic groups"
 dependencies[] = og
 core = 7.x
-version = VERSION
 files[] = og_register.module
 files[] = og_register.install

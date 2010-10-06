@@ -7,9 +7,10 @@
  */
 
 /**
- * Implements hook_og_permission_alter().
+ * Implements hook_og_permission().
  */
-function og_field_access_og_permission_alter(&$perms) {
+function og_field_access_og_permission() {
+  $perms = array();
   foreach (field_info_instances() as $entity => $bundles) {
     foreach ($bundles as $bundle => $bundle_value) {
       if (!empty($bundle_value)) {
@@ -41,6 +42,7 @@ function og_field_access_og_permission_alter(&$perms) {
       }
     }
   }
+  return $perms;
 }
 
 

@@ -1,7 +1,7 @@
 ; $Id$
-name = Group field access
+name = Organic groups field access
 description = "Provide field access based on group."
-package = "Group"
+package = "Organic groups"
 dependencies[] = og
 core = 7.x
 files[] = og_field_access.module

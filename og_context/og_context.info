@@ -1,7 +1,7 @@
 ; $Id$
-name = Group context
+name = Organic groups context
 description = "Get a group from a viewed page."
-package = "Group"
+package = "Organic groups"
 dependencies[] = og
 core = 7.x
 files[] = og_context.module

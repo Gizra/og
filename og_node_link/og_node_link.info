@@ -1,7 +1,7 @@
 ; $Id$
-name = Group node link
+name = Organic groups node link
 description = "Add content creation links field."
-package = "Group"
+package = "Organic groups"
 dependencies[] = og
 core = 7.x
 files[] = og_node_link.module
