@@ -37,7 +37,7 @@ function og_context_create_group($empty, $data = NULL, $conf = FALSE) {
     return $context;
   }
 
-  $data = og_get_group('group', $data['gid']);
+  $data = og_get_group('group', $data->gid);
 
   if (!empty($data)) {
     $context->data     = $data;
