@@ -897,7 +897,7 @@ function og_user_access($gid, $string, $account = NULL) {
   $perm = &drupal_static(__FUNCTION__, array());
 
   if (empty($account)) {
-    $account = $user;
+    $account = clone($user);
   }
 
   // User #1 has all privileges.
@@ -1125,7 +1125,7 @@ function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
 function og_user_access_by_entity($perm, $entity_type = NULL, $etid = NULL, $account = NULL) {
   if (empty($account)) {
     global $user;
-    $account = $user;
+    $account = clone($user);
   }
 
   if ($group = og_get_group($entity_type, $etid)) {

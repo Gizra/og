@@ -90,7 +90,7 @@ function og_field_access_field_attach_view_alter(&$result, $context) {
  */
 function og_field_access_check_access($entity_type, $entity, &$form, $form_state, $langcode, $field_name, $op) {
   global $user;
-  $account = $user;
+  $account = clone($user);
   list($id) = entity_extract_ids($entity_type, $entity);
   if (!empty($form[$field_name]) && !empty($id)) {
     // Existing entity and the field exists.

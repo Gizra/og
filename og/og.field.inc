@@ -573,7 +573,7 @@ function og_field_audience_options($opt_group = FALSE, $account = NULL) {
   if (empty($account)) {
     global $user;
 
-    $account = $user;
+    $account = clone($user);
   }
 
   //Initialize values
@@ -606,7 +606,7 @@ function og_field_audience_count($opt_group = FALSE, $account = NULL) {
     if (empty($account)) {
       global $user;
 
-      $account = $user;
+      $account = clone($user);
     }
     // If opt_group is TRUE then get the count of all the groups that are
     // active, otherwise only the ones the user belongs to.
