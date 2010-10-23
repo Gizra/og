@@ -6,6 +6,8 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
+define('OG_REQUIRED_CTOOLS_API', '2.0-alpha');
+
 // Load all Field module hooks for Group.
 require(drupal_get_path('module', 'og') . '/og.field.inc');
 
@@ -172,6 +174,20 @@ function og_modules_enabled($modules) {
 function og_modules_uninstalled($modules) {
   // Delete module's permissions.
   og_permissions_delete_by_module($modules);
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function og_ctools_plugin_directory($module, $plugin) {
+  // Safety: go away if CTools is not at an appropriate version.
+  if (!module_invoke('ctools', 'api_version', OG_REQUIRED_CTOOLS_API)) {
+    return;
+  }
+
+  if ($module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
 }
 
 /**
