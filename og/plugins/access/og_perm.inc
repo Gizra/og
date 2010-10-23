@@ -11,10 +11,10 @@
  * by the system that includes this file.
  */
 $plugin = array(
-  'title' => t("User: group permission"),
+  'title' => t("OG: user permission in group"),
   'description' => t('Control access by gorup permission string.'),
-  'callback' => 'og_ perm_ctools_access_check',
-  'default' => array('perm' => 'access content'),
+  'callback' => 'og_perm_ctools_access_check',
+  'default' => array('perm' => ''),
   'settings form' => 'og_perm_ctools_access_settings',
   'summary' => 'og_perm_ctools_access_summary',
   'required context' => array(
@@ -49,7 +49,7 @@ function og_perm_ctools_access_settings($form, &$form_state, $conf) {
 /**
  * Check for access.
  */
-function og_perm_ctools_access_check($conf, $account, $group) {
+function og_perm_ctools_access_check($conf, $context) {
   // As far as I know there should always be a context at this point, but this
   // is safe.
   list($user_context, $og_group_context) = $context;
@@ -60,7 +60,6 @@ function og_perm_ctools_access_check($conf, $account, $group) {
   if (empty($og_group_context) || empty($og_group_context->data) || empty($og_group_context->data->gid)) {
     return FALSE;
   }
-
 
   return og_user_access($og_group_context->data->gid, $conf['perm'], $user_context->data);
 }
