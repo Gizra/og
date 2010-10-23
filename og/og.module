@@ -1158,6 +1158,7 @@ function og_get_entity_state($gid, $entity_type, $entity) {
     foreach ($wrapper as $key => $value) {
       if ($value['gid'] == $gid) {
         $state = $value['state'];
+        break;
       }
     }
   }
