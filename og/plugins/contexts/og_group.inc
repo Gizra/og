@@ -74,7 +74,7 @@ function og_context_group_settings_form($form, &$form_state) {
 /**
  * Validate a user.
  */
-function ctools_context_user_settings_form_validate($form, &$form_state) {
+function og_context_group_settings_form_validate($form, &$form_state) {
   if ($form_state['values']['type'] != 'select') {
     return;
   }
@@ -82,7 +82,7 @@ function ctools_context_user_settings_form_validate($form, &$form_state) {
   // TODO: Validate the autocomplete
 }
 
-function ctools_context_user_settings_form_submit($form, &$form_state) {
+function og_context_group_settings_form_submit($form, &$form_state) {
   $form_state['conf']['gid'] = $form_state['values']['gid'];
 }
 
@@ -93,7 +93,7 @@ function og_context_group_convert_list() {
   $list = array(
     'entity_type' => t('Entity type'),
     'entity_id' => t('Entity ID'),
-  	'entity_label' => t('Entity label'),
+  	'label' => t('Group label'),
   );
   if (module_exists('token')) {
     $list += reset(token_get_list(array('og_group')));
@@ -110,7 +110,7 @@ function og_context_group_convert($context, $type) {
       return $context->data->entity_type;
     case 'entity_id':
       return $context->data->etid;
-    case 'entity_label':
+    case 'label':
       return $context->data->label;
   }
   if (module_exists('token')) {
