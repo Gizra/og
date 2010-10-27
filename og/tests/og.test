@@ -8,9 +8,9 @@ class OgGroupCrud extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => 'Group group CRUD',
+      'name' => 'Organic groups CRUD',
       'description' => 'Test the create, update and remove of group entitys.',
-      'group' => 'Group',
+      'group' => 'Organic groups',
     );
   }
 

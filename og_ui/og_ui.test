@@ -4,9 +4,9 @@
 class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
-      'name' => 'Group UI role permissions',
+      'name' => 'Organic groups UI role permissions',
       'description' => 'Verify that role permissions can be added and removed via the permissions page of the group.',
-      'group' => 'Group UI'
+      'group' => 'Organic groups UI'
     );
   }
 
