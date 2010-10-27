@@ -15,7 +15,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity', 'og');
+    parent::setUp('entity', 'entity_test', 'og');
     $this->web_user = $this->drupalCreateUser();
   }
 
@@ -23,7 +23,7 @@ class OgGroupCrud extends DrupalWebTestCase {
    * Test CRUD of group entitys.
    */
   function testOgCrud() {
-    $group = og_get_group('foo', 1, TRUE);
+    $group = og_get_group('entity_test', 1, TRUE);
 
     // Assert is new property.
     $this->assertTrue($group->is_new, t('New group has "is new" property.'));
@@ -44,7 +44,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue(!empty($group->gid), t('Group ID was set for saved group.'));
 
     // Set a new state for the group.
-    $group = og_get_group('foo', 1);
+    $group = og_get_group('entity_test', 1);
     $group->state = OG_STATE_PENDING;
 
     $group = og_save($group);
@@ -52,17 +52,17 @@ class OgGroupCrud extends DrupalWebTestCase {
     // Assert group isn't loaded, when state is pending and state isn't
     // specifically stated.
     drupal_static_reset('og_get_group_ids');
-    $group = og_get_group('foo', 1);
+    $group = og_get_group('entity_test', 1);
 
     $this->assertFalse($group, t('Pending state group was not loaded, as it was not requested.'));
 
     // Reload group to make sure state was updated.
-    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
+    $group = og_get_group('entity_test', 1, FALSE, array(OG_STATE_PENDING), TRUE);
 
     $this->assertTrue($group->state == OG_STATE_PENDING, t('Group was updated.'));
 
     og_delete($group->gid);
-    $group = og_get_group('foo', 1, FALSE, array(OG_STATE_PENDING), TRUE);
+    $group = og_get_group('entity_test', 1, FALSE, array(OG_STATE_PENDING), TRUE);
 
     $this->assertFalse($group, t('Group was deleted.'));
   }
@@ -73,7 +73,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   function testOgFieldOgGroup() {
 
     $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLgroupin($admin_user);
+    $this->drupalLogin($admin_user);
 
     // Create group content type.
     $type = $this->drupalCreateContentType(array(), array('og_group_type' => 'group'));
@@ -124,7 +124,7 @@ class OgTypeTest extends DrupalWebTestCase {
 
   function __testOgType() {
     $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLgroupin($admin_user);
+    $this->drupalLogin($admin_user);
 
     $this->drupalGet('admin/structure/types/add');
 
@@ -159,7 +159,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     parent::setUp('og');
 
     $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLgroupin($this->admin_user);
+    $this->drupalLogin($this->admin_user);
 
     // Create group content type.
     $group_type = $this->drupalCreateContentType();

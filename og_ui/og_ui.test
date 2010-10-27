@@ -11,7 +11,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('group', 'og_ui');
+    parent::setUp('og', 'og_ui');
 
     $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
     $this->drupalLgroupin($this->admin_user);
