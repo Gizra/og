@@ -15,7 +15,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity', 'group');
+    parent::setUp('entity', 'og');
     $this->web_user = $this->drupalCreateUser();
   }
 
@@ -118,7 +118,7 @@ class OgTypeTest extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity', 'group');
+    parent::setUp('entity', 'og');
   }
 
 
@@ -156,7 +156,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('group');
+    parent::setUp('og');
 
     $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
     $this->drupalLgroupin($this->admin_user);
