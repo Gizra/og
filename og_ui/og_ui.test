@@ -14,14 +14,14 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     parent::setUp('og', 'og_ui');
 
     $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLgroupin($this->admin_user);
+    $this->drupalLogin($this->admin_user);
 
     // Create group content type.
     $group_type = $this->drupalCreateContentType();
     $this->group_type = $group_type->type;
 
     // Add og_group field.
-    og_create_field('og_group', 'node', $this->group_type);
+    og_create_field(OG_GROUP_FIELD, 'node', $this->group_type);
 
     $node = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => array(LANGUAGE_NONE => array(0 => array('value' =>TRUE)))));
     $this->group = og_get_group('node', $node->nid);
@@ -35,7 +35,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     $gid = $this->group->gid;
     $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
 
-    $roles = og_get_group_default_roles($gid);
+    $roles = og_get_default_roles();
 
     // Remove a permission.
     $edit = array();
