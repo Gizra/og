@@ -337,7 +337,7 @@ function og_og_fields_info() {
     ),
     'instance' => array(
       'label' => t('Group type'),
-      'widget_type' => 'options_buttons',
+      'widget_type' => 'options_select',
       'required' => TRUE,
       // Make the group type default.
       'default_value' => array(0 => array('value' => 1)),
@@ -366,7 +366,7 @@ function og_og_fields_info() {
     ),
     'instance' => array(
       'label' => t('Group roles and permissions'),
-      'widget_type' => 'options_buttons',
+      'widget_type' => 'options_select',
       'required' => TRUE,
       // Use default role and permissions as default value.
       'default_value' => array(0 => array('value' => 0)),

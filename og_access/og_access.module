@@ -172,7 +172,7 @@ function og_access_og_fields_info() {
       'required' => TRUE,
       // Default to public.
       'default_value' => array(0 => array('value' => 0)),
-      'widget_type' => 'options_buttons',
+      'widget_type' => 'options_select',
       'display' => array(
         'full' => array(
           'label' => 'above',
