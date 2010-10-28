@@ -205,8 +205,9 @@ function og_views_data_alter(&$data) {
   // TODO: Maybe move field overrides to field_views_data_alter().
   // TODO: Override also field revisions table.
 
+  // TODO: Move the below handler to og_context.
   // Override group audience - "gid" (group ID) field argument.
-  $data['field_data_group_audience']['group_audience_gid']['argument']['handler'] = 'og_handler_argument_group_audience_gid';
+  // $data['field_data_group_audience']['group_audience_gid']['argument']['handler'] = 'og_handler_argument_group_audience_gid';
 
   $data['field_data_group_audience']['group_audience_gid']['field']['handler'] = 'views_handler_field_numeric';
 
