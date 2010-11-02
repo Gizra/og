@@ -91,6 +91,7 @@ function og_context_group_settings_form_submit($form, &$form_state) {
  */
 function og_context_group_convert_list() {
   $list = array(
+    'gid' => t('Group ID'),
     'entity_type' => t('Entity type'),
     'entity_id' => t('Entity ID'),
   	'label' => t('Group label'),
@@ -106,6 +107,8 @@ function og_context_group_convert_list() {
  */
 function og_context_group_convert($context, $type) {
   switch ($type) {
+    case 'gid':
+      return $context->data->gid;
     case 'entity_type':
       return $context->data->entity_type;
     case 'entity_id':
