@@ -516,6 +516,15 @@ class EntityOg extends EntityDB {
   public function __construct(array $values = array(), $entityType = NULL) {
     parent::__construct($values, 'group');
   }
+  
+  public function delete() {
+    $gid = $this->gid;
+    parent::delete();
+    og_invalidate_cache(array($gid));
+  
+    // Delete roles and permissions.
+    og_delete_user_roles_by_group($gid, NULL, TRUE);
+  }
 }
 
 
@@ -550,47 +559,6 @@ function og_load_multiple($gids = array(), $conditions = array(), $reset = FALSE
 function og_load($gid, $reset = FALSE) {
   $group = og_load_multiple(array($gid), array(), $reset);
   return $group? reset($group) : FALSE;
-}
-
-/**
- * Save a group entity.
- *
- * @param $group
- *   The group entity.
- * @return
- *   The group entity.
- */
-function og_save($group) {
-  $group->save();
-
-  return $group;
-}
-
-
-/**
- * Delete multiple group entities.
- *
- * @param $gids
- *   An array of group entity IDs.
- */
-function og_delete_multiple(array $gids) {
-  entity_get_controller('group')->delete($gids);
-
-  og_invalidate_cache($gids);
-}
-
-/**
- * Delete a group entity.
- *
- * @param $gid
- *   The group ID.
- */
-
-function og_delete($gid) {
-  og_delete_multiple(array($gid));
-
-  // Delete roles and permissions.
-  og_delete_user_roles_by_group($gid, NULL, TRUE);
 }
 
 /**

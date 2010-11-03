@@ -61,7 +61,7 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     $this->assertTrue($group->state == OG_STATE_PENDING, t('Group was updated.'));
 
-    og_delete($group->gid);
+    $group->delete();
     $group = og_get_group('entity_test', 1, FALSE, array(OG_STATE_PENDING), TRUE);
 
     $this->assertFalse($group, t('Group was deleted.'));

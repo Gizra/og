@@ -491,7 +491,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
     if ($op == 'delete') {
       if (!empty($group->gid)) {
         // Remove group.
-        og_delete(array($group->gid));
+        $group->delete();
       }
     }
     else {
