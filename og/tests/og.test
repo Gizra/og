@@ -156,7 +156,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('entity', 'og');
 
     $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
     $this->drupalLogin($this->admin_user);
@@ -166,7 +166,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $this->group_type = $group_type->type;
 
     // Add og_group field.
-    og_create_field('og_group', 'node', $this->group_type);
+    og_create_field(OG_GROUP_FIELD, 'node', $this->group_type);
 
     $node = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => array(LANGUAGE_NONE => array(0 => array('value' =>TRUE)))));
     $this->group = og_get_group('node', $node->nid);
