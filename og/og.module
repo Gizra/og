@@ -1536,9 +1536,7 @@ function og_user_role_save($role) {
     module_invoke_all('og_user_role_insert', $role);
   }
 
-  // Clear the user access cache.
-  drupal_static_reset('og_user_access');
-  drupal_static_reset('og_user_role_permissions');
+  og_invalidate_cache();
 
   return $status;
 }
@@ -1564,10 +1562,8 @@ function og_user_role_delete($rid) {
     ->execute();
 
   module_invoke_all('og_user_role_delete', $role);
-
-  // Clear the user access cache.
-  drupal_static_reset('og_user_access');
-  drupal_static_reset('og_user_role_permissions');
+  
+  og_invalidate_cache();
 }
 
 /**
@@ -1758,10 +1754,7 @@ function og_user_role_grant_permissions($rid, array $permissions = array()) {
       ))
       ->execute();
   }
-
-  // Clear the user access cache.
-  drupal_static_reset('og_user_access');
-  drupal_static_reset('og_user_role_permissions');
+  og_invalidate_cache();
 }
 
 /**
@@ -1782,9 +1775,7 @@ function og_user_role_revoke_permissions($rid, array $permissions = array()) {
     ->condition('permission', $permissions, 'IN')
     ->execute();
 
-  // Clear the user access cache.
-  drupal_static_reset('og_user_access');
-  drupal_static_reset('og_user_role_permissions');
+  og_invalidate_cache();
 }
 
 
