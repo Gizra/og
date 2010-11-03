@@ -352,12 +352,8 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       $element['#required'] = $element['#required'] && !empty($options);
 
       // Prepare the type as expected in _options_properties().
-      if (in_array($type, array('radios', 'checkboxes'))) {
-        $options_type = 'buttons';
-      }
-      else {
-        $options_type = $type;
-      }
+      $options_type = in_array($type, array('radios', 'checkboxes')) ? 'buttons' : $type;
+      
 
       $properties = _options_properties($options_type, $element['#multiple'], $element['#required'], $options);
 
