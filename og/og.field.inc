@@ -353,7 +353,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
       // Prepare the type as expected in _options_properties().
       $options_type = in_array($type, array('radios', 'checkboxes')) ? 'buttons' : $type;
-      
 
       $properties = _options_properties($options_type, $element['#multiple'], $element['#required'], $options);
 
@@ -383,7 +382,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       $return = $element;
       break;
   }
-
 
   return $return;
 }
@@ -432,6 +430,8 @@ function og_field_attach_delete($entity_type, $entity) {
 
 /**
  * Implements hook_field_attach_form().
+ * 
+ * Handle translated nodes that act as groups.
  */
 function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
   $item = menu_get_item();
