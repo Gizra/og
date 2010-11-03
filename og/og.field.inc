@@ -499,7 +499,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
       if (empty($group->gid)) {
         if (!empty($wrapper[0]['value'])) {
           // Save the group to get the group ID.
-          og_save($group);
+          $group->save();
 
           // Subscribe the entity author, if exists.
           if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
@@ -529,7 +529,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
         }
 
         if ($save) {
-          og_save($group);
+          $group->save();
         }
       }
 

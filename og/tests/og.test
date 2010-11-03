@@ -38,7 +38,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue(empty($group->gid), t('Group ID not set for unsaved group.'));
 
     // Save the group.
-    $group = og_save($group);
+    $group->save();
 
     // Assert group ID was set.
     $this->assertTrue(!empty($group->gid), t('Group ID was set for saved group.'));
@@ -47,7 +47,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $group = og_get_group('entity_test', 1);
     $group->state = OG_STATE_PENDING;
 
-    $group = og_save($group);
+    $group->save();
 
     // Assert group isn't loaded, when state is pending and state isn't
     // specifically stated.

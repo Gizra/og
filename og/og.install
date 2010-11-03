@@ -348,7 +348,7 @@ function _og_upgrade_group(&$sandbox) {
       // Make sure the created value wasn't altered already.
       if (($group = og_get_group('node', $nid, TRUE)) && $group->created != $created) {
         $group->created = $created;
-        og_save($group);
+        $group->save();
 
         // New group created, so add it to the total count.
         $sandbox['count'] += 1;
