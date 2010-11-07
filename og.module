@@ -929,6 +929,11 @@ function og_subscribe_user($gid, $account, $request = NULL) {
  * @return array
  **/
 function og_get_subscriptions($uid, $min_is_active = 1, $reset = FALSE) {
+  // Anonymous users are not able to subscribe to groups.
+  if (!$uid) {
+    return array();
+  }
+
   static $subscriptions = array();
 
   if ($reset) {
