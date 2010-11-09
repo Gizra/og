@@ -97,6 +97,9 @@ function og_ui_add_users_submit($form, &$form_state) {
 function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
   $group = og_get_group($entity_type, $etid);
+  // Get the group real entity, so we can check the user ID of the entity.
+  $entity = og_load_entity_from_group($group->gid);
+
   $header = array(
     'username' => array('data' => t('Username'), 'field' => 'u.name'),
     'status' => array('data' => t('Status'), 'field' => 'group_audience.group_audience_state'),
@@ -133,8 +136,6 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
 
   $status = og_group_content_states();
   $roles = og_user_roles($group->gid);
-  // Get the group real entity, so we can check the user ID of the entity.
-  $entity = og_load_entity_from_group($group->gid);
 
   //TODO: Add pager.
   $query = new EntityFieldQuery();
@@ -151,7 +152,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
 
     foreach ($accounts as $account) {
       // Don't allow editing of the group manager.
-      if (empty($entity->uid) || $account->uid != $entity->uid) {
+      if ($account->uid != $entity->uid) {
         $users_roles = array();
         foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
           if (!in_array($roles[$rid], array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
@@ -181,6 +182,13 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
       }
     }
   }
+
+  // Add group manager details.
+  $form['group_manager'] = array(
+    '#type' => 'item',
+    '#title' => t('Group manager'),
+    '#markup' => theme('username', array('account' => $entity)),
+  );
 
   $form['accounts'] = array(
     '#type' => 'tableselect',
