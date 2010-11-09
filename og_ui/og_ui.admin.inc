@@ -136,38 +136,20 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   // Get the group real entity, so we can check the user ID of the entity.
   $entity = og_load_entity_from_group($group->gid);
 
-  //TODO: Use listing API when we can add a pager to it.
-  $query = db_select('field_data_group_audience', 'group_audience');
+  //TODO: Add pager.
+  $query = new EntityFieldQuery();
   $query
-    ->condition('group_audience.group_audience_gid', $group->gid)
-    ->condition('group_audience.bundle', 'user');
+    ->entityCondition('entity_type', 'user')
+    ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', 1, '=');
 
-  $count_query = clone $query;
-  $count_query->addExpression('COUNT(group_audience.bundle)');
-
-  $query = $query->extend('PagerDefault')->extend('TableSort');
-  $query->join('users', 'u', 'u.uid =  group_audience.entity_id');
-  $query
-    ->fields('group_audience', array('entity_id', 'group_audience_state', 'group_audience_created'))
-    ->fields('u', array('name'))
-    ->limit(10)
-    ->orderByHeader($header)
-    ->setCountQuery($count_query);
-  $result = $query->execute()->fetchAll();
-
-  $uids = array();
-  foreach ($result as $row) {
-    $uids[] = $row->entity_id;
-  }
-
-  if ($uids) {
+  if ($result = $query->execute()) {
+    $uids = array_keys($result['user']);
     $states = og_group_content_states();
     // We load all the accounts as it's will happen in og_get_user_roles() and
     // we prefer loading all accounts at once.
     $accounts = user_load_multiple($uids);
 
-    foreach ($result as $row) {
-      $account = $accounts[$row->entity_id];
+    foreach ($accounts as $account) {
       // Don't allow editing of the group manager.
       if (empty($entity->uid) || $account->uid != $entity->uid) {
         $users_roles = array();
@@ -180,11 +162,20 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
         }
         asort($users_roles);
 
+        // Find the group in the user's field.
+        $property = OG_AUDIENCE_FIELD;
+        foreach ($account->{$property}[LANGUAGE_NONE] as $value) {
+          if ($value['gid'] == $group->gid) {
+            $row = $value;
+            break;
+          }
+        }
+
         $options[$account->uid] = array(
           'username' => theme('username', array('account' => $account)),
-          'status' =>  $states[$row->group_audience_state],
+          'status' =>  $states[$row['state']],
           'roles' => theme('item_list', array('items' => $users_roles)),
-          'member_for' => format_interval(REQUEST_TIME - $row->group_audience_created),
+          'member_for' => format_interval(REQUEST_TIME - $row['created']),
         );
 
       }
