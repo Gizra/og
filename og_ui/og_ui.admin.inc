@@ -141,7 +141,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   $query = new EntityFieldQuery();
   $query
     ->entityCondition('entity_type', 'user')
-    ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', 1, '=');
+    ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', $group->gid, '=');
 
   if ($result = $query->execute()) {
     $uids = array_keys($result['user']);
