@@ -2014,10 +2014,10 @@ function og_list_permissions($type) {
 
     // Build standard list of node permissions for this type.
     $perms = array(
-      "edit own $type content" => array(
+      "update own $type content" => array(
         'title' => t('Edit own %type_name content', array('%type_name' => $info->name)),
       ),
-      "edit any $type content" => array(
+      "update any $type content" => array(
         'title' => t('Edit any %type_name content', array('%type_name' => $info->name)),
       ),
       "delete own $type content" => array(
