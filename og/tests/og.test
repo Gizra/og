@@ -22,7 +22,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   /**
    * Test CRUD of group entitys.
    */
-  function testOgCrud() {
+  function __testOgCrud() {
     $group = og_get_group('entity_test', 1, TRUE);
 
     // Assert is new property.
@@ -68,81 +68,48 @@ class OgGroupCrud extends DrupalWebTestCase {
   }
 
   /**
-   * Test creation of groups upon creation of enteties with group field.
+   * Test OG group field behaviour.
    */
-  function testOgFieldOgGroup() {
+  function testOgGroupField() {
+    // Add OG group field to the entity_test.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'entity_test');
 
-    $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLogin($admin_user);
+    // Create an entity.
+    $user1 = $this->drupalCreateUser();
 
-    // Create group content type.
-    $type = $this->drupalCreateContentType(array(), array('og_group_type' => 'group'));
-    $type = $type->type;
+    $entity = new EntityClass(array('name' => 'test', 'uid' => $user1->uid));
+    $entity->save();
 
-    // Create a node and set the group field to TRUE.
-    $group_group[LANGUAGE_NONE][0]['value'] = TRUE;
-    $node = $this->drupalCreateNode(array('type' => $type, OG_GROUP_FIELD => $group_group));
+    // Assert no group was created.
+    $group = og_get_group('entity_test', $entity->pid);
+    $this->assertTrue(empty($group->gid), t('Group was not created.'));
 
-    // Assert a group was created.
-    $group = og_get_group('node', $node->nid);
-
-    $this->assertTrue(!empty($group->gid), t('Group was created.'));
-
-    // Assert the group's state and the entity state is active.
-    $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Group entity state is active.'));
-
-    // Edit the node prgrouprmatically, and set the group state to pending.
+    // Populate the group field.
     $property = OG_GROUP_FIELD;
-    $node->{$property}[LANGUAGE_NONE][0]['value'] = 0;
-    node_save($node);
+    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
 
-    // Reset the group.
-    $group = og_load($group->gid, TRUE);
-
-    // Assert the group's state is pending.
-    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group entity was changed to pending.'));
+    // Assert group was created.
+    $group = og_get_group('entity_test', $entity->pid);
+    $this->assertTrue(!empty($group->gid), t('Group was created.'));
   }
 }
 
 /**
  * Test the Group content handeling.
  */
-class OgTypeTest extends DrupalWebTestCase {
+class OgGroupAndUngroup extends DrupalWebTestCase {
 
   public static function __getInfo() {
     return array(
-      'name' => 'Organic groups content types',
-      'description' => 'Test the Group group node and group content creation.',
+      'name' => 'Organic groups group and ungroup',
+      'description' => 'Test the group and ungrouping of content under a group.',
       'group' => 'Organic groups',
     );
   }
 
   function setUp() {
-    parent::setUp('entity', 'og');
-  }
-
-
-  function __testOgType() {
-    $admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLogin($admin_user);
-
-    $this->drupalGet('admin/structure/types/add');
-
-    // Assert OG default types exist.
-    $this->assertText(t('Group node'), t('Group node option was found.'));
-    $this->assertText(t('group content'), t('group content option was found.'));
-
-    // Create group content type.
-    $group = $this->drupalCreateContentType(array(), array('og_group_type' => 'group'));
-
-    // Create post content type.
-    $group_content = $this->drupalCreateContentType(array(), array('og_group_content_type' => 'group content'));
-
-    $this->assertTrue(og_is_group_content_type($group_content->type), t('Content type is group content.'));
-
-    // Assert group content fields were added to the content type.
-    $this->drupalGet('node/add/' . $group_content->type);
-    $this->assertText(t('Groups audience'), t('Groups audience field was found.'));
+    parent::setUp('entity', 'entity_test', 'og');
   }
 }
 
