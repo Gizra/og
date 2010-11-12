@@ -22,7 +22,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   /**
    * Test CRUD of group entitys.
    */
-  function __testOgCrud() {
+  function testOgCrud() {
     $group = og_get_group('entity_test', 1, TRUE);
 
     // Assert is new property.
