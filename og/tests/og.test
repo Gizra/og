@@ -76,22 +76,34 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     // Create an entity.
     $user1 = $this->drupalCreateUser();
+    $property = OG_GROUP_FIELD;
 
     $entity = new EntityClass(array('name' => 'test', 'uid' => $user1->uid));
+    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
 
     // Assert no group was created.
     $group = og_get_group('entity_test', $entity->pid);
     $this->assertTrue(empty($group->gid), t('Group was not created.'));
 
-    // Populate the group field.
-    $property = OG_GROUP_FIELD;
+
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
-
-    // Assert group was created.
     $group = og_get_group('entity_test', $entity->pid);
+    // Assert group was created, and was already saved.
+    $group = og_get_group('group', $group->gid);
     $this->assertTrue(!empty($group->gid), t('Group was created.'));
+
+    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid, FALSE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    // Assert group's state was set to pending.
+    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group state was set to pending.'));
+
+    // Delete the entity, and assert the group was deleted.
+    $entity->delete();
+    $group = og_get_group('entity_test', $entity->pid, FALSE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $this->assertFalse($group, t('Group was deleted.'));
   }
 }
 

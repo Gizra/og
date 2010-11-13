@@ -452,7 +452,7 @@ function og_node_type_update($info) {
  * @param $etid
  *   The group content ID.
  * @param $entity_type
- *   The group entity type. "node" is the default value. Pass "gid" if the the
+ *   The group entity type. "node" is the default value. Pass "group" if
  *   content ID is equal to the group unique ID.
  * @param $create
  *   Optional; If no existing group is found, create a new one. Defaults to
