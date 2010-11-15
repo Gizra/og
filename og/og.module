@@ -1988,10 +1988,13 @@ function og_group_content_states() {
  *   The entity object.
  */
 function og_entity_label($entity_type, $entity) {
-  $label = entity_label($entity_type, $entity);
-  if (!$label) {
-    list($id) = entity_extract_ids($entity_type, $entity);
-    $label = t('Entity @entity_type ID @id', array('@entity_type' => $entity_type, '@id' => $id));
+  $label = '';
+  if (!empty($entity)) {
+    $label = entity_label($entity_type, $entity);
+    if (!$label) {
+      list($id) = entity_extract_ids($entity_type, $entity);
+      $label = t('Entity @entity_type ID @id', array('@entity_type' => $entity_type, '@id' => $id));
+    }
   }
   return $label;
 }
