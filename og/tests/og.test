@@ -74,10 +74,11 @@ class OgGroupCrud extends DrupalWebTestCase {
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
-    // Create an entity.
+    // Create user.
     $user1 = $this->drupalCreateUser();
-    $property = OG_GROUP_FIELD;
 
+    // Create an entity.
+    $property = OG_GROUP_FIELD;
     $entity = new EntityClass(array('name' => 'main', 'uid' => $user1->uid));
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
@@ -86,11 +87,12 @@ class OgGroupCrud extends DrupalWebTestCase {
     $group = og_get_group('entity_test', $entity->pid);
     $this->assertTrue(empty($group->gid), t('Group was not created.'));
 
-    // Assert group was created, and was already saved.
+    // Assert group was created, and was already saved, and its state is active
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
     $this->assertTrue(!empty($group->gid), t('Group was created.'));
+    $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Group state is set to active.'));
 
     // Assert group's state was set to pending.
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 0;
