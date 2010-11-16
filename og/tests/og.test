@@ -94,16 +94,25 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue(!empty($group->gid), t('Group was created.'));
     $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Group state is set to active.'));
 
+    // Assert the user is registered to the new group.
+    $this->assertTrue(og_is_member($group->gid, 'user', $user1), t('User is registered to the new group.'));
+
     // Assert group's state was set to pending.
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid, FALSE, array(OG_STATE_ACTIVE, OG_STATE_PENDING), TRUE);
     $this->assertTrue($group->state == OG_STATE_PENDING, t('Group state was set to pending.'));
 
+
+    $gid = $group->gid;
     // Delete the entity, and assert the group was deleted.
     $entity->delete();
     $group = og_get_group('entity_test', $entity->pid, FALSE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
     $this->assertFalse($group, t('Group was deleted.'));
+
+    // Assert user no longer belongs to group.
+    $this->assertFalse(og_is_member($gid), t('User is no longer registered to the new group.'));
+
   }
 }
 

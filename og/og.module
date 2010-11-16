@@ -1067,8 +1067,9 @@ function og_get_all_group_entity() {
 function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
   if ($entity_type == 'user' && empty($entity)) {
     global $user;
-    $entity = $user;
+    $entity = clone($user);
   }
+  $entity = og_load_entity($entity_type, $entity);
   $groups = og_get_entity_groups($entity_type, $entity);
   return in_array($gid, $groups);
 }
