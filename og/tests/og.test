@@ -86,17 +86,16 @@ class OgGroupCrud extends DrupalWebTestCase {
     $group = og_get_group('entity_test', $entity->pid);
     $this->assertTrue(empty($group->gid), t('Group was not created.'));
 
+    // Assert group was created, and was already saved.
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
-    // Assert group was created, and was already saved.
-    $group = og_get_group('group', $group->gid);
     $this->assertTrue(!empty($group->gid), t('Group was created.'));
 
+    // Assert group's state was set to pending.
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid, FALSE, array(OG_STATE_ACTIVE, OG_STATE_PENDING), TRUE);
-    // Assert group's state was set to pending.
     $this->assertTrue($group->state == OG_STATE_PENDING, t('Group state was set to pending.'));
 
     // Delete the entity, and assert the group was deleted.
