@@ -178,8 +178,8 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertTrue(og_is_member($group->gid, 'user', $user2), t('User is registered to the new group.'));
 
     // Verify current permissions.
-    $this->assertTrue(og_user_access($group->gid, 'update own article content', $user2), t('User has "update own article content" permission.'));
-    $this->assertTrue(og_user_access($group->gid, 'delete own article content', $user2), t('User has "delete own article content" permission.'));
+    $this->assertFalse(og_user_access($group->gid, 'update own article content', $user2), t('User does not have "update own article content" permission.'));
+    $this->assertFalse(og_user_access($group->gid, 'delete own article content', $user2), t('User does not have "delete own article content" permission.'));
     $this->assertFalse(og_user_access($group->gid, 'administer group', $user2), t('User does not have "administer group" permission.'));
 
     // Change permissions to authenticated member.
@@ -188,14 +188,24 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
     $rid = $roles[OG_AUTHENTICATED_ROLE];
 
     $permissions = array(
-      'delete own article content' => 0,
+      'delete own article content' => 1,
       'administer group' => 1,
     );
     og_user_role_change_permissions($rid, $permissions);
 
     // Verify proper permission changes.
-    $this->assertTrue(og_user_access($group->gid, 'update own article content', $user2), t('User still has "update own article content" permission.'));
-    $this->assertFalse(og_user_access($group->gid, 'delete own article content', $user2), t('User no longer has "delete own article content" permission.'));
+    $this->assertFalse(og_user_access($group->gid, 'update own article content', $user2), t('User still does not have "update own article content" permission.'));
+    $this->assertTrue(og_user_access($group->gid, 'delete own article content', $user2), t('User now has "delete own article content" permission.'));
     $this->assertTrue(og_user_access($group->gid, 'administer group', $user2), t('User now has "administer group" permission.'));
+
+    $permissions = array(
+      'delete own article content' => 1,
+      'administer group' => 0,
+    );
+    og_user_role_change_permissions($rid, $permissions);
+
+    $this->assertTrue(og_user_access($group->gid, 'delete own article content', $user2), t('User still has "delete own article content" permission.'));
+    $this->assertFalse(og_user_access($group->gid, 'administer group', $user2), t('User no longer has "administer group" permission.'));
+
   }
 }

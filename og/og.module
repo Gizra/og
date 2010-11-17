@@ -574,6 +574,7 @@ function og_invalidate_cache($gids = array()) {
     'og_get_group_ids',
     'og_get_entity_groups',
     'og_field_audience_options',
+    'og_user_role_permissions',
   );
 
   // Let other Group modules invalidate cache.
@@ -895,8 +896,6 @@ function og_user_access($gid, $string, $account = NULL) {
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable.
   if (!isset($perm[$gid][$account->uid])) {
-    $user_groups = og_get_entity_groups('user', $account);
-
     $roles = og_get_user_roles($gid, $account->uid);
     $role_permissions = og_user_role_permissions($roles);
 
