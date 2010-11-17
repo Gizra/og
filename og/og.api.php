@@ -131,6 +131,22 @@ function hook_og_fields_info_alter(&$fields_info) {
 
 }
 
+/**
+ * Act upon organic groups cache clearing.
+ *
+ * This can be used by implementing modules, that need to clear the cache
+ * as-well.
+ */
+function hook_og_invalidate_cache($gids = array()) {
+  $caches = array(
+    'og_foo',
+    'og_bar',
+  );
+
+  foreach ($caches as $cache) {
+    drupal_static_reset($cache);
+  }
+}
 
 
 /**

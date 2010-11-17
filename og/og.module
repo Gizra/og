@@ -577,14 +577,12 @@ function og_invalidate_cache($gids = array()) {
     'og_user_role_permissions',
   );
 
-  // Let other Group modules invalidate cache.
-  // TODO: Is there a better way? we want group_context to invalidate cache
-  // as-well.
-  drupal_alter('og_invalidate_cache', $caches, $gids);
-
   foreach ($caches as $cache) {
     drupal_static_reset($cache);
   }
+
+  // Let other Group modules know we invalidate cache.
+  module_invoke_all('og_invalidate_cache', $gids);
 }
 
 /**
