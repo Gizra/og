@@ -209,3 +209,101 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
 
   }
 }
+
+/**
+ * Test the multilangual groups.
+ */
+class OgTranslationTestCase extends TranslationTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups multilangual',
+      'description' => 'Test tranlatable node that is a group, returns the same group ID.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('locale', 'translation', 'translation_test', 'entity', 'og');
+  }
+
+  function testOgNodeLocale() {
+    // Add OG group field to the node's "page" bundle.
+    og_create_field(OG_GROUP_FIELD, 'node', 'page');
+
+    // Create Basic page in English.
+    $node_title = $this->randomName();
+    $node_body =  $this->randomName();
+    $node = $this->createPage($node_title, $node_body, 'en', TRUE);
+
+    // Submit translation in Spanish.
+    $node_translation_title = $this->randomName();
+    $node_translation_body = $this->randomName();
+    $node_translation = $this->createTranslation($node, $node_translation_title, $node_translation_body, 'es');
+
+    $this->drupalGet('node/' . $node_translation->nid . '/edit');
+    $this->assertText(t('Changing the group state can only be done via'), t('Group field on tranlated node does not allow editing.'));
+    $this->assertText($node_title, t('Link is given to the original node in the group field.'));
+  }
+
+  /**
+   * Create a "Basic page" in the specified language, and set it to be a group.
+   *
+   * @param $title
+   *   Title of basic page in specified language.
+   * @param $body
+   *   Body of basic page in specified language.
+   * @param $language
+   *   Language code.
+   * @param group
+   *   TRUE to set node as group. FALSE by default.
+   */
+  function createPage($title, $body, $language, $group = FALSE) {
+    $edit = array();
+    $property = OG_GROUP_FIELD;
+    $langcode = LANGUAGE_NONE;
+    $edit["title"] = $title;
+    $edit["body[$langcode][0][value]"] = $body;
+    $edit['language'] = $language;
+    if ($group) {
+      $edit["$property[$langcode][0][value]"] = 1;
+    }
+    $this->drupalPost('node/add/page', $edit, t('Save'));
+    $this->assertRaw(t('Basic page %title has been created.', array('%title' => $title)), t('Basic page created.'));
+
+    // Check to make sure the node was created.
+    $node = $this->drupalGetNodeByTitle($title);
+    $this->assertTrue($node, t('Node found in database.'));
+
+    return $node;
+  }
+
+  /**
+   * Create a translation for the specified basic page in the specified language.
+   *
+   * @param object $node The basic page to create translation for.
+   * @param string $title Title of basic page in specified language.
+   * @param string $body Body of basic page in specified language.
+   * @param string $language Language code.
+   */
+  function createTranslation($node, $title, $body, $language) {
+    $this->drupalGet('node/add/page', array('query' => array('translation' => $node->nid, 'target' => $language)));
+
+    $body_key = "body[$language][0][value]";
+    $this->assertFieldByXPath('//input[@id="edit-title"]', $node->title, "Original title value correctly populated.");
+    $this->assertFieldByXPath("//textarea[@name='$body_key']", $node->body[$node->language][0]['value'], "Original body value correctly populated.");
+
+    $edit = array();
+    $edit["title"] = $title;
+    $edit[$body_key] = $body;
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertRaw(t('Basic page %title has been created.', array('%title' => $title)), t('Translation created.'));
+
+    // Check to make sure that translation was successful.
+    $translation = $this->drupalGetNodeByTitle($title);
+    $this->assertTrue($translation, t('Node found in database.'));
+    $this->assertTrue($translation->tnid == $node->nid, t('Translation set id correctly stored.'));
+
+    return $translation;
+  }
+}
+
