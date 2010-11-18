@@ -213,7 +213,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
 /**
  * Test the multilangual groups.
  */
-class OgTranslationTestCase extends TranslationTestCase {
+class OgTranslationTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'Organic groups multilangual',
@@ -227,13 +227,35 @@ class OgTranslationTestCase extends TranslationTestCase {
   }
 
   function testOgNodeLocale() {
+    // Setup users.
+    $user1 = $this->drupalCreateUser(array(
+      'administer languages',
+      'administer content types',
+      'access administration pages',
+      'create page content',
+      'edit own page content',
+      'translate content',
+    ));
+
+    $this->drupalLogin($user1);
+
+    // Add languages.
+    $this->addLanguage('en');
+    $this->addLanguage('es');
+
+    // Set "Basic page" content type to use multilingual support with translation.
+    $this->drupalGet('admin/structure/types/manage/page');
+    $edit = array();
+    $edit['language_content_type'] = 2;
+    $this->drupalPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+
     // Add OG group field to the node's "page" bundle.
     og_create_field(OG_GROUP_FIELD, 'node', 'page');
 
     // Create Basic page in English.
     $node_title = $this->randomName();
     $node_body =  $this->randomName();
-    $node = $this->createPage($node_title, $node_body, 'en', TRUE);
+    $node = $this->createPage($node_title, $node_body, 'en');
 
     // Submit translation in Spanish.
     $node_translation_title = $this->randomName();
@@ -241,8 +263,39 @@ class OgTranslationTestCase extends TranslationTestCase {
     $node_translation = $this->createTranslation($node, $node_translation_title, $node_translation_body, 'es');
 
     $this->drupalGet('node/' . $node_translation->nid . '/edit');
-    $this->assertText(t('Changing the group state can only be done via'), t('Group field on tranlated node does not allow editing.'));
-    $this->assertText($node_title, t('Link is given to the original node in the group field.'));
+    $this->assertText(t('You can not change the group state from a translated content'), t('Group field on tranlated node does not allow editing.'));
+
+    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->assertNoText(t('You can not change the group state from a translated content'), t('Group field on original node allows editing.'));
+  }
+
+  /**
+   * Install a the specified language if it has not been already. Otherwise make sure that
+   * the language is enabled.
+   *
+   * @param string $language_code The language code the check.
+   */
+  function addLanguage($language_code) {
+    // Check to make sure that language has not already been installed.
+    $this->drupalGet('admin/config/regional/language');
+
+    if (strpos($this->drupalGetContent(), 'enabled[' . $language_code . ']') === FALSE) {
+      // Doesn't have language installed so add it.
+      $edit = array();
+      $edit['langcode'] = $language_code;
+      $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
+
+      // Make sure we're not using a stale list.
+      drupal_static_reset('language_list');
+      $languages = language_list('language');
+    }
+    elseif ($this->xpath('//input[@type="checkbox" and @name=:name and @checked="checked"]', array(':name' => 'enabled[' . $language_code . ']'))) {
+      // It's installed and enabled. No need to do anything.
+    }
+    else {
+      // It's installed but not enabled. Enable it.
+      $this->drupalPost(NULL, array('enabled[' . $language_code . ']' => TRUE), t('Save configuration'));
+    }
   }
 
   /**
@@ -257,18 +310,14 @@ class OgTranslationTestCase extends TranslationTestCase {
    * @param group
    *   TRUE to set node as group. FALSE by default.
    */
-  function createPage($title, $body, $language, $group = FALSE) {
+  function createPage($title, $body, $language) {
     $edit = array();
     $property = OG_GROUP_FIELD;
     $langcode = LANGUAGE_NONE;
     $edit["title"] = $title;
     $edit["body[$langcode][0][value]"] = $body;
     $edit['language'] = $language;
-    if ($group) {
-      $edit["$property[$langcode][0][value]"] = 1;
-    }
     $this->drupalPost('node/add/page', $edit, t('Save'));
-    $this->assertRaw(t('Basic page %title has been created.', array('%title' => $title)), t('Basic page created.'));
 
     // Check to make sure the node was created.
     $node = $this->drupalGetNodeByTitle($title);
