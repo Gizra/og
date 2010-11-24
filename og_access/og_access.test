@@ -15,7 +15,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity', 'entity_test', 'og', 'og_access');
+    parent::setUp('entity', 'og', 'og_access');
   }
 
   /**
@@ -40,18 +40,15 @@ class OgAccessTestCase extends DrupalWebTestCase {
     // Create a group node and enable access.
     $settings = array();
     $settings['type'] = $group_type->type;
-    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0] = 1;
-    $settings[OG_ACCESS_FIELD][LANGUAGE_NONE][0] = 1;
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $settings[OG_ACCESS_FIELD][LANGUAGE_NONE][0]['value'] = 1;
 
     $group_node = $this->drupalCreateNode($settings);
 
     $group = og_get_group('node', $group_node->nid);
-    debug($group_type);
-    debug($group_node);
-    debug($group);
 
     // Assert the user is a group member.
-    $this->assertTrue(og_is_member($group->gid, 'user', $user1));
+    $this->assertTrue(og_is_member($group->gid, 'user', $user1), t('User is a group member.'));
 
     // Assert the user can view the group.
     $this->drupalGet('node/' . $group_node->nid);
@@ -59,14 +56,13 @@ class OgAccessTestCase extends DrupalWebTestCase {
 
     // Assert another user is not a group member.
     $this->drupalLogin($user2);
-    $this->assertTrue(og_is_member($group->gid, 'user', $user2));
+    $this->assertFalse(og_is_member($group->gid, 'user', $user2), t('User is not a group member.'));
 
     // Assert non-member can't view the group.
     $this->drupalGet('node/' . $group_node->nid);
-    $this->assertResponse('404', t('Non group member can not view group node.'));
+    $this->assertResponse('403', t('Non group member can not view group node.'));
 
-
-    $group_content = $this->drupalCreateContentType();
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $group_content->type);
+    // $group_content = $this->drupalCreateContentType();
+    // og_create_field(OG_AUDIENCE_FIELD, 'node', $group_content->type);
   }
 }

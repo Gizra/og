@@ -42,8 +42,8 @@ define('OG_CONTENT_ACCESS_PRIVATE', 2);
  */
 function og_access_node_grants($account, $op) {
   $grants = array();
-  if ($op == 'view') {
-    foreach (og_get_entity_groups('user', $account) as $gid => $value) {
+  if ($op == 'view' && $groups = og_get_entity_groups('user', $account)) {
+    foreach ($groups as $gid => $value) {
       // Not all the groups are nodes, but in order to save loading the groups
       // we grant all group IDs.
       $grants[OG_ACCESS_AUTHENTICATED_REALM][] = $gid;
@@ -60,10 +60,15 @@ function og_access_node_grants($account, $op) {
 function og_access_node_access_records($node) {
   $grants = array();
 
+  // The group ID, that in case access is granted, will be recorded.
+  $gid_access = 0;
+
   $access = FALSE;
   if (!empty($node->{OG_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
     // Group or group content that is explicitly set to be unpublic.
     $access = TRUE;
+    $group = og_get_group('node', $node->nid);
+    $gid_access = $group->gid;
   }
   elseif (isset($node->{OG_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
     switch ($node->{OG_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
@@ -120,6 +125,9 @@ function og_access_node_access_records($node) {
             $access = TRUE;
           }
         }
+        if ($access) {
+          $gid_access = reset($gids);
+        }
         break;
 
       case OG_CONTENT_ACCESS_PUBLIC:
@@ -138,7 +146,7 @@ function og_access_node_access_records($node) {
   if ($access) {
     $grants[] = array (
       'realm' => OG_ACCESS_AUTHENTICATED_REALM,
-      'gid' => $node->nid,
+      'gid' => $gid_access,
       'grant_view' => 1,
       'grant_update' => 0,
       'grant_delete' => 0,
