@@ -6,3 +6,7 @@ dependencies[] = og
 core = 7.x
 version = VERSION
 files[] = og_access.module
+files[] = og_access.install
+
+; Tests
+files[] = og_access.test
