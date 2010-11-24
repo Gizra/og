@@ -16,6 +16,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('entity', 'og', 'og_access');
+    node_access_rebuild(TRUE);
   }
 
   /**
