@@ -78,6 +78,7 @@ function og_access_node_access_records($node) {
           // to several groups, and one of them is private, then the group
           // content will private as-well.
           $gids = og_get_entity_groups('node', $node);
+          $gid_access = reset($gids);
 
           $groups = og_load_multiple($gids);
 
@@ -125,9 +126,6 @@ function og_access_node_access_records($node) {
             $access = TRUE;
           }
         }
-        if ($access) {
-          $gid_access = reset($gids);
-        }
         break;
 
       case OG_CONTENT_ACCESS_PUBLIC:
@@ -136,6 +134,8 @@ function og_access_node_access_records($node) {
 
       case OG_CONTENT_ACCESS_PRIVATE:
         $access = TRUE;
+        $gids = og_get_entity_groups('node', $node);
+        $gid_access = reset($gids);
         break;
 
     }
@@ -143,7 +143,7 @@ function og_access_node_access_records($node) {
 
   //TODO: Add a case where the group has access field but group content doesn't.
 
-  if ($access) {
+  if ($access && $gid_access) {
     $grants[] = array (
       'realm' => OG_ACCESS_AUTHENTICATED_REALM,
       'gid' => $gid_access,
@@ -153,6 +153,7 @@ function og_access_node_access_records($node) {
       'priority' => 0,
     );
   }
+
   return $grants;
 }
 
