@@ -44,6 +44,8 @@ function og_access_node_grants($account, $op) {
   $grants = array();
   if ($op == 'view') {
     foreach (og_get_entity_groups('user', $account) as $gid => $value) {
+      // Not all the groups are nodes, but in order to save loading the groups
+      // we grant all group IDs.
       $grants[OG_ACCESS_AUTHENTICATED_REALM][] = $gid;
     }
   }
@@ -86,7 +88,6 @@ function og_access_node_access_records($node) {
           // By default, if one group is private then the group content will be
           // private.
           $strict_private = variable_get('group_access_strict_private', 1);
-          $strict_private = 0;
 
           $total_count = 0;
 
