@@ -430,7 +430,7 @@ function og_field_attach_delete($entity_type, $entity) {
 
 /**
  * Implements hook_field_attach_form().
- * 
+ *
  * Handle translated nodes that act as groups.
  */
 function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
@@ -546,10 +546,6 @@ function og_field_crud_group($op, $entity_type, $entity) {
       }
     }
   }
-
-  // Clear the skip group creation from the entity, in case it was set in
-  // og_group().
-  unset($entity->og_skip_group_create);
 }
 
 
