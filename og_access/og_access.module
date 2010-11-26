@@ -90,7 +90,7 @@ function og_access_node_access_records($node) {
 
           // If group content belongs to several groups, and one of them is
           // private, then this variable decides what should happen -- if the
-          // group content will private as-well or become public.
+          // group content will be private as-well or become public.
           // By default, if one group is private then the group content will be
           // private.
           $strict_private = variable_get('group_access_strict_private', 1);
