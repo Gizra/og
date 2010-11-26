@@ -16,7 +16,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('entity', 'og', 'og_access');
-    node_access_rebuild(TRUE);
+    node_access_rebuild();
   }
 
   /**
@@ -91,7 +91,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
     // Create a group content node and set default access.
     $settings = array();
     $settings['type'] = $group_content_type->type;
-    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['gid'] = $group->gid;
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['gid'] = $group->gid;
     $settings[OG_CONTENT_ACCESS_FIELD][LANGUAGE_NONE][0]['value'] = OG_CONTENT_ACCESS_DEFAULT;
 
     $group_content_node = $this->drupalCreateNode($settings);
