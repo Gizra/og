@@ -57,7 +57,7 @@ function og_register_group_fields_info() {
       'label' => t('Groups register'),
       'default_value' => array(0 => array('value' => 0)),
       'widget_type' => 'options_select',
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => 'above',
           'type' => 'options_onoff',

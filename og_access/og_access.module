@@ -183,7 +183,7 @@ function og_access_og_fields_info() {
       // Default to public.
       'default_value' => array(0 => array('value' => 0)),
       'widget_type' => 'options_select',
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => 'above',
           'type' => 'options_onoff',
@@ -220,7 +220,7 @@ function og_access_og_fields_info() {
       // Make the group type default.
       'default_value' => array(0 => array('value' => 0)),
       'widget_type' => 'options_select',
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => 'above',
           'type' => 'list_default',

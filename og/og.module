@@ -341,7 +341,7 @@ function og_og_fields_info() {
       'required' => TRUE,
       // Make the group type default.
       'default_value' => array(0 => array('value' => 1)),
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => t('Full'),
           'type' => 'og_group_subscribe',
@@ -372,7 +372,7 @@ function og_og_fields_info() {
       'required' => TRUE,
       // Use default role and permissions as default value.
       'default_value' => array(0 => array('value' => 0)),
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => t('Full'),
           'type' => 'list_default',
@@ -399,7 +399,7 @@ function og_og_fields_info() {
     'instance' => array(
       'label' => t('Groups audience'),
       'widget_type' => OG_AUDIENCE_FIELD,
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => t('Full'),
           'type' => 'og_list_default',

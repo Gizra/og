@@ -46,7 +46,7 @@ function og_node_link_og_fields_info() {
     'instance' => array(
       'label' => t('Group content links'),
       'widget_type' => 'options_select',
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => 'above',
           'type' => 'og_node_link_default',
