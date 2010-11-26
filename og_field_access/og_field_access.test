@@ -1,0 +1,83 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Test organic groups field access module.
+ */
+
+/**
+ * Test OG access.
+ */
+class OgFieldAccessTestCase extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups field access',
+      'description' => 'Test the access control on fields.',
+      'group' => 'Organic groups field access',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('entity', 'og', 'og_field_access');
+  }
+
+  /**
+   * Group with access field .
+   */
+  function testOgFieldAccess() {
+    $user1 = $this->drupalCreateUser();
+    $user2 = $this->drupalCreateUser();
+    $this->drupalLogin($user1);
+
+    $global_roles = og_get_global_roles();
+
+    // Set global permissions.
+    $anon_rid = array_search(OG_ANONYMOUS_ROLE, $global_roles);
+    $permissions = array(
+      'view body field' => 0,
+      'update body field' => 0,
+      // Allow non-members to edit the group, so we can test the node-edit page.
+      'update group' => 1,
+    );
+    og_user_role_change_permissions($anon_rid, $permissions);
+
+    $auth_rid = array_search(OG_AUTHENTICATED_ROLE, $global_roles);
+    $permissions = array(
+      'view body field' => 1,
+      'update body field' => 1,
+      'update group' => 1,
+    );
+    og_user_role_change_permissions($auth_rid, $permissions);
+
+    // Create group and group content node types.
+    $group_type = $this->drupalCreateContentType();
+    og_create_field(OG_GROUP_FIELD, 'node', $group_type->type);
+
+    // Create a group node and enable access.
+    $settings = array();
+    $settings['type'] = $group_type->type;
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+
+    $node = $this->drupalCreateNode($settings);
+    $group = og_get_group('node', $node->nid);
+
+    // Assert the user is a group member.
+    $this->assertTrue(og_is_member($group->gid, 'user', $user1), t('User is a group member.'));
+
+    // Assert the user can view the group.
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertResponse('200', t('Group member can view node.'));
+    $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('Group member can view body field.'));
+
+    // Assert another user is not a group member.
+    $this->drupalLogin($user2);
+    $this->assertFalse(og_is_member($group->gid, 'user', $user2), t('User is not a group member.'));
+
+    // Assert non-member can't view the group.
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertResponse('200', t('Non group member can view node.'));
+    $this->assertNoText($node->body[LANGUAGE_NONE][0]['value'], t('Non group member can not view body field.'));
+  }
+}
