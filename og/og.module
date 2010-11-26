@@ -1705,15 +1705,15 @@ function og_users_roles_revoke($gid, $uid, $rid) {
  * handler.
  *
  * @param $rid
- *   The ID of a user role to alter.
+ *   The ID of a group user role to alter.
  * @param $permissions
  *   An array of permissions, where the key holds the permission name and the
  *   value is an integer or boolean that determines whether to grant or revoke
  *   the permission:
  *   @code
  *     array(
- *       'administer nodes' => 0,
- *       'access user profiles' => 1,
+ *       'edit group' => 0,
+ *       'administer group' => 1,
  *     )
  *   @endcode
  *   Existing permissions are not changed, unless specified in $permissions.
@@ -1752,13 +1752,17 @@ function og_user_role_grant_permissions($rid, array $permissions = array()) {
   }
   // Grant new permissions for the role.
   foreach ($permissions as $name) {
-    db_merge('og_role_permission')
-      ->key(array(
-        'rid' => $rid,
-        'permission' => $name,
-        'module' => $modules[$name],
-      ))
-      ->execute();
+    // Prevent WSOD, if the permission name is wrong, and we can't find its
+    // module.
+    if (!empty($modules[$name])) {
+      db_merge('og_role_permission')
+        ->key(array(
+          'rid' => $rid,
+          'permission' => $name,
+          'module' => $modules[$name],
+        ))
+        ->execute();
+    }
   }
   og_invalidate_cache();
 }
