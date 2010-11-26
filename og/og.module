@@ -343,12 +343,14 @@ function og_og_fields_info() {
       'default_value' => array(0 => array('value' => 1)),
       'display' => array(
         'full' => array(
-          'label' => 'above',
+          'label' => t('Full'),
           'type' => 'og_group_subscribe',
+          'custom settings' => FALSE,
         ),
         'teaser' => array(
-          'label' => 'above',
+          'label' => t('Teaser'),
           'type' => 'og_group_subscribe',
+          'custom settings' => FALSE,
         ),
       ),
     ),
@@ -372,12 +374,14 @@ function og_og_fields_info() {
       'default_value' => array(0 => array('value' => 0)),
       'display' => array(
         'full' => array(
-          'label' => 'above',
+          'label' => t('Full'),
           'type' => 'list_default',
+          'custom settings' => FALSE,
         ),
         'teaser' => array(
-          'label' => 'above',
+          'label' => t('Teaser'),
           'type' => 'list_default',
+          'custom settings' => FALSE,
         ),
       ),
     ),
@@ -397,12 +401,14 @@ function og_og_fields_info() {
       'widget_type' => OG_AUDIENCE_FIELD,
       'display' => array(
         'full' => array(
-          'label' => 'above',
+          'label' => t('Full'),
           'type' => 'og_list_default',
+          'custom settings' => FALSE,
         ),
         'teaser' => array(
-          'label' => 'above',
+          'label' => t('Teaser'),
           'type' => 'og_list_default',
+          'custom settings' => FALSE,
         ),
       ),
     ),
