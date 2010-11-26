@@ -32,7 +32,7 @@ function og_field_access_og_permission() {
               'module' => 'og_field_access',
             );
 
-          $perm = 'edit ' . $field_name . ' field';
+          $perm = 'update ' . $field_name . ' field';
           $perms[$perm] = array(
             'title' => t('Edit @label field', array('@label' => $label)),
             'description' => t('Edit the @label field for existing groups.', array('@label' => $label)),
@@ -58,7 +58,7 @@ function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_
   $fields = field_info_instances($entity_type, $form['#bundle']);
   if ($fields) {
     foreach ($fields as $field_name => $value) {
-      og_field_access_check_access($entity_type, $entity, $form, $form_state, $langcode, $field_name, 'edit');
+      og_field_access_check_access($entity_type, $entity, $form, $form_state, $langcode, $field_name, 'update');
     }
   }
 }
@@ -108,6 +108,7 @@ function og_field_access_check_access($entity_type, $entity, &$form, $form_state
       // If there is no access, check if this is a group content.
       if (!$access && og_is_group_content_type($entity_type, $form['#bundle']) && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
         foreach ($gids as $gid) {
+          // TODO: Add "strict" mode.
           if (og_user_access($gid, $perm)) {
             $access = TRUE;
             break;
@@ -115,7 +116,7 @@ function og_field_access_check_access($entity_type, $entity, &$form, $form_state
         }
       }
 
-      if ($op == 'edit') {
+      if ($op == 'update') {
         $element = &$form[$field_name][$langcode]['#access'];
       }
       else {

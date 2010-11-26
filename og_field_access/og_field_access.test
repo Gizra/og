@@ -43,19 +43,11 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     );
     og_user_role_change_permissions($anon_rid, $permissions);
 
-    $auth_rid = array_search(OG_AUTHENTICATED_ROLE, $global_roles);
-    $permissions = array(
-      'view body field' => 1,
-      'update body field' => 1,
-      'update group' => 1,
-    );
-    og_user_role_change_permissions($auth_rid, $permissions);
-
     // Create group and group content node types.
     $group_type = $this->drupalCreateContentType();
     og_create_field(OG_GROUP_FIELD, 'node', $group_type->type);
 
-    // Create a group node and enable access.
+    // Create a group node.
     $settings = array();
     $settings['type'] = $group_type->type;
     $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
@@ -63,21 +55,31 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     $node = $this->drupalCreateNode($settings);
     $group = og_get_group('node', $node->nid);
 
-    // Assert the user is a group member.
-    $this->assertTrue(og_is_member($group->gid, 'user', $user1), t('User is a group member.'));
-
-    // Assert the user can view the group.
-    $this->drupalGet('node/' . $node->nid);
-    $this->assertResponse('200', t('Group member can view node.'));
-    $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('Group member can view body field.'));
-
     // Assert another user is not a group member.
     $this->drupalLogin($user2);
     $this->assertFalse(og_is_member($group->gid, 'user', $user2), t('User is not a group member.'));
 
-    // Assert non-member can't view the group.
+    // Assert non-member can't view the field.
     $this->drupalGet('node/' . $node->nid);
     $this->assertResponse('200', t('Non group member can view node.'));
-    $this->assertNoText($node->body[LANGUAGE_NONE][0]['value'], t('Non group member can not view body field.'));
+    $this->assertNoText($node->body[LANGUAGE_NONE][0]['value'], t('User can not view field.'));
+
+    // Change permissions and assert user ccan view the field.
+    $permissions['view body field'] = 1;
+    og_user_role_change_permissions($anon_rid, $permissions);
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('User can now view field.'));
+
+
+    // Assert non-member can't edit the field.
+    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->assertResponse('200', t('Non group member can view node.'));
+    $this->assertNoText($node->body[LANGUAGE_NONE][0]['value'], t('User can not edit field.'));
+
+    // Change permissions and assert user ccan view the field.
+    $permissions['update body field'] = 1;
+    og_user_role_change_permissions($anon_rid, $permissions);
+    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('User can now edit field.'));
   }
 }
