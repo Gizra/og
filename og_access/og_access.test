@@ -4,15 +4,6 @@
 /**
  * @file
  * Test organic groups access module.
- *
- * TODO:
- * Test the visibility of nodes.
- *
- * - Group with access field and group content without access field.
- * - Group with access field and group content with different definition in
- *   access field.
- * - Group without access field and group content with access field.
- * - "Strict private" variable enabled or disabled.
  */
 
 /**

@@ -8,6 +8,8 @@
 
 /**
  * Implements hook_og_permission().
+ *
+ * Add view/ edit permissions to all existing fields.
  */
 function og_field_access_og_permission() {
   $perms = array();
@@ -49,7 +51,7 @@ function og_field_access_og_permission() {
 /**
  * Implements hook_field_attach_form().
  *
- * Add access check on the field.
+ * Controls editing fields.
  */
 function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
   // Check field access permissions for the specific bundle.
@@ -63,17 +65,18 @@ function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_
 
 /**
  * Implements hook_field_attach_view_alter().
+ *
+ * Controls viewing fields.
  */
 function og_field_access_field_attach_view_alter(&$result, $context) {
-  // Clone the result so it won't be changed in element_children().
+  // Copy the result to a new variable, so it won't be changed in
+  // element_children().
   $fields = $result;
   if ($field_names = element_children($fields)) {
     foreach ($field_names as $field_name) {
-      og_field_access_check_access($context['entity_type'], $context['entity'], $result, array(), array(), $field_name, 'view');
+      og_field_access_check_access($context['entity_type'], $context['entity'], $result, array(), '', $field_name, 'view');
     }
   }
-
-
 }
 
 
@@ -90,33 +93,35 @@ function og_field_access_field_attach_view_alter(&$result, $context) {
  */
 function og_field_access_check_access($entity_type, $entity, &$form, $form_state, $langcode, $field_name, $op) {
   global $user;
-  $account = clone($user);
-  list($id) = entity_extract_ids($entity_type, $entity);
-  if (!empty($form[$field_name]) && !empty($id)) {
-    // Existing entity and the field exists.
-    $access = FALSE;
+  if (!empty($form['#bundle'])) {
+    $account = clone $user;
+    list($id) = entity_extract_ids($entity_type, $entity);
+    if (!empty($form[$field_name]) && !empty($id)) {
+      // Existing entity and the field exists.
+      $access = FALSE;
 
-    $perm = $op . ' ' . $field_name . ' field';
+      $perm = $op . ' ' . $field_name . ' field';
 
-    if (og_is_group_type($entity_type, $form['#bundle']) && $group = og_get_group($entity_type, $id)) {
-      $access = og_user_access($group->gid, $perm);
-    }
-    // If there is no access, check if this is a group content.
-    if (!$access && og_is_group_content_type($entity_type, $form['#bundle']) && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
-      foreach ($gids as $gid) {
-        if (og_user_access($gid, $perm)) {
-          $access = TRUE;
-          break;
+      if (og_is_group_type($entity_type, $form['#bundle']) && $group = og_get_group($entity_type, $id)) {
+        $access = og_user_access($group->gid, $perm);
+      }
+      // If there is no access, check if this is a group content.
+      if (!$access && og_is_group_content_type($entity_type, $form['#bundle']) && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
+        foreach ($gids as $gid) {
+          if (og_user_access($gid, $perm)) {
+            $access = TRUE;
+            break;
+          }
         }
       }
-    }
 
-    if ($op == 'edit') {
-      $element = &$form[$field_name][$langcode]['#access'];
+      if ($op == 'edit') {
+        $element = &$form[$field_name][$langcode]['#access'];
+      }
+      else {
+        $element = &$form[$field_name]['#access'];
+      }
+      $element = $access;
     }
-    else {
-      $element = &$form[$field_name]['#access'];
-    }
-    $element = $access;
   }
 }
