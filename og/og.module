@@ -1882,7 +1882,7 @@ function og_set_breadcrumb($entity_type, $etid, $path = array()) {
 }
 
 /**
- * Create a field in a bundle.
+ * Create an organic groups field in a bundle.
  *
  * @param $field_name
  *   The field name
@@ -1892,30 +1892,21 @@ function og_set_breadcrumb($entity_type, $etid, $path = array()) {
  *   The bundle name.
  */
 function og_create_field($field_name, $entity_type, $bundle) {
-  _field_info_collate_fields(TRUE);
-  _field_info_collate_types(TRUE);
-  $group_field = og_fields_info($field_name);
+  if ($group_field = og_fields_info($field_name)) {
 
-  if (!empty($group_field['callback'])) {
-    // Field has own implementation for creating the fields.
-    call_user_func($group_field['callback'], $field_name, $entity_type, $bundle);
-  }
-  else {
-    // Make sure an inactive field doesn't exist.
-    $prior_field = field_read_field($field_name, array('include_inactive' => TRUE));
     $field = field_info_field($field_name);
-    if (empty($field) && empty($prior_field)) {
+    if (empty($field)) {
       $field = field_create_field($group_field['field']);
     }
 
     $instance = field_info_instance($entity_type, $field_name, $bundle);
-    if (empty($instance) && (!$prior_field || $field)) {
-
-      $instance = array(
+    if (empty($instance)) {
+      $instance = $group_field['instance'];
+      $instance += array(
         'field_name' => $field_name,
         'bundle' => $bundle,
         'entity_type' => $entity_type,
-      ) + $group_field['instance'];
+      );
 
       field_create_instance($instance);
     }
