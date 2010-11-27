@@ -265,6 +265,8 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     // Disable existing group's default access field.
     $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
+    // TODO: Remove after http://drupal.org/node/983090 is committed.
+    entity_get_controller('entity_test')->resetCache();
     $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with enabled default access field that was disabled is assigned to the global roles and permissions settings.'));
   }
 }
