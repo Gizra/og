@@ -534,8 +534,8 @@ function og_field_crud_group($op, $entity_type, $entity) {
       // saved, and its original state.
       $property = OG_DEFAULT_ACCESS_FIELD;
       // The field exists.
-      if (!empty($entity->{$property})) {
-        if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
+      if (isset($entity->{$property})) {
+        if (!empty($entity->{$property}[LANGUAGE_NONE][0]['value'])) {
           og_user_roles_override($group->gid);
         }
         elseif (empty($group->is_new)) {
