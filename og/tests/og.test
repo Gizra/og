@@ -117,7 +117,7 @@ class OgGroupCrud extends DrupalWebTestCase {
 }
 
 /**
- * Test the Group content handeling.
+ * TODO: Test Group content handeling.
  */
 class OgGroupAndUngroup extends DrupalWebTestCase {
 
@@ -418,3 +418,65 @@ class OgTranslationTestCase extends DrupalWebTestCase {
   }
 }
 
+/**
+ * Test group audience field.
+ *
+ * TODO:
+ * - User with no permissions.
+ * - User without and without permissions for opt-group.
+ * - Opt group enabled or disabled.
+ * - Editing existing field.
+ * - Prepopulate via URL.
+ * - Change input from checkboxes to select.
+ */
+class OgGroupudienceField extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups field group audience',
+      'description' => 'Test the field group audience functionality.',
+      'group' => 'Organic groups',
+    );
+  }
+
+   function setUp() {
+    parent::setUp('entity', 'entity_test', 'og');
+
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Add OG audience field to the node's "article" bundle.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+  }
+
+
+  /**
+   * No groups and a group is added.
+   */
+  function testOgAudienceFieldBasic() {
+    // Create user.
+    $user1 = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+    ));
+
+    $this->drupalLogin($user1);
+
+    $this->drupalGet('node/add/article');
+    $this->assertText(t('There are no groups you can select from.'), 'Field group audience shows correct description about no groups.');
+
+    // Create an entity.
+    $property = OG_GROUP_FIELD;
+    $entity = new EntityClass(array('name' => 'main', 'uid' => $user1->uid));
+    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+
+    $this->drupalGet('node/add/article');
+    $this->assertText(t('Select the groups this content should be associated with.'), 'Field group audience shows correct description about existing groups.');
+    // FIXME: Use correct XPath.
+    // $this->assertFieldByXPath('//input[@id="edit-group-audience-und-' . $group->gid . '"]', $group->label, 'Field group audience shows the existing group.');
+  }
+}
