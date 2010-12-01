@@ -15,10 +15,8 @@ class og_handler_argument_group_audience_gid extends views_handler_argument_nume
    */
   function title() {
     $title = '';
-    if ($group = og_context()) {
-
-      // TODO: Use wrapper function.
-      $title = check_plain($group->label);
+    if (!empty($this->argument) && $group = og_get_group('group', $this->argument)) {
+      $title = og_label($group->gid);
     }
 
     return $title;
