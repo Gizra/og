@@ -872,7 +872,7 @@ function og_user_access($gid, $string, $account = NULL) {
   $perm = &drupal_static(__FUNCTION__, array());
 
   if (empty($account)) {
-    $account = clone($user);
+    $account = clone $user;
   }
 
   // User #1 has all privileges.
@@ -910,8 +910,8 @@ function og_user_access($gid, $string, $account = NULL) {
 
       $perm[$gid][$account->uid] = $perms;
     }
-
   }
+
   return isset($perm[$gid][$account->uid][$string]);
 }
 

@@ -106,7 +106,7 @@ function og_field_access_check_access($entity_type, $entity, &$form, $form_state
         $access = og_user_access($group->gid, $perm);
       }
       // If there is no access, check if this is a group content.
-      if (!$access && og_is_group_content_type($entity_type, $form['#bundle']) && $gids = array_intersect(og_get_entity_groups('user', $account), og_get_entity_groups($entity_type, $entity))) {
+      if (!$access && og_is_group_content_type($entity_type, $form['#bundle']) && $gids = og_get_entity_groups($entity_type, $entity)) {
         foreach ($gids as $gid) {
           // TODO: Add "strict" mode.
           if (og_user_access($gid, $perm)) {
