@@ -11,11 +11,6 @@
  */
 define('OG_NODE_LINK_FIELD', 'og_node_link');
 
-/**
- * Define the permissions name for the view field.
- */
-define ('OG_NODE_LINK_PERMISSION', 'view og_node_link field');
-
 
 /**
  * Implement hook_field_formatter_info().
