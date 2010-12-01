@@ -11,6 +11,15 @@
  */
 define('OG_NODE_LINK_FIELD', 'og_node_link');
 
+/**
+ * Implementation of hook_views_api().
+ */
+function og_node_link_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'og_node_link') . '/includes',
+  );
+}
 
 /**
  * Implement hook_field_formatter_info().
