@@ -99,8 +99,14 @@ function og_node_link_field_formatter_view($entity_type, $entity, $field, $insta
           '#type' => 'link',
           '#title' => check_plain(node_type_get_name($node_type)),
           '#href' => 'node/add/' . $node_type,
-          // We know the entity is a node.
-          '#options' => array('query' => array('gids_node[]' => $entity->nid)),
+          '#options' => array(
+            'query' => array(
+              // We know the entity is a node.
+              'gids_node[]' => $entity->nid,
+              // Redirect back to the original page.
+              'destination' => $_GET['q'],
+            ),
+          ),
         );
       }
     }
