@@ -20,11 +20,11 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity', 'og', 'og_field_access');
+    parent::setUp('og_field_access');
   }
 
   /**
-   * Group with access field .
+   * Group with access field.
    */
   function testOgFieldAccess() {
     $user1 = $this->drupalCreateUser();
@@ -47,6 +47,7 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     $group_type = $this->drupalCreateContentType();
     og_create_field(OG_GROUP_FIELD, 'node', $group_type->type);
 
+    $this->drupalLogin($user1);
     // Create a group node.
     $settings = array();
     $settings['type'] = $group_type->type;
@@ -59,7 +60,7 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     $this->drupalLogin($user2);
     $this->assertFalse(og_is_member($group->gid, 'user', $user2), t('User is not a group member.'));
 
-    // Assert non-member can't view the field.
+    // Assert user can't view the field.
     $this->drupalGet('node/' . $node->nid);
     $this->assertResponse('200', t('Non group member can view node.'));
     $this->assertNoText($node->body[LANGUAGE_NONE][0]['value'], t('User can not view field.'));
@@ -70,7 +71,7 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     $this->drupalGet('node/' . $node->nid);
     $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('User can now view field.'));
 
-    // Assert non-member can't edit the field.
+    // Assert user can't edit the field.
     $this->drupalGet('node/' . $node->nid . '/edit');
     $this->assertResponse('200', t('Non group member can view node.'));
     $this->assertNoText($node->body[LANGUAGE_NONE][0]['value'], t('User can not edit field.'));
