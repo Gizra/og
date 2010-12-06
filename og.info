@@ -12,7 +12,7 @@ files[] = includes/og.views.inc
 files[] = includes/og.rules.inc
 
 ; Test files.
-files[] = tests/og.test
+files[] = og.test
 
 ; Views plugins
 files[] = includes/views/og_plugin_argument_default_group_context.inc
