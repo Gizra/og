@@ -714,11 +714,9 @@ function og_field_audience_autocomplete_validate($element, &$form_state, $form) 
 
 /**
  * Implements hook_field_widget_error().
- *
- * TODO: Se where this is needed.
  */
 function og_field_widget_error($element, $error, $form, &$form_state) {
-  form_error($element['gid'], $error['message']);
+  form_error($element, $error['message']);
 }
 
 /**
