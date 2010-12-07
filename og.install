@@ -7,12 +7,11 @@
  */
 
 /**
- * Implements hook_enable().
+ * Implements hook_install().
  *
- * Add group audience to users by default. This can't be in hook_install() as
- * the field isn't known yet.
+ * Add group audience to users by default.
  */
-function og_enable() {
+function og_install() {
   _field_info_collate_fields(TRUE);
   _field_info_collate_types(TRUE);
   og_create_field(OG_AUDIENCE_FIELD, 'user', 'user');
