@@ -15,8 +15,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity', 'entity_test', 'og');
-    $this->web_user = $this->drupalCreateUser();
+    parent::setUp('entity_feature', 'og');
   }
 
   /**
@@ -75,11 +74,12 @@ class OgGroupCrud extends DrupalWebTestCase {
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
     // Create user.
-    $user1 = $this->drupalCreateUser();
+    $web_user = $this->drupalCreateUser();
 
     // Create an entity.
     $property = OG_GROUP_FIELD;
-    $entity = new EntityClass(array('name' => 'main', 'uid' => $user1->uid));
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
+
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
 
@@ -95,7 +95,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Group state is set to active.'));
 
     // Assert the user is registered to the new group.
-    $this->assertTrue(og_is_member($group->gid, 'user', $user1), t('User is registered to the new group.'));
+    $this->assertTrue(og_is_member($group->gid, 'user', $web_user), t('User is registered to the new group.'));
 
     // Assert group's state was set to pending.
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 0;
@@ -130,7 +130,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity', 'entity_test', 'og');
+    parent::setUp('entity_feature', 'og');
   }
 }
 
@@ -144,7 +144,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity', 'entity_test', 'og');
+    parent::setUp('entity_feature', 'og');
 
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
@@ -163,7 +163,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
 
     // Create an entity.
     $property = OG_GROUP_FIELD;
-    $entity = new EntityClass(array('name' => 'main', 'uid' => $user1->uid));
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
@@ -218,7 +218,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity', 'entity_test', 'og');
+    parent::setUp('entity_feature', 'og');
   }
 
 
@@ -231,13 +231,13 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
    */
   function testOgDefaultAccessField() {
     // Create user.
-    $user1 = $this->drupalCreateUser();
+    $web_user = $this->drupalCreateUser();
 
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
     // Group without default access field.
-    $entity = new EntityClass(array('name' => 'main', 'uid' => $user1->uid));
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
     $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
@@ -247,7 +247,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     og_create_field(OG_DEFAULT_ACCESS_FIELD, 'entity_test', 'main');
 
     // Group with default access field disabled.
-    $entity = new EntityClass(array('name' => 'main', 'uid' => $user1->uid));
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
     $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
@@ -255,7 +255,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with default access field disabled is assigned to the global roles and permissions settings.'));
 
     // Group with default access field enabled.
-    $entity = new EntityClass(array('name' => 'main', 'uid' => $user1->uid));
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
     $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
@@ -285,12 +285,12 @@ class OgTranslationTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('locale', 'translation', 'translation_test', 'entity', 'og');
+    parent::setUp('locale', 'translation', 'translation_test', 'og');
   }
 
   function testOgNodeLocale() {
     // Setup users.
-    $user1 = $this->drupalCreateUser(array(
+    $web_user = $this->drupalCreateUser(array(
       'administer languages',
       'administer content types',
       'access administration pages',
@@ -299,7 +299,7 @@ class OgTranslationTestCase extends DrupalWebTestCase {
       'translate content',
     ));
 
-    $this->drupalLogin($user1);
+    $this->drupalLogin($web_user);
 
     // Add languages.
     $this->addLanguage('en');
@@ -440,7 +440,7 @@ class OgGroupudienceField extends DrupalWebTestCase {
   }
 
    function setUp() {
-    parent::setUp('entity', 'entity_test', 'og');
+    parent::setUp('entity_feature', 'og');
 
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
@@ -455,21 +455,21 @@ class OgGroupudienceField extends DrupalWebTestCase {
    */
   function testOgAudienceFieldBasic() {
     // Create user.
-    $user1 = $this->drupalCreateUser(array(
+    $web_user = $this->drupalCreateUser(array(
       'access content',
       'administer content types',
       'create article content',
       'edit any article content',
     ));
 
-    $this->drupalLogin($user1);
+    $this->drupalLogin($web_user);
 
     $this->drupalGet('node/add/article');
     $this->assertText(t('There are no groups you can select from.'), 'Field group audience shows correct description about no groups.');
 
     // Create an entity.
     $property = OG_GROUP_FIELD;
-    $entity = new EntityClass(array('name' => 'main', 'uid' => $user1->uid));
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
     $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
