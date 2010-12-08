@@ -23,7 +23,7 @@ $_SERVER['REQUEST_METHOD']  = 'GET';
 $_SERVER['QUERY_STRING']    = '';
 $_SERVER['PHP_SELF']        = $_SERVER['REQUEST_URI'] = '/';
 $_SERVER['HTTP_USER_AGENT'] = 'console';
-$modules_to_enable          = array('og');
+$modules_to_enable          = array('og','user');
 
 // Bootstrap Drupal.
 include_once './includes/bootstrap.inc';
@@ -46,20 +46,62 @@ drupal_cron_run();
 variable_set('og_content_type_usage_page', 'group');
 variable_set('og_content_type_usage_story', 'group_post_standard');
 
+// why not test node_type_form ?
+// this has changed in og7 , new hook are introduced
+	module_load_include('inc','node','content_types');
+	$form_state=array( 'values'=>array() );
+	$form_state['values']['name']='test-group';
+	$form_state['values']['type']='test_group';
+	$form_state['values']['og_content_type_usage']='group';
+	drupal_execute('node_type_form',$form_state);
 
-// Create six users
-for ($i = 0; $i < 6; $i++) {
-  $name = "test user $i";
-  $pass = md5("test PassW0rd $i !(.)");
-  $mail = "test$i@example.com";
-  $now = mktime(0, 0, 0, 1, $i + 1, 2010);
-  db_query("INSERT INTO {users} (name, pass, mail, status, created, access) VALUES ('%s', '%s', '%s', %d, %d, %d)", $name, $pass, $mail, 1, $now, $now);
+	$form_state=array( 'values'=>array() );
+	$form_state['values']['name']='test-post-group';
+	$form_state['values']['type']='test_post_group';
+	$form_state['values']['og_content_type_usage']='group_post_standard';
+	drupal_execute('node_type_form',$form_state);
+
+// Create six users 
+// identified by range(3,7)
+$user_ids=array();
+foreach ( range(3,7) as $i ) {
+	$user_values=array();
+	$user_values['name']='og_test_user'.$i;
+	$user_values['mail']='og_test_user'.$i.'@example.com';
+	$user_values['pass']=user_password(5);
+	$user_values['status']=1;
+	$user=user_save(NULL,$user_values);
+	$user_ids[ $i ]=$user->uid;
 }
 
 // 1) Create group by user ID 3 with no group posts.
-//
+	$node=new stdClass();
+	$node->type='test_group';
+	$node->title='group-without-posts';
+	$node->uid=$user_ids[3];
+	$node->body='group without posts';
+	node_save($node);
+	
 // 2) Create group by user ID 3 with 3 group posts.
-//
+	$node=new stdClass();
+	$node->type='test_group';
+	$node->title='group-with-3-posts';
+	$node->uid=$user_ids[3];
+	$node->body='group with 3 posts';
+	node_save($node);
+	$nids[]=$node->nid;
+	$gid=$node->nid;
+		/*3 posts*/	
+		foreach( array(1,2,3) as $itr){
+			$node=new stdClass();
+			$node->type='test_post_group';
+			$node->title='group-posts-'.$itr;
+			$node->uid=$user_ids[3];
+			$node->body='group posts '.$itr;
+			$node->og_groups=array($gid);
+			node_save($node);
+			$nids[]=$node->nid;
+		}
 // 3) Create group bu user ID 3 with:
 // - user ID 4 as pending member.
 // - user ID 5 as active member.
