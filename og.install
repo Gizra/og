@@ -17,7 +17,6 @@ function og_install() {
   og_create_field(OG_AUDIENCE_FIELD, 'user', 'user');
 }
 
-
 /**
  * Implements hook_uninstall().
  */
@@ -38,14 +37,6 @@ function og_uninstall() {
  */
 function og_schema() {
   $schema = array();
-
-  if (db_field_exists('og', 'nid') && !db_table_exists('d6_og')) {
-    // Rename the old table, so we can populate the new {og} table using API
-    // functions, that assume the new DB structure.
-    db_rename_table('og', 'd6_og');
-    db_rename_table('og_ancestry', 'd6_og_ancestry');
-    db_rename_table('og_uid', 'd6_og_uid');
-  }
 
   $schema['og'] = array(
     'description'     => 'Store information related to the groups.',
@@ -193,6 +184,17 @@ function og_schema() {
  * Upgrade from Organic groups 6 to 7.
  */
 function og_update_7000(&$sandbox) {
+  if (db_field_exists('og', 'nid') && !db_table_exists('d6_og')) {
+    // Rename the old table, so we can populate the new {og} table using API
+    // functions, that assume the new DB structure.
+    db_rename_table('og', 'd6_og');
+    db_rename_table('og_ancestry', 'd6_og_ancestry');
+    db_rename_table('og_uid', 'd6_og_uid');
+
+    // Install the new database.
+    drupal_install_schema('og');
+    og_install();
+  }
   // Some patterns taken from node_update_7006().
   // - Add group fields to nodes.
   // - Move Organic groups' data into the corresponding fields.
@@ -295,6 +297,10 @@ function og_update_7000(&$sandbox) {
     }
     if (empty($sandbox['group upgrade'])) {
       // All nodes and users are processed.
+
+      // Add default roles and permissions, if existing and not set yet.
+      og_set_global_access_module('og');
+
       $sandbox['#finished'] = 1;
       return t("!number groups and group content converted to use new Group fields.", array('!number' => $sandbox['total']));
     }
