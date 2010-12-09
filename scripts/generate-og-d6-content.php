@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+<?php //#!/usr/bin/env php ?>
 <?php
 // $Id: generate-d6-content.sh,v 1.3 2010/09/11 00:39:49 webchick Exp $
 
@@ -101,12 +101,22 @@ module_load_include('inc', 'node', 'node.pages');
 			$node->og_groups=array($gid);
 			node_save($node);
 		}
-// 3) Create group bu user ID 3 with:
+// 3) Create group by user ID 3 with:
+	$node=new stdClass();
+	$node->type='test_group';
+	$node->title='group-with-user-action';
+	$node->uid=$user_ids[3];
+	$node->body='group with user action';
+	node_save($node);
+	$gid=$node->nid;
 // - user ID 4 as pending member.
+	og_save_subscription($gid,$user_ids[4], array( 'is_active'=>0 ) );
 // - user ID 5 as active member.
+	og_save_subscription($gid,$user_ids[5], array( 'is_active'=>1 ) );
 // - user ID 6 as pending admin member.
+	og_save_subscription($gid,$user_ids[6], array( 'is_active'=>0,'is_admin'=>1 ) );
 // - user ID 7 as active admin member.
-//
+	og_save_subscription($gid,$user_ids[7], array( 'is_active'=>1,'is_admin'=>1 ) );
 // 4) Create group post not associated to any other group.
 //
 	$node=new stdClass();
