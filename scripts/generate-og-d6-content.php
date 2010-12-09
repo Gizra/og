@@ -146,8 +146,8 @@ module_load_include('inc', 'node', 'node.pages');
 
 	$node=new stdClass();
 	$node->type='test_post_group';
-	$node->title='group-posts-orphan';
+	$node->title='group-posts-ab';
 	$node->uid=$user_ids[3];
-	$node->body='group posts orphan';
+	$node->body='group posts ab';
 	$node->og_groups=array($gid_a,$gid_b);
 	node_save($node);
