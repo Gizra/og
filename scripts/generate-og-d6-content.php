@@ -74,7 +74,6 @@ foreach ( range(3,7) as $i ) {
 	$user_ids[ $i ]=$user->uid;
 }
 
-module_load_include('inc', 'node', 'node.pages');
 // 1) Create group by user ID 3 with no group posts.
 	$node=new stdClass();
 	$node->type='test_group';
