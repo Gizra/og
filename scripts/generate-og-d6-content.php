@@ -1,4 +1,4 @@
-<?php //#!/usr/bin/env php ?>
+#!/usr/bin/env php
 <?php
 // $Id: generate-d6-content.sh,v 1.3 2010/09/11 00:39:49 webchick Exp $
 
@@ -23,7 +23,7 @@ $_SERVER['REQUEST_METHOD']  = 'GET';
 $_SERVER['QUERY_STRING']    = '';
 $_SERVER['PHP_SELF']        = $_SERVER['REQUEST_URI'] = '/';
 $_SERVER['HTTP_USER_AGENT'] = 'console';
-$modules_to_enable          = array('og','user');
+$modules_to_enable          = array('og','user','node');
 
 // Bootstrap Drupal.
 include_once './includes/bootstrap.inc';
