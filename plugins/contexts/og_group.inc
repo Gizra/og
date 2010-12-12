@@ -118,10 +118,5 @@ function og_context_group_convert($context, $type) {
     case 'label':
       return $context->data->label;
   }
-  if (module_exists('token')) {
-    $values = token_get_values('og_group', $context->data);
-    if ($key = array_search($type, $values->tokens)) {
-      return $values->values[$key];
-    }
-  }
+  // TODO: Add token support.
 }
