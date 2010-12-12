@@ -98,9 +98,6 @@ function og_context_group_convert_list() {
     'entity_id' => t('Entity ID'),
   	'label' => t('Group label'),
   );
-  if (module_exists('token')) {
-    $list += reset(token_get_list(array('og_group')));
-  }
   return $list;
 }
 
