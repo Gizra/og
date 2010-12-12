@@ -98,6 +98,7 @@ function og_context_group_convert_list() {
     'entity_id' => t('Entity ID'),
   	'label' => t('Group label'),
   );
+  // TODO: Add token support.
   return $list;
 }
 
