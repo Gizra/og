@@ -474,7 +474,7 @@ class OgGroupudienceField extends DrupalWebTestCase {
 
     $this->drupalGet('node/add/article');
     $this->assertText(t('Select the groups this content should be associated with.'), 'Field group audience shows correct description about existing groups.');
-    // FIXME: Use correct XPath.
-    // $this->assertFieldByXPath('//input[@id="edit-group-audience-und-' . $group->gid . '"]', $group->label, 'Field group audience shows the existing group.');
+    // TODO: Why is the extra space needed in the result?
+    $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $group->gid . '"]', $group->label . ' ', 'Field group audience shows the existing group.');
   }
 }
