@@ -19,7 +19,7 @@ function og_ui_subscribe($entity_type, $etid, $uid = NULL) {
   global $user;
   if ($group = og_get_group($entity_type, $etid)) {
     if (empty($uid)) {
-      $account = $user;
+      $account = clone($user);
 
       if (!$account->uid) {
         $dest = drupal_get_destination();

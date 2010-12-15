@@ -352,12 +352,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       $element['#required'] = $element['#required'] && !empty($options);
 
       // Prepare the type as expected in _options_properties().
-      if (in_array($type, array('radios', 'checkboxes'))) {
-        $options_type = 'buttons';
-      }
-      else {
-        $options_type = $type;
-      }
+      $options_type = in_array($type, array('radios', 'checkboxes')) ? 'buttons' : $type;
 
       $properties = _options_properties($options_type, $element['#multiple'], $element['#required'], $options);
 
@@ -387,7 +382,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       $return = $element;
       break;
   }
-
 
   return $return;
 }
@@ -436,6 +430,8 @@ function og_field_attach_delete($entity_type, $entity) {
 
 /**
  * Implements hook_field_attach_form().
+ *
+ * Handle translated nodes that act as groups.
  */
 function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
   $item = menu_get_item();
@@ -491,7 +487,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
     if ($op == 'delete') {
       if (!empty($group->gid)) {
         // Remove group.
-        og_delete(array($group->gid));
+        $group->delete();
       }
     }
     else {
@@ -499,7 +495,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
       if (empty($group->gid)) {
         if (!empty($wrapper[0]['value'])) {
           // Save the group to get the group ID.
-          og_save($group);
+          $group->save();
 
           // Subscribe the entity author, if exists.
           if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
@@ -529,7 +525,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
         }
 
         if ($save) {
-          og_save($group);
+          $group->save();
         }
       }
 
@@ -538,8 +534,8 @@ function og_field_crud_group($op, $entity_type, $entity) {
       // saved, and its original state.
       $property = OG_DEFAULT_ACCESS_FIELD;
       // The field exists.
-      if (!empty($entity->{$property})) {
-        if ($entity->{$property}[LANGUAGE_NONE][0]['value']) {
+      if (isset($entity->{$property})) {
+        if (!empty($entity->{$property}[LANGUAGE_NONE][0]['value'])) {
           og_user_roles_override($group->gid);
         }
         elseif (empty($group->is_new)) {
@@ -550,10 +546,6 @@ function og_field_crud_group($op, $entity_type, $entity) {
       }
     }
   }
-
-  // Clear the skip group creation from the entity, in case it was set in
-  // og_group().
-  unset($entity->og_skip_group_create);
 }
 
 
@@ -573,7 +565,7 @@ function og_field_audience_options($opt_group = FALSE, $account = NULL) {
   if (empty($account)) {
     global $user;
 
-    $account = $user;
+    $account = clone($user);
   }
 
   //Initialize values
@@ -606,7 +598,7 @@ function og_field_audience_count($opt_group = FALSE, $account = NULL) {
     if (empty($account)) {
       global $user;
 
-      $account = $user;
+      $account = clone($user);
     }
     // If opt_group is TRUE then get the count of all the groups that are
     // active, otherwise only the ones the user belongs to.
@@ -722,11 +714,9 @@ function og_field_audience_autocomplete_validate($element, &$form_state, $form) 
 
 /**
  * Implements hook_field_widget_error().
- *
- * TODO: Se where this is needed.
  */
 function og_field_widget_error($element, $error, $form, &$form_state) {
-  form_error($element['gid'], $error['message']);
+  form_error($element, $error['message']);
 }
 
 /**

@@ -30,7 +30,7 @@ function og_theme_og_fields_info() {
       'required' => TRUE,
       // Use default theme as default value.
       'default_value' => array(0 => array('value' => '__default')),
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => 'above',
           'type' => 'list_default',

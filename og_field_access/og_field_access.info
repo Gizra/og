@@ -5,3 +5,6 @@ package = "Organic groups"
 dependencies[] = og
 core = 7.x
 files[] = og_field_access.module
+
+; Tests
+files[] = og_field_access.test

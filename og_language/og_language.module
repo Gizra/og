@@ -31,7 +31,7 @@ function og_language_group_fields_info() {
       'required' => TRUE,
       // Use default language as default value.
       'default_value' => array(0 => array('value' => '__default')),
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => 'above',
           'type' => 'list_default',

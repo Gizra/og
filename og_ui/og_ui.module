@@ -225,7 +225,7 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
 
   if (empty($account)) {
     global $user;
-    $account = $user;
+    $account = clone($user);
   }
 
   list($id) = entity_extract_ids($entity_type, $entity);

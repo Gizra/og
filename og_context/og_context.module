@@ -114,13 +114,17 @@ function og_context_views_api() {
 }
 
 /**
- * Implements hook_og_invalidate_cache_alter().
+ * Implements hook_og_invalidate_cache().
  */
-function og_context_og_invalidate_cache_alter(&$caches, $gids = array()) {
-  $caches += array(
+function og_context_og_invalidate_cache($gids = array()) {
+  $caches = array(
     'og_context',
     'og_context_js',
   );
+
+  foreach ($caches as $cache) {
+    drupal_static_reset($cache);
+  }
 
   if ($gids && !empty($_SESSION['og_context']) && in_array($_SESSION['og_context'], $gids)) {
     // Remove group's context.

@@ -1,0 +1,480 @@
+<?php
+// $Id$
+
+/**
+ * Test the Group group CRUD handling.
+ */
+class OgGroupCrud extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups CRUD',
+      'description' => 'Test the create, update and remove of group entitys.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('entity_feature', 'og');
+  }
+
+  /**
+   * Test CRUD of group entitys.
+   */
+  function testOgCrud() {
+    $group = og_get_group('entity_test', 1, TRUE);
+
+    // Assert is new property.
+    $this->assertTrue($group->is_new, t('New group has "is new" property.'));
+
+    // Assert default state.
+    $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Default state property is active.'));
+
+    // Assert default creation time.
+    $this->assertTrue($group->created, t('Group creating time was added to group.'));
+
+    // Assert group ID not set.
+    $this->assertTrue(empty($group->gid), t('Group ID not set for unsaved group.'));
+
+    // Save the group.
+    $group->save();
+
+    // Assert group ID was set.
+    $this->assertTrue(!empty($group->gid), t('Group ID was set for saved group.'));
+
+    // Set a new state for the group.
+    $group = og_get_group('entity_test', 1);
+    $group->state = OG_STATE_PENDING;
+
+    $group->save();
+
+    // Assert group isn't loaded, when state is pending and state isn't
+    // specifically stated.
+    drupal_static_reset('og_get_group_ids');
+    $group = og_get_group('entity_test', 1);
+
+    $this->assertFalse($group, t('Pending state group was not loaded, as it was not requested.'));
+
+    // Reload group to make sure state was updated.
+    $group = og_get_group('entity_test', 1, FALSE, array(OG_STATE_PENDING), TRUE);
+
+    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group was updated.'));
+
+    $group->delete();
+    $group = og_get_group('entity_test', 1, FALSE, array(), TRUE);
+
+    $this->assertFalse($group, t('Group was deleted.'));
+  }
+
+  /**
+   * Test OG group field behaviour.
+   */
+  function testOgGroupField() {
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Create user.
+    $web_user = $this->drupalCreateUser();
+
+    // Create an entity.
+    $property = OG_GROUP_FIELD;
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
+
+    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 0;
+    $entity->save();
+
+    // Assert no group was created.
+    $group = og_get_group('entity_test', $entity->pid);
+    $this->assertTrue(empty($group->gid), t('Group was not created.'));
+
+    // Assert group was created, and was already saved, and its state is active
+    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+    $this->assertTrue(!empty($group->gid), t('Group was created.'));
+    $this->assertTrue($group->state == OG_STATE_ACTIVE, t('Group state is set to active.'));
+
+    // Assert the user is registered to the new group.
+    $this->assertTrue(og_is_member($group->gid, 'user', $web_user), t('User is registered to the new group.'));
+
+    // Assert group's state was set to pending.
+    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 0;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid, FALSE, array(OG_STATE_ACTIVE, OG_STATE_PENDING), TRUE);
+    $this->assertTrue($group->state == OG_STATE_PENDING, t('Group state was set to pending.'));
+
+
+    $gid = $group->gid;
+    // Delete the entity, and assert the group was deleted.
+    $entity->delete();
+    $group = og_get_group('entity_test', $entity->pid, FALSE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $this->assertFalse($group, t('Group was deleted.'));
+
+    // Assert user no longer belongs to group.
+    $this->assertFalse(og_is_member($gid), t('User is no longer registered to the new group.'));
+
+  }
+}
+
+/**
+ * TODO: Test Group content handeling.
+ */
+class OgGroupAndUngroup extends DrupalWebTestCase {
+
+  public static function __getInfo() {
+    return array(
+      'name' => 'Organic groups group and ungroup',
+      'description' => 'Test the group and ungrouping of content under a group.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('entity_feature', 'og');
+  }
+}
+
+class OgUserPermissionsTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups role permissions',
+      'description' => 'Verify that role permissions can be added and removed via API.',
+      'group' => 'Organic groups'
+    );
+  }
+
+  function setUp() {
+    parent::setUp('entity_feature', 'og');
+
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Add OG audience field to the node's "article" bundle.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+  }
+
+
+  /**
+   * Verify proper permission changes by og_user_role_change_permissions().
+   */
+  function testOgUserRoleChangePermissions() {
+    // Create user.
+    $user1 = $this->drupalCreateUser();
+
+    // Create an entity.
+    $property = OG_GROUP_FIELD;
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
+    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+
+    // Associate user to the group.
+    $user2 = $this->drupalCreateUser();
+    og_group($group->gid, 'user', $user2);
+
+    // Assert the user is registered to the new group.
+    $this->assertTrue(og_is_member($group->gid, 'user', $user2), t('User is registered to the new group.'));
+
+    // Verify current permissions.
+    $this->assertFalse(og_user_access($group->gid, 'update own article content', $user2), t('User does not have "update own article content" permission.'));
+    $this->assertFalse(og_user_access($group->gid, 'delete own article content', $user2), t('User does not have "delete own article content" permission.'));
+    $this->assertFalse(og_user_access($group->gid, 'administer group', $user2), t('User does not have "administer group" permission.'));
+
+    // Change permissions to authenticated member.
+    $roles = array_flip(og_get_global_roles());
+    // Authenticated role ID.
+    $rid = $roles[OG_AUTHENTICATED_ROLE];
+
+    $permissions = array(
+      'delete own article content' => 1,
+      'administer group' => 1,
+    );
+    og_user_role_change_permissions($rid, $permissions);
+
+    // Verify proper permission changes.
+    $this->assertFalse(og_user_access($group->gid, 'update own article content', $user2), t('User still does not have "update own article content" permission.'));
+    $this->assertTrue(og_user_access($group->gid, 'delete own article content', $user2), t('User now has "delete own article content" permission.'));
+    $this->assertTrue(og_user_access($group->gid, 'administer group', $user2), t('User now has "administer group" permission.'));
+
+    $permissions = array(
+      'delete own article content' => 1,
+      'administer group' => 0,
+    );
+    og_user_role_change_permissions($rid, $permissions);
+
+    $this->assertTrue(og_user_access($group->gid, 'delete own article content', $user2), t('User still has "delete own article content" permission.'));
+    $this->assertFalse(og_user_access($group->gid, 'administer group', $user2), t('User no longer has "administer group" permission.'));
+
+  }
+}
+
+class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups default access field',
+      'description' => 'Test groups with default access field enabled or disabled.',
+      'group' => 'Organic groups'
+    );
+  }
+
+  function setUp() {
+    parent::setUp('entity_feature', 'og');
+  }
+
+
+  /**
+   * Test groups with default access field enabled or disabled.
+   *
+   * - Group without default access field.
+   * - Group with default access field enabled.
+   * - Previous group with field disabled.
+   */
+  function testOgDefaultAccessField() {
+    // Create user.
+    $web_user = $this->drupalCreateUser();
+
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Group without default access field.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+    $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group without default access field is assigned to the global roles and permissions settings.'));
+
+    // Add default access field to the entity_test's "main" bundle.
+    og_create_field(OG_DEFAULT_ACCESS_FIELD, 'entity_test', 'main');
+
+    // Group with default access field disabled.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 0;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+    $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with default access field disabled is assigned to the global roles and permissions settings.'));
+
+    // Group with default access field enabled.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+    $this->assertNotEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with default access field enabled has own roles and permissions settings.'));
+
+    // Disable existing group's default access field.
+    $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 0;
+    $entity->save();
+    $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with enabled default access field that was disabled is assigned to the global roles and permissions settings.'));
+  }
+}
+
+
+/**
+ * Test the multilangual groups.
+ */
+class OgTranslationTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups multilangual',
+      'description' => 'Test tranlatable node that is a group, returns the same group ID.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('locale', 'translation', 'translation_test', 'og');
+  }
+
+  function testOgNodeLocale() {
+    // Setup users.
+    $web_user = $this->drupalCreateUser(array(
+      'administer languages',
+      'administer content types',
+      'access administration pages',
+      'create page content',
+      'edit own page content',
+      'translate content',
+    ));
+
+    $this->drupalLogin($web_user);
+
+    // Add languages.
+    $this->addLanguage('en');
+    $this->addLanguage('es');
+
+    // Set "Basic page" content type to use multilingual support with translation.
+    $this->drupalGet('admin/structure/types/manage/page');
+    $edit = array();
+    $edit['language_content_type'] = 2;
+    $this->drupalPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+
+    // Add OG group field to the node's "page" bundle.
+    og_create_field(OG_GROUP_FIELD, 'node', 'page');
+
+    // Create Basic page in English.
+    $node_title = $this->randomName();
+    $node_body =  $this->randomName();
+    $node = $this->createPage($node_title, $node_body, 'en');
+
+    // Submit translation in Spanish.
+    $node_translation_title = $this->randomName();
+    $node_translation_body = $this->randomName();
+    $node_translation = $this->createTranslation($node, $node_translation_title, $node_translation_body, 'es');
+
+    $this->drupalGet('node/' . $node_translation->nid . '/edit');
+    $this->assertText(t('You can not change the group state from a translated content'), t('Group field on tranlated node does not allow editing.'));
+
+    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->assertNoText(t('You can not change the group state from a translated content'), t('Group field on original node allows editing.'));
+  }
+
+  /**
+   * Install a the specified language if it has not been already. Otherwise make sure that
+   * the language is enabled.
+   *
+   * @param string $language_code The language code the check.
+   */
+  function addLanguage($language_code) {
+    // Check to make sure that language has not already been installed.
+    $this->drupalGet('admin/config/regional/language');
+
+    if (strpos($this->drupalGetContent(), 'enabled[' . $language_code . ']') === FALSE) {
+      // Doesn't have language installed so add it.
+      $edit = array();
+      $edit['langcode'] = $language_code;
+      $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
+
+      // Make sure we're not using a stale list.
+      drupal_static_reset('language_list');
+      $languages = language_list('language');
+    }
+    elseif ($this->xpath('//input[@type="checkbox" and @name=:name and @checked="checked"]', array(':name' => 'enabled[' . $language_code . ']'))) {
+      // It's installed and enabled. No need to do anything.
+    }
+    else {
+      // It's installed but not enabled. Enable it.
+      $this->drupalPost(NULL, array('enabled[' . $language_code . ']' => TRUE), t('Save configuration'));
+    }
+  }
+
+  /**
+   * Create a "Basic page" in the specified language, and set it to be a group.
+   *
+   * @param $title
+   *   Title of basic page in specified language.
+   * @param $body
+   *   Body of basic page in specified language.
+   * @param $language
+   *   Language code.
+   * @param group
+   *   TRUE to set node as group. FALSE by default.
+   */
+  function createPage($title, $body, $language) {
+    $edit = array();
+    $property = OG_GROUP_FIELD;
+    $langcode = LANGUAGE_NONE;
+    $edit["title"] = $title;
+    $edit["body[$langcode][0][value]"] = $body;
+    $edit['language'] = $language;
+    $this->drupalPost('node/add/page', $edit, t('Save'));
+
+    // Check to make sure the node was created.
+    $node = $this->drupalGetNodeByTitle($title);
+    $this->assertTrue($node, t('Node found in database.'));
+
+    return $node;
+  }
+
+  /**
+   * Create a translation for the specified basic page in the specified language.
+   *
+   * @param object $node The basic page to create translation for.
+   * @param string $title Title of basic page in specified language.
+   * @param string $body Body of basic page in specified language.
+   * @param string $language Language code.
+   */
+  function createTranslation($node, $title, $body, $language) {
+    $this->drupalGet('node/add/page', array('query' => array('translation' => $node->nid, 'target' => $language)));
+
+    $body_key = "body[$language][0][value]";
+    $this->assertFieldByXPath('//input[@id="edit-title"]', $node->title, "Original title value correctly populated.");
+    $this->assertFieldByXPath("//textarea[@name='$body_key']", $node->body[$node->language][0]['value'], "Original body value correctly populated.");
+
+    $edit = array();
+    $edit["title"] = $title;
+    $edit[$body_key] = $body;
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertRaw(t('Basic page %title has been created.', array('%title' => $title)), t('Translation created.'));
+
+    // Check to make sure that translation was successful.
+    $translation = $this->drupalGetNodeByTitle($title);
+    $this->assertTrue($translation, t('Node found in database.'));
+    $this->assertTrue($translation->tnid == $node->nid, t('Translation set id correctly stored.'));
+
+    return $translation;
+  }
+}
+
+/**
+ * Test group audience field.
+ *
+ * TODO:
+ * - User with no permissions.
+ * - User without and without permissions for opt-group.
+ * - Opt group enabled or disabled.
+ * - Editing existing field.
+ * - Prepopulate via URL.
+ * - Change input from checkboxes to select.
+ */
+class OgGroupudienceField extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups field group audience',
+      'description' => 'Test the field group audience functionality.',
+      'group' => 'Organic groups',
+    );
+  }
+
+   function setUp() {
+    parent::setUp('entity_feature', 'og');
+
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Add OG audience field to the node's "article" bundle.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+  }
+
+
+  /**
+   * No groups and a group is added.
+   */
+  function testOgAudienceFieldBasic() {
+    // Create user.
+    $web_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+    ));
+
+    $this->drupalLogin($web_user);
+
+    $this->drupalGet('node/add/article');
+    $this->assertText(t('There are no groups you can select from.'), 'Field group audience shows correct description about no groups.');
+
+    // Create an entity.
+    $property = OG_GROUP_FIELD;
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
+    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+
+    $this->drupalGet('node/add/article');
+    $this->assertText(t('Select the groups this content should be associated with.'), 'Field group audience shows correct description about existing groups.');
+    // TODO: Why is the extra space needed in the result?
+    $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $group->gid . '"]', $group->label . ' ', 'Field group audience shows the existing group.');
+  }
+}

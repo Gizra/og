@@ -68,7 +68,7 @@ function og_views_og_fields_info() {
     'instance' => array(
       'label' => t('Groups views'),
       'widget_type' => 'options_select',
-      'display' => array(
+      'view modes' => array(
         'full' => array(
           'label' => 'above',
           'type' => 'og_views_default',
