@@ -66,8 +66,8 @@ variable_set('og_content_type_usage_story', 'group_post_standard');
 $user_ids=array();
 foreach ( range(3,7) as $i ) {
   $user_values = array();
-  $user_values['name'] = 'og_test_user'.$i;
-  $user_values['mail'] = 'og_test_user'.$i.'@example.com';
+  $user_values['name'] = 'og_test_user' . $i;
+  $user_values['mail'] = 'og_test_user' . $i . '@example.com';
   $user_values['pass'] = user_password(5);
   $user_values['status'] = 1;
   $user=user_save(NULL,$user_values);
