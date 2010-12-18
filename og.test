@@ -80,12 +80,12 @@ class OgGroupCrud extends DrupalWebTestCase {
   function testOgGetGroupIds() {
     // List keyed by the group ID and their entity type, ID as value.
     $list = array(
-      1 => array('entity_test', 1),
-      2 => array('entity_test', 2),
-      3 => array('entity_test', 3),
-      4 => array('entity_test', 4, OG_STATE_PENDING),
-      5 => array('entity_test', 5, OG_STATE_PENDING),
-      6 => array('node', 1),
+      1 => array('entity_test', 10),
+      2 => array('entity_test', 20),
+      3 => array('entity_test', 30),
+      4 => array('entity_test', 40, OG_STATE_PENDING),
+      5 => array('entity_test', 50, OG_STATE_PENDING),
+      6 => array('node', 10),
     );
 
     foreach ($list as $value) {
@@ -116,12 +116,12 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     // Ask for a group that is pending, but result should include only active.
     drupal_static_reset('og_get_group_ids');
-    $gids = og_get_group_ids('entity_test', array(1, 2, 4));
+    $gids = og_get_group_ids('entity_test', array(10, 20, 40));
     $this->assertEqual(count($gids), 2, t('Specific active groups were returned.'));
 
     // Check the state conditions filters results.
     drupal_static_reset('og_get_group_ids');
-    $gids = og_get_group_ids('entity_test', array(1, 2, 4), array(OG_STATE_PENDING));
+    $gids = og_get_group_ids('entity_test', array(10, 20, 40), array(OG_STATE_PENDING));
     $this->assertEqual(count($gids), 1, t('Specific pending groups were returned.'));
 
     // Entity type that doesn't exist.
@@ -135,27 +135,67 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertFalse($gids, t('Non existent entity ID was not returned.'));
 
     // Test caching is correct and resets properly when the state changes.
+    // We can check the cache itself, by getting it (not be reference) and
+    // making sure it has the correct values.
     drupal_static_reset('og_get_group_ids');
-    $gids = og_get_group_ids('entity_test', array(1, 2, 3));
+    $gids = og_get_group_ids('entity_test', array(10, 20, 30));
     $this->assertEqual(count($gids), 3, t('All active groups loaded.'));
+    $cache = drupal_static('og_get_group_ids', array());
+    $cache_gids = array(10 => 1, 20 => 2, 30 => 3);
+    $this->assertEqual($cache['entity_test'], $cache_gids, 'All active groups are cached.');
 
-    $gids = og_get_group_ids('entity_test', array(1, 2));
+    $gids = og_get_group_ids('entity_test', array(10, 20));
     $this->assertEqual(count($gids), 2, t('All active groups re-loaded from cache.'));
+    $cache = drupal_static('og_get_group_ids', array());
+    $cache_gids = array(10 => 1, 20 => 2, 30 => 3);
+    $this->assertEqual($cache['entity_test'], $cache_gids, 'All active groups are cached.');
 
-    $gids = og_get_group_ids('entity_test', array(1, 2, 3), array(OG_STATE_ACTIVE), TRUE);
-    $this->assertEqual(count($gids), 3, t('All active groups loaded after soft cache clear.'));
+    $gids = og_get_group_ids('entity_test', array(10, 20), array(OG_STATE_ACTIVE), TRUE);
+    $this->assertEqual(count($gids), 2, t('All requested groups loaded after soft-reset.'));
+    $cache = drupal_static('og_get_group_ids', array());
+    $cache_gids = array(10 => 1, 20 => 2);
+    $this->assertEqual($cache['entity_test'], $cache_gids, 'All requested groups are cached after soft-reset.');
 
-    $gids = og_get_group_ids('entity_test', array(1, 2, 3, 4));
+    $gids = og_get_group_ids('entity_test', array(10, 20, 30, 40));
     $this->assertEqual(count($gids), 3, t('Only active groups loaded.'));
+    $cache = drupal_static('og_get_group_ids', array());
+    $cache_gids = array(10 => 1, 20 => 2, 30 => 3);
+    $this->assertEqual($cache['entity_test'], $cache_gids, 'Only active groups cached.');
 
-    $gids = og_get_group_ids('entity_test', array(1, 2, 3, 4), array(OG_STATE_PENDING));
+    $cache = drupal_static('og_get_group_ids', array());
+    $this->assertEqual($cache['__info']['entity_test']['states'], array(OG_STATE_ACTIVE), 'Cache states is set to active.');
+    $gids = og_get_group_ids('entity_test', array(10, 20, 30, 40), array(OG_STATE_PENDING));
     $this->assertEqual(count($gids), 1, t('Cache was soft reset as state was changed, and only pending group was loaded.'));
+    $cache = drupal_static('og_get_group_ids', array());
+    $cache_gids = array(40 => 4);
+    $this->assertEqual($cache['entity_test'], $cache_gids, 'Only requested pending group was cached.');
+    $this->assertEqual($cache['__info']['entity_test']['states'], array(OG_STATE_PENDING), 'Cache states was changed to pending.');
 
+    $cache = drupal_static('og_get_group_ids', array());
+    $this->assertFalse($cache['__info']['entity_test']['query all'], '"query all" is FALSE in cache.');
     $gids = og_get_group_ids('entity_test', FALSE);
     $this->assertEqual(count($gids), 3, t('All active groups loaded from cache after query all.'));
+    $cache = drupal_static('og_get_group_ids', array());
+    $cache_gids = array(10 => 1, 20 => 2, 30 => 3);
+    $this->assertEqual($cache['entity_test'], $cache_gids, 'All active groups are cached.');
+    $this->assertTrue($cache['__info']['entity_test']['query all'], '"query all" was set to TRUE in cache.');
 
-    $gids = og_get_group_ids('entity_test', array(1, 2, 4));
+    $gids = og_get_group_ids('entity_test', array(10, 20, 40));
     $this->assertEqual(count($gids), 2, t('All requested active groups loaded from cache after query all.'));
+    $cache = drupal_static('og_get_group_ids', array());
+    $cache_gids = array(10 => 1, 20 => 2, 30 => 3);
+    $this->assertEqual($cache['entity_test'], $cache_gids, 'All active groups are still cached from previous call.');
+    $this->assertTrue($cache['__info']['entity_test']['query all'], '"query all" is still set to TRUE in cache.');
+
+    // Get all groups (i.e. get by "group" entity type).
+    $cache = drupal_static('og_get_group_ids', array());
+    $this->assertTrue(empty($cache['group']), 'Cache of "group" entity is empty.');
+    $gids = og_get_group_ids('group', FALSE, array(OG_STATE_ACTIVE, OG_STATE_PENDING));
+    $this->assertEqual(count($gids), 6, t('All active and pending groups loaded.'));
+    $cache = drupal_static('og_get_group_ids', array());
+    $cache_gids = drupal_map_assoc(array(1, 2, 3, 4, 5, 6));
+    $this->assertEqual($cache['group'], $cache_gids, 'All active and pending groups are cached.');
+    $this->assertTrue($cache['__info']['group']['query all'], '"query all" is set to TRUE in cache.');
   }
 
   /**
