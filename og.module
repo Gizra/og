@@ -602,12 +602,15 @@ function og_invalidate_cache($gids = array()) {
  * @param $etids
  *   Array with the entity IDs that should be loaded. If FALSE, all groups IDs
  *   that belong to the entity will be returned.
- *   TODO: Cache results when FALSE is passed.
  * @param $states
  *   Array of states the group must be in. Values can be OG_STATE_ACTIVE or
  *   OG_STATE_PENDING. Defaults to OG_STATE_ACTIVE.
- * @param $reset
- *   A boolean indicating that the internal cache should be reset.
+ * @param $soft_reset
+ *   A boolean indicating that the internal cache should be "soft" reset (i.e.
+ *   only the cached values of the specific entity type). For a "hard" reset use
+ *   @code
+ *     drupal_static_reset('og_get_group_ids');
+ *   @endcode
  *
  * @return
  *   Array keyed with the entity ID and the group ID as the value.
