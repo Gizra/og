@@ -514,20 +514,12 @@ function og_create_group($values = array()) {
 }
 
 /**
- * Controller class for Group.
+ * Controller class for "group" entity provided by Drupal's API.
  */
-class OgController extends EntityAPIController {
-  function load($ids = array(), $conditions = array()) {
-    $gids = og_get_group_ids(!empty($conditions['entity_type']) ? $conditions['entity_type'] : 'group', $ids);
-
-    // Unset the entity type condition.
-    unset($conditions['entity_type']);
-    return parent::load($gids, $conditions);
-  }
-}
+class OgController extends EntityAPIController {}
 
 /**
- * Main class for Group entities.
+ * Main class for Group entities provided by Entity API.
  */
 class EntityOg extends EntityDB {
   public function __construct(array $values = array(), $entityType = NULL) {
