@@ -76,9 +76,6 @@ class OgGroupCrud extends DrupalWebTestCase {
    * Test og_get_group_ids().
    *
    * Create a few groups of different entities. and check we get their IDs.
-   *
-   * - Only entity type provided.
-   * - Entity type and
    */
   function testOgGetGroupIds() {
     // List keyed by the group ID and their entity type, ID as value.
@@ -174,7 +171,6 @@ class OgGroupCrud extends DrupalWebTestCase {
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid, FALSE, array(OG_STATE_ACTIVE, OG_STATE_PENDING), TRUE);
     $this->assertTrue($group->state == OG_STATE_PENDING, t('Group state was set to pending.'));
-
 
     $gid = $group->gid;
     // Delete the entity, and assert the group was deleted.

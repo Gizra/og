@@ -672,10 +672,10 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
     $query->condition('state', $states, 'IN');
   }
 
+  $gids[$entity_type] = $query->execute()->fetchAllKeyed();
   // Make sure we return only the ids we were asked for, or if no specific IDs
   // were asked, then return all of them.
-  $gids[$entity_type] = $query->execute()->fetchAllKeyed();
-  $return = $query_etids !== FALSE ? array_intersect_key($gids[$entity_type], drupal_map_assoc($query_etids)) : $gids[$entity_type];
+  $return = $query_etids !== FALSE ? array_intersect_key($gids[$entity_type], drupal_map_assoc($etids)) : $gids[$entity_type];
   return $return;
 }
 
