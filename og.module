@@ -498,16 +498,19 @@ function og_get_group($entity_type, $etid, $create = FALSE, $states = array(OG_S
  * Callback to create a new group.
  */
 function og_create_group($values = array()) {
-  $entity = entity_load($values['entity_type'], array($values['etid']));
-  $entity = current($entity);
-  // Add default values.
-  $values += array(
-    'state' => OG_STATE_ACTIVE,
-    'created' => time(),
-    'label' => og_entity_label($values['entity_type'], $entity),
-  );
+  if ($entity = entity_load($values['entity_type'], array($values['etid']))) {
+    $entity = current($entity);
+    // Add default values.
+    $values += array(
+      'state' => OG_STATE_ACTIVE,
+      'created' => time(),
+      'label' => og_entity_label($values['entity_type'], $entity),
+    );
 
-  return entity_create('group', $values);
+    return entity_create('group', $values);
+  }
+  // Entity couldn't be loaded.
+  return FALSE;
 }
 
 /**
@@ -605,8 +608,9 @@ function og_invalidate_cache($gids = array()) {
  * @param $entity_type
  *   The group entity type. Defaults to "group", that will return the group ID.
  * @param $etids
- *   Array with the entity IDs that should be loaded. If empty, all groups IDs
+ *   Array with the entity IDs that should be loaded. If FALSE, all groups IDs
  *   that belong to the entity will be returned.
+ *   TODO: Cache results when FALSE is passed.
  * @param $states
  *   Array of states the group must be in. Values can be OG_STATE_ACTIVE or
  *   OG_STATE_PENDING. Defaults to OG_STATE_ACTIVE.
@@ -616,19 +620,19 @@ function og_invalidate_cache($gids = array()) {
  * @return
  *   Array keyed with the entity ID and the group ID as the value.
  */
-function og_get_group_ids($entity_type = 'group', $etids = array(), $states = array(OG_STATE_ACTIVE), $reset = FALSE) {
+function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = array(OG_STATE_ACTIVE), $reset = FALSE) {
   $gids = &drupal_static(__FUNCTION__, array());
 
   if ($reset) {
     $gids = array();
   }
 
-  $required_etids = $etids = drupal_map_assoc($etids);
+  $query_etids = $etids;
 
   if (!empty($gids[$entity_type])) {
     // Check we don't already have the group IDs.
-    foreach ($gids[$entity_type] as $etid => $gid) {
-      unset($etids[$etid]);
+    if ($query_etids !== FALSE) {
+      $query_etids = array_diff($gids[$entity_type], $query_etids);
     }
   }
   else {
@@ -647,35 +651,39 @@ function og_get_group_ids($entity_type = 'group', $etids = array(), $states = ar
       // Add the real group node IDs to the entity IDs that will be queried
       // against the {og} table.
       if ($result = $query->execute()->fetchAllKeyed()) {
-        $etids = drupal_map_assoc(array_merge($etids, $result));
-
-        // Add the result also to the required entity IDs, so they are returned.
-        $required_etids = drupal_map_assoc(array_merge($required_etids, $result));
+        $query_etids = array_merge($query_etids, $result);
       }
-    }
-
-    if ($entity_type == 'group') {
-      $gids[$entity_type] = $gids[$entity_type] + drupal_map_assoc($etids);
-    }
-    else {
-      $query = db_select('og', 'og');
-      $query->fields('og', array('etid', 'gid'))
-        ->condition('entity_type', $entity_type);
-
-      if (!empty($etids)) {
-        $query->condition('etid', $etids, 'IN');
-      }
-
-      if (!empty($states)) {
-        $query->condition('state', $states, 'IN');
-      }
-      $gids[$entity_type] = $query->execute()->fetchAllKeyed();
     }
   }
+
+  // We can't use EntityFieldQuery as it return only the group ID, but in
+  // order to cache the results we need to maintain a relation between the
+  // entity ID and the group ID.
+  $query = db_select('og', 'og');
+
+  if ($entity_type == 'group') {
+    $query->fields('og', array('gid', 'gid'));
+    if (!empty($query_etids)) {
+      $query->condition('gid', $query_etids, 'IN');
+    }
+  }
+  else {
+    $query->fields('og', array('etid', 'gid'));
+    $query->condition('entity_type', $entity_type);
+
+    if (!empty($query_etids)) {
+      $query->condition('etid', $query_etids, 'IN');
+    }
+  }
+
+  if (!empty($states)) {
+    $query->condition('state', $states, 'IN');
+  }
+
   // Make sure we return only the ids we were asked for, or if no specific IDs
   // were asked, then return all of them.
-  $return = !empty($etids) ? array_intersect_key($gids[$entity_type], $required_etids) : $gids[$entity_type];
-
+  $gids[$entity_type] = $query->execute()->fetchAllKeyed();
+  $return = $query_etids !== FALSE ? array_intersect_key($gids[$entity_type], drupal_map_assoc($query_etids)) : $gids[$entity_type];
   return $return;
 }
 
