@@ -83,8 +83,6 @@ function og_entity_info() {
     'entity keys' => array(
       'id' => 'gid',
     ),
-    // Entity-metadata properties.
-    'creation callback' => 'og_create_group'
   );
   return $return;
 }
