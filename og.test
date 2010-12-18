@@ -133,6 +133,23 @@ class OgGroupCrud extends DrupalWebTestCase {
     drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test', array(100));
     $this->assertFalse($gids, t('Non existent entity ID was not returned.'));
+
+    // Test caching is correct and resets properly when the state changes.
+    drupal_static_reset('og_get_group_ids');
+    $gids = og_get_group_ids('entity_test', array(1, 2, 3));
+    $this->assertEqual(count($gids), 3, t('All active groups loaded.'));
+
+    $gids = og_get_group_ids('entity_test', array(1, 2));
+    $this->assertEqual(count($gids), 2, t('All active groups re-loaded from cache.'));
+
+    $gids = og_get_group_ids('entity_test', array(1, 2, 3), array(OG_STATE_ACTIVE), TRUE);
+    $this->assertEqual(count($gids), 3, t('All active groups loaded after soft cache clear.'));
+
+    $gids = og_get_group_ids('entity_test', array(1, 2, 3, 4));
+    $this->assertEqual(count($gids), 3, t('Only active groups loaded.'));
+
+    $gids = og_get_group_ids('entity_test', array(1, 2, 3, 4), array(OG_STATE_PENDING));
+    $this->assertEqual(count($gids), 1, t('Cache was soft reset as state was changed, and only pending group was loaded.'));
   }
 
   /**
