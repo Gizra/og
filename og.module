@@ -700,7 +700,7 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
   // Make sure we return only the ids we were asked for, or if no specific IDs
   // were asked, then return all of them.
   if ($query_etids !== FALSE) {
-    $return = array_intersect_key(drupal_map_assoc($etids), $gids[$entity_type]);
+    $return = array_intersect_key($gids[$entity_type], drupal_map_assoc($etids));
   }
   else {
     $return = $gids[$entity_type];
