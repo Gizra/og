@@ -61,8 +61,7 @@ variable_set('og_content_type_usage_story', 'group_post_standard');
   $form_state['values']['og_content_type_usage'] = 'group_post_standard';
   drupal_execute('node_type_form',$form_state);
 
-// Create six users 
-// identified by range(3,7)
+// Create users identified by range(3,7)
 $user_ids=array();
 foreach ( range(3,7) as $i ) {
   $user_values = array();
@@ -74,79 +73,187 @@ foreach ( range(3,7) as $i ) {
   $user_ids[ $i ] = $user->uid;
 }
 
-// 1) Create group by user ID 3 with no group posts.
-  $node = new stdClass();
-  $node->type = 'test_group';
-  $node->title = 'group-without-posts';
-  $node->uid = $user_ids[3];
-  $node->body = 'group without posts';
-  node_save($node);
-  
-// 2) Create group by user ID 3 with 3 group posts.
-  $node = new stdClass();
-  $node->type = 'test_group';
-  $node->title = 'group-with-3-posts';
-  $node->uid = $user_ids[3];
-  $node->body = 'group with 3 posts';
-  node_save($node);
-  $gid = $node->nid;
-    /*3 posts*/  
+// og content generatin policy
+interface ogContent
+{
+  //returns a list of groups configuration arrays
+  public function groupList($user_ids);
+  //returns a list of posts configuation arrays
+  //groups nids generated in groupList are provided in groups parameter
+  public function postList($user_ids,$groups);
+  //performs actions of the generated groups and posts
+  public function groupActions($user_ids,$groups,$posts);
+}
+// a group without posts
+class ogGroupNoPosts implements ogContent
+{
+  public function groupList($user_ids)
+  {
+    $list = array();
+    $list[] = array(
+      'title' => 'group-without-posts',
+      'uid' => $user_ids[3],
+      'body' => 'group without posts'
+    );
+    return $list;
+  }
+  public function postList($user_ids,$groups)
+  {
+    return array();
+  }
+  public function groupActions($user_ids,$groups,$posts){
+
+  }
+}
+//a group with three posts
+class ogGroupThreePosts implements ogContent
+{
+  public function groupList($user_ids)
+  {
+    $list = array();
+    $list[] = array(
+      'title' => 'group-with-3-posts',
+      'uid' => $user_ids[3],
+      'body' => 'group with 3 posts'
+    );
+    return $list;
+  }
+  public function postList($user_ids,$groups)
+  {
+    $gid = $groups[0];
+    $list = array();
     foreach ( array(1,2,3) as $itr){
-      $node = new stdClass();
-      $node->type = 'test_post_group';
-      $node->title = 'group-posts-' . $itr;
-      $node->uid = $user_ids[3];
-      $node->body = 'group posts ' . $itr;
-      $node->og_groups = array($gid);
-      node_save($node);
+      $list[] = array(
+        'title' => 'group-posts-' . $itr,
+        'uid' => $user_ids[3],
+        'body' => 'group posts ' . $itr,
+        'og_groups' => array($gid)
+      );
     }
-// 3) Create group by user ID 3 with:
-  $node = new stdClass();
+    return $list;
+  }
+  public function groupActions($user_ids,$groups,$posts){
+
+  }
+}
+
+//a group post not associated to any other group.
+
+class ogGroupOrphanPost implements ogContent
+{
+  public function groupList($user_ids)
+  {
+    return array();
+  }
+  public function postList($user_ids,$groups)
+  {
+    $list = array();
+    $list[] = array(
+      'title' => 'group-posts-orphan',
+      'uid' => $user_ids[3],
+      'body' => 'group posts orphan',
+      'og_groups' => array()
+    );
+    return $list;
+  }
+  public function groupActions($user_ids,$groups,$posts){
+
+  }
+}
+
+// a group post associated with two group 
+class ogGroupJunctionPost implements ogContent
+{
+  public function groupList($user_ids)
+  {
+    $list = array();
+    $list['alpha'] = array(
+      'title' => 'group-alpha',
+      'uid' => $user_ids[3],
+      'body' => 'group alpha'
+    );
+    $list['beta'] =array(
+      'title' => 'group-beta',
+      'uid' => $user_ids[3],
+      'body' => 'group beta'
+    );
+    return $list;
+  }
+  public function postList($user_ids,$groups)
+  {
+    $list = array();
+
+    $gid_b = $groups['beta'];
+    $gid_a = $groups['alpha'];
+
+    $list[] = array(
+      'title' => 'group-posts-ab',
+      'uid' => $user_ids[3],
+      'body' => 'group posts ab',
+      'og_groups' => array($gid_a,$gid_b)
+    );
+    return $list;
+  }
+  public function groupActions($user_ids,$groups,$posts){
+
+  }
+}
+
+
+// a group with user action
+class ogGroupUserAction implements ogContent
+{
+  public function groupList($user_ids)
+  {
+    $list = array();
+    $list[] = array(
+      'title' => 'group-with-user-action',
+      'uid' => $user_ids[3],
+      'body' => 'group with user action'
+    );
+    return $list;
+  }
+  public function postList($user_ids,$groups)
+  {
+    return $array();
+  }
+  public function groupActions($user_ids,$groups,$posts){
+    $gid = $groups[0];
+    // - user ID 4 as pending member.
+    og_save_subscription( $gid , $user_ids[4] , array( 'is_active' => 0 ) );
+    // - user ID 5 as active member.
+    og_save_subscription( $gid , $user_ids[5] , array( 'is_active' => 1 ) );
+    // - user ID 6 as pending admin member.
+    og_save_subscription( $gid , $user_ids[6] , array( 'is_active' => 0 , 'is_admin' => 1 ) );
+    // - user ID 7 as active admin member.
+    og_save_subscription( $gid , $user_ids[7] , array( 'is_active' => 1 , 'is_admin' => 1 ) );
+  }
+}
+
+
+//start content generation , wish this code could appear before class definitions
+$ogContentConfig=array();
+$ogContentConfig[] = new ogGroupNoPosts();
+$ogContentConfig[] = new ogGroupThreePosts();
+$ogContentConfig[] = new ogGroupOrphanPost();
+$ogContentConfig[] = new ogGroupJunctionPost();
+
+foreach ( $ogContentConfig as $ContentConfig){
+  $groups=array_map( og_group_node , $ContentConfig->groupList($user_ids) );
+  $posts=array_map( og_post_node , $ContentConfig->postList($user_ids,$groups) );
+  $ContentConfig->groupActions($user_ids,$groups,$posts);
+}
+
+function og_group_node( $values ){
+  $node=(object)$values;
   $node->type = 'test_group';
-  $node->title = 'group-with-user-action';
-  $node->uid = $user_ids[3];
-  $node->body = 'group with user action';
   node_save($node);
-  $gid = $node->nid;
-// - user ID 4 as pending member.
-  og_save_subscription( $gid , $user_ids[4] , array( 'is_active' => 0 ) );
-// - user ID 5 as active member.
-  og_save_subscription( $gid , $user_ids[5] , array( 'is_active' => 1 ) );
-// - user ID 6 as pending admin member.
-  og_save_subscription( $gid , $user_ids[6] , array( 'is_active' => 0 , 'is_admin' => 1 ) );
-// - user ID 7 as active admin member.
-  og_save_subscription( $gid , $user_ids[7] , array( 'is_active' => 1 , 'is_admin' => 1 ) );
-// 4) Create group post not associated to any other group.
-//
-  $node = new stdClass();
+  return $node->nid;
+}
+
+function og_post_node( $values ){
+  $node=(object)$values;
   $node->type = 'test_post_group';
-  $node->title = 'group-posts-orphan';
-  $node->uid = $user_ids[3];
-  $node->body = 'group posts orphan';
-  $node->og_groups = array();
   node_save($node);
-// 5) Create group posts associated to group node ID 1, 2.
-
-  $node = new stdClass();
-  $node->type = 'test_group';
-  $node->title = 'group-alpha';
-  $node->uid = $user_ids[3];
-  $node->body = 'group alpha';
-  node_save($node);
-  $gid_a = $node->nid;
-
-  $node = new stdClass();
-  $node->type = 'test_group';
-  $node->title = 'group-beta';
-  $node->uid = $user_ids[3];
-  $node->body = 'group beta';
-  node_save($node);
-  $gid_b = $node->nid;
-
-  $node = new stdClass();
-  $node->type = 'test_post_group';
-  $node->title = 'group-posts-ab';
-  $node->uid = $user_ids[3];
-  $node->body = 'group posts ab';
-  $node->og_groups = array($gid_a,$gid_b);
-  node_save($node);
+  return $node->nid;
+}
