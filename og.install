@@ -29,6 +29,22 @@ function og_uninstall() {
   foreach ($vars as $var) {
     variable_del($var);
   }
+  // Remove all fields owned by organic groups.
+  foreach (field_read_fields(array('module' => 'og'), array('include_inactive' => TRUE)) as $field){
+    // We need to invoke the storage_delete hook and the field_delete_instance
+    // here, even though this should be done by field_delete_field().
+    // The current version of this function only works on active fields,
+    // and during uninstall, the fields will be inactive.
+    // Can be removed once
+    // http://drupal.org/node/943772
+    // is fixed.
+    module_invoke($field['storage']['module'], 'field_storage_delete_field', $field);
+    $instances = field_read_instances(array('field_id' => $field['id']), array('include_inactive' => TRUE));
+    foreach ($instances as $instance) {
+      field_delete_instance($instance, FALSE);
+    }
+    field_delete_field($field['field_name']);
+  }
 }
 
 
