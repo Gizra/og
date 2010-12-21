@@ -40,8 +40,8 @@ function og_register_og_audience_options_alter(&$options, $opt_group, $account) 
  */
 function og_register_group_fields_info() {
   $allowed_values = array(
-    '0|Do not show on registration page',
-    '1|Show on registration page',
+    0 => 'Do not show on registration page',
+    1 => 'Show on registration page',
   );
   $items[OG_REGISTER_FIELD] = array(
     'type' => array('group'),
@@ -51,7 +51,7 @@ function og_register_group_fields_info() {
       'no_ui' => TRUE,
       'type' => 'list_boolean',
       'cardinality' => 1,
-      'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
+      'settings' => array('allowed_values' => $allowed_values, 'allowed_values_function' => ''),
     ),
     'instance' => array(
       'label' => t('Groups register'),

@@ -63,7 +63,7 @@ function og_views_og_fields_info() {
       'no_ui' => TRUE,
       'type' => 'list_text',
       'cardinality' => 1,
-      'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_views_field_allowed_values'),
+      'settings' => array('allowed_values' => array(), 'allowed_values_function' => 'og_views_field_allowed_values'),
     ),
     'instance' => array(
       'label' => t('Groups views'),
