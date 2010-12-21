@@ -162,8 +162,8 @@ function og_access_node_access_records($node) {
  */
 function og_access_og_fields_info() {
   $allowed_values = array(
-    '0|Public - accessible to all site users',
-    '1|Private - accessible only to group members',
+    0 => 'Public - accessible to all site users',
+    1 =>  'Private - accessible only to group members',
   );
   $items[OG_ACCESS_FIELD] = array(
     'type' => array('group'),
@@ -175,7 +175,7 @@ function og_access_og_fields_info() {
       'no_ui' => TRUE,
       'type' => 'list_boolean',
       'cardinality' => 1,
-      'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
+      'settings' => array('allowed_values' => $allowed_values, 'allowed_values_function' => ''),
     ),
     'instance' => array(
       'label' => t('Group visibility'),
@@ -197,9 +197,9 @@ function og_access_og_fields_info() {
   );
 
   $allowed_values = array(
-    '0|Use group defaults',
-    '1|Public - accessible to all site users',
-    '2|Private - accessible only to group members',
+    0 => 'Use group defaults',
+    1 => 'Public - accessible to all site users',
+    2 => 'Private - accessible only to group members',
 
   );
   $items[OG_CONTENT_ACCESS_FIELD] = array(
@@ -212,7 +212,7 @@ function og_access_og_fields_info() {
       'no_ui' => TRUE,
       'type' => 'list_number',
       'cardinality' => 1,
-      'settings' => array('allowed_values' => implode("\r\n", $allowed_values), 'allowed_values_function' => ''),
+      'settings' => array('allowed_values' => $allowed_values, 'allowed_values_function' => ''),
     ),
     'instance' => array(
       'label' => t('Group content visibility'),
