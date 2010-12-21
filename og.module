@@ -721,7 +721,15 @@ function og_set_group_context($node = NULL, $clear = FALSE) {
   if (!empty($node) && og_is_group_type($node->type)) {
     $stored_group_node = $node;
     og_set_theme($node);
-    og_set_language($node);
+    // When setting the language, avoid doing so if we are on a node page
+    // and the language of the node is different to the language of the
+    // group. This covers the case when the site doesn't have a prefix for
+    // the default language, particularly if the same node is posted in
+    // multiple groups.
+    $current_node = menu_get_object();
+    if (!$current_node || (!og_is_group_type($current_node->type) && $current_node->language == $node->group_language)) {
+      og_set_language($node);
+    }
   }
   return !empty($stored_group_node) ? $stored_group_node : NULL;
 }
