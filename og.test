@@ -640,3 +640,38 @@ class OgUnInstallTestCase extends DrupalWebTestCase {
     $this->assertFalse(empty($modules['og']), 'Enabling organic groups module after uninstall is sucessful.');
   }
 }
+
+
+/**
+ * Upgrade test.
+ *
+ * Load a filled installation of Drupal 6 and run the upgrade process on it.
+ */
+class OgUpgradePathTestCase extends UpgradePathTestCase {
+  public static function getInfo() {
+    return array(
+      'name'  => 'Organic groups upgrade path',
+      'description'  => 'Tests the upgrade path of Organic groups.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  public function setUp() {
+    // Path to the database dump.
+    $this->databaseDumpFiles = array(
+      drupal_get_path('module', 'og') . '/tests/drupal-6.og.database.php',
+    );
+    parent::setUp();
+  }
+
+  /**
+   * Test a successful upgrade.
+   */
+  public function testOgUpgrade() {
+    $this->assertTrue($this->performUpgrade(), t('The upgrade was completed successfully.'));
+
+    module_enable(array('entity', 'og'));
+    $this->assertTrue($this->performUpgrade(), t('The upgrade of Organic groups was completed successfully.'));
+
+  }
+}
