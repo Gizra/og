@@ -620,13 +620,14 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
     // Make sure the cached values are according to the states we are looking
     // for.
     $gids['__info'][$entity_type]['states'] = $states;
+    $gids['__info'][$entity_type]['query all'] = FALSE;
   }
 
   $query_etids = $etids;
 
+  // Check we don't already have the group IDs, and if we have them, return them
+  // for the cache.
   if (!empty($gids[$entity_type])) {
-    // Check we don't already have the group IDs, and if we have them, return
-    // them for cache.
     if ($query_etids !== FALSE) {
       $query_etids = array_diff($query_etids, $gids[$entity_type]);
 
@@ -636,51 +637,68 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
     }
   }
 
-  if (!empty($etids)) {
+  // Check if we need to query all group, and if this was already cached.
+  if ($query_etids === FALSE && $gids['__info'][$entity_type]['query all']) {
+    return $gids[$entity_type];
+  }
 
-    if (module_exists('translation') && $entity_type == 'node') {
-      // If a node is a translation of another node that is a group, we should
-      // mark it as a group as-well.
-      $query = db_select('node', 'node');
-      $query->fields('node', array('tnid', 'tnid'))
-        ->condition('nid', $etids, 'IN');
+  // Don't query if we already have already queried all.
+  if (empty($gids['__info'][$entity_type]['query all'])) {
 
-      // Add the real group node IDs to the entity IDs that will be queried
-      // against the {og} table.
-      if ($result = $query->execute()->fetchAllKeyed()) {
-        $query_etids = array_merge($query_etids, $result);
+    if (!empty($etids)) {
+      if (module_exists('translation') && $entity_type == 'node') {
+        // If a node is a translation of another node that is a group, we should
+        // mark it as a group as-well.
+        $query = db_select('node', 'node');
+        $query->fields('node', array('tnid', 'tnid'))
+          ->condition('nid', $etids, 'IN');
+
+        // Add the real group node IDs to the entity IDs that will be queried
+        // against the {og} table.
+        if ($result = $query->execute()->fetchAllKeyed()) {
+          $query_etids = array_merge($query_etids, $result);
+        }
       }
     }
-  }
 
-  // We can't use EntityFieldQuery as it return only the group ID, but in
-  // order to cache the results we need to maintain a relation between the
-  // entity ID and the group ID.
-  $query = db_select('og', 'og');
+    // We can't use EntityFieldQuery as it return only the group ID, but in
+    // order to cache the results we need to maintain a relation between the
+    // entity ID and the group ID.
+    $query = db_select('og', 'og');
 
-  if ($entity_type == 'group') {
-    $query->fields('og', array('gid', 'gid'));
-    if (!empty($query_etids)) {
-      $query->condition('gid', $query_etids, 'IN');
+    if ($entity_type == 'group') {
+      $query->fields('og', array('gid', 'gid'));
+      if (!empty($query_etids)) {
+        $query->condition('gid', $query_etids, 'IN');
+      }
     }
-  }
-  else {
-    $query->fields('og', array('etid', 'gid'));
-    $query->condition('entity_type', $entity_type);
+    else {
+      $query->fields('og', array('etid', 'gid'));
+      $query->condition('entity_type', $entity_type);
 
-    if (!empty($query_etids)) {
-      $query->condition('etid', $query_etids, 'IN');
+      if (!empty($query_etids)) {
+        $query->condition('etid', $query_etids, 'IN');
+      }
     }
+
+    if (!empty($states)) {
+      $query->condition('state', $states, 'IN');
+    }
+
+    $gids[$entity_type] += $query->execute()->fetchAllKeyed();
   }
 
-  if (!empty($states)) {
-    $query->condition('state', $states, 'IN');
-  }
-
-  $gids[$entity_type] += $query->execute()->fetchAllKeyed();
   // Make sure we return only the ids we were asked for, or if no specific IDs
   // were asked, then return all of them.
-  $return = $query_etids !== FALSE ? array_intersect_key($gids[$entity_type], drupal_map_assoc($etids)) : $gids[$entity_type];
+  if ($query_etids !== FALSE) {
+    $return = array_intersect_key(drupal_map_assoc($etids), $gids[$entity_type]);
+  }
+  else {
+    $return = $gids[$entity_type];
+    // Let the cache know we queried all IDs of this entity type.
+    $gids['__info'][$entity_type]['query all'] = TRUE;
+  }
+
   return $return;
 }
 
