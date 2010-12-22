@@ -35,7 +35,7 @@ function og_node_link_og_fields_info() {
       'no_ui' => TRUE,
       'type' => 'list_text',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      'settings' => array('allowed_values' => '', 'allowed_values_function' => 'og_node_link_field_allowed_values'),
+      'settings' => array('allowed_values' => array(), 'allowed_values_function' => 'og_node_link_field_allowed_values'),
     ),
     'instance' => array(
       'label' => t('Group content links'),
