@@ -602,12 +602,14 @@ function og_invalidate_cache($gids = array()) {
 /**
  * Get group IDs by the entity type and entity IDs.
  *
- * @param $etid
- *   The group content ID.
  * @param $entity_type
  *   The group entity type. Defaults to "group", that will return the group ID.
+ * @param $etids
+ *   Array with the entity IDs that should be loaded. If empty, all groups IDs
+ *   that belong to the entity will be returned.
  * @param $states
- *   Array of states the group must be in.
+ *   Array of states the group must be in. Values can be OG_STATE_ACTIVE or
+ *   OG_STATE_PENDING. Defaults to OG_STATE_ACTIVE.
  * @param $reset
  *   A boolean indicating that the internal cache should be reset.
  *
@@ -658,16 +660,21 @@ function og_get_group_ids($entity_type = 'group', $etids = array(), $states = ar
     else {
       $query = db_select('og', 'og');
       $query->fields('og', array('etid', 'gid'))
-      ->condition('entity_type', $entity_type)
-      ->condition('etid', $etids, 'IN');
+        ->condition('entity_type', $entity_type);
+
+      if (!empty($etids)) {
+        $query->condition('etid', $etids, 'IN');
+      }
+
       if (!empty($states)) {
         $query->condition('state', $states, 'IN');
       }
       $gids[$entity_type] = $query->execute()->fetchAllKeyed();
     }
   }
-  // Make sure we return only the ids we were asked for.
-  $return = array_intersect_key($gids[$entity_type], $required_etids);
+  // Make sure we return only the ids we were asked for, or if no specific IDs
+  // were asked, then return all of them.
+  $return = !empty($etids) ? array_intersect_key($gids[$entity_type], $required_etids) : $gids[$entity_type];
 
   return $return;
 }
