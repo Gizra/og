@@ -612,23 +612,28 @@ function og_invalidate_cache($gids = array()) {
  * @return
  *   Array keyed with the entity ID and the group ID as the value.
  */
-function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = array(OG_STATE_ACTIVE), $reset = FALSE) {
+function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = array(OG_STATE_ACTIVE), $soft_reset = FALSE) {
   $gids = &drupal_static(__FUNCTION__, array());
 
-  if ($reset) {
-    $gids = array();
+  if ($soft_reset || empty($gids[$entity_type]) || (!empty($gids['__info'][$entity_type]['states'])) && array_diff($gids['__info'][$entity_type]['states'], $states)) {
+    $gids[$entity_type] = array();
+    // Make sure the cached values are according to the states we are looking
+    // for.
+    $gids['__info'][$entity_type]['states'] = $states;
   }
 
   $query_etids = $etids;
 
   if (!empty($gids[$entity_type])) {
-    // Check we don't already have the group IDs.
+    // Check we don't already have the group IDs, and if we have them, return
+    // them for cache.
     if ($query_etids !== FALSE) {
-      $query_etids = array_diff($gids[$entity_type], $query_etids);
+      $query_etids = array_diff($query_etids, $gids[$entity_type]);
+
+      if (!$query_etids) {
+        return array_intersect_key($gids[$entity_type], drupal_map_assoc($etids));
+      }
     }
-  }
-  else {
-    $gids[$entity_type] = array();
   }
 
   if (!empty($etids)) {
@@ -672,7 +677,7 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
     $query->condition('state', $states, 'IN');
   }
 
-  $gids[$entity_type] = $query->execute()->fetchAllKeyed();
+  $gids[$entity_type] += $query->execute()->fetchAllKeyed();
   // Make sure we return only the ids we were asked for, or if no specific IDs
   // were asked, then return all of them.
   $return = $query_etids !== FALSE ? array_intersect_key($gids[$entity_type], drupal_map_assoc($etids)) : $gids[$entity_type];
