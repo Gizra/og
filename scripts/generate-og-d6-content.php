@@ -23,7 +23,7 @@ $_SERVER['REQUEST_METHOD']  = 'GET';
 $_SERVER['QUERY_STRING']    = '';
 $_SERVER['PHP_SELF']        = $_SERVER['REQUEST_URI'] = '/';
 $_SERVER['HTTP_USER_AGENT'] = 'console';
-$modules_to_enable          = array('og','user','node');
+$modules_to_enable          = array('og', 'user', 'node');
 
 // Bootstrap Drupal.
 include_once './includes/bootstrap.inc';
@@ -42,10 +42,6 @@ unset($form_state);
 // Run cron after installing
 drupal_cron_run();
 
-// Make Page content type a group, and Story content type a group post.
-variable_set('og_content_type_usage_page', 'group');
-variable_set('og_content_type_usage_story', 'group_post_standard');
-
 // Create new content types.
 module_load_include('inc','node','content_types');
 $form_state = array( 'values' => array() );
@@ -54,11 +50,14 @@ $form_state['values']['type'] = 'test_group';
 $form_state['values']['og_content_type_usage'] = 'group';
 drupal_execute('node_type_form',$form_state);
 
-$form_state = array( 'values'=>array() );
+$form_state = array(  'values'=>array() );
 $form_state['values']['name'] = 'test-post-group';
 $form_state['values']['type'] = 'test_post_group';
 $form_state['values']['og_content_type_usage'] = 'group_post_standard';
 drupal_execute('node_type_form',$form_state);
+
+// variable_set('og_content_type_usage_test_group', 'group');
+// variable_set('og_content_type_usage_test_post_group', 'group_post_standard');
 
 // Create users with ID 3 to 7.
 $user_ids=array();
@@ -164,7 +163,7 @@ class ogGroupOrphanPost implements ogContent {
 /**
  * A group post associated with two groups.
  */
-class ogGroupJunctionPost implements ogContent {
+class ogGroupPostMultipleGroups implements ogContent {
 
   public function groupList($user_ids) {
     $list = array();
@@ -235,7 +234,8 @@ $og_content_config = array();
 $og_content_config[] = new ogGroupNoPosts();
 $og_content_config[] = new ogGroupThreePosts();
 $og_content_config[] = new ogGroupOrphanPost();
-$og_content_config[] = new ogGroupJunctionPost();
+$og_content_config[] = new ogGroupPostMultipleGroups();
+$og_content_config[] = new ogGroupUserAction();
 
 foreach ($og_content_config as $content_config){
   $groups = array_map('og_group_node' , $content_config->groupList($user_ids) );
