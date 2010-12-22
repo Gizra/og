@@ -119,8 +119,9 @@ function og_views_field_formatter_view($entity_type, $entity, $field, $instance,
   if ($field['field_name'] == OG_VIEWS_FIELD && !empty($entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'])) {
     $view = $entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'] == '__global' ? variable_get('og_views_global_view', 'og_nodes') : $entity->{OG_VIEWS_FIELD}[LANGUAGE_NONE][0]['value'];
     if ($view = explode(' ', $view)) {
-      $group_id = $entity->group_group[LANGUAGE_NONE][0]['value'];
-      $element[0] = array('#markup' => views_embed_view($view[0], !empty($view[1]) ? $view[1] : 'default', $group_id));
+      list($etid) = entity_extract_ids($entity_type, $entity);
+      $group = og_get_group($entity_type, $etid);
+      $element[0] = array('#markup' => views_embed_view($view[0], !empty($view[1]) ? $view[1] : 'default', !empty($group) ? $group->gid : ''));
     }
   }
 
