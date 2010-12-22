@@ -609,3 +609,34 @@ class OgGroupudienceField extends DrupalWebTestCase {
     $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $group->gid . '"]', $group->label . ' ', 'Field group audience shows the existing group.');
   }
 }
+/**
+* Test re-installation of module.
+*/
+class OgUnInstallTestCase extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups uninstall and re-install',
+      'description' => 'Test the uninstalling and re-installing of the Organic groups module',
+      'group' => 'Organic groups',
+    );
+  }
+  function setUp() {
+    parent::setUp('entity_feature', 'og');
+  }
+  /**
+   * Uninstall and re-install, deletion of fields on uninstall.
+   */
+  function testOgReInstall() {
+    // Uninstall module.
+    module_disable(array('og'));
+    drupal_uninstall_modules(array('og'), FALSE);
+    $og_fields = field_read_fields(array('module' => 'og'), array('include_inactive' => TRUE));
+    $this->assertTrue(empty($og_fields), 'Uninstalling organic groups module removes all fields owned by the module.');
+
+    // Re-enable module.
+    module_enable(array('og'));
+    $modules = module_list(TRUE);
+    $this->assertFalse(empty($modules['og']), 'Enabling organic groups module after uninstall is sucessful.');
+  }
+}
