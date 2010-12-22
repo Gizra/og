@@ -22,7 +22,13 @@ class OgGroupCrud extends DrupalWebTestCase {
    * Test CRUD of group entitys.
    */
   function testOgCrud() {
-    $group = og_get_group('entity_test', 1, TRUE);
+    $node = entity_create('node', array(
+      'type' => 'article',
+      'title' => $this->randomName(),
+      'uid' => 1
+    ));
+    entity_save('node', $node);
+    $group = og_get_group('node', $node->nid, TRUE);
 
     // Assert is new property.
     $this->assertTrue($group->is_new, t('New group has "is new" property.'));
@@ -43,7 +49,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertTrue(!empty($group->gid), t('Group ID was set for saved group.'));
 
     // Set a new state for the group.
-    $group = og_get_group('entity_test', 1);
+    $group = og_get_group('node', $node->nid);
     $group->state = OG_STATE_PENDING;
 
     $group->save();
@@ -51,17 +57,17 @@ class OgGroupCrud extends DrupalWebTestCase {
     // Assert group isn't loaded, when state is pending and state isn't
     // specifically stated.
     drupal_static_reset('og_get_group_ids');
-    $group = og_get_group('entity_test', 1);
+    $group = og_get_group('node', $node->nid);
 
     $this->assertFalse($group, t('Pending state group was not loaded, as it was not requested.'));
 
     // Reload group to make sure state was updated.
-    $group = og_get_group('entity_test', 1, FALSE, array(OG_STATE_PENDING), TRUE);
+    $group = og_get_group('node', $node->nid, FALSE, array(OG_STATE_PENDING), TRUE);
 
     $this->assertTrue($group->state == OG_STATE_PENDING, t('Group was updated.'));
 
     $group->delete();
-    $group = og_get_group('entity_test', 1, FALSE, array(), TRUE);
+    $group = og_get_group('node', $node->nid, FALSE, array(), TRUE);
 
     $this->assertFalse($group, t('Group was deleted.'));
   }
@@ -99,21 +105,35 @@ class OgGroupCrud extends DrupalWebTestCase {
     $gids = og_get_group_ids('entity_test');
     $this->assertEqual(count($gids), 3, t('All active groups of the same entity were returned.'));
 
-    $gids = og_get_group_ids('entity_test', array(), array(OG_STATE_PENDING));
+    drupal_static_reset('og_get_group_ids');
+    $gids = og_get_group_ids('group', FALSE);
+    $this->assertEqual(count($gids), 4, t('All active groups were returned.'));
+
+    drupal_static_reset('og_get_group_ids');
+    $gids = og_get_group_ids('group', array());
+    $this->assertFalse($gids, t('No groups were returned, as no entity ID was specified.'));
+
+    drupal_static_reset('og_get_group_ids');
+    $gids = og_get_group_ids('entity_test', FALSE, array(OG_STATE_PENDING));
     $this->assertEqual(count($gids), 2, t('All pending groups of the same entity were returned.'));
 
     // Ask for a group that is pending, but result should include only active.
+    drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test', array(1, 2, 4));
     $this->assertEqual(count($gids), 2, t('Specific active groups were returned.'));
 
+    // Check the state conditions filters results.
+    drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test', array(1, 2, 4), array(OG_STATE_PENDING));
-    $this->assertEqual(count($gids), 3, t('Specific active and pending groups were returned.'));
+    $this->assertEqual(count($gids), 1, t('Specific pending groups were returned.'));
 
     // Entity type that doesn't exist.
+    drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test_non_exist', array(1));
     $this->assertFalse($gids, t('Non existent entity type was not returned.'));
 
     // Entity Id that doesn't exist.
+    drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test', array(100));
     $this->assertFalse($gids, t('Non existent entity ID was not returned.'));
   }
