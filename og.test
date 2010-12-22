@@ -100,11 +100,8 @@ class OgGroupCrud extends DrupalWebTestCase {
     }
 
     $gids = og_get_group_ids('entity_test');
-    $this->assertEqual(count($gids), 3, t('All active groups of the same entity were returned.'));
-
-    drupal_static_reset('og_get_group_ids');
-    $gids = og_get_group_ids('group', FALSE);
-    $this->assertEqual(count($gids), 4, t('All active groups were returned.'));
+    $expected_gids = array(10 => 1, 20 => 2, 30 => 3);
+    $this->assertEqual($gids, $expected_gids, t('All active groups of the same entity were returned.'));
 
     drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('group', array());
@@ -112,17 +109,20 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test', FALSE, array(OG_STATE_PENDING));
-    $this->assertEqual(count($gids), 2, t('All pending groups of the same entity were returned.'));
+    $expected_gids = array(40 => 4, 50 => 5);
+    $this->assertEqual($gids, $expected_gids, t('All pending groups of the same entity were returned.'));
 
     // Ask for a group that is pending, but result should include only active.
     drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test', array(10, 20, 40));
-    $this->assertEqual(count($gids), 2, t('Specific active groups were returned.'));
+    $expected_gids = array(10 => 1, 20 => 2);
+    $this->assertEqual($gids, $expected_gids, t('Specific active groups were returned.'));
 
     // Check the state conditions filters results.
     drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test', array(10, 20, 40), array(OG_STATE_PENDING));
-    $this->assertEqual(count($gids), 1, t('Specific pending groups were returned.'));
+    $expected_gids = array(40 => 4);
+    $this->assertEqual($gids, $expected_gids, t('Specific pending groups were returned.'));
 
     // Entity type that doesn't exist.
     drupal_static_reset('og_get_group_ids');
