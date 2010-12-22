@@ -645,19 +645,20 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
   // Don't query if we already have already queried all.
   if (empty($gids['__info'][$entity_type]['query all'])) {
 
-    if (!empty($etids)) {
-      if (module_exists('translation') && $entity_type == 'node') {
-        // If a node is a translation of another node that is a group, we should
-        // mark it as a group as-well.
-        $query = db_select('node', 'node');
-        $query->fields('node', array('tnid', 'tnid'))
-          ->condition('nid', $etids, 'IN');
+    if (!empty($query_etids) && $entity_type == 'node' && module_exists('translation')) {
+      // If a node is a translation of another node that is a group, we should
+      // mark it as a group as-well.
+      $query = db_select('node', 'node');
+      $query->fields('node', array('tnid', 'tnid'))
+      ->condition('nid', $query_etids, 'IN');
 
-        // Add the real group node IDs to the entity IDs that will be queried
-        // against the {og} table.
-        if ($result = $query->execute()->fetchAllKeyed()) {
-          $query_etids = array_merge($query_etids, $result);
-        }
+      // Add the real group node IDs to the entity IDs that will be queried
+      // against the {og} table.
+      if ($result = $query->execute()->fetchAllKeyed()) {
+        $query_etids = array_merge($query_etids, $result);
+        // Add it to the original IDs, as they are needed to later on intersect
+        // with the results from the cache.
+        $etids = array_merge($etids, $result);
       }
     }
 
