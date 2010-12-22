@@ -46,24 +46,23 @@ drupal_cron_run();
 variable_set('og_content_type_usage_page', 'group');
 variable_set('og_content_type_usage_story', 'group_post_standard');
 
-// why not test node_type_form ?
-// this has changed in og7 , new hook are introduced
-  module_load_include('inc','node','content_types');
-  $form_state = array( 'values' => array() );
-  $form_state['values']['name'] = 'test-group';
-  $form_state['values']['type'] = 'test_group';
-  $form_state['values']['og_content_type_usage'] = 'group';
-  drupal_execute('node_type_form',$form_state);
+// Create new content types.
+module_load_include('inc','node','content_types');
+$form_state = array( 'values' => array() );
+$form_state['values']['name'] = 'test-group';
+$form_state['values']['type'] = 'test_group';
+$form_state['values']['og_content_type_usage'] = 'group';
+drupal_execute('node_type_form',$form_state);
 
-  $form_state = array( 'values'=>array() );
-  $form_state['values']['name'] = 'test-post-group';
-  $form_state['values']['type'] = 'test_post_group';
-  $form_state['values']['og_content_type_usage'] = 'group_post_standard';
-  drupal_execute('node_type_form',$form_state);
+$form_state = array( 'values'=>array() );
+$form_state['values']['name'] = 'test-post-group';
+$form_state['values']['type'] = 'test_post_group';
+$form_state['values']['og_content_type_usage'] = 'group_post_standard';
+drupal_execute('node_type_form',$form_state);
 
-// Create users identified by range(3,7)
+// Create users with ID 3 to 7.
 $user_ids=array();
-foreach ( range(3,7) as $i ) {
+foreach (range(3,7) as $i) {
   $user_values = array();
   $user_values['name'] = 'og_test_user' . $i;
   $user_values['mail'] = 'og_test_user' . $i . '@example.com';
@@ -73,9 +72,10 @@ foreach ( range(3,7) as $i ) {
   $user_ids[ $i ] = $user->uid;
 }
 
-// og content generatin policy
-interface ogContent
-{
+/**
+ * Organic groups content generation interface.
+ */
+interface ogContent {
   //returns a list of groups configuration arrays
   public function groupList($user_ids);
   //returns a list of posts configuation arrays
@@ -84,11 +84,12 @@ interface ogContent
   //performs actions of the generated groups and posts
   public function groupActions($user_ids,$groups,$posts);
 }
-// a group without posts
-class ogGroupNoPosts implements ogContent
-{
-  public function groupList($user_ids)
-  {
+
+/**
+ * A group without posts.
+ */
+class ogGroupNoPosts implements ogContent {
+  public function groupList($user_ids) {
     $list = array();
     $list[] = array(
       'title' => 'group-without-posts',
@@ -97,19 +98,20 @@ class ogGroupNoPosts implements ogContent
     );
     return $list;
   }
-  public function postList($user_ids,$groups)
-  {
+
+  public function postList($user_ids,$groups) {
     return array();
   }
-  public function groupActions($user_ids,$groups,$posts){
 
-  }
+  public function groupActions($user_ids,$groups,$posts) {}
 }
-//a group with three posts
-class ogGroupThreePosts implements ogContent
-{
-  public function groupList($user_ids)
-  {
+
+/**
+ * A group with three posts.
+ */
+class ogGroupThreePosts implements ogContent {
+
+  public function groupList($user_ids) {
     $list = array();
     $list[] = array(
       'title' => 'group-with-3-posts',
@@ -118,8 +120,8 @@ class ogGroupThreePosts implements ogContent
     );
     return $list;
   }
-  public function postList($user_ids,$groups)
-  {
+
+  public function postList($user_ids,$groups) {
     $gid = $groups[0];
     $list = array();
     foreach ( array(1,2,3) as $itr){
@@ -132,21 +134,20 @@ class ogGroupThreePosts implements ogContent
     }
     return $list;
   }
-  public function groupActions($user_ids,$groups,$posts){
 
-  }
+  public function groupActions($user_ids,$groups,$posts){}
 }
 
-//a group post not associated to any other group.
+/**
+ * A group post not associated to any other group.
+ */
+class ogGroupOrphanPost implements ogContent {
 
-class ogGroupOrphanPost implements ogContent
-{
-  public function groupList($user_ids)
-  {
+  public function groupList($user_ids) {
     return array();
   }
-  public function postList($user_ids,$groups)
-  {
+
+  public function postList($user_ids,$groups) {
     $list = array();
     $list[] = array(
       'title' => 'group-posts-orphan',
@@ -156,16 +157,16 @@ class ogGroupOrphanPost implements ogContent
     );
     return $list;
   }
-  public function groupActions($user_ids,$groups,$posts){
 
-  }
+  public function groupActions($user_ids,$groups,$posts){}
 }
 
-// a group post associated with two group 
-class ogGroupJunctionPost implements ogContent
-{
-  public function groupList($user_ids)
-  {
+/**
+ * A group post associated with two groups.
+ */
+class ogGroupJunctionPost implements ogContent {
+
+  public function groupList($user_ids) {
     $list = array();
     $list['alpha'] = array(
       'title' => 'group-alpha',
@@ -179,8 +180,8 @@ class ogGroupJunctionPost implements ogContent
     );
     return $list;
   }
-  public function postList($user_ids,$groups)
-  {
+
+  public function postList($user_ids,$groups) {
     $list = array();
 
     $gid_b = $groups['beta'];
@@ -194,17 +195,15 @@ class ogGroupJunctionPost implements ogContent
     );
     return $list;
   }
-  public function groupActions($user_ids,$groups,$posts){
-
-  }
+  public function groupActions($user_ids,$groups,$posts){}
 }
 
 
-// a group with user action
-class ogGroupUserAction implements ogContent
-{
-  public function groupList($user_ids)
-  {
+/**
+ * A group with multiple members.
+ */
+class ogGroupUserAction implements ogContent {
+  public function groupList($user_ids) {
     $list = array();
     $list[] = array(
       'title' => 'group-with-user-action',
@@ -213,45 +212,51 @@ class ogGroupUserAction implements ogContent
     );
     return $list;
   }
-  public function postList($user_ids,$groups)
-  {
-    return $array();
+
+  public function postList($user_ids, $groups) {
+    return array();
   }
-  public function groupActions($user_ids,$groups,$posts){
+
+  public function groupActions($user_ids, $groups,$posts){
     $gid = $groups[0];
     // - user ID 4 as pending member.
-    og_save_subscription( $gid , $user_ids[4] , array( 'is_active' => 0 ) );
+    og_save_subscription( $gid , $user_ids[4] , array('is_active' => 0));
     // - user ID 5 as active member.
-    og_save_subscription( $gid , $user_ids[5] , array( 'is_active' => 1 ) );
+    og_save_subscription( $gid , $user_ids[5] , array('is_active' => 1));
     // - user ID 6 as pending admin member.
-    og_save_subscription( $gid , $user_ids[6] , array( 'is_active' => 0 , 'is_admin' => 1 ) );
+    og_save_subscription( $gid , $user_ids[6] , array('is_active' => 0 , 'is_admin' => 1));
     // - user ID 7 as active admin member.
-    og_save_subscription( $gid , $user_ids[7] , array( 'is_active' => 1 , 'is_admin' => 1 ) );
+    og_save_subscription( $gid , $user_ids[7] , array('is_active' => 1 , 'is_admin' => 1));
   }
 }
 
+// Start content generation.
+$og_content_config = array();
+$og_content_config[] = new ogGroupNoPosts();
+$og_content_config[] = new ogGroupThreePosts();
+$og_content_config[] = new ogGroupOrphanPost();
+$og_content_config[] = new ogGroupJunctionPost();
 
-//start content generation , wish this code could appear before class definitions
-$ogContentConfig=array();
-$ogContentConfig[] = new ogGroupNoPosts();
-$ogContentConfig[] = new ogGroupThreePosts();
-$ogContentConfig[] = new ogGroupOrphanPost();
-$ogContentConfig[] = new ogGroupJunctionPost();
-
-foreach ( $ogContentConfig as $ContentConfig){
-  $groups=array_map( og_group_node , $ContentConfig->groupList($user_ids) );
-  $posts=array_map( og_post_node , $ContentConfig->postList($user_ids,$groups) );
-  $ContentConfig->groupActions($user_ids,$groups,$posts);
+foreach ($og_content_config as $content_config){
+  $groups = array_map('og_group_node' , $content_config->groupList($user_ids) );
+  $posts = array_map('og_post_node', $content_config->postList($user_ids, $groups));
+  $content_config->groupActions($user_ids, $groups, $posts);
 }
 
-function og_group_node( $values ){
+/**
+ * Create a group node.
+ */
+function og_group_node($values = array()) {
   $node=(object)$values;
   $node->type = 'test_group';
   node_save($node);
   return $node->nid;
 }
 
-function og_post_node( $values ){
+/**
+ * Create a group post.
+ */
+function og_post_node($values = array()){
   $node=(object)$values;
   $node->type = 'test_post_group';
   node_save($node);
