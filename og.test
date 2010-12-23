@@ -672,6 +672,5 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
 
     module_enable(array('entity', 'og'));
     $this->assertTrue($this->performUpgrade(), t('The upgrade of Organic groups was completed successfully.'));
-
   }
 }
