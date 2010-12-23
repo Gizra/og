@@ -9,12 +9,14 @@
  * installation of Drupal 6, filled with data using the generate-d6-content.sh
  * tool. It has the following modules installed:
  *  - block
+ *  - comment
  *  - dblog
  *  - filter
  *  - help
  *  - menu
  *  - node
  *  - system
+ *  - taxonomy
  *  - user
  */
 
@@ -854,6 +856,101 @@ db_create_table('cache_page', array(
   ),
   'module' => 'system',
   'name' => 'cache_page',
+));
+
+db_create_table('comments', array(
+  'fields' => array(
+    'cid' => array(
+      'type' => 'serial',
+      'not null' => TRUE,
+    ),
+    'pid' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'nid' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'uid' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'subject' => array(
+      'type' => 'varchar',
+      'length' => 64,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'comment' => array(
+      'type' => 'text',
+      'not null' => TRUE,
+      'size' => 'big',
+    ),
+    'hostname' => array(
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'timestamp' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'status' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+      'size' => 'tiny',
+    ),
+    'format' => array(
+      'type' => 'int',
+      'size' => 'small',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'thread' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+    ),
+    'name' => array(
+      'type' => 'varchar',
+      'length' => 60,
+      'not null' => FALSE,
+    ),
+    'mail' => array(
+      'type' => 'varchar',
+      'length' => 64,
+      'not null' => FALSE,
+    ),
+    'homepage' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    ),
+  ),
+  'indexes' => array(
+    'pid' => array(
+      'pid',
+    ),
+    'nid' => array(
+      'nid',
+    ),
+    'status' => array(
+      'status',
+    ),
+  ),
+  'primary key' => array(
+    'cid',
+  ),
+  'module' => 'comment',
+  'name' => 'comments',
 ));
 
 db_create_table('files', array(
@@ -3894,6 +3991,87 @@ db_insert('menu_links')->fields(array(
 ))
 ->values(array(
   'menu_name' => 'navigation',
+  'mlid' => '147',
+  'plid' => '143',
+  'link_path' => 'admin/content/taxonomy/%',
+  'router_path' => 'admin/content/taxonomy/%',
+  'link_title' => 'List terms',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '4',
+  'customized' => '0',
+  'p1' => '2',
+  'p2' => '10',
+  'p3' => '143',
+  'p4' => '147',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '148',
+  'plid' => '143',
+  'link_path' => 'admin/content/taxonomy/edit/term',
+  'router_path' => 'admin/content/taxonomy/edit/term',
+  'link_title' => 'Edit term',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '4',
+  'customized' => '0',
+  'p1' => '2',
+  'p2' => '10',
+  'p3' => '143',
+  'p4' => '148',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '149',
+  'plid' => '143',
+  'link_path' => 'admin/content/taxonomy/edit/vocabulary/%',
+  'router_path' => 'admin/content/taxonomy/edit/vocabulary/%',
+  'link_title' => 'Edit vocabulary',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '4',
+  'customized' => '0',
+  'p1' => '2',
+  'p2' => '10',
+  'p3' => '143',
+  'p4' => '149',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
   'mlid' => '106',
   'plid' => '11',
   'link_path' => 'node/add/page',
@@ -4044,6 +4222,249 @@ db_insert('menu_links')->fields(array(
   'depth' => '1',
   'customized' => '0',
   'p1' => '113',
+  'p2' => '0',
+  'p3' => '0',
+  'p4' => '0',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '145',
+  'plid' => '15',
+  'link_path' => 'admin/help/comment',
+  'router_path' => 'admin/help/comment',
+  'link_title' => 'comment',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '3',
+  'customized' => '0',
+  'p1' => '2',
+  'p2' => '15',
+  'p3' => '145',
+  'p4' => '0',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '146',
+  'plid' => '15',
+  'link_path' => 'admin/help/taxonomy',
+  'router_path' => 'admin/help/taxonomy',
+  'link_title' => 'taxonomy',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '3',
+  'customized' => '0',
+  'p1' => '2',
+  'p2' => '15',
+  'p3' => '146',
+  'p4' => '0',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '143',
+  'plid' => '10',
+  'link_path' => 'admin/content/taxonomy',
+  'router_path' => 'admin/content/taxonomy',
+  'link_title' => 'Taxonomy',
+  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:67:"Manage tagging, categorization, and classification of your content.";}}',
+  'module' => 'system',
+  'hidden' => '0',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '3',
+  'customized' => '0',
+  'p1' => '2',
+  'p2' => '10',
+  'p3' => '143',
+  'p4' => '0',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '144',
+  'plid' => '0',
+  'link_path' => 'taxonomy/term/%',
+  'router_path' => 'taxonomy/term/%',
+  'link_title' => 'Taxonomy term',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '1',
+  'customized' => '0',
+  'p1' => '144',
+  'p2' => '0',
+  'p3' => '0',
+  'p4' => '0',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '142',
+  'plid' => '0',
+  'link_path' => 'comment/reply/%',
+  'router_path' => 'comment/reply/%',
+  'link_title' => 'Reply to comment',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '1',
+  'customized' => '0',
+  'p1' => '142',
+  'p2' => '0',
+  'p3' => '0',
+  'p4' => '0',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '141',
+  'plid' => '10',
+  'link_path' => 'admin/content/comment',
+  'router_path' => 'admin/content/comment',
+  'link_title' => 'Comments',
+  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:61:"List and edit site comments and the comment moderation queue.";}}',
+  'module' => 'system',
+  'hidden' => '0',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '3',
+  'customized' => '0',
+  'p1' => '2',
+  'p2' => '10',
+  'p3' => '141',
+  'p4' => '0',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '140',
+  'plid' => '0',
+  'link_path' => 'comment/edit',
+  'router_path' => 'comment/edit',
+  'link_title' => 'Edit comment',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '1',
+  'customized' => '0',
+  'p1' => '140',
+  'p2' => '0',
+  'p3' => '0',
+  'p4' => '0',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '139',
+  'plid' => '0',
+  'link_path' => 'comment/delete',
+  'router_path' => 'comment/delete',
+  'link_title' => 'Delete comment',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '1',
+  'customized' => '0',
+  'p1' => '139',
+  'p2' => '0',
+  'p3' => '0',
+  'p4' => '0',
+  'p5' => '0',
+  'p6' => '0',
+  'p7' => '0',
+  'p8' => '0',
+  'p9' => '0',
+  'updated' => '0',
+))
+->values(array(
+  'menu_name' => 'navigation',
+  'mlid' => '138',
+  'plid' => '0',
+  'link_path' => 'taxonomy/autocomplete',
+  'router_path' => 'taxonomy/autocomplete',
+  'link_title' => 'Autocomplete taxonomy',
+  'options' => 'a:0:{}',
+  'module' => 'system',
+  'hidden' => '-1',
+  'external' => '0',
+  'has_children' => '0',
+  'expanded' => '0',
+  'weight' => '0',
+  'depth' => '1',
+  'customized' => '0',
+  'p1' => '138',
   'p2' => '0',
   'p3' => '0',
   'p4' => '0',
@@ -4547,6 +4968,28 @@ db_insert('menu_router')->fields(array(
   'file' => '',
 ))
 ->values(array(
+  'path' => 'taxonomy/autocomplete',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:14:"access content";}',
+  'page_callback' => 'taxonomy_autocomplete',
+  'page_arguments' => 'a:0:{}',
+  'fit' => '3',
+  'number_parts' => '2',
+  'tab_parent' => '',
+  'tab_root' => 'taxonomy/autocomplete',
+  'title' => 'Autocomplete taxonomy',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/taxonomy/taxonomy.pages.inc',
+))
+->values(array(
   'path' => 'admin/by-module',
   'load_functions' => '',
   'to_arg_functions' => '',
@@ -4655,6 +5098,50 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '1',
   'file' => 'modules/node/node.pages.inc',
+))
+->values(array(
+  'path' => 'comment/delete',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer comments";}',
+  'page_callback' => 'comment_delete',
+  'page_arguments' => 'a:0:{}',
+  'fit' => '3',
+  'number_parts' => '2',
+  'tab_parent' => '',
+  'tab_root' => 'comment/delete',
+  'title' => 'Delete comment',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/comment/comment.admin.inc',
+))
+->values(array(
+  'path' => 'comment/edit',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:13:"post comments";}',
+  'page_callback' => 'comment_edit',
+  'page_arguments' => 'a:0:{}',
+  'fit' => '3',
+  'number_parts' => '2',
+  'tab_parent' => '',
+  'tab_root' => 'comment/edit',
+  'title' => 'Edit comment',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/comment/comment.pages.inc',
 ))
 ->values(array(
   'path' => 'admin/help',
@@ -5009,6 +5496,28 @@ db_insert('menu_router')->fields(array(
   'file' => 'modules/block/block.admin.inc',
 ))
 ->values(array(
+  'path' => 'admin/content/comment',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer comments";}',
+  'page_callback' => 'comment_admin',
+  'page_arguments' => 'a:0:{}',
+  'fit' => '7',
+  'number_parts' => '3',
+  'tab_parent' => '',
+  'tab_root' => 'admin/content/comment',
+  'title' => 'Comments',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '6',
+  'block_callback' => '',
+  'description' => 'List and edit site comments and the comment moderation queue.',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/comment/comment.admin.inc',
+))
+->values(array(
   'path' => 'admin/content/types',
   'load_functions' => '',
   'to_arg_functions' => '',
@@ -5097,6 +5606,28 @@ db_insert('menu_router')->fields(array(
   'file' => 'modules/system/system.admin.inc',
 ))
 ->values(array(
+  'path' => 'taxonomy/term/%',
+  'load_functions' => 'a:1:{i:2;N;}',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:14:"access content";}',
+  'page_callback' => 'taxonomy_term_page',
+  'page_arguments' => 'a:1:{i:0;i:2;}',
+  'fit' => '6',
+  'number_parts' => '3',
+  'tab_parent' => '',
+  'tab_root' => 'taxonomy/term/%',
+  'title' => 'Taxonomy term',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/taxonomy/taxonomy.pages.inc',
+))
+->values(array(
   'path' => 'admin/help/block',
   'load_functions' => '',
   'to_arg_functions' => '',
@@ -5109,6 +5640,28 @@ db_insert('menu_router')->fields(array(
   'tab_parent' => '',
   'tab_root' => 'admin/help/block',
   'title' => 'block',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/help/help.admin.inc',
+))
+->values(array(
+  'path' => 'admin/help/comment',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:27:"access administration pages";}',
+  'page_callback' => 'help_page',
+  'page_arguments' => 'a:1:{i:0;i:2;}',
+  'fit' => '7',
+  'number_parts' => '3',
+  'tab_parent' => '',
+  'tab_root' => 'admin/help/comment',
+  'title' => 'comment',
   'title_callback' => 't',
   'title_arguments' => '',
   'type' => '4',
@@ -5241,6 +5794,28 @@ db_insert('menu_router')->fields(array(
   'tab_parent' => '',
   'tab_root' => 'admin/help/system',
   'title' => 'system',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/help/help.admin.inc',
+))
+->values(array(
+  'path' => 'admin/help/taxonomy',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:27:"access administration pages";}',
+  'page_callback' => 'help_page',
+  'page_arguments' => 'a:1:{i:0;i:2;}',
+  'fit' => '7',
+  'number_parts' => '3',
+  'tab_parent' => '',
+  'tab_root' => 'admin/help/taxonomy',
+  'title' => 'taxonomy',
   'title_callback' => 't',
   'title_arguments' => '',
   'type' => '4',
@@ -5625,6 +6200,28 @@ db_insert('menu_router')->fields(array(
   'file' => 'modules/system/system.admin.inc',
 ))
 ->values(array(
+  'path' => 'comment/reply/%',
+  'load_functions' => 'a:1:{i:2;s:9:"node_load";}',
+  'to_arg_functions' => '',
+  'access_callback' => 'node_access',
+  'access_arguments' => 'a:2:{i:0;s:4:"view";i:1;i:2;}',
+  'page_callback' => 'comment_reply',
+  'page_arguments' => 'a:1:{i:0;i:2;}',
+  'fit' => '6',
+  'number_parts' => '3',
+  'tab_parent' => '',
+  'tab_root' => 'comment/reply/%',
+  'title' => 'Reply to comment',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/comment/comment.pages.inc',
+))
+->values(array(
   'path' => 'node/%/revisions',
   'load_functions' => 'a:1:{i:1;s:9:"node_load";}',
   'to_arg_functions' => '',
@@ -5711,6 +6308,28 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'file' => 'modules/system/system.admin.inc',
+))
+->values(array(
+  'path' => 'admin/content/taxonomy',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer taxonomy";}',
+  'page_callback' => 'drupal_get_form',
+  'page_arguments' => 'a:1:{i:0;s:30:"taxonomy_overview_vocabularies";}',
+  'fit' => '7',
+  'number_parts' => '3',
+  'tab_parent' => '',
+  'tab_root' => 'admin/content/taxonomy',
+  'title' => 'Taxonomy',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '6',
+  'block_callback' => '',
+  'description' => 'Manage tagging, categorization, and classification of your content.',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/taxonomy/taxonomy.admin.inc',
 ))
 ->values(array(
   'path' => 'admin/build/themes',
@@ -5999,28 +6618,6 @@ db_insert('menu_router')->fields(array(
   'file' => 'modules/node/node.admin.inc',
 ))
 ->values(array(
-  'path' => 'admin/user/rules/list',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:22:"administer permissions";}',
-  'page_callback' => 'user_admin_access',
-  'page_arguments' => 'a:0:{}',
-  'fit' => '15',
-  'number_parts' => '4',
-  'tab_parent' => 'admin/user/rules',
-  'tab_root' => 'admin/user/rules',
-  'title' => 'List',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'type' => '136',
-  'block_callback' => '',
-  'description' => '',
-  'position' => '',
-  'weight' => '-10',
-  'file' => 'modules/user/user.admin.inc',
-))
-->values(array(
   'path' => 'admin/settings/filters/list',
   'load_functions' => '',
   'to_arg_functions' => '',
@@ -6065,6 +6662,50 @@ db_insert('menu_router')->fields(array(
   'file' => 'modules/node/content_types.inc',
 ))
 ->values(array(
+  'path' => 'admin/content/taxonomy/list',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer taxonomy";}',
+  'page_callback' => 'drupal_get_form',
+  'page_arguments' => 'a:1:{i:0;s:30:"taxonomy_overview_vocabularies";}',
+  'fit' => '15',
+  'number_parts' => '4',
+  'tab_parent' => 'admin/content/taxonomy',
+  'tab_root' => 'admin/content/taxonomy',
+  'title' => 'List',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '136',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '-10',
+  'file' => 'modules/taxonomy/taxonomy.admin.inc',
+))
+->values(array(
+  'path' => 'admin/user/rules/list',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:22:"administer permissions";}',
+  'page_callback' => 'user_admin_access',
+  'page_arguments' => 'a:0:{}',
+  'fit' => '15',
+  'number_parts' => '4',
+  'tab_parent' => 'admin/user/rules',
+  'tab_root' => 'admin/user/rules',
+  'title' => 'List',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '136',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '-10',
+  'file' => 'modules/user/user.admin.inc',
+))
+->values(array(
   'path' => 'admin/user/user/list',
   'load_functions' => '',
   'to_arg_functions' => '',
@@ -6107,6 +6748,28 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'file' => 'modules/system/system.admin.inc',
+))
+->values(array(
+  'path' => 'admin/content/comment/new',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer comments";}',
+  'page_callback' => 'comment_admin',
+  'page_arguments' => 'a:0:{}',
+  'fit' => '15',
+  'number_parts' => '4',
+  'tab_parent' => 'admin/content/comment',
+  'tab_root' => 'admin/content/comment',
+  'title' => 'Published comments',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '136',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '-10',
+  'file' => 'modules/comment/comment.admin.inc',
 ))
 ->values(array(
   'path' => 'user/%/edit/account',
@@ -6327,6 +6990,28 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'file' => 'modules/user/user.admin.inc',
+))
+->values(array(
+  'path' => 'admin/content/comment/approval',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer comments";}',
+  'page_callback' => 'comment_admin',
+  'page_arguments' => 'a:1:{i:0;s:8:"approval";}',
+  'fit' => '15',
+  'number_parts' => '4',
+  'tab_parent' => 'admin/content/comment',
+  'tab_root' => 'admin/content/comment',
+  'title' => 'Approval queue',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '128',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/comment/comment.admin.inc',
 ))
 ->values(array(
   'path' => 'admin/user/rules/check',
@@ -6725,6 +7410,28 @@ db_insert('menu_router')->fields(array(
   'file' => 'modules/dblog/dblog.admin.inc',
 ))
 ->values(array(
+  'path' => 'admin/content/taxonomy/%',
+  'load_functions' => 'a:1:{i:3;s:24:"taxonomy_vocabulary_load";}',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer taxonomy";}',
+  'page_callback' => 'drupal_get_form',
+  'page_arguments' => 'a:2:{i:0;s:23:"taxonomy_overview_terms";i:1;i:3;}',
+  'fit' => '14',
+  'number_parts' => '4',
+  'tab_parent' => '',
+  'tab_root' => 'admin/content/taxonomy/%',
+  'title' => 'List terms',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/taxonomy/taxonomy.admin.inc',
+))
+->values(array(
   'path' => 'admin/content/node-type/page',
   'load_functions' => '',
   'to_arg_functions' => '',
@@ -7011,6 +7718,28 @@ db_insert('menu_router')->fields(array(
   'file' => 'modules/system/system.admin.inc',
 ))
 ->values(array(
+  'path' => 'admin/content/taxonomy/%/list',
+  'load_functions' => 'a:1:{i:3;s:24:"taxonomy_vocabulary_load";}',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer taxonomy";}',
+  'page_callback' => 'drupal_get_form',
+  'page_arguments' => 'a:2:{i:0;s:23:"taxonomy_overview_terms";i:1;i:3;}',
+  'fit' => '29',
+  'number_parts' => '5',
+  'tab_parent' => 'admin/content/taxonomy/%',
+  'tab_root' => 'admin/content/taxonomy/%',
+  'title' => 'List',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '136',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '-10',
+  'file' => 'modules/taxonomy/taxonomy.admin.inc',
+))
+->values(array(
   'path' => 'admin/settings/filters/%/edit',
   'load_functions' => 'a:1:{i:3;s:18:"filter_format_load";}',
   'to_arg_functions' => '',
@@ -7229,6 +7958,28 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'file' => 'modules/node/content_types.inc',
+))
+->values(array(
+  'path' => 'admin/content/taxonomy/edit/term',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer taxonomy";}',
+  'page_callback' => 'taxonomy_admin_term_edit',
+  'page_arguments' => 'a:0:{}',
+  'fit' => '31',
+  'number_parts' => '5',
+  'tab_parent' => '',
+  'tab_root' => 'admin/content/taxonomy/edit/term',
+  'title' => 'Edit term',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/taxonomy/taxonomy.admin.inc',
 ))
 ->values(array(
   'path' => 'admin/build/themes/settings/garland',
@@ -7627,6 +8378,28 @@ db_insert('menu_router')->fields(array(
   'file' => 'modules/user/user.pages.inc',
 ))
 ->values(array(
+  'path' => 'admin/content/taxonomy/add/vocabulary',
+  'load_functions' => '',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer taxonomy";}',
+  'page_callback' => 'drupal_get_form',
+  'page_arguments' => 'a:1:{i:0;s:24:"taxonomy_form_vocabulary";}',
+  'fit' => '31',
+  'number_parts' => '5',
+  'tab_parent' => 'admin/content/taxonomy',
+  'tab_root' => 'admin/content/taxonomy',
+  'title' => 'Add vocabulary',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '128',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/taxonomy/taxonomy.admin.inc',
+))
+->values(array(
   'path' => 'node/%/revisions/%/view',
   'load_functions' => 'a:2:{i:1;a:1:{s:9:"node_load";a:1:{i:0;i:3;}}i:3;N;}',
   'to_arg_functions' => '',
@@ -7737,6 +8510,28 @@ db_insert('menu_router')->fields(array(
   'file' => 'modules/menu/menu.admin.inc',
 ))
 ->values(array(
+  'path' => 'admin/content/taxonomy/edit/vocabulary/%',
+  'load_functions' => 'a:1:{i:5;s:24:"taxonomy_vocabulary_load";}',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer taxonomy";}',
+  'page_callback' => 'taxonomy_admin_vocabulary_edit',
+  'page_arguments' => 'a:1:{i:0;i:5;}',
+  'fit' => '62',
+  'number_parts' => '6',
+  'tab_parent' => '',
+  'tab_root' => 'admin/content/taxonomy/edit/vocabulary/%',
+  'title' => 'Edit vocabulary',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '4',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/taxonomy/taxonomy.admin.inc',
+))
+->values(array(
   'path' => 'admin/build/menu/item/%/reset',
   'load_functions' => 'a:1:{i:4;s:14:"menu_link_load";}',
   'to_arg_functions' => '',
@@ -7757,6 +8552,28 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'file' => 'modules/menu/menu.admin.inc',
+))
+->values(array(
+  'path' => 'admin/content/taxonomy/%/add/term',
+  'load_functions' => 'a:1:{i:3;s:24:"taxonomy_vocabulary_load";}',
+  'to_arg_functions' => '',
+  'access_callback' => 'user_access',
+  'access_arguments' => 'a:1:{i:0;s:19:"administer taxonomy";}',
+  'page_callback' => 'taxonomy_add_term_page',
+  'page_arguments' => 'a:1:{i:0;i:3;}',
+  'fit' => '59',
+  'number_parts' => '6',
+  'tab_parent' => 'admin/content/taxonomy/%',
+  'tab_root' => 'admin/content/taxonomy/%',
+  'title' => 'Add term',
+  'title_callback' => 't',
+  'title_arguments' => '',
+  'type' => '128',
+  'block_callback' => '',
+  'description' => '',
+  'position' => '',
+  'weight' => '0',
+  'file' => 'modules/taxonomy/taxonomy.admin.inc',
 ))
 ->execute();
 
@@ -8150,6 +8967,126 @@ db_insert('node_access')->fields(array(
   'grant_view' => '1',
   'grant_update' => '0',
   'grant_delete' => '0',
+))
+->execute();
+
+db_create_table('node_comment_statistics', array(
+  'fields' => array(
+    'nid' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'last_comment_timestamp' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'last_comment_name' => array(
+      'type' => 'varchar',
+      'length' => 60,
+      'not null' => FALSE,
+    ),
+    'last_comment_uid' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'comment_count' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  ),
+  'primary key' => array(
+    'nid',
+  ),
+  'indexes' => array(
+    'node_comment_timestamp' => array(
+      'last_comment_timestamp',
+    ),
+  ),
+  'module' => 'comment',
+  'name' => 'node_comment_statistics',
+));
+db_insert('node_comment_statistics')->fields(array(
+  'nid',
+  'last_comment_timestamp',
+  'last_comment_name',
+  'last_comment_uid',
+  'comment_count',
+))
+->values(array(
+  'nid' => '1',
+  'last_comment_timestamp' => '1293044320',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
+))
+->values(array(
+  'nid' => '2',
+  'last_comment_timestamp' => '1293044320',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
+))
+->values(array(
+  'nid' => '3',
+  'last_comment_timestamp' => '1293044320',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
+))
+->values(array(
+  'nid' => '4',
+  'last_comment_timestamp' => '1293044320',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
+))
+->values(array(
+  'nid' => '5',
+  'last_comment_timestamp' => '1293044321',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
+))
+->values(array(
+  'nid' => '6',
+  'last_comment_timestamp' => '1293044321',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
+))
+->values(array(
+  'nid' => '7',
+  'last_comment_timestamp' => '1293044321',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
+))
+->values(array(
+  'nid' => '8',
+  'last_comment_timestamp' => '1293044321',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
+))
+->values(array(
+  'nid' => '9',
+  'last_comment_timestamp' => '1293044321',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
+))
+->values(array(
+  'nid' => '10',
+  'last_comment_timestamp' => '1293044321',
+  'last_comment_name' => NULL,
+  'last_comment_uid' => '3',
+  'comment_count' => '0',
 ))
 ->execute();
 
@@ -8851,6 +9788,18 @@ db_insert('system')->fields(array(
   'info' => 'a:13:{s:4:"name";s:10:"Bluemarine";s:11:"description";s:66:"Table-based multi-column theme with a marine and ash color scheme.";s:7:"version";s:4:"6.20";s:4:"core";s:3:"6.x";s:6:"engine";s:11:"phptemplate";s:7:"project";s:6:"drupal";s:9:"datestamp";s:10:"1292447788";s:7:"regions";a:5:{s:4:"left";s:12:"Left sidebar";s:5:"right";s:13:"Right sidebar";s:7:"content";s:7:"Content";s:6:"header";s:6:"Header";s:6:"footer";s:6:"Footer";}s:8:"features";a:10:{i:0;s:20:"comment_user_picture";i:1;s:7:"favicon";i:2;s:7:"mission";i:3;s:4:"logo";i:4;s:4:"name";i:5;s:17:"node_user_picture";i:6;s:6:"search";i:7;s:6:"slogan";i:8;s:13:"primary_links";i:9;s:15:"secondary_links";}s:11:"stylesheets";a:1:{s:3:"all";a:1:{s:9:"style.css";s:27:"themes/bluemarine/style.css";}}s:7:"scripts";a:1:{s:9:"script.js";s:27:"themes/bluemarine/script.js";}s:10:"screenshot";s:32:"themes/bluemarine/screenshot.png";s:3:"php";s:5:"4.3.5";}',
 ))
 ->values(array(
+  'filename' => 'themes/garland/garland.info',
+  'name' => 'garland',
+  'type' => 'theme',
+  'owner' => 'themes/engines/phptemplate/phptemplate.engine',
+  'status' => '1',
+  'throttle' => '0',
+  'bootstrap' => '0',
+  'schema_version' => '-1',
+  'weight' => '0',
+  'info' => 'a:13:{s:4:"name";s:7:"Garland";s:11:"description";s:66:"Tableless, recolorable, multi-column, fluid width theme (default).";s:7:"version";s:4:"6.20";s:4:"core";s:3:"6.x";s:6:"engine";s:11:"phptemplate";s:11:"stylesheets";a:2:{s:3:"all";a:1:{s:9:"style.css";s:24:"themes/garland/style.css";}s:5:"print";a:1:{s:9:"print.css";s:24:"themes/garland/print.css";}}s:7:"project";s:6:"drupal";s:9:"datestamp";s:10:"1292447788";s:7:"regions";a:5:{s:4:"left";s:12:"Left sidebar";s:5:"right";s:13:"Right sidebar";s:7:"content";s:7:"Content";s:6:"header";s:6:"Header";s:6:"footer";s:6:"Footer";}s:8:"features";a:10:{i:0;s:20:"comment_user_picture";i:1;s:7:"favicon";i:2;s:7:"mission";i:3;s:4:"logo";i:4;s:4:"name";i:5;s:17:"node_user_picture";i:6;s:6:"search";i:7;s:6:"slogan";i:8;s:13:"primary_links";i:9;s:15:"secondary_links";}s:7:"scripts";a:1:{s:9:"script.js";s:24:"themes/garland/script.js";}s:10:"screenshot";s:29:"themes/garland/screenshot.png";s:3:"php";s:5:"4.3.5";}',
+))
+->values(array(
   'filename' => 'themes/chameleon/marvin/marvin.info',
   'name' => 'marvin',
   'type' => 'theme',
@@ -8885,18 +9834,6 @@ db_insert('system')->fields(array(
   'schema_version' => '-1',
   'weight' => '0',
   'info' => 'a:14:{s:4:"name";s:8:"Minnelli";s:11:"description";s:56:"Tableless, recolorable, multi-column, fixed width theme.";s:7:"version";s:4:"6.20";s:4:"core";s:3:"6.x";s:10:"base theme";s:7:"garland";s:11:"stylesheets";a:1:{s:3:"all";a:1:{s:12:"minnelli.css";s:36:"themes/garland/minnelli/minnelli.css";}}s:7:"project";s:6:"drupal";s:9:"datestamp";s:10:"1292447788";s:7:"regions";a:5:{s:4:"left";s:12:"Left sidebar";s:5:"right";s:13:"Right sidebar";s:7:"content";s:7:"Content";s:6:"header";s:6:"Header";s:6:"footer";s:6:"Footer";}s:8:"features";a:10:{i:0;s:20:"comment_user_picture";i:1;s:7:"favicon";i:2;s:7:"mission";i:3;s:4:"logo";i:4;s:4:"name";i:5;s:17:"node_user_picture";i:6;s:6:"search";i:7;s:6:"slogan";i:8;s:13:"primary_links";i:9;s:15:"secondary_links";}s:7:"scripts";a:1:{s:9:"script.js";s:33:"themes/garland/minnelli/script.js";}s:10:"screenshot";s:38:"themes/garland/minnelli/screenshot.png";s:3:"php";s:5:"4.3.5";s:6:"engine";s:11:"phptemplate";}',
-))
-->values(array(
-  'filename' => 'themes/garland/garland.info',
-  'name' => 'garland',
-  'type' => 'theme',
-  'owner' => 'themes/engines/phptemplate/phptemplate.engine',
-  'status' => '1',
-  'throttle' => '0',
-  'bootstrap' => '0',
-  'schema_version' => '-1',
-  'weight' => '0',
-  'info' => 'a:13:{s:4:"name";s:7:"Garland";s:11:"description";s:66:"Tableless, recolorable, multi-column, fluid width theme (default).";s:7:"version";s:4:"6.20";s:4:"core";s:3:"6.x";s:6:"engine";s:11:"phptemplate";s:11:"stylesheets";a:2:{s:3:"all";a:1:{s:9:"style.css";s:24:"themes/garland/style.css";}s:5:"print";a:1:{s:9:"print.css";s:24:"themes/garland/print.css";}}s:7:"project";s:6:"drupal";s:9:"datestamp";s:10:"1292447788";s:7:"regions";a:5:{s:4:"left";s:12:"Left sidebar";s:5:"right";s:13:"Right sidebar";s:7:"content";s:7:"Content";s:6:"header";s:6:"Header";s:6:"footer";s:6:"Footer";}s:8:"features";a:10:{i:0;s:20:"comment_user_picture";i:1;s:7:"favicon";i:2;s:7:"mission";i:3;s:4:"logo";i:4;s:4:"name";i:5;s:17:"node_user_picture";i:6;s:6:"search";i:7;s:6:"slogan";i:8;s:13:"primary_links";i:9;s:15:"secondary_links";}s:7:"scripts";a:1:{s:9:"script.js";s:24:"themes/garland/script.js";}s:10:"screenshot";s:29:"themes/garland/screenshot.png";s:3:"php";s:5:"4.3.5";}',
 ))
 ->values(array(
   'filename' => 'modules/system/system.module',
@@ -8987,7 +9924,7 @@ db_insert('system')->fields(array(
   'name' => 'comment',
   'type' => 'module',
   'owner' => '',
-  'status' => '0',
+  'status' => '1',
   'throttle' => '0',
   'bootstrap' => '0',
   'schema_version' => '6003',
@@ -9203,7 +10140,7 @@ db_insert('system')->fields(array(
   'name' => 'taxonomy',
   'type' => 'module',
   'owner' => '',
-  'status' => '0',
+  'status' => '1',
   'throttle' => '0',
   'bootstrap' => '0',
   'schema_version' => '0',
@@ -9266,7 +10203,7 @@ db_insert('system')->fields(array(
   'status' => '0',
   'throttle' => '0',
   'bootstrap' => '0',
-  'schema_version' => '6000',
+  'schema_version' => '-1',
   'weight' => '0',
   'info' => 'a:10:{s:4:"name";s:13:"Update status";s:11:"description";s:88:"Checks the status of available updates for Drupal and your installed modules and themes.";s:7:"version";s:4:"6.20";s:7:"package";s:15:"Core - optional";s:4:"core";s:3:"6.x";s:7:"project";s:6:"drupal";s:9:"datestamp";s:10:"1292447788";s:12:"dependencies";a:0:{}s:10:"dependents";a:0:{}s:3:"php";s:5:"4.3.5";}',
 ))
@@ -9301,7 +10238,7 @@ db_insert('system')->fields(array(
   'owner' => '',
   'status' => '0',
   'throttle' => '0',
-  'bootstrap' => '1',
+  'bootstrap' => '0',
   'schema_version' => '6203',
   'weight' => '0',
   'info' => 'a:10:{s:4:"name";s:14:"Organic groups";s:11:"description";s:106:"Enable users to create and manage groups.  OG Views integration module is recommended for best experience.";s:7:"package";s:14:"Organic groups";s:4:"core";s:3:"6.x";s:7:"version";s:7:"6.x-2.1";s:7:"project";s:2:"og";s:9:"datestamp";s:10:"1268751911";s:12:"dependencies";a:0:{}s:10:"dependents";a:0:{}s:3:"php";s:5:"4.3.5";}',
@@ -9355,6 +10292,192 @@ db_insert('system')->fields(array(
   'info' => 'a:10:{s:4:"name";s:32:"Organic groups Views integration";s:11:"description";s:85:"<strong>Highly recommended.</strong>. Use Views to search and display organic groups.";s:7:"package";s:14:"Organic groups";s:12:"dependencies";a:2:{i:0;s:2:"og";i:1;s:5:"views";}s:4:"core";s:3:"6.x";s:7:"version";s:7:"6.x-2.1";s:7:"project";s:2:"og";s:9:"datestamp";s:10:"1268751911";s:10:"dependents";a:0:{}s:3:"php";s:5:"4.3.5";}',
 ))
 ->execute();
+
+db_create_table('term_data', array(
+  'fields' => array(
+    'tid' => array(
+      'type' => 'serial',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+    ),
+    'vid' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'name' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'description' => array(
+      'type' => 'text',
+      'not null' => FALSE,
+      'size' => 'big',
+    ),
+    'weight' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+      'size' => 'tiny',
+    ),
+  ),
+  'primary key' => array(
+    'tid',
+  ),
+  'indexes' => array(
+    'taxonomy_tree' => array(
+      'vid',
+      'weight',
+      'name',
+    ),
+    'vid_name' => array(
+      'vid',
+      'name',
+    ),
+  ),
+  'module' => 'taxonomy',
+  'name' => 'term_data',
+));
+
+db_create_table('term_hierarchy', array(
+  'fields' => array(
+    'tid' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'parent' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  ),
+  'indexes' => array(
+    'parent' => array(
+      'parent',
+    ),
+  ),
+  'primary key' => array(
+    'tid',
+    'parent',
+  ),
+  'module' => 'taxonomy',
+  'name' => 'term_hierarchy',
+));
+
+db_create_table('term_node', array(
+  'fields' => array(
+    'nid' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'vid' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'tid' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  ),
+  'indexes' => array(
+    'vid' => array(
+      'vid',
+    ),
+    'nid' => array(
+      'nid',
+    ),
+  ),
+  'primary key' => array(
+    'tid',
+    'vid',
+  ),
+  'module' => 'taxonomy',
+  'name' => 'term_node',
+));
+
+db_create_table('term_relation', array(
+  'fields' => array(
+    'trid' => array(
+      'type' => 'serial',
+      'not null' => TRUE,
+    ),
+    'tid1' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'tid2' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  ),
+  'unique keys' => array(
+    'tid1_tid2' => array(
+      'tid1',
+      'tid2',
+    ),
+  ),
+  'indexes' => array(
+    'tid2' => array(
+      'tid2',
+    ),
+  ),
+  'primary key' => array(
+    'trid',
+  ),
+  'module' => 'taxonomy',
+  'name' => 'term_relation',
+));
+
+db_create_table('term_synonym', array(
+  'fields' => array(
+    'tsid' => array(
+      'type' => 'serial',
+      'not null' => TRUE,
+    ),
+    'tid' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'name' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+  ),
+  'indexes' => array(
+    'tid' => array(
+      'tid',
+    ),
+    'name_tid' => array(
+      'name',
+      'tid',
+    ),
+  ),
+  'primary key' => array(
+    'tsid',
+  ),
+  'module' => 'taxonomy',
+  'name' => 'term_synonym',
+));
 
 db_create_table('url_alias', array(
   'fields' => array(
@@ -9590,7 +10713,7 @@ db_insert('users')->fields(array(
   'signature' => '',
   'signature_format' => '0',
   'created' => '1293043387',
-  'access' => '1293055603',
+  'access' => '1293134687',
   'login' => '1293043411',
   'status' => '1',
   'timezone' => NULL,
@@ -9777,7 +10900,7 @@ db_insert('variable')->fields(array(
 ))
 ->values(array(
   'name' => 'menu_masks',
-  'value' => 'a:14:{i:0;i:61;i:1;i:31;i:2;i:30;i:3;i:29;i:4;i:24;i:5;i:21;i:6;i:15;i:7;i:14;i:8;i:11;i:9;i:7;i:10;i:5;i:11;i:3;i:12;i:2;i:13;i:1;}',
+  'value' => 'a:17:{i:0;i:62;i:1;i:61;i:2;i:59;i:3;i:31;i:4;i:30;i:5;i:29;i:6;i:24;i:7;i:21;i:8;i:15;i:9;i:14;i:10;i:11;i:11;i:7;i:12;i:6;i:13;i:5;i:14;i:3;i:15;i:2;i:16;i:1;}',
 ))
 ->values(array(
   'name' => 'install_task',
@@ -9832,6 +10955,10 @@ db_insert('variable')->fields(array(
   'value' => 's:7:"default";',
 ))
 ->values(array(
+  'name' => 'drupal_http_request_fails',
+  'value' => 'b:0;',
+))
+->values(array(
   'name' => 'file_directory_temp',
   'value' => 's:26:"/Applications/MAMP/tmp/php";',
 ))
@@ -9842,10 +10969,6 @@ db_insert('variable')->fields(array(
 ->values(array(
   'name' => 'node_options_test_group',
   'value' => 'a:2:{i:0;s:6:"status";i:1;s:7:"promote";}',
-))
-->values(array(
-  'name' => 'update_last_check',
-  'value' => 'i:1293044318;',
 ))
 ->values(array(
   'name' => 'cron_last',
@@ -9944,6 +11067,119 @@ db_insert('variable')->fields(array(
   'value' => 'i:0;',
 ))
 ->execute();
+
+db_create_table('vocabulary', array(
+  'fields' => array(
+    'vid' => array(
+      'type' => 'serial',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+    ),
+    'name' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'description' => array(
+      'type' => 'text',
+      'not null' => FALSE,
+      'size' => 'big',
+    ),
+    'help' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'relations' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+      'size' => 'tiny',
+    ),
+    'hierarchy' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+      'size' => 'tiny',
+    ),
+    'multiple' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+      'size' => 'tiny',
+    ),
+    'required' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+      'size' => 'tiny',
+    ),
+    'tags' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+      'size' => 'tiny',
+    ),
+    'module' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'weight' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+      'size' => 'tiny',
+    ),
+  ),
+  'primary key' => array(
+    'vid',
+  ),
+  'indexes' => array(
+    'list' => array(
+      'weight',
+      'name',
+    ),
+  ),
+  'module' => 'taxonomy',
+  'name' => 'vocabulary',
+));
+
+db_create_table('vocabulary_node_types', array(
+  'fields' => array(
+    'vid' => array(
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'type' => array(
+      'type' => 'varchar',
+      'length' => 32,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+  ),
+  'primary key' => array(
+    'type',
+    'vid',
+  ),
+  'indexes' => array(
+    'vid' => array(
+      'vid',
+    ),
+  ),
+  'module' => 'taxonomy',
+  'name' => 'vocabulary_node_types',
+));
 
 db_create_table('watchdog', array(
   'fields' => array(
