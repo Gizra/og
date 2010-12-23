@@ -11,6 +11,18 @@
  * - Run this script from your Drupal ROOT directory.
  * - Use the dump-database-d6.sh to generate the D7 file
  *   modules/simpletest/tests/upgrade/database.filled.php
+ *
+ * This scripts produces the following scenario:
+ * - Nid 1: Group without posts.
+ * - Nid 2: Group with 3 posts (Nid 3 - 5).
+ * - Nid 6: Orphan group content (i.e. no attached to a group).
+ * - Nid 7, 8: Groups that share a group content (Nid 9).
+ * - Nid 10: Group with members:
+ *   - Uid 3: Group manager.
+ *   - Uid 4: Pending member.
+ *   - Uid 5: active member.
+ *   - Uid 6: Pending admin member.
+ *   - Uid 7: Active admin member.
  */
 
 // Define settings.

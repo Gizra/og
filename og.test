@@ -674,6 +674,8 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
     module_enable(array('entity', 'og'));
     $this->assertTrue($this->performUpgrade(), t('The upgrade of Organic groups was completed successfully.'));
 
-    $this->drupalGet('node/5/edit');
+    // Assert according to the scenario Drupal 6's test table dump was created.
+
+
   }
 }
