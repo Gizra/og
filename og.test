@@ -668,9 +668,12 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
    * Test a successful upgrade.
    */
   public function testOgUpgrade() {
-    $this->assertTrue($this->performUpgrade(), t('The upgrade was completed successfully.'));
+    // The upgrade should "fail" since OG won't upgrade until it's enabled.
+    $this->assertTrue($this->performUpgrade(FALSE), t('The upgrade was completed successfully.'));
 
     module_enable(array('entity', 'og'));
     $this->assertTrue($this->performUpgrade(), t('The upgrade of Organic groups was completed successfully.'));
+
+    $this->drupalGet('node/5/edit');
   }
 }
