@@ -1106,15 +1106,16 @@ function og_get_all_group_entity() {
  *   The entity object. If empty the current user will be used.
  *
  * @return
- *   TRUE if the entity (e.g. the user) belongs to a group.
+ *   TRUE if the entity (e.g. the user) belongs to a group and is not pending or
+ *   blocked.
  */
-function og_is_member($gid, $entity_type = 'user', $entity = NULL) {
+function og_is_member($gid, $entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE)) {
   if ($entity_type == 'user' && empty($entity)) {
     global $user;
-    $entity = clone($user);
+    $entity = clone $user;
   }
   $entity = og_load_entity($entity_type, $entity);
-  $groups = og_get_entity_groups($entity_type, $entity);
+  $groups = og_get_entity_groups($entity_type, $entity, $states);
   return in_array($gid, $groups);
 }
 

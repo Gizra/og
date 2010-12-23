@@ -672,10 +672,59 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
     $this->assertTrue($this->performUpgrade(FALSE), t('The upgrade was completed successfully.'));
 
     module_enable(array('entity', 'og'));
-    $this->assertTrue($this->performUpgrade(), t('The upgrade of Organic groups was completed successfully.'));
+    $this->assertTrue($this->performUpgrade(FALSE), t('The upgrade of Organic groups was completed successfully.'));
 
     // Assert according to the scenario Drupal 6's test table dump was created.
+    // TODO: Assert OG fields.
+    $group = og_get_group('node', 1);
+    $this->assertEqual($group->state, OG_STATE_ACTIVE, t('Node ID 1 is an active group.'));
 
+    $group = og_get_group('node', 2);
+    $this->assertEqual($group->state, OG_STATE_ACTIVE, t('Node ID 2 is an active group.'));
 
+    foreach (range(3, 5) as $nid) {
+      $node = node_load($nid);
+      $this->assertTrue(og_is_member($group->gid, 'node', $node), t('Node ID @nid is a group content of Node ID 2', array('@nid' => $nid)));
+    }
+
+    $group = og_get_group('node', 10);
+
+    // Assert users.
+    $values = array(
+      // Uid 3 is the group manager, so in OG6 it was marked as admin.
+      3 => array('admin' => TRUE),
+      4 => array('active' => FALSE),
+      5 => array(),
+      6 => array('active' => FALSE, 'admin' => TRUE),
+      7 => array('admin' => TRUE),
+    );
+
+    foreach ($values as $uid => $value) {
+      // Set default values.
+      $value += array('active' => TRUE, 'admin' => FALSE);
+
+      if ($value['active']) {
+        $op = t('active');
+        $states = array(OG_STATE_ACTIVE);
+      }
+      else {
+        $op = t('pending');
+        $states = array(OG_STATE_PENDING);
+      }
+
+      $account = user_load($uid);
+
+      $roles = array();
+      // OG_AUTHENTICATED_ROLE
+      $roles[2] = 2;
+
+      if ($value['admin']) {
+        // OG_ADMINISTRATOR_ROLE
+        $roles[3] = 3;
+      }
+
+      $this->assertTrue(og_is_member($group->gid, 'user', $account, $states), t('User @uid is @op member in group.', array('@uid' => $uid, '@op' => $op)));
+      $this->assertEqual(og_get_user_roles($group->gid, $uid), $roles, t('User @uid has the correct roles in group.', array('@uid' => $uid)));
+    }
   }
 }
