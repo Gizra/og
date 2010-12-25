@@ -673,7 +673,8 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
    */
   public function testOgUpgrade() {
     // The upgrade should "fail" since OG won't upgrade until it's enabled.
-    $this->assertTrue($this->performUpgrade(FALSE), t('The upgrade was completed successfully.'));
+    $this->performUpgrade(FALSE);
+    $this->assertText('You must enable Organic groups module to perform an upgrade from Drupal 6', t('Organic groups did not upgrade when module is disabled.'));
 
     // TODO: Understand why this workround is needed to load all entity classes.
     module_enable(array('entity'));
@@ -681,7 +682,7 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
     module_load_include('inc', 'entity' ,'includes/entity.controller');
     module_enable(array('og'));
 
-    $this->assertTrue($this->performUpgrade(FALSE), t('The upgrade of Organic groups was completed successfully.'));
+    $this->performUpgrade(FALSE);
 
     // Assert according to the scenario Drupal 6's test table dump was created.
     // TODO: Assert OG fields.
