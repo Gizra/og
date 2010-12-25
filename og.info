@@ -6,10 +6,7 @@ dependencies[] = entity
 core = 7.x
 version = VERSION
 files[] = og.module
-files[] = og.install
-files[] = og.field.inc
 files[] = includes/og.views.inc
-files[] = includes/og.rules.inc
 
 ; Test files.
 files[] = og.test
