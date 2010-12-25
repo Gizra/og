@@ -518,7 +518,7 @@ class OgController extends EntityAPIController {}
 /**
  * Main class for Group entities provided by Entity API.
  */
-class EntityOg extends EntityDB {
+class EntityOg extends Entity {
   public function __construct(array $values = array(), $entityType = NULL) {
     parent::__construct($values, 'group');
   }
