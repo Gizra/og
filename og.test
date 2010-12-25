@@ -616,8 +616,8 @@ class OgUnInstallTestCase extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups uninstall and re-install',
-      'description' => 'Test the uninstalling and re-installing of the Organic groups module',
+      'name' => 'Organic groups install, uninstall and re-install',
+      'description' => 'Test the installing, uninstalling and re-installing of the Organic groups module',
       'group' => 'Organic groups',
     );
   }
@@ -625,10 +625,14 @@ class OgUnInstallTestCase extends DrupalWebTestCase {
     parent::setUp('entity_feature', 'og');
   }
   /**
-   * Uninstall and re-install, deletion of fields on uninstall.
+   * Instaill, uninstall and re-install.
    */
-  function testOgReInstall() {
-    // Uninstall module.
+  function testOgInstall() {
+    // Assert default roles and permissions were created.
+    $global_roles = og_get_global_roles();
+    $this->assertFalse(array_diff($global_roles, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE)), t('Global roles were created on module installation.'));
+
+    // Uninstall module. Assert the deletion of fields on uninstall.
     module_disable(array('og'));
     drupal_uninstall_modules(array('og'), FALSE);
     $og_fields = field_read_fields(array('module' => 'og'), array('include_inactive' => TRUE));
