@@ -78,7 +78,7 @@ function og_entity_info() {
   $return['group'] = array(
     'label' => t('Group'),
     'entity class' => 'EntityOg',
-    'controller class' => 'OgController',
+    'controller class' => 'EntityAPIController',
     'base table' => 'og',
     'entity keys' => array(
       'id' => 'gid',
@@ -509,11 +509,6 @@ function og_create_group($values = array()) {
   // Entity couldn't be loaded.
   return FALSE;
 }
-
-/**
- * Controller class for "group" entity provided by Drupal's API.
- */
-class OgController extends EntityAPIController {}
 
 /**
  * Main class for Group entities provided by Entity API.
