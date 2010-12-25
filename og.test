@@ -671,7 +671,7 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
     // The upgrade should "fail" since OG won't upgrade until it's enabled.
     $this->assertTrue($this->performUpgrade(FALSE), t('The upgrade was completed successfully.'));
 
-    module_enable(array('entity', 'og'));
+    module_enable(array('og'));
     $this->assertTrue($this->performUpgrade(FALSE), t('The upgrade of Organic groups was completed successfully.'));
 
     // Assert according to the scenario Drupal 6's test table dump was created.
@@ -682,11 +682,29 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
     $group = og_get_group('node', 2);
     $this->assertEqual($group->state, OG_STATE_ACTIVE, t('Node ID 2 is an active group.'));
 
+    // Test group content with NID 3 - 5 belong to the group with NID 2.
     foreach (range(3, 5) as $nid) {
       $node = node_load($nid);
       $this->assertTrue(og_is_member($group->gid, 'node', $node), t('Node ID @nid is a group content of Node ID 2', array('@nid' => $nid)));
     }
 
+    // Orphan group content (i.e. not attached to a group).
+    $group = og_get_group('node', 6);
+    $this->assertFalse($group, t('Node ID 6 is not a group.'));
+    $node = node_load(6);
+    $this->assertFalse($node->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][0], t('Node ID 6 is not associated with a group.'));
+
+    // Group content that shares the same group.
+    // TODO: Change script to have group as nid 7, and group posts as 8 - 9
+    $group = og_get_group('node', 9);
+    foreach (range(7 ,8) as $nid) {
+      $node = node_load($nid);
+      $this->assertEqual($node->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][0], $group->gid, t('Node ID @nid is as group content associated with node ID 9.', array('@nid' => $nid)));
+    }
+
+
+
+    // Check user membership.
     $group = og_get_group('node', 10);
 
     // Assert users.

@@ -15,7 +15,7 @@
  * This scripts produces the following scenario:
  * - Nid 1: Group without posts.
  * - Nid 2: Group with 3 posts (Nid 3 - 5).
- * - Nid 6: Orphan group content (i.e. no attached to a group).
+ * - Nid 6: Orphan group content (i.e. not attached to a group).
  * - Nid 7, 8: Groups that share a group content (Nid 9).
  * - Nid 10: Group with members:
  *   - Uid 3: Group manager.

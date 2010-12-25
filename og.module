@@ -164,7 +164,7 @@ function og_modules_enabled($modules) {
     // Make sure we already have the Drupal 7
     // tables. Otherwise, we skip this, and wait to be called from
     // og_update_7000().
-    $access = module_exists('og') && ($schema = drupal_get_schema('og')) && !empty($schema['gid']);
+    $access = (module_exists('og') || $module == 'og') && ($schema = drupal_get_schema('og')) && !empty($schema['gid']);
     if ($access) {
       // Add default roles and permissions, if existing and not set yet.
       og_set_global_access_module($module);
