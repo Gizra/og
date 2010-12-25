@@ -68,32 +68,31 @@ $form_state['values']['type'] = 'test_post_group';
 $form_state['values']['og_content_type_usage'] = 'group_post_standard';
 drupal_execute('node_type_form',$form_state);
 
-// variable_set('og_content_type_usage_test_group', 'group');
-// variable_set('og_content_type_usage_test_post_group', 'group_post_standard');
-
 // Create users with ID 3 to 7.
 $user_ids=array();
-foreach (range(3,7) as $i) {
+foreach (range(3, 7) as $i) {
   $user_values = array();
   $user_values['name'] = 'og_test_user' . $i;
   $user_values['mail'] = 'og_test_user' . $i . '@example.com';
   $user_values['pass'] = user_password(5);
   $user_values['status'] = 1;
-  $user=user_save(NULL,$user_values);
-  $user_ids[ $i ] = $user->uid;
+  $user = user_save(NULL,$user_values);
+  $user_ids[$i] = $user->uid;
 }
 
 /**
  * Organic groups content generation interface.
  */
 interface ogContent {
-  //returns a list of groups configuration arrays
+  //Returns a list of groups configuration arrays.
   public function groupList($user_ids);
-  //returns a list of posts configuation arrays
-  //groups nids generated in groupList are provided in groups parameter
-  public function postList($user_ids,$groups);
-  //performs actions of the generated groups and posts
-  public function groupActions($user_ids,$groups,$posts);
+
+  // Returns a list of posts configuation arrays
+  // Groups nids generated in groupList are provided in groups parameter.
+  public function postList($user_ids, $groups);
+
+  // Performs actions of the generated groups and posts.
+  public function groupActions($user_ids, $groups, $posts);
 }
 
 /**
@@ -110,11 +109,11 @@ class ogGroupNoPosts implements ogContent {
     return $list;
   }
 
-  public function postList($user_ids,$groups) {
+  public function postList($user_ids, $groups) {
     return array();
   }
 
-  public function groupActions($user_ids,$groups,$posts) {}
+  public function groupActions($user_ids, $groups, $posts) {}
 }
 
 /**
@@ -132,7 +131,7 @@ class ogGroupThreePosts implements ogContent {
     return $list;
   }
 
-  public function postList($user_ids,$groups) {
+  public function postList($user_ids, $groups) {
     $gid = $groups[0];
     $list = array();
     foreach ( array(1,2,3) as $itr){
@@ -146,7 +145,7 @@ class ogGroupThreePosts implements ogContent {
     return $list;
   }
 
-  public function groupActions($user_ids,$groups,$posts){}
+  public function groupActions($user_ids, $groups, $posts){}
 }
 
 /**
@@ -158,7 +157,7 @@ class ogGroupOrphanPost implements ogContent {
     return array();
   }
 
-  public function postList($user_ids,$groups) {
+  public function postList($user_ids, $groups) {
     $list = array();
     $list[] = array(
       'title' => 'group-posts-orphan',
@@ -169,7 +168,7 @@ class ogGroupOrphanPost implements ogContent {
     return $list;
   }
 
-  public function groupActions($user_ids,$groups,$posts){}
+  public function groupActions($user_ids, $groups, $posts){}
 }
 
 /**
@@ -192,7 +191,7 @@ class ogGroupPostMultipleGroups implements ogContent {
     return $list;
   }
 
-  public function postList($user_ids,$groups) {
+  public function postList($user_ids, $groups) {
     $list = array();
 
     $gid_b = $groups['beta'];
@@ -206,7 +205,7 @@ class ogGroupPostMultipleGroups implements ogContent {
     );
     return $list;
   }
-  public function groupActions($user_ids,$groups,$posts){}
+  public function groupActions($user_ids, $groups, $posts) {}
 }
 
 
@@ -228,7 +227,7 @@ class ogGroupUserAction implements ogContent {
     return array();
   }
 
-  public function groupActions($user_ids, $groups,$posts){
+  public function groupActions($user_ids, $groups, $posts){
     $gid = $groups[0];
     // - user ID 4 as pending member.
     og_save_subscription( $gid , $user_ids[4] , array('is_active' => 0));
