@@ -74,6 +74,7 @@ foreach ( range(3,7) as $i ) {
 	$user_ids[ $i ]=$user->uid;
 }
 
+module_load_include('inc', 'node', 'node.pages');
 // 1) Create group by user ID 3 with no group posts.
 	$node=new stdClass();
 	$node->type='test_group';
@@ -89,7 +90,6 @@ foreach ( range(3,7) as $i ) {
 	$node->uid=$user_ids[3];
 	$node->body='group with 3 posts';
 	node_save($node);
-	$nids[]=$node->nid;
 	$gid=$node->nid;
 		/*3 posts*/	
 		foreach( array(1,2,3) as $itr){
@@ -100,7 +100,6 @@ foreach ( range(3,7) as $i ) {
 			$node->body='group posts '.$itr;
 			$node->og_groups=array($gid);
 			node_save($node);
-			$nids[]=$node->nid;
 		}
 // 3) Create group bu user ID 3 with:
 // - user ID 4 as pending member.
@@ -110,31 +109,35 @@ foreach ( range(3,7) as $i ) {
 //
 // 4) Create group post not associated to any other group.
 //
+	$node=new stdClass();
+	$node->type='test_post_group';
+	$node->title='group-posts-orphan';
+	$node->uid=$user_ids[3];
+	$node->body='group posts orphan';
+	$node->og_groups=array();
+	node_save($node);
 // 5) Create group posts associated to group node ID 1, 2.
 
-$node_id = 0;
-$revision_id = 0;
-module_load_include('inc', 'node', 'node.pages');
+	$node=new stdClass();
+	$node->type='test_group';
+	$node->title='group-alpha';
+	$node->uid=$user_ids[3];
+	$node->body='group alpha';
+	node_save($node);
+	$gid_a=$node->nid;
 
+	$node=new stdClass();
+	$node->type='test_group';
+	$node->title='group-beta';
+	$node->uid=$user_ids[3];
+	$node->body='group beta';
+	node_save($node);
+	$gid_b=$node->nid;
 
-$uid = 3;
-
-for ($i = 0; $i < 2; $i++) {
-  $node = new stdClass;
-  $node->uid = $uid;
-  $node->type = 'page';
-  $node->sticky = 0;
-  ++$node_id;
-  ++$revision_id;
-  $node->title = "group node title $node_id rev $revision_id (i=$i)";
-  $node->description = "description for group node title $node_id rev $revision_id (i=$i)";
-
-  $node->status = intval($i / 4) % 2;
-  $node->language = '';
-  $node->revision = $i < 12;
-  $node->promote = $i % 2;
-  $node->created = $now + $i * 86400;
-  $node->log = "added $i node";
-
-  node_save($node);
-}
+	$node=new stdClass();
+	$node->type='test_post_group';
+	$node->title='group-posts-orphan';
+	$node->uid=$user_ids[3];
+	$node->body='group posts orphan';
+	$node->og_groups=array($gid_a,$gid_b);
+	node_save($node);
