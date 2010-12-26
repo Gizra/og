@@ -200,6 +200,10 @@ function og_schema() {
  * Upgrade from Organic groups 6 to 7.
  */
 function og_update_7000(&$sandbox) {
+  if (!module_exists('og')) {
+    // If OG module isn't enabled we can't create the OG specific fields.
+    throw new DrupalUpdateException('You must enable Organic groups module to perform an upgrade from Drupal 6.');
+  }
   if (db_field_exists('og', 'nid') && !db_table_exists('d6_og')) {
     // Rename the old table, so we can populate the new {og} table using API
     // functions, that assume the new DB structure.
@@ -210,6 +214,9 @@ function og_update_7000(&$sandbox) {
     // Install the new database.
     drupal_install_schema('og');
     og_install();
+    // TODO: Move to og_modules_enabled() is possible?
+    // Set global roles and permissions.
+    og_set_global_access_module('og');
   }
   // Some patterns taken from node_update_7006().
   // - Add group fields to nodes.
@@ -318,7 +325,7 @@ function og_update_7000(&$sandbox) {
       og_set_global_access_module('og');
 
       $sandbox['#finished'] = 1;
-      return t("!number groups and group content converted to use new Group fields.", array('!number' => $sandbox['total']));
+      return t("!number groups and group content converted to use new Organic groups fields.", array('!number' => $sandbox['total']));
     }
   }
 }
@@ -411,7 +418,7 @@ function _og_upgrade_group_content(&$sandbox) {
     $node = node_load($revision->nid, $revision->vid);
     og_group($group->gid, 'node', $node);
 
-    $sandbox['last'] = $account->nid;
+    $sandbox['last'] = $node->nid;
     // User subscribed to group.
     $sandbox['count'] += 1;
   }
