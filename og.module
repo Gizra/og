@@ -1355,7 +1355,7 @@ function og_get_global_roles() {
 }
 
 /**
- * Get default roles.
+ * Get ar if default roles, keyed by their declaring module.
  */
 function og_get_default_roles($include = TRUE) {
   $roles = array();
@@ -1823,7 +1823,7 @@ function og_user_role_revoke_permissions($rid, array $permissions = array()) {
 
 
 /**
- * Get all permissions defined for Group.
+ * Get all permissions defined by implementing modules.
  *
  * @return
  *  Array keyed with the permissions name and the value of the permissions.

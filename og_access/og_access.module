@@ -210,7 +210,7 @@ function og_access_og_fields_info() {
     'field' => array(
       'field_name' => OG_CONTENT_ACCESS_FIELD,
       'no_ui' => TRUE,
-      'type' => 'list_number',
+      'type' => 'list_integer',
       'cardinality' => 1,
       'settings' => array('allowed_values' => $allowed_values, 'allowed_values_function' => ''),
     ),

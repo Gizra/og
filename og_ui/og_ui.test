@@ -11,9 +11,13 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og', 'og_ui');
+    parent::setUp('og_ui');
 
-    $this->admin_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
+    $this->admin_user = $this->drupalCreateUser(array(
+      'bypass node access',
+      'administer content types',
+      'administer group',
+    ));
     $this->drupalLogin($this->admin_user);
 
     // Create group content type.
@@ -36,27 +40,25 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
 
     $roles = og_get_default_roles();
+    $roles = array_flip(array_keys($roles['og']));
 
     // Remove a permission.
     $edit = array();
-    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = FALSE;
-    $this->drupalPost('group/' . $this->group->entity_type . '/' . $this->group->etid . '/admin/people/permissions', $edit, t('Save permissions'));
+    $edit['1[subscribe]'] = FALSE;
+    $this->drupalPost('admin/config/group/permissions', $edit, t('Save global permissions'));
     $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
 
-    // TODO: Remove - find out why doesn't work without.
-    drupal_static_reset('og_user_access');
-    drupal_static_reset('og_user_role_permissions');
+    // FIXME: Understand why reseting the static cache isn't enough.
+    $this->resetAll();
 
     $this->assertFalse(og_user_access($gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
 
     // Re-add permission.
     $edit = array();
-    $edit[$roles[OG_ANONYMOUS_ROLE] . '[subscribe]'] = TRUE;
-    $this->drupalPost('group/' . $this->group->entity_type . '/' . $this->group->etid . '/admin/people/permissions', $edit, t('Save permissions'));
+    $edit['1[subscribe]'] = TRUE;
+    $this->drupalPost('admin/config/group/permissions', $edit, t('Save global permissions'));
 
-    // TODO: Remove - find out why doesn't work without.
-    drupal_static_reset('og_user_access');
-    drupal_static_reset('og_user_role_permissions');
+    $this->resetAll();
 
     $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
   }
