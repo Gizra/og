@@ -5,12 +5,22 @@
 /**
  * Generate content for a Drupal 6 database to test the upgrade process.
  *
+ * @todo: Currently we use Drush for producing the script, find out why I wasn't
+ * able to use just php-cli.
+ *
  * Run this script at the root of an existing Drupal 6 installation.
  * Steps to use this generation script:
- * - Install drupal 6.
- * - Run this script from your Drupal ROOT directory.
- * - Use the dump-database-d6.sh to generate the D7 file
- *   modules/simpletest/tests/upgrade/database.filled.php
+ * - Install Drupal 6.
+ * - Install and enable Organic groups module.
+ * - Copy from Drupal 7 includes/utility.inc to Drupal 6 includes folder (the
+ *   include file is version agnostic).
+ * - Execute script by running
+ *     drush php-script generate-og-d6-content.php > drupal-6.og.database.php
+ *   from the command line from the Drupal 6 ROOT directory.
+ * - Since Organic groups module is a contrib module, it needs to be disabled
+ *   for the upgrade path, thus open the result file with a text editor and
+ *   under the {system} table, change the "status" value of the 'og' insertion
+ *   to 0.
  *
  * This scripts produces the following scenario:
  * - Nid 1: Group without posts.
