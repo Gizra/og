@@ -114,7 +114,8 @@ class ogGroupNoPosts implements ogContent {
     $list[] = array(
       'title' => 'group-without-posts',
       'uid' => $user_ids[3],
-      'body' => 'group without posts'
+      'body' => 'group without posts',
+      'og_description' => 'description group without posts.',
     );
     return $list;
   }
@@ -136,7 +137,8 @@ class ogGroupThreePosts implements ogContent {
     $list[] = array(
       'title' => 'group-with-3-posts',
       'uid' => $user_ids[3],
-      'body' => 'group with 3 posts'
+      'body' => 'group with 3 posts',
+      'og_description' => 'description group with 3 posts.',
     );
     return $list;
   }
@@ -149,7 +151,7 @@ class ogGroupThreePosts implements ogContent {
         'title' => 'group-posts-' . $itr,
         'uid' => $user_ids[3],
         'body' => 'group posts ' . $itr,
-        'og_groups' => array($gid)
+        'og_groups' => array($gid),
       );
     }
     return $list;
@@ -173,7 +175,7 @@ class ogGroupOrphanPost implements ogContent {
       'title' => 'group-posts-orphan',
       'uid' => $user_ids[3],
       'body' => 'group posts orphan',
-      'og_groups' => array()
+      'og_groups' => array(),
     );
     return $list;
   }
@@ -191,12 +193,14 @@ class ogGroupPostMultipleGroups implements ogContent {
     $list['alpha'] = array(
       'title' => 'group-alpha',
       'uid' => $user_ids[3],
-      'body' => 'group alpha'
+      'body' => 'group alpha',
+      'og_description' => 'description group alpha.',
     );
     $list['beta'] =array(
       'title' => 'group-beta',
       'uid' => $user_ids[3],
-      'body' => 'group beta'
+      'body' => 'group beta',
+      'og_description' => 'description group beta.',
     );
     return $list;
   }
@@ -228,7 +232,8 @@ class ogGroupUserAction implements ogContent {
     $list[] = array(
       'title' => 'group-with-user-action',
       'uid' => $user_ids[3],
-      'body' => 'group with user action'
+      'body' => 'group with user action',
+      'og_description' => 'description with user action.',
     );
     return $list;
   }

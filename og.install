@@ -214,7 +214,6 @@ function og_update_7000(&$sandbox) {
     // Install the new database.
     drupal_install_schema('og');
     og_install();
-    // TODO: Move to og_modules_enabled() is possible?
     // Set global roles and permissions.
     og_set_global_access_module('og');
   }
@@ -249,12 +248,21 @@ function og_update_7000(&$sandbox) {
               break;
 
           }
-
-          // TODO: Delete variables.
         }
       }
 
       if ($content_type) {
+        // Create a description field. This field isn't part of OG7, however we help
+        // migrate the data from OG6.
+
+        $field = array(
+          'field_name' => 'og_description',
+          'type' => 'text',
+          'entity_types' => array('node'),
+          'cardinality' => 1,
+        );
+        $field = field_create_field($field);
+
         // Add group and group content fields to content types.
         $fields = array(
           'group' => OG_GROUP_FIELD,
@@ -263,6 +271,18 @@ function og_update_7000(&$sandbox) {
         foreach ($fields as $key => $field_name) {
           foreach ($content_type[$key] as $type) {
             og_create_field($field_name, 'node', $type);
+
+            if ($key == 'group') {
+              // Create the "description" field for the bundle.
+              $instance = array(
+                'field_name' => 'og_description',
+                'bundle' => $type,
+                'entity_type' => 'node',
+                'label' => t('Group description'),
+                'description' => t('This is description of the group.'),
+              );
+              field_create_instance($instance);
+            }
           }
         }
       }
@@ -320,12 +340,8 @@ function og_update_7000(&$sandbox) {
     }
     if (empty($sandbox['group upgrade'])) {
       // All nodes and users are processed.
-
-      // Add default roles and permissions, if existing and not set yet.
-      og_set_global_access_module('og');
-
       $sandbox['#finished'] = 1;
-      return t("!number groups and group content converted to use new Organic groups fields.", array('!number' => $sandbox['total']));
+      return t("Organic groups converted to use new schema.");
     }
   }
 }
@@ -344,6 +360,7 @@ function _og_upgrade_group(&$sandbox) {
   $query
     ->fields('nr', array('nid', 'vid'))
     ->fields('n', array('type', 'created'))
+    ->fields('d6_og', array('og_description'))
     ->condition('nr.vid', $sandbox['last'], '>')
     ->orderBy('nr.vid', 'ASC')
     ->range(0, $batch_size);
@@ -367,6 +384,10 @@ function _og_upgrade_group(&$sandbox) {
 
     // Set field values.
     $node->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = TRUE;
+
+    if (!empty($revision->og_description)) {
+      $node->og_description[LANGUAGE_NONE][0]['value'] = $revision->og_description;
+    }
 
     field_attach_update('node', $node);
 
