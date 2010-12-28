@@ -52,24 +52,22 @@ function og_field_group_property_callback(&$info, $entity_type, $field, $instanc
   $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
   // Define a data structure so it's possible to deal with Group
-  // audinece properly.
+  // audience field.
   $property['getter callback'] = 'entity_metadata_field_verbatim_get';
   $property['setter callback'] = 'entity_metadata_field_verbatim_set';
-  $property['data info']['properties'] = array(
-    'properties' => array(
-      'gid' => array(
+  $property['property info'] = array(
+    'gid' => array(
+    'type' => 'integer',
+    'label' => t('The group this group content is associated with'),
+    ),
+    'state' => array(
+      'type' => 'text',
+      'label' => t('Group content state'),
+      'options list' => 'og_group_content_states',
+    ),
+    'created' => array(
       'type' => 'integer',
-      'label' => t('The group this group content is associated with'),
-      ),
-      'state' => array(
-        'type' => 'text',
-        'label' => t('Group content state'),
-        'options list' => 'og_group_content_states',
-      ),
-      'created' => array(
-        'type' => 'integer',
-        'label' => t('Created timestamp'),
-      ),
+      'label' => t('Created timestamp'),
     ),
   );
 }
