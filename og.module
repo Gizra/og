@@ -161,7 +161,7 @@ function og_entity_property_info() {
  */
 function og_modules_enabled($modules) {
   // Make sure we already have the Drupal 7 tables.
-  if (module_exists('og') && db_table_exists('og') && db_field_exists('og', 'gid')) {  
+  if (module_exists('og') && db_table_exists('og') && db_field_exists('og', 'gid')) {
     foreach ($modules as $module) {
       // Add default roles and permissions, if existing and not set yet.
       og_set_global_access_module($module);
@@ -1920,7 +1920,8 @@ function og_set_breadcrumb($entity_type, $etid, $path = array()) {
   if ($entity = entity_load($entity_type, array($etid))) {
     $entity = reset($entity);
     $label = og_entity_label($entity_type, $entity);
-    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$etid")), $path)) ;
+    $uri = entity_uri($entity_type, $entity);
+    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, $uri['path'])), $path)) ;
   }
 }
 
