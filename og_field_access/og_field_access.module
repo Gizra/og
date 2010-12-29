@@ -54,11 +54,14 @@ function og_field_access_og_permission() {
  * Controls editing fields.
  */
 function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
-  // Check field access permissions for the specific bundle.
-  $fields = field_info_instances($entity_type, $form['#bundle']);
-  if ($fields) {
-    foreach ($fields as $field_name => $value) {
-      og_field_access_check_access($entity_type, $entity, $form, $form_state, $langcode, $field_name, 'update');
+  // Make sure entity is a group or group content.
+  if (isset($entity->{OG_AUDIENCE_FIELD}) || isset($entity->{OG_GROUP_FIELD})) {
+    // Check field access permissions for the specific bundle.
+    $fields = field_info_instances($entity_type, $form['#bundle']);
+    if ($fields) {
+      foreach ($fields as $field_name => $value) {
+        og_field_access_check_access($entity_type, $entity, $form, $form_state, $langcode, $field_name, 'update');
+      }
     }
   }
 }
@@ -69,12 +72,16 @@ function og_field_access_field_attach_form($entity_type, $entity, &$form, $form_
  * Controls viewing fields.
  */
 function og_field_access_field_attach_view_alter(&$result, $context) {
-  // Copy the result to a new variable, so it won't be changed in
-  // element_children().
-  $fields = $result;
-  if ($field_names = element_children($fields)) {
-    foreach ($field_names as $field_name) {
-      og_field_access_check_access($context['entity_type'], $context['entity'], $result, array(), '', $field_name, 'view');
+  $entity = $context['entity'];
+  // Make sure entity is a group or group content.
+  if (isset($entity->{OG_AUDIENCE_FIELD}) || isset($entity->{OG_GROUP_FIELD})) {
+    // Copy the result to a new variable, so it won't be changed in
+    // element_children().
+    $fields = $result;
+    if ($field_names = element_children($fields)) {
+      foreach ($field_names as $field_name) {
+        og_field_access_check_access($context['entity_type'], $entity, $result, array(), '', $field_name, 'view');
+      }
     }
   }
 }
@@ -111,7 +118,6 @@ function og_field_access_check_access($entity_type, $entity, &$form, $form_state
 
       // TODO: Remove hack, and see if we can get og_audience attached
       // to views' dummy objects.
-
       $entity = entity_load($entity_type, array($id));
       $entity = reset($entity);
 
