@@ -67,10 +67,6 @@ define('OG_AUTHENTICATED_ROLE', 'member');
  */
 define('OG_ADMINISTRATOR_ROLE', 'administrator member');
 
-/*******************************************************************************
- * Hook implementations
- ******************************************************************************/
-
 /**
  * Implements hook_entity_info().
  */

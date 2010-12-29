@@ -605,7 +605,7 @@ class OgTranslationTestCase extends DrupalWebTestCase {
  *
  * TODO:
  * - User with no permissions.
- * - User without and without permissions for opt-group.
+ * - User with and without permissions for opt-group.
  * - Opt group enabled or disabled.
  * - Editing existing field.
  * - Prepopulate via URL.
@@ -660,6 +660,59 @@ class OgGroupudienceField extends DrupalWebTestCase {
     $this->assertText(t('Select the groups this content should be associated with.'), 'Field group audience shows correct description about existing groups.');
     // TODO: Why is the extra space needed in the result?
     $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $group->gid . '"]', $group->label . ' ', 'Field group audience shows the existing group.');
+  }
+
+  function testOptGroup() {
+    // Create users.
+    $admin_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+      'administer group',
+    ));
+
+    $web_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+    ));
+
+    // Assert no group options are presented to any of the users.
+    foreach (array($admin_user, $web_user) as $account) {
+      $this->drupalLogin($account);
+      $this->drupalGet('node/add/article');
+      $this->assertText(t('There are no groups you can select from.'), t('no group options are presented to any of the users.'));
+    }
+
+    // Create one group that belongs to each user.
+    $groups = array();
+    foreach (array($admin_user, $web_user) as $account) {
+      $settings = array();
+      $settings['type'] = 'article';
+      $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+      $settings['uid'] = $account->uid;
+      $node = $this->drupalCreateNode($settings);
+      $group = og_get_group('node', $node->nid);
+
+      $groups[] = $group;
+    }
+
+    list($admin_group, $web_group) = $groups;
+
+    // Assert admin user sees opt group with both groups.
+    // and web user sees only their own group.
+    $this->drupalLogin($admin_user);
+    $this->drupalGet('node/add/article');
+    $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $web_group->gid . '"]', $web_group->label . ' ', t('Field group audience shows the group to user may see.'));
+    $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $admin_group->gid . '"]', $admin_group->label . ' ', t('Field group audience is shown without opt group to non-privileged user.'));
+
+    $this->drupalLogin($web_user);
+    $this->drupalGet('node/add/article');
+    // Results appear as checkboxes.
+    $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $web_group->gid . '"]', $web_group->label . ' ', t('Field group audience shows the group to user may see.'));
+    $this->assertNoFieldByXPath('//label[@for="edit-group-audience-und-' . $admin_group->gid . '"]', $admin_group->label . ' ', t('Field group audience is shown without opt group to non-privileged user.'));
   }
 }
 /**
