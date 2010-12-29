@@ -271,10 +271,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
   }
 
   /**
-   * Group of a new content.
-   * Group an existing content.
-   * Re-group existing content.
-   * Ungroup content.
+   * Test group and ungroup of content.
    */
   function testGroupAndUngroup() {
     $admin_user = $this->drupalCreateUser();
@@ -290,14 +287,14 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     $entity->save();
     $group1 = og_get_group('entity_test', $entity->pid);
 
-    // Create a group.
+    // Create another group.
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
     $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group2 = og_get_group('entity_test', $entity->pid);
 
 
-    // Create a group post.
+    // Create a group content.
     $node = entity_create('node', array(
       'type' => 'article',
       'title' => $this->randomName(),

@@ -1134,7 +1134,7 @@ function og_is_member($gid, $entity_type = 'user', $entity = NULL, $states = arr
 function og_user_access_by_entity($perm, $entity_type = NULL, $etid = NULL, $account = NULL) {
   if (empty($account)) {
     global $user;
-    $account = clone($user);
+    $account = clone $user;
   }
 
   if ($group = og_get_group($entity_type, $etid)) {
