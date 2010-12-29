@@ -252,16 +252,69 @@ class OgGroupCrud extends DrupalWebTestCase {
  */
 class OgGroupAndUngroup extends DrupalWebTestCase {
 
-  public static function __getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Organic groups group and ungroup',
-      'description' => 'Test the group and ungrouping of content under a group.',
+      'description' => 'Test the group and ungrouping of content with a group.',
       'group' => 'Organic groups',
     );
   }
 
   function setUp() {
     parent::setUp('entity_feature', 'og');
+
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Add OG audience field to the node's "article" bundle.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+  }
+
+  /**
+   * Group of a new content.
+   * Group an existing content.
+   * Re-group existing content.
+   * Ungroup content.
+   */
+  function testGroupAndUngroup() {
+    $admin_user = $this->drupalCreateUser();
+
+    $web_user = $this->drupalCreateUser();
+
+    $this->drupalLogin($web_user);
+    $this->drupalGet('node/add/article');
+
+    // Create a group.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group1 = og_get_group('entity_test', $entity->pid);
+
+    // Create a group.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group2 = og_get_group('entity_test', $entity->pid);
+
+
+    // Create a group post.
+    $node = entity_create('node', array(
+      'type' => 'article',
+      'title' => $this->randomName(),
+      'uid' => $web_user->uid,
+    ));
+
+    entity_save('node', $node);
+
+    $this->assertFalse(og_is_member($group1->gid, 'node', $node), t('Node is not assigned to group1.'));
+    og_group($group1->gid, 'node', $node);
+    $this->assertTrue(og_is_member($group1->gid, 'node', $node), t('Node is now assigned to group1.'));
+
+    $this->assertFalse(og_is_member($group2->gid, 'node', $node), t('Node is not assigned to group2.'));
+    og_group($group1->gid, 'node', $node);
+    og_group($group2->gid, 'node', $node);
+    $this->assertTrue(og_is_member($group1->gid, 'node', $node), t('Node is still assigned to group1.'));
+    $this->assertTrue(og_is_member($group2->gid, 'node', $node), t('Node is now assigned to group2.'));
   }
 }
 
