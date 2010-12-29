@@ -315,6 +315,9 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     og_group($group2->gid, 'node', $node);
     $this->assertTrue(og_is_member($group1->gid, 'node', $node), t('Node is still assigned to group1.'));
     $this->assertTrue(og_is_member($group2->gid, 'node', $node), t('Node is now assigned to group2.'));
+
+    og_ungroup($group2->gid, 'node', $node);
+    $this->assertFalse(og_is_member($group2->gid, 'node', $node), t('Node is no longer assigned to group2.'));
   }
 }
 
