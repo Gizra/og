@@ -91,7 +91,7 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
 
     $settings = array();
     $settings['type'] = $group_content_type->type;
-    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['value'] = $group->gid;
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['gid'] = $group->gid;
     $settings['uid'] = $user1->uid;
     $node = $this->drupalCreateNode($settings);
 
