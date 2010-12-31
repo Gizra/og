@@ -47,6 +47,9 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     $group_type = $this->drupalCreateContentType();
     og_create_field(OG_GROUP_FIELD, 'node', $group_type->type);
 
+    $group_content_type = $this->drupalCreateContentType();
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $group_content_type->type);
+
     $this->drupalLogin($user1);
     // Create a group node.
     $settings = array();
@@ -81,6 +84,33 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     og_user_role_change_permissions($anon_rid, $permissions);
     $this->drupalGet('node/' . $node->nid . '/edit');
     $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('User can now edit field.'));
+
+    // Assert field permissions on group content.
+    $permissions['view body field'] = 0;
+    og_user_role_change_permissions($anon_rid, $permissions);
+
+    $settings = array();
+    $settings['type'] = $group_content_type->type;
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['value'] = $group->gid;
+    $settings['uid'] = $user1->uid;
+    $node = $this->drupalCreateNode($settings);
+
+    $this->drupalLogin($user1);
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('Group member can view field of a group content.'));
+
+    $this->drupalLogin($user2);
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertNoText($node->body[LANGUAGE_NONE][0]['value'], t('Non member can not view field of a group content.'));
+
+    // Assert field permissions on orphan group content.
+    $settings = array();
+    $settings['type'] = $group_content_type->type;
+    $settings['uid'] = $user1->uid;
+    $node = $this->drupalCreateNode($settings);
+
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('Non member can view field of an orphan group content.'));
 
     // Assert fields of nodes not related to OG are not being restricted.
     $user3 = $this->drupalCreateUser(array(

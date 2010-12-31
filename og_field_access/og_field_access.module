@@ -125,13 +125,19 @@ function og_field_access_check_access($entity_type, $entity, &$form, $form_state
         $access = og_user_access($group->gid, $perm);
       }
       // If there is no access, check if this is a group content.
-      if (!$access && og_is_group_content_type($entity_type, $form[$field_name]['#bundle']) && $gids = og_get_entity_groups($entity_type, $entity)) {
-        foreach ($gids as $gid) {
-          // TODO: Add "strict" mode.
-          if (og_user_access($gid, $perm)) {
-            $access = TRUE;
-            break;
+      if (!$access && og_is_group_content_type($entity_type, $form[$field_name]['#bundle'])) {
+        if ($gids = og_get_entity_groups($entity_type, $entity)) {
+          foreach ($gids as $gid) {
+            // TODO: Add "strict" mode.
+            if (og_user_access($gid, $perm)) {
+              $access = TRUE;
+              break;
+            }
           }
+        }
+        else {
+          // This is an orphan group content.
+          $access = TRUE;
         }
       }
 
