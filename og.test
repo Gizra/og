@@ -611,7 +611,7 @@ class OgTranslationTestCase extends DrupalWebTestCase {
  * - Prepopulate via URL.
  * - Change input from checkboxes to select.
  */
-class OgGroupudienceField extends DrupalWebTestCase {
+class OgGroupAudienceField extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
@@ -650,9 +650,8 @@ class OgGroupudienceField extends DrupalWebTestCase {
     $this->assertText(t('There are no groups you can select from.'), 'Field group audience shows correct description about no groups.');
 
     // Create an entity.
-    $property = OG_GROUP_FIELD;
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
-    $entity->{$property}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
 
@@ -714,6 +713,79 @@ class OgGroupudienceField extends DrupalWebTestCase {
     // Result appears as checkboxes.
     $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $web_group->gid . '"]', $web_group->label . ' ', t('Field group audience shows the group to user may see.'));
     $this->assertNoFieldByXPath('//label[@for="edit-group-audience-und-' . $admin_group->gid . '"]', $admin_group->label . ' ', t('Field group audience is shown without opt group to non-privileged user.'));
+  }
+
+  /**
+   * Test prepopulating the audience field widget via URL.
+   */
+  function testPropopulateViaUrl() {
+    // Create users.
+    $admin_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+    ));
+    $this->drupalLogin($admin_user);
+
+    $groups = array();
+    // Create two node groups.
+    foreach (range(1, 3) as $id) {
+      $settings = array();
+      $settings['type'] = 'article';
+      $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+      $node = $this->drupalCreateNode($settings);
+      $group = og_get_group('node', $node->nid);
+      $groups[$id] = $group;
+    }
+
+    // Create two entity_test group.
+    foreach (range(4, 6) as $id) {
+      $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
+      $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+      $entity->save();
+      $group = og_get_group('entity_test', $entity->pid);
+      $groups[$id] = $group;
+    }
+
+    // Assert all 6 groups are unselected in the audience field.
+    $this->drupalGet('node/add/article');
+    foreach ($groups as $group) {
+      $this->assertNoFieldChecked('edit-group-audience-und-' . $group->gid);
+    }
+
+    // Assert all entity types passed in the URL as selected.
+    $options = array('query' => array('gids_node[]' => implode(',', array($groups[1]->etid, $groups[2]->etid)), 'gids_entity_test[]' => implode(',', array($groups[4]->etid, $groups[5]->etid))));
+    $this->drupalGet('node/add/article', $options);
+
+    foreach ($groups as $group) {
+      $op = !in_array($group->gid, array(3, 6)) ? 'assertFieldChecked' : 'assertNoFieldChecked';
+      $this->$op('edit-group-audience-und-' . $group->gid);
+    }
+
+    // Assert all groups passed in the URL are selected.
+    $group = $groups[1];
+    $options = array('query' => array('gids_group[]' => $group->gid));
+    $this->drupalGet('node/add/article', $options);
+
+    foreach ($groups as $group) {
+      $op = $group->gid == 1 ? 'assertFieldChecked' : 'assertNoFieldChecked';
+      $this->$op('edit-group-audience-und-' . $group->gid);
+    }
+
+    // Pass invalid entity types, check nothing is selected.
+    $options = array('query' => array('gids_invalid_entity[]' => $group->gid));
+    $this->drupalGet('node/add/article', $options);
+    foreach ($groups as $group) {
+      $this->assertNoFieldChecked('edit-group-audience-und-' . $group->gid);
+    }
+
+    // Pass invalid group IDs, check nothing is selected.
+    $options = array('query' => array('gids_node[]' => 200));
+    $this->drupalGet('node/add/article', $options);
+    foreach ($groups as $group) {
+      $this->assertNoFieldChecked('edit-group-audience-und-' . $group->gid);
+    }
   }
 }
 /**
