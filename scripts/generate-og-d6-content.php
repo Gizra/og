@@ -5,12 +5,22 @@
 /**
  * Generate content for a Drupal 6 database to test the upgrade process.
  *
+ * @todo: Currently we use Drush for producing the script, find out why I wasn't
+ * able to use just php-cli.
+ *
  * Run this script at the root of an existing Drupal 6 installation.
  * Steps to use this generation script:
- * - Install drupal 6.
- * - Run this script from your Drupal ROOT directory.
- * - Use the dump-database-d6.sh to generate the D7 file
- *   modules/simpletest/tests/upgrade/database.filled.php
+ * - Install Drupal 6.
+ * - Install and enable Organic groups module.
+ * - Copy from Drupal 7 includes/utility.inc to Drupal 6 includes folder (the
+ *   include file is version agnostic).
+ * - Execute script by running
+ *     drush php-script generate-og-d6-content.php > drupal-6.og.database.php
+ *   from the command line from the Drupal 6 ROOT directory.
+ * - Since Organic groups module is a contrib module, it needs to be disabled
+ *   for the upgrade path, thus open the result file with a text editor and
+ *   under the {system} table, change the "status" value of the 'og' insertion
+ *   to 0.
  *
  * This scripts produces the following scenario:
  * - Nid 1: Group without posts.
@@ -104,7 +114,8 @@ class ogGroupNoPosts implements ogContent {
     $list[] = array(
       'title' => 'group-without-posts',
       'uid' => $user_ids[3],
-      'body' => 'group without posts'
+      'body' => 'group without posts',
+      'og_description' => 'description group without posts.',
     );
     return $list;
   }
@@ -126,7 +137,8 @@ class ogGroupThreePosts implements ogContent {
     $list[] = array(
       'title' => 'group-with-3-posts',
       'uid' => $user_ids[3],
-      'body' => 'group with 3 posts'
+      'body' => 'group with 3 posts',
+      'og_description' => 'description group with 3 posts.',
     );
     return $list;
   }
@@ -139,7 +151,7 @@ class ogGroupThreePosts implements ogContent {
         'title' => 'group-posts-' . $itr,
         'uid' => $user_ids[3],
         'body' => 'group posts ' . $itr,
-        'og_groups' => array($gid)
+        'og_groups' => array($gid),
       );
     }
     return $list;
@@ -163,7 +175,7 @@ class ogGroupOrphanPost implements ogContent {
       'title' => 'group-posts-orphan',
       'uid' => $user_ids[3],
       'body' => 'group posts orphan',
-      'og_groups' => array()
+      'og_groups' => array(),
     );
     return $list;
   }
@@ -181,12 +193,14 @@ class ogGroupPostMultipleGroups implements ogContent {
     $list['alpha'] = array(
       'title' => 'group-alpha',
       'uid' => $user_ids[3],
-      'body' => 'group alpha'
+      'body' => 'group alpha',
+      'og_description' => 'description group alpha.',
     );
     $list['beta'] =array(
       'title' => 'group-beta',
       'uid' => $user_ids[3],
-      'body' => 'group beta'
+      'body' => 'group beta',
+      'og_description' => 'description group beta.',
     );
     return $list;
   }
@@ -218,7 +232,8 @@ class ogGroupUserAction implements ogContent {
     $list[] = array(
       'title' => 'group-with-user-action',
       'uid' => $user_ids[3],
-      'body' => 'group with user action'
+      'body' => 'group with user action',
+      'og_description' => 'description with user action.',
     );
     return $list;
   }

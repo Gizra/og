@@ -8,7 +8,7 @@ Each group can have members, and maintains a group home page which individual
 group members may post into. Posts can be sent to multiple groups (i.e. cross-
 posted), and individual posts (referred as 'group content') may be shared with 
 members, or non-members where necessary.
-Group membership can be open, closed, moderated, or by invitation only.
+Group membership can be open, closed or moderated.
 
 TERMS AND DEFINITIONS
 ------------------------------------
@@ -92,14 +92,11 @@ DEVELOPERS & SITE BUILDERS
   node/add/group-content?gids_node[]=4 will add a select the group with node ID 
   4, in the node form. The prefixed entity can change to indicate other entity 
   types allowing crafting the URL and you can have multiple variables, for 
-  example, node/add/group-content?gids_node[]=4&gids_user[]=3&gid_gids[]=5,6,7
+  example, node/add/group-content?gids_node[]=4&gids_user[]=3&gids_group[]=5,6,7
   The above URL will select the group with node ID 4, and the group with user ID
   3, and the groups with the unique group ID 5, 6 and 7.
   Note that the actaul entity of group ID 5, 6 and 7 can be any entity (e.g. 
   nodes or users).    
-- TODO: The current group context is available to javascript code at 
-  Drupal.settings.og. This is useful for enriching ad tags and analytics calls 
-  with group information.
 
 
 CREDITS

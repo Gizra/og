@@ -67,10 +67,6 @@ define('OG_AUTHENTICATED_ROLE', 'member');
  */
 define('OG_ADMINISTRATOR_ROLE', 'administrator member');
 
-/*******************************************************************************
- * Hook implementations
- ******************************************************************************/
-
 /**
  * Implements hook_entity_info().
  */
@@ -161,7 +157,7 @@ function og_entity_property_info() {
  */
 function og_modules_enabled($modules) {
   // Make sure we already have the Drupal 7 tables.
-  if (module_exists('og') && db_table_exists('og') && db_field_exists('og', 'gid')) {  
+  if (module_exists('og') && db_table_exists('og') && db_field_exists('og', 'gid')) {
     foreach ($modules as $module) {
       // Add default roles and permissions, if existing and not set yet.
       og_set_global_access_module($module);
@@ -823,6 +819,7 @@ function og_group($gid, $entity_type, $entity, $state = OG_STATE_ACTIVE, $save =
       $entity->og_skip_group_create = TRUE;
 
       entity_save($entity_type, $entity);
+      og_invalidate_cache();
       // Unset our temporary property.
       unset($entity->og_skip_group_create);
     }
@@ -864,6 +861,7 @@ function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
 
       if ($save) {
         entity_save($entity_type, $entity);
+        og_invalidate_cache();
 
         if ($entity_type == 'user') {
           foreach (og_get_user_roles($gid, $entity->uid) as $rid) {
@@ -1132,7 +1130,7 @@ function og_is_member($gid, $entity_type = 'user', $entity = NULL, $states = arr
 function og_user_access_by_entity($perm, $entity_type = NULL, $etid = NULL, $account = NULL) {
   if (empty($account)) {
     global $user;
-    $account = clone($user);
+    $account = clone $user;
   }
 
   if ($group = og_get_group($entity_type, $etid)) {
@@ -1920,7 +1918,8 @@ function og_set_breadcrumb($entity_type, $etid, $path = array()) {
   if ($entity = entity_load($entity_type, array($etid))) {
     $entity = reset($entity);
     $label = og_entity_label($entity_type, $entity);
-    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, "$entity_type/$etid")), $path)) ;
+    $uri = entity_uri($entity_type, $entity);
+    drupal_set_breadcrumb(array_merge(array(l(t('Home'), '<front>')), array(l($label, $uri['path'])), $path)) ;
   }
 }
 
@@ -1959,8 +1958,8 @@ function og_create_field($field_name, $entity_type, $bundle) {
 /**
  * Return a re-loaded entity with its fields.
  *
- * This is needed only if a user account is passed, as global $user is only a
- * partial user entity.
+ * This is needed for example if a user account is passed, as global $user is
+ * only a partial user entity, or only a partial entity object was sent.
  *
  * @param $entity_type
  *   The entity type.
@@ -1968,10 +1967,9 @@ function og_create_field($field_name, $entity_type, $bundle) {
  *   The entity.
  */
 function og_load_entity($entity_type, $entity) {
-  if ($entity_type == 'user') {
-    $entity = user_load($entity->uid);
-  }
-  return $entity;
+  list($id) = entity_extract_ids($entity_type, $entity);
+  $entity = entity_load($entity_type, array($id));
+  return reset($entity);
 }
 
 /**
