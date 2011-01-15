@@ -955,12 +955,12 @@ function og_user_access($gid, $string, $account = NULL) {
  */
 function og_node_type_save($bundle_name) {
   if (variable_get('og_group_type_' . $bundle_name, 'omitted') == 'group') {
-    og_create_field(OG_GROUP_FIELD,'node', $bundle_name);
+    og_create_field(OG_GROUP_FIELD, 'node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_type_' . $bundle_name);
   }
   if (variable_get('og_group_content_type_' . $bundle_name, 'omitted') == 'og_content') {
-    og_create_field(OG_AUDIENCE_FIELD,'node', $bundle_name);
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $bundle_name);
     // Delete the variable, as we will rely on the presence of th field.
     variable_del('og_group_content_type_' . $bundle_name);
   }
