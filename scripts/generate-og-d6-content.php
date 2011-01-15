@@ -266,18 +266,12 @@ class ogGroupUserAction implements ogContent {
 class ogGroupSelectiveState implements ogContent {
   public function groupList($user_ids) {
     $list = array();
-    $states = array(
-      0 => 'open',
-      1 => 'moderated',
-      2 => 'invite',
-      3 => 'closed',
-    );
 
-    foreach ($states as $key => $value) {
+    foreach (og_selective_map() as $key => $value) {
       $list[] = array(
         'title' => 'group-selective-state-' . $value,
         'uid' => $user_ids[3],
-        'body' => 'Group with selective state set to ' . ucfirst($value),
+        'body' => 'Group with selective state set to ' . $value,
         'og_description' => 'Group with selective state set.',
       );
     }
