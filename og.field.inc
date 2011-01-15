@@ -53,6 +53,8 @@ function og_field_group_property_callback(&$info, $entity_type, $field, $instanc
 
   // Define a data structure so it's possible to deal with Group
   // audience field.
+  $property['label'] = t('Group audience');
+  $property['description'] = t('Associate groups with group content.');
   $property['getter callback'] = 'entity_metadata_field_verbatim_get';
   $property['setter callback'] = 'entity_metadata_field_verbatim_set';
   $property['property info'] = array(
