@@ -95,7 +95,7 @@ DEVELOPERS & SITE BUILDERS
   example, node/add/group-content?gids_node[]=4&gids_user[]=3&gids_group[]=5,6,7
   The above URL will select the group with node ID 4, and the group with user ID
   3, and the groups with the unique group ID 5, 6 and 7.
-  Note that the actaul entity of group ID 5, 6 and 7 can be any entity (e.g. 
+  Note that the actual entity of group ID 5, 6 and 7 can be any entity (e.g. 
   nodes or users).    
 
 
