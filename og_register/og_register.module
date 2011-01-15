@@ -85,7 +85,7 @@ function og_register_get_groups() {
     );
     $query = new EntityFieldQuery;
     $result = $query
-      ->fieldCondition(GROUP_REGISTER_FIELD, 'value', 1, '=')
+      ->fieldCondition(OG_REGISTER_FIELD, 'value', 1, '=')
       ->execute();
 
     if ($result) {
