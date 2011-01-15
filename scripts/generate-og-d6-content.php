@@ -33,6 +33,10 @@
  *   - Uid 5: active member.
  *   - Uid 6: Pending admin member.
  *   - Uid 7: Active admin member.
+ * - Nid 11: Group with "Open" selective state.
+ * - Nid 12: Group with "Moderated" selective state.
+ * - Nid 13: Group with "Invite only" selective state.
+ * - Nid 14: Group with "Closed" selective state.
  */
 
 // Define settings.
@@ -219,6 +223,7 @@ class ogGroupPostMultipleGroups implements ogContent {
     );
     return $list;
   }
+
   public function groupActions($user_ids, $groups, $posts) {}
 }
 
@@ -242,7 +247,7 @@ class ogGroupUserAction implements ogContent {
     return array();
   }
 
-  public function groupActions($user_ids, $groups, $posts){
+  public function groupActions($user_ids, $groups, $posts) {
     $gid = $groups[0];
     // - user ID 4 as pending member.
     og_save_subscription( $gid , $user_ids[4] , array('is_active' => 0));
@@ -255,6 +260,38 @@ class ogGroupUserAction implements ogContent {
   }
 }
 
+/**
+ * Groups with different selective state (e.g. open, moderated, etc'.).
+ */
+class ogGroupSelectiveState implements ogContent {
+  public function groupList($user_ids) {
+    $list = array();
+    $states = array(
+      0 => 'open',
+      1 => 'moderated',
+      2 => 'invite',
+      3 => 'closed',
+    );
+
+    foreach ($states as $key => $value) {
+      $list[] = array(
+        'title' => 'group-selective-state-' . $value,
+        'uid' => $user_ids[3],
+        'body' => 'Group with selective state set to ' . ucfirst($value),
+        'og_description' => 'Group with selective state set.',
+      );
+    }
+
+    return $list;
+  }
+
+  public function postList($user_ids, $groups) {
+    return array();
+  }
+
+  public function groupActions($user_ids, $groups, $posts) {}
+}
+
 // Start content generation.
 $og_content_config = array();
 $og_content_config[] = new ogGroupNoPosts();
@@ -262,6 +299,7 @@ $og_content_config[] = new ogGroupThreePosts();
 $og_content_config[] = new ogGroupOrphanPost();
 $og_content_config[] = new ogGroupPostMultipleGroups();
 $og_content_config[] = new ogGroupUserAction();
+$og_content_config[] = new ogGroupSelectiveState();
 
 foreach ($og_content_config as $content_config){
   $groups = array_map('og_group_node' , $content_config->groupList($user_ids) );

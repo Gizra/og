@@ -6,10 +6,6 @@
  * Field module functionality for the Organic groups module.
  */
 
-/*******************************************************************************
- * Hook implementations
- ******************************************************************************/
-
 /**
  * Implements hook_field_widget_properties_alter().
  *
