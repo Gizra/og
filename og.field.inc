@@ -47,6 +47,9 @@ function og_field_info() {
   );
 }
 
+/**
+ * Entity metdata callback.
+ */
 function og_field_group_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
   $name = str_replace('_', '-', $field['field_name']);
   $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
