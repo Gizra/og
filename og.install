@@ -341,7 +341,7 @@ function og_update_7000(&$sandbox) {
     if (empty($sandbox['group upgrade'])) {
       // All nodes and users are processed.
       $sandbox['#finished'] = 1;
-      return t("Organic groups converted to use new schema.");
+      return t('Organic groups converted to use new schema.');
     }
   }
 }
