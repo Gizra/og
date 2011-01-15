@@ -296,7 +296,9 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       $audience = og_field_audience_options($opt_group);
       foreach (array('content groups', 'other groups') as $key) {
         if (!empty($audience[$key])) {
-          $audience[$key] = og_label_multiple($audience[$key]);
+          // Get the label un-sanitized, as they will be laster sanitized
+          // according to the form type.
+          $audience[$key] = og_label_multiple($audience[$key], FALSE);
         }
       }
 
