@@ -1217,17 +1217,20 @@ function og_get_context_by_url() {
  *
  * @param $gids
  *   The group IDs.
+ * @param $sanitize
+ *   TRUE if the label should be sanitzied using filter_xss(). Defaults to
+ *   TRUE.
  *
  * @return
  *   Array keyed with the group ID, and the entity label as the value, or else
- *   the group ID with the entity type and entity ID, sanitized.
+ *   the group ID with the entity type and entity ID.
  */
-function og_label_multiple($gids = array()) {
+function og_label_multiple($gids = array(), $sanitize = TRUE) {
   $labels = array();
   $groups = og_load_multiple($gids);
   foreach ($groups as $group) {
     if (!empty($group->label)) {
-      $labels[$group->gid] = check_plain($group->label);
+      $labels[$group->gid] = $sanitize ? filter_xss($group->label) : $group->label;
     }
     else {
       $entity = entity_get_info($group->entity_type);
@@ -1247,13 +1250,16 @@ function og_label_multiple($gids = array()) {
  *
  * @param $gid
  *   The group ID.
+ * @param $sanitize
+ *   TRUE if the label should be sanitzied using check_plain(). Defaults to
+ *   TRUE.
  *
  * @return
  *   The label of the group if found, or else the group ID with the entity type
  *   and entity ID, sanitized.
  */
-function og_label($gid) {
-  $labels = og_label_multiple(array($gid));
+function og_label($gid, $sanitize = TRUE) {
+  $labels = og_label_multiple(array($gid), $sanitize);
   return $labels[$gid];
 }
 

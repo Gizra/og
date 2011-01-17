@@ -74,19 +74,10 @@ provide a quick way to get started with Organic groups.
    group. Such as add group members, add roles, and set member permissions. You 
    will notice that these options have the same look and feel as Drupal core in 
    matters relating to management of roles and permissions.
-9. You can enable your privileged users to subscribe to a group by providing a 
-   'Subscribe' link. (Subscribing is the act of associating a user with a group.)
-   To show this subscribe link:
-   9.1 Make sure you have the Group UI module enabled
-   9.2 Go to admin/config/group/permissions and make sure that the "Subscribe user to group"
-       permission is given to the appropriate user-roles. 
-   9.3 Navigate to the "manage display" tab of your content type 
-      (admin/structure/types/manage/group/display)
-       and choose the Group subscription format for the Group type field. 
-   9.4 Back in the group view you will now notice a 'Subscribe' link (If you are the 
-       group administrator it will say "You are the group manager").
+9. Back in the group view you will also notice a 'Subscribe' link, shown to 
+   privileged users. Subscribing is the act of associating a user with a group.
 10. In order to associate other entities with group or group content, navigate 
-    to Organic Groups field settings", in admin/config/group/fields. 
+    to Organic Groups field settings", in admin/config/og/fields. 
 11. In order to define default permissions for groups that are newly created or 
     to edit permissions on all existing groups, navigate to the Group 
     default permissions page. Important permissions in this page are the ones 
@@ -104,7 +95,7 @@ DEVELOPERS & SITE BUILDERS
   example, node/add/group-content?gids_node[]=4&gids_user[]=3&gids_group[]=5,6,7
   The above URL will select the group with node ID 4, and the group with user ID
   3, and the groups with the unique group ID 5, 6 and 7.
-  Note that the actaul entity of group ID 5, 6 and 7 can be any entity (e.g. 
+  Note that the actual entity of group ID 5, 6 and 7 can be any entity (e.g. 
   nodes or users).    
 
 
