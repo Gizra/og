@@ -573,7 +573,7 @@ function og_invalidate_cache($gids = array()) {
     'og_get_group_ids',
     'og_get_entity_groups',
     'og_field_audience_options',
-    'og_user_role_permissions',
+    'og_role_permissions',
   );
 
   foreach ($caches as $cache) {
@@ -932,7 +932,7 @@ function og_user_access($gid, $string, $account = NULL) {
   // in a static variable.
   if (!isset($perm[$gid][$account->uid])) {
     $roles = og_get_user_roles($gid, $account->uid);
-    $role_permissions = og_user_role_permissions($roles);
+    $role_permissions = og_role_permissions($roles);
 
     $perms = array();
     foreach ($role_permissions as $one_role) {
@@ -1274,7 +1274,7 @@ function og_label($gid, $sanitize = TRUE) {
  *   An array indexed by role ID. Each value is an array whose keys are the
  *   permission strings for the given role ID.
  */
-function og_user_role_permissions($roles = array()) {
+function og_role_permissions($roles = array()) {
   $cache = &drupal_static(__FUNCTION__, array());
 
   $role_permissions = $fetch = array();
@@ -1330,7 +1330,7 @@ function og_user_role_permissions($roles = array()) {
  *   value. The anonymous and authenticated deault roles are on the top of the
  *   array.
  */
-function og_user_roles($gid = 0, $permission = NULL, $force_group = FALSE) {
+function og_roles($gid = 0, $permission = NULL, $force_group = FALSE) {
   $roles = array();
 
   // Check if overriden access exists.
@@ -1355,7 +1355,7 @@ function og_user_roles($gid = 0, $permission = NULL, $force_group = FALSE) {
  *   A keyed array with role Id as key and role name as value.
  */
 function og_get_global_roles() {
-  return og_user_roles();
+  return og_roles();
 }
 
 /**
@@ -1430,7 +1430,7 @@ function og_set_global_access_module($module) {
 
   if ($perms_to_add) {
     // Get the assigned permissions of the global roles.
-    $global_roles_perms = og_user_role_permissions($global_roles);
+    $global_roles_perms = og_role_permissions($global_roles);
 
     // Get the roles keyed by thier name.
     $global_roles_flip = array_flip($global_roles);
@@ -1457,7 +1457,7 @@ function og_set_global_access_module($module) {
   if ($perms_to_add_by_rid) {
     foreach ($perms_to_add_by_rid as $rid => $perms) {
       // Assign the permissions to the roles.
-      og_user_role_change_permissions($rid, $perms);
+      og_role_change_permissions($rid, $perms);
     }
   }
 
@@ -1477,7 +1477,7 @@ function og_create_global_role($name) {
   $role->name = $name;
   $role->gid = 0;
 
-  og_user_role_save($role);
+  og_role_save($role);
   return $role;
 }
 
@@ -1506,7 +1506,7 @@ function og_get_user_roles($gid, $uid = NULL, $include = TRUE) {
     // Check if overriden access exists.
     $query_gid = og_is_group_default_access($gid) ? 0 : $gid;
 
-    $group_roles = og_user_roles($query_gid);
+    $group_roles = og_roles($query_gid);
     $account = user_load($uid);
 
     $name = og_is_member($gid, 'user', $account) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
@@ -1546,7 +1546,7 @@ function og_get_users_by_roles($gid, $rids = array()) {
  *   A fully-loaded role object if a role with the given name or ID
  *   exists, FALSE otherwise.
  */
-function og_user_role_load($rid) {
+function og_role_load($rid) {
   return db_select('og_role', 'r')
     ->fields('r')
     ->condition('rid', $rid)
@@ -1565,18 +1565,18 @@ function og_user_role_load($rid) {
  *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation
  *   performed.
  */
-function og_user_role_save($role) {
+function og_role_save($role) {
   if ($role->name) {
     // Prevent leading and trailing spaces in role names.
     $role->name = trim($role->name);
   }
   if (!empty($role->rid) && $role->name) {
     $status = drupal_write_record('og_role', $role, 'rid');
-    module_invoke_all('og_user_role_update', $role);
+    module_invoke_all('og_role_update', $role);
   }
   else {
     $status = drupal_write_record('og_role', $role);
-    module_invoke_all('og_user_role_insert', $role);
+    module_invoke_all('og_role_insert', $role);
   }
 
   og_invalidate_cache();
@@ -1590,8 +1590,8 @@ function og_user_role_save($role) {
  * @param $role
  *   An integer with the role ID.
  */
-function og_user_role_delete($rid) {
-  $role = og_user_role_load($rid);
+function og_role_delete($rid) {
+  $role = og_role_load($rid);
 
   db_delete('og_role')
     ->condition('rid', $rid)
@@ -1604,7 +1604,7 @@ function og_user_role_delete($rid) {
     ->condition('rid', $rid)
     ->execute();
 
-  module_invoke_all('og_user_role_delete', $role);
+  module_invoke_all('og_role_delete', $role);
 
   og_invalidate_cache();
 }
@@ -1617,9 +1617,9 @@ function og_user_role_delete($rid) {
  */
 function og_delete_user_roles_by_group($gid) {
   // Check if group has overriden roles defined.
-  if ($roles = og_user_roles($gid, NULL, TRUE)) {
+  if ($roles = og_roles($gid, NULL, TRUE)) {
     foreach ($roles as $rid => $name) {
-      og_user_role_delete($rid);
+      og_role_delete($rid);
     }
   }
 }
@@ -1660,7 +1660,7 @@ function og_permissions_delete_by_module($modules = array()) {
  *   The newly created roles keyed by role ID and role name as the value. Or
  *   FALSE if no roles were created.
  */
-function og_user_roles_override($gid) {
+function og_roles_override($gid) {
   // Check if roles aren't already overriden. We can't use
   // og_is_group_default_access() as the field is already set, so we
   // check to see if there are new roles in the database and compare
@@ -1668,7 +1668,7 @@ function og_user_roles_override($gid) {
   // TODO: We can add a key to the $group object that will indicate this
   // if performance will be poor.
 
-  if ($roles = og_user_roles($gid, NULL, TRUE)) {
+  if ($roles = og_roles($gid, NULL, TRUE)) {
     return;
   }
 
@@ -1682,9 +1682,9 @@ function og_user_roles_override($gid) {
     $role->name = $name;
     $role->gid = $gid;
 
-    og_user_role_save($role);
+    og_role_save($role);
     $rids[$role->rid] = $role->name;
-    og_user_role_change_permissions($role->rid, $perms[$rid]);
+    og_role_change_permissions($role->rid, $perms[$rid]);
   }
 
   return $rids;
@@ -1755,19 +1755,19 @@ function og_users_roles_revoke($gid, $uid, $rid) {
  *   @endcode
  *   Existing permissions are not changed, unless specified in $permissions.
  *
- * @see og_user_role_grant_permissions()
- * @see og_user_role_revoke_permissions()
+ * @see og_role_grant_permissions()
+ * @see og_role_revoke_permissions()
  */
-function og_user_role_change_permissions($rid, array $permissions = array()) {
+function og_role_change_permissions($rid, array $permissions = array()) {
   // Grant new permissions for the role.
   $grant = array_filter($permissions);
   if (!empty($grant)) {
-    og_user_role_grant_permissions($rid, array_keys($grant));
+    og_role_grant_permissions($rid, array_keys($grant));
   }
   // Revoke permissions for the role.
   $revoke = array_diff_assoc($permissions, $grant);
   if (!empty($revoke)) {
-    og_user_role_revoke_permissions($rid, array_keys($revoke));
+    og_role_revoke_permissions($rid, array_keys($revoke));
   }
 }
 
@@ -1782,7 +1782,7 @@ function og_user_role_change_permissions($rid, array $permissions = array()) {
  * @see user_role_change_permissions()
  * @see user_role_revoke_permissions()
  */
-function og_user_role_grant_permissions($rid, array $permissions = array()) {
+function og_role_grant_permissions($rid, array $permissions = array()) {
   $modules = array();
   foreach (og_get_permissions() as $name => $value) {
     $modules[$name] = $value['module'];
@@ -1815,7 +1815,7 @@ function og_user_role_grant_permissions($rid, array $permissions = array()) {
  * @see user_role_change_permissions()
  * @see user_role_grant_permissions()
  */
-function og_user_role_revoke_permissions($rid, array $permissions = array()) {
+function og_role_revoke_permissions($rid, array $permissions = array()) {
   // Revoke permissions for the role.
   db_delete('og_role_permission')
     ->condition('rid', $rid)
@@ -1871,7 +1871,7 @@ function og_get_permissions() {
 function og_get_global_permissions() {
   $roles = og_get_global_roles();
 
-  $perms = og_user_role_permissions($roles);
+  $perms = og_role_permissions($roles);
   return $perms;
 }
 

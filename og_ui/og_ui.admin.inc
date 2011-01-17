@@ -135,7 +135,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   );
 
   $status = og_group_content_states();
-  $roles = og_user_roles($group->gid);
+  $roles = og_roles($group->gid);
 
   //TODO: Add pager.
   $query = new EntityFieldQuery();
@@ -252,12 +252,12 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0
     if ($rid) {
       og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")), l(t('Roles'), "group/$entity_type/$etid/admin/people/roles"));
 
-      $group_roles = og_user_roles($group->gid);
+      $group_roles = og_roles($group->gid);
       if (!in_array($rid, array_keys($group_roles))) {
         drupal_goto("group/$entity_type, $etid/admin/people/roles");
       }
       // Display the edit role form.
-      $role = og_user_role_load($rid);
+      $role = og_role_load($rid);
       $form['name'] = array(
         '#type' => 'textfield',
         '#title' => t('Role name'),
@@ -309,10 +309,10 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0
 
 function og_ui_user_admin_role_validate($form, &$form_state) {
   if (!empty($form_state['values']['name'])) {
-    $roles = og_user_roles($form_state['values']['group']->gid);
+    $roles = og_roles($form_state['values']['group']->gid);
     $unique_name = TRUE;
     if (!empty($form_state['values']['rid'])) {
-      $role = og_user_role_load($form_state['values']['rid']);
+      $role = og_role_load($form_state['values']['rid']);
       $unique_name = $role->name != $form_state['values']['name'];
     }
     if ($unique_name && in_array($form_state['values']['name'], $roles)) {
@@ -330,15 +330,15 @@ function og_ui_user_admin_role_submit($form, &$form_state) {
     $role->rid = $form_state['values']['rid'];
   }
   if ($form_state['values']['op'] == t('Save role')) {
-    og_user_role_save($role);
+    og_role_save($role);
     drupal_set_message(t('The role has been renamed.'));
   }
   elseif ($form_state['values']['op'] == t('Delete role')) {
-    og_user_role_delete($form_state['values']['rid']);
+    og_role_delete($form_state['values']['rid']);
     drupal_set_message(t('The role has been deleted.'));
   }
   elseif ($form_state['values']['op'] == t('Add role')) {
-    og_user_role_save($role);
+    og_role_save($role);
     drupal_set_message(t('The role has been added.'));
   }
   $form_state['redirect'] = 'group/' . $group->entity_type . '/' . $group->etid . '/admin/people/roles';
@@ -358,7 +358,7 @@ function theme_og_ui_user_admin_new_role($variables) {
 
   $default_access = og_is_group_default_access($group->gid);
 
-  foreach (og_user_roles($group->gid) as $rid => $name) {
+  foreach (og_roles($group->gid) as $rid => $name) {
     $text = !$default_access ? t('edit permissions') : t('view permissions');
     $permissions = l($text, 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/permissions/' . $rid);
 
@@ -401,12 +401,12 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
   }
 
   // Retrieve role names for columns.
-  $role_names = og_user_roles($gid);
+  $role_names = og_roles($gid);
   if (!empty($rid)) {
     $role_names = array($rid => $role_names[$rid]);
   }
   // Fetch permissions for all roles or the one selected role.
-  $role_permissions = og_user_role_permissions($role_names);
+  $role_permissions = og_role_permissions($role_names);
 
   // Store $role_names for use when saving the data.
   $form['role_names'] = array(
@@ -479,7 +479,7 @@ function og_ui_user_admin_permissions_after_build($element) {
   $disable = $gid && og_is_group_default_access($gid);
 
   // Authenticated roles.
-  $auth_rids = array_flip(og_user_roles($gid));
+  $auth_rids = array_flip(og_roles($gid));
 
   // Remove the anonymous member from the authenticated roles.
   $anon_rid = array_shift($auth_rids);
@@ -506,7 +506,7 @@ function og_ui_user_admin_permissions_after_build($element) {
  */
 function og_ui_user_admin_permissions_submit($form, &$form_state) {
   foreach ($form_state['values']['role_names'] as $rid => $name) {
-    og_user_role_change_permissions($rid, $form_state['values'][$rid]);
+    og_role_change_permissions($rid, $form_state['values'][$rid]);
   }
 
   drupal_set_message(t('The changes have been saved.'));
@@ -521,7 +521,7 @@ function og_ui_user_admin_permissions_submit($form, &$form_state) {
 function theme_og_ui_user_admin_permissions($variables) {
   $form = $variables['form'];
   $gid = !empty($form['group']['#value']->gid) ? $form['group']['#value']->gid : 0;
-  $roles = og_user_roles($gid);
+  $roles = og_roles($gid);
 
   foreach (element_children($form['permission']) as $key) {
     $row = array();

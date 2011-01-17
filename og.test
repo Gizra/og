@@ -339,7 +339,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
 
 
   /**
-   * Verify proper permission changes by og_user_role_change_permissions().
+   * Verify proper permission changes by og_role_change_permissions().
    */
   function testOgUserRoleChangePermissions() {
     // Create user.
@@ -373,7 +373,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
       'delete own article content' => 1,
       'administer group' => 1,
     );
-    og_user_role_change_permissions($rid, $permissions);
+    og_role_change_permissions($rid, $permissions);
 
     // Verify proper permission changes.
     $this->assertFalse(og_user_access($group->gid, 'update own article content', $user2), t('User still does not have "update own article content" permission.'));
@@ -384,7 +384,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
       'delete own article content' => 1,
       'administer group' => 0,
     );
-    og_user_role_change_permissions($rid, $permissions);
+    og_role_change_permissions($rid, $permissions);
 
     $this->assertTrue(og_user_access($group->gid, 'delete own article content', $user2), t('User still has "delete own article content" permission.'));
     $this->assertFalse(og_user_access($group->gid, 'administer group', $user2), t('User no longer has "administer group" permission.'));
@@ -425,7 +425,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
-    $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group without default access field is assigned to the global roles and permissions settings.'));
+    $this->assertEqual(og_get_global_roles(), og_roles($group->gid), t('Group without default access field is assigned to the global roles and permissions settings.'));
 
     // Add default access field to the entity_test's "main" bundle.
     og_create_field(OG_DEFAULT_ACCESS_FIELD, 'entity_test', 'main');
@@ -436,7 +436,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
-    $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with default access field disabled is assigned to the global roles and permissions settings.'));
+    $this->assertEqual(og_get_global_roles(), og_roles($group->gid), t('Group with default access field disabled is assigned to the global roles and permissions settings.'));
 
     // Group with default access field enabled.
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
@@ -444,12 +444,12 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
-    $this->assertNotEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with default access field enabled has own roles and permissions settings.'));
+    $this->assertNotEqual(og_get_global_roles(), og_roles($group->gid), t('Group with default access field enabled has own roles and permissions settings.'));
 
     // Disable existing group's default access field.
     $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
-    $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with enabled default access field that was disabled is assigned to the global roles and permissions settings.'));
+    $this->assertEqual(og_get_global_roles(), og_roles($group->gid), t('Group with enabled default access field that was disabled is assigned to the global roles and permissions settings.'));
   }
 }
 

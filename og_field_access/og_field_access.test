@@ -41,7 +41,7 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
       // Allow non-members to edit the group, so we can test the node-edit page.
       'update group' => 1,
     );
-    og_user_role_change_permissions($anon_rid, $permissions);
+    og_role_change_permissions($anon_rid, $permissions);
 
     // Create group and group content node types.
     $group_type = $this->drupalCreateContentType();
@@ -70,7 +70,7 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
 
     // Change permissions and assert user can view the field.
     $permissions['view body field'] = 1;
-    og_user_role_change_permissions($anon_rid, $permissions);
+    og_role_change_permissions($anon_rid, $permissions);
     $this->drupalGet('node/' . $node->nid);
     $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('User can now view field.'));
 
@@ -81,13 +81,13 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
 
     // Change permissions and assert user can view the field.
     $permissions['update body field'] = 1;
-    og_user_role_change_permissions($anon_rid, $permissions);
+    og_role_change_permissions($anon_rid, $permissions);
     $this->drupalGet('node/' . $node->nid . '/edit');
     $this->assertText($node->body[LANGUAGE_NONE][0]['value'], t('User can now edit field.'));
 
     // Assert field permissions on group content.
     $permissions['view body field'] = 0;
-    og_user_role_change_permissions($anon_rid, $permissions);
+    og_role_change_permissions($anon_rid, $permissions);
 
     $settings = array();
     $settings['type'] = $group_content_type->type;

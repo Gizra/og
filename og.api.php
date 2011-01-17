@@ -63,7 +63,7 @@ function hook_og_default_roles_alter(&$roles) {
  * @param $role
  *   The group role object.
  */
-function hook_og_user_role_insert($role) {
+function hook_og_role_insert($role) {
 }
 
 /**
@@ -72,7 +72,7 @@ function hook_og_user_role_insert($role) {
  * @param $role
  *   The group role object.
  */
-function hook_og_user_role_update($role) {
+function hook_og_role_update($role) {
 
 }
 
@@ -84,7 +84,7 @@ function hook_og_user_role_update($role) {
  *   is already deleted from the database. However, we pass the object to allow
  *   implementing modules to properly identify the deleted role.
  */
-function hook_og_user_role_delete($role) {
+function hook_og_role_delete($role) {
 
 }
 

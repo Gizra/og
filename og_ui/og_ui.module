@@ -402,7 +402,7 @@ function og_ui_og_user_operations($form = array(), $form_state = array()) {
   );
 
   if (og_user_access($gid, 'administer group')) {
-    $roles = og_user_roles($gid);
+    $roles = og_roles($gid);
 
     $add_roles = array();
     foreach ($roles as $rid => $name) {
