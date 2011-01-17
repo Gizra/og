@@ -47,17 +47,12 @@ function og_field_info() {
   );
 }
 
-/**
- * Entity metdata callback.
- */
 function og_field_group_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
   $name = str_replace('_', '-', $field['field_name']);
   $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
   // Define a data structure so it's possible to deal with Group
   // audience field.
-  $property['label'] = t('Group audience');
-  $property['description'] = t('Associate groups with group content.');
   $property['getter callback'] = 'entity_metadata_field_verbatim_get';
   $property['setter callback'] = 'entity_metadata_field_verbatim_set';
   $property['property info'] = array(
@@ -301,9 +296,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       $audience = og_field_audience_options($opt_group);
       foreach (array('content groups', 'other groups') as $key) {
         if (!empty($audience[$key])) {
-          // Get the label un-sanitized, as they will be laster sanitized
-          // according to the form type.
-          $audience[$key] = og_label_multiple($audience[$key], FALSE);
+          $audience[$key] = og_label_multiple($audience[$key]);
         }
       }
 
