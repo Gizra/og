@@ -477,7 +477,7 @@ function _og_upgrade_user(&$sandbox) {
     og_group($group->gid, 'user', $account, $state);
 
     if ($account->is_admin) {
-      og_users_roles_grant($group->gid, $account->uid, $rid);
+      og_role_grant($group->gid, $account->uid, $rid);
     }
     $sandbox['last'] = $account->nid;
     // User subscribed to group.

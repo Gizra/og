@@ -509,14 +509,14 @@ function og_ui_user_multiple_role_edit($gid, $accounts, $operation, $rid) {
     case 'add_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
-        og_users_roles_grant($gid, $account->uid, $rid);
+        og_role_grant($gid, $account->uid, $rid);
 
       }
       break;
     case 'remove_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
-        og_users_roles_revoke($gid, $account->uid, $rid);
+        og_role_revoke($gid, $account->uid, $rid);
       }
       break;
   }

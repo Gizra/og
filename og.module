@@ -865,7 +865,7 @@ function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
 
         if ($entity_type == 'user') {
           foreach (og_get_user_roles($gid, $entity->uid) as $rid) {
-            og_users_roles_revoke($gid, $entity->uid, $rid);
+            og_role_revoke($gid, $entity->uid, $rid);
           }
         }
       }
@@ -1698,7 +1698,7 @@ function og_roles_override($gid) {
  * @param $rid
  *   The role ID.
  */
-function og_users_roles_grant($gid, $uid, $rid) {
+function og_role_grant($gid, $uid, $rid) {
   // Get the existiong user roles.
   $user_roles = og_get_user_roles($gid, $uid);
   if (!in_array($rid, $user_roles)) {
@@ -1708,7 +1708,7 @@ function og_users_roles_grant($gid, $uid, $rid) {
     $role->gid = $gid;
 
     drupal_write_record('og_users_roles', $role);
-    module_invoke_all('og_users_roles_grant', $gid, $uid, $rid);
+    module_invoke_all('og_role_grant', $gid, $uid, $rid);
   }
 }
 
@@ -1720,7 +1720,7 @@ function og_users_roles_grant($gid, $uid, $rid) {
  * @param $rid
  *   The role ID.
  */
-function og_users_roles_revoke($gid, $uid, $rid) {
+function og_role_revoke($gid, $uid, $rid) {
   // Get the existiong user roles.
   $user_roles = og_get_user_roles($gid, $uid);
   if (in_array($rid, $user_roles)) {
@@ -1729,7 +1729,7 @@ function og_users_roles_revoke($gid, $uid, $rid) {
       ->condition('uid', $uid)
       ->condition('rid', $rid)
       ->execute();
-    module_invoke_all('og_users_roles_revoke', $gid, $uid, $rid);
+    module_invoke_all('og_role_revoke', $gid, $uid, $rid);
   }
 }
 
