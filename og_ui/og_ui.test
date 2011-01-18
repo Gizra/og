@@ -63,3 +63,55 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
   }
 }
+
+/**
+ * Upgrade test.
+ *
+ * Load a filled installation of Drupal 6 and run the upgrade process on it.
+ */
+class OgUiUpgradePathTestCase extends UpgradePathTestCase {
+  public static function getInfo() {
+    return array(
+      'name'  => 'Organic groups UI upgrade path',
+      'description'  => 'Tests the upgrade path of Organic groups UI.',
+      'group' => 'Organic groups UI',
+    );
+  }
+
+  public function setUp() {
+    // Path to the database dump.
+    $this->databaseDumpFiles = array(
+      drupal_get_path('module', 'og_ui') . '/tests/drupal-6.og-ui.database.php',
+    );
+    parent::setUp();
+  }
+
+  /**
+   * Test a successful upgrade.
+   */
+  public function testOgUiUpgrade() {
+    // The upgrade should "fail" since OG won't upgrade until it's enabled.
+    $this->performUpgrade(FALSE);
+
+    // TODO: Understand why this workround is needed to load all entity classes.
+    module_enable(array('entity'));
+    module_load_include('inc', 'entity' ,'includes/entity');
+    module_load_include('inc', 'entity' ,'includes/entity.controller');
+    module_enable(array('og_ui'));
+
+    $this->performUpgrade(FALSE);
+
+    // Assert according to the scenario Drupal 6's test table dump was created.
+
+    // Assert node is a group.
+    $group = og_get_group('node', 1);
+    $this->assertTrue($group, t('Node ID 1 is a group.'));
+
+    $node = node_load(1);
+    // Assert the role and permissions field exists and is set to TRUE.
+    $this->assertEqual($node->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'], 1, t('Organic groups role and permissions field found and is enabled.'));
+
+    $roles = og_roles($group->gid);
+    debug($roles);
+  }
+}
