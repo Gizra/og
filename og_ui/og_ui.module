@@ -324,18 +324,44 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
     '#description' => t('Specify how Group should treat content of this type. Content may behave as a group, as group content, or may not participate in Group at all.'),
   );
 
+  // Group settings.
+  $url = array(
+    '!url' => l(t('Manage fields'), 'admin/structure/types/manage/' . str_replace('_', '-', $node_type) . '/fields'),
+  );
+  $type = og_is_group_type('node', $node_type) ? 'group' : 'omitted';
+  $disabled = $type != 'omitted';
+
+  $description = t('Set the content type to be a group, that content will be associated with, and will have group members.');
+  if ($disabled) {
+   $description .= '<br/>' . t('To unset the group definition you should delete the "Group type" field via !url.', $url);
+  }
+
+
   $form['group']['og_group_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group'),
-    '#default_value' =>  og_is_group_type('node', $node_type) ? 'group' : 'omitted',
+    '#default_value' => $type,
     '#options' => array('omitted' => t('Not a group type'), 'group' => t('Group type')),
+    '#description' => $description,
+    '#disabled' => $disabled,
   );
+
+  // Group content settings.
+  $type = og_is_group_content_type('node', $node_type) ? 'og_content' : 'omitted';
+  $disabled = $type != 'omitted';
+
+  $description = t('Set the content type to be a group content, that can be associated with groups.');
+  if ($disabled) {
+   $description .= '<br/>' . t('To unset the group content definition you should delete the "Groups audience" field via !url.', $url);
+  }
 
   $form['group']['og_group_content_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group content'),
-    '#default_value' =>  og_is_group_content_type('node', $node_type) ? 'og_content' : 'omitted',
+    '#default_value' =>  $type,
     '#options' => array('omitted' => t('Not a group content type'), 'og_content' => t('Group content type')),
+    '#description' => $description,
+    '#disabled' => $disabled,
   );
 }
 
