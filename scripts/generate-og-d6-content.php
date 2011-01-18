@@ -16,7 +16,7 @@
  *   include file is version agnostic).
  * - Execute script by running
  *     drush php-script generate-og-d6-content.php > drupal-6.og.database.php
- *   from the command line from the Drupal 6 ROOT directory.
+ *   from the command line of the Drupal 6 ROOT directory.
  * - Since Organic groups module is a contrib module, it needs to be disabled
  *   for the upgrade path, thus open the result file with a text editor and
  *   under the {system} table, change the "status" value of the 'og' insertion

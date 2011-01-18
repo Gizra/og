@@ -141,7 +141,7 @@ function og_ui_update_7000(&$sandbox) {
     if (!empty($sandbox['total']) && $sandbox['count'] == $sandbox['total']) {
       // All nodes and are processed.
       $sandbox['#finished'] = 1;
-      return t('Group permissions were upgraded.');
+      return t("Groups selective state (e.g. open group, moderated group, etc.') were upgraded.");
     }
   }
 }
