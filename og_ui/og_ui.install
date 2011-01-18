@@ -11,6 +11,11 @@
  * moderated, etc'.).
  */
 function og_ui_update_7000(&$sandbox) {
+  if (!module_exists('og')) {
+    // If OG module isn't enabled we can't create the OG specific fields.
+    throw new DrupalUpdateException('You must enable Organic groups module to perform an upgrade from Drupal 6.');
+  }
+
   // Check this is an upgrade from Drupal 6, and that the "Group roles and
   // permissions" was not added yet, as we don't want to override existing data.
   if (db_table_exists('d6_og') && !field_info_field(OG_DEFAULT_ACCESS_FIELD)) {
