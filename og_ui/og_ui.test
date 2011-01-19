@@ -117,6 +117,5 @@ class OgUiUpgradePathTestCase extends UpgradePathTestCase {
     $this->assertEqual($node->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'], 1, t('Organic groups role and permissions field found and is enabled.'));
 
     $roles = og_roles($group->gid);
-    debug($roles);
   }
 }
