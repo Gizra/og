@@ -99,6 +99,10 @@ class OgUiUpgradePathTestCase extends UpgradePathTestCase {
     module_load_include('inc', 'entity' ,'includes/entity.controller');
     module_enable(array('og_ui'));
 
+    // TODO: Why is this horrible hack needed?
+    include_once DRUPAL_ROOT . '/includes/install.inc';
+    drupal_set_installed_schema_version('og_ui', 6999);
+
     $this->performUpgrade(FALSE);
 
     // Assert according to the scenario Drupal 6's test table dump was created.
@@ -108,6 +112,7 @@ class OgUiUpgradePathTestCase extends UpgradePathTestCase {
     $this->assertTrue($group, t('Node ID 1 is a group.'));
 
     $node = node_load(1);
+    debug($node);
     // Assert the role and permissions field exists and is set to TRUE.
     $this->assertEqual($node->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'], 1, t('Organic groups role and permissions field found and is enabled.'));
 
