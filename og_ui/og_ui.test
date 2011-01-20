@@ -106,16 +106,64 @@ class OgUiUpgradePathTestCase extends UpgradePathTestCase {
     $this->performUpgrade(FALSE);
 
     // Assert according to the scenario Drupal 6's test table dump was created.
+    $nodes_info = array(
+      // Open group.
+      1 => array(
+        'name' => t('open'),
+        'anon' => array(
+          'subscribe' => FALSE,
+          'subscribe without approval' => TRUE,
+        ),
+      ),
+      // Moderated group.
+      2 => array(
+        'name' => t('moderated'),
+        'anon' => array(
+          'subscribe' => TRUE,
+          'subscribe without approval' => FALSE,
+        ),
+      ),
+      // Invite only group.
+      3 => array(
+        'name' => t('invite only'),
+        'anon' => array(
+          'subscribe' => FALSE,
+          'subscribe without approval' => FALSE,
+        ),
+      ),
+      // Closed group.
+      4 => array(
+        'name' => t('closed'),
+        'anon' => array(
+          'subscribe' => FALSE,
+          'subscribe without approval' => FALSE,
+        ),
+        'auth' => array('unsubscribe' => FALSE),
+      ),
+    );
 
-    // Assert node is a group.
-    $group = og_get_group('node', 1);
-    $this->assertTrue($group, t('Node ID 1 is a group.'));
+    foreach ($nodes_info as $nid => $node_info) {
+      // Set default values.
+      $node_info += array('auth' => array('unsubscribe' => TRUE));
 
-    $node = node_load(1);
-    debug($node);
-    // Assert the role and permissions field exists and is set to TRUE.
-    $this->assertEqual($node->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'], 1, t('Organic groups role and permissions field found and is enabled.'));
+      $node = node_load($nid);
+      // Assert the role and permissions field exists and is set to TRUE.
+      $this->assertEqual($node->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'], 1, t('Organic groups role and permissions field found and is enabled.'));
 
-    $roles = og_roles($group->gid);
+      // Assert node is a group.
+      $group = og_get_group('node', $nid);
+      $this->assertTrue($group, t('Node ID @nid is a group.', array('@nid' => $nid)));
+
+      // Assert permissions for non-member and member roles.
+      $roles = og_roles($group->gid);
+      $permissions = og_role_permissions($roles);
+
+      $anon_rid = array_search(OG_ANONYMOUS_ROLE, $roles);
+      $auth_rid = array_search(OG_AUTHENTICATED_ROLE, $roles);
+
+      $this->assertEqual($permissions[$anon_rid], array_filter($node_info['anon']), t('Correct permissions were set for non-member role in @type group.', array('@type' => $node_info['name'])));
+      $this->assertEqual($permissions[$auth_rid], array_filter($node_info['auth']), t('Correct permissions were set for member role in @type group.', array('@type' => $node_info['name'])));
+    }
+
   }
 }

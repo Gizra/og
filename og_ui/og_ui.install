@@ -124,13 +124,14 @@ function og_ui_update_7000(&$sandbox) {
                   break;
               }
 
-              // Get the anonymous and authenticated role IDs of the group.
-              $roles = og_user_roles($group->gid);
+              // Since the node is already a group we have to manually override
+              // the roles, as og_group() isn't called.
+              $roles = og_roles_override($group->gid);
               $roles = array_flip($roles);
 
               // Set the new permissions.
-              og_user_role_change_permissions($roles[OG_ANONYMOUS_ROLE], $anon_permissions);
-              og_user_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], $auth_permissions);
+              og_role_change_permissions($roles[OG_ANONYMOUS_ROLE], $anon_permissions);
+              og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], $auth_permissions);
 
               // Increment total count.
               $sandbox['count'] += 1;
