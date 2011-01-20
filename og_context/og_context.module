@@ -18,7 +18,6 @@ function og_context_menu() {
     'page arguments' => array('og_context_configure_form'),
     'access arguments' => array('administer group'),
     'file' => 'og_context.admin.inc',
-    'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
