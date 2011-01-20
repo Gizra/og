@@ -16,8 +16,7 @@ function og_ui_update_7000(&$sandbox) {
     throw new DrupalUpdateException('You must enable Organic groups module to perform an upgrade from Drupal 6.');
   }
 
-  // TODO: Check this is an upgrade from Drupal 6, and that the "Group roles and
-  // permissions" was not added yet, as we don't want to override existing data.
+  // Check this is an upgrade from Drupal 6.
   if (db_table_exists('d6_og')) {
     $sandbox['#finished'] = 0;
     // If this is the first time this functions is called in the batch process,
