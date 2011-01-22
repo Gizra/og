@@ -435,21 +435,28 @@ function og_field_attach_delete($entity_type, $entity) {
  * Handle translated nodes that act as groups.
  */
 function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
-  if (!empty($form['#node_edit_form']) && !empty($form[OG_GROUP_FIELD]) && (!empty($entity->tnid) && $entity->tnid != $entity->nid) || (!empty($_GET['translation']) && !empty($_GET['target']))) {
+  if (!empty($form['#node_edit_form']) &&
+    (og_is_group_type('node', $form['type']['#value'])) &&
+    (!empty($entity->tnid) && $entity->tnid != $entity->nid) || (!empty($_GET['translation']) && !empty($_GET['target']))) {
 
-    // Prevent changing the group state on nodes that are translated.
-    // Load the original node.
-    $description = t('You can not change the group state from a translated content.');
+    // Iterate over OG fields that shouldn't be changed in node translation.
+    foreach (og_fields_info() as $field_name => $info) {
+      if (!empty($form[$field_name]) && $info['disable on node translate']) {
+        // Prevent changing the group state on nodes that are translated.
+        $description = t('You can not change "@label" field from a translated content.', array('@label' => $info['instance']['label']));
 
-    $tnid = !empty($entity->tnid) ? $entity->tnid : $_GET['translation'];
-    if (($node = node_load($tnid)) && node_access('update', $node)) {
-      $description .= ' ' . t('Changing the group state can only be done via <a href="@node">@title</a>.', array('@node' => url('node/' . $node->nid . '/edit'), '@title' => $node->title));
+        $tnid = !empty($entity->tnid) ? $entity->tnid : $_GET['translation'];
+        if (($node = node_load($tnid)) && node_access('update', $node)) {
+          $description .= ' ' . t('Changing this field can only be done via <a href="@node">@title</a>.', array('@node' => url('node/' . $node->nid . '/edit'), '@title' => $node->title));
+        }
+
+        $form[$field_name][LANGUAGE_NONE]['#options'] = array();
+        $form[$field_name][LANGUAGE_NONE]['#description'] = $description;
+        $form[$field_name][LANGUAGE_NONE]['#disabled'] = TRUE;
+        $form[$field_name][LANGUAGE_NONE]['#required'] = FALSE;
+
+      }
     }
-
-    $form[OG_GROUP_FIELD][LANGUAGE_NONE]['#options'] = array();
-    $form[OG_GROUP_FIELD][LANGUAGE_NONE]['#description'] = $description;
-    $form[OG_GROUP_FIELD][LANGUAGE_NONE]['#disabled'] = TRUE;
-    $form[OG_GROUP_FIELD][LANGUAGE_NONE]['#required'] = FALSE;
   }
 }
 

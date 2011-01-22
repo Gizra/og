@@ -1888,6 +1888,7 @@ function og_fields_info($field_name = NULL) {
           // Add default values.
           $field += array(
             'entity type' => array(),
+            'disable on node translate' => TRUE,
           );
 
           // Add the module information.

@@ -507,10 +507,11 @@ class OgTranslationTestCase extends DrupalWebTestCase {
     $node_translation = $this->createTranslation($node, $node_translation_title, $node_translation_body, 'es');
 
     $this->drupalGet('node/' . $node_translation->nid . '/edit');
-    $this->assertText(t('You can not change the group state from a translated content'), t('Group field on tranlated node does not allow editing.'));
+    $message = t('You can not change "Group type" field from a translated content.');
+    $this->assertText($message, t('Group field on tranlated node does not allow editing.'));
 
     $this->drupalGet('node/' . $node->nid . '/edit');
-    $this->assertNoText(t('You can not change the group state from a translated content'), t('Group field on original node allows editing.'));
+    $this->assertNoText($message, t('Group field on original node allows editing.'));
   }
 
   /**
