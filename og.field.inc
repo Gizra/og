@@ -436,7 +436,7 @@ function og_field_attach_delete($entity_type, $entity) {
  */
 function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
   if (!empty($form['#node_edit_form']) &&
-    (og_is_group_type('node', $form['type']['#value'])) &&
+    (og_is_group_type('node', $form['type']['#value']) || og_is_group_content_type('node', $form['type']['#value'])) &&
     (!empty($entity->tnid) && $entity->tnid != $entity->nid) || (!empty($_GET['translation']) && !empty($_GET['target']))) {
 
     // Iterate over OG fields that shouldn't be changed in node translation.
