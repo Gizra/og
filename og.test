@@ -344,6 +344,10 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
    * Verify proper permission changes by og_role_change_permissions().
    */
   function testOgUserRoleChangePermissions() {
+    // TODO: We need to invalidate cache as the og permissions are fired before
+    // the field was added to the article content type. But this is a hack, and
+    // should be removed.
+    $this->resetAll();
     // Create user.
     $user1 = $this->drupalCreateUser();
 
