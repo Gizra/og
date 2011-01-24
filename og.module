@@ -1094,6 +1094,9 @@ function og_get_all_group_entity() {
  *   The entity type.
  * @param $entity
  *   The entity object. If empty the current user will be used.
+ * @param $states
+ *   Optional; Array with the state to return. If empty groups of all state will
+ *   return.
  *
  * @return
  *   TRUE if the entity (e.g. the user) belongs to a group and is not pending or
