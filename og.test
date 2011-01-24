@@ -16,13 +16,13 @@ class OgGroupCrud extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('og');
+    module_enable(array('entity_feature'));
   }
 
   /**
    * Test CRUD of group entitys.
    */
   function testOgCrud() {
-    module_enable(array('entity_feature'));
     $node = entity_create('node', array(
       'type' => 'article',
       'title' => $this->randomName(),
@@ -263,12 +263,6 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('og');
-  }
-
-  /**
-   * Test group and ungroup of content.
-   */
-  function testGroupAndUngroup() {
     module_enable(array('entity_feature'));
 
     // Add OG group field to the entity_test's "main" bundle.
@@ -276,7 +270,12 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
 
     // Add OG audience field to the node's "article" bundle.
     og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+  }
 
+  /**
+   * Test group and ungroup of content.
+   */
+  function testGroupAndUngroup() {
     $admin_user = $this->drupalCreateUser();
 
     $web_user = $this->drupalCreateUser();
@@ -332,6 +331,12 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('og');
+    module_enable(array('entity_feature'));
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Add OG audience field to the node's "article" bundle.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
   }
 
 
@@ -339,13 +344,6 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
    * Verify proper permission changes by og_role_change_permissions().
    */
   function testOgUserRoleChangePermissions() {
-    module_enable(array('entity_feature'));
-    // Add OG group field to the entity_test's "main" bundle.
-    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
-
-    // Add OG audience field to the node's "article" bundle.
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
-
     // Create user.
     $user1 = $this->drupalCreateUser();
 
@@ -407,6 +405,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('og');
+    module_enable(array('entity_feature'));
   }
 
 
@@ -418,8 +417,6 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
    * - Previous group with field disabled.
    */
   function testOgDefaultAccessField() {
-    module_enable(array('entity_feature'));
-
     // Create user.
     $web_user = $this->drupalCreateUser();
 
@@ -630,6 +627,12 @@ class OgGroupAudienceField extends DrupalWebTestCase {
 
    function setUp() {
     parent::setUp('og');
+    module_enable(array('entity_feature'));
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Add OG audience field to the node's "article" bundle.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
   }
 
 
@@ -637,13 +640,6 @@ class OgGroupAudienceField extends DrupalWebTestCase {
    * No groups and a group is added.
    */
   function testOgAudienceFieldBasic() {
-    module_enable(array('entity_feature'));
-    // Add OG group field to the entity_test's "main" bundle.
-    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
-
-    // Add OG audience field to the node's "article" bundle.
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
-
     // Create user.
     $web_user = $this->drupalCreateUser(array(
       'access content',
@@ -810,13 +806,12 @@ class OgUnInstallTestCase extends DrupalWebTestCase {
   }
   function setUp() {
     parent::setUp('og');
+    module_enable(array('entity_feature'));
   }
   /**
    * Instaill, uninstall and re-install.
    */
   function testOgInstall() {
-    module_enable(array('entity_feature'));
-
     // Assert default roles and permissions were created.
     $global_roles = og_get_global_roles();
     $this->assertFalse(array_diff($global_roles, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE)), t('Global roles were created on module installation.'));
