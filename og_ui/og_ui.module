@@ -119,7 +119,7 @@ function og_ui_menu() {
 
   $items['admin/config/group'] = array(
     'title' => 'Group',
-    'description' => 'Administer the suite of Group modules.',
+    'description' => 'Administer the suite of Organic groups modules.',
     'position' => 'right',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
@@ -142,7 +142,7 @@ function og_ui_menu() {
     'page arguments' => array('og_ui_user_admin_global_permissions'),
     'title' => 'Group global permissions',
     'access arguments' => array('administer group'),
-    'description' => 'Configure Group global permissions.',
+    'description' => 'Configure Organic groups global permissions.',
     'file' => 'og_ui.admin.inc',
   );
 
@@ -151,7 +151,7 @@ function og_ui_menu() {
     'page arguments' => array('og_ui_field_settings'),
     'title' => 'Group field settings',
     'access arguments' => array('administer group'),
-    'description' => 'Configure Group fields in bundles.',
+    'description' => 'Configure Organic groups fields in bundles.',
     'file' => 'og_ui.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
