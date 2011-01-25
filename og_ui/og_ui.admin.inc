@@ -6,6 +6,20 @@
  * Admin settings for Organic grops module.
  */
 
+function og_ui_user_admin_settings($form_state) {
+  $form = array();
+
+  $form['og_group_manager_full_access'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Group manager full permissions'),
+    '#description' => t('When enabled the group manager will have all the permissions in the group.'),
+    '#default_value' => variable_get('og_group_manager_full_access', TRUE),
+  );
+
+
+  return system_settings_form($form);
+}
+
 /**
  * Provide an overview of the administrator menu items.
  *

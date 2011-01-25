@@ -127,6 +127,16 @@ function og_ui_menu() {
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
+
+  $items['admin/config/group/settings'] = array(
+    'title' => 'Group settings',
+    'description' => 'Administer the Organic groups settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_ui_user_admin_settings'),
+    'access arguments' => array('administer group'),
+    'file' => 'og_ui.admin.inc',
+  );
+
   $items['admin/config/group/permissions'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_user_admin_global_permissions'),
