@@ -64,6 +64,51 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
   }
 }
 
+class OgUiManagePeopleTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups UI manage people',
+      'description' => 'Verify the people management functionality.',
+      'group' => 'Organic groups UI'
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og_ui');
+    module_enable(array('entity_feature'));
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+  }
+
+  /**
+   * Testing adding people via group/[entity_type]/[etid]/admin/people/add-user.
+   */
+  function testOgUiAddPeople() {
+    $admin_user = $this->drupalCreateUser();
+    $this->drupalLogin($admin_user);
+
+    // Create an entity.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
+
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+
+    // Add users to the group, with different states.
+    foreach (og_group_content_states() as $state => $name) {
+      $web_user = $this->drupalCreateUser();
+      $edit = array();
+      $edit['og_add_user'] = $web_user->name;
+      $edit['og_add_user_state'] = $state;
+      $this->drupalPost('group/entity_test/' . $entity->pid . '/admin/people/add-user', $edit, t('Add users'));
+
+      // Reload user, just to make sure field was updated.
+      $web_user = user_load($web_user->uid, TRUE);
+      $this->assertTrue(og_is_member($group->gid, 'user', $web_user, array($state)), t('User was added to the group with @name state.', array('@name' => $name)));
+    }
+  }
+}
+
 /**
  * Upgrade test.
  *
