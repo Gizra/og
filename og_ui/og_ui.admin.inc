@@ -91,8 +91,8 @@ function og_ui_add_users_submit($form, &$form_state) {
  * Form builder; OG user administration page.
  *
  * @ingroup forms
- * @see og_user_admin_account_validate()
- * @see og_user_admin_account_submit()
+ * @see og_ui_user_admin_account_validate().
+ * @see og_ui_user_admin_account_submit().
  */
 function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
@@ -151,35 +151,34 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
     $accounts = user_load_multiple($uids);
 
     foreach ($accounts as $account) {
-      // Don't allow editing of the group manager.
-      if ($account->uid != $entity->uid) {
-        $users_roles = array();
-        foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
-          if (!in_array($roles[$rid], array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
-            // Show the user's roles, except of the authenticated role, that all
-            // group members have, or anonymous that blocked members have.
-            $users_roles[] = $roles[$rid];
-          }
+      // We allow editing of the group manager, but will make sure on submit
+      // that they can not be removed from group.
+      $users_roles = array();
+      foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
+        if (!in_array($roles[$rid], array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
+          // Show the user's roles, except of the authenticated role, that all
+          // group members have, or anonymous that blocked members have.
+          $users_roles[] = $roles[$rid];
         }
-        asort($users_roles);
-
-        // Find the group in the user's field.
-        $property = OG_AUDIENCE_FIELD;
-        foreach ($account->{$property}[LANGUAGE_NONE] as $value) {
-          if ($value['gid'] == $group->gid) {
-            $row = $value;
-            break;
-          }
-        }
-
-        $options[$account->uid] = array(
-          'username' => theme('username', array('account' => $account)),
-          'status' =>  $states[$row['state']],
-          'roles' => theme('item_list', array('items' => $users_roles)),
-          'member_for' => format_interval(REQUEST_TIME - $row['created']),
-        );
-
       }
+      asort($users_roles);
+
+      // Find the group in the user's field.
+      $property = OG_AUDIENCE_FIELD;
+      foreach ($account->{$property}[LANGUAGE_NONE] as $value) {
+        if ($value['gid'] == $group->gid) {
+          $row = $value;
+          break;
+        }
+      }
+
+      $options[$account->uid] = array(
+        'username' => theme('username', array('account' => $account)),
+        'status' =>  $states[$row['state']],
+        'roles' => theme('item_list', array('items' => $users_roles)),
+        'member_for' => format_interval(REQUEST_TIME - $row['created']),
+      );
+
     }
   }
 
@@ -221,7 +220,20 @@ function og_ui_user_admin_account_submit($form, &$form_state) {
   // Filter out unchecked accounts.
   $accounts = array_filter($form_state['values']['accounts']);
 
-  if ($function = $operation['callback']) {
+  // If the operation is unblock, block or deny, we make sure the group manager
+  // isn't being processed, if they were selected.
+  if (in_array($form_state['values']['operation'], array('unblock', 'deny', 'block'))) {
+    // Get the entity from group.
+    $entity = og_load_entity_from_group($form_state['values']['group']->gid);
+
+    if (!empty($entity->uid) && in_array($entity->uid, $accounts)) {
+      // Remove from the accounts array, and give a message.
+      unset($accounts[$entity->uid]);
+      drupal_set_message('This update can not be used on the group manager.');
+    }
+  }
+
+  if ($accounts && $function = $operation['callback']) {
     // Add in callback arguments if present.
     if (isset($operation['callback arguments'])) {
       $args = array_merge(array($accounts), $operation['callback arguments']);
