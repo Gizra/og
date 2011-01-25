@@ -106,6 +106,13 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
       $web_user = user_load($web_user->uid, TRUE);
       $this->assertTrue(og_is_member($group->gid, 'user', $web_user, array($state)), t('User was added to the group with @name state.', array('@name' => $name)));
     }
+
+    // Add non-existing user.
+    $edit = array();
+    $edit['og_add_user'] = $this->randomName();
+    $this->drupalPost('group/entity_test/' . $entity->pid . '/admin/people/add-user', $edit, t('Add users'));
+
+    $this->assertText(t('You have entered an invalid user name.'), t('Invalid user name not added to group.'));
   }
 }
 
