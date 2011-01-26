@@ -262,6 +262,12 @@ function og_views_default_views() {
   $handler->display->display_options['row_plugin'] = 'node';
   $handler->display->display_options['row_options']['links'] = 1;
   $handler->display->display_options['row_options']['comments'] = 0;
+  /* Empty text: Global: Text area */
+  $handler->display->display_options['empty']['area']['id'] = 'area';
+  $handler->display->display_options['empty']['area']['table'] = 'views';
+  $handler->display->display_options['empty']['area']['field'] = 'area';
+  $handler->display->display_options['empty']['area']['empty'] = FALSE;
+  $handler->display->display_options['empty']['area']['content'] = 'There is no content in this group.';
   /* Sort criterion: Node: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
@@ -273,6 +279,7 @@ function og_views_default_views() {
   $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
   $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'default';
   $handler->display->display_options['arguments']['group_audience_gid']['style_plugin'] = 'default_summary';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'fixed';
   $handler->display->display_options['arguments']['group_audience_gid']['validate_fail'] = 'empty';
   $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
   $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
@@ -317,11 +324,13 @@ function og_views_default_views() {
     t('Items per page'),
     t('- All -'),
     t('Offset'),
+    t('There is no content in this group.'),
     t('All'),
     t('Content pane'),
     t('OG nodes'),
     t('View panes'),
   );
+
   $views[$view->name] = $view;
 
   return $views;
