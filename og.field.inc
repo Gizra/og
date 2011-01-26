@@ -482,6 +482,12 @@ function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode
 function og_field_crud_group($op, $entity_type, $entity) {
   $property = OG_GROUP_FIELD;
 
+  // If the entity is a translated node, we can return early, as all operations
+  // happen on the source node.
+  if ($entity_type == 'node' && (!empty($entity->tnid) || !empty($entity->translation_source->tnid)) && module_exists('translation')) {
+    return;
+  }
+
   if (!empty($entity->{$property}) && empty($entity->og_skip_group_create)) {
     $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 

@@ -474,9 +474,12 @@ class OgTranslationTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('locale', 'translation', 'translation_test', 'og');
+    parent::setUp('translation', 'translation_test', 'og');
   }
 
+  /**
+   * Test disabling OG fields on translated content.
+   */
   function testOgNodeLocale() {
     // Setup users.
     $web_user = $this->drupalCreateUser(array(
@@ -513,6 +516,11 @@ class OgTranslationTestCase extends DrupalWebTestCase {
     $node_translation_body = $this->randomName();
     $node_translation = $this->createTranslation($node, $node_translation_title, $node_translation_body, 'es');
 
+    // Assert both nodes return the same group.
+    $group1 = og_get_group('node', $node->nid);
+    $group2 = og_get_group('node', $node_translation->nid);
+    $this->assertEqual($group1, $group2, t('Node and tranlated node are the same group.'));
+
     $this->drupalGet('node/' . $node_translation->nid . '/edit');
     $message = t('You can not change "Group type" field from a translated content.');
     $this->assertText($message, t('Group field on tranlated node does not allow editing.'));
@@ -520,6 +528,7 @@ class OgTranslationTestCase extends DrupalWebTestCase {
     $this->drupalGet('node/' . $node->nid . '/edit');
     $this->assertNoText($message, t('Group field on original node allows editing.'));
   }
+
 
   /**
    * Install a the specified language if it has not been already. Otherwise make sure that
