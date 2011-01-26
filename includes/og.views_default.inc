@@ -279,7 +279,6 @@ function og_views_default_views() {
   $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
   $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'default';
   $handler->display->display_options['arguments']['group_audience_gid']['style_plugin'] = 'default_summary';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'fixed';
   $handler->display->display_options['arguments']['group_audience_gid']['validate_fail'] = 'empty';
   $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
   $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
