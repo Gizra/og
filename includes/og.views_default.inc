@@ -108,16 +108,13 @@ function og_views_default_views() {
 
   $views[$view->name] = $view;
 
-  /*
-   * View 'og_members'
-   */
   $view = new view;
   $view->name = 'og_members';
   $view->description = 'Newest group members';
   $view->tag = 'group';
-  $view->view_php = '';
   $view->base_table = 'users';
-  $view->is_cacheable = FALSE;
+  $view->human_name = '';
+  $view->core = 0;
   $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
@@ -125,6 +122,7 @@ function og_views_default_views() {
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
+  $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'some';
   $handler->display->display_options['pager']['options']['items_per_page'] = '5';
@@ -156,10 +154,9 @@ function og_views_default_views() {
   $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
   $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
   $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'not found';
   $handler->display->display_options['arguments']['group_audience_gid']['style_plugin'] = 'default_summary';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'og_context';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_options']['argument'] = 'group';
+  $handler->display->display_options['arguments']['group_audience_gid']['title'] = '%1 members';
   $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
   $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
   /* Filter: User: Active */
@@ -172,11 +169,24 @@ function og_views_default_views() {
   $handler->display->display_options['filters']['group_audience_state']['table'] = 'field_data_group_audience';
   $handler->display->display_options['filters']['group_audience_state']['field'] = 'group_audience_state';
   $handler->display->display_options['filters']['group_audience_state']['value'] = array(
-    '1' => '1',
+    1 => '1',
   );
 
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block_1');
+  $translatables['og_members'] = array(
+    t('Defaults'),
+    t('more'),
+    t('Apply'),
+    t('Reset'),
+    t('Sort By'),
+    t('Asc'),
+    t('Desc'),
+    t('All'),
+    t('%1 members'),
+    t('Block'),
+  );
+
 
   $views[$view->name] = $view;
 
