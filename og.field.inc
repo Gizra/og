@@ -8,8 +8,6 @@
 
 /**
  * Implements hook_field_widget_properties_alter().
- *
- * Depends on http://drupal.org/node/806830
  */
 function og_field_widget_properties_alter(&$widget, $context) {
   $field = $context['field'];
@@ -620,12 +618,12 @@ function og_field_audience_count($opt_group = FALSE, $account = NULL) {
 /**
  * Implements hook_field_validate().
  *
- * FIXME: Adapt this function to Group.
+ * FIXME: Adapt this function to OG.
  *
  * Possible error codes:
  * - 'invalid_nid': nid is not valid for the field (not a valid node id, or the node is not referenceable).
  */
-function __group_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+function __og_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   // Extract nids to check.
   $ids = array();
 
