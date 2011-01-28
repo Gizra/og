@@ -3,6 +3,7 @@ name = Organic groups panels example
 description = "Example module to show integration between OG and panels, and serve as a starting point to customize group display."
 dependencies[] = og
 dependencies[] = page_manager
+dependencies[] = panels
 dependencies[] = views_content
 package = "Organic groups"
 core = 7.x

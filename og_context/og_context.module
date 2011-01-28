@@ -103,6 +103,20 @@ function og_context_init() {
 }
 
 /**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function og_context_ctools_plugin_directory($module, $plugin) {
+  // Safety: go away if CTools is not at an appropriate version.
+  if (!module_invoke('ctools', 'api_version', OG_REQUIRED_CTOOLS_API)) {
+    return;
+  }
+
+  if ($module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
  * Implements hook_views_api().
  */
 function og_context_views_api() {
