@@ -74,7 +74,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og_ui');
+    parent::setUp('og_ui', 'entity_test');
     module_enable(array('entity_feature'));
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');

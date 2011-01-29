@@ -15,7 +15,7 @@ class OgGroupCrud extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('og', 'entity_test');
     module_enable(array('entity_feature'));
   }
 
@@ -262,7 +262,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('og', 'entity_test');
     module_enable(array('entity_feature'));
 
     // Add OG group field to the entity_test's "main" bundle.
@@ -330,7 +330,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('og', 'entity_test');
     module_enable(array('entity_feature'));
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
@@ -408,7 +408,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('og', 'entity_test');
     module_enable(array('entity_feature'));
   }
 
@@ -639,7 +639,7 @@ class OgGroupAudienceField extends DrupalWebTestCase {
   }
 
    function setUp() {
-    parent::setUp('og');
+    parent::setUp('og', 'entity_test');
     module_enable(array('entity_feature'));
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
@@ -818,7 +818,7 @@ class OgUnInstallTestCase extends DrupalWebTestCase {
     );
   }
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('og', 'entity_test');
     module_enable(array('entity_feature'));
   }
   /**
