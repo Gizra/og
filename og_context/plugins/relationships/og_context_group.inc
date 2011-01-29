@@ -26,11 +26,11 @@ $plugin = array(
 function og_group_context_from_og_context($context, $conf) {
   // If unset it wants a generic, unfilled context, which is just NULL.
   if (empty($context->data)) {
-    return ctools_context_create_empty('og_group', NULL);
+    return ctools_context_create_empty('entity:group', NULL);
   }
 
   if ($group = og_context()) {
     // Send it to ctools.
-    return ctools_context_create('og_group', $group);
+    return ctools_context_create('entity:group', $group);
   }
 }

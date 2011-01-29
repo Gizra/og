@@ -12,7 +12,7 @@
  */
 $plugin = array(
   'title' => t('Group from node'),
-  'keyword' => 'og_group',
+  'keyword' => 'group',
   'description' => t('Get the group context from a node.'),
   'required context' => new ctools_context_required(t('Node'), 'node'),
   'context' => 'og_group_from_node_context',
@@ -24,13 +24,13 @@ $plugin = array(
 function og_group_from_node_context($context, $conf) {
   // If unset it wants a generic, unfilled context, which is just NULL.
   if (empty($context->data) || !isset($context->data->nid)) {
-    return ctools_context_create_empty('og_group', NULL);
+    return ctools_context_create_empty('entity:group', NULL);
   }
 
   if (isset($context->data->nid)) {
     $group = og_get_group('node', $context->data->nid);
 
     // Send it to ctools.
-    return ctools_context_create('og_group', $group);
+    return ctools_context_create('entity:group', $group);
   }
 }
