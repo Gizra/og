@@ -484,7 +484,9 @@ function og_field_crud_group($op, $entity_type, $entity) {
 
   // If the entity is a translated node, we can return early, as all operations
   // happen on the source node.
-  if ($entity_type == 'node' && (!empty($entity->tnid) || !empty($entity->translation_source->tnid)) && module_exists('translation')) {
+  if ($entity_type == 'node'
+    && ((!empty($entity->tnid) && $entity->tnid != $entity->nid) || !empty($entity->translation_source->tnid))
+    && module_exists('translation')) {
     return;
   }
 
