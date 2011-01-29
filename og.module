@@ -83,44 +83,6 @@ function og_entity_info() {
   return $return;
 }
 
-
-function og_ctools_context_convert_list_alter(&$plugin, &$converters) {
-  if (!empty($plugin['context name']) && $plugin['context name'] == 'group') {
-    // Add group converter list.
-    $converters = $converters + array(
-      'gid' => t('Group ID'),
-      'entity_type' => t('Entity type'),
-      'entity_id' => t('Entity ID'),
-      'label' => t('Group label'),
-    );
-  }
-}
-
-function og_ctools_context_converter_alter($context, $converter, &$value) {
-  if (!empty($context->type[0]) && $context->type[0] == 'entity:group') {
-    switch ($converter) {
-      case 'gid':
-        $value = $context->data->gid;
-        break;
-      case 'entity_type':
-        $value = $context->data->entity_type;
-        break;
-      case 'entity_id':
-        $value = $context->data->etid;
-        break;
-      case 'label':
-        $value = $context->data->label;
-    }
-  }
-}
-
-/**
- * Convert a context into a string.
- */
-function og_context_group_convert($context, $type) {
-
-}
-
 /**
  * Implements hook_menu().
  */
@@ -480,6 +442,46 @@ function og_node_type_insert($info) {
 */
 function og_node_type_update($info) {
   og_node_type_save($info->type);
+}
+
+/**
+ * Implements hook_ctools_context_convert_list_alter().
+ *
+ * Add our own converter list to the entity:group context provided by CTools.
+ */
+function og_ctools_context_convert_list_alter(&$plugin, &$converters) {
+  if (!empty($plugin['context name']) && $plugin['context name'] == 'group') {
+    // Add group converter list.
+    $converters = $converters + array(
+      'gid' => t('Group ID'),
+      'entity_type' => t('Entity type'),
+      'entity_id' => t('Entity ID'),
+      'label' => t('Group label'),
+    );
+  }
+}
+
+/**
+ * Implements hook_ctools_context_converter_alter().
+ *
+ * Converter function for CTools context entity:group.
+ */
+function og_ctools_context_converter_alter($context, $converter, &$value) {
+  if (!empty($context->type[0]) && $context->type[0] == 'entity:group') {
+    switch ($converter) {
+      case 'gid':
+        $value = $context->data->gid;
+        break;
+      case 'entity_type':
+        $value = $context->data->entity_type;
+        break;
+      case 'entity_id':
+        $value = $context->data->etid;
+        break;
+      case 'label':
+        $value = $context->data->label;
+    }
+  }
 }
 
 
