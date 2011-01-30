@@ -129,7 +129,7 @@ function og_ui_menu() {
   );
 
   $items['admin/config/group/settings'] = array(
-    'title' => 'Group settings',
+    'title' => 'Orgnic groups settings',
     'description' => 'Administer the Organic groups settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_user_admin_settings'),
