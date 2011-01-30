@@ -8,7 +8,7 @@
 
 define('OG_REQUIRED_CTOOLS_API', '2.0-alpha');
 
-// Load all Field module hooks for Group.
+// Load all Field module hooks for Organic groups.
 require(drupal_get_path('module', 'og') . '/og.field.inc');
 
 /**
@@ -224,7 +224,7 @@ function og_og_views_relationship() {
 function og_permission() {
   return array(
     'administer group' =>  array(
-      'title' => t('Administer Group permissions'),
+      'title' => t('Administer Organic groups permissions'),
       'description' => t('Administer all groups and permissions.'),
     ),
   );
