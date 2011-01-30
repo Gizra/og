@@ -489,9 +489,9 @@ function og_ctools_context_converter_alter($context, $converter, &$value) {
  * Return a loaded group entity if exists or create a new one.
  *
  * This is a wrapper function around og_load() that allows passing the group's
- * entity type and entity ID, and the correct group will be loaded according.
- * If no group exists and $create option is set to TRUE a new group entity will
- * be created.
+ * entity type and entity ID, and the correct group will be loaded accordingly.
+ * If no group exists and $create option is set to TRUE, then a new group entity
+ * will be created.
  *
  * @param $etid
  *   The group content ID.
@@ -1007,10 +1007,6 @@ function og_node_type_save($bundle_name) {
 }
 
 
-/*******************************************************************************
- * API functions
- ******************************************************************************/
-
 /**
  * Get the groups a content is associated with.
  *
@@ -1150,7 +1146,7 @@ function og_is_member($gid, $entity_type = 'user', $entity = NULL, $states = arr
 /**
  * Wrapper of og_user_access(); Gets entity ID instead of group ID.
  *
- * Can be used as a menu callback.
+ * Can be used as a menu access callback.
  *
  * @param $perm
  *   The permissions name.
