@@ -151,11 +151,11 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   $status = og_group_content_states();
   $roles = og_roles($group->gid);
 
-  //TODO: Add pager.
   $query = new EntityFieldQuery();
   $query
     ->entityCondition('entity_type', 'user')
-    ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', $group->gid, '=');
+    ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', $group->gid, '=')
+    ->pager(25);
 
   if ($result = $query->execute()) {
     $uids = array_keys($result['user']);
