@@ -140,7 +140,7 @@ function og_ui_menu() {
   $items['admin/config/group/permissions'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_user_admin_global_permissions'),
-    'title' => 'Group global permissions',
+    'title' => 'Organic groups global permissions',
     'access arguments' => array('administer group'),
     'description' => 'Configure Organic groups global permissions.',
     'file' => 'og_ui.admin.inc',
@@ -149,7 +149,7 @@ function og_ui_menu() {
   $items['admin/config/group/fields'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_field_settings'),
-    'title' => 'Group field settings',
+    'title' => 'Organic groups field settings',
     'access arguments' => array('administer group'),
     'description' => 'Configure Organic groups fields in bundles.',
     'file' => 'og_ui.admin.inc',
@@ -162,7 +162,7 @@ function og_ui_menu() {
     'load arguments' => array(4, 5, 5, '%map'),
     'title' => 'Delete',
     'access arguments' => array('administer group'),
-    'description' => 'Delete a group field from a bundle.',
+    'description' => 'Delete an Organic groups field from a bundle.',
     'file' => 'og_ui.admin.inc',
     'type' => MENU_LOCAL_TASK,
   );
