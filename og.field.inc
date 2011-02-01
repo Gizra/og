@@ -125,16 +125,38 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
   if ($field['field_name'] == OG_AUDIENCE_FIELD && !empty($items[0])) {
     foreach ($items as $delta => $item) {
       if ($group = og_get_group('group', $item['gid'])) {
-        $label = og_label($group->gid);
-        $entity = entity_load($group->entity_type, array($group->etid));
-        $entity = current($entity);
-        // Get the entity type of the group entity.
-        $uri = entity_uri($group->entity_type, $entity);
-        $element[$delta] = array(
-          '#type' => 'link',
-          '#title' => $label,
-          '#href' => $uri['path'],
-        );
+
+        $access = TRUE;
+        if ($group->entity_type == 'node') {
+          // Check user has access to view the node.
+          $node = node_load($group->etid);
+          $access = node_access('view', $node);
+        }
+
+        if ($access) {
+          $label = og_label($group->gid);
+          $entity = entity_load($group->entity_type, array($group->etid));
+          $entity = current($entity);
+          // Get the entity type of the group entity.
+          $uri = entity_uri($group->entity_type, $entity);
+          $element[$delta] = array(
+            '#type' => 'link',
+            '#title' => $label,
+            '#href' => $uri['path'],
+          );
+        }
+        else {
+          // No need to show private groups several times, so remember if it was
+          // already added.
+          $added = &drupal_static(__FUNCTION__, FALSE);
+
+          if (!$added) {
+            $added = TRUE;
+            $element[$delta] = array(
+              '#markup' => '- ' . t('Private group') . ' -',
+            );
+          }
+        }
       }
     }
   }

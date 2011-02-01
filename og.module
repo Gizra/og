@@ -613,6 +613,7 @@ function og_invalidate_cache($gids = array()) {
     'og_get_group_ids',
     'og_field_audience_options',
     'og_role_permissions',
+    'og_field_formatter_view',
   );
 
   foreach ($caches as $cache) {
