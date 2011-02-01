@@ -1036,14 +1036,12 @@ function og_get_entity_groups($entity_type, $entity, $states = array(OG_STATE_AC
   $entity = og_load_entity($entity_type, $entity);
   $gids = array();
   if (!empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) && $wrapper = $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) {
-    if (!empty($wrapper)) {
-      foreach ($wrapper as $group) {
-        if (!empty($states) && !in_array($group['state'], $states)) {
-          // Don't register the group if it's state isn't the one we look for.
-          continue;
-        }
-        $gids += drupal_map_assoc(array($group['gid']));
+    foreach ($wrapper as $group) {
+      if (!empty($states) && !in_array($group['state'], $states)) {
+        // Don't register the group if it's state isn't the one we look for.
+        continue;
       }
+      $gids += drupal_map_assoc(array($group['gid']));
     }
   }
 
@@ -1521,7 +1519,7 @@ function og_create_global_role($name) {
 }
 
 /**
- * Get all roles of a user in a certain group.
+ * Get all roles of a user in a certain group (regardless of their state).
  *
  * @param $gid
  *   The group ID.
@@ -1548,7 +1546,8 @@ function og_get_user_roles($gid, $uid = NULL, $include = TRUE) {
     $group_roles = og_roles($query_gid);
     $account = user_load($uid);
 
-    $name = og_is_member($gid, 'user', $account) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
+    $states = array_keys(og_group_content_states());
+    $name = og_is_member($gid, 'user', $account,$states) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
     $rid = array_search($name, $group_roles);
     $roles[$rid] = $rid;
   }
