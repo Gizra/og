@@ -991,7 +991,9 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
       }
 
       $this->assertTrue(og_is_member($group->gid, 'user', $account, $states), t('User @uid is @op member in group.', array('@uid' => $uid, '@op' => $op)));
-      $this->assertEqual(og_get_user_roles($group->gid, $uid), $roles, t('User @uid has the correct roles in group.', array('@uid' => $uid)));
+      // Pass also pending state, so we make sure that even if the user isn't
+      // active they are considered members, to check they get the correct role.
+      $this->assertEqual(og_get_user_roles($group->gid, $uid, array(OG_STATE_ACTIVE, OG_STATE_PENDING)), $roles, t('User @uid has the correct roles in group.', array('@uid' => $uid)));
     }
   }
 }

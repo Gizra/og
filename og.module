@@ -1519,7 +1519,7 @@ function og_create_global_role($name) {
 }
 
 /**
- * Get all roles of a user in a certain group (regardless of their state).
+ * Get all roles of a user in a certain group.
  *
  * @param $gid
  *   The group ID.
@@ -1528,10 +1528,14 @@ function og_create_global_role($name) {
  * @param $include
  *   Optional; If TRUE also anonymous or authenticated role ID will be returned.
  *   Defaults to TRUE.
+ * @param $states
+ *   Optional; Array with the state to return. If empty groups of all state will
+ *   return.
+ *
  * @return
  *   Array with the role IDs of the user.
  */
-function og_get_user_roles($gid, $uid = NULL, $include = TRUE) {
+function og_get_user_roles($gid, $uid = NULL, $include = TRUE, $states = array(OG_STATE_ACTIVE)) {
   $roles = array();
 
   if (empty($uid)) {
@@ -1546,7 +1550,6 @@ function og_get_user_roles($gid, $uid = NULL, $include = TRUE) {
     $group_roles = og_roles($query_gid);
     $account = user_load($uid);
 
-    $states = array_keys(og_group_content_states());
     $name = og_is_member($gid, 'user', $account,$states) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
     $rid = array_search($name, $group_roles);
     $roles[$rid] = $rid;
