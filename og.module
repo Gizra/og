@@ -564,6 +564,39 @@ class EntityOg extends Entity {
     // Delete roles and permissions.
     og_delete_user_roles_by_group($gid, NULL, TRUE);
   }
+
+  /**
+   * Return TRUE if user has access to 'view', 'update' or 'delete' the entity
+   * that is the group. Otherwise return FALSE.
+   *
+   * This function currently only checks access if the entity type is a node.
+   *
+   * @param $op
+   *   The operation to be performed on the node. Possible values are:
+   *   - "view"
+   *   - "update"
+   *   - "delete"
+   * @param $account
+   *   Optional, a user object representing the user for whom the operation is
+   *   to be performed. Determines access for a user other than the current user.
+   *
+   * @return
+   *   TRUE if the operation may be performed, FALSE otherwise.
+   */
+  public function access($op = 'view', $account = NULL) {
+    $access = TRUE;
+    if ($this->entity_type == 'node') {
+      if (empty($account)) {
+        global $user;
+        $account = clone $user;
+      }
+      if ($node = node_load($this->etid)) {
+        $access = node_access($op, $node, $account);
+      }
+    }
+
+    return $access;
+  }
 }
 
 

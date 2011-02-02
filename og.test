@@ -20,7 +20,41 @@ class OgGroupCrud extends DrupalWebTestCase {
   }
 
   /**
-   * Test CRUD of group entitys.
+   * Test access control of groups.
+   */
+  function testOgAccess() {
+    module_enable(array('og_test'));
+    og_create_field(OG_GROUP_FIELD, 'node', 'article');
+
+    // Create users.
+    $admin_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+      'administer group',
+    ));
+    $this->drupalLogin($admin_user);
+
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $node = $this->drupalCreateNode($settings);
+    $group = og_get_group('node', $node->nid);
+
+    // Assert user can update entity that is the group.
+    $this->assertTrue($group->access('update', $admin_user), t('User can update a node that is a group.'));
+
+    // Add node a with "deny access" in title, so it will return no access. See
+    // og_test_node_access().
+    $settings['title'] = 'deny access';
+    $node = $this->drupalCreateNode($settings);
+    $group = og_get_group('node', $node->nid);
+    $this->assertFalse($group->access('update', $admin_user), t('User can not update the node that is a group.'));
+  }
+
+  /**
+   * Test CRUD of group entities.
    */
   function testOgCrud() {
     $node = entity_create('node', array(

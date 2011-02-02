@@ -16,14 +16,7 @@ class og_handler_argument_group_audience_gid extends views_handler_argument_nume
   function title() {
     $title = '';
     if (!empty($this->argument) && $group = og_get_group('group', $this->argument)) {
-      $access = TRUE;
-      if ($group->entity_type == 'node') {
-        // Check user has access to view the node.
-        $node = node_load($group->etid);
-        $access = node_access('view', $node);
-      }
-
-      if ($access) {
+      if ($group->access()) {
         $title = og_label($group->gid);
       }
     }

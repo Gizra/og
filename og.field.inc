@@ -125,15 +125,7 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
   if ($field['field_name'] == OG_AUDIENCE_FIELD && !empty($items[0])) {
     foreach ($items as $delta => $item) {
       if ($group = og_get_group('group', $item['gid'])) {
-
-        $access = TRUE;
-        if ($group->entity_type == 'node') {
-          // Check user has access to view the node.
-          $node = node_load($group->etid);
-          $access = node_access('view', $node);
-        }
-
-        if ($access) {
+        if ($group->access()) {
           $label = og_label($group->gid);
           $entity = entity_load($group->entity_type, array($group->etid));
           $entity = current($entity);
