@@ -32,10 +32,26 @@ function og_rules_action_info() {
 }
 
 /**
- * Node integration access callback.
+ * Get group members from group audience callback.
  */
 function og_rules_get_members($group_audience) {
-  return array('group_members' => array(1, 2));
+  $gids = $return = array();
+  foreach ($group_audience as $key => $value) {
+    $gids[] = $value['gid'];
+  }
+
+  if ($gids) {
+    $query = new EntityFieldQuery();
+    $query
+      ->entityCondition('entity_type', 'user')
+      ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', $gids, 'IN');
+
+    if ($result = $query->execute()) {
+      $return = array_keys($result['user']);
+    }
+  }
+
+  return array('group_members' => $return);
 }
 
 /**
