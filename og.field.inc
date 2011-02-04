@@ -30,12 +30,12 @@ function og_field_widget_properties_alter(&$widget, $context) {
 function og_field_info() {
   return array(
     'group' => array(
-      'label' => t('Group'),
+      'label' => t('Group audience'),
       'description' => t('This field stores groups associated with the content.'),
       'default_widget' => OG_AUDIENCE_WIDGET,
       'default_formatter' => 'og_list_default',
       // Entity metadata properties.
-      'property_type' => OG_AUDIENCE_FIELD,
+      'property_type' => 'field_item_group',
       'property_callbacks' => array('og_field_group_property_callback'),
     ),
   );
@@ -45,8 +45,7 @@ function og_field_info() {
  * Entity metdata callback.
  */
 function og_field_group_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
-  $name = str_replace('_', '-', $field['field_name']);
-  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
 
   // Define a data structure so it's possible to deal with Group
   // audience field.
@@ -56,8 +55,8 @@ function og_field_group_property_callback(&$info, $entity_type, $field, $instanc
   $property['setter callback'] = 'entity_metadata_field_verbatim_set';
   $property['property info'] = array(
     'gid' => array(
-    'type' => 'integer',
-    'label' => t('The group this group content is associated with'),
+      'type' => 'group',
+      'label' => t('The group this group content is associated with'),
     ),
     'state' => array(
       'type' => 'text',

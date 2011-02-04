@@ -149,7 +149,36 @@ function og_entity_property_info() {
     'setter callback' => 'entity_metadata_verbatim_set',
   );
 
+  $properties['members'] = array(
+    'label' => t("Members"),
+    'type' => 'list<user>',
+    'description' => t("A list of members in group."),
+    'getter callback' => 'og_group_get_properties',
+  );
+
   return $info;
+}
+
+/**
+ * Property getter callback.
+ */
+function og_group_get_properties($group, array $options, $name) {
+  switch ($name) {
+    case 'members':
+      $return = array();
+      if (!empty($group->gid)) {
+        $query = new EntityFieldQuery();
+        $query
+          ->entityCondition('entity_type', 'user')
+          ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', $group->gid, '=');
+
+        $result = $query->execute();
+        if (!empty($result['user'])) {
+          $return = array_keys($result['user']);
+        }
+      }
+      return $return;
+  }
 }
 
 /**
