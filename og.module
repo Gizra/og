@@ -68,6 +68,19 @@ define('OG_AUTHENTICATED_ROLE', 'member');
 define('OG_ADMINISTRATOR_ROLE', 'administrator member');
 
 /**
+ * Implements hook_help().
+ */
+function og_help($section, $arg) {
+  switch ($section) {
+    case 'admin/help#og':
+      $path = drupal_get_path('module', 'og');
+      $output  = '<p>' . t("Read the <a href='@url'>README.txt</a> file in the Organic groups module directory.", array('@url' => "/$path/README.txt")) . '</p>';
+      $output .= '<p>' . t("Information about Organic Groups can also be found on the module's<a href='@og'>documentation page</a>.", array('@og' => 'http://drupal.org/documentation/modules/og')) . '</p>';
+      return $output;
+  }
+}
+
+/**
  * Implements hook_entity_info().
  */
 function og_entity_info() {
