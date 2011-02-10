@@ -171,6 +171,17 @@ function og_ui_menu() {
 }
 
 /**
+ * Implements hook_admin_paths().
+ */
+function og_ui_admin_paths() {
+  $paths = array(
+    'node/*/group' => TRUE,
+    'group/*/*/admin/*' => TRUE,
+  );
+  return $paths;
+}
+
+/**
  * Menu callback; Return the title of a menu item based on the group title.
  */
 function og_ui_menu_title_callback($title, $entity_type, $etid) {
