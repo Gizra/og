@@ -13,7 +13,7 @@ $plugin = array(
   'title' => t('Node from group'),
   'keyword' => 'node',
   'description' => t('Get the node from a group.'),
-  'required context' => new ctools_context_required(t('OG group'), 'og_group'),
+  'required context' => new ctools_context_required(t('Group'), 'entity:group'),
   'context' => 'og_node_from_group_context',
 );
 
