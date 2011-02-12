@@ -2203,23 +2203,28 @@ function og_list_permissions($type) {
 function og_node_create_links($gid, $destination = '') {
   $element = array();
   if ($group = og_get_group('group', $gid)) {
+    $items = array();
     foreach (node_type_get_types() as $node) {
       if (og_is_group_content_type('node', $node->type)) {
         if (node_access('create', $node->type)) {
-          $element['og_ui_create_link'][$node->type] = array(
-            '#type' => 'link',
-            '#title' => check_plain(node_type_get_name($node->type)),
-            '#href' => 'node/add/' . str_replace('_', '-', $node->type),
-            '#options' => array(
-              'query' => array(
-                'gids_' . $group->entity_type . '[]' => $group->etid,
-                // Redirect back to the original page.
-                'destination' => $_GET['q'],
-              ),
+          $options  = array(
+            'query' => array(
+              'gids_' . $group->entity_type . '[]' => $group->etid,
+              // Redirect back to the original page.
+              'destination' => $_GET['q'],
             ),
           );
+          // theme_item_list's 'data' items isn't a render element, so use l().
+          // http://drupal.org/node/891112
+          $items[] = array('data' => l(node_type_get_name($node->type), 'node/add/' . str_replace('_', '-', $node->type), $options));
         }
       }
+    }
+    if ($items) {
+      $element['og_node_create_links'] = array(
+        '#theme' => 'item_list',
+        '#items' => $items,
+      );
     }
   }
   return $element;
