@@ -278,7 +278,9 @@ function og_ui_user_admin_roles($form, $form_state, $entity_type = '', $etid = 0
   $form['gid'] = array('#type' => 'value', '#value' => $gid);
 
   if ($rid) {
-    og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")), l(t('Roles'), "group/$entity_type/$etid/admin/people/roles"));
+    if ($gid) {
+      og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")), l(t('Roles'), "group/$entity_type/$etid/admin/people/roles"));
+    }
 
     $group_roles = og_roles($gid);
     if (!in_array($rid, array_keys($group_roles))) {
@@ -358,6 +360,9 @@ function og_ui_user_admin_roles_validate($form, &$form_state) {
 
 function og_ui_user_admin_roles_submit($form, &$form_state) {
   $gid = $form_state['values']['gid'];
+  if ($gid) {
+    $group = og_load($gid);
+  }
   $role = new stdClass();
   $role->gid = $gid;
   $role->name = $form_state['values']['name'];
@@ -400,12 +405,11 @@ function theme_og_ui_user_admin_new_role($variables) {
 
   foreach (og_roles($gid) as $rid => $name) {
     $text = !$default_access ? t('edit permissions') : t('view permissions');
-    $path = $gid ? 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/permissions' : 'admin/config/group/roles';
-    $path .= '/' . $rid;
-    $permissions = l($text, $path);
+    $path = $gid ? 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people' : 'admin/config/group';
+    $permissions = l($text, $path . '/permissions/' . $rid);
 
     if (!$default_access && !in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
-      $rows[] = array($name, l(t('edit role'), $path), $permissions);
+      $rows[] = array($name, l(t('edit role'), $path . '/roles/edit/' . $rid), $permissions);
     }
     else {
       $rows[] = array($name, t('locked'), $permissions);
