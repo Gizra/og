@@ -157,7 +157,7 @@ function og_ui_menu() {
 
   $items['admin/config/group/roles/edit'] = array(
     'title' => 'Edit role',
-    'page arguments' => array('og_ui_user_admin_global_roles', '', '', 4),
+    'page arguments' => array('og_ui_user_admin_global_roles', '', '', 5),
     'access arguments' => array('administer group'),
     'type' => MENU_CALLBACK,
   );
