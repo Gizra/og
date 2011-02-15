@@ -27,7 +27,8 @@ function og_node_create_links_content_type_render($subtype, $conf, $args, $conte
   $output = '';
   $output .= '<div class="' . str_replace('_', '-', $subtype) . '-wrapper">';
 
-  $output .= drupal_render(og_node_create_links($group->gid));
+  $links = og_node_create_links($group->gid);
+  $output .= drupal_render($links);
 
   $output .= '</div>';
   $block->content = $output;
