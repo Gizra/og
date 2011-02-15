@@ -265,11 +265,11 @@ function og_ui_user_admin_account_submit($form, &$form_state) {
  * Menu callback: administer roles.
  *
  * @ingroup forms
- * @see og_user_admin_role_validate()
- * @see og_user_admin_role_submit()
+ * @see og_user_admin_roles_validate()
+ * @see og_user_admin_roles_submit()
  * @see theme_group_user_admin_new_role()
  */
-function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0) {
+function og_ui_user_admin_roles($form, $form_state, $entity_type, $etid, $rid = 0) {
   if ($group = og_get_group($entity_type, $etid)) {
     $form['group'] = array('#type' => 'value', '#value' => $group);
 
@@ -320,8 +320,8 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0
         $form['add'] = array(
           '#type' => 'submit',
           '#value' => t('Add role'),
-          '#validate' => array('og_ui_user_admin_role_validate'),
-          '#submit' => array('og_ui_user_admin_role_submit'),
+          '#validate' => array('og_ui_user_admin_roles_validate'),
+          '#submit' => array('og_ui_user_admin_roles_submit'),
         );
 
         // Attach the CSS to the form.
@@ -342,7 +342,7 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0
   }
 }
 
-function og_ui_user_admin_role_validate($form, &$form_state) {
+function og_ui_user_admin_roles_validate($form, &$form_state) {
   if (!empty($form_state['values']['name'])) {
     $roles = og_roles($form_state['values']['group']->gid);
     $unique_name = TRUE;
@@ -356,7 +356,7 @@ function og_ui_user_admin_role_validate($form, &$form_state) {
   }
 }
 
-function og_ui_user_admin_role_submit($form, &$form_state) {
+function og_ui_user_admin_roles_submit($form, &$form_state) {
   $group = $form_state['values']['group'];
   $role = new stdClass();
   $role->gid = $group->gid;

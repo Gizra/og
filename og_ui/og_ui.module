@@ -84,7 +84,7 @@ function og_ui_menu() {
 
   $items['group/%/%/admin/people/roles/edit'] = array(
     'title' => 'Edit role',
-    'page arguments' => array('og_ui_user_admin_role', 1, 2),
+    'page arguments' => array('og_ui_user_admin_roles', 1, 2),
     'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
     'type' => MENU_CALLBACK,
@@ -323,7 +323,7 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
  * Implement hook_forms().
  */
 function og_ui_forms() {
-  $forms['og_ui_user_admin_new_role']['callback'] = 'og_ui_user_admin_role';
+  $forms['og_ui_user_admin_new_role']['callback'] = 'og_ui_user_admin_roles';
 
   // Form to define the default permissions state for new groups.
   $forms['og_ui_user_admin_global_permissions']['callback'] = 'og_ui_user_admin_permissions';
