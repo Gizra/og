@@ -997,7 +997,13 @@ function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
  * @param $string
  *   The permission, such as "administer nodes", being checked for.
  * @param $account
- *   (optional) The account to check, if not given use currently lgroupged in user.
+ *   (optional) The account to check, if not given use currently lgroupged in
+ *   user.
+ * @param $skip_hook
+ *   If TRUE and the variable 'og_user_access_invoke_alter' is set to TRUE, then
+ *   a a module_invoke_all command will not be triggered. This can be used by
+ *   modules implementing hook_og_user_access_alter() that still want to use
+ *   og_user_access(), but without causing a recursion.
  *
  * @return
  *   Boolean TRUE if the current user has the requested permission.
@@ -1006,7 +1012,7 @@ function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
  * way, we guarantee consistent behavior, and ensure that the superuser
  * can perform all actions.
  */
-function og_user_access($gid, $string, $account = NULL) {
+function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
   if (variable_get('og_skip_access', FALSE)) {
     // User access should always return TRUE, as Group is requested to
     // skip any access check.
@@ -1055,9 +1061,18 @@ function og_user_access($gid, $string, $account = NULL) {
 
       $perm[$gid][$account->uid] = $perms;
     }
+
+    if (variable_get('og_user_access_invoke_alter', FALSE) && !$skip_alter) {
+      // Let modules alter the permissions. since $perm is static we create a
+      // clone of it.
+      $temp_perm = $perm[$gid][$account->uid];
+      $context = array('string' => $string, 'group' => $group, 'account' => $account);
+      drupal_alter('og_user_access', $temp_perm, $context);
+      $perm[$gid][$account->uid] = $temp_perm;
+    }
   }
 
-  return isset($perm[$gid][$account->uid][$string]);
+  return !empty($perm[$gid][$account->uid][$string]);
 }
 
 

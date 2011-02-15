@@ -198,6 +198,21 @@ function hook_og_invalidate_cache($gids = array()) {
   }
 }
 
+/**
+ * Alter the permissions of a user.
+ *
+ * @param $perm
+ *   The permissions of a user, passed by reference.
+ * @param $context
+ *   Array with:
+ *   - string: The permission asked for the user.
+ *   - group: The group object.
+ *   - account: The user account.
+ */
+function hook_og_user_access_alter($perm, $context) {
+
+}
+
 
 /**
  * @} End of "addtgrouproup hooks".
