@@ -1,7 +1,7 @@
 <?php
 
 /**
-* Plugin definition
+* Plugin definition.
 */
 $plugin = array(
   'title' => t('OG Content create links'),
