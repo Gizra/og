@@ -269,82 +269,82 @@ function og_ui_user_admin_account_submit($form, &$form_state) {
  * @see og_user_admin_roles_submit()
  * @see theme_group_user_admin_new_role()
  */
-function og_ui_user_admin_roles($form, $form_state, $entity_type, $etid, $rid = 0) {
-  if ($group = og_get_group($entity_type, $etid)) {
-    $form['group'] = array('#type' => 'value', '#value' => $group);
+function og_ui_user_admin_roles($form, $form_state, $entity_type = '', $etid = 0, $rid = 0) {
+  $gid = 0;
+  if ($entity_type && $group = og_get_group($entity_type, $etid)) {
+    $gid = $group->gid;
+  }
 
-    $item = menu_get_item();
-    // Get the role ID from the URL.
-    if ($rid) {
-      og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")), l(t('Roles'), "group/$entity_type/$etid/admin/people/roles"));
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
 
-      $group_roles = og_roles($group->gid);
-      if (!in_array($rid, array_keys($group_roles))) {
-        drupal_goto("group/$entity_type, $etid/admin/people/roles");
-      }
-      // Display the edit role form.
-      $role = og_role_load($rid);
-      $form['name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Role name'),
-        '#default_value' => $role->name,
-        '#size' => 30,
-        '#required' => TRUE,
-        '#maxlength' => 64,
-        '#description' => t('The name for this role. Example: "moderator", "editorial board", "site architect".'),
-      );
-      $form['rid'] = array(
-        '#type' => 'value',
-        '#value' => $rid,
-      );
-      $form['actions'] = array('#type' => 'actions');
-      $form['actions']['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Save role'),
-      );
-      $form['actions']['delete'] = array(
-        '#type' => 'submit',
-        '#value' => t('Delete role'),
-      );
+  if ($rid) {
+    og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")), l(t('Roles'), "group/$entity_type/$etid/admin/people/roles"));
+
+    $group_roles = og_roles($gid);
+    if (!in_array($rid, array_keys($group_roles))) {
+      drupal_goto($gid ? "group/$entity_type, $etid/admin/people/roles" : 'admin/config/group/roles');
     }
-    else {
-      og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
-      if (!og_is_group_default_access($group->gid)) {
-        $form['name'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Name'),
-          '#title_display' => 'invisible',
-          '#size' => 32,
-          '#maxlength' => 64,
-        );
-        $form['add'] = array(
-          '#type' => 'submit',
-          '#value' => t('Add role'),
-          '#validate' => array('og_ui_user_admin_roles_validate'),
-          '#submit' => array('og_ui_user_admin_roles_submit'),
-        );
-
-        // Attach the CSS to the form.
-        $form['#attached'] = array(
-          'css' => array (
-            'type' => 'file',
-            'data' => drupal_get_path('module', 'og_ui') . '/css/og_ui.css',
-          ),
-        );
-      }
-    }
-    return $form;
+    // Display the edit role form.
+    $role = og_role_load($rid);
+    $form['name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Role name'),
+      '#default_value' => $role->name,
+      '#size' => 30,
+      '#required' => TRUE,
+      '#maxlength' => 64,
+      '#description' => t('The name for this role. Example: "moderator", "editorial board", "site architect".'),
+    );
+    $form['rid'] = array(
+      '#type' => 'value',
+      '#value' => $rid,
+    );
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save role'),
+    );
+    $form['actions']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete role'),
+    );
   }
   else {
-    // Not a group node.
-    drupal_not_found();
-    exit;
+    // No role ID.
+    if ($gid) {
+      og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
+    }
+    if (!$gid || !og_is_group_default_access($group->gid)) {
+      $form['name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Name'),
+        '#title_display' => 'invisible',
+        '#size' => 32,
+        '#maxlength' => 64,
+      );
+      $form['add'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add role'),
+        '#validate' => array('og_ui_user_admin_roles_validate'),
+        '#submit' => array('og_ui_user_admin_roles_submit'),
+      );
+
+      // Attach the CSS to the form.
+      $form['#attached'] = array(
+        'css' => array (
+          'type' => 'file',
+          'data' => drupal_get_path('module', 'og_ui') . '/css/og_ui.css',
+        ),
+      );
+    }
   }
+
+  return $form;
 }
 
 function og_ui_user_admin_roles_validate($form, &$form_state) {
   if (!empty($form_state['values']['name'])) {
-    $roles = og_roles($form_state['values']['group']->gid);
+    $roles = og_roles($form_state['values']['gid']);
     $unique_name = TRUE;
     if (!empty($form_state['values']['rid'])) {
       $role = og_role_load($form_state['values']['rid']);
@@ -357,26 +357,29 @@ function og_ui_user_admin_roles_validate($form, &$form_state) {
 }
 
 function og_ui_user_admin_roles_submit($form, &$form_state) {
-  $group = $form_state['values']['group'];
+  $gid = $form_state['values']['gid'];
   $role = new stdClass();
-  $role->gid = $group->gid;
+  $role->gid = $gid;
   $role->name = $form_state['values']['name'];
   if (!empty($form_state['values']['rid'])) {
     $role->rid = $form_state['values']['rid'];
   }
+  // Indicates if we need to save role.
+  $save = FALSE;
   if ($form_state['values']['op'] == t('Save role')) {
     og_role_save($role);
     drupal_set_message(t('The role has been renamed.'));
-  }
-  elseif ($form_state['values']['op'] == t('Delete role')) {
-    og_role_delete($form_state['values']['rid']);
-    drupal_set_message(t('The role has been deleted.'));
   }
   elseif ($form_state['values']['op'] == t('Add role')) {
     og_role_save($role);
     drupal_set_message(t('The role has been added.'));
   }
-  $form_state['redirect'] = 'group/' . $group->entity_type . '/' . $group->etid . '/admin/people/roles';
+  elseif ($form_state['values']['op'] == t('Delete role')) {
+    og_role_delete($form_state['values']['rid']);
+    drupal_set_message(t('The role has been deleted.'));
+  }
+
+  $form_state['redirect'] = $gid ? 'group/' . $group->entity_type . '/' . $group->etid . '/admin/people/roles' : 'admin/config/group/roles';
   return;
 }
 
@@ -389,16 +392,20 @@ function theme_og_ui_user_admin_new_role($variables) {
   $form = $variables['form'];
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => 2));
   // The group entity.
-  $group = $form['group']['#value'];
+  if ($gid = $form['gid']['#value']) {
+    $group = og_get_group('group', $gid);
+  }
 
-  $default_access = og_is_group_default_access($group->gid);
+  $default_access = $gid && og_is_group_default_access($gid);
 
-  foreach (og_roles($group->gid) as $rid => $name) {
+  foreach (og_roles($gid) as $rid => $name) {
     $text = !$default_access ? t('edit permissions') : t('view permissions');
-    $permissions = l($text, 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/permissions/' . $rid);
+    $path = $gid ? 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/permissions' : 'admin/config/group/roles';
+    $path .= '/' . $rid;
+    $permissions = l($text, $path);
 
     if (!$default_access && !in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
-      $rows[] = array($name, l(t('edit role'), 'group/' . $group->entity_type .'/' . $group->etid . '/admin/people/roles/edit/' . $rid), $permissions);
+      $rows[] = array($name, l(t('edit role'), $path), $permissions);
     }
     else {
       $rows[] = array($name, t('locked'), $permissions);

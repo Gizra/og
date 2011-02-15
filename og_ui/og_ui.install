@@ -7,6 +7,13 @@
  */
 
 /**
+ * Implements hook_uninstall().
+ */
+function og_ui_uninstall() {
+  variable_del('og_ui_global_roles');
+}
+
+/**
  * Upgrade from Organic groups 6 to 7 the selective state of a group (e.g. open,
  * moderated, etc'.).
  */

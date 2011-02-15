@@ -146,6 +146,22 @@ function og_ui_menu() {
     'file' => 'og_ui.admin.inc',
   );
 
+  $items['admin/config/group/roles'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_ui_user_admin_new_role'),
+    'title' => 'Organic groups global roles',
+    'access arguments' => array('administer group'),
+    'description' => 'Configure Organic groups global roles.',
+    'file' => 'og_ui.admin.inc',
+  );
+
+  $items['admin/config/group/roles/edit'] = array(
+    'title' => 'Edit role',
+    'page arguments' => array('og_ui_user_admin_global_roles', '', '', 4),
+    'access arguments' => array('administer group'),
+    'type' => MENU_CALLBACK,
+  );
+
   $items['admin/config/group/fields'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_field_settings'),
@@ -325,8 +341,11 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
 function og_ui_forms() {
   $forms['og_ui_user_admin_new_role']['callback'] = 'og_ui_user_admin_roles';
 
-  // Form to define the default permissions state for new groups.
+  // Form to define the global permissions.
   $forms['og_ui_user_admin_global_permissions']['callback'] = 'og_ui_user_admin_permissions';
+
+  // Form to define the global roles.
+  $forms['og_ui_user_admin_global_roles']['callback'] = 'og_ui_user_admin_roles';
 
   return $forms;
 }
