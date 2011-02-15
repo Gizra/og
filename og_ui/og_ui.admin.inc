@@ -312,16 +312,25 @@ function og_ui_user_admin_role($form, $form_state, $entity_type, $etid, $rid = 0
       if (!og_is_group_default_access($group->gid)) {
         $form['name'] = array(
           '#type' => 'textfield',
+          '#title' => t('Name'),
+          '#title_display' => 'invisible',
           '#size' => 32,
           '#maxlength' => 64,
         );
-        $form['actions'] = array('#type' => 'actions');
-        $form['actions']['submit'] = array(
+        $form['add'] = array(
           '#type' => 'submit',
           '#value' => t('Add role'),
+          '#validate' => array('og_ui_user_admin_role_validate'),
+          '#submit' => array('og_ui_user_admin_role_submit'),
         );
-        $form['#submit'][] = 'og_ui_user_admin_role_submit';
-        $form['#validate'][] = 'og_ui_user_admin_role_validate';
+
+        // Attach the CSS to the form.
+        $form['#attached'] = array(
+          'css' => array (
+            'type' => 'file',
+            'data' => drupal_get_path('module', 'og_ui') . '/css/og_ui.css',
+          ),
+        );
       }
     }
     return $form;
@@ -396,7 +405,7 @@ function theme_og_ui_user_admin_new_role($variables) {
     }
   }
 
-  $rows[] = array(array('data' => drupal_render($form['name']) . drupal_render($form['submit']), 'colspan' => 3, 'class' => 'edit-name'));
+  $rows[] = array(array('data' => drupal_render($form['name']) . drupal_render($form['add']), 'colspan' => 4, 'class' => 'edit-name'));
 
   $output = drupal_render_children($form);
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
