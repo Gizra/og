@@ -485,6 +485,9 @@ function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langc
   }
 }
 
+/**
+ * Validate handler; Re-add hidden selected gids if exist.
+ */
 function og_field_widget_form_validate($form, &$form_state) {
   if (!empty($form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids']) && $gids = $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids']) {
     // Rebuild the form state values.
@@ -492,7 +495,6 @@ function og_field_widget_form_validate($form, &$form_state) {
       $gids[$value['gid']] = $value['gid'];
     }
 
-    // TODO: Keep the delta of the field values.
     $delta = 0;
     $value = array();
     foreach ($gids as $gid) {
