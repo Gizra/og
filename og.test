@@ -883,7 +883,65 @@ class OgGroupAudienceField extends DrupalWebTestCase {
       $this->assertNoFieldChecked('edit-group-audience-und-' . $group->gid);
     }
   }
+
+  /**
+   * Test re-adding hidden and selected group IDs.
+   *
+   * If a user doesn't have privileges to see a group, we make sure that if they
+   * edit the group content entity, upon save, the associations with that group
+   * isn't lost.
+   */
+  function testHiddenSelectedGids() {
+    // Create user.
+    $permissions = array(
+      'access content',
+      'bypass node access',
+    );
+    $user1 = $this->drupalCreateUser($permissions);
+    $user2 = $this->drupalCreateUser($permissions);
+
+    $permissions[] = 'administer group';
+    $admin_user = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($admin_user);
+
+    $groups = array();
+    // Create three entity_test group. First two belong to user1, and the third
+    // one to user2.
+    foreach (range(1, 3) as $id) {
+      $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $id < 3 ? $user1->uid : $user2->uid));
+      $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+      $entity->save();
+      $group = og_get_group('entity_test', $entity->pid);
+      $groups[$id] = $group;
+    }
+
+    // Create a node article and assign it to the second and third groups.
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['gid'] = $groups[2]->gid;
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][1]['gid'] = $groups[3]->gid;
+    $node = $this->drupalCreateNode($settings);
+
+    // Assert article is assigned to two groups.
+    $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid, $groups[3]->gid)), t('Article node is assigned to two groups.'));
+
+    $this->drupalLogin($user2);
+    $this->drupalGet('node/' . $node->nid . '/edit');
+
+    // TODO: Assert user can see only the third group in the audience field.
+
+    // Unselect the third group.
+    $edit['group_audience[und][' . $groups[3]->gid . ']'] = FALSE;
+    $this->drupalPost(NULL, $edit, t('Save'));
+
+    // Assert article is still assigned to to one group.
+    $this->drupalGet('node/' . $node->nid . '/edit');
+    // Reload node and reset cache.
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid)), t('Article node is still assigned to one group - one that is hidden from the current user.'));
+  }
 }
+
 /**
 * Test re-installation of module.
 */
