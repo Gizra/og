@@ -872,23 +872,36 @@ function og_get_all_group($states = array(OG_STATE_ACTIVE), $options = array()) 
 /**
  * Set an association (e.g. subscribe) an entity to a group.
  *
+ * @param $gid
+ *   The group ID.
  * @param $entity_type
- *   The entity type (e.g. "node" or "user").
+ *   Optional; The entity type (e.g. "node" or "user"). Defaults to 'user'
  * @param $entity
- *   The entity to set the association.
+ *   Optional; The entity to set the association. Defaults to the current user
+ *   if the $entity_type property is set to 'user'.
  * @param $state
- *   The state of the association. Can be:
+ *   Optional; The state of the association. Can be:
  *   - OG_STATE_ACTIVE
  *   - OG_STATE_PENDING
  *   - OG_STATE_BLOCKED
  * @param $save
  *   Optional; TRUE if fields value should be saved. Defaults to TRUE.
+ * @param $force_reload
+ *   Optional; Determine if og_load_entity() should be used on the passed
+ *   entity. This can be used when you pass an entity that has been saved yet to
+ *   the database, but you want to assign it groups. Defaults to TRUE.
  *
  * @return
  *   The entity with the fields updated.
  */
-function og_group($gid, $entity_type, $entity, $state = OG_STATE_ACTIVE, $save = TRUE) {
-  $entity = og_load_entity($entity_type, $entity);
+function og_group($gid, $entity_type = 'user', $entity = NULL, $state = OG_STATE_ACTIVE, $save = TRUE, $force_reload = TRUE) {
+  if ($entity_type == 'user' && empty($entity)) {
+    global $user;
+    $entity = clone $user;
+  }
+  if ($force_reload) {
+    $entity = og_load_entity($entity_type, $entity);
+  }
   $property = OG_AUDIENCE_FIELD;
   // Check the audience field exists in the entity.
   if (isset($entity->{$property})) {

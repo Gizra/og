@@ -297,6 +297,18 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         }
       }
 
+      // Get default values from URL, or from the edited entity.
+      $default_values = og_get_context_by_url();
+      // Keep the group ID of the selected items, as they might be needed again,
+      // and we don't want to iterate over the items again.
+      $items_gid = array();
+      if (!empty($items)) {
+        foreach ($items as $item) {
+          $default_values[$item['gid']] = $item['gid'];
+          $items_gid[] = $item['gid'];
+        }
+      }
+
       // Determine if a user may see other groups as-well.
       $opt_group = FALSE;
 
@@ -316,6 +328,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
       // The group options presented to the user.
       $options = array();
+      $hidden_selected_gids = array();
       if ($opt_group) {
         // Show "My groups" and "Other groups".
         $groups_count = 0;
@@ -340,6 +353,10 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         else {
           $type = $groups_count >= $instance['widget']['settings']['minimum_for_select_list'] ? 'select' : 'checkboxes';
         }
+
+        // If there are items that are already selected but the user doesn't
+        // have access to them, we need to keep track of them.
+        $hidden_selected_gids = drupal_map_assoc(array_diff($items_gid, array_keys($options)));
       }
 
       if (empty($options)) {
@@ -349,14 +366,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
       if (empty($element['#description'])) {
         $element['#description'] = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
-      }
-
-      $default_values = og_get_context_by_url();
-
-      if (!empty($items)) {
-        foreach ($items as $item) {
-          $default_values[$item['gid']] = $item['gid'];
-        }
       }
 
       $element['#multiple'] = $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;;
@@ -392,6 +401,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         // Add OG specific context.
         '#opt_group' => $opt_group,
         '#audience' => $audience,
+        '#hidden_selected_gids' => $hidden_selected_gids,
       );
 
       $return = $element;
@@ -449,6 +459,7 @@ function og_field_attach_delete($entity_type, $entity) {
  * Handle translated nodes that act as groups.
  */
 function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
+  $form['#validate'][] = 'og_field_widget_form_validate';
   if (!empty($form['#node_edit_form']) &&
     (og_is_group_type('node', $form['type']['#value']) || og_is_group_content_type('node', $form['type']['#value'])) &&
     (!empty($entity->tnid) && $entity->tnid != $entity->nid) || (!empty($_GET['translation']) && !empty($_GET['target']))) {
@@ -471,6 +482,25 @@ function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langc
 
       }
     }
+  }
+}
+
+function og_field_widget_form_validate($form, &$form_state) {
+  if (!empty($form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids']) && $gids = $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids']) {
+    // Rebuild the form state values.
+    foreach ($form_state['values'][OG_AUDIENCE_FIELD][LANGUAGE_NONE] as $key => $value) {
+      $gids[$value['gid']] = $value['gid'];
+    }
+
+    // TODO: Keep the delta of the field values.
+    $delta = 0;
+    $value = array();
+    foreach ($gids as $gid) {
+      $value[LANGUAGE_NONE][$delta]['gid'] = $gid;
+      ++$delta;
+    }
+    // Set the new values.
+    form_set_value($form[OG_AUDIENCE_FIELD], $value, $form_state);
   }
 }
 
