@@ -1116,17 +1116,23 @@ function og_node_type_save($bundle_name) {
  * Get the groups a content is associated with.
  *
  * @param $entity_type
- *   The entity type (e.g. "node" or "user").
+ *   The entity type (e.g. "node" or "user"). Defaults to 'user'
  * @param $entity
- *   The entity can be a user, node or any fieldable entity.
+ *   Optioanl; The entity can be a user, node or any fieldable entity. If empty
+ *   the current user will be used.
  * @param $states
  *   Optional; Array with the state to return. If empty groups of all state will
  *   return.
  * @return
  *  An array with the group IDs, or an empty array.
  */
-function og_get_entity_groups($entity_type, $entity, $states = array(OG_STATE_ACTIVE)) {
+function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE)) {
   $groups = array();
+
+  if ($entity_type == 'user' && empty($entity)) {
+    global $user;
+    $entity = clone $user;
+  }
 
   // Get the entity ID.
   list($id) = entity_extract_ids($entity_type, $entity);
