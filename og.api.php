@@ -98,26 +98,6 @@ function hook_og_role_revoke($gid, $uid, $rid) {
 }
 
 /**
- * Allow modules to alter the groups that appear in the group audience field.
- *
- * @param $options
- *   Array passed by reference with the keys:
- *   - "content groups": Array with the group IDs that will appear to the user.
- *   - "other groups": Array with the group IDs that do not belong to the user,
- *     but if the user is an administrator they will see those groups as-well.
- * @param $opt_group
- *   TRUE if user should see also the "other groups" in the group audience
- *   field.
- * @param $account
- *   The user object.
- */
-function hook_og_audience_options_alter(&$options, $opt_group, $account) {
-  if (!$account->uid && $gids = og_register_get_groups()) {
-    $options['content groups'] = array_merge($options['content groups'], $gids);
-  }
-}
-
-/**
  * Provide information about fields that are related to Organic groups.
  *
  * Using this info, Organic groups is aware of the fields, and allows adding

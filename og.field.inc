@@ -389,6 +389,9 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         '#value_key' => 'gid',
         '#element_validate' => $type != 'item' ? array('options_field_widget_validate') : array(),
         '#properties' => $properties,
+        // Add OG specific context.
+        '#opt_group' => $opt_group,
+        '#audience' => $audience,
       );
 
       $return = $element;
@@ -606,10 +609,6 @@ function og_field_audience_options($opt_group = FALSE, $account = NULL) {
     $all_groups = og_get_all_group();
     $return['other groups'] = array_diff($all_groups, $content_groups);
   }
-
-  // Let other modules change the list.
-  // TODO: Is it possible to do it in a more general way?
-  drupal_alter('og_audience_options', $return, $opt_group, $account);
 
   return $return;
 }
