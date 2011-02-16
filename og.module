@@ -459,6 +459,21 @@ function og_og_fields_info() {
 
 
 /**
+ * Implements hook_node_update().
+ *
+ * Check if author of node changed and if so susbscribe the new user.
+ * Keep the previous author subscribed to the group.
+ */
+function og_node_update($node) {
+  if ($node->uid != $node->original->uid && $group = og_get_group('node', $node->nid)) {
+    $account = user_load($node->uid);
+    og_group($group->gid, 'user', $account);
+  }
+
+
+}
+
+/**
 * Implement hook_node_type_delete().
 *
 * We immediately delete those variables as they are only used to indicate a
