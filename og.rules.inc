@@ -2,14 +2,15 @@
 // $Id$
 
 /**
- * @file rules integration for the node module
+ * @file
+ * Rules integration for the Organic groups module.
  *
  * @addtogroup rules
  * @{
  */
 
 /**
- * Implements hook_rules_action_info() on behalf of the node module.
+ * Implements hook_rules_action_info().
  */
 function og_rules_action_info() {
   $items = array();
