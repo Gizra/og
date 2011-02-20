@@ -170,7 +170,7 @@ class OgGroupApi extends DrupalWebTestCase {
     $this->assertFalse($gids, t('Non existent entity ID was not returned.'));
 
     // Test caching is correct and resets properly when the state changes.
-    // We can check the cache itself, by getting it (not be reference) and
+    // We can check the cache itself, by getting it (not by reference) and
     // making sure it has the correct values.
     drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test', array(10, 20, 30));
