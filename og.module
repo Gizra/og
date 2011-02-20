@@ -1671,7 +1671,7 @@ function og_get_user_roles($gid, $uid = NULL, $include = TRUE, $states = array(O
     $group_roles = og_roles($query_gid);
     $account = user_load($uid);
 
-    $name = og_is_member($gid, 'user', $account,$states) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
+    $name = og_is_member($gid, 'user', $account, $states) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
     $rid = array_search($name, $group_roles);
     $roles[$rid] = $rid;
   }
