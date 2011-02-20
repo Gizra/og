@@ -1079,8 +1079,9 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
       $account = user_load($uid);
 
       $roles = array();
-      // OG_AUTHENTICATED_ROLE
-      $roles[2] = 2;
+      // If the member is pending then they have the anonymous role.
+      $rid = $value['active'] ? 2 : 1;
+      $roles[$rid] = $rid;
 
       if ($value['admin']) {
         // OG_ADMINISTRATOR_ROLE
