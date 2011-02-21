@@ -524,7 +524,7 @@ function og_ctools_context_convert_list_alter(&$plugin, &$converters) {
  * Converter function for CTools context entity:group.
  */
 function og_ctools_context_converter_alter($context, $converter, &$value) {
-  if (!empty($context->type[0]) && $context->type[0] == 'entity:group') {
+  if (!empty($context->type[0]) && $context->type[0] == 'entity:group' && !empty($context->data)) {
     switch ($converter) {
       case 'gid':
         $value = $context->data->gid;
