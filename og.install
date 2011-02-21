@@ -246,7 +246,7 @@ function og_schema() {
         'not null'        => TRUE,
       ),
     ),
-    'primary key' => array('rid'),
+    'primary key' => array('id'),
     'foreign keys' => array(
       'user' => array(
         'table' => 'users',
