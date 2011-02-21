@@ -129,7 +129,10 @@ function og_schema() {
       'permission' => array('permission'),
     ),
     'foreign keys' => array(
-      'rid' => array('role' => 'rid'),
+      'og_role' => array(
+        'table' => 'og_role',
+        'columns' => array('rid' => 'rid'),
+      ),
     ),
   );
 
@@ -188,8 +191,14 @@ function og_schema() {
       'rid' => array('rid'),
     ),
     'foreign keys' => array(
-      'uid' => array('users' => 'uid'),
-      'rid' => array('og_role' => 'rid'),
+      'user' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+      'og_role' => array(
+        'table' => 'og_role',
+        'columns' => array('rid' => 'rid'),
+      ),
     ),
   );
 
