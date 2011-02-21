@@ -14,7 +14,7 @@ $plugin = array(
  * Render callback.
  */
 function og_node_create_links_content_type_render($subtype, $conf, $args, $context) {
-  if (empty($context)) {
+  if (empty($context->data)) {
     return FALSE;
   }
   $group = $context->data;
