@@ -15,6 +15,27 @@ function og_install() {
   _field_info_collate_fields(TRUE);
   _field_info_collate_types(TRUE);
   og_create_field(OG_AUDIENCE_FIELD, 'user', 'user');
+
+  // Create the field holding the membership state.
+  // TODO: Add created/ changed fields.
+  $field = array(
+    'field_name' => 'og_membership_state',
+    'type' => 'text',
+    'entity_types' => array('og_membership'),
+    'cardinality' => 1,
+    'locked' => TRUE,
+    'allowed_values_function' => 'og_group_content_states',
+  );
+  $field = field_create_field($field);
+  $instance = array(
+    'field_name' => 'og_membership_state',
+    'bundle' => 'og_membership',
+    'entity_type' => 'og_membership',
+    'label' => t('Group membership state'),
+    'description' => t('Mark the state of the membership to a group.'),
+    'required' => TRUE,
+  );
+  field_create_instance($instance);
 }
 
 /**
