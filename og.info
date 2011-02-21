@@ -8,6 +8,7 @@ dependencies[] = options
 core = 7.x
 version = VERSION
 files[] = og.module
+files[] = og.admin.inc
 files[] = includes/og.views.inc
 
 ; Test files.

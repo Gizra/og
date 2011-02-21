@@ -85,7 +85,7 @@ function og_help($section, $arg) {
  */
 function og_entity_info() {
   $items['group'] = array(
-    'label' => t('Group'),
+    'label' => t('Organic groups group'),
     'entity class' => 'EntityOg',
     'controller class' => 'EntityAPIController',
     'base table' => 'og',
@@ -94,8 +94,8 @@ function og_entity_info() {
     ),
   );
 
-  $items['group_membership'] = array(
-    'label' => t('Group membership'),
+  $items['og_membership'] = array(
+    'label' => t('Organic groups membership'),
     'entity class' => 'EntityOgMembership',
     'controller class' => 'EntityAPIController',
     'base table' => 'og_membership',
@@ -109,7 +109,7 @@ function og_entity_info() {
     'access callback' => 'og_membership_access',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      'path' => 'admin/structure/group-membership',
+      'path' => 'admin/config/group/group-membership',
       'file' => 'og.admin.inc',
       'controller class' => 'OgMembershipUIController',
     ),
@@ -634,6 +634,14 @@ function og_membership_save($membership) {
  */
 function og_membership_delete($message) {
   return entity_delete('og_membership', $message);
+}
+
+/**
+ * Access callback for the group membership entity.
+ */
+function og_membership_access($op, $entity, $account = NULL, $entity_type = 'og_membership') {
+  // TODO
+  return TRUE;
 }
 
 
