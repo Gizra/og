@@ -2402,7 +2402,7 @@ function og_group_states() {
 }
 
 /**
- * Return the states a group can be in.
+ * Return the states a group content can be in.
  */
 function og_group_content_states() {
   return array(
