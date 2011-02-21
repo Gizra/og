@@ -83,7 +83,7 @@ function og_help($section, $arg) {
  * Implements hook_entity_info().
  */
 function og_entity_info() {
-  $return['group'] = array(
+  $items['group'] = array(
     'label' => t('Group'),
     'entity class' => 'EntityOg',
     'controller class' => 'EntityAPIController',
@@ -93,7 +93,28 @@ function og_entity_info() {
       'id' => 'gid',
     ),
   );
-  return $return;
+
+  $items['group_membership'] = array(
+    'label' => t('Group membership'),
+    'entity class' => 'EntityOgMembership',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'og_membership',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      // The membership has no label.
+      'label' => FALSE,
+    ),
+    'module' => 'og',
+    'access callback' => 'og_membership_access',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => 'admin/structure/group-membership',
+      'file' => 'og.admin.inc',
+      'controller class' => 'OgMembershipUIController',
+    ),
+  );
+  return $items;
 }
 
 /**
@@ -640,6 +661,82 @@ function og_ctools_context_converter_alter($context, $converter, &$value) {
     }
   }
 }
+
+/**
+ * Main class for Group membership entities provided by Entity API.
+ */
+class EntityOgMembership extends Entity {
+  public function __construct(array $values = array(), $entityType = NULL) {
+    parent::__construct($values, 'og_membership');
+  }
+}
+
+/**
+ * Creates a new group membership.
+ *
+ * If a group membership already exists, an exception will be thrown.
+ *
+ * @return OgMembership
+ *   Returns a new group membership object.
+ */
+function og_membership_create($name, $values = array()) {
+  // Make sure the group membership doesn't already exist, to prevent duplicate key
+  // error.
+  if (og_membership_load($name)) {
+    throw new Exception('Group membership ' . check_plain($name) . ' already exists.');
+  }
+  $values['name'] = $name;
+  $return = entity_create('og_membership', $values);
+
+  return $return;
+}
+
+/**
+ * Group membership loader.
+ *
+ * @param $name
+ *   (optional) The name for this group membership. If no type is given all existing
+ *   types are returned.
+ *
+ * @return OgMembership
+ *   Returns a fully-loaded group membership definition if a type name is passed.
+ *   Else an array containing all types is returned.
+ */
+function og_membership_load($name = NULL) {
+  // Replace dashes with underscores so this can be used as menu argument
+  // loader too.
+  $types = entity_load('og_membership', isset($name) ? array(strtr($name, array('-' => '_'))) : FALSE);
+  if (isset($name)) {
+    return isset($types[$name]) ? $types[$name] : FALSE;
+  }
+  return $types;
+}
+
+/**
+ * Inserts or updates a group membership object into the database.
+ *
+ * @param $message
+ *   The message object to be inserted.
+ *
+ * @return
+ *   Failure to write a record will return FALSE. Otherwise SAVED_NEW or
+ *   SAVED_UPDATED is returned depending on the operation performed.
+ */
+function og_membership_save($membership) {
+  return entity_save('og_membership', $membership);
+}
+
+/**
+ * Deletes an existing message.
+ *
+ * @param $message
+ *   The message object to be deleted.
+ */
+function og_membership_delete($message) {
+  return entity_delete('og_membership', $message);
+}
+
+
 
 
 /**

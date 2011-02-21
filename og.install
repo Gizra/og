@@ -203,6 +203,42 @@ function og_schema() {
     ),
   );
 
+  $schema['og_membership'] = array(
+    'description' => 'The group membership table.',
+    'fields' => array(
+      'id' => array(
+        'description' => "The group membership's unique ID.",
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Primary Key: {users}.uid for user.',
+      ),
+      'gid'               => array(
+        'description'     => "The group's unique ID.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+    ),
+    'primary key' => array('rid'),
+    'foreign keys' => array(
+      'user' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+      'og' => array(
+        'table' => 'og',
+        'columns' => array('gid' => 'gid'),
+      ),
+    ),
+  );
+
   return $schema;
 }
 
