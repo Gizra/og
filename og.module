@@ -2259,9 +2259,7 @@ function og_node_create_links($gid, $destination = '') {
           $options  = array(
             'query' => array(
               'gids_' . $group->entity_type . '[]' => $group->etid,
-              // Redirect back to the original page.
-              'destination' => $_GET['q'],
-            ),
+            ) + drupal_get_destination(),
           );
           // theme_item_list's 'data' items isn't a render element, so use l().
           // http://drupal.org/node/891112
