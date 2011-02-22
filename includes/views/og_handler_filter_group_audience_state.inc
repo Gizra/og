@@ -1,5 +1,5 @@
 <?php
-// $Id:$
+
 /**
  * @file
  * Contains the group filter for field group audience - state.

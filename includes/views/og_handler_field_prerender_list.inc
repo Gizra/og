@@ -1,5 +1,5 @@
 <?php
-// $Id:$
+
 /**
  * Field handler to provide a list of group permissions.
  */

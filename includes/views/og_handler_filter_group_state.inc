@@ -1,5 +1,5 @@
 <?php
-// $Id:$
+
 /**
  * Filter by group state.
  */
