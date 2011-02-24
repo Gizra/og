@@ -1090,7 +1090,7 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
       $perm[$gid][$account->uid] = $perms;
     }
 
-    if (variable_get('og_user_access_invoke_alter', FALSE) && !$skip_alter) {
+    if (!$skip_alter) {
       // Let modules alter the permissions. since $perm is static we create a
       // clone of it.
       $temp_perm = $perm[$gid][$account->uid];
