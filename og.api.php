@@ -189,7 +189,7 @@ function hook_og_invalidate_cache($gids = array()) {
  *   - group: The group object.
  *   - account: The user account.
  */
-function hook_og_user_access_alter($perm, $context) {
+function hook_og_user_access_alter(&$perm, $context) {
 
 }
 
