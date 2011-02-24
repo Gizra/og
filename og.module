@@ -1131,7 +1131,7 @@ function og_node_type_save($bundle_name) {
  * @param $entity_type
  *   The entity type (e.g. "node" or "user"). Defaults to 'user'
  * @param $entity
- *   Optioanl; The entity can be a user, node or any fieldable entity. If empty
+ *   Optional; The entity can be a user, node or any fieldable entity. If empty
  *   the current user will be used.
  * @param $states
  *   Optional; Array with the state to return. If empty groups of all state will
