@@ -1049,6 +1049,8 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
 
   global $user;
   $perm = &drupal_static(__FUNCTION__, array());
+  // Mark the group ID and permissions that invoked an alter.
+  $perm_alter = &drupal_static(__FUNCTION__, array());
 
   if (empty($account)) {
     $account = clone $user;
@@ -1090,14 +1092,17 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
       $perm[$gid][$account->uid] = $perms;
     }
 
-    if (!$skip_alter) {
-      // Let modules alter the permissions. since $perm is static we create a
-      // clone of it.
-      $temp_perm = $perm[$gid][$account->uid];
-      $context = array('string' => $string, 'group' => $group, 'account' => $account);
-      drupal_alter('og_user_access', $temp_perm, $context);
-      $perm[$gid][$account->uid] = $temp_perm;
-    }
+    $perm[$gid][$account->uid] = $temp_perm;
+  }
+
+  if (!$skip_alter && empty($perm_alter[$gid][$account->uid][$string])) {
+    // Let modules alter the permissions. since $perm is static we create a
+    // clone of it.
+    $temp_perm = $perm[$gid][$account->uid];
+    $context = array('string' => $string, 'group' => $group, 'account' => $account);
+    drupal_alter('og_user_access', $temp_perm, $context);
+    // Make sure alter isn't called for the same permissions.
+    $perm_alter[$gid][$account->uid][$string] = TRUE;
   }
 
   return !empty($perm[$gid][$account->uid][$string]);
