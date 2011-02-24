@@ -1091,8 +1091,6 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
 
       $perm[$gid][$account->uid] = $perms;
     }
-
-    $perm[$gid][$account->uid] = $temp_perm;
   }
 
   if (!$skip_alter && empty($perm_alter[$gid][$account->uid][$string])) {
