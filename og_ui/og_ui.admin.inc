@@ -1,5 +1,5 @@
 <?php
-// $Id: group.admin.inc,v 1.15.4.2 2009/06/22 15:59:27 weitzman Exp $
+
 
 /**
  * @file

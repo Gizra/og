@@ -1,5 +1,5 @@
 <?php
-// $Id$
+
 
 /**
  * Test the Organic groups API and CRUD handling.
