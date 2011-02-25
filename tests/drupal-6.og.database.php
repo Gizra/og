@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * @file
@@ -19,7 +20,7 @@
  *  - taxonomy
  *  - update
  *  - user
- *  - og
+ *  - og (disabled)
  */
 
 db_create_table('access', array(

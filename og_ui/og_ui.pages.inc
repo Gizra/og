@@ -1,4 +1,5 @@
 <?php
+// $Id: group.pages.inc,v 1.1.2.2 2009/06/10 01:07:27 weitzman Exp $
 
 /**
  * @file

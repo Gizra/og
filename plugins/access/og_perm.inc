@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * @file
@@ -18,7 +19,7 @@ $plugin = array(
   'summary' => 'og_perm_ctools_access_summary',
   'required context' => array(
     new ctools_context_required(t('User'), 'user'),
-    new ctools_context_required(t('Group'), 'og_group'),
+    new ctools_context_required(t('Group'), 'group'),
   ),
 );
 

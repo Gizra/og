@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * @file
  * Get a group from a viewed page.
@@ -11,13 +12,12 @@
  */
 function og_context_menu() {
   $items['admin/config/group/context'] = array(
-    'title' => 'Group context',
-    'description' => 'Group context detection and selection',
+    'title' => 'Organic groups context',
+    'description' => 'Organic groups context detection and selection',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_context_configure_form'),
     'access arguments' => array('administer group'),
     'file' => 'og_context.admin.inc',
-    'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
@@ -100,6 +100,20 @@ function og_context_og_context_negotiation_info() {
  */
 function og_context_init() {
   og_context();
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function og_context_ctools_plugin_directory($module, $plugin) {
+  // Safety: go away if CTools is not at an appropriate version.
+  if (!module_invoke('ctools', 'api_version', OG_REQUIRED_CTOOLS_API)) {
+    return;
+  }
+
+  if ($module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
 }
 
 /**

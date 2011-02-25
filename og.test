@@ -1,24 +1,60 @@
 <?php
+// $Id$
 
 /**
- * Test the Group group CRUD handling.
+ * Test the Organic groups API and CRUD handling.
  */
-class OgGroupCrud extends DrupalWebTestCase {
+class OgGroupApi extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups CRUD',
-      'description' => 'Test the create, update and remove of group entitys.',
+      'name' => 'Organic groups API and CRUD',
+      'description' => 'Test the create, update and remove of group entities and API functions.',
       'group' => 'Organic groups',
     );
   }
 
   function setUp() {
-    parent::setUp('entity_feature', 'og');
+    parent::setUp('og', 'entity_test');
+    module_enable(array('entity_feature'));
   }
 
   /**
-   * Test CRUD of group entitys.
+   * Test access control of groups.
+   */
+  function testOgAccess() {
+    module_enable(array('og_test'));
+    og_create_field(OG_GROUP_FIELD, 'node', 'article');
+
+    // Create users.
+    $admin_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+      'administer group',
+    ));
+    $this->drupalLogin($admin_user);
+
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $node = $this->drupalCreateNode($settings);
+    $group = og_get_group('node', $node->nid);
+
+    // Assert user can update entity that is the group.
+    $this->assertTrue($group->access('update', $admin_user), t('User can update a node that is a group.'));
+
+    // Add node a with "deny access" in title, so it will return no access. See
+    // og_test_node_access().
+    $settings['title'] = 'deny access';
+    $node = $this->drupalCreateNode($settings);
+    $group = og_get_group('node', $node->nid);
+    $this->assertFalse($group->access('update', $admin_user), t('User can not update the node that is a group.'));
+  }
+
+  /**
+   * Test CRUD of group entities.
    */
   function testOgCrud() {
     $node = entity_create('node', array(
@@ -134,7 +170,7 @@ class OgGroupCrud extends DrupalWebTestCase {
     $this->assertFalse($gids, t('Non existent entity ID was not returned.'));
 
     // Test caching is correct and resets properly when the state changes.
-    // We can check the cache itself, by getting it (not be reference) and
+    // We can check the cache itself, by getting it (not by reference) and
     // making sure it has the correct values.
     drupal_static_reset('og_get_group_ids');
     $gids = og_get_group_ids('entity_test', array(10, 20, 30));
@@ -242,7 +278,49 @@ class OgGroupCrud extends DrupalWebTestCase {
 
     // Assert user no longer belongs to group.
     $this->assertFalse(og_is_member($gid), t('User is no longer registered to the new group.'));
+  }
 
+  /**
+   * Test the og_get_entity_groups() API function.
+   */
+  function testGetEntityGroups() {
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Add OG audience field to the node's "article" bundle.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+
+    // Create users.
+    $admin_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+    ));
+    $this->drupalLogin($admin_user);
+
+    $settings = array();
+    $settings['type'] = 'article';
+    $node = $this->drupalCreateNode($settings);
+
+    $groups = array();
+    // Create group enteties.
+    foreach (og_group_content_states() as $state => $value) {
+      $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
+      $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+      $entity->save();
+      $group = og_get_group('entity_test', $entity->pid);
+      $groups[$state] = $group->gid;
+
+      // Assign article to the group.
+      og_group($group->gid, 'node', $node, $state);
+    }
+
+    $node = node_load($node->nid);
+
+    foreach ($groups as $state => $gid) {
+      $this->assertEqual(og_get_entity_groups('node', $node, array($state)) , drupal_map_assoc(array($gid)), t('Group content is assigned to group @id with correct state', array('@id' => $gid)));
+    }
   }
 }
 
@@ -260,7 +338,8 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity_feature', 'og');
+    parent::setUp('og', 'entity_test');
+    module_enable(array('entity_feature'));
 
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
@@ -327,8 +406,8 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity_feature', 'og');
-
+    parent::setUp('og', 'entity_test');
+    module_enable(array('entity_feature'));
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
@@ -338,9 +417,13 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
 
 
   /**
-   * Verify proper permission changes by og_user_role_change_permissions().
+   * Verify proper permission changes by og_role_change_permissions().
    */
   function testOgUserRoleChangePermissions() {
+    // TODO: We need to invalidate cache as the og permissions are fired before
+    // the field was added to the article content type. But this is a hack, and
+    // should be removed.
+    $this->resetAll();
     // Create user.
     $user1 = $this->drupalCreateUser();
 
@@ -372,7 +455,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
       'delete own article content' => 1,
       'administer group' => 1,
     );
-    og_user_role_change_permissions($rid, $permissions);
+    og_role_change_permissions($rid, $permissions);
 
     // Verify proper permission changes.
     $this->assertFalse(og_user_access($group->gid, 'update own article content', $user2), t('User still does not have "update own article content" permission.'));
@@ -383,7 +466,7 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
       'delete own article content' => 1,
       'administer group' => 0,
     );
-    og_user_role_change_permissions($rid, $permissions);
+    og_role_change_permissions($rid, $permissions);
 
     $this->assertTrue(og_user_access($group->gid, 'delete own article content', $user2), t('User still has "delete own article content" permission.'));
     $this->assertFalse(og_user_access($group->gid, 'administer group', $user2), t('User no longer has "administer group" permission.'));
@@ -401,7 +484,8 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity_feature', 'og');
+    parent::setUp('og', 'entity_test');
+    module_enable(array('entity_feature'));
   }
 
 
@@ -424,7 +508,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
-    $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group without default access field is assigned to the global roles and permissions settings.'));
+    $this->assertEqual(og_get_global_roles(), og_roles($group->gid), t('Group without default access field is assigned to the global roles and permissions settings.'));
 
     // Add default access field to the entity_test's "main" bundle.
     og_create_field(OG_DEFAULT_ACCESS_FIELD, 'entity_test', 'main');
@@ -435,7 +519,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
-    $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with default access field disabled is assigned to the global roles and permissions settings.'));
+    $this->assertEqual(og_get_global_roles(), og_roles($group->gid), t('Group with default access field disabled is assigned to the global roles and permissions settings.'));
 
     // Group with default access field enabled.
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
@@ -443,12 +527,12 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
-    $this->assertNotEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with default access field enabled has own roles and permissions settings.'));
+    $this->assertNotEqual(og_get_global_roles(), og_roles($group->gid), t('Group with default access field enabled has own roles and permissions settings.'));
 
     // Disable existing group's default access field.
     $entity->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'] = 0;
     $entity->save();
-    $this->assertEqual(og_get_global_roles(), og_user_roles($group->gid), t('Group with enabled default access field that was disabled is assigned to the global roles and permissions settings.'));
+    $this->assertEqual(og_get_global_roles(), og_roles($group->gid), t('Group with enabled default access field that was disabled is assigned to the global roles and permissions settings.'));
   }
 }
 
@@ -466,9 +550,12 @@ class OgTranslationTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('locale', 'translation', 'translation_test', 'og');
+    parent::setUp('translation', 'translation_test', 'og');
   }
 
+  /**
+   * Test disabling OG fields on translated content.
+   */
   function testOgNodeLocale() {
     // Setup users.
     $web_user = $this->drupalCreateUser(array(
@@ -505,12 +592,19 @@ class OgTranslationTestCase extends DrupalWebTestCase {
     $node_translation_body = $this->randomName();
     $node_translation = $this->createTranslation($node, $node_translation_title, $node_translation_body, 'es');
 
+    // Assert both nodes return the same group.
+    $group1 = og_get_group('node', $node->nid);
+    $group2 = og_get_group('node', $node_translation->nid);
+    $this->assertEqual($group1, $group2, t('Node and tranlated node are the same group.'));
+
     $this->drupalGet('node/' . $node_translation->nid . '/edit');
-    $this->assertText(t('You can not change the group state from a translated content'), t('Group field on tranlated node does not allow editing.'));
+    $message = t('You can not change "Group type" field from a translated content.');
+    $this->assertText($message, t('Group field on tranlated node does not allow editing.'));
 
     $this->drupalGet('node/' . $node->nid . '/edit');
-    $this->assertNoText(t('You can not change the group state from a translated content'), t('Group field on original node allows editing.'));
+    $this->assertNoText($message, t('Group field on original node allows editing.'));
   }
+
 
   /**
    * Install a the specified language if it has not been already. Otherwise make sure that
@@ -621,8 +715,8 @@ class OgGroupAudienceField extends DrupalWebTestCase {
   }
 
    function setUp() {
-    parent::setUp('entity_feature', 'og');
-
+    parent::setUp('og', 'entity_test');
+    module_enable(array('entity_feature'));
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
@@ -727,6 +821,9 @@ class OgGroupAudienceField extends DrupalWebTestCase {
     ));
     $this->drupalLogin($admin_user);
 
+    // Add OG group field to the "article" bundle.
+    og_create_field(OG_GROUP_FIELD, 'node', 'article');
+
     $groups = array();
     // Create two node groups.
     foreach (range(1, 3) as $id) {
@@ -786,7 +883,65 @@ class OgGroupAudienceField extends DrupalWebTestCase {
       $this->assertNoFieldChecked('edit-group-audience-und-' . $group->gid);
     }
   }
+
+  /**
+   * Test re-adding hidden and selected group IDs.
+   *
+   * If a user doesn't have privileges to see a group, we make sure that if they
+   * edit the group content entity, upon save, the associations with that group
+   * isn't lost.
+   */
+  function testHiddenSelectedGids() {
+    // Create user.
+    $permissions = array(
+      'access content',
+      'bypass node access',
+    );
+    $user1 = $this->drupalCreateUser($permissions);
+    $user2 = $this->drupalCreateUser($permissions);
+
+    $permissions[] = 'administer group';
+    $admin_user = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($admin_user);
+
+    $groups = array();
+    // Create three entity_test group. First two belong to user1, and the third
+    // one to user2.
+    foreach (range(1, 3) as $id) {
+      $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $id < 3 ? $user1->uid : $user2->uid));
+      $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+      $entity->save();
+      $group = og_get_group('entity_test', $entity->pid);
+      $groups[$id] = $group;
+    }
+
+    // Create a node article and assign it to the second and third groups.
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['gid'] = $groups[2]->gid;
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][1]['gid'] = $groups[3]->gid;
+    $node = $this->drupalCreateNode($settings);
+
+    // Assert article is assigned to two groups.
+    $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid, $groups[3]->gid)), t('Article node is assigned to two groups.'));
+
+    $this->drupalLogin($user2);
+    $this->drupalGet('node/' . $node->nid . '/edit');
+
+    // TODO: Assert user can see only the third group in the audience field.
+
+    // Unselect the third group.
+    $edit['group_audience[und][' . $groups[3]->gid . ']'] = FALSE;
+    $this->drupalPost(NULL, $edit, t('Save'));
+
+    // Assert article is still assigned to to one group.
+    $this->drupalGet('node/' . $node->nid . '/edit');
+    // Reload node and reset cache.
+    $node = node_load($node->nid, NULL, TRUE);
+    $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid)), t('Article node is still assigned to one group - one that is hidden from the current user.'));
+  }
 }
+
 /**
 * Test re-installation of module.
 */
@@ -800,7 +955,8 @@ class OgUnInstallTestCase extends DrupalWebTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entity_feature', 'og');
+    parent::setUp('og', 'entity_test');
+    module_enable(array('entity_feature'));
   }
   /**
    * Instaill, uninstall and re-install.
@@ -923,8 +1079,9 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
       $account = user_load($uid);
 
       $roles = array();
-      // OG_AUTHENTICATED_ROLE
-      $roles[2] = 2;
+      // If the member is pending then they have the anonymous role.
+      $rid = $value['active'] ? 2 : 1;
+      $roles[$rid] = $rid;
 
       if ($value['admin']) {
         // OG_ADMINISTRATOR_ROLE
@@ -932,7 +1089,9 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
       }
 
       $this->assertTrue(og_is_member($group->gid, 'user', $account, $states), t('User @uid is @op member in group.', array('@uid' => $uid, '@op' => $op)));
-      $this->assertEqual(og_get_user_roles($group->gid, $uid), $roles, t('User @uid has the correct roles in group.', array('@uid' => $uid)));
+      // Pass also pending state, so we make sure that even if the user isn't
+      // active they are considered members, to check they get the correct role.
+      $this->assertEqual(og_get_user_roles($group->gid, $uid, array(OG_STATE_ACTIVE, OG_STATE_PENDING)), $roles, t('User @uid has the correct roles in group.', array('@uid' => $uid)));
     }
   }
 }

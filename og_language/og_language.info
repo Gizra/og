@@ -1,3 +1,4 @@
+; $Id:$
 name = Organic groups language
 description = "Associate language interface to a group."
 package = "Organic groups"

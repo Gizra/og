@@ -1,3 +1,4 @@
+; $Id:$
 name = Organic groups node link
 description = "Add content creation links field."
 package = "Organic groups"

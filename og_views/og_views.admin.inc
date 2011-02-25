@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * @file
  * Admin settings for the Group views module.

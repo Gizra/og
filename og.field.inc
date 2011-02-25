@@ -1,18 +1,13 @@
 <?php
+// $Id$
 
 /**
  * @file
  * Field module functionality for the Organic groups module.
  */
 
-/*******************************************************************************
- * Hook implementations
- ******************************************************************************/
-
 /**
  * Implements hook_field_widget_properties_alter().
- *
- * Depends on http://drupal.org/node/806830
  */
 function og_field_widget_properties_alter(&$widget, $context) {
   $field = $context['field'];
@@ -35,29 +30,33 @@ function og_field_widget_properties_alter(&$widget, $context) {
 function og_field_info() {
   return array(
     'group' => array(
-      'label' => t('Group'),
+      'label' => t('Group audience'),
       'description' => t('This field stores groups associated with the content.'),
       'default_widget' => OG_AUDIENCE_WIDGET,
       'default_formatter' => 'og_list_default',
       // Entity metadata properties.
-      'property_type' => OG_AUDIENCE_FIELD,
+      'property_type' => 'field_item_group',
       'property_callbacks' => array('og_field_group_property_callback'),
     ),
   );
 }
 
+/**
+ * Entity metdata callback.
+ */
 function og_field_group_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
-  $name = str_replace('_', '-', $field['field_name']);
-  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
 
   // Define a data structure so it's possible to deal with Group
   // audience field.
+  $property['label'] = t('Group audience');
+  $property['description'] = t('Associate groups with group content.');
   $property['getter callback'] = 'entity_metadata_field_verbatim_get';
   $property['setter callback'] = 'entity_metadata_field_verbatim_set';
   $property['property info'] = array(
     'gid' => array(
-    'type' => 'integer',
-    'label' => t('The group this group content is associated with'),
+      'type' => 'group',
+      'label' => t('The group this group content is associated with'),
     ),
     'state' => array(
       'type' => 'text',
@@ -125,16 +124,30 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
   if ($field['field_name'] == OG_AUDIENCE_FIELD && !empty($items[0])) {
     foreach ($items as $delta => $item) {
       if ($group = og_get_group('group', $item['gid'])) {
-        $label = og_label($group->gid);
-        $entity = entity_load($group->entity_type, array($group->etid));
-        $entity = current($entity);
-        // Get the entity type of the group entity.
-        $uri = entity_uri($group->entity_type, $entity);
-        $element[$delta] = array(
-          '#type' => 'link',
-          '#title' => $label,
-          '#href' => $uri['path'],
-        );
+        if ($group->access()) {
+          $label = og_label($group->gid);
+          $entity = entity_load($group->entity_type, array($group->etid));
+          $entity = current($entity);
+          // Get the entity type of the group entity.
+          $uri = entity_uri($group->entity_type, $entity);
+          $element[$delta] = array(
+            '#type' => 'link',
+            '#title' => $label,
+            '#href' => $uri['path'],
+          );
+        }
+        else {
+          // No need to show private groups several times, so remember if it was
+          // already added.
+          $added = &drupal_static(__FUNCTION__, FALSE);
+
+          if (!$added) {
+            $added = TRUE;
+            $element[$delta] = array(
+              '#markup' => '- ' . t('Private group') . ' -',
+            );
+          }
+        }
       }
     }
   }
@@ -284,6 +297,18 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         }
       }
 
+      // Get default values from URL, or from the edited entity.
+      $default_values = og_get_context_by_url();
+      // Keep the group ID of the selected items, as they might be needed again,
+      // and we don't want to iterate over the items again.
+      $items_gid = array();
+      if (!empty($items)) {
+        foreach ($items as $item) {
+          $default_values[$item['gid']] = $item['gid'];
+          $items_gid[] = $item['gid'];
+        }
+      }
+
       // Determine if a user may see other groups as-well.
       $opt_group = FALSE;
 
@@ -295,12 +320,15 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       $audience = og_field_audience_options($opt_group);
       foreach (array('content groups', 'other groups') as $key) {
         if (!empty($audience[$key])) {
-          $audience[$key] = og_label_multiple($audience[$key]);
+          // Get the label un-sanitized, as they will be laster sanitized
+          // according to the form type.
+          $audience[$key] = og_label_multiple($audience[$key], FALSE);
         }
       }
 
       // The group options presented to the user.
       $options = array();
+      $hidden_selected_gids = array();
       if ($opt_group) {
         // Show "My groups" and "Other groups".
         $groups_count = 0;
@@ -325,6 +353,10 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         else {
           $type = $groups_count >= $instance['widget']['settings']['minimum_for_select_list'] ? 'select' : 'checkboxes';
         }
+
+        // If there are items that are already selected but the user doesn't
+        // have access to them, we need to keep track of them.
+        $hidden_selected_gids = drupal_map_assoc(array_diff($items_gid, array_keys($options)));
       }
 
       if (empty($options)) {
@@ -334,14 +366,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
       if (empty($element['#description'])) {
         $element['#description'] = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
-      }
-
-      $default_values = og_get_context_by_url();
-
-      if (!empty($items)) {
-        foreach ($items as $item) {
-          $default_values[$item['gid']] = $item['gid'];
-        }
       }
 
       $element['#multiple'] = $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;;
@@ -374,6 +398,10 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         '#value_key' => 'gid',
         '#element_validate' => $type != 'item' ? array('options_field_widget_validate') : array(),
         '#properties' => $properties,
+        // Add OG specific context.
+        '#opt_group' => $opt_group,
+        '#audience' => $audience,
+        '#hidden_selected_gids' => $hidden_selected_gids,
       );
 
       $return = $element;
@@ -431,22 +459,50 @@ function og_field_attach_delete($entity_type, $entity) {
  * Handle translated nodes that act as groups.
  */
 function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
-  $item = menu_get_item();
-  if (!empty($form[OG_GROUP_FIELD]) && (($entity_type == 'node' && !empty($entity->tnid) && $entity->tnid != $entity->nid)) || $item['page_callback'] == 'node_add' && !empty($_GET['translation']) && !empty($_GET['target'])) {
+  $form['#validate'][] = 'og_field_widget_form_validate';
+  if (!empty($form['#node_edit_form']) &&
+    (og_is_group_type('node', $form['type']['#value']) || og_is_group_content_type('node', $form['type']['#value'])) &&
+    (!empty($entity->tnid) && $entity->tnid != $entity->nid) || (!empty($_GET['translation']) && !empty($_GET['target']))) {
 
-    // Prevent changing the group state on nodes that are translated.
-    // Load the original node.
-    $description = t('You can not change the group state from a translated content.');
+    // Iterate over OG fields that shouldn't be changed in node translation.
+    foreach (og_fields_info() as $field_name => $info) {
+      if (!empty($form[$field_name]) && $info['disable on node translate']) {
+        // Prevent changing the group state on nodes that are translated.
+        $description = t('You can not change "@label" field from a translated content.', array('@label' => $info['instance']['label']));
 
-    $tnid = !empty($entity->tnid) ? $entity->tnid : $_GET['translation'];
-    if (($node = node_load($tnid)) && node_access('update', $node)) {
-      $description .= ' ' . t('Changing the group state can only be done via <a href="@node">@title</a>.', array('@node' => url('node/' . $node->nid . '/edit'), '@title' => $node->title));
+        $tnid = !empty($entity->tnid) ? $entity->tnid : $_GET['translation'];
+        if (($node = node_load($tnid)) && node_access('update', $node)) {
+          $description .= ' ' . t('Changing this field can only be done via <a href="@node">@title</a>.', array('@node' => url('node/' . $node->nid . '/edit'), '@title' => $node->title));
+        }
+
+        $form[$field_name][LANGUAGE_NONE]['#options'] = array();
+        $form[$field_name][LANGUAGE_NONE]['#description'] = $description;
+        $form[$field_name][LANGUAGE_NONE]['#disabled'] = TRUE;
+        $form[$field_name][LANGUAGE_NONE]['#required'] = FALSE;
+
+      }
+    }
+  }
+}
+
+/**
+ * Validate handler; Re-add hidden selected gids if exist.
+ */
+function og_field_widget_form_validate($form, &$form_state) {
+  if (!empty($form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids']) && $gids = $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids']) {
+    // Rebuild the form state values.
+    foreach ($form_state['values'][OG_AUDIENCE_FIELD][LANGUAGE_NONE] as $key => $value) {
+      $gids[$value['gid']] = $value['gid'];
     }
 
-    $form[OG_GROUP_FIELD][LANGUAGE_NONE]['#options'] = array();
-    $form[OG_GROUP_FIELD][LANGUAGE_NONE]['#description'] = $description;
-    $form[OG_GROUP_FIELD][LANGUAGE_NONE]['#disabled'] = TRUE;
-    $form[OG_GROUP_FIELD][LANGUAGE_NONE]['#required'] = FALSE;
+    $delta = 0;
+    $value = array();
+    foreach ($gids as $gid) {
+      $value[LANGUAGE_NONE][$delta]['gid'] = $gid;
+      ++$delta;
+    }
+    // Set the new values.
+    form_set_value($form[OG_AUDIENCE_FIELD], $value, $form_state);
   }
 }
 
@@ -473,6 +529,14 @@ function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode
  */
 function og_field_crud_group($op, $entity_type, $entity) {
   $property = OG_GROUP_FIELD;
+
+  // If the entity is a translated node, we can return early, as all operations
+  // happen on the source node.
+  if ($entity_type == 'node'
+    && ((!empty($entity->tnid) && $entity->tnid != $entity->nid) || !empty($entity->translation_source->tnid))
+    && module_exists('translation')) {
+    return;
+  }
 
   if (!empty($entity->{$property}) && empty($entity->og_skip_group_create)) {
     $wrapper = &$entity->{$property}[LANGUAGE_NONE];
@@ -533,7 +597,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
       // The field exists.
       if (isset($entity->{$property})) {
         if (!empty($entity->{$property}[LANGUAGE_NONE][0]['value'])) {
-          og_user_roles_override($group->gid);
+          og_roles_override($group->gid);
         }
         elseif (empty($group->is_new)) {
           // If the field is set to be using default access and there are
@@ -578,10 +642,6 @@ function og_field_audience_options($opt_group = FALSE, $account = NULL) {
     $return['other groups'] = array_diff($all_groups, $content_groups);
   }
 
-  // Let other modules change the list.
-  // TODO: Is it possible to do it in a more general way?
-  drupal_alter('og_audience_options', $return, $opt_group, $account);
-
   return $return;
 }
 
@@ -610,12 +670,12 @@ function og_field_audience_count($opt_group = FALSE, $account = NULL) {
 /**
  * Implements hook_field_validate().
  *
- * FIXME: Adapt this function to Group.
+ * FIXME: Adapt this function to OG.
  *
  * Possible error codes:
  * - 'invalid_nid': nid is not valid for the field (not a valid node id, or the node is not referenceable).
  */
-function __group_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+function __og_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   // Extract nids to check.
   $ids = array();
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains the group argument for field group audience.
@@ -15,7 +16,9 @@ class og_handler_argument_group_audience_gid extends views_handler_argument_nume
   function title() {
     $title = '';
     if (!empty($this->argument) && $group = og_get_group('group', $this->argument)) {
-      $title = og_label($group->gid);
+      if ($group->access()) {
+        $title = og_label($group->gid);
+      }
     }
 
     return $title;

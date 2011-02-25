@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * @file
@@ -83,7 +84,7 @@ function og_ui_menu() {
 
   $items['group/%/%/admin/people/roles/edit'] = array(
     'title' => 'Edit role',
-    'page arguments' => array('og_ui_user_admin_role', 1, 2),
+    'page arguments' => array('og_ui_user_admin_roles', 1, 2),
     'access callback' => 'og_user_access_by_entity',
     'access arguments' => array('administer group', 1, 2),
     'type' => MENU_CALLBACK,
@@ -118,7 +119,7 @@ function og_ui_menu() {
 
   $items['admin/config/group'] = array(
     'title' => 'Group',
-    'description' => 'Administer the suite of Group modules.',
+    'description' => 'Administer the suite of Organic groups modules.',
     'position' => 'right',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
@@ -126,21 +127,47 @@ function og_ui_menu() {
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
+
+  $items['admin/config/group/settings'] = array(
+    'title' => 'Organic groups settings',
+    'description' => 'Administer the Organic groups settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_ui_user_admin_settings'),
+    'access arguments' => array('administer group'),
+    'file' => 'og_ui.admin.inc',
+  );
+
   $items['admin/config/group/permissions'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_user_admin_global_permissions'),
-    'title' => 'Group global permissions',
+    'title' => 'Organic groups global permissions',
     'access arguments' => array('administer group'),
-    'description' => 'Configure Group global permissions.',
+    'description' => 'Configure Organic groups global permissions.',
     'file' => 'og_ui.admin.inc',
+  );
+
+  $items['admin/config/group/roles'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_ui_user_admin_new_role'),
+    'title' => 'Organic groups global roles',
+    'access arguments' => array('administer group'),
+    'description' => 'Configure Organic groups global roles.',
+    'file' => 'og_ui.admin.inc',
+  );
+
+  $items['admin/config/group/roles/edit'] = array(
+    'title' => 'Edit role',
+    'page arguments' => array('og_ui_user_admin_global_roles', '', '', 5),
+    'access arguments' => array('administer group'),
+    'type' => MENU_CALLBACK,
   );
 
   $items['admin/config/group/fields'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_field_settings'),
-    'title' => 'Group field settings',
+    'title' => 'Organic groups field settings',
     'access arguments' => array('administer group'),
-    'description' => 'Configure Group fields in bundles.',
+    'description' => 'Configure Organic groups fields in bundles.',
     'file' => 'og_ui.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
@@ -151,12 +178,23 @@ function og_ui_menu() {
     'load arguments' => array(4, 5, 5, '%map'),
     'title' => 'Delete',
     'access arguments' => array('administer group'),
-    'description' => 'Delete a group field from a bundle.',
+    'description' => 'Delete an Organic groups field from a bundle.',
     'file' => 'og_ui.admin.inc',
     'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function og_ui_admin_paths() {
+  $paths = array(
+    'node/*/group' => TRUE,
+    'group/*/*/admin/*' => TRUE,
+  );
+  return $paths;
 }
 
 /**
@@ -301,10 +339,13 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
  * Implement hook_forms().
  */
 function og_ui_forms() {
-  $forms['og_ui_user_admin_new_role']['callback'] = 'og_ui_user_admin_role';
+  $forms['og_ui_user_admin_new_role']['callback'] = 'og_ui_user_admin_roles';
 
-  // Form to define the default permissions state for new groups.
+  // Form to define the global permissions.
   $forms['og_ui_user_admin_global_permissions']['callback'] = 'og_ui_user_admin_permissions';
+
+  // Form to define the global roles.
+  $forms['og_ui_user_admin_global_roles']['callback'] = 'og_ui_user_admin_roles';
 
   return $forms;
 }
@@ -323,18 +364,44 @@ function og_ui_form_node_type_form_alter(&$form, &$form_state) {
     '#description' => t('Specify how Group should treat content of this type. Content may behave as a group, as group content, or may not participate in Group at all.'),
   );
 
+  // Group settings.
+  $url = array(
+    '!url' => l(t('Manage fields'), 'admin/structure/types/manage/' . str_replace('_', '-', $node_type) . '/fields'),
+  );
+  $type = og_is_group_type('node', $node_type) ? 'group' : 'omitted';
+  $disabled = $type != 'omitted';
+
+  $description = t('Set the content type to be a group, that content will be associated with, and will have group members.');
+  if ($disabled) {
+   $description .= '<br/>' . t('To unset the group definition you should delete the "Group type" field via !url.', $url);
+  }
+
+
   $form['group']['og_group_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group'),
-    '#default_value' =>  og_is_group_type('node', $node_type) ? 'group' : 'omitted',
+    '#default_value' => $type,
     '#options' => array('omitted' => t('Not a group type'), 'group' => t('Group type')),
+    '#description' => $description,
+    '#disabled' => $disabled,
   );
+
+  // Group content settings.
+  $type = og_is_group_content_type('node', $node_type) ? 'og_content' : 'omitted';
+  $disabled = $type != 'omitted';
+
+  $description = t('Set the content type to be a group content, that can be associated with groups.');
+  if ($disabled) {
+   $description .= '<br/>' . t('To unset the group content definition you should delete the "Groups audience" field via !url.', $url);
+  }
 
   $form['group']['og_group_content_type'] = array(
     '#type' => 'radios',
     '#title' => t('Group content'),
-    '#default_value' =>  og_is_group_content_type('node', $node_type) ? 'og_content' : 'omitted',
+    '#default_value' =>  $type,
     '#options' => array('omitted' => t('Not a group content type'), 'og_content' => t('Group content type')),
+    '#description' => $description,
+    '#disabled' => $disabled,
   );
 }
 
@@ -401,7 +468,7 @@ function og_ui_og_user_operations($form = array(), $form_state = array()) {
   );
 
   if (og_user_access($gid, 'administer group')) {
-    $roles = og_user_roles($gid);
+    $roles = og_roles($gid);
 
     $add_roles = array();
     foreach ($roles as $rid => $name) {
@@ -508,14 +575,14 @@ function og_ui_user_multiple_role_edit($gid, $accounts, $operation, $rid) {
     case 'add_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
-        og_users_roles_grant($gid, $account->uid, $rid);
+        og_role_grant($gid, $account->uid, $rid);
 
       }
       break;
     case 'remove_role':
       $accounts = user_load_multiple($accounts);
       foreach ($accounts as $account) {
-        og_users_roles_revoke($gid, $account->uid, $rid);
+        og_role_revoke($gid, $account->uid, $rid);
       }
       break;
   }

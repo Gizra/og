@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * @file
  * Administration functions for Group context module.

@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * @file
@@ -128,7 +129,10 @@ function og_schema() {
       'permission' => array('permission'),
     ),
     'foreign keys' => array(
-      'rid' => array('role' => 'rid'),
+      'og_role' => array(
+        'table' => 'og_role',
+        'columns' => array('rid' => 'rid'),
+      ),
     ),
   );
 
@@ -187,8 +191,14 @@ function og_schema() {
       'rid' => array('rid'),
     ),
     'foreign keys' => array(
-      'uid' => array('users' => 'uid'),
-      'rid' => array('og_role' => 'rid'),
+      'user' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+      'og_role' => array(
+        'table' => 'og_role',
+        'columns' => array('rid' => 'rid'),
+      ),
     ),
   );
 
@@ -340,7 +350,7 @@ function og_update_7000(&$sandbox) {
     if (empty($sandbox['group upgrade'])) {
       // All nodes and users are processed.
       $sandbox['#finished'] = 1;
-      return t("Organic groups converted to use new schema.");
+      return t('Organic groups converted to use new schema.');
     }
   }
 }
@@ -476,7 +486,7 @@ function _og_upgrade_user(&$sandbox) {
     og_group($group->gid, 'user', $account, $state);
 
     if ($account->is_admin) {
-      og_users_roles_grant($group->gid, $account->uid, $rid);
+      og_role_grant($group->gid, $account->uid, $rid);
     }
     $sandbox['last'] = $account->nid;
     // User subscribed to group.

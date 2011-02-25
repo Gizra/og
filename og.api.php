@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * @file
@@ -62,7 +63,7 @@ function hook_og_default_roles_alter(&$roles) {
  * @param $role
  *   The group role object.
  */
-function hook_og_user_role_insert($role) {
+function hook_og_role_insert($role) {
 }
 
 /**
@@ -71,7 +72,7 @@ function hook_og_user_role_insert($role) {
  * @param $role
  *   The group role object.
  */
-function hook_og_user_role_update($role) {
+function hook_og_role_update($role) {
 
 }
 
@@ -83,44 +84,74 @@ function hook_og_user_role_update($role) {
  *   is already deleted from the database. However, we pass the object to allow
  *   implementing modules to properly identify the deleted role.
  */
-function hook_og_user_role_delete($role) {
+function hook_og_role_delete($role) {
 
 }
 
 
-function hook_og_users_roles_grant($gid, $uid, $rid) {
+function hook_og_role_grant($gid, $uid, $rid) {
 
 }
 
-function hook_og_users_roles_revoke($gid, $uid, $rid) {
+function hook_og_role_revoke($gid, $uid, $rid) {
 
 }
 
 /**
- * Allow modules to alter the groups that appear in the group audience field.
+ * Provide information about fields that are related to Organic groups.
  *
- * @param $options
- *   Array passed by reference with the keys:
- *   - "content groups": Array with the group IDs that will appear to the user.
- *   - "other groups": Array with the group IDs that do not belong to the user,
- *     but if the user is an administrator they will see those groups as-well.
- * @param $opt_group
- *   TRUE if user should see also the "other groups" in the group audience
- *   field.
- * @param $account
- *   The user object.
- */
-function hook_og_audience_options_alter(&$options, $opt_group, $account) {
-  if (!$account->uid && $gids = og_register_get_groups()) {
-    $options['content groups'] = array_merge($options['content groups'], $gids);
-  }
-}
-
-/**
- * TODO
+ * Using this info, Organic groups is aware of the fields, and allows adding
+ * them to the correct bundle.
+ *
+ * - type: Array with the values "group" and/ or "group content". To define to
+ *   which bundles the field may be attached.
+ * - Description: The description of the field.
+ * - field: The field info array as will be passed to field_create_field().
+ * - instance: The field instance array as will be passed to
+ *   field_info_instance().
+ * - entity type: Optional; Array of the entity types this field can be attached
+ *   to. The field will not be attachable to other entity types. Defaults to
+ *   empty array.
+ * - disable on node translate: Optional; If set to TRUE then on translated
+ *   node, the field will be un-editable, and a message will be shown that the
+ *   field can be only edited via the source node. Defaults to TRUE.
  */
 function hook_og_fields_info() {
-
+  $items = array();
+  $items[OG_GROUP_FIELD] = array(
+    'type' => array('group'),
+    'description' => t('Determine if this should be a group.'),
+    'field' => array(
+      'field_name' => OG_GROUP_FIELD,
+      'no_ui' => TRUE,
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array(
+        'allowed_values' => array(0 => 'Not a group type', 1 => 'Group type'),
+        'allowed_values_function' => '',
+      ),
+    ),
+    'instance' => array(
+      'label' => t('Group type'),
+      'widget_type' => 'options_select',
+      'required' => TRUE,
+      // Make the group type default.
+      'default_value' => array(0 => array('value' => 1)),
+      'view modes' => array(
+        'full' => array(
+          'label' => t('Full'),
+          'type' => 'og_group_subscribe',
+          'custom settings' => FALSE,
+        ),
+        'teaser' => array(
+          'label' => t('Teaser'),
+          'type' => 'og_group_subscribe',
+          'custom settings' => FALSE,
+        ),
+      ),
+    ),
+  );
+  return $items;
 }
 
 /**
@@ -145,6 +176,21 @@ function hook_og_invalidate_cache($gids = array()) {
   foreach ($caches as $cache) {
     drupal_static_reset($cache);
   }
+}
+
+/**
+ * Alter the permissions of a user.
+ *
+ * @param $perm
+ *   The permissions of a user, passed by reference.
+ * @param $context
+ *   Array with:
+ *   - string: The permission asked for the user.
+ *   - group: The group object.
+ *   - account: The user account.
+ */
+function hook_og_user_access_alter(&$perm, $context) {
+
 }
 
 

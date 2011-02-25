@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Filter by group state.
  */

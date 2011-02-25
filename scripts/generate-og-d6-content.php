@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+// $Id: generate-d6-content.sh,v 1.3 2010/09/11 00:39:49 webchick Exp $
 
 /**
  * Generate content for a Drupal 6 database to test the upgrade process.
@@ -13,9 +14,11 @@
  * - Install and enable Organic groups module.
  * - Copy from Drupal 7 includes/utility.inc to Drupal 6 includes folder (the
  *   include file is version agnostic).
- * - Execute script by running
- *     drush php-script generate-og-d6-content.php > drupal-6.og.database.php
- *   from the command line from the Drupal 6 ROOT directory.
+ * - Execute script to create the content by running
+ *     drush php-script generate-og-d6-content.php
+ *  - Execute script to dump the database by running
+ *      drush php-script dump-database-d6.sh > drupal-6.og.database.php
+ *   from the command line of the Drupal 6 ROOT directory.
  * - Since Organic groups module is a contrib module, it needs to be disabled
  *   for the upgrade path, thus open the result file with a text editor and
  *   under the {system} table, change the "status" value of the 'og' insertion
@@ -32,6 +35,10 @@
  *   - Uid 5: active member.
  *   - Uid 6: Pending admin member.
  *   - Uid 7: Active admin member.
+ * - Nid 11: Group with "Open" selective state.
+ * - Nid 12: Group with "Moderated" selective state.
+ * - Nid 13: Group with "Invite only" selective state.
+ * - Nid 14: Group with "Closed" selective state.
  */
 
 // Define settings.
@@ -218,6 +225,7 @@ class ogGroupPostMultipleGroups implements ogContent {
     );
     return $list;
   }
+
   public function groupActions($user_ids, $groups, $posts) {}
 }
 
@@ -241,7 +249,7 @@ class ogGroupUserAction implements ogContent {
     return array();
   }
 
-  public function groupActions($user_ids, $groups, $posts){
+  public function groupActions($user_ids, $groups, $posts) {
     $gid = $groups[0];
     // - user ID 4 as pending member.
     og_save_subscription( $gid , $user_ids[4] , array('is_active' => 0));
@@ -254,6 +262,32 @@ class ogGroupUserAction implements ogContent {
   }
 }
 
+/**
+ * Groups with different selective state (e.g. open, moderated, etc'.).
+ */
+class ogGroupSelectiveState implements ogContent {
+  public function groupList($user_ids) {
+    $list = array();
+
+    foreach (og_selective_map() as $key => $value) {
+      $list[] = array(
+        'title' => 'group-selective-state-' . $value,
+        'uid' => $user_ids[3],
+        'body' => 'Group with selective state set to ' . $value,
+        'og_description' => 'Group with selective state set.',
+      );
+    }
+
+    return $list;
+  }
+
+  public function postList($user_ids, $groups) {
+    return array();
+  }
+
+  public function groupActions($user_ids, $groups, $posts) {}
+}
+
 // Start content generation.
 $og_content_config = array();
 $og_content_config[] = new ogGroupNoPosts();
@@ -261,6 +295,7 @@ $og_content_config[] = new ogGroupThreePosts();
 $og_content_config[] = new ogGroupOrphanPost();
 $og_content_config[] = new ogGroupPostMultipleGroups();
 $og_content_config[] = new ogGroupUserAction();
+$og_content_config[] = new ogGroupSelectiveState();
 
 foreach ($og_content_config as $content_config){
   $groups = array_map('og_group_node' , $content_config->groupList($user_ids) );

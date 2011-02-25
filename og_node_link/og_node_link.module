@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * @file
  * Add content creation links based on group context.
