@@ -1,4 +1,3 @@
-; $Id$
 name = Organic groups context
 description = "Get a group from a viewed page."
 package = "Organic groups"

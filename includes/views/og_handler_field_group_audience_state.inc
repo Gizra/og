@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the group field handler for field group audience - state.

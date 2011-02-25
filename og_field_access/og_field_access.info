@@ -1,4 +1,3 @@
-; $Id$
 name = Organic groups field access
 description = "Provide field access based on group."
 package = "Organic groups"

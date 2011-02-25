@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Contains the group context argument default plugin.
