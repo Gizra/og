@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file node-og-group-post.tpl.php

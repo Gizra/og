@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 // visibility states for private groups. site admin chooses in og_access_settings()
 define('OG_PRIVATE_GROUPS_NEVER', 0);

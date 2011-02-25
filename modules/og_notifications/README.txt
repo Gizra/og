@@ -1,4 +1,3 @@
-$Id$
 
 og_notifications integrates OG with the notifications and messaging modules
 family thereby enabling such features as group subscriptions, administrative

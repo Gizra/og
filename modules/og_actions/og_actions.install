@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 function og_actions_disable() {
   // Make sure our actions get wiped form the DB.

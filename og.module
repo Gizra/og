@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 // Selective groups states. chosen by the group admin
 define ('OG_OPEN', 0);

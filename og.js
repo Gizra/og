@@ -1,4 +1,3 @@
-// $Id$
 
 // Content type form
 Drupal.behaviors.og_content_type = function() {

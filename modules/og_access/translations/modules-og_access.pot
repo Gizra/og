@@ -1,4 +1,3 @@
-# $Id$
 #
 # LANGUAGE translation of Drupal (modules-og_access)
 # Copyright YEAR NAME <EMAIL@ADDRESS>

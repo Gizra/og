@@ -1,4 +1,3 @@
-; $Id$
 
 The og_actions module is a collection of actions. Their most common use case is in conjunction with the Views Bulk Operations module. Together, these modules make a terrific admin dashboard for putitng content into and out of groups, and adding removing members from groups. 
 

@@ -1,4 +1,3 @@
-; $Id$
 name = Organic groups Views integration
 description = "<strong>Highly recommended.</strong>. Use Views to search and display organic groups."
 package = "Organic groups"

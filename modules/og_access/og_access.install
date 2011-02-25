@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Definition of hook_schema();

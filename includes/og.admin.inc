@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Menu callback to load settings form.

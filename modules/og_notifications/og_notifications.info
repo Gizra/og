@@ -1,4 +1,3 @@
-; $Id$
 name = Organic Groups Notifications
 description = Allows users to receive notifications and subscribe to group content.
 package = "Organic groups"

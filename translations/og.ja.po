@@ -1,4 +1,3 @@
-# $Id$
 #
 # Japanese translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
