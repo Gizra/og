@@ -179,7 +179,7 @@ function hook_og_invalidate_cache($gids = array()) {
 }
 
 /**
- * Alter the permissions of a user.
+ * Alter the permissions of a user in a group.
  *
  * @param $perm
  *   The permissions of a user, passed by reference.
@@ -190,7 +190,10 @@ function hook_og_invalidate_cache($gids = array()) {
  *   - account: The user account.
  */
 function hook_og_user_access_alter(&$perm, $context) {
-
+  // If user ID 2 doesn't already have a permission then enable it.
+  if (empty($perm['foo']) && $context['account']->uid = 2) {
+    $perm['foo'] = TRUE;
+  }
 }
 
 
