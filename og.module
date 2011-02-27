@@ -89,6 +89,7 @@ function og_entity_info() {
     'entity class' => 'EntityOg',
     'controller class' => 'EntityAPIController',
     'base table' => 'og',
+    'fieldable' => TRUE,
     'entity keys' => array(
       'id' => 'gid',
     ),
@@ -2106,8 +2107,12 @@ function og_set_breadcrumb($entity_type, $etid, $path = array()) {
  *   The bundle name.
  */
 function og_create_field($field_name, $entity_type, $bundle) {
-  if ($group_field = og_fields_info($field_name)) {
+  // Don't allow creating a group field on a group entity type.
+  if ($entity_type == 'group' && $field_name == OG_GROUP_FIELD) {
+    throw new Exception('Cannot add group field to a group entity.');
+  }
 
+  if ($group_field = og_fields_info($field_name)) {
     $field = field_info_field($field_name);
     if (empty($field)) {
       $field = field_create_field($group_field['field']);

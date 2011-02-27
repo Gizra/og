@@ -717,6 +717,10 @@ function og_ui_field_settings_validate($form, &$form_state) {
     '%entity' => $entity_info['label'],
   );
 
+  if ($form_state['values']['fields'] == OG_GROUP_FIELD && $entity_type == 'group') {
+    form_set_error('bundles', t('It is not allowed to add the group field to the group entity.'));
+  }
+
   // Check if field doesn't exist already.
   if (($field = field_info_field($form_state['values']['fields'])) && !empty($field['bundles'][$entity_type]) && in_array($bundle, drupal_map_assoc($field['bundles'][$entity_type]))) {
     form_set_error('bundles', t('Field %field already exists in %bundle.', $params));
