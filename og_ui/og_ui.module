@@ -635,3 +635,14 @@ function og_ui_get_group_admin($gid) {
 
   return $data;
 }
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Hide the group audience field from the user page, for non-privileged users.
+ */
+function og_ui_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
+  if ($entity_type == 'user' && !user_access('administer group')) {
+    $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#access'] = FALSE;
+  }
+}
