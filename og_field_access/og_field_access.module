@@ -101,6 +101,9 @@ function og_field_access_field_attach_view_alter(&$result, $context) {
 function og_field_access_check_access($entity_type, $entity, &$form, $form_state, $langcode, $field_name, $op) {
   global $user;
 
+  // TODO: It seems $langcode isn't always passed.
+  $langcode = !empty($langcode) ? $langcode : LANGUAGE_NONE;
+
   // We might need to copy the bundle property from the form into the field.
   // This is because this function is called from the view and the edit
   // field attachers, and we want to deal with the access in a general way.
