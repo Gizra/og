@@ -38,7 +38,7 @@ define('OG_CONTENT_ACCESS_PRIVATE', 2);
 
 
 /**
- * Implementation of hook_node_grants().
+ * Implements hook_node_grants().
  */
 function og_access_node_grants($account, $op) {
   $grants = array();
@@ -55,7 +55,7 @@ function og_access_node_grants($account, $op) {
 
 
 /**
- * Implementation of hook_node_access_records.
+ * Implements hook_node_access_records().
  */
 function og_access_node_access_records($node) {
   $grants = array();
