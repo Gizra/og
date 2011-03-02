@@ -1051,7 +1051,7 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
   global $user;
   $perm = &drupal_static(__FUNCTION__, array());
   // Mark the group ID and permissions that invoked an alter.
-  $perm_alter = &drupal_static(__FUNCTION__, array());
+  $perm_alter = &drupal_static(__FUNCTION__ . '_alter', array());
 
   if (empty($account)) {
     $account = clone $user;
