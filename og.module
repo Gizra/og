@@ -1051,7 +1051,7 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
   global $user;
   $perm = &drupal_static(__FUNCTION__, array());
   // Mark the group ID and permissions that invoked an alter.
-  $perm_alter = &drupal_static(__FUNCTION__, array());
+  $perm_alter = &drupal_static(__FUNCTION__ . '_alter', array());
 
   if (empty($account)) {
     $account = clone $user;
@@ -1089,7 +1089,6 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
     $perms = array();
     foreach ($role_permissions as $one_role) {
       $perms += $one_role;
-
       $perm[$gid][$account->uid] = $perms;
     }
   }
@@ -1100,6 +1099,10 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
     $temp_perm = $perm[$gid][$account->uid];
     $context = array('string' => $string, 'group' => $group, 'account' => $account);
     drupal_alter('og_user_access', $temp_perm, $context);
+
+    // Re-assing the altered permissions.
+    $perm[$gid][$account->uid] = $temp_perm;
+
     // Make sure alter isn't called for the same permissions.
     $perm_alter[$gid][$account->uid][$string] = TRUE;
   }
