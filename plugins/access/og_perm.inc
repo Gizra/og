@@ -12,7 +12,7 @@
  */
 $plugin = array(
   'title' => t("OG: user permission in group"),
-  'description' => t('Control access by gorup permission string.'),
+  'description' => t('Control access by group permission string.'),
   'callback' => 'og_perm_ctools_access_check',
   'default' => array('perm' => ''),
   'settings form' => 'og_perm_ctools_access_settings',
