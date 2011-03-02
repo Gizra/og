@@ -17,6 +17,11 @@ function og_node_create_links_content_type_render($subtype, $conf, $args, $conte
   if (empty($context->data)) {
     return FALSE;
   }
+  $links = og_node_create_links($group->gid);
+  if (!$links) {
+    return FALSE;
+  }
+
   $group = $context->data;
 
   $module = 'og';
@@ -27,7 +32,6 @@ function og_node_create_links_content_type_render($subtype, $conf, $args, $conte
   $output = '';
   $output .= '<div class="' . str_replace('_', '-', $subtype) . '-wrapper">';
 
-  $links = og_node_create_links($group->gid);
   $output .= drupal_render($links);
 
   $output .= '</div>';
