@@ -100,6 +100,12 @@ function og_field_schema($field) {
     'indexes' => array(
       'gid' => array('gid'),
     ),
+    'foreign keys' => array(
+      'og' => array(
+        'table' => 'og',
+        'columns' => array('gid' => 'gid'),
+      ),
+    ),
   );
 }
 
