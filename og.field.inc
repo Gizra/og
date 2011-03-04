@@ -466,7 +466,6 @@ function og_field_attach_delete($entity_type, $entity) {
  * Handle translated nodes that act as groups.
  */
 function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
-  $form['#validate'][] = 'og_field_widget_form_validate';
   if (!empty($form['#node_edit_form']) &&
     (og_is_group_type('node', $form['type']['#value']) || og_is_group_content_type('node', $form['type']['#value'])) &&
     (!empty($entity->tnid) && $entity->tnid != $entity->nid) || (!empty($_GET['translation']) && !empty($_GET['target']))) {

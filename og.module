@@ -359,6 +359,17 @@ function og_views_api() {
 }
 
 /**
+ * Implements hook_form_alter().
+ *
+ * Add own validation handler to form that might have fields. We don't add it
+ * via hook_field_attach_form() since it's to early, and we might override the
+ * default validation handler. @see drupal_prepare_form().
+ */
+function og_form_alter(&$form, $form_state, $form_id) {
+  $form['#validate'][] = 'og_field_widget_form_validate';
+}
+
+/**
  * Implements hook_og_fields_info().
  */
 function og_og_fields_info() {
