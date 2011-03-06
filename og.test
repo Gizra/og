@@ -1010,6 +1010,9 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
     $this->performUpgrade(FALSE);
     $this->assertText('You must enable Organic groups module to perform an upgrade from Drupal 6', t('Organic groups did not upgrade when module is disabled.'));
 
+    // Set small batch sizes, so we can simulate upgrade with many records.
+    variable_set('og_update_batch_size', 3);
+
     // TODO: Understand why this workround is needed to load all entity classes.
     module_enable(array('entity'));
     module_load_include('inc', 'entity' ,'includes/entity');
@@ -1047,7 +1050,7 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
     $group_beta = og_get_group('node', 8);
     $node = node_load(9);
     foreach (array($group_alpha, $group_beta) as $group) {
-      $this->assertTrue(og_is_member($group->gid, 'node', $node), t('Node ID @nid is as group content associated with multiple groups.'));
+      $this->assertTrue(og_is_member($group->gid, 'node', $node), t('Node ID @nid is as group content associated with multiple groups.', array('@nid' => $node->nid)));
     }
 
     // Check user membership.

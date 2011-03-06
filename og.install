@@ -25,6 +25,7 @@ function og_uninstall() {
     'og_context',
     'og_group_manager_full_access',
     'og_skip_access',
+    'og_update_batch_size',
   );
   foreach ($vars as $var) {
     variable_del($var);
@@ -220,6 +221,20 @@ function og_update_7000(&$sandbox) {
     db_rename_table('og_ancestry', 'd6_og_ancestry');
     db_rename_table('og_uid', 'd6_og_uid');
 
+    // Add serial ID to d6_og* tables so we can keep track of records that were
+    // processed.
+    foreach (array('d6_og', 'd6_og_ancestry', 'd6_og_uid') as $table) {
+      // Drop the current primary key, as we are adding a serial column.
+      db_drop_primary_key($table);
+      db_add_field($table, 'upgrade_id', array(
+        'description' => 'This a serial ID that keeps track of records that were processed.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      array('primary key' => array('upgrade_id')));
+    }
+
     // Install the new database.
     drupal_install_schema('og');
     og_install();
@@ -298,7 +313,11 @@ function og_update_7000(&$sandbox) {
 
       // Initialize state for future calls.
       $sandbox['last'] = 0;
+      $sandbox['last_vid'] = 0;
       $sandbox['count'] = 0;
+      // The batch size is defined by variable, like this we can change it via
+      // tests.
+      $sandbox['batch_size'] = variable_get('og_update_batch_size', 200);
 
       // Hold the information about the callbacks that upgrade the different
       // fields.
@@ -340,7 +359,7 @@ function og_update_7000(&$sandbox) {
 
         if (!$found) {
           // Continue to the next upgrade element.
-          $sandbox['last'] = 0;
+          $sandbox['last'] = $sandbox['last_vid'] = 0;
           array_shift($sandbox['group upgrade']);
         }
 
@@ -362,15 +381,16 @@ function _og_upgrade_group(&$sandbox) {
   $found = FALSE;
 
   // Operate on every revision of every node, in batches.
-  $batch_size = 200;
+  $batch_size = $sandbox['batch_size'];
   $query = db_select('node_revision', 'nr');
   $query->innerJoin('node', 'n', 'n.vid = nr.vid');
   $query->innerJoin('d6_og', 'og', 'n.nid = og.nid');
   $query
     ->fields('nr', array('nid', 'vid'))
     ->fields('n', array('type', 'created'))
-    ->fields('og', array('og_description'))
-    ->condition('nr.vid', $sandbox['last'], '>')
+    ->fields('og', array('upgrade_id', 'og_description'))
+    ->condition('nr.vid', $sandbox['last_vid'], '>')
+    ->condition('og.upgrade_id', $sandbox['last'], '>')
     ->orderBy('nr.vid', 'ASC')
     ->range(0, $batch_size);
   $revisions = $query->execute();
@@ -400,7 +420,8 @@ function _og_upgrade_group(&$sandbox) {
 
     field_attach_update('node', $node);
 
-    $sandbox['last'] = $revision->vid;
+    $sandbox['last_vid'] = $revision->vid;
+    $sandbox['last'] = $revision->upgrade_id;
   }
 
   // Update group enteties with the correct "created" timestamp. The group
@@ -429,26 +450,29 @@ function _og_upgrade_group_content(&$sandbox) {
   $found = FALSE;
 
   // Operate on users in batches.
-  $batch_size = 200;
+  $batch_size = $sandbox['batch_size'];
   $query = db_select('node_revision', 'nr');
   $query->innerJoin('node', 'n', 'n.vid = nr.vid');
   $query->innerJoin('d6_og_ancestry', 'oga', 'n.nid = oga.nid');
   $query
     ->fields('nr', array('nid', 'vid'))
     ->fields('n', array('type', 'created'))
-    ->fields('oga', array('group_nid'))
-    ->condition('nr.vid', $sandbox['last'], '>')
+    ->fields('oga', array('upgrade_id', 'group_nid'))
+    ->condition('nr.vid', $sandbox['last_vid'], '>')
+    ->condition('oga.upgrade_id', $sandbox['last'], '>')
     ->orderBy('nr.vid', 'ASC')
     ->range(0, $batch_size);
   $revisions = $query->execute();
 
   foreach ($revisions as $revision) {
+    $found = TRUE;
     $group = og_get_group('node', $revision->group_nid);
 
     $node = node_load($revision->nid, $revision->vid);
     og_group($group->gid, 'node', $node);
 
-    $sandbox['last'] = $node->nid;
+    $sandbox['last_vid'] = $revision->vid;
+    $sandbox['last'] = $revision->upgrade_id;
     // User subscribed to group.
     $sandbox['count'] += 1;
   }
@@ -470,16 +494,17 @@ function _og_upgrade_user(&$sandbox) {
   $found = FALSE;
 
   // Operate on users in batches.
-  $batch_size = 200;
+  $batch_size = $sandbox['batch_size'];
   $query = db_select('d6_og_uid', 'ogu');
   $query
     ->fields('ogu')
-    ->condition('ogu.nid', $sandbox['last'], '>')
+    ->condition('ogu.upgrade_id', $sandbox['last'], '>')
     ->orderBy('ogu.nid', 'ASC')
     ->range(0, $batch_size);
   $accounts = $query->execute();
 
   foreach ($accounts as $account) {
+    $found = TRUE;
     $group = og_get_group('node', $account->nid);
     $state = $account->is_active ? OG_STATE_ACTIVE : OG_STATE_PENDING;
 
@@ -488,7 +513,7 @@ function _og_upgrade_user(&$sandbox) {
     if ($account->is_admin) {
       og_role_grant($group->gid, $account->uid, $rid);
     }
-    $sandbox['last'] = $account->nid;
+    $sandbox['last'] = $account->upgrade_id;
     // User subscribed to group.
     $sandbox['count'] += 1;
   }

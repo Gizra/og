@@ -32,7 +32,7 @@
  * - Nid 10: Group with members:
  *   - Uid 3: Group manager.
  *   - Uid 4: Pending member.
- *   - Uid 5: active member.
+ *   - Uid 5: Active member.
  *   - Uid 6: Pending admin member.
  *   - Uid 7: Active admin member.
  * - Nid 11: Group with "Open" selective state.
