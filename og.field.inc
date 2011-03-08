@@ -7,24 +7,6 @@
  */
 
 /**
- * Implements hook_field_widget_properties_alter().
- */
-function og_field_widget_properties_alter(&$widget, $context) {
-  $field = $context['field'];
-  if ($field['field_name'] == OG_AUDIENCE_FIELD) {
-    $instance = $context['instance'];
-    // Determine if a user may see other groups as-well.
-    $opt_group = FALSE;
-
-    if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer group'))) {
-      $opt_group = TRUE;
-    }
-
-    $widget['type'] = $instance['widget']['settings']['minimum_for_autocomplete'] <= og_field_audience_count($opt_group) ? OG_AUDIENCE_AUTOCOMPLETE_WIDGET : OG_AUDIENCE_WIDGET;
-  }
-}
-
-/**
  * Implement hook_field_info().
  */
 function og_field_info() {
@@ -166,12 +148,6 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
  * Implement hook_field_widget_info().
  */
 function og_field_widget_info() {
-  $autocomplete_settings = array(
-    'autocomplete_match' => 'contains',
-    'size' => 60,
-    'autocomplete_path' => 'group/autocomplete',
-  );
-
   return array(
     OG_AUDIENCE_WIDGET => array(
       'label' => t('Group audience'),
@@ -188,13 +164,17 @@ function og_field_widget_info() {
         'opt_group' => 'auto',
         'minimum_for_select_list' => 20,
         'minimum_for_autocomplete' => 50,
-      ) + $autocomplete_settings,
+      ),
     ),
     OG_AUDIENCE_AUTOCOMPLETE_WIDGET => array(
       'label'       => t('Autocomplete text field'),
       'description' => t('Display the list of referenceable groups as a textfield with autocomplete behaviour.'),
       'field types' => array('group'),
-      'settings'    => $autocomplete_settings,
+      'settings'    => array(
+        'autocomplete_match' => 'contains',
+        'size' => 60,
+        'autocomplete_path' => 'group/autocomplete',
+      ),
     ),
   );
 }
@@ -207,57 +187,25 @@ function og_field_widget_settings_form($field, $instance) {
   $defaults = field_info_widget_settings($widget['type']);
   $settings = array_merge($defaults, $widget['settings']);
 
-  if ($widget['type'] == OG_AUDIENCE_WIDGET) {
-
-    $form['opt_group'] = array(
-      '#type' => 'radios',
-      '#title' => t('Input type'),
-      '#description' => t('Select the input type that should be used to get the groups audience. Note that the <em>Never show "other groups"</em> option will show all groups including the ones the user is a not a member of.'),
-      '#options' => array(
-        'auto' => t('Automatically decide the input according to user permissions (Recommended)'),
-        'never' => t('Never show "other groups"'),
-        'always' => t('Always show "other groups"'),
+ if ($widget['type'] == OG_AUDIENCE_AUTOCOMPLETE_WIDGET) {
+    $form['autocomplete_match'] = array(
+      '#type'             => 'select',
+      '#title'            => t('Autocomplete matching'),
+      '#default_value'    => $settings['autocomplete_match'],
+      '#options'          => array(
+        'starts_with'     => t('Starts with'),
+        'contains'        => t('Contains'),
       ),
-      '#default_value' => $settings['opt_group'],
-      '#required' => TRUE,
+      '#description'      => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
     );
-
-    $form['minimum_for_select_list'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Minimum for select list'),
-      '#description' => t('The minimum number of groups before showing the group as a dropdown list.'),
-      '#default_value' => $settings['minimum_for_select_list'],
-      '#required' => TRUE,
+    $form['size'] = array(
+      '#type'             => 'textfield',
+      '#title'            => t('Size of textfield'),
+      '#default_value'    => $settings['size'],
       '#element_validate' => array('_element_validate_integer_positive'),
-    );
-
-    $form['minimum_for_autocomplete'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Minimum for autocomplete'),
-      '#description' => t('The minimum number of groups before showing the group as autocomplete.'),
-      '#default_value' => $settings['minimum_for_autocomplete'],
-      '#required' => TRUE,
-      '#element_validate' => array('_element_validate_integer_positive'),
+      '#required'         => TRUE,
     );
   }
-
-  $form['autocomplete_match'] = array(
-    '#type'             => 'select',
-    '#title'            => t('Autocomplete matching'),
-    '#default_value'    => $settings['autocomplete_match'],
-    '#options'          => array(
-      'starts_with'     => t('Starts with'),
-      'contains'        => t('Contains'),
-    ),
-    '#description'      => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
-  );
-  $form['size'] = array(
-    '#type'             => 'textfield',
-    '#title'            => t('Size of textfield'),
-    '#default_value'    => $settings['size'],
-    '#element_validate' => array('_element_validate_integer_positive'),
-    '#required'         => TRUE,
-  );
 
   return $form;
 }
@@ -335,31 +283,19 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       // The group options presented to the user.
       $options = array();
       $hidden_selected_gids = array();
+      $type = 'select';
       if ($opt_group) {
         // Show "My groups" and "Other groups".
-        $groups_count = 0;
         if ($my_groups = array_diff_key($audience['content groups'], $excludes)) {
           $options += array(t('My groups') => $my_groups);
-          $groups_count = $groups_count + count($my_groups);
         }
         if ($other_groups = array_diff_key($audience['other groups'], $excludes)) {
           $options += array(t('Other groups') => $other_groups);
-          $groups_count = $groups_count + count($other_groups);
         }
-        $type = 'select';
       }
       else {
         // Show only "My groups".
-        $groups_count = count($audience['content groups']);
         $options = array_diff_key($audience['content groups'], $excludes);
-        // Show a select list if their are a minimum of groups.
-        if ($field['cardinality'] == 1) {
-          $type = 'radios';
-        }
-        else {
-          $type = $groups_count >= $instance['widget']['settings']['minimum_for_select_list'] ? 'select' : 'checkboxes';
-        }
-
         // If there are items that are already selected but the user doesn't
         // have access to them, we need to keep track of them.
         $hidden_selected_gids = drupal_map_assoc(array_diff($items_gid, array_keys($options)));
@@ -368,28 +304,28 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       if (empty($options)) {
         // There are no group, so don't show any input element.
         $type = 'item';
+        $element['#description'] = t('There are no groups you can select from.');
+        $properties = array();
+      }
+      else {
+        if (empty($element['#description'])) {
+          $element['#description'] = t('Select the groups this content should be associated with.');
+        }
+
+        $element['#multiple'] = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;;
+        // Don't make the field required, if there are no groups.
+        $element['#required'] = $element['#required'] && !empty($options);
+
+        $properties = _options_properties($type, $element['#multiple'], $element['#required'], $options);
+        // If the element isn't required and cardinality is more than 1, and there
+        // are some options, and a "none" option.
+        if (!$element['#required'] && !$element['#multiple']) {
+          // Use a dummy instance in order to use theme('options_none');
+          $dummy_instance['widget']['type'] = 'options_'. $options_type;
+          $options = array('_none' => theme('options_none', array('instance' => $dummy_instance))) + $options;
+        }
       }
 
-      if (empty($element['#description'])) {
-        $element['#description'] = !empty($groups_count) ? t('Select the groups this content should be associated with.') : t('There are no groups you can select from.');
-      }
-
-      $element['#multiple'] = $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;;
-      // Don't make the field required, if there are no groups.
-      $element['#required'] = $element['#required'] && !empty($options);
-
-      // Prepare the type as expected in _options_properties().
-      $options_type = in_array($type, array('radios', 'checkboxes')) ? 'buttons' : $type;
-
-      $properties = _options_properties($options_type, $element['#multiple'], $element['#required'], $options);
-
-      // If the element isn't required and cardinality is more than 1, and there
-      // are some options, and a "none" option.
-      if (!$element['#required'] && !$multiple && $type != 'item') {
-        // Use a dummy instance in order to use theme('options_none');
-        $dummy_instance['widget']['type'] = 'options_'. $options_type;
-        $options = array('_none' => theme('options_none', array('instance' => $dummy_instance))) + $options;
-      }
 
       $element += array(
         // Input should be TRUE only if there are groups that can be selected.
@@ -398,7 +334,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         '#options' => $options,
         '#default_value' => $default_values,
         '#attributes' => array('class' => array('group-audience')),
-        '#disabled' => empty($groups_count),
+        '#disabled' => empty($options),
         // Re-use options widget element validation, to correctly transform
         // submitted values from field => delta to delta => field.
         // @see options_field_widget().
