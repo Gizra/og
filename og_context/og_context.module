@@ -188,7 +188,7 @@ function og_context_add_js($group) {
   $js = &drupal_static(__FUNCTION__, FALSE);
 
   if (empty($js)) {
-    drupal_add_js(array('group' => array('og_context' => $group)), 'setting');
+    drupal_add_js(array('og' => array('og_context' => $group)), 'setting');
     $js = TRUE;
   }
 }
