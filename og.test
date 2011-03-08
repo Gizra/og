@@ -702,7 +702,6 @@ class OgTranslationTestCase extends DrupalWebTestCase {
  * - Opt group enabled or disabled.
  * - Editing existing field.
  * - Prepopulate via URL.
- * - Change input from checkboxes to select.
  */
 class OgGroupAudienceField extends DrupalWebTestCase {
 
@@ -750,63 +749,8 @@ class OgGroupAudienceField extends DrupalWebTestCase {
 
     $this->drupalGet('node/add/article');
     $this->assertText(t('Select the groups this content should be associated with.'), 'Field group audience shows correct description about existing groups.');
-    // TODO: Why is the extra space needed in the result?
-    $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $group->gid . '"]', $group->label . ' ', 'Field group audience shows the existing group.');
   }
 
-  function testOptGroup() {
-    // Create users.
-    $admin_user = $this->drupalCreateUser(array(
-      'access content',
-      'administer content types',
-      'create article content',
-      'edit any article content',
-      'administer group',
-    ));
-
-    $web_user = $this->drupalCreateUser(array(
-      'access content',
-      'administer content types',
-      'create article content',
-      'edit any article content',
-    ));
-
-    // Assert no group options are presented to any of the users.
-    foreach (array($admin_user, $web_user) as $account) {
-      $this->drupalLogin($account);
-      $this->drupalGet('node/add/article');
-      $this->assertText(t('There are no groups you can select from.'), t('no group options are presented to any of the users.'));
-    }
-
-    // Create one group that belongs to each user.
-    $groups = array();
-    foreach (array($admin_user, $web_user) as $account) {
-      $settings = array();
-      $settings['type'] = 'article';
-      $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
-      $settings['uid'] = $account->uid;
-      $node = $this->drupalCreateNode($settings);
-      $group = og_get_group('node', $node->nid);
-
-      $groups[] = $group;
-    }
-
-    list($admin_group, $web_group) = $groups;
-
-    // Assert admin user sees opt group with both groups.
-    // and web user sees only their own group.
-    $this->drupalLogin($admin_user);
-    $this->drupalGet('node/add/article');
-    // TODO: Get the group label in the xpath instead of just group ID.
-    $this->assertFieldByXPath('//optgroup[@label="My groups"]/option', $admin_group->gid, t('Field group audience shows the group to user may see.'));
-    $this->assertFieldByXPath('//optgroup[@label="Other groups"]/option', $web_group->gid, t('Field group audience shows the group to user may see.'));
-
-    $this->drupalLogin($web_user);
-    $this->drupalGet('node/add/article');
-    // Result appears as checkboxes.
-    $this->assertFieldByXPath('//label[@for="edit-group-audience-und-' . $web_group->gid . '"]', $web_group->label . ' ', t('Field group audience shows the group to user may see.'));
-    $this->assertNoFieldByXPath('//label[@for="edit-group-audience-und-' . $admin_group->gid . '"]', $admin_group->label . ' ', t('Field group audience is shown without opt group to non-privileged user.'));
-  }
 
   /**
    * Test prepopulating the audience field widget via URL.
@@ -844,10 +788,12 @@ class OgGroupAudienceField extends DrupalWebTestCase {
       $groups[$id] = $group;
     }
 
+    $id = 'edit-group-audience-und';
+
     // Assert all 6 groups are unselected in the audience field.
     $this->drupalGet('node/add/article');
     foreach ($groups as $group) {
-      $this->assertNoFieldChecked('edit-group-audience-und-' . $group->gid);
+      $this->assertNoOptionSelected($id, $group->gid);
     }
 
     // Assert all entity types passed in the URL as selected.
@@ -855,8 +801,8 @@ class OgGroupAudienceField extends DrupalWebTestCase {
     $this->drupalGet('node/add/article', $options);
 
     foreach ($groups as $group) {
-      $op = !in_array($group->gid, array(3, 6)) ? 'assertFieldChecked' : 'assertNoFieldChecked';
-      $this->$op('edit-group-audience-und-' . $group->gid);
+      $op = !in_array($group->gid, array(3, 6)) ? 'assertOptionSelected' : 'assertNoOptionSelected';
+      $this->$op($id, $group->gid);
     }
 
     // Assert all groups passed in the URL are selected.
@@ -865,22 +811,22 @@ class OgGroupAudienceField extends DrupalWebTestCase {
     $this->drupalGet('node/add/article', $options);
 
     foreach ($groups as $group) {
-      $op = $group->gid == 1 ? 'assertFieldChecked' : 'assertNoFieldChecked';
-      $this->$op('edit-group-audience-und-' . $group->gid);
+      $op = $group->gid == 1 ? 'assertOptionSelected' : 'assertNoOptionSelected';
+      $this->$op($id, $group->gid);
     }
 
     // Pass invalid entity types, check nothing is selected.
     $options = array('query' => array('gids_invalid_entity[]' => $group->gid));
     $this->drupalGet('node/add/article', $options);
     foreach ($groups as $group) {
-      $this->assertNoFieldChecked('edit-group-audience-und-' . $group->gid);
+      $this->assertNoOptionSelected($id, $group->gid);
     }
 
     // Pass invalid group IDs, check nothing is selected.
     $options = array('query' => array('gids_node[]' => 200));
     $this->drupalGet('node/add/article', $options);
     foreach ($groups as $group) {
-      $this->assertNoFieldChecked('edit-group-audience-und-' . $group->gid);
+      $this->assertNoOptionSelected($id, $group->gid);
     }
   }
 
@@ -931,14 +877,13 @@ class OgGroupAudienceField extends DrupalWebTestCase {
     // TODO: Assert user can see only the third group in the audience field.
 
     // Unselect the third group.
-    $edit['group_audience[und][' . $groups[3]->gid . ']'] = FALSE;
+    $edit = array();
+    $edit['group_audience[und][]'] = array();
     $this->drupalPost(NULL, $edit, t('Save'));
 
-    // Assert article is still assigned to to one group.
-    $this->drupalGet('node/' . $node->nid . '/edit');
     // Reload node and reset cache.
     $node = node_load($node->nid, NULL, TRUE);
-    $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid)), t('Article node is still assigned to one group - one that is hidden from the current user.'));
+    $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid)), t('Article node is still assigned to a group that is hidden from the current user.'));
   }
 }
 
