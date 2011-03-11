@@ -6,3 +6,8 @@ core = 7.x
 version = VERSION
 files[] = og_ui.test
 configure = admin/config/group
+
+; Rules integration.
+features[rules_config][] = "rules_member_subscribe"
+features[rules_config][] = "rules_member_subscribe_pending"
+features[rules_config][] = "rules_member_unsubscribe"
