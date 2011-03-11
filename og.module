@@ -375,6 +375,7 @@ function og_entity_presave($entity, $type) {
       if (!empty($diff[$op])) {
         foreach ($diff[$op] as $item) {
           $group = og_load($item['gid']);
+          $item += array('user request' => '');
           module_invoke_all($hook, $account, $group, $item['state'], $item['user request']);
           // TODO: Can we invoke rule also when type is not user? Currently in
           // rules event info we define the account argument -- can this be any
