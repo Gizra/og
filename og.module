@@ -758,6 +758,7 @@ function og_membership_load($id) {
 }
 
 /**
+<<<<<<< HEAD
  * Get the group membership entity by User ID and group ID.
  *
  * @param $uid
@@ -787,6 +788,8 @@ function og_get_group_membership($uid, $gid) {
 }
 
 /**
+=======
+>>>>>>> bfe3fe4ead0bac7d79d7292e59cbac2201094e36
  * Inserts or updates a group membership object into the database.
  *
  * @param $membership
@@ -801,7 +804,11 @@ function og_membership_save($membership) {
 }
 
 /**
+<<<<<<< HEAD
  * Delete an existing group membership.
+=======
+ * Deletes an existing message.
+>>>>>>> bfe3fe4ead0bac7d79d7292e59cbac2201094e36
  *
  * @param $membership
  *   The group membership entity to be deleted.
@@ -836,7 +843,6 @@ function og_membership_access($op, $entity, $account = NULL, $entity_type = 'og_
   // TODO
   return TRUE;
 }
-
 
 /**
  * Return a loaded group entity if exists or create a new one.
