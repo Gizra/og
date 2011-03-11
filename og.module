@@ -358,6 +358,92 @@ function og_views_api() {
 }
 
 /**
+ * Implements hook_entity_presave().
+ */
+function og_entity_presave($entity, $type) {
+  if ($diff = og_entity_presave_group_audience_diff($entity, $type)) {
+    // Define the operation and the hook that it should invoke.
+    $info = array(
+      'insert' => 'og_group',
+      'update' => 'og_group',
+      'delete' => 'og_ungroup',
+    );
+
+    $account = clone $entity;
+
+    foreach ($info as $op => $hook) {
+      if (!empty($diff[$op])) {
+        foreach ($diff[$op] as $item) {
+          $group = og_load($item['gid']);
+          module_invoke_all($hook, $account, $group, $item['state'], $item['user request']);
+          // TODO: Can we invoke rule also when type is not user? Currently in
+          // rules event info we define the account argument -- can this be any
+          // entity?
+          if ($type == 'user' && module_exists('rules')) {
+            rules_invoke_event($hook, $account, $group, $item['state'], $item['user request']);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Get the difference in group audience for a presaved entity.
+ * @param $entity
+ *   The presaved entity (i.e. with "original" key holding the unchanged
+ *   entity).
+ * @param $type
+ *   The entity type.
+ *
+ * @return
+ *   Array with all the differences, or an empty array if none found.
+ */
+function og_entity_presave_group_audience_diff($entity, $type) {
+  if (empty($entity->original) || empty($entity->{OG_AUDIENCE_FIELD})) {
+    return;
+  }
+
+  $return = array('insert' => array(), 'update' => array(), 'delete' => array());
+  $entity_original = $entity->original;
+  if ($entity_original->{OG_AUDIENCE_FIELD} != $entity->{OG_AUDIENCE_FIELD}) {
+    // Compare arrays. For simplicity we split the cases for when the original
+    // entity has more groups than the entity.
+    if (count($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) > count($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
+      $first_array = $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
+      $second_array = $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
+
+      foreach ($first_array as $key => $value) {
+        if (empty($second_array[$key])) {
+          // Content was removed from group.
+          $return['delete'][] = $first_array[$key];
+        }
+        elseif ($first_array[$key] != $second_array[$key]) {
+          // Content state was updated.
+          $return['update'][] = $second_array[$key];
+        }
+      }
+    }
+    else {
+      $first_array = $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
+      $second_array = $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
+
+      foreach ($first_array as $key => $value) {
+        if (empty($second_array[$key])) {
+          // Content was added to group.
+          $return['insert'][] = $first_array[$key];
+        }
+        elseif ($first_array[$key] != $second_array[$key]) {
+          // Content state was updated.
+          $return['update'][] = $first_array[$key];
+        }
+      }
+    }
+  }
+  return $return;
+}
+
+/**
  * Implements hook_form_alter().
  *
  * Add own validation handler to form that might have fields. We don't add it
@@ -927,7 +1013,7 @@ function og_get_all_group($states = array(OG_STATE_ACTIVE), $options = array()) 
  * @return
  *   The entity with the fields updated.
  */
-function og_group($gid, $entity_type = 'user', $entity = NULL, $state = OG_STATE_ACTIVE, $save = TRUE, $force_reload = TRUE) {
+function og_group($gid, $entity_type = 'user', $entity = NULL, $state = OG_STATE_ACTIVE, $save = TRUE, $force_reload = TRUE, $user_request = '') {
   if ($entity_type == 'user' && empty($entity)) {
     global $user;
     $entity = clone $user;
@@ -972,6 +1058,9 @@ function og_group($gid, $entity_type = 'user', $entity = NULL, $state = OG_STATE
           'gid' => $gid,
           'state' => $state,
           'created' => time(),
+          // This value won't be saved, just passed along.
+          // @see og_entity_presave().
+          'user request' => $user_request,
         );
         $entity->{$property}[LANGUAGE_NONE][] = $values;
 
@@ -979,6 +1068,9 @@ function og_group($gid, $entity_type = 'user', $entity = NULL, $state = OG_STATE
       else {
         if ($wrapper[$existing_key]['state'] != $state) {
           $wrapper[$existing_key]['state'] = $state;
+          // This value won't be saved, just passed along.
+          // @see og_entity_presave().
+          $wrapper[$existing_key]['user request'] = $user_request;
         }
         else {
           // Nothing changed, so don't try to save.

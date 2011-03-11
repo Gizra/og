@@ -654,21 +654,3 @@ function og_ui_get_group_admin($gid) {
 
   return $data;
 }
-
-/**
- * Implements hook_og_ui_subscribe_member()
- */
-function og_ui_og_ui_subscribe_member($account, $group, $state, $request) {
-  if (module_exists('rules')) {
-    rules_invoke_event('og_ui_subscribe_member', $account, $group, $state, $request);
-  }
-}
-
-/**
- * Implements hook_og_ui_unsubscribe_member()
- */
-function og_ui_og_ui_unsubscribe_member($account, $group) {
-  if (module_exists('rules')) {
-    rules_invoke_event('og_ui_unsubscribe_member', $account, $group);
-  }
-}

@@ -15,26 +15,26 @@
  */
 function og_rules_event_info() {
   $items = array();
-  $items['og_ui_subscribe_member'] = array(
-    'label' => t('After subscribing member'),
-    'group' => t('Organic groups UI'),
+  $items['og_group'] = array(
+    'label' => t('After grouping content'),
+    'group' => t('Organic groups'),
     'variables' => array(
       'account' => array('type' => 'user', 'label' => t('Subscribing user')),
       'group' => array('type' => 'group', 'label' => t('Group')),
       'state' => array(
         'type' => 'text',
-        'label' => t('The state of the subscription (active or pending)'),
+        'label' => t('The state of the subscription'),
         'options list' => 'og_group_states',
       ),
-      'request' => array('type' => 'text', 'label' => t('User request (Optional)')),
+      'request' => array('type' => 'text', 'label' => t('User request')),
     ),
     // TODO:
     // 'access callback' => 'rules_user_integration_access',
   );
 
-  $items['og_ui_unsubscribe_member'] = array(
-    'label' => t('After unsubscribing member from group'),
-    'group' => t('Organic groups UI'),
+  $items['og_ungroup'] = array(
+    'label' => t('After ungrouping content'),
+    'group' => t('Organic groups'),
     'variables' => array(
       'account' => array('type' => 'user', 'label' => t('Unsubscribing user')),
       'group' => array('type' => 'group', 'label' => t('Group')),

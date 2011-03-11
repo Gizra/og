@@ -88,11 +88,9 @@ function og_ui_confirm_subscribe_submit($form, &$form_state) {
   $account = $form_state['values']['account'];
 
   $state = og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
-  og_group($group->gid, 'user', $account, $state);
-
-  // Invoke hook.
+  // Pass the user's request to the grouping action.
   $form_state['values'] += array('request' => '');
-  module_invoke_all('og_ui_subscribe_member', $account, $group, $state == OG_STATE_ACTIVE ? 'active' : 'pending', $form_state['values']['request']);
+  og_group($group->gid, 'user', $account, $state, TRUE, TRUE, $form_state['values']['request']);
 
   // Redirect.
   $form_state['redirect'] = "$group->entity_type/$group->etid";
@@ -174,9 +172,6 @@ function og_ui_confirm_unsubscribe_submit($form, &$form_state) {
   $account = $form_state['values']['account'];
 
   og_ungroup($group->gid, 'user', $account);
-
-  // Invoke hook.
-  module_invoke_all('og_ui_un_subscribe_member', $account, $group);
 
   // TODO: Determine where to go next - Group if accessible, or else site front
   // page.

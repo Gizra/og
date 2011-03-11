@@ -6,10 +6,10 @@
 function og_ui_default_rules_configuration() {
   $items = array();
   $items['rules_member_subscribe'] = entity_import('rules_config', '{ "rules_member_subscribe" : {
-      "LABEL" : "Member subscribe",
+      "LABEL" : "OG - Member subscribe",
       "PLUGIN" : "reaction rule",
       "REQUIRES" : [ "rules", "og" ],
-      "ON" : [ "og_ui_subscribe_member" ],
+      "ON" : [ "og_group" ],
       "IF" : [ { "data_is" : { "data" : [ "state" ], "value" : "active" } } ],
       "DO" : [
         { "mail" : {
@@ -23,10 +23,10 @@ function og_ui_default_rules_configuration() {
     }
   }');
   $items['rules_member_subscribe_pending'] = entity_import('rules_config', '{ "rules_member_subscribe_pending" : {
-      "LABEL" : "Member subscribe (pending approval)",
+      "LABEL" : "OG - Member subscribe (pending approval)",
       "PLUGIN" : "reaction rule",
       "REQUIRES" : [ "rules", "og" ],
-      "ON" : [ "og_ui_subscribe_member" ],
+      "ON" : [ "og_group" ],
       "IF" : [ { "data_is" : { "data" : [ "state" ], "value" : "pending" } } ],
       "DO" : [
         { "mail" : {
@@ -52,10 +52,10 @@ function og_ui_default_rules_configuration() {
     }
   }');
   $items['rules_member_unsubscribe'] = entity_import('rules_config', '{ "rules_member_unsubscribe" : {
-      "LABEL" : "Member unsubscribe",
+      "LABEL" : "OG - Member unsubscribe",
       "PLUGIN" : "reaction rule",
       "REQUIRES" : [ "rules", "og" ],
-      "ON" : [ "og_ui_subscribe_member" ],
+      "ON" : [ "og_ungroup" ],
       "DO" : [
         { "mail" : {
             "to" : "[account:mail]",
