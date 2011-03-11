@@ -389,21 +389,14 @@ function og_views_api() {
  */
 function og_entity_presave($entity, $type) {
   if ($diff = og_entity_presave_group_audience_diff($entity, $type)) {
-    // Define the operation and the hook that it should invoke.
-    $info = array(
-      'insert' => 'og_group',
-      'update' => 'og_group',
-      'delete' => 'og_ungroup',
-    );
-
     $account = clone $entity;
 
-    foreach ($info as $op => $hook) {
+    foreach (array('insert', 'update', 'delete') as $op) {
       if (!empty($diff[$op])) {
         foreach ($diff[$op] as $item) {
           $group = og_load($item['gid']);
           $item += array('user request' => '');
-          module_invoke_all($hook, $account, $group, $item['state'], $item['user request']);
+          module_invoke_all('og_group_' . $op, $account, $group, $item['state'], $item['user request']);
           // TODO: Can we invoke rule also when type is not user? Currently in
           // rules event info we define the account argument -- can this be any
           // entity?
@@ -415,6 +408,35 @@ function og_entity_presave($entity, $type) {
     }
   }
 }
+
+/**
+ * Implements hook_og_group_insert().
+ */
+function og_og_group_insert($account, $group, $state, $user_request) {
+  // Create a new group membership entity.
+ $group_membership = og_membership_create($account->uid, $group->gid, array('state' => $state));
+ $group_membership->save();
+}
+
+/**
+ * Implements hook_og_group_insert().
+ */
+function og_og_group_update($account, $group, $state, $user_request) {
+  // Update group membership entity.
+  $group_membership = og_get_group_membership($account->uid, $group->uid);
+  $group_membership->setState($state)->save();
+}
+
+/**
+ * Implements hook_og_group_insert().
+ */
+function og_og_group_delete($account, $group, $state, $user_request) {
+  // Delete group membership entity.
+  $group_membership = og_get_group_membership($account->uid, $group->uid);
+  $group_membership->delete();
+}
+
+
 
 /**
  * Get the difference in group audience for a presaved entity.
@@ -673,6 +695,14 @@ class EntityOgMembership extends Entity {
   public function __construct(array $values = array(), $entityType = NULL) {
     parent::__construct($values, 'og_membership');
   }
+
+  /**
+   * Set the state field.
+   */
+  public function setState($state = OG_STATE_ACTIVE) {
+    $this->{OG_MEMBERSHIP_STATE_FIELD}[LANGUAGE_NONE][0]['value'] = $state;
+    return $this;
+  }
 }
 
 /**
@@ -725,6 +755,35 @@ function og_membership_create($uid, $gid, $values = array()) {
 function og_membership_load($id) {
   $result = entity_load('og_membership', array($id));
   return $result ? reset($result) : FALSE;
+}
+
+/**
+ * Get the group membership entity by User ID and group ID.
+ *
+ * @param $uid
+ *   User ID.
+ * @param $gid
+ *   Group ID.
+ *
+ * @return
+ *   The OgMembership object if found, or FALSE.
+ */
+function og_get_group_membership($uid, $gid) {
+  $return = &drupal_static(__FUNCTION__, array());
+
+  if (empty($return[$uid . ':' . $gid])) {
+    $query = new EntityFieldQuery();
+    $result = $query
+      ->entityCondition('entity_type', 'og_membership')
+      ->propertyCondition('uid', $uid, '=')
+      ->propertyCondition('gid', $gid, '=')
+      ->execute();
+    if (!empty($result['og_membership'])) {
+      $key = key($result['og_membership']);
+      $return[$uid . ':' . $gid] = og_membership_load($key);
+    }
+  }
+  return $return[$uid . ':' . $gid];
 }
 
 /**

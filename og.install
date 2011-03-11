@@ -19,7 +19,7 @@ function og_install() {
   // Create the field holding the membership state.
   // TODO: Add created/ changed fields.
   $field = array(
-    'field_name' => 'og_membership_state',
+    'field_name' => OG_MEMBERSHIP_STATE_FIELD,
     'type' => 'text',
     'entity_types' => array('og_membership'),
     'cardinality' => 1,
@@ -28,11 +28,11 @@ function og_install() {
   );
   $field = field_create_field($field);
   $instance = array(
-    'field_name' => 'og_membership_state',
+    'field_name' => OG_MEMBERSHIP_STATE_FIELD,
     'bundle' => 'og_membership',
     'entity_type' => 'og_membership',
     'label' => t('Group membership state'),
-    'description' => t('Mark the state of the membership to a group.'),
+    'description' => t('Mark the state of the membership in a group.'),
     'required' => TRUE,
   );
   field_create_instance($instance);
@@ -238,7 +238,7 @@ function og_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-        'description' => 'Primary Key: {users}.uid for user.',
+        'description' => 'The user ID.',
       ),
       'gid'               => array(
         'description'     => "The group's unique ID.",
