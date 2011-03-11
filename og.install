@@ -20,6 +20,7 @@ function og_install() {
   // TODO: Add created/ changed fields.
   $field = array(
     'field_name' => OG_MEMBERSHIP_STATE_FIELD,
+    // TODO: Change to integer.
     'type' => 'text',
     'entity_types' => array('og_membership'),
     'cardinality' => 1,
