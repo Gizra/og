@@ -32,3 +32,7 @@ files[] = includes/views/og_handler_relationship.inc
 
 ; Views arguments
 files[] = includes/views/og_handler_argument_group_audience_gid.inc
+
+; Rules integration.
+features[rules_config][] = "rules_member_subscribe"
+features[rules_config][] = "rules_member_subscribe_pending"

@@ -54,7 +54,7 @@ function og_theme_og_fields_info() {
 function og_theme_custom_theme() {
   if ($group = og_context()) {
     // Load the entity.
-    $entity = og_load_entity_from_group($group->gid);
+    $entity = $group->getEntity();
 
     // Check if a theme field exists, and it isn't defined as "default"
     // (i.e. use the default site theme).

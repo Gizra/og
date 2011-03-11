@@ -27,7 +27,8 @@ function og_node_from_group_context($context, $conf) {
   }
 
   if (isset($context->data->gid) && $context->data->entity_type == 'node') {
-    if ($node = og_load_entity_from_group($context->data->gid)) {
+    $group = $context->data;
+    if ($node = $group->getEntity()) {
 
       // Send it to ctools.
       return ctools_context_create('node', $node);

@@ -1,9 +1,8 @@
 <?php
 
-
 /**
  * @file
- * Group UI.
+ * Organic groups UI.
  */
 
 /**
@@ -246,6 +245,26 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   return $element;
+}
+
+/**
+ * Implements hook_mail().
+ */
+function og_ui_mail($key, &$message, $params) {
+  $language = $message['language'];
+  $message['subject'] .= _og_mail_text($key . '_subject', $language, $params);
+  $message['body'][] = _og_mail_text($key . '_body', $language, $params);
+}
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Hide the group audience field from the user page, for non-privileged users.
+ */
+function og_ui_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
+  if ($entity_type == 'user' && !user_access('administer group')) {
+    $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#access'] = FALSE;
+  }
 }
 
 
@@ -637,12 +656,109 @@ function og_ui_get_group_admin($gid) {
 }
 
 /**
- * Implements hook_field_attach_form().
- *
- * Hide the group audience field from the user page, for non-privileged users.
+ * Implements hook_og_ui_subscribe_member()
  */
-function og_ui_field_attach_form($entity_type, $entity, &$form, $form_state, $langcode) {
-  if ($entity_type == 'user' && !user_access('administer group')) {
-    $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#access'] = FALSE;
+function og_ui_og_ui_subscribe_member($account, $group, $state, $request) {
+  if (module_exists('rules')) {
+    rules_invoke_event('og_ui_subscribe_member', $account, $group, $state, $request);
   }
+}
+
+/**
+ * Implements hook_og_ui_unsubscribe_member()
+ */
+function og_ui_og_ui_unsubscribe_member($account, $group) {
+  if (module_exists('rules')) {
+    rules_invoke_event('og_ui_unsubscribe_member', $account, $group);
+  }
+}
+
+/**
+ * Returns a mail string for a variable name.
+ *
+ * Used by og_ui_mail() and the settings forms to retrieve strings.
+ */
+function _og_mail_text($key, $language = NULL, $variables = array(), $replace = TRUE) {
+  $langcode = isset($language) ? $language->language : NULL;
+  $text = '';
+  if ($admin_setting = variable_get('og_ui_mail_' . $key, FALSE)) {
+    // An admin setting overrides the default string.
+    $text = $admin_setting;
+  }
+  else {
+    // No override, return default string.
+
+    switch ($key) {
+        case 'og_ui_subscribe_no_approval_subject':
+          $text = t("Your membership request was approved for '[group:label]'", array(), array('langcode' => $langcode));
+          break;
+
+        case 'og_ui_subscribe_no_approval_body':
+          $text = t("[user:name],
+
+You are now a member in the group '[group:label]' located at [group:url]", array(), array('langcode' => $langcode));
+          break;
+
+      case 'og_ui_subscribe_pending_approval_subject':
+        $text = t("Your membership request is pending for '[group:label]'", array(), array('langcode' => $langcode));
+        break;
+
+      case 'og_ui_subscribe_pending_approval_body':
+        $text = t("[user:name],
+
+Your membership to '[group:label]' located at [group:url] is pending approval.", array(), array('langcode' => $langcode));
+          break;
+
+        case 'og_ui_deny_user_subject':
+          $text = t("Your membership request was denied for '[group:label]'", array(), array('langcode' => $langcode));
+          break;
+
+        case 'og_ui_deny_user_body':
+          $text = t("[user:name],
+
+Sorry, your membership request was denied for '[group:label]'.", array(), array('langcode' => $langcode));
+          break;
+
+        case 'og_ui_manager_subscribe_pending_approval_subject':
+          $text =  t("Membership request for '[group:label]' from [user:name]", array(), array('langcode' => $langcode));
+          break;
+
+        case 'og_ui_manager_subscribe_pending_approval_body':
+          // Set default values.
+          $variables += array('request' => '');
+          $text =  t("[group-manager:name],
+
+[user:name] is requesting membership to '[group:label]' located at [group:url]
+
+!request", array('!request' => $variables['request']), array('langcode' => $langcode));
+          break;
+
+        case 'og_ui_unsubscibe_user_subject':
+          $text = t("You have unsubscribed from '[group:label]'", array(), array('langcode' => $langcode));
+          break;
+
+        case 'og_ui_unsubscibe_user_body':
+          $text = t("[user:name],
+
+You have unsubscribed from '[group:label]' located at [group:url]", array(), array('langcode' => $langcode));
+          break;
+
+        case 'og_ui_manager_unsubscibe_user_subject':
+          $text = t("[user:name] unsubscribed from '[group:label]'", array(), array('langcode' => $langcode));
+          break;
+
+        case 'og_ui_manager_unsubscibe_user_body':
+          $text = t("[group-manager:name],
+
+[user:name] has unsubscribed from '[group:label]' located at [group:url]", array(), array('langcode' => $langcode));
+          break;
+    }
+  }
+  if ($text && $replace) {
+    // We do not sanitize the token replacement, since the output of this
+    // replacement is intended for an e-mail message, not a web browser.
+    return token_replace($text, $variables, array('language' => $language, 'sanitize' => FALSE));
+  }
+
+  return $text;
 }

@@ -84,14 +84,17 @@ function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
  * Submit handler; Confirm OG membership.
  */
 function og_ui_confirm_subscribe_submit($form, &$form_state) {
-  $request = !empty($form_state['values']['request']) ? $form_state['values']['request'] : '';
-
   $group = $form_state['values']['group'];
   $account = $form_state['values']['account'];
-  $state = og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
 
+  $state = og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
   og_group($group->gid, 'user', $account, $state);
 
+  // Invoke hook.
+  $form_state['values'] += array('request' => '');
+  module_invoke_all('og_ui_subscribe_member', $account, $group, $state == OG_STATE_ACTIVE ? 'active' : 'pending', $form_state['values']['request']);
+
+  // Redirect.
   $form_state['redirect'] = "$group->entity_type/$group->etid";
 }
 
@@ -172,6 +175,10 @@ function og_ui_confirm_unsubscribe_submit($form, &$form_state) {
 
   og_ungroup($group->gid, 'user', $account);
 
-  // Determine where to go next - Group if accessible, or else site front page.
+  // Invoke hook.
+  module_invoke_all('og_ui_un_subscribe_member', $account, $group);
+
+  // TODO: Determine where to go next - Group if accessible, or else site front
+  // page.
   $form_state['redirect'] = "$group->entity_type/$group->etid";
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * @file
  * Enable users to create and manage groups with roles and permissions.
@@ -665,6 +664,28 @@ class EntityOg extends Entity {
     }
 
     return $access;
+  }
+
+  /**
+   * Return the entity the group is related to.
+   */
+  public function getEntity() {
+    $entity = entity_load($this->entity_type, array($this->etid));
+    $entity = reset($entity);
+    return $entity;
+  }
+
+  /**
+   * Returns the group manager if exists or FALSE if entity has no User ID
+   * assigned with it.
+   */
+  public function user() {
+    $entity = $this->getEntity();
+    if (!empty($entity->uid)) {
+      return user_load($entity->uid);
+    }
+
+    return FALSE;
   }
 }
 
@@ -1356,8 +1377,7 @@ function og_get_entity_state($gid, $entity_type, $entity) {
  */
 function og_is_group_default_access($gid) {
   $return = TRUE;
-  if ($entity = og_load_entity_from_group($gid)) {
-
+  if (($group = og_load($gid)) && $entity = $group->getEntity()) {
     $property = OG_DEFAULT_ACCESS_FIELD;
 
     if (!empty($entity->{$property}[LANGUAGE_NONE]) && $wrapper = $entity->{$property}[LANGUAGE_NONE]) {
@@ -2166,19 +2186,18 @@ function og_load_entity($entity_type, $entity) {
 /**
  * Return a loaded entity from group.
  *
+ * If you already have the group object you can use $group->getEntity() instead.
+ *
  * @param $gid
  *   The group ID.
  */
 function og_load_entity_from_group($gid) {
-  $entity = FALSE;
   if ($group = og_load($gid)) {
-    $entity = entity_load($group->entity_type, array($group->etid));
-    $entity = reset($entity);
+    return $group->getEntity();
   }
 
-  return $entity;
+  return FALSE;
 }
-
 
 /**
  * Return the states a group can be in.

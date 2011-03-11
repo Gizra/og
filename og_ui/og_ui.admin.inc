@@ -6,6 +6,9 @@
  * Admin settings for Organic grops module.
  */
 
+/**
+ * Menu callback; Admin settings form.
+ */
 function og_ui_user_admin_settings($form_state) {
   $form = array();
 
@@ -15,7 +18,6 @@ function og_ui_user_admin_settings($form_state) {
     '#description' => t('When enabled the group manager will have all the permissions in the group.'),
     '#default_value' => variable_get('og_group_manager_full_access', TRUE),
   );
-
 
   return system_settings_form($form);
 }
@@ -112,7 +114,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   og_set_breadcrumb($entity_type, $etid, array(l(t('Group'), "$entity_type/$etid/group")));
   $group = og_get_group($entity_type, $etid);
   // Get the group real entity, so we can check the user ID of the entity.
-  $entity = og_load_entity_from_group($group->gid);
+  $entity = $group->getEntity();
 
   $header = array(
     'username' => array('data' => t('Username'), 'field' => 'u.name'),
@@ -238,7 +240,7 @@ function og_ui_user_admin_account_submit($form, &$form_state) {
   // isn't being processed, if they were selected.
   if (in_array($form_state['values']['operation'], array('unblock', 'deny', 'block'))) {
     // Get the entity from group.
-    $entity = og_load_entity_from_group($form_state['values']['group']->gid);
+    $entity = $group->getEntity();
 
     if (!empty($entity->uid) && in_array($entity->uid, $accounts)) {
       // Remove from the accounts array, and give a message.
