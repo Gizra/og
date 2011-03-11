@@ -388,7 +388,14 @@ function og_views_api() {
  * Implements hook_entity_presave().
  */
 function og_entity_presave($entity, $type) {
-  if ($diff = og_entity_presave_group_audience_diff($entity, $type)) {
+  if ($type == 'user' && $diff = og_entity_presave_group_audience_diff($entity, $type)) {
+    // Define the operation and the hook that it should invoke.
+    $info = array(
+      'insert' => 'og_group',
+      'update' => 'og_group',
+      'delete' => 'og_ungroup',
+    );
+
     $account = clone $entity;
 
     foreach (array('insert', 'update', 'delete') as $op) {
@@ -400,7 +407,7 @@ function og_entity_presave($entity, $type) {
           // TODO: Can we invoke rule also when type is not user? Currently in
           // rules event info we define the account argument -- can this be any
           // entity?
-          if ($type == 'user' && module_exists('rules')) {
+          if (module_exists('rules')) {
             rules_invoke_event($hook, $account, $group, $item['state'], $item['user request']);
           }
         }
@@ -459,7 +466,9 @@ function og_entity_presave_group_audience_diff($entity, $type) {
   if ($entity_original->{OG_AUDIENCE_FIELD} != $entity->{OG_AUDIENCE_FIELD}) {
     // Compare arrays. For simplicity we split the cases for when the original
     // entity has more groups than the entity.
-    if (count($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) > count($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
+    $original_count = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
+    $count = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
+    if ($original_count > $count) {
       $first_array = $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
       $second_array = $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
 
@@ -753,7 +762,6 @@ function og_membership_load($id) {
 }
 
 /**
-<<<<<<< HEAD
  * Get the group membership entity by User ID and group ID.
  *
  * @param $uid
