@@ -233,12 +233,19 @@ function og_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'uid' => array(
+      'etid' => array(
+        'description' => "The entity ID.",
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-        'description' => 'The user ID.',
+      ),
+      'entity_type' => array(
+        'description' => "The entity type (e.g. node, comment, etc').",
+        'type' => 'varchar',
+        'length' => '32',
+        'not null' => TRUE,
+        'default' => '',
       ),
       'gid'               => array(
         'description'     => "The group's unique ID.",
@@ -249,10 +256,6 @@ function og_schema() {
     ),
     'primary key' => array('id'),
     'foreign keys' => array(
-      'user' => array(
-        'table' => 'users',
-        'columns' => array('uid' => 'uid'),
-      ),
       'group' => array(
         'table' => 'og',
         'columns' => array('gid' => 'gid'),

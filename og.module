@@ -713,21 +713,16 @@ class EntityOgMembership extends Entity {
  * @return OgMembership
  *   Returns a new group membership object.
  */
-function og_membership_create($uid, $gid, $values = array()) {
+function og_membership_create($entity_type, $etid, $gid, $values = array()) {
   // TODO: Make sure the group membership doesn't already exist, to prevent duplicate key
   // error.
-  $query = new EntityFieldQuery();
-  $result = $query
-    ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition('uid', $uid, '=')
-    ->propertyCondition('gid', $gid, '=')
-    ->execute();
-  if (!empty($result['og_membership'])) {
+  if (og_get_group_membership($entity_type, $etid, $gid)) {
     $account = user_load($uid);
     $group = og_label($gid);
-    throw new Exception('Group membership for user ' . check_plain($account->name) . ' for group ' . $group . 'already exists.');
+    throw new Exception('Group membership for entity ' . check_plain($entity_type) . ' with ID ' . check_plain($etid) . ' for group ' . $group . 'already exists.');
   }
-  $values['uid'] = $uid;
+  $values['entity_type'] = $entity_type;
+  $values['etid'] = $etid;
   $values['gid'] = $gid;
 
   $values += array('state' => OG_STATE_ACTIVE);
@@ -769,14 +764,15 @@ function og_membership_load($id) {
  * @return
  *   The OgMembership object if found, or FALSE.
  */
-function og_get_group_membership($uid, $gid) {
+function og_get_group_membership($entity_type, $etid, $gid) {
   $return = &drupal_static(__FUNCTION__, array());
 
   if (empty($return[$uid . ':' . $gid])) {
     $query = new EntityFieldQuery();
     $result = $query
       ->entityCondition('entity_type', 'og_membership')
-      ->propertyCondition('uid', $uid, '=')
+      ->propertyCondition('entity_type', $entity_type, '=')
+      ->propertyCondition('etid', $etid, '=')
       ->propertyCondition('gid', $gid, '=')
       ->execute();
     if (!empty($result['og_membership'])) {
@@ -788,8 +784,6 @@ function og_get_group_membership($uid, $gid) {
 }
 
 /**
-=======
->>>>>>> bfe3fe4ead0bac7d79d7292e59cbac2201094e36
  * Inserts or updates a group membership object into the database.
  *
  * @param $membership
@@ -804,11 +798,7 @@ function og_membership_save($membership) {
 }
 
 /**
-<<<<<<< HEAD
  * Delete an existing group membership.
-=======
- * Deletes an existing message.
->>>>>>> bfe3fe4ead0bac7d79d7292e59cbac2201094e36
  *
  * @param $membership
  *   The group membership entity to be deleted.
@@ -822,14 +812,13 @@ function og_membership_delete_multiple($ids = array()) {
 }
 
 /**
- * Delete all group memberships by an ID (User ID or group ID).
+ * Delete all group memberships by group ID.
  */
-function og_membership_delete_by_id($id, $type = 'group') {
+function og_membership_delete_by_gid($gid) {
   $query = new EntityFieldQuery();
-  $property = $type == 'group' ? 'gid' : 'uid';
   $result = $query
     ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition($property, $id, '=')
+    ->propertyCondition('gid', $gid, '=')
     ->execute();
   if (!empty($result['og_membership'])) {
     og_membership_delete_multiple(array_keys($result['og_membership']));
@@ -918,7 +907,7 @@ class EntityOg extends Entity {
   public function delete() {
     $gid = $this->gid;
     // Delete group memberships.
-    og_membership_delete_by_id($this->gid);
+    og_membership_delete_by_gid($this->gid);
 
     parent::delete();
     og_invalidate_cache(array($gid));
