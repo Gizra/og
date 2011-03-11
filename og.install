@@ -228,7 +228,7 @@ function og_schema() {
     'description' => 'The group membership table.',
     'fields' => array(
       'id' => array(
-        'description' => "The group membership's unique ID composed of user ID : group Id (e.g. 1:2).",
+        'description' => "The group membership's unique ID.",
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
