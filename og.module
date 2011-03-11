@@ -803,13 +803,32 @@ function og_membership_save($membership) {
 }
 
 /**
- * Deletes an existing message.
+ * Delete an existing group membership.
  *
  * @param $membership
  *   The group membership entity to be deleted.
  */
-function og_membership_delete($membership) {
-  return entity_delete('og_membership', $membership);
+function og_membership_delete($id) {
+  return og_membership_delete(array($id));
+}
+
+function og_membership_delete_multiple($ids = array()) {
+  return entity_delete_multiple('og_membership', $ids);
+}
+
+/**
+ * Delete all group memberships by an ID (User ID or group ID).
+ */
+function og_membership_delete_by_id($id, $type = 'group') {
+  $query = new EntityFieldQuery();
+  $property = $type == 'group' ? 'gid' : 'uid';
+  $result = $query
+    ->entityCondition('entity_type', 'og_membership')
+    ->propertyCondition($property, $id, '=')
+    ->execute();
+  if (!empty($result['og_membership'])) {
+    og_membership_delete_multiple(array_keys($result['og_membership']));
+  }
 }
 
 /**
@@ -819,8 +838,6 @@ function og_membership_access($op, $entity, $account = NULL, $entity_type = 'og_
   // TODO
   return TRUE;
 }
-
-
 
 
 /**
@@ -896,6 +913,9 @@ class EntityOg extends Entity {
 
   public function delete() {
     $gid = $this->gid;
+    // Delete group memberships.
+    og_membership_delete_by_id($this->gid);
+
     parent::delete();
     og_invalidate_cache(array($gid));
 
