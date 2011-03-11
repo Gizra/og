@@ -410,7 +410,9 @@ function og_entity_presave_group_audience_diff($entity, $type) {
   if ($entity_original->{OG_AUDIENCE_FIELD} != $entity->{OG_AUDIENCE_FIELD}) {
     // Compare arrays. For simplicity we split the cases for when the original
     // entity has more groups than the entity.
-    if (count($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) > count($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
+    $original_count = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
+    $count = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
+    if ($original_count > $count) {
       $first_array = $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
       $second_array = $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
 
