@@ -434,14 +434,8 @@ class OgGroupMEmbership extends DrupalWebTestCase {
     $this->assertTrue($group_membership, t('Group manager has group membership in new group.'));
 
     // Update group, assert group manager still has group membership.
-    $entity->name = $this->randomName();
     $entity->save();
     $this->assertTrue($group_membership, t('Group manager still has group membership in updated group.'));
-
-    // Delete group, assert group membership is deleted.
-    $entity->delete();
-    $group_membership = og_get_group_membership('user', $web_user->uid, $group->gid);
-    $this->assertFalse($group_membership, t('Group manager has no longer group membership in deleted group.'));
 
     // Create group content not associated with a group.
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
@@ -464,8 +458,7 @@ class OgGroupMEmbership extends DrupalWebTestCase {
       ->propertyCondition('entity_type', 'node', '=')
       ->propertyCondition('etid', $node->nid, '=')
       ->execute();
-
-    $this->assertFalse($result['og_membership'], t('Group content not assigned to a group does not have any group membership assigned to it.'));
+    $this->assertTrue(empty($result['og_membership']), t('Group content not assigned to a group does not have any group membership assigned to it.'));
 
     // Add group association.
     og_group($group->gid, 'node', $node);
@@ -481,11 +474,8 @@ class OgGroupMEmbership extends DrupalWebTestCase {
 
     // Remove group association.
     og_ungroup($group->gid, 'node', $node);
-    $group_membership = og_get_group_membership('user', $web_user->uid, $group->gid);
+    $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
     $this->assertFalse($group_membership, t('Group content no longer has group membership in group.'));
-
-
-
 
     // Create group content associated with a group.
     $settings = array();
@@ -504,7 +494,7 @@ class OgGroupMEmbership extends DrupalWebTestCase {
       ->propertyCondition('entity_type', 'node', '=')
       ->propertyCondition('gid', $gid, '=')
       ->execute();
-    $this->assertFalse($group_membership, t('There are no group memberships assocaited with a delted group.'));
+    $this->assertTrue(empty($result['og_membership']), t('There are no group memberships assocaited with a deleted group.'));
   }
 }
 
