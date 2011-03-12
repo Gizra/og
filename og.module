@@ -736,6 +736,11 @@ class EntityOgMembership extends Entity {
     $this->{OG_MEMBERSHIP_STATE_FIELD}[LANGUAGE_NONE][0]['value'] = $state;
     return $this;
   }
+
+  public function delete() {
+    parent::delete();
+    og_invalidate_cache();
+  }
 }
 
 /**
@@ -1052,6 +1057,7 @@ function og_invalidate_cache($gids = array()) {
     'og_field_audience_options',
     'og_role_permissions',
     'og_field_formatter_view',
+    'og_get_group_membership',
   );
 
   foreach ($caches as $cache) {
