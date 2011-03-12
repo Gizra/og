@@ -723,6 +723,13 @@ class EntityOgMembership extends Entity {
   }
 
   /**
+   * Get the state of the group membership.
+   */
+  public function state() {
+    return $this->{OG_MEMBERSHIP_STATE_FIELD}[LANGUAGE_NONE][0]['value'];
+  }
+
+  /**
    * Set the state field.
    */
   public function setState($state = OG_STATE_ACTIVE) {
