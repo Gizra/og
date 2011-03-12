@@ -325,7 +325,7 @@ class OgGroupApi extends DrupalWebTestCase {
 }
 
 /**
- * TODO: Test Group content handeling.
+ * Test Group content handeling.
  */
 class OgGroupAndUngroup extends DrupalWebTestCase {
 
@@ -355,9 +355,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     $admin_user = $this->drupalCreateUser();
 
     $web_user = $this->drupalCreateUser();
-
     $this->drupalLogin($web_user);
-    $this->drupalGet('node/add/article');
 
     // Create a group.
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
@@ -393,6 +391,120 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
 
     og_ungroup($group2->gid, 'node', $node);
     $this->assertFalse(og_is_member($group2->gid, 'node', $node), t('Node is no longer assigned to group2.'));
+  }
+}
+
+/**
+ * Test group membership handeling.
+ */
+class OgGroupMEmbership extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups group membership',
+      'description' => 'Test the group membership entity.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og', 'entity_test');
+    module_enable(array('entity_feature'));
+
+    // Add OG group field to the entity_test's "main" bundle.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+
+    // Add OG audience field to the node's "article" bundle.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+  }
+
+  /**
+   * Test group group membership create, update and delete.
+   */
+  function testGroupMembershipCrud() {
+    $web_user = $this->drupalCreateUser();
+
+    // Create group, assert group manager has group membership.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+
+    $group_membership = og_get_group_membership('user', $web_user->uid, $group->gid);
+    $this->assertTrue($group_membership, t('Group manager has group membership in new group.'));
+
+    // Update group, assert group manager still has group membership.
+    $entity->name = $this->randomName();
+    $entity->save();
+    $this->assertTrue($group_membership, t('Group manager still has group membership in updated group.'));
+
+    // Delete group, assert group membership is deleted.
+    $entity->delete();
+    $group_membership = og_get_group_membership('user', $web_user->uid, $group->gid);
+    $this->assertFalse($group_membership, t('Group manager has no longer group membership in deleted group.'));
+
+    // Create group content not associated with a group.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+
+    $node = entity_create('node', array(
+      'type' => 'article',
+      'title' => $this->randomName(),
+      'uid' => $web_user->uid,
+    ));
+
+    entity_save('node', $node);
+    $this->assertFalse(og_get_entity_groups('node', $node), t('Node is not assigned to any group.'));
+
+    $query = new EntityFieldQuery();
+    $result = $query
+      ->entityCondition('entity_type', 'og_membership')
+      ->propertyCondition('entity_type', 'node', '=')
+      ->propertyCondition('etid', $node->nid, '=')
+      ->execute();
+
+    $this->assertFalse($result['og_membership'], t('Group content not assigned to a group does not have any group membership assigned to it.'));
+
+    // Add group association.
+    og_group($group->gid, 'node', $node);
+    $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
+    $this->assertTrue($group_membership, t('Group content has group membership in group.'));
+
+    // Change state of group association via og_group() (i.e. not changing the
+    // group membership entity directly).
+    $this->assertEqual($group_membership->state(), OG_STATE_ACTIVE, t('Group membership state is active.'));
+    og_group($group->gid, 'node', $node, OG_STATE_PENDING);
+    $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
+    $this->assertEqual($group_membership->state(), OG_STATE_PENDING, t('Group membership state is active.'));
+
+    // Remove group association.
+    og_ungroup($group->gid, 'node', $node);
+    $group_membership = og_get_group_membership('user', $web_user->uid, $group->gid);
+    $this->assertFalse($group_membership, t('Group content no longer has group membership in group.'));
+
+
+
+
+    // Create group content associated with a group.
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['gid'] = $group->gid;
+    $node = $this->drupalCreateNode($settings);
+
+    $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
+    $this->assertTrue($group_membership, t('New group content has group membership in group.'));
+
+    // Delete group.
+    $gid = $group->gid;
+    $group->delete();
+    $result = $query
+      ->entityCondition('entity_type', 'og_membership')
+      ->propertyCondition('entity_type', 'node', '=')
+      ->propertyCondition('gid', $gid, '=')
+      ->execute();
+    $this->assertFalse($group_membership, t('There are no group memberships assocaited with a delted group.'));
   }
 }
 
