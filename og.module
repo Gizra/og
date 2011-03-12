@@ -402,7 +402,7 @@ function og_entity_presave($entity, $type) {
       if (!empty($diff[$op])) {
         foreach ($diff[$op] as $item) {
           $group = og_load($item['gid']);
-          $item += array('user request' => '');
+          $item += array('state' => OG_STATE_ACTIVE, 'user request' => '');
           module_invoke_all('og_group_' . $op, $type, $entity, $group, $item['state'], $item['user request']);
           // TODO: Can we invoke rule also when type is not user? Currently in
           // rules event info we define the account argument -- can this be any
@@ -412,6 +412,20 @@ function og_entity_presave($entity, $type) {
           }
         }
       }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function og_entity_insert($entity, $type) {
+  if (!empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
+    // Create group membership for each group the new entity belongs to.
+    list($id) = entity_extract_ids($type, $entity);
+    foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
+      $og_membership = og_membership_create($type, $id, $item['gid'], array('state' => $item['state']));
+      $og_membership->save();
     }
   }
 }
@@ -427,7 +441,7 @@ function og_og_group_insert($entity_type, $entity, $group, $state, $user_request
 }
 
 /**
- * Implements hook_og_group_insert().
+ * Implements hook_og_group_update().
  */
 function og_og_group_update($entity_type, $entity, $group, $state, $user_request) {
   // Update group membership entity.
@@ -437,12 +451,12 @@ function og_og_group_update($entity_type, $entity, $group, $state, $user_request
 }
 
 /**
- * Implements hook_og_group_insert().
+ * Implements hook_og_group_delete().
  */
 function og_og_group_delete($entity_type, $entity, $group, $state, $user_request) {
   // Delete group membership entity.
   list($id) = entity_extract_ids($entity_type, $entity);
-  $group_membership = og_get_group_membership($entity_type, $id, $group->uid);
+  $group_membership = og_get_group_membership($entity_type, $id, $group->gid);
   $group_membership->delete();
 }
 
@@ -472,8 +486,8 @@ function og_entity_presave_group_audience_diff($entity, $type) {
     $original_count = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
     $count = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
     if ($original_count > $count) {
-      $first_array = $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
-      $second_array = $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
+      $first_array = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array();
+      $second_array = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array() ;
 
       foreach ($first_array as $key => $value) {
         if (empty($second_array[$key])) {
@@ -487,8 +501,8 @@ function og_entity_presave_group_audience_diff($entity, $type) {
       }
     }
     else {
-      $first_array = $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
-      $second_array = $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE];
+      $first_array = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array();
+      $second_array = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array();
 
       foreach ($first_array as $key => $value) {
         if (empty($second_array[$key])) {
