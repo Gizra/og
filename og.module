@@ -739,7 +739,7 @@ class EntityOgMembership extends Entity {
 
   public function delete() {
     parent::delete();
-    og_invalidate_cache();
+    drupal_static_reset('og_get_group_membership');
   }
 }
 
