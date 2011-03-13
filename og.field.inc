@@ -53,45 +53,6 @@ function og_field_group_property_callback(&$info, $entity_type, $field, $instanc
 }
 
 /**
- * Implement hook_field_schema().
- */
-function og_field_schema($field) {
-  $columns = array(
-    'gid' => array(
-      'description' => 'The group unique ID.',
-      'type' => 'float',
-      'unsigned' => TRUE,
-      'not null' => FALSE,
-    ),
-    'state' => array(
-      'description' => 'The state of the group content.',
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-      'default' => '',
-    ),
-    'created' => array(
-      'description' => 'The Unix timestamp when the group content was created.',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-  );
-  return array(
-    'columns' => $columns,
-    'indexes' => array(
-      'gid' => array('gid'),
-    ),
-    'foreign keys' => array(
-      'og' => array(
-        'table' => 'og',
-        'columns' => array('gid' => 'gid'),
-      ),
-    ),
-  );
-}
-
-/**
  * Implement hook_field_formatter_info().
  */
 function og_field_formatter_info() {
