@@ -447,7 +447,8 @@ function og_og_group_update($entity_type, $entity, $group, $state, $user_request
   // Update group membership entity.
   list($id) = entity_extract_ids($entity_type, $entity);
   $group_membership = og_get_group_membership($entity_type, $id, $group->gid);
-  $group_membership->setState($state)->save();
+  $group_membership->state = $state;
+  $group_membership->save();
 }
 
 /**
@@ -722,21 +723,6 @@ class EntityOgMembership extends Entity {
     parent::__construct($values, 'og_membership');
   }
 
-  /**
-   * Get the state of the group membership.
-   */
-  public function state() {
-    return $this->{OG_MEMBERSHIP_STATE_FIELD}[LANGUAGE_NONE][0]['value'];
-  }
-
-  /**
-   * Set the state field.
-   */
-  public function setState($state = OG_STATE_ACTIVE) {
-    $this->{OG_MEMBERSHIP_STATE_FIELD}[LANGUAGE_NONE][0]['value'] = $state;
-    return $this;
-  }
-
   public function delete() {
     parent::delete();
     drupal_static_reset('og_get_group_membership');
@@ -764,11 +750,6 @@ function og_membership_create($entity_type, $etid, $gid, $values = array()) {
   $values['gid'] = $gid;
 
   $values += array('state' => OG_STATE_ACTIVE);
-
-  // Set state default value.
-  // TODO: Use entity metadata wrapper for the values?
-  $values[OG_MEMBERSHIP_STATE_FIELD][LANGUAGE_NONE][0]['value'] = !empty($values['state']) && in_array($values['state'], array_keys(og_group_content_states())) ? $values['state'] :  OG_STATE_ACTIVE;
-  unset ($values['state']);
 
   $return = entity_create('og_membership', $values);
   return $return;

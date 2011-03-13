@@ -15,28 +15,6 @@ function og_install() {
   _field_info_collate_fields(TRUE);
   _field_info_collate_types(TRUE);
   og_create_field(OG_AUDIENCE_FIELD, 'user', 'user');
-
-  // Create the field holding the membership state.
-  // TODO: Add created/ changed fields.
-  $field = array(
-    'field_name' => OG_MEMBERSHIP_STATE_FIELD,
-    // TODO: Change to integer.
-    'type' => 'text',
-    'entity_types' => array('og_membership'),
-    'cardinality' => 1,
-    'locked' => TRUE,
-    'allowed_values_function' => 'og_group_content_states',
-  );
-  $field = field_create_field($field);
-  $instance = array(
-    'field_name' => OG_MEMBERSHIP_STATE_FIELD,
-    'bundle' => 'og_membership',
-    'entity_type' => 'og_membership',
-    'label' => t('Group membership state'),
-    'description' => t('Mark the state of the membership in a group.'),
-    'required' => TRUE,
-  );
-  field_create_instance($instance);
 }
 
 /**
@@ -254,6 +232,19 @@ function og_schema() {
         'size'            => 'normal',
         'not null'        => TRUE,
       ),
+      'state' => array(
+        'description' => 'The state of the group content.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the group content was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
     'foreign keys' => array(
@@ -278,19 +269,19 @@ function og_field_schema($field) {
       'unsigned' => TRUE,
       'not null' => FALSE,
     ),
-    'state' => array(
-      'description' => 'The state of the group content.',
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-      'default' => '',
-    ),
-    'created' => array(
-      'description' => 'The Unix timestamp when the group content was created.',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
+      'state' => array(
+        'description' => 'The state of the group content.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the group content was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
   );
   return array(
     'columns' => $columns,

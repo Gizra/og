@@ -467,10 +467,10 @@ class OgGroupMEmbership extends DrupalWebTestCase {
 
     // Change state of group association via og_group() (i.e. not changing the
     // group membership entity directly).
-    $this->assertEqual($group_membership->state(), OG_STATE_ACTIVE, t('Group membership state is active.'));
+    $this->assertEqual($group_membership->state, OG_STATE_ACTIVE, t('Group membership state is active.'));
     og_group($group->gid, 'node', $node, OG_STATE_PENDING);
     $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
-    $this->assertEqual($group_membership->state(), OG_STATE_PENDING, t('Group membership state is active.'));
+    $this->assertEqual($group_membership->state, OG_STATE_PENDING, t('Group membership state is active.'));
 
     // Remove group association.
     og_ungroup($group->gid, 'node', $node);
