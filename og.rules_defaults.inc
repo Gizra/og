@@ -3,7 +3,7 @@
 /**
  * Implementation of hook_default_rules_configuration().
  */
-function og_ui_default_rules_configuration() {
+function og_default_rules_configuration() {
   $items = array();
   $items['rules_member_subscribe'] = entity_import('rules_config', '{ "rules_member_subscribe" : {
       "LABEL" : "OG - Member subscribe",
