@@ -40,15 +40,6 @@ function og_field_group_property_callback(&$info, $entity_type, $field, $instanc
       'type' => 'group',
       'label' => t('The group this group content is associated with'),
     ),
-    'state' => array(
-      'type' => 'text',
-      'label' => t('Group content state'),
-      'options list' => 'og_group_content_states',
-    ),
-    'created' => array(
-      'type' => 'integer',
-      'label' => t('Created timestamp'),
-    ),
   );
 }
 
@@ -323,20 +314,6 @@ function og_field_is_empty($item, $field) {
 }
 
 /**
- * Implement hook_field_insert().
- */
-function og_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  og_field_write('insert', $entity_type, $entity, $field, $instance, $langcode, $items);
-}
-
-/**
- * Implement hook_field_update().
- */
-function og_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  og_field_write('update', $entity_type, $entity, $field, $instance, $langcode, $items);
-}
-
-/**
  * Implement hook_field_attach_insert().
  */
 function og_field_attach_insert($entity_type, $entity) {
@@ -406,19 +383,6 @@ function og_field_widget_form_validate($form, &$form_state) {
     }
     // Set the new values.
     form_set_value($form[OG_AUDIENCE_FIELD], $value, $form_state);
-  }
-}
-
-/**
- * Insert or update a field record.
- *
- * @param $op
- *   The operation - "insert" or "update".
- */
-function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode, &$items) {
-  foreach ($items as &$item) {
-    // Set default values.
-    $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
   }
 }
 
