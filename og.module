@@ -870,7 +870,6 @@ function og_membership_access($op, $entity, $account = NULL, $entity_type = 'og_
   return TRUE;
 }
 
-
 /**
  * Return a loaded group entity if exists or create a new one.
  *
