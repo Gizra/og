@@ -424,8 +424,8 @@ function og_entity_insert($entity, $type) {
     // Create group membership for each group the new entity belongs to.
     list($id) = entity_extract_ids($type, $entity);
     foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
-      $og_membership = og_membership_create($type, $id, $item['gid']);
-      $og_membership->save();
+      $group_membership = og_membership_create($type, $id, $item['gid']);
+      $group_membership->save();
     }
   }
 }
@@ -726,8 +726,12 @@ class EntityOgMembership extends Entity {
 
   public function delete() {
     parent::delete();
-    drupal_static_reset('og_get_group_membership');
+    og_group_membership_invalidate_cache();
   }
+}
+
+function og_group_membership_invalidate_cache() {
+  drupal_static_reset('og_get_group_membership');
 }
 
 /**
@@ -768,6 +772,23 @@ function og_membership_create($entity_type, $etid, $gid, $values = array()) {
 function og_membership_load($id) {
   $result = entity_load('og_membership', array($id));
   return $result ? reset($result) : FALSE;
+}
+
+/**
+ * Load multiple group membership entities based on certain conditions.
+ *
+ * @param $gids
+ *   An array of group entity IDs.
+ * @param $conditions
+ *   An array of conditions to match against the {entity} table.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
+ *
+ * @return
+ *   An array of group entities, indexed by group ID.
+ */
+function og_membership_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('og_membership', $ids, $conditions, $reset);
 }
 
 /**
@@ -1044,6 +1065,8 @@ function og_invalidate_cache($gids = array()) {
   foreach ($caches as $cache) {
     drupal_static_reset($cache);
   }
+  // Invalidate group membersihp cache.
+  og_group_membership_invalidate_cache();
 
   // Let other Group modules know we invalidate cache.
   module_invoke_all('og_invalidate_cache', $gids);
@@ -1272,17 +1295,16 @@ function og_group($gid, $entity_type = 'user', $entity = NULL, $state = OG_STATE
       if ($existing_key === FALSE) {
         $values = array(
           'gid' => $gid,
-          'state' => $state,
-          'created' => time(),
-          // This value won't be saved, just passed along.
+          // This values won't be saved, just passed along.
           // @see og_entity_presave().
+          'state' => $state,
           'user request' => $user_request,
         );
         $entity->{$property}[LANGUAGE_NONE][] = $values;
 
       }
       else {
-        $group_membership = og_get_group_membership($entity_type, $entity, $wrapper[$existing_key]['gid']);
+        $group_membership = og_get_group_membership($entity_type, $id, $wrapper[$existing_key]['gid']);
         if ($group_membership->state != $state) {
           $group_membership->state = $state;
           $group_membership->save();
@@ -1514,7 +1536,11 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
       ->propertyCondition('state', $states, 'IN')
       ->execute();
     if (!empty($result['og_membership'])) {
-      $groups[$entity_type][$id] += drupal_map_assoc(array_keys($result['og_membership']));
+      // Get the group ID from the group membership.
+      $group_memberships = og_membership_load_multiple(array_keys($result['og_membership']));
+      foreach ($group_memberships as $group_membership) {
+        $groups[$entity_type][$id][$group_membership->gid] = $group_membership->gid;
+      }
     }
   }
 
