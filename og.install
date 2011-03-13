@@ -269,19 +269,6 @@ function og_field_schema($field) {
       'unsigned' => TRUE,
       'not null' => FALSE,
     ),
-      'state' => array(
-        'description' => 'The state of the group content.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-        'default' => '',
-      ),
-      'created' => array(
-        'description' => 'The Unix timestamp when the group content was created.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
   );
   return array(
     'columns' => $columns,
