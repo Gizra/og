@@ -720,6 +720,7 @@ function og_ctools_context_converter_alter($context, $converter, &$value) {
  */
 class EntityOgMembership extends Entity {
   public function __construct(array $values = array(), $entityType = NULL) {
+    $values += array('state' => OG_STATE_ACTIVE, 'creates' => time());
     parent::__construct($values, 'og_membership');
   }
 
@@ -748,8 +749,6 @@ function og_membership_create($entity_type, $etid, $gid, $values = array()) {
   $values['entity_type'] = $entity_type;
   $values['etid'] = $etid;
   $values['gid'] = $gid;
-
-  $values += array('state' => OG_STATE_ACTIVE);
 
   $return = entity_create('og_membership', $values);
   return $return;
