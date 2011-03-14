@@ -335,6 +335,42 @@ function og_field_attach_delete($entity_type, $entity) {
 }
 
 /**
+ * Implement hook_field_insert().
+ *
+ * DEPRECATE WHEN FIELD SCHEMA CAN BE CHANGED.
+ */
+function og_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  og_field_write('insert', $entity_type, $entity, $field, $instance, $langcode, $items);
+}
+
+/**
+ * Implement hook_field_update().
+ *
+ * DEPRECATE WHEN FIELD SCHEMA CAN BE CHANGED.
+ */
+function og_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  og_field_write('update', $entity_type, $entity, $field, $instance, $langcode, $items);
+}
+
+ /**
+ * Insert or update a field record.
+ *
+ * DEPRECATE WHEN FIELD SCHEMA CAN BE CHANGED.
+ *
+ * Since we can not change the field schema we must still populate the fields
+ * with non-null values.
+ *
+ * @param $op
+ *   The operation - "insert" or "update".
+ */
+function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode, &$items) {
+  foreach ($items as &$item) {
+    // Set default values.
+    $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
+  }
+}
+
+/**
  * Implements hook_field_attach_form().
  *
  * Handle translated nodes that act as groups.
