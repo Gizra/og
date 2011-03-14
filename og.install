@@ -270,6 +270,23 @@ function og_field_schema($field) {
       'not null' => FALSE,
     ),
   );
+  if (variable_get('og_update_7001', FALSE) === FALSE) {
+    $columns += array(
+      'state' => array(
+        'description' => 'The state of the group content.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the group content was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    );
+  }
   return array(
     'columns' => $columns,
     'indexes' => array(
@@ -671,6 +688,9 @@ function og_update_7001(&$sandbox) {
   }
   $batch_size = variable_get('og_update_batch_size', 200);
 
+  $field = array();
+  $field['field_name'] = OG_AUDIENCE_FIELD;
+
   $query = new EntityFieldQuery();
   $result = $query
     ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', 1, '>=')
@@ -683,7 +703,6 @@ function og_update_7001(&$sandbox) {
         $entity = entity_load($entity_type, array($etid));
         $entity = reset($entity);
         foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $value) {
-          // FIXME: The state and created are no longer loaded with the entity!
           $group_membership = og_membership_create($entity_type, $etid, $value['gid'], array('state' => $value['state'], 'created' => $value['created']));
           ++$sandbox['count'];
         }
@@ -695,6 +714,8 @@ function og_update_7001(&$sandbox) {
     $sandbox['#finished'] = 1;
     return t('Organic groups created @count group membership entity.', array('@count' => $sandbox['total']));
   }
+
+  variable_set('og_update_7001', TRUE);
 
   // Update the field with the new schema.
   $field = array();
