@@ -50,8 +50,6 @@ drupal_cron_run();
 // Create users with ID 2 to 5.
 $uids = array();
 foreach (range(2, 5) as $i) {
-  drush_print('test ' . $i);
-
   $values = array(
     'name' => 'og_test_user' . $i,
     'mail' => 'og_test_user' . $i . '@example.com',
