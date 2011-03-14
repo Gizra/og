@@ -1183,9 +1183,6 @@ class OgUpgradePath7001TestCase extends OgUpgradePathTestCase {
       'administer software updates',
     ));
     $this->drupalLogin($admin_user);
-    $group_memberships = og_membership_load_multiple(FALSE);
-    debug($group_memberships);
-
     $this->performUpgrade(FALSE);
 
     // Assert according to the scenario the test table dump was created.

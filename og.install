@@ -678,11 +678,12 @@ function og_update_7001(&$sandbox) {
     ->execute();
 
   if (!empty($result)) {
-    foreach ($result as $entity_type => $foo) {
-      foreach ($result[$entity_type] as $etid => $bar) {
+    foreach ($result as $entity_type => $values) {
+      foreach ($values as $etid => $value) {
         $entity = entity_load($entity_type, array($etid));
-
+        $entity = reset($entity);
         foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $value) {
+          // FIXME: The state and created are no longer loaded with the entity!
           $group_membership = og_membership_create($entity_type, $etid, $value['gid'], array('state' => $value['state'], 'created' => $value['created']));
           ++$sandbox['count'];
         }
