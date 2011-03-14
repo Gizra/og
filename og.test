@@ -1187,6 +1187,15 @@ class OgUpgradePath7001TestCase extends OgUpgradePathTestCase {
 
     // Assert according to the scenario the test table dump was created.
     $group_memberships = og_membership_load_multiple(FALSE);
-    //debug($group_memberships);
+    $info = array(
+      2 => OG_STATE_ACTIVE,
+      3 => OG_STATE_ACTIVE,
+      4 => OG_STATE_PENDING,
+      5 => OG_STATE_BLOCKED,
+    );
+
+    foreach ($group_memberships as $key => $group_membership) {
+      $this->assertEqual($group_membership->state, $info[$group_membership->etid], t('User ID @id has correct state', array('@id' => $key + 1)));
+    }
   }
 }
