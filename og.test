@@ -1028,15 +1028,15 @@ class OgUnInstallTestCase extends DrupalWebTestCase {
 
 
 /**
- * Upgrade test.
+ * Upgrade 7000 test.
  *
  * Load a filled installation of Drupal 6 and run the upgrade process on it.
  */
-class OgUpgradePathTestCase extends UpgradePathTestCase {
+class OgUpgradePath7000TestCase extends UpgradePathTestCase {
   public static function getInfo() {
     return array(
-      'name'  => 'Organic groups upgrade path',
-      'description'  => 'Tests the upgrade path of Organic groups.',
+      'name'  => 'Organic groups upgrade path - 7000',
+      'description'  => 'Tests the upgrade path of Organic groups from Drupal 6.',
       'group' => 'Organic groups',
     );
   }
@@ -1143,5 +1143,53 @@ class OgUpgradePathTestCase extends UpgradePathTestCase {
       // active they are considered members, to check they get the correct role.
       $this->assertEqual(og_get_user_roles($group->gid, $uid, array(OG_STATE_ACTIVE, OG_STATE_PENDING)), $roles, t('User @uid has the correct roles in group.', array('@uid' => $uid)));
     }
+  }
+}
+
+/**
+ * Upgrade 7001 test.
+ */
+class OgUpgradePath7001TestCase extends OgUpgradePathTestCase {
+  public static function getInfo() {
+    return array(
+      'name'  => 'Organic groups upgrade path - 7001',
+      'description'  => 'Tests the upgrade path of Organic groups of creating group memberships.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  public function setUp() {
+    // Path to the database dump.
+    $this->databaseDumpFiles = array(
+      drupal_get_path('module', 'og') . '/tests/drupal-7.og.update_7001.database.php',
+    );
+    parent::setUp();
+
+    // TODO: Understand why this workround is needed to load all entity classes.
+    module_enable(array('entity'));
+    module_load_include('inc', 'entity' ,'includes/entity');
+    module_load_include('inc', 'entity' ,'includes/entity.controller');
+    module_enable(array('og'));
+  }
+
+  /**
+   * Test a successful upgrade.
+   */
+  public function testOgUpgrade() {
+    // Set small batch sizes, so we can simulate upgrade with many records.
+    variable_set('og_update_batch_size', 3);
+
+    $admin_user = $this->drupalCreateUser(array(
+      'administer software updates',
+    ));
+    $this->drupalLogin($admin_user);
+    $group_memberships = og_membership_load_multiple(FALSE);
+    debug($group_memberships);
+
+    $this->performUpgrade(FALSE);
+
+    // Assert according to the scenario the test table dump was created.
+    $group_memberships = og_membership_load_multiple(FALSE);
+    //debug($group_memberships);
   }
 }

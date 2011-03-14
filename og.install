@@ -598,3 +598,51 @@ function _og_upgrade_user(&$sandbox) {
 
   return $found;
 }
+
+/**
+ * Add group membership enteties instead of field data.
+ */
+function og_update_7001(&$sandbox) {
+  if (empty($sandbox['total'])) {
+    // Get any existing group content, and create a group membership for it.
+    $query = new EntityFieldQuery();
+    $sandbox['total'] = $query
+      ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', 1, '>=')
+      ->count()
+      ->execute();
+
+    $sandbox['#finished'] = 0;
+    $sandbox['count'] = 0;
+    $sandbox['last'] = 0;
+  }
+  $batch_size = variable_get('og_update_batch_size', 200);
+
+  $query = new EntityFieldQuery();
+  $result = $query
+    ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', 1, '>=')
+    ->range($sandbox['last'], $batch_size)
+    ->execute();
+
+  if (!empty($result)) {
+    foreach ($result as $entity_type => $foo) {
+      foreach ($result[$entity_type] as $etid => $bar) {
+        $entity = entity_load($entity_type, array($etid));
+
+        foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $value) {
+          $group_membership = og_membership_create($entity_type, $etid, $value['gid'], array('state' => $value['state'], 'created' => $value['created']));
+          ++$sandbox['count'];
+        }
+      }
+    }
+    $sandbox['#finished'] = min(0.99, $sandbox['count'] / $sandbox['total']);
+  }
+  else {
+    $sandbox['#finished'] = 1;
+    return t('Organic groups created @count group membership entity.', array('@count' => $sandbox['total']));
+  }
+
+  // Update the field with the new schema.
+  $field = array();
+  $field['name'] = OG_AUDIENCE_FIELD;
+  field_update_field($field);
+}
