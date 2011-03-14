@@ -603,6 +603,60 @@ function _og_upgrade_user(&$sandbox) {
  * Add group membership enteties instead of field data.
  */
 function og_update_7001(&$sandbox) {
+  $schema['og_membership'] = array(
+    'description' => 'The group membership table.',
+    'fields' => array(
+      'id' => array(
+        'description' => "The group membership's unique ID.",
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'etid' => array(
+        'description' => "The entity ID.",
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'entity_type' => array(
+        'description' => "The entity type (e.g. node, comment, etc').",
+        'type' => 'varchar',
+        'length' => '32',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'gid'               => array(
+        'description'     => "The group's unique ID.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'state' => array(
+        'description' => 'The state of the group content.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the group content was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'group' => array(
+        'table' => 'og',
+        'columns' => array('gid' => 'gid'),
+      ),
+    ),
+  );
+
+  db_create_table('og_membership', $schema['og_membership']);
+
   if (empty($sandbox['total'])) {
     // Get any existing group content, and create a group membership for it.
     $query = new EntityFieldQuery();
