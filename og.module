@@ -116,7 +116,7 @@ function og_entity_info() {
     'admin ui' => array(
       // TODO: This path doesn't exist before OG-ui.
       'path' => 'admin/config/group/group-membership',
-      'file' => 'og.admin.inc',
+      'file' => 'includes/og.admin.inc',
       'controller class' => 'OgMembershipUIController',
     ),
   );
