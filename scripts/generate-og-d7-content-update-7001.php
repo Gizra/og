@@ -13,9 +13,11 @@
  * - Install and enable Organic groups module.
  * - Execute script to create the content by running
  *     drush php-script generate-og-d7-content-update-7001.php
- *  - Execute script to dump the database by running
- *      drush php-script dump-database-d6.sh > drupal-6.og.database.php
- *   from the command line of the Drupal 6 ROOT directory.
+ * - Download script from http://drupal.org/node/838438#comment-4208300 and
+ *   place in root of Drupal installation.
+ * - Execute script to dump the database by running from the command line of the
+ *   Drupal 7 ROOT directory
+ *     drush php-script dump-database-d7.sh > drupal-7.og.update_7001.database.php
  *
  * This scripts produces the following scenario:
  * - Create three users with users ID 2 - 4.
