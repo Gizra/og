@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file
@@ -27,21 +26,18 @@
  *  - node
  *  - number
  *  - og
- *  - og_ui
  *  - options
  *  - overlay
  *  - path
  *  - rdf
  *  - search
  *  - shortcut
- *  - simpletest
  *  - system
  *  - taxonomy
  *  - text
  *  - toolbar
  *  - update
  *  - user
- *  - devel
  *  - standard
  */
 
@@ -254,19 +250,6 @@ db_create_table('batch', array(
   'module' => 'system',
   'name' => 'batch',
 ));
-db_insert('batch')->fields(array(
-  'bid',
-  'token',
-  'timestamp',
-  'batch',
-))
-->values(array(
-  'bid' => '10',
-  'token' => 'B0WgYX3BeMprdqXCUZNT5sUFvQeULOKsBO4UeyPUFg8',
-  'timestamp' => '1300133384',
-  'batch' => 'a:13:{s:4:"sets";a:1:{i:0;a:14:{s:7:"sandbox";a:0:{}s:7:"results";a:0:{}s:7:"success";b:0;s:5:"start";i:0;s:7:"elapsed";i:0;s:5:"title";s:13:"Running tests";s:8:"finished";s:26:"_simpletest_batch_finished";s:16:"progress_message";s:0:"";s:3:"css";a:1:{i:0;s:33:"modules/simpletest/simpletest.css";}s:12:"init_message";s:100:"Processing test 1 of 1 - <em class="placeholder">Organic groups upgrade path - 7001</em>.<br/>&nbsp;";s:13:"error_message";s:22:"An error has occurred.";s:5:"total";i:1;s:5:"count";i:1;s:5:"queue";a:2:{s:4:"name";s:17:"drupal_batch:10:0";s:5:"class";s:10:"BatchQueue";}}}s:16:"has_form_submits";b:0;s:10:"form_state";a:3:{s:10:"programmed";b:0;s:7:"rebuild";b:0;s:8:"redirect";s:42:"admin/config/development/testing/results/5";}s:11:"progressive";b:1;s:11:"current_set";i:0;s:3:"url";s:5:"batch";s:11:"url_options";a:1:{s:5:"query";a:1:{s:6:"render";s:7:"overlay";}}s:10:"source_url";s:47:"admin/config/development/testing/results/re-run";s:8:"redirect";N;s:5:"theme";s:5:"seven";s:17:"redirect_callback";s:11:"drupal_goto";s:2:"id";s:2:"10";s:13:"error_message";s:83:"Please continue to <a href="/d7_dev/batch?id=10&amp;op=finished">the error page</a>";}',
-))
-->execute();
 
 db_create_table('block', array(
   'fields' => array(
@@ -789,90 +772,6 @@ db_insert('block')->fields(array(
   'status' => '1',
   'weight' => '0',
   'region' => 'dashboard_inactive',
-  'custom' => '0',
-  'visibility' => '0',
-  'pages' => '',
-  'title' => '',
-  'cache' => '-1',
-))
-->values(array(
-  'bid' => '31',
-  'module' => 'menu',
-  'delta' => 'devel',
-  'theme' => 'bartik',
-  'status' => '0',
-  'weight' => '0',
-  'region' => '-1',
-  'custom' => '0',
-  'visibility' => '0',
-  'pages' => '',
-  'title' => '',
-  'cache' => '-1',
-))
-->values(array(
-  'bid' => '32',
-  'module' => 'devel',
-  'delta' => 'execute_php',
-  'theme' => 'bartik',
-  'status' => '0',
-  'weight' => '0',
-  'region' => '-1',
-  'custom' => '0',
-  'visibility' => '0',
-  'pages' => '',
-  'title' => '',
-  'cache' => '-1',
-))
-->values(array(
-  'bid' => '33',
-  'module' => 'devel',
-  'delta' => 'switch_user',
-  'theme' => 'bartik',
-  'status' => '0',
-  'weight' => '0',
-  'region' => '-1',
-  'custom' => '0',
-  'visibility' => '0',
-  'pages' => '',
-  'title' => '',
-  'cache' => '-1',
-))
-->values(array(
-  'bid' => '34',
-  'module' => 'menu',
-  'delta' => 'devel',
-  'theme' => 'seven',
-  'status' => '0',
-  'weight' => '0',
-  'region' => '-1',
-  'custom' => '0',
-  'visibility' => '0',
-  'pages' => '',
-  'title' => '',
-  'cache' => '-1',
-))
-->values(array(
-  'bid' => '35',
-  'module' => 'devel',
-  'delta' => 'execute_php',
-  'theme' => 'seven',
-  'status' => '0',
-  'weight' => '0',
-  'region' => '-1',
-  'custom' => '0',
-  'visibility' => '0',
-  'pages' => '',
-  'title' => '',
-  'cache' => '-1',
-))
-->values(array(
-  'bid' => '36',
-  'module' => 'devel',
-  'delta' => 'switch_user',
-  'theme' => 'seven',
-  'status' => '0',
-  'weight' => '0',
-  'region' => '-1',
   'custom' => '0',
   'visibility' => '0',
   'pages' => '',
@@ -2702,6 +2601,17 @@ db_create_table('field_data_group_audience', array(
       'unsigned' => TRUE,
       'not null' => FALSE,
     ),
+    'group_audience_state' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+      'default' => '',
+    ),
+    'group_audience_created' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
   ),
   'primary key' => array(
     'entity_type',
@@ -2753,6 +2663,8 @@ db_insert('field_data_group_audience')->fields(array(
   'language',
   'delta',
   'group_audience_gid',
+  'group_audience_state',
+  'group_audience_created',
 ))
 ->values(array(
   'entity_type' => 'user',
@@ -2763,6 +2675,8 @@ db_insert('field_data_group_audience')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'group_audience_gid' => '1',
+  'group_audience_state' => '1',
+  'group_audience_created' => '1300137505',
 ))
 ->values(array(
   'entity_type' => 'user',
@@ -2773,6 +2687,8 @@ db_insert('field_data_group_audience')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'group_audience_gid' => '1',
+  'group_audience_state' => '1',
+  'group_audience_created' => '1300137505',
 ))
 ->values(array(
   'entity_type' => 'user',
@@ -2783,6 +2699,8 @@ db_insert('field_data_group_audience')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'group_audience_gid' => '1',
+  'group_audience_state' => '2',
+  'group_audience_created' => '1300137505',
 ))
 ->values(array(
   'entity_type' => 'user',
@@ -2793,6 +2711,8 @@ db_insert('field_data_group_audience')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'group_audience_gid' => '1',
+  'group_audience_state' => '3',
+  'group_audience_created' => '1300137505',
 ))
 ->execute();
 
@@ -3328,6 +3248,17 @@ db_create_table('field_revision_group_audience', array(
       'unsigned' => TRUE,
       'not null' => FALSE,
     ),
+    'group_audience_state' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+      'default' => '',
+    ),
+    'group_audience_created' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
   ),
   'primary key' => array(
     'entity_type',
@@ -3380,6 +3311,8 @@ db_insert('field_revision_group_audience')->fields(array(
   'language',
   'delta',
   'group_audience_gid',
+  'group_audience_state',
+  'group_audience_created',
 ))
 ->values(array(
   'entity_type' => 'user',
@@ -3390,6 +3323,8 @@ db_insert('field_revision_group_audience')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'group_audience_gid' => '1',
+  'group_audience_state' => '1',
+  'group_audience_created' => '1300137505',
 ))
 ->values(array(
   'entity_type' => 'user',
@@ -3400,6 +3335,8 @@ db_insert('field_revision_group_audience')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'group_audience_gid' => '1',
+  'group_audience_state' => '1',
+  'group_audience_created' => '1300137505',
 ))
 ->values(array(
   'entity_type' => 'user',
@@ -3410,6 +3347,8 @@ db_insert('field_revision_group_audience')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'group_audience_gid' => '1',
+  'group_audience_state' => '2',
+  'group_audience_created' => '1300137505',
 ))
 ->values(array(
   'entity_type' => 'user',
@@ -3420,6 +3359,8 @@ db_insert('field_revision_group_audience')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'group_audience_gid' => '1',
+  'group_audience_state' => '3',
+  'group_audience_created' => '1300137505',
 ))
 ->execute();
 
@@ -3998,17 +3939,6 @@ db_create_table('history', array(
   'module' => 'system',
   'name' => 'history',
 ));
-db_insert('history')->fields(array(
-  'uid',
-  'nid',
-  'timestamp',
-))
-->values(array(
-  'uid' => '1',
-  'nid' => '1',
-  'timestamp' => '1300132841',
-))
-->execute();
 
 db_create_table('image_effects', array(
   'fields' => array(
@@ -4120,11 +4050,6 @@ db_insert('menu_custom')->fields(array(
   'menu_name',
   'title',
   'description',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'title' => 'Development',
-  'description' => 'Development link',
 ))
 ->values(array(
   'menu_name' => 'main-menu',
@@ -11979,1518 +11904,6 @@ db_insert('menu_links')->fields(array(
   'p9' => '0',
   'updated' => '0',
 ))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '321',
-  'plid' => '8',
-  'link_path' => 'admin/config/group/group-membership',
-  'router_path' => 'admin/config/group/group-membership',
-  'link_title' => 'Organic groups memberships',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:43:"Manage group memberships, including fields.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '1',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '321',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '322',
-  'plid' => '321',
-  'link_path' => 'admin/config/group/group-membership/add',
-  'router_path' => 'admin/config/group/group-membership/add',
-  'link_title' => '',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '4',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '321',
-  'p4' => '322',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '323',
-  'plid' => '321',
-  'link_path' => 'admin/config/group/group-membership/manage/%',
-  'router_path' => 'admin/config/group/group-membership/manage/%',
-  'link_title' => 'Edit',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '1',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '4',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '321',
-  'p4' => '323',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '324',
-  'plid' => '323',
-  'link_path' => 'admin/config/group/group-membership/manage/%/%',
-  'router_path' => 'admin/config/group/group-membership/manage/%/%',
-  'link_title' => '',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '5',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '321',
-  'p4' => '323',
-  'p5' => '324',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '325',
-  'plid' => '323',
-  'link_path' => 'admin/config/group/group-membership/manage/%/clone',
-  'router_path' => 'admin/config/group/group-membership/manage/%/clone',
-  'link_title' => 'Clone',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '5',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '321',
-  'p4' => '323',
-  'p5' => '325',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '326',
-  'plid' => '323',
-  'link_path' => 'admin/config/group/group-membership/manage/%/edit',
-  'router_path' => 'admin/config/group/group-membership/manage/%/edit',
-  'link_title' => 'Edit',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '5',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '321',
-  'p4' => '323',
-  'p5' => '326',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '327',
-  'plid' => '0',
-  'link_path' => 'devel/settings',
-  'router_path' => 'devel/settings',
-  'link_title' => 'Devel settings',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:168:"Helper functions, pages, and blocks to assist Drupal developers. The devel blocks can be managed via the <a href="/admin/structure/block">block administration</a> page.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '327',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '328',
-  'plid' => '0',
-  'link_path' => 'devel/php',
-  'router_path' => 'devel/php',
-  'link_title' => 'Execute PHP Code',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:21:"Execute some PHP code";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '328',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '329',
-  'plid' => '0',
-  'link_path' => 'devel/reference',
-  'router_path' => 'devel/reference',
-  'link_title' => 'Function reference',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:73:"View a list of currently defined user functions with documentation links.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '329',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '330',
-  'plid' => '0',
-  'link_path' => 'devel/elements',
-  'router_path' => 'devel/elements',
-  'link_title' => 'Hook_elements()',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:51:"View the active form/render elements for this site.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '330',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '331',
-  'plid' => '0',
-  'link_path' => 'devel/phpinfo',
-  'router_path' => 'devel/phpinfo',
-  'link_title' => 'PHPinfo()',
-  'options' => "a:1:{s:10:\"attributes\";a:1:{s:5:\"title\";s:36:\"View your server's PHP configuration\";}}",
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '331',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '332',
-  'plid' => '0',
-  'link_path' => 'devel/reinstall',
-  'router_path' => 'devel/reinstall',
-  'link_title' => 'Reinstall modules',
-  'options' => 'a:2:{s:10:"attributes";a:1:{s:5:"title";s:64:"Run hook_uninstall() and then hook_install() for a given module.";}s:5:"alter";b:1;}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '332',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '333',
-  'plid' => '0',
-  'link_path' => 'devel/run-cron',
-  'router_path' => 'devel/run-cron',
-  'link_title' => 'Run cron',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '333',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '334',
-  'plid' => '0',
-  'link_path' => 'devel/session',
-  'router_path' => 'devel/session',
-  'link_title' => 'Session viewer',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:31:"List the contents of $_SESSION.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '334',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '335',
-  'plid' => '0',
-  'link_path' => 'devel/variable',
-  'router_path' => 'devel/variable',
-  'link_title' => 'Variable editor',
-  'options' => 'a:2:{s:10:"attributes";a:1:{s:5:"title";s:31:"Edit and delete site variables.";}s:5:"alter";b:1;}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '335',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '336',
-  'plid' => '3',
-  'link_path' => 'comment/%/devel',
-  'router_path' => 'comment/%/devel',
-  'link_title' => 'Devel',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '100',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '3',
-  'p2' => '336',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '337',
-  'plid' => '5',
-  'link_path' => 'node/%/devel',
-  'router_path' => 'node/%/devel',
-  'link_title' => 'Devel',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '100',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '5',
-  'p2' => '337',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '338',
-  'plid' => '16',
-  'link_path' => 'user/%/devel',
-  'router_path' => 'user/%/devel',
-  'link_title' => 'Devel',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '100',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '16',
-  'p2' => '338',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '339',
-  'plid' => '0',
-  'link_path' => 'devel/cache/clear',
-  'router_path' => 'devel/cache/clear',
-  'link_title' => 'Empty cache',
-  'options' => 'a:2:{s:10:"attributes";a:1:{s:5:"title";s:100:"Clear the CSS cache and all database cache tables which store page, node, theme and variable caches.";}s:5:"alter";b:1;}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '339',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '340',
-  'plid' => '0',
-  'link_path' => 'devel/entity/info',
-  'router_path' => 'devel/entity/info',
-  'link_title' => 'Entity info',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:46:"View entity information across the whole site.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '340',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '341',
-  'plid' => '0',
-  'link_path' => 'devel/field/info',
-  'router_path' => 'devel/field/info',
-  'link_title' => 'Field info',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:46:"View fields information across the whole site.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '341',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '342',
-  'plid' => '0',
-  'link_path' => 'devel/menu/item',
-  'router_path' => 'devel/menu/item',
-  'link_title' => 'Menu item',
-  'options' => 'a:2:{s:10:"attributes";a:1:{s:5:"title";s:32:"Details about a given menu item.";}s:5:"alter";b:1;}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '342',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '343',
-  'plid' => '0',
-  'link_path' => 'devel/menu/reset',
-  'router_path' => 'devel/menu/reset',
-  'link_title' => 'Rebuild menus',
-  'options' => 'a:2:{s:10:"attributes";a:1:{s:5:"title";s:113:"Rebuild menu based on hook_menu() and revert any custom changes. All menu items return to their default settings.";}s:5:"alter";b:1;}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '343',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'devel',
-  'mlid' => '344',
-  'plid' => '0',
-  'link_path' => 'devel/theme/registry',
-  'router_path' => 'devel/theme/registry',
-  'link_title' => 'Theme registry',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:63:"View a list of available theme functions across the whole site.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '344',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '345',
-  'plid' => '164',
-  'link_path' => 'admin/help/devel',
-  'router_path' => 'admin/help/devel',
-  'link_title' => 'devel',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '164',
-  'p3' => '345',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '346',
-  'plid' => '165',
-  'link_path' => 'taxonomy/term/%/devel',
-  'router_path' => 'taxonomy/term/%/devel',
-  'link_title' => 'Devel',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '100',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '165',
-  'p2' => '346',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '347',
-  'plid' => '37',
-  'link_path' => 'admin/config/development/devel',
-  'router_path' => 'admin/config/development/devel',
-  'link_title' => 'Devel settings',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:168:"Helper functions, pages, and blocks to assist Drupal developers. The devel blocks can be managed via the <a href="/admin/structure/block">block administration</a> page.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '4',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '37',
-  'p4' => '347',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '348',
-  'plid' => '336',
-  'link_path' => 'comment/%/devel/load',
-  'router_path' => 'comment/%/devel/load',
-  'link_title' => 'Load',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '3',
-  'p2' => '336',
-  'p3' => '348',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '349',
-  'plid' => '337',
-  'link_path' => 'node/%/devel/load',
-  'router_path' => 'node/%/devel/load',
-  'link_title' => 'Load',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '5',
-  'p2' => '337',
-  'p3' => '349',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '350',
-  'plid' => '338',
-  'link_path' => 'user/%/devel/load',
-  'router_path' => 'user/%/devel/load',
-  'link_title' => 'Load',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '16',
-  'p2' => '338',
-  'p3' => '350',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '351',
-  'plid' => '336',
-  'link_path' => 'comment/%/devel/render',
-  'router_path' => 'comment/%/devel/render',
-  'link_title' => 'Render',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '100',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '3',
-  'p2' => '336',
-  'p3' => '351',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '352',
-  'plid' => '337',
-  'link_path' => 'node/%/devel/render',
-  'router_path' => 'node/%/devel/render',
-  'link_title' => 'Render',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '100',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '5',
-  'p2' => '337',
-  'p3' => '352',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '353',
-  'plid' => '338',
-  'link_path' => 'user/%/devel/render',
-  'router_path' => 'user/%/devel/render',
-  'link_title' => 'Render',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '100',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '16',
-  'p2' => '338',
-  'p3' => '353',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '354',
-  'plid' => '346',
-  'link_path' => 'taxonomy/term/%/devel/load',
-  'router_path' => 'taxonomy/term/%/devel/load',
-  'link_title' => 'Load',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '165',
-  'p2' => '346',
-  'p3' => '354',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '355',
-  'plid' => '346',
-  'link_path' => 'taxonomy/term/%/devel/render',
-  'router_path' => 'taxonomy/term/%/devel/render',
-  'link_title' => 'Render',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '100',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '165',
-  'p2' => '346',
-  'p3' => '355',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '356',
-  'plid' => '0',
-  'link_path' => 'group/%/group',
-  'router_path' => 'group/%/group',
-  'link_title' => 'Group',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '356',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '357',
-  'plid' => '0',
-  'link_path' => 'og_membership/%/group',
-  'router_path' => 'og_membership/%/group',
-  'link_title' => 'Group',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '357',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '358',
-  'plid' => '0',
-  'link_path' => 'taxonomy_term/%/group',
-  'router_path' => 'taxonomy_term/%/group',
-  'link_title' => 'Group',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '358',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '359',
-  'plid' => '3',
-  'link_path' => 'comment/%/group',
-  'router_path' => 'comment/%/group',
-  'link_title' => 'Group',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '3',
-  'p2' => '359',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '360',
-  'plid' => '5',
-  'link_path' => 'node/%/group',
-  'router_path' => 'node/%/group',
-  'link_title' => 'Group',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '5',
-  'p2' => '360',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '361',
-  'plid' => '16',
-  'link_path' => 'user/%/group',
-  'router_path' => 'user/%/group',
-  'link_title' => 'Group',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '16',
-  'p2' => '361',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '362',
-  'plid' => '8',
-  'link_path' => 'admin/config/group',
-  'router_path' => 'admin/config/group',
-  'link_title' => 'Group',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:47:"Administer the suite of Organic groups modules.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '1',
-  'expanded' => '0',
-  'weight' => '-5',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '362',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '363',
-  'plid' => '362',
-  'link_path' => 'admin/config/group/fields',
-  'router_path' => 'admin/config/group/fields',
-  'link_title' => 'Organic groups field settings',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:43:"Configure Organic groups fields in bundles.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '4',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '362',
-  'p4' => '363',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '364',
-  'plid' => '362',
-  'link_path' => 'admin/config/group/settings',
-  'router_path' => 'admin/config/group/settings',
-  'link_title' => 'Organic groups settings',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:39:"Administer the Organic groups settings.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '4',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '362',
-  'p4' => '364',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '365',
-  'plid' => '362',
-  'link_path' => 'admin/config/group/permissions',
-  'router_path' => 'admin/config/group/permissions',
-  'link_title' => 'Organic groups global permissions',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:44:"Configure Organic groups global permissions.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '4',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '362',
-  'p4' => '365',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '366',
-  'plid' => '362',
-  'link_path' => 'admin/config/group/roles',
-  'router_path' => 'admin/config/group/roles',
-  'link_title' => 'Organic groups global roles',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:38:"Configure Organic groups global roles.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '4',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '362',
-  'p4' => '366',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '367',
-  'plid' => '0',
-  'link_path' => 'group/%/%/admin/people',
-  'router_path' => 'group/%/%/admin/people',
-  'link_title' => '',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:30:"Find and manage group members.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '1',
-  'expanded' => '0',
-  'weight' => '-4',
-  'depth' => '1',
-  'customized' => '0',
-  'p1' => '367',
-  'p2' => '0',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '368',
-  'plid' => '367',
-  'link_path' => 'group/%/%/admin/people/permissions',
-  'router_path' => 'group/%/%/admin/people/permissions',
-  'link_title' => '',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:64:"Determine access to features by selecting permissions for roles.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '-8',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '367',
-  'p2' => '368',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '369',
-  'plid' => '367',
-  'link_path' => 'group/%/%/admin/people/roles',
-  'router_path' => 'group/%/%/admin/people/roles',
-  'link_title' => '',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:30:"List, edit, or add user roles.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '-9',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '367',
-  'p2' => '369',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'navigation',
-  'mlid' => '370',
-  'plid' => '367',
-  'link_path' => 'group/%/%/admin/people/add-user',
-  'router_path' => 'group/%/%/admin/people/add-user',
-  'link_title' => 'Add members',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '5',
-  'depth' => '2',
-  'customized' => '0',
-  'p1' => '367',
-  'p2' => '370',
-  'p3' => '0',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '371',
-  'plid' => '363',
-  'link_path' => 'admin/config/group/fields/%/%/%/delete',
-  'router_path' => 'admin/config/group/fields/%/%/%/delete',
-  'link_title' => 'Delete',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:45:"Delete an Organic groups field from a bundle.";}}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '5',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '362',
-  'p4' => '363',
-  'p5' => '371',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '372',
-  'plid' => '164',
-  'link_path' => 'admin/help/simpletest',
-  'router_path' => 'admin/help/simpletest',
-  'link_title' => 'simpletest',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '3',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '164',
-  'p3' => '372',
-  'p4' => '0',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '373',
-  'plid' => '37',
-  'link_path' => 'admin/config/development/testing',
-  'router_path' => 'admin/config/development/testing',
-  'link_title' => 'Testing',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:122:"Run tests against Drupal core and your active modules. These tests help assure that your site code is working as designed.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '1',
-  'expanded' => '0',
-  'weight' => '-5',
-  'depth' => '4',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '37',
-  'p4' => '373',
-  'p5' => '0',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '374',
-  'plid' => '373',
-  'link_path' => 'admin/config/development/testing/list',
-  'router_path' => 'admin/config/development/testing/list',
-  'link_title' => 'List',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '5',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '37',
-  'p4' => '373',
-  'p5' => '374',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '375',
-  'plid' => '373',
-  'link_path' => 'admin/config/development/testing/settings',
-  'router_path' => 'admin/config/development/testing/settings',
-  'link_title' => 'Settings',
-  'options' => 'a:0:{}',
-  'module' => 'system',
-  'hidden' => '-1',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '5',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '37',
-  'p4' => '373',
-  'p5' => '375',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
-->values(array(
-  'menu_name' => 'management',
-  'mlid' => '376',
-  'plid' => '373',
-  'link_path' => 'admin/config/development/testing/results/%',
-  'router_path' => 'admin/config/development/testing/results/%',
-  'link_title' => 'Test result',
-  'options' => 'a:1:{s:10:"attributes";a:1:{s:5:"title";s:21:"View result of tests.";}}',
-  'module' => 'system',
-  'hidden' => '0',
-  'external' => '0',
-  'has_children' => '0',
-  'expanded' => '0',
-  'weight' => '0',
-  'depth' => '5',
-  'customized' => '0',
-  'p1' => '1',
-  'p2' => '8',
-  'p3' => '37',
-  'p4' => '373',
-  'p5' => '376',
-  'p6' => '0',
-  'p7' => '0',
-  'p8' => '0',
-  'p9' => '0',
-  'updated' => '0',
-))
 ->execute();
 
 db_create_table('menu_router', array(
@@ -14346,31 +12759,6 @@ db_insert('menu_router')->fields(array(
   'include_file' => 'modules/system/system.admin.inc',
 ))
 ->values(array(
-  'path' => 'admin/config/development/devel',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:29:"administer site configuration";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:20:"devel_admin_settings";}',
-  'delivery_callback' => '',
-  'fit' => '15',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/development/devel',
-  'title' => 'Devel settings',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Helper functions, pages, and blocks to assist Drupal developers. The devel blocks can be managed via the <a href="/admin/structure/block">block administration</a> page.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.admin.inc',
-))
-->values(array(
   'path' => 'admin/config/development/logging',
   'load_functions' => '',
   'to_arg_functions' => '',
@@ -14444,431 +12832,6 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '-20',
   'include_file' => 'modules/system/system.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/development/testing',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:21:"administer unit tests";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:20:"simpletest_test_form";}',
-  'delivery_callback' => '',
-  'fit' => '15',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/development/testing',
-  'title' => 'Testing',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Run tests against Drupal core and your active modules. These tests help assure that your site code is working as designed.',
-  'position' => '',
-  'weight' => '-5',
-  'include_file' => 'modules/simpletest/simpletest.pages.inc',
-))
-->values(array(
-  'path' => 'admin/config/development/testing/list',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:21:"administer unit tests";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:20:"simpletest_test_form";}',
-  'delivery_callback' => '',
-  'fit' => '31',
-  'number_parts' => '5',
-  'context' => '1',
-  'tab_parent' => 'admin/config/development/testing',
-  'tab_root' => 'admin/config/development/testing',
-  'title' => 'List',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '140',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'modules/simpletest/simpletest.pages.inc',
-))
-->values(array(
-  'path' => 'admin/config/development/testing/results/%',
-  'load_functions' => 'a:1:{i:5;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:21:"administer unit tests";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:2:{i:0;s:22:"simpletest_result_form";i:1;i:5;}',
-  'delivery_callback' => '',
-  'fit' => '62',
-  'number_parts' => '6',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/development/testing/results/%',
-  'title' => 'Test result',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'View result of tests.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'modules/simpletest/simpletest.pages.inc',
-))
-->values(array(
-  'path' => 'admin/config/development/testing/settings',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:21:"administer unit tests";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:24:"simpletest_settings_form";}',
-  'delivery_callback' => '',
-  'fit' => '31',
-  'number_parts' => '5',
-  'context' => '1',
-  'tab_parent' => 'admin/config/development/testing',
-  'tab_root' => 'admin/config/development/testing',
-  'title' => 'Settings',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'modules/simpletest/simpletest.pages.inc',
-))
-->values(array(
-  'path' => 'admin/config/group',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:16:"administer group";}',
-  'page_callback' => 'system_admin_menu_block_page',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '7',
-  'number_parts' => '3',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group',
-  'title' => 'Group',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Administer the suite of Organic groups modules.',
-  'position' => 'right',
-  'weight' => '-5',
-  'include_file' => 'modules/system/system.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/fields',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:16:"administer group";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:20:"og_ui_field_settings";}',
-  'delivery_callback' => '',
-  'fit' => '15',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group/fields',
-  'title' => 'Organic groups field settings',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Configure Organic groups fields in bundles.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/fields/%/%/%/delete',
-  'load_functions' => 'a:3:{i:4;N;i:5;N;i:6;a:1:{s:18:"field_ui_menu_load";a:4:{i:0;i:4;i:1;i:5;i:2;i:5;i:3;s:4:"%map";}}}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:16:"administer group";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:2:{i:0;s:23:"og_ui_field_delete_form";i:1;i:6;}',
-  'delivery_callback' => '',
-  'fit' => '241',
-  'number_parts' => '8',
-  'context' => '1',
-  'tab_parent' => 'admin/config/group/fields',
-  'tab_root' => 'admin/config/group/fields',
-  'title' => 'Delete',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => 'Delete an Organic groups field from a bundle.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/group-membership',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'entity_access',
-  'access_arguments' => 'a:2:{i:0;s:4:"view";i:1;s:13:"og_membership";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:2:{i:0;s:27:"og_membership_overview_form";i:1;s:13:"og_membership";}',
-  'delivery_callback' => '',
-  'fit' => '15',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group/group-membership',
-  'title' => 'Organic groups memberships',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Manage group memberships, including fields.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/entity/includes/entity.ui.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/group-membership/add',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'entity_access',
-  'access_arguments' => 'a:2:{i:0;s:6:"create";i:1;s:13:"og_membership";}',
-  'page_callback' => 'entity_ui_get_form',
-  'page_arguments' => 'a:3:{i:0;s:13:"og_membership";i:1;N;i:2;s:3:"add";}',
-  'delivery_callback' => '',
-  'fit' => '31',
-  'number_parts' => '5',
-  'context' => '1',
-  'tab_parent' => 'admin/config/group/group-membership',
-  'tab_root' => 'admin/config/group/group-membership',
-  'title' => '',
-  'title_callback' => 'entity_ui_get_action_title',
-  'title_arguments' => 'a:2:{i:0;s:3:"add";i:1;s:13:"og_membership";}',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '388',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/group-membership/manage/%',
-  'load_functions' => 'a:1:{i:5;a:1:{s:18:"og_membership_load";a:1:{i:0;s:13:"og_membership";}}}',
-  'to_arg_functions' => '',
-  'access_callback' => 'entity_access',
-  'access_arguments' => 'a:3:{i:0;s:6:"update";i:1;s:13:"og_membership";i:2;i:5;}',
-  'page_callback' => 'entity_ui_get_form',
-  'page_arguments' => 'a:2:{i:0;s:13:"og_membership";i:1;i:5;}',
-  'delivery_callback' => '',
-  'fit' => '62',
-  'number_parts' => '6',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group/group-membership/manage/%',
-  'title' => 'Edit',
-  'title_callback' => 'entity_label',
-  'title_arguments' => 'a:2:{i:0;s:13:"og_membership";i:1;i:5;}',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/group-membership/manage/%/%',
-  'load_functions' => 'a:2:{i:5;a:1:{s:18:"og_membership_load";a:1:{i:0;s:13:"og_membership";}}i:6;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'entity_access',
-  'access_arguments' => 'a:3:{i:0;s:6:"delete";i:1;s:13:"og_membership";i:2;i:5;}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:4:{i:0;s:28:"og_membership_operation_form";i:1;s:13:"og_membership";i:2;i:5;i:3;i:6;}',
-  'delivery_callback' => '',
-  'fit' => '124',
-  'number_parts' => '7',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group/group-membership/manage/%/%',
-  'title' => '',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/entity/includes/entity.ui.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/group-membership/manage/%/clone',
-  'load_functions' => 'a:1:{i:5;a:1:{s:18:"og_membership_load";a:1:{i:0;s:13:"og_membership";}}}',
-  'to_arg_functions' => '',
-  'access_callback' => 'entity_access',
-  'access_arguments' => 'a:2:{i:0;s:6:"create";i:1;s:13:"og_membership";}',
-  'page_callback' => 'entity_ui_get_form',
-  'page_arguments' => 'a:3:{i:0;s:13:"og_membership";i:1;i:5;i:2;s:5:"clone";}',
-  'delivery_callback' => '',
-  'fit' => '125',
-  'number_parts' => '7',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group/group-membership/manage/%/clone',
-  'title' => 'Clone',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/group-membership/manage/%/edit',
-  'load_functions' => 'a:1:{i:5;a:1:{s:18:"og_membership_load";a:1:{i:0;s:13:"og_membership";}}}',
-  'to_arg_functions' => '',
-  'access_callback' => 'entity_access',
-  'access_arguments' => 'a:3:{i:0;s:6:"update";i:1;s:13:"og_membership";i:2;i:5;}',
-  'page_callback' => 'entity_ui_get_form',
-  'page_arguments' => 'a:2:{i:0;s:13:"og_membership";i:1;i:5;}',
-  'delivery_callback' => '',
-  'fit' => '125',
-  'number_parts' => '7',
-  'context' => '1',
-  'tab_parent' => 'admin/config/group/group-membership/manage/%',
-  'tab_root' => 'admin/config/group/group-membership/manage/%',
-  'title' => 'Edit',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '140',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/permissions',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:16:"administer group";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:35:"og_ui_user_admin_global_permissions";}',
-  'delivery_callback' => '',
-  'fit' => '15',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group/permissions',
-  'title' => 'Organic groups global permissions',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Configure Organic groups global permissions.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/roles',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:16:"administer group";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:25:"og_ui_user_admin_new_role";}',
-  'delivery_callback' => '',
-  'fit' => '15',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group/roles',
-  'title' => 'Organic groups global roles',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Configure Organic groups global roles.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/roles/edit',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:16:"administer group";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:4:{i:0;s:29:"og_ui_user_admin_global_roles";i:1;s:0:"";i:2;s:0:"";i:3;i:5;}',
-  'delivery_callback' => '',
-  'fit' => '31',
-  'number_parts' => '5',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group/roles/edit',
-  'title' => 'Edit role',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'admin/config/group/settings',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:16:"administer group";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:25:"og_ui_user_admin_settings";}',
-  'delivery_callback' => '',
-  'fit' => '15',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/config/group/settings',
-  'title' => 'Organic groups settings',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Administer the Organic groups settings.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
 ))
 ->values(array(
   'path' => 'admin/config/media',
@@ -17046,31 +15009,6 @@ db_insert('menu_router')->fields(array(
   'include_file' => 'modules/help/help.admin.inc',
 ))
 ->values(array(
-  'path' => 'admin/help/devel',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:27:"access administration pages";}',
-  'page_callback' => 'help_page',
-  'page_arguments' => 'a:1:{i:0;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '7',
-  'number_parts' => '3',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/help/devel',
-  'title' => 'devel',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '4',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'modules/help/help.admin.inc',
-))
-->values(array(
   'path' => 'admin/help/field',
   'load_functions' => '',
   'to_arg_functions' => '',
@@ -17510,31 +15448,6 @@ db_insert('menu_router')->fields(array(
   'tab_parent' => '',
   'tab_root' => 'admin/help/shortcut',
   'title' => 'shortcut',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '4',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'modules/help/help.admin.inc',
-))
-->values(array(
-  'path' => 'admin/help/simpletest',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:27:"access administration pages";}',
-  'page_callback' => 'help_page',
-  'page_arguments' => 'a:1:{i:0;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '7',
-  'number_parts' => '3',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'admin/help/simpletest',
-  'title' => 'simpletest',
   'title_callback' => 't',
   'title_arguments' => '',
   'theme_callback' => '',
@@ -20821,81 +18734,6 @@ db_insert('menu_router')->fields(array(
   'include_file' => 'modules/comment/comment.admin.inc',
 ))
 ->values(array(
-  'path' => 'comment/%/devel',
-  'load_functions' => 'a:1:{i:1;s:12:"comment_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_load_object',
-  'page_arguments' => 'a:2:{i:0;i:1;i:1;s:7:"comment";}',
-  'delivery_callback' => '',
-  'fit' => '5',
-  'number_parts' => '3',
-  'context' => '1',
-  'tab_parent' => 'comment/%',
-  'tab_root' => 'comment/%',
-  'title' => 'Devel',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '100',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'comment/%/devel/load',
-  'load_functions' => 'a:1:{i:1;s:12:"comment_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_load_object',
-  'page_arguments' => 'a:2:{i:0;i:1;i:1;s:7:"comment";}',
-  'delivery_callback' => '',
-  'fit' => '11',
-  'number_parts' => '4',
-  'context' => '1',
-  'tab_parent' => 'comment/%/devel',
-  'tab_root' => 'comment/%',
-  'title' => 'Load',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '140',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'comment/%/devel/render',
-  'load_functions' => 'a:1:{i:1;s:12:"comment_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_render_object',
-  'page_arguments' => 'a:2:{i:0;s:7:"comment";i:1;i:1;}',
-  'delivery_callback' => '',
-  'fit' => '11',
-  'number_parts' => '4',
-  'context' => '1',
-  'tab_parent' => 'comment/%/devel',
-  'tab_root' => 'comment/%',
-  'title' => 'Render',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '100',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
   'path' => 'comment/%/edit',
   'load_functions' => 'a:1:{i:1;s:12:"comment_load";}',
   'to_arg_functions' => '',
@@ -20919,31 +18757,6 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'include_file' => '',
-))
-->values(array(
-  'path' => 'comment/%/group',
-  'load_functions' => 'a:1:{i:1;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;s:7:"comment";i:2;i:1;}',
-  'page_callback' => 'og_ui_group_admin_overview',
-  'page_arguments' => 'a:2:{i:0;s:7:"comment";i:1;i:1;}',
-  'delivery_callback' => '',
-  'fit' => '5',
-  'number_parts' => '3',
-  'context' => '3',
-  'tab_parent' => 'comment/%',
-  'tab_root' => 'comment/%',
-  'title' => 'Group',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
 ))
 ->values(array(
   'path' => 'comment/%/view',
@@ -20994,506 +18807,6 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'include_file' => 'modules/comment/comment.pages.inc',
-))
-->values(array(
-  'path' => 'devel/arguments',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_querylog_arguments',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/arguments',
-  'title' => 'Arguments query',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => 'Return a given query, with arguments instead of placeholders. Used by query log',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/cache/clear',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_cache_clear',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '7',
-  'number_parts' => '3',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/cache/clear',
-  'title' => 'Empty cache',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Clear the CSS cache and all database cache tables which store page, node, theme and variable caches.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/elements',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_elements_page',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/elements',
-  'title' => 'Hook_elements()',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'View the active form/render elements for this site.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/entity/info',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_entity_info_page',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '7',
-  'number_parts' => '3',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/entity/info',
-  'title' => 'Entity info',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'View entity information across the whole site.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/explain',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_querylog_explain',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/explain',
-  'title' => 'Explain query',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => 'Run an EXPLAIN on a given query. Used by query log',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/field/info',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_field_info_page',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '7',
-  'number_parts' => '3',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/field/info',
-  'title' => 'Field info',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'View fields information across the whole site.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/menu/item',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_menu_item',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '7',
-  'number_parts' => '3',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/menu/item',
-  'title' => 'Menu item',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Details about a given menu item.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/menu/reset',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:18:"devel_menu_rebuild";}',
-  'delivery_callback' => '',
-  'fit' => '7',
-  'number_parts' => '3',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/menu/reset',
-  'title' => 'Rebuild menus',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Rebuild menu based on hook_menu() and revert any custom changes. All menu items return to their default settings.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/php',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:16:"execute php code";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:18:"devel_execute_form";}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/php',
-  'title' => 'Execute PHP Code',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Execute some PHP code',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/phpinfo',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_phpinfo',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/phpinfo',
-  'title' => 'PHPinfo()',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => "View your server's PHP configuration",
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/reference',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_function_reference',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/reference',
-  'title' => 'Function reference',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'View a list of currently defined user functions with documentation links.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/reinstall',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:15:"devel_reinstall";}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/reinstall',
-  'title' => 'Reinstall modules',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Run hook_uninstall() and then hook_install() for a given module.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/run-cron',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:29:"administer site configuration";}',
-  'page_callback' => 'system_run_cron',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/run-cron',
-  'title' => 'Run cron',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'modules/system/system.admin.inc',
-))
-->values(array(
-  'path' => 'devel/session',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_session',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/session',
-  'title' => 'Session viewer',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'List the contents of $_SESSION.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/settings',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:29:"administer site configuration";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:1:{i:0;s:20:"devel_admin_settings";}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/settings',
-  'title' => 'Devel settings',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Helper functions, pages, and blocks to assist Drupal developers. The devel blocks can be managed via the <a href="/admin/structure/block">block administration</a> page.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.admin.inc',
-))
-->values(array(
-  'path' => 'devel/source',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:19:"display source code";}',
-  'page_callback' => 'devel_display_source',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/source',
-  'title' => 'Display the PHP code of any file in your Drupal installation',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/switch',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:12:"switch users";}',
-  'page_callback' => 'devel_switch_user',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/switch',
-  'title' => 'Switch user',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/theme/registry',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_theme_registry',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '7',
-  'number_parts' => '3',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/theme/registry',
-  'title' => 'Theme registry',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'View a list of available theme functions across the whole site.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/variable',
-  'load_functions' => '',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_variable_page',
-  'page_arguments' => 'a:0:{}',
-  'delivery_callback' => '',
-  'fit' => '3',
-  'number_parts' => '2',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/variable',
-  'title' => 'Variable editor',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Edit and delete site variables.',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'devel/variable/edit/%',
-  'load_functions' => 'a:1:{i:3;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:2:{i:0;s:19:"devel_variable_edit";i:1;i:3;}',
-  'delivery_callback' => '',
-  'fit' => '14',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'devel/variable/edit/%',
-  'title' => 'Variable editor',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
 ))
 ->values(array(
   'path' => 'file/ajax',
@@ -21569,231 +18882,6 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'include_file' => 'modules/filter/filter.pages.inc',
-))
-->values(array(
-  'path' => 'group/%/%/admin/people',
-  'load_functions' => 'a:2:{i:1;N;i:2;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;i:1;i:2;i:2;}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:3:{i:0;s:24:"og_ui_user_admin_account";i:1;i:1;i:2;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '19',
-  'number_parts' => '5',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'group/%/%/admin/people',
-  'title' => '',
-  'title_callback' => 'og_ui_menu_title_callback',
-  'title_arguments' => 'a:3:{i:0;s:22:"People in group @group";i:1;i:1;i:2;i:2;}',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Find and manage group members.',
-  'position' => '',
-  'weight' => '-4',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'group/%/%/admin/people/add-user',
-  'load_functions' => 'a:2:{i:1;N;i:2;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:8:"add user";i:1;i:1;i:2;i:2;}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:3:{i:0;s:15:"og_ui_add_users";i:1;i:1;i:2;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '39',
-  'number_parts' => '6',
-  'context' => '1',
-  'tab_parent' => 'group/%/%/admin/people',
-  'tab_root' => 'group/%/%/admin/people',
-  'title' => 'Add members',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '5',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'group/%/%/admin/people/permissions',
-  'load_functions' => 'a:2:{i:1;N;i:2;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;i:1;i:2;i:2;}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:3:{i:0;s:28:"og_ui_user_admin_permissions";i:1;i:1;i:2;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '39',
-  'number_parts' => '6',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'group/%/%/admin/people/permissions',
-  'title' => '',
-  'title_callback' => 'og_ui_menu_title_callback',
-  'title_arguments' => 'a:3:{i:0;s:28:"Permissions for group @group";i:1;i:1;i:2;i:2;}',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'Determine access to features by selecting permissions for roles.',
-  'position' => '',
-  'weight' => '-8',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'group/%/%/admin/people/roles',
-  'load_functions' => 'a:2:{i:1;N;i:2;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;i:1;i:2;i:2;}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:3:{i:0;s:25:"og_ui_user_admin_new_role";i:1;i:1;i:2;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '39',
-  'number_parts' => '6',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'group/%/%/admin/people/roles',
-  'title' => '',
-  'title_callback' => 'og_ui_menu_title_callback',
-  'title_arguments' => 'a:3:{i:0;s:22:"Roles for group @group";i:1;i:1;i:2;i:2;}',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '6',
-  'description' => 'List, edit, or add user roles.',
-  'position' => '',
-  'weight' => '-9',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'group/%/%/admin/people/roles/edit',
-  'load_functions' => 'a:2:{i:1;N;i:2;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;i:1;i:2;i:2;}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:3:{i:0;s:22:"og_ui_user_admin_roles";i:1;i:1;i:2;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '79',
-  'number_parts' => '7',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'group/%/%/admin/people/roles/edit',
-  'title' => 'Edit role',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
-))
-->values(array(
-  'path' => 'group/%/%/invite',
-  'load_functions' => 'a:2:{i:1;N;i:2;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:6:"invite";i:1;i:1;i:2;i:2;}',
-  'page_callback' => 'drupal_get_form',
-  'page_arguments' => 'a:3:{i:0;s:17:"og_ui_invite_form";i:1;i:1;i:2;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '9',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'group/%/%/invite',
-  'title' => 'Send invitation',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.pages.inc',
-))
-->values(array(
-  'path' => 'group/%/%/subscribe',
-  'load_functions' => 'a:2:{i:1;N;i:2;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_is_logged_in',
-  'access_arguments' => 'a:0:{}',
-  'page_callback' => 'og_ui_subscribe',
-  'page_arguments' => 'a:2:{i:0;i:1;i:1;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '9',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'group/%/%/subscribe',
-  'title' => 'Join group',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.pages.inc',
-))
-->values(array(
-  'path' => 'group/%/%/unsubscribe',
-  'load_functions' => 'a:2:{i:1;N;i:2;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:11:"unsubscribe";i:1;i:1;i:2;i:2;}',
-  'page_callback' => 'og_ui_unsubscribe',
-  'page_arguments' => 'a:2:{i:0;i:1;i:1;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '9',
-  'number_parts' => '4',
-  'context' => '0',
-  'tab_parent' => '',
-  'tab_root' => 'group/%/%/unsubscribe',
-  'title' => 'Leave group',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '0',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.pages.inc',
-))
-->values(array(
-  'path' => 'group/%/group',
-  'load_functions' => 'a:1:{i:1;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;s:5:"group";i:2;i:1;}',
-  'page_callback' => 'og_ui_group_admin_overview',
-  'page_arguments' => 'a:2:{i:0;s:5:"group";i:1;i:1;}',
-  'delivery_callback' => '',
-  'fit' => '5',
-  'number_parts' => '3',
-  'context' => '3',
-  'tab_parent' => '',
-  'tab_root' => 'group/%/group',
-  'title' => 'Group',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
 ))
 ->values(array(
   'path' => 'group/autocomplete',
@@ -21896,81 +18984,6 @@ db_insert('menu_router')->fields(array(
   'include_file' => 'modules/node/node.pages.inc',
 ))
 ->values(array(
-  'path' => 'node/%/devel',
-  'load_functions' => 'a:1:{i:1;s:9:"node_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_load_object',
-  'page_arguments' => 'a:2:{i:0;i:1;i:1;s:4:"node";}',
-  'delivery_callback' => '',
-  'fit' => '5',
-  'number_parts' => '3',
-  'context' => '1',
-  'tab_parent' => 'node/%',
-  'tab_root' => 'node/%',
-  'title' => 'Devel',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '100',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'node/%/devel/load',
-  'load_functions' => 'a:1:{i:1;s:9:"node_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_load_object',
-  'page_arguments' => 'a:2:{i:0;i:1;i:1;s:4:"node";}',
-  'delivery_callback' => '',
-  'fit' => '11',
-  'number_parts' => '4',
-  'context' => '1',
-  'tab_parent' => 'node/%/devel',
-  'tab_root' => 'node/%',
-  'title' => 'Load',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '140',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'node/%/devel/render',
-  'load_functions' => 'a:1:{i:1;s:9:"node_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_render_object',
-  'page_arguments' => 'a:2:{i:0;s:4:"node";i:1;i:1;}',
-  'delivery_callback' => '',
-  'fit' => '11',
-  'number_parts' => '4',
-  'context' => '1',
-  'tab_parent' => 'node/%/devel',
-  'tab_root' => 'node/%',
-  'title' => 'Render',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '100',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
   'path' => 'node/%/edit',
   'load_functions' => 'a:1:{i:1;s:9:"node_load";}',
   'to_arg_functions' => '',
@@ -21994,31 +19007,6 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'include_file' => 'modules/node/node.pages.inc',
-))
-->values(array(
-  'path' => 'node/%/group',
-  'load_functions' => 'a:1:{i:1;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;s:4:"node";i:2;i:1;}',
-  'page_callback' => 'og_ui_group_admin_overview',
-  'page_arguments' => 'a:2:{i:0;s:4:"node";i:1;i:1;}',
-  'delivery_callback' => '',
-  'fit' => '5',
-  'number_parts' => '3',
-  'context' => '3',
-  'tab_parent' => 'node/%',
-  'tab_root' => 'node/%',
-  'title' => 'Group',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
 ))
 ->values(array(
   'path' => 'node/%/revisions',
@@ -22219,31 +19207,6 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'include_file' => 'modules/node/node.pages.inc',
-))
-->values(array(
-  'path' => 'og_membership/%/group',
-  'load_functions' => 'a:1:{i:1;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;s:13:"og_membership";i:2;i:1;}',
-  'page_callback' => 'og_ui_group_admin_overview',
-  'page_arguments' => 'a:2:{i:0;s:13:"og_membership";i:1;i:1;}',
-  'delivery_callback' => '',
-  'fit' => '5',
-  'number_parts' => '3',
-  'context' => '3',
-  'tab_parent' => '',
-  'tab_root' => 'og_membership/%/group',
-  'title' => 'Group',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
 ))
 ->values(array(
   'path' => 'overlay-ajax/%',
@@ -22646,81 +19609,6 @@ db_insert('menu_router')->fields(array(
   'include_file' => 'modules/taxonomy/taxonomy.pages.inc',
 ))
 ->values(array(
-  'path' => 'taxonomy/term/%/devel',
-  'load_functions' => 'a:1:{i:2;s:18:"taxonomy_term_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_load_object',
-  'page_arguments' => 'a:2:{i:0;i:2;i:1;s:4:"term";}',
-  'delivery_callback' => '',
-  'fit' => '13',
-  'number_parts' => '4',
-  'context' => '1',
-  'tab_parent' => 'taxonomy/term/%',
-  'tab_root' => 'taxonomy/term/%',
-  'title' => 'Devel',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '100',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'taxonomy/term/%/devel/load',
-  'load_functions' => 'a:1:{i:2;s:18:"taxonomy_term_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_load_object',
-  'page_arguments' => 'a:2:{i:0;i:2;i:1;s:4:"term";}',
-  'delivery_callback' => '',
-  'fit' => '27',
-  'number_parts' => '5',
-  'context' => '1',
-  'tab_parent' => 'taxonomy/term/%/devel',
-  'tab_root' => 'taxonomy/term/%',
-  'title' => 'Load',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '140',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'taxonomy/term/%/devel/render',
-  'load_functions' => 'a:1:{i:2;s:18:"taxonomy_term_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_render_term',
-  'page_arguments' => 'a:1:{i:0;i:2;}',
-  'delivery_callback' => '',
-  'fit' => '27',
-  'number_parts' => '5',
-  'context' => '1',
-  'tab_parent' => 'taxonomy/term/%/devel',
-  'tab_root' => 'taxonomy/term/%',
-  'title' => 'Render',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '100',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
   'path' => 'taxonomy/term/%/edit',
   'load_functions' => 'a:1:{i:2;s:18:"taxonomy_term_load";}',
   'to_arg_functions' => '',
@@ -22794,31 +19682,6 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'include_file' => 'modules/taxonomy/taxonomy.pages.inc',
-))
-->values(array(
-  'path' => 'taxonomy_term/%/group',
-  'load_functions' => 'a:1:{i:1;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;s:13:"taxonomy_term";i:2;i:1;}',
-  'page_callback' => 'og_ui_group_admin_overview',
-  'page_arguments' => 'a:2:{i:0;s:13:"taxonomy_term";i:1;i:1;}',
-  'delivery_callback' => '',
-  'fit' => '5',
-  'number_parts' => '3',
-  'context' => '3',
-  'tab_parent' => '',
-  'tab_root' => 'taxonomy_term/%/group',
-  'title' => 'Group',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
 ))
 ->values(array(
   'path' => 'toolbar/toggle',
@@ -22946,81 +19809,6 @@ db_insert('menu_router')->fields(array(
   'include_file' => 'modules/user/user.pages.inc',
 ))
 ->values(array(
-  'path' => 'user/%/devel',
-  'load_functions' => 'a:1:{i:1;s:9:"user_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_load_object',
-  'page_arguments' => 'a:2:{i:0;i:1;i:1;s:4:"user";}',
-  'delivery_callback' => '',
-  'fit' => '5',
-  'number_parts' => '3',
-  'context' => '1',
-  'tab_parent' => 'user/%',
-  'tab_root' => 'user/%',
-  'title' => 'Devel',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '100',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'user/%/devel/load',
-  'load_functions' => 'a:1:{i:1;s:9:"user_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_load_object',
-  'page_arguments' => 'a:2:{i:0;i:1;i:1;s:4:"user";}',
-  'delivery_callback' => '',
-  'fit' => '11',
-  'number_parts' => '4',
-  'context' => '1',
-  'tab_parent' => 'user/%/devel',
-  'tab_root' => 'user/%',
-  'title' => 'Load',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '140',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
-  'path' => 'user/%/devel/render',
-  'load_functions' => 'a:1:{i:1;s:9:"user_load";}',
-  'to_arg_functions' => '',
-  'access_callback' => 'user_access',
-  'access_arguments' => 'a:1:{i:0;s:24:"access devel information";}',
-  'page_callback' => 'devel_render_object',
-  'page_arguments' => 'a:2:{i:0;s:4:"user";i:1;i:1;}',
-  'delivery_callback' => '',
-  'fit' => '11',
-  'number_parts' => '4',
-  'context' => '1',
-  'tab_parent' => 'user/%/devel',
-  'tab_root' => 'user/%',
-  'title' => 'Render',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '100',
-  'include_file' => 'sites/all/modules/devel/devel.pages.inc',
-))
-->values(array(
   'path' => 'user/%/edit',
   'load_functions' => 'a:1:{i:1;s:9:"user_load";}',
   'to_arg_functions' => '',
@@ -23069,31 +19857,6 @@ db_insert('menu_router')->fields(array(
   'position' => '',
   'weight' => '0',
   'include_file' => 'modules/user/user.pages.inc',
-))
-->values(array(
-  'path' => 'user/%/group',
-  'load_functions' => 'a:1:{i:1;N;}',
-  'to_arg_functions' => '',
-  'access_callback' => 'og_user_access_by_entity',
-  'access_arguments' => 'a:3:{i:0;s:16:"administer group";i:1;s:4:"user";i:2;i:1;}',
-  'page_callback' => 'og_ui_group_admin_overview',
-  'page_arguments' => 'a:2:{i:0;s:4:"user";i:1;i:1;}',
-  'delivery_callback' => '',
-  'fit' => '5',
-  'number_parts' => '3',
-  'context' => '3',
-  'tab_parent' => 'user/%',
-  'tab_root' => 'user/%',
-  'title' => 'Group',
-  'title_callback' => 't',
-  'title_arguments' => '',
-  'theme_callback' => '',
-  'theme_arguments' => 'a:0:{}',
-  'type' => '132',
-  'description' => '',
-  'position' => '',
-  'weight' => '0',
-  'include_file' => 'sites/all/modules/og/og_ui/og_ui.admin.inc',
 ))
 ->values(array(
   'path' => 'user/%/shortcuts',
@@ -23465,8 +20228,8 @@ db_insert('node')->fields(array(
   'title' => 'Group node',
   'uid' => '2',
   'status' => '1',
-  'created' => '1300127037',
-  'changed' => '1300127037',
+  'created' => '1300137503',
+  'changed' => '1300137503',
   'comment' => '0',
   'promote' => '1',
   'sticky' => '0',
@@ -23628,7 +20391,7 @@ db_insert('node_comment_statistics')->fields(array(
 ->values(array(
   'nid' => '1',
   'cid' => '0',
-  'last_comment_timestamp' => '1300127037',
+  'last_comment_timestamp' => '1300137503',
   'last_comment_name' => NULL,
   'last_comment_uid' => '2',
   'comment_count' => '0',
@@ -23736,7 +20499,7 @@ db_insert('node_revision')->fields(array(
   'uid' => '0',
   'title' => 'Group node',
   'log' => '',
-  'timestamp' => '1300127037',
+  'timestamp' => '1300137503',
   'status' => '1',
   'comment' => '0',
   'promote' => '1',
@@ -23933,99 +20696,7 @@ db_insert('og')->fields(array(
   'entity_type' => 'node',
   'label' => 'Group node',
   'state' => '1',
-  'created' => '1300127039',
-))
-->execute();
-
-db_create_table('og_membership', array(
-  'fields' => array(
-    'id' => array(
-      'type' => 'serial',
-      'unsigned' => TRUE,
-      'not null' => TRUE,
-    ),
-    'etid' => array(
-      'type' => 'int',
-      'unsigned' => TRUE,
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-    'entity_type' => array(
-      'type' => 'varchar',
-      'length' => '32',
-      'not null' => TRUE,
-      'default' => '',
-    ),
-    'gid' => array(
-      'type' => 'int',
-      'size' => 'normal',
-      'not null' => TRUE,
-    ),
-    'state' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-      'default' => '',
-    ),
-    'created' => array(
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-  ),
-  'primary key' => array(
-    'id',
-  ),
-  'foreign keys' => array(
-    'group' => array(
-      'table' => 'og',
-      'columns' => array(
-        'gid' => 'gid',
-      ),
-    ),
-  ),
-  'module' => 'og',
-  'name' => 'og_membership',
-));
-db_insert('og_membership')->fields(array(
-  'id',
-  'etid',
-  'entity_type',
-  'gid',
-  'state',
-  'created',
-))
-->values(array(
-  'id' => '1',
-  'etid' => '2',
-  'entity_type' => 'user',
-  'gid' => '1',
-  'state' => '1',
-  'created' => '0',
-))
-->values(array(
-  'id' => '2',
-  'etid' => '3',
-  'entity_type' => 'user',
-  'gid' => '1',
-  'state' => '1',
-  'created' => '0',
-))
-->values(array(
-  'id' => '3',
-  'etid' => '4',
-  'entity_type' => 'user',
-  'gid' => '1',
-  'state' => '2',
-  'created' => '0',
-))
-->values(array(
-  'id' => '4',
-  'etid' => '5',
-  'entity_type' => 'user',
-  'gid' => '1',
-  'state' => '3',
-  'created' => '0',
+  'created' => '1300137505',
 ))
 ->execute();
 
@@ -24122,29 +20793,9 @@ db_insert('og_role_permission')->fields(array(
   'module',
 ))
 ->values(array(
-  'rid' => '1',
-  'permission' => 'subscribe',
-  'module' => 'og_ui',
-))
-->values(array(
-  'rid' => '2',
-  'permission' => 'unsubscribe',
-  'module' => 'og_ui',
-))
-->values(array(
-  'rid' => '3',
-  'permission' => 'add user',
-  'module' => 'og_ui',
-))
-->values(array(
   'rid' => '3',
   'permission' => 'administer group',
   'module' => 'og',
-))
-->values(array(
-  'rid' => '3',
-  'permission' => 'approve and deny subscription',
-  'module' => 'og_ui',
 ))
 ->values(array(
   'rid' => '3',
@@ -24258,77 +20909,14 @@ db_insert('queue')->fields(array(
   'name' => 'update_fetch_tasks',
   'data' => 'a:8:{s:4:"name";s:6:"drupal";s:4:"info";a:6:{s:4:"name";s:5:"Block";s:7:"package";s:4:"Core";s:7:"version";s:7:"7.0-dev";s:7:"project";s:6:"drupal";s:16:"_info_file_ctime";i:1297541921;s:9:"datestamp";i:0;}s:9:"datestamp";i:0;s:8:"includes";a:31:{s:5:"block";s:5:"Block";s:5:"color";s:5:"Color";s:7:"comment";s:7:"Comment";s:10:"contextual";s:16:"Contextual links";s:9:"dashboard";s:9:"Dashboard";s:5:"dblog";s:16:"Database logging";s:5:"field";s:5:"Field";s:17:"field_sql_storage";s:17:"Field SQL storage";s:8:"field_ui";s:8:"Field UI";s:4:"file";s:4:"File";s:6:"filter";s:6:"Filter";s:4:"help";s:4:"Help";s:5:"image";s:5:"Image";s:4:"list";s:4:"List";s:4:"menu";s:4:"Menu";s:4:"node";s:4:"Node";s:6:"number";s:6:"Number";s:7:"options";s:7:"Options";s:7:"overlay";s:7:"Overlay";s:4:"path";s:4:"Path";s:3:"rdf";s:3:"RDF";s:6:"search";s:6:"Search";s:8:"shortcut";s:8:"Shortcut";s:6:"system";s:6:"System";s:8:"taxonomy";s:8:"Taxonomy";s:4:"text";s:4:"Text";s:7:"toolbar";s:7:"Toolbar";s:6:"update";s:14:"Update manager";s:4:"user";s:4:"User";s:6:"bartik";s:6:"Bartik";s:5:"seven";s:5:"Seven";}s:12:"project_type";s:4:"core";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
   'expire' => '0',
-  'created' => '1300122925',
+  'created' => '1300137088',
 ))
 ->values(array(
   'item_id' => '30',
   'name' => 'update_fetch_tasks',
   'data' => 'a:8:{s:4:"name";s:6:"drupal";s:4:"info";a:6:{s:4:"name";s:5:"Block";s:7:"package";s:4:"Core";s:7:"version";s:7:"7.0-dev";s:7:"project";s:6:"drupal";s:16:"_info_file_ctime";i:1297541921;s:9:"datestamp";i:0;}s:9:"datestamp";i:0;s:8:"includes";a:31:{s:5:"block";s:5:"Block";s:5:"color";s:5:"Color";s:7:"comment";s:7:"Comment";s:10:"contextual";s:16:"Contextual links";s:9:"dashboard";s:9:"Dashboard";s:5:"dblog";s:16:"Database logging";s:5:"field";s:5:"Field";s:17:"field_sql_storage";s:17:"Field SQL storage";s:8:"field_ui";s:8:"Field UI";s:4:"file";s:4:"File";s:6:"filter";s:6:"Filter";s:4:"help";s:4:"Help";s:5:"image";s:5:"Image";s:4:"list";s:4:"List";s:4:"menu";s:4:"Menu";s:4:"node";s:4:"Node";s:6:"number";s:6:"Number";s:7:"options";s:7:"Options";s:7:"overlay";s:7:"Overlay";s:4:"path";s:4:"Path";s:3:"rdf";s:3:"RDF";s:6:"search";s:6:"Search";s:8:"shortcut";s:8:"Shortcut";s:6:"system";s:6:"System";s:8:"taxonomy";s:8:"Taxonomy";s:4:"text";s:4:"Text";s:7:"toolbar";s:7:"Toolbar";s:6:"update";s:14:"Update manager";s:4:"user";s:4:"User";s:6:"bartik";s:6:"Bartik";s:5:"seven";s:5:"Seven";}s:12:"project_type";s:4:"core";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
   'expire' => '0',
-  'created' => '1300127039',
-))
-->values(array(
-  'item_id' => '31',
-  'name' => 'update_fetch_tasks',
-  'data' => 'a:8:{s:4:"name";s:6:"drupal";s:4:"info";a:6:{s:4:"name";s:5:"Block";s:7:"package";s:4:"Core";s:7:"version";s:7:"7.0-dev";s:7:"project";s:6:"drupal";s:16:"_info_file_ctime";i:1297541921;s:9:"datestamp";i:0;}s:9:"datestamp";i:0;s:8:"includes";a:31:{s:5:"block";s:5:"Block";s:5:"color";s:5:"Color";s:7:"comment";s:7:"Comment";s:10:"contextual";s:16:"Contextual links";s:9:"dashboard";s:9:"Dashboard";s:5:"dblog";s:16:"Database logging";s:5:"field";s:5:"Field";s:17:"field_sql_storage";s:17:"Field SQL storage";s:8:"field_ui";s:8:"Field UI";s:4:"file";s:4:"File";s:6:"filter";s:6:"Filter";s:4:"help";s:4:"Help";s:5:"image";s:5:"Image";s:4:"list";s:4:"List";s:4:"menu";s:4:"Menu";s:4:"node";s:4:"Node";s:6:"number";s:6:"Number";s:7:"options";s:7:"Options";s:7:"overlay";s:7:"Overlay";s:4:"path";s:4:"Path";s:3:"rdf";s:3:"RDF";s:6:"search";s:6:"Search";s:8:"shortcut";s:8:"Shortcut";s:6:"system";s:6:"System";s:8:"taxonomy";s:8:"Taxonomy";s:4:"text";s:4:"Text";s:7:"toolbar";s:7:"Toolbar";s:6:"update";s:14:"Update manager";s:4:"user";s:4:"User";s:6:"bartik";s:6:"Bartik";s:5:"seven";s:5:"Seven";}s:12:"project_type";s:4:"core";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
-  'expire' => '0',
-  'created' => '1300131626',
-))
-->values(array(
-  'item_id' => '32',
-  'name' => 'update_fetch_tasks',
-  'data' => 'a:8:{s:4:"name";s:5:"devel";s:4:"info";a:6:{s:4:"name";s:5:"Devel";s:7:"package";s:11:"Development";s:7:"version";s:11:"7.x-1.0-rc1";s:7:"project";s:5:"devel";s:9:"datestamp";s:10:"1291608172";s:16:"_info_file_ctime";i:1292522576;}s:9:"datestamp";s:10:"1291608172";s:8:"includes";a:1:{s:5:"devel";s:5:"Devel";}s:12:"project_type";s:6:"module";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
-  'expire' => '0',
-  'created' => '1300131626',
-))
-->values(array(
-  'item_id' => '33',
-  'name' => 'update_fetch_tasks',
-  'data' => 'a:8:{s:4:"name";s:6:"drupal";s:4:"info";a:6:{s:4:"name";s:5:"Block";s:7:"package";s:4:"Core";s:7:"version";s:7:"7.0-dev";s:7:"project";s:6:"drupal";s:16:"_info_file_ctime";i:1297541921;s:9:"datestamp";i:0;}s:9:"datestamp";i:0;s:8:"includes";a:31:{s:5:"block";s:5:"Block";s:5:"color";s:5:"Color";s:7:"comment";s:7:"Comment";s:10:"contextual";s:16:"Contextual links";s:9:"dashboard";s:9:"Dashboard";s:5:"dblog";s:16:"Database logging";s:5:"field";s:5:"Field";s:17:"field_sql_storage";s:17:"Field SQL storage";s:8:"field_ui";s:8:"Field UI";s:4:"file";s:4:"File";s:6:"filter";s:6:"Filter";s:4:"help";s:4:"Help";s:5:"image";s:5:"Image";s:4:"list";s:4:"List";s:4:"menu";s:4:"Menu";s:4:"node";s:4:"Node";s:6:"number";s:6:"Number";s:7:"options";s:7:"Options";s:7:"overlay";s:7:"Overlay";s:4:"path";s:4:"Path";s:3:"rdf";s:3:"RDF";s:6:"search";s:6:"Search";s:8:"shortcut";s:8:"Shortcut";s:6:"system";s:6:"System";s:8:"taxonomy";s:8:"Taxonomy";s:4:"text";s:4:"Text";s:7:"toolbar";s:7:"Toolbar";s:6:"update";s:14:"Update manager";s:4:"user";s:4:"User";s:6:"bartik";s:6:"Bartik";s:5:"seven";s:5:"Seven";}s:12:"project_type";s:4:"core";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
-  'expire' => '0',
-  'created' => '1300131706',
-))
-->values(array(
-  'item_id' => '34',
-  'name' => 'update_fetch_tasks',
-  'data' => 'a:8:{s:4:"name";s:5:"devel";s:4:"info";a:6:{s:4:"name";s:5:"Devel";s:7:"package";s:11:"Development";s:7:"version";s:11:"7.x-1.0-rc1";s:7:"project";s:5:"devel";s:9:"datestamp";s:10:"1291608172";s:16:"_info_file_ctime";i:1292522576;}s:9:"datestamp";s:10:"1291608172";s:8:"includes";a:1:{s:5:"devel";s:5:"Devel";}s:12:"project_type";s:6:"module";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
-  'expire' => '0',
-  'created' => '1300131706',
-))
-->values(array(
-  'item_id' => '35',
-  'name' => 'update_fetch_tasks',
-  'data' => 'a:8:{s:4:"name";s:6:"drupal";s:4:"info";a:6:{s:4:"name";s:5:"Block";s:7:"package";s:4:"Core";s:7:"version";s:7:"7.0-dev";s:7:"project";s:6:"drupal";s:16:"_info_file_ctime";i:1297541921;s:9:"datestamp";i:0;}s:9:"datestamp";i:0;s:8:"includes";a:31:{s:5:"block";s:5:"Block";s:5:"color";s:5:"Color";s:7:"comment";s:7:"Comment";s:10:"contextual";s:16:"Contextual links";s:9:"dashboard";s:9:"Dashboard";s:5:"dblog";s:16:"Database logging";s:5:"field";s:5:"Field";s:17:"field_sql_storage";s:17:"Field SQL storage";s:8:"field_ui";s:8:"Field UI";s:4:"file";s:4:"File";s:6:"filter";s:6:"Filter";s:4:"help";s:4:"Help";s:5:"image";s:5:"Image";s:4:"list";s:4:"List";s:4:"menu";s:4:"Menu";s:4:"node";s:4:"Node";s:6:"number";s:6:"Number";s:7:"options";s:7:"Options";s:7:"overlay";s:7:"Overlay";s:4:"path";s:4:"Path";s:3:"rdf";s:3:"RDF";s:6:"search";s:6:"Search";s:8:"shortcut";s:8:"Shortcut";s:6:"system";s:6:"System";s:8:"taxonomy";s:8:"Taxonomy";s:4:"text";s:4:"Text";s:7:"toolbar";s:7:"Toolbar";s:6:"update";s:14:"Update manager";s:4:"user";s:4:"User";s:6:"bartik";s:6:"Bartik";s:5:"seven";s:5:"Seven";}s:12:"project_type";s:4:"core";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
-  'expire' => '0',
-  'created' => '1300132759',
-))
-->values(array(
-  'item_id' => '36',
-  'name' => 'update_fetch_tasks',
-  'data' => 'a:8:{s:4:"name";s:5:"devel";s:4:"info";a:6:{s:4:"name";s:5:"Devel";s:7:"package";s:11:"Development";s:7:"version";s:11:"7.x-1.0-rc1";s:7:"project";s:5:"devel";s:9:"datestamp";s:10:"1291608172";s:16:"_info_file_ctime";i:1292522576;}s:9:"datestamp";s:10:"1291608172";s:8:"includes";a:1:{s:5:"devel";s:5:"Devel";}s:12:"project_type";s:6:"module";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
-  'expire' => '0',
-  'created' => '1300132759',
-))
-->values(array(
-  'item_id' => '37',
-  'name' => 'update_fetch_tasks',
-  'data' => 'a:8:{s:4:"name";s:6:"drupal";s:4:"info";a:6:{s:4:"name";s:5:"Block";s:7:"package";s:4:"Core";s:7:"version";s:7:"7.0-dev";s:7:"project";s:6:"drupal";s:16:"_info_file_ctime";i:1297541921;s:9:"datestamp";i:0;}s:9:"datestamp";i:0;s:8:"includes";a:32:{s:5:"block";s:5:"Block";s:5:"color";s:5:"Color";s:7:"comment";s:7:"Comment";s:10:"contextual";s:16:"Contextual links";s:9:"dashboard";s:9:"Dashboard";s:5:"dblog";s:16:"Database logging";s:5:"field";s:5:"Field";s:17:"field_sql_storage";s:17:"Field SQL storage";s:8:"field_ui";s:8:"Field UI";s:4:"file";s:4:"File";s:6:"filter";s:6:"Filter";s:4:"help";s:4:"Help";s:5:"image";s:5:"Image";s:4:"list";s:4:"List";s:4:"menu";s:4:"Menu";s:4:"node";s:4:"Node";s:6:"number";s:6:"Number";s:7:"options";s:7:"Options";s:7:"overlay";s:7:"Overlay";s:4:"path";s:4:"Path";s:3:"rdf";s:3:"RDF";s:6:"search";s:6:"Search";s:8:"shortcut";s:8:"Shortcut";s:10:"simpletest";s:7:"Testing";s:6:"system";s:6:"System";s:8:"taxonomy";s:8:"Taxonomy";s:4:"text";s:4:"Text";s:7:"toolbar";s:7:"Toolbar";s:6:"update";s:14:"Update manager";s:4:"user";s:4:"User";s:6:"bartik";s:6:"Bartik";s:5:"seven";s:5:"Seven";}s:12:"project_type";s:4:"core";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
-  'expire' => '0',
-  'created' => '1300132844',
-))
-->values(array(
-  'item_id' => '38',
-  'name' => 'update_fetch_tasks',
-  'data' => 'a:8:{s:4:"name";s:5:"devel";s:4:"info";a:6:{s:4:"name";s:5:"Devel";s:7:"package";s:11:"Development";s:7:"version";s:11:"7.x-1.0-rc1";s:7:"project";s:5:"devel";s:9:"datestamp";s:10:"1291608172";s:16:"_info_file_ctime";i:1292522576;}s:9:"datestamp";s:10:"1291608172";s:8:"includes";a:1:{s:5:"devel";s:5:"Devel";}s:12:"project_type";s:6:"module";s:14:"project_status";b:1;s:10:"sub_themes";a:0:{}s:11:"base_themes";a:0:{}}',
-  'expire' => '0',
-  'created' => '1300132844',
-))
-->values(array(
-  'item_id' => '43',
-  'name' => 'drupal_batch:10:0',
-  'data' => 'a:2:{i:0;s:27:"_simpletest_batch_operation";i:1;a:2:{i:0;a:1:{i:0;s:25:"OgUpgradePath7001TestCase";}i:1;s:1:"5";}}',
-  'expire' => '0',
-  'created' => '1300133384',
+  'created' => '1300137505',
 ))
 ->execute();
 
@@ -24435,115 +21023,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'ActionLoopTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/actions.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ActionsConfigurationTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/actions.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AddFeedTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AdminMenuLinksTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/admin_menu/tests/admin_menu.test',
-  'module' => 'admin_menu',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AdminMenuPermissionsTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/admin_menu/tests/admin_menu.test',
-  'module' => 'admin_menu',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AdminMenuWebTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/admin_menu/tests/admin_menu.test',
-  'module' => 'admin_menu',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'AdminMetaTagTestCase',
   'type' => 'class',
   'filename' => 'modules/system/system.test',
   'module' => 'system',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AggregatorCronTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AggregatorRenderingTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AggregatorTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AJAXCommandsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/ajax.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AJAXElementValidation',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/ajax.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AJAXFormValuesTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/ajax.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AJAXFrameworkTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/ajax.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AJAXMultiFormTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/ajax.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'AJAXTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/ajax.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -24575,38 +21058,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'BasicUpgradePath',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'BatchMemoryQueue',
   'type' => 'class',
   'filename' => 'includes/batch.queue.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BatchPageTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/batch.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BatchPercentagesUnitTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/batch.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BatchProcessingTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/batch.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -24642,139 +21097,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/block/block.test',
   'module' => 'block',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BlogTestCase',
-  'type' => 'class',
-  'filename' => 'modules/blog/blog.test',
-  'module' => 'blog',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BookTestCase',
-  'type' => 'class',
-  'filename' => 'modules/book/book.test',
-  'module' => 'book',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BootstrapGetFilenameTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BootstrapIPAddressTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BootstrapMiscTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BootstrapOverrideServerVariablesTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BootstrapPageCacheTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BootstrapResettableStaticTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BootstrapTimerTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'BootstrapVariableTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CacheClearCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/cache.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CacheGetMultipleUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/cache.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CacheIsEmptyCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/cache.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CacheSavingCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/cache.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CacheTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/cache.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CascadingStylesheetsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CascadingStylesheetsUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CategorizeFeedItemTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CategorizeFeedTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
   'weight' => '0',
 ))
 ->values(array(
@@ -24883,262 +21205,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'CommentUpgradePathTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.comment.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceBaseTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/tests/commerce_base.test',
-  'module' => 'commerce',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceBaseTesterTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/tests/commerce_base.test',
-  'module' => 'commerce',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceCartTestCaseAttributes',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/modules/cart/tests/commerce_cart.test',
-  'module' => 'commerce_cart',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceCartTestCaseMultiProducts',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/modules/cart/tests/commerce_cart.test',
-  'module' => 'commerce_cart',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceCartTestCaseSimpleProduct',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/modules/cart/tests/commerce_cart.test',
-  'module' => 'commerce_cart',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceCheckoutTestProcess',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/modules/checkout/tests/commerce_checkout.test',
-  'module' => 'commerce_checkout',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceOrderUIAdminTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/modules/order/tests/commerce_order_ui.test',
-  'module' => 'commerce_order',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceProductCRUDTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/modules/product/tests/commerce_product.test',
-  'module' => 'commerce_product',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceProductRulesTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/modules/product/tests/commerce_product.test',
-  'module' => 'commerce_product',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceSandboxTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/tests/commerce_base.test',
-  'module' => 'commerce',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommerceTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/drupalcommerce/tests/commerce.test',
-  'module' => 'commerce',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommonSizeTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommonURLUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CommonXssUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContactPersonalTestCase',
-  'type' => 'class',
-  'filename' => 'modules/contact/contact.test',
-  'module' => 'contact',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContactSitewideTestCase',
-  'type' => 'class',
-  'filename' => 'modules/contact/contact.test',
-  'module' => 'contact',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionBookroot',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionBookTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionContextTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionLanguageTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionMenuTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionNodeTaxonomyTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionNodeTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionPathTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionSitewideTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionUserPageTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextConditionUserTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextReactionBlockAjaxTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.reactions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextReactionBlockTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.reactions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextReactionBreadcrumbTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.reactions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextReactionMenuTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.reactions.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextUiTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/context_ui/tests/context_ui.test',
-  'module' => 'context_ui',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ContextUnitTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/context/tests/context.test',
-  'module' => 'context',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'CronRunTestCase',
   'type' => 'class',
   'filename' => 'modules/system/system.test',
   'module' => 'system',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CtoolsObjectCache',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/ctools/tests/object_cache.test',
-  'module' => 'ctools_plugin_test',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'CtoolsPluginsGetInfoTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/ctools/tests/ctools.plugins.test',
-  'module' => 'ctools_plugin_test',
   'weight' => '0',
 ))
 ->values(array(
@@ -25153,20 +21223,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'includes/database/database.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseAlterTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseBasicSyntaxTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -25191,13 +21247,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DatabaseConnectionTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DatabaseConnection_mysql',
   'type' => 'class',
   'filename' => 'includes/database/mysql/database.inc',
@@ -25219,13 +21268,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DatabaseDeleteTruncateTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DatabaseDriverNotSpecifiedException',
   'type' => 'class',
   'filename' => 'includes/database/database.inc',
@@ -25233,101 +21275,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DatabaseEmptyStatementTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseFetch2TestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseFetchTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseInsertDefaultsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseInsertLOBTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseInsertTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseInvalidDataTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DatabaseLog',
   'type' => 'class',
   'filename' => 'includes/database/log.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseLoggingTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseMergeTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseNextIdCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseQueryTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseRangeQueryTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseRegressionTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -25373,62 +21324,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DatabaseSelectComplexTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseSelectComplexTestCase2',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseSelectOrderedTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseSelectPagerDefaultTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseSelectSubqueryTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseSelectTableSortDefaultTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseSelectTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseSerializeQueryTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DatabaseStatementBase',
   'type' => 'class',
   'filename' => 'includes/database/database.inc',
@@ -25461,13 +21356,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'includes/database/sqlite/database.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseTaggingTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -25506,20 +21394,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DatabaseTemporaryQueryTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DatabaseTransaction',
   'type' => 'class',
   'filename' => 'includes/database/database.inc',
@@ -25552,34 +21426,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'includes/database/database.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseTransactionTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseUpdateComplexTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseUpdateLOBTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DatabaseUpdateTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -25618,38 +21464,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DrupalAddFeedTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalAlterTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalAttributesUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DrupalCacheInterface',
   'type' => 'interface',
   'filename' => 'includes/cache.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalDataApiTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -25674,20 +21492,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DrupalErrorCollectionUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalErrorHandlerUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/error.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DrupalFakeCache',
   'type' => 'class',
   'filename' => 'includes/cache-install.inc',
@@ -25695,52 +21499,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DrupalGetRdfNamespacesTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalGotoTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalHTMLIdentifierTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalHTTPRequestTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalJSONTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DrupalLocalStreamWrapper',
   'type' => 'class',
   'filename' => 'includes/stream_wrappers.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalMatchPathTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/path.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -25779,20 +21541,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DrupalRenderTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalSetContentTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DrupalStreamWrapperInterface',
   'type' => 'interface',
   'filename' => 'includes/stream_wrappers.inc',
@@ -25800,38 +21548,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'DrupalSystemListingTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalTagsHandlingTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'DrupalTemporaryStreamWrapper',
   'type' => 'class',
   'filename' => 'includes/stream_wrappers.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/drupal_web_test_case.php',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalUnitTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/drupal_web_test_case.php',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -25846,13 +21566,6 @@ db_insert('registry')->fields(array(
   'type' => 'interface',
   'filename' => 'includes/updater.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'DrupalWebTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/drupal_web_test_case.php',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -25895,13 +21608,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'sites/all/modules/entity/entity.test',
   'module' => 'entity',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'EntityCrudHookTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/entity_crud_hook_test.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -25975,13 +21681,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'EntityFieldQueryTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/entity_query.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'EntityListWrapper',
   'type' => 'class',
   'filename' => 'sites/all/modules/entity/includes/entity.wrapper.inc',
@@ -26038,13 +21737,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'EntityOgMembership',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/og/og.module',
-  'module' => 'og',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'EntityPropertiesTestCase',
   'type' => 'class',
   'filename' => 'modules/field/tests/field.test',
@@ -26073,27 +21765,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'FakeRecord',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FeaturesUserTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/features/tests/features.test',
-  'module' => 'features',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FeedParserTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'FieldAttachOtherTestCase',
   'type' => 'class',
   'filename' => 'modules/field/tests/field.test',
@@ -26119,20 +21790,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/field/tests/field.test',
   'module' => 'field',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FieldCollectionBasicTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/field_collection/field_collection.test',
-  'module' => 'field_collection',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FieldCollectionRulesIntegrationTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/field_collection/field_collection.test',
-  'module' => 'field_collection',
   'weight' => '0',
 ))
 ->values(array(
@@ -26241,34 +21898,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'FileCopyTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileDeleteTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileDirectoryTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileDownloadTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'FileFieldDisplayTestCase',
   'type' => 'class',
   'filename' => 'modules/file/tests/file.test',
@@ -26311,20 +21940,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'FileHookTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileLoadTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'FileManagedFileElementTestCase',
   'type' => 'class',
   'filename' => 'modules/file/tests/file.test',
@@ -26332,80 +21947,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'FileMimeTypeTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileMoveTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileNameMungingTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileSaveDataTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileSaveTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileSaveUploadTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileScanDirectoryTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileSpaceUsedTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'FileTokenReplaceTestCase',
   'type' => 'class',
   'filename' => 'modules/file/tests/file.test',
   'module' => 'file',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileTranferTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/filetransfer.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -26458,69 +22003,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'FileUnmanagedCopyTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileUnmanagedDeleteRecursiveTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileUnmanagedDeleteTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileUnmanagedMoveTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileUnmanagedSaveDataTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileURLRewritingTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileUsageTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileValidateTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FileValidatorTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'FilterAdminTestCase',
   'type' => 'class',
   'filename' => 'modules/filter/filter.test',
@@ -26546,13 +22028,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/filter/filter.test',
   'module' => 'filter',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FilterFormatUpgradePathTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.filter.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -26584,143 +22059,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'FlagTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/flag/tests/flag.test',
-  'module' => 'flag',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'FloodFunctionalTest',
   'type' => 'class',
   'filename' => 'modules/system/system.test',
   'module' => 'system',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormAlterTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormatDateUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormCheckboxTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormElementTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsArbitraryRebuildTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsElementsLabelsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsElementsTableSelectFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsElementsVerticalTabsFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsFileInclusionTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsFormStorageTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsFormWrapperTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsProgrammaticTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsRebuildTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormStateValuesCleanTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormsTriggeringElementTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'FormValidationTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/form.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ForumTestCase',
-  'type' => 'class',
-  'filename' => 'modules/forum/forum.test',
-  'module' => 'forum',
   'weight' => '0',
 ))
 ->values(array(
@@ -26731,31 +22073,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'GraphUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/graph.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'HeartbeatAPI',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/heartbeat/tests/heartbeat.api.test',
-  'module' => 'heartbeat',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'HelpTestCase',
   'type' => 'class',
   'filename' => 'modules/help/help.test',
   'module' => 'help',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'HookBootExitTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -26808,34 +22129,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'ImageToolkitGdTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/image.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ImageToolkitTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/image.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ImageToolkitUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/image.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ImportOPMLTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'InfoFileParserTestCase',
   'type' => 'class',
   'filename' => 'modules/system/system.test',
@@ -26885,13 +22178,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'JavaScriptTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'ListFieldTestCase',
   'type' => 'class',
   'filename' => 'modules/field/modules/list/tests/list.test',
@@ -26906,150 +22192,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'LocaleCommentLanguageFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleConfigurationTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleContentFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleDateFormatsFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleExportFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleImportFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleInstallTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleLanguageSwitchingFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleMultilingualFieldsFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocalePathFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleTranslationFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleUILanguageNegotiationTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleUninstallFrenchFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleUninstallFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleUpgradePathTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.locale.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleUrlRewritingTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleUserCreationTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LocaleUserLanguageFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/locale/locale.test',
-  'module' => 'locale',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'LockFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/lock.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'MailSystemInterface',
   'type' => 'interface',
   'filename' => 'includes/mail.inc',
   'module' => '',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'MailTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/mail.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -27060,38 +22206,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'MenuBreadcrumbTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/menu.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'MenuLinksUnitTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/menu.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'MenuNodeTestCase',
   'type' => 'class',
   'filename' => 'modules/menu/menu.test',
   'module' => 'menu',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'MenuRebuildTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/menu.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'MenuRouterTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/menu.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -27102,13 +22220,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'MenuTreeDataTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/menu.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'MergeQuery',
   'type' => 'class',
   'filename' => 'includes/database/query.inc',
@@ -27116,45 +22227,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'MessageCrud',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/message/message.test',
-  'module' => 'message',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'MessageRulesIntegrationTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/message/message.test',
-  'module' => 'message',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'MessageShowMessage',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/message/message.test',
-  'module' => 'message',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'MockTestConnection',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/filetransfer.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'ModuleDependencyTestCase',
   'type' => 'class',
   'filename' => 'modules/system/system.test',
   'module' => 'system',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ModuleInstallTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/module.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -27169,20 +22245,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/system/system.test',
   'module' => 'system',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ModuleUninstallTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/module.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ModuleUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/module.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -27211,13 +22273,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/block/block.test',
   'module' => 'block',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'NoAuthEndpointTestRunner',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/services/tests/functional/NoAuthEndpointTestRunner.test',
-  'module' => 'services',
   'weight' => '0',
 ))
 ->values(array(
@@ -27260,13 +22315,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/node/node.test',
   'module' => 'node',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'NodeBodyUpgradePathTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.node.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -27330,13 +22378,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/node/node.test',
   'module' => 'node',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'NodeReferenceFormTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/references/node_reference/node_reference.test',
-  'module' => 'node_reference',
   'weight' => '0',
 ))
 ->values(array(
@@ -27424,24 +22465,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'OgAccessTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/og/og_access/og_access.test',
-  'module' => 'og_access',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'OgDefaultAccessFieldTestCase',
   'type' => 'class',
   'filename' => 'sites/all/modules/og/og.test',
   'module' => 'og',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'OgFieldAccessTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/og/og_field_access/og_field_access.test',
-  'module' => 'og_field_access',
   'weight' => '0',
 ))
 ->values(array(
@@ -27466,45 +22493,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'OgGroupMEmbership',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/og/og.test',
-  'module' => 'og',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'OgMembershipUIController',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/og/og.admin.inc',
-  'module' => 'og',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'OgTranslationTestCase',
   'type' => 'class',
   'filename' => 'sites/all/modules/og/og.test',
   'module' => 'og',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'OgUiManagePeopleTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/og/og_ui/og_ui.test',
-  'module' => 'og_ui',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'OgUiUpgradePathTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/og/og_ui/og_ui.test',
-  'module' => 'og_ui',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'OgUiUserPermissionsTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/og/og_ui/og_ui.test',
-  'module' => 'og_ui',
   'weight' => '0',
 ))
 ->values(array(
@@ -27515,14 +22507,7 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'OgUpgradePath7000TestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/og/og.test',
-  'module' => 'og',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'OgUpgradePath7001TestCase',
+  'name' => 'OgUpgradePathTestCase',
   'type' => 'class',
   'filename' => 'sites/all/modules/og/og.test',
   'module' => 'og',
@@ -27592,34 +22577,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'OpenIDFunctionalTestCase',
-  'type' => 'class',
-  'filename' => 'modules/openid/openid.test',
-  'module' => 'openid',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'OpenIDRegistrationTestCase',
-  'type' => 'class',
-  'filename' => 'modules/openid/openid.test',
-  'module' => 'openid',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'OpenIDUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/openid/openid.test',
-  'module' => 'openid',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'OpenIDWebTestCase',
-  'type' => 'class',
-  'filename' => 'modules/openid/openid.test',
-  'module' => 'openid',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'OptionsWidgetsTestCase',
   'type' => 'class',
   'filename' => 'modules/field/modules/options/options.test',
@@ -27669,20 +22626,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'ParseInfoFilesTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PasswordHashingTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/password.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'PathLanguageTestCase',
   'type' => 'class',
   'filename' => 'modules/path/path.test',
@@ -27694,13 +22637,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/path/path.test',
   'module' => 'path',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PathLookupTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/path.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -27722,153 +22658,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/path/path.test',
   'module' => 'path',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PHPAccessTestCase',
-  'type' => 'class',
-  'filename' => 'modules/php/php.test',
-  'module' => 'php',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PHPFilterTestCase',
-  'type' => 'class',
-  'filename' => 'modules/php/php.test',
-  'module' => 'php',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PHPTestCase',
-  'type' => 'class',
-  'filename' => 'modules/php/php.test',
-  'module' => 'php',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PollBlockTestCase',
-  'type' => 'class',
-  'filename' => 'modules/poll/poll.test',
-  'module' => 'poll',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PollCreateTestCase',
-  'type' => 'class',
-  'filename' => 'modules/poll/poll.test',
-  'module' => 'poll',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PollExpirationTestCase',
-  'type' => 'class',
-  'filename' => 'modules/poll/poll.test',
-  'module' => 'poll',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PollJSAddChoice',
-  'type' => 'class',
-  'filename' => 'modules/poll/poll.test',
-  'module' => 'poll',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PollTestCase',
-  'type' => 'class',
-  'filename' => 'modules/poll/poll.test',
-  'module' => 'poll',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PollTokenReplaceTestCase',
-  'type' => 'class',
-  'filename' => 'modules/poll/poll.test',
-  'module' => 'poll',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PollUpgradePathTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.node.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PollVoteCheckHostname',
-  'type' => 'class',
-  'filename' => 'modules/poll/poll.test',
-  'module' => 'poll',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'PollVoteTestCase',
-  'type' => 'class',
-  'filename' => 'modules/poll/poll.test',
-  'module' => 'poll',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ProfileBlockTestCase',
-  'type' => 'class',
-  'filename' => 'modules/profile/profile.test',
-  'module' => 'profile',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ProfileCRUDTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/profile/profile2.test',
-  'module' => 'profile2',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ProfileTestAutocomplete',
-  'type' => 'class',
-  'filename' => 'modules/profile/profile.test',
-  'module' => 'profile',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ProfileTestBrowsing',
-  'type' => 'class',
-  'filename' => 'modules/profile/profile.test',
-  'module' => 'profile',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ProfileTestCase',
-  'type' => 'class',
-  'filename' => 'modules/profile/profile.test',
-  'module' => 'profile',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ProfileTestDate',
-  'type' => 'class',
-  'filename' => 'modules/profile/profile.test',
-  'module' => 'profile',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ProfileTestFields',
-  'type' => 'class',
-  'filename' => 'modules/profile/profile.test',
-  'module' => 'profile',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ProfileTestSelect',
-  'type' => 'class',
-  'filename' => 'modules/profile/profile.test',
-  'module' => 'profile',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ProfileTestWeights',
-  'type' => 'class',
-  'filename' => 'modules/profile/profile.test',
-  'module' => 'profile',
   'weight' => '0',
 ))
 ->values(array(
@@ -27963,34 +22752,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'RegistryParseFilesTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/registry.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'RegistryParseFileTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/registry.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'RemoveFeedItemTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'RemoveFeedTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'RetrieveFileTestCase',
   'type' => 'class',
   'filename' => 'modules/system/system.test',
@@ -27998,73 +22759,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'RulesIntegrationTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/rules/tests/rules.test',
-  'module' => 'rules',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'RulesSchedulerTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/rules/rules_scheduler/rules_scheduler.test',
-  'module' => 'rules_scheduler',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'RulesTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/rules/tests/rules.test',
-  'module' => 'rules',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'RulesTestDataCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/rules/tests/rules.test',
-  'module' => 'rules',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'RulesTriggerTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/rules/tests/rules.test',
-  'module' => 'rules',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SchemaTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/schema.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'SearchAdvancedSearchForm',
   'type' => 'class',
   'filename' => 'modules/search/search.test',
   'module' => 'search',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SearchApiDbTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/search_api/contrib/search_api_db/search_api_db.test',
-  'module' => 'search_api_db',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SearchApiUnitTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/search_api/search_api.test',
-  'module' => 'search_api',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SearchApiWebTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/search_api/search_api.test',
-  'module' => 'search_api',
   'weight' => '0',
 ))
 ->values(array(
@@ -28236,41 +22934,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'ServicesEndpointTests',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/services/tests/functional/ServicesEndpointTests.test',
-  'module' => 'services',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ServicesModuleTests',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/services/tests/unit/TestServicesModule.test',
-  'module' => 'services',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ServicesResourceNodetests',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/services/tests/functional/ServicesResourceNodeTests.test',
-  'module' => 'services',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SessionHttpsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/session.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SessionTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/session.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'ShortcutLinksTestCase',
   'type' => 'class',
   'filename' => 'modules/shortcut/shortcut.test',
@@ -28299,41 +22962,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'SimpleTestBrowserTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/simpletest.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SimpleTestFolderTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/simpletest.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SimpleTestFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/simpletest.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SimpleTestMailCaptureTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/simpletest.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SimpleTestMissingDependentModuleUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/simpletest.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'SiteMaintenanceTestCase',
   'type' => 'class',
   'filename' => 'modules/system/system.test',
@@ -28348,48 +22976,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'StatisticsAdminTestCase',
-  'type' => 'class',
-  'filename' => 'modules/statistics/statistics.test',
-  'module' => 'statistics',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'StatisticsBlockVisitorsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/statistics/statistics.test',
-  'module' => 'statistics',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'StatisticsLoggingTestCase',
-  'type' => 'class',
-  'filename' => 'modules/statistics/statistics.test',
-  'module' => 'statistics',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'StatisticsReportsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/statistics/statistics.test',
-  'module' => 'statistics',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'StatisticsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/statistics/statistics.test',
-  'module' => 'statistics',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'StatisticsTokenReplaceTestCase',
-  'type' => 'class',
-  'filename' => 'modules/statistics/statistics.test',
-  'module' => 'statistics',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'StreamWrapperInterface',
   'type' => 'interface',
   'filename' => 'includes/stream_wrappers.inc',
@@ -28397,24 +22983,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'StreamWrapperTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/file.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'SummaryLengthTestCase',
   'type' => 'class',
   'filename' => 'modules/node/node.test',
   'module' => 'node',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'SyslogTestCase',
-  'type' => 'class',
-  'filename' => 'modules/syslog/syslog.test',
-  'module' => 'syslog',
   'weight' => '0',
 ))
 ->values(array(
@@ -28565,13 +23137,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'TestFileTransfer',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/filetransfer.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'TestingMailSystem',
   'type' => 'class',
   'filename' => 'modules/system/system.mail.inc',
@@ -28600,48 +23165,6 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'ThemeFastTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/theme.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ThemeHookInitUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/theme.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ThemeItemListUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/theme.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ThemeLinksUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/theme.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ThemeTableUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/theme.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ThemeUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/theme.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'ThemeUpdater',
   'type' => 'class',
   'filename' => 'modules/system/system.updater.inc',
@@ -28649,150 +23172,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'TokenCommentTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TokenCurrentPageTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TokenEntityTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TokenMenuTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TokenNodeTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TokenProfileTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'TokenReplaceTestCase',
   'type' => 'class',
   'filename' => 'modules/system/system.test',
   'module' => 'system',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TokenTaxonomyTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TokenTestHelper',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TokenUnitTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TokenUserTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/token/token.test',
-  'module' => 'token',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TrackerTest',
-  'type' => 'class',
-  'filename' => 'modules/tracker/tracker.test',
-  'module' => 'tracker',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TranslationTestCase',
-  'type' => 'class',
-  'filename' => 'modules/translation/translation.test',
-  'module' => 'translation',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TriggerActionTestCase',
-  'type' => 'class',
-  'filename' => 'modules/trigger/trigger.test',
-  'module' => 'trigger',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TriggerContentTestCase',
-  'type' => 'class',
-  'filename' => 'modules/trigger/trigger.test',
-  'module' => 'trigger',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TriggerCronTestCase',
-  'type' => 'class',
-  'filename' => 'modules/trigger/trigger.test',
-  'module' => 'trigger',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TriggerOrphanedActionsTestCase',
-  'type' => 'class',
-  'filename' => 'modules/trigger/trigger.test',
-  'module' => 'trigger',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TriggerOtherTestCase',
-  'type' => 'class',
-  'filename' => 'modules/trigger/trigger.test',
-  'module' => 'trigger',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TriggerUserActionTestCase',
-  'type' => 'class',
-  'filename' => 'modules/trigger/trigger.test',
-  'module' => 'trigger',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TriggerUserTokenTestCase',
-  'type' => 'class',
-  'filename' => 'modules/trigger/trigger.test',
-  'module' => 'trigger',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'TriggerWebTestCase',
-  'type' => 'class',
-  'filename' => 'modules/trigger/trigger.test',
-  'module' => 'trigger',
   'weight' => '0',
 ))
 ->values(array(
@@ -28817,52 +23200,10 @@ db_insert('registry')->fields(array(
   'weight' => '0',
 ))
 ->values(array(
-  'name' => 'UnicodeUnitTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/unicode.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
   'name' => 'UpdateCoreTestCase',
   'type' => 'class',
   'filename' => 'modules/update/update.test',
   'module' => 'update',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'UpdateDependencyHookInvocationTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/update.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'UpdateDependencyMissingTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/update.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'UpdateDependencyOrderingTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/update.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'UpdateFeedItemTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'UpdateFeedTestCase',
-  'type' => 'class',
-  'filename' => 'modules/aggregator/aggregator.test',
-  'module' => 'aggregator',
   'weight' => '0',
 ))
 ->values(array(
@@ -28933,34 +23274,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/update/update.test',
   'module' => 'update',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'UpgradePathTaxonomyTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.taxonomy.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'UpgradePathTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'UploadUpgradePathTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.upload.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'UrlAlterFunctionalTest',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/path.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->values(array(
@@ -29122,307 +23435,6 @@ db_insert('registry')->fields(array(
   'type' => 'class',
   'filename' => 'modules/user/user.test',
   'module' => 'user',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ValidUrlTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/common.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsAccessTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_access.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsAnalyzeTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_analyze.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsArgumentDefaultTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_argument_default.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'viewsArgumentValidatorTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_argument_validator.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsBasicTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_basic.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsCacheTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_cache.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsExposedFormTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_exposed_form.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsGlossaryTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_glossary.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerAreaTextTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_area_text.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerArgumentNullTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_argument_null.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerFieldBooleanTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_boolean.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerFieldCustomTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_custom.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerFieldDateTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_date.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerFieldMath',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_math.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerFieldUrlTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_url.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'viewsHandlerFilterCounterTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_counter.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerFilterDateTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_date.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'viewsHandlerFilterEqualityTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_equality.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerFilterInOperator',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_in_operator.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'viewsHandlerFilterNumericTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_numeric.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'viewsHandlerFilterStringTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_string.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerSortDateTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_sort_date.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerSortRandomTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_sort_random.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerSortTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_sort.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlersTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_handlers.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerTestFileSize',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_file_size.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsHandlerTestXss',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_xss.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'viewsModuleTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_module.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsPagerTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_pager.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsQueryGroupByTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_groupby.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsSqlTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_query.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'ViewsTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_query.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'viewsTranslatableTest',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/views_translatable.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'viewsUserArgumentDefault',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/user/views_user_argument_default.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'viewsUserArgumentValidate',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/views/tests/user/views_user_argument_validate.test',
-  'module' => 'views',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'WSClientRESTRulesTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/wsclient/wsclient_rest/tests/wsclient_rest.test',
-  'module' => 'wsclient_rest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'WSClientRESTTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/wsclient/wsclient_rest/tests/wsclient_rest.test',
-  'module' => 'wsclient_rest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'WSClientSOAPRulesTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/wsclient/wsclient_soap/tests/wsclient_soap.test',
-  'module' => 'wsclient_soap',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'WSClientSOAPTestCase',
-  'type' => 'class',
-  'filename' => 'sites/all/modules/wsclient/wsclient_soap/tests/wsclient_soap.test',
-  'module' => 'wsclient_soap',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'XMLRPCBasicTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/xmlrpc.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'XMLRPCMessagesTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/xmlrpc.test',
-  'module' => 'simpletest',
-  'weight' => '0',
-))
-->values(array(
-  'name' => 'XMLRPCValidator1IncTestCase',
-  'type' => 'class',
-  'filename' => 'modules/simpletest/tests/xmlrpc.test',
-  'module' => 'simpletest',
   'weight' => '0',
 ))
 ->execute();
@@ -29723,20 +23735,8 @@ db_insert('registry_file')->fields(array(
   'hash' => '3e0c23de49736007c10d39f0639b09c23d61f20bf00be0956b72bc2a0d9681ac',
 ))
 ->values(array(
-  'filename' => 'modules/aggregator/aggregator.test',
-  'hash' => 'f999614660c040e361028ea14a5ca79dd14cd6b7b738aaf063055d7502c83666',
-))
-->values(array(
   'filename' => 'modules/block/block.test',
   'hash' => '58687cf1fedce6fae10e348191d5ea1d5cc8b08dcd7424f4fd3ffb5c154a39ff',
-))
-->values(array(
-  'filename' => 'modules/blog/blog.test',
-  'hash' => '78b82d98c94586813c61acc2f6be217c6061d6cf033f62c54e34074fcc779a85',
-))
-->values(array(
-  'filename' => 'modules/book/book.test',
-  'hash' => '7fcc217f487589031d33044b94a8e235b2fa80491a969245d8c27a2d75d8edf9',
 ))
 ->values(array(
   'filename' => 'modules/color/color.test',
@@ -29749,10 +23749,6 @@ db_insert('registry_file')->fields(array(
 ->values(array(
   'filename' => 'modules/comment/comment.test',
   'hash' => '4c45fbfa0cfbdb880a27098044245767edbc5df95647da002a9e8efb529d7a87',
-))
-->values(array(
-  'filename' => 'modules/contact/contact.test',
-  'hash' => '8f0581a86b588d3e1989d6244525959e38d4db5c2a234d5c68bcd3c77bdfdf0c',
 ))
 ->values(array(
   'filename' => 'modules/dashboard/dashboard.test',
@@ -29807,20 +23803,12 @@ db_insert('registry_file')->fields(array(
   'hash' => 'd17d7040a211d92ececb9d14520366d4a04126d954caca038c1c647a4350e64f',
 ))
 ->values(array(
-  'filename' => 'modules/forum/forum.test',
-  'hash' => '680493bf36ad449fbb6acd85b3c4910d09c653bcc516af8e1a40490e75dc7406',
-))
-->values(array(
   'filename' => 'modules/help/help.test',
   'hash' => '4f88b321ae93a3caa85c9fa2301c58d39e51044282cffa6badf2d6799bfd598f',
 ))
 ->values(array(
   'filename' => 'modules/image/image.test',
   'hash' => '21537e8776d7b5353b4c9e09294e93d8e11f8a4185f9da1cfae31467a32b96a4',
-))
-->values(array(
-  'filename' => 'modules/locale/locale.test',
-  'hash' => '100ad3b28898859cd4162aab261da6215c0a162a8ac0a2dc9f48384319cec7fc',
 ))
 ->values(array(
   'filename' => 'modules/menu/menu.test',
@@ -29835,24 +23823,8 @@ db_insert('registry_file')->fields(array(
   'hash' => '066fffe1b830cc70fcc19c547ce0115aa8d07a1fc0afd36c5620d52d5aa89829',
 ))
 ->values(array(
-  'filename' => 'modules/openid/openid.test',
-  'hash' => '3ba3c939883d320b8e67b21d0ded6a516064fef525e5299b03c994cd8e21d93b',
-))
-->values(array(
   'filename' => 'modules/path/path.test',
   'hash' => '552a55262b807081442868a9a3877c120c293b419dfe287c6de1c927a9dfbd3f',
-))
-->values(array(
-  'filename' => 'modules/php/php.test',
-  'hash' => '48edb4f0b1bd361c84952f0b8e1f8103199b92bb6c2458a6c5ba58390458eb43',
-))
-->values(array(
-  'filename' => 'modules/poll/poll.test',
-  'hash' => '0d52e8581d86945e1a9b8bd6f39c4483f883e1ce7d0238cee323402edf739947',
-))
-->values(array(
-  'filename' => 'modules/profile/profile.test',
-  'hash' => '7b93735d3bc59e0714f42c5b3a7c081e9b53b870ba85cc9d06f92a4bb21541d7',
 ))
 ->values(array(
   'filename' => 'modules/rdf/rdf.test',
@@ -29869,162 +23841,6 @@ db_insert('registry_file')->fields(array(
 ->values(array(
   'filename' => 'modules/shortcut/shortcut.test',
   'hash' => '87fa3559c33757295667111470732fb506a81ddc7319cc60d124755f6a673a49',
-))
-->values(array(
-  'filename' => 'modules/simpletest/drupal_web_test_case.php',
-  'hash' => 'edcd7ea966846eb0a53c3c3847d6c7262fa836b91d2c7f7e6af4991998112a90',
-))
-->values(array(
-  'filename' => 'modules/simpletest/simpletest.test',
-  'hash' => 'bc3bac7fccc5dfd2f03cdd26c68031702c99fb22da9a531e2dbd54796836c221',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/actions.test',
-  'hash' => '34dfea8e0afb7b39c1404fa562020c98692a1b04161cd801932f0a651090c80a',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/ajax.test',
-  'hash' => 'a435338b17badcbd73725579daf49a023faa26a47153d7dea5b7a1fcb0f98e64',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/batch.test',
-  'hash' => 'b26c5909ff61af75e587d57a72258476494f4c10ac4a4444d1719969f61f44b1',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/bootstrap.test',
-  'hash' => 'e80b46b0e082c1a5d4ab69617d37ebb857f0cf7be259d1d2847e75c304d52710',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/cache.test',
-  'hash' => '2227bcda7b985b65d948c1c2547d863bde8132ae7f4c9bf013798a59df53497b',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/common.test',
-  'hash' => '21cb956baa50dd3fa2c8a7d1842fba2f7896ddba994166d02687017a4c3fc301',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/database_test.test',
-  'hash' => '58b7ae81bcb15f48c2b5e916b3519c53302e50061ff3db809615ce3f3309c9ee',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/entity_crud_hook_test.test',
-  'hash' => 'dbacc51da9b7e05703e5e54fb603d7f4bb3add24e942d7ae1c4b150437dfd4bf',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/entity_query.test',
-  'hash' => '3066e21af61615895eb91bb4d5a6cee276f26afe4723bff4134f817d64a71bc9',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/error.test',
-  'hash' => 'fc73463ea25b3deee739eebe934fa47260c0b497ec8ffcd1da3dd1a5d6063f3d',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/file.test',
-  'hash' => '204607276d30bf4248c3d5fecd11dc6856b63223474a029066ee56a6a8eb641f',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/filetransfer.test',
-  'hash' => 'a6fcad9065139e8281c1488f678b64fe5ddae46577c0294d4f202551377fb62b',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/form.test',
-  'hash' => 'bbf59983a985905f9463965a2260fa732d356431eaf0d5f9b10d86a40c764e76',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/graph.test',
-  'hash' => 'a24f8177e326d7e6798d6ff971787dc40a65cc75f91dc85dff09d582a8d67afb',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/image.test',
-  'hash' => '9c477bc5d194f1dc663ad7e91aef49063f018cd698e8972c733cbd7f2efbcc28',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/lock.test',
-  'hash' => '786edaf33504d8c668bbbfce5ece718cbb07366e7dd14c4c40d07b3718d97c08',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/mail.test',
-  'hash' => 'f1631b19f16db381d3405509233034c0c299124e75f653891659b80e09d2962d',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/menu.test',
-  'hash' => '2b7056ed49c107328d55265fbf46fa6a86dc77b25b3a7c42c3fc5caff18ed213',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/module.test',
-  'hash' => '0d7aaab52df6e571b34c7fa54a0aa9046407f9592520e6400fa2a854503e728c',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/password.test',
-  'hash' => '5e96157cb593e47c5711b19306b88807308b01eaffe3f28746436221db549938',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/path.test',
-  'hash' => '11abe911fe0fa0e09f81957aec9d1aedf44f91156b752644df080b46fd7aa2e9',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/registry.test',
-  'hash' => '6c18dcee1985fdb9b93e2f8b8def98d322cfee1c4a0bb068c0a5dbaaf2612616',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/schema.test',
-  'hash' => '9e8fec0c70105bfc0f8e6579ed4f6e813823fd0ee487e6ce62f3063bac6b2988',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/session.test',
-  'hash' => '0bf7630ceebafa83debb19c5afef3ab0ca89c0bc490723beb96af46d85a274b7',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/theme.test',
-  'hash' => '9da5c3b6a2b8a800a315063c1f6f1218d1a47c9d8f866cff669ce4d7f86312f1',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/unicode.test',
-  'hash' => '17e5f317b4ad3859de8178c499f1d105ecc3f55a46a18a98698408161093aeec',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/update.test',
-  'hash' => '72adfbf68260c18b20393ea85bd9f405af2c9fca8c00503a02c388c58c686a81',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.comment.test',
-  'hash' => '90604a4559266da2f938c17c68f02f12429d4221e703ae76ee7cfee532663466',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.filter.test',
-  'hash' => '95b158c8c98d9922e10f499f83bcc2ac07b57bb1680253b754d1292f8d956078',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.locale.test',
-  'hash' => 'b1b8f892309d65a58eb56199970132b782f057d4aa0eb16835f608c65a1150b4',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.node.test',
-  'hash' => 'ced7b9cdfb1f3b0f22c3d1bdd06685b0913435b505923c3172a0f4dc75f7aea4',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.taxonomy.test',
-  'hash' => '085264c9c93598934fa551443c35f04f9e67544cadf5f6124c2309ec0de338b7',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.test',
-  'hash' => 'bcfb7441795a8464fb3f1b85fc3b85b64ef2c6f705183fc9184019e853ec5c0f',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/upgrade/upgrade.upload.test',
-  'hash' => '4c4e0b6f4ae6f849405e1786ad71c1aa3c19ff0d982baa915ba57c1fc2b816fd',
-))
-->values(array(
-  'filename' => 'modules/simpletest/tests/xmlrpc.test',
-  'hash' => '2de058b3e6486366140f2f98877946b887edad349a747597ee30feb652834bd7',
-))
-->values(array(
-  'filename' => 'modules/statistics/statistics.test',
-  'hash' => '834df690f44996c2e8c9404d275d3e540b991707f220ec7d8f70cd8aefdbf400',
-))
-->values(array(
-  'filename' => 'modules/syslog/syslog.test',
-  'hash' => 'dcad1597a02b0c48c45f93f461c4b6a9f446269e06b1d8821f3d622acbed9349',
 ))
 ->values(array(
   'filename' => 'modules/system/system.archiver.inc',
@@ -30059,18 +23875,6 @@ db_insert('registry_file')->fields(array(
   'hash' => 'b8a1794da2284e5c609e23f819646b99a043432d0704b8cb884e2313be97cd6f',
 ))
 ->values(array(
-  'filename' => 'modules/tracker/tracker.test',
-  'hash' => 'bd93fee299dd79fa84bb1e808f77ee34065c4824bb06da723f5deb061a39d7a5',
-))
-->values(array(
-  'filename' => 'modules/translation/translation.test',
-  'hash' => '1e01c3ecb08f24d630762ab34176fe1722e181da7863dac5d9572123189f319a',
-))
-->values(array(
-  'filename' => 'modules/trigger/trigger.test',
-  'hash' => '33dd96957d8d7e3e1e13ea982c2f1af17e2670123b7a8bca370e5c41d55aaab1',
-))
-->values(array(
   'filename' => 'modules/update/update.test',
   'hash' => '3c552595ae500b3d9a24fb078c441e57f22ff4e14ba05737196799713471dc62',
 ))
@@ -30085,66 +23889,6 @@ db_insert('registry_file')->fields(array(
 ->values(array(
   'filename' => 'profiles/standard/standard.profile',
   'hash' => '390c6e1184c7bc9f8611ff6fc67f248f4a877191b2590088e5ace68c38626eaf',
-))
-->values(array(
-  'filename' => 'sites/all/modules/admin_menu/tests/admin_menu.test',
-  'hash' => 'cbe5e711cd57da3203e60269be8864c70269d6e41492f964b4f4d1e7b71bcea1',
-))
-->values(array(
-  'filename' => 'sites/all/modules/context/context_ui/tests/context_ui.test',
-  'hash' => '388548855d66572a6da4cdec096df3cf1911e801509a161435a7181e3ee31621',
-))
-->values(array(
-  'filename' => 'sites/all/modules/context/tests/context.conditions.test',
-  'hash' => '4ac306e1d1a4e733ce9b6ad646363ea3191282f9d91e5b64dd88ac1c61cc1a75',
-))
-->values(array(
-  'filename' => 'sites/all/modules/context/tests/context.reactions.test',
-  'hash' => '5a825b0c2d98d8ae1973979422f42b0ef833d1987ea9a196bae545799a8b0486',
-))
-->values(array(
-  'filename' => 'sites/all/modules/context/tests/context.test',
-  'hash' => '4e3bc04402550cd82940ec7f2ed722a2b941bbd2872d91fd8921b9faaf091053',
-))
-->values(array(
-  'filename' => 'sites/all/modules/ctools/tests/ctools.plugins.test',
-  'hash' => '6af9d9caa3afe93faf5051d3d42c0ce33a1ff6e3a18a09f281df1260d43337d6',
-))
-->values(array(
-  'filename' => 'sites/all/modules/ctools/tests/object_cache.test',
-  'hash' => '18e03c7760a2fc8858d801479ec5471b8c93bd4044c80db557c5e77e7ab20d79',
-))
-->values(array(
-  'filename' => 'sites/all/modules/devel/devel.install',
-  'hash' => 'bc9eafff3fa5a779b14fa959117057f67bc848f0b8d52fad9bac0988cf792950',
-))
-->values(array(
-  'filename' => 'sites/all/modules/devel/devel.module',
-  'hash' => '878b3a5f730fe1dbd47b0a392b906da0e8b35d6543047021f9209bb4ff8d8769',
-))
-->values(array(
-  'filename' => 'sites/all/modules/drupalcommerce/modules/cart/tests/commerce_cart.test',
-  'hash' => '5c64963b4ab1752a165aeff16599d61612b695d8e0f64a6797ba7e1cf5ae210c',
-))
-->values(array(
-  'filename' => 'sites/all/modules/drupalcommerce/modules/checkout/tests/commerce_checkout.test',
-  'hash' => '6b6fc671cddb6c2738eb85c8a6bb5ecc91e7aa52d78a2d7c5e5efe0fa949dff1',
-))
-->values(array(
-  'filename' => 'sites/all/modules/drupalcommerce/modules/order/tests/commerce_order_ui.test',
-  'hash' => '4aeabe9f4b38808350c1d1aea236a2fc4591ec7b04dc5d0313b3a9e20aeec34a',
-))
-->values(array(
-  'filename' => 'sites/all/modules/drupalcommerce/modules/product/tests/commerce_product.test',
-  'hash' => '856a887998ba767b634e6ebf63e08cfd8f872cf999e30b0c2cb82518348b3483',
-))
-->values(array(
-  'filename' => 'sites/all/modules/drupalcommerce/tests/commerce.test',
-  'hash' => '543c81687de0bab6176dba99893744ab45068ebfdb06de13f80e508e6809450d',
-))
-->values(array(
-  'filename' => 'sites/all/modules/drupalcommerce/tests/commerce_base.test',
-  'hash' => '8ee0129e37db6e85294097b59eecfe0380ecff011e2f9264bb593f6875333e03',
 ))
 ->values(array(
   'filename' => 'sites/all/modules/entity/entity.features.inc',
@@ -30177,26 +23921,6 @@ db_insert('registry_file')->fields(array(
 ->values(array(
   'filename' => 'sites/all/modules/entity/includes/entity.wrapper.inc',
   'hash' => '7f03f83ee991df9818faf42274ce91119e961462b86db565fa6aa9177e3e5c1c',
-))
-->values(array(
-  'filename' => 'sites/all/modules/features/tests/features.test',
-  'hash' => '6ec0374c85275f02b2956306a93000433ecdfca70316afeea55aedfcf349af8a',
-))
-->values(array(
-  'filename' => 'sites/all/modules/field_collection/field_collection.test',
-  'hash' => 'd85c3d4fa94562c3c1e35cd1dab9ca73d3a624eacd1f1e503a014219562b0e34',
-))
-->values(array(
-  'filename' => 'sites/all/modules/flag/tests/flag.test',
-  'hash' => '71f7fe41b13ea02d0a5ada2d8d7d54bd00e0bc842fdab131b48b654c2fb69d2d',
-))
-->values(array(
-  'filename' => 'sites/all/modules/heartbeat/tests/heartbeat.api.test',
-  'hash' => '8a1208b098a41816d70e381f4c548b82e4683df828a656e600766d9c066e7572',
-))
-->values(array(
-  'filename' => 'sites/all/modules/message/message.test',
-  'hash' => '7b97a364b7dd90f1ce610be32b38f35c1a889bc0f45a82f1a530937d2ae95a42',
 ))
 ->values(array(
   'filename' => 'sites/all/modules/og/includes/og.views.inc',
@@ -30235,220 +23959,12 @@ db_insert('registry_file')->fields(array(
   'hash' => '951f3919aeefefbea01ce05ec41a51f8ea960fed6d6eb37236dfa34eb7e9b9d6',
 ))
 ->values(array(
-  'filename' => 'sites/all/modules/og/og.admin.inc',
-  'hash' => 'bfff09d43f18cbd3f0928fba53006bc1e321f2a249f2d5085242a00ac3f8305a',
-))
-->values(array(
   'filename' => 'sites/all/modules/og/og.module',
-  'hash' => 'b61b67ca4d9df6ed259293b8973060f463832c20388f349bd71d0baad769b21c',
+  'hash' => 'b1aa3ec87f3ec071da9d4ccf38a57ad6fb81a9f700bad169752e51ba5f1e7e3b',
 ))
 ->values(array(
   'filename' => 'sites/all/modules/og/og.test',
-  'hash' => 'e5a13009aa069b466a275e3a9bc7fee626c6a80d7e7ae0a52cae5e915e802e9c',
-))
-->values(array(
-  'filename' => 'sites/all/modules/og/og_access/og_access.test',
-  'hash' => '7467052c30b8cf896eab606a36d64e9e9d793da1d62add083ddd9a735f6b398e',
-))
-->values(array(
-  'filename' => 'sites/all/modules/og/og_field_access/og_field_access.test',
-  'hash' => '30059d85ad67ebeb0e9d9eb214e6e03ee844c4f281fe665e9f3bca026d6f88ce',
-))
-->values(array(
-  'filename' => 'sites/all/modules/og/og_ui/og_ui.test',
-  'hash' => '5712e0cc4305ab5556f55ebee24504536f0cc41923e8a87e5ebc4a93b0d37443',
-))
-->values(array(
-  'filename' => 'sites/all/modules/profile/profile2.test',
-  'hash' => '6eaf27391ade1f8429e58eae40fbcd90f948513c56b99f0e33497b3a2ff0a476',
-))
-->values(array(
-  'filename' => 'sites/all/modules/references/node_reference/node_reference.test',
-  'hash' => 'dfecb049090d7e37276cef24895f99fec302338befde0f796325cc820be39d73',
-))
-->values(array(
-  'filename' => 'sites/all/modules/relation/tests/relation.test',
-  'hash' => '2440beda690e6ebaf33bb5880d211f1861795a5f4f36af533f39d275791a4578',
-))
-->values(array(
-  'filename' => 'sites/all/modules/rules/rules_scheduler/rules_scheduler.test',
-  'hash' => '5d3f36edfd6d1290aaecc8eeb211494f0c720f3625b466514a0ca568013eb83b',
-))
-->values(array(
-  'filename' => 'sites/all/modules/rules/tests/rules.test',
-  'hash' => 'd0211728200e150e4537496d2c2d1de605a41523d9216bc6d1d5e3bd13e3bd37',
-))
-->values(array(
-  'filename' => 'sites/all/modules/search_api/contrib/search_api_db/search_api_db.test',
-  'hash' => '2f79e3fd26f63bdaa60a6c3c7573cbc1f861f790b1f3742345f158bcef902934',
-))
-->values(array(
-  'filename' => 'sites/all/modules/search_api/search_api.test',
-  'hash' => '87dc03b1dadfcc48141c7c901997459b7c22f3f4dca876a3670009d623113be4',
-))
-->values(array(
-  'filename' => 'sites/all/modules/services/tests/functional/NoAuthEndpointTestRunner.test',
-  'hash' => '88703cf7d8231c538ae00195d49e149df375c64a597dbbdb35af217cd69475cf',
-))
-->values(array(
-  'filename' => 'sites/all/modules/services/tests/functional/ServicesEndpointTests.test',
-  'hash' => '4d42f3d8fd37ee5d268eea4e876fb0395ecc4032dafdb8200837fcaa8e301129',
-))
-->values(array(
-  'filename' => 'sites/all/modules/services/tests/functional/ServicesResourceNodeTests.test',
-  'hash' => '5bfc47047536790c493eeec26a726d13a7af989c5469ad9b193c42295bc7f54b',
-))
-->values(array(
-  'filename' => 'sites/all/modules/services/tests/unit/TestServicesModule.test',
-  'hash' => '47284d0e74f2e88f4b1d80637f661f51a2955c50a57d12e68aa1f1300d07e804',
-))
-->values(array(
-  'filename' => 'sites/all/modules/token/token.test',
-  'hash' => '89269883120f5c1be8bd4c9cbfa1194a72f9ebce5ff479c2e442ffaae040aa94',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_area_text.test',
-  'hash' => '3d0eda73ba646a359948e60d8c9c1d4a6fbcbf207565402e0476024982e57052',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_argument_null.test',
-  'hash' => '07d508f60e2bbb4d3fe166a87acb9cceed4a7ebd25f001de633cb47a4436e9cb',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_boolean.test',
-  'hash' => '61c7c16be14c074ec025b0e55c58ac4a102025f57a32b09ea85cfd87dd23f6f2',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_counter.test',
-  'hash' => 'ab01fc940e98a6f3808f267d56e8082d4410d07659a8c80e534058ec5781cd26',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_custom.test',
-  'hash' => '5e5dc8bca0df044caecc7c25e89a99712e107797b929b84afe84c53f6f297c99',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_date.test',
-  'hash' => '98ea4c36d51d7b0104dcdbad7f5bab52d5577e70c1db72512de946ac85b54cd0',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_file_size.test',
-  'hash' => '4f9c6d7f73be3a5e7c8ab8ee147775dfc79c72dd23b5ed7e54786002f1b95f32',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_math.test',
-  'hash' => '1a8e4a27002ef9a06c9b9dea021ce6cc6f7e47557525c6cd5390b0abf19dc17f',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_url.test',
-  'hash' => '4f523059e3b87e61ce7edec4495e89dbc129e37ff83c6bd3c60d5fa3fa7bad22',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_field_xss.test',
-  'hash' => '055799ab3918ceca02830d78ae5cb6bc35b2f04b7f3f19a20800a60a0b879c1a',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_date.test',
-  'hash' => 'dc97170efe771417fe768ae2fdbb3baf8413d7a0b6ecc6e718b233eb59381b0e',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_equality.test',
-  'hash' => 'd6978f08550a1c85110c5c995da90d3e27decd8e503d2023265130c2bb4229fd',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_in_operator.test',
-  'hash' => '3f6bde3d7f75e3fcacb7c1a6dbe7ab795c5081c66ecaee26ece0a603eb8489a2',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_numeric.test',
-  'hash' => '77802b15cfeb9ad6e08e61aac6860069e2e6a15fb8de28e3bff78bad4e7be8e1',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_filter_string.test',
-  'hash' => 'a5681fdc02a588c9f428c26fba96a04e5990b8bb9dcf30d4d09176137dca13bf',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_sort.test',
-  'hash' => '44981a2e4470ac5f69fcff4510e9d4c7119dcc6d292426c0a40d836789227026',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_sort_date.test',
-  'hash' => '2916a28642e95bb35844c30c53702e57f9513030e28aa1923a965084ee650751',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/handlers/views_handler_sort_random.test',
-  'hash' => '0c9bc218cb0cb28fe4816fa4b2373c57c15a33513bdd1d653aef4637099779f6',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/user/views_user_argument_default.test',
-  'hash' => '8d35ad19d8f832624d7089644da8583f34dc313e5d0801104980e74dc1141680',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/user/views_user_argument_validate.test',
-  'hash' => '53aa5d03cf1ecc8cfd4615523c8ecd29b6a5241c2fd0c8deb60f3f9437480534',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_access.test',
-  'hash' => '53e7c6bcaa2084ff5d6f6f472adf4a7a31791092f8b5de36b154da48cf9c0fa2',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_analyze.test',
-  'hash' => 'b2ed1805f29d25e80438bb59d516596d23cd704f8d8a3ff0a071c75d86896719',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_argument_default.test',
-  'hash' => '4d9c66623e60eafd9a86ab7d5e5946d96886949976052e33dc49b98b355a785c',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_argument_validator.test',
-  'hash' => 'd8f4917e341c4885f9fac72099a51a00030d9c1e2a74cb1ead97a4fdf2c38ee6',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_basic.test',
-  'hash' => '2eefee7637ebb02ad75b965c9e58675782a229b85053d2fff81acd4d1f9756f5',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_cache.test',
-  'hash' => '8fd48d5c78c4580516945e2e48bf72cf0da17739104ca119b7ba6085fd74732a',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_exposed_form.test',
-  'hash' => '7bc543e077d8d76f4352f474f5d109fbd68a9073d75135062845ec2562c73a79',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_glossary.test',
-  'hash' => 'ef85485d8eb60cfb13a62f8e2145b8e5dc075064a6269af9d61dbda7140be260',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_groupby.test',
-  'hash' => '1e42747a149a64fbe34a3034172b348b4ca2535b4bc3787b902f592cf78e4108',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_handlers.test',
-  'hash' => 'bd3887b1815d44072b8b60003c88bff55e91a29ea1e3ba12a453e103c2fd28d7',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_module.test',
-  'hash' => 'a6e94bd28c212b9d40e6b7140f1f7844064f368eca6147a2dc26dc962f6556ed',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_pager.test',
-  'hash' => 'feda312d2cca2415bd06071a1b932f50745465423b1b4bd65a4ca77177f3ebac',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_query.test',
-  'hash' => '133370bae7c45eaa0d2f640c8d7c08ecc80c31d87b0ed249371c33f58ffbd2d8',
-))
-->values(array(
-  'filename' => 'sites/all/modules/views/tests/views_translatable.test',
-  'hash' => '1674a5da259c07d5f5af1c65be954cbde5ca816f44e8db37cca638e05cff5338',
-))
-->values(array(
-  'filename' => 'sites/all/modules/wsclient/wsclient_rest/tests/wsclient_rest.test',
-  'hash' => '828cd2044f824c2d3541b146262206738909175b51473379acc573cf61be4aed',
-))
-->values(array(
-  'filename' => 'sites/all/modules/wsclient/wsclient_soap/tests/wsclient_soap.test',
-  'hash' => 'ac57d80ed74a229fa6b0c9e0a293f9f58961fc31cb4382b2d74a2ff8d663f5cc',
+  'hash' => '6ebe0a89554755ee99ebf86ddb5ddc45ed5370e5f64b15b9c44eec1c9edac24c',
 ))
 ->execute();
 
@@ -30628,11 +24144,6 @@ db_insert('role_permission')->fields(array(
 ))
 ->values(array(
   'rid' => '3',
-  'permission' => 'access devel information',
-  'module' => 'devel',
-))
-->values(array(
-  'rid' => '3',
   'permission' => 'access overlay',
   'module' => 'overlay',
 ))
@@ -30743,11 +24254,6 @@ db_insert('role_permission')->fields(array(
 ))
 ->values(array(
   'rid' => '3',
-  'permission' => 'administer unit tests',
-  'module' => 'simpletest',
-))
-->values(array(
-  'rid' => '3',
   'permission' => 'administer url aliases',
   'module' => 'path',
 ))
@@ -30828,11 +24334,6 @@ db_insert('role_permission')->fields(array(
 ))
 ->values(array(
   'rid' => '3',
-  'permission' => 'display source code',
-  'module' => 'devel',
-))
-->values(array(
-  'rid' => '3',
   'permission' => 'edit any article content',
   'module' => 'node',
 ))
@@ -30863,11 +24364,6 @@ db_insert('role_permission')->fields(array(
 ))
 ->values(array(
   'rid' => '3',
-  'permission' => 'execute php code',
-  'module' => 'devel',
-))
-->values(array(
-  'rid' => '3',
   'permission' => 'post comments',
   'module' => 'comment',
 ))
@@ -30895,11 +24391,6 @@ db_insert('role_permission')->fields(array(
   'rid' => '3',
   'permission' => 'switch shortcut sets',
   'module' => 'shortcut',
-))
-->values(array(
-  'rid' => '3',
-  'permission' => 'switch users',
-  'module' => 'devel',
 ))
 ->values(array(
   'rid' => '3',
@@ -31127,7 +24618,7 @@ db_insert('sequences')->fields(array(
   'value',
 ))
 ->values(array(
-  'value' => '10',
+  'value' => '5',
 ))
 ->execute();
 
@@ -31277,122 +24768,6 @@ db_create_table('shortcut_set_users', array(
   'module' => 'shortcut',
   'name' => 'shortcut_set_users',
 ));
-
-db_create_table('simpletest', array(
-  'fields' => array(
-    'message_id' => array(
-      'type' => 'serial',
-      'not null' => TRUE,
-    ),
-    'test_id' => array(
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-    'test_class' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => TRUE,
-      'default' => '',
-    ),
-    'status' => array(
-      'type' => 'varchar',
-      'length' => 9,
-      'not null' => TRUE,
-      'default' => '',
-    ),
-    'message' => array(
-      'type' => 'text',
-      'not null' => TRUE,
-    ),
-    'message_group' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => TRUE,
-      'default' => '',
-    ),
-    'function' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => TRUE,
-      'default' => '',
-    ),
-    'line' => array(
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-    'file' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => TRUE,
-      'default' => '',
-    ),
-  ),
-  'primary key' => array(
-    'message_id',
-  ),
-  'indexes' => array(
-    'reporter' => array(
-      'test_class',
-      'message_id',
-    ),
-  ),
-  'module' => 'simpletest',
-  'name' => 'simpletest',
-));
-db_insert('simpletest')->fields(array(
-  'message_id',
-  'test_id',
-  'test_class',
-  'status',
-  'message',
-  'message_group',
-  'function',
-  'line',
-  'file',
-))
-->values(array(
-  'message_id' => '82',
-  'test_id' => '5',
-  'test_class' => 'OgUpgradePath7001TestCase',
-  'status' => 'fail',
-  'message' => 'The test did not complete due to a fatal error.',
-  'message_group' => 'Completion check',
-  'function' => 'OgUpgradePath7001TestCase->testOgUpgrade()',
-  'line' => '1172',
-  'file' => '/Applications/MAMP/htdocs/d7_dev/sites/all/modules/og/og.test',
-))
-->execute();
-
-db_create_table('simpletest_test_id', array(
-  'fields' => array(
-    'test_id' => array(
-      'type' => 'serial',
-      'not null' => TRUE,
-    ),
-    'last_prefix' => array(
-      'type' => 'varchar',
-      'length' => 60,
-      'not null' => FALSE,
-      'default' => '',
-    ),
-  ),
-  'primary key' => array(
-    'test_id',
-  ),
-  'module' => 'simpletest',
-  'name' => 'simpletest_test_id',
-));
-db_insert('simpletest_test_id')->fields(array(
-  'test_id',
-  'last_prefix',
-))
-->values(array(
-  'test_id' => '5',
-  'last_prefix' => 'simpletest822045',
-))
-->execute();
 
 db_create_table('system', array(
   'fields' => array(
@@ -32009,9 +25384,9 @@ db_insert('system')->fields(array(
   'name' => 'simpletest',
   'type' => 'module',
   'owner' => '',
-  'status' => '1',
+  'status' => '0',
   'bootstrap' => '0',
-  'schema_version' => '0',
+  'schema_version' => '-1',
   'weight' => '0',
   'info' => 'a:10:{s:4:"name";s:7:"Testing";s:11:"description";s:53:"Provides a framework for unit and functional testing.";s:7:"package";s:4:"Core";s:7:"version";s:7:"7.0-dev";s:4:"core";s:3:"7.x";s:5:"files";a:37:{i:0;s:15:"simpletest.test";i:1;s:24:"drupal_web_test_case.php";i:2;s:18:"tests/actions.test";i:3;s:15:"tests/ajax.test";i:4;s:16:"tests/batch.test";i:5;s:20:"tests/bootstrap.test";i:6;s:16:"tests/cache.test";i:7;s:17:"tests/common.test";i:8;s:24:"tests/database_test.test";i:9;s:32:"tests/entity_crud_hook_test.test";i:10;s:23:"tests/entity_query.test";i:11;s:16:"tests/error.test";i:12;s:15:"tests/file.test";i:13;s:23:"tests/filetransfer.test";i:14;s:15:"tests/form.test";i:15;s:16:"tests/graph.test";i:16;s:16:"tests/image.test";i:17;s:15:"tests/lock.test";i:18;s:15:"tests/mail.test";i:19;s:15:"tests/menu.test";i:20;s:17:"tests/module.test";i:21;s:19:"tests/password.test";i:22;s:15:"tests/path.test";i:23;s:19:"tests/registry.test";i:24;s:17:"tests/schema.test";i:25;s:18:"tests/session.test";i:26;s:16:"tests/theme.test";i:27;s:18:"tests/unicode.test";i:28;s:17:"tests/update.test";i:29;s:17:"tests/xmlrpc.test";i:30;s:26:"tests/upgrade/upgrade.test";i:31;s:34:"tests/upgrade/upgrade.comment.test";i:32;s:33:"tests/upgrade/upgrade.filter.test";i:33;s:31:"tests/upgrade/upgrade.node.test";i:34;s:35:"tests/upgrade/upgrade.taxonomy.test";i:35;s:33:"tests/upgrade/upgrade.upload.test";i:36;s:33:"tests/upgrade/upgrade.locale.test";}s:9:"configure";s:41:"admin/config/development/testing/settings";s:12:"dependencies";a:0:{}s:3:"php";s:5:"5.2.4";s:9:"bootstrap";i:0;}',
 ))
@@ -32812,10 +26187,10 @@ db_insert('system')->fields(array(
   'name' => 'devel',
   'type' => 'module',
   'owner' => '',
-  'status' => '1',
-  'bootstrap' => '1',
-  'schema_version' => '7003',
-  'weight' => '88',
+  'status' => '0',
+  'bootstrap' => '0',
+  'schema_version' => '-1',
+  'weight' => '0',
   'info' => 'a:12:{s:4:"name";s:5:"Devel";s:11:"description";s:52:"Various blocks, pages, and functions for developers.";s:7:"package";s:11:"Development";s:12:"dependencies";a:1:{i:0;s:4:"menu";}s:4:"core";s:3:"7.x";s:5:"files";a:2:{i:0;s:12:"devel.module";i:1;s:13:"devel.install";}s:9:"configure";s:30:"admin/config/development/devel";s:7:"version";s:11:"7.x-1.0-rc1";s:7:"project";s:5:"devel";s:9:"datestamp";s:10:"1291608172";s:3:"php";s:5:"5.2.4";s:9:"bootstrap";i:0;}',
 ))
 ->values(array(
@@ -33311,7 +26686,7 @@ db_insert('system')->fields(array(
   'bootstrap' => '0',
   'schema_version' => '7000',
   'weight' => '0',
-  'info' => 'a:10:{s:4:"name";s:14:"Organic groups";s:11:"description";s:45:"API to allow associating content with groups.";s:7:"package";s:14:"Organic groups";s:12:"dependencies";a:3:{i:0;s:6:"entity";i:1;s:4:"list";i:2;s:7:"options";}s:4:"core";s:3:"7.x";s:7:"version";s:7:"7.0-dev";s:5:"files";a:14:{i:0;s:9:"og.module";i:1;s:12:"og.admin.inc";i:2;s:21:"includes/og.views.inc";i:3;s:7:"og.test";i:4;s:59:"includes/views/og_plugin_argument_default_group_context.inc";i:5;s:54:"includes/views/og_handler_field_group_member_count.inc";i:6;s:56:"includes/views/og_handler_field_group_audience_state.inc";i:7;s:50:"includes/views/og_handler_field_prerender_list.inc";i:8;s:46:"includes/views/og_handler_field_user_roles.inc";i:9;s:53:"includes/views/og_handler_field_group_permissions.inc";i:10;s:48:"includes/views/og_handler_filter_group_state.inc";i:11;s:57:"includes/views/og_handler_filter_group_audience_state.inc";i:12;s:42:"includes/views/og_handler_relationship.inc";i:13;s:57:"includes/views/og_handler_argument_group_audience_gid.inc";}s:8:"features";a:1:{s:12:"rules_config";a:3:{i:0;s:22:"rules_member_subscribe";i:1;s:30:"rules_member_subscribe_pending";i:2;s:24:"rules_member_unsubscribe";}}s:3:"php";s:5:"5.2.4";s:9:"bootstrap";i:0;}',
+  'info' => 'a:10:{s:4:"name";s:14:"Organic groups";s:11:"description";s:45:"API to allow associating content with groups.";s:7:"package";s:14:"Organic groups";s:12:"dependencies";a:3:{i:0;s:6:"entity";i:1;s:4:"list";i:2;s:7:"options";}s:4:"core";s:3:"7.x";s:7:"version";s:7:"7.0-dev";s:5:"files";a:13:{i:0;s:9:"og.module";i:1;s:21:"includes/og.views.inc";i:2;s:7:"og.test";i:3;s:59:"includes/views/og_plugin_argument_default_group_context.inc";i:4;s:54:"includes/views/og_handler_field_group_member_count.inc";i:5;s:56:"includes/views/og_handler_field_group_audience_state.inc";i:6;s:50:"includes/views/og_handler_field_prerender_list.inc";i:7;s:46:"includes/views/og_handler_field_user_roles.inc";i:8;s:53:"includes/views/og_handler_field_group_permissions.inc";i:9;s:48:"includes/views/og_handler_filter_group_state.inc";i:10;s:57:"includes/views/og_handler_filter_group_audience_state.inc";i:11;s:42:"includes/views/og_handler_relationship.inc";i:12;s:57:"includes/views/og_handler_argument_group_audience_gid.inc";}s:8:"features";a:1:{s:12:"rules_config";a:3:{i:0;s:22:"rules_member_subscribe";i:1;s:30:"rules_member_subscribe_pending";i:2;s:24:"rules_member_unsubscribe";}}s:3:"php";s:5:"5.2.4";s:9:"bootstrap";i:0;}',
 ))
 ->values(array(
   'filename' => 'sites/all/modules/og/og_access/og_access.module',
@@ -33406,9 +26781,9 @@ db_insert('system')->fields(array(
   'name' => 'og_ui',
   'type' => 'module',
   'owner' => '',
-  'status' => '1',
+  'status' => '0',
   'bootstrap' => '0',
-  'schema_version' => '7000',
+  'schema_version' => '-1',
   'weight' => '0',
   'info' => 'a:10:{s:4:"name";s:17:"Organic groups UI";s:11:"description";s:18:"Organic groups UI.";s:7:"package";s:14:"Organic groups";s:12:"dependencies";a:1:{i:0;s:2:"og";}s:4:"core";s:3:"7.x";s:7:"version";s:7:"7.0-dev";s:5:"files";a:1:{i:0;s:10:"og_ui.test";}s:9:"configure";s:18:"admin/config/group";s:3:"php";s:5:"5.2.4";s:9:"bootstrap";i:0;}',
 ))
@@ -34398,14 +27773,14 @@ db_insert('users')->fields(array(
 ->values(array(
   'uid' => 2,
   'name' => 'admin',
-  'pass' => '$S$ClggqflJF70YhTu3HoURQY8CONNlInuEu5RxpsvA63lpwSglJuXQ',
+  'pass' => '$S$C0LgdzPyo1a7E8.heUzSWPxQWNLvFDYnbg8jLegPjCoHnxpzA7om',
   'mail' => 'og@example.com',
   'theme' => '',
   'signature' => '',
   'signature_format' => NULL,
-  'created' => '1300122859',
-  'access' => '1300133357',
-  'login' => '1300122919',
+  'created' => '1300137024',
+  'access' => '1300137080',
+  'login' => '1300137080',
   'status' => '1',
   'timezone' => NULL,
   'language' => '',
@@ -34421,7 +27796,7 @@ db_insert('users')->fields(array(
   'theme' => '',
   'signature' => '',
   'signature_format' => NULL,
-  'created' => '1300127037',
+  'created' => '1300137503',
   'access' => '0',
   'login' => '0',
   'status' => '1',
@@ -34439,7 +27814,7 @@ db_insert('users')->fields(array(
   'theme' => '',
   'signature' => '',
   'signature_format' => NULL,
-  'created' => '1300127037',
+  'created' => '1300137503',
   'access' => '0',
   'login' => '0',
   'status' => '1',
@@ -34457,7 +27832,7 @@ db_insert('users')->fields(array(
   'theme' => '',
   'signature' => '',
   'signature_format' => NULL,
-  'created' => '1300127037',
+  'created' => '1300137503',
   'access' => '0',
   'login' => '0',
   'status' => '1',
@@ -34475,7 +27850,7 @@ db_insert('users')->fields(array(
   'theme' => '',
   'signature' => '',
   'signature_format' => NULL,
-  'created' => '1300127037',
+  'created' => '1300137503',
   'access' => '0',
   'login' => '0',
   'status' => '1',
@@ -34578,27 +27953,23 @@ db_insert('variable')->fields(array(
 ))
 ->values(array(
   'name' => 'cron_key',
-  'value' => 's:43:"XWpEuSShLAXKZ18E4TpZ5wls6OBurmysfW8-90YY1qA";',
+  'value' => 's:43:"oeT9mhTBCSIxr45Z46zwv4Fb6YdupF41qN4BtIfpUdY";',
 ))
 ->values(array(
   'name' => 'cron_last',
-  'value' => 'i:1300127037;',
+  'value' => 'i:1300137503;',
 ))
 ->values(array(
   'name' => 'css_js_query_string',
-  'value' => 's:6:"li2cv7";',
+  'value' => 's:6:"li2gi8";',
 ))
 ->values(array(
   'name' => 'date_default_timezone',
   'value' => 's:14:"Asia/Jerusalem";',
 ))
 ->values(array(
-  'name' => 'drupal_http_request_fails',
-  'value' => 'b:0;',
-))
-->values(array(
   'name' => 'drupal_private_key',
-  'value' => 's:43:"_IuSQ8fKJ8kZrNemhoJ2Vv-qX_qLKGlDyuMCm3F84RA";',
+  'value' => 's:43:"PtWxW7gI28mt5jvfUw0w708wr5uWp_DhryuBsji8DR4";',
 ))
 ->values(array(
   'name' => 'entity_defaults_built',
@@ -34622,7 +27993,7 @@ db_insert('variable')->fields(array(
 ))
 ->values(array(
   'name' => 'install_time',
-  'value' => 'i:1300122919;',
+  'value' => 'i:1300137080;',
 ))
 ->values(array(
   'name' => 'menu_expanded',
@@ -34630,7 +28001,7 @@ db_insert('variable')->fields(array(
 ))
 ->values(array(
   'name' => 'menu_masks',
-  'value' => 'a:41:{i:0;i:501;i:1;i:493;i:2;i:250;i:3;i:247;i:4;i:246;i:5;i:245;i:6;i:241;i:7;i:125;i:8;i:124;i:9;i:123;i:10;i:122;i:11;i:121;i:12;i:117;i:13;i:79;i:14;i:63;i:15;i:62;i:16;i:61;i:17;i:60;i:18;i:59;i:19;i:58;i:20;i:44;i:21;i:39;i:22;i:31;i:23;i:30;i:24;i:29;i:25;i:28;i:26;i:27;i:27;i:24;i:28;i:21;i:29;i:19;i:30;i:15;i:31;i:14;i:32;i:13;i:33;i:11;i:34;i:9;i:35;i:7;i:36;i:6;i:37;i:5;i:38;i:3;i:39;i:2;i:40;i:1;}',
+  'value' => 'a:34:{i:0;i:501;i:1;i:493;i:2;i:250;i:3;i:247;i:4;i:246;i:5;i:245;i:6;i:125;i:7;i:123;i:8;i:122;i:9;i:121;i:10;i:117;i:11;i:63;i:12;i:62;i:13;i:61;i:14;i:60;i:15;i:59;i:16;i:58;i:17;i:44;i:18;i:31;i:19;i:30;i:20;i:29;i:21;i:28;i:22;i:24;i:23;i:21;i:24;i:15;i:25;i:14;i:26;i:13;i:27;i:11;i:28;i:7;i:29;i:6;i:30;i:5;i:31;i:3;i:32;i:2;i:33;i:1;}',
 ))
 ->values(array(
   'name' => 'node_admin_theme',
@@ -34658,7 +28029,7 @@ db_insert('variable')->fields(array(
 ))
 ->values(array(
   'name' => 'site_name',
-  'value' => 's:11:"update_7001";',
+  'value' => 's:3:"OG7";',
 ))
 ->values(array(
   'name' => 'theme_default',
