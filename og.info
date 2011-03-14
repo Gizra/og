@@ -13,6 +13,7 @@ files[] = includes/og.views.inc
 
 ; Test files.
 files[] = og.test
+files[] = tests/upgrade/og.upgrade.test
 
 ; Views plugins
 files[] = includes/views/og_plugin_argument_default_group_context.inc
@@ -38,3 +39,6 @@ files[] = includes/views/og_handler_argument_group_audience_gid.inc
 features[rules_config][] = "rules_member_subscribe"
 features[rules_config][] = "rules_member_subscribe_pending"
 features[rules_config][] = "rules_member_unsubscribe"
+
+; Entity API controllers.
+files[] = includes/og.admin.inc
