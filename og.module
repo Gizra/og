@@ -1301,16 +1301,14 @@ function og_group($gid, $entity_type = 'user', $entity = NULL, $state = OG_STATE
           'user request' => $user_request,
         );
         $entity->{$property}[LANGUAGE_NONE][] = $values;
-
       }
       else {
         $group_membership = og_get_group_membership($entity_type, $id, $wrapper[$existing_key]['gid']);
         if ($group_membership->state != $state) {
-          $group_membership->state = $state;
-          $group_membership->save();
-          // No need to save the entity, as we already save the group
-          // membership.
-          $save = FALSE;
+          // This value won't be saved in the field, just passed along and
+          // processed in og_entity_presave().
+          $wrapper[$existing_key]['state'] = $state;
+          $wrapper[$existing_key]['user request'] = $user_request;
         }
         else {
           // Nothing changed, so don't try to save.
