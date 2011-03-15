@@ -133,7 +133,7 @@ function og_entity_info() {
       'label' => FALSE,
     ),
     'entity keys' => array(
-      'id' => 'mid',
+      'id' => 'id',
       // The message has no label.
       'label' => FALSE,
       'bundle' => 'name',
