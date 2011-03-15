@@ -1197,5 +1197,8 @@ class OgUpgradePath7001TestCase extends OgUpgradePathTestCase {
     foreach ($group_memberships as $key => $group_membership) {
       $this->assertEqual($group_membership->state, $info[$group_membership->etid], t('User ID @id has correct state', array('@id' => $key + 1)));
     }
+
+    // Assert the created time was updated.
+    $this->assertEqual($group_memberships[2]->created, 1000000000, t('Create date was upgraded.'));
   }
 }

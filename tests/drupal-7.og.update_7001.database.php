@@ -2688,7 +2688,7 @@ db_insert('field_data_group_audience')->fields(array(
   'delta' => '0',
   'group_audience_gid' => '1',
   'group_audience_state' => '1',
-  'group_audience_created' => '1300137505',
+  'group_audience_created' => '1000000000',
 ))
 ->values(array(
   'entity_type' => 'user',
