@@ -313,7 +313,8 @@ class OgGroupApi extends DrupalWebTestCase {
       $groups[$state] = $group->gid;
 
       // Assign article to the group.
-      og_group($group->gid, 'node', $node, $state);
+      $values = array('entity type' => 'node', 'entity' => $node, 'state' => $state);
+      og_group($group->gid, $values);
     }
 
     $node = node_load($node->nid);
@@ -380,12 +381,14 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     entity_save('node', $node);
 
     $this->assertFalse(og_is_member($group1->gid, 'node', $node), t('Node is not assigned to group1.'));
-    og_group($group1->gid, 'node', $node);
+    $values = array('entity type' => 'node', 'entity' => $node);
+    og_group($group1->gid, $values);
     $this->assertTrue(og_is_member($group1->gid, 'node', $node), t('Node is now assigned to group1.'));
 
     $this->assertFalse(og_is_member($group2->gid, 'node', $node), t('Node is not assigned to group2.'));
-    og_group($group1->gid, 'node', $node);
-    og_group($group2->gid, 'node', $node);
+    $values = array('entity type' => 'node', 'entity' => $node);
+    og_group($group1->gid, $values);
+    og_group($group2->gid, $values);
     $this->assertTrue(og_is_member($group1->gid, 'node', $node), t('Node is still assigned to group1.'));
     $this->assertTrue(og_is_member($group2->gid, 'node', $node), t('Node is now assigned to group2.'));
 
@@ -461,14 +464,16 @@ class OgGroupMEmbership extends DrupalWebTestCase {
     $this->assertTrue(empty($result['og_membership']), t('Group content not assigned to a group does not have any group membership assigned to it.'));
 
     // Add group association.
-    og_group($group->gid, 'node', $node);
+    $values = array('entity type' => 'node', 'entity' => $node);
+    og_group($group->gid, $values);
     $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
     $this->assertTrue($group_membership, t('Group content has group membership in group.'));
 
     // Change state of group association via og_group() (i.e. not changing the
     // group membership entity directly).
     $this->assertEqual($group_membership->state, OG_STATE_ACTIVE, t('Group membership state is active.'));
-    og_group($group->gid, 'node', $node, OG_STATE_PENDING);
+    $values = array('entity type' => 'node', 'entity' => $node, 'state' => OG_STATE_PENDING);
+    og_group($group->gid, $values);
     $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
     $this->assertEqual($group_membership->state, OG_STATE_PENDING, t('Group membership state is active.'));
 
@@ -538,7 +543,8 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
 
     // Associate user to the group.
     $user2 = $this->drupalCreateUser();
-    og_group($group->gid, 'user', $user2);
+    $values = array('entity' => $user2);
+    og_group($group->gid, $values);
 
     // Assert the user is registered to the new group.
     $this->assertTrue(og_is_member($group->gid, 'user', $user2), t('User is registered to the new group.'));

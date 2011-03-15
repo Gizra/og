@@ -462,7 +462,8 @@ function og_field_crud_group($op, $entity_type, $entity) {
 
           // Subscribe the entity author, if exists.
           if (!empty($entity->uid) && ($account = user_load($entity->uid))) {
-            og_group($group->gid, 'user', $account, OG_STATE_ACTIVE);
+            $values = array('entity' => $account);
+            og_group($group->gid, $values);
           }
         }
       }

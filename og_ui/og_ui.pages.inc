@@ -90,7 +90,8 @@ function og_ui_confirm_subscribe_submit($form, &$form_state) {
   $state = og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
   // Pass the user's request to the grouping action.
   $form_state['values'] += array('request' => '');
-  og_group($group->gid, 'user', $account, $state, TRUE, TRUE, $form_state['values']['request']);
+  $values = array('entity' => $account, 'state' => $state, 'user request' => $form_state['values']['request']);
+  og_group($group->gid, $values);
 
   // Redirect.
   $form_state['redirect'] = "$group->entity_type/$group->etid";

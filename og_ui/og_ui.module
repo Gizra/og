@@ -569,7 +569,8 @@ function og_ui_user_operations_block($gid, $uids) {
 function _group_ui_user_operations_set_state($gid, $uids, $state) {
   $accounts = user_load_multiple($uids);
   foreach ($accounts as $account) {
-    og_group($gid, 'user', $account, $state);
+    $values = array('entity' => $account, 'state' => $state);
+    og_group($gid, 'user', $values);
   }
 }
 

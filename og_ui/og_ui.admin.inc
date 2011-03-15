@@ -99,7 +99,8 @@ function og_ui_add_users_validate($form, &$form_state) {
 function og_ui_add_users_submit($form, &$form_state) {
   $account = user_load_by_name($form_state['values']['og_add_user']);
 
-  og_group($form_state['values']['group']->gid, 'user', $account, $form_state['values']['og_add_user_state']);
+  $values = array('entity' => $account, 'state' => $form_state['values']['og_add_user_state']);
+  og_group($form_state['values']['group']->gid, $values);
   drupal_set_message(t('%user has been added to group.', array('%user' => $account->name)));
 }
 

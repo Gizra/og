@@ -706,10 +706,9 @@ function og_og_fields_info() {
 function og_node_update($node) {
   if ($node->uid != $node->original->uid && $group = og_get_group('node', $node->nid)) {
     $account = user_load($node->uid);
-    og_group($group->gid, 'user', $account);
+    $values = array('entity' => $account);
+    og_group($group->gid, $values);
   }
-
-
 }
 
 /**
@@ -1407,7 +1406,23 @@ function og_get_all_group($states = array(OG_STATE_ACTIVE), $options = array()) 
  * @return
  *   The entity with the fields updated.
  */
-function og_group($gid, $entity_type = 'user', $entity = NULL, $state = OG_STATE_ACTIVE, $save = TRUE, $force_reload = TRUE, $user_request = '') {
+function og_group($gid, $values = array()) {
+  $values += array(
+    'entity type' => 'user',
+    'entity' => FALSE,
+    'state' => OG_STATE_ACTIVE,
+    'save' => TRUE,
+    'force reload' => TRUE,
+    'user request' => '',
+  );
+
+  $entity_type = $values['entity type'];
+  $entity = $values['entity'];
+  $state = $values['state'];
+  $save = $values['save'];
+  $force_reload = $values['force reload'];
+  $user_request = $values['user request'];
+
   if ($entity_type == 'user' && empty($entity)) {
     global $user;
     $entity = clone $user;

@@ -608,7 +608,8 @@ function _og_upgrade_group_content(&$sandbox) {
     $group = og_get_group('node', $revision->group_nid);
 
     $node = node_load($revision->nid, $revision->vid);
-    og_group($group->gid, 'node', $node);
+    $values = array('entity type' => 'node', 'entity' => $node);
+    og_group($group->gid, $values);
 
     $sandbox['last_vid'] = $revision->vid;
     $sandbox['last'] = $revision->upgrade_id;
@@ -647,7 +648,8 @@ function _og_upgrade_user(&$sandbox) {
     $group = og_get_group('node', $account->nid);
     $state = $account->is_active ? OG_STATE_ACTIVE : OG_STATE_PENDING;
 
-    og_group($group->gid, 'user', $account, $state);
+    $values = array('entity' => $account, 'state' => $state);
+    og_group($group->gid, $values);
 
     if ($account->is_admin) {
       og_role_grant($group->gid, $account->uid, $rid);
