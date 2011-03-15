@@ -95,7 +95,7 @@ function og_entity_info() {
   );
 
   $items['og_membership_type'] = array(
-    'label' => t('Group membership type'),
+    'label' => t('Organic groups membership type'),
     'controller class' => 'EntityAPIController',
     'entity class' => 'EntityOgMembershipType',
     'base table' => 'og_membership_type',
