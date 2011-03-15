@@ -663,6 +663,10 @@ function _og_upgrade_user(&$sandbox) {
  * Add group membership enteties instead of field data.
  */
 function og_update_7001(&$sandbox) {
+  if (!module_exists('og')) {
+    // If OG module isn't enabled we can't create the OG specific fields.
+    throw new DrupalUpdateException('You must enable Organic groups module to perform an upgrade.');
+  }
   $schema['og_membership_type'] = array(
     'description' => 'Storage for user-defined group membership.',
     'fields' => array(

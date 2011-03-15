@@ -117,7 +117,7 @@ function og_entity_info() {
       // TODO: This path doesn't exist before OG-ui.
       'path' => 'admin/config/group/group-membership',
       'file' => 'includes/og.admin.inc',
-      'controller class' => 'OgMembershipUIController',
+      'controller class' => 'OgMembershipTypeUIController',
     ),
   );
 
@@ -132,11 +132,57 @@ function og_entity_info() {
       // The membership has no label.
       'label' => FALSE,
     ),
+    'entity keys' => array(
+      'id' => 'mid',
+      // The message has no label.
+      'label' => FALSE,
+      'bundle' => 'name',
+    ),
+    'bundles' => array(),
+    'bundle keys' => array(
+      'bundle' => 'name',
+    ),
     'module' => 'og',
     'access callback' => 'og_membership_access',
   );
   return $items;
 }
+
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * Use this hook to specify bundles to avoid a recursion, as loading the entity
+ * message types needs the entity info too.
+ */
+function og_entity_info_alter(&$entity_info) {
+  $og_membership_types = entity_load('og_membership_type');
+  foreach ($og_membership_types as $type_name => $type) {
+    $entity_info['og_membership']['bundles'][$type_name] = array(
+      //@todo do we need a short label too?
+      'label' => $type->name,
+      'admin' => array(
+        'path' => 'admin/config/group/group-membership/manage/%og_membership_type',
+        'real path' => 'admin/config/group/group-membership/manage/' . $type->name,
+        'bundle argument' => 5,
+        'access arguments' => array('administer group'),
+      ),
+    );
+  }
+}
+
+/**
+ * Implementation of hook_default_og_membership_type().
+ */
+function og_default_og_membership_type() {
+  $items = array();
+  $items['og_membership_type_default'] = entity_import('og_membership_type', '{
+    "name" : "og_membership_type_default",
+    "description" : "Default",
+    "rdf_mapping" : []
+  }');
+  return $items;
+}
+
 
 /**
  * Implements hook_menu().
@@ -808,6 +854,14 @@ function og_membership_type_delete($group_membership) {
   return entity_delete('og_membership_type', $group_membership);
 }
 
+/**
+ * Access callback for the group membership entity.
+ */
+function og_membership_type_access($op, $entity, $account = NULL, $entity_type = 'og_membership') {
+  // TODO
+  return TRUE;
+}
+
 
 /**
  * Main class for Group membership entities provided by Entity API.
@@ -849,7 +903,7 @@ function og_membership_create($entity_type, $etid, $gid, $values = array()) {
   $values['gid'] = $gid;
 
   // Set default group membership type.
-  $values += array('name' => 'og_membership_default');
+  $values += array('name' => 'og_membership_type_default');
 
   $return = entity_create('og_membership', $values);
   return $return;
