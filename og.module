@@ -52,11 +52,6 @@ define('OG_GROUP_FIELD', 'group_group');
 define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
 
 /**
- * Group membership state field.
- */
-define('OG_MEMBERSHIP_STATE_FIELD', 'og_membership_state');
-
-/**
  * The role name of group non-members.
  */
 define('OG_ANONYMOUS_ROLE', 'non-member');
