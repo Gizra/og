@@ -97,7 +97,7 @@ function og_entity_info() {
   $items['og_membership_type'] = array(
     'label' => t('Group membership type'),
     'controller class' => 'EntityAPIController',
-    'entity class' => 'OgMembershipType',
+    'entity class' => 'EntityOgMembershipType',
     'base table' => 'og_membership_type',
     'fieldable' => TRUE,
     'entity keys' => array(
@@ -731,6 +731,85 @@ function og_ctools_context_converter_alter($context, $converter, &$value) {
 }
 
 /**
+ * A class used for group membership types.
+ */
+class EntityOgMembershipType extends Entity {
+
+  public $name;
+  public $description = '';
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'og_membership_type');
+  }
+}
+
+/**
+ * Creates a new message type.
+ *
+ * If a message type already exists, an exception will be thrown.
+ *
+ * @return MessageType
+ *   Returns a new message type object.
+ */
+function og_membership_type_create($name, $values = array()) {
+  // Make sure the message type doesn't already exist, to prevent duplicate key
+  // error.
+  if (og_membership_type_load($name)) {
+    throw new Exception('Group membership type ' . check_plain($name) . ' already exists.');
+  }
+  $values['name'] = $name;
+  $return = entity_create('og_membership_type', $values);
+
+  return $return;
+}
+
+/**
+ * Message type loader.
+ *
+ * @param $type_name
+ *   (optional) The name for this message type. If no type is given all existing
+ *   types are returned.
+ *
+ * @return MessageType
+ *   Returns a fully-loaded message type definition if a type name is passed.
+ *   Else an array containing all types is returned.
+ */
+function og_membership_type_load($name = NULL) {
+  // Replace dashes with underscores so this can be used as menu argument
+  // loader too.
+  $types = entity_load('og_membership_type', isset($name) ? array(strtr($name, array('-' => '_'))) : FALSE);
+  if (isset($name)) {
+    return isset($types[$name]) ? $types[$name] : FALSE;
+  }
+  return $types;
+}
+
+/**
+ * Inserts or updates a message object into the database.
+ *
+ * @param $group_membership
+ *   The message object to be inserted.
+ *
+ * @return
+ *   Failure to write a record will return FALSE. Otherwise SAVED_NEW or
+ *   SAVED_UPDATED is returned depending on the operation performed.
+ */
+function og_membership_type_save($group_membership) {
+  return entity_save('og_membership_type', $group_membership);
+}
+
+/**
+ * Deletes an existing message.
+ *
+ * @param $group_membership
+ *   The message object to be deleted.
+ */
+function og_membership_type_delete($group_membership) {
+  return entity_delete('og_membership_type', $group_membership);
+}
+
+
+/**
  * Main class for Group membership entities provided by Entity API.
  */
 class EntityOgMembership extends Entity {
@@ -768,6 +847,9 @@ function og_membership_create($entity_type, $etid, $gid, $values = array()) {
   $values['entity_type'] = $entity_type;
   $values['etid'] = $etid;
   $values['gid'] = $gid;
+
+  // Set default group membership type.
+  $values += array('name' => 'og_membership_default');
 
   $return = entity_create('og_membership', $values);
   return $return;
