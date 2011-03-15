@@ -94,6 +94,33 @@ function og_entity_info() {
     ),
   );
 
+  $items['og_membership_type'] = array(
+    'label' => t('Group membership type'),
+    'controller class' => 'EntityAPIController',
+    'entity class' => 'OgMembershipType',
+    'base table' => 'og_membership_type',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'description',
+      'name' => 'name',
+    ),
+    'exportable' => TRUE,
+    'export' => array(
+      'default hook' => 'default_og_membership_type',
+    ),
+    'bundle of' => 'og_membership',
+    'module' => 'og',
+    'access callback' => 'og_membership_type_access',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      // TODO: This path doesn't exist before OG-ui.
+      'path' => 'admin/config/group/group-membership',
+      'file' => 'includes/og.admin.inc',
+      'controller class' => 'OgMembershipUIController',
+    ),
+  );
+
   $items['og_membership'] = array(
     'label' => t('Organic groups membership'),
     'entity class' => 'EntityOgMembership',
@@ -107,13 +134,6 @@ function og_entity_info() {
     ),
     'module' => 'og',
     'access callback' => 'og_membership_access',
-    // Enable the entity API's admin UI.
-    'admin ui' => array(
-      // TODO: This path doesn't exist before OG-ui.
-      'path' => 'admin/config/group/group-membership',
-      'file' => 'includes/og.admin.inc',
-      'controller class' => 'OgMembershipUIController',
-    ),
   );
   return $items;
 }

@@ -204,6 +204,37 @@ function og_schema() {
     ),
   );
 
+  $schema['og_membership_type'] = array(
+    'description' => 'Storage for user-defined group membership.',
+    'fields' => array(
+      // Although the "name" should be enough as the primary key, the numeric ID
+      // is required for the internal use of entity API.
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Numeric group membership type ID.',
+      ),
+      'name' => array(
+        'description' => 'The unified identifier for a group membership type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'Description for this group membership type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ) + entity_exportable_schema_fields(),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+  );
+
   $schema['og_membership'] = array(
     'description' => 'The group membership table.',
     'fields' => array(
@@ -212,6 +243,13 @@ function og_schema() {
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Reference to a group membership type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
       ),
       'etid' => array(
         'description' => "The entity ID.",
@@ -249,6 +287,10 @@ function og_schema() {
     ),
     'primary key' => array('id'),
     'foreign keys' => array(
+      'og_membership_type' => array(
+        'table' => 'og_membership_type',
+        'columns' => array('name' => 'name'),
+      ),
       'group' => array(
         'table' => 'og',
         'columns' => array('gid' => 'gid'),
@@ -621,6 +663,37 @@ function _og_upgrade_user(&$sandbox) {
  * Add group membership enteties instead of field data.
  */
 function og_update_7001(&$sandbox) {
+  $schema['og_membership_type'] = array(
+    'description' => 'Storage for user-defined group membership.',
+    'fields' => array(
+      // Although the "name" should be enough as the primary key, the numeric ID
+      // is required for the internal use of entity API.
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Numeric group membership type ID.',
+      ),
+      'name' => array(
+        'description' => 'The unified identifier for a group membership type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'Description for this group membership type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ) + entity_exportable_schema_fields(),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+  );
+
   $schema['og_membership'] = array(
     'description' => 'The group membership table.',
     'fields' => array(
@@ -629,6 +702,13 @@ function og_update_7001(&$sandbox) {
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Reference to a group membership type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
       ),
       'etid' => array(
         'description' => "The entity ID.",
@@ -674,6 +754,7 @@ function og_update_7001(&$sandbox) {
   );
 
   db_create_table('og_membership', $schema['og_membership']);
+  db_create_table('og_membership_type', $schema['og_membership_type']);
 
   if (empty($sandbox['total'])) {
     // Get any existing group content, and create a group membership for it.
