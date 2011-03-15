@@ -325,6 +325,7 @@ function og_ui_user_admin_roles($form, $form_state, $entity_type = '', $etid = 0
         '#title_display' => 'invisible',
         '#size' => 32,
         '#maxlength' => 64,
+        '#required' => TRUE,
       );
       $form['add'] = array(
         '#type' => 'submit',
