@@ -807,7 +807,6 @@ function og_update_7001(&$sandbox) {
       $sandbox['#finished'] = min(0.99, $sandbox['count'] / $sandbox['total']);
     }
     else {
-      debug('finish');
       $sandbox['#finished'] = 1;
     }
   }
