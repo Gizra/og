@@ -1445,12 +1445,12 @@ function og_group($gid, $values = array()) {
     $op = empty($entity->is_new) ? 'update' : 'insert';
 
     if ($op == 'insert') {
-      $values = array(
+      $field_values = array(
         'gid' => $gid,
         'state' => $state,
         'created' => time(),
       );
-      $wrapper[] = $values;
+      $wrapper[] = $field_values;
     }
     else {
       $existing_key = FALSE;
@@ -1464,14 +1464,14 @@ function og_group($gid, $values = array()) {
       }
 
       if ($existing_key === FALSE) {
-        $values = array(
+        $field_values = array(
           'gid' => $gid,
           // This values won't be saved, just passed along.
           // @see og_entity_presave().
           'state' => $state,
           'user request' => $user_request,
         );
-        $entity->{$property}[LANGUAGE_NONE][] = $values;
+        $entity->{$property}[LANGUAGE_NONE][] = $field_values;
       }
       else {
         $group_membership = og_get_group_membership($entity_type, $id, $wrapper[$existing_key]['gid']);
