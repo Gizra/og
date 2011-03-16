@@ -671,104 +671,104 @@ function og_update_7001(&$sandbox) {
     throw new DrupalUpdateException('You must enable Organic groups module to perform an upgrade.');
   }
 
-  $schema['og_membership_type'] = array(
-    'description' => 'Storage for user-defined group membership.',
-    'fields' => array(
-      // Although the "name" should be enough as the primary key, the numeric ID
-      // is required for the internal use of entity API.
-      'id' => array(
-        'type' => 'serial',
-        'not null' => TRUE,
-        'description' => 'Primary Key: Numeric group membership type ID.',
+  if (!isset($sandbox['total'])) {
+    $schema['og_membership_type'] = array(
+      'description' => 'Storage for user-defined group membership.',
+      'fields' => array(
+        // Although the "name" should be enough as the primary key, the numeric ID
+        // is required for the internal use of entity API.
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+          'description' => 'Primary Key: Numeric group membership type ID.',
+        ),
+        'name' => array(
+          'description' => 'The unified identifier for a group membership type.',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => '',
+        ),
+        'description' => array(
+          'description' => 'Description for this group membership type.',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => '',
+        ),
+      ) + entity_exportable_schema_fields(),
+      'primary key' => array('id'),
+      'unique keys' => array(
+        'name' => array('name'),
       ),
-      'name' => array(
-        'description' => 'The unified identifier for a group membership type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'description' => array(
-        'description' => 'Description for this group membership type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-    ) + entity_exportable_schema_fields(),
-    'primary key' => array('id'),
-    'unique keys' => array(
-      'name' => array('name'),
-    ),
-  );
+    );
 
-  $schema['og_membership'] = array(
-    'description' => 'The group membership table.',
-    'fields' => array(
-      'id' => array(
-        'description' => "The group membership's unique ID.",
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
+    $schema['og_membership'] = array(
+      'description' => 'The group membership table.',
+      'fields' => array(
+        'id' => array(
+          'description' => "The group membership's unique ID.",
+          'type' => 'serial',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+        'name' => array(
+          'description' => 'Reference to a group membership type.',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => '',
+        ),
+        'etid' => array(
+          'description' => "The entity ID.",
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'entity_type' => array(
+          'description' => "The entity type (e.g. node, comment, etc').",
+          'type' => 'varchar',
+          'length' => '32',
+          'not null' => TRUE,
+          'default' => '',
+        ),
+        'gid'               => array(
+          'description'     => "The group's unique ID.",
+          'type'            => 'int',
+          'size'            => 'normal',
+          'not null'        => TRUE,
+        ),
+        'state' => array(
+          'description' => 'The state of the group content.',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => FALSE,
+          'default' => '',
+        ),
+        'created' => array(
+          'description' => 'The Unix timestamp when the group content was created.',
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
       ),
-      'name' => array(
-        'description' => 'Reference to a group membership type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
+      'primary key' => array('id'),
+      'foreign keys' => array(
+        'og_membership_type' => array(
+          'table' => 'og_membership_type',
+          'columns' => array('name' => 'name'),
+        ),
+        'group' => array(
+          'table' => 'og',
+          'columns' => array('gid' => 'gid'),
+        ),
       ),
-      'etid' => array(
-        'description' => "The entity ID.",
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'entity_type' => array(
-        'description' => "The entity type (e.g. node, comment, etc').",
-        'type' => 'varchar',
-        'length' => '32',
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'gid'               => array(
-        'description'     => "The group's unique ID.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
-      ),
-      'state' => array(
-        'description' => 'The state of the group content.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-        'default' => '',
-      ),
-      'created' => array(
-        'description' => 'The Unix timestamp when the group content was created.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array('id'),
-    'foreign keys' => array(
-      'og_membership_type' => array(
-        'table' => 'og_membership_type',
-        'columns' => array('name' => 'name'),
-      ),
-      'group' => array(
-        'table' => 'og',
-        'columns' => array('gid' => 'gid'),
-      ),
-    ),
-  );
+    );
 
-  db_create_table('og_membership', $schema['og_membership']);
-  db_create_table('og_membership_type', $schema['og_membership_type']);
+    db_create_table('og_membership', $schema['og_membership']);
+    db_create_table('og_membership_type', $schema['og_membership_type']);
 
-  if (empty($sandbox['total'])) {
     // Get any existing group content, and create a group membership for it.
     $query = new EntityFieldQuery();
     $sandbox['total'] = $query
@@ -778,10 +778,9 @@ function og_update_7001(&$sandbox) {
 
     $sandbox['#finished'] = 0;
     $sandbox['count'] = 0;
-    $sandbox['last'] = 0;
   }
 
-  if ($sandbox['total'] > 0) {
+  if ($sandbox['total']) {
     $batch_size = variable_get('og_update_batch_size', 200);
 
     $field = array();
@@ -790,7 +789,7 @@ function og_update_7001(&$sandbox) {
     $query = new EntityFieldQuery();
     $result = $query
       ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', 1, '>=')
-      ->range($sandbox['last'], $batch_size)
+      ->range($sandbox['count'], $sandbox['count'] + $batch_size)
       ->execute();
 
     if (!empty($result)) {
@@ -808,6 +807,7 @@ function og_update_7001(&$sandbox) {
       $sandbox['#finished'] = min(0.99, $sandbox['count'] / $sandbox['total']);
     }
     else {
+      debug('finish');
       $sandbox['#finished'] = 1;
     }
   }
