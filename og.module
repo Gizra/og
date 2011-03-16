@@ -67,6 +67,11 @@ define('OG_AUTHENTICATED_ROLE', 'member');
 define('OG_ADMINISTRATOR_ROLE', 'administrator member');
 
 /**
+ * The default group membership type that is the bundle of group membership.
+ */
+define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
+
+/**
  * Implements hook_help().
  */
 function og_help($section, $arg) {
@@ -468,8 +473,16 @@ function og_entity_presave($entity, $type) {
       if (!empty($diff[$op])) {
         foreach ($diff[$op] as $item) {
           $group = og_load($item['gid']);
-          $item += array('state' => OG_STATE_ACTIVE, 'user request' => '');
-          module_invoke_all('og_group_' . $op, $type, $entity, $group, $item['state'], $item['user request']);
+          $values = array(
+            'entity type' => $type,
+            'entity' => $entity,
+            'group' => $group,
+            'state' => OG_STATE_ACTIVE,
+            'user request' => '',
+            'group membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
+            'created' => !empty($item['created']) ? $item['created'] : time(),
+          );
+          module_invoke_all('og_group_' . $op, $values);
           // TODO: Can we invoke rule also when type is not user? Currently in
           // rules event info we define the account argument -- can this be any
           // entity?
@@ -499,34 +512,33 @@ function og_entity_insert($entity, $type) {
 /**
  * Implements hook_og_group_insert().
  */
-function og_og_group_insert($entity_type, $entity, $group, $state, $user_request) {
+function og_og_group_insert($values = array()) {
   // Create a new group membership entity.
-  list($id) = entity_extract_ids($entity_type, $entity);
-  $group_membership = og_membership_create($entity_type, $id, $group->gid, array('state' => $state));
+  list($id) = entity_extract_ids($values['entity type'], $values['entity']);
+  $group_membership = og_membership_create($values['entity type'], $id, $values['group']->gid, array('state' => $values['state']));
   $group_membership->save();
 }
 
 /**
  * Implements hook_og_group_update().
  */
-function og_og_group_update($entity_type, $entity, $group, $state, $user_request) {
+function og_og_group_update($values = array()) {
   // Update group membership entity.
-  list($id) = entity_extract_ids($entity_type, $entity);
-  $group_membership = og_get_group_membership($entity_type, $id, $group->gid);
-  $group_membership->state = $state;
+  list($id) = entity_extract_ids($values['entity type'], $values['entity']);
+  $group_membership = og_get_group_membership($values['entity type'], $id, $values['group']->gid);
+  $group_membership->state = $values['state'];
   $group_membership->save();
 }
 
 /**
  * Implements hook_og_group_delete().
  */
-function og_og_group_delete($entity_type, $entity, $group, $state, $user_request) {
+function og_og_group_delete($values = array()) {
   // Delete group membership entity.
-  list($id) = entity_extract_ids($entity_type, $entity);
-  $group_membership = og_get_group_membership($entity_type, $id, $group->gid);
+  list($id) = entity_extract_ids($values['entity type'], $values['entity']);
+  $group_membership = og_get_group_membership($values['entity type'], $id, $values['group']->gid);
   $group_membership->delete();
 }
-
 
 
 /**
@@ -873,7 +885,7 @@ function og_membership_type_access($op, $entity, $account = NULL, $entity_type =
 class EntityOgMembership extends Entity {
   public function __construct(array $values = array(), $entityType = NULL) {
     $values += array(
-      'name' => 'og_membership_type_default',
+      'name' => OG_MEMBERSHIP_TYPE_DEFAULT,
       'state' => OG_STATE_ACTIVE,
       'creates' => time(),
     );
@@ -1409,6 +1421,7 @@ function og_get_all_group($states = array(OG_STATE_ACTIVE), $options = array()) 
  *   The entity with the fields updated.
  */
 function og_group($gid, $values = array()) {
+  // Set default values.
   $values += array(
     'entity type' => 'user',
     'entity' => FALSE,
@@ -1416,20 +1429,19 @@ function og_group($gid, $values = array()) {
     'save' => TRUE,
     'force reload' => TRUE,
     'user request' => '',
+    'group membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
   );
 
   $entity_type = $values['entity type'];
   $entity = $values['entity'];
   $state = $values['state'];
   $save = $values['save'];
-  $force_reload = $values['force reload'];
-  $user_request = $values['user request'];
 
   if ($entity_type == 'user' && empty($entity)) {
     global $user;
     $entity = clone $user;
   }
-  if ($force_reload) {
+  if ($values['force reload']) {
     $entity = og_load_entity($entity_type, $entity);
   }
   $property = OG_AUDIENCE_FIELD;
@@ -1450,6 +1462,7 @@ function og_group($gid, $values = array()) {
         'gid' => $gid,
         'state' => $state,
         'created' => time(),
+        'user request' => $values['user request'],
       );
       $wrapper[] = $field_values;
     }
@@ -1465,12 +1478,14 @@ function og_group($gid, $values = array()) {
       }
 
       if ($existing_key === FALSE) {
+        // Update field with new value.
         $field_values = array(
           'gid' => $gid,
           // This values won't be saved, just passed along.
           // @see og_entity_presave().
           'state' => $state,
-          'user request' => $user_request,
+          'user request' => $values['user request'],
+          'group membership type' => $values['group membership type'],
         );
         $entity->{$property}[LANGUAGE_NONE][] = $field_values;
       }
@@ -1480,7 +1495,7 @@ function og_group($gid, $values = array()) {
           // This value won't be saved in the field, just passed along and
           // processed in og_entity_presave().
           $wrapper[$existing_key]['state'] = $state;
-          $wrapper[$existing_key]['user request'] = $user_request;
+          $wrapper[$existing_key]['user request'] = $values['user request'];
         }
         else {
           // Nothing changed, so don't try to save.
