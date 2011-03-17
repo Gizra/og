@@ -473,7 +473,7 @@ function og_entity_presave($entity, $type) {
       if (!empty($diff[$op])) {
         foreach ($diff[$op] as $item) {
           $group = og_load($item['gid']);
-          $item + array(
+          $item += array(
             'state' => OG_STATE_ACTIVE,
             'created' => time(),
             'membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
