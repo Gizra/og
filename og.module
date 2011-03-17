@@ -887,7 +887,7 @@ class EntityOgMembership extends Entity {
     $values += array(
       'name' => OG_MEMBERSHIP_TYPE_DEFAULT,
       'state' => OG_STATE_ACTIVE,
-      'creates' => time(),
+      'created' => time(),
     );
     parent::__construct($values, 'og_membership');
   }
