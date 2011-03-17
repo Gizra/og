@@ -503,7 +503,7 @@ function og_entity_insert($entity, $type) {
     // Create group membership for each group the new entity belongs to.
     list($id) = entity_extract_ids($type, $entity);
     foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
-      $group_membership = og_membership_create($type, $id, $item['gid']);
+      $group_membership = og_membership_create($item['gid'], $type, $id);
       $group_membership->save();
     }
   }
@@ -515,7 +515,7 @@ function og_entity_insert($entity, $type) {
 function og_og_group_insert($values = array()) {
   // Create a new group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
-  $group_membership = og_membership_create($values['entity type'], $id, $values['group']->gid, array('state' => $values['state']));
+  $group_membership = og_membership_create($values['group']->gid, $values['entity type'], $id, array('state' => $values['state']));
   $group_membership->save();
 }
 
@@ -525,7 +525,7 @@ function og_og_group_insert($values = array()) {
 function og_og_group_update($values = array()) {
   // Update group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
-  $group_membership = og_get_group_membership($values['entity type'], $id, $values['group']->gid);
+  $group_membership = og_get_group_membership($values['group']->gid, $values['entity type'], $id);
   $group_membership->state = $values['state'];
   $group_membership->save();
 }
@@ -536,7 +536,7 @@ function og_og_group_update($values = array()) {
 function og_og_group_delete($values = array()) {
   // Delete group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
-  $group_membership = og_get_group_membership($values['entity type'], $id, $values['group']->gid);
+  $group_membership = og_get_group_membership($values['group']->gid, $values['entity type'], $id);
   $group_membership->delete();
 }
 
@@ -910,10 +910,10 @@ function og_group_membership_invalidate_cache() {
  * @return OgMembership
  *   Returns a new group membership object.
  */
-function og_membership_create($entity_type, $etid, $gid, $values = array()) {
+function og_membership_create($gid, $entity_type, $etid, $values = array()) {
   // TODO: Make sure the group membership doesn't already exist, to prevent duplicate key
   // error.
-  if (og_get_group_membership($entity_type, $etid, $gid)) {
+  if (og_get_group_membership($gid, $entity_type, $etid)) {
     $account = user_load($uid);
     $group = og_label($gid);
     throw new Exception('Group membership for entity ' . check_plain($entity_type) . ' with ID ' . check_plain($etid) . ' for group ' . $group . 'already exists.');
@@ -970,7 +970,7 @@ function og_membership_load_multiple($ids = array(), $conditions = array(), $res
  * @return
  *   The OgMembership object if found, or FALSE.
  */
-function og_get_group_membership($entity_type, $etid, $gid) {
+function og_get_group_membership($gid, $entity_type, $etid) {
   $return = &drupal_static(__FUNCTION__, array());
   $identifier = $entity_type . ':' . $etid . ':' . $gid;
   if (empty($return[$identifier])) {
@@ -1430,6 +1430,7 @@ function og_group($gid, $values = array()) {
     'force reload' => TRUE,
     'user request' => '',
     'group membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
+    'created' => time(),
   );
 
   $entity_type = $values['entity type'];
@@ -1461,7 +1462,7 @@ function og_group($gid, $values = array()) {
       $field_values = array(
         'gid' => $gid,
         'state' => $state,
-        'created' => time(),
+        'created' => $values['created'],
         'user request' => $values['user request'],
       );
       $wrapper[] = $field_values;
@@ -1490,7 +1491,7 @@ function og_group($gid, $values = array()) {
         $entity->{$property}[LANGUAGE_NONE][] = $field_values;
       }
       else {
-        $group_membership = og_get_group_membership($entity_type, $id, $wrapper[$existing_key]['gid']);
+        $group_membership = og_get_group_membership($wrapper[$existing_key]['gid'], $entity_type, $id);
         if ($group_membership->state != $state) {
           // This value won't be saved in the field, just passed along and
           // processed in og_entity_presave().
