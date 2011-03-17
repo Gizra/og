@@ -74,6 +74,18 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
       '#options' => og_group_content_states(),
       '#description' => t('Select the state of the membership.'),
     );
+    $options = array();
+    foreach (entity_load('og_membership_type') as $type) {
+      $options[$type->name] = check_plain($type->description);
+    }
+
+    $form['og_user']['og_add_user_membership_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Membership type'),
+      '#options' => $options,
+      '#default_value' => 'OG_MEMBERSHIP_TYPE_DEFAULT',
+      '#description' => t('Select the group membership type of the membership.'),
+    );
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Add users'));
 
@@ -99,7 +111,12 @@ function og_ui_add_users_validate($form, &$form_state) {
 function og_ui_add_users_submit($form, &$form_state) {
   $account = user_load_by_name($form_state['values']['og_add_user']);
 
-  $values = array('entity' => $account, 'state' => $form_state['values']['og_add_user_state']);
+  $values = array(
+    // Entity type is user by default.
+    'entity' => $account,
+    'state' => $form_state['values']['og_add_user_state'],
+    'membership type' => $form_state['values']['og_add_user_membership_type'],
+  );
   og_group($form_state['values']['group']->gid, $values);
   drupal_set_message(t('%user has been added to group.', array('%user' => $account->name)));
 }
