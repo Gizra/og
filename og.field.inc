@@ -138,8 +138,9 @@ function og_field_widget_settings_form($field, $instance) {
   $widget   = $instance['widget'];
   $defaults = field_info_widget_settings($widget['type']);
   $settings = array_merge($defaults, $widget['settings']);
+  $form = array();
 
- if ($widget['type'] == OG_AUDIENCE_AUTOCOMPLETE_WIDGET) {
+  if ($widget['type'] == OG_AUDIENCE_AUTOCOMPLETE_WIDGET) {
     $form['autocomplete_match'] = array(
       '#type'             => 'select',
       '#title'            => t('Autocomplete matching'),
