@@ -473,14 +473,19 @@ function og_entity_presave($entity, $type) {
       if (!empty($diff[$op])) {
         foreach ($diff[$op] as $item) {
           $group = og_load($item['gid']);
+          $item + array(
+            'state' => OG_STATE_ACTIVE,
+            'created' => time(),
+            'membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
+          );
           $values = array(
             'entity type' => $type,
             'entity' => $entity,
             'group' => $group,
-            'state' => !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE,
+            'state' => $item['state'],
             'user request' => '',
-            'group membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
-            'created' => !empty($item['created']) ? $item['created'] : time(),
+            'membership type' => $item['membership type'],
+            'created' => $item['created'],
           );
           module_invoke_all('og_group_' . $op, $values);
           // TODO: Can we invoke rule also when type is not user? Currently in
@@ -515,7 +520,7 @@ function og_entity_insert($entity, $type) {
 function og_og_group_insert($values = array()) {
   // Create a new group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
-  $group_membership = og_membership_create($values['group']->gid, $values['entity type'], $id, array('state' => $values['state']));
+  $group_membership = og_membership_create($values['group']->gid, $values['entity type'], $id, array('state' => $values['state'], 'membership type' => $values['membership type']));
   $group_membership->save();
 }
 
@@ -527,6 +532,7 @@ function og_og_group_update($values = array()) {
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
   $group_membership = og_get_group_membership($values['group']->gid, $values['entity type'], $id);
   $group_membership->state = $values['state'];
+  $group_membership->name = $values['membership type'];
   $group_membership->save();
 }
 
@@ -1429,7 +1435,7 @@ function og_group($gid, $values = array()) {
     'save' => TRUE,
     'force reload' => TRUE,
     'user request' => '',
-    'group membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
+    'membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
     'created' => time(),
   );
 
@@ -1464,6 +1470,7 @@ function og_group($gid, $values = array()) {
         'state' => $state,
         'created' => $values['created'],
         'user request' => $values['user request'],
+        'membership type' => $values['membership type'],
       );
       $wrapper[] = $field_values;
     }
@@ -1486,17 +1493,18 @@ function og_group($gid, $values = array()) {
           // @see og_entity_presave().
           'state' => $state,
           'user request' => $values['user request'],
-          'group membership type' => $values['group membership type'],
+          'membership type' => $values['membership type'],
         );
         $entity->{$property}[LANGUAGE_NONE][] = $field_values;
       }
       else {
         $group_membership = og_get_group_membership($wrapper[$existing_key]['gid'], $entity_type, $id);
-        if ($group_membership->state != $state) {
+        if ($group_membership->state != $state || $group_membership->name != $values['membership type']) {
+          $wrapper[$existing_key]['state'] = $state;
           // This value won't be saved in the field, just passed along and
           // processed in og_entity_presave().
-          $wrapper[$existing_key]['state'] = $state;
           $wrapper[$existing_key]['user request'] = $values['user request'];
+          $wrapper[$existing_key]['membership type'] = $values['membership type'];
         }
         else {
           // Nothing changed, so don't try to save.
