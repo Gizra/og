@@ -477,7 +477,7 @@ function og_entity_presave($entity, $type) {
             'entity type' => $type,
             'entity' => $entity,
             'group' => $group,
-            'state' => OG_STATE_ACTIVE,
+            'state' => !empty($item['state']) ? $item['state'] : OG_STATE_ACTIVE,
             'user request' => '',
             'group membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
             'created' => !empty($item['created']) ? $item['created'] : time(),
