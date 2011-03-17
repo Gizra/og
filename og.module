@@ -155,8 +155,9 @@ function og_entity_info() {
  * message types needs the entity info too.
  */
 function og_entity_info_alter(&$entity_info) {
-  if (variable_get('og_update_7001', FALSE) === FALSE) {
-    // Schema isn't updated yet.
+  if (!db_table_exists('og_membership_type')) {
+    // When running testsThe table might not exist yet
+    // @see OgUpgradePath7001TestCase::testOgUpgrade().
     return;
   }
   $og_membership_types = entity_load('og_membership_type');

@@ -1200,6 +1200,8 @@ class OgUpgradePath7001TestCase extends OgUpgradePathTestCase {
       5 => OG_STATE_BLOCKED,
     );
 
+    $this->assertEqual(count($group_memberships), count($info), t('All group membership enteties exist.'));
+
     foreach ($group_memberships as $key => $group_membership) {
       $this->assertEqual($group_membership->state, $info[$group_membership->etid], t('User ID @id has correct state', array('@id' => $key + 1)));
     }
