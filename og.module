@@ -161,7 +161,7 @@ function og_entity_info() {
  */
 function og_entity_info_alter(&$entity_info) {
   if (!db_table_exists('og_membership_type')) {
-    // When running testsThe table might not exist yet
+    // When running tests the table might not exist yet
     // @see OgUpgradePath7001TestCase::testOgUpgrade().
     return;
   }
