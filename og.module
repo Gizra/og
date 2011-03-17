@@ -1708,7 +1708,7 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
   // Get the entity ID.
   list($id) = entity_extract_ids($entity_type, $entity);
 
-  if (isset($groups[$entity_type][$id]) && !empty($groups['__info'][$entity_type][$id]['states']) && in_array($groups['__info'][$entity_type][$id]['states'], $states)) {
+  if (isset($groups[$entity_type][$id]) && !empty($groups['__info'][$entity_type][$id]['states']) && $groups['__info'][$entity_type][$id]['states'] == $states) {
     return $groups[$entity_type][$id];
   }
 
