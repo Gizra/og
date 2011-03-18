@@ -898,14 +898,29 @@ class EntityOgMembership extends Entity {
     parent::__construct($values, 'og_membership');
   }
 
+  public function save() {
+    parent::save();
+    og_group_membership_invalidate_cache();
+  }
+
   public function delete() {
     parent::delete();
     og_group_membership_invalidate_cache();
   }
 }
 
+/**
+ * Reset static cache related to group membership.
+ */
 function og_group_membership_invalidate_cache() {
-  drupal_static_reset('og_get_group_membership');
+  $caches = array(
+    'og_get_entity_groups',
+    'og_get_group_membership',
+  );
+
+  foreach ($caches as $cache) {
+    drupal_static_reset($cache);
+  }
 }
 
 /**
@@ -1229,11 +1244,9 @@ function og_invalidate_cache($gids = array()) {
   $caches = array(
     'og_user_access',
     'og_get_group_ids',
-    'og_get_entity_groups',
     'og_field_audience_options',
     'og_role_permissions',
     'og_field_formatter_view',
-    'og_get_group_membership',
   );
 
   foreach ($caches as $cache) {
