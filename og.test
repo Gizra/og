@@ -984,13 +984,15 @@ class OgGroupAudienceField extends DrupalWebTestCase {
 
     // TODO: Assert user can see only the third group in the audience field.
 
-    // Unselect the third group.
+    // Unselect all (visible) options.
     $edit = array();
     $edit['group_audience[und][]'] = array();
     $this->drupalPost(NULL, $edit, t('Save'));
 
-    // Reload node and reset cache.
-    $node = node_load($node->nid, NULL, TRUE);
+    // Invalidate cache as it was called from og_field_widget_form() to show
+    // the field.
+    og_group_membership_invalidate_cache();
+
     $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid)), t('Article node is still assigned to a group that is hidden from the current user.'));
   }
 }
