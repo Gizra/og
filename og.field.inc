@@ -274,7 +274,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         // are some options, and a "none" option.
         if (!$element['#required'] && !$element['#multiple']) {
           // Use a dummy instance in order to use theme('options_none');
-          $dummy_instance['widget']['type'] = 'options_'. $options_type;
+          $dummy_instance['widget']['type'] = 'options_select';
           $options = array('_none' => theme('options_none', array('instance' => $dummy_instance))) + $options;
         }
       }
