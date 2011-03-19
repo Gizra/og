@@ -155,6 +155,13 @@ function og_entity_info() {
  * message types needs the entity info too.
  */
 function og_entity_info_alter(&$entity_info) {
+  if (variable_get('og_upgrade_7001', FALSE) == FALSE) {
+    // FIXME:
+    // When running tests the og_membership_type table might not exist yet
+    // @see OgUpgradePath7001TestCase::testOgUpgrade().
+    // We need to find a better solution for this hack.
+    return;
+  }
   $og_membership_types = entity_load('og_membership_type');
   foreach ($og_membership_types as $type_name => $type) {
     $entity_info['og_membership']['bundles'][$type_name] = array(

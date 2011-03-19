@@ -26,6 +26,7 @@ function og_uninstall() {
     'og_group_manager_full_access',
     'og_skip_access',
     'og_update_batch_size',
+    'og_upgrade_7001',
   );
   foreach ($vars as $var) {
     variable_del($var);
@@ -813,6 +814,7 @@ function og_update_7001(&$sandbox) {
     $field = array();
     $field['field_name'] = OG_AUDIENCE_FIELD;
     field_update_field($field);
+    variable_set('og_upgrade_7001', TRUE);
 
     if ($sandbox['total']) {
       return t('Organic groups created @count group membership entity, and added group membership tables.', array('@count' => $sandbox['total']));
