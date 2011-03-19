@@ -492,6 +492,7 @@ function og_entity_presave($entity, $type) {
           // rules event info we define the account argument -- can this be any
           // entity?
           if ($type == 'user' && module_exists('rules')) {
+            $hook = $op == 'delete' ? 'og_ungroup' : 'og_group';
             rules_invoke_event($hook, $account, $group, $item['state'], $item['user request']);
           }
         }
