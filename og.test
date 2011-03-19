@@ -1167,7 +1167,6 @@ class OgUpgradePath7001TestCase extends OgUpgradePathTestCase {
 
   public function setUp() {
     // Path to the database dump.
-    variable_set('og_update_batch_size', 3);
     $this->databaseDumpFiles = array(
       drupal_get_path('module', 'og') . '/tests/drupal-7.og.update_7001.database.php',
     );
@@ -1184,6 +1183,7 @@ class OgUpgradePath7001TestCase extends OgUpgradePathTestCase {
    * Test a successful upgrade.
    */
   public function testOgUpgrade() {
+    variable_set('og_update_batch_size', 3);
     // Set small batch sizes, so we can simulate upgrade with many records.
     $admin_user = $this->drupalCreateUser(array(
       'administer software updates',
