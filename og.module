@@ -155,7 +155,7 @@ function og_entity_info() {
  * message types needs the entity info too.
  */
 function og_entity_info_alter(&$entity_info) {
-  if (variable_set('og_update_batch_size', 200) != 3) {
+  if (variable_get('og_update_batch_size', 200) != 3) {
     // FIXME:
     // When running tests the og_membership_type table might not exist yet
     // @see OgUpgradePath7001TestCase::testOgUpgrade().
