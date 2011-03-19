@@ -134,11 +134,6 @@ function og_entity_info() {
     'fieldable' => TRUE,
     'entity keys' => array(
       'id' => 'id',
-      // The membership has no label.
-      'label' => FALSE,
-    ),
-    'entity keys' => array(
-      'id' => 'id',
       // The message has no label.
       'label' => FALSE,
       'bundle' => 'name',
