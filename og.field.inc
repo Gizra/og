@@ -537,7 +537,6 @@ function og_field_audience_options($opt_group = FALSE, $account = NULL) {
   $return = array('content groups' => array(), 'other groups' => array());
 
   $content_groups = og_get_entity_groups('user', $account);
-
   $return['content groups'] = $content_groups;
 
   if ($opt_group) {

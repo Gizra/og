@@ -532,7 +532,6 @@ function og_og_group_update($values = array()) {
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
   $group_membership = og_get_group_membership($values['group']->gid, $values['entity type'], $id);
   $group_membership->state = $values['state'];
-  $group_membership->name = $values['membership type'];
   $group_membership->save();
 }
 
@@ -932,8 +931,8 @@ function og_group_membership_invalidate_cache() {
  *   Returns a new group membership object.
  */
 function og_membership_create($gid, $entity_type, $etid, $values = array()) {
-  // TODO: Make sure the group membership doesn't already exist, to prevent duplicate key
-  // error.
+  // Make sure the group membership doesn't already exist, to prevent duplicate
+  // key error.
   if (og_get_group_membership($gid, $entity_type, $etid)) {
     $account = user_load($uid);
     $group = og_label($gid);
@@ -1506,7 +1505,6 @@ function og_group($gid, $values = array()) {
           // @see og_entity_presave().
           'state' => $state,
           'user request' => $values['user request'],
-          'membership type' => $values['membership type'],
         );
         $entity->{$property}[LANGUAGE_NONE][] = $field_values;
       }
@@ -1517,7 +1515,6 @@ function og_group($gid, $values = array()) {
           // This value won't be saved in the field, just passed along and
           // processed in og_entity_presave().
           $wrapper[$existing_key]['user request'] = $values['user request'];
-          $wrapper[$existing_key]['membership type'] = $values['membership type'];
         }
         else {
           // Nothing changed, so don't try to save.
@@ -1719,8 +1716,6 @@ function og_node_type_save($bundle_name) {
  */
 function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE)) {
   $groups = &drupal_static(__FUNCTION__, array());
-  // Make sure the cached values are according to the states we are looking
-  // for.
   if ($entity_type == 'user' && empty($entity)) {
     global $user;
     $entity = clone $user;
@@ -1729,7 +1724,9 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
   // Get the entity ID.
   list($id) = entity_extract_ids($entity_type, $entity);
 
-  if (isset($groups[$entity_type][$id]) && !empty($groups['__info'][$entity_type][$id]['states']) && $groups['__info'][$entity_type][$id]['states'] == $states) {
+  // Make sure the cached values are according to the states we are looking
+  // for.
+  if (isset($groups[$entity_type][$id]) && !empty($groups['__info'][$entity_type][$id]['states']) && !array_diff($groups['__info'][$entity_type][$id]['states'], $states)) {
     return $groups[$entity_type][$id];
   }
 
