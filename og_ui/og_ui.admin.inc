@@ -67,6 +67,7 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
       '#type' => 'textfield',
       '#title' => t('User name'),
       '#autocomplete_path' => 'user/autocomplete',
+      '#required' => TRUE,
     );
     $form['og_user']['og_add_user_state'] = array(
       '#type' => 'select',
