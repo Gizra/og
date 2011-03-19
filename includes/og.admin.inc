@@ -34,7 +34,7 @@ function og_membership_type_form($form, &$form_state, $og_membership_type, $op =
     '#title' => t('Description'),
     '#type' => 'textfield',
     '#default_value' => $og_membership_type->description,
-    '#description' => t('The human-readable description of this og_membership type.'),
+    '#description' => t('The human-readable description of this group membership type.'),
     '#required' => TRUE,
   );
   // Machine-readable type name.
@@ -46,7 +46,7 @@ function og_membership_type_form($form, &$form_state, $og_membership_type, $op =
       'exists' => 'og_membership_type_load',
       'source' => array('description'),
     ),
-    '#description' => t('A unique machine-readable name for this og_membership type. It must only contain lowercase letters, numbers, and underscores.'),
+    '#description' => t('A unique machine-readable name for this group membership type. It must only contain lowercase letters, numbers, and underscores.'),
   );
 
   field_attach_form('og_membership_type', $og_membership_type, $form, $form_state);

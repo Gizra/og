@@ -795,7 +795,7 @@ function og_update_7001(&$sandbox) {
           $entity = entity_load($entity_type, array($etid));
           $entity = reset($entity);
           foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $value) {
-            $group_membership = og_membership_create($entity_type, $etid, $value['gid'], array('state' => $value['state'], 'created' => $value['created']));
+            $group_membership = og_membership_create($value['gid'], $entity_type, $etid, array('state' => $value['state'], 'created' => $value['created']));
             $group_membership->save();
             ++$sandbox['count'];
           }

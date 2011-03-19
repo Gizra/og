@@ -537,7 +537,6 @@ function og_field_audience_options($opt_group = FALSE, $account = NULL) {
   $return = array('content groups' => array(), 'other groups' => array());
 
   $content_groups = og_get_entity_groups('user', $account);
-
   $return['content groups'] = $content_groups;
 
   if ($opt_group) {
@@ -548,28 +547,6 @@ function og_field_audience_options($opt_group = FALSE, $account = NULL) {
 
   return $return;
 }
-
-/**
- * Return the number of groups a user may see in the group audience field.
- */
-function og_field_audience_count($opt_group = FALSE, $account = NULL) {
-  $count = &drupal_static(__FUNCTION__, FALSE);
-
-  if ($count === FALSE) {
-    if (empty($account)) {
-      global $user;
-
-      $account = clone($user);
-    }
-    // If opt_group is TRUE then get the count of all the groups that are
-    // active, otherwise only the ones the user belongs to.
-    $count = $opt_group ? og_get_all_group(array(OG_STATE_ACTIVE), array('count' => TRUE)) : count(og_get_entity_groups('user', $account));
-  }
-
-  return $count;
-}
-
-
 
 /**
  * Implements hook_field_validate().

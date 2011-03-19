@@ -433,7 +433,7 @@ class OgGroupMEmbership extends DrupalWebTestCase {
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
 
-    $group_membership = og_get_group_membership('user', $web_user->uid, $group->gid);
+    $group_membership = og_get_group_membership($group->gid, 'user', $web_user->uid);
     $this->assertTrue($group_membership, t('Group manager has group membership in new group.'));
 
     // Update group, assert group manager still has group membership.
@@ -466,7 +466,7 @@ class OgGroupMEmbership extends DrupalWebTestCase {
     // Add group association.
     $values = array('entity type' => 'node', 'entity' => $node);
     og_group($group->gid, $values);
-    $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
+    $group_membership = og_get_group_membership($group->gid, 'node', $node->nid);
     $this->assertTrue($group_membership, t('Group content has group membership in group.'));
 
     // Change state of group association via og_group() (i.e. not changing the
@@ -474,12 +474,12 @@ class OgGroupMEmbership extends DrupalWebTestCase {
     $this->assertEqual($group_membership->state, OG_STATE_ACTIVE, t('Group membership state is active.'));
     $values = array('entity type' => 'node', 'entity' => $node, 'state' => OG_STATE_PENDING);
     og_group($group->gid, $values);
-    $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
+    $group_membership = og_get_group_membership($group->gid, 'node', $node->nid);
     $this->assertEqual($group_membership->state, OG_STATE_PENDING, t('Group membership state is pending.'));
 
     // Remove group association.
     og_ungroup($group->gid, 'node', $node);
-    $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
+    $group_membership = og_get_group_membership($group->gid, 'node', $node->nid);
     $this->assertFalse($group_membership, t('Group content no longer has group membership in group.'));
 
     // Create group content associated with a group.
@@ -488,7 +488,7 @@ class OgGroupMEmbership extends DrupalWebTestCase {
     $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['gid'] = $group->gid;
     $node = $this->drupalCreateNode($settings);
 
-    $group_membership = og_get_group_membership('node', $node->nid, $group->gid);
+    $group_membership = og_get_group_membership($group->gid, 'node', $node->nid);
     $this->assertTrue($group_membership, t('New group content has group membership in group.'));
 
     // Delete group.
@@ -984,13 +984,14 @@ class OgGroupAudienceField extends DrupalWebTestCase {
 
     // TODO: Assert user can see only the third group in the audience field.
 
-    // Unselect the third group.
+    // Unselect all (visible) options.
     $edit = array();
     $edit['group_audience[und][]'] = array();
     $this->drupalPost(NULL, $edit, t('Save'));
 
-    // Reload node and reset cache.
-    $node = node_load($node->nid, NULL, TRUE);
+    // FIXME: Although we have already invalidated group membersiho cache, it
+    // someohow pops-up again, so we invalidate it again.
+    og_group_membership_invalidate_cache();
     $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid)), t('Article node is still assigned to a group that is hidden from the current user.'));
   }
 }
