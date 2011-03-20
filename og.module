@@ -473,6 +473,7 @@ function og_entity_presave($entity, $type) {
           $item += array(
             'state' => OG_STATE_ACTIVE,
             'created' => time(),
+            'user request' => '',
             'membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
             'membership type fields' => array(),
           );
@@ -481,7 +482,7 @@ function og_entity_presave($entity, $type) {
             'entity' => $entity,
             'group' => $group,
             'state' => $item['state'],
-            'user request' => '',
+            'user request' => $item['user request'],
             'membership type' => $item['membership type'],
             'membership type fields' => $item['membership type fields'],
             'created' => $item['created'],
