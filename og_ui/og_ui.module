@@ -570,7 +570,7 @@ function _group_ui_user_operations_set_state($gid, $uids, $state) {
   $accounts = user_load_multiple($uids);
   foreach ($accounts as $account) {
     $values = array('entity' => $account, 'state' => $state);
-    og_group($gid, 'user', $values);
+    og_group($gid, $values);
   }
 }
 
