@@ -186,6 +186,20 @@ function og_ui_menu() {
 }
 
 /**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function og_ui_ctools_plugin_directory($module, $plugin) {
+  // Safety: go away if CTools is not at an appropriate version.
+  if (!module_invoke('ctools', 'api_version', OG_MIGRATE_REQUIRED_CTOOLS_API)) {
+    return;
+  }
+
+  if ($module == 'ctools' || $module == 'og_migrate') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
  * Implements hook_admin_paths().
  */
 function og_ui_admin_paths() {

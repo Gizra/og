@@ -74,8 +74,8 @@ define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
 /**
  * Implements hook_help().
  */
-function og_help($section, $arg) {
-  switch ($section) {
+function og_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#og':
       $path = drupal_get_path('module', 'og');
       $output  = '<p>' . t("Read the <a href='@url'>README.txt</a> file in the Organic groups module directory.", array('@url' => "/$path/README.txt")) . '</p>';
@@ -117,14 +117,19 @@ function og_entity_info() {
     'bundle of' => 'og_membership',
     'module' => 'og',
     'access callback' => 'og_membership_type_access',
-    // Enable the entity API's admin UI.
-    'admin ui' => array(
-      // TODO: This path doesn't exist before OG-ui.
-      'path' => 'admin/config/group/group-membership',
-      'file' => 'includes/og.admin.inc',
-      'controller class' => 'OgMembershipTypeUIController',
-    ),
   );
+
+  if (class_exists('EntityAPIController') && class_exists('OgMembershipTypeUIController')) {
+    $items['og_membership_type'] += array(
+      // Enable the entity API's admin UI.
+      'admin ui' => array(
+        // TODO: This path doesn't exist before OG-ui.
+        'path' => 'admin/config/group/group-membership',
+        'file' => 'includes/og.admin.inc',
+        'controller class' => 'OgMembershipTypeUIController',
+      ),
+    );
+  }
 
   $items['og_membership'] = array(
     'label' => t('Organic groups membership'),
@@ -152,14 +157,11 @@ function og_entity_info() {
  * Implements hook_entity_info_alter().
  *
  * Use this hook to specify bundles to avoid a recursion, as loading the entity
- * message types needs the entity info too.
+ * group membership types needs the entity info too.
  */
 function og_entity_info_alter(&$entity_info) {
-  if (variable_get('og_upgrade_7001', FALSE) == FALSE) {
-    // FIXME:
-    // When running tests the og_membership_type table might not exist yet
-    // @see OgUpgradePath7001TestCase::testOgUpgrade().
-    // We need to find a better solution for this hack.
+  // If we're updating, the schema may not be ready yet.
+  if (!class_exists('EntityAPIController') || !class_exists('OgMembershipTypeUIController')) {
     return;
   }
   $og_membership_types = entity_load('og_membership_type');
@@ -293,12 +295,9 @@ function og_group_get_properties($group, array $options, $name) {
  * Implements hook_modules_enabled().
  */
 function og_modules_enabled($modules) {
-  // Make sure we already have the Drupal 7 tables.
-  if (module_exists('og') && db_table_exists('og') && db_field_exists('og', 'gid')) {
-    foreach ($modules as $module) {
-      // Add default roles and permissions, if existing and not set yet.
-      og_set_global_access_module($module);
-    }
+  foreach ($modules as $module) {
+    // Add default roles and permissions, if existing and not set yet.
+    og_set_global_access_module($module);
   }
 }
 
@@ -319,7 +318,7 @@ function og_ctools_plugin_directory($module, $plugin) {
     return;
   }
 
-  if ($module == 'ctools') {
+  if ($module == 'ctools' || $module == 'og_migrate') {
     return 'plugins/' . $plugin;
   }
 }
@@ -1008,8 +1007,8 @@ function og_membership_load_multiple($ids = array(), $conditions = array(), $res
  */
 function og_get_group_membership($gid, $entity_type, $etid) {
   $return = &drupal_static(__FUNCTION__, array());
-  $identifier = $entity_type . ':' . $etid . ':' . $gid;
-  if (empty($return[$identifier])) {
+  $identifier = $gid . ':' . $entity_type . ':' . $etid;
+  if (!isset($return[$identifier])) {
     $query = new EntityFieldQuery();
     $result = $query
       ->entityCondition('entity_type', 'og_membership')
@@ -1736,6 +1735,7 @@ function og_node_type_save($bundle_name) {
  */
 function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE)) {
   $groups = &drupal_static(__FUNCTION__, array());
+
   if ($entity_type == 'user' && empty($entity)) {
     global $user;
     $entity = clone $user;
@@ -2120,7 +2120,7 @@ function og_get_global_roles() {
 }
 
 /**
- * Get ar if default roles, keyed by their declaring module.
+ * Get arary of default roles, keyed by their declaring module.
  */
 function og_get_default_roles($include = TRUE) {
   $roles = array();
@@ -2252,14 +2252,11 @@ function og_create_global_role($name) {
  * @param $include
  *   Optional; If TRUE also anonymous or authenticated role ID will be returned.
  *   Defaults to TRUE.
- * @param $states
- *   Optional; Array with the state to return. If empty groups of all state will
- *   return.
  *
  * @return
  *   Array with the role IDs of the user.
  */
-function og_get_user_roles($gid, $uid = NULL, $include = TRUE, $states = array(OG_STATE_ACTIVE)) {
+function og_get_user_roles($gid, $uid = NULL, $include = TRUE) {
   $roles = array();
 
   if (empty($uid)) {
@@ -2274,7 +2271,7 @@ function og_get_user_roles($gid, $uid = NULL, $include = TRUE, $states = array(O
     $group_roles = og_roles($query_gid);
     $account = user_load($uid);
 
-    $name = og_is_member($gid, 'user', $account, $states) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
+    $name = og_is_member($gid, 'user', $account) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
     $rid = array_search($name, $group_roles);
     $roles[$rid] = $rid;
   }
@@ -2881,4 +2878,29 @@ function og_node_create_links($gid, $destination = '') {
     }
   }
   return $element;
+}
+
+/**
+ * Flag / unflag the node access grants for rebuilding, or read the current
+ * value of the flag.
+ *
+ * When the flag is set, a message is displayed to users with 'access
+ * administration pages' permission, pointing to the 'og-migrate' confirm form
+ * in the og-migrate module.
+ *
+ * @param $migrate
+ *   (Optional) The boolean value to be written.
+  * @return
+ *   (If no value was provided for $migrate) The current value of the flag.
+ */
+function og_needs_migrate($migrate = NULL) {
+  if (!isset($migrate)) {
+    return variable_get('og_needs_migrate', FALSE);
+  }
+  elseif ($migrate) {
+    variable_set('og_needs_migrate', TRUE);
+  }
+  else {
+    variable_del('og_needs_migrate');
+  }
 }

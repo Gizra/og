@@ -136,26 +136,40 @@ class OgUiUpgradePathTestCase extends UpgradePathTestCase {
       drupal_get_path('module', 'og_ui') . '/tests/drupal-6.og-ui.database.php',
     );
     parent::setUp();
+    $this->performUpgrade();
+
+    // og_update_7001 required Entity module to be enabled, so we enable the
+    // modules an re-run upgrade.
+    // TODO: Understand why this workround is needed to load all entity classes.
+    module_enable(array('entity'));
+    module_load_include('inc', 'entity' ,'includes/entity');
+    module_load_include('inc', 'entity' ,'includes/entity.controller');
+    module_enable(array('og_migrate', 'og_ui'));
+
+    // Rebuild menu so og-migrate items are added.
+    menu_rebuild();
+
+    // Set small batch sizes, so we can simulate upgrade with many records.
+    variable_set('og_update_batch_size', 3);
+    $this->drupalLogout();
+    $admin_user = $this->drupalCreateUser(array('access administration pages'));
+    $this->drupalLogin($admin_user);
+
+    // Make sure Organic group fields are recognized by the field system.
+    _field_info_collate_fields(TRUE);
+    _field_info_collate_types(TRUE);
   }
 
   /**
    * Test a successful upgrade.
    */
   public function testOgUiUpgrade() {
-    // The upgrade should "fail" since OG won't upgrade until it's enabled.
-    $this->performUpgrade(FALSE);
-
-    // TODO: Understand why this workround is needed to load all entity classes.
-    module_enable(array('entity'));
-    module_load_include('inc', 'entity' ,'includes/entity');
-    module_load_include('inc', 'entity' ,'includes/entity.controller');
-    module_enable(array('og_ui'));
-
-    // TODO: Why is this horrible hack needed?
-    include_once DRUPAL_ROOT . '/includes/install.inc';
-    drupal_set_installed_schema_version('og_ui', 6999);
-
-    $this->performUpgrade(FALSE);
+    // Run the required migration.
+    $edit = array(
+      'migrate[og_migrate_og_migrate_upgrade_group]' => TRUE,
+      'migrate[og_ui_og_migrate_upgrade_group_visibility]' => TRUE,
+    );
+    $this->drupalPost('admin/config/group/group-migrate', $edit, t('Migrate'));
 
     // Assert according to the scenario Drupal 6's test table dump was created.
     $nodes_info = array(
