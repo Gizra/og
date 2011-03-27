@@ -130,9 +130,13 @@ function og_ui_add_users_validate($form, &$form_state) {
   if (!$account) {
     form_set_error('og_add_user', t('You have entered an invalid user name.'));
   }
-  // @see entity_form_field_validate()
-  $dummy_entity = (object) $form_state['values']['membership_fields'];
+  // @see entity_form_field_validate().
+  $dummy_entity = new stdClass();
+  if (!empty($form_state['values']['membership_fields'])) {
+    $dummy_entity = (object) $form_state['values']['membership_fields'];
+  }
   $dummy_entity->name = $form_state['values']['og_add_user_membership_type'];
+
   field_attach_form_validate('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
 }
 
