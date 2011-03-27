@@ -20,12 +20,6 @@ define('OG_MIGRATE_EXECUTED', 1);
  */
 define('OG_MIGRATE_FAILED', 2);
 
-
-/**
- * Minimum CTools API version.
- */
-define('OG_MIGRATE_REQUIRED_CTOOLS_API', '2.0-alpha');
-
 /**
  * Implements hook_menu().
  */

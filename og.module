@@ -7,6 +7,11 @@
 
 define('OG_REQUIRED_CTOOLS_API', '2.0-alpha');
 
+/**
+ * Minimum CTools API version for organic groups migrate plugins.
+ */
+define('OG_MIGRATE_REQUIRED_CTOOLS_API', '2.0-alpha');
+
 // Load all Field module hooks for Organic groups.
 require(drupal_get_path('module', 'og') . '/og.field.inc');
 
