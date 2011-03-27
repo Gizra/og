@@ -479,7 +479,7 @@ function og_entity_presave($entity, $type) {
             'created' => time(),
             'user request' => '',
             'membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
-            'membership type fields' => array(),
+            'membership fields' => array(),
           );
           $values = array(
             'entity type' => $type,
@@ -488,7 +488,7 @@ function og_entity_presave($entity, $type) {
             'state' => $item['state'],
             'user request' => $item['user request'],
             'membership type' => $item['membership type'],
-            'membership type fields' => $item['membership type fields'],
+            'membership fields' => $item['membership fields'],
             'created' => $item['created'],
           );
           module_invoke_all('og_group_' . $op, $values);
@@ -513,8 +513,8 @@ function og_entity_insert($entity, $type) {
     // Create group membership for each group the new entity belongs to.
     list($id) = entity_extract_ids($type, $entity);
     foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
-      $item += array('membership type' => '', 'membership type fields' => array());
-      $group_membership = og_membership_create($item['gid'], $type, $id, array('membership type' => $item['membership type'], 'membership type fields' => $item['membership type fields']));
+      $item += array('membership type' => '', 'membership fields' => array());
+      $group_membership = og_membership_create($item['gid'], $type, $id, array('membership type' => $item['membership type'], 'membership fields' => $item['membership fields']));
       $group_membership->save();
     }
   }
@@ -526,7 +526,7 @@ function og_entity_insert($entity, $type) {
 function og_og_group_insert($values = array()) {
   // Create a new group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
-  $group_membership = og_membership_create($values['group']->gid, $values['entity type'], $id, array('state' => $values['state'], 'membership type' => $values['membership type'], 'membership type fields' => $values['membership type fields']));
+  $group_membership = og_membership_create($values['group']->gid, $values['entity type'], $id, array('state' => $values['state'], 'membership type' => $values['membership type'], 'membership fields' => $values['membership fields']));
   $group_membership->save();
 }
 
@@ -954,11 +954,11 @@ function og_membership_create($gid, $entity_type, $etid, $values = array()) {
     unset($values['membership type']);
   }
 
-  if (!empty($values['membership type fields'])) {
-    foreach ($values['membership type fields'] as $field_name => $value) {
+  if (!empty($values['membership fields'])) {
+    foreach ($values['membership fields'] as $field_name => $value) {
       $values[$field_name] = $value;
     }
-    unset($values['membership type fields']);
+    unset($values['membership fields']);
   }
 
 
@@ -1468,7 +1468,7 @@ function og_group($gid, $values = array()) {
     'force reload' => TRUE,
     'user request' => '',
     'membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
-    'membership type fields' => array(),
+    'membership fields' => array(),
     'created' => time(),
   );
 
@@ -1504,7 +1504,7 @@ function og_group($gid, $values = array()) {
         'created' => $values['created'],
         'user request' => $values['user request'],
         'membership type' => $values['membership type'],
-        'membership type fields' => $values['membership type fields'],
+        'membership fields' => $values['membership fields'],
       );
       $wrapper[] = $field_values;
     }
@@ -1528,7 +1528,7 @@ function og_group($gid, $values = array()) {
           'state' => $state,
           'user request' => $values['user request'],
           'membership type' => $values['membership type'],
-          'membership type fields' => $values['membership type fields'],
+          'membership fields' => $values['membership fields'],
         );
         $entity->{$property}[LANGUAGE_NONE][] = $field_values;
       }

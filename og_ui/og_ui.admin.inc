@@ -86,7 +86,23 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
       '#options' => $options,
       '#default_value' => 'OG_MEMBERSHIP_TYPE_DEFAULT',
       '#description' => t('Select the group membership type of the membership.'),
+      '#ajax' => array(
+        'callback' => 'og_ui_admin_add_user_ajax_callback',
+        'wrapper' => 'og-ui-membership-type',
+      ),
     );
+
+    // Add group membership form.
+    $name = !empty($form_state['values']['og_add_user_membership_type']) ? $form_state['values']['og_add_user_membership_type'] : 'og_membership_default';
+    $dummy_entity = og_membership_create(0, 'user', 0, array('name' => $name));
+    $form['membership_fields'] = array(
+      '#prefix' => '<div id="og-ui-membership-type">',
+      '#suffix' => '</div>',
+      '#tree' => TRUE,
+      '#parents' => array('membership_fields'),
+    );
+    field_attach_form('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
+
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Add users'));
 
@@ -97,6 +113,16 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
 }
 
 /**
+ * AJAX callback to attach the group membership type fields to the form.
+ *
+ * Since the controlling logic for populating the form is in the form builder
+ * function, all we do here is select the element and return it to be updated.
+ */
+function og_ui_admin_add_user_ajax_callback(array $form, array &$form_state) {
+  return $form['membership_fields'];
+}
+
+/**
  * Validate handler; Add users to group.
  */
 function og_ui_add_users_validate($form, &$form_state) {
@@ -104,6 +130,10 @@ function og_ui_add_users_validate($form, &$form_state) {
   if (!$account) {
     form_set_error('og_add_user', t('You have entered an invalid user name.'));
   }
+  // @see entity_form_field_validate()
+  $dummy_entity = (object) $form_state['values']['membership_fields'];
+  $dummy_entity->name = $form_state['values']['og_add_user_membership_type'];
+  field_attach_form_validate('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
 }
 
 /**
@@ -112,11 +142,14 @@ function og_ui_add_users_validate($form, &$form_state) {
 function og_ui_add_users_submit($form, &$form_state) {
   $account = user_load_by_name($form_state['values']['og_add_user']);
 
+  $form_state['values'] += array('membership_fields' => array());
+
   $values = array(
     // Entity type is user by default.
     'entity' => $account,
     'state' => $form_state['values']['og_add_user_state'],
     'membership type' => $form_state['values']['og_add_user_membership_type'],
+    'membership fields' => $form_state['values']['membership_fields']
   );
   og_group($form_state['values']['group']->gid, $values);
   drupal_set_message(t('%user has been added to group.', array('%user' => $account->name)));
