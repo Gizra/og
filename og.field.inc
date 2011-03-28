@@ -140,7 +140,22 @@ function og_field_widget_settings_form($field, $instance) {
   $settings = array_merge($defaults, $widget['settings']);
   $form = array();
 
-  if ($widget['type'] == OG_AUDIENCE_AUTOCOMPLETE_WIDGET) {
+  if ($widget['type'] == OG_AUDIENCE_WIDGET) {
+
+    $form['opt_group'] = array(
+      '#type' => 'radios',
+      '#title' => t('Input type'),
+      '#description' => t('Select the input type that should be used to get the groups audience. Note that the <em>Never show "other groups"</em> option will show all groups including the ones the user is a not a member of.'),
+      '#options' => array(
+        'auto' => t('Automatically decide the input according to user permissions (Recommended)'),
+        'never' => t('Never show "other groups"'),
+        'always' => t('Always show "other groups"'),
+      ),
+      '#default_value' => $settings['opt_group'],
+      '#required' => TRUE,
+    );
+  }
+  elseif ($widget['type'] == OG_AUDIENCE_AUTOCOMPLETE_WIDGET) {
     $form['autocomplete_match'] = array(
       '#type'             => 'select',
       '#title'            => t('Autocomplete matching'),
