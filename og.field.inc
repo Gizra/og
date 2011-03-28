@@ -105,8 +105,6 @@ function og_field_widget_info() {
       'label' => t('Group audience'),
       'settings' => array(
         'opt_group' => 'auto',
-        'minimum_for_select_list' => 20,
-        'minimum_for_autocomplete' => 50,
       ),
       'field types' => array('group'),
       'behaviors' => array(
@@ -114,8 +112,6 @@ function og_field_widget_info() {
       ),
       'settings' => array(
         'opt_group' => 'auto',
-        'minimum_for_select_list' => 20,
-        'minimum_for_autocomplete' => 50,
       ),
     ),
     OG_AUDIENCE_AUTOCOMPLETE_WIDGET => array(
