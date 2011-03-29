@@ -36,9 +36,9 @@ function og_register_og_audience_options_alter(&$options, $opt_group, $account) 
 }
 
 /**
- * Implement og_fields_info().
+ * Implements og_fields_info().
  */
-function og_register_group_fields_info() {
+function og_register_og_fields_info() {
   $allowed_values = array(
     0 => 'Do not show on registration page',
     1 => 'Show on registration page',
@@ -54,7 +54,7 @@ function og_register_group_fields_info() {
       'settings' => array('allowed_values' => $allowed_values, 'allowed_values_function' => ''),
     ),
     'instance' => array(
-      'label' => t('Groups register'),
+      'label' => t('Group register'),
       'default_value' => array(0 => array('value' => 0)),
       'widget_type' => 'options_select',
       'view modes' => array(
