@@ -196,6 +196,24 @@ function hook_og_user_access_alter(&$perm, $context) {
   }
 }
 
+/**
+ * Alter the groups audience fields options.
+ *
+ * @param $options
+ *   All the groups in the site divided into the "content groups" array and
+ *   "other groups" array.
+ * @param $opt_group
+ *   TRUE if the user should see also "other groups" options.
+ * @param $account
+ *   The user object for which the field is built.
+ */
+function og_register_og_audience_options_alter(&$options, &$opt_group, $account) {
+  // Hide every group from the user.
+  if ($account->uid == 5) {
+    $options['content groups'] = array();
+  }
+}
+
 
 /**
  * @} End of "addtgrouproup hooks".

@@ -550,11 +550,14 @@ function og_field_audience_options($opt_group = FALSE, $account = NULL) {
   $content_groups = og_get_entity_groups('user', $account);
   $return['content groups'] = $content_groups;
 
-  if ($opt_group) {
-    // Get all existing group.
-    $all_groups = og_get_all_group();
-    $return['other groups'] = array_diff($all_groups, $content_groups);
-  }
+  // Get all other groups.
+  $all_groups = og_get_all_group();
+  $return['other groups'] = array_diff($all_groups, $content_groups);
+
+  // Allow other modules to change the audience options. While it can be done
+  // via hook_form_alter(), it will require other modules to know too much of
+  // the internal work.
+  drupal_alter('og_audience_options', $return, $opt_group, $account);
 
   return $return;
 }
