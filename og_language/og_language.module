@@ -58,7 +58,7 @@ function og_language_language_negotiation_info() {
     'weight' => -5,
     'name' => t('Group'),
     'description' => t("Follow the Group context's language preference."),
-    'file' => drupal_get_path('module', 'og_language') .'/group_language.module',
+    'file' => drupal_get_path('module', 'og_language') . '/og_language.module',
   );
 
   return $providers;
