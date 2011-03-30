@@ -77,6 +77,11 @@ define('OG_ADMINISTRATOR_ROLE', 'administrator member');
 define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
 
 /**
+ * The name of the user's request field in the default group membership type.
+ */
+define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
+
+/**
  * Implements hook_help().
  */
 function og_help($path, $arg) {
@@ -185,7 +190,7 @@ function og_entity_info_alter(&$entity_info) {
 }
 
 /**
- * Implementation of hook_default_og_membership_type().
+ * Implements hook_default_og_membership_type().
  */
 function og_default_og_membership_type() {
   $items = array();
@@ -895,11 +900,6 @@ function og_membership_type_access($op, $entity, $account = NULL, $entity_type =
  */
 class EntityOgMembership extends Entity {
   public function __construct(array $values = array(), $entityType = NULL) {
-    $values += array(
-      'name' => OG_MEMBERSHIP_TYPE_DEFAULT,
-      'state' => OG_STATE_ACTIVE,
-      'created' => time(),
-    );
     parent::__construct($values, 'og_membership');
   }
 
@@ -961,6 +961,11 @@ function og_membership_create($gid, $entity_type, $etid, $values = array()) {
     unset($values['membership fields']);
   }
 
+  $values += array(
+    'name' => OG_MEMBERSHIP_TYPE_DEFAULT,
+    'state' => OG_STATE_ACTIVE,
+    'created' => time(),
+  );
 
   $return = entity_create('og_membership', $values);
   return $return;
@@ -1745,7 +1750,6 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
     global $user;
     $entity = clone $user;
   }
-
   // Get the entity ID.
   list($id) = entity_extract_ids($entity_type, $entity);
 
@@ -1756,26 +1760,24 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
   }
 
   $entity = og_load_entity($entity_type, $entity);
-  $groups[$entity_type][$id] = array();
+  $groups = array();
   $groups['__info'][$entity_type][$id]['states'] = $states;
-  if (!empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
-    $query = new EntityFieldQuery();
-    $result = $query
-      ->entityCondition('entity_type', 'og_membership')
-      ->propertyCondition('entity_type', $entity_type, '=')
-      ->propertyCondition('etid', $id, '=')
-      ->propertyCondition('state', $states, 'IN')
-      ->execute();
-    if (!empty($result['og_membership'])) {
-      // Get the group ID from the group membership.
-      $group_memberships = og_membership_load_multiple(array_keys($result['og_membership']));
-      foreach ($group_memberships as $group_membership) {
-        $groups[$entity_type][$id][$group_membership->gid] = $group_membership->gid;
-      }
+  $query = new EntityFieldQuery();
+  $result = $query
+    ->entityCondition('entity_type', 'og_membership')
+    ->propertyCondition('entity_type', $entity_type, '=')
+    ->propertyCondition('etid', $id, '=')
+    ->propertyCondition('state', $states, 'IN')
+    ->execute();
+  if (!empty($result['og_membership'])) {
+    // Get the group ID from the group membership.
+    $group_memberships = og_membership_load_multiple(array_keys($result['og_membership']));
+    foreach ($group_memberships as $group_membership) {
+      $groups[$entity_type][$id][$group_membership->gid] = $group_membership->gid;
     }
   }
 
-  return $groups[$entity_type][$id];
+  return !empty($groups[$entity_type][$id]) ? $groups[$entity_type][$id] : array();
 }
 
 /**
