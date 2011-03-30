@@ -93,7 +93,7 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
     );
 
     // Add group membership form.
-    $name = !empty($form_state['values']['og_add_user_membership_type']) ? $form_state['values']['og_add_user_membership_type'] : 'og_membership_default';
+    $name = !empty($form_state['values']['og_add_user_membership_type']) ? $form_state['values']['og_add_user_membership_type'] : OG_MEMBERSHIP_TYPE_DEFAULT;
     $dummy_entity = og_membership_create(0, 'user', 0, array('name' => $name));
     $form['membership_fields'] = array(
       '#prefix' => '<div id="og-ui-membership-type">',

@@ -69,15 +69,43 @@ function og_ui_subscribe($entity_type, $etid, $uid = NULL) {
 function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
   $form['group'] = array('#type' => 'value', '#value' => $group);
   $form['account'] = array('#type' => 'value', '#value' => $account);
-  if (!og_user_access($group->gid, 'subscribe without approval')) {
-    $form['request'] = array(
-      '#type' => 'textarea',
-      '#title' => t('Additional details'),
-      '#description' => t('Add any detail which will help an administrator decide whether to approve or deny your membership request.')
-    );
+
+  // Add group membership form.
+  // TODO: We need to associate a group membership with group?
+  $name = OG_MEMBERSHIP_TYPE_DEFAULT;
+  $form['membership_type'] = array('#type' => 'value', '#value' => $name);
+  $dummy_entity = og_membership_create(0, 'user', 0, array('name' => $name));
+  $form['membership_fields'] = array(
+    '#prefix' => '<div id="og-ui-membership-type">',
+    '#suffix' => '</div>',
+    '#tree' => TRUE,
+    '#parents' => array('membership_fields'),
+  );
+  field_attach_form('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
+
+  if (og_user_access($group->gid, 'subscribe without approval')) {
+    // Hide the user request field.
+    if (!empty($form['membership_fields'][OG_MEMBERSHIP_REQUEST_FIELD])) {
+      $form['membership_fields'][OG_MEMBERSHIP_REQUEST_FIELD]['#access'] = FALSE;
+    }
   }
+
   $label = og_label($group->gid);
   return confirm_form($form, t('Are you sure you want to join the group %title?', array('%title' => $label)), "$group->entity_type/$group->etid", ' ', t('Join'), t('Cancel'));
+}
+
+/**
+ * Submit handler; Confirm OG membership.
+ */
+function og_ui_confirm_subscribe_validate($form, &$form_state) {
+  // @see entity_form_field_validate().
+  $dummy_entity = new stdClass();
+  if (!empty($form_state['values']['membership_fields'])) {
+    $dummy_entity = (object) $form_state['values']['membership_fields'];
+  }
+  $dummy_entity->name = $form_state['values']['membership_type'];
+
+  field_attach_form_validate('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
 }
 
 /**
@@ -88,9 +116,12 @@ function og_ui_confirm_subscribe_submit($form, &$form_state) {
   $account = $form_state['values']['account'];
 
   $state = og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
-  // Pass the user's request to the grouping action.
-  $form_state['values'] += array('request' => '');
-  $values = array('entity' => $account, 'state' => $state, 'user request' => $form_state['values']['request']);
+  $values = array(
+    'entity' => $account,
+    'state' => $state,
+    'membership type' => $form_state['values']['membership_type'],
+    'membership fields' => $form_state['values']['membership_fields'],
+  );
   og_group($group->gid, $values);
 
   // Redirect.
@@ -110,19 +141,19 @@ function og_ui_unsubscribe($entity_type, $etid) {
     global $user;
     $label = og_label($group->gid);
     // Check the user isn't the manager of the group.
-    $entity= entity_load($group->entity_type, array($group->etid));
-    $entity = reset($entity);
-    if (!empty($entity->uid) && $entity->uid != $user->uid) {
-      $user_groups = og_get_entity_groups('user', $user);
-      if (!empty($user_groups[$group->gid])) {
+    $manager = $group->user();
+    if ($manager->uid != $user->uid) {
+      $account = clone $user;
+      if (og_is_member($group->gid, 'user', $account, array(OG_STATE_ACTIVE, OG_STATE_PENDING))) {
         // Show the user a subscription confirmation.
-        return drupal_get_form('og_ui_confirm_unsubscribe', $group, $user);
+        return drupal_get_form('og_ui_confirm_unsubscribe', $group, $account);
       }
     }
     else {
       drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $label)));
     }
-    _group_ui_redirect($entity_type, $entity);
+    $entity= $group->getEntity();
+    _group_ui_redirect($group->entity_type, $entity);
   }
   // Not a valid group.
   drupal_not_found();
