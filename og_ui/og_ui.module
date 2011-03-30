@@ -6,7 +6,7 @@
  */
 
 /**
- * Implement hook_menu().
+ * Implements hook_menu().
  */
 function og_ui_menu() {
   $items = array();
@@ -186,7 +186,7 @@ function og_ui_menu() {
 }
 
 /**
- * Implementation of hook_ctools_plugin_directory().
+ * Implements hook_ctools_plugin_directory().
  */
 function og_ui_ctools_plugin_directory($module, $plugin) {
   // Safety: go away if CTools is not at an appropriate version.
@@ -235,6 +235,15 @@ function og_ui_theme() {
   );
 }
 
+/**
+ * Implements hook_og_fields_info_alter().
+ *
+ * Change the default formatter of the group field.
+ */
+function og_ui_og_fields_info_alter(&$items) {
+  $items[OG_GROUP_FIELD]['instance']['display']['default']['type'] = 'og_group_subscribe';
+}
+
 
 /**
  * Implement hook_field_formatter_info().
@@ -281,6 +290,22 @@ function og_ui_field_attach_form($entity_type, $entity, &$form, $form_state, $la
   }
 }
 
+/**
+ * Implements hook_og_user_access_alter().
+ *
+ * Add a permission to pending users to unsubscribe form group.
+ */
+function og_ui_og_user_access_alter(&$perms, $context) {
+  if ($context['string'] == 'unsubscribe' && empty($perm['unsubscribe'])) {
+    // Check user's state.
+    $state = og_get_entity_state($context['group']->gid, 'user', $context['account']);
+    if ($state == OG_STATE_PENDING) {
+      // Allow user to unsubscribe.
+      $perms['unsubscribe'] = TRUE;
+    }
+  }
+}
+
 
 /**
  * Return a subscribe link according to user's permissions.
@@ -309,14 +334,9 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
       );
     }
     else {
-      // check the user state.
-      if ($state = og_get_entity_state($group->gid, 'user', $account)) {
-
-        if ($state == OG_STATE_PENDING && og_user_access($group->gid, 'subscribe')) {
-          $links['title'] = t('Re-request group membership');
-          $links['href'] = "group/$entity_type/$id/subscribe";
-        }
-        elseif ($state == OG_STATE_ACTIVE && og_user_access($group->gid, 'unsubscribe', $account)) {
+      // Check if the user is a group member.
+      if (og_is_member($group->gid, 'user', $account, array(OG_STATE_ACTIVE, OG_STATE_PENDING))) {
+        if (og_user_access($group->gid, 'unsubscribe', $account)) {
           $links['title'] = t('Unsubscribe from group');
           $links['href'] = "group/$entity_type/$id/unsubscribe";
         }
