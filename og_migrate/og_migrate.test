@@ -102,11 +102,7 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
     // Assert users.
     $values = array(
       // Uid 3 is the group manager, so in OG6 it was marked as admin.
-      // FIXME: When we try to query user ID 3 by passing
-      // og_get_group_membership($group->gid, 'user', 3)
-      // we get a very strange response, that doesn't happen if we disable the
-      // testogMigrateUpgradeGroup test.
-      // 3 => array('admin' => TRUE),
+      3 => array('admin' => TRUE),
       4 => array('active' => FALSE),
       5 => array(),
       6 => array('active' => FALSE, 'admin' => TRUE),
