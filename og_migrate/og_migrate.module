@@ -92,6 +92,90 @@ function og_migrate_init() {
 }
 
 /**
+ * Get a list of plugin names by dependencies.
+ *
+ * @param $plugins_name
+ *
+ * @return
+ *   Array with the plugin names sorted, or FALSE if no plugins are accessible.
+ */
+function og_migrate_get_plugins_dependencies($plugins_name) {
+  // Get all module data so we can find dependencies and sort.
+  $plugins_data = og_migrate_build_dependencies();
+  // Create an associative array with weights as values.
+  $plugins_name = array_flip(array_values($plugins_name));
+
+  $plugins_accessible = og_migrate_get_accessible_plugins();
+
+  while (list($plugin_name) = each($plugins_name)) {
+    if (!isset($plugins_data[$plugin_name])) {
+      // This plugin is not found, abort.
+      return FALSE;
+    }
+
+    // TODO: Check access.
+    if (empty($plugins_accessible[$plugin_name])) {
+      // Skip plugin that has no access.
+      unset($plugins_name[$plugin_name]);
+    }
+
+    $plugins_name[$plugin_name] = $plugins_data[$plugin_name]['sort'];
+
+    // Add dependencies to the list, with a placeholder weight.
+    // The new modules will be processed as the while loop continues.
+    foreach (array_keys($plugins_data[$plugin_name]['requires']) as $dependency) {
+      if (!isset($plugins_name[$dependency])) {
+        $plugins_name[$dependency] = 0;
+      }
+    }
+  }
+
+  if (!$plugins_name) {
+    // Nothing to do, plugins are not accessible.
+    return FALSE;
+  }
+
+  // Sort the module list by pre-calculated weights.
+  arsort($plugins_name);
+  $plugins_name = array_keys($plugins_name);
+  return $plugins_name;
+}
+
+/**
+ * Find dependencies any level deep and fill in required by information too.
+ *
+ * @param $files
+ *   The array of filesystem objects used to rebuild the cache.
+ *
+ * @return
+ *   The same array with the new keys for each module:
+ *   - requires: An array with the keys being the modules that this module
+ *     requires.
+ *   - required_by: An array with the keys being the modules that will not work
+ *     without this module.
+ */
+function og_migrate_build_dependencies() {
+  require_once DRUPAL_ROOT . '/includes/graph.inc';
+  $plugins = og_migrate_get_plugins();
+  foreach ($plugins as $plugin_name => $plugin) {
+    $graph[$plugin_name]['edges'] = array();
+    if (isset($plugin['dependencies']) && is_array($plugin['dependencies'])) {
+      foreach ($plugin['dependencies'] as $dependency) {
+        $graph[$plugin_name]['edges'][$dependency] = $dependency;
+      }
+    }
+  }
+
+  drupal_depth_first_search($graph);
+  foreach ($graph as $plugin_name => $data) {
+    $plugins[$plugin_name]['required_by'] = isset($data['reverse_paths']) ? $data['reverse_paths'] : array();
+    $plugins[$plugin_name]['requires'] = isset($data['paths']) ? $data['paths'] : array();
+    $plugins[$plugin_name]['sort'] = $data['weight'];
+  }
+  return $plugins;
+}
+
+/**
  * Register plugins that are not in the database yet.
  */
 function og_migrate_register_plugins() {
@@ -144,7 +228,6 @@ function og_migrate_write_record($name, $status = OG_MIGRATE_EXECUTED) {
 function og_migrate_process(&$plugin, $info) {
   $plugin += array(
     'description' => '',
-    'dependency' => array(),
     'access callback' => TRUE,
   );
 }
@@ -175,7 +258,7 @@ function og_migrate_get_plugins() {
  * @return
  *   Array with plugins. If no plugins are valid, return empty array.
  */
-function og_migrate_get_accessibale_plugins() {
+function og_migrate_get_accessible_plugins() {
   $plugins = array();
   foreach (og_migrate_get_plugins() as $name => $plugin) {
     if ($plugin['access callback'] === TRUE || call_user_func($plugin['access callback'])) {
@@ -200,7 +283,7 @@ function og_migrate_7000_access() {
 function og_migrate_admin() {
   $form = array();
 
-  $plugins = og_migrate_get_accessibale_plugins();
+  $plugins = og_migrate_get_accessible_plugins();
 
   if ($plugins) {
     $header = array(
@@ -222,7 +305,7 @@ function og_migrate_admin() {
 
     $options = array();
     foreach ($plugins as $name => $plugin) {
-      $options[$plugin['migrate callback']] = array(
+      $options[$name] = array(
         'name' => filter_xss($plugin['name']),
         'description' => filter_xss($plugin['description']),
         'status' => $status_map[$status[$name]],
@@ -251,13 +334,8 @@ function og_migrate_admin() {
  * TODO: Add dependency tree.
  */
 function og_migrate_admin_submit($form, &$form_state) {
-  if ($callbacks = array_filter($form_state['values']['migrate'])) {
-    $operations = array();
-    foreach ($callbacks as $callback) {
-      $operations[] = array($callback, array());
-    }
-
-    og_migrate_batch($operations);
+  if ($plugins_name = array_filter($form_state['values']['migrate'])) {
+    og_migrate_batch($plugins_name);
   }
 }
 
@@ -265,19 +343,17 @@ function og_migrate_admin_submit($form, &$form_state) {
 /**
  * Helper function to create a batch.
  */
-function og_migrate_batch($operations) {
-  // Add the executed plugins information.
-  // Get an array keyed with the plugin callback and the plugin name as the
-  // value.
-  $plugins_callbacks = array();
-  foreach (og_migrate_get_plugins() as $name => $plugin) {
-    $plugins_callbacks[$plugin['migrate callback']] = $name;
+function og_migrate_batch($plugins_name) {
+  $plugins_name = og_migrate_get_plugins_dependencies($plugins_name);
+
+  if (!$plugins_name) {
+    return;
   }
 
-  $plugins = array();
-  foreach ($operations as $operation) {
-    $callback = $operation[0];
-    $plugins[] = $plugins_callbacks[$callback];
+  // Add the operations.
+  $plugins = og_migrate_get_plugins();
+  foreach ($plugins_name as $plugin_name) {
+    $operations[] = array($plugins[$plugin_name]['migrate callback'], array());
   }
 
   $batch = array(
@@ -289,7 +365,7 @@ function og_migrate_batch($operations) {
     'error_message' => t('Organic groups migration has encountered an error.'),
     // This is our own key, used to retrieve the list of plugins that were
     // called.
-    'og_migrate_plugins' => $plugins,
+    'og_migrate_plugins' => $plugins_name,
   );
 
   batch_set($batch);
@@ -366,7 +442,7 @@ function og_migrate_create_fields() {
  */
 function og_migrate_finished($success, $results, $operations) {
   $batch = batch_get();
-  $plugins = $batch['sets'][0]['og_migrate_plugins'];
+  $plugins_name = $batch['sets'][0]['og_migrate_plugins'];
   if ($success) {
     $message = format_plural(count($results), 'One post processed.', '@count posts processed.');
     $status = OG_MIGRATE_EXECUTED;
@@ -380,8 +456,8 @@ function og_migrate_finished($success, $results, $operations) {
   // TODO: This is not correct, as if there will be an error then all we be set
   // to failed.
   // Set the status in the database.
-  foreach ($plugins as $plugin) {
-    og_migrate_write_record($plugin, $status);
+  foreach ($plugins_name as $plugin_name) {
+    og_migrate_write_record($plugin_name, $status);
   }
 
   if (!empty($results)) {
@@ -404,3 +480,4 @@ function og_migrate_status() {
     OG_MIGRATE_FAILED => t('Executed but failed'),
   );
 }
+

@@ -7,7 +7,7 @@ $plugin = array(
   'name' => t('User relation to group'),
   'access callback' => 'og_migrate_7000_access',
   'migrate callback' => 'og_migrate_og_migrate_upgrade_user',
-  'dependency' => array('upgrade_group'),
+  'dependencies' => array('upgrade_group'),
 );
 
 /**

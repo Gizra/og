@@ -6,7 +6,6 @@
 $plugin = array(
   'name' => t('Group'),
   'access callback' => 'og_migrate_7000_access',
-  'dependency' => array('og_migrate_set_global_access'),
   'migrate callback' => 'og_migrate_og_migrate_upgrade_group',
 );
 

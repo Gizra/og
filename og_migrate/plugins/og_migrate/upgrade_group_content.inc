@@ -8,7 +8,7 @@ $plugin = array(
   'description' => t('Upgrade group content'),
   'access callback' => 'og_migrate_7000_access',
   'migrate callback' => 'og_migrate_og_migrate_upgrade_group_content',
-  'dependency' => array('upgrade_group'),
+  'dependencies' => array('upgrade_group'),
 );
 
 

@@ -1053,7 +1053,12 @@ class OgMigrateGroupMembershipTestCase extends OgUpgradePathTestCase {
       drupal_get_path('module', 'og') . '/tests/drupal-7.og.update_7001.database.php',
     );
     parent::setUp();
-    $this->performUpgrade(FALSE);
+
+    $this->drupalLogout();
+    $admin_user = $this->drupalCreateUser(array('access administration pages', 'administer software updates'));
+    $this->drupalLogin($admin_user);
+
+    $this->performUpgrade();
 
     // TODO: Understand why this workround is needed to load all entity classes.
     module_enable(array('entity'));
@@ -1066,9 +1071,6 @@ class OgMigrateGroupMembershipTestCase extends OgUpgradePathTestCase {
 
     // Set small batch sizes, so we can simulate upgrade with many records.
     variable_set('og_update_batch_size', 3);
-    $this->drupalLogout();
-    $admin_user = $this->drupalCreateUser(array('access administration pages'));
-    $this->drupalLogin($admin_user);
   }
 
   /**
@@ -1077,7 +1079,7 @@ class OgMigrateGroupMembershipTestCase extends OgUpgradePathTestCase {
   public function testOgUpgrade() {
     // Run the required migration.
     $edit = array(
-      'migrate[og_og_migrate_group_membership]' => TRUE,
+      'migrate[group_membership]' => TRUE,
     );
     $this->drupalPost('admin/config/group/group-migrate', $edit, t('Migrate'));
 

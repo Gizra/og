@@ -238,8 +238,8 @@ class OgUiUpgradePathTestCase extends UpgradePathTestCase {
   public function testOgUiUpgrade() {
     // Run the required migration.
     $edit = array(
-      'migrate[og_migrate_og_migrate_upgrade_group]' => TRUE,
-      'migrate[og_ui_og_migrate_upgrade_group_visibility]' => TRUE,
+      'migrate[upgrade_group]' => TRUE,
+      'migrate[upgrade_group_visibility]' => TRUE,
     );
     $this->drupalPost('admin/config/group/group-migrate', $edit, t('Migrate'));
 

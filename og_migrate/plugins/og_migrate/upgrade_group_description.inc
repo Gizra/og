@@ -5,10 +5,9 @@
  */
 $plugin = array(
   'name' => t('Group description'),
-  'dependency' => array('og_migrate_upgrade_group'),
   'access callback' => 'og_migrate_7000_access',
   'migrate callback' => 'og_migrate_og_migrate_upgrade_group_description',
-  'dependency' => array('upgrade_group'),
+  'dependencies' => array('upgrade_group'),
 );
 
 

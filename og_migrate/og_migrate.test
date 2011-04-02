@@ -54,8 +54,8 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
   public function testogMigrateUpgradeGroup() {
     // Run the required migration.
     $edit = array(
-      'migrate[og_migrate_og_migrate_upgrade_group]' => TRUE,
-      'migrate[og_migrate_og_migrate_upgrade_group_content]' => TRUE,
+      'migrate[upgrade_group]' => TRUE,
+      'migrate[upgrade_group_content]' => TRUE,
     );
     $this->drupalPost('admin/config/group/group-migrate', $edit, t('Migrate'));
 
@@ -91,8 +91,8 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
   public function testogMigrateUpgradeUsers() {
     // Run the required migration.
     $edit = array(
-      'migrate[og_migrate_og_migrate_upgrade_group]' => TRUE,
-      'migrate[og_migrate_og_migrate_upgrade_user]' => TRUE,
+      'migrate[upgrade_group]' => TRUE,
+      'migrate[upgrade_user]' => TRUE,
     );
     $this->drupalPost('admin/config/group/group-migrate', $edit, t('Migrate'));
 
@@ -146,8 +146,8 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
   public function testogMigrateUpgradeGroupDescription() {
     // Run the required migration.
     $edit = array(
-      'migrate[og_migrate_og_migrate_upgrade_group]' => TRUE,
-      'migrate[og_migrate_og_migrate_upgrade_group_description]' => TRUE,
+      'migrate[upgrade_group]' => TRUE,
+      'migrate[upgrade_group_description]' => TRUE,
     );
 
     $this->drupalPost('admin/config/group/group-migrate', $edit, t('Migrate'));

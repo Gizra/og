@@ -8,7 +8,7 @@ $plugin = array(
   'description' => t('Upgrade group visibility (e.g. open, moderated, closed) from Organic groups 6.'),
   'access callback' => 'og_migrate_7000_access',
   'migrate callback' => 'og_ui_og_migrate_upgrade_group_visibility',
-  'dependency' => array('upgrade_group'),
+  'dependencies' => array('upgrade_group'),
 );
 
 /**
