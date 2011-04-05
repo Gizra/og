@@ -27,6 +27,8 @@ class OgMetadataController extends EntityDefaultMetadataController {
       'required' => TRUE,
     );
 
+    $properties['created']['type'] = 'date';
+
     $properties['state'] += array(
       'setter callback' => 'entity_metadata_verbatim_set',
       'options list' => 'og_group_states',
@@ -39,6 +41,7 @@ class OgMetadataController extends EntityDefaultMetadataController {
       'description' => t("A list of members in group."),
       'getter callback' => 'og_group_get_properties',
     );
+
 
     return $info;
   }
@@ -60,6 +63,8 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       'required' => TRUE,
       'schema field' => 'gid',
     );
+
+    $properties['created']['type'] = 'date';
 
     $properties['state'] += array(
       'setter callback' => 'entity_metadata_verbatim_set',
