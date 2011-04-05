@@ -115,6 +115,28 @@ function og_views_handlers() {
  * Implements hook_views_data_alter().
  */
 function og_views_data_alter(&$data) {
+  $items = module_invoke_all('og_views_relationship');
+
+  foreach ($items as $item) {
+    $entity = entity_get_info($item['entity']);
+    $title = t('@entity group', array('@entity' => ucfirst($entity['label'])));
+    $help = t('Add information on groups that belong to the @entity entity.', array('@entity' => ucfirst($entity['label'])));
+
+    // Add the group relationship.
+    $data[$item['views table']]['og_rel'] = array(
+      'group' => t('Group'),
+      'title' => $title,
+      'help' => $help,
+      'relationship' => array(
+        'entity' => $item['entity'],
+        'handler' => 'og_handler_relationship',
+        'label' => t('group'),
+        'base' => 'og',
+        'base field' => 'etid',
+        'relationship field' => $item['join field'],
+      ),
+    );
+  }
   // TODO: Maybe move field overrides to field_views_data_alter().
   // TODO: Override also field revisions table.
 

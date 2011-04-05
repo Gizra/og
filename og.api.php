@@ -207,13 +207,27 @@ function hook_og_user_access_alter(&$perm, $context) {
  * @param $account
  *   The user object for which the field is built.
  */
-function og_register_og_audience_options_alter(&$options, &$opt_group, $account) {
+function hook_og_audience_options_alter(&$options, &$opt_group, $account) {
   // Hide every group from the user.
   if ($account->uid == 5) {
     $options['content groups'] = array();
   }
 }
 
+ /**
+ * Add relationship information for enteties to the group's etid field.
+ */
+function hook_og_views_relationship() {
+  $items = array();
+
+  // User entity is in table "users" column "uid".
+  $items['user'] = array(
+    'entity' => 'user',
+    'views table' => 'users',
+    'join field' => 'uid',
+  );
+  return $items;
+}
 
 /**
  * @} End of "addtgrouproup hooks".

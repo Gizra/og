@@ -42,7 +42,6 @@ class OgMetadataController extends EntityDefaultMetadataController {
       'getter callback' => 'og_group_get_properties',
     );
 
-
     return $info;
   }
 }
