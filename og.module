@@ -107,6 +107,9 @@ function og_entity_info() {
     'entity keys' => array(
       'id' => 'gid',
     ),
+    'views controller class' => 'OgViewsController',
+    'metadata controller class' => 'OgMetadataController',
+    'module' => 'og',
   );
 
   $items['og_membership_type'] = array(
@@ -158,6 +161,8 @@ function og_entity_info() {
       'bundle' => 'name',
     ),
     'module' => 'og',
+    'metadata controller class' => 'OgMembershipMetadataController',
+    'views controller class' => 'OgMembershipViewsController',
     'access callback' => 'og_membership_access',
   );
   return $items;
@@ -218,68 +223,6 @@ function og_menu() {
 }
 
 /**
- * Implements hook_entity_property_info().
- *
- * Entity metadata hook.
- */
-function og_entity_property_info() {
-  $info = array();
-  $properties = &$info['group']['properties'];
-
-  $properties['gid'] = array(
-    'label' => t("Group ID"),
-    'type' => 'integer',
-    'description' => t("The unique ID of the group."),
-    'required' => TRUE,
-  );
-
-  $properties['etid'] = array(
-    'label' => t("Object ID"),
-    'type' => 'integer',
-    'description' => t("The ID of the entity."),
-    'required' => TRUE,
-  );
-
-  $properties['entity_type'] = array(
-    'label' => t("Object type"),
-    'type' => 'text',
-    'description' => t("The entity type."),
-    'required' => TRUE,
-  );
-
-  $properties['state'] = array(
-    'label' => t("State"),
-    'type' => 'text',
-    'description' => t("The state of the group."),
-    'setter callback' => 'entity_metadata_verbatim_set',
-    'options list' => 'og_group_states',
-  );
-
-  $properties['label'] = array(
-    'label' => t("Label"),
-    'type' => 'text',
-    'description' => t("The label of the entity."),
-    'required' => TRUE,
-  );
-
-  $properties['created'] = array(
-    'label' => t("Date created"),
-    'type' => 'date',
-    'description' => t("The date the group was created."),
-    'setter callback' => 'entity_metadata_verbatim_set',
-  );
-
-  $properties['members'] = array(
-    'label' => t("Members"),
-    'type' => 'list<user>',
-    'description' => t("A list of members in group."),
-    'getter callback' => 'og_group_get_properties',
-  );
-
-  return $info;
-}
-
-/**
  * Property getter callback.
  */
 function og_group_get_properties($group, array $options, $name) {
@@ -331,37 +274,6 @@ function og_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools' || $module == 'og_migrate') {
     return 'plugins/' . $plugin;
   }
-}
-
-/**
- * Implements hook_og_views_relationship().
- *
- * Add relationship information for all core's enteties.
- */
-function og_og_views_relationship() {
-  $items = array();
-
-  $items['node'] = array(
-    'entity' => 'node',
-    'views table' => 'node',
-    'join field' => 'nid',
-  );
-
-  $items['comment'] = array(
-    'entity' => 'comment',
-    'views table' => 'comment',
-    'join field' => 'cid',
-  );
-
-  $items['user'] = array(
-    'entity' => 'user',
-    'views table' => 'users',
-    'join field' => 'uid',
-  );
-
-  //TODO: Add all enteties.
-
-  return $items;
 }
 
 /**

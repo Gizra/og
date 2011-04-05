@@ -42,3 +42,5 @@ features[rules_config][] = "rules_member_unsubscribe"
 
 ; Entity API controllers.
 files[] = includes/og.admin.inc
+files[] = includes/og.info.inc
+files[] = includes/og.views.inc
