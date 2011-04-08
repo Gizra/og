@@ -1,8 +1,0 @@
-; $Id:$
-name = Organic groups theme
-description = "Associate theme to a group."
-package = "Organic groups"
-dependencies[] = og_context
-core = 7.x
-files[] = og_theme.module
-files[] = og_theme.install
