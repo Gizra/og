@@ -516,6 +516,7 @@ function og_og_group_delete($values = array()) {
 
 /**
  * Get the difference in group audience for a presaved entity.
+ *
  * @param $entity
  *   The presaved entity (i.e. with "original" key holding the unchanged
  *   entity).
@@ -898,7 +899,7 @@ function og_membership_create($gid, $entity_type, $etid, $values = array()) {
   // key error.
   if (og_get_group_membership($gid, $entity_type, $etid)) {
     $group = og_label($gid);
-    throw new Exception('Group membership for entity ' . check_plain($entity_type) . ' with ID ' . check_plain($etid) . ' for group ' . $group . 'already exists.');
+    throw new Exception('Group membership for entity ' . check_plain($entity_type) . ' with ID ' . check_plain($etid) . ' for group ID ' . $gid . ' (' . $group . ') already exists.');
   }
   $values['entity_type'] = $entity_type;
   $values['etid'] = $etid;
