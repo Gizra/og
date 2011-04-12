@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * og_example.pages_default.inc
+ */
 
 /**
  * Implementation of hook_default_page_manager_handlers().
