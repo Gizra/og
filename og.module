@@ -882,7 +882,6 @@ function og_membership_create($gid, $entity_type, $etid, $values = array()) {
   // Make sure the group membership doesn't already exist, to prevent duplicate
   // key error.
   if (og_get_group_membership($gid, $entity_type, $etid)) {
-    $account = user_load($uid);
     $group = og_label($gid);
     throw new Exception('Group membership for entity ' . check_plain($entity_type) . ' with ID ' . check_plain($etid) . ' for group ' . $group . 'already exists.');
   }
