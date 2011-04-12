@@ -30,7 +30,7 @@ function og_example_default_page_manager_handlers() {
         'identifier' => 'Group from node',
         'keyword' => 'group',
         'name' => 'og_group_from_node',
-        'context' => 'argument_nid_1',
+        'context' => 'argument_entity_id:node_1',
         'id' => 1,
       ),
     ),
@@ -41,7 +41,7 @@ function og_example_default_page_manager_handlers() {
           'settings' => array(
             'is_group_content' => '1',
           ),
-          'context' => 'argument_nid_1',
+          'context' => 'argument_entity_id:node_1',
           'not' => FALSE,
         ),
       ),
@@ -90,30 +90,6 @@ function og_example_default_page_manager_handlers() {
     $pane = new stdClass;
     $pane->pid = 'new-2';
     $pane->panel = 'right';
-    $pane->type = 'entity_field';
-    $pane->subtype = 'node:group_group';
-    $pane->shown = TRUE;
-    $pane->access = array();
-    $pane->configuration = array(
-      'label' => '',
-      'formatter' => 'og_group_subscribe',
-      'formatter_settings' => array(),
-      'context' => 'argument_nid_1',
-      'override_title' => 0,
-      'override_title_text' => '',
-    );
-    $pane->cache = array();
-    $pane->style = array(
-      'settings' => NULL,
-    );
-    $pane->css = array();
-    $pane->extras = array();
-    $pane->position = 0;
-    $display->content['new-2'] = $pane;
-    $display->panels['right'][0] = 'new-2';
-    $pane = new stdClass;
-    $pane->pid = 'new-3';
-    $pane->panel = 'right';
     $pane->type = 'node_create_links';
     $pane->subtype = 'node_create_links';
     $pane->shown = TRUE;
@@ -129,11 +105,11 @@ function og_example_default_page_manager_handlers() {
     );
     $pane->css = array();
     $pane->extras = array();
-    $pane->position = 1;
-    $display->content['new-3'] = $pane;
-    $display->panels['right'][1] = 'new-3';
+    $pane->position = 0;
+    $display->content['new-2'] = $pane;
+    $display->panels['right'][0] = 'new-2';
     $pane = new stdClass;
-    $pane->pid = 'new-4';
+    $pane->pid = 'new-3';
     $pane->panel = 'right';
     $pane->type = 'views_panes';
     $pane->subtype = 'og_members-panel_pane_1';
@@ -145,6 +121,30 @@ function og_example_default_page_manager_handlers() {
       ),
       'override_title' => 1,
       'override_title_text' => 'Members',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 1;
+    $display->content['new-3'] = $pane;
+    $display->panels['right'][1] = 'new-3';
+    $pane = new stdClass;
+    $pane->pid = 'new-4';
+    $pane->panel = 'right';
+    $pane->type = 'entity_field';
+    $pane->subtype = 'node:group_group';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'label' => '',
+      'formatter' => 'og_group_subscribe',
+      'formatter_settings' => array(),
+      'context' => 'argument_entity_id:node_1',
+      'override_title' => 1,
+      'override_title_text' => '',
     );
     $pane->cache = array();
     $pane->style = array(
@@ -166,7 +166,7 @@ function og_example_default_page_manager_handlers() {
       'label' => '',
       'formatter' => 'text_default',
       'formatter_settings' => array(),
-      'context' => 'argument_nid_1',
+      'context' => 'argument_entity_id:node_1',
       'override_title' => 1,
       'override_title_text' => '',
     );
