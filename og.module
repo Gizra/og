@@ -468,6 +468,21 @@ function og_entity_insert($entity, $type) {
 }
 
 /**
+ * Implements hook_entity_delete().
+ *
+ * Delete group membership of deleted entity.
+ */
+function og_entity_delete($entity, $type) {
+  if (!empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
+    list($id) = entity_extract_ids($type, $entity);
+    foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
+      $group_membership = og_get_group_membership($item['gid'], $type, $id);
+      $group_membership->delete();
+    }
+  }
+}
+
+/**
  * Implements hook_og_group_insert().
  */
 function og_og_group_insert($values = array()) {

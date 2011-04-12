@@ -400,7 +400,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
 /**
  * Test group membership handeling.
  */
-class OgGroupMEmbership extends DrupalWebTestCase {
+class OgGroupMembership extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
@@ -490,6 +490,12 @@ class OgGroupMEmbership extends DrupalWebTestCase {
 
     $group_membership = og_get_group_membership($group->gid, 'node', $node->nid);
     $this->assertTrue($group_membership, t('New group content has group membership in group.'));
+
+    // Delete group content.
+    $nid = $node->nid;
+    node_delete($nid);
+    $group_membership = og_get_group_membership($group->gid, 'node', $nid);
+    $this->assertFalse($group_membership, t('Group membership was deleted for deleted group content.'));
 
     // Delete group.
     $gid = $group->gid;
