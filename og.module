@@ -95,6 +95,14 @@ function og_help($path, $arg) {
 }
 
 /**
+ * Getter callback for the 'etid' property.
+ */
+function og_entity_getter($group) {
+  // We have to return the entity wrapped.
+  return entity_metadata_wrapper($group->entity_type, $group->etid);
+}
+
+/**
  * Implements hook_entity_info().
  */
 function og_entity_info() {
@@ -241,6 +249,12 @@ function og_group_get_properties($group, array $options, $name) {
         }
       }
       return $return;
+      break;
+
+    case 'url':
+      $wrapper = entity_metadata_wrapper('group', $group);
+      return $wrapper->entity->url->value();
+      break;
   }
 }
 

@@ -20,7 +20,14 @@ class OgMetadataController extends EntityDefaultMetadataController {
       'type' => 'group',
     );
 
-    $properties['etid'] += array(
+    unset($properties['etid']);
+    $properties['entity'] = array(
+      'label' => t('Entity'),
+      'type' => 'entity',
+      'description' => t('The entity that is a group.'),
+      'getter callback' => 'og_entity_getter',
+      // TODO:
+      // 'setter callback' => 'field_collection_item_set_host_entity',
       'required' => TRUE,
     );
 
@@ -43,6 +50,13 @@ class OgMetadataController extends EntityDefaultMetadataController {
       'getter callback' => 'og_group_get_properties',
     );
 
+    $properties['url'] = array(
+      'label' => t('URL'),
+      'type' => 'uri',
+      'description' => t("The URL to the entity that is a group."),
+      'getter callback' => 'og_group_get_properties',
+    );
+
     return $info;
   }
 }
@@ -56,12 +70,28 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 
+    unset($properties['gid']);
     $properties['group'] = array(
       'label' => t("Group"),
       'type' => 'group',
       'description' => t("The group associated with the group membership."),
       'required' => TRUE,
       'schema field' => 'gid',
+    );
+
+    unset($properties['etid']);
+    $properties['entity'] = array(
+      'label' => t('Entity'),
+      'type' => 'entity',
+      'description' => t('The entity that is a group.'),
+      'getter callback' => 'og_entity_getter',
+      // TODO:
+      // 'setter callback' => 'field_collection_item_set_host_entity',
+      'required' => TRUE,
+    );
+
+    $properties['entity_type'] += array(
+      'required' => TRUE,
     );
 
     $properties['created']['type'] = 'date';
