@@ -1278,7 +1278,7 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
   // for the cache.
   if (!empty($gids[$entity_type])) {
     if ($query_etids !== FALSE) {
-      $query_etids = array_diff($query_etids, $gids[$entity_type]);
+      $query_etids = array_diff($query_etids, array_flip($gids[$entity_type]));
 
       if (!$query_etids) {
         return array_intersect_key($gids[$entity_type], drupal_map_assoc($etids));
@@ -1286,12 +1286,13 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
     }
   }
 
-  // Check if we need to query all group, and if this was already cached.
+  // Check if we need to query all group enteties, and if this was already
+  // cached.
   if ($query_etids === FALSE && $gids['__info'][$entity_type]['query all']) {
     return $gids[$entity_type];
   }
 
-  // Don't query if we already have already queried all.
+  // Don't query if we have already queried all.
   if (empty($gids['__info'][$entity_type]['query all'])) {
 
     if (!empty($query_etids) && $entity_type == 'node' && module_exists('translation')) {
