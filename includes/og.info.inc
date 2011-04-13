@@ -17,6 +17,7 @@ class OgMetadataController extends EntityDefaultMetadataController {
 
     $properties['gid'] += array(
       'required' => TRUE,
+      'type' => 'group',
     );
 
     $properties['etid'] += array(
