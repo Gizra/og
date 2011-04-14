@@ -92,7 +92,12 @@ function og_help($path, $arg) {
       $message = t('Organic groups or one of its modules needs to migrate data.');
     }
     else {
-      $message = t('Organic groups or one of its modules needs to <a href="@url">migrate data</a>.', array('@url' => url('admin/config/group/group-migrate')));
+      if (module_exists('og_migrate')) {
+        $message = t('Organic groups or one of its modules needs to <a href="@url">migrate data</a>.', array('@url' => url('admin/config/group/group-migrate')));
+      }
+      else {
+        $message = t('Organic groups or one of its modules needs you to enable Organic groups migrate module.');
+      }
     }
     drupal_set_message($message, 'error');
   }
