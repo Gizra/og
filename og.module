@@ -85,6 +85,18 @@ define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
  * Implements hook_help().
  */
 function og_help($path, $arg) {
+  // Provide messages for og-migrate module.
+  if ($path != 'admin/config/group/group-migrate' && $path != 'batch' && strpos($path, '#') === FALSE
+      && user_access('access administration pages') && og_needs_migrate()) {
+    if ($path == 'admin/reports/status') {
+      $message = t('Organic groups or one of its modules needs to migrate data.');
+    }
+    else {
+      $message = t('Organic groups or one of its modules needs to <a href="@url">migrate data</a>.', array('@url' => url('admin/config/group/group-migrate')));
+    }
+    drupal_set_message($message, 'error');
+  }
+
   switch ($path) {
     case 'admin/help#og':
       $path = drupal_get_path('module', 'og');

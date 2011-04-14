@@ -60,22 +60,6 @@ function og_migrate_ctools_plugin_type() {
 }
 
 /**
- * Implements hook_help().
- */
-function og_migrate_help($path, $arg) {
-  if ($path != 'admin/config/group/group-migrate' && $path != 'batch' && strpos($path, '#') === FALSE
-      && user_access('access administration pages') && og_needs_migrate()) {
-    if ($path == 'admin/reports/status') {
-      $message = t('Organic groups or one of its modules needs to migrate data.');
-    }
-    else {
-      $message = t('Organic groups or one of its modules needs to <a href="@url">migrate data</a>.', array('@url' => url('admin/config/group/group-migrate')));
-    }
-    drupal_set_message($message, 'error');
-  }
-}
-
-/**
  * Implements hook_init().
  */
 function og_migrate_init() {
