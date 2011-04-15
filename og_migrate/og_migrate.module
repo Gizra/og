@@ -84,10 +84,13 @@ function og_migrate_init() {
    // Load all the plugins, so it will work in the batch.
    og_migrate_get_plugins();
   }
-  elseif (!og_needs_migrate() && user_access('access administration pages') && flood_is_allowed('og_migrate_warning', 1)) {
+  elseif ((!og_needs_migrate() || !og_migrate_register_plugins())
+    && user_access('access administration pages') && flood_is_allowed('og_migrate_warning', 1)) {
     flood_register_event('og_migrate_warning');
-    drupal_set_message(t('Organic groups migrate should be disabled when not in use.'), 'status');
+    og_needs_migrate(FALSE);
+    drupal_set_message(t('There are no pending migration plugins that need to be executed. You can disable Organic groups module.'));
   }
+
   og_migrate_register_plugins();
 }
 
@@ -267,6 +270,33 @@ function og_migrate_get_accessible_plugins() {
   }
 
   return $plugins;
+}
+
+/**
+ * Return TRUE if there are pending migration plugins.
+ */
+function og_migrate_is_pending() {
+  $plugins = og_migrate_get_accessible_plugins();
+
+  if (!$plugins) {
+    return FALSE;
+  }
+
+  $plugin_names = array();
+  foreach ($plugins as $name => $plugin) {
+    $plugin_names[] = $name;
+  }
+
+  // Check if the plugins are already executed.
+  $query = db_select('og_migrate', 'ogm');
+  $result = $query->fields('ogm', array('plugin'))
+    ->condition('plugin', $plugin_names, 'IN')
+    ->condition('status', OG_MIGRATE_EXECUTED, '!=')
+    ->countQuery()
+    ->execute()
+    ->fetchField();
+
+  return (bool) $result;
 }
 
 /**
