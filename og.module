@@ -547,41 +547,30 @@ function og_entity_presave_group_audience_diff($entity, $type) {
 
   $return = array('insert' => array(), 'update' => array(), 'delete' => array());
   $entity_original = $entity->original;
-  if ($entity_original->{OG_AUDIENCE_FIELD} != $entity->{OG_AUDIENCE_FIELD}) {
-    // Compare arrays. For simplicity we split the cases for when the original
-    // entity has more groups than the entity.
-    $original_count = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
-    $count = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
-    if ($original_count > $count) {
-      $first_array = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array();
-      $second_array = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array() ;
+  $new_gids = array ();
+  $original_gids = array ();
 
-      foreach ($first_array as $key => $value) {
-        if (empty($second_array[$key])) {
-          // Content was removed from group.
-          $return['delete'][] = $first_array[$key];
-        }
-        elseif ($first_array[$key] != $second_array[$key]) {
-          // Content state was updated.
-          $return['update'][] = $second_array[$key];
-        }
+  if (isset($entity->{OG_AUDIENCE_FIELD}) && isset($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])){
+    foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
+      $new_gids[$item['gid']] = $item;
+    }
+  }
+
+  $original = $entity->original;
+  // See if there are deleted groups.
+  if (isset($original->{OG_AUDIENCE_FIELD}) && isset($original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])){
+    foreach ($original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
+      $gid = $item['gid'];
+      $original_gids[$gid] = $item;
+      if (empty($new_gids[$gid])) {
+        $return['delete'][] = $item;
       }
     }
-    else {
-      $first_array = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array();
-      $second_array = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array();
+  }
 
-      foreach ($first_array as $key => $value) {
-        if (empty($second_array[$key])) {
-          // Content was added to group.
-          $return['insert'][] = $first_array[$key];
-        }
-        elseif ($first_array[$key] != $second_array[$key]) {
-          // Content state was updated.
-          $return['update'][] = $first_array[$key];
-        }
-      }
-    }
+  // See if there are new or updated groups.
+  foreach ($new_gids as $gid => $item) {
+    $return[isset($original_gids[$gid]) ? 'update' : 'insert'][] = $item;
   }
   return $return;
 }
