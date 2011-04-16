@@ -453,13 +453,6 @@ function og_entity_presave($entity, $type) {
             'created' => $item['created'],
           );
           module_invoke_all('og_group_' . $op, $values);
-          // TODO: Can we invoke rule also when type is not user? Currently in
-          // rules event info we define the account argument -- can this be any
-          // entity?
-          if ($type == 'user' && module_exists('rules')) {
-            $hook = $op == 'delete' ? 'og_ungroup' : 'og_group';
-            rules_invoke_event($hook, $account, $group, $item['state'], $item['user request']);
-          }
         }
       }
     }

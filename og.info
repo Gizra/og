@@ -36,9 +36,8 @@ files[] = includes/views/og_handler_relationship.inc
 files[] = includes/views/og_handler_argument_group_audience_gid.inc
 
 ; Rules integration.
-features[rules_config][] = "rules_member_subscribe"
-features[rules_config][] = "rules_member_subscribe_pending"
-features[rules_config][] = "rules_member_unsubscribe"
+features[rules_config][] = "rules_og_member_active"
+features[rules_config][] = "rules_og_member_pending"
 
 ; Entity API controllers.
 files[] = includes/og.admin.inc

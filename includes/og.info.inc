@@ -100,7 +100,7 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
 
     $properties['state'] += array(
       'setter callback' => 'entity_metadata_verbatim_set',
-      'options list' => 'og_group_states',
+      'options list' => 'og_group_content_states',
     );
 
     return $info;
