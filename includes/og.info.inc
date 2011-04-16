@@ -33,6 +33,7 @@ class OgMetadataController extends EntityDefaultMetadataController {
 
     $properties['entity_type'] += array(
       'required' => TRUE,
+      'options list' => 'og_get_fieldable_entity_list',
     );
 
     $properties['created']['type'] = 'date';
@@ -92,6 +93,7 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
 
     $properties['entity_type'] += array(
       'required' => TRUE,
+      'options list' => 'og_get_fieldable_entity_list',
     );
 
     $properties['created']['type'] = 'date';

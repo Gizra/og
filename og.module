@@ -2751,6 +2751,23 @@ function og_group_content_states() {
 }
 
 /**
+ * Return a list of fieldable enteties.
+ *
+ * @return
+ *  Array keyed with the entity machine name and the saniztized human name as
+ *  the value.
+ */
+function og_get_fieldable_entity_list() {
+  $return = array();
+  foreach (entity_get_info() as $name => $info) {
+    $return[$name] = check_plain($info['label']);
+  }
+
+  return $return;
+}
+
+
+/**
  * Wrapper function for entity_label() to return some text if label isn't found.
  *
  * @param $entity_type
