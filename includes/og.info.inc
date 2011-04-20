@@ -20,7 +20,6 @@ class OgMetadataController extends EntityDefaultMetadataController {
       'type' => 'group',
     );
 
-    unset($properties['etid']);
     $properties['entity'] = array(
       'label' => t('Entity'),
       'type' => 'entity',
@@ -81,7 +80,6 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       'schema field' => 'gid',
     );
 
-    unset($properties['etid']);
     $properties['entity'] = array(
       'label' => t('Entity'),
       'type' => 'entity',
