@@ -35,6 +35,39 @@ function og_context_theme() {
 }
 
 /**
+ * Implements hook_entity_property_info().
+ *
+ * Add the current-group to the system token (i.e. like current-user).
+ */
+function og_context_entity_property_info() {
+  $info = array();
+
+  $properties = &$info['site']['properties'];
+  $properties['current_group'] = array(
+    'label' => t("Current group"),
+    'description' => t("The group from context, if exists."),
+    'getter callback' => 'og_context_get_properties',
+    'type' => 'group',
+  );
+  return $info;
+}
+
+/**
+ * Property getter callback.
+ */
+function og_context_get_properties($data = array(), array $options, $name, $type) {
+  switch ($name) {
+    case 'current_group':
+      // Get the current group.
+      //@code
+      //$wrapper = entity_metadata_site_wrapper();
+      //wrapper->current_group->value()
+      //@endcode
+      return og_context();
+  }
+}
+
+/**
  * Implement hook_preprocess_html().
  *
  * HTML preprocess; Add context related templates and CSS.
