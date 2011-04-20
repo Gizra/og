@@ -77,6 +77,7 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       'type' => 'group',
       'description' => t("The group associated with the group membership."),
       'required' => TRUE,
+      'getter callback' => 'entity_property_getter_method',
       'schema field' => 'gid',
     );
 

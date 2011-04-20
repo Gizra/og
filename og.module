@@ -112,14 +112,6 @@ function og_help($path, $arg) {
 }
 
 /**
- * Getter callback for the 'etid' property.
- */
-function og_entity_getter($group) {
-  // We have to return the entity wrapped.
-  return entity_metadata_wrapper($group->entity_type, $group->etid);
-}
-
-/**
  * Implements hook_entity_info().
  */
 function og_entity_info() {
@@ -220,6 +212,71 @@ function og_entity_info_alter(&$entity_info) {
 }
 
 /**
+ * Implements hook_entity_property_info().
+ *
+ * Add group-membership metadata for every fieldable entity that is a group
+ * content type.
+ */
+function og_entity_property_info() {
+  $info = array();
+  foreach (og_get_all_group_content_entity() as $entity_type => $name) {
+    $info[$entity_type]['properties']['og_membership'] = array(
+      'label' => t("Group memberships"),
+      'type' => 'list<og_membership>',
+      'description' => t("A list of all group membership of the @name entity.", array('@name' => $name)),
+      'getter callback' => 'og_group_get_properties',
+    );
+  }
+  return $info;
+}
+
+/**
+ * Property getter callback.
+ */
+function og_group_get_properties($entity, array $options, $name, $type) {
+  switch ($name) {
+    case 'members':
+      $return = array();
+      if (!empty($entity->gid)) {
+        $query = new EntityFieldQuery();
+        $query
+          ->entityCondition('entity_type', 'user')
+          ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', $entity->gid, '=');
+
+        $result = $query->execute();
+        if (!empty($result['user'])) {
+          $return = array_keys($result['user']);
+        }
+      }
+      return $return;
+
+    case 'og_membership':
+      list($id) = entity_extract_ids($type, $entity);
+      $query = new EntityFieldQuery();
+      $result = $query
+        ->entityCondition('entity_type', 'og_membership')
+        ->propertyCondition('entity_type', $type, '=')
+        ->propertyCondition('etid', $id, '=')
+        // ->propertyCondition('state', $states, 'IN')
+        ->execute();
+
+      return !empty($result['og_membership']) ? array_keys($result['og_membership']) : array();
+
+    case 'url':
+      $wrapper = entity_metadata_wrapper('group', $entity);
+      return $wrapper->entity->url->value();
+  }
+}
+
+/**
+ * Getter callback for the 'etid' property of a group membership.
+ */
+function og_entity_getter($group) {
+  // We have to return the entity wrapped.
+  return entity_metadata_wrapper($group->entity_type, $group->etid);
+}
+
+/**
  * Implements hook_default_og_membership_type().
  */
 function og_default_og_membership_type() {
@@ -245,34 +302,6 @@ function og_menu() {
     'type' => MENU_CALLBACK
   );
   return $items;
-}
-
-/**
- * Property getter callback.
- */
-function og_group_get_properties($group, array $options, $name) {
-  switch ($name) {
-    case 'members':
-      $return = array();
-      if (!empty($group->gid)) {
-        $query = new EntityFieldQuery();
-        $query
-          ->entityCondition('entity_type', 'user')
-          ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', $group->gid, '=');
-
-        $result = $query->execute();
-        if (!empty($result['user'])) {
-          $return = array_keys($result['user']);
-        }
-      }
-      return $return;
-      break;
-
-    case 'url':
-      $wrapper = entity_metadata_wrapper('group', $group);
-      return $wrapper->entity->url->value();
-      break;
-  }
 }
 
 /**
@@ -882,6 +911,13 @@ class EntityOgMembership extends Entity {
   public function delete() {
     parent::delete();
     og_group_membership_invalidate_cache();
+  }
+
+  /**
+   * Return the group assocaited with the group membership.
+   */
+  public function group() {
+    return og_load($this->gid);
   }
 }
 
@@ -1812,6 +1848,31 @@ function og_get_all_group_entity() {
     if (!empty($entity_value['fieldable'])) {
       foreach ($entity_value['bundles'] as $bundle => $bundle_value) {
         if (og_is_group_type($entity_type, $bundle)) {
+          $return[$entity_type] = check_plain($entity_value['label']);
+          // At least one bundle of the entity can be a group, so break.
+          break;
+        }
+      }
+    }
+  }
+  return $return;
+}
+
+/**
+ * Return all the enteties that are a group content.
+ *
+ * @return
+ *   Array keyed with the entity type machine name and the entity human readable
+ *   name as the value, or an empty array if no enteties are defined as group
+ *   content.
+ */
+function og_get_all_group_content_entity() {
+  $return = array();
+
+  foreach (entity_get_info() as $entity_type => $entity_value) {
+    if (!empty($entity_value['fieldable'])) {
+      foreach ($entity_value['bundles'] as $bundle => $bundle_value) {
+        if (og_is_group_content_type($entity_type, $bundle)) {
           $return[$entity_type] = check_plain($entity_value['label']);
           // At least one bundle of the entity can be a group, so break.
           break;
