@@ -224,7 +224,7 @@ function og_entity_property_info() {
       'label' => t("Group memberships"),
       'type' => 'list<og_membership>',
       'description' => t("A list of all group membership of the @name entity.", array('@name' => $name)),
-      'getter callback' => 'og_group_get_properties',
+      'getter callback' => 'og_get_properties',
     );
   }
   return $info;
@@ -233,7 +233,7 @@ function og_entity_property_info() {
 /**
  * Property getter callback.
  */
-function og_group_get_properties($entity, array $options, $name, $type) {
+function og_get_properties($entity, array $options, $name, $type) {
   switch ($name) {
     case 'members':
       $return = array();

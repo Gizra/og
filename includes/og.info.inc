@@ -48,14 +48,14 @@ class OgMetadataController extends EntityDefaultMetadataController {
       'label' => t("Members"),
       'type' => 'list<user>',
       'description' => t("A list of members in group."),
-      'getter callback' => 'og_group_get_properties',
+      'getter callback' => 'og_get_properties',
     );
 
     $properties['url'] = array(
       'label' => t('URL'),
       'type' => 'uri',
       'description' => t("The URL to the entity that is a group."),
-      'getter callback' => 'og_group_get_properties',
+      'getter callback' => 'og_get_properties',
     );
 
     return $info;
