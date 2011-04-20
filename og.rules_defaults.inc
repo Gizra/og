@@ -1,78 +1,83 @@
 <?php
+/**
+ * @file
+ * og.rules_defaults.inc
+ */
 
 /**
  * Implementation of hook_default_rules_configuration().
  */
 function og_default_rules_configuration() {
   $items = array();
-  $items['rules_member_subscribe'] = entity_import('rules_config', '{ "rules_member_subscribe" : {
-      "LABEL" : "OG - Member subscribe",
+  $items['rules_og_member_active'] = entity_import('rules_config', '{ "rules_og_member_active" : {
+      "LABEL" : "OG member subscribe (Active)",
       "PLUGIN" : "reaction rule",
       "REQUIRES" : [ "rules", "og" ],
-      "ON" : [ "og_group" ],
-      "IF" : [ { "data_is" : { "data" : [ "state" ], "value" : "active" } } ],
+      "ON" : [ "og_membership_insert" ],
+      "IF" : [
+        { "data_is" : { "data" : [ "og-membership:entity-type" ], "value" : "user" } },
+        { "data_is" : { "data" : [ "og-membership:state" ], "value" : "1" } }
+      ],
       "DO" : [
+        { "entity_fetch" : {
+            "USING" : { "type" : "user", "id" : [ "og-membership:etid" ] },
+            "PROVIDE" : { "entity_fetched" : { "subscribed_user" : "Subscribed user" } }
+          }
+        },
         { "mail" : {
-            "to" : [ "account:mail" ],
-            "subject" : "Your membership request was approved for \'[group:label]\'",
-            "message" : "[account:name],\\r\\n\\r\\nYou are now a member in the group \'[group:label]\' located at [group:url]",
+            "to" : [ "subscribed-user:mail" ],
+            "subject" : "Your membership request was approved for \'[og-membership:group:label]\'\\r\\n",
+            "message" : "[subscribed_user:name],\\r\\n\\r\\nYou are now a member in the group \'[og-membership:group:label]\' located at [og-membership:group:url]",
+            "from" : ""
+          }
+        },
+        { "og_get_managers_from_group" : {
+            "USING" : { "group" : [ "og-membership:group" ] },
+            "PROVIDE" : { "group_manager" : { "group_manager" : "Group manager" } }
+          }
+        },
+        { "mail" : {
+            "to" : [ "group-manager:mail" ],
+            "subject" : "[subscribed_user:name] joined [og_membership:group:label]",
+            "message" : "[group_manager:name],\\r\\n\\r\\n[subscribed_user:name] joined [og_membership:group:label] in [og_membership:group:url]",
             "from" : ""
           }
         }
       ]
     }
   }');
-  $items['rules_member_subscribe_pending'] = entity_import('rules_config', '{ "rules_member_subscribe_pending" : {
-      "LABEL" : "OG - Member subscribe (pending approval)",
+
+  $items['rules_og_member_pending'] = entity_import('rules_config', '{ "rules_og_member_pending" : {
+      "LABEL" : "OG member subscribe (Pending)",
       "PLUGIN" : "reaction rule",
       "REQUIRES" : [ "rules", "og" ],
-      "ON" : [ "og_group" ],
-      "IF" : [ { "data_is" : { "data" : [ "state" ], "value" : "pending" } } ],
+      "ON" : [ "og_membership_insert" ],
+      "IF" : [
+        { "data_is" : { "data" : [ "og-membership:entity-type" ], "value" : "user" } },
+        { "data_is" : { "data" : [ "og-membership:state" ], "value" : "2" } }
+      ],
       "DO" : [
+        { "entity_fetch" : {
+            "USING" : { "type" : "user", "id" : [ "og-membership:etid" ] },
+            "PROVIDE" : { "entity_fetched" : { "subscribed_user" : "Subscribed user" } }
+          }
+        },
         { "mail" : {
-            "to" : "[account:mail]",
-            "subject" : "Your membership request is pending for \'[group:label]\'",
-            "message" : "[account:name],\\r\\n\\r\\nYour membership to \'[group:label]\' located at [group:url] is pending approval.",
+            "to" : [ "subscribed-user:mail" ],
+            "subject" : "Your membership request for \'[og-membership:group:label]\'\\r\\n",
+            "message" : "[subscribed_user:name],\\r\\n\\r\\nYour membership to group \'[og-membership:group:label]\' located at [og-membership:group:url] is pending approval.",
             "from" : ""
           }
         },
         { "og_get_managers_from_group" : {
-            "USING" : { "group" : [ "group" ] },
+            "USING" : { "group" : [ "og-membership:group" ] },
             "PROVIDE" : { "group_manager" : { "group_manager" : "Group manager" } }
           }
         },
         { "mail" : {
             "to" : [ "group-manager:mail" ],
-            "subject" : "Membership request for \'[group:label]\' from [account:name]",
-            "message" : "[group-manager:name],\\r\\n\\r\\n[account:name] is requesting membership to \'[group:label]\' located at [group:url]\\r\\n\\r\\n!request",
-            "from" : ""
-          }
-        }
-      ]
-    }
-  }');
-  $items['rules_member_unsubscribe'] = entity_import('rules_config', '{ "rules_member_unsubscribe" : {
-      "LABEL" : "OG - Member unsubscribe",
-      "PLUGIN" : "reaction rule",
-      "REQUIRES" : [ "rules", "og" ],
-      "ON" : [ "og_ungroup" ],
-      "DO" : [
-        { "mail" : {
-            "to" : "[account:mail]",
-            "subject" : "You have unsubscribed from \'[group:label]\'",
-            "message" : "[account:name],\\r\\n\\r\\nYou have unsubscribed from \'[group:label]\' located at [group:url]",
-            "from" : ""
-          }
-        },
-        { "og_get_managers_from_group" : {
-            "USING" : { "group" : [ "group" ] },
-            "PROVIDE" : { "group_manager" : { "group_manager" : "Group manager" } }
-          }
-        },
-        { "mail" : {
-            "to" : [ "group-manager:mail" ],
-            "subject" : "[account:name] unsubscribed from \'[group:label]\'",
-            "message" : "[group-manager:name],\\r\\n\\r\\n[account:name] has unsubscribed from \'[group:label]\' located at [group:url]",
+            "subject" : "[subscribed_user:name] membership request [og_membership:group:label]",
+            "message" : "[group_manager:name],\\r\\n\\r\\n[subscribed_user:name] requests membership for group \'[og_membership:group:label]\' in [og_membership:group:url].",
             "from" : ""
           }
         }

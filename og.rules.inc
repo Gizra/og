@@ -9,42 +9,6 @@
  * @{
  */
 
-
-/**
- * Implements hook_rules_event_info().
- */
-function og_rules_event_info() {
-  $items = array();
-  $items['og_group'] = array(
-    'label' => t('After grouping content'),
-    'group' => t('Organic groups'),
-    'variables' => array(
-      'account' => array('type' => 'user', 'label' => t('Subscribing user')),
-      'group' => array('type' => 'group', 'label' => t('Group')),
-      'state' => array(
-        'type' => 'text',
-        'label' => t('The state of the subscription'),
-        'options list' => 'og_group_states',
-      ),
-      'request' => array('type' => 'text', 'label' => t('User request')),
-    ),
-    // TODO:
-    // 'access callback' => 'rules_user_integration_access',
-  );
-
-  $items['og_ungroup'] = array(
-    'label' => t('After ungrouping content'),
-    'group' => t('Organic groups'),
-    'variables' => array(
-      'account' => array('type' => 'user', 'label' => t('Unsubscribing user')),
-      'group' => array('type' => 'group', 'label' => t('Group')),
-    ),
-    // TODO:
-    // 'access callback' => 'rules_user_integration_access',
-  );
-  return $items;
-}
-
 /**
  * Implements hook_rules_action_info().
  */

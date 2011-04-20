@@ -112,6 +112,14 @@ function og_help($path, $arg) {
 }
 
 /**
+ * Getter callback for the 'etid' property.
+ */
+function og_entity_getter($group) {
+  // We have to return the entity wrapped.
+  return entity_metadata_wrapper($group->entity_type, $group->etid);
+}
+
+/**
  * Implements hook_entity_info().
  */
 function og_entity_info() {
@@ -258,6 +266,12 @@ function og_group_get_properties($group, array $options, $name) {
         }
       }
       return $return;
+      break;
+
+    case 'url':
+      $wrapper = entity_metadata_wrapper('group', $group);
+      return $wrapper->entity->url->value();
+      break;
   }
 }
 
@@ -456,13 +470,6 @@ function og_entity_presave($entity, $type) {
             'created' => $item['created'],
           );
           module_invoke_all('og_group_' . $op, $values);
-          // TODO: Can we invoke rule also when type is not user? Currently in
-          // rules event info we define the account argument -- can this be any
-          // entity?
-          if ($type == 'user' && module_exists('rules')) {
-            $hook = $op == 'delete' ? 'og_ungroup' : 'og_group';
-            rules_invoke_event($hook, $account, $group, $item['state'], $item['user request']);
-          }
         }
       }
     }
@@ -550,41 +557,30 @@ function og_entity_presave_group_audience_diff($entity, $type) {
 
   $return = array('insert' => array(), 'update' => array(), 'delete' => array());
   $entity_original = $entity->original;
-  if ($entity_original->{OG_AUDIENCE_FIELD} != $entity->{OG_AUDIENCE_FIELD}) {
-    // Compare arrays. For simplicity we split the cases for when the original
-    // entity has more groups than the entity.
-    $original_count = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
-    $count = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? count($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) : 0;
-    if ($original_count > $count) {
-      $first_array = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array();
-      $second_array = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array() ;
+  $new_gids = array ();
+  $original_gids = array ();
 
-      foreach ($first_array as $key => $value) {
-        if (empty($second_array[$key])) {
-          // Content was removed from group.
-          $return['delete'][] = $first_array[$key];
-        }
-        elseif ($first_array[$key] != $second_array[$key]) {
-          // Content state was updated.
-          $return['update'][] = $second_array[$key];
-        }
+  if (isset($entity->{OG_AUDIENCE_FIELD}) && isset($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])){
+    foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
+      $new_gids[$item['gid']] = $item;
+    }
+  }
+
+  $original = $entity->original;
+  // See if there are deleted groups.
+  if (isset($original->{OG_AUDIENCE_FIELD}) && isset($original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])){
+    foreach ($original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
+      $gid = $item['gid'];
+      $original_gids[$gid] = $item;
+      if (empty($new_gids[$gid])) {
+        $return['delete'][] = $item;
       }
     }
-    else {
-      $first_array = !empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array();
-      $second_array = !empty($entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]) ? $entity_original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] : array();
+  }
 
-      foreach ($first_array as $key => $value) {
-        if (empty($second_array[$key])) {
-          // Content was added to group.
-          $return['insert'][] = $first_array[$key];
-        }
-        elseif ($first_array[$key] != $second_array[$key]) {
-          // Content state was updated.
-          $return['update'][] = $first_array[$key];
-        }
-      }
-    }
+  // See if there are new or updated groups.
+  foreach ($new_gids as $gid => $item) {
+    $return[isset($original_gids[$gid]) ? 'update' : 'insert'][] = $item;
   }
   return $return;
 }
@@ -1295,7 +1291,7 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
   // for the cache.
   if (!empty($gids[$entity_type])) {
     if ($query_etids !== FALSE) {
-      $query_etids = array_diff($query_etids, $gids[$entity_type]);
+      $query_etids = array_diff($query_etids, array_flip($gids[$entity_type]));
 
       if (!$query_etids) {
         return array_intersect_key($gids[$entity_type], drupal_map_assoc($etids));
@@ -1303,12 +1299,13 @@ function og_get_group_ids($entity_type = 'group', $etids = FALSE, $states = arra
     }
   }
 
-  // Check if we need to query all group, and if this was already cached.
+  // Check if we need to query all group enteties, and if this was already
+  // cached.
   if ($query_etids === FALSE && $gids['__info'][$entity_type]['query all']) {
     return $gids[$entity_type];
   }
 
-  // Don't query if we already have already queried all.
+  // Don't query if we have already queried all.
   if (empty($gids['__info'][$entity_type]['query all'])) {
 
     if (!empty($query_etids) && $entity_type == 'node' && module_exists('translation')) {
@@ -2762,6 +2759,23 @@ function og_group_content_states() {
     OG_STATE_BLOCKED => t('Blocked'),
   );
 }
+
+/**
+ * Return a list of fieldable enteties.
+ *
+ * @return
+ *  Array keyed with the entity machine name and the saniztized human name as
+ *  the value.
+ */
+function og_get_fieldable_entity_list() {
+  $return = array();
+  foreach (entity_get_info() as $name => $info) {
+    $return[$name] = check_plain($info['label']);
+  }
+
+  return $return;
+}
+
 
 /**
  * Wrapper function for entity_label() to return some text if label isn't found.
