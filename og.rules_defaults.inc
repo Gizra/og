@@ -46,7 +46,6 @@ function og_default_rules_configuration() {
       ]
     }
   }');
-
   $items['rules_og_member_pending'] = entity_import('rules_config', '{ "rules_og_member_pending" : {
       "LABEL" : "OG member subscribe (Pending)",
       "PLUGIN" : "reaction rule",
@@ -77,8 +76,8 @@ function og_default_rules_configuration() {
         { "mail" : {
             "to" : [ "group-manager:mail" ],
             "subject" : "[subscribed_user:name] membership request [og_membership:group:label]",
-            "message" : "[group_manager:name],\\r\\n\\r\\n[subscribed_user:name] requests membership for group \'[og_membership:group:label]\' in [og_membership:group:url].",
-            "from" : ""
+            "message" : "[group_manager:name],\\r\\n\\r\\n[subscribed_user:name] requests membership for group \'[og_membership:group:label]\' in [og_membership:group:url].\\r\\n\\r\\n[og_membership:og-membership-request]",
+            "from" : [ "" ]
           }
         }
       ]
