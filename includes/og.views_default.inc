@@ -12,7 +12,7 @@ function og_views_default_views() {
   $view->description = 'Show active groups that are nodes';
   $view->tag = 'group';
   $view->base_table = 'node';
-  $view->human_name = '';
+  $view->human_name = 'OG list';
   $view->core = 0;
   $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -243,10 +243,10 @@ function og_views_default_views() {
    */
   $view = new view;
   $view->name = 'og_nodes';
-  $view->description = 'Show all nodes of a group.';
+  $view->description = 'Show all content (nodes) of a group.';
   $view->tag = 'group';
   $view->base_table = 'node';
-  $view->human_name = '';
+  $view->human_name = 'OG content';
   $view->core = 0;
   $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
