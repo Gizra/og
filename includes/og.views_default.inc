@@ -129,12 +129,12 @@ function og_views_default_views() {
   /*
    * View 'og_members'
    */
- $view = new view;
+  $view = new view;
   $view->name = 'og_members';
-  $view->description = 'Newest group members';
-  $view->tag = 'group';
+  $view->description = 'Newest group members.';
+  $view->tag = '';
   $view->base_table = 'users';
-  $view->human_name = '';
+  $view->human_name = 'OG members';
   $view->core = 0;
   $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -150,6 +150,11 @@ function og_views_default_views() {
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'fields';
+  /* Relationship: Group membership: User */
+  $handler->display->display_options['relationships']['og_membership_rel']['id'] = 'og_membership_rel';
+  $handler->display->display_options['relationships']['og_membership_rel']['table'] = 'users';
+  $handler->display->display_options['relationships']['og_membership_rel']['field'] = 'og_membership_rel';
+  $handler->display->display_options['relationships']['og_membership_rel']['required'] = 0;
   /* Field: User: Name */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
@@ -166,39 +171,46 @@ function og_views_default_views() {
   $handler->display->display_options['fields']['name']['empty_zero'] = 0;
   $handler->display->display_options['fields']['name']['link_to_user'] = 1;
   $handler->display->display_options['fields']['name']['overwrite_anonymous'] = 0;
-  /* Sort criterion: Fields: group_audience (group_audience) - created */
-  $handler->display->display_options['sorts']['group_audience_created']['id'] = 'group_audience_created';
-  $handler->display->display_options['sorts']['group_audience_created']['table'] = 'field_data_group_audience';
-  $handler->display->display_options['sorts']['group_audience_created']['field'] = 'group_audience_created';
-  $handler->display->display_options['sorts']['group_audience_created']['order'] = 'DESC';
-  /* Argument: Fields: group_audience (group_audience) - gid */
-  $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
-  $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
-  $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'not found';
-  $handler->display->display_options['arguments']['group_audience_gid']['style_plugin'] = 'default_summary';
-  $handler->display->display_options['arguments']['group_audience_gid']['title'] = '%1 members';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
-  /* Filter: User: Active */
+  /* Sort criterion: Organic groups membership: Created */
+  $handler->display->display_options['sorts']['created']['id'] = 'created';
+  $handler->display->display_options['sorts']['created']['table'] = 'og_membership';
+  $handler->display->display_options['sorts']['created']['field'] = 'created';
+  $handler->display->display_options['sorts']['created']['relationship'] = 'og_membership_rel';
+  $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+  /* Contextual filter: Organic groups membership: Gid */
+  $handler->display->display_options['arguments']['gid']['id'] = 'gid';
+  $handler->display->display_options['arguments']['gid']['table'] = 'og_membership';
+  $handler->display->display_options['arguments']['gid']['field'] = 'gid';
+  $handler->display->display_options['arguments']['gid']['relationship'] = 'og_membership_rel';
+  $handler->display->display_options['arguments']['gid']['default_action'] = 'not found';
+  $handler->display->display_options['arguments']['gid']['title_enable'] = 1;
+  $handler->display->display_options['arguments']['gid']['title'] = '%1 members';
+  $handler->display->display_options['arguments']['gid']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['gid']['default_argument_skip_url'] = 0;
+  $handler->display->display_options['arguments']['gid']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['gid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['gid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['gid']['break_phrase'] = 0;
+  $handler->display->display_options['arguments']['gid']['not'] = 0;
+  /* Filter criterion: User: Active */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'users';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = '1';
-  /* Filter: Fields: group_audience (group_audience) - state */
-  $handler->display->display_options['filters']['group_audience_state']['id'] = 'group_audience_state';
-  $handler->display->display_options['filters']['group_audience_state']['table'] = 'field_data_group_audience';
-  $handler->display->display_options['filters']['group_audience_state']['field'] = 'group_audience_state';
-  $handler->display->display_options['filters']['group_audience_state']['value'] = array(
+  /* Filter criterion: Organic groups membership: State */
+  $handler->display->display_options['filters']['state']['id'] = 'state';
+  $handler->display->display_options['filters']['state']['table'] = 'og_membership';
+  $handler->display->display_options['filters']['state']['field'] = 'state';
+  $handler->display->display_options['filters']['state']['relationship'] = 'og_membership_rel';
+  $handler->display->display_options['filters']['state']['value'] = array(
     1 => '1',
   );
 
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block_1');
 
+  /* Display: Content pane */
   if (module_exists('views_content')) {
-    /* Display: Content pane */
     $handler = $view->new_display('panel_pane', 'Content pane', 'panel_pane_1');
     $handler->display->display_options['pane_title'] = 'OG members';
     $handler->display->display_options['allow']['use_pager'] = 0;
@@ -211,13 +223,13 @@ function og_views_default_views() {
     $handler->display->display_options['allow']['exposed_form'] = 0;
     $handler->display->display_options['allow']['fields_override'] = 0;
     $handler->display->display_options['argument_input'] = array(
-      'group_audience_gid' => array(
+      'gid' => array(
         'type' => 'context',
         'context' => 'entity:group.gid',
         'context_optional' => 0,
         'panel' => '0',
         'fixed' => '',
-        'label' => 'Fields: group_audience (group_audience) - gid',
+        'label' => 'Organic groups membership: Gid',
       ),
     );
   }
@@ -226,9 +238,10 @@ function og_views_default_views() {
     t('more'),
     t('Apply'),
     t('Reset'),
-    t('Sort By'),
+    t('Sort by'),
     t('Asc'),
     t('Desc'),
+    t('group membership'),
     t('All'),
     t('%1 members'),
     t('Block'),
@@ -236,6 +249,8 @@ function og_views_default_views() {
     t('OG members'),
     t('View panes'),
   );
+
+
   $views[$view->name] = $view;
 
   /*
