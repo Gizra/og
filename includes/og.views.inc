@@ -118,11 +118,11 @@ function og_views_data_alter(&$data) {
   $items = module_invoke_all('og_views_relationship');
 
   foreach ($items as $item) {
+    // Add group relationship.
     $entity = entity_get_info($item['entity']);
     $title = t('@entity group', array('@entity' => ucfirst($entity['label'])));
     $help = t('Add information on groups that belong to the @entity entity.', array('@entity' => ucfirst($entity['label'])));
 
-    // Add the group relationship.
     $data[$item['views table']]['og_rel'] = array(
       'group' => t('Group'),
       'title' => $title,
@@ -132,6 +132,24 @@ function og_views_data_alter(&$data) {
         'handler' => 'og_handler_relationship',
         'label' => t('group'),
         'base' => 'og',
+        'base field' => 'etid',
+        'relationship field' => $item['join field'],
+      ),
+    );
+
+    // Add group membership relationship.
+    $title = t('@entity', array('@entity' => ucfirst($entity['label'])));
+    $help = t('Add information on groups membership that are associated with the @entity entity.', array('@entity' => ucfirst($entity['label'])));
+
+    $data[$item['views table']]['og_membership_rel'] = array(
+      'group' => t('Group membership'),
+      'title' => $title,
+      'help' => $help,
+      'relationship' => array(
+        'entity' => $item['entity'],
+        'handler' => 'og_handler_relationship',
+        'label' => t('group membership'),
+        'base' => 'og_membership',
         'base field' => 'etid',
         'relationship field' => $item['join field'],
       ),
