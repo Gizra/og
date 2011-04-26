@@ -1,8 +1,8 @@
 <?php
 
 /**
-* Plugin definition.
-*/
+ * Plugin definition.
+ */
 $plugin = array(
   'title' => t('OG Content create links'),
   'description' => t('Crafted links to create content (nodes) for a given group.'),
@@ -33,6 +33,9 @@ function og_node_create_links_content_type_render($subtype, $conf, $args, $conte
   return $block;
 }
 
+/**
+ * Edit form.
+ */
 function og_node_create_links_content_type_edit_form($form, &$form_state) {
   // provide a blank form so we have a place to have context setting.
   return $form;
