@@ -84,9 +84,8 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       'type' => 'entity',
       'description' => t('The entity that is a group.'),
       'getter callback' => 'og_entity_getter',
-      // TODO:
-      // 'setter callback' => 'field_collection_item_set_host_entity',
       'required' => TRUE,
+      'schema field' => 'etid',
     );
 
     $properties['entity_type'] += array(
