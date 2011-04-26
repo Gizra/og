@@ -59,10 +59,10 @@ function og_context_get_properties($data = array(), array $options, $name, $type
   switch ($name) {
     case 'current_group':
       // Get the current group.
-      //@code
-      //$wrapper = entity_metadata_site_wrapper();
-      //wrapper->current_group->value()
-      //@endcode
+      // @code
+      //   $wrapper = entity_metadata_site_wrapper();
+      //   wrapper->current_group->value()
+      // @endcode
       return og_context();
   }
 }
