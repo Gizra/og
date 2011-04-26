@@ -29,13 +29,7 @@ function og_node_create_links_content_type_render($subtype, $conf, $args, $conte
   $block->module = $module;
   $block->title = t('Content create links');
 
-  $output = '';
-  $output .= '<div class="' . str_replace('_', '-', $subtype) . '-wrapper">';
-
-  $output .= drupal_render($links);
-
-  $output .= '</div>';
-  $block->content = $output;
+  $block->content = drupal_render($links);
   return $block;
 }
 
