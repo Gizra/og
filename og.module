@@ -349,36 +349,6 @@ function og_permission() {
 }
 
 /**
- * Implements hook_og_views_relationship().
- *
- * Add relationship information for users, content and comment enteties on
- * behalf of core.
- */
-function og_og_views_relationship() {
-  $items = array();
-
-  $items['user'] = array(
-    'entity' => 'user',
-    'views table' => 'users',
-    'join field' => 'uid',
-  );
-
-  $items['node'] = array(
-    'entity' => 'node',
-    'views table' => 'node',
-    'join field' => 'nid',
-  );
-
-  $items['comment'] = array(
-    'entity' => 'comment',
-    'views table' => 'comment',
-    'join field' => 'cid',
-  );
-
-  return $items;
-}
-
-/**
  * Implement hook_og_permission().
  */
 function og_og_permission() {

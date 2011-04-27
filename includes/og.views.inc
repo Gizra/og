@@ -115,48 +115,50 @@ function og_views_handlers() {
  * Implements hook_views_data_alter().
  */
 function og_views_data_alter(&$data) {
-  $items = module_invoke_all('og_views_relationship');
+  // TODO: This should be handled by entity-metadata.
+  foreach (entity_get_info() as $entity_type => $info) {
+    if (!empty($info['fieldable'])) {
+      // Group relationship.
+      if ($entity_type != 'group') {
+        $title = t('@entity group', array('@entity' => ucfirst($info['label'])));
+        $help = t('Add information on groups that belong to the @entity entity.', array('@entity' => ucfirst($info['label'])));
+        $data[$entity_type]['og_rel'] = array(
+          'group' => t('Group'),
+          'title' => $title,
+          'help' => $help,
+          'relationship' => array(
+            // Pass the entity to the handler.
+            'entity' => $entity_type,
+            'handler' => 'og_handler_relationship',
+            'label' => t('group'),
+            'base' => 'og',
+            'base field' => 'etid',
+            'relationship field' => $info['entity keys']['id'],
+          ),
+        );
+      }
 
-  foreach ($items as $item) {
-    // Add group relationship.
-    $entity = entity_get_info($item['entity']);
-    $title = t('@entity group', array('@entity' => ucfirst($entity['label'])));
-    $help = t('Add information on groups that belong to the @entity entity.', array('@entity' => ucfirst($entity['label'])));
-
-    $data[$item['views table']]['og_rel'] = array(
-      'group' => t('Group'),
-      'title' => $title,
-      'help' => $help,
-      'relationship' => array(
-        'entity' => $item['entity'],
-        'handler' => 'og_handler_relationship',
-        'label' => t('group'),
-        'base' => 'og',
-        'base field' => 'etid',
-        'relationship field' => $item['join field'],
-      ),
-    );
-
-    // Add group membership relationship.
-    $title = t('@entity', array('@entity' => ucfirst($entity['label'])));
-    $help = t('Add information on groups membership that are associated with the @entity entity.', array('@entity' => ucfirst($entity['label'])));
-
-    $data[$item['views table']]['og_membership_rel'] = array(
-      'group' => t('Group membership'),
-      'title' => $title,
-      'help' => $help,
-      'relationship' => array(
-        'entity' => $item['entity'],
-        'handler' => 'og_handler_relationship',
-        'label' => t('group membership'),
-        'base' => 'og_membership',
-        'base field' => 'etid',
-        'relationship field' => $item['join field'],
-      ),
-    );
+      // Group membership relationship.
+      if ($entity_type != 'og_membership') {
+        $title = t('@entity group membership', array('@entity' => ucfirst($info['label'])));
+        $help = t('Add information on groups membership that are associated with the @entity entity.', array('@entity' => ucfirst($info['label'])));
+        $data[$entity_type]['og_membership_rel'] = array(
+          'group' => t('Group membership'),
+          'title' => $title,
+          'help' => $help,
+          'relationship' => array(
+            // Pass the entity to the handler.
+            'entity' => $entity_type,
+            'handler' => 'og_handler_relationship',
+            'label' => t('group membership'),
+            'base' => 'og_membership',
+            'base field' => 'etid',
+            'relationship field' => $info['entity keys']['id'],
+          ),
+        );
+      }
+    }
   }
-  // TODO: Maybe move field overrides to field_views_data_alter().
-  // TODO: Override also field revisions table.
 
   // Override group audience - "gid" (group ID) field argument.
   $data['field_data_group_audience']['group_audience_gid']['argument']['handler'] = 'og_handler_argument_group_audience_gid';

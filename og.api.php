@@ -214,21 +214,6 @@ function hook_og_audience_options_alter(&$options, &$opt_group, $account) {
   }
 }
 
- /**
- * Add relationship information for enteties to the group's etid field.
- */
-function hook_og_views_relationship() {
-  $items = array();
-
-  // User entity is in table "users" column "uid".
-  $items['user'] = array(
-    'entity' => 'user',
-    'views table' => 'users',
-    'join field' => 'uid',
-  );
-  return $items;
-}
-
 /**
  * @} End of "addtgrouproup hooks".
  */
