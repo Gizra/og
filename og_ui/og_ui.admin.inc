@@ -210,23 +210,32 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   $roles = og_roles($group->gid);
 
   $query = new EntityFieldQuery();
-  $query
-    ->entityCondition('entity_type', 'user')
-    ->fieldCondition(OG_AUDIENCE_FIELD, 'gid', $group->gid, '=')
-    ->pager(25);
 
-  if ($result = $query->execute()) {
-    $uids = array_keys($result['user']);
+  $result = $query
+    ->entityCondition('entity_type', 'og_membership')
+    ->propertyCondition('entity_type', 'user', '=')
+    ->propertyCondition('gid', $group->gid, '=')
+    ->pager(25)
+    ->execute();
+
+  if (!empty($result['og_membership'])) {
+    $ids = array_keys($result['og_membership']);
     $states = og_group_content_states();
-    // We load all the accounts as it's will happen in og_get_user_roles() and
-    // we prefer loading all accounts at once.
+    $og_memberships = og_membership_load_multiple($ids);
+
+    // Load all the user accounts at once.
+    $uids = array();
+    foreach ($og_memberships as $og_membership) {
+      $uids[] = $og_membership->etid;
+    }
+
     $accounts = user_load_multiple($uids);
 
-    foreach ($accounts as $account) {
+    foreach ($og_memberships as $og_membership) {
       // We allow editing of the group manager, but will make sure on submit
       // that they can not be removed from group.
       $users_roles = array();
-      foreach (og_get_user_roles($group->gid, $account->uid) as $rid) {
+      foreach (og_get_user_roles($group->gid, $og_membership->etid) as $rid) {
         if (!in_array($roles[$rid], array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
           // Show the user's roles, except of the authenticated role, that all
           // group members have, or anonymous that blocked members have.
@@ -235,22 +244,13 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
       }
       asort($users_roles);
 
-      // Find the group in the user's field.
-      $property = OG_AUDIENCE_FIELD;
-      foreach ($account->{$property}[LANGUAGE_NONE] as $value) {
-        if ($value['gid'] == $group->gid) {
-          $row = $value;
-          break;
-        }
-      }
-
+      $account = $accounts[$og_membership->etid];
       $options[$account->uid] = array(
         'username' => theme('username', array('account' => $account)),
-        'status' =>  $states[$row['state']],
+        'status' =>  $states[$og_membership->state],
         'roles' => theme('item_list', array('items' => $users_roles)),
-        'member_for' => format_interval(REQUEST_TIME - $row['created']),
+        'member_for' => format_interval(REQUEST_TIME - $og_membership->created),
       );
-
     }
   }
 
