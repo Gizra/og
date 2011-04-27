@@ -10,7 +10,7 @@ function og_views_default_views() {
   $view = new view;
   $view->name = 'og_list';
   $view->description = 'Show active groups that are nodes';
-  $view->tag = 'group';
+  $view->tag = 'og';
   $view->base_table = 'node';
   $view->human_name = 'OG list';
   $view->core = 0;
@@ -132,7 +132,7 @@ function og_views_default_views() {
   $view = new view;
   $view->name = 'og_members';
   $view->description = 'Newest group members.';
-  $view->tag = '';
+  $view->tag = 'og';
   $view->base_table = 'users';
   $view->human_name = 'OG members';
   $view->core = 0;
@@ -259,7 +259,7 @@ function og_views_default_views() {
   $view = new view;
   $view->name = 'og_nodes';
   $view->description = 'Show all content (nodes) of a group.';
-  $view->tag = 'group';
+  $view->tag = 'og';
   $view->base_table = 'node';
   $view->human_name = 'OG content';
   $view->core = 0;
@@ -349,11 +349,11 @@ function og_views_default_views() {
   $views[$view->name] = $view;
 
   $view = new view;
-  $view->name = 'user_groups';
+  $view->name = 'og_user_groups';
   $view->description = 'Show groups of a user.';
-  $view->tag = 'default';
+  $view->tag = 'og';
   $view->base_table = 'node';
-  $view->human_name = 'User groups';
+  $view->human_name = 'OG User groups';
   $view->core = 7;
   $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
