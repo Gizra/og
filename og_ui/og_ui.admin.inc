@@ -172,13 +172,6 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
   // Get the group real entity, so we can check the user ID of the entity.
   $entity = $group->getEntity();
 
-  $header = array(
-    'username' => array('data' => t('Username'), 'field' => 'u.name'),
-    'status' => array('data' => t('Status'), 'field' => 'group_audience.group_audience_state'),
-    'roles' => array('data' => t('Roles')),
-    'member_for' => array('data' => t('Member for'), 'field' => 'group_audience.group_audience_created', 'sort' => 'desc'),
-  );
-
   $form['group'] = array('#type' => 'value', '#value' => $group);
   $form['options'] = array(
     '#type' => 'fieldset',
@@ -206,19 +199,54 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
     '#value' => t('Update'),
   );
 
-  $status = og_group_content_states();
+  $states = og_group_content_states();
   $roles = og_roles($group->gid);
+  $header = array(
+    'username' => array('data' => t('Username'), 'field' => 'u.name'),
+    'state' => array('data' => t('State'), 'field' => 'ogm.state'),
+    'roles' => array('data' => t('Roles')),
+    'member_for' => array('data' => t('Member for'), 'field' => 'ogm.created', 'sort' => 'desc'),
+  );
 
-  $query = new EntityFieldQuery();
+  $query = db_select('users', 'u');
+  $query->innerJoin('og_membership', 'ogm', 'u.uid = ogm.etid');
+  $query->condition('ogm.gid', $group->gid, '=');
 
-  $result = $query
-    ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition('entity_type', 'user', '=')
-    ->propertyCondition('gid', $group->gid, '=')
-    ->pager(25)
-    ->execute();
+  $count_query = clone $query;
+  $count_query->addExpression('COUNT(u.uid)');
 
-  if (!empty($result['og_membership'])) {
+  $query = $query->extend('PagerDefault')->extend('TableSort');
+  $query
+    ->fields('u', array('uid', 'name'))
+    ->fields('ogm', array('state', 'created'))
+    ->limit(25)
+    ->orderByHeader($header)
+    ->setCountQuery($count_query);
+  $result = $query->execute();
+
+  foreach ($result as $row) {
+    // Note that we allow editing of the group manager, but will make sure on
+    // submit that they can not be removed from group.
+    $users_roles = array();
+    foreach (og_get_user_roles($group->gid, $row->uid) as $rid) {
+      if (!in_array($roles[$rid], array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
+        // Show the user's roles, except of the authenticated role, that all
+        // group members have, or anonymous that blocked members have.
+        $users_roles[] = $roles[$rid];
+      }
+    }
+    asort($users_roles);
+
+    $account = user_load($row->uid);
+    $options[$account->uid] = array(
+      'username' => theme('username', array('account' => $account)),
+      'state' =>  $states[$row->state],
+      'roles' => theme('item_list', array('items' => $users_roles)),
+      'member_for' => format_interval(REQUEST_TIME - $row->created),
+    );
+  }
+
+  if (FALSE && !empty($result['og_membership'])) {
     $ids = array_keys($result['og_membership']);
     $states = og_group_content_states();
     $og_memberships = og_membership_load_multiple($ids);
@@ -247,7 +275,7 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
       $account = $accounts[$og_membership->etid];
       $options[$account->uid] = array(
         'username' => theme('username', array('account' => $account)),
-        'status' =>  $states[$og_membership->state],
+        'state' =>  $states[$og_membership->state],
         'roles' => theme('item_list', array('items' => $users_roles)),
         'member_for' => format_interval(REQUEST_TIME - $og_membership->created),
       );
