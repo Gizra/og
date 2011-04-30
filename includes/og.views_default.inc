@@ -150,7 +150,7 @@ function og_views_default_views() {
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'fields';
-  /* Relationship: Group membership: User */
+  /* Relationship: Group membership: User group membership */
   $handler->display->display_options['relationships']['og_membership_rel']['id'] = 'og_membership_rel';
   $handler->display->display_options['relationships']['og_membership_rel']['table'] = 'users';
   $handler->display->display_options['relationships']['og_membership_rel']['field'] = 'og_membership_rel';
@@ -190,6 +190,8 @@ function og_views_default_views() {
   $handler->display->display_options['arguments']['gid']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['gid']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['gid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['gid']['specify_validation'] = 1;
+  $handler->display->display_options['arguments']['gid']['validate']['type'] = 'og';
   $handler->display->display_options['arguments']['gid']['break_phrase'] = 0;
   $handler->display->display_options['arguments']['gid']['not'] = 0;
   /* Filter criterion: User: Active */
@@ -249,7 +251,6 @@ function og_views_default_views() {
     t('OG members'),
     t('View panes'),
   );
-
 
   $views[$view->name] = $view;
 
