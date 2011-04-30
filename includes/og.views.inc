@@ -176,3 +176,18 @@ function og_views_data_alter(&$data) {
     unset($data['field_data_group_audience']['group_audience_'. $type]);
   }
 }
+
+/**
+ * Implements hook_views_plugins
+ */
+function og_views_plugins() {
+  return array(
+    'argument validator' => array(
+      'og' => array(
+        'title' => t('Organic groups group'),
+        'handler' => 'og_plugin_argument_validate_group',
+        'path' => drupal_get_path('module', 'og') . '/includes/views',
+      ),
+    ),
+  );
+}

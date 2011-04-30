@@ -16,7 +16,7 @@ files[] = og.test
 files[] = tests/upgrade/og.upgrade.test
 
 ; Views plugins
-files[] = includes/views/og_plugin_argument_default_group_context.inc
+files[] = includes/views/og_plugin_argument_validate_group.inc
 
 ; Views fields
 files[] = includes/views/og_handler_field_group_member_count.inc
