@@ -246,42 +246,6 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
     );
   }
 
-  if (FALSE && !empty($result['og_membership'])) {
-    $ids = array_keys($result['og_membership']);
-    $states = og_group_content_states();
-    $og_memberships = og_membership_load_multiple($ids);
-
-    // Load all the user accounts at once.
-    $uids = array();
-    foreach ($og_memberships as $og_membership) {
-      $uids[] = $og_membership->etid;
-    }
-
-    $accounts = user_load_multiple($uids);
-
-    foreach ($og_memberships as $og_membership) {
-      // We allow editing of the group manager, but will make sure on submit
-      // that they can not be removed from group.
-      $users_roles = array();
-      foreach (og_get_user_roles($group->gid, $og_membership->etid) as $rid) {
-        if (!in_array($roles[$rid], array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
-          // Show the user's roles, except of the authenticated role, that all
-          // group members have, or anonymous that blocked members have.
-          $users_roles[] = $roles[$rid];
-        }
-      }
-      asort($users_roles);
-
-      $account = $accounts[$og_membership->etid];
-      $options[$account->uid] = array(
-        'username' => theme('username', array('account' => $account)),
-        'state' =>  $states[$og_membership->state],
-        'roles' => theme('item_list', array('items' => $users_roles)),
-        'member_for' => format_interval(REQUEST_TIME - $og_membership->created),
-      );
-    }
-  }
-
   // Add group manager details.
   $form['group_manager'] = array(
     '#type' => 'item',
