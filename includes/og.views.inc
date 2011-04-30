@@ -122,7 +122,7 @@ function og_views_data_alter(&$data) {
       if ($entity_type != 'group') {
         $title = t('@entity group', array('@entity' => ucfirst($info['label'])));
         $help = t('Add information on groups that belong to the @entity entity.', array('@entity' => ucfirst($info['label'])));
-        $data[$entity_type]['og_rel'] = array(
+        $data[$info['base table']]['og_rel'] = array(
           'group' => t('Group'),
           'title' => $title,
           'help' => $help,
@@ -142,7 +142,7 @@ function og_views_data_alter(&$data) {
       if ($entity_type != 'og_membership') {
         $title = t('@entity group membership', array('@entity' => ucfirst($info['label'])));
         $help = t('Add information on groups membership that are associated with the @entity entity.', array('@entity' => ucfirst($info['label'])));
-        $data[$entity_type]['og_membership_rel'] = array(
+        $data[$info['base table']]['og_membership_rel'] = array(
           'group' => t('Group membership'),
           'title' => $title,
           'help' => $help,
