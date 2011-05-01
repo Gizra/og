@@ -71,6 +71,34 @@ class OgMembershipViewsController extends EntityDefaultViewsController {
   }
 }
 
+/**
+ * "Group membership" entity Views definitions.
+ */
+class OgMembershipTypeViewsController extends EntityDefaultViewsController {
+
+  /**
+   * Override views_data().
+   */
+  public function views_data() {
+    $data = parent::views_data();
+
+    $data['og_membership']['og_membership_type_rel'] = array(
+      'group' => t('Organic groups membership'),
+      'title' => t('Organic groups membership type'),
+      'help' => t('Add information on group membership that belong to the Organic groups membership entity.'),
+      'relationship' => array(
+        'handler' => 'views_handler_relationship',
+        'label' => t('group membership type'),
+        'base' => 'og_membership_type',
+        'base field' => 'name',
+        'relationship field' => 'name',
+      ),
+    );
+
+    return $data;
+  }
+}
+
 
 
 /**

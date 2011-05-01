@@ -146,6 +146,7 @@ function og_entity_info() {
     ),
     'bundle of' => 'og_membership',
     'module' => 'og',
+    'views controller class' => 'OgMembershipTypeViewsController',
     'access callback' => 'og_membership_type_access',
   );
 
