@@ -855,7 +855,7 @@ class OgGroupAudienceField extends DrupalWebTestCase {
     $this->drupalGet('node/add/article');
     $this->assertText(t('There are no groups you can select from.'), 'Field group audience shows correct description about no groups.');
 
-    // Create an entity.
+    // Create an entity that is a group.
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
     $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
     $entity->save();
@@ -999,6 +999,71 @@ class OgGroupAudienceField extends DrupalWebTestCase {
     // someohow pops-up again, so we invalidate it again.
     og_group_membership_invalidate_cache();
     $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid)), t('Article node is still assigned to a group that is hidden from the current user.'));
+  }
+
+  /**
+   * Test the group-audience field for a group that was deleted, but there are
+   * still users associated with that group.
+   */
+  function testOgAudienceFieldDeletedGroup() {
+    // Create user.
+    $admin_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+    ));
+
+    $web_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+    ));
+
+    $this->drupalLogin($web_user);
+
+    // Create three entity that are groups.
+    $groups = array();
+    for ($i = 0; $i <= 2; $i++) {
+      $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
+      $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+      $entity->save();
+      $group = og_get_group('entity_test', $entity->pid);
+      $groups[$i] = $group;
+
+      // Associate the user with the group.
+      og_group($group->gid, array('entity' => $web_user));
+    }
+
+    // Assert the group-audience field.
+    $web_user = user_load($web_user->uid, TRUE);
+    for ($i = 0; $i <= 2; $i++) {
+      $gid = $groups[$i]->gid;
+      $this->assertEqual($web_user->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][$i]['gid'], $gid, t("Group ID @id found in user's group-audienec field.", array('@id' => $gid)));
+    }
+
+    // Delete the first entity that is a group.
+    $first_gid = $groups[0]->gid;
+    entity_delete('entity_test', $groups[0]->etid);
+    $group = og_load($first_gid);
+    $this->assertFalse($group, t('Group was deleted'));
+
+    // Assert the group-audience still has all the values, as deleting the group
+    // don't buld delete all content associated with it.
+    $this->assertEqual($web_user->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][0]['gid'], $first_gid, t("Group ID 1 is still found in user's group-audience field."));
+
+    // Assert the group-audience is with the correct values, after re-saving
+    // user form.
+    $this->drupalPost('user/' . $web_user->uid . '/edit', array(), t('Save'));
+
+    $web_user = user_load($web_user->uid, TRUE);
+    $this->assertEqual(count($web_user->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]), 2, t('After user save, group-audience field has 2 items.'));
+
+    for ($i = 0; $i <= 1; $i++) {
+      $gid = $groups[$i+1]->gid;
+      $this->assertEqual($web_user->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][$i]['gid'], $gid, t("Group ID @id found in user's group-audienec field.", array('@id' => $gid)));
+    }
   }
 }
 

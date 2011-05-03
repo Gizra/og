@@ -204,6 +204,17 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       break;
 
     case OG_AUDIENCE_WIDGET:
+      // Determine if a user may see other groups as-well.
+      $opt_group = FALSE;
+
+      if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer group'))) {
+        $opt_group = TRUE;
+      }
+
+      // Get all the groups divided to "content groups" and "other groups".
+      $audience = og_field_audience_options($opt_group);
+
+      // Get all groups that should be excluded.
       $excludes = array();
       // If it's an existing group, then exclude itself, as in some cases a group
       // can act also as a group content, but we want to prevent associating the
@@ -222,20 +233,17 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       $items_gid = array();
       if (!empty($items)) {
         foreach ($items as $item) {
-          $default_values[$item['gid']] = $item['gid'];
-          $items_gid[] = $item['gid'];
+          // Some groups might be already deleted, but we don't bulk
+          // delete the fields of the entities associated with that group.
+          // So make sure the hidden selected fields are only for existing
+          // groups.
+          if (in_array($item['gid'], $audience['content groups']) || in_array($item['gid'], $audience['other groups'])) {
+            $default_values[$item['gid']] = $item['gid'];
+            $items_gid[] = $item['gid'];
+          }
         }
       }
 
-      // Determine if a user may see other groups as-well.
-      $opt_group = FALSE;
-
-      if ($instance['widget']['settings']['opt_group'] == 'always' || ($instance['widget']['settings']['opt_group'] == 'auto' && user_access('administer group'))) {
-        $opt_group = TRUE;
-      }
-
-      // Get all the groups a user can see.
-      $audience = og_field_audience_options($opt_group);
       foreach (array('content groups', 'other groups') as $key) {
         if (!empty($audience[$key])) {
           // Get the label un-sanitized, as they will be laster sanitized

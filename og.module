@@ -451,20 +451,20 @@ function og_entity_presave($entity, $type) {
     foreach (array('insert', 'update', 'delete') as $op) {
       if (!empty($diff[$op])) {
         foreach ($diff[$op] as $item) {
-          $group = og_load($item['gid']);
           $item += array(
             'state' => OG_STATE_ACTIVE,
             'created' => time(),
-            'user request' => '',
             'membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
             'membership fields' => array(),
           );
           $values = array(
             'entity type' => $type,
             'entity' => $entity,
-            'group' => $group,
+            // The group might be deleted already, and since we don't bulk
+            // delete in such a case, we can't be sure it's there, so we just
+            // pass the group ID.
+            'gid' => $item['gid'],
             'state' => $item['state'],
-            'user request' => $item['user request'],
             'membership type' => $item['membership type'],
             'membership fields' => $item['membership fields'],
             'created' => $item['created'],
@@ -500,8 +500,11 @@ function og_entity_delete($entity, $type) {
   if (!empty($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])) {
     list($id) = entity_extract_ids($type, $entity);
     foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
-      $group_membership = og_get_group_membership($item['gid'], $type, $id);
-      $group_membership->delete();
+      // If the group is already deleted, all the group memberships were already
+      // deleted.
+      if ($group_membership = og_get_group_membership($item['gid'], $type, $id)) {
+        $group_membership->delete();
+      }
     }
   }
 }
@@ -512,7 +515,7 @@ function og_entity_delete($entity, $type) {
 function og_og_group_insert($values = array()) {
   // Create a new group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
-  $group_membership = og_membership_create($values['group']->gid, $values['entity type'], $id, array('state' => $values['state'], 'membership type' => $values['membership type'], 'membership fields' => $values['membership fields']));
+  $group_membership = og_membership_create($values['gid'], $values['entity type'], $id, array('state' => $values['state'], 'membership type' => $values['membership type'], 'membership fields' => $values['membership fields']));
   $group_membership->save();
 }
 
@@ -522,9 +525,13 @@ function og_og_group_insert($values = array()) {
 function og_og_group_update($values = array()) {
   // Update group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
-  $group_membership = og_get_group_membership($values['group']->gid, $values['entity type'], $id);
-  $group_membership->state = $values['state'];
-  $group_membership->save();
+  $group_membership = og_get_group_membership($values['gid'], $values['entity type'], $id);
+
+  // Check membership state changed.
+  if ($group_membership->state != $values['state']) {
+    $group_membership->state = $values['state'];
+    $group_membership->save();
+  }
 }
 
 /**
@@ -533,8 +540,11 @@ function og_og_group_update($values = array()) {
 function og_og_group_delete($values = array()) {
   // Delete group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
-  $group_membership = og_get_group_membership($values['group']->gid, $values['entity type'], $id);
-  $group_membership->delete();
+  // If the group is already deleted, all the group memberships were already
+  // deleted.
+  if ($group_membership = og_get_group_membership($values['gid'], $values['entity type'], $id)) {
+    $group_membership->delete();
+  }
 }
 
 
@@ -580,7 +590,8 @@ function og_entity_presave_group_audience_diff($entity, $type) {
 
   // See if there are new or updated groups.
   foreach ($new_gids as $gid => $item) {
-    $return[isset($original_gids[$gid]) ? 'update' : 'insert'][] = $item;
+    $op = isset($original_gids[$gid]) ? 'update' : 'insert';
+    $return[$op][] = $item;
   }
   return $return;
 }
@@ -1421,22 +1432,22 @@ function og_get_all_group($states = array(OG_STATE_ACTIVE), $options = array()) 
  *
  * @param $gid
  *   The group ID.
- * @param $entity_type
- *   Optional; The entity type (e.g. "node" or "user"). Defaults to 'user'
- * @param $entity
- *   Optional; The entity to set the association. Defaults to the current user
- *   if the $entity_type property is set to 'user'.
- * @param $state
- *   Optional; The state of the association. Can be:
- *   - OG_STATE_ACTIVE
- *   - OG_STATE_PENDING
- *   - OG_STATE_BLOCKED
- * @param $save
- *   Optional; TRUE if fields value should be saved. Defaults to TRUE.
- * @param $force_reload
- *   Optional; Determine if og_load_entity() should be used on the passed
- *   entity. This can be used when you pass an entity that has been saved yet to
- *   the database, but you want to assign it groups. Defaults to TRUE.
+ * @param $values
+ *   Array with the information to pass along, until it is processed in
+ *   og_entity_presave(). Keys are:
+ *   - "entity type": Optional; The entity type (e.g. "node" or "user").
+ *     Defaults to 'user'
+ *   - "entity" :Optional; The entity to set the association. Defaults to the
+ *     current user if the $entity_type property is set to 'user'.
+ *   - "state": Optional; The state of the association. Can be:
+ *     - OG_STATE_ACTIVE
+ *     - OG_STATE_PENDING
+ *     - OG_STATE_BLOCKED
+ *   - "save": Optional; TRUE if fields value should be saved. Defaults to TRUE.
+ *   - "force reload": Optional; Determine if og_load_entity() should be used on
+ *     the passed entity. This can be used when you pass an entity that has been
+ *     saved yet to the database, but you want to assign it groups. Defaults to TRUE.
+ *     // TODO: Adds docs on rest of keys.
  *
  * @return
  *   The entity with the fields updated.
@@ -1449,7 +1460,6 @@ function og_group($gid, $values = array()) {
     'state' => OG_STATE_ACTIVE,
     'save' => TRUE,
     'force reload' => TRUE,
-    'user request' => '',
     'membership type' => OG_MEMBERSHIP_TYPE_DEFAULT,
     'membership fields' => array(),
     'created' => time(),
@@ -1485,7 +1495,6 @@ function og_group($gid, $values = array()) {
         'gid' => $gid,
         'state' => $state,
         'created' => $values['created'],
-        'user request' => $values['user request'],
         'membership type' => $values['membership type'],
         'membership fields' => $values['membership fields'],
       );
@@ -1509,7 +1518,6 @@ function og_group($gid, $values = array()) {
           // This values won't be saved, just passed along.
           // @see og_entity_presave().
           'state' => $state,
-          'user request' => $values['user request'],
           'membership type' => $values['membership type'],
           'membership fields' => $values['membership fields'],
         );
@@ -1520,11 +1528,16 @@ function og_group($gid, $values = array()) {
         if ($group_membership->state != $state || $group_membership->name != $values['membership type']) {
           $wrapper[$existing_key]['state'] = $state;
           // This value won't be saved in the field, just passed along and
-          // processed in og_entity_presave().
-          $wrapper[$existing_key]['user request'] = $values['user request'];
+          // processed later on.
+          // @see og_entity_insert()
+          // @see og_og_entity_insert()
+          $wrapper[$existing_key] += array(
+            'membership type' => $values['membership type'],
+            'membership fields' => $values['membership fields'],
+          );
         }
         else {
-          // Nothing changed, so don't try to save.
+          // Nothing changed, so no need to save.
           $save = FALSE;
         }
       }
@@ -1547,7 +1560,7 @@ function og_group($gid, $values = array()) {
 }
 
 /**
- * Delete an an association (e.g. unsubscribe) of an entity to a group.
+ * Delete an association (e.g. unsubscribe) of an entity to a group.
  *
  * @param $entity_type
  *   The entity type (e.g. "node" or "user").
@@ -1582,7 +1595,10 @@ function og_ungroup($gid, $entity_type, $entity, $save = TRUE) {
         entity_save($entity_type, $entity);
         og_invalidate_cache();
 
-        if ($entity_type == 'user') {
+        // Group might be deleted, so don't try to remove roles that don't
+        // exist.
+        $group = og_load($gid);
+        if ($entity_type == 'user' && $group) {
           foreach (og_get_user_roles($gid, $entity->uid) as $rid) {
             og_role_revoke($gid, $entity->uid, $rid);
           }
