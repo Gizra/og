@@ -445,6 +445,8 @@ function og_field_widget_form_validate($form, &$form_state) {
 /**
  * Create update or delete a group, based on the field CRUD.
  *
+ * TODO: Remove this an move to hook_entity_presave().
+ *
  * @see og_field_attach_insert().
  * @see og_field_attach_update().
  * @see og_field_attach_delete().
