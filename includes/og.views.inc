@@ -99,46 +99,6 @@ class OgMembershipTypeViewsController extends EntityDefaultViewsController {
   }
 }
 
-
-
-/**
- * Implements hook_views_handlers().
- */
-function og_views_handlers() {
-  return array(
-    // Base class field.
-    'og_handler_field_prerender_list' => array(
-     'parent' => 'views_handler_field_prerender_list',
-    ),
-    // Field
-    'og_handler_field_group_audience_state' => array(
-      'parent' => 'views_handler_field',
-    ),
-    'og_handler_field_user_roles' => array(
-      'parent' => 'og_handler_field_prerender_list',
-    ),
-    'og_handler_field_group_permissions' => array(
-      'parent' => 'og_handler_field_prerender_list',
-    ),
-    // Filter
-    'og_handler_filter_group_state' => array(
-      'parent' => 'views_handler_filter_in_operator',
-    ),
-    'og_handler_filter_group_audience_state' => array(
-      'parent' => 'views_handler_filter_in_operator',
-    ),
-    // Relationship
-    'og_handler_relationship' => array(
-      'parent' => 'views_handler_relationship',
-    ),
-    // Arguments
-    'og_handler_argument_group_audience_gid' => array(
-      'parent' => 'views_handler_argument_numeric',
-    ),
-  );
-}
-
-
 /**
  * Implements hook_views_data_alter().
  */
