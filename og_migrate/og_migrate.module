@@ -72,7 +72,7 @@ function og_migrate_init() {
     && user_access('access administration pages') && flood_is_allowed('og_migrate_warning', 1)) {
     flood_register_event('og_migrate_warning');
     og_needs_migrate(FALSE);
-    drupal_set_message(t('There are no pending migration plugins that need to be executed. You can disable Organic groups module.'));
+    drupal_set_message(t('There are no pending migration plugins that need to be executed. You can disable Organic groups migrate module.'));
   }
 
   og_migrate_register_plugins();
