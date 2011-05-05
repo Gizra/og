@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * @file
  * Install, update, and uninstall functions for the Organic groups module.
@@ -425,7 +424,7 @@ function og_update_7000(&$sandbox) {
 }
 
 /**
- * Add group membership enteties instead of field data.
+ * Add group membership entities instead of field data.
  */
 function og_update_7001(&$sandbox) {
   $schema = og_schema_info();
