@@ -210,7 +210,9 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
 
   $query = db_select('users', 'u');
   $query->innerJoin('og_membership', 'ogm', 'u.uid = ogm.etid');
-  $query->condition('ogm.gid', $group->gid, '=');
+  $query
+    ->condition('ogm.gid', $group->gid, '=')
+    ->condition('ogm.entity_type', 'user', '=');
 
   $count_query = clone $query;
   $count_query->addExpression('COUNT(u.uid)');
