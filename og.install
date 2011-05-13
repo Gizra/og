@@ -418,7 +418,7 @@ function og_update_7000(&$sandbox) {
 
     // We can't call og_needs_migrate() directly, so just set the variable.
     variable_set('og_needs_migrate', TRUE);
-    return t('Renamed Organic groups 6 tables.');
+    return t('Renamed Organic groups 6 tables. Enable Organic groups migrate module to continue the migration of data.');
   }
   return t('No change needed in Organic groups schema.');
 }
@@ -441,5 +441,5 @@ function og_update_7001(&$sandbox) {
   }
   // We can't call og_needs_migrate() directly, so just set the variable.
   variable_set('og_needs_migrate', TRUE);
-  return t('Organic groups added group membership tables.');
+  return t('Organic groups added group membership tables. Enable Organic groups migrate module to continue the migration of data.');
 }
