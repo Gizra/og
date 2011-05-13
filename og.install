@@ -429,8 +429,16 @@ function og_update_7000(&$sandbox) {
 function og_update_7001(&$sandbox) {
   $schema = og_schema_info();
 
-  db_create_table('og_membership', $schema['og_membership']);
-  db_create_table('og_membership_type', $schema['og_membership_type']);
+  // Due to changes in the upgrade path (e.g. moving data migration to
+  // og-migrate) some users already have the tables, so be careful about the
+  // creation of these tables.
+  if (!table_exists('og_membership')) {
+    db_create_table('og_membership', $schema['og_membership']);
+  }
+
+  if (!table_exists('og_membership_type')) {
+    db_create_table('og_membership_type', $schema['og_membership_type']);
+  }
   // We can't call og_needs_migrate() directly, so just set the variable.
   variable_set('og_needs_migrate', TRUE);
   return t('Organic groups added group membership tables.');
