@@ -432,11 +432,11 @@ function og_update_7001(&$sandbox) {
   // Due to changes in the upgrade path (e.g. moving data migration to
   // og-migrate) some users already have the tables, so be careful about the
   // creation of these tables.
-  if (!table_exists('og_membership')) {
+  if (!db_table_exists('og_membership')) {
     db_create_table('og_membership', $schema['og_membership']);
   }
 
-  if (!table_exists('og_membership_type')) {
+  if (!db_table_exists('og_membership_type')) {
     db_create_table('og_membership_type', $schema['og_membership_type']);
   }
   // We can't call og_needs_migrate() directly, so just set the variable.
