@@ -26,8 +26,8 @@ function og_default_rules_configuration() {
         },
         { "mail" : {
             "to" : [ "subscribed-user:mail" ],
-            "subject" : "Your membership request was approved for \'[og-membership:group:label]\'\\r\\n",
-            "message" : "[subscribed_user:name],\\r\\n\\r\\nYou are now a member in the group \'[og-membership:group:label]\' located at [og-membership:group:url]",
+            "subject" : "Your membership request was approved for \'[og_membership:group:label]\'\\r\\n",
+            "message" : "[subscribed_user:name],\\r\\n\\r\\nYou are now a member in the group \'[og_membership:group:label]\' located at [og_membership:group:url]",
             "from" : ""
           }
         },
@@ -63,8 +63,8 @@ function og_default_rules_configuration() {
         },
         { "mail" : {
             "to" : [ "subscribed-user:mail" ],
-            "subject" : "Your membership request for \'[og-membership:group:label]\'\\r\\n",
-            "message" : "[subscribed_user:name],\\r\\n\\r\\nYour membership to group \'[og-membership:group:label]\' located at [og-membership:group:url] is pending approval.",
+            "subject" : "Your membership request for \'[og_membership:group:label]\'\\r\\n",
+            "message" : "[subscribed_user:name],\\r\\n\\r\\nYour membership to group \'[og_membership:group:label]\' located at [og_membership:group:url] is pending approval.",
             "from" : ""
           }
         },
