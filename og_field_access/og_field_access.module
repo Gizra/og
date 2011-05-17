@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * @file
  * Provide field access based on group.
@@ -8,7 +9,7 @@
 /**
  * Implements hook_og_permission().
  *
- * Add view/ edit permissions to all existing fields of group related entities.
+ * Add view/ edit permissions to all existing fields.
  */
 function og_field_access_og_permission() {
   $perms = array();
@@ -16,11 +17,10 @@ function og_field_access_og_permission() {
     foreach ($bundles as $bundle => $bundle_value) {
       if (!empty($bundle_value)) {
         foreach ($bundle_value as $field_name => $value) {
-          if (og_is_group_content_type($value['entity_type'], $bundle) ||  og_is_group_type($value['entity_type'], $bundle)) {
-            $label = $value['label'];
+          $label = $value['label'];
 
-            $perm = 'view ' . $field_name . ' field';
-            $perms[$perm] = array(
+          $perm = 'view ' . $field_name . ' field';
+          $perms[$perm] = array(
               'title' => t('View @label field', array('@label' => $label)),
               'description' => t('View the @label field for existing groups.', array('@label' => $label)),
               'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE),
@@ -30,17 +30,16 @@ function og_field_access_og_permission() {
                 OG_ADMINISTRATOR_ROLE,
               ),
               'module' => 'og_field_access',
-              );
-
-            $perm = 'update ' . $field_name . ' field';
-            $perms[$perm] = array(
-              'title' => t('Edit @label field', array('@label' => $label)),
-              'description' => t('Edit the @label field for existing groups.', array('@label' => $label)),
-              'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE),
-              'default role' => array(OG_ADMINISTRATOR_ROLE),
-              'module' => 'og_field_access',
             );
-          }
+
+          $perm = 'update ' . $field_name . ' field';
+          $perms[$perm] = array(
+            'title' => t('Edit @label field', array('@label' => $label)),
+            'description' => t('Edit the @label field for existing groups.', array('@label' => $label)),
+            'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE),
+            'default role' => array(OG_ADMINISTRATOR_ROLE),
+            'module' => 'og_field_access',
+          );
         }
       }
     }
