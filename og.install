@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * @file
  * Install, update, and uninstall functions for the Organic groups module.
@@ -419,20 +418,28 @@ function og_update_7000(&$sandbox) {
 
     // We can't call og_needs_migrate() directly, so just set the variable.
     variable_set('og_needs_migrate', TRUE);
-    return t('Renamed Organic groups 6 tables.');
+    return t('Renamed Organic groups 6 tables. Enable Organic groups migrate module to continue the migration of data.');
   }
   return t('No change needed in Organic groups schema.');
 }
 
 /**
- * Add group membership enteties instead of field data.
+ * Add group membership entities instead of field data.
  */
 function og_update_7001(&$sandbox) {
   $schema = og_schema_info();
 
-  db_create_table('og_membership', $schema['og_membership']);
-  db_create_table('og_membership_type', $schema['og_membership_type']);
+  // Due to changes in the upgrade path (e.g. moving data migration to
+  // og-migrate) some users already have the tables, so be careful about the
+  // creation of these tables.
+  if (!db_table_exists('og_membership')) {
+    db_create_table('og_membership', $schema['og_membership']);
+  }
+
+  if (!db_table_exists('og_membership_type')) {
+    db_create_table('og_membership_type', $schema['og_membership_type']);
+  }
   // We can't call og_needs_migrate() directly, so just set the variable.
   variable_set('og_needs_migrate', TRUE);
-  return t('Organic groups added group membership tables.');
+  return t('Organic groups added group membership tables. Enable Organic groups migrate module to continue the migration of data.');
 }
