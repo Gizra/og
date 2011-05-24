@@ -11,6 +11,7 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
       'name'  => 'Organic groups migrate - upgrade path 7000',
       'description'  => 'Tests the upgrade path of Organic groups from Drupal 6.',
       'group' => 'Organic groups migrate',
+      'dependencies' => array('ctools'),
     );
   }
 
