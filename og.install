@@ -129,6 +129,10 @@ function og_schema_info() {
       ),
     ),
     'primary key' => array('gid'),
+    'indexes' => array(
+      // Entity index; When searching for an entity, we use both the id and type.
+      'entity' => array('etid', 'entity_type'),
+    ),
   );
 
   $schema['og_role_permission'] = array(
@@ -329,6 +333,11 @@ function og_schema_info() {
       ),
     ),
     'primary key' => array('id'),
+    'indexes' => array(
+      // Entity index; When searching for an entity, we use both the id and type.
+      'entity' => array('etid', 'entity_type'),
+      'gid' => array('gid'),
+    ),
     'foreign keys' => array(
       'og_membership_type' => array(
         'table' => 'og_membership_type',
@@ -442,4 +451,14 @@ function og_update_7001(&$sandbox) {
   // We can't call og_needs_migrate() directly, so just set the variable.
   variable_set('og_needs_migrate', TRUE);
   return t('Organic groups added group membership tables. Enable Organic groups migrate module to continue the migration of data.');
+}
+
+/**
+ * Add indexes to og and og_membership tables.
+ */
+function og_update_7100(&$sandbox) {
+  db_add_index('og_membership', 'entity', array('etid', 'entity_type'));
+  db_add_index('og_membership', 'gid', array('gid'));
+  db_add_index('og', 'entity', array('etid', 'entity_type'));
+  return t('Added table indexes for the following tables: @tables', array('@tables' => 'og, og_membership'));
 }
