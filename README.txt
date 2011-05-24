@@ -104,6 +104,8 @@ DEVELOPERS & SITE BUILDERS
 - Rules integration: Organic groups is shipped with a Rules configuration that
   allows simple notification. You can disable it or clone and change its 
   behaviour.
+- Devel generate integration: Enable devel-generate module to create dummy 
+  groups and groups content.
 - You may craft your own URLs which produce useful behavior. For example,
   node/add/group-content?gids_node[]=4 will add a select the group with node ID
   4, in the node form. The prefixed entity can change to indicate other entity
