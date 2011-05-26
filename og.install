@@ -457,8 +457,16 @@ function og_update_7001(&$sandbox) {
  * Add indexes to og and og_membership tables.
  */
 function og_update_7100(&$sandbox) {
-  db_add_index('og_membership', 'entity', array('etid', 'entity_type'));
-  db_add_index('og_membership', 'gid', array('gid'));
-  db_add_index('og', 'entity', array('etid', 'entity_type'));
+  // Make sure we don't try to re-add an index that was added in previous
+  // updates.
+  if (!db_index_exists('og_membership', 'entity')) {
+    db_add_index('og_membership', 'entity', array('etid', 'entity_type'));
+  }
+  if (!db_index_exists('og_membership', 'gid')) {
+    db_add_index('og_membership', 'gid', array('gid'));
+  }
+  if (!db_index_exists('og', 'entity')) {
+    db_add_index('og', 'entity', array('etid', 'entity_type'));
+  }
   return t('Added table indexes for the following tables: @tables', array('@tables' => 'og, og_membership'));
 }
