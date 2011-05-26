@@ -1263,6 +1263,7 @@ function og_invalidate_cache($gids = array()) {
     'og_field_audience_options',
     'og_role_permissions',
     'og_field_formatter_view',
+    'og_get_permissions',
   );
 
   foreach ($caches as $cache) {
@@ -1705,7 +1706,59 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
   return !empty($perm[$gid][$account->uid][$string]);
 }
 
+/**
+ * Check if a user has access to a permission on a certain entity context.
+ *
+ * @param $perm
+ *   The organic groups permission.
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity
+ *   The entity object.
+ * @param $account
+ *   Optional; The user object. If empty the current user will be used.
+ */
+function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
+  // Make sure entity is a group or group content.
+  if (!isset($entity->{OG_AUDIENCE_FIELD}) && !isset($entity->{OG_GROUP_FIELD})) {
+    return;
+  }
 
+  if (empty($account)) {
+    global $user;
+    $account = clone $user;
+  }
+
+  // Quick checks for admin privileges.
+  if ($account->uid == 1 || user_access('administer group', $account)) {
+    return TRUE;
+  }
+
+  // Check if entity is a group.
+  list($id) = entity_extract_ids($entity_type, $entity);
+  if (($group = og_get_group($entity_type, $id)) && og_user_access($group->gid, $perm, $account)) {
+    // Entity is a group, and user has access.
+    return TRUE;
+  }
+
+  if (!isset($entity->{OG_AUDIENCE_FIELD})) {
+    // Content is not a group content, so deny access.
+    return FALSE;
+  }
+
+  // Entity is a group content.
+  if ($gids = og_get_entity_groups($entity_type, $entity)) {
+    foreach ($gids as $gid) {
+      if (og_user_access($gid, $perm, $account)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  // This is an orphan group content, or a group that was disabled.
+  return TRUE;
+}
 
 /**
  * Add group and group content fields to new content types.
