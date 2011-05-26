@@ -1735,10 +1735,12 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
   }
 
   // Check if entity is a group.
-  list($id) = entity_extract_ids($entity_type, $entity);
-  if (($group = og_get_group($entity_type, $id)) && og_user_access($group->gid, $perm, $account)) {
-    // Entity is a group, and user has access.
-    return TRUE;
+  if (isset($entity->{OG_GROUP_FIELD})) {
+    list($id) = entity_extract_ids($entity_type, $entity);
+    if (($group = og_get_group($entity_type, $id)) && og_user_access($group->gid, $perm, $account)) {
+      // Entity is a group, and user has access.
+      return TRUE;
+    }
   }
 
   if (!isset($entity->{OG_AUDIENCE_FIELD})) {
