@@ -22,10 +22,6 @@ function og_register_form_user_register_form_alter(&$form, $form_state) {
   if ($gids = og_register_get_groups()) {
     $account = clone $user;
     field_attach_form('user', $account, $form, $form_state);
-
-    // Make sure we have access to this element.
-    $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#access'] = TRUE;
-    $form[OG_AUDIENCE_FIELD]['#access'] = TRUE;
   }
 }
 
