@@ -283,7 +283,15 @@ function og_ui_mail($key, &$message, $params) {
  * Implements hook_field_access().
  */
 function og_ui_field_access($op, $field, $entity_type, $entity, $account) {
+  global $user;
+
   if ($field['field_name'] != OG_AUDIENCE_FIELD) {
+    return;
+  }
+
+  if (!$user->uid) {
+    // User is anonymous, and user register might try to add the group-audience
+    // field.
     return;
   }
 
