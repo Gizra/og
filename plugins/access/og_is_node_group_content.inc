@@ -8,7 +8,7 @@
 
 $plugin = array(
   'title' => t("OG: Node is a group content"),
-  'description' => t('Control access by whether or not a node is of type "Group".'),
+  'description' => t('Control access by whether or not a node is of type "Group content".'),
   'callback' => 'og_is_node_group_content_check',
   'settings form' => 'og_is_node_group_content_settings',
   'summary' => 'og_is_node_group_content_summary',
@@ -38,7 +38,7 @@ function og_is_node_group_content_check($conf, $context) {
   if (empty($context) || empty($context->data) || empty($context->data->type)) {
     return FALSE;
   }
-  
+
   return og_is_group_content_type('node', $context->data->type);
 }
 

@@ -8,7 +8,7 @@
 
 $plugin = array(
   'title' => t("OG: Node is a group"),
-  'description' => t('Control access by whether or not a node is of type "Group content".'),
+  'description' => t('Control access by whether or not a node is of type "Group".'),
   'callback' => 'og_is_node_group_check',
   'settings form' => 'og_is_node_group_settings',
   'summary' => 'og_is_node_group_summary',
