@@ -7,7 +7,7 @@
  */
 
 /**
- * Implement hook_field_info().
+ * Implements hook_field_info().
  */
 function og_field_info() {
   return array(
@@ -44,7 +44,7 @@ function og_field_group_property_callback(&$info, $entity_type, $field, $instanc
 }
 
 /**
- * Implement hook_field_formatter_info().
+ * Implements hook_field_formatter_info().
  */
 function og_field_formatter_info() {
   return array(
@@ -97,15 +97,12 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
 
 
 /**
- * Implement hook_field_widget_info().
+ * Implements hook_field_widget_info().
  */
 function og_field_widget_info() {
   return array(
     OG_AUDIENCE_WIDGET => array(
       'label' => t('Group audience'),
-      'settings' => array(
-        'opt_group' => 'auto',
-      ),
       'field types' => array('group'),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
@@ -128,7 +125,7 @@ function og_field_widget_info() {
 }
 
 /**
- * Implement hook_field_widget_settings_form().
+ * Implements hook_field_widget_settings_form().
  */
 function og_field_widget_settings_form($field, $instance) {
   $widget   = $instance['widget'];
@@ -175,7 +172,7 @@ function og_field_widget_settings_form($field, $instance) {
 }
 
 /**
- * Implement hook_field_widget_form().
+ * Implements hook_field_widget_form().
  *
  * Unlike options_field_widget_form() our widget's logic is a bit different, as
  * the form element type is a result of the user's access to the groups.
@@ -327,35 +324,35 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 }
 
 /**
- * Implement hook_field_is_empty().
+ * Implements hook_field_is_empty().
  */
 function og_field_is_empty($item, $field) {
   return empty($item['gid']);
 }
 
 /**
- * Implement hook_field_attach_insert().
+ * Implements hook_field_attach_insert().
  */
 function og_field_attach_insert($entity_type, $entity) {
   og_field_crud_group('insert', $entity_type, $entity);
 }
 
 /**
- * Implement hook_field_attach_update().
+ * Implements hook_field_attach_update().
  */
 function og_field_attach_update($entity_type, $entity) {
   og_field_crud_group('update', $entity_type, $entity);
 }
 
 /**
- * Implement hook_field_attach_delete().
+ * Implements hook_field_attach_delete().
  */
 function og_field_attach_delete($entity_type, $entity) {
   og_field_crud_group('delete', $entity_type, $entity);
 }
 
 /**
- * Implement hook_field_insert().
+ * Implements hook_field_insert().
  *
  * DEPRECATE WHEN FIELD SCHEMA CAN BE CHANGED.
  */
@@ -364,7 +361,7 @@ function og_field_insert($entity_type, $entity, $field, $instance, $langcode, &$
 }
 
 /**
- * Implement hook_field_update().
+ * Implements hook_field_update().
  *
  * DEPRECATE WHEN FIELD SCHEMA CAN BE CHANGED.
  */
