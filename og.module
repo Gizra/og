@@ -215,8 +215,9 @@ function og_entity_info_alter(&$entity_info) {
 /**
  * Implements hook_entity_property_info().
  *
- * Add group-membership metadata for every fieldable entity that is a group
- * content type.
+ * - Add group metadata for every fieldable entity that is a group type.
+ * - Add group-membership metadata for every fieldable entity that is a group
+ *   content type.
  */
 function og_entity_property_info() {
   $info = array();
@@ -228,6 +229,16 @@ function og_entity_property_info() {
       'getter callback' => 'og_get_properties',
     );
   }
+
+  foreach (og_get_all_group_entity() as $entity_type => $name) {
+    $info[$entity_type]['properties']['group'] = array(
+      'label' => t("Group"),
+      'type' => 'group',
+      'description' => t("The group associated with the @name entity.", array('@name' => $name)),
+      'getter callback' => 'og_get_properties',
+    );
+  }
+
   return $info;
 }
 
@@ -266,6 +277,11 @@ function og_get_properties($entity, array $options, $name, $type) {
     case 'url':
       $wrapper = entity_metadata_wrapper('group', $entity);
       return $wrapper->entity->url->value();
+
+    case 'group':
+      list($id) = entity_extract_ids($type, $entity);
+      // TODO: Return also pending groups?
+      return og_get_group($type, $id);
   }
 }
 
