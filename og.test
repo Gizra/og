@@ -1130,12 +1130,6 @@ class OgMigrateGroupMembershipTestCase extends OgUpgradePathTestCase {
     $this->drupalLogin($admin_user);
 
     $this->performUpgrade();
-
-    // TODO: Understand why this workround is needed to load all entity classes.
-    module_enable(array('entity'));
-    module_load_include('inc', 'entity' ,'includes/entity');
-    module_load_include('inc', 'entity' ,'includes/entity.controller');
-    module_enable(array('og'));
     module_enable(array('og_migrate'));
 
     menu_rebuild();
