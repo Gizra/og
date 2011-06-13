@@ -34,16 +34,6 @@ function og_ui_menu() {
     'title' => 'Leave group',
   );
 
-  $items['group/%/%/invite'] = array(
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_ui_invite_form', 1, 2),
-    'access callback' => 'og_user_access_by_entity',
-    'access arguments' => array('invite', 1, 2),
-    'title' => 'Send invitation',
-    'type' => MENU_CALLBACK,
-    'file' => 'og_ui.pages.inc',
-  );
-
   $items['group/%/%/admin/people/add-user'] = array(
     'page callback' => 'drupal_get_form',
     'title' => 'Add members',
