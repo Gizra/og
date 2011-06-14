@@ -24,7 +24,7 @@ class OgViewsController extends EntityDefaultViewsController {
     $data['field_data_group_audience']['user_roles'] = array(
       'group' => t('Group'),
       'title' => t('Group user roles'),
-      'help' => t('Show all the groups a user belongs to in a group.'),
+      'help' => t('Show all the roles a user belongs to in a group.'),
       // This is a dummy field, so point it to a real field that we need - the
       // group ID
       'real field' => 'group_audience_gid',
