@@ -2318,6 +2318,7 @@ function og_block_details() {
 
   // Only display group details if we have a group context.
   if (($node = og_get_group_context()) && node_access('view', $node)) {
+    $account = user_load($node->uid);
     list($txt, $subscription) = og_subscriber_count_link($node);
     if ($subscription == 'active' || user_access('administer nodes')) {
       $links = module_invoke_all('og_create_links', $node);
@@ -2326,7 +2327,7 @@ function og_block_details() {
         $links['invite'] = l(t('Invite friend'), "og/invite/$node->nid");
       }
       $links['subscribers'] = $txt;
-      $links['manager'] = t('Manager: !name', array('!name' => theme('username', $node)));
+      $links['manager'] = t('Manager: !name', array('!name' => theme('username', $account)));
 
       // Site admins get a Join link if they are not yet subscribed.
       $subscribe = isset($subscription) && og_is_group_member($node->nid, FALSE) ? l(t('My membership'), "og/manage/$node->nid") : og_subscribe_link($node);
