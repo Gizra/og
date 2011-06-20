@@ -131,7 +131,7 @@ function og_entity_info() {
 
   $items['og_membership_type'] = array(
     'label' => t('Organic groups membership type'),
-    'controller class' => 'EntityAPIController',
+    'controller class' => 'EntityAPIControllerExportable',
     'entity class' => 'EntityOgMembershipType',
     'base table' => 'og_membership_type',
     'fieldable' => TRUE,
@@ -197,8 +197,7 @@ function og_entity_info_alter(&$entity_info) {
   if (!class_exists('EntityAPIController') || !class_exists('OgMembershipTypeUIController')) {
     return;
   }
-  $og_membership_types = entity_load('og_membership_type');
-  foreach ($og_membership_types as $type_name => $type) {
+  foreach (og_membership_type_load() as $type_name => $type) {
     $entity_info['og_membership']['bundles'][$type_name] = array(
       //@todo do we need a short label too?
       'label' => $type->name,
@@ -857,7 +856,7 @@ function og_membership_type_create($name, $values = array()) {
 function og_membership_type_load($name = NULL) {
   // Replace dashes with underscores so this can be used as menu argument
   // loader too.
-  $types = entity_load('og_membership_type', isset($name) ? array(strtr($name, array('-' => '_'))) : FALSE);
+  $types = entity_load_multiple_by_name('og_membership_type', isset($name) ? array(strtr($name, array('-' => '_'))) : FALSE);
   if (isset($name)) {
     return isset($types[$name]) ? $types[$name] : FALSE;
   }
