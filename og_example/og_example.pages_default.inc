@@ -119,7 +119,7 @@ function og_example_default_page_manager_handlers() {
       'context' => array(
         0 => 'relationship_og_group_from_node_1',
       ),
-      'override_title' => 1,
+      'override_title' => 0,
       'override_title_text' => 'Members',
     );
     $pane->cache = array();
@@ -182,6 +182,7 @@ function og_example_default_page_manager_handlers() {
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = '0';
   $handler->conf['display'] = $display;
+
   $export['node_view_panel_context'] = $handler;
 
   return $export;
