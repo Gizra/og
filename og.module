@@ -540,15 +540,15 @@ function og_og_group_update($values = array()) {
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
   $group_membership = og_get_group_membership($values['gid'], $values['entity type'], $id);
 
+  // Just make sure we the group membership.
   if (!$group_membership) {
     return;
   }
 
-  // Check membership state changed.
-  if ($group_membership->state != $values['state']) {
-    $group_membership->state = $values['state'];
-    $group_membership->save();
-  }
+  // We know the state changed.
+  // see og_entity_presave_group_audience_diff().
+  $group_membership->state = $values['state'];
+  $group_membership->save();
 }
 
 /**
