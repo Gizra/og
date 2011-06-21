@@ -272,34 +272,43 @@ function og_views_default_views() {
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'node';
   $handler->display->display_options['row_options']['links'] = 1;
   $handler->display->display_options['row_options']['comments'] = 0;
-  /* Empty text: Global: Text area */
+  /* No results behavior: Global: Text area */
   $handler->display->display_options['empty']['area']['id'] = 'area';
   $handler->display->display_options['empty']['area']['table'] = 'views';
   $handler->display->display_options['empty']['area']['field'] = 'area';
   $handler->display->display_options['empty']['area']['empty'] = FALSE;
   $handler->display->display_options['empty']['area']['content'] = 'There is no content in this group.';
-  /* Sort criterion: Node: Post date */
+  /* Relationship: Group membership: Node group membership */
+  $handler->display->display_options['relationships']['og_membership_rel']['id'] = 'og_membership_rel';
+  $handler->display->display_options['relationships']['og_membership_rel']['table'] = 'node';
+  $handler->display->display_options['relationships']['og_membership_rel']['field'] = 'og_membership_rel';
+  $handler->display->display_options['relationships']['og_membership_rel']['required'] = 0;
+  /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-  /* Argument: Fields: group_audience (group_audience) - gid */
-  $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
-  $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
-  $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'default';
-  $handler->display->display_options['arguments']['group_audience_gid']['style_plugin'] = 'default_summary';
-  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['group_audience_gid']['validate_fail'] = 'empty';
-  $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
-  /* Filter: Node: Published */
+  /* Contextual filter: Organic groups membership: Group gid */
+  $handler->display->display_options['arguments']['group']['id'] = 'group';
+  $handler->display->display_options['arguments']['group']['table'] = 'og_membership';
+  $handler->display->display_options['arguments']['group']['field'] = 'group';
+  $handler->display->display_options['arguments']['group']['relationship'] = 'og_membership_rel';
+  $handler->display->display_options['arguments']['group']['default_action'] = 'not found';
+  $handler->display->display_options['arguments']['group']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['group']['default_argument_skip_url'] = 0;
+  $handler->display->display_options['arguments']['group']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['group']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['group']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['group']['break_phrase'] = 0;
+  $handler->display->display_options['arguments']['group']['not'] = 0;
+  /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
   $handler->display->display_options['filters']['status']['field'] = 'status';
@@ -334,13 +343,14 @@ function og_views_default_views() {
     t('more'),
     t('Apply'),
     t('Reset'),
-    t('Sort By'),
+    t('Sort by'),
     t('Asc'),
     t('Desc'),
     t('Items per page'),
     t('- All -'),
     t('Offset'),
     t('There is no content in this group.'),
+    t('group membership'),
     t('All'),
     t('Content pane'),
     t('OG nodes'),
