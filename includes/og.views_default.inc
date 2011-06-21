@@ -324,13 +324,13 @@ function og_views_default_views() {
     $handler->display->display_options['allow']['exposed_form'] = 0;
     $handler->display->display_options['allow']['fields_override'] = 0;
     $handler->display->display_options['argument_input'] = array(
-      'group_audience_gid' => array(
+      'group' => array(
         'type' => 'context',
         'context' => 'entity:group.gid',
         'context_optional' => 0,
         'panel' => '0',
         'fixed' => '',
-        'label' => 'Fields: group_audience (group_audience) - gid',
+        'label' => 'Organic groups membership: Group gid',
       ),
     );
   }
