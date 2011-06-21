@@ -84,7 +84,7 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
     $properties['entity'] = array(
       'label' => t('Entity'),
       'type' => 'entity',
-      'description' => t('The entity that is a group.'),
+      'description' => t('The entity that is a group content.'),
       'getter callback' => 'og_entity_getter',
       'required' => TRUE,
       'schema field' => 'etid',
