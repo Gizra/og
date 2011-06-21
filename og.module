@@ -461,8 +461,6 @@ function og_entity_presave($entity, $type) {
       'delete' => 'og_ungroup',
     );
 
-    $account = clone $entity;
-
     foreach (array('insert', 'update', 'delete') as $op) {
       if (!empty($diff[$op])) {
         foreach ($diff[$op] as $item) {
@@ -585,7 +583,6 @@ function og_entity_presave_group_audience_diff($entity, $type) {
   }
 
   $return = array('insert' => array(), 'update' => array(), 'delete' => array());
-  $entity_original = $entity->original;
   $new_gids = array ();
   $original_gids = array ();
 
