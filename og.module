@@ -584,10 +584,12 @@ function og_entity_presave_group_audience_diff($entity, $type) {
 
   $return = array('insert' => array(), 'update' => array(), 'delete' => array());
   $new_gids = array ();
-  $original_gids = array ();
+  $original_gids = array();
 
   if (isset($entity->{OG_AUDIENCE_FIELD}) && isset($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])){
     foreach ($entity->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
+      // Item is still no populated with default values.
+      $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
       $new_gids[$item['gid']] = $item;
     }
   }
@@ -606,8 +608,14 @@ function og_entity_presave_group_audience_diff($entity, $type) {
 
   // See if there are new or updated groups.
   foreach ($new_gids as $gid => $item) {
-    $op = isset($original_gids[$gid]) ? 'update' : 'insert';
-    $return[$op][] = $item;
+    if (empty($original_gids[$gid])) {
+      $return['insert'][] = $item;
+    }
+    elseif ($item['state'] != $original_gids[$gid]['state']) {
+      // This is an existing group. Update the group only if the state has
+      // changed.
+      $return['update'][] = $item;
+    }
   }
   return $return;
 }
