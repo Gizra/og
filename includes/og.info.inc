@@ -70,6 +70,8 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 
+    // Group ID is provided in the "group" property.
+    unset($properties['gid']);
     $properties['group'] = array(
       'label' => t("Group"),
       'type' => 'group',
