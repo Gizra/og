@@ -184,6 +184,8 @@ function og_views_default_views() {
   $handler->display->display_options['arguments']['group']['field'] = 'group';
   $handler->display->display_options['arguments']['group']['relationship'] = 'og_membership_rel';
   $handler->display->display_options['arguments']['group']['default_action'] = 'not found';
+  $handler->display->display_options['arguments']['group']['title_enable'] = 1;
+  $handler->display->display_options['arguments']['group']['title'] = '%1 group members';
   $handler->display->display_options['arguments']['group']['default_argument_type'] = 'fixed';
   $handler->display->display_options['arguments']['group']['default_argument_skip_url'] = 0;
   $handler->display->display_options['arguments']['group']['summary']['number_of_records'] = '0';
@@ -208,8 +210,8 @@ function og_views_default_views() {
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block_1');
 
-  /* Display: Content pane */
   if (module_exists('views_content')) {
+    /* Display: Content pane */
     $handler = $view->new_display('panel_pane', 'Content pane', 'panel_pane_1');
     $handler->display->display_options['pane_title'] = 'OG members';
     $handler->display->display_options['allow']['use_pager'] = 0;
@@ -222,13 +224,13 @@ function og_views_default_views() {
     $handler->display->display_options['allow']['exposed_form'] = 0;
     $handler->display->display_options['allow']['fields_override'] = 0;
     $handler->display->display_options['argument_input'] = array(
-      'gid' => array(
+      'group' => array(
         'type' => 'context',
         'context' => 'entity:group.gid',
         'context_optional' => 0,
         'panel' => '0',
         'fixed' => '',
-        'label' => 'Organic groups membership: Gid',
+        'label' => 'Organic groups membership: Group gid',
       ),
     );
   }
@@ -242,6 +244,7 @@ function og_views_default_views() {
     t('Desc'),
     t('group membership'),
     t('All'),
+    t('%1 group members'),
     t('Block'),
     t('Content pane'),
     t('OG members'),
