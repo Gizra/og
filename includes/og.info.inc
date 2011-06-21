@@ -100,6 +100,16 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
     $properties['state'] += array(
       'setter callback' => 'entity_metadata_verbatim_set',
       'options list' => 'og_group_content_states',
+      'required' => TRUE,
+    );
+
+    $properties['og_membership_type'] = array(
+      'label' => t("Group membership type"),
+      'type' => 'og_membership_type',
+      'description' => t('The group membership type.'),
+      'required' => TRUE,
+      'getter callback' => 'entity_property_getter_method',
+      'schema field' => 'name',
     );
 
     return $info;

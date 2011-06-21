@@ -238,7 +238,7 @@ function og_schema_info() {
   );
 
   $schema['og_membership_type'] = array(
-    'description' => 'Storage for user-defined group membership.',
+    'description' => 'The group membership type.',
     'fields' => array(
       // Although the "name" should be enough as the primary key, the numeric ID
       // is required for the internal use of entity API.
