@@ -168,6 +168,7 @@ function og_notifications_og($op, $gid, $uid, $args) {
       // These different ops have been provided for consistency and flexibility
       // during use by other modules.
     case 'user approve':
+    case 'user deny':
     case 'admin create':
     case 'admin new':
     case 'user broadcast':
