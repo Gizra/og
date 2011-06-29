@@ -1227,7 +1227,7 @@ class EntityOg extends Entity {
    */
   public function user() {
     $entity = $this->getEntity();
-    if (!empty($entity->uid)) {
+    if (isset($entity->uid)) {
       return user_load($entity->uid);
     }
 
