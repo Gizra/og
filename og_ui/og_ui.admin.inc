@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Admin settings for Organic grops module.
+ * Admin settings for Organic groups module.
  */
 
 /**

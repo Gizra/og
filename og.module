@@ -268,7 +268,6 @@ function og_get_properties($entity, array $options, $name, $type) {
         ->entityCondition('entity_type', 'og_membership')
         ->propertyCondition('entity_type', $type, '=')
         ->propertyCondition('etid', $id, '=')
-        // ->propertyCondition('state', $states, 'IN')
         ->execute();
 
       return !empty($result['og_membership']) ? array_keys($result['og_membership']) : array();
@@ -594,19 +593,28 @@ function og_entity_presave_group_audience_diff($entity, $type) {
     }
   }
 
-  $original = $entity->original;
-  // See if there are deleted groups.
-  if (isset($original->{OG_AUDIENCE_FIELD}) && isset($original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE])){
-    foreach ($original->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE] as $item) {
-      $gid = $item['gid'];
-      $original_gids[$gid] = $item;
-      if (empty($new_gids[$gid])) {
-        $return['delete'][] = $item;
-      }
+  // Instead of checking $entity->original, we get the group membership. This
+  // will allow egde cases, such as settings the group-audience field widget to
+  // accpet only a single group, but later, subscribing a user to another group
+  // via og_group(). By checking the group membership directly, we make sure we
+  // have all the real membership, not only the ones captured on group-audience
+  // field.
+  $original_gids = array();
+  $wrapper = entity_metadata_wrapper($type, $entity);
+  foreach ($wrapper->og_membership->value() as $group_membership) {
+    $gid = $group_membership->gid;
+    $item = array(
+      'gid' => $group_membership->gid,
+      'state' => $group_membership->state,
+      'created' => $group_membership->created,
+    );
+    $original_gids[$gid] = $item;
+    if (empty($new_gids[$gid])) {
+      $return['delete'][] = $item;
     }
   }
 
-  // See if there are new or updated groups.
+  // Check if the membership is new, or updating an existing one.
   foreach ($new_gids as $gid => $item) {
     if (empty($original_gids[$gid])) {
       $return['insert'][] = $item;
