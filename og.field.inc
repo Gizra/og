@@ -538,7 +538,7 @@ function og_field_crud_group($op, $entity_type, $entity) {
  * @return
  *   Array keyed by "content groups" and "other groups".
  */
-function og_field_audience_options($opt_group = FALSE, $account = NULL) {
+function og_field_audience_options(&$opt_group = FALSE, $account = NULL) {
   $return = &drupal_static(__FUNCTION__, array());
 
   if (!empty($return)) {
@@ -551,7 +551,7 @@ function og_field_audience_options($opt_group = FALSE, $account = NULL) {
     $account = clone($user);
   }
 
-  //Initialize values
+  //Initialize values.
   $return = array('content groups' => array(), 'other groups' => array());
 
   $content_groups = og_get_entity_groups('user', $account);
