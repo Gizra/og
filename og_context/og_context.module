@@ -438,12 +438,14 @@ function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $p
   if ($entity) {
     // Check if the entity is itself a group.
     list($id) = entity_extract_ids($entity_type, $entity);
-    if ($group = og_get_group($entity_type, $id)) {
-      $context = drupal_map_assoc(array($group->gid));
-    }
-
-    elseif ($gids = og_get_entity_groups($entity_type, $entity)) {
-      $context = $gids;
+    // Only proceed if it really is the entity and we got an id.
+    if (isset($id)) {
+      if ($group = og_get_group($entity_type, $id)) {
+        $context = drupal_map_assoc(array($group->gid));
+      }
+      elseif ($gids = og_get_entity_groups($entity_type, $entity)) {
+        $context = $gids;
+      }
     }
   }
 
