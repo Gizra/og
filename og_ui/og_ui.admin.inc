@@ -779,8 +779,14 @@ function og_ui_field_settings_validate($form, &$form_state) {
     form_set_error('bundles', t('Field %field already exists in %bundle.', $params));
   }
 
+  // Check field can be attached to entity type.
   if (!empty($group_field['entity']) && !in_array($entity_type, $group_field['entity'])) {
-    form_set_error('bundles', t('Field %field can only be attached to %entity entity bundles.', $params));
+    $items = array();
+    foreach ($group_field['entity'] as $entity_type) {
+      $info = entity_get_info($entity_type);
+      $items[] = $info['label'];
+    }
+    form_set_error('bundles', t('Field %field can only be attached to %entities entity bundles.', $params + array('%entities' => implode(', ', $items))));
   }
 
 }
