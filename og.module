@@ -1075,7 +1075,7 @@ function og_membership_save($membership) {
  *   The group membership entity to be deleted.
  */
 function og_membership_delete($id) {
-  return og_membership_delete(array($id));
+  return og_membership_delete_multiple(array($id));
 }
 
 function og_membership_delete_multiple($ids = array()) {
