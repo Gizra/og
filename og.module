@@ -599,7 +599,6 @@ function og_entity_presave_group_audience_diff($entity, $type) {
   // via og_group(). By checking the group membership directly, we make sure we
   // have all the real membership, not only the ones captured on group-audience
   // field.
-  $original_gids = array();
   $wrapper = entity_metadata_wrapper($type, $entity);
   foreach ($wrapper->og_membership->value() as $group_membership) {
     $gid = $group_membership->gid;
