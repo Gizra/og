@@ -3015,7 +3015,7 @@ function og_node_create_links($gid, $destination = '') {
   foreach ($names as $type => $name) {
     // theme_item_list's 'data' items isn't a render element, so use l().
     // http://drupal.org/node/891112
-    $items[] = array('data' => l($name, 'node/add/' . str_replace('_', '-', $node->type), $options));
+    $items[] = array('data' => l($name, 'node/add/' . str_replace('_', '-', $type), $options));
   }
 
   $element = array();
