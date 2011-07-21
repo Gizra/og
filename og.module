@@ -2985,30 +2985,45 @@ function og_list_permissions($type) {
  *   page.
  */
 function og_node_create_links($gid, $destination = '') {
-  $element = array();
-  if ($group = og_get_group('group', $gid)) {
-    $items = array();
-    foreach (node_type_get_types() as $node) {
-      if (og_is_group_content_type('node', $node->type)) {
-        if (node_access('create', $node->type)) {
-          $options  = array(
-            'query' => array(
-              'gids_' . $group->entity_type . '[]' => $group->etid,
-            ) + drupal_get_destination(),
-          );
-          // theme_item_list's 'data' items isn't a render element, so use l().
-          // http://drupal.org/node/891112
-          $items[] = array('data' => l(node_type_get_name($node->type), 'node/add/' . str_replace('_', '-', $node->type), $options));
-        }
-      }
-    }
-    if ($items) {
-      $element['og_node_create_links'] = array(
-        '#theme' => 'item_list',
-        '#items' => $items,
-      );
+  $group = og_get_group('group', $gid);
+  if (!$group) {
+    return;
+  }
+
+  $name = array();
+  foreach (node_type_get_types() as $node) {
+    if (og_is_group_content_type('node', $node->type) && node_access('create', $node->type)) {
+      $names[$node->type] = node_type_get_name($node->type);
     }
   }
+
+  if (empty($names)) {
+    return;
+  }
+
+  // Sort names.
+  asort($names);
+
+  // Build links.
+  $options  = array(
+    'query' => array(
+      'gids_' . $group->entity_type . '[]' => $group->etid,
+    ) + drupal_get_destination(),
+  );
+
+  $items = array();
+  foreach ($names as $type => $name) {
+    // theme_item_list's 'data' items isn't a render element, so use l().
+    // http://drupal.org/node/891112
+    $items[] = array('data' => l($name, 'node/add/' . str_replace('_', '-', $node->type), $options));
+  }
+
+  $element = array();
+  $element['og_node_create_links'] = array(
+    '#theme' => 'item_list',
+    '#items' => $items,
+  );
+
   return $element;
 }
 
