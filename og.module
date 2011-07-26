@@ -1838,7 +1838,29 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
 
   // Make sure the cached values are according to the states we are looking
   // for.
-  if (isset($groups[$entity_type][$id]) && !empty($groups['__info'][$entity_type][$id]['states']) && !array_diff($groups['__info'][$entity_type][$id]['states'], $states)) {
+  // We break down the checks for easier readbility of the code.
+  $cache = TRUE;
+  if (!isset($groups[$entity_type][$id])) {
+    // The value doesn't exist.
+    $cache = FALSE;
+  }
+
+  if ($cache && empty($groups['__info'][$entity_type][$id]['states'])) {
+    // The states are not registered.
+    $cache = FALSE;
+  }
+
+  if ($cache && count($groups['__info'][$entity_type][$id]['states']) != count($states)) {
+    // The registered states are not the equal.
+    $cache = FALSE;
+  }
+
+  if ($cache && array_diff($groups['__info'][$entity_type][$id]['states'], $states)) {
+    // Same number of states but they are not the equal.
+    $cache = FALSE;
+  }
+
+  if ($cache) {
     return $groups[$entity_type][$id];
   }
 
