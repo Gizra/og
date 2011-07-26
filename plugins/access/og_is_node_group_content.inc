@@ -7,27 +7,12 @@
  */
 
 $plugin = array(
-  'title' => t("OG: Node is a group content"),
+  'title' => t("OG: Node is an OG group content"),
   'description' => t('Control access by whether or not a node is of type "Group content".'),
   'callback' => 'og_is_node_group_content_check',
-  'settings form' => 'og_is_node_group_content_settings',
   'summary' => 'og_is_node_group_content_summary',
   'required context' => new ctools_context_required(t('Node'), 'node'),
-  'defaults' => array('is_group' => TRUE),
 );
-
-/**
- * Settings form
- */
-function og_is_node_group_content_settings($form, &$form_state, $conf) {
-  $form['settings']['is_group'] = array(
-    '#type' => 'radios',
-    '#description' => t('Check to see if the node is of type "Group".'),
-    '#options' => array(TRUE => t('Is "Group"'), FALSE => t('Is not "Group"')),
-    '#default_value' => $conf['is_group'],
-  );
-  return $form;
-}
 
 /**
  * Check for access.
@@ -46,10 +31,5 @@ function og_is_node_group_content_check($conf, $context) {
  * Provide a summary description based upon the specified context
  */
 function og_is_node_group_content_summary($conf, $context) {
-  if (!empty($conf['is_group'])) {
-    return t('@identifier exists', array('@identifier' => $context->identifier));
-  }
-  else {
-    return t('@identifier does not exist', array('@identifier' => $context->identifier));
-  }
+  return t('@identifier is an OG group', array('@identifier' => $context->identifier));
 }
