@@ -23,7 +23,7 @@ function og_is_node_group_content_settings($form, &$form_state, $conf) {
   $form['settings']['is_group'] = array(
     '#type' => 'radios',
     '#description' => t('Check to see if the node is of type "Group".'),
-    '#options' => array(TRUE => t('Is "Group content"'), FALSE => t('Is not "Group content"')),
+    '#options' => array(TRUE => t('Is "Group"'), FALSE => t('Is not "Group"')),
     '#default_value' => $conf['is_group'],
   );
   return $form;
