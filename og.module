@@ -2929,7 +2929,9 @@ function og_group_content_states() {
 function og_get_fieldable_entity_list() {
   $return = array();
   foreach (entity_get_info() as $name => $info) {
-    $return[$name] = check_plain($info['label']);
+    if (!empty($info['fieldable'])) {
+      $return[$name] = check_plain($info['label']);
+    }
   }
 
   return $return;
