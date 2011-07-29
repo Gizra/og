@@ -3,11 +3,11 @@
 
 /**
  * @file
- * Plugin to provide an relationship handler for node from user.
+ * Plugin to provide an relationship handler for node from OG gorup.
  */
 
 /**
- * TODO: Can this be made generic to be entity from group?
+ * Plugin definition.
  */
 $plugin = array(
   'title' => t('Node from OG group'),

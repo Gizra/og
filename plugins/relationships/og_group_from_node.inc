@@ -3,12 +3,11 @@
 
 /**
  * @file
- * Plugin to provide an relationship handler for node from user.
+ * Plugin to provide an relationship handler for OG group from node.
  */
 
 /**
- * Plugins are described by creating a $plugin array which will be used
- * by the system that includes this file.
+ * Plugin definition.
  */
 $plugin = array(
   'title' => t('OG group from node'),
