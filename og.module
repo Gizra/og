@@ -117,7 +117,7 @@ function og_help($path, $arg) {
 function og_entity_info() {
   $items['group'] = array(
     'label' => t('Organic groups group'),
-    'entity class' => 'EntityOg',
+    'entity class' => 'OgGroup',
     'controller class' => 'EntityAPIController',
     'base table' => 'og',
     'fieldable' => TRUE,
@@ -132,7 +132,7 @@ function og_entity_info() {
   $items['og_membership_type'] = array(
     'label' => t('Organic groups membership type'),
     'controller class' => 'EntityAPIControllerExportable',
-    'entity class' => 'EntityOgMembershipType',
+    'entity class' => 'OgMembershipType',
     'base table' => 'og_membership_type',
     'fieldable' => TRUE,
     'entity keys' => array(
@@ -827,7 +827,7 @@ function og_ctools_context_converter_alter($context, $converter, &$value) {
 /**
  * A class used for group membership types.
  */
-class EntityOgMembershipType extends Entity {
+class OgMembershipType extends Entity {
 
   public $name;
   public $description = '';
@@ -1167,7 +1167,7 @@ function og_create_group($values = array()) {
 /**
  * Main class for Group entities provided by Entity API.
  */
-class EntityOg extends Entity {
+class OgGroup extends Entity {
   public function __construct(array $values = array(), $entityType = NULL) {
     parent::__construct($values, 'group');
   }
