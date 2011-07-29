@@ -11,9 +11,9 @@
  * by the system that includes this file.
  */
 $plugin = array(
-  'title' => t('Group from node'),
+  'title' => t('OG group from node'),
   'keyword' => 'group',
-  'description' => t('Get the group context from a node.'),
+  'description' => t('Get the OG group context from a node.'),
   'required context' => new ctools_context_required(t('Node'), 'node'),
   'context' => 'og_group_from_node_context',
 );

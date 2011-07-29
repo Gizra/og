@@ -10,9 +10,9 @@
  * TODO: Can this be made generic to be entity from group?
  */
 $plugin = array(
-  'title' => t('Node from group'),
+  'title' => t('Node from OG group'),
   'keyword' => 'node',
-  'description' => t('Get the node from a group.'),
+  'description' => t('Get the node from an OG group.'),
   'required context' => new ctools_context_required(t('Group'), 'entity:group'),
   'context' => 'og_node_from_group_context',
 );
