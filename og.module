@@ -456,13 +456,6 @@ function og_views_api() {
  */
 function og_entity_presave($entity, $type) {
   if ($diff = og_entity_presave_group_audience_diff($entity, $type)) {
-    // Define the operation and the hook that it should invoke.
-    $info = array(
-      'insert' => 'og_group',
-      'update' => 'og_group',
-      'delete' => 'og_ungroup',
-    );
-
     foreach (array('insert', 'update', 'delete') as $op) {
       if (!empty($diff[$op])) {
         foreach ($diff[$op] as $item) {
@@ -1516,9 +1509,6 @@ function og_group($gid, $values = array()) {
   // Check the audience field exists in the entity.
   if (isset($entity->{$property})) {
     $wrapper = &$entity->{$property}[LANGUAGE_NONE];
-
-    $op = !empty($wrapper[0]['gid']) ? 'update' : 'insert';
-
 
     list($id) = entity_extract_ids($entity_type, $entity);
     // Check if the entity is new or an existing one.
@@ -2929,7 +2919,9 @@ function og_group_content_states() {
 function og_get_fieldable_entity_list() {
   $return = array();
   foreach (entity_get_info() as $name => $info) {
-    $return[$name] = check_plain($info['label']);
+    if (!empty($info['fieldable'])) {
+      $return[$name] = check_plain($info['label']);
+    }
   }
 
   return $return;
