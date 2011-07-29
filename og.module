@@ -146,6 +146,7 @@ function og_entity_info() {
     ),
     'bundle of' => 'og_membership',
     'module' => 'og',
+    'metadata controller class' => 'EntityDefaultMetadataController',
     'views controller class' => 'EntityDefaultViewsController',
     'access callback' => 'og_membership_type_access',
   );
