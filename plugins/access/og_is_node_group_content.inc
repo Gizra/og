@@ -31,5 +31,5 @@ function og_is_node_group_content_check($conf, $context) {
  * Provide a summary description based upon the specified context
  */
 function og_is_node_group_content_summary($conf, $context) {
-  return t('@identifier is an OG group', array('@identifier' => $context->identifier));
+  return t('@identifier is an OG group content', array('@identifier' => $context->identifier));
 }
