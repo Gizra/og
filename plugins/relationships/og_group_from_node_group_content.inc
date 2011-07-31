@@ -35,7 +35,6 @@ function og_group_from_node_group_content_context($context, $conf) {
     // Get the first group.
     $gid = reset($gids);
     $group = og_load($gid);
-    dpm($group);
 
     // Send it to ctools.
     return ctools_context_create('entity:group', $group);
