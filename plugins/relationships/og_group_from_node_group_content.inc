@@ -13,13 +13,13 @@ $plugin = array(
   'keyword' => 'group',
   'description' => t('Get the OG group context from a node that is a group content. The first group the node belongs to will be used.'),
   'required context' => new ctools_context_required(t('Node'), 'node'),
-  'context' => 'og_group_content_from_node_context',
+  'context' => 'og_group_from_node_group_content_context',
 );
 
 /**
  * Return a new context based on an existing context.
  */
-function og_group_content_from_node_context($context, $conf) {
+function og_group_from_node_group_content_context($context, $conf) {
   // If unset it wants a generic, unfilled context, which is just NULL.
   if (empty($context->data) || !isset($context->data->nid)) {
     return ctools_context_create_empty('entity:group', NULL);
@@ -35,6 +35,7 @@ function og_group_content_from_node_context($context, $conf) {
     // Get the first group.
     $gid = reset($gids);
     $group = og_load($gid);
+    dpm($group);
 
     // Send it to ctools.
     return ctools_context_create('entity:group', $group);
