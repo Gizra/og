@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file
@@ -15,24 +14,18 @@ class OgMetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 
-    $properties['gid'] += array(
-      'required' => TRUE,
-      'type' => 'group',
-    );
-
     $properties['entity'] = array(
       'label' => t('Entity'),
       'type' => 'entity',
       'description' => t('The entity that is a group.'),
       'getter callback' => 'og_entity_getter',
-      // TODO:
-      // 'setter callback' => 'field_collection_item_set_host_entity',
+      'setter permission' => 'administer group',
       'required' => TRUE,
     );
 
     $properties['entity_type'] += array(
       'required' => TRUE,
-      'options list' => 'og_get_fieldable_entity_list',
+      'options list' => 'og_get_all_group_entity',
     );
 
     $properties['created']['type'] = 'date';
@@ -46,7 +39,14 @@ class OgMetadataController extends EntityDefaultMetadataController {
     $properties['members'] = array(
       'label' => t("Members"),
       'type' => 'list<user>',
-      'description' => t("A list of members in group."),
+      'description' => t("A list of members of the group, including active, pending and blocked memberships."),
+      'getter callback' => 'og_get_properties',
+    );
+
+    $properties['manager'] = array(
+      'label' => t("Manager"),
+      'type' => 'user',
+      'description' => t("The user account of the group manager."),
       'getter callback' => 'og_get_properties',
     );
 
@@ -81,18 +81,17 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       'schema field' => 'gid',
     );
 
+    // Entity id is provided via the "entity" property.
+    unset($properties['etid']);
+
     $properties['entity'] = array(
       'label' => t('Entity'),
       'type' => 'entity',
       'description' => t('The entity that is a group content.'),
       'getter callback' => 'og_entity_getter',
+      'setter callback' => 'og_entity_setter',
+      'setter permission' => 'administer group',
       'required' => TRUE,
-      'schema field' => 'etid',
-    );
-
-    $properties['entity_type'] += array(
-      'required' => TRUE,
-      'options list' => 'og_get_fieldable_entity_list',
     );
 
     $properties['created']['type'] = 'date';
@@ -103,14 +102,15 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       'required' => TRUE,
     );
 
-    $properties['og_membership_type'] = array(
+    // Provide the membership-type under 'type' not 'name'.
+    $properties['type'] = array(
       'label' => t("Group membership type"),
       'type' => 'og_membership_type',
       'description' => t('The group membership type.'),
       'required' => TRUE,
       'getter callback' => 'entity_property_getter_method',
-      'schema field' => 'name',
-    );
+    ) + $properties['name'];
+    unset($properties['name']);
 
     return $info;
   }

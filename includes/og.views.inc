@@ -21,6 +21,24 @@ class OgViewsController extends EntityDefaultViewsController {
       'handler' => 'og_handler_argument_group_audience_gid',
     );
 
+    $data['og']['etid'] = array(
+      'title' => t('Entity id'),
+      'help' => t('The numeric id of the entity.'),
+      'field' => array(
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+       ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_numeric',
+      ),
+      'argument' => array(
+        'handler' => 'views_handler_argument_numeric',
+      ),
+    );
+
     $data['field_data_group_audience']['user_roles'] = array(
       'group' => t('Group'),
       'title' => t('Group user roles'),
@@ -65,6 +83,24 @@ class OgMembershipViewsController extends EntityDefaultViewsController {
       'numeric' => TRUE,
       'allow empty' => FALSE,
       'help' => t('Select the state of the group.'),
+    );
+
+    $data['og_membership']['etid'] = array(
+      'title' => t('Entity id'),
+      'help' => t('The numeric id of the entity.'),
+      'field' => array(
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+       ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_numeric',
+      ),
+      'argument' => array(
+        'handler' => 'views_handler_argument_numeric',
+      ),
     );
 
     return $data;

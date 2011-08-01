@@ -16,29 +16,8 @@ function og_field_info() {
       'description' => t('This field stores groups associated with the content.'),
       'default_widget' => OG_AUDIENCE_WIDGET,
       'default_formatter' => 'og_list_default',
-      // Entity metadata properties.
-      'property_type' => 'field_item_group',
-      'property_callbacks' => array('og_field_group_property_callback'),
-    ),
-  );
-}
-
-/**
- * Entity metdata callback.
- */
-function og_field_group_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
-  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
-
-  // Define a data structure so it's possible to deal with Group
-  // audience field.
-  $property['label'] = t('Group audience');
-  $property['description'] = t('Associate groups with group content.');
-  $property['getter callback'] = 'entity_metadata_field_verbatim_get';
-  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
-  $property['property info'] = array(
-    'gid' => array(
-      'type' => 'group',
-      'label' => t('The group this group content is associated with'),
+      // We do not expose the field as entity property, but we provide a
+      // separate property making use of the membership entities instead.
     ),
   );
 }

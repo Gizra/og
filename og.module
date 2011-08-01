@@ -127,10 +127,11 @@ function og_entity_info() {
     'views controller class' => 'OgViewsController',
     'metadata controller class' => 'OgMetadataController',
     'module' => 'og',
+    'access callback' => 'og_group_entity_access',
   );
 
   $items['og_membership_type'] = array(
-    'label' => t('Organic groups membership type'),
+    'label' => t('OG membership type'),
     'controller class' => 'EntityAPIControllerExportable',
     'entity class' => 'OgMembershipType',
     'base table' => 'og_membership_type',
@@ -164,7 +165,7 @@ function og_entity_info() {
   }
 
   $items['og_membership'] = array(
-    'label' => t('Organic groups membership'),
+    'label' => t('OG membership'),
     'entity class' => 'EntityOgMembership',
     'controller class' => 'EntityAPIController',
     'base table' => 'og_membership',
@@ -225,7 +226,7 @@ function og_entity_property_info() {
     $info[$entity_type]['properties']['og_membership'] = array(
       'label' => t("Group memberships"),
       'type' => 'list<og_membership>',
-      'description' => t("A list of all group membership of the @name entity.", array('@name' => $name)),
+      'description' => t("A list of all group memberships of the @name entity.", array('@name' => $name)),
       'getter callback' => 'og_get_properties',
     );
   }
@@ -244,9 +245,16 @@ function og_entity_property_info() {
 
 /**
  * Property getter callback.
+ *
+ * @see OgMetadataController
+ * @see OgMembershipMetadataController
+ * @see og_entity_property_info()
  */
 function og_get_properties($entity, array $options, $name, $type) {
   switch ($name) {
+    case 'manager':
+      return ($account = $entity->user()) ? $account : NULL;
+
     case 'members':
       $return = array();
       if (!empty($entity->gid)) {
@@ -275,21 +283,32 @@ function og_get_properties($entity, array $options, $name, $type) {
 
     case 'url':
       $wrapper = entity_metadata_wrapper('group', $entity);
-      return $wrapper->entity->url->value();
+      return $wrapper->entity->url->value($options);
 
     case 'group':
       list($id) = entity_extract_ids($type, $entity);
-      // TODO: Return also pending groups?
-      return og_get_group($type, $id);
+      $group = og_get_group($type, $id);
+      return $group ? $group : NULL;
   }
 }
 
 /**
- * Getter callback for the 'etid' property of a group membership.
+ * Getter callback to load the 'entity' property for groups or memberships.
  */
-function og_entity_getter($group) {
+function og_entity_getter($object) {
   // We have to return the entity wrapped.
-  return entity_metadata_wrapper($group->entity_type, $group->etid);
+  return entity_metadata_wrapper($object->entity_type, $object->etid);
+}
+
+/**
+ * Entity property info setter callback to set the "entity" property for groups and memberships.
+ *
+ * As the property is of type entity, the value will be passed as a wrapped
+ * entity.
+ */
+function og_entity_setter($object, $property_name, $wrapper) {
+  $object->entity_type = $wrapper->type();
+  $object->etid = $wrapper->getIdentifier();
 }
 
 /**
@@ -560,6 +579,37 @@ function og_og_group_delete($values = array()) {
   }
 }
 
+/**
+ * Implements hook_og_membership_insert().
+ */
+function og_og_membership_insert($membership) {
+  if ($membership->entity_type == 'user' && module_exists('rules')) {
+    rules_invoke_event('og_user_insert', $membership, entity_metadata_wrapper('user', $membership->etid));
+  }
+}
+
+/**
+ * Implements hook_og_membership_delete().
+ */
+function og_og_membership_delete($membership) {
+  if ($membership->entity_type == 'user' && module_exists('rules')) {
+    rules_invoke_event('og_user_delete', $membership, entity_metadata_wrapper('user', $membership->etid));
+  }
+}
+
+/**
+ * Implements hook_og_membership_update().
+ */
+function og_og_membership_update($membership) {
+  if ($membership->entity_type == 'user' && module_exists('rules')) {
+    if ($membership->original->state != OG_STATE_ACTIVE && $membership->state == OG_STATE_ACTIVE) {
+      rules_invoke_event('og_user_approved', $membership, entity_metadata_wrapper('user', $membership->etid));
+    }
+    if ($membership->original->state != OG_STATE_BLOCKED && $membership->state == OG_STATE_BLOCKED) {
+      rules_invoke_event('og_user_blocked', $membership, entity_metadata_wrapper('user', $membership->etid));
+    }
+  }
+}
 
 /**
  * Get the difference in group audience for a presaved entity.
@@ -900,10 +950,9 @@ function og_membership_type_delete($group_membership) {
  * Access callback for the group membership entity.
  */
 function og_membership_type_access($op, $entity, $account = NULL, $entity_type = 'og_membership') {
-  // TODO
-  return TRUE;
+  // No-end user needs access to this entity, so restrict it to admins.
+  return user_access('administer group');
 }
-
 
 /**
  * Main class for Group membership entities provided by Entity API.
@@ -1096,8 +1145,8 @@ function og_membership_delete_by_gid($gid) {
  * Access callback for the group membership entity.
  */
 function og_membership_access($op, $entity, $account = NULL, $entity_type = 'og_membership') {
-  // TODO
-  return TRUE;
+  // No-end user needs access to this entity, so restrict it to admins.
+  return user_access('administer group');
 }
 
 /**
@@ -1202,17 +1251,11 @@ class OgGroup extends Entity {
    *   TRUE if the operation may be performed, FALSE otherwise.
    */
   public function access($op = 'view', $account = NULL) {
-    $access = TRUE;
-    if ($this->entity_type == 'node') {
-      if (empty($account)) {
-        global $user;
-        $account = clone $user;
-      }
-      if ($node = node_load($this->etid)) {
-        $access = node_access($op, $node, $account);
-      }
+    $access = entity_access($op, $this->entity_type, $this->getEntity(), $account);
+    if (!isset($access)) {
+      // If no access information is available, default to grant access.
+      return TRUE;
     }
-
     return $access;
   }
 
@@ -1239,6 +1282,15 @@ class OgGroup extends Entity {
   }
 }
 
+/**
+ * Determines access for a group entity.
+ */
+function og_group_entity_access($op, $group = NULL, $account = NULL) {
+  if (isset($group)) {
+    return $group->access($op, $account);
+  }
+  return user_access('administer group');
+}
 
 /**
  * Load multiple Group entities based on certain conditions.
@@ -1928,7 +1980,7 @@ function og_is_group_content_type($entity_type, $bundle_name) {
  *
  * @return
  *   Array keyed with the entity type machine name and the entity human readable
- *   name as the value, or an empty array if no enteties are defined as group.
+ *   name as the value, or an empty array if no entities are defined as group.
  */
 function og_get_all_group_entity() {
   $return = array();
@@ -2911,7 +2963,7 @@ function og_group_content_states() {
 }
 
 /**
- * Return a list of fieldable enteties.
+ * Return a list of fieldable entities.
  *
  * @return
  *  Array keyed with the entity machine name and the saniztized human name as
@@ -2924,7 +2976,6 @@ function og_get_fieldable_entity_list() {
       $return[$name] = check_plain($info['label']);
     }
   }
-
   return $return;
 }
 

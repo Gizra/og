@@ -63,7 +63,7 @@ function og_context_get_properties($data = array(), array $options, $name, $type
       //   $wrapper = entity_metadata_site_wrapper();
       //   wrapper->current_group->value()
       // @endcode
-      return og_context();
+      return ($group = og_context()) ? $group : NULL;
   }
 }
 
