@@ -26,10 +26,25 @@ function og_group_from_node_context($context, $conf) {
     return ctools_context_create_empty('entity:group', NULL);
   }
 
-  if (isset($context->data->nid)) {
-    $group = og_get_group('node', $context->data->nid);
+  $group = og_get_group('node', $context->data->nid);
 
-    // Send it to ctools.
-    return ctools_context_create('entity:group', $group);
+  if (!$group) {
+    // The node isn't a group, check if it's a group content.
+    $node = clone $context->data;
+    $gids = og_get_entity_groups('node', $node);
+    if (!$gids) {
+      return;
+    }
+
+    // Get the first group.
+    $gid = reset($gids);
+    $group = og_load($gid);
   }
+
+  if (!$group) {
+    return;
+  }
+
+  // Send it to ctools.
+  return ctools_context_create('entity:group', $group);
 }
