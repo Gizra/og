@@ -400,7 +400,11 @@ function og_context_handler_node() {
     return;
   }
 
-  // Check the context is a node type.
+  // Check the context is a node type. We check only path similar to node/%/foo
+  // and don't traverse over the whole arguments, as it might be a page manager
+  // page passing multiple nodes (e.g. some/path/with/%node/%node). Implementing
+  // modules wanting to handle the above example, should implement their own
+  // context handler.
   $context = clone $item['map'][1];
   if (empty($context->type[0]) || $context->type[0] != 'entity:node') {
     return;
