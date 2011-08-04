@@ -107,7 +107,7 @@ function og_ui_menu() {
   }
 
   $items['admin/config/group'] = array(
-    'title' => 'Group',
+    'title' => 'Organic groups',
     'description' => 'Administer the suite of Organic groups modules.',
     'position' => 'right',
     'weight' => -5,
