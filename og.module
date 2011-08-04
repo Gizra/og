@@ -596,15 +596,6 @@ function og_og_membership_insert($membership) {
 }
 
 /**
- * Implements hook_og_membership_delete().
- */
-function og_og_membership_delete($membership) {
-  if ($membership->entity_type == 'user' && module_exists('rules')) {
-    rules_invoke_event('og_user_delete', $membership, entity_metadata_wrapper('user', $membership->etid));
-  }
-}
-
-/**
  * Implements hook_og_membership_update().
  */
 function og_og_membership_update($membership) {
@@ -615,6 +606,15 @@ function og_og_membership_update($membership) {
     if ($membership->original->state != OG_STATE_BLOCKED && $membership->state == OG_STATE_BLOCKED) {
       rules_invoke_event('og_user_blocked', $membership, entity_metadata_wrapper('user', $membership->etid));
     }
+  }
+}
+
+/**
+ * Implements hook_og_membership_delete().
+ */
+function og_og_membership_delete($membership) {
+  if ($membership->entity_type == 'user' && module_exists('rules')) {
+    rules_invoke_event('og_user_delete', $membership, entity_metadata_wrapper('user', $membership->etid));
   }
 }
 
