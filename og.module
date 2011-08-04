@@ -497,7 +497,7 @@ function og_entity_presave($entity, $type) {
             'membership fields' => $item['membership fields'],
             'created' => $item['created'],
           );
-          module_invoke_all('og_group_' . $op, $values);
+          call_user_func('og_membership_' . $op . '_on_entity_presave', $values);
         }
       }
     }
@@ -538,9 +538,11 @@ function og_entity_delete($entity, $type) {
 }
 
 /**
- * Implements hook_og_group_insert().
+ * Create a new group membership on entity presave.
+ *
+ * @see og_entity_presave().
  */
-function og_og_group_insert($values = array()) {
+function og_membership_insert_on_entity_presave($values = array()) {
   // Create a new group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
   $group_membership = og_membership_create($values['gid'], $values['entity type'], $id, array('state' => $values['state'], 'membership type' => $values['membership type'], 'membership fields' => $values['membership fields']));
@@ -548,9 +550,11 @@ function og_og_group_insert($values = array()) {
 }
 
 /**
- * Implements hook_og_group_update().
+ * Update an existing group membership on entity presave.
+ *
+ * @see og_entity_presave().
  */
-function og_og_group_update($values = array()) {
+function og_membership_update_on_entity_presave($values = array()) {
   // Update group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
   $group_membership = og_get_group_membership($values['gid'], $values['entity type'], $id);
@@ -567,9 +571,11 @@ function og_og_group_update($values = array()) {
 }
 
 /**
- * Implements hook_og_group_delete().
+ * Delete an existing group membership on entity presave.
+ *
+ * @see og_entity_presave().
  */
-function og_og_group_delete($values = array()) {
+function og_membership_delete_on_entity_presave($values = array()) {
   // Delete group membership entity.
   list($id) = entity_extract_ids($values['entity type'], $values['entity']);
   // If the group is already deleted, all the group memberships were already
@@ -578,6 +584,7 @@ function og_og_group_delete($values = array()) {
     $group_membership->delete();
   }
 }
+
 
 /**
  * Implements hook_og_membership_insert().

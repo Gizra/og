@@ -214,6 +214,7 @@ function hook_og_audience_options_alter(&$options, &$opt_group, $account) {
   }
 }
 
+
 /**
  * @} End of "addtgrouproup hooks".
  */
