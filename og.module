@@ -166,7 +166,7 @@ function og_entity_info() {
 
   $items['og_membership'] = array(
     'label' => t('OG membership'),
-    'entity class' => 'EntityOgMembership',
+    'entity class' => 'OgMembership',
     'controller class' => 'EntityAPIController',
     'base table' => 'og_membership',
     'fieldable' => TRUE,
@@ -964,7 +964,7 @@ function og_membership_type_access($op, $entity, $account = NULL, $entity_type =
 /**
  * Main class for Group membership entities provided by Entity API.
  */
-class EntityOgMembership extends Entity {
+class OgMembership extends Entity {
   public function __construct(array $values = array(), $entityType = NULL) {
     parent::__construct($values, 'og_membership');
   }
