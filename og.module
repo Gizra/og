@@ -1567,7 +1567,7 @@ function og_group($gid, $values = array()) {
   }
   $property = OG_AUDIENCE_FIELD;
   // Check the audience field exists in the entity.
-  if (isset($entity->{$property})) {
+  if (in_array($entity_type, array_keys(og_get_all_group_content_entity()))) {
     $wrapper = &$entity->{$property}[LANGUAGE_NONE];
 
     list($id) = entity_extract_ids($entity_type, $entity);
