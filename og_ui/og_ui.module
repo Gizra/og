@@ -350,6 +350,12 @@ function og_ui_subscribe_link($entity_type, $entity, $account = NULL) {
         }
       }
       else {
+        if (og_is_member($group->gid, 'user', $account, array(OG_STATE_BLOCKED))) {
+          // If user is blocked, they should not be able to apply for
+          // membership.
+          return;
+        }
+
         if (og_user_access($group->gid, 'subscribe without approval', $account)) {
           $links['title'] = t('Subscribe to group');
           $url = "group/$entity_type/$id/subscribe";
