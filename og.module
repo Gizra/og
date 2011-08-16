@@ -282,8 +282,10 @@ function og_get_properties($entity, array $options, $name, $type) {
       return !empty($result['og_membership']) ? array_keys($result['og_membership']) : array();
 
     case 'url':
-      $wrapper = entity_metadata_wrapper('group', $entity);
-      return $wrapper->entity->url->value($options);
+      $group = $entity;
+      $entity_from_group = $group->getEntity();
+      $return = entity_uri($group->entity_type, $entity_from_group);
+      return url($return['path'], $return['options'] + $options);      
 
     case 'group':
       list($id) = entity_extract_ids($type, $entity);
