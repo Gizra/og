@@ -285,7 +285,7 @@ function og_get_properties($entity, array $options, $name, $type) {
       $group = $entity;
       $entity_from_group = $group->getEntity();
       $return = entity_uri($group->entity_type, $entity_from_group);
-      return url($return['path'], $return['options'] + $options);      
+      return url($return['path'], $return['options'] + $options);
 
     case 'group':
       list($id) = entity_extract_ids($type, $entity);
@@ -986,6 +986,15 @@ class OgMembership extends Entity {
    */
   public function group() {
     return og_load($this->gid);
+  }
+
+  /**
+   * Gets the associated OG membership type.
+   *
+   * @return OgMembershipType
+   */
+  public function type() {
+    return og_membership_type_load($this->name);
   }
 }
 
