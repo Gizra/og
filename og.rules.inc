@@ -326,7 +326,7 @@ function og_rules_add_entity_to_group(EntityDrupalWrapper $entity, $group) {
 }
 
 /**
- * Action: Remove entity to group.
+ * Action: Remove entity from group.
  */
 function og_rules_remove_entity_from_group(EntityDrupalWrapper $entity, $group) {
   // Let saving the entity handle by Rules.
