@@ -223,23 +223,6 @@ function og_rules_action_info() {
     'access callback' => 'og_rules_integration_access',
   );
 
-  $items['og_get_group_from_entity'] = array(
-    'label' => t('Get OG group from entity'),
-    'group' => t('Organic groups'),
-    'parameter' => array(
-      'group' => array(
-        'type' => 'entity',
-        'label' => t('Entity'),
-        'description' => t('The entity (e.g. node) that is a group.'),
-      ),
-    ),
-    'provides' => array(
-      'group' => array('type' => 'group', 'label' => t('OG Group')),
-    ),
-    'base' => 'og_rules_get_group_from_entity',
-    'access callback' => 'og_rules_integration_access',
-  );
-
   return $items;
 }
 
@@ -334,13 +317,6 @@ function og_rules_add_entity_to_group(EntityDrupalWrapper $entity, $group) {
 function og_rules_remove_entity_from_group(EntityDrupalWrapper $entity, $group) {
   // Let saving the entity handle by Rules.
   og_ungroup($group->gid, $entity->type(), $entity->value(), FALSE);
-}
-
-/**
- * Action: Get OG group from entity.
- */
-function og_rules_get_group_from_entity(EntityDrupalWrapper $entity) {
-  return array('group' => og_get_group($entity->type(), $entity->getIdentifier()));
 }
 
 /**
