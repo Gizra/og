@@ -233,6 +233,9 @@ function og_rules_action_info() {
         'description' => t('The entity (e.g. node) that is a group.'),
       ),
     ),
+    'provides' => array(
+      'group' => array('type' => 'group', 'label' => t('OG Group')),
+    ),
     'base' => 'og_rules_get_group_from_entity',
     'access callback' => 'og_rules_integration_access',
   );
@@ -337,7 +340,7 @@ function og_rules_remove_entity_from_group(EntityDrupalWrapper $entity, $group) 
  * Action: Get OG group from entity.
  */
 function og_rules_get_group_from_entity(EntityDrupalWrapper $entity) {
-  return og_get_group($entity->type(), $entity->getIdentifier());
+  return array('group' => og_get_group($entity->type(), $entity->getIdentifier()));
 }
 
 /**
