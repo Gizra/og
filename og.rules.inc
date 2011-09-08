@@ -370,14 +370,41 @@ function og_rules_condition_info() {
       ),
       'states' => array(
         'type' => 'list<integer>',
-        'label' => t('Valid membership states'),
+        'label' => t('Membership states'),
         'restriction' => 'input',
         'options list' => 'og_group_content_states',
         'optional' => TRUE,
         'default value' => array(OG_STATE_ACTIVE),
       ),
     ),
-    'base' => 'og_rules_condition_user_in_group',
+    'base' => 'og_rules_condition_entity_in_group',
+    'access callback' => 'og_rules_integration_access',
+  );
+  $items['og_entity_in_group'] = array(
+    'label' => t('Entity is in group'),
+    'group' => t('Organic groups'),
+    'parameter' => array(
+      'entity' => array(
+        // Do not use type 'entity' but restrict the type to group content type.
+        'type' => array_keys(og_get_all_group_content_entity()),
+        'label' => t('Group content entity'),
+        'description' => t('The group content which will be checked.'),
+        'wrapped' => TRUE,
+      ),
+      'group' => array(
+        'type' => 'group',
+        'label' => t('Group'),
+      ),
+      'states' => array(
+        'type' => 'list<integer>',
+        'label' => t('Membership states'),
+        'restriction' => 'input',
+        'options list' => 'og_group_content_states',
+        'optional' => TRUE,
+        'default value' => array(OG_STATE_ACTIVE),
+      ),
+    ),
+    'base' => 'og_rules_condition_entity_in_group',
     'access callback' => 'og_rules_integration_access',
   );
   $items['og_entity_is_group'] = array(
@@ -432,10 +459,10 @@ function og_rules_user_has_permission_options_list() {
 }
 
 /**
- * Condition: User is in group.
+ * Condition: Entity is in group.
  */
-function og_rules_condition_user_in_group($account, $group, $states = array(OG_STATE_ACTIVE)) {
-  return og_is_member($group->gid, 'user', $account, $states);
+function og_rules_condition_entity_in_group(EntityDrupalWrapper $entity, $group, $states = array(OG_STATE_ACTIVE)) {
+  return og_is_member($group->gid, $entity->type(), $entity->value(), $states);
 }
 
 /**
