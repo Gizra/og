@@ -10,6 +10,7 @@ version = VERSION
 files[] = og.module
 files[] = og.admin.inc
 files[] = includes/og.views.inc
+files[] = og.rules.inc
 
 ; Test files.
 files[] = og.test
