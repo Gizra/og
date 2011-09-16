@@ -363,6 +363,7 @@ function og_rules_condition_info() {
       'account' => array(
         'type' => 'user',
         'label' => t('User'),
+        'wrapped' => TRUE,
       ),
       'group' => array(
         'type' => 'group',
