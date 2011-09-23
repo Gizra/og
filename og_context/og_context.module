@@ -165,17 +165,18 @@ function og_context_og_invalidate_cache($gids = array()) {
 }
 
 /**
- * Implements hook_ctools_entity_context_alter().
+ * Implements hook_ctools_entity_contexts_alter().
  *
  * Change the OG context plugin.
  *
  * @see ctools_context_entity_get_children().
  */
-function og_context_ctools_entity_context_alter(&$plugin, $entity, $plugin_id) {
-  if ($plugin_id != 'entity:group') {
+function og_context_ctools_entity_contexts_alter(&$plugins) {
+  if (empty($plugins['entity:group'])) {
     return;
   }
 
+  $plugin = &$plugins['entity:group'];
   $plugin['context'] = 'og_context_create_og_group';
   $plugin['edit form'] = 'og_context_og_group_settings_form';
   $plugin['defaults'] = array('type' => 'select', 'gid' => '');
