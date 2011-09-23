@@ -136,20 +136,6 @@ function og_context_init() {
 }
 
 /**
- * Implementation of hook_ctools_plugin_directory().
- */
-function og_context_ctools_plugin_directory($module, $plugin) {
-  // Safety: go away if CTools is not at an appropriate version.
-  if (!module_invoke('ctools', 'api_version', OG_REQUIRED_CTOOLS_API)) {
-    return;
-  }
-
-  if ($module == 'ctools') {
-    return 'plugins/' . $plugin;
-  }
-}
-
-/**
  * Implements hook_views_api().
  */
 function og_context_views_api() {
@@ -176,6 +162,129 @@ function og_context_og_invalidate_cache($gids = array()) {
     // Remove group's context.
     $_SESSION['og_context'] = NULL;
   }
+}
+
+/**
+ * Implements hook_ctools_entity_context_alter().
+ *
+ * Change the OG context plugin.
+ *
+ * @see ctools_context_entity_get_children().
+ */
+function og_context_ctools_entity_context_alter(&$plugin, $entity, $plugin_id) {
+  if ($plugin_id != 'entity:group') {
+    return;
+  }
+
+  $plugin['context'] = 'og_context_create_og_group';
+  $plugin['edit form'] = 'og_context_og_group_settings_form';
+  $plugin['defaults'] = array('type' => 'select', 'gid' => '');
+}
+
+/**
+ * Return OG group form context.
+ */
+function og_context_create_og_group($empty, $data = NULL, $conf = FALSE) {
+  $context = new ctools_context(array('entity:group', 'entity', 'group'));
+  $context->plugin = 'og_group';
+
+  if ($empty) {
+    return $context;
+  }
+
+  if ($conf) {
+    if ($data['type'] == 'select') {
+      global $user;
+      $data = og_load($data->gid);
+    }
+    else {
+      $data = og_context();
+    }
+  }
+
+  // Load entity if the data provided is a numeric value. This kind of data is
+  // passed by some relationships.
+  if (!empty($data) && is_numeric($data)) {
+    $data = og_load($data);
+  }
+
+  if (!$data) {
+    return;
+  }
+
+  $context->data = $data;
+  $context->argument = $data->gid;
+  $context->title = og_label($data->gid);
+  return $context;
+}
+
+/**
+ * OG group context settings form.
+ */
+function og_context_og_group_settings_form($form, &$form_state) {
+  $conf = $form_state['conf'];
+
+  $form['type'] = array(
+    '#title' => t('Enter the context type'),
+    '#type' => 'radios',
+    '#options' => array(
+      'select' => t('Select an OG group'),
+      'context' => t('OG group form context'),
+    ),
+    '#default_value' => $conf['type'],
+  );
+
+  $form['gid'] = array(
+    '#title' => t('Enter a group ID'),
+    '#type' => 'textfield',
+    '#states' => array(
+      'visible' => array(
+        ':input[name=type]' => array('value' => 'select'),
+      ),
+    ),
+    '#default_value' => $conf['gid'],
+  );
+
+  if (!empty($conf['gid'])) {
+    $group = og_load($conf['gid']);
+    if ($group) {
+      $form['gid']['#description'] = t('Currently set to %name group', array('%name' => og_label($group->gid)));
+    }
+  }
+
+  return $form;
+}
+
+/**
+ * Validate an OG group.
+ */
+function og_context_og_group_settings_form_validate($form, &$form_state) {
+  if ($form_state['values']['type'] != 'select') {
+    return;
+  }
+
+  if (empty($form_state['values']['gid'])) {
+    form_error($form['user'], t('You must select an OG group.'));
+    return;
+  }
+
+  element_validate_integer_positive($form['gid'], &$form_state);
+  if (form_get_error($form['gid'])) {
+    return;
+  }
+
+  $group = og_load($form_state['values']['gid']);
+  if (!$group) {
+    form_error($form['gid'], t('Invalid OG group selected.'));
+  }
+}
+
+/**
+ * Submit handler; Save values.
+ */
+function og_context_og_group_settings_form_submit($form, &$form_state) {
+  $form_state['conf']['type'] = $form_state['values']['type'];
+  $form_state['conf']['gid'] = $form_state['values']['gid'];
 }
 
 
