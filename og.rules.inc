@@ -134,13 +134,13 @@ function og_rules_action_info() {
   );
 
   $items['og_group_content_add'] = array(
-    'label' => t('Add group content to group'),
+    'label' => t('Add entity to group'),
     'group' => t('Organic groups'),
     'parameter' => array(
       'entity' => array(
         // Do not use type 'entity' but restrict the type to group content type.
         'type' => array_keys(og_get_all_group_content_entity()),
-        'label' => t('Group content entity'),
+        'label' => t('Entity'),
         'description' => t('The group content which is to be added to a group.'),
         'wrapped' => TRUE,
         'save' => TRUE,
@@ -155,13 +155,13 @@ function og_rules_action_info() {
   );
 
   $items['og_group_content_remove'] = array(
-    'label' => t('Remove group content from group'),
+    'label' => t('Remove entity from group'),
     'group' => t('Organic groups'),
     'parameter' => array(
       'entity' => array(
         // Do not use type 'entity' but restrict the type to group content type.
         'type' => array_keys(og_get_all_group_content_entity()),
-        'label' => t('Group content entity'),
+        'label' => t('Entity'),
         'description' => t('The entity which is to be removed from a group.'),
         'wrapped' => TRUE,
         'save' => TRUE,
@@ -395,14 +395,6 @@ function og_rules_condition_info() {
       'group' => array(
         'type' => 'group',
         'label' => t('Group'),
-      ),
-      'states' => array(
-        'type' => 'list<integer>',
-        'label' => t('Membership states'),
-        'restriction' => 'input',
-        'options list' => 'og_group_content_states',
-        'optional' => TRUE,
-        'default value' => array(OG_STATE_ACTIVE),
       ),
     ),
     'base' => 'og_rules_condition_entity_in_group',
