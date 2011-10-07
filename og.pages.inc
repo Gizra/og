@@ -138,7 +138,7 @@ function og_create_admin_confirm_submit($form, &$form_state) {
   $variables = array(
     '@group' => $node->title,
     '!group_url' => url("node/$node->nid", array('absolute' => TRUE)),
-    '@username' => $account->name
+    '@username' => strip_tags(theme('username', $account))
   );
 
   $message = array(
