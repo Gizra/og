@@ -726,7 +726,7 @@ function og_set_group_context($node = NULL, $clear = FALSE) {
     // the default language, particularly if the same node is posted in
     // multiple groups.
     $current_node = menu_get_object();
-    if (!$current_node || (!og_is_group_type($current_node->type) && $current_node->language == $node->group_language)) {
+    if (!$current_node || (!og_is_group_type($current_node->type) && $current_node->language == $node->og_language)) {
       og_set_language($node);
     }
   }
