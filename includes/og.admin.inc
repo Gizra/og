@@ -1,6 +1,4 @@
 <?php
-// $Id$
-
 /**
  * @file
  * Group membersihp type editing UI.

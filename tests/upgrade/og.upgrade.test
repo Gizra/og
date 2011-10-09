@@ -1,6 +1,4 @@
 <?php
-// $Id$
-
 /**
  * Perform end-to-end tests of the upgrade path using Drupal 7 dump file.
  */
