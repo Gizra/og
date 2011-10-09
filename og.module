@@ -116,7 +116,7 @@ function og_help($path, $arg) {
  */
 function og_entity_info() {
   $items['group'] = array(
-    'label' => t('Organic groups group'),
+    'label' => t('OG group'),
     'entity class' => 'OgGroup',
     'controller class' => 'EntityAPIController',
     'base table' => 'og',

@@ -142,7 +142,7 @@ function og_field_widget_settings_form($field, $instance) {
       '#type'             => 'textfield',
       '#title'            => t('Size of textfield'),
       '#default_value'    => $settings['size'],
-      '#element_validate' => array('_element_validate_integer_positive'),
+      '#element_validate' => array('element_validate_integer_positive'),
       '#required'         => TRUE,
     );
   }
