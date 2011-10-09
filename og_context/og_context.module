@@ -269,7 +269,7 @@ function og_context_og_group_settings_form_validate($form, &$form_state) {
     return;
   }
 
-  element_validate_integer_positive($form['gid'], &$form_state);
+  element_validate_integer_positive($form['gid'], $form_state);
   if (form_get_error($form['gid'])) {
     return;
   }
