@@ -141,6 +141,9 @@ function og_schema() {
       ),
     ),
     'primary key'       => array('nid', 'group_nid'),
+    'indexes'           => array(
+      'group_nid'         => array('group_nid'),
+    ),
   );
 
   return $schema;
@@ -428,6 +431,15 @@ function og_update_6203() {
     og_ancestry_dedupe($ret);
   }
 
+  return $ret;
+}
+
+/**
+ * Add index 'group_nid' to og_ancestry table.
+ */
+function og_update_6204() {
+  $ret = array();
+  db_add_index($ret, 'og_ancestry', 'group_nid', array('group_nid'));
   return $ret;
 }
 
