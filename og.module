@@ -185,22 +185,15 @@ function og_entity_info() {
     'views controller class' => 'OgMembershipViewsController',
     'access callback' => 'og_membership_access',
   );
-  return $items;
-}
 
-/**
- * Implements hook_entity_info_alter().
- *
- * Use this hook to specify bundles to avoid a recursion, as loading the entity
- * group membership types needs the entity info too.
- */
-function og_entity_info_alter(&$entity_info) {
-  // If we're updating, the schema may not be ready yet.
-  if (!class_exists('EntityAPIController') || !class_exists('OgMembershipTypeUIController')) {
-    return;
-  }
-  foreach (og_membership_type_load() as $type_name => $type) {
-    $entity_info['og_membership']['bundles'][$type_name] = array(
+  // Add bundle info but bypass entity_load() as we cannot use it here.
+  $memberships = db_select('og_membership_type', 'g')
+    ->fields('g')
+    ->execute()
+    ->fetchAllAssoc('name');
+
+  foreach ($memberships as $type_name => $type) {
+    $items['og_membership']['bundles'][$type_name] = array(
       //@todo do we need a short label too?
       'label' => $type->name,
       'admin' => array(
@@ -211,7 +204,10 @@ function og_entity_info_alter(&$entity_info) {
       ),
     );
   }
+
+  return $items;
 }
+
 
 /**
  * Implements hook_entity_property_info().
