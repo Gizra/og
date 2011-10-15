@@ -29,7 +29,7 @@ function og_field_access_og_permission() {
         $perm = 'view ' . $field_name . ' field';
         $perms[$perm] = array(
           'title' => t('View @label field', array('@label' => $label)),
-          'description' => t('View the @label field for existing groups.', array('@label' => $label)),
+          'description' => t('View the %fieldname field for existing groups.', array('%fieldname' => $field_name)),
           'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE),
           'default role' => array(
             OG_ANONYMOUS_ROLE,
@@ -42,7 +42,7 @@ function og_field_access_og_permission() {
         $perm = 'update ' . $field_name . ' field';
         $perms[$perm] = array(
           'title' => t('Edit @label field', array('@label' => $label)),
-          'description' => t('Edit the @label field for existing groups.', array('@label' => $label)),
+          'description' => t('Edit the %fieldname field for existing groups.', array('%fieldname' => $field_name)),
           'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE),
           'default role' => array(OG_ADMINISTRATOR_ROLE),
           'module' => 'og_field_access',
