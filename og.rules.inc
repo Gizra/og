@@ -227,49 +227,56 @@ function og_rules_action_info() {
 }
 
 /**
- * Action: Get group members from group audience.
+ * Action: Get group members from a group content.
  */
 function og_rules_get_members($group_content) {
-  if (empty($group_content->og_membership)) {
+  if (!isset($group_content->og_membership)) {
+    // Not a group content.
     return;
   }
 
   $members = array();
   $gids = array();
-  foreach ($group_content->og_membership->value() as $group) {
+  foreach ($group_content->og_membership->value() as $og_membership) {
     // Get the groups the group content belongs to.
-    $gids[] = $group->gid;
+    $gids[] = $og_membership->gid;
   }
 
-  if ($gids) {
-    foreach ($gids as $gid) {
-      $wrapper = entity_metadata_wrapper('group', $gid);
-      $members = $wrapper->members->value(array('identifier' => TRUE));
-    }
+  if (!$gids) {
+    return;
+  }
+
+  foreach ($gids as $gid) {
+    $wrapper = entity_metadata_wrapper('group', $gid);
+    $members = array_merge_recursive($members, $wrapper->members->value(array('identifier' => TRUE)));
   }
 
   return array('group_members' => $members);
 }
 
 /**
- * Action: Get group managers from group audience.
+ * Action: Get group managers from a group content.
  */
 function og_rules_get_managers($group_content) {
-  if (empty($group_content->OG_AUDIENCE_FIELD)) {
+  if (!isset($group_content->og_membership)) {
+    // Not a group content.
     return;
   }
+
   $return = array();
   $gids = array();
-  foreach ($group_content->OG_AUDIENCE_FIELD as $key => $value) {
-    $gids[] = $value['gid'];
+  foreach ($group_content->og_membership->value() as $og_membership) {
+    $gids[] = $og_membership->gid;
   }
 
-  if ($gids) {
-    $groups = og_load_multiple($gids);
-    foreach ($groups as $group) {
-      if ($account = $group->user()) {
-        $return[] = $account;
-      }
+  if (!$gids) {
+    return;
+  }
+
+  $groups = og_load_multiple($gids);
+  foreach ($groups as $group) {
+    if ($account = $group->user()) {
+      $return[] = $account->uid;
     }
   }
 
