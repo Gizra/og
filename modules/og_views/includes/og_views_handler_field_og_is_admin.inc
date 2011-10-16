@@ -16,8 +16,8 @@ class og_views_handler_field_og_is_admin extends og_views_handler_field_og_uid {
         break;
       case 'node':
         global $user;
-        if (!empty($user->og_groups[$values->nid]['is_admin'])) {
-          $is_admin = $user->og_groups[$values->nid]['is_admin'];
+        if (!empty($user->og_groups[$values->{$this->aliases['nid']}]['is_admin'])) {
+          $is_admin = $user->og_groups[$values->{$this->aliases['nid']}]['is_admin'];
         }
         break;
     }
