@@ -117,7 +117,7 @@ function og_field_widget_settings_form($field, $instance) {
     $form['opt_group'] = array(
       '#type' => 'radios',
       '#title' => t('Input type'),
-      '#description' => t('Select the input type that should be used to get the groups audience. Note that the <em>Never show "other groups"</em> option will show all groups including the ones the user is a not a member of.'),
+      '#description' => t('Select the input type that should be used to get the groups audience. Note that the <em>Always show "other groups"</em> option will show all groups including the ones the user is a not a member of.'),
       '#options' => array(
         'auto' => t('Automatically decide the input according to user permissions (Recommended)'),
         'never' => t('Never show "other groups"'),
