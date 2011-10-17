@@ -187,22 +187,24 @@ function og_entity_info() {
   );
 
   // Add bundle info but bypass entity_load() as we cannot use it here.
-  $memberships = db_select('og_membership_type', 'g')
-    ->fields('g')
-    ->execute()
-    ->fetchAllAssoc('name');
+  if (db_table_exists('og_membership_type')) {
+    $memberships = db_select('og_membership_type', 'g')
+      ->fields('g')
+      ->execute()
+      ->fetchAllAssoc('name');
 
-  foreach ($memberships as $type_name => $type) {
-    $items['og_membership']['bundles'][$type_name] = array(
-      //@todo do we need a short label too?
-      'label' => $type->name,
-      'admin' => array(
-        'path' => 'admin/config/group/group-membership/manage/%og_membership_type',
-        'real path' => 'admin/config/group/group-membership/manage/' . $type->name,
-        'bundle argument' => 5,
-        'access arguments' => array('administer group'),
-      ),
-    );
+    foreach ($memberships as $type_name => $type) {
+      $items['og_membership']['bundles'][$type_name] = array(
+        //@todo do we need a short label too?
+        'label' => $type->name,
+        'admin' => array(
+          'path' => 'admin/config/group/group-membership/manage/%og_membership_type',
+          'real path' => 'admin/config/group/group-membership/manage/' . $type->name,
+          'bundle argument' => 5,
+          'access arguments' => array('administer group'),
+        ),
+      );
+    }
   }
 
   return $items;
