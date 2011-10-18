@@ -27,7 +27,7 @@ function og_example_default_page_manager_handlers() {
     'contexts' => array(),
     'relationships' => array(
       0 => array(
-        'identifier' => 'Group from node',
+        'identifier' => 'OG group from node',
         'keyword' => 'group',
         'name' => 'og_group_from_node',
         'context' => 'argument_entity_id:node_1',
@@ -182,7 +182,6 @@ function og_example_default_page_manager_handlers() {
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = '0';
   $handler->conf['display'] = $display;
-
   $export['node_view_panel_context'] = $handler;
 
   return $export;
