@@ -385,7 +385,7 @@ function og_rules_condition_info() {
         'default value' => array(OG_STATE_ACTIVE),
       ),
     ),
-    'base' => 'og_rules_condition_entity_in_group',
+    'base' => 'og_rules_condition_user_in_group',
     'access callback' => 'og_rules_integration_access',
   );
   $items['og_entity_in_group'] = array(
@@ -461,7 +461,14 @@ function og_rules_user_has_permission_options_list() {
 /**
  * Condition: Entity is in group.
  */
-function og_rules_condition_entity_in_group(EntityDrupalWrapper $entity, $group, $states = array(OG_STATE_ACTIVE)) {
+function og_rules_condition_entity_in_group(EntityDrupalWrapper $entity, $group) {
+  return og_is_member($group->gid, $entity->type(), $entity->value());
+}
+
+/**
+ * Condition: User is in group.
+ */
+function og_rules_condition_user_in_group(EntityDrupalWrapper $entity, $group, $states = array(OG_STATE_ACTIVE)) {
   return og_is_member($group->gid, $entity->type(), $entity->value(), $states);
 }
 
