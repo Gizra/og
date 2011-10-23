@@ -232,7 +232,7 @@ function og_rules_action_info() {
 function og_rules_get_members($group_content) {
   if (!isset($group_content->og_membership)) {
     // Not a group content.
-    return array('group_members' => NULL);
+    return;
   }
 
   $members = array();
@@ -243,7 +243,7 @@ function og_rules_get_members($group_content) {
   }
 
   if (!$gids) {
-    return array('group_members' => NULL);
+    return;
   }
 
   foreach ($gids as $gid) {
@@ -260,7 +260,7 @@ function og_rules_get_members($group_content) {
 function og_rules_get_managers($group_content) {
   if (!isset($group_content->og_membership)) {
     // Not a group content.
-    return array('group_managers' => NULL);
+    return;
   }
 
   $return = array();
@@ -270,7 +270,7 @@ function og_rules_get_managers($group_content) {
   }
 
   if (!$gids) {
-    return array('group_managers' => NULL);
+    return;
   }
 
   $groups = og_load_multiple($gids);
