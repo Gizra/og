@@ -705,15 +705,20 @@ function og_og_fields_info() {
       'type' => 'list_boolean',
       'cardinality' => 1,
       'settings' => array(
-        'allowed_values' => array(0 => 'Not a group type', 1 => 'Group type'),
+        'allowed_values' => array(0 => 'Not a group', 1 => 'Group'),
         'allowed_values_function' => '',
       ),
     ),
     'instance' => array(
-      'label' => t('Group type'),
-      'widget_type' => 'options_select',
-      'required' => TRUE,
-      // Make the group type default.
+      'label' => t('Group'),
+      'description' => t('Determine if this is an OG group.'),
+      'display_label' => 1,
+      'widget' => array(
+        'module' => 'options',
+        'settings' => array(),
+        'type' => 'options_onoff',
+        'weight' => 0,
+      ),
       'default_value' => array(0 => array('value' => 1)),
       'view modes' => array(
         'full' => array(

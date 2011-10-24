@@ -98,11 +98,10 @@ function og_example_field_default_fields() {
         ),
       ),
       'module' => 'list',
-      'no_ui' => TRUE,
       'settings' => array(
         'allowed_values' => array(
-          0 => 'Not a group type',
-          1 => 'Group type',
+          0 => 'Not a group',
+          1 => 'Group',
         ),
         'allowed_values_function' => '',
       ),
@@ -117,7 +116,8 @@ function og_example_field_default_fields() {
         ),
       ),
       'deleted' => '0',
-      'description' => '',
+      'description' => t('Determine if this is an OG group.'),
+      'display_label' => 1,
       'display' => array(
         'default' => array(
           'label' => 'above',
@@ -135,8 +135,7 @@ function og_example_field_default_fields() {
       ),
       'entity_type' => 'node',
       'field_name' => 'group_group',
-      'label' => 'Group type',
-      'required' => TRUE,
+      'label' => 'Group',
       'settings' => array(
         'user_register_form' => FALSE,
       ),
@@ -155,10 +154,9 @@ function og_example_field_default_fields() {
       'widget' => array(
         'module' => 'options',
         'settings' => array(),
-        'type' => 'options_buttons',
+        'type' => 'options_onoff',
         'weight' => 0,
       ),
-      'widget_type' => 'options_select',
     ),
   );
 
