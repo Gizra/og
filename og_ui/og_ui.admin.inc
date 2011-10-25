@@ -531,6 +531,13 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
       '#markup' => $perm_item['title'],
       '#description' => $perm_item['description'],
     );
+
+    // TODO: Move this to theme function. 
+    // @see theme_user_admin_permissions().
+    if (!empty($perm_item['restrict access'])) {
+      $form['permission'][$perm]['#description'] .= '</br>';
+      $form['permission'][$perm]['#description'] .= '<em class="permission-warning">' . t('Warning: Give to trusted roles only; this permission has security implications.') . '</em>';
+    }
     foreach ($role_names as $rid => $name) {
       // Builds arrays for checked boxes for each role
       if (isset($role_permissions[$rid][$perm])) {
@@ -713,7 +720,7 @@ function og_ui_field_settings($form, &$form_state) {
       '#weight' => 99,
     );
 
-    // Show all teh group fields of each bundle.
+    // Show all the group fields of each bundle.
     foreach ($field_enabled as $entity_type => $bundles) {
       foreach ($bundles as $bundle => $fields) {
         $options = array();

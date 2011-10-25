@@ -400,8 +400,9 @@ function og_og_permission() {
   );
   $perms['administer group'] = array(
     'title' => t('Administer group'),
-    'description' => t('Manage or block users, and manage their role assignments in the group.'),
+    'description' => t('Manage group members and content in the group.'),
     'default role' => array(OG_ADMINISTRATOR_ROLE),
+    'restrict access' => TRUE,
   );
 
   foreach (node_permissions_get_configured_types() as $type) {
