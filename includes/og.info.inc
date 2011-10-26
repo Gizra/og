@@ -30,9 +30,11 @@ class OgMetadataController extends EntityDefaultMetadataController {
 
     $properties['created']['type'] = 'date';
 
+    $properties['state']['type'] = 'integer';
     $properties['state'] += array(
-      'setter callback' => 'entity_metadata_verbatim_set',
+      'setter callback' => 'entity_property_verbatim_set',
       'options list' => 'og_group_states',
+      'required' => TRUE,
     );
 
     // Custom properties.
@@ -96,8 +98,9 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
 
     $properties['created']['type'] = 'date';
 
+    $properties['state']['type'] = 'integer';
     $properties['state'] += array(
-      'setter callback' => 'entity_metadata_verbatim_set',
+      'setter callback' => 'entity_property_verbatim_set',
       'options list' => 'og_group_content_states',
       'required' => TRUE,
     );
