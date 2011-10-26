@@ -1811,40 +1811,48 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
  * @param $entity
  *   The entity object.
  * @param $account
- *   Optional; The user object. If empty the current user will be used.
+ *   (optional) The user object. If empty the current user will be used.
+ * @param $strict
+ *   (optional) If the entity is found to be not a group or a group content,
+ *   determine the return value. Setting this property to TRUE means that
+ *   permission will be denied. Defaults to TRUE.
+ *
+ * @return
+ *   Returns TRUE if the user has access to the permission, otherwise FALSE.
  */
-function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
-  // Make sure entity is a group or group content.
-  if (!isset($entity->{OG_AUDIENCE_FIELD}) && !isset($entity->{OG_GROUP_FIELD})) {
-    return;
-  }
-
+function og_user_access_entity($perm, $entity_type, $entity, $account = NULL, $strict = TRUE) {
   if (empty($account)) {
     global $user;
     $account = clone $user;
   }
 
-  // Quick checks for admin privileges.
-  if ($account->uid == 1 || user_access('administer group', $account)) {
+  // Quick check for user ID 1.
+  if ($account->uid == 1) {
     return TRUE;
   }
 
-  // Check if entity is a group.
-  if (isset($entity->{OG_GROUP_FIELD})) {
-    list($id) = entity_extract_ids($entity_type, $entity);
-    if (($group = og_get_group($entity_type, $id)) && og_user_access($group->gid, $perm, $account)) {
-      // Entity is a group, and user has access.
+  list($id, $vid, $bundle_name) = entity_extract_ids($entity_type, $entity);
+  $is_group = og_is_group_type($entity_type, $bundle_name);
+  $is_group_content = og_is_group_content_type($entity_type, $bundle_name);
+
+  // Set the default for the case there is not a group or a group content.
+  $result = !$strict;
+
+  // Check if entity is an active group.
+  $group = og_get_group($entity_type, $id);
+  if ($is_group && $group) {
+    if (og_user_access($group->gid, $perm, $account)) {
       return TRUE;
+    }
+    else {
+      // An entity can be a group and group content in the same time. The group
+      // didn't return TRUE, but the user still might have access to the
+      // permission in group content context.
+      $result = FALSE;
     }
   }
 
-  if (!isset($entity->{OG_AUDIENCE_FIELD})) {
-    // Content is not a group content, so deny access.
-    return FALSE;
-  }
-
-  // Entity is a group content.
-  if ($gids = og_get_entity_groups($entity_type, $entity)) {
+  if ($is_group_content && $gids = og_get_entity_groups($entity_type, $entity)) {
     foreach ($gids as $gid) {
       if (og_user_access($gid, $perm, $account)) {
         return TRUE;
@@ -1853,8 +1861,9 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
     return FALSE;
   }
 
-  // This is an orphan group content, or a group that was disabled.
-  return TRUE;
+  // Either the user didn't have permission, or the entity might be a
+  // disabled gorup or an orphaned group content.
+  return $result;
 }
 
 /**

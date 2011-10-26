@@ -584,7 +584,84 @@ class OgUserPermissionsTestCase extends DrupalWebTestCase {
 
     $this->assertTrue(og_user_access($group->gid, 'delete own article content', $user2), t('User still has "delete own article content" permission.'));
     $this->assertFalse(og_user_access($group->gid, 'administer group', $user2), t('User no longer has "administer group" permission.'));
+  }
 
+  /**
+   * Verify og_user_access_entity() returns correct value.
+   */
+  function testOgUserAccessEntity() {
+    $perm = 'administer group';
+    // Change permissions to authenticated member.
+    $roles = array_flip(og_get_global_roles());
+    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], array($perm => 1));
+
+    $user1 = $this->drupalCreateUser();
+    $user2 = $this->drupalCreateUser();
+    $user3 = $this->drupalCreateUser();
+
+    // Create an entity.
+    $entity1 = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
+    $wrapper = entity_metadata_wrapper('entity_test', $entity1);
+    $wrapper->{OG_GROUP_FIELD}->set(1);
+    $wrapper->save();
+
+    // User has access to group.
+    $this->assertTrue(og_user_access_entity($perm, 'entity_test', $entity1, $user1), t('User1 has access to group.'));
+    $this->assertFalse(og_user_access_entity($perm, 'entity_test', $entity1, $user2), t('User2 does not have access to group.'));
+
+    // User has access to a group associated with a group content.
+    $settings = array();
+    $settings['type'] = 'article';
+    $node = $this->drupalCreateNode($settings);
+
+    $group = og_get_group('entity_test', $entity1->pid);
+    $values = array('entity type' => 'node', 'entity' => $node);
+    og_group($group->gid, $values);
+    $this->assertTrue(og_user_access_entity($perm, 'node', $node, $user1), t('User1 has access to group content.'));
+    $this->assertFalse(og_user_access_entity($perm, 'node', $node, $user2), t('User2 does not have access to group content.'));
+
+    // Make group content also a group.
+    og_create_field(OG_GROUP_FIELD, 'node', 'article');
+    $settings['uid'] = $user2->uid;
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $node = $this->drupalCreateNode($settings);
+
+    $wrapper = entity_metadata_wrapper('node', $node);
+    $wrapper->{OG_GROUP_FIELD}->set(1);
+    $wrapper->save();
+
+    $values = array('entity type' => 'node', 'entity' => $node);
+    og_group($group->gid, $values);
+
+    $this->assertTrue(og_user_access_entity($perm, 'node', $node, $user1), t('User1 has access based on access to group.'));
+    $this->assertTrue(og_user_access_entity($perm, 'node', $node, $user2), t('User2 has access based on access to group content.'));
+    $this->assertFalse(og_user_access_entity($perm, 'node', $node, $user3), t('User3 has no access to entity.'));
+
+    // Entity is a disabled group.
+    $settings['uid'] = $user2->uid;
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 0;
+    $node = $this->drupalCreateNode($settings);
+    $this->assertFalse(og_user_access_entity($perm, 'node', $node, $user1));
+
+    // Entity is an orphan group content (strict and non-strict mode).
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 0;
+    $node = $this->drupalCreateNode($settings);
+    $values = array('entity type' => 'node', 'entity' => $node);
+    og_group($group->gid, $values);
+    $entity1->delete();
+
+    $this->assertFalse(og_user_access_entity($perm, 'node', $node, $user1), t('Entity is an orphan group content (strict mode).'));
+    $this->assertTrue(og_user_access_entity($perm, 'node', $node, $user1, FALSE), t('Entity is an orphan group content (non-strict mode).'));
+
+    // Entity isn't a group or a group content (strict and non-strict mode).
+    $settings = array();
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 0;
+    $settings['type'] = 'article';
+    $node = $this->drupalCreateNode($settings);
+    $this->assertFalse(og_user_access_entity($perm, 'node', $node, $user1), t('Entity is not a group or a group content (strict mode).'));
+    $this->assertTrue(og_user_access_entity($perm, 'node', $node, $user1, FALSE), t('Entity is not a group or a group content (non-strict mode).'));
   }
 }
 
