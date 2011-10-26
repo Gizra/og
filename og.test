@@ -712,7 +712,7 @@ class OgTranslationTestCase extends DrupalWebTestCase {
     $this->assertEqual($group1, $group2, t('Node and tranlated node are the same group.'));
 
     $this->drupalGet('node/' . $node_translation->nid . '/edit');
-    $message = t('You can not change "Group type" field from a translated content.');
+    $message = t('You can not change "Group" field from a translated content.');
     $this->assertText($message, t('Group field on tranlated node does not allow editing.'));
 
     $this->drupalGet('node/' . $node->nid . '/edit');
