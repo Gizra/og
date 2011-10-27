@@ -58,6 +58,9 @@ function og_field_access_og_permission() {
  */
 function og_field_access_field_access($op, $field, $entity_type, $entity, $account) {
   $perm = $op == 'view' ? 'view ' . $field['field_name'] . ' field' : 'update ' . $field['field_name'] . ' field';
-  // If the entity isn't related to OG, return TRUE, so we don't deny access.
-  return og_user_access_entity($perm, $entity_type, $entity, $account, FALSE);
+  // Return result only if the entity is related to OG.
+  $access = og_user_access_entity($perm, $entity_type, $entity, $account);
+  if (!is_null($access)) {
+    return $access;
+  }
 }

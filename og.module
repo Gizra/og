@@ -1834,12 +1834,18 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL, $s
     return TRUE;
   }
 
+  // Set the default for the case there is not a group or a group content.
+  $result = $strict ? NULL : TRUE;
+
+  if (empty($entity)) {
+    // $entity might be NULL, so return early.
+    // @see field_access().
+    return $result;
+  }
+
   list($id, $vid, $bundle_name) = entity_extract_ids($entity_type, $entity);
   $is_group = og_is_group_type($entity_type, $bundle_name);
   $is_group_content = og_is_group_content_type($entity_type, $bundle_name);
-
-  // Set the default for the case there is not a group or a group content.
-  $result = $strict ? NULL : TRUE;
 
   // Check if entity is an active group.
   $group = og_get_group($entity_type, $id);
