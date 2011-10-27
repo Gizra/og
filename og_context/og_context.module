@@ -210,7 +210,7 @@ function og_context_create_og_group($empty, $data = NULL, $conf = FALSE) {
   }
 
   if (!$data) {
-    return;
+    return ctools_context_create_empty('entity:group', NULL);
   }
 
   $context->data = $data;
