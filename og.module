@@ -1818,7 +1818,10 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
  *   permission will be denied. Defaults to TRUE.
  *
  * @return
- *   Returns TRUE if the user has access to the permission, otherwise FALSE.
+ *   Returns TRUE if the user has access to the permission, otherwise FALSE, or
+ *   if this is a strict mode, and we are not in any OG context, function
+ *   will return NULL. This allows a distinction between FALSE - no access,
+ *   and NULL - no access but no OG context found.
  */
 function og_user_access_entity($perm, $entity_type, $entity, $account = NULL, $strict = TRUE) {
   if (empty($account)) {
@@ -1836,7 +1839,7 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL, $s
   $is_group_content = og_is_group_content_type($entity_type, $bundle_name);
 
   // Set the default for the case there is not a group or a group content.
-  $result = !$strict;
+  $result = $strict ? NULL : TRUE;
 
   // Check if entity is an active group.
   $group = og_get_group($entity_type, $id);
@@ -1862,7 +1865,7 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL, $s
   }
 
   // Either the user didn't have permission, or the entity might be a
-  // disabled gorup or an orphaned group content.
+  // disabled group or an orphaned group content.
   return $result;
 }
 
