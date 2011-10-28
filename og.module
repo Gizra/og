@@ -1812,18 +1812,14 @@ function og_user_access($gid, $string, $account = NULL, $skip_alter = FALSE) {
  *   The entity object.
  * @param $account
  *   (optional) The user object. If empty the current user will be used.
- * @param $strict
- *   (optional) If the entity is found to be not a group or a group content,
- *   determine the return value. Setting this property to TRUE means that
- *   permission will be denied. Defaults to TRUE.
  *
  * @return
  *   Returns TRUE if the user has access to the permission, otherwise FALSE, or
- *   if this is a strict mode, and we are not in any OG context, function
- *   will return NULL. This allows a distinction between FALSE - no access,
- *   and NULL - no access but no OG context found.
+ *   if the entity is not in OG context, function will return NULL. This allows
+ *   a distinction between FALSE - no access, and NULL - no access but no OG
+ *   context found.
  */
-function og_user_access_entity($perm, $entity_type, $entity, $account = NULL, $strict = TRUE) {
+function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
   if (empty($account)) {
     global $user;
     $account = clone $user;
@@ -1835,7 +1831,7 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL, $s
   }
 
   // Set the default for the case there is not a group or a group content.
-  $result = $strict ? NULL : TRUE;
+  $result = NULL;
 
   if (empty($entity)) {
     // $entity might be NULL, so return early.
