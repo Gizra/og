@@ -865,9 +865,9 @@ class OgTranslationTestCase extends DrupalWebTestCase {
   function createTranslation($node, $title, $body, $language) {
     $this->drupalGet('node/add/page', array('query' => array('translation' => $node->nid, 'target' => $language)));
 
-    $body_key = "body[$language][0][value]";
-    $this->assertFieldByXPath('//input[@id="edit-title"]', $node->title, "Original title value correctly populated.");
-    $this->assertFieldByXPath("//textarea[@name='$body_key']", $node->body[$node->language][0]['value'], "Original body value correctly populated.");
+    $body_key = "body[und][0][value]";
+    $this->assertFieldByXPath('//input[@id="edit-title"]', $node->title, t('Original title value correctly populated.'));
+    $this->assertFieldByXPath("//textarea[@name='$body_key']", $node->body[LANGUAGE_NONE][0]['value'], t('Original body value correctly populated.'));
 
     $edit = array();
     $edit["title"] = $title;
