@@ -53,7 +53,7 @@ function og_migrate_og_migrate_upgrade_user(&$context) {
   $query
     ->fields('ogu')
     ->condition('ogu.upgrade_id', $context['sandbox']['last'], '>')
-    ->orderBy('ogu.nid', 'ASC')
+    ->orderBy('ogu.upgrade_id', 'ASC')
     ->range(0, $batch_size);
   $records = $query->execute();
 
@@ -73,6 +73,7 @@ function og_migrate_og_migrate_upgrade_user(&$context) {
     }
     $context['sandbox']['last'] = $record->upgrade_id;
     $context['sandbox']['progress']++;
+    $context['message'] = t('Processing database rows @start - @end', array('@start' => $record->upgrade_id, '@end' => $record->upgrade_id + $batch_size));
   }
 
   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
