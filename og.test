@@ -57,8 +57,10 @@ class OgGroupApi extends DrupalWebTestCase {
    * Verify og_user_access_entity() returns correct value.
    */
   function testOgAccessEntity() {
-    // Add OG group field to the entity_test's "main" bundle.
+    // Add OG group fields.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+
     $perm = 'administer group';
     // Change permissions to authenticated member.
     $roles = array_flip(og_get_global_roles());
