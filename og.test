@@ -1158,7 +1158,7 @@ class OgGroupAudienceField extends DrupalWebTestCase {
 */
 class OgUnInstallTestCase extends DrupalWebTestCase {
 
-  public static function getInfo() {
+  public static function __getInfo() {
     return array(
       'name' => 'Organic groups install, uninstall and re-install',
       'description' => 'Test the installing, uninstalling and re-installing of the Organic groups module',
@@ -1166,8 +1166,7 @@ class OgUnInstallTestCase extends DrupalWebTestCase {
     );
   }
   function setUp() {
-    parent::setUp('og', 'entity_test');
-    module_enable(array('entity_feature'));
+    parent::setUp('og');
   }
   /**
    * Instaill, uninstall and re-install.
