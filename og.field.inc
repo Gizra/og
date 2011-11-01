@@ -398,24 +398,30 @@ function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langc
 }
 
 /**
- * Validate handler; Re-add hidden selected gids if exist.
+ * Validate handler; Re-add hidden selected group IDs if exist.
  */
 function og_field_widget_form_validate($form, &$form_state) {
-  if (!empty($form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids']) && $gids = $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids']) {
-    // Rebuild the form state values.
+  if (empty($form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids'])) {
+    return;
+  }
+
+  // The hidden group IDs.
+  $gids = $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids'];
+  if (!empty($form_state['values'][OG_AUDIENCE_FIELD][LANGUAGE_NONE])) {
     foreach ($form_state['values'][OG_AUDIENCE_FIELD][LANGUAGE_NONE] as $key => $value) {
+      // Add the selected group IDs.
       $gids[$value['gid']] = $value['gid'];
     }
-
-    $delta = 0;
-    $value = array();
-    foreach ($gids as $gid) {
-      $value[LANGUAGE_NONE][$delta]['gid'] = $gid;
-      ++$delta;
-    }
-    // Set the new values.
-    form_set_value($form[OG_AUDIENCE_FIELD], $value, $form_state);
   }
+
+  $delta = 0;
+  $value = array();
+  foreach ($gids as $gid) {
+    $value[LANGUAGE_NONE][$delta]['gid'] = $gid;
+    ++$delta;
+  }
+  // Set the new values.
+  form_set_value($form[OG_AUDIENCE_FIELD], $value, $form_state);
 }
 
 /**

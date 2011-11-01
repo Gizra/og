@@ -424,42 +424,36 @@ function og_og_default_roles() {
  * Implement hook_node_access()
  */
 function og_node_access($node, $op, $account) {
-  // If not a group type or the operation is node creation which still has no
-  // groups so we can't check it yet, we ignore the access.
-  $return = NODE_ACCESS_IGNORE;
-
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
   if (in_array($op, array('update', 'delete'))) {
-    if (og_is_group_type('node', $type) && $group = og_get_group('node', $node->nid)) {
-      $return = NODE_ACCESS_DENY;
-      // The node is a group.
-      if (og_user_access($group->gid, $op . ' group', $account)) {
-        $return = NODE_ACCESS_ALLOW;
-      }
+    $access = og_user_access_entity('administer group', 'node', $node, $account);
+
+    if (is_null($access)) {
+      // The node isn't in an OG context, so no need to keep testing.
+      return NODE_ACCESS_IGNORE;
     }
-    // A single content type can act as a group and as group content, so make
-    // sure that even if the user doesn't have access on the group itself,
-    // further access checks are performed.
-    // However if we already have access, then skip the following access checks.
-    if ($return != NODE_ACCESS_ALLOW && og_is_group_content_type('node', $type) && $gids = og_get_entity_groups('node', $node)) {
-      $return = NODE_ACCESS_DENY;
-      // We don't have a context, so we need to get all the permissions
-      // of all the groups. We don't intersect with the user's group, as
-      // groups might allow anonymous members access.
-      foreach ($gids as $gid) {
-        if (og_user_access($gid, "administer group", $account) ||
-          // Any content.
-          og_user_access($gid, "$op any $type content", $account) ||
-          // Users own content.
-          (og_user_access($gid, "$op own $type content", $account) && $node->uid == $account->uid)) {
-          $return =  NODE_ACCESS_ALLOW;
-          break;
-        }
-      }
+    else {
+      $access = $access ||
+        // Any content.
+        og_user_access_entity("$op any $type content", 'node', $node, $account) ||
+        // Own content.
+        og_user_access_entity("$op own $type content", 'node', $node, $account);
     }
+
+    if (!$access && $op == 'update' && og_get_group('node', $node->nid)) {
+      // The node is a group, so check "update group" permission.
+      $access = og_user_access_entity('update group', 'node', $node, $account);
+    }
+
+    if ($access) {
+      return NODE_ACCESS_ALLOW;
+    }
+
+    // Check if OG should explicitly deny access or not.
+    return (variable_get('og_node_access_strict', TRUE)) ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
   }
 
-  return $return;
+  return NODE_ACCESS_IGNORE;
 }
 
 /**

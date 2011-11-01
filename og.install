@@ -52,6 +52,7 @@ function og_uninstall() {
     'og_skip_access',
     'og_update_batch_size',
     'og_upgrade_7001',
+    'og_node_access_strict',
   );
   foreach ($vars as $var) {
     variable_del($var);

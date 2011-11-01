@@ -413,6 +413,111 @@ class OgGroupApi extends DrupalWebTestCase {
 }
 
 /**
+ * Test Group node access. This will test nodes that are groups and group content.
+ */
+class OgNodeAccess extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Organic groups node access',
+      'description' => 'Test strict node access permissions for group nodes and group content.',
+      'group' => 'Organic groups',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og');
+
+    // Add OG group field to a the node's "page" bundle.
+    og_create_field(OG_GROUP_FIELD, 'node', 'page');
+
+    // Add OG audience field to the node's "article" bundle.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+
+    // Create an editor user and a group manager for these tests.
+    $this->editor_user = $this->drupalCreateUser(array('access content', 'edit any page content', 'edit any article content'));
+    $this->group_manager = $this->drupalCreateUser(array('access content', 'create page content', 'edit own article content', 'edit own page content'));
+
+    // Create group node.
+    $settings = array(
+      'type' => 'page',
+      OG_GROUP_FIELD . '[und][0][value]' => 1,
+      'uid' => $this->group_manager->uid
+    );
+    $this->group_node = $this->drupalCreateNode($settings);
+    $this->group = og_get_group('node', $this->group_node->nid);
+
+    // Create node to add to group.
+    $settings = array(
+      'type' => 'article',
+      'uid' => $this->group_manager->uid,
+    );
+    $this->group_content = $this->drupalCreateNode($settings);
+
+    // Add node to group.
+    $values = array(
+      'entity type' => 'node',
+      'entity' => $this->group_content,
+    );
+    og_group($this->group->gid, $values);
+  }
+
+  /**
+   * Test strict access permissions for updating group node. A non-member of
+   * a group who has core node access update permission is denied access.
+   */
+  function testStrictAccess() {
+    // Set Node access strict variable.
+    variable_set('og_node_access_strict', TRUE);
+
+    // Login as editor and try to change the group node and group content.
+    $this->drupalLogin($this->editor_user);
+
+    $this->drupalGet('node/' . $this->group_node->nid . '/edit');
+    $this->assertResponse('403', t('A non-member with core node access permissions was denied access to edit group node.'));
+
+    $this->drupalGet('node/' . $this->group_content->nid . '/edit');
+    $this->assertResponse('403', t('A non-member with core node access permissions was denied access to edit group content node.'));
+
+    // Login as a group manager and try to change group node.
+    $this->drupalLogin($this->group_manager);
+
+    $this->drupalGet('node/' . $this->group_node->nid . '/edit');
+    $this->assertResponse('200', t('Group manager allowed to access to edit group node.'));
+
+    $this->drupalGet('node/' . $this->group_content->nid . '/edit');
+    $this->assertResponse('200', t('Group manager allowed to access to edit group content node.'));
+  }
+
+  /**
+   * Test non-strict access permissions for updating group node. A non-member
+   * of a group who has core node access update permission is allowed access.
+   */
+  function testNoStrictAccess() {
+    // Set Node access strict variable.
+    variable_set('og_node_access_strict', FALSE);
+
+    // Login as editor and try to change the group node and group content.
+    $this->drupalLogin($this->editor_user);
+
+    $this->drupalGet('node/' . $this->group_node->nid . '/edit');
+    $this->assertResponse('200', t('A non-member with core node access permissions was not denied access.'));
+
+    $this->drupalGet('node/' . $this->group_content->nid . '/edit');
+    $this->assertResponse('200', t('A non-member with core node access permissions was not denied access to edit group content node.'));
+
+    // Login as a group manager and try to change group node.
+    $this->drupalLogin($this->group_manager);
+
+    $this->drupalGet('node/' . $this->group_node->nid . '/edit');
+    $this->assertResponse('200', t('Group manager allowed to access to edit group node.'));
+
+    $this->drupalGet('node/' . $this->group_content->nid . '/edit');
+    $this->assertResponse('200', t('Group manager allowed to access to edit group content node.'));
+  }
+}
+
+/**
  * Test Group content handeling.
  */
 class OgGroupAndUngroup extends DrupalWebTestCase {
@@ -1081,7 +1186,7 @@ class OgGroupAudienceField extends DrupalWebTestCase {
     $edit['group_audience[und][]'] = array();
     $this->drupalPost(NULL, $edit, t('Save'));
 
-    // FIXME: Although we have already invalidated group membersiho cache, it
+    // FIXME: Although we have already invalidated group membersihp cache, it
     // someohow pops-up again, so we invalidate it again.
     og_group_membership_invalidate_cache();
     $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid)), t('Article node is still assigned to a group that is hidden from the current user.'));
