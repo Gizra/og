@@ -450,7 +450,7 @@ function og_node_access($node, $op, $account) {
     }
 
     // Check if OG should explicitly deny access or not.
-    return (variable_get('og_node_access_strict', TRUE)) ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
+    return variable_get('og_node_access_strict', TRUE) ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
   }
 
   return NODE_ACCESS_IGNORE;
