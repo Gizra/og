@@ -437,7 +437,7 @@ function og_node_access($node, $op, $account) {
         // Any content.
         og_user_access_entity("$op any $type content", 'node', $node, $account) ||
         // Own content.
-        og_user_access_entity("$op own $type content", 'node', $node, $account);
+        (og_user_access_entity("$op own $type content", 'node', $node, $account) && $account->uid == $node->uid);
     }
 
     if (!$access && $op == 'update' && og_get_group('node', $node->nid)) {
