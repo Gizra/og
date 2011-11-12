@@ -111,6 +111,7 @@ class OgMembershipViewsController extends EntityDefaultViewsController {
  * Implements hook_views_data_alter().
  */
 function og_views_data_alter(&$data) {
+  $group_entities = og_get_all_group_entity();
   // TODO: This should be handled by entity-metadata.
   foreach (entity_get_info() as $entity_type => $info) {
     if (!empty($info['fieldable'])) {
@@ -130,6 +131,22 @@ function og_views_data_alter(&$data) {
             'base' => 'og',
             'base field' => 'etid',
             'relationship field' => $info['entity keys']['id'],
+          ),
+        );
+      }
+
+      // Group's related entity.
+      if (isset($group_entities[$entity_type])) {
+        $data['og']['og_related_' . $entity_type] = array(
+          'group' => t('Group'),
+          'title' => t('@entity being the group', array('@entity' => ucfirst($info['label']))),
+          'help' => t('Relate an entity to its group entity.'),
+          'relationship' => array(
+            'handler' => 'views_handler_relationship',
+            'label' => t('@entity being the group', array('@entity' => $entity_type)),
+            'base' => $info['base table'],
+            'base field' => $info['entity keys']['id'],
+            'relationship field' => 'etid',
           ),
         );
       }
