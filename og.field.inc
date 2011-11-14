@@ -11,8 +11,8 @@
  */
 function og_field_info() {
   return array(
-    'group' => array(
-      'label' => t('Group audience'),
+    OG_AUDIENCE_FIELD_TYPE => array(
+      'label' => t('OG group audience'),
       'description' => t('This field stores groups associated with the content.'),
       'default_widget' => OG_AUDIENCE_WIDGET,
       'default_formatter' => 'og_list_default',
@@ -28,8 +28,8 @@ function og_field_info() {
 function og_field_formatter_info() {
   return array(
     'og_list_default' => array(
-      'label' => t('Group default list'),
-      'field types' => array('group'),
+      'label' => t('OG audience list'),
+      'field types' => array(OG_AUDIENCE_FIELD_TYPE),
     ),
   );
 }
@@ -38,40 +38,82 @@ function og_field_formatter_info() {
  * Implements hook_field_formatter_view().
  */
 function og_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  if (!$items) {
+    return;
+  }
+
   $element = array();
-
-  if ($field['field_name'] == OG_AUDIENCE_FIELD && !empty($items[0])) {
-    foreach ($items as $delta => $item) {
-      if ($group = og_get_group('group', $item['gid'])) {
-        if ($group->access()) {
-          $label = og_label($group->gid);
-          $entity = entity_load($group->entity_type, array($group->etid));
-          $entity = current($entity);
-          // Get the entity type of the group entity.
-          $uri = entity_uri($group->entity_type, $entity);
-          $element[$delta] = array(
-            '#type' => 'link',
-            '#title' => $label,
-            '#href' => $uri['path'],
-          );
-        }
-        else {
-          // No need to show private groups several times, so remember if it was
-          // already added.
-          $added = &drupal_static(__FUNCTION__, FALSE);
-
-          if (!$added) {
-            $added = TRUE;
-            $element[$delta] = array(
-              '#markup' => '- ' . t('Private group') . ' -',
-            );
-          }
-        }
+  foreach ($items as $delta => $item) {
+    if ($item['gid']) {
+      if (empty($item['label'])) {
+        // We are in node preview mode, for simplicity we return without showing
+        // a real preview.
+        return;
       }
+
+      $element[$delta] = array(
+        '#type' => 'link',
+        '#title' => $item['label'],
+        '#href' => $item['uri'],
+      );
+    }
+    else {
+      $element[$delta] = array(
+        '#markup' => '- ' . t('Private group') . ' -',
+      );
     }
   }
 
   return $element;
+}
+
+/**
+ * Implements hook_field_formatter_prepare_view().
+ */
+function og_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
+  if (!class_exists('OgMetadataController')) {
+    // We might be in update.php and the metadata class isn't loaded yet.
+    return;
+  }
+  $private = FALSE;
+  foreach ($entities as $entity) {
+    $wrapper = entity_metadata_wrapper($entity_type, $entity);
+    if (!$wrapper->og_membership->value()) {
+      return;
+    }
+    $id = $wrapper->getIdentifier();
+    $membership_type = $instances[$id]['widget']['settings']['membership_type'];
+
+    foreach ($wrapper->og_membership as $delta => $og_membership_wrapper) {
+      // Show the membership only if it's according to the field settings.
+      if ($membership_type != $og_membership_wrapper->type->value(array('identifier' => TRUE))) {
+        continue;
+      }
+      $group_wrapper = $og_membership_wrapper->group;
+      $group = $group_wrapper->value();
+      if ($group->access()) {
+        $items[$id][] = array(
+          'gid' => $group->gid,
+          'label' => og_label($group->gid),
+          'uri' => $group_wrapper->url->value(),
+        );
+      }
+      else {
+        // Private group.
+        $private[$id] = $id;
+      }
+    }
+  }
+  if (!$private) {
+    return;
+  }
+  foreach ($private as $id) {
+    // Add the private label only once, in the end of the list.
+    $items[$id][] = array(
+      'gid' => 0,
+      'label' =>  '- ' . t('Private group') . ' -',
+    );
+  }
 }
 
 
@@ -81,19 +123,20 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
 function og_field_widget_info() {
   return array(
     OG_AUDIENCE_WIDGET => array(
-      'label' => t('Group audience'),
-      'field types' => array('group'),
+      'label' => t('OG group audience'),
+      'field types' => array(OG_AUDIENCE_FIELD_TYPE),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
       ),
       'settings' => array(
         'opt_group' => 'auto',
+        'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
       ),
     ),
     OG_AUDIENCE_AUTOCOMPLETE_WIDGET => array(
       'label'       => t('Autocomplete text field'),
       'description' => t('Display the list of referenceable groups as a textfield with autocomplete behaviour.'),
-      'field types' => array('group'),
+      'field types' => array(OG_AUDIENCE_FIELD_TYPE),
       'settings'    => array(
         'autocomplete_match' => 'contains',
         'size' => 60,
@@ -124,6 +167,19 @@ function og_field_widget_settings_form($field, $instance) {
         'always' => t('Always show "other groups"'),
       ),
       '#default_value' => $settings['opt_group'],
+      '#required' => TRUE,
+    );
+
+    $options = array();
+    foreach (og_membership_type_load() as $og_membership) {
+      $options[$og_membership->name] = $og_membership->description;
+    }
+    $form['membership_type'] = array(
+      '#type' => 'select',
+      '#title' => t('OG membership type'),
+      '#description' => t('Select the membership type that will be used for a subscribing user.'),
+      '#options' => $options,
+      '#default_value' => $settings['membership_type'],
       '#required' => TRUE,
     );
   }
@@ -163,6 +219,10 @@ function og_field_widget_settings_form($field, $instance) {
 function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
   $element = $base;
   $widget = $instance['widget'];
+
+  $form_state['entity_type'] = $instance['entity_type'];
+  $entity_type = $form_state['entity_type'];
+  $form_state['bundle'] = $instance['bundle'];
 
   switch ($widget['type']) {
     case OG_AUDIENCE_AUTOCOMPLETE_WIDGET:
@@ -207,22 +267,21 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       // Keep the group ID of the selected items, as they might be needed again,
       // and we don't want to iterate over the items again.
       $items_gid = array();
-      if (!empty($items)) {
-        foreach ($items as $item) {
-          // Some groups might be already deleted, but we don't bulk
-          // delete the fields of the entities associated with that group.
-          // So make sure the hidden selected fields are only for existing
-          // groups.
-          if (in_array($item['gid'], $audience['content groups']) || in_array($item['gid'], $audience['other groups'])) {
-            $default_values[$item['gid']] = $item['gid'];
-            $items_gid[] = $item['gid'];
+      $membership_type = $instance['widget']['settings']['membership_type'];
+      if (!empty($form_state[$entity_type])) {
+        $wrapper = entity_metadata_wrapper($entity_type, $form_state[$entity_type]);
+        foreach ($wrapper->og_membership->value() as $og_membership) {
+          if ($membership_type != $og_membership->type) {
+            continue;
           }
+          $gid = $og_membership->gid;
+          $default_values[$gid] = $gid;
         }
       }
 
       foreach (array('content groups', 'other groups') as $key) {
         if (!empty($audience[$key])) {
-          // Get the label un-sanitized, as they will be laster sanitized
+          // Get the label un-sanitized, as they will be later sanitized
           // according to the form type.
           $audience[$key] = og_label_multiple($audience[$key], FALSE);
         }
@@ -246,7 +305,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         $options = array_diff_key($audience['content groups'], $excludes);
         // If there are items that are already selected but the user doesn't
         // have access to them, we need to keep track of them.
-        $hidden_selected_gids = drupal_map_assoc(array_diff($items_gid, array_keys($options)));
+        $hidden_selected_gids = array_diff($default_values, array_keys($options));
       }
 
       if (empty($options)) {
@@ -274,6 +333,17 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         }
       }
 
+      $element_validate = array();
+      if ($type != 'item') {
+        // Re-use options widget element validation, to correctly transform
+        // submitted values from field => delta to delta => field.
+        // @see options_field_widget().
+        $element_validate[] = 'options_field_widget_validate';
+      }
+      if ($hidden_selected_gids) {
+        $element_validate[] = 'og_field_widget_element_validate';
+      }
+
 
       $element += array(
         // Input should be TRUE only if there are groups that can be selected.
@@ -283,11 +353,8 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         '#default_value' => $default_values,
         '#attributes' => array('class' => array('group-audience')),
         '#disabled' => empty($options),
-        // Re-use options widget element validation, to correctly transform
-        // submitted values from field => delta to delta => field.
-        // @see options_field_widget().
         '#value_key' => 'gid',
-        '#element_validate' => $type != 'item' ? array('options_field_widget_validate') : array(),
+        '#element_validate' => $element_validate,
         '#properties' => $properties,
         // Add OG specific context.
         '#opt_group' => $opt_group,
@@ -300,6 +367,28 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   }
 
   return $return;
+}
+
+/**
+ * Validate handler; Re-add hidden selected group IDs if exist.
+ */
+function og_field_widget_element_validate($element, &$form_state) {
+  // The hidden group IDs.
+  $gids = $element['#hidden_selected_gids'];
+  $field_name = $element['#field_name'];
+  if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
+    foreach ($form_state['values'][$field_name][LANGUAGE_NONE] as $key => $value) {
+      // Add the selected group IDs.
+      $gids[$value['gid']] = $value['gid'];
+    }
+  }
+
+  $value = array();
+  foreach ($gids as $gid) {
+    $value[] = array('gid' => $gid);
+  }
+  // Set the new values.
+  form_set_value($element, $value, $form_state);
 }
 
 /**
@@ -332,8 +421,6 @@ function og_field_attach_delete($entity_type, $entity) {
 
 /**
  * Implements hook_field_insert().
- *
- * DEPRECATE WHEN FIELD SCHEMA CAN BE CHANGED.
  */
 function og_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
   og_field_write('insert', $entity_type, $entity, $field, $instance, $langcode, $items);
@@ -341,8 +428,6 @@ function og_field_insert($entity_type, $entity, $field, $instance, $langcode, &$
 
 /**
  * Implements hook_field_update().
- *
- * DEPRECATE WHEN FIELD SCHEMA CAN BE CHANGED.
  */
 function og_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
   og_field_write('update', $entity_type, $entity, $field, $instance, $langcode, $items);
@@ -351,8 +436,6 @@ function og_field_update($entity_type, $entity, $field, $instance, $langcode, &$
  /**
  * Insert or update a field record.
  *
- * DEPRECATE WHEN FIELD SCHEMA CAN BE CHANGED.
- *
  * Since we can not change the field schema we must still populate the fields
  * with non-null values.
  *
@@ -360,10 +443,119 @@ function og_field_update($entity_type, $entity, $field, $instance, $langcode, &$
  *   The operation - "insert" or "update".
  */
 function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode, &$items) {
-  foreach ($items as &$item) {
-    // Set default values.
-    $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
+  if ($diff = og_field_save_group_audience_diff($entity_type, $entity, $field, $instance, $langcode, $items)) {
+    foreach (array('insert', 'update', 'delete') as $op) {
+      if (empty($diff[$op])) {
+        continue;
+      }
+
+      foreach ($diff[$op] as $item) {
+        $values = array(
+          'entity_type' => $entity_type,
+          'entity' => $entity,
+          'gid' => $item['gid'],
+          'type' => !empty($item['type']) ? $item['type'] : '',
+        );
+        call_user_func('og_membership_' . $op . '_on_field_save', $values);
+      }
+    }
   }
+
+  // Clear the items, so they are not saved to the database.
+  $items = array();
+}
+
+
+
+/**
+ * Get the difference in group audience for a saved field.
+ *
+ * @return
+ *   Array with all the differences, or an empty array if none found.
+ */
+function og_field_save_group_audience_diff($entity_type, $entity, $field, $instance, $langcode, $items) {
+  $return = array('insert' => array(), 'update' => array(), 'delete' => array());
+  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+
+  $existing_gids = array();
+
+  // Get the existing OG memberships.
+  foreach ($wrapper->og_membership->value() as $og_membership) {
+    $gid = $og_membership->gid;
+    $item = array(
+      'gid' => $og_membership->gid,
+      'state' => $og_membership->state,
+    );
+    $existing_gids[$gid] = $item;
+  }
+
+  // Get the group membership from the field instance settings.
+  $field_name = $field['field_name'];
+  $membership_type = $instance['widget']['settings']['membership_type'];
+
+  $new_gids = array();
+  foreach ($items as $item) {
+    $item += array('type' => $membership_type, 'state' => OG_STATE_ACTIVE);
+    $new_gids[$item['gid']] = $item;
+  }
+
+  foreach ($wrapper->og_membership->value() as $og_membership) {
+    $gid = $og_membership->gid;
+    $item = array(
+      'gid' => $gid,
+      'state' => $og_membership->state,
+      'type' => $membership_type,
+    );
+    if (empty($new_gids[$gid]) && $membership_type == $og_membership->type) {
+      $return['delete'][$gid] = $item;
+    }
+  }
+
+  // Check if the membership is new, or updating an existing one.
+  foreach ($new_gids as $gid => $item) {
+    if (empty($existing_gids[$gid])) {
+      $return['insert'][$gid] = $item;
+    }
+    elseif ($item['state'] != $existing_gids[$gid]['state']) {
+      // This is an existing group. Update the group only if the state has
+      // changed.
+      $return['update'][$gid] = $item;
+    }
+  }
+  return $return;
+}
+
+/**
+ * Create a new group membership on entity save.
+ *
+ * @see og_entity_insert()
+ * @see og_entity_update()
+ */
+function og_membership_insert_on_field_save($values = array()) {
+  // Create a new group membership entity.
+  list($id) = entity_extract_ids($values['entity_type'], $values['entity']);
+  og_group($values['gid'], $values);
+}
+
+/**
+ * Update an existing group membership on entity save.
+ *
+ * @see og_entity_update()
+ */
+function og_membership_update_on_field_save($values = array()) {
+  // Update group membership entity.
+  list($id) = entity_extract_ids($values['entity_type'], $values['entity']);
+  og_group($values['gid'], $values);
+}
+
+/**
+ * Delete an existing group membership on entity save.
+ *
+ * @see og_entity_update()
+ */
+function og_membership_delete_on_field_save($values = array()) {
+  list($id) = entity_extract_ids($values['entity_type'], $values['entity']);
+  og_ungroup($values['gid'], $values['entity_type'], $id);
 }
 
 /**

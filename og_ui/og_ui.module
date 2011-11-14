@@ -269,34 +269,6 @@ function og_ui_mail($key, &$message, $params) {
   $message['body'][] = _og_mail_text($key . '_body', $language, $params);
 }
 
-/**
- * Implements hook_field_access().
- */
-function og_ui_field_access($op, $field, $entity_type, $entity, $account) {
-  global $user;
-
-  if ($field['field_name'] != OG_AUDIENCE_FIELD) {
-    return;
-  }
-
-  if (!$user->uid) {
-    // User is anonymous, and user register might try to add the group-audience
-    // field.
-    return;
-  }
-
-  if ($op != 'edit') {
-    return;
-  }
-
-  if ($entity_type != 'user') {
-    return;
-  }
-
-  if (!user_access('administer group', $account)) {
-    return FALSE;
-  }
-}
 
 /**
  * Implements hook_og_user_access_alter().
@@ -304,14 +276,16 @@ function og_ui_field_access($op, $field, $entity_type, $entity, $account) {
  * Add a permission to pending users to unsubscribe form group.
  */
 function og_ui_og_user_access_alter(&$perms, $context) {
-  if ($context['string'] == 'unsubscribe' && empty($perm['unsubscribe'])) {
-    // Check user's state.
-    $state = og_get_entity_state($context['group']->gid, 'user', $context['account']);
-    if ($state == OG_STATE_PENDING) {
-      // Allow user to unsubscribe.
-      $perms['unsubscribe'] = TRUE;
-    }
+  if ($context['string'] != 'unsubscribe' || !empty($perm['unsubscribe'])) {
+    return;
   }
+
+  $og_membership = og_get_group_membership($context['group']->gid, 'user', $context['account']->uid);
+  if (empty($og_membership) || $og_membership->state != OG_STATE_PENDING) {
+    return;
+  }
+  // Allow user to unsubscribe.
+  $perms['unsubscribe'] = TRUE;
 }
 
 

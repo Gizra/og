@@ -103,10 +103,10 @@ class OgUiSubscribeTestCase extends DrupalWebTestCase {
 
     $this->clickLink(t('Request group membership'));
     // Assert user's request field appears.
-    $this->assertText('Request message', t('Request message does not appear.'));
+    $this->assertText('Request message', t('Request message appears.'));
     $request = $this->randomString();
     $edit = array();
-    $edit['membership_fields[og_membership_request][und][0][value]'] = $request;
+    $edit['og_membership_request[und][0][value]'] = $request;
     $this->drupalPost(NULL, $edit , t('Join'));
 
     $og_membership = og_get_group_membership($group->gid, 'user', $web_user->uid);
@@ -170,8 +170,8 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
     foreach (og_group_content_states() as $state => $name) {
       $web_user = $this->drupalCreateUser();
       $edit = array();
-      $edit['og_add_user'] = $web_user->name;
-      $edit['og_add_user_state'] = $state;
+      $edit['name'] = $web_user->name;
+      $edit['state'] = $state;
       $this->drupalPost('group/entity_test/' . $entity->pid . '/admin/people/add-user', $edit, t('Add users'));
 
       // Reload user, just to make sure field was updated.
@@ -181,7 +181,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
 
     // Add non-existing user.
     $edit = array();
-    $edit['og_add_user'] = $this->randomName();
+    $edit['name'] = $this->randomName();
     $this->drupalPost('group/entity_test/' . $entity->pid . '/admin/people/add-user', $edit, t('Add users'));
 
     $this->assertText(t('You have entered an invalid user name.'), t('Invalid user name not added to group.'));

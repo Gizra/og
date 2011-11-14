@@ -4,7 +4,7 @@
  * Plugin definition.
  */
 $plugin = array(
-  'title' => t('OG Content create links'),
+  'title' => t('Content create links'),
   'description' => t('Crafted links to create content (nodes) for a given group.'),
   'required context' => new ctools_context_required(t('OG Group'), 'entity:group'),
   'category' => t('Organic groups'),

@@ -24,12 +24,14 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
     $this->performUpgrade();
 
     // og_update_7001 required Entity module to be enabled, so we enable the
-    // modules an re-run upgrade.
+    // modules.
     // TODO: Understand why this workround is needed to load all entity classes.
     module_enable(array('entity'));
     module_load_include('inc', 'entity' ,'includes/entity');
     module_load_include('inc', 'entity' ,'includes/entity.controller');
+    module_load_include('inc', 'entity' ,'includes/entity.ui');
     module_enable(array('og'));
+    module_load_include('inc', 'og' ,'includes/og.admin');
     module_enable(array('og_migrate'));
 
     // Rebuild menu so og-migrate items are added.

@@ -3,11 +3,11 @@
 
 /**
  * @file
- * Page callbacks for Group module.
+ * Page callbacks for Organic groups module.
  */
 
 /**
- * Manage user subscription to a group.
+ * Subscribe the current user to a group.
  *
  * @param $node
  *   The group node entity.
@@ -15,94 +15,89 @@
  *   Optional; The user ID of the subscribing user. If empty the current user
  *   will be used.
  */
-function og_ui_subscribe($entity_type, $etid, $uid = NULL) {
+function og_ui_subscribe($entity_type, $etid, $membership_type = OG_MEMBERSHIP_TYPE_DEFAULT) {
   global $user;
-  if ($group = og_get_group($entity_type, $etid)) {
-    if (empty($uid)) {
-      $account = clone($user);
+  $group = og_get_group($entity_type, $etid);
+  if (!$group) {
+    // Not a valid group node.
+    drupal_not_found();
+    return;
+  }
 
-      if (!$account->uid) {
-        $dest = drupal_get_destination();
-        if (variable_get('user_register', 1)) {
-          drupal_set_message(t('In order to join any group, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
-        }
-        else {
-          drupal_set_message(t('In order to join any group, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest)))));
-        }
-        drupal_goto('user');
-      }
+  if (!$user->uid) {
+    // Anonymous user can't request membership.
+    $dest = drupal_get_destination();
+    if (variable_get('user_register', 1)) {
+      drupal_set_message(t('In order to join any group, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
     }
     else {
-      $account = user_load($uid);
+      drupal_set_message(t('In order to join any group, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest)))));
     }
-
-    $entity = entity_load($entity_type, array($etid));
-    $entity = reset($entity);
-
-    $redirect = FALSE;
-    $params = array(
-      '@user' => format_username($account),
-      // TODO: check user has permissions to see label (e.g. node title).
-      '@group' => og_entity_label($entity_type, $entity),
-    );
-    if (og_is_member($group->gid, 'user', $account, array(OG_STATE_BLOCKED))) {
-      // User is blocked, give them access denied.
-      drupal_access_denied();
-    }
-    if (og_is_member($group->gid, 'user', $account, array(OG_STATE_PENDING))) {
-      // User is pending, return them back.
-      $message = $account->uid == $user->uid ? t('You already have a pending membership for the group @group.', $params) : t('@user already has a pending membership for the  the group @group.', $params);
-      $redirect = TRUE;
-    }
-
-    if (og_is_member($group->gid, 'user', $account, array(OG_STATE_ACTIVE))) {
-      // User is already a member, return them back.
-      $message = $account->uid == $user->uid ? t('You are already a member of the group @group.', $params) : t('@user is already a member of the group @group.', $params);
-      $redirect = TRUE;
-    }
-
-    if (!empty($message)) {
-      drupal_set_message($message);
-    }
-    if ($redirect) {
-      _group_ui_redirect($entity_type, $entity);
-    }
-
-    if (og_user_access($group->gid, 'subscribe', $account) || og_user_access($group->gid, 'subscribe without approval', $account)) {
-      // Show the user a subscription confirmation.
-      return drupal_get_form('og_ui_confirm_subscribe', $group, $account);
-    }
-    drupal_access_denied();
+    drupal_goto('user');
   }
-  // Not a valid group node.
-  drupal_not_found();
 
+  $entity = $group->getEntity();
+
+  $redirect = FALSE;
+  $params = array(
+    '@user' => format_username($user),
+    // TODO: check user has permissions to see label (e.g. node title).
+    '@group' => og_entity_label($entity_type, $entity),
+  );
+
+  if (og_is_member($group->gid, 'user', $user, array(OG_STATE_BLOCKED))) {
+    // User is blocked, give them access denied.
+    drupal_access_denied();
+    return;
+  }
+  if (og_is_member($group->gid, 'user', $user, array(OG_STATE_PENDING))) {
+    // User is pending, return them back.
+    $message = $user->uid == $user->uid ? t('You already have a pending membership for the group @group.', $params) : t('@user already has a pending membership for the  the group @group.', $params);
+    $redirect = TRUE;
+  }
+
+  if (og_is_member($group->gid, 'user', $user, array(OG_STATE_ACTIVE))) {
+    // User is already a member, return them back.
+    $message = $user->uid == $user->uid ? t('You are already a member of the group @group.', $params) : t('@user is already a member of the group @group.', $params);
+    $redirect = TRUE;
+  }
+
+  if ($redirect) {
+    drupal_set_message($message);
+    _group_ui_redirect($entity_type, $entity);
+  }
+
+  // Check the membership type is valid.
+  $type = og_membership_type_load($membership_type);
+  if (!$type) {
+    // Fallback to the default membership type.
+    $membership_type = OG_MEMBERSHIP_TYPE_DEFAULT;
+  }
+
+  if (og_user_access($group->gid, 'subscribe', $user) || og_user_access($group->gid, 'subscribe without approval', $user)) {
+    // Show the user a subscription confirmation.
+    return drupal_get_form('og_ui_confirm_subscribe', $group, $user, $membership_type);
+  }
 }
 
 /**
  * Confirm subscribe form.
  */
-function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
-  $form['group'] = array('#type' => 'value', '#value' => $group);
-  $form['account'] = array('#type' => 'value', '#value' => $account);
+function og_ui_confirm_subscribe($form, &$form_state, $group, $account, $membership_type) {
+  $values = array(
+    'state' => og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING,
+    'type' => $membership_type,
+  );
 
   // Add group membership form.
-  // TODO: We need to associate a group membership with group?
-  $name = OG_MEMBERSHIP_TYPE_DEFAULT;
-  $form['membership_type'] = array('#type' => 'value', '#value' => $name);
-  $dummy_entity = og_membership_create(0, 'user', 0, array('name' => $name));
-  $form['membership_fields'] = array(
-    '#prefix' => '<div id="og-ui-membership-type">',
-    '#suffix' => '</div>',
-    '#tree' => TRUE,
-    '#parents' => array('membership_fields'),
-  );
-  field_attach_form('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
+  $og_membership = og_membership_create($group->gid, 'user', $account->uid, $values);
+  $form_state['og_membership'] = $og_membership;
+  field_attach_form('og_membership', $og_membership, $form, $form_state);
 
   if (og_user_access($group->gid, 'subscribe without approval')) {
     // Hide the user request field.
-    if (!empty($form['membership_fields'][OG_MEMBERSHIP_REQUEST_FIELD])) {
-      $form['membership_fields'][OG_MEMBERSHIP_REQUEST_FIELD]['#access'] = FALSE;
+    if (!empty($form[OG_MEMBERSHIP_REQUEST_FIELD])) {
+      $form[OG_MEMBERSHIP_REQUEST_FIELD]['#access'] = FALSE;
     }
   }
 
@@ -111,37 +106,26 @@ function og_ui_confirm_subscribe($form, &$form_state, $group, $account) {
 }
 
 /**
- * Submit handler; Confirm OG membership.
+ * Validate handler; Confirm OG membership.
  */
 function og_ui_confirm_subscribe_validate($form, &$form_state) {
   // @see entity_form_field_validate().
-  $dummy_entity = new stdClass();
-  if (!empty($form_state['values']['membership_fields'])) {
-    $dummy_entity = (object) $form_state['values']['membership_fields'];
-  }
-  $dummy_entity->name = $form_state['values']['membership_type'];
-
-  field_attach_form_validate('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
+  $og_membership = $form_state['og_membership'];
+  field_attach_form_validate('og_membership', $og_membership, $form, $form_state);
 }
 
 /**
  * Submit handler; Confirm OG membership.
  */
 function og_ui_confirm_subscribe_submit($form, &$form_state) {
-  $group = $form_state['values']['group'];
-  $account = $form_state['values']['account'];
+  $og_membership = $form_state['og_membership'];
+  field_attach_submit('og_membership', $og_membership, $form, $form_state);
 
-  $state = og_user_access($group->gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
-  $values = array(
-    'entity' => $account,
-    'state' => $state,
-    'membership type' => $form_state['values']['membership_type'],
-    'membership fields' => $form_state['values']['membership_fields'],
-  );
-  og_group($group->gid, $values);
+  $wrapper = entity_metadata_wrapper('og_membership', $og_membership);
+  $wrapper->save();
 
-  // Redirect.
-  $form_state['redirect'] = "$group->entity_type/$group->etid";
+  // Redirect back to entity.
+  $form_state['redirect'] = $wrapper->group->entity->url->value();
 }
 
 
