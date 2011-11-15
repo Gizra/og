@@ -474,6 +474,12 @@ function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode
  *   Array with all the differences, or an empty array if none found.
  */
 function og_field_save_group_audience_diff($entity_type, $entity, $field, $instance, $langcode, $items) {
+  $field_name = $field['field_name'];
+  if (empty($entity->{$field_name})) {
+    // The field is empty, so its a programmatic save of the entity.
+    return NULL;
+  }
+
   $return = array('insert' => array(), 'update' => array(), 'delete' => array());
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
 
@@ -490,7 +496,6 @@ function og_field_save_group_audience_diff($entity_type, $entity, $field, $insta
   }
 
   // Get the group membership from the field instance settings.
-  $field_name = $field['field_name'];
   $membership_type = $instance['widget']['settings']['membership_type'];
 
   $new_gids = array();
