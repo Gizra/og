@@ -75,9 +75,9 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
     // Group ID is provided in the "group" property.
     unset($properties['gid']);
     $properties['group'] = array(
-      'label' => t("Group"),
+      'label' => t("OG group"),
       'type' => 'group',
-      'description' => t("The group associated with the group membership."),
+      'description' => t("The OG group associated with the OG membership."),
       'required' => TRUE,
       'getter callback' => 'entity_property_getter_method',
       'schema field' => 'gid',
