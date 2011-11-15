@@ -947,7 +947,7 @@ function og_membership_load($id) {
  * Load multiple group membership entities based on certain conditions.
  *
  * @param $gids
- *   An array of group entity IDs.
+ *   An array of group membership IDs.
  * @param $conditions
  *   An array of conditions to match against the {entity} table.
  * @param $reset
@@ -2957,4 +2957,41 @@ function og_needs_migrate($migrate = NULL) {
   else {
     variable_del('og_needs_migrate');
   }
+}
+
+/**
+ * Get the group IDs of all the groups a user is an approved member of.
+ *
+ * @param $account
+ *   Optional; The user object to fetch group memberships for. Defaults to the
+ *   acting user.
+ *
+ * @return
+ *   An array with the group IDs or an empty array.
+ */
+function og_get_groups_by_user($account = NULL) {
+  if (empty($account)) {
+    global $user;
+    $account = $user;
+  }
+
+  $gids = array();
+
+  // Get all active OG membership that belong to the user.
+  $query = new EntityFieldQuery();
+  $result = $query
+    ->entityCondition('entity_type', 'og_membership')
+    ->propertyCondition('entity_type', 'user')
+    ->propertyCondition('etid', $account->uid)
+    ->propertyCondition('state', OG_STATE_ACTIVE)
+    ->execute();
+
+  if (!empty($result['og_membership'])) {
+    $memberships = og_membership_load_multiple(array_keys($result['og_membership']));
+    foreach ($memberships as &$membership) {
+      $gids[] = $membership->gid;
+    }
+  }
+
+  return $gids;
 }

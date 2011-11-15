@@ -225,5 +225,11 @@ function og_views_plugins() {
         'path' => drupal_get_path('module', 'og') . '/includes/views',
       ),
     ),
+    'argument default' => array(
+      'og_user_groups' => array(
+        'title' => t('The OG groups of the logged in user'),
+        'handler' => 'og_plugin_argument_default_user_groups',
+      ),
+    ),
   );
 }
