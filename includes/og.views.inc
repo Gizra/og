@@ -118,10 +118,11 @@ class OgMembershipViewsController extends EntityDefaultViewsController {
  */
 function og_views_data_alter(&$data) {
   $group_entities = og_get_all_group_entity();
-  // TODO: This should be handled by entity-metadata.
+  $group_content_entities = og_get_all_group_content_entity();
+
   foreach (entity_get_info() as $entity_type => $info) {
     if (!empty($info['fieldable'])) {
-      // Group relationship.
+      // OG group relationship.
       if ($entity_type != 'group') {
         $data[$info['base table']]['og_rel'] = array(
           'group' => t('OG group'),
@@ -139,8 +140,8 @@ function og_views_data_alter(&$data) {
         );
       }
 
-      // Group's related entity.
-      if (isset($group_entities[$entity_type])) {
+      // OG group's related entity.
+      if (!empty($group_entities[$entity_type])) {
         $data['og']['og_related_' . $entity_type] = array(
           'group' => t('OG group'),
           'title' => t('@entity from OG group', array('@entity' => ucfirst($info['label']))),
@@ -169,6 +170,22 @@ function og_views_data_alter(&$data) {
             'base' => 'og_membership',
             'base field' => 'etid',
             'relationship field' => $info['entity keys']['id'],
+          ),
+        );
+      }
+
+      // OG membership's related entity.
+      if (!empty($group_content_entities[$entity_type])) {
+        $data['og_membership']['og_membership_related_' . $entity_type] = array(
+          'group' => t('OG membership'),
+          'title' => t('@entity from OG membership', array('@entity' => ucfirst($info['label']))),
+          'help' => t('The @entity entity that is associated with the OG membership.', array('@entity' => $info['label'])),
+          'relationship' => array(
+            'handler' => 'views_handler_relationship',
+            'label' => t('@entity from OG membership', array('@entity' => $entity_type)),
+            'base' => $info['base table'],
+            'base field' => $info['entity keys']['id'],
+            'relationship field' => 'etid',
           ),
         );
       }
