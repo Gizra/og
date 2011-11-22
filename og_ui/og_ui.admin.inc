@@ -70,13 +70,13 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
       '#type' => 'fieldset',
       '#title' => t('Add a group member to %group', array('%group' => $label)),
     );
-    $form['og_user']['name'] = array(
+    $form['og_user']['og_add_user'] = array(
       '#type' => 'textfield',
       '#title' => t('User name'),
       '#autocomplete_path' => 'user/autocomplete',
       '#required' => TRUE,
     );
-    $form['og_user']['state'] = array(
+    $form['og_user']['og_add_user_state'] = array(
       '#type' => 'select',
       '#title' => t('Membership state'),
       '#options' => og_group_content_states(),
@@ -87,11 +87,11 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
       $options[$type->name] = check_plain($type->description);
     }
 
-    $form['og_user']['membership_type'] = array(
+    $form['og_user']['og_add_user_membership_type'] = array(
       '#type' => 'select',
       '#title' => t('Membership type'),
       '#options' => $options,
-      '#default_value' => OG_MEMBERSHIP_TYPE_DEFAULT,
+      '#default_value' => 'OG_MEMBERSHIP_TYPE_DEFAULT',
       '#description' => t('Select the group membership type of the membership.'),
       '#ajax' => array(
         'callback' => 'og_ui_admin_add_user_ajax_callback',
@@ -100,23 +100,15 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
     );
 
     // Add group membership form.
-    $values = array();
-
-    if (!empty($form_state['values']['membership_type'])) {
-      $values['type'] = $form_state['values']['membership_type'];
-    }
-
-    // Add group membership form. We still don't have the user or state.
-    $og_membership = og_membership_create($group->gid, 'user', 0, $values);
-    $form_state['og_membership'] = $og_membership;
-
+    $type = !empty($form_state['values']['og_add_user_membership_type']) ? $form_state['values']['og_add_user_membership_type'] : OG_MEMBERSHIP_TYPE_DEFAULT;
+    $dummy_entity = og_membership_create(0, 'user', 0, array('type' => $type));
     $form['membership_fields'] = array(
       '#prefix' => '<div id="og-ui-membership-type">',
       '#suffix' => '</div>',
       '#tree' => TRUE,
       '#parents' => array('membership_fields'),
     );
-    field_attach_form('og_membership', $og_membership, $form['membership_fields'], $form_state);
+    field_attach_form('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
 
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Add users'));
@@ -141,30 +133,37 @@ function og_ui_admin_add_user_ajax_callback(array $form, array &$form_state) {
  * Validate handler; Add users to group.
  */
 function og_ui_add_users_validate($form, &$form_state) {
-  $account = user_load_by_name($form_state['values']['name']);
+  $account = user_load_by_name($form_state['values']['og_add_user']);
   if (!$account) {
-    form_set_error('name', t('You have entered an invalid user name.'));
+    form_set_error('og_add_user', t('You have entered an invalid user name.'));
   }
+  // @see entity_form_field_validate().
+  $dummy_entity = new stdClass();
+  if (!empty($form_state['values']['membership_fields'])) {
+    $dummy_entity = (object) $form_state['values']['membership_fields'];
+  }
+  $dummy_entity->type = $form_state['values']['og_add_user_membership_type'];
 
-  $og_membership = $form_state['og_membership'];
-  field_attach_form_validate('og_membership', $og_membership, $form['membership_fields'], $form_state);
+  field_attach_form_validate('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
 }
 
 /**
  * Submit handler; Add users to group.
  */
 function og_ui_add_users_submit($form, &$form_state) {
-  $og_membership = $form_state['og_membership'];
-  // Set the user and state.
-  field_attach_submit('commerce_product', $og_membership, $form, $form_state);
+  $account = user_load_by_name($form_state['values']['og_add_user']);
 
-  $account = user_load_by_name($form_state['values']['name']);
+  $form_state['values'] += array('membership_fields' => array());
 
-  $og_membership->etid = $account->uid;
-  $og_membership->state = $form_state['values']['state'];
-  $og_membership->save();
-
-  drupal_set_message(t('%user has been added to group.', array('%user' => format_username($account))));
+  $values = array(
+    // Entity type is user by default.
+    'entity' => $account,
+    'state' => $form_state['values']['og_add_user_state'],
+    'membership type' => $form_state['values']['og_add_user_membership_type'],
+    'membership fields' => $form_state['values']['membership_fields']
+  );
+  og_group($form_state['values']['group']->gid, $values);
+  drupal_set_message(t('%user has been added to group.', array('%user' => $account->name)));
 }
 
 /**
@@ -540,7 +539,7 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
       '#description' => $perm_item['description'],
     );
 
-    // TODO: Move this to theme function. 
+    // TODO: Move this to theme function.
     // @see theme_user_admin_permissions().
     if (!empty($perm_item['restrict access'])) {
       $form['permission'][$perm]['#description'] .= '</br>';

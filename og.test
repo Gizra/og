@@ -400,7 +400,7 @@ class OgGroupApi extends DrupalWebTestCase {
       $groups[$state] = $group->gid;
 
       // Assign article to the group.
-      $values = array('entity_type' => 'node', 'entity' => $node, 'state' => $state);
+      $values = array('entity type' => 'node', 'entity' => $node, 'state' => $state);
       og_group($group->gid, $values);
     }
 
@@ -573,12 +573,12 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     entity_save('node', $node);
 
     $this->assertFalse(og_is_member($group1->gid, 'node', $node), t('Node is not assigned to group1.'));
-    $values = array('entity_type' => 'node', 'entity' => $node);
+    $values = array('entity type' => 'node', 'entity' => $node);
     og_group($group1->gid, $values);
     $this->assertTrue(og_is_member($group1->gid, 'node', $node), t('Node is now assigned to group1.'));
 
     $this->assertFalse(og_is_member($group2->gid, 'node', $node), t('Node is not assigned to group2.'));
-    $values = array('entity_type' => 'node', 'entity' => $node);
+    $values = array('entity type' => 'node', 'entity' => $node);
     og_group($group1->gid, $values);
     og_group($group2->gid, $values);
     $this->assertTrue(og_is_member($group1->gid, 'node', $node), t('Node is still assigned to group1.'));
@@ -625,12 +625,12 @@ class OgGroupMembership extends DrupalWebTestCase {
     $entity->save();
     $group = og_get_group('entity_test', $entity->pid);
 
-    $og_membership = og_get_group_membership($group->gid, 'user', $web_user->uid);
-    $this->assertTrue($og_membership, t('Group manager has group membership in new group.'));
+    $group_membership = og_get_group_membership($group->gid, 'user', $web_user->uid);
+    $this->assertTrue($group_membership, t('Group manager has group membership in new group.'));
 
     // Update group, assert group manager still has group membership.
     $entity->save();
-    $this->assertTrue($og_membership, t('Group manager still has group membership in updated group.'));
+    $this->assertTrue($group_membership, t('Group manager still has group membership in updated group.'));
 
     // Create group content not associated with a group.
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
@@ -656,22 +656,23 @@ class OgGroupMembership extends DrupalWebTestCase {
     $this->assertTrue(empty($result['og_membership']), t('Group content not assigned to a group does not have any group membership assigned to it.'));
 
     // Add group association.
-    $values = array('entity_type' => 'node', 'entity' => $node);
+    $values = array('entity type' => 'node', 'entity' => $node);
     og_group($group->gid, $values);
-    $og_membership = og_get_group_membership($group->gid, 'node', $node->nid);
-    $this->assertTrue($og_membership, t('Group content has group membership in group.'));
+    $group_membership = og_get_group_membership($group->gid, 'node', $node->nid);
+    $this->assertTrue($group_membership, t('Group content has group membership in group.'));
 
-    // Change state of group association via og_group().
-    $this->assertEqual($og_membership->state, OG_STATE_ACTIVE, t('Group membership state is active.'));
-    $values = array('entity_type' => 'node', 'entity' => $node, 'state' => OG_STATE_PENDING);
+    // Change state of group association via og_group() (i.e. not changing the
+    // group membership entity directly).
+    $this->assertEqual($group_membership->state, OG_STATE_ACTIVE, t('Group membership state is active.'));
+    $values = array('entity type' => 'node', 'entity' => $node, 'state' => OG_STATE_PENDING);
     og_group($group->gid, $values);
-    $og_membership = og_get_group_membership($group->gid, 'node', $node->nid);
-    $this->assertEqual($og_membership->state, OG_STATE_PENDING, t('Group membership state is pending.'));
+    $group_membership = og_get_group_membership($group->gid, 'node', $node->nid);
+    $this->assertEqual($group_membership->state, OG_STATE_PENDING, t('Group membership state is pending.'));
 
     // Remove group association.
     og_ungroup($group->gid, 'node', $node);
-    $og_membership = og_get_group_membership($group->gid, 'node', $node->nid);
-    $this->assertFalse($og_membership, t('Group content no longer has group membership in group.'));
+    $group_membership = og_get_group_membership($group->gid, 'node', $node->nid);
+    $this->assertFalse($group_membership, t('Group content no longer has group membership in group.'));
 
     // Create group content associated with a group.
     $settings = array();
@@ -679,14 +680,14 @@ class OgGroupMembership extends DrupalWebTestCase {
     $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['gid'] = $group->gid;
     $node = $this->drupalCreateNode($settings);
 
-    $og_membership = og_get_group_membership($group->gid, 'node', $node->nid);
-    $this->assertTrue($og_membership, t('Group membership exists for new group content.'));
+    $group_membership = og_get_group_membership($group->gid, 'node', $node->nid);
+    $this->assertTrue($group_membership, t('New group content has group membership in group.'));
 
     // Delete group content.
     $nid = $node->nid;
     node_delete($nid);
-    $og_membership = og_get_group_membership($group->gid, 'node', $nid);
-    $this->assertFalse($og_membership, t('Group membership was deleted for deleted group content.'));
+    $group_membership = og_get_group_membership($group->gid, 'node', $nid);
+    $this->assertFalse($group_membership, t('Group membership was deleted for deleted group content.'));
 
     // Delete group.
     $gid = $group->gid;
@@ -968,17 +969,12 @@ class OgTranslationTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Create a translation for the specified basic page in the specified
-   * language.
+   * Create a translation for the specified basic page in the specified language.
    *
-   * @param $node
-   *   The basic page to create translation for.
-   * @param $title
-   *   Title of basic page in specified language.
-   * @param $body
-   *   Body of basic page in specified language.
-   * @param $language
-   *   Language code.
+   * @param object $node The basic page to create translation for.
+   * @param string $title Title of basic page in specified language.
+   * @param string $body Body of basic page in specified language.
+   * @param string $language Language code.
    */
   function createTranslation($node, $title, $body, $language) {
     $this->drupalGet('node/add/page', array('query' => array('translation' => $node->nid, 'target' => $language)));
@@ -1023,7 +1019,7 @@ class OgGroupAudienceField extends DrupalWebTestCase {
   }
 
    function setUp() {
-    parent::setUp('og', 'entity_test', 'og_test');
+    parent::setUp('og', 'entity_test');
     module_enable(array('entity_feature'));
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
@@ -1036,7 +1032,7 @@ class OgGroupAudienceField extends DrupalWebTestCase {
   /**
    * No groups and a group is added.
    */
-  function testBasic() {
+  function testOgAudienceFieldBasic() {
     // Create user.
     $web_user = $this->drupalCreateUser(array(
       'access content',
@@ -1064,7 +1060,7 @@ class OgGroupAudienceField extends DrupalWebTestCase {
   /**
    * Test prepopulating the audience field widget via URL.
    */
-  function testPrepopulateViaUrl() {
+  function testPropopulateViaUrl() {
     // Create users.
     $admin_user = $this->drupalCreateUser(array(
       'access content',
@@ -1184,64 +1180,81 @@ class OgGroupAudienceField extends DrupalWebTestCase {
     $this->drupalGet('node/' . $node->nid . '/edit');
 
     // TODO: Assert user can see only the third group in the audience field.
+
     // Unselect all (visible) options.
     $edit = array();
     $edit['group_audience[und][]'] = array();
     $this->drupalPost(NULL, $edit, t('Save'));
 
-    $wrapper = entity_metadata_wrapper('node', $node);
-    $this->assertEqual($wrapper->og_membership->get(0)->group->value(array('identifier' => TRUE)), $groups[2]->gid, t('Article node is still assigned to a group that is hidden from the current user.'));
+    // FIXME: Although we have already invalidated group membersihp cache, it
+    // someohow pops-up again, so we invalidate it again.
+    og_group_membership_invalidate_cache();
+    $this->assertEqual(og_get_entity_groups('node', $node), drupal_map_assoc(array($groups[2]->gid)), t('Article node is still assigned to a group that is hidden from the current user.'));
   }
 
   /**
-   * Test multiple group audience fields.
+   * Test the group-audience field for a group that was deleted, but there are
+   * still users associated with that group.
    */
-  function testMultipleFields() {
-    $field_name = 'og_audience_2';
-    $field_info = og_fields_info(OG_AUDIENCE_FIELD);
-    $field_info['field']['field_name'] = $field_name;
-    $field = field_create_field($field_info['field']);
-
-    $instance = $field_info['instance'];
-    $instance += array(
-      'field_name' => $field_name,
-      'bundle' => 'article',
-      'entity_type' => 'node',
-    );
-
-    $instance['widget']['settings']['membership_type'] = 'expire';
-    $instance['label'] = t('Expire groups audience');
-    field_create_instance($instance);
-
-      // Create user.
-    $permissions = array(
+  function testOgAudienceFieldDeletedGroup() {
+    // Create user.
+    $admin_user = $this->drupalCreateUser(array(
       'access content',
-      'bypass node access',
-      'administer group',
-    );
-    $user1 = $this->drupalCreateUser($permissions);
-    $user2 = $this->drupalCreateUser($permissions);
+      'administer content types',
+      'create article content',
+      'edit any article content',
+    ));
 
-    foreach (range(1, 2) as $id) {
-      $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
+    $web_user = $this->drupalCreateUser(array(
+      'access content',
+      'administer content types',
+      'create article content',
+      'edit any article content',
+    ));
+
+    $this->drupalLogin($web_user);
+
+    // Create three entity that are groups.
+    $groups = array();
+    for ($i = 0; $i <= 2; $i++) {
+      $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
       $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
       $entity->save();
+      $group = og_get_group('entity_test', $entity->pid);
+      $groups[$i] = $group;
+
+      // Associate the user with the group.
+      og_group($group->gid, array('entity' => $web_user));
     }
-    $this->drupalLogin($user2);
 
-    $this->drupalGet('node/add/article');
-    $this->assertText(t('Groups audience'), t('First group audience field was found.'));
-    $this->assertText(t('Expire groups audience'), t('Second group audience field was found.'));
+    // Assert the group-audience field.
+    $web_user = user_load($web_user->uid, TRUE);
+    for ($i = 0; $i <= 2; $i++) {
+      $gid = $groups[$i]->gid;
+      $this->assertEqual($web_user->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][$i]['gid'], $gid, t("Group ID @id found in user's group-audienec field.", array('@id' => $gid)));
+    }
 
-    $settings = array();
-    $settings['type'] = 'article';
-    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['gid'] = 1;
-    $settings['og_audience_2'][LANGUAGE_NONE][1]['gid'] = 2;
-    $node = $this->drupalCreateNode($settings);
+    // Delete the first entity that is a group.
+    $first_gid = $groups[0]->gid;
+    entity_delete('entity_test', $groups[0]->etid);
+    $group = og_load($first_gid);
+    $this->assertFalse($group, t('Group was deleted'));
 
-    $wrapper = entity_metadata_wrapper('node', $node);
-    $this->assertTrue($wrapper->og_membership->get(0)->value()->type == OG_MEMBERSHIP_TYPE_DEFAULT, t('Node has "Default" membership type, through first group audience field.'));
-    $this->assertTrue($wrapper->og_membership->get(1)->value()->type == 'expire', t('Node has "Expire" membership type, through second group audience field.'));
+    // Assert the group-audience still has all the values, as deleting the group
+    // don't buld delete all content associated with it.
+    $this->assertEqual($web_user->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][0]['gid'], $first_gid, t("Group ID 1 is still found in user's group-audience field."));
+
+    // Assert the group-audience is with the correct values, after re-saving
+    // user form.
+    $this->drupalPost('user/' . $web_user->uid . '/edit', array(), t('Save'));
+
+    $web_user = user_load($web_user->uid, TRUE);
+    $this->assertEqual(count($web_user->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE]), 2, t('After user save, group-audience field has 2 items.'));
+
+    for ($i = 0; $i <= 1; $i++) {
+      $gid = $groups[$i+1]->gid;
+      $this->assertEqual($web_user->{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][$i]['gid'], $gid, t("Group ID @id found in user's group-audienec field.", array('@id' => $gid)));
+    }
   }
 }
 
@@ -1302,7 +1315,6 @@ class OgMigrateGroupMembershipTestCase extends OgUpgradePathTestCase {
     );
     parent::setUp();
 
-    // TODO: For some reason we need to logout, otherwise we get a notice.
     $this->drupalLogout();
     $admin_user = $this->drupalCreateUser(array('access administration pages', 'administer software updates'));
     $this->drupalLogin($admin_user);
@@ -1327,7 +1339,7 @@ class OgMigrateGroupMembershipTestCase extends OgUpgradePathTestCase {
     $this->drupalPost('admin/config/group/group-migrate', $edit, t('Migrate'));
 
     // Assert according to the scenario the test table dump was created.
-    $og_memberships = og_membership_load_multiple(FALSE);
+    $group_memberships = og_membership_load_multiple(FALSE);
     $info = array(
       2 => OG_STATE_ACTIVE,
       3 => OG_STATE_ACTIVE,
@@ -1335,13 +1347,13 @@ class OgMigrateGroupMembershipTestCase extends OgUpgradePathTestCase {
       5 => OG_STATE_BLOCKED,
     );
 
-    $this->assertEqual(count($og_memberships), count($info), t('All group membership enteties exist.'));
+    $this->assertEqual(count($group_memberships), count($info), t('All group membership enteties exist.'));
 
-    foreach ($og_memberships as $key => $og_membership) {
-      $this->assertEqual($og_membership->state, $info[$og_membership->etid], t('User ID @id has correct state', array('@id' => $key + 1)));
+    foreach ($group_memberships as $key => $group_membership) {
+      $this->assertEqual($group_membership->state, $info[$group_membership->etid], t('User ID @id has correct state', array('@id' => $key + 1)));
     }
 
     // Assert the created time was updated.
-    $this->assertEqual($og_memberships[2]->created, 1000000000, t('Create date was upgraded.'));
+    $this->assertEqual($group_memberships[2]->created, 1000000000, t('Create date was upgraded.'));
   }
 }
