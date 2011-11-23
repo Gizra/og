@@ -313,6 +313,30 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 }
 
 /**
+ * Default value function for OG audience fields.
+ *
+ * Set the default from the URL context. This works even if the widget is
+ * not shown, e.g. due to restricted field access.
+ *
+ * @see og_og_fields_info()
+ */
+function og_field_audience_default_value($entity_type, $entity, $field, $instance, $langcode) {
+  $gids = og_get_context_by_url();
+  if (!$gids) {
+    return;
+  }
+  $items = array();
+  $groups = og_load_multiple($gids);
+  foreach ($groups as $gid => $group) {
+    // Check access to group.
+    if ($group->access()) {
+      $items[] = array('gid' => $gid);
+    }
+  }
+  return $items;
+}
+
+/**
  * Implements hook_field_is_empty().
  */
 function og_field_is_empty($item, $field) {

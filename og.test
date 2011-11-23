@@ -1019,7 +1019,7 @@ class OgGroupAudienceField extends DrupalWebTestCase {
   }
 
    function setUp() {
-    parent::setUp('og', 'entity_test');
+    parent::setUp('og_test', 'entity_test');
     module_enable(array('entity_feature'));
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
@@ -1133,6 +1133,44 @@ class OgGroupAudienceField extends DrupalWebTestCase {
     foreach ($groups as $group) {
       $this->assertNoOptionSelected($id, $group->gid);
     }
+  }
+
+  /**
+   * Test prepopulating a hidden audience field widget via URL.
+   */
+  function testPropopulateViaUrlHidden() {
+    // Set variable, so we can hide the field.
+    // see og_test_field_access().
+    variable_set('og_test_hide_audience', TRUE);
+
+    // Create user.
+    $web_user = $this->drupalCreateUser(array('access content','create article content'));
+    $this->drupalLogin($web_user);
+
+    // Create an entity that is a group.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $web_user->uid));
+    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    $entity->save();
+    $group = og_get_group('entity_test', $entity->pid);
+
+    $this->drupalGet('node/add/article');
+    // Assert group audience is hidden.
+    $this->assertNoField('group_audience[und][]', t('OG audience field is hidden.'));
+    $edit['title'] = $this->randomName(8);
+    $this->drupalPost(NULL, $edit, t('Save'));
+
+    // Assert node does not belong to group.
+    $node = node_load(1);
+    $this->assertFalse(og_is_member($group->gid, 'node', $node), t('Node does not belong to a group.'));
+
+    $this->drupalGet('node/add/article', array('query' => array('gids_entity_test' => $entity->pid)));
+    $edit['title'] = $this->randomName(8);
+    $this->drupalPost(NULL, $edit, t('Save'));
+
+    // Assert node belongs to group.
+    $node = node_load(2);
+    $this->assertTrue(og_is_member($group->gid, 'node', $node), t('Node belongs to group.'));
+
   }
 
   /**

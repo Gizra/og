@@ -774,6 +774,7 @@ function og_og_fields_info() {
     'instance' => array(
       'label' => t('Groups audience'),
       'widget_type' => OG_AUDIENCE_FIELD,
+      'default_value_function' => 'og_field_audience_default_value',
       'view modes' => array(
         'full' => array(
           'label' => t('Full'),
