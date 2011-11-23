@@ -16,10 +16,20 @@ function og_field_info() {
       'description' => t('This field stores groups associated with the content.'),
       'default_widget' => OG_AUDIENCE_WIDGET,
       'default_formatter' => 'og_list_default',
-      // We do not expose the field as entity property, but we provide a
-      // separate property making use of the membership entities instead.
+      'property_callbacks' => array('og_field_property_callback'),
     ),
   );
+}
+
+/**
+ * OG audience field metadata callback.
+ */
+function og_field_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  // Set the property type to "group".
+  $field_type['property_type'] = 'group';
+
+  // Then apply the default.
+  entity_metadata_field_default_property_callback($info, $entity_type, $field, $instance, $field_type);
 }
 
 /**
