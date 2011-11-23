@@ -51,7 +51,10 @@ function og_ui_group_admin_overview($entity_type, $etid) {
     $item['localized_options'] = array();
   }
 
-  $form['admin_block_content'] = array('#markup' => theme('admin_block_content', array('content' => $items)));
+  $form['admin_block_content'] = array(
+    '#theme' => 'admin_block_content',
+    '#content' => $items,
+  );
 
   return $form;
 }
