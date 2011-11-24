@@ -759,7 +759,7 @@ function og_update_7101() {
  * Add default value function to all audience field instances.
  */
 function og_update_7102() {
-  $instances = field_read_instances(array('field_name' => OG_AUDIENCE_FIELD));
+  $instances = field_read_instances(array('field_name' => 'group_audience'));
   foreach ($instances as $instance) {
     $instance['default_value_function'] = 'og_field_audience_default_value';
     field_update_instance($instance);
