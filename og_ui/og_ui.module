@@ -261,15 +261,6 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
 }
 
 /**
- * Implements hook_mail().
- */
-function og_ui_mail($key, &$message, $params) {
-  $language = $message['language'];
-  $message['subject'] .= _og_mail_text($key . '_subject', $language, $params);
-  $message['body'][] = _og_mail_text($key . '_body', $language, $params);
-}
-
-/**
  * Implements hook_field_access().
  */
 function og_ui_field_access($op, $field, $entity_type, $entity, $account) {
