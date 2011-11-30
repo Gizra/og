@@ -1834,6 +1834,11 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
     $account = clone $user;
   }
 
+  // Quick check for user ID 1.
+  if ($account->uid == 1) {
+    return TRUE;
+  }
+
   // Set the default for the case there is not a group or a group content.
   $result = NULL;
 
@@ -1852,11 +1857,6 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
 
   $is_group = og_is_group_type($entity_type, $bundle_name);
   $is_group_content = og_is_group_content_type($entity_type, $bundle_name);
-
-  if ($account->uid == 1 && ($is_group || $is_group_content)) {
-    // Quick check for user ID 1.
-    return TRUE;
-  }
 
   // Check if entity is an active group.
   $group = og_get_group($entity_type, $id);
