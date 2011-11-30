@@ -263,7 +263,7 @@ function og_views_default_views() {
   $view->base_table = 'node';
   $view->human_name = 'OG content';
   $view->core = 0;
-  $view->api_version = '3.0-alpha1';
+  $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Defaults */
@@ -284,29 +284,23 @@ function og_views_default_views() {
   $handler->display->display_options['empty']['area']['field'] = 'area';
   $handler->display->display_options['empty']['area']['empty'] = FALSE;
   $handler->display->display_options['empty']['area']['content'] = 'There is no content in this group.';
-  /* Relationship: Group membership: Node group membership */
-  $handler->display->display_options['relationships']['og_membership_rel']['id'] = 'og_membership_rel';
-  $handler->display->display_options['relationships']['og_membership_rel']['table'] = 'node';
-  $handler->display->display_options['relationships']['og_membership_rel']['field'] = 'og_membership_rel';
-  $handler->display->display_options['relationships']['og_membership_rel']['required'] = 0;
   /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-  /* Contextual filter: Organic groups membership: Group gid */
-  $handler->display->display_options['arguments']['group']['id'] = 'group';
-  $handler->display->display_options['arguments']['group']['table'] = 'og_membership';
-  $handler->display->display_options['arguments']['group']['field'] = 'group';
-  $handler->display->display_options['arguments']['group']['relationship'] = 'og_membership_rel';
-  $handler->display->display_options['arguments']['group']['default_action'] = 'not found';
-  $handler->display->display_options['arguments']['group']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['group']['default_argument_skip_url'] = 0;
-  $handler->display->display_options['arguments']['group']['summary']['number_of_records'] = '0';
-  $handler->display->display_options['arguments']['group']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['group']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['group']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['group']['not'] = 0;
+  /* Contextual filter: Field: Groups audience (group_audience:gid) */
+  $handler->display->display_options['arguments']['group_audience_gid']['id'] = 'group_audience_gid';
+  $handler->display->display_options['arguments']['group_audience_gid']['table'] = 'field_data_group_audience';
+  $handler->display->display_options['arguments']['group_audience_gid']['field'] = 'group_audience_gid';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_action'] = 'not found';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['group_audience_gid']['default_argument_skip_url'] = 0;
+  $handler->display->display_options['arguments']['group_audience_gid']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['group_audience_gid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['group_audience_gid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['group_audience_gid']['break_phrase'] = 0;
+  $handler->display->display_options['arguments']['group_audience_gid']['not'] = 0;
   /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -327,13 +321,13 @@ function og_views_default_views() {
     $handler->display->display_options['allow']['exposed_form'] = 0;
     $handler->display->display_options['allow']['fields_override'] = 0;
     $handler->display->display_options['argument_input'] = array(
-      'group' => array(
+      'group_audience_gid' => array(
         'type' => 'context',
         'context' => 'entity:group.gid',
         'context_optional' => 0,
         'panel' => '0',
         'fixed' => '',
-        'label' => 'Organic groups membership: Group gid',
+        'label' => 'Field: Groups audience (group_audience:gid)',
       ),
     );
   }

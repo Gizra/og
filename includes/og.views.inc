@@ -195,11 +195,6 @@ function og_views_data_alter(&$data) {
   // Override group audience - "gid" (group ID) field argument.
   $data['og_membership']['group']['argument']['handler'] = 'og_handler_argument_group_audience_gid';
 
-  // TODO: Remove field-data-group-audience completely form Views and use
-  // group membership entity instead.
-  unset($data['field_data_group_audience']['group_audience_gid']['argument']);
-  unset($data['field_data_group_audience']['group_audience_gid']['field']);
-
   // Override group and group membership - "state" filter and add a field.
   foreach (array('og', 'og_membership') as $type) {
     $data[$type]['state']['filter']['handler'] = 'og_handler_filter_group_audience_state';
