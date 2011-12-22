@@ -39,18 +39,6 @@ class OgViewsController extends EntityDefaultViewsController {
       ),
     );
 
-    $data['field_data_group_audience']['user_roles'] = array(
-      'group' => t('Group'),
-      'title' => t('Group user roles'),
-      'help' => t('Show all the roles a user belongs to in a group.'),
-      // This is a dummy field, so point it to a real field that we need - the
-      // group ID
-      'real field' => 'group_audience_gid',
-      'field' => array(
-        'handler' => 'og_handler_field_user_roles',
-      ),
-    );
-
     $data['field_data_group_audience']['og_permissions'] = array(
       'group' => t('Group'),
       'title' => t('Group permissions'),
@@ -60,6 +48,29 @@ class OgViewsController extends EntityDefaultViewsController {
       'real field' => 'group_audience_gid',
       'field' => array(
         'handler' => 'og_handler_field_group_permissions',
+      ),
+    );
+
+    $data['og_users_roles'] = array(
+      'table' => array(
+        'group' => t('OG user roles'),
+        'join' => array(
+          'og_membership' => array(
+            'left_field' => 'gid',
+            'field' => 'gid',
+          ),
+        ),
+      ),
+    );
+
+    $data['og_users_roles']['rid'] = array(
+      'title' => t('Role ID'),
+      'help' => t('The OG role ID.'),
+      // We provide a dummy field to show the roles a user is part of. See
+      // 'og_membership - og_roles'.
+      // @todo: Add sort and filter.
+      'filter' => array(
+        'handler' => 'og_handler_filter_group_roles',
       ),
     );
 
@@ -108,6 +119,17 @@ class OgMembershipViewsController extends EntityDefaultViewsController {
     $data['og']['og_membership']['help'] =  t('The OG membership associated with OG group via the group ID.');
     $data['og']['og_membership']['relationship']['label'] = t('OG membership from OG group');
 
+
+    $data['og_membership']['og_roles'] = array(
+      'title' => t('OG user roles in group'),
+      'help' => t('Show all the roles a user belongs to in a group. Requires a relationship to users to be present.'),
+      // This is a dummy field, so point it to a real field that we need - the
+      // group ID
+      'real field' => 'gid',
+      'field' => array(
+        'handler' => 'og_handler_field_user_roles',
+      ),
+    );
 
     return $data;
   }
