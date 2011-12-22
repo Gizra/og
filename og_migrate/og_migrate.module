@@ -69,8 +69,7 @@ function og_migrate_init() {
     // Load all the plugins, so it will work in the batch.
     og_migrate_get_plugins();
   }
-  elseif (!og_migrate_is_pending() && user_access('access administration pages') && flood_is_allowed('og_migrate_warning', 1)) {
-    flood_register_event('og_migrate_warning');
+  elseif (!og_migrate_is_pending() && user_access('access administration pages')) {
     og_needs_migrate(FALSE);
     drupal_set_message(t('There are no pending migration plugins that need to be executed. You can disable Organic groups migrate module.'));
   }
