@@ -157,15 +157,6 @@ function og_notifications_update_6001() {
 }
 
 /**
- * First 4.x update. Update module that may be blank for subscriptions of this module
- */
-function og_notifications_update_6010() {
-  $ret = array();
-  $ret[] = update_sql("UPDATE {notifications} SET module = 'og_notifications' WHERE type = 'grouptype'");
-  return $ret;
-}
-
-/**
  * Populate the og_notifications_table with any uids added prior to installation
  * or when disabled.
  */
