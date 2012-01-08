@@ -123,6 +123,7 @@ function og_entity_info() {
     'fieldable' => TRUE,
     'entity keys' => array(
       'id' => 'gid',
+      'label' => 'label',
     ),
     'views controller class' => 'OgViewsController',
     'metadata controller class' => 'OgMetadataController',
