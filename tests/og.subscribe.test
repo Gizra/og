@@ -66,11 +66,12 @@ class OgSubscribe extends OgTestCase {
 
         // Unsubscribe a group.
         $this->drupalGet('og/unsubscribe/'. $this->nodes[$key]->nid .'/'. $this->web_user->uid);
-        $this->assertRaw(t('Are you sure you want to remove @user from the group %title?', array('@user' => $this->web_user->name, '%title' => $this->nodes[$key]->title)), t('Unsubscribe @selective group text found.', array('@selective' => $key)));
+        $this->assertRaw(t('Are you sure you want to leave the group %title?', array('%title' => $this->nodes[$key]->title)), t('Unsubscribe @selective group text found.', array('@selective' => $key)));
+
         // Click the join button.
-        $this->drupalPost(NULL, array(), t('Remove'));
+        $this->drupalPost(NULL, array(), t('Leave'));
         // Assert membership removal.
-        $this->assertRaw(t('%user removed from %group.', array('%user' => $this->web_user->name, '%group' => $this->nodes[$key]->title)), t('Confirmation of unsubscribing @selective group text found.', array('@selective' => $key)));
+        $this->assertRaw(t('You left the group %group.', array('%group' => $this->nodes[$key]->title)), t('Confirmation of unsubscribing @selective group text found.', array('@selective' => $key)));
         // Assert user is properly removed to group.
         if ($key == 'open') {
           // Assert the group was removed from web user.

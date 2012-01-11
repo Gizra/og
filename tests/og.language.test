@@ -36,6 +36,7 @@ class OgLanguage extends OgTestCase {
     $this->group_type = $og_group_type->name;
 
     // Setup languages
+    include_once 'includes/locale.inc';
     variable_set('language_negotiation', LANGUAGE_NEGOTIATION_PATH);
     locale_add_language('es');
     locale_add_language('de');
@@ -67,8 +68,8 @@ class OgLanguage extends OgTestCase {
 
     // Language neutral group, no path prefix. Should be site default.
     $this->ogLanguageTestCase(language_default('language'), NULL, 'default');
-    // German group, no path prefix. Should be German.
-    $this->ogLanguageTestCase('de', NULL, 'de');
+    // German group, no path prefix. Should be Default. In a default configuration, that means English.
+    $this->ogLanguageTestCase('en', NULL, 'de');
     // Language neutral group, German prefix. Should be German.
     $this->ogLanguageTestCase('de', 'de', 'default');
     // Language German group, Spanish prefix. Should be Spanish.
