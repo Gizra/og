@@ -163,7 +163,14 @@ function og_views_data_og() {
     'field' => array(
       'handler' => 'views_handler_field_markup',
       'format' => FILTER_FORMAT_DEFAULT,
-      'click sortable' => FALSE,
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'help' => t('Description field on Organic Group nodes.'),
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
   );
   $data['og']['member_count'] = array(
