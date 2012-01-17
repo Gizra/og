@@ -478,7 +478,7 @@ function og_init() {
   drupal_add_js(drupal_get_path('module', 'og'). '/og.js');
 
   // Set group context and language if needed.
-  if ($group_node = og_determine_context()) {
+  if (!og_get_group_context() && ($group_node = og_determine_context())) {
     og_set_group_context($group_node);
   }
 }
