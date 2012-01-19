@@ -123,6 +123,9 @@ function og_schema() {
       ),
     ),
     'primary key'       => array('nid', 'uid'),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
   );
   $schema['og_ancestry'] = array(
     'description'     => '',
@@ -440,6 +443,15 @@ function og_update_6203() {
 function og_update_6204() {
   $ret = array();
   db_add_index($ret, 'og_ancestry', 'group_nid', array('group_nid'));
+  return $ret;
+}
+
+/**
+ * Add an index on og_uid.uid.
+ */
+function og_update_6205() {
+  $ret = array();
+  db_add_index($ret, 'og_uid', 'uid', array('uid'));
   return $ret;
 }
 
