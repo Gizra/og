@@ -484,7 +484,7 @@ function og_ui_og_permission() {
 
   $items['unsubscribe'] = array(
     'title' => t('Unsubscribe user from group'),
-    'description' => t("Allow user to be remove membership from a group."),
+    'description' => t("Allow user to remove membership from a group."),
     'roles' => array(OG_AUTHENTICATED_ROLE),
     'default role' => array(OG_AUTHENTICATED_ROLE),
   );
