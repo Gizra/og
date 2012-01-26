@@ -1,14 +1,8 @@
 <?php
 
-
 /**
  * @file
- * Administration functions for Group context module.
- */
-
-/**
- * @defgroup locale-languages-negotiation Language negotiation options
- * @{
+ * Administration functions for OG context module.
  */
 
 /**
@@ -22,7 +16,7 @@ function og_context_configure_form() {
     '#group_context_providers' => og_context_negotiation_info(),
   );
 
-  _group_context_configure_form_table($form);
+  _og_context_configure_form_table($form);
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -36,7 +30,7 @@ function og_context_configure_form() {
 /**
  * Helper function to build a group context provider table.
  */
-function _group_context_configure_form_table(&$form) {
+function _og_context_configure_form_table(&$form) {
   $type = 'group_context';
 
   $table_form = array(
@@ -183,7 +177,3 @@ function og_context_configure_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/config/group/context';
   drupal_set_message(t('Group context negotiation configuration saved.'));
 }
-
-/**
- * @} End of "locale-group_contexts-negotiation"
- */

@@ -31,10 +31,17 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     $user2 = $this->drupalCreateUser();
     $this->drupalLogin($user1);
 
-    $global_roles = og_get_global_roles();
+    // Create group and group content node types.
+    $group_type = $this->drupalCreateContentType();
+    og_create_field(OG_GROUP_FIELD, 'node', $group_type->type);
+
+    $group_content_type = $this->drupalCreateContentType();
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $group_content_type->type);
+
+    $og_roles = og_roles('node', 0, $group_type->type);
 
     // Set global permissions.
-    $anon_rid = array_search(OG_ANONYMOUS_ROLE, $global_roles);
+    $anon_rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);
     $permissions = array(
       'view body field' => 0,
       'update body field' => 0,
@@ -42,13 +49,6 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
       'update group' => 1,
     );
     og_role_change_permissions($anon_rid, $permissions);
-
-    // Create group and group content node types.
-    $group_type = $this->drupalCreateContentType();
-    og_create_field(OG_GROUP_FIELD, 'node', $group_type->type);
-
-    $group_content_type = $this->drupalCreateContentType();
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $group_content_type->type);
 
     $this->drupalLogin($user1);
     // Create a group node.
@@ -58,11 +58,10 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     $settings['body'][LANGUAGE_NONE][0]['value'] = $this->randomName();
 
     $node = $this->drupalCreateNode($settings);
-    $group = og_get_group('node', $node->nid);
 
     // Assert another user is not a group member.
     $this->drupalLogin($user2);
-    $this->assertFalse(og_is_member($group->gid, 'user', $user2), t('User is not a group member.'));
+    $this->assertFalse(og_is_member('node', $node->nid, 'user', $user2), t('User is not a group member.'));
 
     // Assert user can't view the field.
     $this->drupalGet('node/' . $node->nid);
@@ -94,8 +93,8 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     $settings = array();
     $settings['uid'] = $user1->uid;
     $settings['type'] = $group_content_type->type;
-    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['gid'] = $group->gid;
-    $settings['body'][LANGUAGE_NONE][0]['value'] = $this->randomName();
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['target_id'] = $node->nid;
+    $settings['body'][LANGUAGE_NONE][0]['value'] = $this->randomString();
     $node = $this->drupalCreateNode($settings);
 
     $this->drupalLogin($user1);

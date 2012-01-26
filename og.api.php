@@ -112,9 +112,6 @@ function hook_og_role_revoke($gid, $uid, $rid) {
  * - entity type: Optional; Array of the entity types this field can be attached
  *   to. The field will not be attachable to other entity types. Defaults to
  *   empty array.
- * - disable on node translate: Optional; If set to TRUE then on translated
- *   node, the field will be un-editable, and a message will be shown that the
- *   field can be only edited via the source node. Defaults to TRUE.
  */
 function hook_og_fields_info() {
   $items = array();
@@ -196,107 +193,6 @@ function hook_og_user_access_alter(&$perm, $context) {
   }
 }
 
-/**
- * Alter the groups audience fields options.
- *
- * @param $options
- *   All the groups in the site divided into the "content groups" array and
- *   "other groups" array.
- * @param $opt_group
- *   TRUE if the user should see also "other groups" options.
- * @param $account
- *   The user object for which the field is built.
- */
-function hook_og_audience_options_alter(&$options, &$opt_group, $account) {
-  // Hide every group from the user.
-  if ($account->uid == 5) {
-    $options['content groups'] = array();
-  }
-}
-
-/**
-* Acts on OG groups being loaded from the database.
-*
-* This hook is invoked during OG group loading, which is handled by
-* entity_load(), via the EntityCRUDController.
-*
-* @param array og_groups
-*   An array of OG group entities being loaded, keyed by id.
-*
-* @see hook_entity_load()
-*/
-function hook_group_load(array $og_groups) {
-  $result = db_query('SELECT pid, foo FROM {mytable} WHERE pid IN(:ids)', array(':ids' => array_keys($entities)));
-  foreach ($result as $record) {
-    $entities[$record->pid]->foo = $record->foo;
-  }
-}
-
-/**
-* Responds when a OG group is inserted.
-*
-* This hook is invoked after the OG group is inserted into the database.
-*
-* @param OgGroup $og_group
-*   The OG group that is being inserted.
-*
-* @see hook_entity_insert()
-*/
-function hook_group_insert(OgGroup $og_group) {
-  db_insert('mytable')
-    ->fields(array(
-      'id' => entity_id('group', $og_group),
-      'extra' => print_r($og_group, TRUE),
-    ))
-    ->execute();
-}
-
-/**
-* Acts on a OG group being inserted or updated.
-*
-* This hook is invoked before the OG group is saved to the database.
-*
-* @param OgGroup $og_group
-*   The OG group that is being inserted or updated.
-*
-* @see hook_entity_presave()
-*/
-function hook_group_presave(OgGroup $og_group) {
-  $og_group->name = 'foo';
-}
-
-/**
-* Responds to a OG group being updated.
-*
-* This hook is invoked after the OG group has been updated in the database.
-*
-* @param OgGroup $og_group
-*   The OG group that is being updated.
-*
-* @see hook_entity_update()
-*/
-function hook_group_update(OgGroup $og_group) {
-  db_update('mytable')
-    ->fields(array('extra' => print_r($og_group, TRUE)))
-    ->condition('id', entity_id('group', $og_group))
-    ->execute();
-}
-
-/**
-* Responds to OG group deletion.
-*
-* This hook is invoked after the OG group has been removed from the database.
-*
-* @param OgGroup $og_group
-*   The OG group that is being deleted.
-*
-* @see hook_entity_delete()
-*/
-function hook_group_delete(OgGroup $og_group) {
-  db_delete('mytable')
-    ->condition('pid', entity_id('group', $og_group))
-    ->execute();
-}
 
 
 /**

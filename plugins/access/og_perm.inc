@@ -19,7 +19,7 @@ $plugin = array(
   'summary' => 'og_perm_ctools_access_summary',
   'required context' => array(
     new ctools_context_required(t('User'), 'user'),
-    new ctools_context_required(t('OG Group'), 'entity:group'),
+    new ctools_context_required(t('Node'), 'node'),
   ),
 );
 
@@ -41,6 +41,7 @@ function og_perm_ctools_access_settings($form, &$form_state, $conf) {
     '#title' => t('Group permission'),
     '#default_value' => $conf['perm'],
     '#description' => t('Only users with the selected permission flag, in the specified group, will be able to access this.'),
+    '#required' => TRUE,
   );
 
   return $form;
@@ -54,26 +55,26 @@ function og_perm_ctools_access_check($conf, $context) {
   // is safe.
   list($user_context, $og_group_context) = $context;
   if (empty($user_context) || empty($user_context->data)) {
-    return FALSE;
+    return;
   }
 
-  if (empty($og_group_context) || empty($og_group_context->data) || empty($og_group_context->data->gid)) {
-    return FALSE;
+  if (empty($node_context) || empty($node_context->data)) {
+    return;
   }
 
-  return og_user_access($og_group_context->data->gid, $conf['perm'], $user_context->data);
+  $account = clone $user_context->data;
+  $node = $node_context->data;
+
+  return og_user_access('node', $node->nid, $conf['perm'], $account);
 }
 
 /**
- * Provide a summary description based upon the checked roles.
+ * Provide a summary description based upon the checked permissions.
  */
 function og_perm_ctools_access_summary($conf, $context) {
-  list($user_context, $og_group_context) = $context;
-  if (!isset($conf['perm'])) {
-    return t('Error, unset permission');
-  }
+  list($user_context, $node_context) = $context;
 
   $permissions = og_get_permissions();
-  return t('@identifier has "@perm in @group group"', array('@identifier' => $user_context->identifier, '@perm' => $permissions[$conf['perm']]['title'], '@group' => $og_group_context->identifier));
+  return t('@identifier has "@perm in @group group"', array('@identifier' => $user_context->identifier, '@perm' => $permissions[$conf['perm']]['title'], '@group' => $node_context->identifier));
 }
 

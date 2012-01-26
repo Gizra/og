@@ -2,10 +2,10 @@
  * Override default textfield float to put the "Add role" button next to
  * the input textfield.
  */
-#og-ui-user-admin-new-role td.edit-name {
+#og-ui-admin-new-role td.edit-name {
   clear: both;
 }
-#og-ui-user-admin-new-role .form-item-name {
-  float: left;
+#og-ui-admin-new-role .form-item-name {
+  float: left; /* LTR */
   margin-right: 1em;
 }

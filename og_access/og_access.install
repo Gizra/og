@@ -28,22 +28,16 @@ function og_access_schema() {
 }
 
 /**
- * Implements hook_update_dependencies().
- */
-function og_access_update_dependencies() {
-  $dependencies = array();
-  $dependencies['og_access'][7000] = array(
-    'og' => 7000,
-  );
-
-  return $dependencies;
-
-}
-
-
-/**
  * Upgrade from Organic groups access 6 to 7.
  */
 function og_access_update_7000(&$sandbox) {
+  // Nothing to do, just clear cache.
+}
 
+/**
+ * Set variable to show message about "Rebuilding permissions".
+ */
+function og_access_update_7200(&$sandbox) {
+  node_access_needs_rebuild(TRUE);
+  variable_del('group_access_strict_private');
 }

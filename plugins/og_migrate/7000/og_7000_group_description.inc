@@ -6,15 +6,14 @@
 $plugin = array(
   'name' => t('Group description'),
   'access callback' => 'og_migrate_7000_access',
-  'migrate callback' => 'og_migrate_og_migrate_upgrade_group_description',
-  'dependencies' => array('upgrade_group'),
+  'dependencies' => array('og_7000_group'),
 );
 
 
 /**
  * OG Migrate callback; Upgrade "group" nodes.
  */
-function og_migrate_og_migrate_upgrade_group_description(&$context) {
+function og_7000_group_description(&$context) {
   if (empty($context['sandbox'])) {
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['last'] = 0;
@@ -49,33 +48,16 @@ function og_migrate_og_migrate_upgrade_group_description(&$context) {
     ->range(0, $batch_size);
   $revisions = $query->execute();
 
-  // Holds the node IDs with their earliest revision and timestamp, to create a
-  // group entity with the earliest timestamp.
-  $nids = array();
   foreach ($revisions as $revision) {
-    // Create a dummy node object.
-    $node = (object) array(
-      'nid' => $revision->nid,
-      'vid' => $revision->vid,
-      'type' => $revision->type,
-    );
-
-    if (empty($nids[$revision->nid]) || $nids[$revision->nid] > $revision->created) {
-      $nids[$revision->nid] = $revision->created;
-    }
     if (!empty($revision->og_description)) {
-      $node->og_description[LANGUAGE_NONE][0]['value'] = $revision->og_description;
+      $node = node_load($revision->nid, $revision->vid);
+      $wrapper = entity_metadata_wrapper('node', $node);
+      $wrapper->og_description->set($revision->og_description);
+      $wrapper->save();
     }
-    field_attach_update('node', $node);
 
     $context['sandbox']['last'] = $revision->upgrade_id;
-  }
-
-  if ($nids) {
-    foreach ($nids as $nid => $created) {
-      // New group created, so add it to the total count.
-      $context['sandbox']['progress']++;
-    }
+    $context['sandbox']['progress']++;
   }
 
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {

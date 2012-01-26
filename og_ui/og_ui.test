@@ -4,199 +4,204 @@
 class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups UI role permissions',
+      'name' => 'OG UI role permissions',
       'description' => 'Verify that role permissions can be added and removed via the permissions page of the group.',
       'group' => 'Organic groups UI'
     );
   }
 
   function setUp() {
-    parent::setUp('og_ui');
+    parent::setUp('og_ui', 'entity_feature');
 
-    $this->admin_user = $this->drupalCreateUser(array(
-      'bypass node access',
-      'administer content types',
-      'administer group',
-    ));
-    $this->drupalLogin($this->admin_user);
-
-    // Create group content type.
-    $group_type = $this->drupalCreateContentType();
-    $this->group_type = $group_type->type;
-
-    // Add og_group field.
-    og_create_field(OG_GROUP_FIELD, 'node', $this->group_type);
-
-    $node = $this->drupalCreateNode(array('type' => $group_type->type, 'og_group' => array(LANGUAGE_NONE => array(0 => array('value' =>TRUE)))));
-    $this->group = og_get_group('node', $node->nid);
+    // Add OG group fields.
+    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
   }
 
   /**
    * Change user permissions and check og_user_access().
    */
   function testOgUiUserPermissionChanges() {
+    $permissions = array(
+      'bypass node access',
+      'administer content types',
+      'administer group',
+    );
+    $admin_user = $this->drupalCreateUser($permissions);
     $web_user = $this->drupalCreateUser();
-    $gid = $this->group->gid;
-    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
+    $this->drupalLogin($admin_user);
 
-    $roles = og_get_default_roles();
-    $roles = array_flip(array_keys($roles['og']));
+    // Create a group.
+    $entity1 = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
+    $wrapper = entity_metadata_wrapper('entity_test', $entity1);
+    $wrapper->{OG_GROUP_FIELD}->set(1);
+    $wrapper->save();
+
+    $this->assertTrue(og_user_access('entity_test', $entity1->pid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
 
     // Remove a permission.
-    $edit = array();
-    $edit['1[subscribe]'] = FALSE;
-    $this->drupalPost('admin/config/group/permissions', $edit, t('Save global permissions'));
+    $this->drupalPost('admin/config/group/permissions/0/entity_test/0/main', array('4[subscribe]' => FALSE), t('Save global permissions'));
     $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
 
-    // FIXME: Understand why reseting the static cache isn't enough.
-    $this->resetAll();
+    // FIXME: There is an og_invalidate_cache() on permissions granting
+    // and revoking, but somehow, we need to do it manually here.
+    og_invalidate_cache();
 
-    $this->assertFalse(og_user_access($gid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
+    $this->assertFalse(og_user_access('entity_test', $entity1->pid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
 
     // Re-add permission.
-    $edit = array();
-    $edit['1[subscribe]'] = TRUE;
-    $this->drupalPost('admin/config/group/permissions', $edit, t('Save global permissions'));
+    $this->drupalPost('admin/config/group/permissions/0/entity_test/0/main', array('4[subscribe]' => TRUE), t('Save global permissions'));
 
-    $this->resetAll();
-
-    $this->assertTrue(og_user_access($gid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
+    // FIXME: There is an og_invalidate_cache() on permissions granting
+    // and revoking, but somehow, we need to do it manually here.
+    og_invalidate_cache();
+    $this->assertTrue(og_user_access('entity_test', $entity1->pid, 'subscribe', $web_user), t('User has "subscribe" permission again.'));
   }
 }
 
 class OgUiSubscribeTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups UI subscribe',
+      'name' => 'OG UI subscribe',
       'description' => 'Verify the subscribe and unsubsribe functionality.',
       'group' => 'Organic groups UI'
     );
   }
 
   function setUp() {
-    parent::setUp('og_ui', 'entity_test');
-    module_enable(array('entity_feature'));
-    // Add OG group field to the entity_test's "main" bundle.
+    parent::setUp('og_ui', 'entity_feature');
+    // Add OG group field.
     og_create_field(OG_GROUP_FIELD, 'node', 'article');
   }
 
   /**
-   * Testing adding people via group/[entity_type]/[etid]/admin/people/add-user.
+   * Test subscribing to group.
    */
-  function testOgUiAddPeople() {
-    $admin_user = $this->drupalCreateUser();
-    $this->drupalLogin($admin_user);
+  function testOgUiSubscribe() {
+    $user1 = $this->drupalCreateUser();
+    $user2 = $this->drupalCreateUser();
+    $this->drupalLogin($user1);
 
-    // Create an entity.
-    $node = entity_create('node', array('type' => 'article', 'uid' => $admin_user->uid));
-    $node->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
-    entity_save('node', $node);
-    $group = og_get_group('node', $node->nid);
+    // Create a group.
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings['uid'] = $user1->uid;
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $node = $this->drupalCreateNode($settings);
+
     $this->drupalGet('node/' . $node->nid);
     $this->assertText(t('You are the group manager'), t('Group manager gets correct text.'));
 
 
-    $web_user = $this->drupalCreateUser();
-    $this->drupalLogin($web_user);
+    $this->drupalLogin($user2);
     $this->drupalGet('node/' . $node->nid);
     $this->assertText(t('Request group membership'), t('Non-member without "subscribe without approval" gets correct text.'));
 
     $this->clickLink(t('Request group membership'));
     // Assert user's request field appears.
-    $this->assertText('Request message', t('Request message does not appear.'));
+    $this->assertText('Request message', t('Request message appears.'));
     $request = $this->randomString();
     $edit = array();
-    $edit['membership_fields[og_membership_request][und][0][value]'] = $request;
+    $edit['og_membership_request[und][0][value]'] = $request;
     $this->drupalPost(NULL, $edit , t('Join'));
 
-    $og_membership = og_get_group_membership($group->gid, 'user', $web_user->uid);
-    $this->assertEqual($request, $og_membership->og_membership_request[LANGUAGE_NONE][0]['value'], t('User request was saved in group membership.'));
+    $og_membership = og_get_membership('node', $node->nid, 'user', $user2->uid);
+    $wrapper = entity_metadata_wrapper('og_membership', $og_membership);
+    $this->assertEqual($request, $wrapper->og_membership_request->value(), t('User request was saved in group membership.'));
 
     $this->drupalGet('node/' . $node->nid);
     $this->assertText(t('Unsubscribe from group'), t('Member gets correct unsubscribe text.'));
     $this->clickLink(t('Unsubscribe from group'));
     $this->drupalPost(NULL, array() , t('Remove'));
 
-    $this->assertFalse(og_is_member($group->gid, 'user', $web_user, array(OG_STATE_ACTIVE, OG_STATE_PENDING)), t('User unsubscribed from group.'));
+    $this->assertFalse(og_is_member('node', $node->nid, 'user', $user2, array(OG_STATE_ACTIVE, OG_STATE_PENDING)), t('User unsubscribed from group.'));
 
     // Change global permissions to allow user to subscribe without approval.
-    $roles = array_flip(og_get_global_roles());
-    $rid = $roles[OG_ANONYMOUS_ROLE];
-    $permissions = array(
-      'subscribe without approval' => 1,
-    );
-    og_role_change_permissions($rid, $permissions);
+    $og_roles = og_roles('node', 0, 'article');
+    $rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);
+    og_role_change_permissions($rid, array('subscribe without approval' => 1));
 
     $this->drupalGet('node/' . $node->nid);
     $this->assertText(t('Subscribe to group'), t('Non-member with "subscribe without approval" gets correct text.'));
     $this->clickLink(t('Subscribe to group'));
     $this->assertNoText('Request message', t('Request message does not appear.'));
     $this->drupalPost(NULL, array() , t('Join'));
-    $this->assertTrue(og_is_member($group->gid, 'user', $web_user), t('User subscribed to group'));
+    $this->assertTrue(og_is_member('node', $node->nid, 'user', $user2), t('User subscribed to group'));
   }
 }
 
 class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
-      'name' => 'Organic groups UI manage people',
+      'name' => 'OG UI manage people',
       'description' => 'Verify the people management functionality.',
       'group' => 'Organic groups UI'
     );
   }
 
   function setUp() {
-    parent::setUp('og_ui', 'entity_test');
-    module_enable(array('entity_feature'));
-    // Add OG group field to the entity_test's "main" bundle.
+    parent::setUp('og_ui', 'entity_feature');
+    // Add OG group field.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
   }
 
   /**
-   * Testing adding people via group/[entity_type]/[etid]/admin/people/add-user.
+   * Test adding people via group/[entity_type]/[etid]/admin/people/add-user.
    */
   function testOgUiAddPeople() {
-    $admin_user = $this->drupalCreateUser();
-    $this->drupalLogin($admin_user);
+    $user1 = $this->drupalCreateUser();
+    $this->drupalLogin($user1);
 
-    // Create an entity.
-    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $admin_user->uid));
+    // Create a group.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
+    $wrapper = entity_metadata_wrapper('entity_test', $entity);
+    $wrapper->{OG_GROUP_FIELD}->set(1);
+    $wrapper->save();
 
-    $entity->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
-    $entity->save();
-    $group = og_get_group('entity_test', $entity->pid);
+    $og_membership = og_get_membership('entity_test', $entity->pid, 'user', $user1->uid);
 
     // Add users to the group, with different states.
+    $user2 = $this->drupalCreateUser();
     foreach (og_group_content_states() as $state => $name) {
-      $web_user = $this->drupalCreateUser();
       $edit = array();
-      $edit['og_add_user'] = $web_user->name;
-      $edit['og_add_user_state'] = $state;
+      $edit['name'] = $user2->name;
+      $edit['state'] = $state;
       $this->drupalPost('group/entity_test/' . $entity->pid . '/admin/people/add-user', $edit, t('Add users'));
 
       // Reload user, just to make sure field was updated.
-      $web_user = user_load($web_user->uid, TRUE);
-      $this->assertTrue(og_is_member($group->gid, 'user', $web_user, array($state)), t('User was added to the group with @name state.', array('@name' => $name)));
+      $user2 = user_load($user2->uid, TRUE);
+      og_membership_invalidate_cache();
+      $og_membership = og_get_membership('entity_test', $entity->pid, 'user', $user2->uid);
+      $this->assertTrue(og_is_member('entity_test', $entity->pid, 'user', $user2, array($state)), t('User was added to the group with @name state.', array('@name' => $name)));
+
+      // Unsubscribe from group.
+      og_ungroup('entity_test', $entity->pid, 'user', $user2);
     }
 
     // Add non-existing user.
     $edit = array();
-    $edit['og_add_user'] = $this->randomName();
+    $edit['name'] = $this->randomName();
     $this->drupalPost('group/entity_test/' . $entity->pid . '/admin/people/add-user', $edit, t('Add users'));
-
     $this->assertText(t('You have entered an invalid user name.'), t('Invalid user name not added to group.'));
+
+    // Add the same user twice.
+    $edit = array();
+    $edit['name'] = $user2->name;
+    $edit['state'] = $state;
+    $this->drupalPost('group/entity_test/' . $entity->pid . '/admin/people/add-user', $edit, t('Add users'));
+    $this->drupalPost('group/entity_test/' . $entity->pid . '/admin/people/add-user', $edit, t('Add users'));
+    $this->assertText(t('User @name is already subscribed to group.', array('@name' => format_username($user2))), t('User can not be added twice.'));
   }
 }
 
 /**
- * Upgrade test.
+ * Upgrade 7000 test.
  *
  * Load a filled installation of Drupal 6 and run the upgrade process on it.
  */
-class OgUiUpgradePathTestCase extends UpgradePathTestCase {
+class OgUiMigrate7000TestCase extends UpgradePathTestCase {
   public static function getInfo() {
     return array(
-      'name'  => 'Organic groups UI upgrade path',
+      'name'  => 'OG UI upgrade path',
       'description'  => 'Tests the upgrade path of Organic groups UI.',
       'group' => 'Organic groups UI',
     );
@@ -210,26 +215,18 @@ class OgUiUpgradePathTestCase extends UpgradePathTestCase {
     parent::setUp();
     $this->performUpgrade();
 
-    // og_update_7001 required Entity module to be enabled, so we enable the
-    // modules an re-run upgrade.
-    // TODO: Understand why this workround is needed to load all entity classes.
-    module_enable(array('entity'));
+    // Drupal doesn't rebuild the registery properly, so we have to
+    // manually include all the classes.
+    module_load_include('inc', 'entity' ,'entity.info');
     module_load_include('inc', 'entity' ,'includes/entity');
     module_load_include('inc', 'entity' ,'includes/entity.controller');
+    module_load_include('inc', 'entity' ,'includes/entity.wrapper');
+    module_load_include('inc', 'og' ,'includes/og.info');
+
     module_enable(array('og_migrate', 'og_ui'));
 
-    // Rebuild menu so og-migrate items are added.
-    menu_rebuild();
-
-    // Set small batch sizes, so we can simulate upgrade with many records.
+    // Set small batch size, so we can simulate upgrade with many records.
     variable_set('og_update_batch_size', 3);
-    $this->drupalLogout();
-    $admin_user = $this->drupalCreateUser(array('access administration pages'));
-    $this->drupalLogin($admin_user);
-
-    // Make sure Organic group fields are recognized by the field system.
-    _field_info_collate_fields(TRUE);
-    _field_info_collate_types(TRUE);
   }
 
   /**
@@ -238,8 +235,8 @@ class OgUiUpgradePathTestCase extends UpgradePathTestCase {
   public function testOgUiUpgrade() {
     // Run the required migration.
     $edit = array(
-      'migrate[upgrade_group]' => TRUE,
-      'migrate[upgrade_group_visibility]' => TRUE,
+      'migrate[og_7000_group]' => TRUE,
+      'migrate[og_ui_7000_group_visibility]' => TRUE,
     );
     $this->drupalPost('admin/config/group/group-migrate', $edit, t('Migrate'));
 
@@ -284,24 +281,17 @@ class OgUiUpgradePathTestCase extends UpgradePathTestCase {
       // Set default values.
       $node_info += array('auth' => array('unsubscribe' => TRUE));
 
-      $node = node_load($nid);
-      // Assert the role and permissions field exists and is set to TRUE.
-      $this->assertEqual($node->{OG_DEFAULT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'], 1, t('Organic groups role and permissions field found and is enabled.'));
+      // TODO: There is some issue with og_is_group_default_access()
+      // returning a wrong result, due to $wrapper not being up-to-date.
+      $og_roles = og_roles('node', $nid, 'test_group', TRUE);
+      $permissions = og_role_permissions($og_roles);
 
-      // Assert node is a group.
-      $group = og_get_group('node', $nid);
-      $this->assertTrue($group, t('Node ID @nid is a group.', array('@nid' => $nid)));
+      $anon_rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);
+      $auth_rid = array_search(OG_AUTHENTICATED_ROLE, $og_roles);
 
       // Assert permissions for non-member and member roles.
-      $roles = og_roles($group->gid);
-      $permissions = og_role_permissions($roles);
-
-      $anon_rid = array_search(OG_ANONYMOUS_ROLE, $roles);
-      $auth_rid = array_search(OG_AUTHENTICATED_ROLE, $roles);
-
       $this->assertEqual($permissions[$anon_rid], array_filter($node_info['anon']), t('Correct permissions were set for non-member role in @type group.', array('@type' => $node_info['name'])));
       $this->assertEqual($permissions[$auth_rid], array_filter($node_info['auth']), t('Correct permissions were set for member role in @type group.', array('@type' => $node_info['name'])));
     }
-
   }
 }

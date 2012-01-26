@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Field handler to provide a list of group roles.
+ * Field handler to provide a list of OG roles of a user.
  */
 class og_handler_field_user_roles extends og_handler_field_prerender_list {
 
@@ -11,6 +11,12 @@ class og_handler_field_user_roles extends og_handler_field_prerender_list {
     foreach ($this->query->relationships as $alias => $info) {
       if ($info['table'] == 'users') {
         $user_table_alias = $alias;
+      }
+      elseif ($info['table'] == 'og_membership') {
+        $og_membership_table_alias = $alias;
+      }
+
+      if (!empty($user_table_alias) && !empty($og_membership_table_alias)) {
         break;
       }
     }
@@ -19,11 +25,14 @@ class og_handler_field_user_roles extends og_handler_field_prerender_list {
     if (!empty($user_table_alias)) {
       $this->aliases['uid'] = $this->query->add_field($user_table_alias, 'uid');
     }
+    if (!empty($og_membership_table_alias)) {
+      $this->aliases['group_type'] = $this->query->add_field($og_membership_table_alias, 'group_type');
+    }
     parent::query();
   }
 
   function pre_render($values) {
-    if (!isset($this->aliases['uid'])) {
+    if (!isset($this->aliases['uid']) || !isset($this->aliases['group_type'])) {
       return;
     }
 
@@ -33,40 +42,27 @@ class og_handler_field_user_roles extends og_handler_field_prerender_list {
       if ($value->{$this->aliases['uid']} && $value->{$this->field_alias}) {
         $list[] = array(
           'uid' => $value->{$this->aliases['uid']},
+          'group_type' => $value->{$this->aliases['group_type']},
           'gid' => $value->{$this->field_alias},
         );
       }
     }
 
-    // Array of all the role IDss we will need to get a role name.
+    // Array of all the role IDs we will need to get a role name.
     $all_rids = array();
     if ($list) {
       foreach ($list as $value) {
-        $rids = og_get_user_roles($value['gid'], $value['uid']);
-        foreach ($rids as $rid) {
+        $rids = og_get_user_roles($value['group_type'], $value['gid'], $value['uid'], FALSE);
+        foreach ($rids as $rid => $role) {
           $this->items[$value['gid']][$value['uid']][$rid]['rid'] = $rid;
-        }
-        $all_rids = array_merge($all_rids, $rids);
-      }
-
-      // Get the name of all the roles we need to show.
-      $all_rids = og_get_user_roles_name($all_rids);
-
-      // Sanitize each role name once.
-      array_walk($all_rids, 'check_plain');
-
-      foreach ($this->items as $gid => $gid_value) {
-        foreach ($gid_value as $uid => $uid_value) {
-          foreach ($uid_value as $rid => $value) {
-            $this->items[$gid][$uid][$rid]['role'] = $all_rids[$rid];
-          }
+          $this->items[$value['gid']][$value['uid']][$rid]['role'] = $role;
         }
       }
     }
   }
 
   function render_item($rid, $item) {
-    return $item['role'];
+    return check_plain($item['role']);
   }
 
   function advanced_render($values) {

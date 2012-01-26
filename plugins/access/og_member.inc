@@ -18,7 +18,7 @@ $plugin = array(
   'summary' => 'og_member_ctools_access_summary',
   'required context' => array(
     new ctools_context_required(t('User'), 'user'),
-    new ctools_context_required(t('OG Group'), 'entity:group'),
+    new ctools_context_required(t('Node'), 'node'),
   ),
 );
 
@@ -33,6 +33,7 @@ function og_member_ctools_access_settings($form, &$form_state, $conf) {
     '#multiple' => TRUE,
     '#default_value' => $conf['state'],
     '#description' => t('Only users with the specified state in group will be able to access this.'),
+    '#required' => TRUE,
   );
 
   return $form;
@@ -44,26 +45,26 @@ function og_member_ctools_access_settings($form, &$form_state, $conf) {
 function og_member_ctools_access_check($conf, $context) {
   // As far as I know there should always be a context at this point, but this
   // is safe.
-  list($user_context, $og_group_context) = $context;
+  list($user_context, $node_context) = $context;
   if (empty($user_context) || empty($user_context->data)) {
-    return FALSE;
+    return;
   }
 
-  if (empty($og_group_context) || empty($og_group_context->data) || empty($og_group_context->data->gid)) {
-    return FALSE;
+  if (empty($node_context) || empty($node_context->data)) {
+    return;
   }
 
-  return og_is_member($og_group_context->data->gid, 'user', $user_context->data, $conf['state']);
+  $account = clone $user_context->data;
+  $node = $node_context->data;
+
+  return og_is_member('node', $node->nid, 'user', $account, $conf['state']);
 }
 
 /**
  * Provide a summary description based upon the checked roles.
  */
 function og_member_ctools_access_summary($conf, $context) {
-  list($user_context, $og_group_context) = $context;
-  if (!isset($conf['state'])) {
-    return t('Error, unset state');
-  }
+  list($user_context, $node_context) = $context;
 
   $states = og_group_content_states();
   $state = array();
@@ -71,6 +72,6 @@ function og_member_ctools_access_summary($conf, $context) {
     $state[] = $states[$value];
   }
 
-  return t('@identifier has "@state in @group group"', array('@identifier' => $user_context->identifier, '@state' => implode(',', $state), '@group' => $og_group_context->identifier));
+  return t('@identifier has "@state in @group group"', array('@identifier' => $user_context->identifier, '@state' => implode(',', $state), '@group' => $node_context->identifier));
 }
 

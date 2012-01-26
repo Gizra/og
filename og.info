@@ -1,11 +1,12 @@
 name = Organic groups
 description = "API to allow associating content with groups."
 package = "Organic groups"
-dependencies[] = entity
-dependencies[] = list
 dependencies[] = options
+dependencies[] = list
+dependencies[] = entity
+dependencies[] = entityreference
 core = 7.x
-version = VERSION
+
 files[] = og.module
 files[] = og.admin.inc
 files[] = includes/og.views.inc
@@ -27,17 +28,15 @@ files[] = includes/views/og_handler_field_user_roles.inc
 files[] = includes/views/og_handler_field_group_permissions.inc
 
 ; Views filters
-files[] = includes/views/og_handler_filter_group_state.inc
 files[] = includes/views/og_handler_filter_group_audience_state.inc
-files[] = includes/views/og_handler_filter_group_roles.inc
 
 ; Views relationships
 files[] = includes/views/og_handler_relationship.inc
-
-; Views arguments
-files[] = includes/views/og_handler_argument_group_audience_gid.inc
 
 ; Entity API controllers.
 files[] = includes/og.admin.inc
 files[] = includes/og.info.inc
 files[] = includes/og.views.inc
+
+; Entityreference selection handler.
+files[] = plugins/entityreference/selection/og.class.php

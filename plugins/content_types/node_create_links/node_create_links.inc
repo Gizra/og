@@ -6,7 +6,7 @@
 $plugin = array(
   'title' => t('Content create links'),
   'description' => t('Crafted links to create content (nodes) for a given group.'),
-  'required context' => new ctools_context_required(t('OG Group'), 'entity:group'),
+  'required context' => new ctools_context_required(t('Node'), 'node'),
   'category' => t('Organic groups'),
   'defaults' => array(
     'types' => array(),
@@ -21,8 +21,8 @@ function og_node_create_links_content_type_render($subtype, $conf, $args, $conte
     return FALSE;
   }
 
-  $group = $context->data;
-  $links = og_node_create_links($group->gid, '', !empty($conf['types']) ? $conf['types'] : NULL);
+  $node = $context->data;
+  $links = og_node_create_links('node', $node->nid, NULL, !empty($conf['types']) ? $conf['types'] : NULL);
   if (!$links) {
     return FALSE;
   }

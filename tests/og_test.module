@@ -7,32 +7,14 @@
  */
 
 /**
- * Implements hook_node_access().
+ * Implements hook_default_og_membership_type().
  */
-function og_test_node_access($node, $op, $account) {
-  $return = NODE_ACCESS_IGNORE;
-
-  if ($op == 'update' && $node->title == 'deny access') {
-    $return = NODE_ACCESS_DENY;
-  }
-  return $return;
-}
-
-/**
- * Implements hook_field_access().
- */
-function og_test_field_access($op, $field, $entity_type, $entity, $account) {
-  if (!variable_get('og_test_hide_audience', FALSE)) {
-    return;
-  }
-
-  if ($field['field_name'] != OG_AUDIENCE_FIELD) {
-    return;
-  }
-
-  if ($op != 'edit') {
-    return;
-  }
-
-  return FALSE;
+function og_test_default_og_membership_type() {
+  $items = array();
+  $items['expire'] = entity_import('og_membership_type', '{
+    "name" : "expire",
+    "description" : "Expire",
+    "rdf_mapping" : []
+  }');
+  return $items;
 }

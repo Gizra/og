@@ -5,5 +5,3 @@ dependencies[] = og
 dependencies[] = ctools
 core = 7.x
 
-; Test files.
-files[] = og_migrate.test

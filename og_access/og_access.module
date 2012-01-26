@@ -9,7 +9,7 @@
 /**
  * The access realm of group member.
  */
-define('OG_ACCESS_AUTHENTICATED_REALM', 'group_access_authenticated');
+define('OG_ACCESS_REALM', 'og_access');
 
 /**
  * Group public access field.
@@ -41,16 +41,20 @@ define('OG_CONTENT_ACCESS_PRIVATE', 2);
  * Implements hook_node_grants().
  */
 function og_access_node_grants($account, $op) {
-  $grants = array();
-  if ($op == 'view' && $groups = og_get_entity_groups('user', $account)) {
-    foreach ($groups as $gid => $value) {
-      // Not all the groups are nodes, but in order to save loading the groups
-      // we grant all group IDs.
-      $grants[OG_ACCESS_AUTHENTICATED_REALM][] = $gid;
+  if ($op != 'view') {
+    return;
+  }
+
+  if ($groups = og_get_entity_groups('user', $account)) {
+    foreach ($groups as $group_type => $gids) {
+      foreach ($gids as $gid) {
+        $realm = OG_ACCESS_REALM . ':' . $group_type;
+        $grants[$realm][] = $gid;
+      }
     }
   }
 
-  return $grants;
+  return !empty($grants) ? $grants : array();
 }
 
 
@@ -58,71 +62,45 @@ function og_access_node_grants($account, $op) {
  * Implements hook_node_access_records().
  */
 function og_access_node_access_records($node) {
-  $grants = array();
-
   // The group IDs, that in case access is granted, will be recorded.
   $gids = array();
 
-  $access = FALSE;
-  if (!empty($node->{OG_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) && $group = og_get_group('node', $node->nid)) {
-    // Group or group content that is explicitly set to be unpublic.
-    $access = TRUE;
-    $gids[] = $group->gid;
+  $wrapper = entity_metadata_wrapper('node', $node);
+
+  if (!empty($wrapper->{OG_ACCESS_FIELD}) && $wrapper->{OG_ACCESS_FIELD}->value() && og_is_group('node', $node)) {
+    // Private group.
+    $gids['node'][] = $node->nid;
   }
-  elseif (isset($node->{OG_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value'])) {
-    switch ($node->{OG_CONTENT_ACCESS_FIELD}[LANGUAGE_NONE][0]['value']) {
+  if (!empty($wrapper->{OG_CONTENT_ACCESS_FIELD})) {
+    switch ($wrapper->{OG_CONTENT_ACCESS_FIELD}->value()) {
       case OG_CONTENT_ACCESS_DEFAULT:
-        if ($field = field_info_field(OG_ACCESS_FIELD)) {
-          // Access should be determined by its groups. If group content belongs
-          // to several groups, and one of them is private, then the group
-          // content will private as-well.
-          $gids = og_get_entity_groups('node', $node);
+        $gids = og_get_entity_groups('node', $node);
+        if (!$gids) {
+          break;
+        }
 
-          $groups = og_load_multiple($gids);
-
-          // Get all groups under their entity.
-          $list = array();
-          foreach ($groups as $group) {
-            $list[$group->entity_type][$group->etid] = $group->etid;
+        // Get all the group-audience fields in the node.
+        $list_gids = array();
+        // Indicate if atleast one group is private.
+        $has_private = FALSE;
+        foreach (field_info_instances('node', $node->type) as $field_name => $field_instance) {
+          if (!og_is_group_audience_field($field_name)) {
+            continue;
           }
 
-          // If group content belongs to several groups, and one of them is
-          // private, then this variable decides what should happen -- if the
-          // group content will be private as-well or become public.
-          // By default, if one group is private then the group content will be
-          // private.
-          $strict_private = variable_get('group_access_strict_private', 1);
+          $field = field_info_field($field_name);
+          $group_type = $field['settings']['target_type'];
 
-          $total_count = 0;
-
-          foreach ($list as $entity_type => $entity_gids) {
-            $query = new EntityFieldQuery;
-            $count = $query
-              ->entityCondition('entity_type', $entity_type)
-              ->entityCondition('entity_id', $entity_gids, 'IN')
-              ->fieldCondition(OG_ACCESS_FIELD, 'value', 1, '=')
-              ->count()
-              ->execute();
-
-            if ($strict_private) {
-              // There is at least one private group and 'strict private' is
-              // TRUE so this group content should be private.
-              if ($count) {
-                $access = TRUE;
-                break;
-              }
-            }
-            else {
-              // 'strict private' is FALSE so count all the groups, and only if
-              // all of them are private then this group content should be
-              // private.
-              $total_count += $count;
+          foreach ($wrapper->{$field_name . '__og_membership__' . OG_STATE_ACTIVE} as $group_wrapper) {
+            $list_gids[$group_type][] = $group_wrapper->getIdentifier();
+            if (!empty($group_wrapper->{OG_ACCESS_FIELD}) && $group_wrapper->{OG_ACCESS_FIELD}->value()) {
+              $has_private = TRUE;
             }
           }
-          if ($total_count == count($gids)) {
-            // All groups are private.
-            $access = TRUE;
-          }
+        }
+
+        if ($has_private) {
+          $gids = $gids + $list_gids;
         }
         break;
 
@@ -131,19 +109,15 @@ function og_access_node_access_records($node) {
         break;
 
       case OG_CONTENT_ACCESS_PRIVATE:
-        $access = TRUE;
         $gids = og_get_entity_groups('node', $node);
         break;
-
     }
   }
 
-  //TODO: Add a case where the group has access field but group content doesn't.
-
-  if ($access && $gids) {
-    foreach ($gids as $gid) {
+  foreach ($gids as $group_type => $values) {
+    foreach ($values as $gid) {
       $grants[] = array (
-        'realm' => OG_ACCESS_AUTHENTICATED_REALM,
+        'realm' => OG_ACCESS_REALM . ':' . $group_type,
         'gid' => $gid,
         'grant_view' => 1,
         'grant_update' => 0,
@@ -153,7 +127,7 @@ function og_access_node_access_records($node) {
     }
   }
 
-  return $grants;
+  return !empty($grants) ? $grants : array();
 }
 
 /**

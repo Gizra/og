@@ -11,27 +11,60 @@
  */
 define('OG_REGISTER_FIELD', 'group_register');
 
+
 /**
- * Implement hook_form_FORM_ID_alter().
- *
- * Get all the groups that should appear in the user registration, and if they
- * exist, attach the user's field to the form.
+ * Implements hook_query_TAG_alter().
  */
-function og_register_form_user_register_form_alter(&$form, $form_state) {
+function og_register_query_og_alter(QueryAlterableInterface $query) {
   global $user;
-  if ($gids = og_register_get_groups()) {
-    $account = clone $user;
-    field_attach_form('user', $account, $form, $form_state);
+  if ($user->uid) {
+    // User is authenticated.
+    return;
   }
-}
 
+  if (!field_info_field(OG_REGISTER_FIELD)) {
+    // No register field exists.
+    return;
+  }
 
-/**
- * Implements hook_og_audience_alter().
- */
-function og_register_og_audience_options_alter(&$options, $opt_group, $account) {
-  if (!$account->uid && $gids = og_register_get_groups()) {
-    $options['content groups'] = array_merge($options['content groups'], $gids);
+  $field = $query->alterMetaData['field'];
+  $group_type = $field['settings']['target_type'];
+  $group_bundles = $field['settings']['handler_settings']['target_bundles'];
+
+  $entity_info = entity_get_info($group_type);
+  $conditions = &$query->conditions();
+
+  // Search the condition that falsified the query.
+  // @see OgHandler_base::buildEntityFieldQuery
+  foreach ($conditions as $key => $condition) {
+    if (!is_array($condition)) {
+      continue;
+    }
+    if ($condition['field'] != $group_type . '.' . $entity_info['entity keys']['id']) {
+      continue;
+    }
+    if ($condition['value'] != -1 || $condition['operator'] != '=') {
+      continue;
+    }
+
+    // Get all the referencable groups.
+    $efq_query = new EntityFieldQuery;
+    $efq_query
+      ->entityCondition('entity_type', $group_type)
+      ->fieldCondition(OG_REGISTER_FIELD, 'value', 1, '=')
+      ->fieldCondition(OG_GROUP_FIELD, 'value', 1, '=');
+
+    if ($group_bundles) {
+      $efq_query->propertyCondition($entity_info['bundle keys ']['bundle'], $group_bundles, 'IN');
+    }
+    $result = $efq_query->execute();
+    if (empty($result[$group_type])) {
+      return;
+    }
+
+    $conditions[$key]['value'] = array_keys($result[$group_type]);
+    $conditions[$key]['operator'] = 'IN';
+    return;
   }
 }
 
@@ -72,29 +105,4 @@ function og_register_og_fields_info() {
   );
 
   return $items;
-}
-
-/**
- *  Get all the groups node IDs that should appear in the user registration.
- */
-function og_register_get_groups() {
-  $gids = &drupal_static(__FUNCTION__, array());
-
-  if (!$gids && $field = field_info_field(OG_REGISTER_FIELD)) {
-    $query = new EntityFieldQuery;
-    $result = $query
-      ->fieldCondition(OG_REGISTER_FIELD, 'value', 1, '=')
-      ->execute();
-
-    if ($result) {
-      foreach ($result as $entity_type => $ids) {
-        $ids = array_keys($ids);
-
-        // Get the group IDs of the IDs.
-        $gids = array_merge($gids, og_get_group_ids($entity_type, $ids));
-      }
-    }
-  }
-
-  return $gids;
 }

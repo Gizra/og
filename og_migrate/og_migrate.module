@@ -25,27 +25,14 @@ define('OG_MIGRATE_FAILED', 2);
  */
 function og_migrate_menu() {
   $items['admin/config/group/group-migrate'] = array(
-    'title' => 'Organic groups migrate',
-    'description' => 'Migrate Organic groups data.',
+    'title' => 'OG migrate',
+    'description' => 'Migrate OG data.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_migrate_admin'),
     'access arguments' => array('access administration pages'),
   );
 
   return $items;
-}
-
-/**
- * Implements hook_ctools_plugin_directory().
- */
-function og_migrate_ctools_plugin_directory($module, $type) {
-  // Safety: go away if CTools is not at an appropriate version.
-  if (!module_invoke('ctools', 'api_version', OG_MIGRATE_REQUIRED_CTOOLS_API)) {
-    return;
-  }
-  if ($module == 'og_migrate' && $type == 'og_migrate') {
-    return 'plugins/og_migrate';
-  }
 }
 
 /**
@@ -196,7 +183,7 @@ function og_migrate_write_record($name, $status = OG_MIGRATE_EXECUTED) {
   // Delete the previous record.
   db_delete('og_migrate')
     ->condition('plugin', $name)
-        ->execute();
+    ->execute();
 
   // Insert the record.
   $object = new stdClass();
@@ -213,6 +200,9 @@ function og_migrate_process(&$plugin, $info) {
   $plugin += array(
     'description' => '',
     'access callback' => TRUE,
+    // TODO: Although we have a file, for some reason PHP gives a notice, unless
+    // we check for empty() values.
+    'migrate callback' => !empty($plugin['file']) ? str_replace('.inc', '', $plugin['file']) : '',
   );
 }
 
@@ -285,7 +275,30 @@ function og_migrate_is_pending() {
  */
 function og_migrate_7000_access() {
   return db_table_exists('d6_og');
+}
 
+/**
+ * Access callback for og_update_7200() related migration items.
+ */
+function og_migrate_7200_access() {
+  return db_field_exists('og_membership', 'group_type') && db_table_exists('og');
+}
+
+/**
+ * Get the entity type and entity ID from the deprecated OG table.
+ *
+ * @param $gid
+ *   The deprecated group ID.
+ */
+function og_migrate_get_group($gid) {
+  // Get the entity that is the group.
+  $result = db_select('og', 'og')
+    ->fields('og', array('entity_type', 'etid'))
+    ->condition('gid', $gid, '=')
+    ->execute()
+    ->fetchAssoc();
+
+  return !empty($result) ? array_values($result) : FALSE;
 }
 
 /**

@@ -10,11 +10,20 @@
  * Implements hook_uninstall().
  */
 function og_ui_uninstall() {
-  variable_del('og_ui_global_roles');
+  variable_del('og_ui_admin_people_view');
 }
 
 /**
  * Removed -- Upgrade from Organic groups 6 to 7, moved to og-migrate.
  */
 function og_ui_update_7000(&$sandbox) {
+}
+
+/**
+ * Enable VBO module.
+ */
+function og_ui_update_7200(&$sandbox) {
+  if (!module_enable(array('views_bulk_operations'))) {
+    throw new DrupalUpdateException('This version of OG UI requires Views bulk operation (VBO), but it could not be enabled.');
+  }
 }

@@ -24,7 +24,7 @@ function og_is_node_group_check($conf, $context) {
     return FALSE;
   }
 
-  return og_get_group('node', $context->data->nid);
+  return og_is_group('node', $context->data);
 }
 
 /**

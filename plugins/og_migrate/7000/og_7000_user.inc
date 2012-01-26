@@ -6,21 +6,16 @@
 $plugin = array(
   'name' => t('User relation to group'),
   'access callback' => 'og_migrate_7000_access',
-  'migrate callback' => 'og_migrate_og_migrate_upgrade_user',
-  'dependencies' => array('upgrade_group'),
+  'dependencies' => array('og_7000_group'),
 );
 
 /**
  * OG Migrate callback; Upgrade user subscription to groups.
  */
-function og_migrate_og_migrate_upgrade_user(&$context) {
+function og_7000_user(&$context) {
   if (empty($context['sandbox'])) {
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['last'] = 0;
-
-    // Get the administrator role ID.
-    $roles = array_flip(og_get_global_roles());
-    $context['sandbox']['rid'] = $roles[OG_ADMINISTRATOR_ROLE];
 
     // Calculate max items.
     $query = db_select('d6_og_uid', 'ogu');
@@ -58,25 +53,27 @@ function og_migrate_og_migrate_upgrade_user(&$context) {
   $records = $query->execute();
 
   foreach ($records as $record) {
-    $group = og_get_group('node', $record->nid);
     $state = $record->is_active ? OG_STATE_ACTIVE : OG_STATE_PENDING;
 
     $account = user_load($record->uid);
+    $node = node_load($record->nid);
     // Make sure entity isn't already associated with group.
-    if (!og_is_member($group->gid, 'user', $account)) {
+    if (!og_is_member('node', $record->nid, 'user', $account)) {
       $values = array('entity' => $account, 'state' => $state);
-      og_group($group->gid, $values);
+      og_group('node', $record->nid, $values);
     }
 
     if ($record->is_admin) {
-      og_role_grant($group->gid, $record->uid, $context['sandbox']['rid']);
+      $og_roles = og_roles('node', $node->nid, $node->type);
+      $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
+      og_role_grant('node', $record->nid, $record->uid, $rid);
     }
     $context['sandbox']['last'] = $record->upgrade_id;
     $context['sandbox']['progress']++;
     $context['message'] = t('Processing database rows @start - @end', array('@start' => $record->upgrade_id, '@end' => $record->upgrade_id + $batch_size));
   }
 
-  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
 }
