@@ -240,7 +240,7 @@ function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bund
 
     // Show the global and per-bundle links.
     $items = array();
-    $items[] = array('data' => l(t('Global roles'), 'admin/config/group/roles'));
+    $items[] = array('data' => l(t('Global (used for inheritance)'), 'admin/config/group/roles'));
     foreach (og_get_all_group_bundle() as $entity_type => $bundles) {
       $entity_info = entity_get_info($entity_type);
       foreach ($bundles as $bundle_name => $bundle_label) {
@@ -249,7 +249,7 @@ function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bund
     }
 
     $form['global_links'] = array(
-      '#title' => t('Global links'),
+      '#title' => t('Roles links'),
       '#theme' => 'item_list',
       '#items' => $items,
     );
@@ -477,7 +477,7 @@ function og_ui_admin_permissions($form, $form_state, $og_rid = 0, $group_type = 
 
     // Show the global and per-bundle links.
     $items = array();
-    $items[] = array('data' => l(t('Global permissions'), 'admin/config/group/permissions'));
+    $items[] = array('data' => l(t('Global (used for inheritance)'), 'admin/config/group/permissions'));
     foreach (og_get_all_group_bundle() as $entity_type => $bundles) {
       $entity_info = entity_get_info($entity_type);
       foreach ($bundles as $bundle_name => $bundle_label) {
@@ -486,7 +486,7 @@ function og_ui_admin_permissions($form, $form_state, $og_rid = 0, $group_type = 
     }
 
     $form['global_links'] = array(
-      '#title' => t('Global links'),
+      '#title' => t('Permissions links'),
       '#theme' => 'item_list',
       '#items' => $items,
     );
