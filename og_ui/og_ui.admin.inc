@@ -309,7 +309,7 @@ function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bund
         '#submit' => array('og_ui_admin_roles_submit'),
       );
 
-      if (!$gid) {
+      if (!$gid && og_get_group_audience_fields()) {
         $form['actions'] = array('#type' => 'actions');
         $form['actions']['copy'] = array(
           '#type' => 'submit',
@@ -572,7 +572,7 @@ function og_ui_admin_permissions($form, $form_state, $og_rid = 0, $group_type = 
       '#value' => $bundle ? t('Copy roles and permissions from global') : t('Copy roles and permissions to per-bundles'),
       '#submit' => array('og_ui_admin_access_copy_global_redirect'),
       // Show only on global permissions page.
-      '#access' => !$gid,
+      '#access' => !$gid && og_get_group_audience_fields(),
     );
   }
 
