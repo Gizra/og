@@ -1358,7 +1358,7 @@ function og_membership_load_multiple($ids = array(), $conditions = array(), $res
  */
 function og_get_membership($group_type, $gid, $entity_type, $etid) {
   $return = &drupal_static(__FUNCTION__, array());
-  $identifier = $gid . ':' . $entity_type . ':' . $etid;
+  $identifier = $group_type . ':' . $gid . ':' . $entity_type . ':' . $etid;
   if (!isset($return[$identifier])) {
     $return[$identifier] = FALSE;
 
