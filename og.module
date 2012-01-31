@@ -71,18 +71,15 @@ define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
  */
 function og_help($path, $arg) {
   // Provide messages for og-migrate module.
-  if ($path != 'admin/config/group/group-migrate' && $path != 'batch' && strpos($path, '#') === FALSE
+  if ($path != 'admin/config/group/group-migrate'
+      && $path != 'batch' && strpos($path, '#') === FALSE
       && user_access('access administration pages') && og_needs_migrate()) {
-    if ($path == 'admin/reports/status') {
-      $message = t('Organic groups or one of its modules needs to migrate data.');
+
+    if (module_exists('og_migrate')) {
+      $message = t('Organic groups or one of its modules needs to <a href="@url">migrate data</a>. Organic groups may not work properly without it. After a successful execution you can disable it.', array('@url' => url('admin/config/group/group-migrate')));
     }
     else {
-      if (module_exists('og_migrate')) {
-        $message = t('Organic groups or one of its modules needs to <a href="@url">migrate data</a>. After a successful execution you can disable it.', array('@url' => url('admin/config/group/group-migrate')));
-      }
-      else {
-        $message = t('Organic groups or one of its modules needs you to enable Organic groups migrate module.');
-      }
+      $message = t('Organic groups or one of its modules needs you to enable Organic groups migrate module.');
     }
     drupal_set_message($message, 'error');
   }
