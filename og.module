@@ -1711,25 +1711,27 @@ function og_ungroup($group_type, $gid, $entity_type = 'user', $etid = NULL) {
 /**
  * Determine whether a user has a given privilege.
  *
- * @param $gid
- *   The group ID, or the objet.
- * @param $string
- *   The permission, such as "administer nodes", being checked for.
- * @param $account
- *   (optional) The account to check, if not given use currently lgroupged in
- *   user.
- * @param $skip_hook
- *   If TRUE and the variable 'og_user_access_invoke_alter' is set to TRUE, then
- *   a a module_invoke_all command will not be triggered. This can be used by
- *   modules implementing hook_og_user_access_alter() that still want to use
- *   og_user_access(), but without causing a recursion.
- *
- * @return
- *   Boolean TRUE if the current user has the requested permission.
- *
  * All permission checks in OG should go through this function. This
  * way, we guarantee consistent behavior, and ensure that the superuser
  * can perform all actions.
+ *
+ * @param $group_type
+ *   The entity type of the group.
+ * @param $gid
+ *   The entity ID of the group.
+ * @param $string
+ *   The permission, such as "administer group", being checked for.
+ * @param $account
+ *   Optional; The account to check. Defaults to the current user.
+ * @param $skip_alter
+ *   If TRUE then user access will not be sent to other modules using
+ *   drupal_alter(). This can be used by modules implementing
+ *   hook_og_user_access_alter() that still want to use og_user_access(), but
+ *   without causing a recursion. Defaults to FALSE.
+ *
+ * @return
+ *   TRUE or FALSE if the current user has the requested permission. NULL, if
+ *   the given group isn't a valid group.
  */
 function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter = FALSE) {
   global $user;
@@ -1739,7 +1741,7 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
 
   if (!og_is_group($group_type, $gid)) {
     // Not a group.
-    return FALSE;
+    return NULL;
   }
 
 
