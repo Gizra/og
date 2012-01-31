@@ -846,13 +846,6 @@ function og_entity_presave($entity, $entity_type) {
       }
     }
 
-    // FIXME: Temporary fix until Entity reference remove "target_type" from
-    // the field values.
-    $wrapper_info = $wrapper->info();
-    $lang = !empty($wrapper_info['languagecode']) ? $wrapper_info['languagecode'] : LANGUAGE_NONE;
-    foreach ($entity->{$primary_field}[$lang] as $delta => $value) {
-      $entity->{$primary_field}[$lang][$delta]['target_type'] = 'node';
-    }
     // Remove the values from the secondary field.
     $wrapper->{$field_name}->set(NULL);
   }
