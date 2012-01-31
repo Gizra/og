@@ -8,6 +8,7 @@ class og_views_handler_field_og_invite extends views_handler_field {
   function construct() {
     parent::construct();
     $this->additional_fields['og_selective'] = 'og_selective';
+    $this->additional_fields['nid'] = array('table' => 'node', 'field' => 'nid');
   }
 
   function query() {
