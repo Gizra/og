@@ -2984,7 +2984,7 @@ function og_list_permissions($type) {
  *   Optional; An array of type names. Restrict the created links to the given
  *   types.
  */
-function og_node_create_links($group_type, $gid, $destination = NULL, $types = NULL) {
+function og_node_create_links($group_type, $gid, $field_name, $destination = NULL, $types = NULL) {
   if (!og_is_group($group_type, $gid)) {
     return;
   }
@@ -3003,13 +3003,9 @@ function og_node_create_links($group_type, $gid, $destination = NULL, $types = N
   // Sort names.
   asort($names);
 
-  $wrapper = entity_metadata_wrapper($group_type, $gid);
-
   // Build links.
   $options  = array(
-    'query' => array(
-      'gids_' . $wrapper->type(). '[]' => $wrapper->getIdentifier(),
-    ) + drupal_get_destination(),
+    'query' => array($field_name => $gid) + drupal_get_destination(),
   );
 
   $items = array();
