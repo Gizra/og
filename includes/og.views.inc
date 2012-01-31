@@ -144,8 +144,9 @@ function og_views_data_alter(&$data) {
 
   foreach (entity_get_info() as $entity_type => $info) {
     if (!empty($info['fieldable'])) {
-      // OG group relationship.
-      if ($entity_type != 'group') {
+
+      if (!empty($group_entities[$entity_type])) {
+        // OG group relationship.
         $data[$info['base table']]['og_rel'] = array(
           'group' => t('OG group'),
           'title' => t('OG group from @entity', array('@entity' => ucfirst($info['label']))),
@@ -160,10 +161,8 @@ function og_views_data_alter(&$data) {
             'relationship field' => $info['entity keys']['id'],
           ),
         );
-      }
 
-      // OG group's related entity.
-      if (!empty($group_entities[$entity_type])) {
+        // OG group's related entity.
         $data['og']['og_related_' . $entity_type] = array(
           'group' => t('OG group'),
           'title' => t('@entity from OG group', array('@entity' => ucfirst($info['label']))),
@@ -178,8 +177,8 @@ function og_views_data_alter(&$data) {
         );
       }
 
-      // OG membership relationship.
-      if (!in_array($entity_type, array('group', 'og_membership'))) {
+      if (!empty($group_content_entities[$entity_type])) {
+        // OG membership relationship.
         $data[$info['base table']]['og_membership_rel'] = array(
           'group' => t('OG membership'),
           'title' => t('OG membership from @entity', array('@entity' => ucfirst($info['label']))),
@@ -194,10 +193,8 @@ function og_views_data_alter(&$data) {
             'relationship field' => $info['entity keys']['id'],
           ),
         );
-      }
 
-      // OG membership's related entity.
-      if (!empty($group_content_entities[$entity_type])) {
+        // OG membership's related entity.
         $data['og_membership']['og_membership_related_' . $entity_type] = array(
           'group' => t('OG membership'),
           'title' => t('@entity from OG membership', array('@entity' => ucfirst($info['label']))),
