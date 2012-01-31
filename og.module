@@ -2722,6 +2722,7 @@ function og_role_revoke($gid, $uid, $rid) {
     db_delete('og_users_roles')
       ->condition('uid', $uid)
       ->condition('rid', $rid)
+      ->condition('gid', $gid)
       ->execute();
     module_invoke_all('og_role_revoke', $gid, $uid, $rid);
   }
