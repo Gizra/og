@@ -3044,6 +3044,11 @@ function og_get_groups_by_user($account = NULL, $group_type = NULL) {
     $account = $user;
   }
 
+  if (!og_get_group_audience_fields()) {
+    // User entity doesn't have group audience fields.
+    return;
+  }
+
   $gids = array();
 
   // Get all active OG membership that belong to the user.
