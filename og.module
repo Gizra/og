@@ -1713,7 +1713,7 @@ function og_ungroup($group_type, $gid, $entity_type = 'user', $etid = NULL) {
  *
  * All permission checks in OG should go through this function. This
  * way, we guarantee consistent behavior, and ensure that the superuser
- * can perform all actions.
+ * and group administrators can perform all actions.
  *
  * @param $group_type
  *   The entity type of the group.
@@ -1877,13 +1877,12 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
  * Get the groups an entity is associated with.
  *
  * @param $entity_type
- *   The entity type (e.g. "node" or "user"). Defaults to 'user'
+ *   The entity type. Defaults to 'user'
  * @param $entity
- *   Optional; The entity can be a user, node or any fieldable entity. If
- *   empty the current user will be used.
+ *   Optional; The entity object. If empty, and $entity_type is "user", the
+ *   current user will be used.
  * @param $states
- *   Optional; Array with the state to return. If empty groups of all
- *   state will return.
+ *   Optional; Array with the state to return. Defaults to active.
  *
  * @return
  *  An array with the group's entity type as the key, and array - keyed by
