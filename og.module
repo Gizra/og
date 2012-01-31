@@ -1069,7 +1069,7 @@ function og_og_fields_info() {
 /**
  * Provide a separate Exception so it can be caught separately.
  */
-class OgException extends Exception { }
+class OgException extends Exception {}
 
 /**
  * A class used for group membership types.
