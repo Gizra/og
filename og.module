@@ -71,18 +71,15 @@ define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
  */
 function og_help($path, $arg) {
   // Provide messages for og-migrate module.
-  if ($path != 'admin/config/group/group-migrate' && $path != 'batch' && strpos($path, '#') === FALSE
+  if ($path != 'admin/config/group/group-migrate'
+      && $path != 'batch' && strpos($path, '#') === FALSE
       && user_access('access administration pages') && og_needs_migrate()) {
-    if ($path == 'admin/reports/status') {
-      $message = t('Organic groups or one of its modules needs to migrate data.');
+
+    if (module_exists('og_migrate')) {
+      $message = t('Organic groups or one of its modules needs to <a href="@url">migrate data</a>. Organic groups may not work properly without it. After a successful execution you can disable it.', array('@url' => url('admin/config/group/group-migrate')));
     }
     else {
-      if (module_exists('og_migrate')) {
-        $message = t('Organic groups or one of its modules needs to <a href="@url">migrate data</a>. After a successful execution you can disable it.', array('@url' => url('admin/config/group/group-migrate')));
-      }
-      else {
-        $message = t('Organic groups or one of its modules needs you to enable Organic groups migrate module.');
-      }
+      $message = t('Organic groups or one of its modules needs you to enable Organic groups migrate module.');
     }
     drupal_set_message($message, 'error');
   }
@@ -849,13 +846,6 @@ function og_entity_presave($entity, $entity_type) {
       }
     }
 
-    // FIXME: Temporary fix until Entity reference remove "target_type" from
-    // the field values.
-    $wrapper_info = $wrapper->info();
-    $lang = !empty($wrapper_info['languagecode']) ? $wrapper_info['languagecode'] : LANGUAGE_NONE;
-    foreach ($entity->{$primary_field}[$lang] as $delta => $value) {
-      $entity->{$primary_field}[$lang][$delta]['target_type'] = 'node';
-    }
     // Remove the values from the secondary field.
     $wrapper->{$field_name}->set(NULL);
   }
@@ -1079,7 +1069,7 @@ function og_og_fields_info() {
 /**
  * Provide a separate Exception so it can be caught separately.
  */
-class OgException extends Exception { }
+class OgException extends Exception {}
 
 /**
  * A class used for group membership types.
@@ -1368,7 +1358,7 @@ function og_membership_load_multiple($ids = array(), $conditions = array(), $res
  */
 function og_get_membership($group_type, $gid, $entity_type, $etid) {
   $return = &drupal_static(__FUNCTION__, array());
-  $identifier = $gid . ':' . $entity_type . ':' . $etid;
+  $identifier = $group_type . ':' . $gid . ':' . $entity_type . ':' . $etid;
   if (!isset($return[$identifier])) {
     $return[$identifier] = FALSE;
 
@@ -1721,25 +1711,27 @@ function og_ungroup($group_type, $gid, $entity_type = 'user', $etid = NULL) {
 /**
  * Determine whether a user has a given privilege.
  *
- * @param $gid
- *   The group ID, or the objet.
- * @param $string
- *   The permission, such as "administer nodes", being checked for.
- * @param $account
- *   (optional) The account to check, if not given use currently lgroupged in
- *   user.
- * @param $skip_hook
- *   If TRUE and the variable 'og_user_access_invoke_alter' is set to TRUE, then
- *   a a module_invoke_all command will not be triggered. This can be used by
- *   modules implementing hook_og_user_access_alter() that still want to use
- *   og_user_access(), but without causing a recursion.
- *
- * @return
- *   Boolean TRUE if the current user has the requested permission.
- *
  * All permission checks in OG should go through this function. This
  * way, we guarantee consistent behavior, and ensure that the superuser
- * can perform all actions.
+ * and group administrators can perform all actions.
+ *
+ * @param $group_type
+ *   The entity type of the group.
+ * @param $gid
+ *   The entity ID of the group.
+ * @param $string
+ *   The permission, such as "administer group", being checked for.
+ * @param $account
+ *   Optional; The account to check. Defaults to the current user.
+ * @param $skip_alter
+ *   If TRUE then user access will not be sent to other modules using
+ *   drupal_alter(). This can be used by modules implementing
+ *   hook_og_user_access_alter() that still want to use og_user_access(), but
+ *   without causing a recursion. Defaults to FALSE.
+ *
+ * @return
+ *   TRUE or FALSE if the current user has the requested permission. NULL, if
+ *   the given group isn't a valid group.
  */
 function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter = FALSE) {
   global $user;
@@ -1749,7 +1741,7 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
 
   if (!og_is_group($group_type, $gid)) {
     // Not a group.
-    return FALSE;
+    return NULL;
   }
 
 
@@ -1885,13 +1877,12 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
  * Get the groups an entity is associated with.
  *
  * @param $entity_type
- *   The entity type (e.g. "node" or "user"). Defaults to 'user'
+ *   The entity type. Defaults to 'user'
  * @param $entity
- *   Optional; The entity can be a user, node or any fieldable entity. If
- *   empty the current user will be used.
+ *   Optional; The entity object. If empty, and $entity_type is "user", the
+ *   current user will be used.
  * @param $states
- *   Optional; Array with the state to return. If empty groups of all
- *   state will return.
+ *   Optional; Array with the state to return. Defaults to active.
  *
  * @return
  *  An array with the group's entity type as the key, and array - keyed by
