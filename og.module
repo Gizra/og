@@ -2571,20 +2571,36 @@ function og_permissions_delete_by_module($modules = array()) {
 function og_roles_override($group_type, $gid, $bundle = NULL) {
   // Check if roles aren't already overriden. We can't use
   // og_is_group_default_access() as the field is already set, so we
-  // check to see if there are new roles in the database and compare
-  // them with the default roles.
-  if ($roles = og_roles($group_type, $gid, $bundle, TRUE)) {
+  // check to see if there are new roles in the database by setting
+  // "force group" parameter to TRUE.
+  if (og_roles($group_type, $gid, $bundle, TRUE)) {
     return;
   }
 
   $rids = array();
-  $perms = og_get_global_permissions();
-  foreach (og_get_global_roles() as $rid => $name) {
+  if ($gid) {
+    $og_roles = og_roles($group_type, 0, $bundle);
+    $perms = og_role_permissions($og_roles);
+  }
+  else {
+    $og_roles = og_get_global_roles();
+    $perms = og_get_global_permissions();
+  }
+
+  foreach ($og_roles as $rid => $name) {
     $role = og_role_create($name, $group_type, $gid, $bundle);
     og_role_save($role);
 
     $rids[$role->rid] = $role->name;
     og_role_change_permissions($role->rid, $perms[$rid]);
+
+    // Remap the default roles, to the newely created ones.
+    db_update('og_users_roles')
+      ->fields(array('rid' => $role->rid))
+      ->condition('rid', $rid)
+      ->condition('group_type', $group_type)
+      ->condition('gid', $gid)
+      ->execute();
   }
 
   return $rids;
@@ -2627,6 +2643,7 @@ function og_role_grant($group_type, $gid, $uid, $rid) {
     $role->gid = $gid;
 
     drupal_write_record('og_users_roles', $role);
+    og_invalidate_cache();
     module_invoke_all('og_role_grant', $group_type, $gid, $uid, $rid);
   }
 }
