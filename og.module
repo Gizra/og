@@ -691,11 +691,11 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
       continue;
     }
 
-    // Intersect the IDs from the primary field, with the referencable IDs from
-    // the secondary, by validating the IDs.
+    // Intersect the IDs from the primary field, with the referencable IDs
+    // from the secondary, by validating the IDs.
     if (!is_array($primary_ids)) {
-      // If the field cardinality is 1, entity metadatwrapper, returns the value
-      // as integer, so turn it into an array.
+      // If the field cardinality is 1, entity metadatwrapper, returns the
+      // value as integer, so turn it into an array.
       $primary_ids = array($primary_ids);
     }
     $secondary_ids = entityreference_get_selection_handler($field)->validateReferencableEntities($primary_ids);
@@ -708,7 +708,6 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
     foreach ($secondary_ids as $id) {
       $items[] = array(
         'target_id' => $id,
-        'target_type' => $field['settings']['target_type'],
       );
     }
 
@@ -720,12 +719,13 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
 
     $instance = $form_state['field'][$field_name][$key]['instance'];
     // Re-build the field, based on the injected values.
-    $result = field_default_form($entity_type, $entity, $field, $instance, $langcode, $items, $form, $form_state, NULL);
+    $result = field_default_form($entity_type, $entity, $field, $instance, $key, $items, $form, $form_state, NULL);
     $form[$field_name] = $result[$field_name];
   }
   if ($has_secodary) {
     $form['#validate'][] = 'og_form_secondary_field_validate';
   }
+
 }
 
 /**
@@ -845,6 +845,7 @@ function og_entity_presave($entity, $entity_type) {
         $delta = $primary_field_info['cardinality'] == 1 ? 0 : $wrapper->{$primary_field}->count();
       }
     }
+
 
     // Remove the values from the secondary field.
     $wrapper->{$field_name}->set(NULL);
