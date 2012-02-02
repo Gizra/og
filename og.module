@@ -2679,6 +2679,13 @@ function og_roles_override($gid) {
     og_role_save($role);
     $rids[$role->rid] = $role->name;
     og_role_change_permissions($role->rid, $perms[$rid]);
+
+    // Remap roles.
+    $query = db_update('og_users_roles')
+      ->fields(array('rid' => $role->rid))
+      ->condition('rid', $rid)
+      ->condition('gid', $gid)
+      ->execute();
   }
 
   return $rids;
