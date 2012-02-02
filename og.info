@@ -37,6 +37,3 @@ files[] = includes/views/og_handler_relationship.inc
 files[] = includes/og.admin.inc
 files[] = includes/og.info.inc
 files[] = includes/og.views.inc
-
-; Entityreference selection handler.
-files[] = plugins/entityreference/selection/og.class.php

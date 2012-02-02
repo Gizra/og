@@ -12,9 +12,8 @@ $plugin = array(
  */
 class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
 
-  public function access($selection_class) {
-    // TODO: Make extendible.
-    return $selection_class == 'OgSelectionHandler';
+  public function access($field, $instance) {
+    return $field['settings']['handler'] == 'og';
   }
 
   public function load($entity_type, $entities, $field, $instances, $langcode, &$items) {
