@@ -212,9 +212,10 @@ function og_views_view_group($node, $teaser, $page) {
       drupal_set_message(t('The View %name was not found. Check your variables table or settings.php.', array('%name' => $name)), 'error');
     }
     else {
-      $built = $view->preview('default', array($node->nid));
+      if ($view->access('default')) {
+        $built = $view->preview('default', array($node->nid));
+      }
     }
-
     // Views will set either total_rows or num_rows depending on whether
     // View has a pager, or might show an empty text.
     if (!empty($view->total_rows) || !empty($view->num_rows) || !empty($view->page_empty) || $view->display_handler->get_option('empty')) {
