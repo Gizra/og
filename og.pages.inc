@@ -297,7 +297,7 @@ function og_subscribe($node, $uid = NULL) {
   }
   // User is already a member of this group, redirect to group homepage.
   else if (isset($account->og_groups[$node->nid])) {
-    drupal_set_message(t('@user is already a member the group @group.', array('@user' => $account->name, '@group' => $node->title)));
+    drupal_set_message(t('@user is already a member of the group @group.', array('@user' => $account->name, '@group' => $node->title)));
     drupal_goto('node/'. $node->nid);
   }
   else {
