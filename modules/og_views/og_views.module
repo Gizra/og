@@ -31,7 +31,7 @@ function og_views_menu() {
 // An menu access callback.
 function og_menu_access_picture($gid) {
   $view = views_get_view('og_members_faces');
-  // Not working properly. See  http://drupal.org/node/345144.
+  // Not working properly. See http://drupal.org/node/345144.
   return og_is_picture() && og_is_group_member($gid) && !$view->disabled;
 }
 
@@ -206,7 +206,7 @@ function og_views_form_views_exposed_form_alter(&$form, $form_state) {
  */
 function og_views_view_group($node, $teaser, $page) {
   if ($name = variable_get('og_home_page_view', 'og_ghp_ron')) {
-    // There is a view defiened to act as the group's home page.
+    // There is a view defined to act as the group's home page.
     $view = views_get_view($name);
     if (!$view) {
       drupal_set_message(t('The View %name was not found. Check your variables table or settings.php.', array('%name' => $name)), 'error');
