@@ -199,6 +199,9 @@ function og_views_form_views_exposed_form_alter(&$form, $form_state) {
     // Redirect to the Views page.
     $form['#action'] = url('og/search/' . $node->nid);
   }
+  if ($form_state['view']->name == variable_get('og_home_page_view', 'og_ghp_ron')) {
+    $form['#action'] = $_SERVER['REQUEST_URI'];
+  }
 }
 
 /**
