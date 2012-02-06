@@ -1788,8 +1788,9 @@ function og_form_node_type_form_alter(&$form, &$form_state) {
     '#description' => t('Specify how organic groups should treat nodes of this type. Nodes may behave as a group, as group posts, or may not participate in organic groups at all.'),
   );
 
+  $max_number = '';
   if (isset($form['identity']['type']['#default_value'])) {
-    $max_number = variable_get('og_max_groups_' . $form['identity']['type']['#default_value'],'');
+    $max_number = variable_get('og_max_groups_' . $form['identity']['type']['#default_value'], '');
   }
 
   $form['og']['og_max_groups'] = array(
