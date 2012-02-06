@@ -71,47 +71,40 @@ function og_access_node_access_records($node) {
     // Private group.
     $gids['node'][] = $node->nid;
   }
-  if (!empty($wrapper->{OG_CONTENT_ACCESS_FIELD})) {
-    switch ($wrapper->{OG_CONTENT_ACCESS_FIELD}->value()) {
-      case OG_CONTENT_ACCESS_DEFAULT:
-        $gids = og_get_entity_groups('node', $node);
-        if (!$gids) {
-          break;
-        }
+  // If there is no content access field on the group content, we assume
+  // that the group defaults are needed.
+  // This allows us not to have the content access field on the group
+  // content but still have access control.
+  $content_access = !empty($wrapper->{OG_CONTENT_ACCESS_FIELD}) ? $wrapper->{OG_CONTENT_ACCESS_FIELD}->value() : OG_CONTENT_ACCESS_DEFAULT;
+  switch ($content_access) {
+    case OG_CONTENT_ACCESS_DEFAULT:
+      if (!$entity_groups = og_get_entity_groups('node', $node)) {
+        break;
+      }
 
-        // Get all the group-audience fields in the node.
-        $list_gids = array();
-        // Indicate if atleast one group is private.
-        $has_private = FALSE;
-        foreach (field_info_instances('node', $node->type) as $field_name => $field_instance) {
-          if (!og_is_group_audience_field($field_name)) {
-            continue;
-          }
-
-          $field = field_info_field($field_name);
-          $group_type = $field['settings']['target_type'];
-
-          foreach ($wrapper->{$field_name . '__og_membership__' . OG_STATE_ACTIVE} as $group_wrapper) {
-            $list_gids[$group_type][] = $group_wrapper->getIdentifier();
-            if (!empty($group_wrapper->{OG_ACCESS_FIELD}) && $group_wrapper->{OG_ACCESS_FIELD}->value()) {
-              $has_private = TRUE;
-            }
+      foreach ($entity_groups as $group_type => $values) {
+        entity_load($group_type, $values);
+        foreach ($values as $gid) {
+          $list_gids[$group_type][] = $gid;
+          $group_wrapper = entity_metadata_wrapper($group_type, $gid);
+          if (!empty($group_wrapper->{OG_ACCESS_FIELD}) && $group_wrapper->{OG_ACCESS_FIELD}->value()) {
+            $has_private = TRUE;
           }
         }
+      }
 
-        if ($has_private) {
-          $gids = $gids + $list_gids;
-        }
-        break;
+      if ($has_private) {
+        $gids = $gids + $list_gids;
+      }
+      break;
 
-      case OG_CONTENT_ACCESS_PUBLIC:
-        // Do nothing.
-        break;
+    case OG_CONTENT_ACCESS_PUBLIC:
+      // Do nothing.
+      break;
 
-      case OG_CONTENT_ACCESS_PRIVATE:
-        $gids = og_get_entity_groups('node', $node);
-        break;
-    }
+    case OG_CONTENT_ACCESS_PRIVATE:
+      $gids = $gids + og_get_entity_groups('node', $node);
+      break;
   }
 
   foreach ($gids as $group_type => $values) {
