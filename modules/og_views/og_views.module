@@ -136,7 +136,7 @@ function og_views_block_search() {
 function og_views_block_search_form($groupnode) {
   // Render our display programmatically after adding an argument. Take that!
   $view = views_get_view('og_search');
-  $view->set_display('default');
+  $view->set_display('page_1');
   $view->set_arguments(array($groupnode->nid));
   $block = $view->display_handler->view_special_blocks('-exp');
   return $block['content'];
