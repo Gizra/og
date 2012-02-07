@@ -5,6 +5,19 @@
  * Language tests for the organic groups module.
  */
 
+/**
+ * Tests that depend on the Locale module do not work with automated testing in 
+ * Drupal 6, as the Locale module does not use the generated database test
+ * environment.
+ *
+ * It can still be tested (more or less) if you turn on the Locale module in
+ * your local dev environment before running the tests. (And rename this file
+ * to og.language.test.
+ *
+ * @see http://drupal.org/node/1419530
+ * @see http://drupal.org/node/1430932
+ */
+
   require_once drupal_get_path('module', 'og') . '/tests/og_testcase.php';
   require_once './includes/locale.inc';
 
