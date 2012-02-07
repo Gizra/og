@@ -128,7 +128,7 @@ function og_schema() {
     ),
   );
   $schema['og_ancestry'] = array(
-    'description'     => '',
+    'description'     => 'Stores associations between nodes and groups.',
     'fields'          => array(
       'nid'             => array(
         'description'     => "The post's {node}.nid.",
