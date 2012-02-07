@@ -98,7 +98,7 @@ function og_ui_menu() {
         'page callback' => 'og_ui_group_admin_overview',
         'page arguments' => array($entity, 1),
         'access callback' => 'og_ui_user_access_group',
-        'access arguments' => array('administer group', $entity, 1),
+        'access arguments' => array('access administration pages', $entity, 1),
         'type' => MENU_LOCAL_TASK,
         'file' => 'og_ui.admin.inc',
         'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -779,6 +779,12 @@ function og_ui_og_permission() {
     'default role' => array(OG_ADMINISTRATOR_ROLE),
   );
 
+  $items['access administration pages'] = array(
+    'title' => t('Use the administration pages'),
+    'description' => t('Allow users to see the "Group" tab, and access the administration pages.'),
+    'default role' => array(OG_ADMINISTRATOR_ROLE),
+  );
+
   return $items;
 }
 
@@ -799,17 +805,17 @@ function og_ui_get_group_admin($entity_type, $etid) {
 }
 
 /**
- * Implementation of hook_og_ui_get_group_admin()
+ * Implements hook_og_ui_get_group_admin()
  */
-function og_ui_og_ui_get_group_admin($entity_type, $etid) {
+function og_ui_og_ui_get_group_admin($group_type, $gid) {
   $items = array();
 
-  $default_access = og_is_group_default_access($entity_type, $etid);
+  $default_access = og_is_group_default_access($group_type, $gid);
 
   $items['add_people'] = array(
     'title' => t('Add people'),
     'description' => t('Add group members.'),
-    // The final URL will be "group/$entity_type/$etid/admin/people/add-user".
+    // The final URL will be "group/$group_type/$gid/admin/people/add-user".
     // @see og_ui_group_admin_overview().
     'href' => 'admin/people/add-user',
   );
@@ -820,16 +826,19 @@ function og_ui_og_ui_get_group_admin($entity_type, $etid) {
     'href' => "admin/people",
   );
 
-  $items['roles'] = array(
-    'title' => !$default_access ? t('Roles') : t('Roles (read-only)'),
-    'description' => !$default_access ? t('Manage the group roles.') : t('View the group roles.'),
-    'href' => "admin/people/roles",
-  );
-  $items['permissions'] = array(
-    'title' => !$default_access ? t('Permissions') : t('Permissions (read-only)'),
-    'description' => !$default_access ? t('Manage the group permissions.') : t('View the group permissions.'),
-    'href' => "admin/people/permissions",
-  );
+	if (og_user_access($group_type, $gid, 'administer group')) {
+	  $items['roles'] = array(
+	    'title' => !$default_access ? t('Roles') : t('Roles (read-only)'),
+	    'description' => !$default_access ? t('Manage the group roles.') : t('View the group roles.'),
+	    'href' => "admin/people/roles",
+	  );
+	  $items['permissions'] = array(
+	    'title' => !$default_access ? t('Permissions') : t('Permissions (read-only)'),
+	    'description' => !$default_access ? t('Manage the group permissions.') : t('View the group permissions.'),
+	    'href' => "admin/people/permissions",
+	  );
+
+	}
 
   return $items;
 }
