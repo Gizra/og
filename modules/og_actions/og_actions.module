@@ -228,7 +228,7 @@ function og_remove_group_action_submit($form, &$form_state) {
  */
 function og_subscribe_user_action($account, $context) {
   if (isset($context['groups'])) {
-    $groups = $memberships = array();
+    $new_groups = $existing_groups = array();
     foreach ($context['groups'] as $gid) {
       // Add user if they are not already an active member.
       if (empty($account->og_groups[$gid])) {
