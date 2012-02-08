@@ -2404,6 +2404,7 @@ function og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE) {
     ->condition('ogr.group_bundle', $bundle, '=')
     ->condition('ogr.gid', $query_gid, '=')
     ->condition('ogur.uid', $uid, '=')
+    ->condition('ogur.gid', $gid, '=')
     ->orderBy('rid')
     ->execute()
     ->fetchAllkeyed();
