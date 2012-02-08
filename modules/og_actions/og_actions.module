@@ -249,7 +249,7 @@ function og_subscribe_user_action($account, $context) {
       $text .= 'User %name is already a member of groups %oldgroups. ';
     }
     if (!empty($text)) {
-      watchdog('action, $text, array('%name' => $account->name, '%newgroups' => implode(',', $groups), '%oldgroups' => implode(',', $existing_groups));
+      watchdog('action', $text, array('%name' => $account->name, '%newgroups' => implode(',', $new_groups), '%oldgroups' => implode(',', $existing_groups)));
     }
   }
 }
