@@ -82,6 +82,7 @@ function og_access_node_access_records($node) {
         break;
       }
 
+      $has_private = FALSE;
       foreach ($entity_groups as $group_type => $values) {
         entity_load($group_type, $values);
         foreach ($values as $gid) {
