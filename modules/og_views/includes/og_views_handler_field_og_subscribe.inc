@@ -25,7 +25,7 @@ class og_views_handler_field_og_subscribe extends views_handler_field {
         case OG_INVITE_ONLY:
           return '<em>'. t('Invite only'). '</em>';
         default:
-          return og_subscribe_link(node_load((int)$values->{$this->aliases['nid']}));
+          return theme('og_subscribe_link', node_load((int)$values->{$this->aliases['nid']}));
       }
     }
   }

@@ -426,6 +426,7 @@ function og_theme() {
     'opml_icon' => array('arguments' => array('url')),
     'og_format_subscriber_status' => array('arguments' => array('group')),
     'og_mission' => array('template' => 'og-mission', 'arguments' => array('form' => NULL), 'path' => drupal_get_path('module', 'og'). '/theme'),
+    'og_subscribe_link' => array('arguments' => array('node')),
   );
 }
 
@@ -2598,7 +2599,7 @@ function og_block_details() {
       $links['manager'] = t('Manager: !name', array('!name' => theme('username', $account)));
 
       // Site admins get a Join link if they are not yet subscribed.
-      $subscribe = isset($subscription) && og_is_group_member($node->nid, FALSE) ? l(t('My membership'), "og/manage/$node->nid") : og_subscribe_link($node);
+      $subscribe = isset($subscription) && og_is_group_member($node->nid, FALSE) ? l(t('My membership'), "og/manage/$node->nid") : theme('og_subscribe_link', $node);
       if(isset($subscribe)) {
         $links['my_membership'] = $subscribe;
       }
@@ -2617,7 +2618,7 @@ function og_block_details() {
       }
     }
     elseif ($node->og_selective < OG_INVITE_ONLY) {
-      $links['subscribe'] = og_subscribe_link($node);
+      $links['subscribe'] = theme('og_subscribe_link', $node);
     }
     elseif ($node->og_selective == OG_INVITE_ONLY) {
       $links['closed'] = t('This is an <em>invite only</em> group. The group administrators add/remove members as needed.');
@@ -2673,8 +2674,24 @@ function og_block_details() {
  *   Node object of the group.
  *
  * @return string
+ *
+ * @deprecated
+ *   This function is deprecated in favor of theme('og_subscribe_link'), which
+ *   can be used to override the link's output.
  */
 function og_subscribe_link($node) {
+  return theme('og_subscribe_link', $node);
+}
+
+/**
+ * Generate a link to join or request to join the specified group.
+ *
+ * @param $node
+ *   Node object of the group.
+ *
+ * @return string
+ */
+function theme_og_subscribe_link($node) {
   if ($node->og_selective == OG_MODERATED) {
     $txt = t('Request membership');
   }
