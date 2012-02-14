@@ -220,7 +220,11 @@ function og_entity_property_info() {
         // Add per-state properties.
         $general = $info[$entity_type]['bundles'][$bundle]['properties'][$field_name . '__og_membership'];
         foreach (og_group_content_states() as $state => $state_label) {
-          $params = array('@label' => $label, '@label' => $label);
+          $params = array(
+            '@label' => $label,
+            '@label' => $label,
+            '@state' => $state_label,
+          );
           $info[$entity_type]['bundles'][$bundle]['properties'][$field_name . '__og_membership__' . $state] = $general;
           $info[$entity_type]['bundles'][$bundle]['properties'][$field_name . '__og_membership__' . $state]['label'] = t('@state OG memberships from field @label', $params);
           $info[$entity_type]['bundles'][$bundle]['properties'][$field_name . '__og_membership__' . $state]['description'] = t('A list of all OG memberships with @state registered in field @label.', $params);
