@@ -2243,7 +2243,8 @@ function og_roles($group_type = '', $gid = 0, $bundle = '', $force_group = FALSE
     ->fields('ogr', array('rid', 'name'))
     ->condition('group_type', $group_type, '=')
     ->condition('group_bundle', $bundle, '=')
-    ->condition('gid', $query_gid, '=');
+    ->condition('gid', $query_gid, '=')
+    ->orderBy('rid', 'ASC');
 
   if (!$include_all) {
     $query->condition('name', array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), 'NOT IN');
