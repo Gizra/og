@@ -17,7 +17,6 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
       foreach ($wrapper->{$field['field_name'] . '__og_membership'}->value() as $og_membership) {
         $items[$id][] = array(
           'target_id' => $og_membership->gid,
-          'target_type' => $og_membership->group_type,
         );
       }
     }
