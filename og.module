@@ -586,7 +586,7 @@ function og_field_access($op, $field, $entity_type, $entity, $account) {
   $settings = $field['settings']['handler_settings'];
 
 
-  // Check if we are editing the user entity, or need to hide a seconbdary
+  // Check if we are editing the user entity, or need to hide a secondary
   // field.
   if ($entity_type == 'user' || (!empty($settings['primary_field']) && !empty($settings['hide_secondary_field']))) {
     return user_access('administer group', $account);
