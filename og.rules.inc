@@ -46,31 +46,6 @@ function og_rules_event_info() {
 }
 
 /**
- * Implements hook_rules_data_info_alter().
- */
-function og_rules_data_info_alter(&$data_info) {
-  $data_info['group']['ui class'] = 'OGRulesDataUIGroup';
-}
-
-/**
- * UI that adds in the group options list.
- */
-class OGRulesDataUIGroup extends RulesDataUIEntity {
-
-  public static function inputForm($name, $info, $settings, RulesPlugin $element) {
-    // Add an options list of all groups if there is none yet.
-    if (!isset($info['options list'])) {
-      $info['options list'] = array('OGRulesDataUIGroup', 'optionsList');
-    }
-    return parent::inputForm($name, $info, $settings, $element);
-  }
-
-  public static function optionsList() {
-    return og_label_multiple(og_get_all_group());
-  }
-}
-
-/**
  * Implements hook_rules_action_info().
  */
 function og_rules_action_info() {
@@ -148,6 +123,7 @@ function og_rules_action_info() {
       'group' => array(
         'type' => 'group',
         'label' => t('Group'),
+        'wrapped' => TRUE,
       ),
     ),
     'base' => 'og_rules_add_entity_to_group',
@@ -169,6 +145,7 @@ function og_rules_action_info() {
       'group' => array(
         'type' => 'group',
         'label' => t('Group'),
+        'wrapped' => TRUE,
       ),
     ),
     'base' => 'og_rules_remove_entity_from_group',
@@ -192,6 +169,7 @@ function og_rules_action_info() {
       'group' => array(
         'type' => 'group',
         'label' => t('Group'),
+        'wrapped' => TRUE,
       ),
       // @todo: Add membership-type setting + add in the membership-entity
       // fields via the info_alter callback + reload the form once the
@@ -217,6 +195,7 @@ function og_rules_action_info() {
       'group' => array(
         'type' => 'group',
         'label' => t('Group'),
+        'wrapped' => TRUE,
       ),
     ),
     'base' => 'og_rules_remove_entity_from_group',
@@ -308,22 +287,20 @@ function og_rules_get_group_content_info_alter(&$element_info, $element) {
 /**
  * Action: Add entity to group.
  */
-function og_rules_add_entity_to_group(EntityDrupalWrapper $entity, $group) {
-  // Let saving the entity handle by Rules.
-  og_group($group->gid, array(
-    'entity type' => $entity->type(),
+function og_rules_add_entity_to_group(EntityDrupalWrapper $entity, EntityDrupalWrapper $group) {
+  // TODO: Add field-name.
+  $values = array(
+    'entity_type' => $entity->type(),
     'entity' => $entity->value(),
-    'save' => FALSE,
-    'force reload' => FALSE,
-  ));
+  );
+  og_group($group->type(), $group->getIdentifier(), $values);
 }
 
 /**
  * Action: Remove entity from group.
  */
-function og_rules_remove_entity_from_group(EntityDrupalWrapper $entity, $group) {
-  // Let saving the entity handle by Rules.
-  og_ungroup($group->gid, $entity->type(), $entity->value(), FALSE);
+function og_rules_remove_entity_from_group(EntityDrupalWrapper $entity, EntityDrupalWrapper $group) {
+  og_ungroup($group->type(), $group->getIdentifier(), $entity->type(), $entity->value());
 }
 
 /**
@@ -354,6 +331,7 @@ function og_rules_condition_info() {
         'type' => 'group',
         'label' => t('Group'),
         'description' => t('The group for which permission should be checked.'),
+        'wrapped' => TRUE,
       ),
       'account' => array(
         'type' => 'user',
@@ -375,6 +353,7 @@ function og_rules_condition_info() {
       'group' => array(
         'type' => 'group',
         'label' => t('Group'),
+        'wrapped' => TRUE,
       ),
       'states' => array(
         'type' => 'list<integer>',
@@ -402,6 +381,7 @@ function og_rules_condition_info() {
       'group' => array(
         'type' => 'group',
         'label' => t('Group'),
+        'wrapped' => TRUE,
       ),
     ),
     'base' => 'og_rules_condition_entity_in_group',
@@ -441,8 +421,8 @@ function og_rules_condition_info() {
 /**
  * Condition: User has group permisison.
  */
-function og_rules_user_has_permission($permission, $group, $account) {
-  return og_user_access($group->gid, $permission, $account);
+function og_rules_user_has_permission($permission, EntityDrupalWrapper $group, $account) {
+  return og_user_access($group->type(), $group->getIdentifier(), $permission, $account);
 }
 
 /**
@@ -461,15 +441,15 @@ function og_rules_user_has_permission_options_list() {
 /**
  * Condition: Entity is in group.
  */
-function og_rules_condition_entity_in_group(EntityDrupalWrapper $entity, $group) {
-  return og_is_member($group->gid, $entity->type(), $entity->value());
+function og_rules_condition_entity_in_group(EntityDrupalWrapper $entity, EntityDrupalWrapper $group) {
+  return og_is_member($group->type(), $group->getIdentifier(), $entity->type(), $entity->value());
 }
 
 /**
  * Condition: User is in group.
  */
-function og_rules_condition_user_in_group(EntityDrupalWrapper $entity, $group, $states = array(OG_STATE_ACTIVE)) {
-  return og_is_member($group->gid, $entity->type(), $entity->value(), $states);
+function og_rules_condition_user_in_group(EntityDrupalWrapper $entity, EntityDrupalWrapper $group, $states = array(OG_STATE_ACTIVE)) {
+  return og_is_member($group->type(), $group->getIdentifier(), $entity->type(), $entity->value(), $states);
 }
 
 /**
@@ -483,7 +463,7 @@ function og_rules_condition_user_in_group_help() {
  * Condition: Entity is group.
  */
 function og_rules_entity_is_group(EntityDrupalWrapper $entity) {
-  return (bool) og_get_group($entity->type(), $entity->getIdentifier());
+  return (bool) og_is_group($entity->type(), $entity->getIdentifier());
 }
 
 /**
