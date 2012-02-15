@@ -63,6 +63,9 @@ function og_field_formatter_view($entity_type, $entity, $field, $instance, $lang
             '#type' => 'link',
             '#title' => $label,
             '#href' => $uri['path'],
+            '#options' => array(
+              'html' => TRUE,
+            ),
           );
         }
         else {
