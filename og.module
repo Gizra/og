@@ -1102,7 +1102,7 @@ function og_list_users_sql($min_is_active = 1, $min_is_admin = 0, $orderby='u.na
       $order = "ORDER BY $orderby";
     }
   }
-  return "SELECT $fields FROM {og_uid} ou INNER JOIN {users} u ON ou.uid = u.uid WHERE ou.nid = %d AND u.status > 0 AND ou.is_active >= $min_is_active AND ou.is_admin >= $min_is_admin $order";
+  return db_rewrite_sql("SELECT $fields FROM {og_uid} ou INNER JOIN {users} u ON ou.uid = u.uid WHERE ou.nid = %d AND u.status > 0 AND ou.is_active >= $min_is_active AND ou.is_admin >= $min_is_admin $order", 'u', 'uid');
 }
 
 /**
