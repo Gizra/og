@@ -2658,9 +2658,18 @@ function og_recreate_permissions($group_type, $bundle) {
  *   The role ID.
  */
 function og_role_grant($group_type, $gid, $uid, $rid) {
-  // Get the existiong user roles.
-  $og_roles = og_get_user_roles($group_type, $gid, $uid);
+  // Make sure the role is valid.
+  $group = entity_load_single($group_type, $gid);
+  list(,, $bundle) = entity_extract_ids($group_type, $group);
+  $og_roles = og_roles($group_type, $gid, $bundle, FALSE, FALSE);
   if (empty($og_roles[$rid])) {
+    // Role isn't valid.
+    return;
+  }
+
+  // Get the existiong user roles.
+  $user_roles = og_get_user_roles($group_type, $gid, $uid);
+  if (empty($user_roles[$rid])) {
     $role = new stdClass();
     $role->uid = $uid;
     $role->rid = $rid;
