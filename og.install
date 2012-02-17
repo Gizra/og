@@ -41,6 +41,10 @@ function og_install() {
  * Implements hook_uninstall().
  */
 function og_uninstall() {
+  db_delete('variable')
+    ->condition('name', 'og_group_manager_default_rids_%', 'LIKE')
+    ->execute();
+
   $vars = array(
     'og_context',
     'og_group_manager_full_access',

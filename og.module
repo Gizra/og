@@ -867,6 +867,13 @@ function og_entity_insert($entity, $entity_type) {
   if (!empty($entity->uid)) {
     // Subscribe the group manager.
     og_group($entity_type, $id, array('entity' => $entity->uid));
+    // Assign roles to group manager.
+    $name = 'og_group_manager_default_rids_' . $entity_type . '_' . $bundle;
+    if ($rids = variable_get($name)) {
+      foreach ($rids as $rid) {
+        og_role_grant($entity_type, $id, $entity->uid, $rid);
+      }
+    }
   }
   if (!og_is_group_default_access($entity_type, $entity)) {
     // Override default roles.
@@ -883,9 +890,16 @@ function og_entity_update($entity, $entity_type) {
   }
 
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
-  if (!empty($entity->uid)) {
+  if (!empty($entity->uid) && !og_is_member($entity_type, $entity, 'user', $entity->uid)) {
     // Subscribe the group manager, in case the owner changed.
     og_group($entity_type, $id, array('entity' => $entity->uid));
+    // Assign roles to group manager.
+    $name = 'og_group_manager_default_rids_' . $entity_type . '_' . $bundle;
+    if ($rids = variable_get($name)) {
+      foreach ($rids as $rid) {
+        og_role_grant($entity_type, $id, $entity->uid, $rid);
+      }
+    }
   }
   $origianl_entity = $entity->original;
   $property = OG_DEFAULT_ACCESS_FIELD;
@@ -1884,8 +1898,8 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
  * @param $entity_type
  *   The entity type. Defaults to 'user'
  * @param $entity
- *   Optional; The entity object. If empty, and $entity_type is "user", the
- *   current user will be used.
+ *   Optional; The entity object or entity ID. If empty, and $entity_type is
+ *   "user", the current user will be used.
  * @param $states
  *   Optional; Array with the state to return. Defaults to active.
  *
@@ -1901,8 +1915,13 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
     global $user;
     $entity = clone $user;
   }
-  // Get the entity ID.
-  list($id) = entity_extract_ids($entity_type, $entity);
+  if (is_object($entity)) {
+    // Get the entity ID.
+    list($id) = entity_extract_ids($entity_type, $entity);
+  }
+  else {
+    $id = $entity;
+  }
 
   // Get a string identifier of the states, so we can retrieve it from cache.
   if ($states) {

@@ -33,6 +33,37 @@ function og_ui_admin_settings($form_state) {
     '#default_value' => variable_get('og_ui_admin_people_view', 'og_members_admin:default'),
     '#required' => TRUE,
   );
+  if ($group_bundles = og_get_all_group_bundle()) {
+    $form['og_group_manager_rids'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Group manager default roles'),
+      '#description' => t('Select the role(s) a group manager will be granted upon creating a new group.'),
+    );
+    // Add group manager default roles.
+    $entity_info = entity_get_info();
+    foreach ($group_bundles as $entity_type => $bundles) {
+      foreach ($bundles as $bundle_name => $bundle_label) {
+        $og_roles = og_roles($entity_type, 0, $bundle_name, FALSE, FALSE);
+        if (!$og_roles) {
+         continue;
+        }
+
+        $params = array(
+          '@entity-label' => $entity_info[$entity_type]['label'],
+          '@bundle-label' => $bundle_label,
+        );
+
+        $name = 'og_group_manager_default_rids_' . $entity_type . '_' . $bundle_name;
+        $form['og_group_manager_rids'][$name] = array(
+          '#type' => 'select',
+          '#title' => t('Roles in @entity-label - @bundle-label', $params),
+          '#options' => $og_roles,
+          '#multiple' => TRUE,
+          '#default_value' => variable_get($name, array()),
+        );
+      }
+    }
+  }
 
   return system_settings_form($form);
 }
