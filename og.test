@@ -507,6 +507,23 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     $wrapper->save();
     $this->assertFalse(og_get_entity_groups('node', $node), t('Node is not associated with any group.'));
   }
+  /**
+   * Test granting deault role to group manager.
+   */
+  function testGroupManagerDefaultRoles() {
+    // Get only the admin role.
+    $og_roles = og_roles('entity_test', 0, 'main', FALSE, FALSE);
+    variable_set('og_group_manager_default_rids_entity_test_main', array_keys($og_roles));
+    $user1 = $this->drupalCreateUser();
+
+    $entity1 = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
+    $wrapper = entity_metadata_wrapper('entity_test', $entity1);
+    $wrapper->{OG_GROUP_FIELD}->set(1);
+    $wrapper->save();
+
+    $user_roles = og_get_user_roles('entity_test', $entity1->pid, $user1->uid, FALSE);
+    $this->assertEqual($og_roles, $user_roles, t('Group manager was granted default role.'));
+  }
 }
 
 class OgPermissionsTestCase extends DrupalWebTestCase {
