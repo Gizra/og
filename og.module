@@ -656,8 +656,8 @@ function og_field_delete_instance($instance) {
 
   // Get the global roles.
   $roles = og_roles($instance['entity_type'], 0, $instance['bundle']);
-  foreach ($roles as $role) {
-    og_role_delete($role['rid']);
+  foreach ($roles as $rid => $name) {
+    og_role_delete($rid);
   }
 }
 
