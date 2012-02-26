@@ -200,8 +200,14 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         $opt_group = TRUE;
       }
 
+      // If this is a user account, base the list on the account being edited.
+      $account = NULL;
+      if (isset($form['#user'])) {
+        $account = $form['#user'];
+      }
+
       // Get all the groups divided to "content groups" and "other groups".
-      $audience = og_field_audience_options($opt_group);
+      $audience = og_field_audience_options($opt_group, $account);
 
       // Get all groups that should be excluded.
       $excludes = array();
