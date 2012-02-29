@@ -13,6 +13,10 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
     // Get the OG memberships from the field.
     foreach ($entities as $entity) {
       $wrapper = entity_metadata_wrapper($entity_type, $entity);
+      if (empty($wrapper->{$field['field_name'] . '__og_membership'})) {
+        // If the entity belongs to a bundle that was deleted, return early.
+        continue;
+      }
       $id = $wrapper->getIdentifier();
       foreach ($wrapper->{$field['field_name'] . '__og_membership'}->value() as $og_membership) {
         $items[$id][] = array(
