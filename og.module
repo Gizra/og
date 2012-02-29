@@ -2896,26 +2896,26 @@ function og_set_breadcrumb($entity_type, $etid, $path = array()) {
  *   The entity type
  * @param $bundle
  *   The bundle name.
- * @param $group_field
+ * @param $og_field
  *   Optional; Array with field definitions, to allow easier overriding by the
  *   caller. If empty, function will get the field info by calling
  *   og_fields_info() with the field name.
  */
-function og_create_field($field_name, $entity_type, $bundle, $group_field = array()) {
-  if (empty($group_field)) {
-    $group_field = og_fields_info($field_name);
+function og_create_field($field_name, $entity_type, $bundle, $og_field = array()) {
+  if (empty($og_field)) {
+    $og_field = og_fields_info($field_name);
   }
 
   $field = field_info_field($field_name);
   // Allow overriding the field name.
-  $group_field['field']['field_name'] = $field_name;
+  $og_field['field']['field_name'] = $field_name;
   if (empty($field)) {
-    $field = field_create_field($group_field['field']);
+    $field = field_create_field($og_field['field']);
   }
 
   $instance = field_info_instance($entity_type, $field_name, $bundle);
   if (empty($instance)) {
-    $instance = $group_field['instance'];
+    $instance = $og_field['instance'];
     $instance += array(
       'field_name' => $field_name,
       'bundle' => $bundle,
