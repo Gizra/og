@@ -4,7 +4,7 @@
  * Plugin definition.
  */
 $plugin = array(
-  'name' => t('Update user roles'),
+  'name' => t('Upgrade user roles - 7.2'),
   'description' => t('Update the group ID in user roles.'),
   'access callback' => 'og_migrate_7200_access',
   'dependencies' => array('og_7200_roles'),

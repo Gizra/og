@@ -4,7 +4,7 @@
  * Plugin definition.
  */
 $plugin = array(
-  'name' => t('Upgrade OG membership'),
+  'name' => t('Upgrade OG membership - 7.2'),
   'description' => t('Re-populate group ID and group entity, deprecating the OG group entity.'),
   'access callback' => 'og_migrate_7200_access',
 );

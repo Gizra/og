@@ -4,7 +4,7 @@
  * Plugin definition.
  */
 $plugin = array(
-  'name' => t('Add per-bundle OG roles'),
+  'name' => t('Upgrade OG roles - 7.2'),
   'description' => t('Add per-bundle OG roles, based on the global roles.'),
   'access callback' => 'og_migrate_7200_access',
 );
