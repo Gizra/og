@@ -4,7 +4,7 @@
  * Plugin definition.
  */
 $plugin = array(
-  'name' => t('Group content'),
+  'name' => t('Group content nodes'),
   'description' => t('Upgrade group content'),
   'access callback' => 'og_migrate_7000_access',
   'dependencies' => array('og_7000_group'),
