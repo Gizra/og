@@ -50,9 +50,8 @@ function og_7000_group_content(&$context) {
   foreach ($result as $row) {
     $node = node_load($row->nid);
 
-    // Make sure entity isn't already associated with group, and make sure group
-    // node exists.
-    if (!og_is_member('node', $row->group_nid, 'node', $node) && node_load($row->group_nid)) {
+    // Make sure entity isn't already associated with group.
+    if (!og_is_member('node', $row->group_nid, 'node', $node)) {
       $values = array('entity_type' => 'node', 'entity' => $row->nid);
       og_group('node', $row->group_nid, $values);
     }
