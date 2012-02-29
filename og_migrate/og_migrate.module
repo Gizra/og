@@ -368,16 +368,30 @@ function og_migrate_admin_submit($form, &$form_state) {
  * Helper function to create a batch.
  */
 function og_migrate_batch($plugins_name) {
-  $plugins_name = og_migrate_get_plugins_dependencies($plugins_name);
+  $all_plugins_name = og_migrate_get_plugins_dependencies($plugins_name);
 
   if (!$plugins_name) {
     return;
   }
 
+  $query = db_select('og_migrate', 'ogm');
+  $result = $query->fields('ogm', array('plugin', 'status'))
+    ->execute()
+    ->fetchAll();
+
+  $status = array();
+  foreach ($result as $row) {
+    $status[$row->plugin] = $row->status;
+  }
+
   // Add the operations.
   $plugins = og_migrate_get_plugins();
-  foreach ($plugins_name as $plugin_name) {
-    $operations[] = array($plugins[$plugin_name]['migrate callback'], array());
+  foreach ($all_plugins_name as $plugin_name) {
+    if (in_array($plugin_name, $plugins_name) || empty($status[$plugin_name]) || $status[$plugin_name] != OG_MIGRATE_EXECUTED) {
+      // Plugin was explicetly selected, or not executed successfuly yet.
+      $operations[] = array($plugins[$plugin_name]['migrate callback'], array());
+    }
+
   }
 
   $batch = array(
