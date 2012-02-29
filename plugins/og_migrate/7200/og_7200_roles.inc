@@ -51,7 +51,7 @@ function og_7200_roles(&$context) {
     ->range(0, $batch_size)
     ->orderBy('rid')
     ->execute()
-    ->fetch();
+    ->fetchAll();
 
   if (empty($result)) {
     // No data to process, so return.
@@ -60,11 +60,13 @@ function og_7200_roles(&$context) {
   }
 
   foreach ($result as $row) {
-    list($entity_type, $etid) = og_migrate_get_group($row->gid);
+    list($group_type, $gid) = og_migrate_get_group($row->gid);
+    $group = entity_load_single($group_type, $gid);
+    list(,,$bundle) = entity_extract_ids($group_type, $group);
 
     db_update('og_role')
-      ->fields(array('group_type' => $entity_type, 'gid' => $etid))
-      ->condition('rid', $row->rid, '>=')
+      ->fields(array('group_type' => $group_type, 'gid' => $gid, 'group_bundle' => $bundle))
+      ->condition('rid', $row->rid, '=')
       ->execute();
 
     $context['sandbox']['progress']++;
