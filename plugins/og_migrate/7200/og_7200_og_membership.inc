@@ -14,10 +14,6 @@ $plugin = array(
  */
 function og_7200_og_membership(&$context) {
   if (empty($context['sandbox'])) {
-    $context['sandbox']['progress'] = 0;
-    $context['sandbox']['last'] = 0;
-
-
     // Calculate max items.
     $query = new EntityFieldQuery();
     $context['sandbox']['max'] = $query
@@ -31,15 +27,18 @@ function og_7200_og_membership(&$context) {
       $context['finished'] = 1;
       return;
     }
-  }
 
-  // Indicate if there is a group-audience field referencing the entity
-  // type.
-  $audience_fields = &drupal_static(__FUNCTION__, array());
-  foreach (field_info_fields() as $field_name => $field) {
-    if (og_is_group_audience_field($field_name)) {
-      $group_type = $field['settings']['target_type'];
-      $audience_fields[$group_type][$field_name] = $field['bundles'];
+    $context['audience_fields'] = array();
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['last'] = 0;
+
+    // Indicate if there is a group-audience field referencing the entity
+    // type.
+    foreach (field_info_fields() as $field_name => $field) {
+      if (og_is_group_audience_field($field_name)) {
+        $group_type = $field['settings']['target_type'];
+        $context['audience_fields'][$group_type][$field_name] = $field['bundles'];
+      }
     }
   }
 
@@ -64,6 +63,12 @@ function og_7200_og_membership(&$context) {
   $og_memberships = og_membership_load_multiple(array_keys($result['og_membership']));
   foreach ($og_memberships as $og_membership) {
     list($group_type, $gid) = og_migrate_get_group($og_membership->gid);
+    if (empty($gid)) {
+      // The OG membership was somehow not deleted when the group was deleted,
+      // so do it now.
+      $og_membership->delete();
+      continue;
+    }
 
     // Re-populate the group ID and add the group type.
     $og_membership->group_type = $group_type;
@@ -72,20 +77,26 @@ function og_7200_og_membership(&$context) {
     $entity_type = $og_membership->entity_type;
 
     $entity = entity_load_single($entity_type, $og_membership->etid);
+    if (!$entity) {
+      // The OG membership was somehow not deleted when the entity was deleted,
+      // so do it now.
+      $og_membership->delete();
+      continue;
+    }
     list(,,$bundle) = entity_extract_ids($og_membership->entity_type, $entity);
 
     $field_name = $group_type == 'node' ? OG_AUDIENCE_FIELD : OG_AUDIENCE_FIELD . '_' . $group_type;
 
-    if (empty($audience_fields[$group_type][$field_name][$entity_type]) || !array_search($bundle, $audience_fields[$group_type][$field_name][$entity_type])) {
+    if (empty($context['audience_fields'][$group_type][$field_name][$entity_type]) || !array_search($bundle, $context['audience_fields'][$group_type][$field_name][$entity_type])) {
       // Add a group-audience field to the bundle.
       $og_field = og_fields_info(OG_AUDIENCE_FIELD);
       $og_field['field']['settings']['target_type'] = $group_type;
 
       $entity_info = entity_get_info($group_type);
       $og_field['instance']['label'] = t('Groups audience - @label', array('@label' => $entity_info['label']));
-      $audience_fields[$group_type][$field_name][$entity_type][] = $bundle;
+      $context['audience_fields'][$group_type][$field_name][$entity_type][] = $bundle;
 
-      og_create_field($field_name, $entity_type, $bundle);
+      og_create_field($field_name, $entity_type, $bundle, $og_field);
     }
 
     $og_membership->field_name = $field_name;
