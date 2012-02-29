@@ -29,10 +29,6 @@ function og_7000_user(&$context) {
       $context['finished'] = 1;
       return;
     }
-
-    // It is probably already added, but make sure there is og-audience field
-    // attached to the user.
-    og_create_field(OG_AUDIENCE_FIELD, 'user', 'user');
   }
 
   if (!$context['sandbox']['max']) {
