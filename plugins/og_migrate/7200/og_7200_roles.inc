@@ -39,8 +39,6 @@ function og_7200_roles(&$context) {
     }
   }
 
-  return;
-
   // Operate on entity in batches.
   $batch_size = variable_get('og_batch_size', 200);
 
