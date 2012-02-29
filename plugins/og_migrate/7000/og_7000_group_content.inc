@@ -39,18 +39,20 @@ function og_7000_group_content(&$context) {
 
   $query = db_select('node', 'n');
   $query->innerJoin('d6_og_ancestry', 'oga', 'n.nid = oga.nid');
-  $query
+  $result = $query
     ->fields('n', array('nid', 'type', 'created'))
     ->fields('oga', array('upgrade_id', 'group_nid'))
     ->condition('oga.upgrade_id', $context['sandbox']['last'], '>')
     ->orderBy('oga.upgrade_id', 'ASC')
-    ->range(0, $batch_size);
-  $result = $query->execute();
+    ->range(0, $batch_size)
+    ->execute();
 
   foreach ($result as $row) {
     $node = node_load($row->nid);
-    // Make sure entity isn't already associated with group.
-    if (!og_is_member('node', $row->group_nid, 'node', $node)) {
+
+    // Make sure entity isn't already associated with group, and make sure group
+    // node exists.
+    if (!og_is_member('node', $row->group_nid, 'node', $node) && node_load($row->group_nid)) {
       $values = array('entity_type' => 'node', 'entity' => $row->nid);
       og_group('node', $row->group_nid, $values);
     }
