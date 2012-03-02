@@ -55,7 +55,7 @@ function og_register_query_og_alter(QueryAlterableInterface $query) {
       ->fieldCondition(OG_GROUP_FIELD, 'value', 1, '=');
 
     if ($group_bundles) {
-      $efq_query->propertyCondition($entity_info['bundle keys ']['bundle'], $group_bundles, 'IN');
+      $efq_query->propertyCondition($entity_info['bundle keys']['bundle'], $group_bundles, 'IN');
     }
     $result = $efq_query->execute();
     if (empty($result[$group_type])) {
