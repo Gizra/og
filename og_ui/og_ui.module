@@ -748,34 +748,34 @@ function og_ui_og_permission() {
   $items = array();
 
   $items['subscribe'] = array(
-    'title' => t('Subscribe user to group'),
-    'description' => t("Allow user to be a member of a group (approval required)."),
+    'title' => t('Subscribe to group'),
+    'description' => t('Allow non-members to request membership to a group (approval required).'),
     'roles' => array(OG_ANONYMOUS_ROLE),
     'default role' => array(OG_ANONYMOUS_ROLE),
   );
 
   $items['subscribe without approval'] = array(
-    'title' => t('Subscribe user to group (no approval required).'),
-    'description' => t("Allow user to be a member of a group without an approval of the group administrator."),
+    'title' => t('Subscribe to group (no approval required)'),
+    'description' => t('Allow non-members to join a group without an approval from group administrators.'),
     'roles' => array(OG_ANONYMOUS_ROLE),
   );
 
   $items['unsubscribe'] = array(
-    'title' => t('Unsubscribe user from group'),
-    'description' => t("Allow user to remove membership from a group."),
+    'title' => t('Unsubscribe from group'),
+    'description' => t('Allow members to unsubscribe themselves from a group, removing their membership.'),
     'roles' => array(OG_AUTHENTICATED_ROLE),
     'default role' => array(OG_AUTHENTICATED_ROLE),
   );
 
   $items['approve and deny subscription'] = array(
     'title' => t('Approve and deny subscription'),
-    'description' => t("Allow user to allow or deny another user's subscription request."),
+    'description' => t('Users may allow or deny another user\'s subscription request.'),
     'default role' => array(OG_ADMINISTRATOR_ROLE),
   );
 
-  $items['administer members'] = array(
-    'title' => t('Administer members'),
-    'description' => t("Allow users to add and manage other members in the group."),
+  $items['add user'] = array(
+    'title' => t('Add user'),
+    'description' => t('Users may add other users to the group without approval.'),
     'default role' => array(OG_ADMINISTRATOR_ROLE),
   );
 
@@ -826,19 +826,19 @@ function og_ui_og_ui_get_group_admin($group_type, $gid) {
     'href' => "admin/people",
   );
 
-	if (og_user_access($group_type, $gid, 'administer group')) {
-	  $items['roles'] = array(
-	    'title' => !$default_access ? t('Roles') : t('Roles (read-only)'),
-	    'description' => !$default_access ? t('Manage the group roles.') : t('View the group roles.'),
-	    'href' => "admin/people/roles",
-	  );
-	  $items['permissions'] = array(
-	    'title' => !$default_access ? t('Permissions') : t('Permissions (read-only)'),
-	    'description' => !$default_access ? t('Manage the group permissions.') : t('View the group permissions.'),
-	    'href' => "admin/people/permissions",
-	  );
+  if (og_user_access($group_type, $gid, 'administer group')) {
+    $items['roles'] = array(
+      'title' => !$default_access ? t('Roles') : t('Roles (read-only)'),
+      'description' => !$default_access ? t('Manage the group roles.') : t('View the group roles.'),
+      'href' => "admin/people/roles",
+    );
+    $items['permissions'] = array(
+      'title' => !$default_access ? t('Permissions') : t('Permissions (read-only)'),
+      'description' => !$default_access ? t('Manage the group permissions.') : t('View the group permissions.'),
+      'href' => "admin/people/permissions",
+    );
 
-	}
+  }
 
   return $items;
 }
