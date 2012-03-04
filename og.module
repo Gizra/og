@@ -393,6 +393,38 @@ function og_is_group_member($gid, $include_admins = TRUE, $uid = NULL) {
 }
 
 /**
+ * Determine the moderated groups a user has petitioned to join.
+ *
+ * @param gid
+ *  An integer or a node object representing the group node.
+ * @param $uid
+ *   Pass a user id, or pass NULL in order to check current user.
+ * @param $reset
+ *   If TRUE, the cached user object (if any) will be reset for the given $uid
+ *   (or the current $user if $uid is NULL).
+ *
+ * @return
+ *  Whether the user is a pending member of the specified group. If no $gid is specified,
+ *  will return an array of all pending groups.
+ */
+function og_is_pending_member($gid = NULL, $uid = NULL, $reset = FALSE) {
+  static $pending;
+
+  if (!isset($uid)) {
+    $uid = $GLOBALS['user']->uid;
+  }
+
+  if (empty($pending[$uid]) || $reset) {
+    $pending[$uid] = array();
+    $groups = array_diff_assoc(og_get_subscriptions($uid, 0, $reset), og_get_subscriptions($uid, 1));
+    foreach ($groups as $group_nid => $group) {
+      $pending[$uid][$group_nid] = $group_nid;
+    }
+  }
+  return !empty($gid) ? in_array($gid, $pending[$uid]) : $pending[$uid];
+}
+
+/**
   * Determine whether user can act as a group administrator for a given group.
   *
   * @param string $node
@@ -2694,6 +2726,9 @@ function og_subscribe_link($node) {
 function theme_og_subscribe_link($node) {
   if ($node->og_selective == OG_MODERATED) {
     $txt = t('Request membership');
+    if (og_is_pending_member($node->nid)) {
+      return t('Awaiting approval');
+    }
   }
   elseif ($node->og_selective == OG_OPEN) {
     $txt = t('Join');
