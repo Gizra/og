@@ -89,7 +89,7 @@ You may wish to stylize nodes which have properties assigned by this module.
     for both groups and group posts. These can be starting points for your
     customization of look and feel of your group. To customize, copy one or both
     to your theme directory and edit as desired. Your theme directory must also
-    impement node.tpl.php for your overrides to be recognized. Or you might use
+    implement node.tpl.php for your overrides to be recognized. Or you might use
     the og_panels module to achieve custom group homepages (and other group
     pages) that group admins can design themselves.
 
