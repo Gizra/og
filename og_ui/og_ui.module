@@ -47,8 +47,8 @@ function og_ui_menu() {
 
   // User listing pages.
   $items['group/%/%/admin/people'] = array(
-    'title arguments' => array('People in group @group', 1, 2),
     'title callback' => 'og_ui_menu_title_callback',
+    'title arguments' => array('People in group @group', 1, 2),
     'description' => 'Find and manage group members.',
     'page callback' => 'og_ui_admin_account',
     'page arguments' => array(1, 2),
@@ -59,9 +59,9 @@ function og_ui_menu() {
   );
 
   // Permission administration pages.
-  $items['group/%/%/admin/people/roles'] = array(
-    'title arguments' => array('Roles for group @group', 1, 2),
+  $items['group/%/%/admin/roles'] = array(
     'title callback' => 'og_ui_menu_title_callback',
+    'title arguments' => array('Roles for group @group', 1, 2),
     'description' => 'List, edit, or add user roles.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_admin_new_role', 1, 2),
@@ -71,24 +71,46 @@ function og_ui_menu() {
     'weight' => -9,
   );
 
-  $items['group/%/%/admin/people/roles/edit'] = array(
+  // Node specific role edit
+  // group/[1: Group type]/[2: Group ID]/admin/role/[5: Role ID]/edit
+  $items['group/%/%/admin/role/%/edit'] = array(
     'title' => 'Edit role',
-    'page arguments' => array('og_ui_admin_roles', 1, 2, 7),
-    'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('administer group', 1, 2),
-    'type' => MENU_CALLBACK,
+    'description' => 'List, edit, or add user roles.',
+    'page callback' => 'drupal_get_form',
+    // Passing empty bundle name to og_ui_admin_roles. The bundle will be
+    // loaded from the role.
+    'page arguments' => array('og_ui_admin_roles', 1, 2, '', 5),
+    'access callback' => 'og_ui_access_entity_role',
+    'access arguments' => array('administer group', 1, 2, 5),
+    'file' => 'og_ui.admin.inc',
+    'weight' => -9,
   );
 
-  $items['group/%/%/admin/people/permissions'] = array(
-    'title arguments' => array('Permissions for group @group', 1, 2),
+  $items['group/%/%/admin/permissions'] = array(
     'title callback' => 'og_ui_menu_title_callback',
+    'title arguments' => array('Permissions for group @group', 1, 2),
     'description' => 'Determine access to features by selecting permissions for roles.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('og_ui_admin_permissions', 6, 1, 2),
+    'page arguments' => array('og_ui_admin_permissions', 1, 2),
     'access callback' => 'og_ui_user_access_group',
     'access arguments' => array('administer group', 1, 2),
     'file' => 'og_ui.admin.inc',
     'weight' => -8,
+  );
+
+  // Node specific permission edit
+  // group/[1: Group type]/[2: Group ID]/admin/permission/[5: Role ID]/edit
+  $items['group/%/%/admin/permission/%/edit'] = array(
+    'title' => "Edit role's permissions",
+    'description' => 'Determine access to features by selecting permissions for role.',
+    'page callback' => 'drupal_get_form',
+    // Passing empty bundle name to og_ui_admin_permissions. The bundle will be
+    // loaded from the role.
+    'page arguments' => array('og_ui_admin_permissions', 1, 2, '', 5),
+    'access callback' => 'og_ui_access_entity_role',
+    'access arguments' => array('administer group', 1, 2, 5),
+    'file' => 'og_ui.admin.inc',
+    'weight' => -9,
   );
 
   foreach (og_get_all_group_entity() as $entity => $value) {
@@ -130,9 +152,30 @@ function og_ui_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_admin_global_permissions'),
     'title' => 'OG global permissions',
+    'access arguments' => array('administer group'),
+    'description' => 'Configure Organic groups global permissions.',
+    'file' => 'og_ui.admin.inc',
+  );
+
+  $items['admin/config/group/permissions/%/%'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_ui_admin_global_permissions', 4, '0', 5),
+    'title callback' => 'og_ui_menu_bundle_roles_title_callback',
+    'title arguments' => array('OG @type - @bundle permissions', 4, 5),
     'access callback' => array('og_ui_access_group_permissions'),
-    'access arguments' => array(4, 5, 6, 7),
+    'access arguments' => array(4, '0', 5),
     'description' => 'Configure OG global permissions.',
+    'file' => 'og_ui.admin.inc',
+  );
+
+  $items['admin/config/group/permission/%/edit'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_ui_admin_permissions', '', '0', '', 4),
+    'title callback' => 'og_ui_menu_bundle_roles_title_callback',
+    'title arguments' => array('OG @type - @bundle - @role permissions', '', '', 4),
+    'access callback' => array('og_ui_access_bundle_role'),
+    'access arguments' => array(4),
+    'description' => 'Configure Organic groups group type permissions.',
     'file' => 'og_ui.admin.inc',
   );
 
@@ -154,11 +197,27 @@ function og_ui_menu() {
     'file' => 'og_ui.admin.inc',
   );
 
-  $items['admin/config/group/roles/edit'] = array(
-    'title' => 'Edit OG role',
-    'page arguments' => array('og_ui_admin_global_roles', '', '', 5),
-    'access arguments' => array('administer group'),
-    'type' => MENU_CALLBACK,
+  // admin/config/group/roles/[Entity type]/[Group bundle]
+  $items['admin/config/group/roles/%/%'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_ui_admin_new_role', 4, '0', 5),
+    'title callback' => 'og_ui_menu_bundle_roles_title_callback',
+    'title arguments' => array('OG @type - @bundle roles', 4, 5),
+    'access callback' => array('og_ui_access_bundle'),
+    'access arguments' => array(4, 5),
+    'description' => 'Configure Organic groups group type roles.',
+    'file' => 'og_ui.admin.inc',
+  );
+
+  $items['admin/config/group/role/%/edit'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('og_ui_admin_roles', '', '0', '', 4),
+    'title callback' => 'og_ui_menu_bundle_roles_title_callback',
+    'title arguments' => array('OG @type - @bundle - @role', '', '', 4),
+    'access callback' => array('og_ui_access_bundle_role'),
+    'access arguments' => array(4),
+    'description' => 'Configure Organic groups group type roles.',
+    'file' => 'og_ui.admin.inc',
   );
 
   $items['admin/config/group/fields'] = array(
@@ -189,10 +248,22 @@ function og_ui_menu() {
  * Menu access; Check if entity is a group, and user has permission.
  */
 function og_ui_user_access_group($perm, $group_type, $gid) {
+  $group = entity_load_single($group_type, $gid);
+  if (!$group || !og_is_group($group_type, $group)) {
+    return FALSE;
+  }
+
+  // Extract the group's bundle.
+  list(,,$bundle) = entity_extract_ids($group_type, $group);
+  // Verify the bundle has roles
+  if (!og_roles($group_type, $gid, $bundle)) {
+    return FALSE;
+  }
+
   $entity_info = entity_get_info($group_type);
   if (!$group_type || !$entity_info) {
     // Not a valid entity type.
-    return;
+    return FALSE;
   }
   return og_is_group($group_type, $gid) && og_user_access($group_type, $gid, $perm);
 }
@@ -200,26 +271,104 @@ function og_ui_user_access_group($perm, $group_type, $gid) {
 /**
  * Menu access; Check access and validate values for group permissions page.
  *
- * @param $og_rid
+ * @param $rid
  * @param $group_type
  * @param $gid
  * @param $bundle
  */
-function og_ui_access_group_permissions($og_rid = 0, $group_type = '', $gid = 0, $bundle = '') {
+function og_ui_access_group_permissions($group_type = '', $gid = 0, $bundle = '', $rid = 0) {
   if (!user_access('administer group')) {
-    return;
+    return FALSE;
   }
 
   if ($group_type && !entity_get_info($group_type)) {
-    return;
+    return FALSE;
   }
   if ($gid && !entity_load_single($group_type, $gid)) {
-    return;
+    return FALSE;
   }
 
-  if ($og_rid) {
+  if ($rid) {
     $og_roles = og_roles($group_type, $gid, $bundle);
-    return !empty($og_roles[$og_rid]);
+    return !empty($og_roles[$rid]);
+  }
+
+  return TRUE;
+}
+
+/**
+ * Menu access; Check permissions per-bundle editing.
+ *
+ * @param $group_type
+ *   Group entity type. E.g. 'node'.
+ * @param $bundle_name
+ *   Bundle name.
+ *
+ * @return
+ *   True if current user is allowed to edit given bundle. False otherwise.
+ */
+function og_ui_access_bundle($group_type, $bundle_name) {
+  if (!user_access('administer group')) {
+    return FALSE;
+  }
+
+  $role_names = og_roles($group_type, 0, $bundle_name);
+  if (!$role_names) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Menu access; Check permissions for role editing.
+ *
+ * @param $perm
+ *   Permission string. E.g. 'administer group'.
+ * @param $rid
+ *   Role ID.
+ *
+ * @return
+ *   True if current user is allowed to edit given role. False otherwise.
+ */
+function og_ui_access_bundle_role($rid) {
+  if (!user_access('administer group')) {
+    return FALSE;
+  }
+
+  $role = og_role_load($rid);
+  return (boolean)$role;
+}
+
+/**
+ * Menu access; Check permissions for role editing - For a specific entity.
+ *
+ * @param $perm
+ *   Permission string. E.g. 'administer group'.
+ * @param $group_type
+ *   Group entity type. E.g. 'node'.
+ * @param $gid
+ *   Group ID.
+ * @param $rid
+ *   Role ID.
+ *
+ * @return
+ *   True if current user is allowed to edit given role. False otherwise.
+ */
+function og_ui_access_entity_role($perm, $group_type, $gid, $rid) {
+  if (!og_user_access($group_type, $gid, $perm)) {
+    return FALSE;
+  }
+
+  $group = entity_load_single($group_type, $gid);
+  if (!$group || !og_is_group($group_type, $group)) {
+    return FALSE;
+  }
+
+  $role = og_role_load($rid);
+  if (!$role || $role->group_type != $group_type || $role->gid != $gid) {
+    // Role doesn't exist, or doesn't belong to the group.
+    return FALSE;
   }
 
   return TRUE;
@@ -251,6 +400,34 @@ function og_ui_admin_paths() {
 function og_ui_menu_title_callback($title, $entity_type, $etid) {
   $wrapper = entity_metadata_wrapper($entity_type, $etid);
   return str_replace('@group', $wrapper->label(), $title);
+}
+
+/**
+ * Title callback; Return the title for role or permission editing, based on
+ * context.
+ */
+function og_ui_menu_bundle_roles_title_callback($title, $group_type, $bundle, $rid = 0) {
+  if ($rid) {
+    // Get group type and bundle from role.
+    $role = og_role_load($rid);
+    if (!$role->group_type) {
+      $title = str_replace('@type', '', $title);
+      $title = str_replace('@bundle', t('Global'), $title);
+    }
+
+    $bundle = $role->group_bundle;
+    $group_type = $role->group_type;
+
+    $title = str_replace('@role', check_plain($role->name), $title);
+  }
+
+  $entity_info = entity_get_info($group_type);
+  if (!empty($entity_info['label'])) {
+    $title = str_replace('@type', check_plain($entity_info['label']), $title);
+    $title = str_replace('@bundle', check_plain($entity_info['bundles'][$bundle]['label']), $title);
+  }
+
+  return $title;
 }
 
 /**
@@ -830,12 +1007,12 @@ function og_ui_og_ui_get_group_admin($group_type, $gid) {
     $items['roles'] = array(
       'title' => !$default_access ? t('Roles') : t('Roles (read-only)'),
       'description' => !$default_access ? t('Manage the group roles.') : t('View the group roles.'),
-      'href' => "admin/people/roles",
+      'href' => "admin/roles",
     );
     $items['permissions'] = array(
       'title' => !$default_access ? t('Permissions') : t('Permissions (read-only)'),
       'description' => !$default_access ? t('Manage the group permissions.') : t('View the group permissions.'),
-      'href' => "admin/people/permissions",
+      'href' => "admin/permissions",
     );
 
   }

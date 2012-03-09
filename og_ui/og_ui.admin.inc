@@ -242,64 +242,38 @@ function og_ui_admin_account($group_type, $gid) {
  * @see theme_group_user_admin_new_role()
  */
 function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bundle = '', $rid = 0) {
-  if (!empty($group_type) && !empty($gid)) {
-    $group = entity_load_single($group_type, $gid);
-    $group = $group && og_is_group($group_type, $group) ? $group : FALSE;
-    if (!$group) {
-      drupal_not_found();
-      return;
-    }
-  }
-
   if ($gid) {
-    list(,,$bundle) = entity_extract_ids($group_type, $group);
-    og_set_breadcrumb($group_type, $gid, array(l(t('Group'), "$group_type/$gid/group")), l(t('Roles'), "group/$group_type/$gid/admin/people/roles"));
-    $role_names = og_roles($group_type, og_is_group_default_access($group_type, $group) ? 0 : $gid, $bundle);
-    if (!empty($og_rid) && !empty($role_names[$og_rid])) {
-      $role_names = array($rid => $role_names[$og_rid]);
-    }
+    og_set_breadcrumb($group_type, $gid, array(l(t('Group'), "$group_type/$gid/group")), l(t('Roles'), "group/$group_type/$gid/admin/roles"));
   }
   else {
-    $role_names = og_roles($group_type, $gid, $bundle);
-    if (!$role_names) {
-      drupal_not_found();
-      return;
-    }
-    if (!empty($og_rid) && !empty($role_names[$og_rid])) {
-      $role_names = array($rid => $role_names[$og_rid]);
-    }
-
     // Show the global and per-bundle links.
     $items = array();
     $items[] = array('data' => l(t('Global (used for inheritance)'), 'admin/config/group/roles'));
     foreach (og_get_all_group_bundle() as $entity_type => $bundles) {
       $entity_info = entity_get_info($entity_type);
       foreach ($bundles as $bundle_name => $bundle_label) {
-        $items[] = array('data' => l(check_plain($entity_info['label'] . ' - ' . $bundle_label), "admin/config/group/roles/$entity_type/0/$bundle_name"));
+        $items[] = array('data' => l(check_plain($entity_info['label'] . ' - ' . $bundle_label), "admin/config/group/roles/$entity_type/$bundle_name"));
       }
     }
 
-    $form['global_links'] = array(
-      '#title' => t('Roles links'),
-      '#theme' => 'item_list',
-      '#items' => $items,
-    );
+    // Hide the links when editing a role.
+    if (!$rid) {
+      $form['global_links'] = array(
+        '#title' => t('Roles links'),
+        '#theme' => 'item_list',
+        '#items' => $items,
+      );
+    }
   }
 
-  $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
-  $form['gid'] = array('#type' => 'value', '#value' => $gid);
-  $form['bundle'] = array('#type' => 'value', '#value' => $bundle);
-  $form['role_names'] = array('#type' => 'value', '#value' => $role_names);
-  $form['referrer'] = array('#type' => 'value', '#value' => 'roles');
-
   if ($rid) {
-    if (!in_array($rid, array_keys($role_names))) {
-      drupal_not_found();
-      return;
-    }
-
     // Display the edit role form.
     $role = og_role_load($rid);
+
+    // Get group type and bundle from role.
+    $bundle = $role->group_bundle;
+    $group_type = $role->group_type;
+
     $form['name'] = array(
       '#type' => 'textfield',
       '#title' => t('Role name'),
@@ -324,8 +298,13 @@ function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bund
     );
   }
   else {
+    if ($gid) {
+      $group = entity_load_single($group_type, $gid);
+    }
+
     // No role ID.
     if (!$gid || ($group && !og_is_group_default_access($group_type, $group))) {
+
       $form['name'] = array(
         '#type' => 'textfield',
         '#title' => t('Name'),
@@ -358,6 +337,13 @@ function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bund
       );
     }
   }
+
+  $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+  $form['bundle'] = array('#type' => 'value', '#value' => $bundle);
+  $role_names = _og_ui_get_role_names($group_type, $gid, $bundle, $rid);
+  $form['role_names'] = array('#type' => 'value', '#value' => $role_names);
+  $form['referrer'] = array('#type' => 'value', '#value' => 'roles');
 
   return $form;
 }
@@ -415,12 +401,12 @@ function og_ui_admin_roles_submit($form, &$form_state) {
   }
 
   if ($gid) {
-    $form_state['redirect'] = "group/$group_type/$gid/admin/people/roles";
+    $form_state['redirect'] = "group/$group_type/$gid/admin/roles";
   }
   else {
     $form_state['redirect'] = 'admin/config/group/roles';
     if ($bundle) {
-      $form_state['redirect'] .= "/$group_type/0/$bundle";
+      $form_state['redirect'] .= "/$group_type/$bundle";
     }
   }
 }
@@ -449,11 +435,11 @@ function theme_og_ui_admin_new_role($variables) {
 
   foreach ($role_names as $rid => $name) {
     $text = !$default_access ? t('edit permissions') : t('view permissions');
-    $path = $gid ? 'group/' . $group_type .'/' . $gid . '/admin/people' : 'admin/config/group';
-    $permissions = l($text, $path . '/permissions/' . $rid);
+    $path = $gid ? "group/$group_type/$gid/admin" : 'admin/config/group';
+    $permissions = l($text, "$path/permission/$rid/edit");
 
     if (!$default_access && !in_array($name, array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE))) {
-      $rows[] = array(check_plain($name), l(t('edit role'), $path . '/roles/edit/' . $rid), $permissions);
+      $rows[] = array(check_plain($name), l(t('edit role'), "$path/role/$rid/edit"), $permissions);
     }
     else {
       $rows[] = array(check_plain($name), t('locked'), $permissions);
@@ -470,63 +456,91 @@ function theme_og_ui_admin_new_role($variables) {
   return $output;
 }
 
+/**
+ * Helper function to get role names.
+ *
+ * @param $group_type
+ *   Group entity type. E.g. 'node'.
+ * @param $gid
+ *   Group item ID.
+ * @param $bundle
+ *   Group bundle.
+ * @param $rid
+ *   Role ID.
+ *
+ * @return array
+ *   Role names according to parameters.
+ */
+function _og_ui_get_role_names($group_type, $gid, $bundle, $rid) {
+  if ($gid) {
+    $group = entity_load_single($group_type, $gid);
+
+    list(,,$bundle) = entity_extract_ids($group_type, $group);
+    $gid = og_is_group_default_access($group_type, $group) ? 0 : $gid;
+  }
+
+  $role_names = og_roles($group_type, $gid, $bundle);
+  if ($rid && !empty($role_names[$rid])) {
+    $role_names = array($rid => $role_names[$rid]);
+  }
+
+  return $role_names;
+}
 
 /**
  * Menu callback: administer permissions.
+ *
+ * @param $group_type
+ *   Group entity type. E.g. 'node'.
+ * @param $gid
+ *   Group item ID.
+ * @param $bundle
+ *   Group bundle.
+ * @param $rid.
+ *   Role ID. When specified, edit only this role's permissions.
  *
  * @ingroup forms
  * @see og_ui_admin_permissions_submit()
  * @see theme_og_ui_admin_permissions()
  */
-function og_ui_admin_permissions($form, $form_state, $og_rid = 0, $group_type = '', $gid = 0, $bundle = '') {
-  if (!empty($group_type) && !empty($gid)) {
-    $group = entity_load_single($group_type, $gid);
-    $group = $group && og_is_group($group_type, $group) ? $group : FALSE;
-    if (!$group) {
-      drupal_not_found();
-      return;
-    }
+function og_ui_admin_permissions($form, $form_state, $group_type = '', $gid = 0, $bundle = '', $rid = 0) {
+  if ($rid) {
+    // Get group type and bundle from role.
+    $role = og_role_load($rid);
+    $bundle = $role->group_bundle;
+    $group_type = $role->group_type;
   }
 
   if ($gid) {
-    list(,,$bundle) = entity_extract_ids($group_type, $group);
     og_set_breadcrumb($group_type, $gid, array(l(t('Group'), "$group_type/$gid/group")));
-    $role_names = og_roles($group_type, og_is_group_default_access($group_type, $group) ? 0 : $gid, $bundle);
-    if (!empty($og_rid) && !empty($role_names[$og_rid])) {
-      $role_names = array($og_rid => $role_names[$og_rid]);
-    }
   }
   else {
-    $role_names = og_roles($group_type, $gid, $bundle);
-    if (!$role_names) {
-      drupal_not_found();
-      return;
-    }
-    if (!empty($og_rid) && !empty($role_names[$og_rid])) {
-      $role_names = array($og_rid => $role_names[$og_rid]);
-    }
-
     // Show the global and per-bundle links.
     $items = array();
     $items[] = array('data' => l(t('Global (used for inheritance)'), 'admin/config/group/permissions'));
     foreach (og_get_all_group_bundle() as $entity_type => $bundles) {
       $entity_info = entity_get_info($entity_type);
       foreach ($bundles as $bundle_name => $bundle_label) {
-        $items[] = array('data' => l(check_plain($entity_info['label'] . ' - ' . $bundle_label), "admin/config/group/permissions/0/$entity_type/0/$bundle_name"));
+        $items[] = array('data' => l(check_plain($entity_info['label'] . ' - ' . $bundle_label), "admin/config/group/permissions/$entity_type/$bundle_name"));
       }
     }
 
-    $form['global_links'] = array(
-      '#title' => t('Permissions links'),
-      '#theme' => 'item_list',
-      '#items' => $items,
-    );
+    // Hide the links when editing a role.
+    if (!$rid) {
+      $form['global_links'] = array(
+        '#title' => t('Permissions links'),
+        '#theme' => 'item_list',
+        '#items' => $items,
+      );
+    }
   }
 
   $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
   $form['gid'] = array('#type' => 'value', '#value' => $gid);
   $form['bundle'] = array('#type' => 'value', '#value' => $bundle);
   $form['referrer'] = array('#type' => 'value', '#value' => 'permissions');
+
+  $role_names = _og_ui_get_role_names($group_type, $gid, $bundle, $rid);
 
   // Fetch permissions for all roles or the one selected role.
   $role_permissions = og_role_permissions($role_names);
@@ -598,15 +612,18 @@ function og_ui_admin_permissions($form, $form_state, $og_rid = 0, $group_type = 
       '#submit' => array('og_ui_admin_permissions_submit'),
     );
 
-    $form['actions']['copy'] = array(
-      '#type' => 'submit',
-      '#value' => $bundle ? t('Copy roles and permissions from global') : t('Copy roles and permissions to per-bundles'),
-      '#submit' => array('og_ui_admin_access_copy_global_redirect'),
-      // Show only on global permissions page.
-      '#access' => !$gid && og_get_group_audience_fields(),
-    );
+    // Hide the copy from global button when editing permissions of a specific
+    // role.
+    if (!$rid) {
+      $form['actions']['copy'] = array(
+        '#type' => 'submit',
+        '#value' => $bundle ? t('Copy roles and permissions from global') : t('Copy roles and permissions to per-bundles'),
+        '#submit' => array('og_ui_admin_access_copy_global_redirect'),
+        // Show only on global permissions page.
+        '#access' => !$gid && og_get_group_audience_fields(),
+      );
+    }
   }
-
   $form['#after_build'][] = 'og_ui_admin_permissions_after_build';
   return $form;
 }
@@ -720,9 +737,10 @@ function theme_og_ui_admin_permissions($variables) {
 function og_ui_admin_access_copy_global_redirect($form, &$form_state) {
   $referrer = $form['referrer']['#value'];
   $form_state['redirect'] = "admin/config/group/copy-global-access/$referrer";
-  if (!empty($form_state['values']['bundle'])) {
+
+  if (!empty($form['bundle']['#value'])) {
     // Add the group type and bundle values should be copied to.
-    $form_state['redirect'] .= '/' . $form_state['values']['group_type'] . '/' . $form_state['values']['bundle'];
+    $form_state['redirect'] .= '/' . $form['group_type']['#value'] . '/' . $form['bundle']['#value'];
   }
 }
 
@@ -748,7 +766,7 @@ function og_ui_admin_confirm_access_copy_global($form, $form_state, $group_type,
       '%bundle' => $bundle,
     );
     $text = t('Are you sure you want to copy the OG global permissions to %type - %bundle permissions?', $params);
-    $cancel_link .= "/$group_type/0/$bundle";
+    $cancel_link .= "/$group_type/$bundle";
   }
   else {
     $text = t('Are you sure you want to copy the OG global permissions to all permissions?');
@@ -780,10 +798,7 @@ function og_ui_admin_confirm_access_copy_global_submit($form, &$form_state) {
   }
   $form_state['redirect'] = "admin/config/group/$referrer";
   if ($bundle) {
-    if ($referrer == 'permissions') {
-      $form_state['redirect'] .= '/0';
-    }
-    $form_state['redirect'] .= "/$group_type/0/$bundle";
+    $form_state['redirect'] .= "/$group_type/$bundle";
   }
 }
 

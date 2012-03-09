@@ -39,7 +39,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertTrue(og_user_access('entity_test', $entity1->pid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
 
     // Remove a permission.
-    $this->drupalPost('admin/config/group/permissions/0/entity_test/0/main', array('4[subscribe]' => FALSE), t('Save global permissions'));
+    $this->drupalPost('admin/config/group/permissions/entity_test/main', array('4[subscribe]' => FALSE), t('Save global permissions'));
     $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
 
     // FIXME: There is an og_invalidate_cache() on permissions granting
@@ -49,7 +49,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertFalse(og_user_access('entity_test', $entity1->pid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
 
     // Re-add permission.
-    $this->drupalPost('admin/config/group/permissions/0/entity_test/0/main', array('4[subscribe]' => TRUE), t('Save global permissions'));
+    $this->drupalPost('admin/config/group/permissions/entity_test/main', array('4[subscribe]' => TRUE), t('Save global permissions'));
 
     // FIXME: There is an og_invalidate_cache() on permissions granting
     // and revoking, but somehow, we need to do it manually here.

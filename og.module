@@ -2245,7 +2245,7 @@ function og_role_permissions($roles = array()) {
  *
  * @return
  *   An associative array with the role id as the key and the role name as
- *   value. The anonymous and authenticated deault roles are on the top of the
+ *   value. The anonymous and authenticated default roles are on the top of the
  *   array.
  */
 function og_roles($group_type = '', $gid = 0, $bundle = '', $force_group = FALSE, $include_all = TRUE) {
