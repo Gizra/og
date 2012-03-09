@@ -111,11 +111,13 @@ function og_context_preprocess_html(&$variables) {
 function og_context_og_context_negotiation_info() {
   $providers = array();
 
-  $providers['url'] = array(
-    'name' => t('URL'),
-    'description' => t("Select groups if they were passed in the URL (e.g. node/add/post?gids_node[]=4,5,6)."),
-    'callback' => 'og_context_handler_url',
-  );
+  if (module_exists('entityreference_prepopulate')) {
+    $providers['url'] = array(
+      'name' => t('URL (content create)'),
+      'description' => t("Select groups if they were passed in the node create URL (e.g. node/add/post?field_group_ref=4,5,6)."),
+      'callback' => 'og_context_handler_url',
+    );
+  }
 
   $providers['node'] = array(
     'name' => t('Node'),
@@ -486,11 +488,30 @@ function og_context_determine_context($group_type, $item = NULL) {
 }
 
 /**
- * Context handler; Get groups from URL.
- *
- * TODO: Fix when we have this in Entity reference.
+ * Context handler; Get groups from node create URL.
  */
-function og_context_handler_url() {}
+function og_context_handler_url() {
+  $item = menu_get_item();
+  if (strpos($item['path'], 'node/add/') !== 0) {
+    return;
+  }
+  $node_type = $item['map'][2];
+
+  if (!$fields = og_get_group_audience_fields('node', $node_type, FALSE)) {
+    return;
+  }
+  $gids = array();
+  foreach ($fields as $field_name => $label) {
+    $field = field_info_field($field_name);
+    $instance = field_info_instance('node', $field_name, $node_type);
+    if ($ids = entityreference_prepopulate_get_values_from_url($field, $instance, TRUE)) {
+      $target_type = $field['settings']['target_type'];
+      $gids += array($target_type => array());
+      $gids[$target_type] = array_merge($gids[$target_type], $ids);
+    }
+  }
+  return $gids;
+}
 
 /**
  * Context handler; Get groups from existing node or ctools context.
