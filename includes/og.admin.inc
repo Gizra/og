@@ -24,8 +24,7 @@ class OgMembershipTypeUIController extends EntityDefaultUIController {
  */
 function og_membership_type_form($form, &$form_state, $og_membership_type, $op = 'edit') {
   if ($op == 'clone') {
-    $og_membership_type->label .= ' (cloned)';
-    $og_membership_type->name .= '_clone';
+    $og_membership_type->description .= ' (cloned)';
   }
 
   $form['description'] = array(
