@@ -27,17 +27,42 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
   }
 
   public function insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
-    $this->OgMembershipCrud($entity_type, $entity, $field, $instance, $langcode, $items);
-    $items = array();
+    $this->updateField($entity_type, $entity, $field, $instance, $langcode, $items);
   }
 
   public function update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-    $this->OgMembershipCrud($entity_type, $entity, $field, $instance, $langcode, $items);
-    $items = array();
+    $this->updateField($entity_type, $entity, $field, $instance, $langcode, $items);
   }
 
   public function delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
     $this->OgMembershipCrud($entity_type, $entity, $field, $instance, $langcode, $items);
+  }
+
+
+  /**
+   * CRUD OG membership and set field values on the saved entity.
+   *
+   * After saving an entity, the entity isn't loaded, so we make sure that
+   * the fields values are up-to-date even without hook_field_load()
+   * invoked.
+   */
+  public function updateField($entity_type, $entity, $field, $instance, $langcode, &$items) {
+    $this->OgMembershipCrud($entity_type, $entity, $field, $instance, $langcode, $items);
+    $items = array();
+
+    // Get the OG memberships from the field.
+    $field_name = $field['field_name'];
+    $wrapper = entity_metadata_wrapper($entity_type, $entity);
+    if (empty($wrapper->{$field_name . '__og_membership'})) {
+      // If the entity belongs to a bundle that was deleted, return early.
+      continue;
+    }
+    $id = $wrapper->getIdentifier();
+    foreach ($wrapper->{$field_name . '__og_membership'}->value() as $og_membership) {
+      $items[] = array(
+        'target_id' => $og_membership->gid,
+      );
+    }
   }
 
   /**
