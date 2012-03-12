@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the OG example module.
+ */
+
+/**
+ * Implements hook_enable.
+ *
+ * Add group audience fields to "Post" node type.
+ */
+function og_example_enable() {
+  $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+  $og_field['field']['settings']['target_type'] = 'node';
+  og_create_field(OG_AUDIENCE_FIELD, 'node', 'post', $og_field);
+
+  // Create "Other groups" field.
+  $og_field['instance']['label'] = t('Other groups');
+  $og_field['instance']['widget']['type'] = 'entityreference_autocomplete';
+  $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
+  $og_field['field']['settings']['handler_settings']['primary_field'] = OG_AUDIENCE_FIELD;
+  og_create_field(OG_AUDIENCE_OTHER_GROUPS_FIELD, 'node', 'post', $og_field);
+}
