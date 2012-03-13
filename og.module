@@ -860,6 +860,7 @@ function og_entity_presave($entity, $entity_type) {
  * Implements hook_entity_insert().
  */
 function og_entity_insert($entity, $entity_type) {
+  _og_update_entity_fields($entity_type, $entity);
   if (!og_is_group($entity_type, $entity)) {
     return;
   }
@@ -885,6 +886,7 @@ function og_entity_insert($entity, $entity_type) {
  * Implements hook_entity_update().
  */
 function og_entity_update($entity, $entity_type) {
+  _og_update_entity_fields($entity_type, $entity);
   if (!og_is_group($entity_type, $entity)) {
     return;
   }
@@ -915,6 +917,39 @@ function og_entity_update($entity, $entity_type) {
     }
   }
 }
+
+/**
+ * Update the field values in the entity, to reflect the membership.
+ *
+ * This is used to allow other modules that save a new/ existing entity
+ * to act on the field values, even before hook_field_load() is called.
+ */
+function _og_update_entity_fields($entity_type, $entity) {
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+  if (!og_is_group_content_type($entity_type, $bundle)) {
+    return;
+  }
+
+  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+  foreach (og_get_group_audience_fields($entity_type, $bundle, FALSE) as $field_name => $label) {
+    $field = field_info_field($field_name);
+    $gids = array();
+    if ($field['cardinality'] == 1) {
+      if ($og_membership = $wrapper->{$field_name . '__og_membership'}->value()) {
+        $gids = $og_membership->gid;
+      }
+    }
+    else {
+      foreach ($wrapper->{$field_name . '__og_membership'}->value() as $og_membership) {
+        $gids[] = $og_membership->gid;
+      }
+    }
+    if ($gids) {
+      $wrapper->{$field_name}->set($gids);
+    }
+  }
+}
+
 
 /**
  * Implements hook_entity_delete().
@@ -1980,6 +2015,8 @@ function og_is_group_audience_field($field_name) {
  *   The entity type.
  * @param $bundle_name
  *   The bundle name to be checked.
+ * @param $include_secondary
+ *   TRUE, if secondary group-audience field should be also returned.
  *
  * @return
  *   Array keyed with the field name and the field label as the value.
