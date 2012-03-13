@@ -1840,7 +1840,12 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
     // Let modules alter the permissions. since $perm is static we create a
     // clone of it.
     $temp_perm = $perm[$identifier][$account->uid];
-    $context = array('string' => $string, 'group_type' => $group_type, 'gid' => $gid, 'account' => $account);
+    $context = array(
+      'string' => $string,
+      'group_type' => $group_type,
+      'group' => $group,
+      'account' => $account,
+    );
     drupal_alter('og_user_access', $temp_perm, $context);
 
     // Re-assing the altered permissions.

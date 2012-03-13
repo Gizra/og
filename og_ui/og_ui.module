@@ -730,9 +730,10 @@ function og_ui_og_user_access_alter(&$perms, $context) {
   }
 
   $group_type = $context['group_type'];
-  $gid = $context['gid'];
+  $group = $context['group'];
 
-  $og_membership = og_get_membership($group_type, $gid, 'user', $context['account']->uid);
+  list($id) = entity_extract_ids($group_type, $group);
+  $og_membership = og_get_membership($group_type, $id, 'user', $context['account']->uid);
   if (empty($og_membership) || $og_membership->state != OG_STATE_PENDING) {
     return;
   }

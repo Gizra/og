@@ -183,6 +183,7 @@ function hook_og_invalidate_cache($gids = array()) {
  * @param $context
  *   Array with:
  *   - string: The permission asked for the user.
+ *   - group_type: The entity type of the group.
  *   - group: The group object.
  *   - account: The user account.
  */
