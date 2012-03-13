@@ -22,7 +22,7 @@ class og_handler_field_user_roles extends og_handler_field_prerender_list {
     parent::query();
   }
 
-  function pre_render($values) {
+  function pre_render(&$values) {
     if (!isset($this->aliases['uid'])) {
       return;
     }
