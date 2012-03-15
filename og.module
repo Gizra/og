@@ -941,7 +941,8 @@ function _og_update_entity_fields($entity_type, $entity) {
     $gids = array();
     if ($field['cardinality'] == 1) {
       if ($og_membership = $wrapper->{$field_name . '__og_membership'}->value()) {
-        $gids = $og_membership->gid;
+        // Wrapper return an array.
+        $gids = $og_membership[0]->gid;
       }
     }
     else {
