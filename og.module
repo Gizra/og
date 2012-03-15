@@ -1575,9 +1575,18 @@ function og_get_all_group($group_type = 'node') {
  * Get the first best matching group-audience field.
  *
  * @param $entity_type
+ *   The entity type.
  * @param $entity
+ *   The entity object.
+ * @param $group_type
+ *   The group type.
+ * @param $group
+ *   The group object.
+ * @param $skip_access
+ *   TRUE, if current user access to the field, should be skipped.
+ *   Defaults to FALSE.
  */
-function og_get_best_group_audience_field($entity_type, $entity, $group_type, $group) {
+function og_get_best_group_audience_field($entity_type, $entity, $group_type, $group, $skip_access = FALSE) {
   $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
   $group_wrapper = entity_metadata_wrapper($group_type, $group);
   $bundle = $entity_wrapper->getBundle();
@@ -1608,10 +1617,11 @@ function og_get_best_group_audience_field($entity_type, $entity, $group_type, $g
       // Field reached maximum.
       continue;
     }
-    if (!$entity_wrapper->{$field_name}->access('view')) {
+    if (!$skip_access && !$entity_wrapper->{$field_name}->access('view')) {
       // User can't access field.
       continue;
     }
+
     return $field_name;
   }
 }
@@ -1679,6 +1689,8 @@ function og_group($group_type, $gid, $values = array()) {
   }
 
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
+  // If entity was an ID, get the object.
+  $entity = $wrapper->value();
   $bundle = $wrapper->getBundle();
   $id = $wrapper->getIdentifier();
 
@@ -1696,7 +1708,8 @@ function og_group($group_type, $gid, $values = array()) {
       '%group-bundle' => $group_bundle,
     );
 
-    $field_name = og_get_best_group_audience_field($entity_type, $entity, $group_type, $group);
+    // Allow getting fields not accessible by the user.
+    $field_name = og_get_best_group_audience_field($entity_type, $entity, $group_type, $group, TRUE);
     if (!$field_name) {
       throw new OgException(t('There are no OG fields in entity %entity-type and bundle %bundle referencing %group-type - %group-bundle.', $params));
     }
