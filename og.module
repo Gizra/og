@@ -589,7 +589,6 @@ function og_field_access($op, $field, $entity_type, $entity, $account) {
   $field = field_info_field($field_name);
   $settings = $field['settings']['handler_settings'];
 
-
   // Check if we are editing the user entity, or need to hide a secondary
   // field.
   if ($entity_type == 'user' || (!empty($settings['primary_field']) && !empty($settings['hide_secondary_field']))) {
@@ -635,6 +634,7 @@ function og_field_create_instance($instance) {
     $og_field['instance']['widget']['type'] = 'entityreference_autocomplete';
     $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
     $og_field['field']['settings']['handler_settings']['primary_field'] = OG_AUDIENCE_FIELD;
+    $og_field['field']['settings']['handler_settings']['hide_secondary_field'] = TRUE;
     og_create_field(OG_AUDIENCE_OTHER_GROUPS_FIELD, 'user', 'user', $og_field);
   }
 }
