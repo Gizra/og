@@ -715,6 +715,10 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
       );
     }
 
+    if (empty($form_state['field'][$field_name])) {
+      continue;
+    }
+
     $key = key($form_state['field'][$field_name]);
 
     // We don't use field_form_set_state() as we just want to change the items
