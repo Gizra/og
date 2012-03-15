@@ -623,19 +623,20 @@ function og_field_create_instance($instance) {
   og_roles_override($instance['entity_type'], 0, $instance['bundle']);
 
   // Check if we need to add a group audience on the user's entity.
+  // We add a different field, so each field can be set differently.
   if (!og_is_group_content_type('user', 'user')) {
     $og_field = og_fields_info(OG_AUDIENCE_FIELD);
     $og_field['field']['settings']['target_type'] = $instance['entity_type'];
     $og_field['instance']['label'] = t('Group membership');
-    og_create_field(OG_AUDIENCE_FIELD, 'user', 'user', $og_field);
+    og_create_field('og_user_group_ref', 'user', 'user', $og_field);
 
     // Create "Other groups" field.
     $og_field['instance']['label'] = t('Other groups');
     $og_field['instance']['widget']['type'] = 'entityreference_autocomplete';
     $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
-    $og_field['field']['settings']['handler_settings']['primary_field'] = OG_AUDIENCE_FIELD;
+    $og_field['field']['settings']['handler_settings']['primary_field'] = 'og_user_group_ref';
     $og_field['field']['settings']['handler_settings']['hide_secondary_field'] = TRUE;
-    og_create_field(OG_AUDIENCE_OTHER_GROUPS_FIELD, 'user', 'user', $og_field);
+    og_create_field('og_other_user_group_ref', 'user', 'user', $og_field);
   }
 }
 
