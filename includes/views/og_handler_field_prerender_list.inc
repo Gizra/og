@@ -32,6 +32,7 @@ class og_handler_field_prerender_list extends views_handler_field_prerender_list
             $this->original_value = $this->last_render;
 
             $alter = $item + $this->options['alter'];
+            $alter['phase'] = VIEWS_HANDLER_RENDER_TEXT_PHASE_SINGLE_ITEM;
             $items[] = $this->render_text($alter);
           }
         }
