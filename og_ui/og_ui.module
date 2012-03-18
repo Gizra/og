@@ -671,7 +671,7 @@ function og_ui_field_formatter_settings_form($field, $instance, $view_mode, $for
       '#title' => t('Field name'),
       '#description' => t('Select the field that should register the user subscription.'),
       '#type' => 'select',
-      '#options' => array(0 => t('Automatic (not recommended)')) + og_get_group_audience_fields('user', 'user', FALSE),
+      '#options' => array(0 => t('Automatic (best matching)')) + og_get_group_audience_fields('user', 'user', FALSE),
       '#default_value' => $settings['field_name'],
     );
   }
@@ -695,7 +695,7 @@ function og_ui_field_formatter_settings_summary($field, $instance, $view_mode) {
     return t('Field %label', array('%label' => $fields[$settings['field_name']]));
   }
   else {
-    return t('No field selected (not recommended)');
+    return t('No field selected (best matching)');
   }
 
 }
