@@ -157,7 +157,6 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
     // Show only the entities that are active groups.
     $query->fieldCondition(OG_GROUP_FIELD, 'value', 1, '=');
 
-
     $user_groups = og_get_groups_by_user(NULL, $group_type);
     $reference_type = $this->field['settings']['handler_settings']['reference_type'];
     // Show the user only the groups they belong to.
@@ -186,7 +185,7 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
       }
     }
     elseif ($reference_type == 'other_groups' && $user_groups) {
-      // Show only group the user doesn't belong to.
+      // Show only groups the user doesn't belong to.
       $query->propertyCondition($entity_info['entity keys']['id'], $user_groups, 'NOT IN');
     }
 
