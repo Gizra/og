@@ -519,7 +519,7 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
         return $element;
       }
 
-      list($id) = entity_extract_ids($entity_type, $entity);
+      list($id,, $bundle) = entity_extract_ids($entity_type, $entity);
       if (og_is_member($entity_type, $id, 'user', $account, array(OG_STATE_ACTIVE, OG_STATE_PENDING))) {
         if (og_user_access($entity_type, $id, 'unsubscribe', $account)) {
           $links['title'] = t('Unsubscribe from group');
@@ -541,8 +541,19 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
           return;
         }
 
+        $field_info = field_info_field($settings['field_name']);
+
+        // Check if entity is referencable.
+        if ($field_info['settings']['target_type'] != $entity_type) {
+          // Group type doesn't match.
+          return;
+        }
+        if (!empty($field_info['settings']['handler_settings']['target_bundles']) && !in_array($bundle, $field_info['settings']['handler_settings']['target_bundles'])) {
+          // Bundles don't match.
+          return;
+        }
+
         if (!og_check_field_cardinality('user', $user->uid, $settings['field_name'])) {
-          $field_info = field_info_field($settings['field_name']);
           $element[0] = array('#markup' => format_plural($field_info['cardinality'], 'You are already registered to another group', 'You are already registered to @count groups'));
           return $element;
         }
