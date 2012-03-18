@@ -457,7 +457,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
 
 
     // Exception as user has no group-audience field.
-    $instance = field_info_instance('user', OG_AUDIENCE_FIELD, 'user');
+    $instance = field_info_instance('user', 'og_user_group_ref', 'user');
     field_delete_instance($instance);
 
     try {
