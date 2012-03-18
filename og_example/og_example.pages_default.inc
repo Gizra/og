@@ -73,7 +73,7 @@ function og_example_default_page_manager_handlers() {
     $pane->access = array();
     $pane->configuration = array(
       'context' => array(
-        0 => 'relationship_og_group_from_node_1',
+        0 => 'argument_entity_id:node_1',
       ),
       'override_title' => 1,
       'override_title_text' => 'Group articles',
