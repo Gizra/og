@@ -3095,9 +3095,15 @@ function og_node_create_links($group_type, $gid, $field_name, $destination = NUL
 
   $types = isset($types) ? $types : array_keys(node_type_get_types());
   foreach ($types as $type_name) {
-    if (og_is_group_content_type('node', $type_name) && node_access('create', $type_name)) {
-      $names[$type_name] = node_type_get_name($type_name);
+    if (!og_is_group_content_type('node', $type_name) && node_access('create', $type_name)) {
     }
+
+    $instance = field_info_instance('node', $field_name, $type_name);
+    if (empty($instance['settings']['behaviors']['prepopulate']['status'])) {
+      // Instance doesn't allow prepopulating.
+      continue;
+    }
+    $names[$type_name] = node_type_get_name($type_name);
   }
 
   if (empty($names)) {

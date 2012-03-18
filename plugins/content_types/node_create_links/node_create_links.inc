@@ -56,7 +56,7 @@ function og_node_create_links_content_type_edit_form($form, &$form_state) {
     }
     // Use CTools to get the best matching field name.
     ctools_include('fields');
-    $options[$field_name] = ctools_field_label($field_name);
+    $options[$field_name] = ctools_field_label($field_name) . " ($field_name)";
   }
 
   $form['field_name'] = array(
