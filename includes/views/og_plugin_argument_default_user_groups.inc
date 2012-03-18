@@ -53,5 +53,6 @@ class og_plugin_argument_default_user_groups extends views_plugin_argument_defau
     if ($gids = og_get_groups_by_user(NULL, $this->options['group_type'])) {
       return implode($this->options['glue'], $gids);
     }
+    return FALSE;
   }
 }
