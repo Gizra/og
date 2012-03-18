@@ -669,11 +669,6 @@ function og_field_delete_instance($instance) {
  */
 function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
   list($id,, $bundle_name) = entity_extract_ids($entity_type, $entity);
-  if (!$id) {
-    // New entity.
-    return;
-  }
-
   if (!og_is_group_content_type($entity_type, $bundle_name)) {
     return;
   }
@@ -734,7 +729,6 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
   if ($has_secodary) {
     $form['#validate'][] = 'og_form_secondary_field_validate';
   }
-
 }
 
 /**
@@ -854,7 +848,6 @@ function og_entity_presave($entity, $entity_type) {
         $delta = $primary_field_info['cardinality'] == 1 ? 0 : $wrapper->{$primary_field}->count();
       }
     }
-
 
     // Remove the values from the secondary field.
     $wrapper->{$field_name}->set(NULL);

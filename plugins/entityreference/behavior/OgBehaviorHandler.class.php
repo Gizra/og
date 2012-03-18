@@ -79,6 +79,10 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
   public function groupAudiencegetDiff($entity_type, $entity, $field, $instance, $langcode, $items) {
     $return = FALSE;
 
+    if (!empty($field['settings']['handler_settings']['primary_field'])) {
+      return;
+    }
+
     $field_name = $field['field_name'];
     $wrapper = entity_metadata_wrapper($entity_type, $entity);
     $og_memberships = $wrapper->{$field_name . '__og_membership'}->value();
