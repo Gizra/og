@@ -1275,7 +1275,7 @@ class OgMembership extends Entity {
 
     // Check field is not a secondary field.
     if (!empty($field['settings']['handler_settings']['primary_field'])) {
-      throw new OgException(t('OG membership can not be created using the field %field_name as the field is defined as a secondary field.', $params));
+      throw new OgException(t('OG membership can not be created using the field %field-name as the field is defined as a secondary field.', $params));
     }
 
     if (empty($this->id) && $og_membership = og_get_membership($this->group_type, $this->gid, $this->entity_type, $this->etid)) {
