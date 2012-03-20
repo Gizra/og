@@ -33,7 +33,7 @@ function og_ui_subscribe($entity_type, $etid, $field_name = NULL) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   if (empty($field_name)) {
-    $field_name = og_get_best_group_audience_field('user', $user->uid, $entity_type, $entity);
+    $field_name = og_get_best_group_audience_field('user', $user->uid, $entity_type, $bundle);
     if (empty($field_name)) {
       // User entity has no group audience field.
       drupal_not_found();

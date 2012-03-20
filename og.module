@@ -663,6 +663,87 @@ function og_field_delete_instance($instance) {
 }
 
 /**
+ * Implements hook_form_alter().
+ */
+function og_form_alter(&$form, $form_state, $form_id) {
+  if (empty($form['#entity_type']) && empty($form['#bundle'])) {
+    return;
+  }
+  $entity_type = $form['#entity_type'];
+  $bundle = $form['#bundle'];
+
+  if ($entity_type == 'user' || !og_is_group_type($entity_type, $bundle)) {
+    return;
+  }
+  $form['#validate'][] = 'og_form_group_manager_validate';
+}
+
+/**
+ * Validate handler; Make sure a group can be created.
+ *
+ * We check if the group manager has a matching group-audience field for the
+ * OG membership do be created in.
+ */
+function og_form_group_manager_validate($form, &$form_state) {
+  $entity_type = $form['#entity_type'];
+  $bundle = $form['#bundle'];
+  $entity = $form_state[$entity_type];
+  $langcode = $form_state['values']['language'];
+
+  if (!isset($form_state['values']['uid']) || !isset($entity->uid)) {
+    // There is no user ID property on the entity.
+    return;
+  }
+
+  if (isset($form_state['values'][OG_GROUP_FIELD]) && empty($form_state['values'][OG_GROUP_FIELD][$langcode][0]['value'])) {
+    // Not a group.
+    return;
+  }
+
+  if (!isset($form_state['values'][OG_GROUP_FIELD])) {
+    // Field doesn't appear in the form, so it is probably hidden by
+    // hook_field_access(). So check the default value of the field.
+    $field = field_info_field(OG_GROUP_FIELD);
+    $instance = field_info_instance($entity_type, OG_GROUP_FIELD, $bundle);
+
+    $items = field_get_default_value($entity_type, $entity, $field, $instance, $langcode);
+    if (empty($items[0]['value'])) {
+      // Default value is not a group.
+      return;
+    }
+  }
+
+  if ($entity_type == 'node') {
+    // A user might assign the node author by entering a user name in the
+    // node form, which we then need to translate to a user ID.
+    // However, this happens later on, in node_submit(), so we do a special
+    // check for the node entity.
+    if (!$account = user_load_by_name($form_state['values']['name'])) {
+      // Invalid username.
+      return;
+    }
+  }
+  else {
+    $account = user_load($form_state['values']['uid']);
+  }
+
+  list($id) = entity_extract_ids($entity_type, $entity);
+
+  if ($id && $entity->uid == $account->uid) {
+    // The entity's user ID hasn't changed.
+    return;
+  }
+
+  if ($access = og_get_best_group_audience_field('user', $account, $entity_type, $bundle)) {
+    // Matching group audience field found.
+    return;
+  }
+
+  form_error($form, t("Can't save entity as group, because user @name can't be subscribed to group and become a manager.", array('@name' => format_username($account))));
+}
+
+
+/**
  * Implements hook_field_attach_form().
  *
  * Inject values to a secondary field, based on the primary field.
@@ -1577,17 +1658,15 @@ function og_get_all_group($group_type = 'node') {
  *   The entity object.
  * @param $group_type
  *   The group type.
- * @param $group
- *   The group object.
+ * @param $group_bundle
+ *   The group bundle.
  * @param $skip_access
  *   TRUE, if current user access to the field, should be skipped.
  *   Defaults to FALSE.
  */
-function og_get_best_group_audience_field($entity_type, $entity, $group_type, $group, $skip_access = FALSE) {
+function og_get_best_group_audience_field($entity_type, $entity, $group_type, $group_bundle, $skip_access = FALSE) {
   $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
-  $group_wrapper = entity_metadata_wrapper($group_type, $group);
   $bundle = $entity_wrapper->getBundle();
-  $group_bundle = $group_wrapper->getBundle();
 
   $field_names = og_get_group_audience_fields($entity_type, $bundle);
   if (!$field_names) {
@@ -1706,7 +1785,7 @@ function og_group($group_type, $gid, $values = array()) {
     );
 
     // Allow getting fields not accessible by the user.
-    $field_name = og_get_best_group_audience_field($entity_type, $entity, $group_type, $group, TRUE);
+    $field_name = og_get_best_group_audience_field($entity_type, $entity, $group_type, $group_bundle, TRUE);
     if (!$field_name) {
       throw new OgException(t('There are no OG fields in entity %entity-type and bundle %bundle referencing %group-type - %group-bundle.', $params));
     }

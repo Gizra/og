@@ -534,7 +534,7 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
         }
 
         // Check if user can subscribe to the field.
-        if (empty($settings['field_name']) && $audience_field_name = og_get_best_group_audience_field('user', $user->uid, $entity_type, $entity)) {
+        if (empty($settings['field_name']) && $audience_field_name = og_get_best_group_audience_field('user', $user->uid, $entity_type, $bundle)) {
           $settings['field_name'] = $audience_field_name;
         }
         if (!$settings['field_name']) {
