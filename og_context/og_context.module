@@ -370,6 +370,11 @@ function og_context_handler_url() {
   if (strpos($item['path'], 'node/add/') !== 0) {
     return;
   }
+  if (empty($item['map'][2])) {
+    // If we don't have this key in the array, it means the user doesn't have
+    // access to create this node.
+    return;
+  }
   $node_type = $item['map'][2];
 
   if (!$fields = og_get_group_audience_fields('node', $node_type, FALSE)) {
