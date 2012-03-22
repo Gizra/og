@@ -228,7 +228,7 @@ function og_ui_admin_account($group_type, $gid) {
   // @see http://drupal.org/node/525592#comment-1968604
   $view = views_get_view($view_name, $display);
   $view->set_arguments(array($group_type, $gid));
-  $view->override_path = $_GET['q'];
+  $view->override_url = $_GET['q'];
   return $view->preview();
 }
 
