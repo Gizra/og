@@ -50,7 +50,7 @@ function og_context_entity_property_info() {
   $info = array();
 
   foreach (og_get_all_group_entity() as $entity_type => $label) {
-    $params = array('@type' => '@label');
+    $params = array('@label' => $label);
     $properties = &$info['site']['properties'];
     $properties['og_context__' . $entity_type] = array(
       'label' => t('Current OG group of @label entity type', $params),
