@@ -38,14 +38,11 @@ class OgMembershipViewsController extends EntityDefaultViewsController {
       ),
     );
 
+    // Improve help text.
     $data['og_membership']['gid'] = $data['og_membership']['etid'];
     $data['og_membership']['gid']['title'] = t('Group ID');
     $data['og_membership']['gid']['help'] = t('Og membership "gid" property.');
 
-    // Improve relationship text.
-    $data['og']['og_membership']['title'] = t('OG membership from OG group');
-    $data['og']['og_membership']['help'] =  t('The OG membership associated with OG group via the group ID.');
-    $data['og']['og_membership']['relationship']['label'] = t('OG membership from OG group');
 
 
     $data['og_membership']['og_roles'] = array(
