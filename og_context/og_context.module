@@ -111,13 +111,11 @@ function og_context_preprocess_html(&$variables) {
 function og_context_og_context_negotiation_info() {
   $providers = array();
 
-  if (module_exists('entityreference_prepopulate')) {
-    $providers['url'] = array(
-      'name' => t('URL (content create)'),
-      'description' => t("Select groups if they were passed in the node create URL (e.g. node/add/post?field_group_ref=4,5,6)."),
-      'callback' => 'og_context_handler_url',
-    );
-  }
+  $providers['url'] = array(
+    'name' => t('URL (content create)'),
+    'description' => t('Select groups if they were passed in the node create URL (e.g. node/add/post?field_group_ref=4,5,6). <em>Note: Depends on <a href="@url">Entity reference</a> module, and enabling "Prepopulate" in the field settings.</em>', array('@url' => 'http://drupal.org/project/entityreference_prepopulate')),
+    'callback' => 'og_context_handler_url',
+  );
 
   $providers['node'] = array(
     'name' => t('Node'),
@@ -366,6 +364,9 @@ function og_context_determine_context($group_type, $item = NULL) {
  * Context handler; Get groups from node create URL.
  */
 function og_context_handler_url() {
+  if (!module_exists('entityreference_prepopulate')) {
+    return;
+  }
   $item = menu_get_item();
   if (strpos($item['path'], 'node/add/') !== 0) {
     return;
