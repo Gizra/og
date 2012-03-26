@@ -767,9 +767,6 @@ function og_ui_forms() {
   // Form to define the global permissions.
   $forms['og_ui_admin_global_permissions']['callback'] = 'og_ui_admin_permissions';
 
-  // Form to define the global roles.
-  $forms['og_ui_admin_global_roles']['callback'] = 'og_ui_admin_roles';
-
   return $forms;
 }
 
