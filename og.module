@@ -2266,7 +2266,7 @@ function og_get_all_group_content_entity() {
  *
  * @return
  *   Array keyed with the entity type machine name and the entity human readable
- *   name as the value, or an empty array if no enteties are defined as group
+ *   name as the value, or an empty array if no entities are defined as group
  *   content.
  */
 function og_get_all_group_content_bundle() {
