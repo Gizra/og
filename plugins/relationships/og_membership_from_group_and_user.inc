@@ -32,10 +32,6 @@ function og_membership_from_group_and_user_context($context, $conf) {
     return ctools_context_create_empty('entity:og_membership', NULL);
   }
 
-  if (empty($node_context) || empty($node_context->data)) {
-    return;
-  }
-
   if (empty($user_context) || empty($user_context->data)) {
     return;
   }
