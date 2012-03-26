@@ -366,8 +366,14 @@ function og_ui_access_entity_role($perm, $group_type, $gid, $rid) {
   }
 
   $role = og_role_load($rid);
-  if (!$role || $role->group_type != $group_type || $role->gid != $gid) {
+  if (!$role || $role->group_type != $group_type) {
     // Role doesn't exist, or doesn't belong to the group.
+    return FALSE;
+  }
+
+  if ($role->gid && $role->gid != $gid) {
+    // Role isn't a global role (i.e. gid isn't 0), but it doesn't match the
+    // given role.
     return FALSE;
   }
 
