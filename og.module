@@ -822,6 +822,11 @@ function og_form_secondary_field_validate($form, &$form_state) {
   // Get an keyed with the primary field, and an arrayof secoadry fields as the
   // value.
   $entity_type = $form['#entity_type'];
+  if (empty($form_state[$entity_type])) {
+    // Entity info isn't in the $form_state (e.g. when admin creates a new
+    // user).
+    return;
+  }
   $entity = $form_state[$entity_type];
   $fields_info = array();
   foreach ($form_state['field'] as $field_name => $value) {
