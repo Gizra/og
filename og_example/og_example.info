@@ -1,6 +1,6 @@
 core = "7.x"
 dependencies[] = "ctools"
-dependencies[] = "entityreference"
+dependencies[] = "entityreference_prepopulate"
 dependencies[] = "features"
 dependencies[] = "list"
 dependencies[] = "og"
