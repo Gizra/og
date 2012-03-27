@@ -1391,7 +1391,7 @@ function og_group_form($node, $form_state) {
 function og_get_node_groups($node) {
   $groups = array();
   if (!og_is_group_type($node->type)) {
-    $result = og_get_node_groups_result($node->nid);
+    $result = og_get_node_groups_result($node->nid, TRUE);
     while ($row = db_fetch_object($result)) {
       $groups[$row->group_nid] = $row->title;
     }
@@ -1406,13 +1406,20 @@ function og_get_node_groups($node) {
  *
  * @param $nid
  *   Node ID.
+ * @param $bypass
+ *   (optional) Bypass user access checks to resulting groups. Defaults to FALSE.
  *
- * @see get_node_groups()
+ * @see og_get_node_groups()
  */
-function og_get_node_groups_result($nid) {
-  // We do not run db_rewrite_sql() here since we need to know about groups that the user cannot access as well (i.e. node edit).
+function og_get_node_groups_result($nid, $bypass = FALSE) {
   $sql = "SELECT oga.group_nid, n.title FROM {node} n INNER JOIN {og_ancestry} oga ON n.nid = oga.group_nid WHERE oga.nid = %d";
-  return db_query($sql, $nid);
+
+  if ($bypass) {
+    // We do not run db_rewrite_sql() here since we need to know about groups that the user cannot access as well (i.e. node edit).
+    return db_query($sql, $nid);
+  }
+
+  return db_query(db_rewrite_sql($sql), $nid);
 }
 
 /**
