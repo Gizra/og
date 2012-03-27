@@ -25,15 +25,7 @@ function og_example_default_page_manager_handlers() {
     'css_id' => '',
     'css' => '',
     'contexts' => array(),
-    'relationships' => array(
-      0 => array(
-        'identifier' => 'OG group from node',
-        'keyword' => 'group',
-        'name' => 'og_group_from_node',
-        'context' => 'argument_entity_id:node_1',
-        'id' => 1,
-      ),
-    ),
+    'relationships' => array(),
     'access' => array(
       'plugins' => array(
         0 => array(
