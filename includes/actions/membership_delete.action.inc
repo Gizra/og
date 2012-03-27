@@ -8,7 +8,7 @@
 function og_membership_delete_action_info() {
   return array('og_membership_delete_action' => array(
     'type' => 'og_membership',
-    'label' => t('Reject form group'),
+    'label' => t('Remove from group'),
     'configurable' => FALSE,
   ));
 }

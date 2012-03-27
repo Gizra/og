@@ -8,7 +8,7 @@
 function og_set_state_action_info() {
   return array('og_set_state_action' => array(
     'type' => 'og_membership',
-    'label' => t('Set state in group'),
+    'label' => t('Modify membership status'),
     'configurable' => TRUE,
   ));
 }
