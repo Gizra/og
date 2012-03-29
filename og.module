@@ -930,8 +930,6 @@ function og_entity_presave($entity, $entity_type) {
         else {
           $wrapper->{$primary_field}[] = $id;
         }
-
-        $delta = $primary_field_info['cardinality'] == 1 ? 0 : $wrapper->{$primary_field}->count();
       }
     }
 
