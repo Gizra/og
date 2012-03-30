@@ -300,6 +300,7 @@ function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bund
   else {
     if ($gid) {
       $group = entity_load_single($group_type, $gid);
+      list(,, $bundle) = entity_extract_ids($group_type, $group);
     }
 
     // No role ID.
