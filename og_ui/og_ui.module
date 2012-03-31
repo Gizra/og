@@ -381,6 +381,16 @@ function og_ui_access_entity_role($perm, $group_type, $gid, $rid) {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function og_ui_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'og_ui') . '/includes/views',
+  );
+}
+
+/**
  * Implements hook_ctools_plugin_directory().
  */
 function og_ui_ctools_plugin_directory($module, $plugin) {
