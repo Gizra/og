@@ -1134,7 +1134,11 @@ function og_og_fields_info() {
     ),
     'instance' => array(
       'label' => t('Group roles and permissions'),
-      'widget_type' => 'options_select',
+      'widget' => array(
+        'module' => 'options',
+        'settings' => array(),
+        'type' => 'options_select',
+      ),
       'required' => TRUE,
       // Use default role and permissions as default value.
       'default_value' => array(0 => array('value' => 0)),
