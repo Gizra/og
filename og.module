@@ -942,7 +942,6 @@ function og_entity_presave($entity, $entity_type) {
  * Implements hook_entity_insert().
  */
 function og_entity_insert($entity, $entity_type) {
-  _og_update_entity_fields($entity_type, $entity);
   if (!og_is_group($entity_type, $entity)) {
     return;
   }
@@ -968,7 +967,6 @@ function og_entity_insert($entity, $entity_type) {
  * Implements hook_entity_update().
  */
 function og_entity_update($entity, $entity_type) {
-  _og_update_entity_fields($entity_type, $entity);
   if (!og_is_group($entity_type, $entity)) {
     return;
   }
@@ -998,6 +996,20 @@ function og_entity_update($entity, $entity_type) {
       og_delete_user_roles_by_group($entity_type, $entity);
     }
   }
+}
+
+/**
+ * Implements hook_field_attach_insert().
+ */
+function og_field_attach_insert($entity_type, $entity) {
+  _og_update_entity_fields($entity_type, $entity);
+}
+
+/**
+ * Implements hook_field_attach_update().
+ */
+function og_field_attach_update($entity_type, $entity) {
+  _og_update_entity_fields($entity_type, $entity);
 }
 
 /**
