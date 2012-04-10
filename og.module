@@ -2619,13 +2619,25 @@ function og_block_new() {
 }
 
 /**
- * Content for Group Details block.
+ * Create group-contextual links, such as the group details block.
+ *
+ * @param $node
+ *   Node object providing group context for links.
+ *
+ * @return array
+ *
+ * @see og_block_details()
  */
-function og_block_details() {
+function og_details_links($node = NULL) {
   global $user;
 
-  // Only display group details if we have a group context.
-  if (($node = og_get_group_context()) && node_access('view', $node)) {
+  if (empty($node)) {
+    $node = og_get_group_context();
+  }
+
+  $links = array();
+  // Only display the group details links if we have a group context.
+  if ($node && node_access('view', $node)) {
     $account = user_load($node->uid);
     list($txt, $subscription) = og_subscriber_count_link($node);
     if ($subscription == 'active' || user_access('administer nodes')) {
@@ -2668,7 +2680,17 @@ function og_block_details() {
 
     // Modify these links by reference. If you want control of the whole block, see og_block_details().
     drupal_alter('og_links', $links, $node);
+  }
+  return $links;
+}
 
+/**
+ * Content for Group Details block.
+ */
+function og_block_details() {
+   // Only display group details if we have a group context.
+  if (($node = og_get_group_context()) && node_access('view', $node)) {
+    $links = og_details_links();
     $block['content'] = theme('item_list', $links);
     $block['subject'] = l($node->title, "node/$node->nid");
     return $block;
