@@ -53,7 +53,7 @@ function og_ui_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_user_admin_account', 1, 2),
     'access callback' => 'og_user_access_by_entity',
-    'access arguments' => array('administer group', 1, 2),
+    'access arguments' => array('approve and deny subscription', 1, 2),
     'weight' => -4,
     'file' => 'og_ui.admin.inc',
   );
