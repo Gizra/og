@@ -771,6 +771,10 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
     $has_secodary = TRUE;
 
     $primary_field = $field['settings']['handler_settings']['primary_field'];
+    if (!isset($wrapper->$primary_field)) {
+      // Settings are referencing a non-existing field.
+      return;
+    }
     $primary_ids = $wrapper->$primary_field->value(array('identifier' => TRUE));
     if (!$primary_ids) {
       continue;
