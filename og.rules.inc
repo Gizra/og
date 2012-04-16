@@ -90,9 +90,10 @@ function og_rules_action_info() {
     'group' => t('Organic groups'),
     'parameter' => array(
       'group' => array(
-        'type' => 'group',
+        'type' => array_keys(og_get_all_group_entity()),
         'label' => t('Group'),
         'description' => t('The group for which to fetch content.'),
+        'wrapped' => TRUE,
       ),
       'entity_type' => array(
         'type' => 'token',
@@ -118,10 +119,9 @@ function og_rules_action_info() {
         'label' => t('Entity'),
         'description' => t('The group content which is to be added to a group.'),
         'wrapped' => TRUE,
-        'save' => TRUE,
       ),
       'group' => array(
-        'type' => 'group',
+        'type' => array_keys(og_get_all_group_entity()),
         'label' => t('Group'),
         'wrapped' => TRUE,
       ),
@@ -140,10 +140,9 @@ function og_rules_action_info() {
         'label' => t('Entity'),
         'description' => t('The entity which is to be removed from a group.'),
         'wrapped' => TRUE,
-        'save' => TRUE,
       ),
       'group' => array(
-        'type' => 'group',
+        'type' => array_keys(og_get_all_group_entity()),
         'label' => t('Group'),
         'wrapped' => TRUE,
       ),
@@ -164,10 +163,9 @@ function og_rules_action_info() {
         'label' => t('User'),
         'description' => t('The user who will be subscribed.'),
         'wrapped' => TRUE,
-        'save' => TRUE,
       ),
       'group' => array(
-        'type' => 'group',
+        'type' => array_keys(og_get_all_group_entity()),
         'label' => t('Group'),
         'wrapped' => TRUE,
       ),
@@ -190,10 +188,9 @@ function og_rules_action_info() {
         'label' => t('User'),
         'description' => t('The user who will be unsubscribed.'),
         'wrapped' => TRUE,
-        'save' => TRUE,
       ),
       'group' => array(
-        'type' => 'group',
+        'type' => array_keys(og_get_all_group_entity()),
         'label' => t('Group'),
         'wrapped' => TRUE,
       ),
@@ -215,21 +212,20 @@ function og_rules_get_members($group_content) {
   }
 
   $members = array();
-  $gids = array();
   foreach ($group_content->og_membership->value() as $og_membership) {
-    // Get the groups the group content belongs to.
-    $gids[] = $og_membership->gid;
-  }
+    // Get the group members the group content belongs to.
+    $current_members = db_select('og_membership', 'om')
+      ->fields('om', array('etid'))
+      ->condition('om.gid', $og_membership->gid)
+      ->condition('om.group_type', $og_membership->group_type)
+      ->condition('om.entity_type', 'user')
+      ->execute()
+      ->fetchCol();
 
-  if (!$gids) {
-    return;
+    $members = array_merge($members, $current_members);
   }
-
-  foreach ($gids as $gid) {
-    $wrapper = entity_metadata_wrapper('group', $gid);
-    $members = array_merge_recursive($members, $wrapper->members->value(array('identifier' => TRUE)));
-  }
-
+  // Remove duplicate items.
+  $members = array_keys(array_flip($members));
   return array('group_members' => $members);
 }
 
@@ -243,30 +239,23 @@ function og_rules_get_managers($group_content) {
   }
 
   $return = array();
-  $gids = array();
   foreach ($group_content->og_membership->value() as $og_membership) {
-    $gids[] = $og_membership->gid;
-  }
-
-  if (!$gids) {
-    return;
-  }
-
-  $groups = og_load_multiple($gids);
-  foreach ($groups as $group) {
-    if ($account = $group->user()) {
-      $return[] = $account->uid;
+    $group = entity_load_single($og_membership->group_type, $og_membership->gid);
+    if(!empty($group->uid)){
+      $return[] = $group->uid;
     }
   }
 
+  // Remove duplicate items.
+  $return = array_keys(array_flip($return));
   return array('group_managers' => $return);
 }
 
 /**
  * Action: Fetch group content of a certain entity type.
  */
-function og_rules_get_group_content($group, $entity_type) {
-  $memberships = og_membership_load_multiple(FALSE, array('gid' => $group->gid, 'entity_type' => $entity_type));
+function og_rules_get_group_content(EntityDrupalWrapper $group, $entity_type) {
+  $memberships = og_membership_load_multiple(FALSE, array('gid' => $group->getIdentifier(), 'entity_type' => $entity_type));
   $entities = array();
   foreach ($memberships as $membership) {
     $entities[] = $membership->etid;
@@ -328,7 +317,7 @@ function og_rules_condition_info() {
         'restriction' => 'input',
       ),
       'group' => array(
-        'type' => 'group',
+        'type' => array_keys(og_get_all_group_entity()),
         'label' => t('Group'),
         'description' => t('The group for which permission should be checked.'),
         'wrapped' => TRUE,
@@ -351,7 +340,7 @@ function og_rules_condition_info() {
         'wrapped' => TRUE,
       ),
       'group' => array(
-        'type' => 'group',
+        'type' => array_keys(og_get_all_group_entity()),
         'label' => t('Group'),
         'wrapped' => TRUE,
       ),
@@ -379,7 +368,7 @@ function og_rules_condition_info() {
         'wrapped' => TRUE,
       ),
       'group' => array(
-        'type' => 'group',
+        'type' => array_keys(og_get_all_group_entity()),
         'label' => t('Group'),
         'wrapped' => TRUE,
       ),
