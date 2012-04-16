@@ -687,10 +687,6 @@ function og_form_alter(&$form, $form_state, $form_id) {
 function og_form_group_manager_validate($form, &$form_state) {
   $entity_type = $form['#entity_type'];
   $bundle = $form['#bundle'];
-  if (empty($form_state[$entity_type])) {
-    // Field settings page.
-    return;
-  }
   $entity = $form_state[$entity_type];
   $langcode = $form_state['values']['language'];
 
