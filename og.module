@@ -687,6 +687,10 @@ function og_form_alter(&$form, $form_state, $form_id) {
 function og_form_group_manager_validate($form, &$form_state) {
   $entity_type = $form['#entity_type'];
   $bundle = $form['#bundle'];
+  if (empty($form_state[$entity_type])) {
+    // We are inside field settings page.
+    return;
+  }
   $entity = $form_state[$entity_type];
   $langcode = $form_state['values']['language'];
 
@@ -934,8 +938,6 @@ function og_entity_presave($entity, $entity_type) {
         else {
           $wrapper->{$primary_field}[] = $id;
         }
-
-        $delta = $primary_field_info['cardinality'] == 1 ? 0 : $wrapper->{$primary_field}->count();
       }
     }
 
@@ -948,7 +950,6 @@ function og_entity_presave($entity, $entity_type) {
  * Implements hook_entity_insert().
  */
 function og_entity_insert($entity, $entity_type) {
-  _og_update_entity_fields($entity_type, $entity);
   if (!og_is_group($entity_type, $entity)) {
     return;
   }
@@ -974,7 +975,6 @@ function og_entity_insert($entity, $entity_type) {
  * Implements hook_entity_update().
  */
 function og_entity_update($entity, $entity_type) {
-  _og_update_entity_fields($entity_type, $entity);
   if (!og_is_group($entity_type, $entity)) {
     return;
   }
@@ -1004,6 +1004,20 @@ function og_entity_update($entity, $entity_type) {
       og_delete_user_roles_by_group($entity_type, $entity);
     }
   }
+}
+
+/**
+ * Implements hook_field_attach_insert().
+ */
+function og_field_attach_insert($entity_type, $entity) {
+  _og_update_entity_fields($entity_type, $entity);
+}
+
+/**
+ * Implements hook_field_attach_update().
+ */
+function og_field_attach_update($entity_type, $entity) {
+  _og_update_entity_fields($entity_type, $entity);
 }
 
 /**
@@ -1140,7 +1154,11 @@ function og_og_fields_info() {
     ),
     'instance' => array(
       'label' => t('Group roles and permissions'),
-      'widget_type' => 'options_select',
+      'widget' => array(
+        'module' => 'options',
+        'settings' => array(),
+        'type' => 'options_select',
+      ),
       'required' => TRUE,
       // Use default role and permissions as default value.
       'default_value' => array(0 => array('value' => 0)),
