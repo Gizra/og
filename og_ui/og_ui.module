@@ -98,7 +98,7 @@ function og_ui_menu() {
         'page callback' => 'og_ui_group_admin_overview',
         'page arguments' => array($entity, 1),
         'access callback' => 'og_user_access_by_entity',
-        'access arguments' => array('administer group', $entity, 1),
+        'access arguments' => array('access administration pages', $entity, 1),
         'type' => MENU_LOCAL_TASK,
         'file' => 'og_ui.admin.inc',
         'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -498,6 +498,12 @@ function og_ui_og_permission() {
   $items['add user'] = array(
     'title' => t('Add user'),
     'description' => t('Users may add other users to the group without approval.'),
+    'default role' => array(OG_ADMINISTRATOR_ROLE),
+  );
+
+  $items['access administration pages'] = array(
+    'title' => t('Use the administration pages'),
+    'description' => t('Allow users to see the "Group" tab, and access the administration pages.'),
     'default role' => array(OG_ADMINISTRATOR_ROLE),
   );
 
