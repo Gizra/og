@@ -1898,12 +1898,16 @@ function og_ungroup($group_type, $gid, $entity_type = 'user', $etid = NULL) {
  *   drupal_alter(). This can be used by modules implementing
  *   hook_og_user_access_alter() that still want to use og_user_access(), but
  *   without causing a recursion. Defaults to FALSE.
+ * @param $ignore_admin
+ *   When TRUE the specific permission is checked, ignoring the "administer
+ *   group" permission if the user has it. When FALSE, a user with "administer
+ *   group" will be granted all permissions. Defaults to FALSE.
  *
  * @return
  *   TRUE or FALSE if the current user has the requested permission. NULL, if
  *   the given group isn't a valid group.
  */
-function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter = FALSE) {
+function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
   global $user;
   $perm = &drupal_static(__FUNCTION__, array());
   // Mark the group ID and permissions that invoked an alter.
@@ -1925,7 +1929,7 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
   }
 
   // Administer group permission.
-  if (user_access('administer group', $account)) {
+  if (user_access('administer group', $account) && !$ignore_admin) {
     return TRUE;
   }
 
@@ -1971,7 +1975,7 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
     $perm_alter[$identifier][$account->uid][$string] = TRUE;
   }
 
-  return !empty($perm[$identifier][$account->uid][$string]) || !empty($perm[$identifier][$account->uid]['administer group']);
+  return !empty($perm[$identifier][$account->uid][$string]) || (!empty($perm[$identifier][$account->uid]['administer group']) && !$ignore_admin);
 }
 
 /**
