@@ -1199,6 +1199,9 @@ function og_membership_access($op, $entity, $account = NULL, $entity_type = 'og_
  * @param $create
  *   Optional; If no existing group is found, create a new one. Defaults to
  *   FALSE.
+ * @param $states
+ *   Array of states the group must be in. Values can be OG_STATE_ACTIVE,
+ *   OG_STATE_PENDING or OG_STATE_BLOCKED. Defaults to OG_STATE_ACTIVE.
  * @param $reset
  *   A boolean indicating that the internal cache should be reset.
  *
@@ -1395,8 +1398,8 @@ function og_invalidate_cache($gids = array()) {
  *   Array with the entity IDs that should be loaded. If FALSE, all groups IDs
  *   that belong to the entity will be returned.
  * @param $states
- *   Array of states the group must be in. Values can be OG_STATE_ACTIVE or
- *   OG_STATE_PENDING. Defaults to OG_STATE_ACTIVE.
+ *   Array of states the group must be in. Values can be OG_STATE_ACTIVE,
+ *   OG_STATE_PENDING or OG_STATE_BLOCKED. Defaults to OG_STATE_ACTIVE.
  * @param $soft_reset
  *   A boolean indicating that the internal cache should be "soft" reset (i.e.
  *   only the cached values of the specific entity type). For a "hard" reset use
