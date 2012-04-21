@@ -787,7 +787,8 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
       // value as integer, so turn it into an array.
       $primary_ids = array($primary_ids);
     }
-    $secondary_ids = entityreference_get_selection_handler($field)->validateReferencableEntities($primary_ids);
+    $instance = field_info_instance($entity_type, $field['field_name'], $bundle_name);
+    $secondary_ids = entityreference_get_selection_handler($field, $instance)->validateReferencableEntities($primary_ids);
     if (!$secondary_ids) {
       continue;
     }
@@ -810,14 +811,37 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
     // count. We have to do it before calling field_default_form().
     $form_state['field'][$field_name][$key]['items_count'] = count($items);
 
-    $instance = $form_state['field'][$field_name][$key]['instance'];
     // Re-build the field, based on the injected values.
     $result = field_default_form($entity_type, $entity, $field, $instance, $key, $items, $form, $form_state, NULL);
     $form[$field_name] = $result[$field_name];
   }
+
   if ($has_secodary) {
     $form['#validate'][] = 'og_form_secondary_field_validate';
+
+    if ($id && !field_access('edit', $field, $entity_type, $entity)) {
+      $group_type = $field['settings']['target_type'];
+      $gids = $primary_ids + $secondary_ids;
+      $hidden_gids = array();
+      foreach ($gids as $gid) {
+        if (in_array($gid, $secondary_ids)) {
+          $hidden_gids[] = array('target_id' => $gid);
+        }
+      }
+
+      if ($hidden_gids) {
+        $form[$field['field_name']][$langcode]['#element_validate'][] = 'og_form_keep_primary_field_validate';
+        $form[$field['field_name']][$langcode]['#hidden_gids'] = $hidden_gids;
+      }
+    }
   }
+}
+
+/**
+ * Validate handler; Re-populate inaccessible values, to the secondary field.
+ */
+function og_form_keep_primary_field_validate($element, &$form_state) {
+  form_set_value($element, $element['#hidden_gids'], $form_state);
 }
 
 /**

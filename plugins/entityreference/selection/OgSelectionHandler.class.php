@@ -186,7 +186,19 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
     }
     elseif ($reference_type == 'other_groups' && $user_groups) {
       // Show only groups the user doesn't belong to.
-      $query->propertyCondition($entity_info['entity keys']['id'], $user_groups, 'NOT IN');
+      if (!empty($this->instance) && $this->instance['entity_type'] == 'node') {
+        // Don't include the groups, the user doesn't have create
+        // permission.
+        $node_type = $this->instance['bundle'];
+        foreach ($user_groups as $delta => $gid) {
+          if (!og_user_access($group_type, $gid, "create $node_type content")) {
+            unset($user_groups[$delta]);
+          }
+        }
+      }
+      if ($user_groups) {
+        $query->propertyCondition($entity_info['entity keys']['id'], $user_groups, 'NOT IN');
+      }
     }
 
     return $query;
