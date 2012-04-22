@@ -769,7 +769,7 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
   }
 
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  $has_secodary = FALSE;
+  $has_secondary = FALSE;
 
   // Get all the group-audience fields in the entity.
   foreach (og_get_group_audience_fields($entity_type, $bundle_name) as $field_name => $label) {
@@ -778,7 +778,6 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
     if (empty($field['settings']['handler_settings']['primary_field'])) {
       continue;
     }
-    $has_secodary = TRUE;
 
     $primary_field = $field['settings']['handler_settings']['primary_field'];
     if (!isset($wrapper->$primary_field)) {
@@ -802,6 +801,7 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
     if (!$secondary_ids) {
       continue;
     }
+    $has_secondary = TRUE;
 
     // Rebuild the items array.
     $items = array();
@@ -826,7 +826,7 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
     $form[$field_name] = $result[$field_name];
   }
 
-  if ($has_secodary) {
+  if ($has_secondary) {
     $form['#validate'][] = 'og_form_secondary_field_validate';
 
     if ($id && !field_access('edit', $field, $entity_type, $entity)) {
