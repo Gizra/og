@@ -246,6 +246,14 @@ function og_schema_info() {
         'length' => 255,
         'not null' => FALSE,
       ),
+
+      'language' => array(
+        'description' => 'The {languages}.language of this membership type.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
     ),
     'primary key' => array('id'),
     'unique keys' => array(
@@ -315,6 +323,13 @@ function og_schema_info() {
         'not null' => TRUE,
         'default' => '',
         'description' => "The name of the field holding the group ID, the OG memebership is associated with.",
+      ),
+      'language' => array(
+        'description' => 'The {languages}.language of this membership.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
       ),
     ),
     'primary key' => array('id'),
@@ -919,3 +934,62 @@ function og_update_7200() {
   entity_info_cache_clear();
 }
 
+/**
+ * Add "language" column to all OG membership's related entities.
+ */
+function og_update_7201(&$sandbox) {
+  //Update the existing entities, with the default language.
+  $langcode = language_default()->language;
+
+  $tables = array(
+    'og_membership_type',
+    'og_membership',
+  );
+
+  if (!isset($sandbox['total'])) {
+    foreach ($tables as $key => $table) {
+      $name = str_replace('_', ' ', $table);
+      $column = array(
+        'description' => "The {languages}.language of this $name.",
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => $langcode,
+      );
+      db_add_field($table, 'language', $column);
+
+      if ($table == 'og_membership') {
+        // We don't want to time out when updating og_membership, so we will
+        // process it using batches.
+        $query = db_select($table);
+        $sandbox['last'] = 0;
+        $sandbox['total'] = $query->countQuery()->execute()->fetchField();
+        $sandbox['#finished'] = 0;
+      }
+      else {
+        db_update($table)
+          ->fields(array(
+            'language' => $langcode,
+          ))
+          ->execute();
+      }
+    }
+  }
+  elseif ($sandbox['last'] <= $sandbox['total']  && $sandbox['total'] > 0) {
+    // Update og_memberships.
+    $batch_size = 200;
+    db_update('og_membership')
+      ->fields(array(
+        'language' => $langcode,
+      ))
+      ->condition('id', $sandbox['last'], '>')
+      ->execute();
+
+    $sandbox['last'] += $batch_size;
+    $sandbox['#finished'] = min(0.99, $sandbox['last'] / $sandbox['total']);
+  }
+  else {
+    // Finished processing.
+    $sandbox['#finished'] = 1;
+  }
+}

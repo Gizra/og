@@ -74,6 +74,10 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       // 'options list' => '',
     );
 
+    $properties['language'] += array(
+      'setter callback' => 'entity_property_verbatim_set',
+    );
+
     return $info;
   }
 }
