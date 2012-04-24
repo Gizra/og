@@ -3,6 +3,7 @@ description = "API to allow associating content with groups."
 package = "Organic groups"
 dependencies[] = options
 dependencies[] = list
+dependencies[] = text
 dependencies[] = entity
 dependencies[] = entityreference
 core = 7.x
