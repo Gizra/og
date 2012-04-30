@@ -21,11 +21,13 @@ class OgAccess extends DrupalWebTestCase {
   function testOgAccessEntity() {
     $perm = 'administer group';
     // Change permissions to authenticated member.
-    $roles = array_flip(og_get_global_roles());
-    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], array($perm => 1));
 
     // Add OG group fields.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+    $roles = array_flip(og_roles('entity_test', 'main'));
+    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], array($perm => 1));
+
+
     $og_field = og_fields_info(OG_AUDIENCE_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
     og_create_field(OG_AUDIENCE_FIELD, 'node', 'article', $og_field);
@@ -512,7 +514,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
    */
   function testGroupManagerDefaultRoles() {
     // Get only the admin role.
-    $og_roles = og_roles('entity_test', 0, 'main', FALSE, FALSE);
+    $og_roles = og_roles('entity_test', 'main', 0, FALSE, FALSE);
     variable_set('og_group_manager_default_rids_entity_test_main', array_keys($og_roles));
     $user1 = $this->drupalCreateUser();
 
@@ -574,7 +576,7 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     $this->assertFalse(og_user_access('entity_test', $entity->pid, 'delete own article content', $user2), t('User does not have "delete own article content" permission.'));
 
     // Change permissions to authenticated member.
-    $og_roles = array_flip(og_roles('entity_test', $entity->pid, 'main'));
+    $og_roles = array_flip(og_roles('entity_test', 'main', $entity->pid));
     // Authenticated role ID.
     $rid = $og_roles[OG_AUTHENTICATED_ROLE];
 
@@ -622,14 +624,14 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
-    $og_roles = og_roles('entity_test', 0, 'main');
+    $og_roles = og_roles('entity_test', 'main');
 
     // Group without default access field.
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
     $wrapper = entity_metadata_wrapper('entity_test', $entity);
     $wrapper->{OG_GROUP_FIELD}->set(1);
     $wrapper->save();
-    $this->assertEqual($og_roles, og_roles('entity_test', $entity->pid, 'main'), t('Group without default access field is assigned to the global roles and permissions settings.'));
+    $this->assertEqual($og_roles, og_roles('entity_test', 'main', $entity->pid), t('Group without default access field is assigned to the global roles and permissions settings.'));
 
     // Add default access field to the entity_test's "main" bundle.
     og_create_field(OG_DEFAULT_ACCESS_FIELD, 'entity_test', 'main');
@@ -640,7 +642,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $wrapper->{OG_GROUP_FIELD}->set(1);
     $wrapper->{OG_DEFAULT_ACCESS_FIELD}->set(0);
     $wrapper->save();
-    $this->assertEqual($og_roles, og_roles('entity_test', $entity->pid, 'main'), t('Group with default access field disabled is assigned to the global roles and permissions settings.'));
+    $this->assertEqual($og_roles, og_roles('entity_test', 'main', $entity->pid), t('Group with default access field disabled is assigned to the global roles and permissions settings.'));
 
     // Add admin role to a user.
     $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
@@ -651,7 +653,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     // Group with default access field enabled.
     $wrapper->{OG_DEFAULT_ACCESS_FIELD}->set(1);
     $wrapper->save();
-    $new_og_roles = og_roles('entity_test', $entity->pid, 'main');
+    $new_og_roles = og_roles('entity_test', 'main', $entity->pid);
     $this->assertNotEqual($og_roles, $new_og_roles, t('Group with default access field enabled has own roles and permissions settings.'));
 
     // Assert the newley created admin role was mapped to the default one.
@@ -661,7 +663,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     // Disable existing group's default access field.
     $wrapper->{OG_DEFAULT_ACCESS_FIELD}->set(0);
     $wrapper->save();
-    $this->assertEqual($og_roles, og_roles('entity_test', $entity->pid, 'main'), t('Group with enabled default access field that was disabled is assigned to the global roles and permissions settings.'));
+    $this->assertEqual($og_roles, og_roles('entity_test', 'main', $entity->pid), t('Group with enabled default access field that was disabled is assigned to the global roles and permissions settings.'));
   }
 }
 
@@ -765,7 +767,7 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
       7 => array('admin' => TRUE),
     );
 
-    $og_roles = og_roles('node', 0, 'test_group');
+    $og_roles = og_roles('node', 'test_group');
 
     foreach ($values as $uid => $value) {
       $account = user_load($uid);
@@ -886,7 +888,7 @@ class OgPrimarySecondaryField extends DrupalWebTestCase {
     og_group('node', $this->group1->nid, array('entity' => $this->editor_user->uid));
 
     // Change permissions to authenticated member.
-    $roles = array_flip(og_roles('node', $this->group1->nid, 'page'));
+    $roles = array_flip(og_roles('node', 'page', $this->group1->nid));
     $permissions = array(
       'create article content' => 1,
       'update any article content' => 1,

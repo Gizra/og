@@ -424,19 +424,6 @@ function og_default_og_membership_type() {
 }
 
 /**
- * Implements hook_modules_enabled().
- */
-function og_modules_enabled($modules) {
-  // Reset this cache first, since Drush can call this function multiple times
-  // before all modules are available.
-  drupal_static_reset('og_get_permissions');
-  foreach ($modules as $module) {
-    // Add default roles and permissions, if existing and not set yet.
-    og_set_global_access_by_module($module);
-  }
-}
-
-/**
  * Implements hook_modules_uninstalled().
  */
 function og_modules_uninstalled($modules) {
@@ -629,8 +616,8 @@ function og_field_create_instance($instance) {
     return;
   }
 
-  // Create global roles per entity-type per bundle.
-  og_roles_override($instance['entity_type'], 0, $instance['bundle']);
+  // Create default roles per entity-type per bundle.
+  og_roles_override($instance['entity_type'], $instance['bundle'], 0);
 
   // Check if we need to add a group audience on the user's entity.
   // We add a different field, so each field can be set differently.
@@ -665,8 +652,8 @@ function og_field_delete_instance($instance) {
     return;
   }
 
-  // Get the global roles.
-  $roles = og_roles($instance['entity_type'], 0, $instance['bundle']);
+  // Get the per-bundle roles.
+  $roles = og_roles($instance['entity_type'], $instance['bundle']);
   foreach ($roles as $rid => $name) {
     og_role_delete($rid);
   }
@@ -1001,7 +988,7 @@ function og_entity_insert($entity, $entity_type) {
   }
   if (!og_is_group_default_access($entity_type, $entity)) {
     // Override default roles.
-    og_roles_override($entity_type, $id, $bundle);
+    og_roles_override($entity_type, $bundle, $id);
   }
 }
 
@@ -1031,7 +1018,7 @@ function og_entity_update($entity, $entity_type) {
   if (!empty($entity->{$property}) && $entity->{$property} != $origianl_entity->{$property}) {
     if (!og_is_group_default_access($entity_type, $entity)) {
       // Override default roles.
-      og_roles_override($entity_type, $id, $bundle);
+      og_roles_override($entity_type, $bundle, $id);
     }
     else {
       // Delete overridden roles.
@@ -2437,6 +2424,10 @@ function og_role_permissions($roles = array()) {
 /**
  * Retrieve an array of roles matching specified conditions.
  *
+ * @param $group_type
+ *   The group type.
+ * @param $bundle
+ *   The bundle type.
  * @param $gid
  *   The group ID.
  * @param $force_group
@@ -2451,7 +2442,7 @@ function og_role_permissions($roles = array()) {
  *   value. The anonymous and authenticated default roles are on the top of the
  *   array.
  */
-function og_roles($group_type = '', $gid = 0, $bundle = '', $force_group = FALSE, $include_all = TRUE) {
+function og_roles($group_type, $bundle, $gid = 0, $force_group = FALSE, $include_all = TRUE) {
   if ($gid && !$bundle) {
     $wrapper = entity_metadata_wrapper($group_type, $gid);
     $bundle = $wrapper->getBundle();
@@ -2483,22 +2474,17 @@ function og_roles($group_type = '', $gid = 0, $bundle = '', $force_group = FALSE
 }
 
 /**
- * Get global roles - roles that belong to non-existent group ID 0.
+ * Get arary of default roles, keyed by their declaring module.
+ *
+ * @param $include
  *
  * @return
- *   A keyed array with role Id as key and role name as value.
- */
-function og_get_global_roles() {
-  return og_roles();
-}
-
-/**
- * Get arary of default roles, keyed by their declaring module.
+ *   Array of default roles, grouped by module name.
  */
 function og_get_default_roles($include = TRUE) {
   $roles = array();
   foreach (module_implements('og_default_roles') as $module) {
-    $roles[$module] = module_invoke($module, 'og_default_roles');
+    $roles += module_invoke($module, 'og_default_roles');
   }
 
   // Allow other modules to alter the defult roles, excpet of the anonymous and
@@ -2506,85 +2492,11 @@ function og_get_default_roles($include = TRUE) {
   drupal_alter('og_default_roles', $roles);
 
   if ($include) {
-    $roles += array('og' => array());
-    array_unshift($roles['og'], OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE);
+    array_unshift($roles, OG_AUTHENTICATED_ROLE);
+    array_unshift($roles, OG_ANONYMOUS_ROLE);
   }
 
   return $roles;
-}
-
-/**
- * Add default roles and permissions of a module to the global permissions.
- *
- * This function is called whenever a module is enabled. Calling this function
- * directly will re-assign permissions to thier default roles.
- *
- * @param $module
- *   The module name.
- * @return
- *   Array with the global roles, as new records might have been added.
- */
-function og_set_global_access_by_module($module) {
-  $default_roles = og_get_default_roles();
-  if (!empty($default_roles[$module])) {
-    og_create_global_roles($default_roles[$module]);
-  }
-
-  $og_global_roles = og_get_global_roles();
-
-  // Add permissions to the roles.
-  $perms = array();
-  foreach (og_get_permissions() as $name => $perm) {
-    if (empty($perm['default role'])) {
-      continue;
-    }
-
-    foreach ($perm['default role'] as $key => $role) {
-      // Get the role ID by the role name.
-      $rid = array_search($role, $og_global_roles);
-      if (!$rid) {
-        continue;
-      }
-
-      $perms[$rid][] = $name;
-    }
-  }
-
-  if (!$perms) {
-    return;
-  }
-
-  foreach ($perms as $rid => $rid_perms) {
-    // Add the permissions to the OG role.
-    og_role_grant_permissions($rid, $rid_perms);
-  }
-
-}
-
-/**
- * Helper function; Create global OG roles if not existing already.
- *
- * @param $names
- *   Array with the role names.
- */
-function og_create_global_roles($names) {
-  foreach ($names as $name) {
-    // Check if role doesn't alreayd exist.
-    $count = db_select('og_role', 'ogr')
-      ->condition('gid', 0)
-      ->condition('group_type', '', '=')
-      ->condition('group_bundle', '', '=')
-      ->condition('name', $name)
-      ->countQuery()
-      ->execute()
-      ->fetchField();
-
-    if (!$count) {
-      // Create a new role.
-      $role = og_role_create($name);
-      og_role_save($role);
-    }
-  }
 }
 
 /**
@@ -2687,6 +2599,7 @@ function og_role_load($rid) {
     ->execute()
     ->fetchObject();
 }
+
 /**
  * Save a user role to the database.
  *
@@ -2753,7 +2666,7 @@ function og_role_delete($rid) {
 function og_delete_user_roles_by_group($group_type, $group) {
   // Check if group has overriden roles defined.
   list($gid, $vid,$bundle) = entity_extract_ids($group_type, $group);
-  if ($roles = og_roles($group_type, $gid, $bundle, TRUE)) {
+  if ($roles = og_roles($group_type, $bundle, $gid, TRUE)) {
     foreach ($roles as $rid => $name) {
       og_role_delete($rid);
     }
@@ -2790,29 +2703,33 @@ function og_permissions_delete_by_module($modules = array()) {
 /**
  * Create new roles, based on the default roles and permissions.
  *
+ * @param $group_type
+ *   The group type.
+ * @param $bundle
+ *   The bundle type.
  * @param $gid
  *   The group ID.
  * @return
  *   The newly created roles keyed by role ID and role name as the value. Or
  *   FALSE if no roles were created.
  */
-function og_roles_override($group_type, $gid, $bundle = NULL) {
+function og_roles_override($group_type, $bundle, $gid) {
   // Check if roles aren't already overriden. We can't use
   // og_is_group_default_access() as the field is already set, so we
   // check to see if there are new roles in the database by setting
   // "force group" parameter to TRUE.
-  if (og_roles($group_type, $gid, $bundle, TRUE)) {
+  if (og_roles($group_type, $bundle, $gid, TRUE)) {
     return;
   }
 
   $rids = array();
   if ($gid) {
-    $og_roles = og_roles($group_type, 0, $bundle);
+    $og_roles = og_roles($group_type, $bundle);
     $perms = og_role_permissions($og_roles);
   }
   else {
-    $og_roles = og_get_global_roles();
-    $perms = og_get_global_permissions();
+    $og_roles = og_get_default_roles();
+    $perms = og_get_default_permissions();
   }
 
   foreach ($og_roles as $rid => $name) {
@@ -2835,24 +2752,6 @@ function og_roles_override($group_type, $gid, $bundle = NULL) {
 }
 
 /**
- * Recreate permissions form global permissions.
- *
- * @param $group_type
- *   The group type.
- * @param $bundle
- *   The group bundle.
- */
-function og_recreate_permissions($group_type, $bundle) {
-  $perms = og_get_global_permissions();
-
-  foreach (og_roles($group_type, 0, $bundle) as $rid => $name) {
-    og_role_delete($rid);
-  }
-
-  og_roles_override($group_type, 0, $bundle);
-}
-
-/**
  * Grant a group role to a user.
  *
  * @param $uid
@@ -2864,7 +2763,7 @@ function og_role_grant($group_type, $gid, $uid, $rid) {
   // Make sure the role is valid.
   $group = entity_load_single($group_type, $gid);
   list(,, $bundle) = entity_extract_ids($group_type, $group);
-  $og_roles = og_roles($group_type, $gid, $bundle, FALSE, FALSE);
+  $og_roles = og_roles($group_type, $bundle, $gid, FALSE, FALSE);
   if (empty($og_roles[$rid])) {
     // Role isn't valid.
     return;
@@ -3034,16 +2933,28 @@ function og_get_permissions() {
 }
 
 /**
- * Get global permissions.
+ * Get default permissions.
  *
  * @return
  *   Array keyed with the anonymous, authenticated and administror and the
  *   permissions that should be enabled by default.
  */
-function og_get_global_permissions() {
-  $roles = og_get_global_roles();
+function og_get_default_permissions() {
+  $roles = og_get_default_roles();
+  $default_perms = og_get_permissions();
+  $perms = array();
 
-  $perms = og_role_permissions($roles);
+  foreach ($roles as $rid => $role_name) {
+    $perms[$rid] = array();
+    // For each default role, iterate default permissions and mark the
+    // permissions that set the role as default.
+    foreach ($default_perms as $perm_name => $perm) {
+      if (in_array($role_name, $perm['default role'])) {
+        $perms[$rid][$perm_name] = TRUE;
+      }
+    }
+  }
+
   return $perms;
 }
 

@@ -25,7 +25,7 @@ function og_user_roles_action_form($context) {
     return;
   }
   list(,, $bundle) = entity_extract_ids($group_type, $group);
-  $og_roles = og_roles($group_type, $gid, $bundle, FALSE, FALSE);
+  $og_roles = og_roles($group_type, $bundle, $gid, FALSE, FALSE);
 
   $form['add_roles'] = array(
     '#type' => 'select',

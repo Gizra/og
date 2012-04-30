@@ -60,7 +60,7 @@ function og_7000_user(&$context) {
     }
 
     if ($record->is_admin) {
-      $og_roles = og_roles('node', $node->nid, $node->type);
+      $og_roles = og_roles('node', $node->type, $node->nid);
       $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
       og_role_grant('node', $record->nid, $record->uid, $rid);
     }

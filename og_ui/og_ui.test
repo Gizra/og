@@ -39,7 +39,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertTrue(og_user_access('entity_test', $entity1->pid, 'subscribe', $web_user), t('User has "subscribe" permission.'));
 
     // Remove a permission.
-    $this->drupalPost('admin/config/group/permissions/entity_test/main', array('4[subscribe]' => FALSE), t('Save global permissions'));
+    $this->drupalPost('admin/config/group/permissions/entity_test/main', array('1[subscribe]' => FALSE), t('Save permissions'));
     $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
 
     // FIXME: There is an og_invalidate_cache() on permissions granting
@@ -49,7 +49,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
     $this->assertFalse(og_user_access('entity_test', $entity1->pid, 'subscribe', $web_user), t('User now does not have "subscribe" permission.'));
 
     // Re-add permission.
-    $this->drupalPost('admin/config/group/permissions/entity_test/main', array('4[subscribe]' => TRUE), t('Save global permissions'));
+    $this->drupalPost('admin/config/group/permissions/entity_test/main', array('1[subscribe]' => TRUE), t('Save permissions'));
 
     // FIXME: There is an og_invalidate_cache() on permissions granting
     // and revoking, but somehow, we need to do it manually here.
@@ -116,7 +116,7 @@ class OgUiSubscribeTestCase extends DrupalWebTestCase {
     $this->assertFalse(og_is_member('node', $node->nid, 'user', $user2, array(OG_STATE_ACTIVE, OG_STATE_PENDING)), t('User unsubscribed from group.'));
 
     // Change global permissions to allow user to subscribe without approval.
-    $og_roles = og_roles('node', 0, 'article');
+    $og_roles = og_roles('node', 'article');
     $rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);
     og_role_change_permissions($rid, array('subscribe without approval' => 1));
 
@@ -283,7 +283,7 @@ class OgUiMigrate7000TestCase extends UpgradePathTestCase {
 
       // TODO: There is some issue with og_is_group_default_access()
       // returning a wrong result, due to $wrapper not being up-to-date.
-      $og_roles = og_roles('node', $nid, 'test_group', TRUE);
+      $og_roles = og_roles('node', 'test_group', $nid, TRUE);
       $permissions = og_role_permissions($og_roles);
 
       $anon_rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);

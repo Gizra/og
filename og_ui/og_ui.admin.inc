@@ -43,7 +43,7 @@ function og_ui_admin_settings($form_state) {
     $entity_info = entity_get_info();
     foreach ($group_bundles as $entity_type => $bundles) {
       foreach ($bundles as $bundle_name => $bundle_label) {
-        $og_roles = og_roles($entity_type, 0, $bundle_name, FALSE, FALSE);
+        $og_roles = og_roles($entity_type, $bundle_name, 0, FALSE, FALSE);
         if (!$og_roles) {
          continue;
         }
@@ -232,6 +232,39 @@ function og_ui_admin_account($group_type, $gid) {
   return $view->preview();
 }
 
+/**
+ * Display an overview of group types with edit link.
+ *
+ * @param $type
+ *   Either 'roles' or 'permissions'. Determines the edit link url.
+ *
+ * @return
+ *   Renderable table of group types.
+ */
+function og_ui_group_types_overview($type) {
+  $header = array(t('Group type'), t('Operations'));
+  $rows = array();
+
+  foreach (og_get_all_group_bundle() as $entity_type => $bundles) {
+    $entity_info = entity_get_info($entity_type);
+    foreach ($bundles as $bundle_name => $bundle_label) {
+      $row = array();
+      $row[] = array('data' => check_plain($entity_info['label'] . ' - ' . $bundle_label));
+      $row[] = array('data' => l(t('edit'), "admin/config/group/$type/$entity_type/$bundle_name"));
+
+      $rows[] = $row;
+    }
+  }
+
+  $build['roles_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No group types available.'),
+  );
+
+  return $build;
+}
 
 /**
  * Menu callback: administer roles.
@@ -244,26 +277,6 @@ function og_ui_admin_account($group_type, $gid) {
 function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bundle = '', $rid = 0) {
   if ($gid) {
     og_set_breadcrumb($group_type, $gid, array(l(t('Group'), "$group_type/$gid/group")), l(t('Roles'), "group/$group_type/$gid/admin/roles"));
-  }
-  else {
-    // Show the global and per-bundle links.
-    $items = array();
-    $items[] = array('data' => l(t('Global (used for inheritance)'), 'admin/config/group/roles'));
-    foreach (og_get_all_group_bundle() as $entity_type => $bundles) {
-      $entity_info = entity_get_info($entity_type);
-      foreach ($bundles as $bundle_name => $bundle_label) {
-        $items[] = array('data' => l(check_plain($entity_info['label'] . ' - ' . $bundle_label), "admin/config/group/roles/$entity_type/$bundle_name"));
-      }
-    }
-
-    // Hide the links when editing a role.
-    if (!$rid) {
-      $form['global_links'] = array(
-        '#title' => t('Roles links'),
-        '#theme' => 'item_list',
-        '#items' => $items,
-      );
-    }
   }
 
   if ($rid) {
@@ -320,15 +333,6 @@ function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bund
         '#submit' => array('og_ui_admin_roles_submit'),
       );
 
-      if (!$gid && og_get_group_audience_fields()) {
-        $form['actions'] = array('#type' => 'actions');
-        $form['actions']['copy'] = array(
-          '#type' => 'submit',
-          '#value' => $bundle ? t('Copy roles and permissions from global') : t('Copy roles and permissions to per-bundles'),
-          '#submit' => array('og_ui_admin_access_copy_global_redirect'),
-          '#limit_validation_errors' => array(),
-        );
-      }
       // Attach the CSS to the form.
       $form['#attached'] = array(
         'css' => array (
@@ -340,11 +344,11 @@ function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bund
   }
 
   $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
-  $form['gid'] = array('#type' => 'value', '#value' => $gid);
   $form['bundle'] = array('#type' => 'value', '#value' => $bundle);
-  $role_names = _og_ui_get_role_names($group_type, $gid, $bundle, $rid);
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
+
+  $role_names = _og_ui_get_role_names($group_type, $bundle, $gid, $rid);
   $form['role_names'] = array('#type' => 'value', '#value' => $role_names);
-  $form['referrer'] = array('#type' => 'value', '#value' => 'roles');
 
   return $form;
 }
@@ -355,10 +359,10 @@ function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bund
 function og_ui_admin_roles_validate($form, &$form_state) {
   if (!empty($form_state['values']['name'])) {
     $group_type = $form['group_type']['#value'];
-    $gid = $form['gid']['#value'];
     $bundle = $form['bundle']['#value'];
+    $gid = $form['gid']['#value'];
 
-    $roles = og_roles($group_type, $gid, $bundle);
+    $roles = og_roles($group_type, $bundle, $gid);
     $unique_name = TRUE;
     if (!empty($form_state['values']['rid'])) {
       $role = og_role_load($form_state['values']['rid']);
@@ -378,8 +382,9 @@ function og_ui_admin_roles_validate($form, &$form_state) {
  */
 function og_ui_admin_roles_submit($form, &$form_state) {
   $group_type = $form['group_type']['#value'];
-  $gid = $form['gid']['#value'];
   $bundle = $form['bundle']['#value'];
+  $gid = $form['gid']['#value'];
+
 
   if (!empty($form_state['values']['rid'])) {
     $role = og_role_load($form_state['values']['rid']);
@@ -462,17 +467,17 @@ function theme_og_ui_admin_new_role($variables) {
  *
  * @param $group_type
  *   Group entity type. E.g. 'node'.
- * @param $gid
- *   Group item ID.
  * @param $bundle
  *   Group bundle.
+ * @param $gid
+ *   Group item ID.
  * @param $rid
  *   Role ID.
  *
  * @return array
  *   Role names according to parameters.
  */
-function _og_ui_get_role_names($group_type, $gid, $bundle, $rid) {
+function _og_ui_get_role_names($group_type, $bundle, $gid, $rid) {
   if ($gid) {
     $group = entity_load_single($group_type, $gid);
 
@@ -480,7 +485,7 @@ function _og_ui_get_role_names($group_type, $gid, $bundle, $rid) {
     $gid = og_is_group_default_access($group_type, $group) ? 0 : $gid;
   }
 
-  $role_names = og_roles($group_type, $gid, $bundle);
+  $role_names = og_roles($group_type, $bundle, $gid);
   if ($rid && !empty($role_names[$rid])) {
     $role_names = array($rid => $role_names[$rid]);
   }
@@ -515,33 +520,12 @@ function og_ui_admin_permissions($form, $form_state, $group_type = '', $gid = 0,
   if ($gid) {
     og_set_breadcrumb($group_type, $gid, array(l(t('Group'), "$group_type/$gid/group")));
   }
-  else {
-    // Show the global and per-bundle links.
-    $items = array();
-    $items[] = array('data' => l(t('Global (used for inheritance)'), 'admin/config/group/permissions'));
-    foreach (og_get_all_group_bundle() as $entity_type => $bundles) {
-      $entity_info = entity_get_info($entity_type);
-      foreach ($bundles as $bundle_name => $bundle_label) {
-        $items[] = array('data' => l(check_plain($entity_info['label'] . ' - ' . $bundle_label), "admin/config/group/permissions/$entity_type/$bundle_name"));
-      }
-    }
-
-    // Hide the links when editing a role.
-    if (!$rid) {
-      $form['global_links'] = array(
-        '#title' => t('Permissions links'),
-        '#theme' => 'item_list',
-        '#items' => $items,
-      );
-    }
-  }
 
   $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
-  $form['gid'] = array('#type' => 'value', '#value' => $gid);
   $form['bundle'] = array('#type' => 'value', '#value' => $bundle);
-  $form['referrer'] = array('#type' => 'value', '#value' => 'permissions');
+  $form['gid'] = array('#type' => 'value', '#value' => $gid);
 
-  $role_names = _og_ui_get_role_names($group_type, $gid, $bundle, $rid);
+  $role_names = _og_ui_get_role_names($group_type, $bundle, $gid, $rid);
 
   // Fetch permissions for all roles or the one selected role.
   $role_permissions = og_role_permissions($role_names);
@@ -609,21 +593,9 @@ function og_ui_admin_permissions($form, $form_state, $group_type = '', $gid = 0,
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => $gid == 0 ? t('Save global permissions') : t('Save permissions'),
+      '#value' => t('Save permissions'),
       '#submit' => array('og_ui_admin_permissions_submit'),
     );
-
-    // Hide the copy from global button when editing permissions of a specific
-    // role.
-    if (!$rid) {
-      $form['actions']['copy'] = array(
-        '#type' => 'submit',
-        '#value' => $bundle ? t('Copy roles and permissions from global') : t('Copy roles and permissions to per-bundles'),
-        '#submit' => array('og_ui_admin_access_copy_global_redirect'),
-        // Show only on global permissions page.
-        '#access' => !$gid && og_get_group_audience_fields(),
-      );
-    }
   }
   $form['#after_build'][] = 'og_ui_admin_permissions_after_build';
   return $form;
@@ -649,7 +621,7 @@ function og_ui_admin_permissions_after_build($form) {
   $disable = $gid && og_is_group_default_access($group_type, $gid);
 
   // Authenticated roles.
-  $roles = og_roles($group_type, $gid, $bundle);
+  $roles = og_roles($group_type, $bundle, $gid);
   $anon_rid = array_search(OG_ANONYMOUS_ROLE, $roles);
 
   // Remove the anonymous member from the authenticated roles.
@@ -675,6 +647,7 @@ function og_ui_admin_permissions_after_build($form) {
 
   return $form;
 }
+
 /**
  * Save permissions selected on the administer permissions page.
  *
@@ -687,7 +660,6 @@ function og_ui_admin_permissions_submit($form, &$form_state) {
 
   drupal_set_message(t('The changes have been saved.'));
 }
-
 
 /**
  * Theme the administer permissions page.
@@ -724,85 +696,10 @@ function theme_og_ui_admin_permissions($variables) {
     $header[] = array('data' => drupal_render($form['role_names'][$rid]), 'class' => array('checkbox'));
   }
   $output = '';
-  if (!empty($form['global_links'])) {
-    $output = drupal_render($form['global_links']);
-  }
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
   $output .= drupal_render_children($form);
   return $output;
 }
-
-/**
- * Submit handler; Redirect to copy global permissions.
- */
-function og_ui_admin_access_copy_global_redirect($form, &$form_state) {
-  $referrer = $form['referrer']['#value'];
-  $form_state['redirect'] = "admin/config/group/copy-global-access/$referrer";
-
-  if (!empty($form['bundle']['#value'])) {
-    // Add the group type and bundle values should be copied to.
-    $form_state['redirect'] .= '/' . $form['group_type']['#value'] . '/' . $form['bundle']['#value'];
-  }
-}
-
-/**
- * Menu callback; Get copy global permissions form.
- */
-function og_ui_admin_access_copy_global($referrer = '', $group_type = '', $bundle = '') {
-  return drupal_get_form('og_ui_admin_confirm_access_copy_global', $group_type, $bundle, $referrer);
-}
-
-/**
- * Form builder; Confirm copy global permissions.
- */
-function og_ui_admin_confirm_access_copy_global($form, $form_state, $group_type, $bundle, $referrer) {
-  $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
-  $form['bundle'] = array('#type' => 'value', '#value' => $bundle);
-  $form['referrer'] = array('#type' => 'value', '#value' => $referrer);
-
-  $cancel_link = "admin/config/group/$referrer";
-  if ($bundle) {
-    $params = array(
-      '%type' => $group_type,
-      '%bundle' => $bundle,
-    );
-    $text = t('Are you sure you want to copy the OG global permissions to %type - %bundle permissions?', $params);
-    $cancel_link .= "/$group_type/$bundle";
-  }
-  else {
-    $text = t('Are you sure you want to copy the OG global permissions to all permissions?');
-  }
-
-  return confirm_form($form, $text, $cancel_link, NULL, t('Copy'), t('Cancel'));
-}
-
-/**
- * Submit handler; Re-create permissions from global permissions.
- */
-function og_ui_admin_confirm_access_copy_global_submit($form, &$form_state) {
-  $group_type = $form['group_type']['#value'];
-  $bundle = $form['bundle']['#value'];
-  $referrer = $form['referrer']['#value'];
-
-  if ($group_type && $bundle) {
-    og_recreate_permissions($group_type, $bundle);
-  }
-  else {
-    // Recreate all entity type - bundle permissions.
-    foreach (entity_get_info() as $entity_type => $entity_value) {
-      foreach ($entity_value['bundles'] as $bundle_name => $bundle_value) {
-        if (og_is_group_type($entity_type, $bundle_name)) {
-          og_recreate_permissions($entity_type, $bundle_name);
-        }
-      }
-    }
-  }
-  $form_state['redirect'] = "admin/config/group/$referrer";
-  if ($bundle) {
-    $form_state['redirect'] .= "/$group_type/$bundle";
-  }
-}
-
 
 /**
  * Allow site admin to add or remove group fields from fieldable enteies.

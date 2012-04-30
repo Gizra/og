@@ -5,7 +5,7 @@
  */
 $plugin = array(
   'name' => t('Upgrade OG roles - 7.2'),
-  'description' => t('Add per-bundle OG roles, based on the global roles.'),
+  'description' => t('Add per-bundle OG roles.'),
   'access callback' => 'og_migrate_7200_access',
 );
 
@@ -15,7 +15,7 @@ $plugin = array(
 function og_7200_roles(&$context) {
   foreach (og_get_all_group_bundle() as $group_type => $bundles) {
     foreach ($bundles as $bundle => $label) {
-      og_roles_override($group_type, 0, $bundle);
+      og_roles_override($group_type, $bundle, 0);
     }
   }
 

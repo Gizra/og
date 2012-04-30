@@ -38,7 +38,7 @@ class OgFieldAccessTestCase extends DrupalWebTestCase {
     $group_content_type = $this->drupalCreateContentType();
     og_create_field(OG_AUDIENCE_FIELD, 'node', $group_content_type->type);
 
-    $og_roles = og_roles('node', 0, $group_type->type);
+    $og_roles = og_roles('node', $group_type->type);
 
     // Set global permissions.
     $anon_rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);

@@ -115,7 +115,7 @@ function og_ui_7000_group_visibility(&$context) {
     }
 
     $node = node_load($nid);
-    $og_roles = og_roles('node', $node->nid, $node->type);
+    $og_roles = og_roles('node', $node->type, $node->nid);
     $permissions = og_role_permissions($og_roles);
 
     $anon_rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);

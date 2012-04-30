@@ -50,7 +50,8 @@ function og_7200_user_roles(&$context) {
     return;
   }
 
-  $global_roles = og_get_global_roles();
+  // Fetch the global roles.
+  $default_roles = og_roles('', '');
 
   foreach ($result as $row) {
     list($group_type, $gid) = og_migrate_get_group($row->gid);
@@ -61,8 +62,8 @@ function og_7200_user_roles(&$context) {
 
     // Get the per-bundle roles, and replace the role ID, with the
     // per-bundle role ID.
-    $og_roles = og_roles($group_type, $gid, $bundle);
-    $rid = array_search($global_roles[$row->rid], $og_roles);
+    $og_roles = og_roles($group_type, $bundle, $gid);
+    $rid = array_search($default_roles[$row->rid], $og_roles);
 
     db_update('og_users_roles')
       ->fields(array('rid' => $rid, 'group_type' => $group_type, 'gid' => $gid))
@@ -78,4 +79,12 @@ function og_7200_user_roles(&$context) {
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
+
+  // Remove global roles.
+  db_delete('og_role')
+    ->condition('gid', 0)
+    ->condition('group_type', '')
+    ->condition('group_bundle', '')
+    ->execute();
 }
+
