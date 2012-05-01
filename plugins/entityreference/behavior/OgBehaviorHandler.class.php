@@ -36,8 +36,29 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
     $items = array();
   }
 
+  /**
+   * Implements EntityReference_BehaviorHandler_Abstract::Delete()
+   *
+   * CRUD memberships from field, or if entity is marked for deleteing,
+   * delete all the OG membership related to it.
+   *
+   * @see og_entity_delete().
+   */
   public function delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
-    $this->OgMembershipCrud($entity_type, $entity, $field, $instance, $langcode, $items);
+    if (!empty($entity->delete_og_membership)) {
+      // Delete all OG memberships related to this entity.
+      $og_memberships = array();
+      foreach (og_get_entity_groups($entity_type, $entity) as $group_type => $ids) {
+        $og_memberships = array_merge($og_memberships, array_keys($ids));
+      }
+      if ($og_memberships) {
+        og_membership_delete_multiple($og_memberships);
+      }
+
+    }
+    else {
+      $this->OgMembershipCrud($entity_type, $entity, $field, $instance, $langcode, $items);
+    }
   }
 
   /**

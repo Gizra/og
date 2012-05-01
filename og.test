@@ -477,6 +477,17 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     og_ungroup('entity_test', $entity1->pid, 'node', $node);
     $og_membership = og_get_membership('entity_test', $entity1->pid, 'node', $node->nid);
     $this->assertFalse($og_membership, t('Node was ungrouped from group.'));
+
+    // Delete node and confirm memberships were deleted.
+    $values = array('entity_type' => 'node', 'entity' => $node);
+    og_group('entity_test', $entity1->pid, $values);
+    $nid = $node->nid;
+
+    // Re-load node, to make sure we are deleting the most up-to-date one,
+    // after it was altered by og_group().
+    $node = node_load($nid, NULL, TRUE);
+    node_delete($nid);
+    $this->assertFalse(og_get_entity_groups('node', $nid), t('OG memberships deleted on entity deletion.'));
   }
 
   /**

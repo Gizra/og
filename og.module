@@ -1079,13 +1079,18 @@ function _og_update_entity_fields($entity_type, $entity) {
  * Implements hook_entity_delete().
  */
 function og_entity_delete($entity, $entity_type) {
-  if (!og_is_group($entity_type, $entity)) {
-    return;
+  list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
+  if (og_is_group($entity_type, $entity)) {
+    og_delete_user_roles_by_group($entity_type, $entity);
+    og_membership_delete_by_group($entity_type, $id);
   }
-
-  list($id) = entity_extract_ids($entity_type, $entity);
-  og_delete_user_roles_by_group($entity_type, $entity);
-  og_membership_delete_by_group($entity_type, $id);
+  if (og_is_group_content_type($entity_type, $bundle)) {
+    // As the field attachers are called after hook_entity_presave() we
+    // can't delete the OG memberships here. So we just mark the entity
+    // as being deleted, and we will do the actual delete in
+    // OgBehaviorHandler::delete().
+    $entity->delete_og_membership = TRUE;
+  }
 }
 
 /**
@@ -1801,7 +1806,7 @@ function og_check_field_cardinality($entity_type, $entity, $field_name) {
  *     will be used. If no field found, an execpetion will be thrown.
  *
  * @return
- *   The entity with the fields updated.
+ *   The OG membership entity.
  */
 function og_group($group_type, $gid, $values = array()) {
   // Set default values.
