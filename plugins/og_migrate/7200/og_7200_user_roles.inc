@@ -79,12 +79,5 @@ function og_7200_user_roles(&$context) {
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
-
-  // Remove global roles.
-  db_delete('og_role')
-    ->condition('gid', 0)
-    ->condition('group_type', '')
-    ->condition('group_bundle', '')
-    ->execute();
 }
 
