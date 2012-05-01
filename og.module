@@ -1695,6 +1695,10 @@ function og_invalidate_cache($gids = array()) {
  * Return all existing groups of an entity type.
  */
 function og_get_all_group($group_type = 'node') {
+  if (!field_info_field(OG_GROUP_FIELD)) {
+    return array();
+  }
+
   $query = new EntityFieldQuery();
   $return = $query
     ->entityCondition('entity_type', $group_type)
