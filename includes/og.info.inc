@@ -15,6 +15,15 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 
+    // Initialize values to prevent WSOD, no certain cases of clear cache.
+    $properties = !empty($properties) ? $properties : array();
+    $properties += array(
+      'entity_type' => array(),
+      'group_type' => array(),
+      'field_name' => array(),
+      'language' => array(),
+    );
+
     // Group ID is provided in the "group" property.
     unset($properties['gid']);
     $properties['group'] = array(
