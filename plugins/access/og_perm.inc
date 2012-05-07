@@ -53,7 +53,7 @@ function og_perm_ctools_access_settings($form, &$form_state, $conf) {
 function og_perm_ctools_access_check($conf, $context) {
   // As far as I know there should always be a context at this point, but this
   // is safe.
-  list($user_context, $og_group_context) = $context;
+  list($user_context, $node_context) = $context;
   if (empty($user_context) || empty($user_context->data)) {
     return;
   }
