@@ -758,7 +758,7 @@ function og_ui_field_formatter_settings_summary($field, $instance, $view_mode) {
 function og_ui_field_access($op, $field, $entity_type, $entity, $account) {
   global $user;
 
-  if ($field['field_name'] != OG_AUDIENCE_FIELD) {
+  if (!og_is_group_audience_field($field['field_name'])) {
     return;
   }
 
