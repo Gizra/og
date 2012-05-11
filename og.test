@@ -892,7 +892,7 @@ class OgPrimarySecondaryField extends DrupalWebTestCase {
       'uid' => $this->group1_manager->uid
     );
     $this->group1 = $this->drupalCreateNode($settings);
-    $settings['uid'] =  $this->group2_manager->uid;
+    $settings['uid'] = $this->group2_manager->uid;
     $this->group2 = $this->drupalCreateNode($settings);
 
     // Add editor user to group1.
@@ -991,6 +991,50 @@ class OgPrimarySecondaryField extends DrupalWebTestCase {
     $this->assertText(t('Article Group Content has been updated.'), t('Group manager edits group content node successfully.'));
     $this->assertTrue(og_is_member('node', $this->group1->nid, 'node', $this->group_content->nid), t('Group content still belongs to group1'));
     $this->assertTrue(og_is_member('node', $this->group2->nid, 'node', $this->group_content->nid), t('Group content still belongs to group2'));
+  }
+
+  /**
+   * Test the group audience field when editing content;
+   * 1. Member with edit own content permission.
+   * 2. Member with edit any content permission.
+   */
+  function testGroupAudienceField() {
+    // Test user with "Edit own article content" permission.
+    $own_editor_user = $this->drupalCreateUser();
+    og_group('node', $this->group1->nid, array('entity' => $own_editor_user->uid));
+
+    // Update group permissions.
+    og_create_field(OG_GROUP_FIELD, 'node', 'article');
+    $roles = array_flip(og_roles('node', 'article'));
+    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], array('update own article content' => TRUE));
+
+    // Create content owned by own_editor_user and add it to group1.
+    $settings = array(
+      'type' => 'article',
+      'uid' => $own_editor_user->uid,
+    );
+    $node = $this->drupalCreateNode($settings);
+    // Add the content to group1.
+    $values = array(
+      'entity_type' => 'node',
+      'entity' => $node,
+    );
+    og_group('node', $this->group1->nid, $values);
+    // Login and check
+    $this->drupalLogin($own_editor_user);
+    $this->drupalGet('node/' . $node->nid . '/edit');
+    $field_id = drupal_html_id('edit-' . OG_AUDIENCE_FIELD .'-' . LANGUAGE_NONE);
+    $this->assertOptionSelected($field_id, $this->group1->nid, t('Group1 is selected in group audience field (Edit own content).'));
+
+    // Test user with "Edit any article content" permission.
+    // Update group permissions.
+    og_create_field(OG_GROUP_FIELD, 'node', 'article');
+    $roles = array_flip(og_roles('node', 'article'));
+    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], array('update own article content' => FALSE, 'update any article content' => TRUE));
+
+    $this->drupalLogin($this->editor_user);
+    $this->drupalGet('node/' . $node->nid . '/edit');
+    $this->assertOptionSelected($field_id, $this->group1->nid, t('Group1 is selected in group audience field (Edit any content).'));
   }
 
   /**
