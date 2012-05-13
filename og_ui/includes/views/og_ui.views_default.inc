@@ -11,7 +11,7 @@ function og_ui_views_default_views() {
   $view = new view;
   $view->name = 'og_members_admin';
   $view->description = '';
-  $view->tag = 'default';
+  $view->tag = 'og';
   $view->base_table = 'users';
   $view->human_name = 'OG members admin';
   $view->core = 7;
