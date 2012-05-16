@@ -44,7 +44,7 @@ function og_default_rules_configuration() {
     "PLUGIN" : "reaction rule",
     "REQUIRES" : [ "rules", "og" ],
     "ON" : [ "og_user_insert" ],
-    "IF" : [ 
+    "IF" : [
       { "data_is" : { "data" : [ "og-membership:state" ], "value" : "2" } },
       { "entity_is_of_type" : { "entity" : [ "og-membership:group" ], "type" : "node" } }
     ],
@@ -70,8 +70,8 @@ function og_default_rules_configuration() {
   }
 }');
 
-  $items['rules_og_group_content_notification'] = entity_import('rules_config', '{ "rules_og_group_content_notification" : {
-    "LABEL" : "OG group content notification",
+  $items['rules_og_new_content'] = entity_import('rules_config', '{ "rules_og_new_content" : {
+    "LABEL" : "OG new content notification",
     "PLUGIN" : "reaction rule",
     "REQUIRES" : [ "og", "rules" ],
     "ON" : [ "node_insert" ],
