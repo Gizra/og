@@ -2493,7 +2493,7 @@ function og_roles($group_type, $bundle, $gid = 0, $force_group = FALSE, $include
 function og_get_default_roles($include = TRUE) {
   $roles = array();
   foreach (module_implements('og_default_roles') as $module) {
-    $roles += module_invoke($module, 'og_default_roles');
+    $roles = array_merge($roles, module_invoke($module, 'og_default_roles'));
   }
 
   // Allow other modules to alter the defult roles, excpet of the anonymous and
