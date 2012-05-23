@@ -650,6 +650,8 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
         );
         return $element;
       }
+      // User didn't have permissions.
+      break;
 
     case 'og_list_default':
       $accessible_ids = array();
