@@ -792,9 +792,19 @@ function og_update_7000(&$sandbox) {
     db_rename_table('og_ancestry', 'd6_og_ancestry');
     db_rename_table('og_uid', 'd6_og_uid');
 
+    // The tables that will need to be processed.
+    $tables = array('d6_og', 'd6_og_ancestry', 'd6_og_uid');
+
+    // If OG user roles module was installed in the past, make a copy of
+    // its table.
+    if (db_table_exists('og_users_roles')) {
+      db_rename_table('og_users_roles', 'd6_og_users_roles');
+      $tables[] = 'd6_og_users_roles';
+    }
+
     // Add serial ID to d6_og* tables so we can keep track of records that were
     // processed.
-    foreach (array('d6_og', 'd6_og_ancestry', 'd6_og_uid') as $table) {
+    foreach ($tables as $table) {
       // Drop the current primary key, as we are adding a serial column.
       db_drop_primary_key($table);
       db_add_field($table, 'upgrade_id', array(
