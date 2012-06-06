@@ -162,9 +162,8 @@ function og_views_views_default_views() {
     ),
   ));
   $handler->override_option('access', array(
-    'type' => 'none',
-    'role' => array(),
-    'perm' => '',
+    'type' => 'perm',
+    'perm' => 'access content',
   ));
   $handler->override_option('cache', array(
     'type' => 'none',
@@ -381,7 +380,8 @@ function og_views_views_default_views() {
     ),
   ));
   $handler->override_option('access', array(
-    'type' => 'none',
+    'type' => 'perm',
+    'perm' => 'access content',
   ));
   $handler->override_option('cache', array(
     'type' => 'none',
@@ -1423,9 +1423,8 @@ function og_views_views_default_views() {
     ),
   ));
   $handler->override_option('access', array(
-    'type' => 'none',
-    'role' => array(),
-    'perm' => '',
+    'type' => 'perm',
+    'perm' => 'access content',
   ));
   $handler->override_option('cache', array(
     'type' => 'none',
@@ -1686,7 +1685,8 @@ function og_views_views_default_views() {
     ),
   ));
   $handler->override_option('access', array(
-    'type' => 'none',
+    'type' => 'perm',
+    'perm' => 'access content',
   ));
   $handler->override_option('cache', array(
     'type' => 'none',
@@ -2066,7 +2066,8 @@ function og_views_views_default_views() {
     ),
   ));
   $handler->override_option('access', array(
-    'type' => 'none',
+    'type' => 'perm',
+    'perm' => 'access content',
   ));
   $handler->override_option('cache', array(
     'type' => 'none',
@@ -2640,9 +2641,8 @@ function og_views_views_default_views() {
     ),
   ));
   $handler->override_option('access', array(
-    'type' => 'none',
-    'role' => array(),
-    'perm' => '',
+    'type' => 'perm',
+    'perm' => 'access content',
   ));
   $handler->override_option('cache', array(
     'type' => 'none',
