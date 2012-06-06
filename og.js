@@ -26,7 +26,7 @@ Drupal.verticalTabs.og_nodeapi = function() {
       values[i] = $(selected).text();
     });
 
-  return values.join(', ');
+  return Drupal.checkPlain(values.join(', '));
 }
 
 Drupal.verticalTabs.og = function() {
