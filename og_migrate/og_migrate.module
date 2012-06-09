@@ -285,6 +285,13 @@ function og_migrate_7200_access() {
 }
 
 /**
+ * Access callback for OGUR related migration items.
+ */
+function og_migrate_ogur_access() {
+  return db_table_exists('d6_og_users_roles');
+}
+
+/**
  * Get the entity type and entity ID from the deprecated OG table.
  *
  * @param $gid

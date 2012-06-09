@@ -5,8 +5,8 @@
  */
 $plugin = array(
   'name' => t('Migrate OGUR module data - 7.2'),
-  'description' => t('Migrate data from Drupal 6.x og_user_roles(OGUR) module.'),
-  'access callback' => 'og_migrate_7200_access',
+  'description' => t('Migrate data from Drupal 6.x og_user_roles (OGUR) module.'),
+  'access callback' => 'og_migrate_ogur_access',
   'dependencies' => array('og_7200_user_roles'),
 );
 
@@ -29,7 +29,8 @@ function og_7200_ogur(&$context) {
       ->groupBy('rid')
       ->orderBy('rid', 'ASC')
       ->execute()->fetchCol();
-    // For each role, enumerate over all possible types and their respective bundles.
+    // For each role, enumerate over all possible types and their respective
+    // bundles.
     foreach ($drupal_roles as $drupal_role) {
       foreach(og_get_all_group_bundle() as $type => $bundles) {
         foreach($bundles as $bundle => $name) {
