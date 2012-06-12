@@ -79,10 +79,6 @@ function og_uninstall() {
  * Implements hook_schema().
  */
 function og_schema() {
-  return og_schema_info();
-}
-
-function og_schema_info() {
   $schema = array();
 
   $schema['og_role_permission'] = array(
