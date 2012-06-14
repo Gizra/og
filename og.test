@@ -131,7 +131,7 @@ class OgNodeAccess extends DrupalWebTestCase {
     og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
 
     // Create an editor user and a group manager for these tests.
-    $this->editor_user = $this->drupalCreateUser(array('access content', 'edit any page content', 'edit any article content'));
+    $this->editor_user = $this->drupalCreateUser(array('access content', 'edit any page content', 'edit any article content', 'create article content'));
     $this->group_manager = $this->drupalCreateUser(array('access content', 'create page content', 'edit own article content', 'edit own page content'));
 
     // Create group node.
@@ -183,6 +183,26 @@ class OgNodeAccess extends DrupalWebTestCase {
     $this->drupalGet('node/' . $this->group_content->nid . '/edit');
     $this->assertResponse('200', t('Group manager allowed to access to edit group content node.'));
   }
+
+  /**
+   * Test access to node create on strict mode, when field isn't required.
+   */
+  function testStrictAccessNodeCreate() {
+    // Set Node access strict variable.
+    variable_set('og_node_access_strict', TRUE);
+    $this->drupalLogin($this->editor_user);
+
+    $this->drupalGet('node/add/article');
+    $this->assertResponse('200', t('User can access node create with non-required field.'));
+
+    $instance = field_info_instance('node', OG_AUDIENCE_FIELD, 'article');
+    $instance['required'] = TRUE;
+    field_update_instance($instance);
+
+    $this->drupalGet('node/add/article');
+    $this->assertResponse('403', t('User cannot access node create with required field.'));
+  }
+
 
   /**
    * Test non-strict access permissions for updating group node. A non-member
