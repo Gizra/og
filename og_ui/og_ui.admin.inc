@@ -21,7 +21,7 @@ function og_ui_admin_settings($form_state) {
   $form['og_node_access_strict'] = array(
     '#type' => 'checkbox',
     '#title' => t('Strict node access permissions'),
-    '#description' => t('When enabled Organic groups will take full control of node access permission, and will deny access based on Organic groups access. Example: A content editor with the <em>Edit any page content</em> permission who is not a member of a group would be denied access to modifying page content in that group.'),
+    '#description' => t('When enabled Organic groups will restrict permissions for creating, updating and deleting according to the  Organic groups access settings. Example: A content editor with the <em>Edit any page content</em> permission who is not a member of a group would be denied access to modifying page content in that group. (For restricting view access use the Organic groups access control module.)'),
     '#default_value' => variable_get('og_node_access_strict', TRUE),
   );
 
