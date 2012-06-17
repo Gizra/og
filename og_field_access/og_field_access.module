@@ -15,7 +15,7 @@ function og_field_access_field_access($op, $field, $entity_type, $entity, $accou
     return;
   }
 
-  if (user_access('administer groups')) {
+  if (user_access('administer group')) {
     return TRUE;
   }
 
