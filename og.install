@@ -92,7 +92,7 @@ function og_schema() {
       ),
       'permission' => array(
         'type' => 'varchar',
-        'length' => 64,
+        'length' => 128,
         'not null' => TRUE,
         'default' => '',
         'description' => 'A single permission granted to the role identified by rid.',
@@ -998,4 +998,20 @@ function og_update_7201(&$sandbox) {
     // Finished processing.
     $sandbox['#finished'] = 1;
   }
+}
+
+/**
+ * Extend the length of permission field in og_role_permission.
+ */
+function og_update_7202() {
+  $column = array(
+    'type' => 'varchar',
+    'length' => 128,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => 'A single permission granted to the role identified by rid.',
+  );
+
+  db_change_field('og_role_permission', 'permission', 'permission', $column);
+  return t('Updated column definition for {og_role_permission} table.');
 }
