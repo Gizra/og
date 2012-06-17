@@ -48,12 +48,15 @@ function og_7000_group_content(&$context) {
     ->execute();
 
   foreach ($result as $row) {
-    $node = node_load($row->nid);
+    // Some installations might have missing node types, so we don't assume
+    // the node is properly loaded.
+    if ($node = node_load($row->nid)) {
 
-    // Make sure entity isn't already associated with group.
-    if (!og_is_member('node', $row->group_nid, 'node', $node)) {
-      $values = array('entity_type' => 'node', 'entity' => $row->nid);
-      og_group('node', $row->group_nid, $values);
+      // Make sure entity isn't already associated with group.
+      if (!og_is_member('node', $row->group_nid, 'node', $node)) {
+        $values = array('entity_type' => 'node', 'entity' => $row->nid);
+        og_group('node', $row->group_nid, $values);
+      }
     }
 
     $context['sandbox']['last'] = $row->upgrade_id;

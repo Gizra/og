@@ -50,11 +50,13 @@ function og_7000_group(&$context) {
   $revisions = $query->execute();
 
   foreach ($revisions as $revision) {
-    $node = node_load($revision->nid, $revision->vid);
-
-    $wrapper = entity_metadata_wrapper('node', $node);
-    $wrapper->{OG_GROUP_FIELD}->set(TRUE);
-    $wrapper->save();
+    // Some installations might have missing node types, so we don't assume
+    // the node is properly loaded.
+    if ($node = node_load($revision->nid, $revision->vid)) {
+      $wrapper = entity_metadata_wrapper('node', $node);
+      $wrapper->{OG_GROUP_FIELD}->set(TRUE);
+      $wrapper->save();
+    }
 
     $context['sandbox']['last'] = $revision->upgrade_id;
     $context['sandbox']['progress']++;

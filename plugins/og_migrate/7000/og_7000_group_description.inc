@@ -50,10 +50,13 @@ function og_7000_group_description(&$context) {
 
   foreach ($revisions as $revision) {
     if (!empty($revision->og_description)) {
-      $node = node_load($revision->nid, $revision->vid);
-      $wrapper = entity_metadata_wrapper('node', $node);
-      $wrapper->og_description->set($revision->og_description);
-      $wrapper->save();
+      // Some installations might have missing node types, so we don't assume
+      // the node is properly loaded.
+      if ($node = node_load($revision->nid, $revision->vid)) {
+        $wrapper = entity_metadata_wrapper('node', $node);
+        $wrapper->og_description->set($revision->og_description);
+        $wrapper->save();
+      }
     }
 
     $context['sandbox']['last'] = $revision->upgrade_id;

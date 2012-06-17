@@ -53,17 +53,23 @@ function og_7000_user(&$context) {
 
     $account = user_load($record->uid);
     $node = node_load($record->nid);
-    // Make sure entity isn't already associated with group.
-    if (!og_is_member('node', $record->nid, 'user', $account)) {
-      $values = array('entity' => $account, 'state' => $state);
-      og_group('node', $record->nid, $values);
+
+    // Some installations might have missing node types or users, so we don't
+    // assume the node or user is properly loaded.
+    if ($node && $account) {
+      // Make sure entity isn't already associated with group.
+      if (!og_is_member('node', $record->nid, 'user', $account)) {
+        $values = array('entity' => $account, 'state' => $state);
+        og_group('node', $record->nid, $values);
+      }
+
+      if ($record->is_admin) {
+        $og_roles = og_roles('node', $node->type, $node->nid);
+        $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
+        og_role_grant('node', $record->nid, $record->uid, $rid);
+      }
     }
 
-    if ($record->is_admin) {
-      $og_roles = og_roles('node', $node->type, $node->nid);
-      $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
-      og_role_grant('node', $record->nid, $record->uid, $rid);
-    }
     $context['sandbox']['last'] = $record->upgrade_id;
     $context['sandbox']['progress']++;
     $context['message'] = t('Processing database rows @start - @end', array('@start' => $record->upgrade_id, '@end' => $record->upgrade_id + $batch_size));
