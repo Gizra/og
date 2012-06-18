@@ -1128,9 +1128,20 @@ function og_og_membership_update($membership) {
  * Implements hook_og_membership_delete().
  */
 function og_og_membership_delete($membership) {
-  if ($membership->entity_type == 'user' && module_exists('rules')) {
+  if ($membership->entity_type != 'user')  {
+    return;
+  }
+
+  if (module_exists('rules'))  {
     rules_invoke_event('og_user_delete', $membership, entity_metadata_wrapper('user', $membership->etid));
   }
+
+  // Remove possible records in the table {og_users_roles}.
+  db_delete('og_users_roles')
+    ->condition('uid', $membership->etid)
+    ->condition('gid', $membership->gid)
+    ->condition('group_type', $membership->group_type)
+    ->execute();
 }
 
 /**
