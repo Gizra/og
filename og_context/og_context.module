@@ -113,7 +113,7 @@ function og_context_og_context_negotiation_info() {
 
   $providers['url'] = array(
     'name' => t('URL (content create)'),
-    'description' => t('Select groups if they were passed in the node create URL (e.g. node/add/post?field_group_ref=4,5,6). <em>Note: Depends on <a href="@url">Entity reference prepopulate</a> module, and enabling "Prepopulate" in the field settings.</em>', array('@url' => 'http://drupal.org/project/entityreference_prepopulate')),
+    'description' => t('Select groups if they were passed in the node create URL (e.g. node/add/post?og_group_ref=4,5,6). <em>Note: Depends on <a href="@url">Entity reference prepopulate</a> module, and enabling "Prepopulate" in the field settings.</em>', array('@url' => 'http://drupal.org/project/entityreference_prepopulate')),
     'callback' => 'og_context_handler_url',
   );
 
