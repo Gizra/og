@@ -147,7 +147,7 @@ function og_context_og_context_negotiation_info() {
 function og_context_views_api() {
   return array(
     'api' => 2,
-    'path' => drupal_get_path('module', 'og_context') . '/includes',
+    'path' => drupal_get_path('module', 'og_context') . '/includes/views',
   );
 }
 

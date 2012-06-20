@@ -9,4 +9,4 @@ files[] = og_ui.test
 configure = admin/config/group
 
 ; Views handlers
-files[] = includes/views/og_ui_handler_area_og_membership_overview.inc
+files[] = includes/views/handlers/og_ui_handler_area_og_membership_overview.inc

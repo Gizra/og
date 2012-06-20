@@ -221,7 +221,11 @@ class OgUiMigrate7000TestCase extends UpgradePathTestCase {
     module_load_include('inc', 'entity' ,'includes/entity');
     module_load_include('inc', 'entity' ,'includes/entity.controller');
     module_load_include('inc', 'entity' ,'includes/entity.wrapper');
-    module_load_include('inc', 'og' ,'includes/og.info');
+
+    module_load_include('inc', 'og' ,'og.info');
+    module_load_include('inc', 'og' ,'includes/og.exception');
+    module_load_include('inc', 'og' ,'includes/og.membership');
+    module_load_include('inc', 'og' ,'includes/og.membership_type');
 
     module_enable(array('og_migrate', 'og_ui'));
 

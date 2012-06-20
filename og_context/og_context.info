@@ -7,7 +7,7 @@ files[] = og_context.module
 files[] = og_context.install
 
 ; Views default arguments
-files[] = includes/views/og_context_plugin_argument_default_group_context.inc
+files[] = includes/views/handlers/og_context_plugin_argument_default_group_context.inc
 
 ; Views access plugin
-files[] = includes/views/og_context_plugin_access_og_perm.inc
+files[] = includes/views/handlers/og_context_plugin_access_og_perm.inc

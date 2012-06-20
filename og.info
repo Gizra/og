@@ -8,32 +8,33 @@ dependencies[] = entity
 dependencies[] = entityreference
 core = 7.x
 
-files[] = og.module
-files[] = og.admin.inc
-files[] = includes/og.views.inc
+; Entity API controllers
+files[] = og.info.inc
+files[] = includes/og.admin.inc
+files[] = includes/og.exception.inc
+files[] = includes/og.membership.inc
+files[] = includes/og.membership_type.inc
+files[] = includes/views/og.views.inc
 
 ; Test files.
 files[] = og.test
 files[] = tests/upgrade/og.upgrade.test
 
 ; Views plugins
-files[] = includes/views/og_plugin_argument_validate_group.inc
-files[] = includes/views/og_plugin_argument_default_user_groups.inc
+files[] = includes/views/handlers/og_plugin_argument_validate_group.inc
+files[] = includes/views/handlers/og_plugin_argument_default_user_groups.inc
 
 ; Views fields
-files[] = includes/views/og_handler_field_group_member_count.inc
-files[] = includes/views/og_handler_field_group_audience_state.inc
-files[] = includes/views/og_handler_field_prerender_list.inc
-files[] = includes/views/og_handler_field_user_roles.inc
-files[] = includes/views/og_handler_field_group_permissions.inc
+files[] = includes/views/handlers/og_handler_field_group_member_count.inc
+files[] = includes/views/handlers/og_handler_field_group_audience_state.inc
+files[] = includes/views/handlers/og_handler_field_prerender_list.inc
+files[] = includes/views/handlers/og_handler_field_user_roles.inc
+files[] = includes/views/handlers/og_handler_field_group_permissions.inc
 
 ; Views filters
-files[] = includes/views/og_handler_filter_group_audience_state.inc
+files[] = includes/views/handlers/og_handler_filter_group_audience_state.inc
 
 ; Views relationships
-files[] = includes/views/og_handler_relationship.inc
+files[] = includes/views/handlers/og_handler_relationship.inc
 
-; Entity API controllers.
-files[] = includes/og.admin.inc
-files[] = includes/og.info.inc
-files[] = includes/og.views.inc
+

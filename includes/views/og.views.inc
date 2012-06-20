@@ -150,7 +150,7 @@ function og_views_plugins() {
       'og' => array(
         'title' => t('OG group'),
         'handler' => 'og_plugin_argument_validate_group',
-        'path' => drupal_get_path('module', 'og') . '/includes/views',
+        'path' => drupal_get_path('module', 'og') . '/includes/views/handlers',
       ),
     ),
     'argument default' => array(
