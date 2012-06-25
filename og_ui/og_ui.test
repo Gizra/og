@@ -58,6 +58,62 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
   }
 }
 
+class OgUiAdminPermissionsTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'OG UI admin section',
+      'description' => 'Verify that only users with group admin permissions can see the admin tabs.',
+      'group' => 'Organic groups UI'
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og_ui');
+
+    // Add OG group fields.
+    og_create_field(OG_GROUP_FIELD, 'node', 'article');
+  }
+
+  /**
+   * Check access permissions to the group admin tab.
+   */
+  function testOgUiAdminTabAccess() {
+    $user1 = $this->drupalCreateUser();
+    $user2 = $this->drupalCreateUser();
+
+    $settings = array();
+    $settings['uid'] = $user1->uid;
+    $settings['type'] = 'article';
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $node = $this->drupalCreateNode($settings);
+
+    $this->drupalLogin($user2);
+
+    // User does not have any access permissions.
+    $this->drupalGet('node/' . $node->nid . '/group');
+    $this->assertResponse(403, t('User without privileges can not access group admin tabs.'));
+
+    $perms = array(
+      'add user',
+      'manage members',
+      'manage roles',
+      'manage permissions',
+    );
+
+    $roles = og_roles('node', 'article');
+    $auth_rid = array_search(OG_ANONYMOUS_ROLE, $roles);
+    foreach ($perms as $perm) {
+      // Add an admin permission to allow the user to access to the admin tabs.
+      og_role_grant_permissions($auth_rid, array($perm));
+      $this->drupalGet('node/' . $node->nid . '/group');
+      $this->assertResponse(200, t('User with "@perm" privilege can access group admin tabs.', array('@perm' => $perm)));
+      // Remove the admin permission to restrict user access to the admin tabs.
+      // User is left without admin permissions for the next loop.
+      og_role_revoke_permissions($auth_rid, array($perm));
+    }
+  }
+}
+
 class OgUiSubscribeTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(

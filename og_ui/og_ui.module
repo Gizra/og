@@ -42,7 +42,7 @@ function og_ui_menu() {
     'file' => 'og_ui.admin.inc',
     'weight' => 5,
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('administer members', 1, 2),
+    'access arguments' => array('add user', 1, 2),
   );
 
   // User listing pages.
@@ -53,7 +53,7 @@ function og_ui_menu() {
     'page callback' => 'og_ui_admin_account',
     'page arguments' => array(1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('administer members', 1, 2),
+    'access arguments' => array('manage members', 1, 2),
     'weight' => -4,
     'file' => 'og_ui.admin.inc',
   );
@@ -66,7 +66,7 @@ function og_ui_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_admin_new_role', 1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('administer group', 1, 2),
+    'access arguments' => array('manage roles', 1, 2),
     'file' => 'og_ui.admin.inc',
     'weight' => -9,
   );
@@ -81,7 +81,8 @@ function og_ui_menu() {
     // loaded from the role.
     'page arguments' => array('og_ui_admin_roles', 1, 2, '', 5),
     'access callback' => 'og_ui_access_entity_role',
-    'access arguments' => array('administer group', 1, 2, 5),
+    // Require administer group permission to edit and delete roles.
+    'access arguments' => array('manage roles', 1, 2, 5),
     'file' => 'og_ui.admin.inc',
     'weight' => -9,
   );
@@ -93,7 +94,7 @@ function og_ui_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('og_ui_admin_permissions', 1, 2),
     'access callback' => 'og_ui_user_access_group',
-    'access arguments' => array('administer group', 1, 2),
+    'access arguments' => array('manage permissions', 1, 2),
     'file' => 'og_ui.admin.inc',
     'weight' => -8,
   );
@@ -108,7 +109,7 @@ function og_ui_menu() {
     // loaded from the role.
     'page arguments' => array('og_ui_admin_permissions', 1, 2, '', 5),
     'access callback' => 'og_ui_access_entity_role',
-    'access arguments' => array('administer group', 1, 2, 5),
+    'access arguments' => array('manage permissions', 1, 2, 5),
     'file' => 'og_ui.admin.inc',
     'weight' => -9,
   );
@@ -118,8 +119,8 @@ function og_ui_menu() {
       'title' => 'Group',
       'page callback' => 'og_ui_group_admin_overview',
       'page arguments' => array($entity, 1),
-      'access callback' => 'og_ui_user_access_group',
-      'access arguments' => array('access administration pages', $entity, 1),
+      'access callback' => 'og_ui_get_group_admin',
+      'access arguments' => array($entity, 1),
       'type' => MENU_LOCAL_TASK,
       'file' => 'og_ui.admin.inc',
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -1018,10 +1019,25 @@ function og_ui_og_permission() {
     'default role' => array(OG_ADMINISTRATOR_ROLE),
   );
 
-  $items['access administration pages'] = array(
-    'title' => t('Use the administration pages'),
-    'description' => t('Allow users to see the "Group" tab, and access the administration pages.'),
+  $items['manage members'] = array(
+    'title' => t('Manage members'),
+    'description' => t('Users may remove group members and alter member status and roles.'),
     'default role' => array(OG_ADMINISTRATOR_ROLE),
+    'restrict access' => TRUE,
+  );
+
+  $items['manage roles'] = array(
+    'title' => t('Add roles'),
+    'description' => t('Users may view group roles and add new roles if group default roles are overriden.'),
+    'default role' => array(OG_ADMINISTRATOR_ROLE),
+    'restrict access' => TRUE,
+  );
+
+  $items['manage permissions'] = array(
+    'title' => t('Manage permissions'),
+    'description' => t('Users may view the group permissions page and change permsissions if group default roles are overriden.'),
+    'default role' => array(OG_ADMINISTRATOR_ROLE),
+    'restrict access' => TRUE,
   );
 
   return $items;
@@ -1048,35 +1064,40 @@ function og_ui_get_group_admin($entity_type, $etid) {
  */
 function og_ui_og_ui_get_group_admin($group_type, $gid) {
   $items = array();
-
   $default_access = og_is_group_default_access($group_type, $gid);
 
-  $items['add_people'] = array(
-    'title' => t('Add people'),
-    'description' => t('Add group members.'),
-    // The final URL will be "group/$group_type/$gid/admin/people/add-user".
-    // @see og_ui_group_admin_overview().
-    'href' => 'admin/people/add-user',
-  );
+  if (og_user_access($group_type, $gid, 'add user')) {
+    $items['add_people'] = array(
+      'title' => t('Add people'),
+      'description' => t('Add group members.'),
+      // The final URL will be "group/$group_type/$gid/admin/people/add-user".
+      // @see og_ui_group_admin_overview().
+      'href' => 'admin/people/add-user',
+    );
+  }
 
-  $items['people'] = array(
-    'title' => t('People'),
-    'description' => t('Manage the group members.'),
-    'href' => "admin/people",
-  );
+  if (og_user_access($group_type, $gid, 'manage members')) {
+    $items['people'] = array(
+      'title' => t('People'),
+      'description' => t('Manage the group members.'),
+      'href' => "admin/people",
+    );
+  }
 
-  if (og_user_access($group_type, $gid, 'administer group')) {
+  if (og_user_access($group_type, $gid, 'manage roles')) {
     $items['roles'] = array(
       'title' => !$default_access ? t('Roles') : t('Roles (read-only)'),
       'description' => !$default_access ? t('Manage the group roles.') : t('View the group roles.'),
       'href' => "admin/roles",
     );
+  }
+
+  if (og_user_access($group_type, $gid, 'manage permissions')) {
     $items['permissions'] = array(
       'title' => !$default_access ? t('Permissions') : t('Permissions (read-only)'),
       'description' => !$default_access ? t('Manage the group permissions.') : t('View the group permissions.'),
       'href' => "admin/permissions",
     );
-
   }
 
   return $items;
