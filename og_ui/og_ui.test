@@ -112,6 +112,38 @@ class OgUiAdminPermissionsTestCase extends DrupalWebTestCase {
       og_role_revoke_permissions($auth_rid, array($perm));
     }
   }
+
+  /**
+   * Check access to restricted permissions on the permissions edit page.
+   */
+  function testOgUiAdminPermissionsAccess() {
+    $user1 = $this->drupalCreateUser();
+    $user2 = $this->drupalCreateUser();
+
+    $settings = array();
+    $settings['uid'] = $user1->uid;
+    $settings['type'] = 'article';
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $node = $this->drupalCreateNode($settings);
+
+    $this->drupalLogin($user2);
+    $roles = og_roles('node', 'article');
+    $auth_rid = array_search(OG_ANONYMOUS_ROLE, $roles);
+    $text = t('Warning: Give to trusted roles only; this permission has security implications in the group context.');
+
+    // Check that restricted permissions are not displayed to the user with
+    // manage permissions but not administer group.
+    og_role_grant_permissions($auth_rid, array('manage permissions'));
+    $this->drupalGet('group/node/' . $node->nid . '/admin/permissions');
+    $this->assertNoText($text, t('Restricted permissions are not displayed to the unprivileged user.'));
+
+    // Check that restricted permissions are displayed to a user with administer
+    // group.
+    og_role_revoke_permissions($auth_rid, array('manage permissions'));
+    og_role_grant_permissions($auth_rid, array('administer group'));
+    $this->drupalGet('group/node/' . $node->nid . '/admin/permissions');
+    $this->assertText($text, t('Restricted permissions are displayed to the privileged user.'));
+  }
 }
 
 class OgUiSubscribeTestCase extends DrupalWebTestCase {

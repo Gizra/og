@@ -561,6 +561,13 @@ function og_ui_admin_permissions($form, $form_state, $group_type = '', $gid = 0,
           'restrict access' => FALSE,
           'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications in the group context.') : '',
         );
+        // If the user can manage permissions, but does not have administer
+        // group permission, hide restricted permissions from them. This
+        // prevents users from escalating their privileges.
+        if (($perm_item['restrict access'] && !og_user_access($group_type, $gid, 'administer group'))) {
+          continue;
+        }
+
         $options[$perm] = '';
         $form['permission'][$perm] = array(
           '#type' => 'item',
