@@ -63,8 +63,7 @@ function og_7200_roles(&$context) {
     list($group_type, $gid) = og_migrate_get_group($row->gid);
     // Some installations might have missing entities, so we don't assume
     // they exist.
-    if ($gid) {
-      $group = entity_load_single($group_type, $gid);
+    if ($gid && $group = entity_load_single($group_type, $gid)) {
       list(,,$bundle) = entity_extract_ids($group_type, $group);
 
       db_update('og_role')

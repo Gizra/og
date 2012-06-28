@@ -58,9 +58,8 @@ function og_7200_user_roles(&$context) {
 
     // Some installations might have missing entities, so we don't assume
     // they exist.
-    if ($gid) {
+    if ($gid && $group = entity_load_single($group_type, $gid)) {
       // Get the bundle from the entity.
-      $group = entity_load_single($group_type, $gid);
       list(,,$bundle) = entity_extract_ids($group_type, $group);
 
       // Get the per-bundle roles, and replace the role ID, with the
