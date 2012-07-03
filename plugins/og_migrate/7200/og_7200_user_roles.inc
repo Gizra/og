@@ -65,7 +65,9 @@ function og_7200_user_roles(&$context) {
       // Get the per-bundle roles, and replace the role ID, with the
       // per-bundle role ID.
       $og_roles = og_roles($group_type, $bundle, $gid);
-      $rid = array_search($default_roles[$row->rid], $og_roles);
+      if (!$rid = array_search($default_roles[$row->rid], $og_roles)) {
+        continue;
+      }
 
       db_update('og_users_roles')
         ->fields(array('rid' => $rid, 'group_type' => $group_type, 'gid' => $gid))
