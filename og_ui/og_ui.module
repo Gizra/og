@@ -974,7 +974,7 @@ function og_ui_node_type_save($bundle_name) {
     'og_group_type',
     'og_group_content_type',
     'target_type',
-    'target_bundle',
+    'target_bundles',
   );
   foreach ($vars as $var) {
     variable_del($var . '_' . $bundle_name);
