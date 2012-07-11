@@ -27,7 +27,15 @@ function og_register_query_og_alter(QueryAlterableInterface $query) {
     return;
   }
 
-  $field = $query->alterMetaData['field'];
+  $handler = $query->alterMetaData['entityreference_selection_handler'];
+  $field = $handler->field;
+  $instance = $handler->instance;
+
+  if ($instance['entity_type'] != 'user') {
+    // Field is not attached to the user entity.
+    return;
+  }
+
   $group_type = $field['settings']['target_type'];
   $group_bundles = $field['settings']['handler_settings']['target_bundles'];
 
