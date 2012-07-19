@@ -3207,3 +3207,26 @@ function og_operations_load_action_includes() {
 
   return $files;
 }
+
+
+/**
+ * Implements hook_features_api().
+ */
+function og_features_api() {
+  return array(
+    'og_features_role' => array(
+      'name' => t('OG Role'),
+      'feature source' => TRUE,
+      'default_hook' => 'og_features_default_roles',
+      'default_file' => FEATURES_DEFAULTS_INCLUDED,
+      'file' => drupal_get_path('module', 'og') . '/includes/og_features_role.features.inc',
+    ),
+    'og_features_permission' => array(
+      'name' => t('OG Permissions'),
+      'feature_source' => TRUE,
+      'default_hook' => 'og_features_default_permissions',
+      'default_file' => FEATURES_DEFAULTS_INCLUDED,
+      'file' => drupal_get_path('module', 'og') . '/includes/og_features_permission.features.inc',
+    ),
+  );
+}
