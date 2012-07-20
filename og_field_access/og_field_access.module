@@ -21,6 +21,10 @@ function og_field_access_field_access($op, $field, $entity_type, $entity, $accou
 
   $perm = $op == 'view' ? 'view ' . $field['field_name'] . ' field' : 'update ' . $field['field_name'] . ' field';
   list($id,, $bundle) = entity_extract_ids($entity_type, $entity);
+  // Show fields in user registration form.
+  if ($entity_type == 'user' && !$id) {
+    return;
+  }
   if (!$id && $op == 'edit' && (og_is_group($entity_type, $entity) || og_is_group_content_type($entity_type, $bundle))) {
     // This is create form of a non-saved entity, so we check
     // permissions to access the field, for all the groups the user is a
