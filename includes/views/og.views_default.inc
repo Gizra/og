@@ -362,6 +362,11 @@ function og_views_default_views() {
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['relationship'] = 'og_membership_related_node_group';
   $handler->display->display_options['filters']['status']['value'] = '1';
+  /* Filter criterion: OG membership: Entity_type */
+  $handler->display->display_options['filters']['entity_type']['id'] = 'entity_type';
+  $handler->display->display_options['filters']['entity_type']['table'] = 'og_membership';
+  $handler->display->display_options['filters']['entity_type']['field'] = 'entity_type';
+  $handler->display->display_options['filters']['entity_type']['value'] = 'user';
 
   if (module_exists('views_content')) {
     /* Display: Content pane */
