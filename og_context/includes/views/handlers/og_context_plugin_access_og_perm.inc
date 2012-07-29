@@ -23,6 +23,16 @@ class og_context_plugin_access_og_perm extends views_plugin_access {
   }
 
   /**
+   * Determine the access callback and arguments.
+   */
+  function get_access_callback() {
+    if ($group = og_context($this->options['group_type'])) {
+      return array('og_user_access', array($group['group_type'], $group['gid'], $this->options['perm']));
+    }
+    return FALSE;
+  }
+
+  /**
    * Return a string to display as the clickable title for the
    * access control.
    */
