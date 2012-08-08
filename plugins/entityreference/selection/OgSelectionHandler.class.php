@@ -137,10 +137,6 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
   public function buildEntityFieldQuery($match = NULL, $match_operator = 'CONTAINS') {
     global $user;
 
-    // TODO: Remove after Entityreference RC2.
-    $this->entity_type = !empty($this->entity_type) ? $this->entity_type : NULL;
-    $this->entity = !empty($this->entity) ? $this->entity : NULL;
-
     $handler = EntityReference_SelectionHandler_Generic::getInstance($this->field, $this->instance, $this->entity_type, $this->entity);
     $query = $handler->buildEntityFieldQuery($match, $match_operator);
 
