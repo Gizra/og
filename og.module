@@ -780,8 +780,16 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
       return;
     }
     $primary_ids = $wrapper->$primary_field->value(array('identifier' => TRUE));
-    if (!$primary_ids) {
-      continue;
+
+    if (!empty($field['settings']['handler_settings']['force_optional_primary']) && user_access('administer group')) {
+      // Set required field to not required for administrator.
+      $form_primary = &$form[$primary_field][LANGUAGE_NONE];
+
+      if ($form_primary['#required']) {
+        $form_primary['#required'] = FALSE;
+        // Need to add a "None" option now that the field is not required.
+        $form_primary['#options'] = array('_none' => t('- None -')) + $form_primary['#options'];
+      }
     }
 
     // Intersect the IDs from the primary field, with the referencable IDs
@@ -890,7 +898,7 @@ function og_form_secondary_field_validate($form, &$form_state) {
     $items = FALSE;
     field_default_extract_form_values($entity_type, $entity, $primary_field, $primary_instance, $langcode, $items, $form, $form_state);
     foreach ($items as $item) {
-      if (!empty($item['target_id'])) {
+      if (!empty($item['target_id']) && $item['target_id'] != '_none') {
         ++$count;
       }
     }
@@ -947,8 +955,13 @@ function og_entity_presave($entity, $entity_type) {
       continue;
     }
 
-    if (!$wrapper->{$field_name}->value(array('identifier' => TRUE))) {
+    if (!$new_ids = $wrapper->{$field_name}->value(array('identifier' => TRUE))) {
       continue;
+    }
+
+    if (!is_array($new_ids)) {
+      // Entity metadta returned a single ID or no ID.
+      $new_ids = array($new_ids);
     }
 
     $primary_field = $fields_info[$field_name]['settings']['handler_settings']['primary_field'];
@@ -958,7 +971,7 @@ function og_entity_presave($entity, $entity_type) {
       // Entity metadta returned a single ID.
       $existing_ids = array($existing_ids);
     }
-    foreach ($wrapper->{$field_name}->value(array('identifier' => TRUE)) as $id) {
+    foreach ($new_ids as $id) {
       // TODO: Move this check to Entity API.
       if (!in_array($id, $existing_ids)) {
         if ($primary_field_info['cardinality'] == 1) {

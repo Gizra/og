@@ -44,6 +44,7 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
         'reference_type' => 'my_groups',
         'primary_field' => FALSE,
         'hide_secondary_field' => TRUE,
+        'force_optional_primary' => TRUE,
       );
 
       $form['target_bundles'] = array(
@@ -125,6 +126,19 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
           ),
         ),
       );
+
+      $form['force_optional_primary'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Force optional primary field'),
+        '#description' => t("Force the primary field to be optional when the secondary field is shown. If the primary field is requrired, then this will allow privileged users to edit group content for groups they're not members of -- i.e., they can leave the primary field blank."),
+        '#default_value' => $settings['force_optional_primary'],
+        '#states' => array(
+          'invisible' => array(
+            ':input[name="field[settings][handler_settings][primary_field]"]' => array('value' => 0),
+          ),
+        ),
+      );
+
       form_load_include($form_state, 'php', 'og', '/plugins/selection/og.class');
     }
 
