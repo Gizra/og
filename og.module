@@ -641,6 +641,7 @@ function og_field_create_instance($instance) {
     $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
     $og_field['field']['settings']['handler_settings']['primary_field'] = 'og_user_group_ref';
     $og_field['field']['settings']['handler_settings']['hide_secondary_field'] = TRUE;
+    $og_field['field']['settings']['handler_settings']['force_optional_primary'] = TRUE;
     og_create_field('og_other_user_group_ref', 'user', 'user', $og_field);
   }
 }

@@ -966,6 +966,8 @@ function og_ui_node_type_save($bundle_name) {
     $og_field['instance']['widget']['type'] = 'entityreference_autocomplete';
     $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
     $og_field['field']['settings']['handler_settings']['primary_field'] = OG_AUDIENCE_FIELD;
+    $og_field['field']['settings']['handler_settings']['hide_secondary_field'] = TRUE;
+    $og_field['field']['settings']['handler_settings']['force_optional_primary'] = TRUE;
     og_create_field(OG_AUDIENCE_OTHER_GROUPS_FIELD, 'node', $bundle_name, $og_field);
   }
 
