@@ -661,19 +661,23 @@ function og_ui_og_ui_get_group_admin($gid) {
 
   $default_access = og_is_group_default_access($gid);
 
-  $items['add_people'] = array(
-    'title' => t('Add people'),
-    'description' => t('Add group members.'),
-    // The final URL will be "group/$entity_type/$etid/admin/people/add-user".
-    // @see og_ui_group_admin_overview().
-    'href' => 'admin/people/add-user',
-  );
+  if (og_user_access($gid, 'add user')) {
+    $items['add_people'] = array(
+      'title' => t('Add people'),
+      'description' => t('Add group members.'),
+      // The final URL will be "group/$entity_type/$etid/admin/people/add-user".
+      // @see og_ui_group_admin_overview().
+      'href' => 'admin/people/add-user',
+    );
+  }
 
-  $items['people'] = array(
-    'title' => t('People'),
-    'description' => t('Manage the group members.'),
-    'href' => "admin/people",
-  );
+  if (og_user_access($gid, 'approve and deny subscription')) {
+    $items['people'] = array(
+      'title' => t('People'),
+      'description' => t('Manage the group members.'),
+      'href' => "admin/people",
+    );
+  }
 
   $items['roles'] = array(
     'title' => !$default_access ? t('Roles') : t('Roles (read-only)'),
