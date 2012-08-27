@@ -235,10 +235,12 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         // existing ones.
         $gids = array_keys(og_load_multiple($gids));
         foreach ($gids as $gid) {
-          $default_values[$gid] = $gid;
+          $default_values[] = $gid;
           $items_gid[] = $gid;
         }
       }
+// Since array_unique compares values according to (string)$a==(string)$b, this also cleans up duplicates such as "1" and 1
+      $default_values = array_unique($default_values);
 
       foreach (array('content groups', 'other groups') as $key) {
         if (!empty($audience[$key])) {
@@ -442,15 +444,11 @@ function og_field_attach_form($entity_type, $entity, &$form, $form_state, $langc
 }
 
 /**
- * Validate handler; Re-add hidden selected group IDs if exist.
+ * Validate handler; Re-add hidden selected group IDs if exist.  Also, to be safe, check for and clean up duplicate entries.
  */
 function og_field_widget_form_validate($form, &$form_state) {
-  if (empty($form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids'])) {
-    return;
-  }
-
   // The hidden group IDs.
-  $gids = $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids'];
+  $gids = !empty($form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids']) ? $form[OG_AUDIENCE_FIELD][LANGUAGE_NONE]['#hidden_selected_gids'] : array();
   if (!empty($form_state['values'][OG_AUDIENCE_FIELD][LANGUAGE_NONE])) {
     foreach ($form_state['values'][OG_AUDIENCE_FIELD][LANGUAGE_NONE] as $key => $value) {
       // Add the selected group IDs.
@@ -464,6 +462,10 @@ function og_field_widget_form_validate($form, &$form_state) {
     $value[LANGUAGE_NONE][$delta]['gid'] = $gid;
     ++$delta;
   }
+  if (empty($value)) {
+    return;
+  }
+
   // Set the new values.
   form_set_value($form[OG_AUDIENCE_FIELD], $value, $form_state);
 }
