@@ -16,7 +16,9 @@ $plugin = array(
 function og_7200_user_roles(&$context) {
   if (empty($context['sandbox'])) {
     $context['sandbox']['progress'] = 0;
-    $context['sandbox']['last'] = 0;
+    $context['sandbox']['last_uid'] = 0;
+    $context['sandbox']['last_rid'] = 0;
+    $context['sandbox']['last_gid'] = 0;
 
     // Calculate max items.
     $context['sandbox']['max'] = db_select('og_users_roles', 'ogur')
@@ -35,12 +37,35 @@ function og_7200_user_roles(&$context) {
   // Operate on entity in batches.
   $batch_size = variable_get('og_batch_size', 200);
 
-  $result = db_select('og_users_roles', 'ogur')
+  $query = db_select('og_users_roles', 'ogur')
     ->fields('ogur', array('uid', 'rid', 'gid'))
     ->condition('group_type', '', '=')
-    ->condition('uid', $context['sandbox']['last'], '>=')
     ->range(0, $batch_size)
     ->orderBy('uid')
+    ->orderBy('rid')
+    ->orderBy('gid');
+
+  // Create a complex query condition to ensure that this loop picks up exactly where last one left off.
+  // Any simpler condition can potentially lead to infinite loops and/or loops that finish too early.
+  // The assembled condition is:
+  // (uid>last_uid) || (uid==last_uid && rid>last_rid) || (uid==last_uid && rid==last_rid && gid>last_gid)
+  $db_or = db_or();
+  $db_or->condition('uid', $context['sandbox']['last_uid'], '>');
+
+  $db_and = db_and();
+  $db_and->condition('uid', $context['sandbox']['last_uid'], '=');
+  $db_and->condition('rid', $context['sandbox']['last_rid'], '>');
+  $db_or->condition($db_and);
+
+  $db_and = db_and();
+  $db_and->condition('uid', $context['sandbox']['last_uid'], '=');
+  $db_and->condition('rid', $context['sandbox']['last_rid'], '=');
+  $db_and->condition('gid', $context['sandbox']['last_gid'], '>');
+  $db_or->condition($db_and);
+
+  $query->condition($db_or);
+
+  $result = $query
     ->execute()
     ->fetchAll();
 
@@ -55,6 +80,12 @@ function og_7200_user_roles(&$context) {
 
   foreach ($result as $row) {
     list($group_type, $gid) = og_migrate_get_group($row->gid);
+
+    // Update context early to ensure that it gets done for each row, regardless of subsequent processing
+    $context['sandbox']['progress']++;
+    $context['sandbox']['last_uid'] = $row->uid;
+    $context['sandbox']['last_rid'] = $row->rid;
+    $context['sandbox']['last_gid'] = $row->gid;
 
     // Some installations might have missing entities, so we don't assume
     // they exist.
@@ -76,9 +107,6 @@ function og_7200_user_roles(&$context) {
         ->condition('gid', $row->gid, '=')
         ->execute();
     }
-
-    $context['sandbox']['progress']++;
-    $context['sandbox']['last'] = $row->uid;
   }
 
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {

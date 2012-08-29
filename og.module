@@ -2644,10 +2644,12 @@ function og_roles_override($group_type, $bundle, $gid) {
 
   $rids = array();
   if ($gid) {
+    // Copy roles from a specific group
     $og_roles = og_roles($group_type, $bundle);
     $perms = og_role_permissions($og_roles);
   }
   else {
+    // Copy the global default roles
     $og_roles = og_get_default_roles();
     $perms = og_get_default_permissions();
   }
