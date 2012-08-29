@@ -1058,6 +1058,9 @@ function og_ui_get_group_admin($entity_type, $etid) {
   );
   drupal_alter('og_ui_get_group_admin', $data, $context);
 
+  // Sort the results.
+  uasort($data, 'drupal_sort_title');
+
   return $data;
 }
 
