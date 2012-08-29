@@ -85,16 +85,36 @@ function hook_og_role_update($role) {
  *   implementing modules to properly identify the deleted role.
  */
 function hook_og_role_delete($role) {
-
 }
 
-
-function hook_og_role_grant($gid, $uid, $rid) {
-
+/**
+ * Allow modules to react upon a role being granted.
+ *
+ * @param $entity_type
+ *   The entity type of the group in which a role has been granted.
+ * @param $gid
+ *   The group id of the group in which a role has been granted.
+ * @param $uid
+ *   The user id of the user to whom a role has been granted.
+ * @param $rid
+ *   The OG role id being granted to the user.
+ */
+function hook_og_role_grant($entity_type, $gid, $uid, $rid) {
 }
 
-function hook_og_role_revoke($gid, $uid, $rid) {
-
+/**
+ * Allow modules to react upon a role being revoked.
+ *
+ * @param $entity_type
+ *   The entity type of the group in which a role has been revoked.
+ * @param $gid
+ *   The group id of the group in which a role has been revoked.
+ * @param $uid
+ *   The user id of the user to whom a role has been revoked.
+ * @param $rid
+ *   The OG role id being revoked from the user.
+ */
+function hook_og_role_revoke($entity_type, $gid, $uid, $rid) {
 }
 
 /**
@@ -290,7 +310,7 @@ function hook_og_membership_type_delete(OgMembershipType $og_membership) {
 */
 function hook_default_og_membership_type() {
   $defaults['main'] = entity_create('og_membership_type', array(
-    // É
+    // ï¿½
   ));
   return $defaults;
 }
