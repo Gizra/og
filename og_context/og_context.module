@@ -320,10 +320,12 @@ function og_context_determine_context($group_type, $item = NULL) {
     $item = menu_get_item();
   }
 
-  foreach (og_context_negotiation_info() as $name => $provider) {
-    if (!in_array($name, $enabled_providers)) {
+  $providers = og_context_negotiation_info();
+  foreach ($enabled_providers as $name) {
+    if (!in_array($name, $providers)) {
       continue;
     }
+    $provider = $providers[$name];
     $invoke = FALSE;
     if (!empty($provider['menu path'])) {
       foreach ($provider['menu path'] as $path) {
