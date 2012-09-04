@@ -880,9 +880,21 @@ function og_update_7101() {
  * Deprecate OG group entity, and add per-bundle roles.
  */
 function og_update_7200() {
+  // Delete the old group-audience field. The OG membership is not
+  // affected by this.
+  foreach (field_info_instances() as $entity_type => $bundles) {
+    foreach ($bundles as $bundle => $field_names) {
+      if (!empty($field_names['group_audience'])) {
+        field_delete_instance($field_names['group_audience']);
+      }
+    }
+  }
+  field_delete_field('group_audience');
+
   if (!module_enable(array('entityreference'))) {
     throw new DrupalUpdateException('This version of OG requires Entity reference, but it could not be enabled.');
   }
+
   $column = array(
     'description' => "The group's entity type (e.g. node, comment, etc').",
     'type' => 'varchar',
@@ -926,16 +938,13 @@ function og_update_7200() {
   );
   db_add_field('og_membership', 'field_name', $column);
 
-  // Delete the old group-audience field. The OG membership is not
-  // affected by this.
-  field_delete_field('group_audience');
-
   // Variable cleanup.
   variable_del('og_skip_access');
 
   // We can't call og_needs_migrate() directly, so just set the variable.
   variable_set('og_needs_migrate', TRUE);
 
+  // Clear entity cache.
   // See http://drupal.org/node/996236
   entity_info_cache_clear();
 }
