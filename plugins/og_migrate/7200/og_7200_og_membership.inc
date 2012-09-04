@@ -14,6 +14,21 @@ $plugin = array(
  */
 function og_7200_og_membership(&$context) {
   if (empty($context['sandbox'])) {
+
+    foreach (variable_get('og_migrate_7200_field_instances', array()) as $entity_type => $bundles) {
+      foreach ($bundles as $bundle) {
+        // Add a group-audience field to the bundle.
+        $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+        $og_field['field']['settings']['target_type'] = $group_type;
+
+        $entity_info = entity_get_info($entity_type);
+        $og_field['instance']['label'] = t('Groups audience - @label', array('@label' => $entity_info['label']));
+
+        $field_name = OG_AUDIENCE_FIELD . '_' . $entity_type . '_' . $bundle;
+        og_create_field($field_name, $entity_type, $bundle, $og_field);
+      }
+    }
+
     // Calculate max items.
     $query = new EntityFieldQuery();
     $context['sandbox']['max'] = $query
@@ -28,18 +43,8 @@ function og_7200_og_membership(&$context) {
       return;
     }
 
-    $context['audience_fields'] = array();
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['last'] = 0;
-
-    // Indicate if there is a group-audience field referencing the entity
-    // type.
-    foreach (field_info_fields() as $field_name => $field) {
-      if (og_is_group_audience_field($field_name)) {
-        $group_type = $field['settings']['target_type'];
-        $context['audience_fields'][$group_type][$field_name] = $field['bundles'];
-      }
-    }
   }
 
   // Operate on entity in batches.
@@ -85,19 +90,7 @@ function og_7200_og_membership(&$context) {
     }
     list(,,$bundle) = entity_extract_ids($og_membership->entity_type, $entity);
 
-    $field_name = $group_type == 'node' ? OG_AUDIENCE_FIELD : OG_AUDIENCE_FIELD . '_' . $group_type;
-
-    if (empty($context['audience_fields'][$group_type][$field_name][$entity_type]) || !array_search($bundle, $context['audience_fields'][$group_type][$field_name][$entity_type])) {
-      // Add a group-audience field to the bundle.
-      $og_field = og_fields_info(OG_AUDIENCE_FIELD);
-      $og_field['field']['settings']['target_type'] = $group_type;
-
-      $entity_info = entity_get_info($group_type);
-      $og_field['instance']['label'] = t('Groups audience - @label', array('@label' => $entity_info['label']));
-      $context['audience_fields'][$group_type][$field_name][$entity_type][] = $bundle;
-
-      og_create_field($field_name, $entity_type, $bundle, $og_field);
-    }
+    $field_name = OG_AUDIENCE_FIELD . '_' . $group_type . '_' . $bundle;
 
     $og_membership->field_name = $field_name;
     $og_membership->save();
