@@ -15,9 +15,9 @@ $plugin = array(
 function og_7200_og_membership(&$context) {
   if (empty($context['sandbox'])) {
 
+    // Add a group-audience field to the bundles.
     foreach (variable_get('og_migrate_7200_field_instances', array()) as $entity_type => $bundles) {
       foreach ($bundles as $bundle) {
-        // Add a group-audience field to the bundle.
         $og_field = og_fields_info(OG_AUDIENCE_FIELD);
         $og_field['field']['settings']['target_type'] = $group_type;
 
@@ -28,6 +28,8 @@ function og_7200_og_membership(&$context) {
         og_create_field($field_name, $entity_type, $bundle, $og_field);
       }
     }
+
+    variable_del('og_migrate_7200_field_instances');
 
     // Calculate max items.
     $query = new EntityFieldQuery();
