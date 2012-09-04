@@ -37,11 +37,6 @@ define('OG_STATE_BLOCKED', 3);
 define('OG_AUDIENCE_FIELD', 'og_group_ref');
 
 /**
- * Define the "other groups" (i.e. not "my groups") default field name.
- */
-define('OG_AUDIENCE_OTHER_GROUPS_FIELD', 'og_group_ref_other_groups');
-
-/**
  * Group field.
  */
 define('OG_GROUP_FIELD', 'group_group');
@@ -101,6 +96,32 @@ function og_help($path, $arg) {
       $output .= '<p>' . t("Information about Organic Groups can also be found on the module's<a href='@og'>documentation page</a>.", array('@og' => 'http://drupal.org/documentation/modules/og')) . '</p>';
       return $output;
   }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function og_menu() {
+  $items = array();
+
+  // Add our own autocomplete callback to pass also the group and
+  // vocabulary info.
+  $items['og/autocomplete/single/%/%/%/%'] = array(
+    'title' => 'Entity Reference Autocomplete',
+    'page callback' => 'og_entityreference_autocomplete_callback',
+    'page arguments' => array(2, 3, 4, 5, 6),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['og/autocomplete/tags/%/%/%/%'] = array(
+    'title' => 'Entity Reference Autocomplete',
+    'page callback' => 'og_entityreference_autocomplete_callback',
+    'page arguments' => array(2, 3, 4, 5, 6),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
 }
 
 /**
@@ -495,22 +516,29 @@ function og_og_default_roles() {
 function og_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
 
-  if ($op == 'create' && og_is_group_content_type('node', $type) && variable_get('og_node_access_strict', TRUE) && !user_access('administer group')) {
+  if ($op == 'create' && og_is_group_content_type('node', $type) && variable_get('og_node_access_strict', TRUE)) {
+    if (user_access('administer group')) {
+      return NODE_ACCESS_ALLOW;
+    }
     // We can't check if user has create permissions using og_user_access(), as
     // there is no group context. However, we can check if there are any groups
     // the user will be able to select, and if not, we don't allow access.
     // @see OgSelectionHandler::getReferencableEntities()
     $required = FALSE;
-    foreach (og_get_group_audience_fields('node', $type, FALSE) as $field_name => $label) {
+    foreach (og_get_group_audience_fields('node', $type) as $field_name => $label) {
       $field = field_info_field($field_name);
       $instance = field_info_instance('node', $field_name, $type);
+      // Set the "field mode" to default, before passing it to the
+      // selection handler.
+      $instance['field_mode'] = 'default';
+      if (entityreference_get_selection_handler($field, $instance)->getReferencableEntities()) {
+        return NODE_ACCESS_ALLOW;
+      }
+
       // Allow users to create content outside of groups, if none of the
       // audience fields is required.
       if ($instance['required']) {
         $required = TRUE;
-      }
-      if (entityreference_get_selection_handler($field, $instance)->getReferencableEntities()) {
-        return NODE_ACCESS_ALLOW;
       }
     }
     // If no group audience field is required, we igonre, otherwise we
@@ -594,9 +622,8 @@ function og_field_access($op, $field, $entity_type, $entity, $account) {
   $field = field_info_field($field_name);
   $settings = $field['settings']['handler_settings'];
 
-  // Check if we are editing the user entity, or need to hide a secondary
-  // field.
-  if ($entity_type == 'user' || (!empty($settings['primary_field']) && !empty($settings['hide_secondary_field']))) {
+  // Check if we are editing the user entity.
+  if ($entity_type == 'user') {
     return user_access('administer group', $account);
   }
 }
@@ -610,6 +637,307 @@ function og_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'og') . '/includes/views',
   );
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function og_field_widget_info() {
+  $widgets['og_complex'] = array(
+    'label' => t('OG reference'),
+    'description' => t('Complex widget to reference groups.'),
+    'field types' => array('entityreference'),
+  );
+
+  return $widgets;
+}
+
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $entity_type = $instance['entity_type'];
+  $entity = isset($element['#entity']) ? $element['#entity'] : NULL;
+
+  if (!$entity) {
+    return;
+  }
+
+  if ($field['settings']['handler'] != 'og') {
+    $params = array('%label' => $instance['label']);
+    form_error($form, t('Field %label is a group-audience but its Entity selection mode is not defined as "Organic groups" in the field settings page.', $params));
+    return;
+  }
+
+  // Cache the processed entity, to make sure we call the widget only once.
+  $cache = &drupal_static(__FUNCTION__, array());
+  list($id,, $bundle) = entity_extract_ids($entity_type, $entity);
+  $field_name = $field['field_name'];
+
+  $identifier = $field_name . ':' . $entity_type . ':' . $id;
+  if (isset($cache[$identifier])) {
+    return;
+  }
+  $cache[$identifier] = TRUE;
+
+  ctools_include('fields');
+
+  $field_modes = array('default');
+  $has_admin = FALSE;
+
+  // The group IDs that might not be accessible by the user, but we need
+  // to keep even after saving.
+  $element['#other_groups_ids'] = array();
+  $element['#element_validate'][] = 'og_complex_widget_element_validate';
+
+  if (user_access('administer group')) {
+    $has_admin = TRUE;
+    $field_modes[] = 'admin';
+  }
+
+  // Get the "Other group" group IDs.
+  $target_type = $field['settings']['target_type'];
+  $entity_gids = og_get_entity_groups($entity_type, $entity);
+  $entity_gids = !empty($entity_gids[$target_type]) ? $entity_gids[$target_type] : array();
+
+  $user_gids = og_get_entity_groups();
+  $user_gids = !empty($user_gids[$target_type]) ? $user_gids[$target_type] : array();
+
+  $other_groups_ids = array();
+  $other_groups_ids = array_values(array_diff($entity_gids, $user_gids));
+
+  foreach ($field_modes as $field_mode) {
+    $mocked_instance = og_get_mocked_instance($instance, $field_mode);
+    $dummy_entity = clone $entity;
+
+    if ($has_admin) {
+      $mocked_instance['required'] = FALSE;
+      $mocked_instance['label'] = $field_mode == 'default' ? t('Default') : t('Administrator');
+
+      if ($id) {
+        // The field might be required, and it will throw an exception
+        // when we try to set an empty value, so change the wrapper's
+        // info.
+        $wrapper = entity_metadata_wrapper($entity_type, $dummy_entity, array('property info alter' => 'og_property_info_alter', 'field name' => $field_name));
+        if ($field_mode == 'admin') {
+          // Keep only the hidden group IDs on the entity, so they won't
+          // appear again on the "admin" field, for example on an autocomplete
+          // widget type.
+          $valid_ids = $other_groups_ids ? entityreference_get_selection_handler($field, $mocked_instance, $entity_type, $dummy_entity)->validateReferencableEntities($other_groups_ids) : array();
+          $valid_ids = $field['cardinality'] == 1 ? reset($valid_ids) : $valid_ids;
+          $wrapper->{$field_name}->set($valid_ids);
+        }
+        else {
+          // Keep only the groups that belong to the user and to the entity.
+          $my_group_ids = array_values(array_intersect($user_gids, $entity_gids));
+          $valid_ids = $my_group_ids ? entityreference_get_selection_handler($field, $mocked_instance, $entity_type, $dummy_entity)->validateReferencableEntities($my_group_ids) : array();
+
+          $valid_ids = $field['cardinality'] == 1 ? reset($valid_ids) : $valid_ids;
+          $wrapper->{$field_name}->set($valid_ids);
+        }
+      }
+    }
+    else {
+      // Non-admin user.
+      $mocked_instance_other_groups = $mocked_instance;
+      $mocked_instance_other_groups['field_mode'] = 'admin';
+      if ($other_groups_ids && $valid_ids = entityreference_get_selection_handler($field, $mocked_instance_other_groups, $entity_type, $dummy_entity)->validateReferencableEntities($other_groups_ids)) {
+        foreach ($valid_ids as $id) {
+          $element['#other_groups_ids'][] = array('target_id' => $id);
+        }
+      }
+    }
+
+    $new_element = ctools_field_invoke_field($mocked_instance, 'form', $entity_type, $dummy_entity, $form, $form_state, array('default' => TRUE));
+    $element[$field_mode] = $new_element[$field_name][LANGUAGE_NONE];
+
+    if (in_array($mocked_instance['widget']['type'], array('entityreference_autocomplete', 'entityreference_autocomplete_tags'))) {
+      // Change the "Add more" button name so it adds only the needed
+      // element.
+      if (!empty($element[$field_mode]['add_more']['#name'])) {
+        $element[$field_mode]['add_more']['#name'] .= '__' . $field_mode;
+      }
+
+      foreach (array_keys($element[$field_mode]) as $delta) {
+        if (!is_numeric($delta)) {
+          continue;
+        }
+
+        $sub_element = &$element[$field_mode][$delta]['target_id'];
+
+        // Rebuild the autocomplete path.
+        $path = explode('/', $sub_element['#autocomplete_path']);
+        $sub_element['#autocomplete_path'] = 'og/autocomplete';
+
+        // Add autocomplete type
+        $sub_element['#autocomplete_path'] .= "/$path[2]/$path[3]/$path[4]/$path[5]";
+
+        // Add field mode.
+        $sub_element['#autocomplete_path'] .= "/$field_mode";
+
+        // Add the entity ID.
+        $sub_element['#autocomplete_path'] .= "/$path[6]";
+        if (!empty($path[7])) {
+          // Add the text.
+          $sub_element['#autocomplete_path'] .= "/$path[7]";
+        }
+      }
+    }
+  }
+
+  $form['#after_build']['og'] = 'og_complex_widget_after_build';
+
+  return $element;
+}
+
+/**
+ * Property info alter; Change mocked field to be non-required.
+ */
+function og_property_info_alter($wrapper, $info) {
+  $property_info = $wrapper->info();
+  $field_name = $property_info['field name'];
+  $info['properties'][$field_name]['required'] = FALSE;
+  return $info;
+}
+
+/**
+ * Helper function; Get the mocked instance.
+ */
+function og_get_mocked_instance($instance, $field_mode) {
+  $mocked_instance = $instance;
+  $widget_type = $instance['settings']['behaviors']['og_widget'][$field_mode]['widget_type'];
+  $mocked_instance['widget']['type'] = $widget_type;
+
+  // Set the widget's module.
+  $widget_info = field_info_widget_types($widget_type);
+  $mocked_instance['widget']['module'] = $widget_info['module'];
+  $mocked_instance['widget']['settings'] = drupal_array_merge_deep($mocked_instance['widget']['settings'], $widget_info['settings']);
+
+  // See OgSelectionHandler::buildEntityFieldQuery().
+  $mocked_instance['field_mode'] = $field_mode;
+
+  return $mocked_instance;
+}
+
+/**
+ * Rebuild the element's values, using the default and admin if exists.
+ */
+function og_complex_widget_element_validate($element, &$form_state, $form) {
+  $field_name = $element['#field_name'];
+  $field = field_info_field($field_name);
+  $subform = $form_state['values'][$field_name][LANGUAGE_NONE][0];
+  $ids = $element['#other_groups_ids'];
+  foreach (array('default', 'admin') as $type) {
+    if (empty($subform[$type])) {
+      continue;
+    }
+
+    foreach ($subform[$type] as $delta => $value) {
+      if (!empty($value['target_id']) && is_numeric($value['target_id'])) {
+        $ids[] = array('target_id' => $value['target_id']);
+      }
+    }
+  }
+  form_set_value($form[$field_name][LANGUAGE_NONE], $ids, $form_state);
+}
+
+/**
+ * After build; Remove the "Add more" button.
+ *
+ * @see field_multiple_value_form()
+ * @see theme_field_multiple_value_form()
+ */
+function og_complex_widget_after_build($form, &$form_state) {
+  foreach (og_get_group_audience_fields($form['#entity_type'], $form['#bundle']) as $field_name => $value) {
+    if (empty($form[$field_name])) {
+      continue;
+    }
+    $form[$field_name][LANGUAGE_NONE]['#theme'] = '';
+    unset($form[$field_name][LANGUAGE_NONE]['add_more']);
+    unset($form[$field_name][LANGUAGE_NONE][0]['_weight']);
+
+    if (!empty($form[$field_name][LANGUAGE_NONE][0]['admin'])) {
+      // Wrap both elements with a fieldset.
+      $form[$field_name][LANGUAGE_NONE]['#theme_wrappers'] = array('fieldset');
+    }
+  }
+
+  return $form;
+}
+
+/**
+ * Menu callback: autocomplete the label of an entity.
+ *
+ * @param $type
+ *   The widget type (i.e. 'single' or 'tags').
+ * @param $field_name
+ *   The name of the entity-reference field.
+ * @param $entity_type
+ *   The entity type.
+ * @param $bundle_name
+ *   The bundle name.
+ * @param $field_mode
+ *   The field mode, "default" or "admin".
+ * @param $entity_id
+ *   Optional; The entity ID the entity-reference field is attached to.
+ *   Defaults to ''.
+ * @param $string
+ *   The label of the entity to query by.
+ *
+ * @see entityreference_autocomplete_callback()
+ */
+function og_entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $field_mode, $entity_id = '', $string = '') {
+  $field = field_info_field($field_name);
+  $instance = field_info_instance($entity_type, $field_name, $bundle_name);
+  $instance = og_get_mocked_instance($instance, $field_mode);
+  $matches = array();
+
+  if (!$field || !$instance || $field['type'] != 'entityreference' || !field_access('edit', $field, $entity_type)) {
+    return MENU_ACCESS_DENIED;
+  }
+
+  $entity = NULL;
+  if ($entity_id !== 'NULL') {
+    $entity = entity_load_single($entity_type, $entity_id);
+    if (!$entity || !entity_access('view', $entity_type, $entity)) {
+      return MENU_ACCESS_DENIED;
+    }
+  }
+  $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
+
+  if ($type == 'tags') {
+    // The user enters a comma-separated list of tags. We only autocomplete the last tag.
+    $tags_typed = drupal_explode_tags($string);
+    $tag_last = drupal_strtolower(array_pop($tags_typed));
+    if (!empty($tag_last)) {
+      $prefix = count($tags_typed) ? implode(', ', $tags_typed) . ', ' : '';
+    }
+  }
+  else {
+    // The user enters a single tag.
+    $prefix = '';
+    $tag_last = $string;
+  }
+
+  if (!empty($tag_last)) {
+    // Get an array of matching entities.
+    $entity_labels = $handler->getReferencableEntities($tag_last, $instance['widget']['settings']['match_operator'], 10);
+
+    // Loop through the products and convert them into autocomplete output.
+    foreach ($entity_labels as $entity_id => $label) {
+      $key = "$label ($entity_id)";
+      // Strip things like starting/trailing white spaces, line breaks and tags.
+      $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
+      // Names containing commas or quotes must be wrapped in quotes.
+      if (strpos($key, ',') !== FALSE || strpos($key, '"') !== FALSE) {
+        $key = '"' . str_replace('"', '""', $key) . '"';
+      }
+      $matches[$prefix . $key] = '<div class="reference-autocomplete">' . $label . '</div>';
+    }
+  }
+
+  drupal_json_output($matches);
 }
 
 /**
@@ -634,15 +962,6 @@ function og_field_create_instance($instance) {
     $og_field['field']['settings']['target_type'] = $instance['entity_type'];
     $og_field['instance']['label'] = t('Group membership');
     og_create_field('og_user_group_ref', 'user', 'user', $og_field);
-
-    // Create "Other groups" field.
-    $og_field['instance']['label'] = t('Other groups');
-    $og_field['instance']['widget']['type'] = 'entityreference_autocomplete';
-    $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
-    $og_field['field']['settings']['handler_settings']['primary_field'] = 'og_user_group_ref';
-    $og_field['field']['settings']['handler_settings']['hide_secondary_field'] = TRUE;
-    $og_field['field']['settings']['handler_settings']['force_optional_primary'] = TRUE;
-    og_create_field('og_other_user_group_ref', 'user', 'user', $og_field);
   }
 }
 
@@ -688,7 +1007,7 @@ function og_form_alter(&$form, $form_state, $form_id) {
  * Validate handler; Make sure a group can be created.
  *
  * We check if the group manager has a matching group-audience field for the
- * OG membership do be created in.
+ * OG membership to be created in.
  */
 function og_form_group_manager_validate($form, &$form_state) {
   $entity_type = $form['#entity_type'];
@@ -750,243 +1069,6 @@ function og_form_group_manager_validate($form, &$form_state) {
   }
 
   form_error($form, t("Can't save entity as group, because user @name can't be subscribed to group and become a manager.", array('@name' => format_username($account))));
-}
-
-
-/**
- * Implements hook_field_attach_form().
- *
- * Inject values to a secondary field, based on the primary field.
- */
-function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
-  list($id,, $bundle_name) = entity_extract_ids($entity_type, $entity);
-  if (!og_is_group_content_type($entity_type, $bundle_name)) {
-    return;
-  }
-
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  $has_secondary = FALSE;
-
-  // Get all the group-audience fields in the entity.
-  foreach (og_get_group_audience_fields($entity_type, $bundle_name) as $field_name => $label) {
-    $field = field_info_field($field_name);
-
-    if (empty($field['settings']['handler_settings']['primary_field'])) {
-      continue;
-    }
-
-    $primary_field = $field['settings']['handler_settings']['primary_field'];
-    if (!isset($wrapper->$primary_field)) {
-      // Settings are referencing a non-existing field.
-      return;
-    }
-    $primary_ids = $wrapper->$primary_field->value(array('identifier' => TRUE));
-
-    if (!empty($field['settings']['handler_settings']['force_optional_primary']) && user_access('administer group')) {
-      // Set required field to not required for administrator.
-      $form_primary = &$form[$primary_field][LANGUAGE_NONE];
-
-      if ($form_primary['#required']) {
-        $form_primary['#required'] = FALSE;
-        // Need to add a "None" option now that the field is not required.
-        $form_primary['#options'] = array('_none' => t('- None -')) + $form_primary['#options'];
-      }
-    }
-
-    // Intersect the IDs from the primary field, with the referencable IDs
-    // from the secondary, by validating the IDs.
-    if (!is_array($primary_ids)) {
-      // If the field cardinality is 1, entity metadatwrapper, returns the
-      // value as integer, so turn it into an array.
-      $primary_ids = array($primary_ids);
-    }
-    $instance = field_info_instance($entity_type, $field['field_name'], $bundle_name);
-    $secondary_ids = entityreference_get_selection_handler($field, $instance)->validateReferencableEntities($primary_ids);
-    if (!$secondary_ids) {
-      continue;
-    }
-    $has_secondary = TRUE;
-
-    // Rebuild the items array.
-    $items = array();
-    foreach ($secondary_ids as $id) {
-      $items[] = array(
-        'target_id' => $id,
-      );
-    }
-
-    if (empty($form_state['field'][$field_name])) {
-      continue;
-    }
-
-    $key = key($form_state['field'][$field_name]);
-
-    // We don't use field_form_set_state() as we just want to change the items
-    // count. We have to do it before calling field_default_form().
-    $form_state['field'][$field_name][$key]['items_count'] = count($items);
-
-    // Re-build the field, based on the injected values.
-    $result = field_default_form($entity_type, $entity, $field, $instance, $key, $items, $form, $form_state, NULL);
-    $form[$field_name] = $result[$field_name];
-  }
-
-  if ($has_secondary) {
-    $form['#validate'][] = 'og_form_secondary_field_validate';
-
-    if ($id && !field_access('edit', $field, $entity_type, $entity)) {
-      $group_type = $field['settings']['target_type'];
-      $gids = $primary_ids + $secondary_ids;
-      $hidden_gids = array();
-      foreach ($gids as $gid) {
-        if (in_array($gid, $secondary_ids)) {
-          $hidden_gids[] = array('target_id' => $gid);
-        }
-      }
-
-      if ($hidden_gids) {
-        $form[$field['field_name']][$langcode]['#element_validate'][] = 'og_form_keep_primary_field_validate';
-        $form[$field['field_name']][$langcode]['#hidden_gids'] = $hidden_gids;
-      }
-    }
-  }
-}
-
-/**
- * Validate handler; Re-populate inaccessible values, to the secondary field.
- */
-function og_form_keep_primary_field_validate($element, &$form_state) {
-  form_set_value($element, $element['#hidden_gids'], $form_state);
-}
-
-/**
- * Validate handler; Check field cardinality of primary field.
- *
- * We need to make sure that values pushed from a secondary field, don't exceed
- * the allowed values of the primary field.
- */
-function og_form_secondary_field_validate($form, &$form_state) {
-  // Get an keyed with the primary field, and an arrayof secoadry fields as the
-  // value.
-  $entity_type = $form['#entity_type'];
-  if (empty($form_state[$entity_type])) {
-    // Entity info isn't in the $form_state (e.g. when admin creates a new
-    // user).
-    return;
-  }
-  $entity = $form_state[$entity_type];
-  $fields_info = array();
-  foreach ($form_state['field'] as $field_name => $value) {
-    if (!og_is_group_audience_field($field_name)) {
-      continue;
-    }
-    $langcode = key($value);
-    // If there is no field info, it means the field isn't accessible.
-    $field = !empty($value[$langcode]['field']) ? $value[$langcode]['field'] : array();
-    if (!empty($field['settings']['handler_settings']['primary_field'])) {
-      $fields_info[$field['settings']['handler_settings']['primary_field']][] = $field_name;
-    }
-  }
-
-  foreach ($fields_info as $primary_field_name => $values) {
-    $langcode = key($form_state['field'][$primary_field_name]);
-    $primary_field = $form_state['field'][$primary_field_name][$langcode]['field'];
-    if ($primary_field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-      continue;
-    }
-    $primary_instance = $form_state['field'][$primary_field_name][$langcode]['instance'];
-    // Get the items from the form state.
-    $count = 0;
-    $items = FALSE;
-    field_default_extract_form_values($entity_type, $entity, $primary_field, $primary_instance, $langcode, $items, $form, $form_state);
-    foreach ($items as $item) {
-      if (!empty($item['target_id']) && $item['target_id'] != '_none') {
-        ++$count;
-      }
-    }
-
-    $secondary_labels = array();
-    foreach ($values as $secondary_field_name) {
-      $langcode = key($form_state['field'][$secondary_field_name]);
-      $secondary_field = $form_state['field'][$secondary_field_name][$langcode]['field'];
-      $secondary_instance = $form_state['field'][$secondary_field_name][$langcode]['instance'];
-      $secondary_labels[] = $secondary_instance['label'];
-      // Get the items from the form state.
-      $items = FALSE;
-      field_default_extract_form_values($entity_type, $entity, $secondary_field, $secondary_instance, $langcode, $items, $form, $form_state);
-      foreach ($items as $item) {
-        if (!empty($item['target_id'])) {
-          ++$count;
-          // Set the field name that will invoke the error.
-          $element_error = $secondary_field_name;
-        }
-      }
-    }
-
-    if ($count > $primary_field['cardinality']) {
-      $params = array(
-        '%primary' => $primary_instance['label'],
-        '%secondary' => implode(', ', $secondary_labels),
-        '@count' => $primary_field['cardinality'],
-      );
-      form_error($form[$element_error], t('Values from the secondary field(s) %secondary can not be pushed into the primary field %primary as it is limited to @count values.', $params));
-    }
-  }
-}
-
-/**
- * Implements hook_entity_presave().
- */
-function og_entity_presave($entity, $entity_type) {
-  list(,,$bundle) = entity_extract_ids($entity_type, $entity);
-  if (!og_is_group_content_type($entity_type, $bundle)) {
-    return;
-  }
-
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  // Get secondary fields.
-  $fields_info = field_info_fields();
-  foreach (field_info_instances($entity_type, $bundle) as $field_name => $field_instance) {
-    $field_info = $fields_info[$field_name];
-    if ($field_info['type'] != 'entityreference' || $field_info['settings']['handler'] != 'og') {
-      // This is not an Entity reference field.
-      continue;
-    }
-
-    if (empty($field_info['settings']['handler_settings']['primary_field'])) {
-      continue;
-    }
-
-    if (!$new_ids = $wrapper->{$field_name}->value(array('identifier' => TRUE))) {
-      continue;
-    }
-
-    if (!is_array($new_ids)) {
-      // Entity metadta returned a single ID or no ID.
-      $new_ids = array($new_ids);
-    }
-
-    $primary_field = $fields_info[$field_name]['settings']['handler_settings']['primary_field'];
-    $primary_field_info = field_info_field($primary_field);
-    $existing_ids = $wrapper->{$primary_field}->value(array('identifier' => TRUE));
-    if (!is_array($existing_ids)) {
-      // Entity metadta returned a single ID.
-      $existing_ids = array($existing_ids);
-    }
-    foreach ($new_ids as $id) {
-      // TODO: Move this check to Entity API.
-      if (!in_array($id, $existing_ids)) {
-        if ($primary_field_info['cardinality'] == 1) {
-          $wrapper->{$primary_field}->set($id);
-        }
-        else {
-          $wrapper->{$primary_field}[] = $id;
-        }
-      }
-    }
-
-    // Remove the values from the secondary field.
-    $wrapper->{$field_name}->set(NULL);
-  }
 }
 
 /**
@@ -1076,7 +1158,7 @@ function _og_update_entity_fields($entity_type, $entity) {
   }
 
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  foreach (og_get_group_audience_fields($entity_type, $bundle, FALSE) as $field_name => $label) {
+  foreach (og_get_group_audience_fields($entity_type, $bundle) as $field_name => $label) {
     $field = field_info_field($field_name);
     $gids = array();
     if ($field['cardinality'] == 1) {
@@ -1255,8 +1337,6 @@ function og_og_fields_info() {
           ),
           'target_bundles' => array(),
           'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
-          'reference_type' => 'my_groups',
-          'primary_field' => FALSE,
         ),
         'target_type' => 'node',
       ),
@@ -1264,9 +1344,22 @@ function og_og_fields_info() {
     'instance' => array(
       'label' => t('Groups audience'),
       'widget' => array(
-        'module' => 'options',
+        'type' => 'og_complex',
+        'module' => 'og',
         'settings' => array(),
-        'type' => 'options_select',
+      ),
+      'settings' => array(
+        'behaviors' => array(
+          'og_widget' => array(
+            'status' => TRUE,
+            'default' => array(
+              'widget_type' => 'options_select',
+            ),
+            'admin' => array(
+              'widget_type' => 'entityreference_autocomplete',
+            ),
+          ),
+        ),
       ),
       'view modes' => array(
         'full' => array(
@@ -1412,7 +1505,7 @@ function og_membership_create($group_type, $gid, $entity_type, $etid, $field_nam
   );
 
   if (!og_is_group_audience_field($field_name)) {
-    throw new OgException(t('%field-name is not a valid group-audience field.', array('%field-name' => $field_name)));
+    throw new OgException(format_string('%field-name is not a valid group-audience field.', array('%field-name' => $field_name)));
   }
 
   // Get the type from the field.
@@ -1659,11 +1752,6 @@ function og_get_best_group_audience_field($entity_type, $entity, $group_type, $g
       continue;
     }
 
-    if (!empty($settings['handler_settings']['primary_field'])) {
-      // Secondary field.
-      continue;
-    }
-
     if (!og_check_field_cardinality($entity_type, $entity, $field_name)) {
       // Field reached maximum.
       continue;
@@ -1762,7 +1850,7 @@ function og_group($group_type, $gid, $values = array()) {
     // Allow getting fields not accessible by the user.
     $field_name = og_get_best_group_audience_field($entity_type, $entity, $group_type, $group_bundle, TRUE);
     if (!$field_name) {
-      throw new OgException(t('There are no OG fields in entity %entity-type and bundle %bundle referencing %group-type - %group-bundle.', $params));
+      throw new OgException(format_string('There are no OG fields in entity %entity-type and bundle %bundle referencing %group-type - %group-bundle.', $params));
     }
   }
 
@@ -2088,15 +2176,13 @@ function og_is_group_audience_field($field_name) {
  *   The entity type.
  * @param $bundle_name
  *   The bundle name to be checked.
- * @param $include_secondary
- *   TRUE, if secondary group-audience field should be also returned.
  *
  * @return
  *   Array keyed with the field name and the field label as the value.
  */
-function og_get_group_audience_fields($entity_type = 'user', $bundle_name = 'user', $include_secondary = TRUE) {
+function og_get_group_audience_fields($entity_type = 'user', $bundle_name = 'user') {
   $return = &drupal_static(__FUNCTION__, array());
-  $identifier = $entity_type . ':' . $bundle_name . ':' . $include_secondary;
+  $identifier = $entity_type . ':' . $bundle_name;
   if (isset($return[$identifier])) {
     return $return[$identifier];
   }
@@ -2109,10 +2195,6 @@ function og_get_group_audience_fields($entity_type = 'user', $bundle_name = 'use
     }
 
     if (empty($field_info['bundles'][$entity_type])) {
-      continue;
-    }
-
-    if (!$include_secondary && !empty($field_info['settings']['handler_settings']['primary_field'])) {
       continue;
     }
 

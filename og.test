@@ -1,10 +1,13 @@
 <?php
 
+
+
 /**
  * Helper class that adds additional assert methods
  * to any DrupalWebTestCase class.
  */
-class OGAssertOptionsTestCase extends DrupalWebTestCase {
+class OgAssertOptionsTestCase extends DrupalWebTestCase {
+
   /**
    * Helper function to assert an option doesn't exist in select field.
    */
@@ -183,7 +186,7 @@ class OgNodeAccess extends DrupalWebTestCase {
    * Test strict access permissions for updating group node. A non-member of
    * a group who has core node access update permission is denied access.
    */
-  function testStrictAccess() {
+  function testStrictAccessNodeUpdate() {
     // Set Node access strict variable.
     variable_set('og_node_access_strict', TRUE);
 
@@ -207,7 +210,7 @@ class OgNodeAccess extends DrupalWebTestCase {
   }
 
   /**
-   * Test access to node create on strict mode, when field isn't required.
+   * Test access to node create on strict mode.
    */
   function testStrictAccessNodeCreate() {
     // Set Node access strict variable.
@@ -230,7 +233,7 @@ class OgNodeAccess extends DrupalWebTestCase {
    * Test non-strict access permissions for updating group node. A non-member
    * of a group who has core node access update permission is allowed access.
    */
-  function testNoStrictAccess() {
+  function testNoStrictAccessNodeUpdate() {
     // Set Node access strict variable.
     variable_set('og_node_access_strict', FALSE);
 
@@ -455,20 +458,6 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     }
     catch (OgException $e) {
       $this->pass('Grouping with incorrect field name does not work.');
-    }
-
-    // Exception grouping using a secondary field.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
-    $og_field['field']['settings']['target_type'] = 'entity_test';
-    $og_field['field']['settings']['handler_settings']['primary_field'] = OG_AUDIENCE_FIELD;
-    og_create_field('og_ref_secondary', 'node', 'article', $og_field);
-    $values['field_name'] = 'og_ref_secondary';
-    try {
-      og_group('entity_test', $entity1->pid, $values);
-      $this->fail('Grouping with secondary field name works.');
-    }
-    catch (OgException $e) {
-      $this->pass('Grouping with secondary field name does not work.');
     }
 
     // Exception on audience field, referencing wrong target type.
@@ -886,322 +875,112 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
 
 
 /**
- * Test primary/ second field in UI.
+ * Test the complex widget.
  */
-class OgPrimarySecondaryField extends OGAssertOptionsTestCase {
+class OgComplexWidgetTestCase extends DrupalWebTestCase {
+
   public static function getInfo() {
     return array(
-      'name' => 'OG primary/ secondary field',
-      'description' => 'Test primary/ secondary field in UI.',
+      'name' => 'OG reference widget',
+      'description' => 'Test the OG reference widget behavior.',
       'group' => 'Organic groups',
     );
   }
 
-  /**
-   * - Page content type as group type
-   * - Article content type as group content type
-   * - create 2 groups and one article which belongs to both group
-   * - Create an editor user who is a member of group1, and two group
-   *   admins for each group
-   */
   function setUp() {
     parent::setUp('og');
 
-    // Add OG group field to a the node's "page" bundle.
-    og_create_field(OG_GROUP_FIELD, 'node', 'page');
+    // Add OG group field to a the node's "group" bundle.
+    $this->drupalCreateContentType(array('type' => 'group'));
+    og_create_field(OG_GROUP_FIELD, 'node', 'group');
 
-    // Add OG audience field to the node's "article" bundle.
+    // Add OG audience field to the node's "post" bundle.
+    $this->drupalCreateContentType(array('type' => 'post'));
     $og_field = og_fields_info(OG_AUDIENCE_FIELD);
-    $og_field['field']['settings']['target_type'] = 'node';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article', $og_field);
+    $og_field['instance']['required'] = TRUE;
+    og_create_field(OG_AUDIENCE_FIELD, 'node', 'post', $og_field);
+  }
 
-    // Add a secondary field to the node's "article" bundle.
-    $og_field['instance']['label'] = t('Other groups');
-    $og_field['instance']['widget']['type'] = 'entityreference_autocomplete';
-    $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
-    $og_field['field']['settings']['handler_settings']['primary_field'] = OG_AUDIENCE_FIELD;
-    $og_field['field']['settings']['handler_settings']['hide_secondary_field'] = TRUE;
-    og_create_field(OG_AUDIENCE_OTHER_GROUPS_FIELD, 'node', 'article', $og_field);
 
-    // Create an editor user.
-    $this->editor_user = $this->drupalCreateUser(array('access content', 'edit any article content'));
-    // Create group managers for these tests, need 'administer group'
-    // permission to see secondary field.
-    $this->group1_manager = $this->drupalCreateUser(array('administer group', 'access content', 'create page content', 'edit own article content', 'edit own page content'));
-    $this->group2_manager = $this->drupalCreateUser(array('access content', 'create page content', 'edit own article content', 'edit own page content'));
+  /**
+   * Test "field modes" of the OG reference widget.
+   */
+  function testFieldModes() {
+    $user1 = $this->drupalCreateUser(array('administer group', 'access content', 'create post content'));
+    $user2 = $this->drupalCreateUser(array('access content', 'create post content'));
 
     // Create group nodes.
     $settings = array(
-      'type' => 'page',
+      'type' => 'group',
       OG_GROUP_FIELD . '[und][0][value]' => 1,
-      'uid' => $this->group1_manager->uid
     );
-    $this->group1 = $this->drupalCreateNode($settings);
-    $settings['uid'] = $this->group2_manager->uid;
-    $this->group2 = $this->drupalCreateNode($settings);
+    $settings['uid'] = $user1->uid;
+    $group1 = $this->drupalCreateNode($settings);
 
-    // Add editor user to group1.
-    og_group('node', $this->group1->nid, array('entity' => $this->editor_user->uid));
+    $settings['uid'] = $user2->uid;
+    $group2 = $this->drupalCreateNode($settings);
 
-    // Change permissions to authenticated member.
-    $roles = array_flip(og_roles('node', 'page', $this->group1->nid));
-    $permissions = array(
-      'create article content' => 1,
-      'update any article content' => 1,
-    );
-    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], $permissions);
-
-    // Create node to add to group.
     $settings = array(
-      'type' => 'article',
-      'uid' => $this->group1_manager->uid,
+      'type' => 'post',
     );
-    $this->group_content = $this->drupalCreateNode($settings);
+    $settings['uid'] = $user1->uid;
+    $post1 = $this->drupalCreateNode($settings);
+    og_group('node', $group1->nid, array('entity_type' => 'node', 'entity' => $post1));
 
-    // Add node to group1 and group2.
-    $values = array(
-      'entity_type' => 'node',
-      'entity' => $this->group_content,
-    );
-    og_group('node', $this->group1->nid, $values);
-    og_group('node', $this->group2->nid, $values);
+    $settings['uid'] = $user2->uid;
+    $post2 = $this->drupalCreateNode($settings);
+    og_group('node', $group2->nid, array('entity_type' => 'node', 'entity' => $post2));
 
-    // Set Node access strict variable.
-    variable_set('og_node_access_strict', TRUE);
+    $this->drupalLogin($user1);
+    $this->drupalGet("node/$post1->nid/edit");
+
+    $fields = $this->xpath('//*[@id="edit-og-group-ref-und-0-default"]');
+    $this->assertEqual($fields[0]->option['value'], '_none', '"Default" field mode is not required for administrator.');
+
+    $fields = $this->xpath('//*[@id="edit-og-group-ref-und-0-admin-0-target-id"]');
+    $this->assertTrue(strpos($fields[0]->attributes()->class[0], 'form-autocomplete'), '"Administrator field more is an autocomplete widget type."');
+
+    $this->drupalLogin($user2);
+    $this->drupalGet("node/$post2->nid/edit");
+
+    $fields = $this->xpath('//*[@id="edit-og-group-ref-und-0-default"]');
+    $this->assertEqual($fields[0]->option['value'], $group2->nid, '"Default" field mode is required.');
   }
 
   /**
-   * Test primary/secondary field on node edit for group admin.
-   *
-   * Primary field should display the groups the admin is a member of,
-   * while secondary field should display the groups the admin is not a
-   * member of.
+   * Test non-accessible group IDs are saved, upon form submit.
    */
-  function testGroupAdminFields() {
-    // Login as a group manager and try to change group content.
-    $this->drupalLogin($this->group1_manager);
-
-    $this->drupalGet('node/' . $this->group_content->nid . '/edit');
-
-    // Check primary field.
-    $instance = field_info_instance('node', OG_AUDIENCE_FIELD, 'article');
-    $this->assertText($instance['label'], t('Primary field label exists.'));
-    $langcode = LANGUAGE_NONE;
-    $field_id = drupal_html_id("edit-".OG_AUDIENCE_FIELD."-$langcode");
-    $this->assertOptionSelected($field_id, $this->group1->nid, t('Group1 appears in primary field and is selected.'));
-    $this->assertNoOption($field_id, $this->group2->nid, t("Group2 doesn't appear in primary field."));
-
-    // Check secondary field.
-    $instance = field_info_instance('node', OG_AUDIENCE_OTHER_GROUPS_FIELD, 'article');
-    $this->assertText($instance['label'], t('Secondary field label exists.'));
-    $field_id = drupal_html_id("edit-".OG_AUDIENCE_OTHER_GROUPS_FIELD."-$langcode-0-target-id");
-    $field_value = $this->group2->title . ' (' . $this->group2->nid . ')';
-    $this->assertFieldById($field_id, $field_value, t('Group2 appears in secondary field.'));
-
-    // Update group content, and assert group membership remains correct.
-    $edit = array('title' => 'Group Content');
-    $this->drupalPost('node/' . $this->group_content->nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('Article Group Content has been updated.'), t('Group manager edits group content node successfully.'));
-    $this->assertTrue(og_is_member('node', $this->group1->nid, 'node', $this->group_content->nid), t('Group content still belongs to group1'));
-    $this->assertTrue(og_is_member('node', $this->group2->nid, 'node', $this->group_content->nid), t('Group content still belongs to group2'));
-  }
-
-  /**
-   * Test primary/ secondary field on node edit for editor.
-   *
-   * Primary field should display the groups the admin is a member of,
-   * while secondary field is invisible.
-   */
-  function testNonGroupAdminFields() {
-    // Login as a group member and try to change group content.
-    $this->drupalLogin($this->editor_user);
-
-    $this->drupalGet('node/' . $this->group_content->nid . '/edit');
-
-    // Check primary field.
-    $instance = field_info_instance('node', OG_AUDIENCE_FIELD, 'article');
-    $this->assertText($instance['label'], t('Primary field label exists.'));
-    $langcode = LANGUAGE_NONE;
-    $field_id = drupal_html_id("edit-".OG_AUDIENCE_FIELD."-$langcode");
-    $this->assertOptionSelected($field_id, $this->group1->nid, t('Group1 appears in primary field and is selected.'));
-    $this->assertNoOption($field_id, $this->group2->nid, t("Group2 doesn't appear in primary field."));
-
-    // Check secondary field.
-    $instance = field_info_instance('node', OG_AUDIENCE_OTHER_GROUPS_FIELD, 'article');
-    $this->assertNoText($instance['label'], t("Secondary field isn't accessible by user."));
-
-    // Update group content, and assert group membership remains correct.
-    $edit = array('title' => 'Group Content');
-    $this->drupalPost('node/' . $this->group_content->nid . '/edit', $edit, t('Save'));
-    $this->assertText(t('Article Group Content has been updated.'), t('Group manager edits group content node successfully.'));
-    $this->assertTrue(og_is_member('node', $this->group1->nid, 'node', $this->group_content->nid), t('Group content still belongs to group1'));
-    $this->assertTrue(og_is_member('node', $this->group2->nid, 'node', $this->group_content->nid), t('Group content still belongs to group2'));
-  }
-
-  /**
-   * Test the group audience field when editing content;
-   * 1. Member with edit own content permission.
-   * 2. Member with edit any content permission.
-   */
-  function testGroupAudienceField() {
-    // Test user with "Edit own article content" permission.
-    $own_editor_user = $this->drupalCreateUser();
-    og_group('node', $this->group1->nid, array('entity' => $own_editor_user->uid));
-
-    // Update group permissions.
-    og_create_field(OG_GROUP_FIELD, 'node', 'article');
-    $roles = array_flip(og_roles('node', 'article'));
-    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], array('update own article content' => TRUE));
-
-    // Create content owned by own_editor_user and add it to group1.
-    $settings = array(
-      'type' => 'article',
-      'uid' => $own_editor_user->uid,
-    );
-    $node = $this->drupalCreateNode($settings);
-    // Add the content to group1.
-    $values = array(
-      'entity_type' => 'node',
-      'entity' => $node,
-    );
-    og_group('node', $this->group1->nid, $values);
-    // Login and check
-    $this->drupalLogin($own_editor_user);
-    $this->drupalGet('node/' . $node->nid . '/edit');
-    $field_id = drupal_html_id('edit-' . OG_AUDIENCE_FIELD .'-' . LANGUAGE_NONE);
-    $this->assertOptionSelected($field_id, $this->group1->nid, t('Group1 is selected in group audience field (Edit own content).'));
-
-    // Test user with "Edit any article content" permission.
-    // Update group permissions.
-    og_create_field(OG_GROUP_FIELD, 'node', 'article');
-    $roles = array_flip(og_roles('node', 'article'));
-    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], array('update own article content' => FALSE, 'update any article content' => TRUE));
-
-    $this->drupalLogin($this->editor_user);
-    $this->drupalGet('node/' . $node->nid . '/edit');
-    $this->assertOptionSelected($field_id, $this->group1->nid, t('Group1 is selected in group audience field (Edit any content).'));
-  }
-
-}
-
-
-
-/**
- * Test second field forcing primary field to optional in UI.
- */
-class OgSecondaryForcePrimaryOptField extends OGAssertOptionsTestCase {
-
-  public static function getInfo() {
-    return array(
-      'name' => 'OG secondary field force primary optional',
-      'description' => 'Test secondary field forcing primary field optional in UI.',
-      'group' => 'Organic groups',
-    );
-  }
-
-  /**
-   * - Set Page content type as group type.
-   * - Set Article content type as group content type.
-   * - Set OG_AUDIENCE_FIELD on Article to be single select + required.
-   * - Set OG_AUDIENCE_OTHER_GROUPS_FIELD to use "force_optional_primary".
-   * - Create a group and one article which belongs to it.
-   * - Create an admin user who is NOT a member of group.
-   */
-  function setUp() {
-    parent::setUp('og');
-
-    // Add OG group field to a the node's "page" bundle.
-    og_create_field(OG_GROUP_FIELD, 'node', 'page');
-
-    // Add OG audience field to the node's "article" bundle.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
-    $og_field['field']['settings']['target_type'] = 'node';
-    $og_field['field']['cardinality'] = 1;
-    $og_field['field']['required'] = TRUE;
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article', $og_field);
-
-    // Add a secondary field to the node's "article" bundle.
-    $og_field['instance']['label'] = t('Other groups');
-    $og_field['instance']['widget']['type'] = 'options_select';
-    $og_field['field']['cardinality'] = 1;
-    $og_field['field']['required'] = TRUE;
-    $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
-    $og_field['field']['settings']['handler_settings']['primary_field'] = OG_AUDIENCE_FIELD;
-    $og_field['field']['settings']['handler_settings']['hide_secondary_field'] = TRUE;
-    $og_field['field']['settings']['handler_settings']['force_optional_primary'] = TRUE;
-    og_create_field(OG_AUDIENCE_OTHER_GROUPS_FIELD, 'node', 'article', $og_field);
-
-    // Create a group manager.
-    $this->group_manager = $this->drupalCreateUser(array('access content', 'create page content', 'edit own page content', 'edit own article content'));
-
-    // Create an admin user.
-    $this->admin_user = $this->drupalCreateUser(array('administer group', 'access content', 'create page content', 'edit any page content', 'edit own page content', 'edit any article content', 'edit own article content'));
+  function testHiddenGroupIds() {
+    $user1 = $this->drupalCreateUser(array('administer group', 'access content', 'create post content'));
+    $user2 = $this->drupalCreateUser(array('access content', 'create post content'));
 
     // Create group nodes.
     $settings = array(
-      'type' => 'page',
+      'type' => 'group',
       OG_GROUP_FIELD . '[und][0][value]' => 1,
-      'uid' => $this->group_manager->uid
     );
-    $this->group = $this->drupalCreateNode($settings);
+    $settings['uid'] = $user1->uid;
+    $group1 = $this->drupalCreateNode($settings);
 
-    // Change permissions to authenticated member.
-    $roles = array_flip(og_roles('node', 'page', $this->group->nid));
-    $permissions = array(
-      'create article content' => 1,
-      'update any article content' => 1,
-    );
-    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], $permissions);
+    $settings['uid'] = $user2->uid;
+    $group2 = $this->drupalCreateNode($settings);
 
-
-    // Create article node to add to group.
     $settings = array(
-      'type' => 'article',
-      'uid' => $this->group_manager->uid,
+      'type' => 'post',
     );
-    $this->group_content = $this->drupalCreateNode($settings);
+    $settings['uid'] = $user1->uid;
+    $post1 = $this->drupalCreateNode($settings);
+    og_group('node', $group1->nid, array('entity_type' => 'node', 'entity' => $post1));
+    og_group('node', $group2->nid, array('entity_type' => 'node', 'entity' => $post1));
 
-    // Add node to group
-    $values = array(
-      'entity_type' => 'node',
-      'entity' => $this->group_content,
-    );
-    og_group('node', $this->group->nid, $values);
+    $this->drupalLogin($user2);
+    $this->drupalPost("node/$post1->nid/edit", array(), 'Save');
 
-    // Ensure Node access strict variable is FALSE,
-    // so we can test that an admin user who is not a member
-    // of the group can edit the article content.
-    variable_set('og_node_access_strict', FALSE);
+    // Assert post still belongs to both groups, although user was able
+    // to select only one.
+    $gids = og_get_entity_groups('node', $post1);
+    $this->assertEqual(count($gids['node']), 2, 'Hidden groups remained.');
   }
-
-  /**
-   * Test primary/secondary fields on node edit for admin
-   * (non-member) user.
-   *
-   * Primary field should display no groups and only -None- option,
-   * since the admin user is not a member of any group.
-   * The secondary field should display the Page group we created.
-   *
-   */
-   function testGroupFields() {
-    $this->drupalLogin($this->admin_user);
-
-    $this->drupalGet('node/' . $this->group_content->nid . '/edit');
-
-    // Check primary field.
-    $instance = field_info_instance('node', OG_AUDIENCE_FIELD, 'article');
-    $this->assertText($instance['label'], t('Primary field label exists.'));
-    $langcode = LANGUAGE_NONE;
-    $field_id = drupal_html_id("edit-" . OG_AUDIENCE_FIELD . "-$langcode");
-    $this->assertOption($field_id, '_none', t('"None" option appears in primary field.'));
-    $this->assertNoOption($field_id, $this->group->nid, t("Group doesn't appear in primary field."));
-
-    // Check secondary field.
-    $instance = field_info_instance('node', OG_AUDIENCE_OTHER_GROUPS_FIELD, 'article');
-    $this->assertText($instance['label'], t('Secondary field label exists.'));
-    $field_id = drupal_html_id("edit-".OG_AUDIENCE_OTHER_GROUPS_FIELD."-$langcode");
-    $this->assertOptionSelected($field_id, $this->group->nid, t('Group appears in secondary field and is selected.'));
-   }
 }
 
 
@@ -1266,3 +1045,4 @@ class OgRoleRevoke extends DrupalWebTestCase {
     $this->assertFalse($result->rowCount(), t('User is removed, so all roles of this user were revoked'));
   }
 }
+

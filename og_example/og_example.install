@@ -22,12 +22,4 @@ function og_example_enable() {
     'skip_perm' => FALSE,
   );
   og_create_field(OG_AUDIENCE_FIELD, 'node', 'post', $og_field);
-
-  // Create "Other groups" field.
-  $og_field['instance']['label'] = t('Other groups');
-  $og_field['instance']['widget']['type'] = 'entityreference_autocomplete';
-  $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
-  $og_field['field']['settings']['handler_settings']['primary_field'] = OG_AUDIENCE_FIELD;
-  $og_field['field']['settings']['handler_settings']['hide_secondary_field'] = TRUE;
-  og_create_field(OG_AUDIENCE_OTHER_GROUPS_FIELD, 'node', 'post', $og_field);
 }

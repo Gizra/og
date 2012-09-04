@@ -121,7 +121,7 @@ function og_ui_add_users($form, &$form_state, $group_type, $gid) {
     '#description' => t('Select the state of the membership.'),
   );
 
-  $field_names = og_get_group_audience_fields('user', 'user', FALSE);
+  $field_names = og_get_group_audience_fields();
   $field_name = !empty($form_state['values']['field_name']) ? $form_state['values']['field_name'] : key($field_names);
 
   $form['og_user']['field_name'] = array(

@@ -43,35 +43,30 @@ class OgMembership extends Entity {
     $field = field_info_field($field_name);
 
     if (!$field || !field_info_instance($entity_type, $field_name, $bundle)) {
-      throw new OgException(t('OG membership can not be created in entity %entity-type and bundle %entity-bundle using the field %field-name as the field does not exist.', $params));
+      throw new OgException(format_string('OG membership can not be created in entity %entity-type and bundle %entity-bundle using the field %field-name as the field does not exist.', $params));
     }
 
     if (!og_is_group_audience_field($field_name)) {
-      throw new OgException(t('OG membership can not be created with %field-name as it is not a valid group-audience type.', $params));
+      throw new OgException(format_string('OG membership can not be created with %field-name as it is not a valid group-audience type.', $params));
     }
 
     if ($field['settings']['target_type'] != $group_type) {
-      throw new OgException(t('OG membership can not be created in entity %entity-type and bundle %entity-bundle using the field %field-name as the field does not reference %group-type entity type.', $params));
+      throw new OgException(format_string('OG membership can not be created in entity %entity-type and bundle %entity-bundle using the field %field-name as the field does not reference %group-type entity type.', $params));
     }
 
     if (!empty($field['settings']['handler_settings']['target_bundles']) && !in_array($group_bundle, $field['settings']['handler_settings']['target_bundles'])) {
-      throw new OgException(t('OG membership can not be created in entity %entity-type and bundle %entity-bundle using the field %field-name as the field does not reference %group-bundle bundle in %group-type entity type.', $params));
+      throw new OgException(format_string('OG membership can not be created in entity %entity-type and bundle %entity-bundle using the field %field-name as the field does not reference %group-bundle bundle in %group-type entity type.', $params));
     }
 
     $params += array('@cardinality' => $field['cardinality']);
     // Check field cardinality, that we may add another value, if we have a new
     // OG membership.
     if (empty($this->id) && !og_check_field_cardinality($entity_type, $etid, $field_name)) {
-      throw new OgException(t('OG membership can not be created in entity %entity-type and bundle %entity-bundle using the field %field-name as the field cardinality is set to @cardinality.', $params));
-    }
-
-    // Check field is not a secondary field.
-    if (!empty($field['settings']['handler_settings']['primary_field'])) {
-      throw new OgException(t('OG membership can not be created using the field %field-name as the field is defined as a secondary field.', $params));
+      throw new OgException(format_string('OG membership can not be created in entity %entity-type and bundle %entity-bundle using the field %field-name as the field cardinality is set to @cardinality.', $params));
     }
 
     if (empty($this->id) && $og_membership = og_get_membership($this->group_type, $this->gid, $this->entity_type, $this->etid)) {
-      throw new OgException(t('OG membership for %etid - %entity-type in group %gid - %group-type already exists.', $params));
+      throw new OgException(format_string('OG membership for %etid - %entity-type in group %gid - %group-type already exists.', $params));
     }
 
     // We can now safely save the entity.

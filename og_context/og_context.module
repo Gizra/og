@@ -380,7 +380,7 @@ function og_context_handler_url() {
   }
   $node_type = $item['map'][2];
 
-  if (!$fields = og_get_group_audience_fields('node', $node_type, FALSE)) {
+  if (!$fields = og_get_group_audience_fields('node', $node_type)) {
     return;
   }
   $gids = array();

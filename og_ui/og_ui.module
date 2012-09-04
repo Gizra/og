@@ -725,7 +725,7 @@ function og_ui_field_formatter_settings_form($field, $instance, $view_mode, $for
       '#title' => t('Field name'),
       '#description' => t('Select the field that should register the user subscription.'),
       '#type' => 'select',
-      '#options' => array(0 => t('Automatic (best matching)')) + og_get_group_audience_fields('user', 'user', FALSE),
+      '#options' => array(0 => t('Automatic (best matching)')) + og_get_group_audience_fields('user', 'user'),
       '#default_value' => $settings['field_name'],
     );
   }
@@ -745,7 +745,7 @@ function og_ui_field_formatter_settings_summary($field, $instance, $view_mode) {
   }
 
   if ($settings['field_name']) {
-    $fields = og_get_group_audience_fields('user', 'user');
+    $fields = og_get_group_audience_fields();
     return t('Field %label', array('%label' => $fields[$settings['field_name']]));
   }
   else {
@@ -960,15 +960,6 @@ function og_ui_node_type_save($bundle_name) {
     $og_field['field']['target_type'] = variable_get('target_type_' . $bundle_name);
     $og_field['field']['settings']['handler_settings']['target_bundles'] = variable_get('target_bundles_' . $bundle_name);
     og_create_field(OG_AUDIENCE_FIELD, 'node', $bundle_name, $og_field);
-
-    // Create "Other groups" field.
-    $og_field['instance']['label'] = t('Other groups');
-    $og_field['instance']['widget']['type'] = 'entityreference_autocomplete';
-    $og_field['field']['settings']['handler_settings']['reference_type'] = 'other_groups';
-    $og_field['field']['settings']['handler_settings']['primary_field'] = OG_AUDIENCE_FIELD;
-    $og_field['field']['settings']['handler_settings']['hide_secondary_field'] = TRUE;
-    $og_field['field']['settings']['handler_settings']['force_optional_primary'] = TRUE;
-    og_create_field(OG_AUDIENCE_OTHER_GROUPS_FIELD, 'node', $bundle_name, $og_field);
   }
 
   // Delete the variable, as we will rely on the presence of the field.

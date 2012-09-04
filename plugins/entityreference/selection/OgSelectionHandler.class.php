@@ -13,8 +13,8 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
     return new OgSelectionHandler($field, $instance, $entity_type, $entity);
   }
 
- /**
-   * Override settings form().
+  /**
+   * Override EntityReferenceHandler::settingsForm().
    */
   public static function settingsForm($field, $instance) {
     $form = parent::settingsForm($field, $instance);
@@ -36,15 +36,10 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
       );
     }
     else {
-
       $settings = $field['settings']['handler_settings'];
       $settings += array(
         'target_bundles' => array(),
         'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
-        'reference_type' => 'my_groups',
-        'primary_field' => FALSE,
-        'hide_secondary_field' => TRUE,
-        'force_optional_primary' => TRUE,
       );
 
       $form['target_bundles'] = array(
@@ -69,77 +64,6 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
         '#default_value' => $settings['membership_type'],
         '#required' => TRUE,
       );
-
-      $form['reference_type'] = array(
-        '#type' => 'select',
-        '#title' => t('Reference'),
-        '#options' => array(
-          'my_groups' => t('My groups'),
-          'other_groups' => t('Other groups'),
-          'all_groups' => t('All groups'),
-        ),
-        '#description' => t('What groups should be referenced.'),
-        '#default_value' => $settings['reference_type'],
-      );
-
-      $options = array('0' => t('None'));
-
-      // Get all the other group audience fields in this bundle.
-      $entity_type = $instance['entity_type'];
-      $bundle = $instance['bundle'];
-      $fields_info = field_info_fields();
-      foreach (field_info_instances($entity_type, $bundle) as $field_name => $field_instance) {
-        if ($field_name == $field['field_name']) {
-          // This is the current field.
-          continue;
-        }
-        if ($fields_info[$field_name]['type'] != 'entityreference' || $fields_info[$field_name]['settings']['handler'] != 'og') {
-          // This is not an Entity reference field.
-          continue;
-        }
-
-        if (!empty($fields_info[$field_name]['settings']['handler_settings']['primary_field'])) {
-          // Field is already a secondary field.
-          continue;
-        }
-        $options[$field_name] = $field_instance['label'] . ' (' . $field_name . ')';
-      }
-
-      $form['primary_field'] = array(
-        '#type' => 'select',
-        '#title' => t('Primary field'),
-        '#description' => t('Select a field that will be populated with the values of this field.'),
-        '#options' => $options,
-        '#default_value' => $settings['primary_field'],
-        '#required' => TRUE,
-        '#element_validate' => array('og_handler_primary_field_validate'),
-      );
-
-      $form['hide_secondary_field'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Hide secondary field'),
-        '#description' => t('Show the secondary field only to users with "administer group" permission.'),
-        '#default_value' => $settings['hide_secondary_field'],
-        '#states' => array(
-          'invisible' => array(
-            ':input[name="field[settings][handler_settings][primary_field]"]' => array('value' => 0),
-          ),
-        ),
-      );
-
-      $form['force_optional_primary'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Force optional primary field'),
-        '#description' => t("Force the primary field to be optional when the secondary field is shown. If the primary field is requrired, then this will allow privileged users to edit group content for groups they're not members of -- i.e., they can leave the primary field blank."),
-        '#default_value' => $settings['force_optional_primary'],
-        '#states' => array(
-          'invisible' => array(
-            ':input[name="field[settings][handler_settings][primary_field]"]' => array('value' => 0),
-          ),
-        ),
-      );
-
-      form_load_include($form_state, 'php', 'og', '/plugins/selection/og.class');
     }
 
     return $form;
@@ -175,10 +99,14 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
     // Show only the entities that are active groups.
     $query->fieldCondition(OG_GROUP_FIELD, 'value', 1, '=');
 
+    if (empty($this->instance['field_mode'])) {
+      return $query;
+    }
+
+    $field_mode = $this->instance['field_mode'];
     $user_groups = og_get_groups_by_user(NULL, $group_type);
-    $reference_type = $this->field['settings']['handler_settings']['reference_type'];
     // Show the user only the groups they belong to.
-    if ($reference_type == 'my_groups') {
+    if ($field_mode == 'default') {
       if ($user_groups && !empty($this->instance) && $this->instance['entity_type'] == 'node') {
         // Determine which groups should be selectable.
         $node = $this->entity;
@@ -206,7 +134,7 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
         $query->propertyCondition($entity_info['entity keys']['id'], -1, '=');
       }
     }
-    elseif ($reference_type == 'other_groups' && $user_groups) {
+    elseif ($field_mode == 'admin' && $user_groups) {
       // Show only groups the user doesn't belong to.
       if (!empty($this->instance) && $this->instance['entity_type'] == 'node') {
         // Don't include the groups, the user doesn't have create
@@ -231,39 +159,4 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
     // FIXME: Allow altering, after fixing http://drupal.org/node/1413108
     // $handler->entityFieldQueryAlter($query);
   }
-}
-
-/**
- * Validate handler; Check primary field.
- */
-function og_handler_primary_field_validate($element, $form_state) {
-  if (empty($form_state['values']['instance'])) {
-    // Field doesn't exist yet.
-    return;
-  }
-
-  $field_name = $form_state['values']['field']['settings']['handler_settings']['primary_field'];
-  if (!$field_name) {
-    return;
-  }
-
-  // Check the primary field has the same target type, bundle and membership
-  // type as the secondary one.
-  $primary_field = field_info_field($field_name);
-  $secondary_field = $form_state['values']['field'];
-  if ($primary_field['settings']['target_type'] != $secondary_field['settings']['target_type']) {
-    form_error($element, t('Primary field target type does not match the secondary field.'));
-  }
-  elseif (!empty($primary_field['settings']['handler_settings']['target_bundles']) && $primary_field['settings']['handler_settings']['target_bundles'] != $secondary_field['settings']['handler_settings']['target_bundles']) {
-    // Primary field defines bundles, but they are not the same as the
-    // secondary.
-    form_error($element, t('Primary field target bundles do not match the secondary field.'));
-  }
-
-  if ($primary_field['settings']['handler_settings']['membership_type'] != $secondary_field['settings']['handler_settings']['membership_type']) {
-    form_error($element, t('Primary field membership type does not match the secondary field.'));
-  }
-
-  $entity_type = $form_state['values']['instance']['entity_type'];
-  $bundle = $form_state['values']['instance']['bundle'];
 }

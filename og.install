@@ -1030,3 +1030,61 @@ function og_update_7202() {
   db_change_field('og_role_permission', 'permission', 'permission', $column);
   return t('Updated column definition for {og_role_permission} table.');
 }
+
+/**
+ * Update group-audience field to use "OG group" widget type.
+ */
+function og_update_7203() {
+  if (!module_exists('field_sql_storage')) {
+    return;
+  }
+
+  // List of secondary group-audience fields.
+  $secondary_fields = array();
+
+  foreach (field_info_fields() as $field_name => $field) {
+    if ($field['type'] != 'entityreference' || $field['settings']['handler'] != 'og') {
+      continue;
+    }
+
+    if (!empty($field['settings']['handler_settings']['primary_field'])) {
+      field_delete_field($field_name);
+      $secondary_fields[] = $field_name;
+      continue;
+    }
+
+    foreach ($field['bundles'] as $entity_type => $bundles) {
+      foreach ($bundles as $bundle) {
+        $og_widget =
+        $instance = field_info_instance($entity_type, $field_name, $bundle);
+        $instance['settings']['behaviors']['og_widget'] = array(
+          'status' => TRUE,
+          'default' => array(
+            'widget_type' => 'options_select',
+          ),
+          'admin' => array(
+            'widget_type' => 'entityreference_autocomplete',
+          ),
+        );
+
+        $instance['widget'] = array(
+          'type' => 'og_complex',
+          'module' => 'og',
+          'settings' => array(),
+        );
+
+        field_update_instance($instance);
+      }
+    }
+  }
+
+  if ($secondary_fields) {
+    $output = t('The following "secondary" fields were deleted, as they are no longer in use:');
+    $output .= theme('item_list', array('items' => $secondary_fields));
+  }
+  else {
+    $output = t('All group-audience fields were updated');
+  }
+
+  return $output;
+}
