@@ -1583,6 +1583,140 @@ function og_get_membership($group_type, $gid, $entity_type, $etid) {
   return FALSE;
 }
 
+/**
+ * Implements hook_entity_query_alter().
+ *
+ * Add "og_membership" tag if there's a group audience field in the query.
+ *
+ * @see og_query_og_membership_alter().
+ */
+function og_entity_query_alter(EntityFieldQuery $query) {
+  foreach ($query->fieldConditions as $values) {
+    if (og_is_group_audience_field($values['field']['field_name'])) {
+      $query->addTag('og_membership');
+      return;
+    }
+  }
+}
+
+/**
+ * Implements hook_query_QUERY_TAG_alter().
+ *
+ * Join the {og_membership} table and alter the query.
+ */
+function og_query_og_membership_alter(QueryAlterableInterface $query) {
+  $tables = &$query->getTables();
+  $fields = &$query->getFields();
+  $conditions =  &$query->conditions();
+
+  // Find the group-audience fields.
+  $field_names = array();
+  foreach ($query->alterMetaData['entity_field_query']->fieldConditions as $values) {
+    $field_name = $values['field']['field_name'];
+    if (og_is_group_audience_field($field_name)) {
+      $field_names[] = $field_name;
+    }
+  }
+
+  $aliases = array();
+  $base_table = FALSE;
+  $base_table_alias = '';
+
+  foreach ($tables as $alias => $values) {
+    if (!$base_table_alias && empty($values['join type'])) {
+      $base_table_alias = $alias;
+    }
+
+    if (strpos($alias, 'field_data') !== 0) {
+      continue;
+    }
+    $field_name = substr($values['table'], 11);
+    if (!in_array($field_name, $field_names)) {
+      continue;
+    }
+
+    if (empty($values['join type'])) {
+      // This is the base table, so remove it in favor of OG membership.
+      $base_table = TRUE;
+    }
+
+    unset($tables[$alias]);
+    $aliases[$alias] = $field_name;
+  }
+
+  foreach ($aliases as $alias => $field_name) {
+    foreach ($tables as $key => $values) {
+      $condition = str_replace("$alias.entity_type", 'ogm.entity_type', $values['condition']);
+      $condition = str_replace("$alias.entity_id", 'ogm.etid', $condition);
+      $tables[$key]['condition'] = $condition;
+    }
+  }
+
+  if ($base_table) {
+    // Point the revision ID and bundle to the base entity.
+    $entity_type = $query->alterMetaData['entity_field_query']->entityConditions['entity_type']['value'];
+    $entity_type = is_array($entity_type) ? $entity_type[0] : $entity_type;
+    $entity_info = entity_get_info($entity_type);
+
+    // If the table of the base entity does not exist (e.g. there is no
+    // property condition), we need to add it, as we don't have the
+    // revision ID and bundle in {og_membership} table.
+    if (strpos($base_table_alias, 'field_data') === 0) {
+      $id = $entity_info['entity keys']['id'];
+      $query->innerJoin($entity_type, $entity_type, "$entity_type.$id = ogm.etid");
+    }
+
+    $fields['revision_id']['table'] = $entity_type;
+    $fields['revision_id']['field'] = $entity_info['entity keys']['revision'];
+
+    $fields['bundle']['table'] = $entity_type;
+    $fields['bundle']['field'] = $entity_info['entity keys']['bundle'];
+
+    $fields['entity_type']['table'] = 'ogm';
+    $fields['entity_id']['table'] = 'ogm';
+    $fields['entity_id']['field'] = 'etid';
+
+    $ogm = array(
+      'join type' => NULL,
+      'table' => 'og_membership',
+      'alias' => 'ogm',
+      'condition' => '',
+      'arguments' => array(),
+    );
+
+    $tables = array_merge(array('ogm' => $ogm), $tables);
+  }
+  else {
+    $query->join('og_membership', 'ogm', "ogm.etid = $base_table_alias.entity_id");
+  }
+
+  foreach ($conditions as $delta => $values) {
+    if (!is_array($values)) {
+      continue;
+    }
+    if (strpos($values['field'], 'field_data_') !== 0) {
+      continue;
+    }
+
+    $args = explode('.', $values['field']);
+
+    if (empty($aliases[$args[0]])) {
+      continue;
+    }
+    $field_name = $aliases[$args[0]];
+
+    if ($args[1] == 'deleted') {
+      unset($conditions[$delta]);
+    }
+    elseif (strpos($args[1], 'target_id')) {
+      $conditions[$delta]['field'] = 'ogm.gid';
+    }
+    else {
+      $conditions[$delta]['field'] = 'ogm.' . $args[1];
+    }
+  }
+}
+
 
 /**
  * Inserts or updates an OG membership entity into the database.
