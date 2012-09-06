@@ -202,7 +202,7 @@ function og_ui_views_default_views() {
   $handler->display->display_options['fields']['created']['table'] = 'og_membership';
   $handler->display->display_options['fields']['created']['field'] = 'created';
   $handler->display->display_options['fields']['created']['relationship'] = 'og_membership_rel';
-  $handler->display->display_options['fields']['created']['label'] = 'Member for';
+  $handler->display->display_options['fields']['created']['label'] = 'Member since';
   $handler->display->display_options['fields']['created']['date_format'] = 'time ago';
   /* Field: OG membership: Request message */
   $handler->display->display_options['fields']['og_membership_request']['id'] = 'og_membership_request';
