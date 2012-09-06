@@ -16,7 +16,7 @@ files[] = includes/og.membership.inc
 files[] = includes/og.membership_type.inc
 files[] = includes/views/og.views.inc
 
-; Test files.
+; Test files
 files[] = og.test
 files[] = tests/upgrade/og.upgrade.test
 
