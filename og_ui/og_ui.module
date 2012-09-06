@@ -114,13 +114,22 @@ function og_ui_menu() {
     'weight' => -9,
   );
 
-  foreach (og_get_all_group_entity() as $entity => $value) {
-    $items["$entity/%/group"] = array(
+  foreach (og_get_all_group_entity() as $entity_type => $value) {
+    if ($entity_type == 'taxonomy_term') {
+      $path = 'taxonomy/term/%/group';
+      $argument = 2;
+    }
+    else {
+      $path = "$entity_type/%/group";
+      $argument = 1;
+    }
+
+    $items[$path] = array(
       'title' => 'Group',
       'page callback' => 'og_ui_group_admin_overview',
-      'page arguments' => array($entity, 1),
+      'page arguments' => array($entity_type, $argument),
       'access callback' => 'og_ui_get_group_admin',
-      'access arguments' => array($entity, 1),
+      'access arguments' => array($entity_type, $argument),
       'type' => MENU_LOCAL_TASK,
       'file' => 'og_ui.admin.inc',
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
