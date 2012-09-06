@@ -1040,6 +1040,12 @@ function og_ui_og_permission() {
  * Get all the group admin menu items.
  */
 function og_ui_get_group_admin($entity_type, $etid) {
+  // We cache the values, as this function is also used as an access
+  // callback, so we don't want to trigger it many times.
+  $cache = &drupal_static(__FUNCTION__);
+  if (isset($cache["$entity_type:$etid"])) {
+    return $cache["$entity_type:$etid"];
+  }
   $data = module_invoke_all('og_ui_get_group_admin', $entity_type, $etid);
 
   // Allow other modules to alter the menu items.
@@ -1052,6 +1058,7 @@ function og_ui_get_group_admin($entity_type, $etid) {
   // Sort the results.
   uasort($data, 'drupal_sort_title');
 
+  $cache["$entity_type:$etid"] = $data;
   return $data;
 }
 
