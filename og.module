@@ -1792,7 +1792,7 @@ function og_check_field_cardinality($entity_type, $entity, $field_name) {
   @param $group_type
  *   The entity type of the group.
  * @param $gid
- *   The group ID.
+ *   The group entity or ID.
  * @param $values
  *   Array with the information to pass along, until it is processed in the
  *   field handlers.
@@ -1834,8 +1834,16 @@ function og_group($group_type, $gid, $values = array()) {
   $bundle = $wrapper->getBundle();
   $id = $wrapper->getIdentifier();
 
-  $group = entity_load_single($group_type, $gid);
-  list(,, $group_bundle) = entity_extract_ids($group_type, $group);
+  if (is_object($gid)) {
+    $group = $gid;
+
+  }
+  else {
+    $group = entity_load_single($group_type, $gid);
+  }
+
+  // the group ID might be the entity, so re-popualte it.
+  list($gid,, $group_bundle) = entity_extract_ids($group_type, $group);
 
   // Get membership if exists.
   $og_membership = og_get_membership($group_type, $gid, $entity_type, $id);
