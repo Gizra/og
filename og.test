@@ -1213,11 +1213,11 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     // No entity property.
     $query = new EntityFieldQuery();
     $result = $query
-      ->entityCondition('entity_type', array('node', 'user'), 'IN')
+      ->entityCondition('entity_type', 'node')
       ->fieldCondition('og_node', 'target_id', $group2->nid)
       ->execute();
 
-    $this->assertTrue(array_keys($result['node']) == array($node->nid) && array_keys($result['user']) == array($user1->uid), 'Multiple entity types in entityCondition() query is correct.');
+    $this->assertEqual(array_keys($result['node']), array($node->nid), 'No entity property query is correct.');
 
     // Count query.
     $query = new EntityFieldQuery();
