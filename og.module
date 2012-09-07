@@ -854,7 +854,7 @@ function og_complex_widget_after_build($form, &$form_state) {
     if (empty($form[$field_name])) {
       continue;
     }
-    $form[$field_name][LANGUAGE_NONE]['#theme'] = '';
+    unset($form[$field_name][LANGUAGE_NONE]['#theme']);
     unset($form[$field_name][LANGUAGE_NONE]['add_more']);
     unset($form[$field_name][LANGUAGE_NONE][0]['_weight']);
 
