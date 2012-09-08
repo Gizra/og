@@ -322,7 +322,7 @@ function og_context_determine_context($group_type, $item = NULL) {
 
   $providers = og_context_negotiation_info();
   foreach ($enabled_providers as $name) {
-    if (!in_array($name, $providers)) {
+    if (!in_array($name, array_keys($providers))) {
       continue;
     }
     $provider = $providers[$name];
