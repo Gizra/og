@@ -750,7 +750,15 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       }
     }
 
-    $new_element = ctools_field_invoke_field($mocked_instance, 'form', $entity_type, $dummy_entity, $form, $form_state, array('default' => TRUE));
+    $dummy_form_state = $form_state;
+    if (empty($form_state['rebuild'])) {
+      // Form is "fresh" (i.e. not call from field_add_more_submit()), so
+      // re-set the items-count, to show the correct amount for the mocked
+      // instance.
+      $dummy_form_state['field'][$field_name][LANGUAGE_NONE]['items_count'] = !empty($dummy_entity->{$field_name}[LANGUAGE_NONE]) ? count($dummy_entity->{$field_name}[LANGUAGE_NONE]) : 0;
+    }
+
+    $new_element = ctools_field_invoke_field($mocked_instance, 'form', $entity_type, $dummy_entity, $form, $dummy_form_state, array('default' => TRUE));
     $element[$field_mode] = $new_element[$field_name][LANGUAGE_NONE];
 
     if (in_array($mocked_instance['widget']['type'], array('entityreference_autocomplete', 'entityreference_autocomplete_tags'))) {
