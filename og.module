@@ -958,12 +958,33 @@ function og_field_create_instance($instance) {
 
   // Check if we need to add a group audience on the user's entity.
   // We add a different field, so each field can be set differently.
-  if (!og_is_group_content_type('user', 'user')) {
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
-    $og_field['field']['settings']['target_type'] = $instance['entity_type'];
-    $og_field['instance']['label'] = t('Group membership');
-    og_create_field('og_user_group_ref', 'user', 'user', $og_field);
+  $entity_type = $instance['entity_type'];
+  $bundle = $instance['bundle'];
+  foreach (array_keys(og_get_group_audience_fields()) as $field_name) {
+    $field = field_info_field($field_name);
+
+    if ($field['settings']['target_type'] == $entity_type  && empty($field['settings']['handler_settings']['target_bundles'])) {
+      return;
+    }
+
+    if ($field['settings']['target_type'] == $entity_type && in_array($bundle, $field['settings']['handler_settings']['target_bundles'])) {
+      return;
+    }
   }
+
+  // If we reached here, it means we need to create a field.
+  // Pick an unused name.
+  $field_name = substr("og_user_$entity_type", 0, 32);
+  $i = 1;
+  while (field_info_field($field_name)) {
+    $field_name = substr("og_user_$entity_type", 0, 32 - strlen($i)) . $i;
+    ++$i;
+  }
+
+  $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+  $og_field['field']['settings']['target_type'] = $entity_type;
+  $og_field['instance']['label'] = t('Group membership');
+  og_create_field($field_name, 'user', 'user', $og_field);
 }
 
 /**
@@ -2329,7 +2350,7 @@ function og_get_group_audience_fields($entity_type = 'user', $bundle_name = 'use
   if (isset($return[$identifier])) {
     return $return[$identifier];
   }
-  $return[$identifier] = FALSE;
+  $return[$identifier] = array();
   // field_info_instances() doesn't give the field type, so we have to use
   // field_info_fields().
   foreach (field_info_fields() as $field_name => $field_info) {
