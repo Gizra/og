@@ -833,9 +833,7 @@ function og_get_mocked_instance($instance, $field_mode) {
  * Rebuild the element's values, using the default and admin if exists.
  */
 function og_complex_widget_element_validate($element, &$form_state, $form) {
-  $field_name = $element['#field_name'];
-  $field = field_info_field($field_name);
-  $subform = $form_state['values'][$field_name][LANGUAGE_NONE][0];
+  $subform = drupal_array_get_nested_value($form_state['values'], $element['#array_parents']);
   $ids = $element['#other_groups_ids'];
   foreach (array('default', 'admin') as $type) {
     if (empty($subform[$type])) {
@@ -848,7 +846,12 @@ function og_complex_widget_element_validate($element, &$form_state, $form) {
       }
     }
   }
-  form_set_value($form[$field_name][LANGUAGE_NONE], $ids, $form_state);
+
+  // Set the form values by directly using drupal_array_set_nested_values(),
+  // which allows us to control the element parents. In this case we cut off the
+  // last element that contains the delta 0, as $ids is already keyed with
+  // deltas.
+  drupal_array_set_nested_value($form_state['values'], array_slice($element['#parents'], 0, -1), $ids, TRUE);
 }
 
 /**
