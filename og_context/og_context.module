@@ -378,7 +378,7 @@ function og_context_handler_url() {
     // access to create this node.
     return;
   }
-  $node_type = $item['map'][2];
+  $node_type = str_replace('-', '_', $item['map'][2]);
 
   if (!$fields = og_get_group_audience_fields('node', $node_type)) {
     return;
