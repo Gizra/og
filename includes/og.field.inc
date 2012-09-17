@@ -192,14 +192,6 @@ function og_get_mocked_instance($instance, $field_mode) {
 
   // See OgSelectionHandler::buildEntityFieldQuery().
   $mocked_instance['field_mode'] = $field_mode;
-
-  if (!empty($mocked_instance['default_value_function']) && $mocked_instance['default_value_function'] == 'entityreference_prepopulate_field_default_value' && user_access('administer group') && module_exists('entityreference_prepopulate')) {
-    // If the default value function is to Entityreference-prepopualte
-    // we change it to our own function, that will filter default values
-    // according to the field-mode.
-    $mocked_instance['default_value_function'] = 'og_prepopulate_field_default_value';
-  }
-
   return $mocked_instance;
 }
 
@@ -326,23 +318,3 @@ function og_entityreference_autocomplete_callback($type, $field_name, $entity_ty
   drupal_json_output($matches);
 }
 
-/**
- * Default value callback; Filter results by field-mode.
- */
-function og_prepopulate_field_default_value($entity_type, $entity, $field, $instance, $langcode) {
-  if ($items = entityreference_prepopulate_get_values_from_url($field, $instance)) {
-    // Filter out the items that don't match the field-mode.
-    $gids = array();
-    foreach ($items as $item) {
-      $gids[] = $item['target_id'];
-    }
-    if (!$valid_ids = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->validateReferencableEntities($gids)) {
-      return;
-    }
-    $valid_items = array();
-    foreach ($valid_ids as $valid_id) {
-      $valid_items[] = array('target_id' => $valid_id);
-    }
-    return $valid_items;
-  }
-}
