@@ -78,6 +78,7 @@ class OgMembership extends Entity {
 
   public function delete() {
     parent::delete();
+
     og_membership_invalidate_cache();
     // Clear the group content entity field cache.
     cache_clear_all('field:'. $this->entity_type . ':' . $this->etid, 'cache_field');

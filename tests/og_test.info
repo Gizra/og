@@ -1,5 +1,0 @@
-name = Organic groups test module
-description = Functionality to assist Organic groups testing.
-core = 7.x
-dependencies[] = og
-hidden = TRUE

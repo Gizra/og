@@ -7,13 +7,20 @@ $plugin = array(
   'name' => t('Migrate OGUR module data - 7.2'),
   'description' => t('Migrate data from Drupal 6.x og_user_roles (OGUR) module.'),
   'access callback' => 'og_migrate_ogur_access',
-  'dependencies' => array('og_7200_user_roles'),
+  'dependencies' => array('og__user_roles'),
 );
+
+/**
+ * Access callback for OGUR related migration items.
+ */
+// function og_migrate_ogur_access() {
+  // return db_table_exists('d6_og_users_roles');
+// }
 
 /**
  * OG Migrate callback; Upgrade user roles in groups.
  */
-function og_7200_ogur(&$context) {
+function og__ogur(&$context) {
   if (empty($context['sandbox'])) {
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['last'] = 0;

@@ -801,20 +801,6 @@ function og_update_7000(&$sandbox) {
       $tables[] = 'd6_og_users_roles';
     }
 
-    // Add serial ID to d6_og* tables so we can keep track of records that were
-    // processed.
-    foreach ($tables as $table) {
-      // Drop the current primary key, as we are adding a serial column.
-      db_drop_primary_key($table);
-      db_add_field($table, 'upgrade_id', array(
-        'description' => 'This a serial ID that keeps track of records that were processed.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      array('primary key' => array('upgrade_id')));
-    }
-
     $schema = og_schema_7000_info();
     foreach (array('og', 'og_role_permission', 'og_role', 'og_users_roles') as $table) {
       db_create_table($table, $schema[$table]);
@@ -822,7 +808,11 @@ function og_update_7000(&$sandbox) {
 
     // We can't call og_needs_migrate() directly, so just set the variable.
     variable_set('og_needs_migrate', TRUE);
-    return t('Renamed Organic groups 6 tables. Enable Organic groups migrate module to continue the migration of data.');
+
+    // Temporary variable to indicate we need to add OG related fields.
+    variable_set('og_7000_add_field', TRUE);
+    variable_set('og_ui_7000_add_field', TRUE);
+    return t('Renamed Organic groups 6 tables. Enable "Migrate-UI" module to continue the migration of data.');
   }
   return t('No change needed in Organic groups schema.');
 }
@@ -894,7 +884,6 @@ function og_update_7200() {
       }
     }
   }
-  field_delete_field('group_audience');
 
   // Create a temporary variable that will be used to later re-add the new
   // group-audience field.

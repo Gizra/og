@@ -439,7 +439,7 @@ function og_ui_views_api() {
  * Implements hook_ctools_plugin_directory().
  */
 function og_ui_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'ctools' || $module == 'og_migrate') {
+  if ($module == 'ctools') {
     return 'plugins/' . $plugin;
   }
 }
@@ -1115,3 +1115,32 @@ function og_ui_og_ui_get_group_admin($group_type, $gid) {
   return $items;
 }
 
+/**
+ * Implements hook_migrate_api().
+ */
+function og_ui_migrate_api() {
+  $api = array(
+    'api' => 2,
+  );
+  return $api;
+}
+
+/**
+ * Implements hook_modules_enabled().
+ *
+ * Register dynamic migrate plugins for upgrading from OG6.
+ */
+function og_ui_modules_enabled($modules) {
+  if (!db_table_exists('d6_og')) {
+    return;
+  }
+
+  if (!in_array('migrate', $modules) && !module_exists('migrate')) {
+    return;
+  }
+
+  foreach (node_type_get_names() as $bundle => $value) {
+    // Register dynamic migrations.
+    Migration::registerMigration('OgUiPopulateField', 'OgUiPopulateField' . ucfirst($bundle), array('bundle' => $bundle));
+  }
+}

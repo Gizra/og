@@ -459,7 +459,7 @@ function og_modules_uninstalled($modules) {
  * Implements hook_ctools_plugin_directory().
  */
 function og_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'ctools' || $module == 'og_migrate') {
+  if ($module == 'ctools') {
     return 'plugins/' . $plugin;
   }
   elseif ($module == 'entityreference') {
@@ -924,22 +924,22 @@ function og_entity_delete($entity, $entity_type) {
 /**
  * Implements hook_og_membership_insert().
  */
-function og_og_membership_insert($membership) {
-  if ($membership->entity_type == 'user' && module_exists('rules')) {
-    rules_invoke_event('og_user_insert', $membership, entity_metadata_wrapper('user', $membership->etid));
+function og_og_membership_insert($og_membership) {
+  if ($og_membership->entity_type == 'user' && module_exists('rules')) {
+    rules_invoke_event('og_user_insert', $og_membership, entity_metadata_wrapper('user', $og_membership->etid));
   }
 }
 
 /**
  * Implements hook_og_membership_update().
  */
-function og_og_membership_update($membership) {
-  if ($membership->entity_type == 'user' && module_exists('rules')) {
-    if ($membership->original->state != OG_STATE_ACTIVE && $membership->state == OG_STATE_ACTIVE) {
-      rules_invoke_event('og_user_approved', $membership, entity_metadata_wrapper('user', $membership->etid));
+function og_og_membership_update($og_membership) {
+  if ($og_membership->entity_type == 'user' && module_exists('rules')) {
+    if ($og_membership->original->state != OG_STATE_ACTIVE && $og_membership->state == OG_STATE_ACTIVE) {
+      rules_invoke_event('og_user_approved', $og_membership, entity_metadata_wrapper('user', $og_membership->etid));
     }
-    if ($membership->original->state != OG_STATE_BLOCKED && $membership->state == OG_STATE_BLOCKED) {
-      rules_invoke_event('og_user_blocked', $membership, entity_metadata_wrapper('user', $membership->etid));
+    if ($og_membership->original->state != OG_STATE_BLOCKED && $og_membership->state == OG_STATE_BLOCKED) {
+      rules_invoke_event('og_user_blocked', $og_membership, entity_metadata_wrapper('user', $og_membership->etid));
     }
   }
 }
@@ -947,21 +947,21 @@ function og_og_membership_update($membership) {
 /**
  * Implements hook_og_membership_delete().
  */
-function og_og_membership_delete($membership) {
-  if ($membership->entity_type != 'user')  {
+function og_og_membership_delete($og_membership) {
+  if ($og_membership->entity_type != 'user')  {
     return;
   }
 
-  if (module_exists('rules'))  {
-    rules_invoke_event('og_user_delete', $membership, entity_metadata_wrapper('user', $membership->etid));
-  }
-
-  // Remove possible records in the table {og_users_roles}.
+  // Remove possible records in the {og_users_roles} table.
   db_delete('og_users_roles')
-    ->condition('uid', $membership->etid)
-    ->condition('gid', $membership->gid)
-    ->condition('group_type', $membership->group_type)
+    ->condition('uid', $og_membership->etid)
+    ->condition('gid', $og_membership->gid)
+    ->condition('group_type', $og_membership->group_type)
     ->execute();
+
+  if (module_exists('rules'))  {
+    rules_invoke_event('og_user_delete', $og_membership, entity_metadata_wrapper('user', $og_membership->etid));
+  }
 }
 
 /**
@@ -1444,15 +1444,15 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
 /**
  * Inserts or updates an OG membership entity into the database.
  *
- * @param $membership
+ * @param $og_membership
  *   The OG membership entity to be inserted.
  *
  * @return
  *   Failure to write a record will return FALSE. Otherwise SAVED_NEW or
  *   SAVED_UPDATED is returned depending on the operation performed.
  */
-function og_membership_save($membership) {
-  return entity_save('og_membership', $membership);
+function og_membership_save($og_membership) {
+  return entity_save('og_membership', $og_membership);
 }
 
 /**
@@ -3193,4 +3193,34 @@ function og_features_api() {
       'file' => drupal_get_path('module', 'og') . '/includes/og_features_permission.features.inc',
     ),
   );
+}
+
+/**
+ * Implements hook_migrate_api().
+ */
+function og_migrate_api() {
+  $api = array(
+    'api' => 2,
+  );
+  return $api;
+}
+
+/**
+ * Implements hook_modules_enabled().
+ *
+ * Register dynamic migrate plugins for upgrading from OG6.
+ */
+function og_modules_enabled($modules) {
+  if (!db_table_exists('d6_og')) {
+    return;
+  }
+
+  if (!in_array('migrate', $modules) && !module_exists('migrate')) {
+    return;
+  }
+
+  foreach (node_type_get_names() as $bundle => $value) {
+    // Register a dynamic migration.
+    Migration::registerMigration('OgMigrateGroup', 'OgMigrateGroup' . ucfirst($bundle), array('bundle' => $bundle));
+  }
 }

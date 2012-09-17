@@ -14,12 +14,6 @@ function og_ui_uninstall() {
 }
 
 /**
- * Removed -- Upgrade from Organic groups 6 to 7, moved to og-migrate.
- */
-function og_ui_update_7000(&$sandbox) {
-}
-
-/**
  * Enable VBO module.
  */
 function og_ui_update_7200(&$sandbox) {

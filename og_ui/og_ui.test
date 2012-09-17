@@ -292,6 +292,7 @@ class OgUiMigrate7000TestCase extends UpgradePathTestCase {
       'name'  => 'OG UI upgrade path',
       'description'  => 'Tests the upgrade path of Organic groups UI.',
       'group' => 'Organic groups UI',
+      'dependencies' => array('migrate'),
     );
   }
 
@@ -301,37 +302,30 @@ class OgUiMigrate7000TestCase extends UpgradePathTestCase {
       drupal_get_path('module', 'og_ui') . '/tests/drupal-6.og-ui.database.php',
     );
     parent::setUp();
-    $this->performUpgrade();
+    $this->assertTrue($this->performUpgrade(), 'The upgrade was completed successfully.');
 
-    // Drupal doesn't rebuild the registery properly, so we have to
-    // manually include all the classes.
-    module_load_include('inc', 'entity' ,'entity.info');
-    module_load_include('inc', 'entity' ,'includes/entity');
-    module_load_include('inc', 'entity' ,'includes/entity.controller');
-    module_load_include('inc', 'entity' ,'includes/entity.wrapper');
+    // spl_autoload_register() wasn't called, so we do it here, to allow
+    // classes to be auto-loaded.
+    spl_autoload_register('drupal_autoload_class');
+    spl_autoload_register('drupal_autoload_interface');
 
-    module_load_include('inc', 'og' ,'og.info');
-    module_load_include('inc', 'og' ,'includes/og.exception');
-    module_load_include('inc', 'og' ,'includes/og.membership');
-    module_load_include('inc', 'og' ,'includes/og.membership_type');
+    module_enable(array('og_ui', 'migrate'));
 
-    module_enable(array('og_migrate', 'og_ui'));
+    Migration::registerMigration('OgMigrateAddFields');
+    Migration::registerMigration('OgUiMigrateAddField');
+    Migration::registerMigration('OgUiSetRoles');
 
-    // Set small batch size, so we can simulate upgrade with many records.
-    variable_set('og_update_batch_size', 3);
+    foreach (migrate_migrations() as $migration) {
+      $machine_name = $migration->getMachineName();
+      $result = $migration->processImport();
+      $this->assertEqual($result, Migration::RESULT_COMPLETED, format_string('Migration @name executed.', array('@name' => $machine_name)));
+    }
   }
 
   /**
    * Test a successful upgrade.
    */
-  public function testOgUiUpgrade() {
-    // Run the required migration.
-    $edit = array(
-      'migrate[og_7000_group]' => TRUE,
-      'migrate[og_ui_7000_group_visibility]' => TRUE,
-    );
-    $this->drupalPost('admin/config/group/group-migrate', $edit, t('Migrate'));
-
+  public function testUpgrade() {
     // Assert according to the scenario Drupal 6's test table dump was created.
     $nodes_info = array(
       // Open group.
@@ -373,8 +367,6 @@ class OgUiMigrate7000TestCase extends UpgradePathTestCase {
       // Set default values.
       $node_info += array('auth' => array('unsubscribe' => TRUE));
 
-      // TODO: There is some issue with og_is_group_default_access()
-      // returning a wrong result, due to $wrapper not being up-to-date.
       $og_roles = og_roles('node', 'test_group', $nid, TRUE);
       $permissions = og_role_permissions($og_roles);
 

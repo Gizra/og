@@ -18,7 +18,6 @@ files[] = includes/views/og.views.inc
 
 ; Test files
 files[] = og.test
-files[] = tests/upgrade/og.upgrade.test
 
 ; Views plugins
 files[] = includes/views/handlers/og_plugin_argument_validate_group.inc
@@ -36,5 +35,23 @@ files[] = includes/views/handlers/og_handler_filter_group_audience_state.inc
 
 ; Views relationships
 files[] = includes/views/handlers/og_handler_relationship.inc
+
+; Migrate destinations
+files[] = includes/migrate/plugins/destinations/og_membership.inc
+
+; Migrate from 6.x to 7.x
+files[] = includes/migrate/7000/og_add_fields.inc
+files[] = includes/migrate/7000/og_content.inc
+files[] = includes/migrate/7000/og_group.inc
+files[] = includes/migrate/7000/og_user.inc
+
+; Migrate from 7.x-1.x to 7.x-2.x
+files[] = includes/migrate/og.migrate.inc
+files[] = includes/migrate/7200/og_group_audience.migrate.inc
+files[] = includes/migrate/7200/og_og_membership.migrate.inc
+files[] = includes/migrate/7200/og_ogur_permissions.migrate.inc
+files[] = includes/migrate/7200/og_ogur.migrate.inc
+files[] = includes/migrate/7200/og_roles.migrate.inc
+files[] = includes/migrate/7200/og_user_roles.migrate.inc
 
 
