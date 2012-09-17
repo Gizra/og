@@ -957,6 +957,31 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
     $gids = og_get_entity_groups('node', $post1);
     $this->assertEqual(count($gids['node']), 2, 'Hidden groups remained.');
   }
+
+  /**
+   * Test a non "administer group" user with pending membership, re-saving
+   * user edit.
+   */
+  function testUserEdit() {
+    $user1 = $this->drupalCreateUser();
+    $user2 = $this->drupalCreateUser();
+
+    $type = $this->drupalCreateContentType();
+
+    $settings = array(
+      'type' => 'group',
+      OG_GROUP_FIELD . '[und][0][value]' => 1,
+    );
+    $settings['uid'] = $user1->uid;
+    $group1 = $this->drupalCreateNode($settings);
+
+    og_group('node', $group1->nid, array('entity' => $user2, 'state' => OG_STATE_PENDING));
+
+    $this->drupalLogin($user2);
+    $this->drupalPost("user/$user2->uid/edit", array(), 'Save');
+
+    $this->assertTrue(og_get_entity_groups('user', $user2, array(OG_STATE_PENDING)), 'User membership was retained after user save.');
+  }
 }
 
 /**
