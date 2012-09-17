@@ -6,7 +6,6 @@
  */
 
 /**
-/**
  * Extend the default OG membership metadata properties.
  */
 class OgMembershipMetadataController extends EntityDefaultMetadataController {
