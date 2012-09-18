@@ -806,13 +806,10 @@ function og_update_7000(&$sandbox) {
       db_create_table($table, $schema[$table]);
     }
 
-    // We can't call og_needs_migrate() directly, so just set the variable.
-    variable_set('og_needs_migrate', TRUE);
-
     // Temporary variable to indicate we need to add OG related fields.
     variable_set('og_7000_add_field', TRUE);
     variable_set('og_ui_7000_add_field', TRUE);
-    return t('Renamed Organic groups 6 tables. Enable "Migrate-UI" module to continue the migration of data.');
+    return t('Renamed Organic groups 6 tables. Enable "Migrate-UI" module to continue the migration of data. Once migration is done you may disable "Migrate" module');
   }
   return t('No change needed in Organic groups schema.');
 }
@@ -832,8 +829,6 @@ function og_update_7001(&$sandbox) {
   if (!db_table_exists('og_membership_type')) {
     db_create_table('og_membership_type', $schema['og_membership_type']);
   }
-  // We can't call og_needs_migrate() directly, so just set the variable.
-  variable_set('og_needs_migrate', TRUE);
 }
 
 /**
@@ -939,12 +934,11 @@ function og_update_7200() {
   // Variable cleanup.
   variable_del('og_skip_access');
 
-  // We can't call og_needs_migrate() directly, so just set the variable.
-  variable_set('og_needs_migrate', TRUE);
-
   // Clear entity cache.
   // See http://drupal.org/node/996236
   entity_info_cache_clear();
+
+  return t('Enable "Migrate-UI" module to continue the migration of data. Once migration is done you may disable "Migrate" module');
 }
 
 /**
