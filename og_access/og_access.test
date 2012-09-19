@@ -221,4 +221,37 @@ class OgAccessTestCase extends DrupalWebTestCase {
     $this->assertEqual($records[0]->gid, $group_node1->nid, t('First gid is the first group ID.'));
     $this->assertEqual($records[1]->gid, $group_node2->nid, t('Second gid is the second group ID.'));
   }
+
+  /**
+   * Test unpublished node.
+   */
+  function testUnpublishedNode() {
+    $user1 = $this->user1;
+    $user2 = $this->user2;
+    $this->drupalLogin($user1);
+
+    // Create a group node and set as private.
+    $settings = array();
+    $settings['type'] = $this->group_type;
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $settings[OG_ACCESS_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $group_node1 = $this->drupalCreateNode($settings);
+
+    // Create a group content node and set default access.
+    $settings = array();
+    $settings['type'] = $this->group_content_type;
+    $settings[OG_AUDIENCE_FIELD][LANGUAGE_NONE][0]['target_id'] = $group_node1->nid;
+    $node = $this->drupalCreateNode($settings);
+
+    // Add another user to group.
+    og_group('node', $group_node1->nid, array('entity' => $user2));
+
+    $this->assertTrue(node_access('view', $node, $user2), 'Group member can view published node.');
+
+    $node->status = NODE_NOT_PUBLISHED;
+    node_save($node);
+    drupal_static_reset('node_access');
+
+    $this->assertFalse(node_access('view', $node, $user2), 'Group member can not view unpublished node.');
+  }
 }
