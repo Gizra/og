@@ -2328,7 +2328,7 @@ function og_roles($group_type, $bundle, $gid = 0, $force_group = FALSE, $include
 }
 
 /**
- * Get arary of default roles, keyed by their declaring module.
+ * Get array of default roles, keyed by their declaring module.
  *
  * @param $include
  *
