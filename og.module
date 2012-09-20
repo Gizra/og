@@ -1632,7 +1632,7 @@ function og_check_field_cardinality($entity_type, $entity, $field_name) {
 /**
  * Set an association (e.g. subscribe) an entity to a group.
  *
-  @param $group_type
+ * @param $group_type
  *   The entity type of the group.
  * @param $gid
  *   The group entity or ID.
