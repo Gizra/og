@@ -875,19 +875,13 @@ function og_update_7101() {
 function og_update_7200() {
   // Delete the old group-audience field. The OG membership is not
   // affected by this.
-  $instances = array();
   foreach (field_info_instances() as $entity_type => $bundles) {
     foreach ($bundles as $bundle => $field_names) {
       if (!empty($field_names['group_audience'])) {
-        $instances[$entity_type][$bundle] = $bundle;
         field_delete_instance($field_names['group_audience']);
       }
     }
   }
-
-  // Create a temporary variable that will be used to later re-add the new
-  // group-audience field.
-  variable_set('og_migrate_7200_field_instances', $instances);
 
   if (!module_enable(array('entityreference'))) {
     throw new DrupalUpdateException('This version of OG requires Entity reference, but it could not be enabled.');

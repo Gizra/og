@@ -25,8 +25,6 @@ class OgMigrateMembership extends OgEntityMigration {
   public function __construct() {
     $this->description = t('Re-populate group ID and group entity, deprecating the OG group entity.');
 
-    $this->softDependencies = array('OgMigrateGroupAudience');
-
     $this->query = db_select('og_membership', 'ogm')
       ->fields('ogm')
       ->condition('group_type', '', '=')
@@ -65,15 +63,28 @@ class OgMigrateMembership extends OgEntityMigration {
 
     $entity_type = $row->entity_type;
 
-    $entity = entity_load_single($entity_type, $row->etid);
-    if (!$entity) {
+    if (!$entity = entity_load_single($entity_type, $row->etid)) {
       // TODO: The OG membership was somehow not deleted when the entity
       // was deleted, so do it now.
       // $row->delete();
       return;
     }
-    list(,, $bundle) = entity_extract_ids($row->entity_type, $entity);
-    $row->field_name = OG_AUDIENCE_FIELD . '_' . $entity_type . '_' . $bundle;
+
+    if (!$group = entity_load_single($group_type, $gid)) {
+      return;
+    }
+
+    list(,, $group_bundle) = entity_extract_ids($group_type, $group);
+    if (!$field_name = og_get_best_group_audience_field($entity_type, $entity, $group_type, $group_bundle)) {
+      // Create a new field. Pick an unused name.
+      $field_name = substr("og_$group_type", 0, 32);
+      $i = 1;
+      while (field_info_field($field_name)) {
+        $field_name = substr("og_$group_type", 0, 32 - strlen($i)) . $i;
+        ++$i;
+      }
+    }
+    $row->field_name = $field_name;
 
     parent::prepareRow($row);
   }

@@ -47,7 +47,6 @@ files[] = includes/migrate/7000/og_user.inc
 
 ; Migrate from 7.x-1.x to 7.x-2.x
 files[] = includes/migrate/og.migrate.inc
-files[] = includes/migrate/7200/og_group_audience.migrate.inc
 files[] = includes/migrate/7200/og_og_membership.migrate.inc
 files[] = includes/migrate/7200/og_ogur_permissions.migrate.inc
 files[] = includes/migrate/7200/og_ogur.migrate.inc

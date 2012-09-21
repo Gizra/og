@@ -1080,6 +1080,8 @@ class OgMigrate7200TestCase extends UpdatePathTestCase {
   function testUpgrade() {
     $this->assertTrue($this->performUpgrade(), t('The upgrade was completed successfully.'));
 
+    $this->assertFalse(field_info_field('group_audience'), 'Group audience field was deleted.');
+
     // spl_autoload_register() wasn't called, so we do it here, to allow
     // classes to be auto-loaded.
     spl_autoload_register('drupal_autoload_class');
@@ -1088,14 +1090,13 @@ class OgMigrate7200TestCase extends UpdatePathTestCase {
     module_enable(array('og', 'migrate'));
 
     // FIXME: migrate_flush_caches() crashes, so we register manually.
-    MigrationBase::registerMigration('OgMigrateGroupAudience');
+    MigrationBase::registerMigration('OgMigrateMembership');
     MigrationBase::registerMigration('OgMigrateRoles');
     MigrationBase::registerMigration('OgMigrateUserRoles');
-    MigrationBase::registerMigration('OgMigrateMembership');
 
-    $migration = Migration::getInstance('OgMigrateGroupAudience');
+    $migration = Migration::getInstance('OgMigrateMembership');
     $result = $migration->processImport();
-    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'OgMigrateGroupAudience returned RESULT_COMPLETED');
+    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'OgMigrateMembership returned RESULT_COMPLETED');
 
     $migration = Migration::getInstance('OgMigrateRoles');
     $result = $migration->processImport();
@@ -1104,12 +1105,6 @@ class OgMigrate7200TestCase extends UpdatePathTestCase {
     $migration = Migration::getInstance('OgMigrateUserRoles');
     $result = $migration->processImport();
     $this->assertEqual($result, Migration::RESULT_COMPLETED, 'OgMigrateUserRoles returned RESULT_COMPLETED');
-
-    $migration = Migration::getInstance('OgMigrateMembership');
-    $result = $migration->processImport();
-    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'OgMigrateMembership returned RESULT_COMPLETED');
-
-    $this->assertFalse(field_info_field('group_audience'), 'Group audience field was deleted.');
 
     // Assert group roles.
     $roles = array(
@@ -1124,7 +1119,7 @@ class OgMigrate7200TestCase extends UpdatePathTestCase {
 
     // Assert field name was registered in the OG membership.
     $og_membership = entity_load_single('og_membership', 1);
-    $this->assertEqual($og_membership->field_name, 'og_group_ref_user_user', 'Field name was registered in the OG membership.');
+    $this->assertEqual($og_membership->field_name, 'og_node', 'Field name was registered in the OG membership.');
   }
 }
 
