@@ -335,7 +335,7 @@ function og_get_og_membership_properties($entity, array $options, $name, $type) 
   if ($gids = og_get_entity_groups($type, $entity, $state)) {
     $ids = array();
     foreach ($gids as $group_type => $values) {
-      $ids = $ids + array_keys($values);
+      $ids = array_merge($ids, array_keys($values));
     }
   }
 
