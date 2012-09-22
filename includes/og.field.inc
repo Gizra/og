@@ -44,7 +44,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
   $identifier = $field_name . ':' . $entity_type . ':' . $id;
   if (isset($cache[$identifier])) {
-    return;
+    return array();
   }
   $cache[$identifier] = TRUE;
 
