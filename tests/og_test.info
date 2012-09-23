@@ -1,0 +1,5 @@
+name = OG test module
+description = Functionality to assist OG testing.
+core = 7.x
+dependencies[] = og
+hidden = TRUE

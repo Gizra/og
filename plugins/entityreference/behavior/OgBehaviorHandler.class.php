@@ -24,6 +24,7 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
         continue;
       }
       $id = $wrapper->getIdentifier();
+      $items[$id] = array();
       foreach ($wrapper->{$field['field_name'] . '__og_membership'}->value() as $og_membership) {
         $items[$id][] = array(
           'target_id' => $og_membership->gid,
@@ -36,6 +37,9 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
    * Implements EntityReference_BehaviorHandler_Abstract::insert().
    */
   public function insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+    if (!empty($entity->skip_og_membership)) {
+      return;
+    }
     $this->OgMembershipCrud($entity_type, $entity, $field, $instance, $langcode, $items);
     $items = array();
   }
@@ -44,6 +48,9 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
    * Implements EntityReference_BehaviorHandler_Abstract::access().
    */
   public function update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+    if (!empty($entity->skip_og_membership)) {
+      return;
+    }
     $this->OgMembershipCrud($entity_type, $entity, $field, $instance, $langcode, $items);
     $items = array();
   }
@@ -57,6 +64,9 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
    * @see og_entity_delete().
    */
   public function delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
+    if (!empty($entity->skip_og_membership)) {
+      return;
+    }
     if (!empty($entity->delete_og_membership)) {
       // Delete all OG memberships related to this entity.
       $og_memberships = array();

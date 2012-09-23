@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Test module for OG.
+ */
+
+/**
+ * Implements hook_node_presave().
+ */
+function og_node_presave($node) {
+  if (!empty($node->nid) && !empty($node->og_group_on_save)) {
+    $values = $node->og_group_on_save;
+    og_group($values['group_type'], $values['gid'], array('entity_type' => 'node', 'entity' => $node));
+  }
+}
