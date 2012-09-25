@@ -25,6 +25,18 @@ class MigrateDestinationOGMembership extends MigrateDestination {
   }
 
   /**
+   * Delete a membership.
+   *
+   * @param $id
+   *  IDs to be deleted.
+   */
+  public function rollback(array $id) {
+    $membership = og_membership_load($id);
+    og_ungroup($membership->group_type, $membership->gid, $membership->entity_type, $membership->etid);
+  }
+
+
+  /**
    * Import a single membership.
    *
    * @param $entity
