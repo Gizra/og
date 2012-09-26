@@ -181,7 +181,9 @@ function og_ui_unsubscribe($group_type, $gid) {
   else {
     $label = entity_label($group_type, $group);
     drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $label)));
-    drupal_goto(entity_uri($group_type, $group));
+
+    $url = entity_uri($group_type, $group);
+    drupal_goto($url['path'], $url['options']);
   }
 }
 
