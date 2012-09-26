@@ -340,8 +340,8 @@ function og_field_audience_default_value($entity_type, $entity, $field, $instanc
   $items = array();
   $groups = og_load_multiple($gids);
   foreach ($groups as $gid => $group) {
-    // Check access to group.
-    if ($group->access()) {
+    // Check access to group, and user is a group member.
+    if ($group->access() && og_is_member($gid)) {
       $items[] = array('gid' => $gid);
     }
   }
