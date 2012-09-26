@@ -1370,16 +1370,17 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
     // If the table of the base entity does not exist (e.g. there is no
     // property condition), we need to add it, as we don't have the
     // revision ID and bundle in {og_membership} table.
+    $base_table = $entity_info['base table'];
     if (strpos($base_table_alias, 'field_data') === 0) {
       $id = $entity_info['entity keys']['id'];
-      $query->innerJoin($entity_type, $entity_type, "$entity_type.$id = ogm.etid");
+      $query->innerJoin($base_table, $base_table, "$base_table.$id = ogm.etid");
     }
 
-    $fields['revision_id']['table'] = $entity_info['base table'];
+    $fields['revision_id']['table'] = $base_table;
     // If there is no revision table, use the bundle.
     $fields['revision_id']['field'] = !empty($entity_info['entity keys']['revision']) ? $entity_info['entity keys']['revision'] : $entity_info['entity keys']['bundle'];
 
-    $fields['bundle']['table'] = $entity_info['base table'];
+    $fields['bundle']['table'] = $base_table;
     $fields['bundle']['field'] = $entity_info['entity keys']['bundle'];
 
     $fields['entity_type']['table'] = 'ogm';
