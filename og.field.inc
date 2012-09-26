@@ -406,9 +406,22 @@ function og_field_update($entity_type, $entity, $field, $instance, $langcode, &$
  *   The operation - "insert" or "update".
  */
 function og_field_write($op, $entity_type, $entity, $field, $instance, $langcode, &$items) {
+  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+  $group_memberships = array();
+  foreach ($wrapper->og_membership->value() as $group_membership) {
+    $group_memberships[$group_membership->gid] = $group_membership;
+  }
+
   foreach ($items as &$item) {
-    // Set default values.
-    $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
+    $gid = $item['gid'];
+    if (!empty($group_memberships[$gid])) {
+      $item['state'] = $group_memberships[$gid]->state;
+      $item['created'] = $group_memberships[$gid]->created;
+    }
+    else {
+      $item += array('state' => OG_STATE_ACTIVE, 'created' => time());
+    }
+
   }
 }
 
