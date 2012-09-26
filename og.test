@@ -1101,7 +1101,7 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
       'name' => 'OG audience fields query',
-      'description' => 'Test queying group-audience fields using entityFieldQuery.',
+      'description' => 'Test querying group-audience fields using entityFieldQuery.',
       'group' => 'Organic groups',
     );
   }
@@ -1122,11 +1122,13 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     // Add audience field to reference node.
     $og_field = og_fields_info(OG_AUDIENCE_FIELD);
     og_create_field('og_node', 'node', $group_content_type, $og_field);
+    og_create_field('og_node', 'entity_test', 'test', $og_field);
 
-    // Add audience field to reference entity-test, and user.
+    // Add audience field to reference entity-test.
     $og_field['field']['settings']['target_type'] = 'entity_test';
     og_create_field('og_entity_test', 'node', $group_content_type, $og_field);
     og_create_field('og_entity_test', 'user', 'user', $og_field);
+
 
     // Create a non-group audience, entity-refence field.
     $field = array(
@@ -1163,6 +1165,7 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
     $group2 = $this->drupalCreateNode($settings);
 
+    // Create group-content.
     $settings = array(
       'type' => $group_content_type,
       'uid' => $user1->uid,
@@ -1181,10 +1184,19 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     og_group('entity_test', $group1, $values);
     og_group('node', $group2, $values);
 
+    $entity_test = entity_create('entity_test', array('name' => 'test', 'uid' => $user1->uid));
+    $entity_test->save();
+    $values = array(
+      'entity_type' => 'entity_test',
+      'entity' => $entity_test,
+    );
+    og_group('node', $group2, $values);
+
     $this->group1 = $group1;
     $this->group2 = $group2;
     $this->node = $node;
     $this->user1 = $user1;
+    $this->entity_test = $entity_test;
   }
 
   /**
@@ -1196,6 +1208,7 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
    * - Non-audience field first, with single group audience.
    * - Multiple entity types in entityCondition().
    * - No entity property.
+   * - Non-node entity without revision table.
    * - Count query.
    */
   function testEntityFieldQuery()  {
@@ -1203,6 +1216,7 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     $group2 = $this->group2;
     $node = $this->node;
     $user1 = $this->user1;
+    $entity_test = $this->entity_test;
 
     // Single group audience.
     $query = new EntityFieldQuery();
@@ -1265,6 +1279,15 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
       ->execute();
 
     $this->assertEqual(array_keys($result['node']), array($node->nid), 'No entity property query is correct.');
+
+    // Non-node entity without revision table.
+    $query = new EntityFieldQuery();
+    $result = $query
+      ->entityCondition('entity_type', 'entity_test')
+      ->fieldCondition('og_node', 'target_id', $group2->nid)
+      ->execute();
+
+    $this->assertEqual(array_keys($result['entity_test']), array($entity_test->pid), 'Non-node entity without revision table query is correct.');
 
     // Count query.
     $query = new EntityFieldQuery();
