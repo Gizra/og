@@ -700,10 +700,10 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
         }
       }
       $group_type = $field['settings']['target_type'];
-      entity_load($group_type, array_keys($accessible_ids));
+      $accessible_entity = entity_load($group_type, array_keys($accessible_ids));
       $element = array();
       foreach ($items as $delta => $item) {
-        if (!empty($accessible_ids[$item['target_id']])) {
+        if (!empty($accessible_ids[$item['target_id']]) && !empty($accessible_entity[$item['target_id']])) {
           $wrapper = entity_metadata_wrapper($group_type, $item['target_id']);
           $element[$delta] = array(
             '#type' => 'link',
