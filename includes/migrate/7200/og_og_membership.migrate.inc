@@ -27,7 +27,6 @@ class OgMigrateMembership extends OgEntityMigration {
 
     $this->query = db_select('og_membership', 'ogm')
       ->fields('ogm')
-      ->condition('group_type', '', '=')
       ->orderBy('id');
 
     parent::__construct();
@@ -49,6 +48,10 @@ class OgMigrateMembership extends OgEntityMigration {
   }
 
   public function prepareRow($row) {
+    if (!empty($row->group_type)) {
+      // This membership was already processed.
+      return TRUE;
+    }
     list($group_type, $gid) = $this->getNewGroupId($row->gid);
     if (empty($gid)) {
       // TODO: The OG membership was somehow not deleted when the group was deleted,
@@ -83,10 +86,16 @@ class OgMigrateMembership extends OgEntityMigration {
         $field_name = substr("og_$group_type", 0, 32 - strlen($i)) . $i;
         ++$i;
       }
+
+      $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+      $og_field['field']['settings']['target_type'] = $group_type;
+
+      list(,, $bundle) = entity_extract_ids($entity_type, $entity);
+      og_create_field($field_name, $entity_type, $bundle, $og_field);
     }
     $row->field_name = $field_name;
 
-    parent::prepareRow($row);
+    return parent::prepareRow($row);
   }
 }
 

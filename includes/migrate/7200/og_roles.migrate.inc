@@ -40,13 +40,7 @@ class OgMigrateRoles extends OgEntityMigration {
     $this->addFieldMapping('gid', 'gid');
     $this->addFieldMapping('group_type', 'group_type');
     $this->addFieldMapping('group_bundle', 'group_bundle');
-  }
 
-  /**
-   * Override Migration::preImport().
-   */
-  protected function preImport() {
-    parent::preImport();
     foreach (og_get_all_group_bundle() as $group_type => $bundles) {
       foreach ($bundles as $bundle => $label) {
         og_roles_override($group_type, $bundle, 0);
@@ -66,7 +60,7 @@ class OgMigrateRoles extends OgEntityMigration {
     $row->group_type = $group_type;
     $row->gid = $gid;
     $row->group_bundle = $bundle;
-    parent::prepareRow($row);
+    return parent::prepareRow($row);
   }
 }
 
