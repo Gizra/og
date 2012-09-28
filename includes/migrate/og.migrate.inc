@@ -27,21 +27,4 @@ abstract class OgEntityMigration extends Migration {
     $this->source = new MigrateSourceSQL($this->query);
     $this->destination = new MigrateDestinationTable($this->tableName);
   }
-
-  /**
-   * Get the entity type and entity ID from the deprecated OG table.
-   *
-   * @param $gid
-   *   The deprecated group ID.
-   */
-  public function getNewGroupId($gid) {
-    // Get the entity that is the group.
-    $result = db_select('og', 'og')
-      ->fields('og', array('entity_type', 'etid'))
-      ->condition('gid', $gid, '=')
-      ->execute()
-      ->fetchAssoc();
-
-    return !empty($result) ? array_values($result) : FALSE;
-  }
 }

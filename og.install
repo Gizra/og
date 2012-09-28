@@ -744,6 +744,61 @@ function og_schema_7001_info() {
 }
 
 /**
+ * Return the schema for upgrade 7200.
+ *
+ * Currently we hold only the {og_users_role} table.
+ */
+function og_schema_7200_info() {
+  $schema['og_users_roles'] = array(
+    'description' => 'Maps users to roles.',
+    'fields' => array(
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Primary Key: {users}.uid for user.',
+      ),
+      'rid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Primary Key: {og_role}.rid for role.',
+      ),
+      'gid'               => array(
+        'description'     => "The group's unique ID.",
+        'type'            => 'int',
+        'size'            => 'normal',
+        'not null'        => TRUE,
+      ),
+      'group_type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "The group's entity type.",
+      ),
+    ),
+    'primary key' => array('uid', 'rid', 'gid'),
+    'indexes' => array(
+      'rid' => array('rid'),
+    ),
+    'foreign keys' => array(
+      'user' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+      'og_role' => array(
+        'table' => 'og_role',
+        'columns' => array('rid' => 'rid'),
+      ),
+    ),
+  );
+  return $schema;
+}
+
+/**
  * Implements hook_field_schema().
  */
 function og_field_schema($field) {
@@ -910,7 +965,15 @@ function og_update_7200() {
   );
 
   db_add_field('og_role', 'group_type', $column);
-  db_add_field('og_users_roles', 'group_type', $column);
+
+
+  // Rename {og_users_roles} to allow easier migration.
+  // Re-create a clean {og_users_roles}.
+  db_rename_table('og_users_roles', 'temp_og_users_roles');
+
+  $schema = og_schema_7200_info();
+  db_create_table('og_users_roles', $schema['og_users_roles']);
+
 
   $column = array(
     'type' => 'varchar',
@@ -929,6 +992,9 @@ function og_update_7200() {
     'description' => "The name of the field holding the group ID, the OG memebership is associated with.",
   );
   db_add_field('og_membership', 'field_name', $column);
+
+  // Delete OG-migrate's table.
+  db_drop_table('og_migrate');
 
   // Variable cleanup.
   variable_del('og_skip_access');

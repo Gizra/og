@@ -30,21 +30,31 @@ class OgMigrateUserRoles extends OgEntityMigration {
     'gid' => array(
       'type' => 'int',
       'not null' => TRUE,
+      // Set the alias, so the query in MigrateSourceSQL::performRewind()
+      // will not fail.
+      'alias' => 'og',
     ),
   );
 
   public function __construct() {
     $this->description = t('Update the group ID in user roles.');
 
-    $this->query = db_select('og_users_roles', 'ogur')
-      ->condition('group_type', '', '=')
-      ->fields('ogur');
+    $query = db_select('temp_og_users_roles', 'ogur');
+    $query->innerJoin('og', 'og', 'ogur.gid = og.gid');
+
+    $query
+      ->fields('ogur', array('uid', 'rid'));
+
+    $query->addField('og', 'etid', 'gid');
+    $query->addField('og', 'entity_type', 'group_type');
+
+    $this->query = $query;
 
     parent::__construct();
 
     $this->addFieldMapping('uid', 'uid');
-    $this->addFieldMapping('rid', 'rid');
-    $this->addFieldMapping('gid', 'gid');
+    $this->addFieldMapping('rid');
+    $this->addFieldMapping('gid');
     $this->addFieldMapping('group_type');
   }
 
@@ -56,13 +66,14 @@ class OgMigrateUserRoles extends OgEntityMigration {
     $this->defaultRoles = og_roles('', '');
   }
 
-  public function prepare($entity, stdClass $row) {
-    list($group_type, $gid) = $this->getNewGroupId($row->gid);
+  public function prepare($entity, $row) {
+    $group_type = $row->group_type;
+    $gid = $row->gid;
 
-    // Some installations might have missing entities, so we don't assume
-    // they exist.
-    if (!$gid || !$group = entity_load_single($group_type, $gid)) {
-      return FALSE;
+    if (!$group = entity_load_single($group_type, $gid)) {
+      // Some installations might have missing entities, so we don't assume
+      // they exist.
+      return;
     }
     // Get the bundle from the entity.
     list(,, $bundle) = entity_extract_ids($group_type, $group);
@@ -74,8 +85,9 @@ class OgMigrateUserRoles extends OgEntityMigration {
       // Assign the new role ID.
       $entity->rid = $rid;
     }
-    $entity->group_type = $group_type;
-    $entity->gid = $gid;
+
+    $entity->group_type = $row->group_type;
+    $entity->gid = $row->gid;
   }
 
   /**
@@ -83,6 +95,7 @@ class OgMigrateUserRoles extends OgEntityMigration {
    *
    * Remove the global roles. We didn't do so it in OgMigrateRoles as
    * we need it in this class, when calling og_roles().
+   * Also, delete legacy tables.
    */
   protected function postImport() {
     if (!$this->isComplete() || !$this->defaultRoles) {
