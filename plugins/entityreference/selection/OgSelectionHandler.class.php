@@ -116,7 +116,7 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
           // Check if user has "create" permissions on those groups.
           // If the user doesn't have create permission, check if perhaps the
           // content already exists and the user has edit permission.
-          if (og_user_access($group_type, $gid, "create $node_type content") || !empty($node) && (og_user_access($group_type, $gid, "update any $node_type content") || ($user->uid == $node->uid && og_user_access($group_type, $gid, "update own $node_type content")))) {
+          if (og_user_access($group_type, $gid, "create $node_type content") || !empty($node->nid) && (og_user_access($group_type, $gid, "update any $node_type content") || ($user->uid == $node->uid && og_user_access($group_type, $gid, "update own $node_type content")))) {
             $ids[] = $gid;
           }
         }

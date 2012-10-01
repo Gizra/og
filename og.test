@@ -189,7 +189,8 @@ class OgNodeAccess extends DrupalWebTestCase {
   function testStrictAccessNodeCreate() {
     // Set Node access strict variable.
     variable_set('og_node_access_strict', TRUE);
-    $this->drupalLogin($this->editor_user);
+    $editor_user = $this->editor_user;
+    $this->drupalLogin($editor_user);
 
     $this->drupalGet('node/add/article');
     $this->assertResponse('200', t('User can access node create with non-required field.'));
@@ -200,6 +201,32 @@ class OgNodeAccess extends DrupalWebTestCase {
 
     $this->drupalGet('node/add/article');
     $this->assertResponse('403', t('User cannot access node create with required field.'));
+
+    // Test OG's create permission for a group member.
+    $editor_user = user_load($editor_user->uid);
+    og_group('node', $this->group, array('entity' => $editor_user));
+    $roles = array_flip(og_roles('node', 'page'));
+
+    $permissions = array(
+      'create article content' => 0,
+      'update own article content' => 1,
+      'update any article content' => 1,
+    );
+
+    // Add update permission.
+    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], $permissions);$this->drupalGet('node/add/article');
+    $this->drupalGet('node/add/article');
+    $this->assertResponse('403', 'Group member cannot create node.');
+
+    // Add create permission.
+    $permissions = array(
+      'create article content' => 1,
+      'update own article content' => 0,
+      'update any article content' => 0,
+    );
+    og_role_change_permissions($roles[OG_AUTHENTICATED_ROLE], $permissions);
+    $this->drupalGet('node/add/article');
+    $this->assertResponse('200', 'Group member can create node.');
   }
 
 
