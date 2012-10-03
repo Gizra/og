@@ -1654,6 +1654,7 @@ function og_check_field_cardinality($entity_type, $entity, $field_name) {
  *   The OG membership entity.
  */
 function og_group($group_type, $gid, $values = array()) {
+  global $user;
   // Set default values.
   $values += array(
     'entity_type' => 'user',
