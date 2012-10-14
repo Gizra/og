@@ -65,15 +65,17 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
   // Get the "Other group" group IDs.
   $target_type = $field['settings']['target_type'];
-  $entity_gids = og_get_entity_groups($entity_type, $entity);
-  $entity_gids = !empty($entity_gids[$target_type]) ? $entity_gids[$target_type] : array();
-
-  $user_gids = og_get_entity_groups();
-  $user_gids = !empty($user_gids[$target_type]) ? $user_gids[$target_type] : array();
-
   $other_groups_ids = array();
-  $full_diff = array_diff(array_merge($entity_gids, $user_gids), array_intersect($entity_gids, $user_gids));
-  $other_groups_ids = array_values($full_diff);
+  if ($id) {
+    $entity_gids = og_get_entity_groups($entity_type, $entity);
+    $entity_gids = !empty($entity_gids[$target_type]) ? $entity_gids[$target_type] : array();
+
+    $user_gids = og_get_entity_groups();
+    $user_gids = !empty($user_gids[$target_type]) ? $user_gids[$target_type] : array();
+
+    $full_diff = array_diff(array_merge($entity_gids, $user_gids), array_intersect($entity_gids, $user_gids));
+    $other_groups_ids = array_values($full_diff);
+  }
 
   foreach ($field_modes as $field_mode) {
     $mocked_instance = og_get_mocked_instance($instance, $field_mode);
