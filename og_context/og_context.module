@@ -174,16 +174,22 @@ function og_context_og_invalidate_cache($gids = array()) {
 
 /**
  * Get or set group context using the menu system.
- *
+ * @param $group_type
+ *   The context to get by group type. Defaults to "node".
  * @param $group
  *   Optional; The group entity to set as the context.
  *
  * @return
- *   A group entity, or FALSE if no context was found.
+ *   Array keyed by the group type and group ID, or FALSE if no context
+ *   was found.
  */
 function og_context($group_type = 'node', $group = NULL) {
   global $user;
   $context = &drupal_static(__FUNCTION__, FALSE);
+
+  if (empty($group) && !empty($context) && $context['group_type'] == $group_type) {
+    return $context;
+  }
 
   if (!empty($group)) {
     // Set the group.
