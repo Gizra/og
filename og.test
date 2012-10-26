@@ -302,6 +302,12 @@ class OgNodeAccess extends DrupalWebTestCase {
     $xpath = $this->buildXPathQuery('//select[@name=:name]', array(':name' => $name));
     $fields = $this->xpath($xpath);
     $this->assertFalse(!empty($fields[0]->option[2]), 'User cannot assign group-content to a new group.');
+
+    // Test for retaining groups on node save.
+    $this->drupalPost('node/'. $this->group_content->nid .'/edit', array(), t('Save'));
+
+    $entity_groups = og_get_entity_groups('node', $this->group_content->nid);
+    $this->assertFalse(in_array($this->group2->nid, $entity_groups['node']), 'Content retains original groups after saving node form.');
   }
 
 }

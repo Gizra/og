@@ -73,8 +73,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     $user_gids = og_get_entity_groups();
     $user_gids = !empty($user_gids[$target_type]) ? $user_gids[$target_type] : array();
 
-    $full_diff = array_diff(array_merge($entity_gids, $user_gids), array_intersect($entity_gids, $user_gids));
-    $other_groups_ids = array_values($full_diff);
+    $other_groups_ids = array_diff($entity_gids, $user_gids);
   }
 
   foreach ($field_modes as $field_mode) {
