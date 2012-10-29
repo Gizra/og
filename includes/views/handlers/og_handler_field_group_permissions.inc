@@ -9,7 +9,7 @@ class og_handler_field_group_permissions extends og_handler_field_prerender_list
     $this->additional_fields['uid'] = array('table' => 'users', 'field' => 'uid');
   }
 
-  function pre_render($values) {
+  function pre_render(&$values) {
     $list = array();
     $this->items = array();
 
