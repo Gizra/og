@@ -114,27 +114,35 @@ function og_ui_add_users($form, &$form_state, $group_type, $gid) {
     '#autocomplete_path' => 'user/autocomplete',
     '#required' => TRUE,
   );
+
   $form['og_user']['state'] = array(
-    '#type' => 'select',
-    '#title' => t('Membership state'),
-    '#options' => og_group_content_states(),
-    '#description' => t('Select the state of the membership.'),
+    '#type' => 'value',
+    '#value' => OG_STATE_ACTIVE,
   );
 
   $field_names = og_get_group_audience_fields();
   $field_name = !empty($form_state['values']['field_name']) ? $form_state['values']['field_name'] : key($field_names);
 
-  $form['og_user']['field_name'] = array(
-    '#type' => 'select',
-    '#title' => t('Field name'),
-    '#options' => $field_names,
-    '#default_value' => $field_name,
-    '#description' => t('Select the field name, the group membership should be registered in.'),
-    '#ajax' => array(
-      'callback' => 'og_ui_admin_add_user_ajax_callback',
-      'wrapper' => 'og-ui-field-name',
-    ),
-  );
+  if (count($field_names) > 1) {
+   $form['og_user']['field_name'] = array(
+      '#type' => 'select',
+      '#title' => t('Field name'),
+      '#options' => $field_names,
+      '#default_value' => $field_name,
+      '#description' => t('Select the field name, the group membership should be registered in.'),
+      '#ajax' => array(
+        'callback' => 'og_ui_admin_add_user_ajax_callback',
+        'wrapper' => 'og-ui-field-name',
+      ),
+    );
+  }
+  else {
+    // There is only a single field name, so just pass it as a value.
+    $form['og_user']['field_name'] = array(
+      '#type' => 'value',
+      '#value' => $field_name,
+    );
+  }
 
   // Add group membership form.
   $values = array();
