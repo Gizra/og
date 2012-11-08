@@ -142,7 +142,7 @@ function og_views_data_alter(&$data) {
 }
 
 /**
- * Implements hook_views_plugins
+ * Implements hook_views_plugins().
  */
 function og_views_plugins() {
   return array(
