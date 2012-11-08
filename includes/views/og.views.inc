@@ -87,6 +87,21 @@ function og_views_data_alter(&$data) {
       ),
     );
 
+    // The OG membership group.
+    $data[$info['base table']]['og_membership_rel_group'] = array(
+      'group' => t('OG membership'),
+      'title' => t('OG membership from @entity group', array('@entity' => ucfirst($info['label']))),
+      'help' => t('The OG membership associated with the @entity group', array('@entity' => ucfirst($info['label']))),
+      'relationship' => array(
+        'entity' => $entity_type,
+        'handler' => 'views_handler_relationship',
+        'label' => t('OG membership from @entity group', array('@entity' => $entity_type)),
+        'base' => 'og_membership',
+        'base field' => 'gid',
+        'relationship field' => $info['entity keys']['id'],
+      ),
+    );
+
     // OG membership's related entity.
     $data['og_membership']['og_membership_related_' . $entity_type] = array(
       'group' => t('OG membership'),
