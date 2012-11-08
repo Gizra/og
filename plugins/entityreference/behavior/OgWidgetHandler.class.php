@@ -32,7 +32,7 @@ class OgWidgetHandler extends EntityReference_BehaviorHandler_Abstract {
       ),
       'admin' => array(
         'title' => t('Administrator widget type'),
-        'description' => t('The widget type of the field that will appear only to a user with "Adminiser group" permission.'),
+        'description' => t('The widget type of the field that will appear only to a user with "Administer group" permission.'),
       ),
     );
 
