@@ -260,7 +260,7 @@ function og_ui_group_types_overview($type) {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#empty' => t('No group types available.'),
+    '#empty' => t('No group types available. Edit or <a href="@url">add a new content type</a> and set it to behave as a group.', array('@url' => url('admin/structure/types/add'))),
   );
 
   return $build;
