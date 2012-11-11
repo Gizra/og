@@ -131,7 +131,7 @@ function og_features_permission_features_rebuild($module) {
       foreach ($details['roles'] as $role) {
         $bundle_role = _og_features_role_exists($role, $group_type, $bundle);
         if (empty($bundle_role)) {
-          og_role_save((object) $details);
+          og_role_save(og_role_create($role, $group_type, 0, $bundle));
         }
       }
 
