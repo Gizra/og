@@ -35,6 +35,15 @@ class MigrateDestinationOGMembership extends MigrateDestination {
     og_ungroup($membership->group_type, $membership->gid, $membership->entity_type, $membership->etid);
   }
 
+  /**
+   * Delete a batch of memberships at once.
+   *
+   * @param $ids
+   *   Array of membership ids to be deleted.
+   */
+  public function bulkRollback(array $ids) {
+    og_membership_delete_multiple($ids);
+  }
 
   /**
    * Import a single membership.
