@@ -1121,6 +1121,10 @@ function og_ui_og_ui_get_group_admin($group_type, $gid) {
 function og_ui_migrate_api() {
   $api = array(
     'api' => 2,
+    'migrations' => array(
+      'OgUiMigrateAddField' => array('class_name' => 'OgUiMigrateAddField'),
+      'OgUiSetRoles' => array('class_name' => 'OgUiSetRoles'),
+    )
   );
   return $api;
 }

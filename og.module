@@ -3165,6 +3165,17 @@ function og_features_api() {
 function og_migrate_api() {
   $api = array(
     'api' => 2,
+    'migrations' => array(
+      'OgMigrateAddFields' => array('class_name' => 'OgMigrateAddFields'),
+      'OgMigrateContent' => array('class_name' => 'OgMigrateContent'),
+      'OgMigrateUser' => array('class_name' => 'OgMigrateUser'),
+      'OgMigrateMembership' => array('class_name' => 'OgMigrateMembership'),
+      'OgMigrateRoles' => array('class_name' => 'OgMigrateRoles'),
+      'OgMigrateUserRoles' => array('class_name' => 'OgMigrateUserRoles'),
+    ),
+    'destination handlers' => array(
+      'MigrateDestinationOGMembership',
+    ),
   );
   return $api;
 }
