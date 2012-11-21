@@ -88,7 +88,7 @@ class MigrateDestinationOGMembership extends MigrateDestination {
 
     $og_membership = og_group($entity->group_type, $entity->gid, $values);
 
-    if ($entity->entity_type == 'user' && !empty($entity->is_admin)) {
+    if ($entity->entity_type == 'user') {
       $cache = &drupal_static(__FUNCTION__, array());
       if (isset($cache["$entity->group_type:$entity->gid"])) {
         $og_roles = $cache["$entity->group_type:$entity->gid"];
@@ -97,8 +97,16 @@ class MigrateDestinationOGMembership extends MigrateDestination {
         $og_roles = og_roles($entity->group_type, NULL, $entity->gid);
         $cache["$entity->group_type:$entity->gid"] = $og_roles;
       }
-      $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
-      og_role_grant($entity->group_type, $entity->gid, $entity->etid, $rid);
+      if (!empty($entity->is_admin)) {
+        $admin_rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
+        og_role_grant($entity->group_type, $entity->gid, $entity->etid, $admin_rid);
+      }
+      if (isset($entity->group_roles)) {
+        foreach ($entity->group_roles as $role) {
+          $rid = array_search($role, $og_roles);
+          og_role_grant($entity->group_type, $entity->gid, $entity->etid, $rid);
+        }
+      }
     }
 
     return array($og_membership->id);
@@ -113,6 +121,7 @@ class MigrateDestinationOGMembership extends MigrateDestination {
       'state' => 'User\'s group membership can be OG_STATE_ACTIVE or OG_STATE_PENDING. Defaults to OG_STATE_ACTIVE.',
       'created' => 'Create date for this membership. Defaults to REQUEST_TIME',
       'is_admin' => 'Legacy: Is member an administrator in this group. Defaults to No.',
+      'group_roles' => 'Array of role names to assign to the user in this group.',
     );
   }
 }
