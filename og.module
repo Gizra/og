@@ -3007,7 +3007,7 @@ function og_node_create_links($group_type, $gid, $field_name, $destination = NUL
 
   $types = isset($types) ? $types : array_keys(node_type_get_types());
   foreach ($types as $type_name) {
-    if (!og_is_group_content_type('node', $type_name) || !node_access('create', $type_name)) {
+    if (!og_is_group_content_type('node', $type_name) || !og_user_access($group_type, $gid, "create $type_name content")) {
       continue;
     }
 
