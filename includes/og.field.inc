@@ -82,7 +82,14 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
     if ($has_admin) {
       $mocked_instance['required'] = FALSE;
-      $mocked_instance['label'] = $field_mode == 'default' ? t('Default') : t('Administrator');
+      if ($field_mode == 'default') {
+        $mocked_instance['label'] = t('Your groups');
+        $mocked_instance['description'] = t('Associate this content with groups you belong to.');
+      }
+      else {
+        $mocked_instance['label'] = t('Other groups');
+        $mocked_instance['description'] = t('Add groups administrator, associate this content with groups you do <em>not</em> belong to.');
+      }
 
       if ($id) {
         // The field might be required, and it will throw an exception
