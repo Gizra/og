@@ -88,7 +88,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
       }
       else {
         $mocked_instance['label'] = t('Other groups');
-        $mocked_instance['description'] = t('Add groups administrator, associate this content with groups you do <em>not</em> belong to.');
+        $mocked_instance['description'] = t('As groups administrator, associate this content with groups you do <em>not</em> belong to.');
       }
 
       if ($id) {
