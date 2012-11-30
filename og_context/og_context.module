@@ -121,7 +121,7 @@ function og_context_og_context_negotiation_info() {
     'name' => t('Node'),
     'description' => t("Determine context by checking if a node is a group or a group content."),
     'callback' => 'og_context_handler_node',
-    'menu path' => array('node/%', 'node/%/edit'),
+    'menu path' => array('node/%', 'group/%/%/admin'),
   );
 
   $providers['user-view'] = array(
@@ -406,7 +406,18 @@ function og_context_handler_url() {
  * Context handler; Get groups from existing node or ctools context.
  */
 function og_context_handler_node() {
-  $node = menu_get_object('node');
+  if ($node = menu_get_object('node')) {
+    return _group_context_handler_entity('node', $node);
+  }
+
+  $item = menu_get_item();
+  if ($item['path'] == 'node/%/group') {
+    $node = node_load($item['map'][1]);
+  }
+  elseif (strpos($item['path'], 'group/%/%/admin') === 0 && $item['map'][1] == 'node') {
+    $node = node_load($item['map'][2]);
+  }
+
   if ($node) {
     return _group_context_handler_entity('node', $node);
   }
