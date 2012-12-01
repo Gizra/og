@@ -1372,8 +1372,18 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
     // revision ID and bundle in {og_membership} table.
     $base_table = $entity_info['base table'];
     if (strpos($base_table_alias, 'field_data') === 0) {
-      $id = $entity_info['entity keys']['id'];
-      $query->innerJoin($base_table, $base_table, "$base_table.$id = ogm.etid");
+      // Check if the entity base table already exists.
+      $base_table_alias = FALSE;
+      foreach ($tables as $table) {
+        if ($table['table'] == $base_table) {
+          $base_table_alias = $table['alias'];
+          break;
+        }
+      }
+      if (!$base_table_alias) {
+        $id = $entity_info['entity keys']['id'];
+        $base_table_alias = $query->innerJoin($base_table, NULL, "$base_table.$id = ogm.etid");
+      }
     }
 
     $fields['revision_id']['table'] = $base_table;
@@ -1421,6 +1431,10 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
     }
     elseif (strpos($args[1], 'target_id')) {
       $conditions[$delta]['field'] = 'ogm.gid';
+    }
+    elseif ($args[1] == 'bundle') {
+      // Add the bundle of the base entity type.
+      $conditions[$delta]['field'] = $base_table_alias . '.' . $entity_info['entity keys']['bundle'];
     }
     else {
       $conditions[$delta]['field'] = 'ogm.' . $args[1];
