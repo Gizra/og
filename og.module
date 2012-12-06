@@ -3199,9 +3199,6 @@ function og_migrate_api() {
   $api = array(
     'api' => 2,
     'migrations' => $migrations,
-    'destination handlers' => array(
-      'MigrateDestinationOGMembership',
-    ),
   );
   return $api;
 }
