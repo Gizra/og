@@ -2833,6 +2833,13 @@ function og_get_default_permissions() {
 
 /**
  * Get all the modules fields that can be assigned to fieldable enteties.
+ *
+ * @param $field_name
+ *   The field name that was registered for the definition.
+ *
+ * @return
+ *   An array with the field and instance definitions, or FALSE if not
+ *   found.
  */
 function og_fields_info($field_name = NULL) {
   $return = &drupal_static(__FUNCTION__, array());
@@ -2854,7 +2861,11 @@ function og_fields_info($field_name = NULL) {
     drupal_alter('og_fields_info', $return);
   }
 
-  return empty($field_name) ? $return : $return[$field_name];
+  if (!empty($field_name)) {
+    return !empty($return[$field_name]) ?  $return[$field_name] : FALSE;
+  }
+
+  return $return;
 }
 
 /**
@@ -3178,6 +3189,25 @@ function og_features_api() {
       'file' => drupal_get_path('module', 'og') . '/includes/og_features_permission.features.inc',
     ),
   );
+}
+
+/**
+ * Implements hook_features_pipe_alter().
+ *
+ * Prevent OG related fields from being piped in features, when a content
+ * type that has them is selected.
+ */
+function og_features_pipe_alter(&$pipe, $data, $export) {
+  if (variable_get('og_features_ignore_og_fields', FALSE) || empty($pipe['field'])) {
+    return;
+  }
+  foreach ($pipe['field'] as $delta => $value) {
+    $args = explode('-', $value);
+    $field_name = $args[2];
+    if (og_fields_info($field_name) || og_is_group_audience_field($field_name)) {
+      unset($pipe['field'][$delta]);
+    }
+  }
 }
 
 /**
