@@ -1316,7 +1316,7 @@ function og_entity_query_alter(EntityFieldQuery $query) {
 function og_query_og_membership_alter(QueryAlterableInterface $query) {
   $tables = &$query->getTables();
   $fields = &$query->getFields();
-  $conditions =  &$query->conditions();
+  $conditions = &$query->conditions();
 
   // Find the group-audience fields.
   $field_names = array();
@@ -1361,12 +1361,11 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
     }
   }
 
-  if ($base_table) {
-    // Point the revision ID and bundle to the base entity.
-    $entity_type = $query->alterMetaData['entity_field_query']->entityConditions['entity_type']['value'];
-    $entity_type = is_array($entity_type) ? $entity_type[0] : $entity_type;
-    $entity_info = entity_get_info($entity_type);
+  $entity_type = $query->alterMetaData['entity_field_query']->entityConditions['entity_type']['value'];
+  $entity_type = is_array($entity_type) ? $entity_type[0] : $entity_type;
+  $entity_info = entity_get_info($entity_type);
 
+  if ($base_table) {
     // If the table of the base entity does not exist (e.g. there is no
     // property condition), we need to add it, as we don't have the
     // revision ID and bundle in {og_membership} table.
@@ -1386,6 +1385,7 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
       }
     }
 
+    // Point the revision ID and bundle to the base entity.
     $fields['revision_id']['table'] = $base_table;
     // If there is no revision table, use the bundle.
     $fields['revision_id']['field'] = !empty($entity_info['entity keys']['revision']) ? $entity_info['entity keys']['revision'] : $entity_info['entity keys']['bundle'];
@@ -1411,33 +1411,69 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
     $query->join('og_membership', 'ogm', "ogm.etid = $base_table_alias.entity_id");
   }
 
+  _og_query_og_membership_alter_conditions($conditions, $aliases, $base_table_alias, $entity_info);
+}
+
+/**
+ * Recursively replace the fields to their aliases in the query's conditions.
+ *
+ * See og_query_og_membership_alter().
+ */
+function _og_query_og_membership_alter_conditions(&$conditions, $aliases, $base_table_alias, $entity_info) {
   foreach ($conditions as $delta => $values) {
     if (!is_array($values)) {
       continue;
     }
+
+    // Handle conditions in a sub-query.
+    if (is_object($values['value'])) {
+      _og_query_og_membership_alter_conditions($values['value']->conditions(), $aliases, $base_table_alias, $entity_info);
+    }
+
+    // Handle sub-conditions.
+    if (is_object($values['field'])) {
+      _og_query_og_membership_alter_conditions($values['field']->conditions(), $aliases, $base_table_alias, $entity_info);
+      continue;
+    }
+
     if (strpos($values['field'], 'field_data_') !== 0) {
       continue;
     }
 
-    $args = explode('.', $values['field']);
+    // Explode spaces on the fiels, for handling only the first part in values
+    // such as "foo.nid = bar.nid".
+    $field_parts = explode(' ', $values['field'], 2);
+    list($table, $column) = explode('.', $field_parts[0]);
 
-    if (empty($aliases[$args[0]])) {
+    if (empty($aliases[$table])) {
       continue;
     }
-    $field_name = $aliases[$args[0]];
+    $table = 'ogm';
 
-    if ($args[1] == 'deleted') {
+    // Replace entity_id or any other primary id (e.g. nid for the node
+    // entity).
+    $id_columns = array('entity_id', $entity_info['entity keys']['id']);
+    if (in_array($column, $id_columns)) {
+      $column = 'etid';
+    }
+
+    if ($column == 'deleted') {
       unset($conditions[$delta]);
+      continue;
     }
-    elseif (strpos($args[1], 'target_id')) {
-      $conditions[$delta]['field'] = 'ogm.gid';
+    elseif (strpos($column, 'target_id')) {
+       $column = 'gid';
     }
-    elseif ($args[1] == 'bundle') {
+    elseif ($column == 'bundle') {
       // Add the bundle of the base entity type.
-      $conditions[$delta]['field'] = $base_table_alias . '.' . $entity_info['entity keys']['bundle'];
+      $table = $base_table_alias;
+      $column = $entity_info['entity keys']['bundle'];
     }
-    else {
-      $conditions[$delta]['field'] = 'ogm.' . $args[1];
+
+    $conditions[$delta]['field'] = "$table.$column";
+    // Add the second part if it exists.
+    if (!empty($field_parts[1])) {
+      $conditions[$delta]['field'] .= ' ' . $field_parts[1];
     }
   }
 }
