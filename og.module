@@ -2274,6 +2274,10 @@ function og_is_member($group_type, $gid, $entity_type = 'user', $entity = NULL, 
  *   TRUE if group should use default roles and permissions.
  */
 function og_is_group_default_access($entity_type, $entity) {
+  if (!field_info_field(OG_DEFAULT_ACCESS_FIELD)) {
+    // Don't bother loading entity if field does not exist.
+    return TRUE;
+  }
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
   if (empty($wrapper->{OG_DEFAULT_ACCESS_FIELD})) {
     return TRUE;
