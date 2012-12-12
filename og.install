@@ -355,6 +355,18 @@ function og_schema() {
     ),
   );
 
+  // Cache bins for Entity-cache module.
+  $cache_schema = drupal_get_schema_unprocessed('system', 'cache');
+  $types = array(
+    'og_membership_type',
+    'og_membership',
+  );
+
+  foreach ($types as $type) {
+    $schema["cache_entity_$type"] = $cache_schema;
+    $schema["cache_entity_$type"]['description'] = "Cache table used to store $type entity records.";
+  }
+
   return $schema;
 }
 
@@ -1139,4 +1151,24 @@ function og_update_7203() {
   }
 
   return $output;
+}
+
+/**
+ * Create cache bins for Entity-cache module.
+ */
+function og_update_7204() {
+  $cache_schema = drupal_get_schema_unprocessed('system', 'cache');
+  $types = array(
+    'og_membership_type',
+    'og_membership',
+  );
+
+  foreach ($types as $type) {
+    $schema["cache_entity_$type"] = $cache_schema;
+    $schema["cache_entity_$type"]['description'] = "Cache table used to store $type entity records.";
+  }
+
+  foreach ($schema as $name => $table) {
+    db_create_table($name, $table);
+  }
 }

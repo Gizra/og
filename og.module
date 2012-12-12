@@ -137,6 +137,7 @@ function og_entity_info() {
     'metadata controller class' => 'EntityDefaultMetadataController',
     'views controller class' => 'EntityDefaultViewsController',
     'access callback' => 'og_membership_type_access',
+    'entity cache' => module_exists('entitycache'),
   );
 
   if (class_exists('OgMembershipTypeUIController')) {
@@ -172,6 +173,7 @@ function og_entity_info() {
     'metadata controller class' => 'OgMembershipMetadataController',
     'views controller class' => 'OgMembershipViewsController',
     'access callback' => 'og_membership_access',
+    'entity cache' => module_exists('entitycache'),
   );
 
   // Add bundle info but bypass entity_load() as we cannot use it here.
