@@ -1876,9 +1876,9 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
     return TRUE;
   }
 
-  $group = entity_load_single($group_type, $gid);
   // Group manager has all privileges (if variable is TRUE).
-  if (variable_get('og_group_manager_full_access', TRUE)) {
+  if (!empty($account->uid) && variable_get('og_group_manager_full_access', TRUE)) {
+    $group = entity_load_single($group_type, $gid);
     if (!empty($group->uid) && $group->uid == $account->uid) {
       return TRUE;
     }
@@ -1900,8 +1900,9 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
   }
 
   if (!$skip_alter && empty($perm_alter[$identifier][$account->uid][$string])) {
-    // Let modules alter the permissions. since $perm is static we create a
-    // clone of it.
+    // Let modules alter the permissions. since $perm is static we create
+    // a clone of it.
+    $group = !empty($group) ? $group : entity_load_single($group_type, $gid);
     $temp_perm = $perm[$identifier][$account->uid];
     $context = array(
       'string' => $string,
