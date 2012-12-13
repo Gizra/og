@@ -140,7 +140,7 @@ function og_access_og_fields_info() {
   );
   $items[OG_ACCESS_FIELD] = array(
     'type' => array('group'),
-    'description' => t('Add Group access field to group types.'),
+    'description' => t('Determine access to the group.'),
     // Private access can be done only on node entity.
     'entity' => array('node'),
     'field' => array(
@@ -177,7 +177,7 @@ function og_access_og_fields_info() {
   );
   $items[OG_CONTENT_ACCESS_FIELD] = array(
     'type' => array('group content'),
-    'description' => t('Add Group access field to group-content types, that may override the group settings.'),
+    'description' => t('Determine access to the group content, which may override the group settings.'),
     // Private access can be done only on node entity.
     'entity' => array('node'),
     'field' => array(
