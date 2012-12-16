@@ -5,8 +5,6 @@
  * Upgrade group visibility (e.g. open, moderated, closed) from OG6.
  */
 
-if (db_table_exists('d6_og')) {
-
 class OgUiPopulateField extends DynamicMigration {
 
   /**
@@ -53,6 +51,3 @@ class OgUiPopulateField extends DynamicMigration {
     return drupal_strtolower('OgUiPopulateField' . ucfirst($this->arguments['bundle']));
   }
 }
-
-}
-

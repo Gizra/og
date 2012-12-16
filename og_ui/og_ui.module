@@ -1122,6 +1122,7 @@ function og_ui_migrate_api() {
   $migrations = array();
   if (db_table_exists('d6_og')) {
     $migrations['OgUiMigrateAddField'] = array('class_name' => 'OgUiMigrateAddField');
+    $migrations['OgUiPopulateField'] = array('class_name' => 'OgUiPopulateField');
     $migrations['OgUiSetRoles'] = array('class_name' => 'OgUiSetRoles');
   }
   $api = array(

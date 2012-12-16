@@ -8,8 +8,6 @@
  * to branch 7.x-2.x
  */
 
-if (db_field_exists('og_membership', 'group_type') && db_table_exists('og') && !db_table_exists('d6_og')) {
-
 class OgMigrateMembership extends OgEntityMigration {
 
   /**
@@ -99,6 +97,4 @@ class OgMigrateMembership extends OgEntityMigration {
       ->condition('group_type', '')
       ->execute();
   }
-}
-
 }

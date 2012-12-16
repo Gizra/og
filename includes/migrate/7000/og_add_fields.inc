@@ -5,8 +5,6 @@
  * Add OG related fields to group and group-content node-types.
  */
 
-if (db_table_exists('d6_og')) {
-
 class OgMigrateAddFields extends MigrationBase {
 
   public function __construct() {
@@ -91,6 +89,4 @@ class OgMigrateAddFields extends MigrationBase {
 
     return MigrationBase::RESULT_COMPLETED;
   }
-}
-
 }

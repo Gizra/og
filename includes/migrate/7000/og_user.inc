@@ -5,8 +5,6 @@
  * Create user relation to group.
  */
 
-if (db_table_exists('d6_og')) {
-
 class OgMigrateUser extends Migration {
 
   public function __construct() {
@@ -63,6 +61,4 @@ class OgMigrateUser extends Migration {
     $row->state = !empty($row->state) ? OG_STATE_ACTIVE : OG_STATE_PENDING;
     parent::prepareRow($row);
   }
-}
-
 }

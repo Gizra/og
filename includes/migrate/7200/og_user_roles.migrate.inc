@@ -8,8 +8,6 @@
  * to branch 7.x-2.x
  */
 
-if (db_field_exists('og_membership', 'group_type') && db_table_exists('og') && !db_table_exists('d6_og')) {
-
 class OgMigrateUserRoles extends OgEntityMigration {
 
   public $tableName = 'og_users_roles';
@@ -107,6 +105,4 @@ class OgMigrateUserRoles extends OgEntityMigration {
       og_role_delete($rid);
     }
   }
-}
-
 }

@@ -5,8 +5,6 @@
  * Add OG UI related fields to group node-types.
  */
 
-if (db_table_exists('d6_og')) {
-
 class OgUiMigrateAddField extends MigrationBase {
 
   public function __construct() {
@@ -44,6 +42,4 @@ class OgUiMigrateAddField extends MigrationBase {
 
     return MigrationBase::RESULT_COMPLETED;
   }
-}
-
 }

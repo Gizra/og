@@ -5,8 +5,6 @@
  * Set permissions on group to upgrade group visibility.
  */
 
-if (db_table_exists('d6_og')) {
-
 class OgUiSetRoles extends Migration {
 
   /**
@@ -102,6 +100,3 @@ class OgUiSetRoles extends Migration {
     return TRUE;
   }
 }
-
-}
-

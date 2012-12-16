@@ -5,8 +5,6 @@
  * Upgrade nodes that are groups, by settings the correct field value.
  */
 
-if (db_table_exists('d6_og')) {
-
 class OgMigrateGroup extends DynamicMigration {
 
   /**
@@ -53,6 +51,4 @@ class OgMigrateGroup extends DynamicMigration {
   protected function generateMachineName($class_name = NULL) {
     return drupal_strtolower('OgMigrateGroup' . ucfirst($this->arguments['bundle']));
   }
-}
-
 }
