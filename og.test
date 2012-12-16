@@ -1191,6 +1191,7 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     parent::setUp('og', 'entity_feature');
 
     $user1 = $this->drupalCreateUser();
+    $user2 = $this->drupalCreateUser();
     $type = $this->drupalCreateContentType();
     $group_type = $type->type;
 
@@ -1273,10 +1274,17 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     );
     og_group('node', $group2, $values);
 
+    $values = array(
+      'entity_type' => 'user',
+      'entity' => $user2,
+    );
+    og_group('node', $group2, $values);
+
     $this->group1 = $group1;
     $this->group2 = $group2;
     $this->node = $node;
     $this->user1 = $user1;
+    $this->user2 = $user2;
     $this->entity_test = $entity_test;
   }
 
@@ -1289,7 +1297,8 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
    * - Non-audience field first, with single group audience.
    * - Multiple entity types in entityCondition().
    * - No entity property.
-   * - Non-node entity without revision table.
+   * - Non-node entity without revision table (e.g. entity_test).
+   * - Non-node entity without revision table and without bundles (e.g. user).
    * - Count query.
    */
   function testEntityFieldQuery()  {
@@ -1369,6 +1378,19 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
       ->execute();
 
     $this->assertEqual(array_keys($result['entity_test']), array($entity_test->pid), 'Non-node entity without revision table query is correct.');
+
+    // Non-node entity without revision table and without bundles.
+    $query = new EntityFieldQuery();
+    $result = $query
+      ->entityCondition('entity_type', 'user')
+      ->fieldCondition('og_entity_test', 'target_id', $group2->nid)
+      ->execute();
+
+    $expected_values = array(
+      $this->user1->uid,
+      $this->user2->uid,
+    );
+    $this->assertEqual(array_keys($result['user']), $expected_values, 'Non-node entity without revision table and without bundles query is correct.');
 
     // Count query.
     $query = new EntityFieldQuery();

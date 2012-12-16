@@ -1366,6 +1366,7 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
   $entity_type = $query->alterMetaData['entity_field_query']->entityConditions['entity_type']['value'];
   $entity_type = is_array($entity_type) ? $entity_type[0] : $entity_type;
   $entity_info = entity_get_info($entity_type);
+  $id = $entity_info['entity keys']['id'];
 
   if ($base_table) {
     // If the table of the base entity does not exist (e.g. there is no
@@ -1382,7 +1383,6 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
         }
       }
       if (!$base_table_alias) {
-        $id = $entity_info['entity keys']['id'];
         $base_table_alias = $query->innerJoin($base_table, NULL, "$base_table.$id = ogm.etid");
       }
     }
@@ -1390,11 +1390,22 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
     // Point the revision ID and bundle to the base entity.
     $fields['revision_id']['table'] = $base_table;
     // If there is no revision table, use the bundle.
-    $fields['revision_id']['field'] = !empty($entity_info['entity keys']['revision']) ? $entity_info['entity keys']['revision'] : $entity_info['entity keys']['bundle'];
+    if (!empty($entity_info['entity keys']['revision'])) {
+      // Entity doesn't support revisions.
+      $fields['revision_id']['field'] = $entity_info['entity keys']['revision'];
+
+    }
+    elseif (!empty($entity_info['entity keys']['bundle'])) {
+      $fields['revision_id']['field'] = $entity_info['entity keys']['bundle'];
+
+    }
+    else {
+      // Entity doesn't have bundles (e.g. user).
+      $fields['revision_id']['field'] = $id;
+    }
 
     $fields['bundle']['table'] = $base_table;
-    $fields['bundle']['field'] = $entity_info['entity keys']['bundle'];
-
+    $fields['bundle']['field'] = !empty($entity_info['entity keys']['bundle']) ? $entity_info['entity keys']['bundle'] : $id;
     $fields['entity_type']['table'] = 'ogm';
     $fields['entity_id']['table'] = 'ogm';
     $fields['entity_id']['field'] = 'etid';
