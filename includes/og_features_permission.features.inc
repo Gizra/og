@@ -90,6 +90,9 @@ function og_features_permission_features_export_render($module, $data) {
       $permission['roles'] = array();
     }
 
+    // Ensure consistent ordering of roles on output to avoid extraneious diffs.
+    asort($permission['roles']);
+
     $perm_identifier = features_var_export($key);
     $perm_export = features_var_export($permission, '  ');
     $code[] = "  // Exported og permission: {$perm_identifier}";
