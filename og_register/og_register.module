@@ -45,7 +45,7 @@ function og_register_query_og_alter(QueryAlterableInterface $query) {
   // Search the condition that falsified the query.
   // @see OgHandler_base::buildEntityFieldQuery
   foreach ($conditions as $key => $condition) {
-    if (!is_array($condition)) {
+    if (!is_array($condition) || !is_string($condition['field'])) {
       continue;
     }
     if ($condition['field'] != $group_type . '.' . $entity_info['entity keys']['id']) {
