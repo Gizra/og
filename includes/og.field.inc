@@ -63,18 +63,19 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     $field_modes[] = 'admin';
   }
 
-  // Get the "Other group" group IDs.
-  $target_type = $field['settings']['target_type'];
-  $other_groups_ids = array();
-  if ($id) {
-    $entity_gids = og_get_entity_groups($entity_type, $entity);
-    $entity_gids = !empty($entity_gids[$target_type]) ? $entity_gids[$target_type] : array();
-
-    $user_gids = og_get_entity_groups();
-    $user_gids = !empty($user_gids[$target_type]) ? $user_gids[$target_type] : array();
-
-    $other_groups_ids = array_diff($entity_gids, $user_gids);
+  // Build an array of entity IDs. Field's $items are loaded
+  // in OgBehaviorHandler::load().
+  $entity_gids = array();
+  foreach ($items as $item) {
+    $entity_gids[] = $item['target_id'];
   }
+
+  $target_type = $field['settings']['target_type'];
+  $user_gids = og_get_entity_groups();
+  $user_gids = !empty($user_gids[$target_type]) ? $user_gids[$target_type] : array();
+
+  // Get the "Other group" group IDs.
+  $other_groups_ids = array_diff($entity_gids, $user_gids);
 
   foreach ($field_modes as $field_mode) {
     $mocked_instance = og_get_mocked_instance($instance, $field_mode);

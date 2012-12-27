@@ -928,7 +928,6 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
     og_create_field(OG_AUDIENCE_FIELD, 'node', 'post', $og_field);
   }
 
-
   /**
    * Test "field modes" of the OG reference widget.
    */
@@ -1017,8 +1016,6 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
     $user1 = $this->drupalCreateUser();
     $user2 = $this->drupalCreateUser();
 
-    $type = $this->drupalCreateContentType();
-
     $settings = array(
       'type' => 'group',
       OG_GROUP_FIELD . '[und][0][value]' => 1,
@@ -1032,6 +1029,43 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
     $this->drupalPost("user/$user2->uid/edit", array(), 'Save');
 
     $this->assertTrue(og_get_entity_groups('user', $user2, array(OG_STATE_PENDING)), 'User membership was retained after user save.');
+  }
+
+  /**
+   * Test multiple group-audience fields.
+   */
+  function testMultipleFields() {
+    // Add another group-audience field.
+    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    og_create_field('another_field', 'node', 'post', $og_field);
+
+    $user1 = $this->drupalCreateUser();
+
+    // Create a group.
+    $settings = array(
+      'type' => 'group',
+      OG_GROUP_FIELD . '[und][0][value]' => 1,
+      'uid' => $user1->uid,
+    );
+    $group1 = $this->drupalCreateNode($settings);
+    $group2 = $this->drupalCreateNode($settings);
+
+    // Create group content.
+    $settings = array(
+      'type' => 'post',
+      'uid' => $user1->uid,
+    );
+    $post1 = $this->drupalCreateNode($settings);
+
+    og_group('node', $group1->nid, array('entity_type' => 'node', 'entity' => $post1, 'field_name' => OG_AUDIENCE_FIELD));
+    og_group('node', $group2->nid, array('entity_type' => 'node', 'entity' => $post1, 'field_name' => 'another_field'));
+
+    $this->drupalLogin($user1);
+    $this->drupalGet("node/$post1->nid/edit");
+
+    // Assert correct selection in both fields.
+    $this->assertOptionSelected('edit-og-group-ref-und-0-default', $group1->nid);
+    $this->assertOptionSelected('edit-another-field-und-0-default', $group2->nid);
   }
 }
 
