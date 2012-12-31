@@ -41,10 +41,11 @@ function og_ui_subscribe($entity_type, $etid, $field_name = NULL) {
     }
   }
 
-  $wrapper = entity_metadata_wrapper('user', $user->uid);
+  $field = field_info_field($field_name);
+  $instance = field_info_instance('user', $field_name, 'user');
+  $account = user_load($user->uid);
 
-  $field_info = field_info_field($field_name);
-  if (empty($field_info) || empty($wrapper->{$field_name}) || !$wrapper->{$field_name}->access('view')) {
+  if (empty($instance) || !field_access('view', $field, 'user', $account)) {
     // Field name given is incorrect, or user doesn't have access to the field.
     drupal_not_found();
     return;
@@ -63,6 +64,7 @@ function og_ui_subscribe($entity_type, $etid, $field_name = NULL) {
   }
 
   $redirect = FALSE;
+  $message = '';
 
   $params = array();
   $params['@user'] = format_username($user);
@@ -86,8 +88,24 @@ function og_ui_subscribe($entity_type, $etid, $field_name = NULL) {
     $redirect = TRUE;
   }
 
+  if (!$message && $field['cardinality'] != FIELD_CARDINALITY_UNLIMITED) {
+    // Check if user is already registered as active or pending in the maximum
+    // allowed values.
+    $wrapper = entity_metadata_wrapper('user', $account->uid);
+    if ($field['cardinality'] == 1) {
+      $count = $wrapper->{$field_name}->value() ? 1 : 0;
+    }
+    else {
+      $count = $wrapper->{$field_name}->count();
+    }
+    if ($count >= $field['cardinality']) {
+      $message = t('You cannot register to this group, as you have reached your maximum allowed subscriptions.');
+      $redirect = TRUE;
+    }
+  }
+
   if ($redirect) {
-    drupal_set_message($message);
+    drupal_set_message($message, 'warning');
     $url = entity_uri($entity_type, $entity);
     drupal_goto($url['path'], $url['options']);
   }
