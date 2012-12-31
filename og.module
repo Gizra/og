@@ -898,7 +898,7 @@ function og_entity_delete($entity, $entity_type) {
   list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
   if (og_is_group($entity_type, $entity)) {
     og_delete_user_roles_by_group($entity_type, $entity);
-    og_membership_delete_by_group($entity_type, $id);
+    og_membership_delete_by_group($entity_type, $entity);
   }
   if (og_is_group_content_type($entity_type, $bundle)) {
     // As the field attachers are called after hook_entity_presave() we
@@ -1531,13 +1531,166 @@ function og_membership_delete_multiple($ids = array()) {
 }
 
 /**
- * Delete all OG memberships by group.
+ * Implements hook_advanced_queue_info().
  */
-function og_membership_delete_by_group($group_type, $gid) {
+function og_advanced_queue_info() {
+  $items['og_membership_orphans'] = array(
+    'worker callback' => 'og_membership_orphans_worker',
+    // Message-subscribe will deal itself with deleting claimed items.
+    'delete when completed' => FALSE,
+  );
+  return $items;
+}
+
+/**
+ * Advanced queue worker; Process a queue item.
+ *
+ * Delete memberships, and if needed all related group-content.
+ */
+function og_membership_orphans_worker($item, $end_time = FALSE) {
+  $queue = DrupalQueue::get('og_membership_orphans');
+  $data = $item->data;
+
+  $group_type = $data['group_type'];
+  $gid = $data['gid'];
+
   $query = new EntityFieldQuery();
   $result = $query
     ->entityCondition('entity_type', 'og_membership')
     ->propertyCondition('group_type', $group_type, '=')
+    ->propertyCondition('gid', $gid, '=')
+    ->propertyOrderBy('id')
+    ->range(0, 10)
+    ->execute();
+
+  if (empty($result['og_membership'])) {
+    // We can delete the item.
+    $queue->deleteItem($item);
+    return TRUE;
+  }
+
+  $ids = array_keys($result['og_membership']);
+  if ($data['orphans']['delete']) {
+    _og_orphans_delete($ids);
+    // Release the item.
+    $queue->releaseItem($item);
+  }
+  elseif ($data['orphans']['move']) {
+    _og_orphans_move($ids, $data['orphans']['move']['group_type'], $data['orphans']['move']['gid']);
+    // Delete the item.
+    $queue->deleteItem($item);
+  }
+
+  return TRUE;
+}
+
+/**
+ * Helper function to delete orphan group-content.
+ *
+ * @param $ids
+ *   Array of OG membership IDs.
+ *
+ * @see og_membership_delete_by_group_worker()
+ */
+function _og_orphans_delete($ids) {
+  // Get all the group-content that is now orphan.
+  $orphans = array();
+  $og_memberships = og_membership_load_multiple($ids);
+
+  foreach ($og_memberships as $og_membership) {
+    $entity_type = $og_membership->entity_type;
+    $id = $og_membership->etid;
+    // Don't delete users.
+    if ($entity_type == 'user') {
+      continue;
+    }
+    if (count(og_get_entity_groups($entity_type, $id)) > 1) {
+      continue;
+    }
+    $orphans[$entity_type][] = $id;
+  }
+
+  if ($orphans) {
+    foreach ($orphans as $entity_type => $ids) {
+      entity_delete_multiple($entity_type, $ids);
+    }
+  }
+
+  // Delete the OG memberships.
+  og_membership_delete_multiple($ids);
+}
+
+/**
+ * Helper function to move orphan group-content to another group.
+ *
+ * @param $ids
+ *   Array of OG membership IDs.
+ *
+ * @see og_membership_delete_by_group_worker()
+ */
+function _og_orphans_move($ids, $group_type, $gid) {
+  if (!og_is_group($group_type, $gid)) {
+    $params = array(
+      '@group-type' => $group_type,
+      '@gid' => $gid,
+    );
+    throw new OgException(format_string('Cannot move orphan group-content to @group-type - @gid, as it is not a valid group.', $params));
+  }
+
+  $og_memberships = og_membership_load_multiple($ids);
+  foreach ($og_memberships as $og_membership) {
+    $entity_type = $og_membership->entity_type;
+    $id = $og_membership->etid;
+    if (count(og_get_entity_groups($entity_type, $id)) > 1) {
+      continue;
+    }
+    $og_membership->group_type = $group_type;
+    $og_membership->gid = $gid;
+    $og_membership->save();
+  }
+}
+
+/**
+ * Register memberships for deletion.
+ *
+ * if the property "skip_og_membership_delete_by_group" exists on the
+ * entity, this function will return early, and allow other implementing
+ * modules to deal with the deletion logic.
+ *
+ * @param $entity_type
+ *   The group type.
+ * @param $entity
+ *   The group entity object.
+ */
+function og_membership_delete_by_group($entity_type, $entity) {
+  if (!empty($entity->skip_og_membership_delete_by_group)) {
+    return;
+  }
+
+  list($gid) = entity_extract_ids($entity_type, $entity);
+  if (variable_get('og_use_queue', FALSE) && module_exists('advancedqueue')) {
+    $queue = DrupalQueue::get('og_membership_orphans');
+    // Add item to the queue.
+    $task = array(
+      'group_type' => $entity_type,
+      'gid' => $gid,
+      // Allow implementing modules to determine the disposition (e.g. delete
+      // orphan group content).
+      'orphans' => array(
+        'delete' => isset($entity->og_orphans['delete']) ? $entity->og_orphans['delete'] : variable_get('og_orphans_delete', FALSE),
+        'move' => isset($entity->og_orphans['move']) ? $entity->og_orphans['move'] : array(),
+      ),
+    );
+
+    // Exit now, as the task will be processed via advanced-queue.
+    return $queue->createItem($task);
+  }
+
+  // No scalable solution was chosen, so just delete OG memberships.
+  $query = new EntityFieldQuery();
+  $result = $query
+    ->entityCondition('entity_type', 'og_membership')
+    ->propertyCondition('group_type', $entity_type, '=')
     ->propertyCondition('gid', $gid, '=')
     ->execute();
 
