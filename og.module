@@ -1642,8 +1642,7 @@ function og_get_all_group($group_type = 'node') {
  *   Defaults to FALSE.
  */
 function og_get_best_group_audience_field($entity_type, $entity, $group_type, $group_bundle, $skip_access = FALSE) {
-  $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
-  $bundle = $entity_wrapper->getBundle();
+  list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
   $field_names = og_get_group_audience_fields($entity_type, $bundle);
   if (!$field_names) {
@@ -1661,11 +1660,13 @@ function og_get_best_group_audience_field($entity_type, $entity, $group_type, $g
       continue;
     }
 
+
     if (!og_check_field_cardinality($entity_type, $entity, $field_name)) {
       // Field reached maximum.
       continue;
     }
-    if (!$skip_access && !$entity_wrapper->{$field_name}->access('view')) {
+
+    if (!$skip_access && !field_access('view', $field, $entity_type, $entity)) {
       // User can't access field.
       continue;
     }

@@ -668,6 +668,9 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
       $private = FALSE;
       $wrapper = entity_metadata_wrapper($entity_type, $entity);
       $field_name = $field['field_name'];
+      if (!$wrapper->{$field_name}->value()) {
+        return;
+      }
       if ($field['cardinality'] == 1) {
         // Single-value field.
         if ($wrapper->{$field_name}->entityAccess('view')) {
