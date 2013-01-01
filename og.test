@@ -1568,3 +1568,105 @@ class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
     $this->assertEqual(array_values($gids['entity_test']), array($entity1->pid), 'Widget behavior was skipped and removed group association as expected.');
   }
 }
+
+/**
+ * Testing for deleting orphans group content.
+ */
+class OgDeleteOrphansTestCase extends DrupalWebTestCase {
+
+  public $group_type;
+  public $node_type;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'OG orphan delete',
+      'description' => 'Verifying for deleting orphan group content.',
+      'group' => 'Organic groups',
+      'dependencies' => array('advancedqueue'),
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og_test', 'advancedqueue');
+
+    // Create a group content type.
+    $group = $this->drupalCreateContentType();
+    og_create_field(OG_GROUP_FIELD, 'node', $group->type);
+    $this->group_type = $group->type;
+
+    // Create group audience content type.
+    $type = $this->drupalCreateContentType();
+    $this->node_type = $type->type;
+
+    // Add OG audience field to the audience content type.
+    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field['field']['settings']['target_type'] = 'node';
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $type->type, $og_field);
+
+    // Set the setting for delete a group content when deleting group.
+    variable_set('og_orphans_delete', TRUE);
+    variable_set('og_use_queue', TRUE);
+  }
+
+  /**
+   * Testing two things:
+   *  When deleting a group, the node of the group will be deleted.
+   *  Associated node with the deleted group and another group won't be deleted.
+   */
+  function testDeleteGroup() {
+    // Creating two groups.
+    $first_group = $this->drupalCreateNode(array('type' => $this->group_type));
+    $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
+
+    // Create two nodes.
+    $first_node = $this->drupalCreateNode(array('type' => $this->node_type));
+    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $first_node));
+    og_group('node', $second_group, array('entity_type' => 'node', 'entity' => $first_node));
+
+    $second_node = $this->drupalCreateNode(array('type' => $this->node_type));
+    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $second_node));
+
+    // Delete the group.
+    node_delete($first_group->nid);
+
+    // Execute manually the queue worker.
+    $queue = DrupalQueue::get('og_membership_orphans');
+    $item = $queue->claimItem();
+    og_membership_orphans_worker($item);
+
+    // Load the nodes we used during the test.
+    $first_node = node_load($first_node->nid);
+    $second_node = node_load($second_node->nid);
+
+    // Verify the none orphan node wasn't deleted.
+    $this->assertTrue($first_node, "The second node is realted to another group and deleted.");
+    // Verify the orphan node deleted.
+    $this->assertFalse($second_node, "The orphan node deleted.");
+  }
+
+  /**
+   * Testing the moving of the node to another group when deleting a group.
+   */
+  function testMoveOrphans() {
+    // Creating two groups.
+    $first_group = $this->drupalCreateNode(array('type' => $this->group_type, 'title' => 'move'));
+    $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
+
+    // Create a group and relate it to the first group.
+    $first_node = $this->drupalCreateNode(array('type' => $this->node_type));
+    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $first_node));
+
+    // Delete the group.
+    node_delete($first_group->nid);
+
+    // Execute manually the queue worker.
+    $queue = DrupalQueue::get('og_membership_orphans');
+    $item = $queue->claimItem();
+    og_membership_orphans_worker($item);
+
+    // Load the node into a wrapper and verify we moved him to another group.
+    $wrapper = entity_metadata_wrapper('node', $first_node->nid);
+
+    $this->assertTrue($wrapper->{OG_AUDIENCE_FIELD}->get(0)->getIdentifier() == $second_group->nid, "The node of the group moved to another group.");
+  }
+}
