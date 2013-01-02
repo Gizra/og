@@ -66,10 +66,11 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   // Build an array of entity IDs. Field's $items are loaded
   // in OgBehaviorHandler::load().
   $entity_gids = array();
-  foreach ($items as $item) {
-    $entity_gids[] = $item['target_id'];
+  if (!empty($items)) {
+    foreach ($items as $item) {
+      $entity_gids[] = $item['target_id'];
+    }
   }
-
   $target_type = $field['settings']['target_type'];
   $user_gids = og_get_entity_groups();
   $user_gids = !empty($user_gids[$target_type]) ? $user_gids[$target_type] : array();
