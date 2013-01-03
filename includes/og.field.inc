@@ -136,7 +136,6 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
 
     $new_element = ctools_field_invoke_field($mocked_instance, 'form', $entity_type, $dummy_entity, $form, $dummy_form_state, array('default' => TRUE));
     $element[$field_mode] = $new_element[$field_name][LANGUAGE_NONE];
-
     if (in_array($mocked_instance['widget']['type'], array('entityreference_autocomplete', 'entityreference_autocomplete_tags'))) {
       // Change the "Add more" button name so it adds only the needed
       // element.
@@ -144,29 +143,20 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         $element[$field_mode]['add_more']['#name'] .= '__' . $field_mode;
       }
 
-      foreach (array_keys($element[$field_mode]) as $delta) {
-        if (!is_numeric($delta)) {
-          continue;
+      if ($mocked_instance['widget']['type'] == 'entityreference_autocomplete') {
+        foreach (array_keys($element[$field_mode]) as $delta) {
+          if (!is_numeric($delta)) {
+            continue;
+          }
+
+          $sub_element = &$element[$field_mode][$delta]['target_id'];
+          _og_field_widget_replace_autocomplete_path($sub_element, $field_mode);
+
         }
-
-        $sub_element = &$element[$field_mode][$delta]['target_id'];
-
-        // Rebuild the autocomplete path.
-        $path = explode('/', $sub_element['#autocomplete_path']);
-        $sub_element['#autocomplete_path'] = 'og/autocomplete';
-
-        // Add autocomplete type
-        $sub_element['#autocomplete_path'] .= "/$path[2]/$path[3]/$path[4]/$path[5]";
-
-        // Add field mode.
-        $sub_element['#autocomplete_path'] .= "/$field_mode";
-
-        // Add the entity ID.
-        $sub_element['#autocomplete_path'] .= "/$path[6]";
-        if (!empty($path[7])) {
-          // Add the text.
-          $sub_element['#autocomplete_path'] .= "/$path[7]";
-        }
+      }
+      else {
+        // Tags widget, there's no delta, we can pass the element itself.
+        _og_field_widget_replace_autocomplete_path($element[$field_mode], $field_mode);
       }
     }
   }
@@ -174,6 +164,34 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   $form['#after_build']['og'] = 'og_complex_widget_after_build';
 
   return $element;
+}
+
+/**
+ * Replace Entity-reference's autocomplete path with our own.
+ *
+ * @param $element
+ *   The form element, passed by reference.
+ * @param $field_mode
+ *   The field mode.
+ *
+ */
+function _og_field_widget_replace_autocomplete_path(&$element, $field_mode) {
+  // Rebuild the autocomplete path.
+  $path = explode('/', $element['#autocomplete_path']);
+  $element['#autocomplete_path'] = 'og/autocomplete';
+
+  // Add autocomplete type
+  $element['#autocomplete_path'] .= "/$path[2]/$path[3]/$path[4]/$path[5]";
+
+  // Add field mode.
+  $element['#autocomplete_path'] .= "/$field_mode";
+
+  // Add the entity ID.
+  $element['#autocomplete_path'] .= "/$path[6]";
+  if (!empty($path[7])) {
+    // Add the text.
+    $element['#autocomplete_path'] .= "/$path[7]";
+  }
 }
 
 /**
