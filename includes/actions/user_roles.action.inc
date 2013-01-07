@@ -9,11 +9,20 @@ function og_user_roles_action_info() {
 }
 
 function og_user_roles_action_form($context) {
-  // Get the group type and group ID from the Views arguments.
-  list($group_type, $gid) = $context['view']->args;
+  $gid = '';
+  $group_type = '';
 
-  if(empty($group_type) || empty($gid)) {
-    return;
+  if (module_exists('og_context') && $og_context = og_context()) {
+    // Get the group type and group ID from OG context.
+    $gid = $og_context['gid'];
+    $group_type = $og_context['group_type'];
+  }
+  elseif (empty($gid) || empty($group_type)) {
+    // Get the group type and group ID from the Views arguments if they exist.
+    list($group_type, $gid) = $context['view']->args;
+    if (empty($group_type) || empty($gid)) {
+      return;
+    }
   }
 
   if (!entity_get_info($group_type)) {
