@@ -138,6 +138,13 @@ function og_context_og_context_negotiation_info() {
     'menu path' => array('user/%/edit'),
   );
 
+  $providers['comment'] = array(
+    'name' => t('Comment'),
+    'description' => t("Determine context by checking if the parent content of the comment belongs to a group"),
+    'callback' => 'og_context_handler_comment',
+    'menu path' => array('comment/reply/%', 'comment/%'),
+  );
+
   return $providers;
 }
 
@@ -404,9 +411,13 @@ function og_context_handler_url() {
 
 /**
  * Context handler; Get groups from existing node or ctools context.
+ *
+ * @param $node
+ *  Optional; A node. If empty a node object will attempted to be loaded via
+ *  menu_get_object().
  */
-function og_context_handler_node() {
-  if ($node = menu_get_object('node')) {
+function og_context_handler_node($node = NULL) {
+  if (empty($node) && $node = menu_get_object()) {
     return _group_context_handler_entity('node', $node);
   }
 
@@ -454,6 +465,21 @@ function og_context_handler_user_view() {
  */
 function og_context_handler_user_edit() {
   return _group_context_handler_entity('user');
+}
+
+/**
+ * Context handler; Get groups from parent of comment being added to it.
+ */
+function og_context_handler_comment() {
+  $item = menu_get_item();
+  // Get the last argument.
+  $cid = end($item['original_map']);
+  if (!$comment = comment_load($cid)) {
+    return;
+  }
+
+  $node = node_load($comment->nid);
+  return og_context_handler_node($node);
 }
 
 /**
