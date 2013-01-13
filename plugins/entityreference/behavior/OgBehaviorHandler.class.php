@@ -162,4 +162,51 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
 
     return $return;
   }
+
+  /**
+   * Overrides views_data_alter().
+   */
+  public function views_data_alter(&$data, $field) {
+    // We need to override the default EntityReference table settings when OG
+    // behavior is being used.
+    if (og_is_group_audience_field($field['field_name'])) {
+      $entity_types = array_keys($field['bundles']);
+      // We need to join the base table for the entities
+      // that this field is attached to.
+      foreach ($entity_types as $entity_type) {
+        $entity_info = entity_get_info($entity_type);
+        $data['og_membership'] = array(
+          'table' => array(
+            'join' => array(
+              $entity_info['base table'] => array(
+                // Join entity base table on its id field with left_field.
+                'left_field' => $entity_info['entity keys']['id'],
+                'field' => 'etid',
+                'extra' => array(
+                  0 => array(
+                    'field' => 'entity_type',
+                    'value' => $entity_type,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Copy the original config from the table definition.
+          $field['field_name'] => $data['field_data_' . $field['field_name']][$field['field_name']],
+          $field['field_name'] . '_target_id' => $data['field_data_' . $field['field_name']][$field['field_name'] . '_target_id'],
+        );
+
+        // Change config with settings from og_membership table.
+        foreach (array('filter', 'argument', 'sort') as $op) {
+          $data['og_membership'][$field['field_name'] . '_target_id'][$op]['field'] = 'gid';
+          $data['og_membership'][$field['field_name'] . '_target_id'][$op]['table'] = 'og_membership';
+          unset($data['og_membership'][$field['field_name'] . '_target_id'][$op]['additional fields']);
+        }
+      }
+
+      // Get rid of the original table configs.
+      unset($data['field_data_' . $field['field_name']]);
+      unset($data['field_revision_' . $field['field_name']]);
+    }
+  }
 }
