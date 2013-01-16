@@ -518,3 +518,29 @@ function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $p
 
   return $contexts;
 }
+
+/**
+ * Helper function to handle views page access.
+ *
+ * @param $group_type
+ *   The group type.
+ * @param $perm
+ *   The group permission to search for.
+ * @param $group_id_arg
+ *   Optional; The position in arg() where the group ID can be found.
+ *
+ * @return
+ *   TRUE if user is allowed access to the page.
+ */
+function _og_context_views_page_access($group_type, $perm, $group_id_arg = FALSE) {
+  if ($group_id_arg !== FALSE) {
+    $gid = arg($group_id_arg);
+    if (is_numeric($gid)) {
+      return og_user_access($group_type, $gid, $perm);
+    }
+  }
+  elseif ($group = og_context($group_type)) {
+    // Try to get context.
+    return og_user_access($group_type, $group['gid'], $perm);
+  }
+}
