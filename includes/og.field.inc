@@ -42,7 +42,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   list($id,, $bundle) = entity_extract_ids($entity_type, $entity);
   $field_name = $field['field_name'];
 
-  $identifier = $field_name . ':' . $entity_type . ':' . $id;
+  $identifier = $field_name . ':' . $entity_type . ':' . $bundle . ':' . $id;
   if (isset($cache[$identifier])) {
     return array();
   }
