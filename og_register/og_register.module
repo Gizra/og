@@ -13,7 +13,9 @@ define('OG_REGISTER_FIELD', 'group_register');
 
 
 /**
- * Implements hook_query_TAG_alter().
+ * Implements hook_query_og_alter().
+ *
+ * @todo: Filter out groups that don't allow to subscribe, if OG-UI is enabled.
  */
 function og_register_query_og_alter(QueryAlterableInterface $query) {
   global $user;
@@ -74,6 +76,61 @@ function og_register_query_og_alter(QueryAlterableInterface $query) {
     $conditions[$key]['operator'] = 'IN';
     return;
   }
+}
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Mark the group-audience fields as ones that are used i registration. This is used
+ * to later on make sure the user is registered according to the allowed permissions (i.e. with or
+ * without administrator approval).
+ */
+function og_register_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  global $user;
+  if ($user->uid || $entity_type != 'user') {
+    return;
+  }
+
+  if (!module_exists('og_ui')) {
+    return;
+  }
+
+  if (!$fields = og_get_group_audience_fields()) {
+    return;
+  }
+
+  foreach (array_keys($fields) as $field_name) {
+    if (empty($form[$field_name])) {
+      continue;
+    }
+    $form[$field_name]['#element_validate'][] = 'og_register_og_membership_state_validate';
+  }
+}
+
+/**
+ * Validate handler; Set the state according to the "subscribe" permissions of the group.
+ */
+function og_register_og_membership_state_validate($element, &$form_state) {
+  $langcode = $element['#language'];
+  $field_name = $element[$langcode]['#field_name'];
+
+  if (empty($form_state['values'][$field_name][$langcode])) {
+    return;
+  }
+
+  $field = field_info_field($field_name);
+  $group_type = $field['settings']['target_type'];
+
+  $values = $form_state['values'][$field_name][$langcode];
+  foreach ($values as &$value) {
+    $og_roles = og_roles($group_type, NULL, $value['target_id']);
+    $rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);
+    $og_permissions = og_role_permissions(array($rid => $rid));
+    // State should be pending if "subscribe without approval" is not enabled.
+    $value['state'] = !empty($og_permissions[$rid]['subscribe without approval']) ? OG_STATE_ACTIVE : OG_STATE_PENDING;
+  }
+
+  form_set_value($element, array($langcode => $values), $form_state);
 }
 
 /**
