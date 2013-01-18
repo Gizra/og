@@ -298,10 +298,6 @@ class OgUiMigrate7000TestCase extends UpgradePathTestCase {
 
     module_enable(array('og_ui', 'migrate'));
 
-    Migration::registerMigration('OgMigrateAddFields');
-    Migration::registerMigration('OgUiMigrateAddField');
-    Migration::registerMigration('OgUiSetRoles');
-
     foreach (migrate_migrations() as $migration) {
       $machine_name = $migration->getMachineName();
       $result = $migration->processImport();

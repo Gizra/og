@@ -3421,6 +3421,14 @@ function og_migrate_api() {
     $migrations['OgMigrateAddFields'] = array('class_name' => 'OgMigrateAddFields');
     $migrations['OgMigrateContent'] = array('class_name' => 'OgMigrateContent');
     $migrations['OgMigrateUser'] = array('class_name' => 'OgMigrateUser');
+
+    foreach (node_type_get_names() as $bundle => $value) {
+      $machine_name = 'OgMigrateGroup' . ucfirst($bundle);
+      $migrations[$machine_name] = array(
+        'class_name' => 'OgMigrateGroup',
+        'bundle' => $bundle,
+      );
+    }
   }
   elseif (db_field_exists('og_membership', 'group_type') && db_table_exists('og') && !db_table_exists('d6_og')) {
     $migrations['OgMigrateMembership'] = array('class_name' => 'OgMigrateMembership');
@@ -3433,24 +3441,4 @@ function og_migrate_api() {
     'migrations' => $migrations,
   );
   return $api;
-}
-
-/**
- * Implements hook_modules_enabled().
- *
- * Register dynamic migrate plugins for upgrading from OG6.
- */
-function og_modules_enabled($modules) {
-  if (!db_table_exists('d6_og')) {
-    return;
-  }
-
-  if (!in_array('migrate', $modules) && !module_exists('migrate')) {
-    return;
-  }
-
-  foreach (node_type_get_names() as $bundle => $value) {
-    // Register a dynamic migration.
-    Migration::registerMigration('OgMigrateGroup', 'OgMigrateGroup' . ucfirst($bundle), array('bundle' => $bundle));
-  }
 }

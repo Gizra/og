@@ -1125,32 +1125,19 @@ function og_ui_migrate_api() {
   $migrations = array();
   if (db_table_exists('d6_og')) {
     $migrations['OgUiMigrateAddField'] = array('class_name' => 'OgUiMigrateAddField');
-    $migrations['OgUiPopulateField'] = array('class_name' => 'OgUiPopulateField');
     $migrations['OgUiSetRoles'] = array('class_name' => 'OgUiSetRoles');
+
+    foreach (node_type_get_names() as $bundle => $value) {
+      $machine_name = 'OgUiPopulateField' . ucfirst($bundle);
+      $migrations[$machine_name] = array(
+        'class_name' => 'OgUiPopulateField',
+        'bundle' => $bundle,
+      );
+    }
   }
   $api = array(
     'api' => 2,
     'migrations' => $migrations,
   );
   return $api;
-}
-
-/**
- * Implements hook_modules_enabled().
- *
- * Register dynamic migrate plugins for upgrading from OG6.
- */
-function og_ui_modules_enabled($modules) {
-  if (!db_table_exists('d6_og')) {
-    return;
-  }
-
-  if (!in_array('migrate', $modules) && !module_exists('migrate')) {
-    return;
-  }
-
-  foreach (node_type_get_names() as $bundle => $value) {
-    // Register dynamic migrations.
-    Migration::registerMigration('OgUiPopulateField', 'OgUiPopulateField' . ucfirst($bundle), array('bundle' => $bundle));
-  }
 }
