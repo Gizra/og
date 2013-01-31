@@ -95,7 +95,7 @@ function og_views_data_alter(&$data) {
       'help' => t('The OG membership associated with the @entity group', array('@entity' => ucfirst($info['label']))),
       'relationship' => array(
         'entity' => $entity_type,
-        'handler' => 'views_handler_relationship',
+        'handler' => 'og_handler_relationship_group',
         'label' => t('OG membership from @entity group', array('@entity' => $entity_type)),
         'base' => 'og_membership',
         'base field' => 'gid',

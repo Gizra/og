@@ -35,6 +35,7 @@ files[] = includes/views/handlers/og_handler_filter_group_audience_state.inc
 
 ; Views relationships
 files[] = includes/views/handlers/og_handler_relationship.inc
+files[] = includes/views/handlers/og_handler_relationship_group.inc
 
 ; Migrate destinations
 files[] = includes/migrate/plugins/destinations/og_membership.inc
