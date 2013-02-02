@@ -76,7 +76,7 @@ function og_ui_admin_settings($form_state) {
   $form['og_use_queue'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use queue'),
-    '#description' => t('Use <a href="@url">"Advacned-Queue"</a> module to process operations such as deleting memberships when groups are deleted.', array('@url' => 'http://drupal.org/project/advancedqueue')),
+    '#description' => t('Use <a href="@url">Advanced queue</a> module to process operations such as deleting memberships when groups are deleted.', array('@url' => 'http://drupal.org/project/advancedqueue')),
     '#default_value' => variable_get('og_use_queue', FALSE),
     '#disabled' => !module_exists('advancedqueue'),
   );
