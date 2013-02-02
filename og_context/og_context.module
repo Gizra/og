@@ -422,6 +422,12 @@ function og_context_handler_node($node = NULL) {
   }
 
   $item = menu_get_item();
+
+  if (empty($item['map'])) {
+    // User has no access to the menu item.
+    return;
+  }
+
   if ($item['path'] == 'node/%/group') {
     $node = node_load($item['map'][1]);
   }
