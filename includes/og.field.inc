@@ -70,12 +70,19 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     $entity_gids[] = $item['target_id'];
   }
 
-  $target_type = $field['settings']['target_type'];
-  $user_gids = og_get_entity_groups();
-  $user_gids = !empty($user_gids[$target_type]) ? $user_gids[$target_type] : array();
+  $mocked_instance = og_get_mocked_instance($instance, 'default');
+  // Get the group ids available for selection in the audience field.
+  $field_gids = array();
+  $ids = entityreference_get_selection_handler($field, $mocked_instance)->getReferencableEntities();
+  if (!empty($ids)) {
+    foreach ($ids as $key => $values) {
+      $field_gids += $values;
+    }
+    $field_gids = array_keys($field_gids);
+  }
 
-  // Get the "Other group" group IDs.
-  $other_groups_ids = array_diff($entity_gids, $user_gids);
+  // Entity groups not shown in the audience field.
+  $other_groups_ids = array_diff($entity_gids, $field_gids);
 
   foreach ($field_modes as $field_mode) {
     $mocked_instance = og_get_mocked_instance($instance, $field_mode);
@@ -107,7 +114,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
         }
         else {
           // Keep only the groups that belong to the user and to the entity.
-          $my_group_ids = array_values(array_intersect($user_gids, $entity_gids));
+          $my_group_ids = array_values(array_intersect($field_gids, $entity_gids));
           $valid_ids = $my_group_ids ? entityreference_get_selection_handler($field, $mocked_instance, $entity_type, $dummy_entity)->validateReferencableEntities($my_group_ids) : array();
 
           $valid_ids = $field['cardinality'] == 1 ? reset($valid_ids) : $valid_ids;

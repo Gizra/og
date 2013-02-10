@@ -915,7 +915,7 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og');
+    parent::setUp('og', 'og_test');
 
     // Add OG group field to a the node's "group" bundle.
     $this->drupalCreateContentType(array('type' => 'group'));
@@ -1066,6 +1066,63 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
     // Assert correct selection in both fields.
     $this->assertOptionSelected('edit-og-group-ref-und-0-default', $group1->nid);
     $this->assertOptionSelected('edit-another-field-und-0-default', $group2->nid);
+  }
+
+  /**
+   * Test selection of groups added to audience field by external modules.
+   */
+  function testAlteredAudienceField() {
+    // Add an OG audience field we will alter in og_test_entity_query_alter().
+    $this->drupalCreateContentType(array('type' => 'common'));
+    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    og_create_field(OG_AUDIENCE_FIELD . '_altered', 'node', 'common', $og_field);
+
+    $user1 = $this->drupalCreateUser(array('administer group', 'access content', 'create common content', 'edit any common content'));
+    $user2 = $this->drupalCreateUser(array('access content', 'create common content', 'edit any common content'));
+
+    // Create group nodes.
+    $settings = array(
+      'type' => 'group',
+      OG_GROUP_FIELD . '[und][0][value]' => 1,
+    );
+    $settings['uid'] = $user1->uid;
+    $group1 = $this->drupalCreateNode($settings);
+
+    $settings['uid'] = $user2->uid;
+    $group2 = $this->drupalCreateNode($settings);
+
+    $settings = array(
+      'type' => 'common',
+    );
+    $settings['uid'] = $user1->uid;
+    $common1 = $this->drupalCreateNode($settings);
+
+    // Login as user2 who is only a member of group2.
+    $this->drupalLogin($user2);
+
+    // The altered audience field displays all groups, user2 can save the
+    // content with membership in both group1 and group2.
+    $edit = array("og_group_ref_altered[und][0][default][]" => array(
+      $group1->nid => $group1->nid,
+      $group2->nid => $group2->nid,
+    ));
+    $this->drupalPost("node/$common1->nid/edit", $edit, 'Save');
+
+    // Assert user2 was able to post to both groups.
+    og_membership_invalidate_cache();
+    $gids = og_get_entity_groups('node', $common1->nid);
+    $this->assertEqual(count($gids['node']), 2, 'Both groups selected.');
+
+    // Ensure user2 can remove memberships from any group displayed in the
+    // audience field.
+    $edit = array("og_group_ref_altered[und][0][default][]" => array(
+      '_none' => '_none',
+    ));
+    $this->drupalPost("node/$common1->nid/edit", $edit, 'Save');
+
+    // Assert user2 was able to remove content from all groups.
+    og_membership_invalidate_cache();
+    $this->assertFalse(og_get_entity_groups('node', $common1->nid), 'No groups selected.');
   }
 }
 

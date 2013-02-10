@@ -89,3 +89,17 @@ function og_test_form_behavior_validate($element, &$form_state) {
 
   form_set_value($element, $value, $form_state);
 }
+
+/**
+ * Implements hook_entity_query_alter().
+ *
+ * @see OgComplexWidgetTestCase::testAlteredAudienceField()
+ */
+function og_test_entity_query_alter($query) {
+  $instance = !empty($query->metaData['entityreference_selection_handler']->instance) ? $query->metaData['entityreference_selection_handler']->instance : array();
+  // Alter OG_AUDIENCE_FIELD . '_altered' to allow selection of all group nodes.
+  if (!empty($query->metaData['field']['field_name']) && $query->metaData['field']['field_name'] == OG_AUDIENCE_FIELD . '_altered' && !empty($instance['field_mode']) && $instance['field_mode'] == 'default' && !empty($query->propertyConditions[0]['operator']) && $query->propertyConditions[0]['operator'] == 'IN') {
+    // Set the property conditions to match all groups of type node.
+    $query->propertyConditions[0]['value'] = og_get_all_group('node');
+  }
+}
