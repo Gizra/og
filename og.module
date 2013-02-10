@@ -3400,7 +3400,7 @@ function og_features_api() {
  * type that has them is selected.
  */
 function og_features_pipe_alter(&$pipe, $data, $export) {
-  if (variable_get('og_features_ignore_og_fields', FALSE) || empty($pipe['field'])) {
+  if (!variable_get('og_features_ignore_og_fields', FALSE) || empty($pipe['field'])) {
     return;
   }
   foreach ($pipe['field'] as $delta => $value) {
