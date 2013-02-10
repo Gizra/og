@@ -94,8 +94,8 @@ function og_views_data_alter(&$data) {
       'title' => t('OG membership from @entity group', array('@entity' => ucfirst($info['label']))),
       'help' => t('The OG membership associated with the @entity group', array('@entity' => ucfirst($info['label']))),
       'relationship' => array(
-        'entity' => $entity_type,
-        'handler' => 'og_handler_relationship_group',
+        'group_type' => $entity_type,
+        'handler' => 'og_handler_relationship',
         'label' => t('OG membership from @entity group', array('@entity' => $entity_type)),
         'base' => 'og_membership',
         'base field' => 'gid',
@@ -109,7 +109,8 @@ function og_views_data_alter(&$data) {
       'title' => t('@entity from OG membership', array('@entity' => ucfirst($info['label']))),
       'help' => t('The @entity entity that is associated with the OG membership.', array('@entity' => $info['label'])),
       'relationship' => array(
-        'handler' => 'views_handler_relationship',
+        'entity' => $entity_type,
+        'handler' => 'og_handler_relationship',
         'label' => t('@entity from OG membership', array('@entity' => $entity_type)),
         'base' => $info['base table'],
         'base field' => $info['entity keys']['id'],
@@ -123,7 +124,8 @@ function og_views_data_alter(&$data) {
       'title' => t('Group @entity from OG membership', array('@entity' => ucfirst($info['label']))),
       'help' => t('The @entity group that is associated with the OG membership.', array('@entity' => $info['label'])),
       'relationship' => array(
-        'handler' => 'views_handler_relationship',
+        'group_type' => $entity_type,
+        'handler' => 'og_handler_relationship',
         'label' => t('Group @entity from OG membership', array('@entity' => $entity_type)),
         'base' => $info['base table'],
         'base field' => $info['entity keys']['id'],
