@@ -32,6 +32,7 @@ files[] = includes/views/handlers/og_handler_field_group_permissions.inc
 
 ; Views filters
 files[] = includes/views/handlers/og_handler_filter_group_audience_state.inc
+files[] = includes/views/handlers/og_handler_filter_user_roles.inc
 
 ; Views relationships
 files[] = includes/views/handlers/og_handler_relationship.inc

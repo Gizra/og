@@ -43,8 +43,6 @@ class OgMembershipViewsController extends EntityDefaultViewsController {
     $data['og_membership']['gid']['title'] = t('Group ID');
     $data['og_membership']['gid']['help'] = t('Og membership "gid" property.');
 
-
-
     $data['og_membership']['og_roles'] = array(
       'title' => t('OG user roles in group'),
       'help' => t('Show all the roles a user belongs to in a group. Requires a relationship to users to be present.'),
@@ -53,6 +51,38 @@ class OgMembershipViewsController extends EntityDefaultViewsController {
       'real field' => 'gid',
       'field' => array(
         'handler' => 'og_handler_field_user_roles',
+      ),
+    );
+
+    $data['og_membership']['og_users_roles'] = array(
+      'title' => t('OG Roles from membership'),
+      'help' => t('The OG Roles associated with the OG membership'),
+      // Provide a possible relationship to roles through uid.
+      'relationship' => array(
+        'label' => t('OG Roles from OG membership'),
+        'base' => 'og_users_roles',
+        'base field' => 'uid',
+        'relationship field' => 'etid',
+      ),
+    );
+
+    $data['og_role'] = array(
+      'table' => array(
+        'group' => t('OG user roles'),
+        'join' => array(
+          // Attach automatically to og_users_roles relations.
+          'og_users_roles' => array(
+            'left_field' => 'rid',
+            'field' => 'rid',
+          ),
+        )
+      )
+    );
+    $data['og_role']['name'] = array(
+      'title' => t('Role Name'),
+      'help' => t('The OG role name.'),
+      'filter' => array(
+        'handler' => 'og_handler_filter_user_roles',
       ),
     );
 
