@@ -786,7 +786,14 @@ function og_ui_field_settings($form, &$form_state) {
   $selected_field_name = !empty($form_state['values']['field_type']) ? $form_state['values']['field_type'] : OG_AUDIENCE_FIELD;
   $selected_og_info = og_fields_info($selected_field_name);
 
-  $form['field_type'] = array(
+  $form['field_info_wrapper'] = array(
+    '#prefix' => '<div id="field-info-wrapper">',
+    '#suffix' => '</div>',
+    '#parents' => array('field_info_wrapper'),
+    '#type' => 'fieldset',
+  );
+
+  $form['field_info_wrapper']['field_type'] = array(
     '#title' => t('Fields'),
     '#type' => 'select',
     '#options' => $options,
@@ -796,13 +803,6 @@ function og_ui_field_settings($form, &$form_state) {
       'callback' => 'og_ui_admin_fields_ajax_callback',
       'wrapper' => 'field-info-wrapper',
     ),
-  );
-
-  $form['field_info_wrapper'] = array(
-    '#prefix' => '<div id="field-info-wrapper">',
-    '#suffix' => '</div>',
-    '#parents' => array('field_info_wrapper'),
-    '#type' => 'fieldset',
   );
 
   $form['field_info_wrapper']['description'] = array(
