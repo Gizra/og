@@ -134,6 +134,7 @@ function og_ui_add_users($form, &$form_state, $group_type, $gid) {
   og_set_breadcrumb($group_type, $gid, array(l(t('Group'), "$group_type/$gid/group")));
   $group = entity_load_single($group_type, $gid);
   $label = entity_label($group_type, $group);
+  list(,, $bundle) = entity_extract_ids($group_type, $group);
 
   $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
   $form['gid'] = array('#type' => 'value', '#value' => $gid);
@@ -153,6 +154,15 @@ function og_ui_add_users($form, &$form_state, $group_type, $gid) {
     '#type' => 'value',
     '#value' => OG_STATE_ACTIVE,
   );
+
+  // Get all the non-default roles.
+  if ($og_roles = og_roles($group_type, $bundle, $gid, FALSE, FALSE)) {
+    $form['og_user']['roles'] = array(
+      '#type' => 'checkboxes',
+      '#options' => $og_roles,
+      '#title' => t('Roles'),
+    );
+  }
 
   $field_names = og_get_group_audience_fields();
   $field_name = !empty($form_state['values']['field_name']) ? $form_state['values']['field_name'] : key($field_names);
@@ -254,7 +264,12 @@ function og_ui_add_users_submit($form, &$form_state) {
   $og_membership->etid = $account->uid;
   $og_membership->state = $state;
   $og_membership->save();
-
+  // Assign roles.
+  if (!empty($form_state['values']['roles'])) {
+    foreach ($form_state['values']['roles'] as $rid) {
+      og_role_grant($group_type, $gid, $og_membership->etid, $rid);
+    }
+  }
   drupal_set_message(t('%user has been added to group.', array('%user' => format_username($account))));
 }
 
