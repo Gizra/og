@@ -3446,3 +3446,15 @@ function og_migrate_api() {
   );
   return $api;
 }
+
+/**
+ * Implements hook_flush_caches().
+ */
+function og_flush_caches() {
+  $bins = array(
+    'cache_entity_og_membership',
+    'cache_entity_og_membership_type',
+  );
+  return $bins;
+}
+
