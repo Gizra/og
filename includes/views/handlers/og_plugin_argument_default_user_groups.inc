@@ -33,7 +33,7 @@ class og_plugin_argument_default_user_groups extends views_plugin_argument_defau
       '#description' => t('Select the group type.'),
       '#options' => og_get_all_group_entity(),
       '#default_value' => $this->options['group_type'],
-      '#required' => TRUE,
+      '#required' => og_get_all_group_entity(),
     );
     $form['glue'] = array(
       '#type' => 'select',

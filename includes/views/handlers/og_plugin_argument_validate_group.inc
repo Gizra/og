@@ -30,7 +30,7 @@ class og_plugin_argument_validate_group extends views_plugin_argument_validate {
       '#description' => t('Select the group type.'),
       '#options' => og_get_all_group_entity(),
       '#default_value' => $this->options['group_type'],
-      '#required' => TRUE,
+      '#required' => og_get_all_group_entity(),
     );
   }
 
