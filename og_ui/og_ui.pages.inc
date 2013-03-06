@@ -114,6 +114,7 @@ function og_ui_subscribe($entity_type, $etid, $field_name = NULL) {
     // Show the user a subscription confirmation.
     return drupal_get_form('og_ui_confirm_subscribe', $entity_type, $id, $user, $field_name);
   }
+  drupal_access_denied();
 }
 
 /**
