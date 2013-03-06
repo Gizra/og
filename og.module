@@ -1834,7 +1834,7 @@ function og_get_best_group_audience_field($entity_type, $entity, $group_type, $g
 }
 
 /**
- * Return TRUE if a field can be used and has not reached maxium values.
+ * Return TRUE if a field can be used and has not reached maximum values.
  *
  * @param $entity_type
  *   The entity type.
