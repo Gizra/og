@@ -674,7 +674,13 @@ function og_field_create_instance($instance) {
   $og_field = og_fields_info(OG_AUDIENCE_FIELD);
   $og_field['field']['settings']['target_type'] = $entity_type;
   $og_field['instance']['label'] = t('Group membership');
-  og_create_field($field_name, 'user', 'user', $og_field);
+
+  // If the user entity type has multiple bundles, make sure to attach a field
+  // instance to all of them.
+  $entity_info = entity_get_info('user');
+  foreach (array_keys($entity_info['bundles']) as $user_bundle) {
+    og_create_field($field_name, 'user', $user_bundle, $og_field);
+  }
 }
 
 /**

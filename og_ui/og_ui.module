@@ -574,7 +574,7 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
         return;
       }
 
-      if (!empty($entity->uid) && ($entity->uid == $user->uid)) {
+      if (!empty($entity->uid) && ($entity->uid == $account->uid)) {
         // User is the group manager.
         $element[0] = array('#markup' => t('You are the group manager'));
         return $element;
@@ -595,7 +595,7 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
         }
 
         // Check if user can subscribe to the field.
-        if (empty($settings['field_name']) && $audience_field_name = og_get_best_group_audience_field('user', $user->uid, $entity_type, $bundle)) {
+        if (empty($settings['field_name']) && $audience_field_name = og_get_best_group_audience_field('user', $account, $entity_type, $bundle)) {
           $settings['field_name'] = $audience_field_name;
         }
         if (!$settings['field_name']) {
@@ -614,7 +614,7 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
           return;
         }
 
-        if (!og_check_field_cardinality('user', $user->uid, $settings['field_name'])) {
+        if (!og_check_field_cardinality('user', $account, $settings['field_name'])) {
           $element[0] = array('#markup' => format_plural($field_info['cardinality'], 'You are already registered to another group', 'You are already registered to @count groups'));
           return $element;
         }
