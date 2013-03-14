@@ -86,6 +86,15 @@ class OgMembershipViewsController extends EntityDefaultViewsController {
       ),
     );
 
+    // Link to edit membership
+    $data['og_membership']['edit_membership'] = array(
+      'field' => array(
+        'title' => t('Edit link'),
+        'help' => t('Provide a simple link to edit the membership.'),
+        'handler' => 'og_handler_field_og_membership_link_edit',
+      ),
+    );
+
     return $data;
   }
 }

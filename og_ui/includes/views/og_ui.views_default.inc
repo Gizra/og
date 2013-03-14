@@ -209,6 +209,14 @@ function og_ui_views_default_views() {
   $handler->display->display_options['fields']['og_membership_request']['table'] = 'field_data_og_membership_request';
   $handler->display->display_options['fields']['og_membership_request']['field'] = 'og_membership_request';
   $handler->display->display_options['fields']['og_membership_request']['relationship'] = 'og_membership_rel';
+  /* Field: OG membership: Edit link */
+  $handler->display->display_options['fields']['edit_membership']['id'] = 'edit_membership';
+  $handler->display->display_options['fields']['edit_membership']['table'] = 'og_membership';
+  $handler->display->display_options['fields']['edit_membership']['field'] = 'edit_membership';
+  $handler->display->display_options['fields']['edit_membership']['relationship'] = 'og_membership_rel';
+  $handler->display->display_options['fields']['edit_membership']['label'] = '';
+  $handler->display->display_options['fields']['edit_membership']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['edit_membership']['destination'] = TRUE;
   /* Sort criterion: User: Name */
   $handler->display->display_options['sorts']['name']['id'] = 'name';
   $handler->display->display_options['sorts']['name']['table'] = 'users';
