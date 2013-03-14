@@ -48,7 +48,10 @@ class OgMigrateMembership extends OgEntityMigration {
     }
   }
 
-  public function prepare($entity, $row) {
+  /**
+   * Reject the source row if the group or group content are missing.
+   */
+  public function prepareRow($row) {
     $entity_type = $row->entity_type;
     $etid = $row->etid;
     $group_type = $row->group_type;
@@ -57,12 +60,23 @@ class OgMigrateMembership extends OgEntityMigration {
     if (!$group_content = entity_load_single($entity_type, $etid)) {
       // The OG membership was somehow not deleted when the entity
       // was deleted.
-      return;
+      return FALSE;
     }
 
     if (!$group = entity_load_single($group_type, $gid)) {
-      return;
+      return FALSE;
     }
+    return parent::prepareRow($row);
+  }
+
+  public function prepare($entity, $row) {
+    $entity_type = $row->entity_type;
+    $etid = $row->etid;
+    $group_type = $row->group_type;
+    $gid = $row->gid;
+
+    $group_content = entity_load_single($entity_type, $etid);
+    $group = entity_load_single($group_type, $gid);
 
     list(,, $group_bundle) = entity_extract_ids($group_type, $group);
     if (!$field_name = og_get_best_group_audience_field($entity_type, $group_content, $group_type, $group_bundle)) {
@@ -86,8 +100,7 @@ class OgMigrateMembership extends OgEntityMigration {
   /**
    * Override Migration::postImport().
    *
-   * Remove OG-memberships that should hae been deleted.
-   *
+   * Remove OG-memberships that should have been deleted.
    */
   protected function postImport() {
     if (!$this->isComplete()) {
