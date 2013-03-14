@@ -270,7 +270,9 @@ function og_ui_add_users_submit($form, &$form_state) {
       og_role_grant($group_type, $gid, $og_membership->etid, $rid);
     }
   }
-  drupal_set_message(t('%user has been added to group.', array('%user' => format_username($account))));
+
+  $group = entity_load_single($group_type, $gid);
+  drupal_set_message(t('%user has been added to the group %group-title.', array('%user' => format_username($account), '%group-title' => entity_label($group_type, $group))));
 }
 
 /**
