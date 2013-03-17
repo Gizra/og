@@ -105,6 +105,10 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
 
     $field_mode = $this->instance['field_mode'];
     $user_groups = og_get_groups_by_user(NULL, $group_type);
+    $user_groups = $user_groups ? $user_groups : array();
+    $user_groups = array_merge($user_groups, $this->getGidsForCreate());
+
+
     // Show the user only the groups they belong to.
     if ($field_mode == 'default') {
       if ($user_groups && !empty($this->instance) && $this->instance['entity_type'] == 'node') {
@@ -164,5 +168,33 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
     $handler = EntityReference_SelectionHandler_Generic::getInstance($this->field, $this->instance);
     // FIXME: Allow altering, after fixing http://drupal.org/node/1413108
     // $handler->entityFieldQueryAlter($query);
+  }
+
+  /**
+   * Get group IDs from URL or OG-context, with access to create group-content.
+   *
+   * @return
+   *   Array with group IDs a user (member or non-member) is allowed to
+   * create, or empty array.
+   */
+  private function getGidsForCreate() {
+    if ($this->instance['entity_type'] != 'node') {
+      return array();
+    }
+
+    if (!module_exists('entityreference_prepopulate') || empty($this->instance['settings']['behaviors']['prepopulate'])) {
+      return array();
+    }
+    // Don't try to validate the IDs.
+    if (!$ids = entityreference_prepopulate_get_values($this->field, $this->instance, TRUE, FALSE)) {
+      return array();
+    }
+    $node_type = $this->instance['bundle'];
+    foreach ($ids as $delta => $id) {
+      if (!is_numeric($id) || !$id || !og_user_access('node', $id, "create $node_type content")) {
+        unset($ids[$delta]);
+      }
+    }
+    return $ids;
   }
 }

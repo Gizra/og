@@ -3197,10 +3197,7 @@ function og_list_permissions($type) {
     $perms += array(
       "create $type content" => array(
         'title' => t('Create %type_name content', array('%type_name' => $info->name)),
-        // We allow the create permission only on members, as otherwise we would
-        // have to iterate over every single group to decide if the user has
-        // permissions for it.
-        'roles' => array(OG_AUTHENTICATED_ROLE),
+
       ),
       "update own $type content" => array(
         'title' => t('Edit own %type_name content', array('%type_name' => $info->name)),
@@ -3215,6 +3212,13 @@ function og_list_permissions($type) {
         'title' => t('Delete any %type_name content', array('%type_name' => $info->name)),
       ),
     );
+
+    if (!module_exists('entityreference_prepopulate')) {
+      // We allow the create permission only on members, as otherwise we would
+      // have to iterate over every single group to decide if the user has
+      // permissions for it.
+      $perms["create $type content"]['roles'] = array(OG_AUTHENTICATED_ROLE);
+    }
 
     // Add default permissions.
     foreach ($perms as $key => $value) {
