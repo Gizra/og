@@ -2250,7 +2250,7 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
  */
 function og_is_group_audience_field($field_name) {
   $field = field_info_field($field_name);
-  return $field['type'] == 'entityreference' && $field['settings']['handler'] == 'og';
+  return $field['type'] == 'entityreference' && ($field['settings']['handler'] == 'og' || strpos($field['settings']['handler'], 'og_') === 0);
 }
 
 /**

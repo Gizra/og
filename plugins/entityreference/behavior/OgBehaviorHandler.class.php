@@ -9,7 +9,7 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
    * Implements EntityReference_BehaviorHandler_Abstract::access().
    */
   public function access($field, $instance) {
-    return $field['settings']['handler'] == 'og';
+    return $field['settings']['handler'] == 'og' || strpos($field['settings']['handler'], 'og_') === 0;
   }
 
   /**

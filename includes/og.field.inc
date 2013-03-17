@@ -31,7 +31,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     return;
   }
 
-  if ($field['settings']['handler'] != 'og') {
+  if ($field['settings']['handler'] != 'og' && strpos($field['settings']['handler'], 'og_') !== 0) {
     $params = array('%label' => $instance['label']);
     form_error($form, t('Field %label is a group-audience but its Entity selection mode is not defined as "Organic groups" in the field settings page.', $params));
     return;

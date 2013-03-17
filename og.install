@@ -73,7 +73,7 @@ function og_uninstall() {
         }
         else {
           $field = field_info_field($instance['field_name']);
-          if ($field['type'] == 'entityreference' && $field['settings']['handler'] == 'og') {
+          if ($field['type'] == 'entityreference' && ($field['settings']['handler'] == 'og' || strpos($field['settings']['handler'], 'og_') === 0)) {
             // Last instance will take care also of deleting the field itself.
             field_delete_instance($instance);
           }
