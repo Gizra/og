@@ -458,6 +458,15 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     $settings['uid'] = $user2->uid;
     $node = $this->drupalCreateNode($settings);
 
+    // Exception on OG membership for anonymous user.
+    try {
+      og_membership_create('entity_test', $entity1->pid, 'user', 0, OG_AUDIENCE_FIELD)->save();
+      $this->fail('OG membership can be created for anonymous user.');
+    }
+    catch (OgException $e) {
+      $this->pass('OG membership can not be created for anonymous user.');
+    }
+
     $this->assertFalse(og_is_member('entity_test', $entity1->pid, 'node', $node), t('Node is not assigned to group1.'));
     $values = array('entity_type' => 'node', 'entity' => $node);
     og_group('entity_test', $entity1->pid, $values);
