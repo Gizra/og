@@ -48,6 +48,15 @@ class OgExampleSelectionHandler extends OgSelectionHandler {
       $query->propertyCondition('nid', '5', '>');
     }
 
+    // FIXME: http://drupal.org/node/1325628
+    unset($query->tags['node_access']);
+
+    // FIXME: drupal.org/node/1413108
+    unset($query->tags['entityreference']);
+
+    $query->addTag('entity_field_access');
+    $query->addTag('og');
+
     return $query;
   }
 }
