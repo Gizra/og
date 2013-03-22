@@ -80,18 +80,26 @@ class OgMigrateMembership extends OgEntityMigration {
 
     list(,, $group_bundle) = entity_extract_ids($group_type, $group);
     if (!$field_name = og_get_best_group_audience_field($entity_type, $group_content, $group_type, $group_bundle)) {
-      // Create a new field. Pick an unused name.
-      $field_name = substr("og_$group_type", 0, 32);
+      // Create a new field. Pick an unused name, if the settings don't match.
+      // To maintain some backwards compatibility, if the group type is a node,
+      // we try to set its name to OG_AUDIENCE FIELD.
+      $field_name = $group_type == 'node' ? OG_AUDIENCE_FIELD : substr("og_$group_type", 0, 32);
       $i = 1;
-      while (field_info_field($field_name)) {
+
+      $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+      $og_field['field']['settings']['target_type'] = $group_type;
+      list(,, $bundle) = entity_extract_ids($entity_type, $group_content);
+
+      while ($field = field_info_field($field_name)) {
+        if ($field['settings']['target_type'] == $group_type && empty($field['settings']['handler_settings']['target_bundles']) || in_array($bundle, $field['settings']['handler_settings']['target_bundles'])) {
+          // An existing field.
+          $field_name = $field['field_name'];
+          break;
+        }
         $field_name = substr("og_$group_type", 0, 32 - strlen($i)) . $i;
         ++$i;
       }
 
-      $og_field = og_fields_info(OG_AUDIENCE_FIELD);
-      $og_field['field']['settings']['target_type'] = $group_type;
-
-      list(,, $bundle) = entity_extract_ids($entity_type, $group_content);
       og_create_field($field_name, $entity_type, $bundle, $og_field);
     }
     $entity->field_name = $field_name;
