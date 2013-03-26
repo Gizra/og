@@ -2515,6 +2515,9 @@ function og_role_permissions($roles = array()) {
  *   The group might be set to "Default access" but infact there are inactive
  *   group roles. Thus, we are forcing the function to return the overriden
  *   roles. see og_delete_user_roles_by_group().
+ * @param $include_all
+ *   Optional; If TRUE then the anonymous and authenticated default roles will
+ *   be included.
  *
  * @return
  *   An associative array with the role id as the key and the role name as
