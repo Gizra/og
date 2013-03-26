@@ -78,15 +78,13 @@ class MigrateDestinationOGMembership extends MigrateDestination {
     else {
       $state = OG_STATE_ACTIVE;
     }
-
-    $values = array(
-      'entity_type' => $entity->entity_type,
-      'entity' => $entity->etid,
-      'state' => $state,
-      'created' => isset($entity->created) ? $entity->created : REQUEST_TIME,
-    );
-
     $this->prepare($entity, $row);
+    // Allow passing OG-membership fields via og_group().
+    $values = (array) $entity;
+    $values['entity'] = $entity->etid;
+    $values['state'] = $state;
+    $values['created'] = isset($entity->created) ? $entity->created : REQUEST_TIME;
+
     $og_membership = og_group($entity->group_type, $entity->gid, $values);
 
     if ($entity->entity_type == 'user') {
