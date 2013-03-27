@@ -1193,12 +1193,16 @@ function og_membership_invalidate_cache() {
  *
  * If a group membership already exists, an exception will be thrown.
  *
+ * @param $group_type
+ *   The entity type of the group.
  * @param $gid
- *   The group ID
+ *   The group ID.
  * @param $entity_type
  *   The entity type of the group content.
  * @param $etid
  *   The entity ID of the group content.
+ * @param $field_name
+ *   The group audience field name.
  * @param $values
  *   Optional; Array of fields values to be attached to the OG membership, that
  *   will be processed using entity-metadata wrapper.
@@ -3470,4 +3474,3 @@ function og_flush_caches() {
   );
   return $bins;
 }
-
