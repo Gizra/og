@@ -76,9 +76,8 @@ function og_ui_admin_settings($form_state) {
   $form['og_use_queue'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use queue'),
-    '#description' => t('Use <a href="@url">Advanced queue</a> module to process operations such as deleting memberships when groups are deleted.', array('@url' => 'http://drupal.org/project/advancedqueue')),
+    '#description' => t("Use the core's queue process to operations such as deleting memberships when groups are deleted."),
     '#default_value' => variable_get('og_use_queue', FALSE),
-    '#disabled' => !module_exists('advancedqueue'),
   );
 
   $form['og_orphans_delete'] = array(
@@ -86,7 +85,6 @@ function og_ui_admin_settings($form_state) {
     '#title' => t('Delete orphans'),
     '#description' => t('Delete "Orphan" group-content (not including useres), when the group is deleted.'),
     '#default_value' => variable_get('og_orphans_delete', FALSE),
-    '#disabled' => !module_exists('advancedqueue'),
     '#states' => array(
       'visible' => array(
         ':input[name="og_use_queue"]' => array('checked' => TRUE),

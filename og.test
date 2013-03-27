@@ -1641,12 +1641,11 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
       'name' => 'OG orphan delete',
       'description' => 'Verifying for deleting orphan group content.',
       'group' => 'Organic groups',
-      'dependencies' => array('advancedqueue'),
     );
   }
 
   function setUp() {
-    parent::setUp('og_test', 'advancedqueue');
+    parent::setUp('og_test');
 
     // Create a group content type.
     $group = $this->drupalCreateContentType();
@@ -1691,7 +1690,7 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
     // Execute manually the queue worker.
     $queue = DrupalQueue::get('og_membership_orphans');
     $item = $queue->claimItem();
-    og_membership_orphans_worker($item);
+    og_membership_orphans_worker($item->data);
 
     // Load the nodes we used during the test.
     $first_node = node_load($first_node->nid);
@@ -1721,7 +1720,7 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
     // Execute manually the queue worker.
     $queue = DrupalQueue::get('og_membership_orphans');
     $item = $queue->claimItem();
-    og_membership_orphans_worker($item);
+    og_membership_orphans_worker($item->data);
 
     // Load the node into a wrapper and verify we moved him to another group.
     $wrapper = entity_metadata_wrapper('node', $first_node->nid);
