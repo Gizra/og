@@ -112,6 +112,10 @@ DEVELOPERS & SITE BUILDERS
   http://drupal.org/project/entityreference_prepopulate
   and configuring the correct settings in the field UI. Read more about
   it in Entity reference prepopulate's README file.
+- When deleting groups, it is possible to delete orphan group-content, or move
+  it under another group. In order to do it in a scalable way, enable the
+  "Use queue" option, and process it using for example:
+  drush queue-run og_membership_orphans
 
 FAQ
 ----
