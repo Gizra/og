@@ -112,6 +112,11 @@ DEVELOPERS & SITE BUILDERS
   http://drupal.org/project/entityreference_prepopulate
   and configuring the correct settings in the field UI. Read more about
   it in Entity reference prepopulate's README file.
+  Further more, when Entity reference prepopulate module is enabled the node
+  "create" permissions will be enabled even for non-members. In order to allow
+  a non member to create a node to a group they don't belong to, you should
+  craft the URL in the same way. OG will recognize this situation and add the
+  group as a valid option under the "My groups" widget.
 - When deleting groups, it is possible to delete orphan group-content, or move
   it under another group. In order to do it in a scalable way, enable the
   "Use queue" option, and process it using for example:
