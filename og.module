@@ -3305,6 +3305,9 @@ function og_node_create_links($group_type, $gid, $field_name, $destination = NUL
  * @param $account
  *   Optional; The user object to fetch group memberships for. Defaults to the
  *   acting user.
+ * @param $group_type
+ *   Optional; The entity type of the groups to fetch. By default all group
+ *   types will be fetched.
  *
  * @return
  *   An array with the group IDs or an empty array.
