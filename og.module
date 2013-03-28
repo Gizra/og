@@ -508,7 +508,7 @@ function og_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
 
   if ($op == 'create' && og_is_group_content_type('node', $type) && variable_get('og_node_access_strict', TRUE)) {
-    if (user_access('administer group')) {
+    if (user_access('administer group', $account)) {
       return NODE_ACCESS_ALLOW;
     }
     // We can't check if user has create permissions using og_user_access(), as
