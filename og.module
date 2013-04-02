@@ -2437,17 +2437,21 @@ function og_is_member($group_type, $gid, $entity_type = 'user', $entity = NULL, 
 /**
  * Check if group should use default roles and permissions.
  *
+ * @param $group_type
+ *   The entity type of the group.
  * @param $gid
- *   The group ID.
+ *   The group ID or the group entity.
+ *
  * @return
  *   TRUE if group should use default roles and permissions.
  */
-function og_is_group_default_access($entity_type, $entity) {
+function og_is_group_default_access($group_type, $gid) {
   if (!field_info_field(OG_DEFAULT_ACCESS_FIELD)) {
     // Don't bother loading entity if field does not exist.
     return TRUE;
   }
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+
+  $wrapper = entity_metadata_wrapper($group_type, $gid);
   if (empty($wrapper->{OG_DEFAULT_ACCESS_FIELD})) {
     return TRUE;
   }
