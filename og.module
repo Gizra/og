@@ -3235,8 +3235,12 @@ function og_list_permissions($type) {
 /**
  * Return a form element with crafted links to create nodes for a group.
  *
+ * @param $group_type
+ *   The entity type of the group.
  * @param $gid
  *   The group ID.
+ * @param $field_name
+ *   The group audience field name.
  * @param $destination
  *   Optional; The destiantion after a node is created. Defaults to the
  *   destination passed in the URL if exists, otherwise back to the current
