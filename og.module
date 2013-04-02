@@ -2322,8 +2322,8 @@ function og_is_group_type($entity_type, $bundle_name) {
  *
  * This is a wrapper function around og_get_group_type().
  *
- * @param $node_type
- *   The node type to be checked.
+ * @param $entity_type
+ *   The entity type to be checked.
  */
 function og_is_group_content_type($entity_type, $bundle_name) {
   return og_get_group_type($entity_type, $bundle_name, 'group content');
