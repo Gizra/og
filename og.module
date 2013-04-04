@@ -2675,6 +2675,7 @@ function og_role_create($name, $group_type = '', $gid = 0, $group_bundle = '') {
  *
  * @param $role
  *   An integer with the role ID.
+ *
  * @return
  *   A fully-loaded role object if a role with the given name or ID
  *   exists, FALSE otherwise.
@@ -2693,6 +2694,7 @@ function og_role_load($rid) {
  * @param $role
  *   A role object to modify or add. If $role->rid is not specified, a new
  *   role will be created.
+ *
  * @return
  *   Status constant indicating if role was created or updated.
  *   Failure to write the user role record will return FALSE. Otherwise.
@@ -2796,6 +2798,7 @@ function og_permissions_delete_by_module($modules = array()) {
  *   The bundle type.
  * @param $gid
  *   The group ID.
+ *
  * @return
  *   The newly created roles keyed by role ID and role name as the value. Or
  *   FALSE if no roles were created.
@@ -3191,6 +3194,7 @@ function og_get_fieldable_entity_list() {
  *
  * @param $type
  *   The machine-readable name of the node type.
+ *
  * @return array
  *   An array of permission names and descriptions.
  */
