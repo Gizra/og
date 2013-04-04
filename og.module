@@ -2846,6 +2846,10 @@ function og_roles_override($group_type, $bundle, $gid) {
 /**
  * Grant a group role to a user.
  *
+ * @param $group_type
+ *   The entity type of the group.
+ * @param $gid
+ *   The group ID.
  * @param $uid
  *   The user ID.
  * @param $rid
