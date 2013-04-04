@@ -483,13 +483,21 @@ function og_context_handler_user_edit() {
  */
 function og_context_handler_comment() {
   $item = menu_get_item();
-  // Get the last argument.
-  $cid = end($item['original_map']);
-  if (!$comment = comment_load($cid)) {
+  // Check if we are in comment/reply/%nid. No need to load the comment.
+  if (isset($item['original_map'][2]) && is_numeric($item['original_map'][2])) {
+    $node = node_load($item['original_map'][2]);
+  }
+  // Use the comment ID.
+  elseif (isset($item['original_map'][1]) && is_numeric($item['original_map'][1])) {
+    $cid = $item['original_map'][1];
+    if (!$comment = comment_load($cid)) {
+      return;
+    }
+    $node = node_load($comment->nid);
+  }
+  else {
     return;
   }
-
-  $node = node_load($comment->nid);
   return og_context_handler_node($node);
 }
 
