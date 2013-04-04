@@ -318,9 +318,14 @@ function og_context_provider_weight($provider) {
 /**
  * Determine the best matching context of a viewed page.
  *
+ * @param $group_type
+ *   The entity type of the group. For example, "node" or "user".
  * @param $item
  *   Optional; A menu item that context should be extracted from. If empty
  *   defaults to the current menu item by using menu_get_item().
+ *
+ * @return
+ *   The group ID for the current context.
  */
 function og_context_determine_context($group_type, $item = NULL) {
   // Enable url and node context handlers by default.
