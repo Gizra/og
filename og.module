@@ -2883,6 +2883,10 @@ function og_role_grant($group_type, $gid, $uid, $rid) {
 /**
  * Revoke a group role from a user.
  *
+ * @param $group_type
+ *   The entity type of the group.
+ * @param $gid
+ *   The group ID.
  * @param $uid
  *   The user ID.
  * @param $rid
