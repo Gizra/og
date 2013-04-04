@@ -2722,7 +2722,7 @@ function og_role_save($role) {
 /**
  * Delete a user role from database.
  *
- * @param $role
+ * @param $rid
  *   An integer with the role ID.
  */
 function og_role_delete($rid) {
