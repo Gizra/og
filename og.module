@@ -2778,13 +2778,13 @@ function og_get_user_roles_name($rids = array()) {
  *
  * @see og_modules_uninstalled()
  *
- * @param $module
- *   Array with the modules name.
+ * @param $modules
+ *   Array with the module names.
  */
 function og_permissions_delete_by_module($modules = array()) {
-   db_delete('og_role_permission')
-     ->condition('module', $modules, 'IN')
-     ->execute();
+  db_delete('og_role_permission')
+    ->condition('module', $modules, 'IN')
+    ->execute();
 }
 
 /**
