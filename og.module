@@ -2657,9 +2657,16 @@ function og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE) {
  * Create a stub OG role object.
  *
  * @param $name
- * @param $gid
+ *   A name of the role.
  * @param $group_type
+ *   (optional) The entity type of the group.
+ * @param $gid
+ *   (optional) The group ID.
  * @param $group_bundle
+ *   (optional) The bundle of the group.
+ *
+ * @return
+ *   A stub OG role object.
  */
 function og_role_create($name, $group_type = '', $gid = 0, $group_bundle = '') {
   $role = new stdClass;
