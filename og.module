@@ -2564,6 +2564,8 @@ function og_roles($group_type, $bundle, $gid = 0, $force_group = FALSE, $include
  * Get array of default roles, keyed by their declaring module.
  *
  * @param $include
+ *   (optional) If TRUE also anonymous and authenticated roles will be returned.
+ *   Defaults to TRUE.
  *
  * @return
  *   Array of default roles, grouped by module name.
