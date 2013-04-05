@@ -2680,12 +2680,12 @@ function og_role_create($name, $group_type = '', $gid = 0, $group_bundle = '') {
 /**
  * Fetch a user role from database.
  *
- * @param $role
+ * @param $rid
  *   An integer with the role ID.
  *
  * @return
- *   A fully-loaded role object if a role with the given name or ID
- *   exists, FALSE otherwise.
+ *   A fully-loaded role object if a role with the given ID exists,
+ *   FALSE otherwise.
  */
 function og_role_load($rid) {
   return db_select('og_role', 'r')
