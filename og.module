@@ -2591,13 +2591,16 @@ function og_get_default_roles($include = TRUE) {
 /**
  * Get all roles of a user in a certain group.
  *
+ * @param $group_type
+ *   The entity type of the group.
  * @param $gid
  *   The group ID.
  * @param $uid
- *   The user ID.
+ *   (optional) Integer specifying the user ID. By default an ID of current
+ *   logged in user will be used.
  * @param $include
- *   Optional; If TRUE also anonymous or authenticated role ID will be returned.
- *   Defaults to TRUE.
+ *   (optional) If TRUE also anonymous or authenticated role ID will be
+ *   returned. Defaults to TRUE.
  *
  * @return
  *   Array with the role IDs of the user as the key, and the role name as
