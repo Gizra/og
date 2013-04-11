@@ -2330,7 +2330,7 @@ function og_is_group_content_type($entity_type, $bundle_name) {
 }
 
 /**
- * Return all the enteties that are a group.
+ * Return all the entities that are a group.
  *
  * @return
  *   Array keyed with the entity type machine name and the entity human readable
@@ -2373,7 +2373,7 @@ function og_get_all_group_bundle() {
  *
  * @return
  *   Array keyed with the entity type machine name and the entity human readable
- *   name as the value, or an empty array if no enteties are defined as group
+ *   name as the value, or an empty array if no entities are defined as group
  *   content.
  */
 function og_get_all_group_content_entity() {
@@ -3068,7 +3068,7 @@ function og_get_default_permissions() {
 }
 
 /**
- * Get all the modules fields that can be assigned to fieldable enteties.
+ * Get all the modules fields that can be assigned to fieldable entities.
  *
  * @param $field_name
  *   The field name that was registered for the definition.
