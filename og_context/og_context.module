@@ -194,9 +194,13 @@ function og_context($group_type = 'node', $group = NULL) {
   global $user;
   $context = &drupal_static(__FUNCTION__, FALSE);
 
-  if (empty($group) && !empty($context) && $context['group_type'] == $group_type) {
+  if (empty($group) && $context !== FALSE && (empty($context)) || (!empty($context['group_type']) && $context['group_type'] == $group_type)) {
     return $context;
   }
+
+  // Set the context to array, so we can now this function has been already
+  // executed.
+  $context = array();
 
   if (!empty($group)) {
     // Set the group.
