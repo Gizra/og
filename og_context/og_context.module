@@ -552,7 +552,7 @@ function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $p
  *   TRUE if user is allowed access to the page.
  */
 function _og_context_views_page_access($group_type, $perm, $group_id_arg = FALSE) {
-  if ($group_id_arg !== FALSE) {
+  if ($group_id_arg !== '') {
     $gid = arg($group_id_arg);
     if (is_numeric($gid)) {
       return og_user_access($group_type, $gid, $perm);
