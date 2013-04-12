@@ -52,7 +52,7 @@ class og_context_plugin_access_og_perm extends views_plugin_access {
     );
 
     $current_display = $this->view->current_display;
-    if ($this->view->display[$current_display]->display_plugin == 'page') {
+    if ($this->view->display[$current_display]->handler->has_path()) {
       // Show the group ID argument position only for "Page" displays.
       $form['group_id_arg'] = array(
         '#type' => 'select',
