@@ -123,6 +123,34 @@ function hook_og_role_revoke($entity_type, $gid, $uid, $rid) {
 }
 
 /**
+ * Give a notification about OG role permissions change.
+ *
+ * @param $role
+ *   The role object of the changed role.
+ * @param $permissions
+ *   A list of permission names that were granted.
+ */
+function hook_og_role_grant_permissions($role, $permissions) {
+  if (!$role->gid) {
+    drupal_set_message(t('Global group permissions granted for @role users: @permissions', array('@role' => $role->name, '@permissions' => implode(', ', $permissions))));
+  }
+}
+
+/**
+ * Give a notification about OG role permissions change.
+ *
+ * @param $role
+ *   The role object of the changed role.
+ * @param $permissions
+ *   A list of permission names that were revoked.
+ */
+function hook_og_role_revoke_permissions($role, $permissions) {
+  if (!$role->gid) {
+    drupal_set_message(t('Global group permissions revoked for @role users: @permissions', array('@role' => $role->name, '@permissions' => implode(', ', $permissions))));
+  }
+}
+
+/**
  * Provide information about fields that are related to Organic groups.
  *
  * Using this info, Organic groups is aware of the fields, and allows adding
