@@ -2816,7 +2816,7 @@ function og_permissions_delete_by_module($modules = array()) {
  *   FALSE if no roles were created.
  */
 function og_roles_override($group_type, $bundle, $gid) {
-  // Check if roles aren't already overriden. We can't use
+  // Check if roles aren't already overridden. We can't use
   // og_is_group_default_access() as the field is already set, so we
   // check to see if there are new roles in the database by setting
   // "force group" parameter to TRUE.
@@ -2953,6 +2953,12 @@ function og_role_change_permissions($rid, array $permissions = array()) {
   if (!empty($revoke)) {
     og_role_revoke_permissions($rid, array_keys($revoke));
   }
+
+  if (!empty($grant) || !empty($revoke)) {
+    // Allow modules to be notified on permission changes.
+    $role = og_role_load($rid);
+    module_invoke_all('og_role_change_permissions', $role, $grant, $revoke);
+  }
 }
 
 /**
@@ -2986,10 +2992,6 @@ function og_role_grant_permissions($rid, array $permissions = array()) {
     }
   }
   og_invalidate_cache();
-
-  // Allow modules to be notified on permission changes.
-  $role = og_role_load($rid);
-  module_invoke_all('og_role_grant_permissions', $role, $permissions);
 }
 
 /**
@@ -3011,10 +3013,6 @@ function og_role_revoke_permissions($rid, array $permissions = array()) {
     ->execute();
 
   og_invalidate_cache();
-
-  // Allow modules to be notified on permission changes.
-  $role = og_role_load($rid);
-  module_invoke_all('og_role_revoke_permissions', $role, $permissions);
 }
 
 /**
