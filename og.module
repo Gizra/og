@@ -709,7 +709,7 @@ function og_field_delete_instance($instance) {
  * Implements hook_form_alter().
  */
 function og_form_alter(&$form, $form_state, $form_id) {
-  if (empty($form['#entity_type']) && empty($form['#bundle'])) {
+  if (empty($form['#entity_type']) || empty($form['#bundle'])) {
     return;
   }
   $entity_type = $form['#entity_type'];
