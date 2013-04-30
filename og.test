@@ -583,6 +583,25 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     $node = node_load($nid, NULL, TRUE);
     node_delete($nid);
     $this->assertFalse(og_get_entity_groups('node', $nid), t('OG memberships deleted on entity deletion.'));
+
+    // Test creating a non-saved OG membership.
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings['uid'] = $user2->uid;
+    $node = $this->drupalCreateNode($settings);
+    $values = array('entity_type' => 'node', 'entity' => $node);
+
+    $og_membership = og_group('entity_test', $entity1->pid, $values);
+    $this->assertTrue($og_membership->id, 'New OG membership was created and saved.');
+
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings['uid'] = $user2->uid;
+    $node = $this->drupalCreateNode($settings);
+    $values = array('entity_type' => 'node', 'entity' => $node);
+
+    $og_membership = og_group('entity_test', $entity1->pid, $values, FALSE);
+    $this->assertTrue(empty($og_membership->id), 'New OG membership was created but not saved.');
   }
 
   /**

@@ -1878,11 +1878,14 @@ function og_check_field_cardinality($entity_type, $entity, $field_name) {
  *   - "field_name": The name of the field, the membership should be registered
  *     in. If no value given, a first field with the correct membership type
  *     will be used. If no field found, an execpetion will be thrown.
+ * @param $save_created
+ *    Optional; If the OG membership is new, it determines whether the
+ *    membership will be saved. Defaults to TRUE.
  *
  * @return
  *   The OG membership entity.
  */
-function og_group($group_type, $gid, $values = array()) {
+function og_group($group_type, $gid, $values = array(), $save_created = TRUE) {
   global $user;
   // Set default values.
   $values += array(
@@ -1965,7 +1968,12 @@ function og_group($group_type, $gid, $values = array()) {
     $og_membership = og_membership_create($group_type, $gid, $entity_type, $id, $field_name, $values);
   }
 
-  $og_membership->save();
+  if (empty($og_membership->is_new) || $save_created) {
+    // Save the membership for update, or if the OG membership is new when
+    // "save-created" is TRUE.
+    $og_membership->save();
+  }
+
   return $og_membership;
 }
 
