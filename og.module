@@ -1567,7 +1567,7 @@ function og_membership_orphans_worker($data) {
     ->propertyCondition('group_type', $group_type, '=')
     ->propertyCondition('gid', $gid, '=')
     ->propertyOrderBy('id')
-    ->range(0, 10)
+    ->range(0, 50)
     ->execute();
 
   if (empty($result['og_membership'])) {
@@ -1621,8 +1621,8 @@ function _og_orphans_delete($ids) {
   }
 
   if ($orphans) {
-    foreach ($orphans as $entity_type => $ids) {
-      entity_delete_multiple($entity_type, $ids);
+    foreach ($orphans as $entity_type => $orphan_ids) {
+      entity_delete_multiple($entity_type, $orphan_ids);
     }
   }
 
