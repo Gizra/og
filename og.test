@@ -1755,6 +1755,7 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
 
   public $group;
   public $user;
+  public $adminUser;
 
   public static function getInfo() {
     return array(
@@ -1770,6 +1771,9 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
 
     // Creating a user.
     $this->user = $this->drupalCreateUser();
+
+    // Creating admin.
+    $this->adminUser = $this->drupalCreateUser(array('bypass node access', 'administer group'));
 
     // Create a group content type.
     $this->drupalCreateContentType(array( 'name' => 'Group', 'type' => 'group'));
@@ -1824,5 +1828,14 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
       ->execute();
 
     $this->assertTrue(!empty($result['node']), 'The node was added to the group.');
+
+    $nid = reset(array_keys($result['node']));
+
+    $this->drupalLogin($this->adminUser);
+
+    // Verify the audience field will remain after another user editing the
+    // group.
+    $this->drupalpost('node/' . $nid . '/edit', array(), t('Save'));
+    $this->assertText($this->group->title, 'The node is still referenced to the group.');
   }
 }
