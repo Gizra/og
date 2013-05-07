@@ -2797,7 +2797,13 @@ function og_delete_user_roles_by_group($group_type, $group) {
  *  Array keyed by the role ID, and the role name as the value.
  */
 function og_get_user_roles_name($rids = array()) {
-  return db_query("SELECT rid, name FROM {og_role} WHERE rid IN (:rids)", array(':rids' => $rids))->fetchAllKeyed();
+  if ($rids) {
+    $query = db_query("SELECT rid, name FROM {og_role} WHERE rid IN (:rids)", array(':rids' => $rids));
+  }
+  else {
+    $query = db_query("SELECT rid, name FROM {og_role}");
+  }
+  return $query->fetchAllKeyed();
 }
 
 
