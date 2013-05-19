@@ -2080,8 +2080,8 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
     $perms = array();
     foreach ($role_permissions as $one_role) {
       $perms += $one_role;
-      $perm[$identifier][$account->uid] = $perms;
     }
+    $perm[$identifier][$account->uid] = $perms;
   }
 
   if (!$skip_alter && empty($perm_alter[$identifier][$account->uid][$string])) {
