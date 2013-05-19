@@ -2367,6 +2367,11 @@ function og_get_all_group_entity() {
 
 /**
  * Return all bundles that are a group type.
+ *
+ * @return
+ *  An associative array whose keys are entity types, and whose values are
+ *  arrays of bundles for that entity type. The array of bundles is keyed by
+ *  bundle machine name, and the values are bundle labels.
  */
 function og_get_all_group_bundle() {
   $return = array();
