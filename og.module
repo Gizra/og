@@ -1980,10 +1980,14 @@ function og_group($group_type, $gid, $values = array(), $save_created = TRUE) {
 /**
  * Delete an association (e.g. unsubscribe) of an entity to a group.
  *
+ * @param $group_type
+ *   The entity type (e.g. "node").
+ * @param $gid
+ *   The group entity object or ID, to ungroup.
  * @param $entity_type
- *   The entity type (e.g. "node" or "user").
- * @param $entity
- *   The entity object or ID, to ungroup.
+ *   (optional) The entity type (e.g. "node" or "user").
+ * @param $etid
+ *   (optional) The entity object or ID, to ungroup.
  *
  * @return
  *   The entity with the fields updated.
