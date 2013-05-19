@@ -245,6 +245,14 @@ function og_complex_widget_element_validate($element, &$form_state, $form) {
   // last element that contains the delta 0, as $ids is already keyed with
   // deltas.
   drupal_array_set_nested_value($form_state['values'], array_slice($element['#parents'], 0, -1), $ids, TRUE);
+
+  // If the element is required, ensure that at least one group has been chosen.
+  if ($element['#required']) {
+    $subform = drupal_array_get_nested_value($form_state['values'], $element['#array_parents']);
+    if (empty($subform)) {
+      form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
+    }
+  }
 }
 
 /**
