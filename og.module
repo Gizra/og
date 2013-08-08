@@ -529,7 +529,7 @@ function og_node_access($node, $op, $account) {
       // Set the "field mode" to default, before passing it to the
       // selection handler.
       $instance['field_mode'] = 'default';
-      if (entityreference_get_selection_handler($field, $instance)->getReferencableEntities(NULL, 'CONTAINS', 1)) {
+      if (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
         return NODE_ACCESS_ALLOW;
       }
 
