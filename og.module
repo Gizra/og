@@ -3332,7 +3332,7 @@ function og_list_permissions($type) {
  * @param $destination
  *   (optional) The destiantion after a node is created. Defaults to the
  *   destination passed in the URL if exists, otherwise back to the current
- *   page.
+ *   page. FALSE to not append any destination to node create links.
  * @param $types
  *   (optional) An array of type names. Restrict the created links to the given
  *   types.
@@ -3371,7 +3371,7 @@ function og_node_create_links($group_type, $gid, $field_name, $destination = NUL
   if ($destination) {
     $options['query']['destination'] = $destination;
   }
-  else {
+  elseif ($destination !== FALSE) {
     $options['query'] += drupal_get_destination();
   }
 
