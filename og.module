@@ -2931,7 +2931,7 @@ function og_role_grant($group_type, $gid, $uid, $rid) {
     return;
   }
 
-  // Get the existiong user roles.
+  // Get the existing user roles.
   $user_roles = og_get_user_roles($group_type, $gid, $uid);
   if (empty($user_roles[$rid])) {
     $role = new stdClass();
@@ -2943,6 +2943,10 @@ function og_role_grant($group_type, $gid, $uid, $rid) {
     drupal_write_record('og_users_roles', $role);
     og_invalidate_cache();
     module_invoke_all('og_role_grant', $group_type, $gid, $uid, $rid);
+
+    if (module_exists('rules'))  {
+      rules_invoke_event('og_role_grant', og_get_membership($group_type, $gid, 'user', $uid), entity_metadata_wrapper('user', $uid), $rid);
+    }
   }
 }
 
@@ -2968,6 +2972,10 @@ function og_role_revoke($group_type, $gid, $uid, $rid) {
       ->condition('gid', $gid)
       ->execute();
     module_invoke_all('og_role_revoke', $group_type, $gid, $uid, $rid);
+
+    if (module_exists('rules'))  {
+      rules_invoke_event('og_role_revoke', og_get_membership($group_type, $gid, 'user', $uid), entity_metadata_wrapper('user', $uid), $rid);
+    }
   }
 }
 
