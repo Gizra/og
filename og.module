@@ -3550,6 +3550,12 @@ function og_migrate_api() {
         'bundle' => $bundle,
       );
     }
+
+    if (db_table_exists('d6_og_users_roles')) {
+      // OG user roles (OGUR) related migrations.
+      $migrations['OgMigrateOgurRoles'] = array('class_name' => 'OgMigrateOgurRoles');
+      $migrations['OgMigrateOgur'] = array('class_name' => 'OgMigrateOgur');
+    }
   }
   elseif (db_field_exists('og_membership', 'group_type') && db_table_exists('og') && !db_table_exists('d6_og')) {
     $migrations['OgMigrateMembership'] = array('class_name' => 'OgMigrateMembership');
