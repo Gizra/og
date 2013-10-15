@@ -845,10 +845,10 @@ function og_entity_update($entity, $entity_type) {
       }
     }
   }
-  $origianl_entity = $entity->original;
+  $original_entity = $entity->original;
   $property = OG_DEFAULT_ACCESS_FIELD;
 
-  if (!empty($entity->{$property}) && $entity->{$property} != $origianl_entity->{$property}) {
+  if (!empty($entity->{$property}) && $entity->{$property} != $original_entity->{$property}) {
     if (!og_is_group_default_access($entity_type, $entity)) {
       // Override default roles.
       og_roles_override($entity_type, $bundle, $id);
