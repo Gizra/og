@@ -2372,7 +2372,7 @@ function og_is_group_content_type($entity_type, $bundle_name) {
 }
 
 /**
- * Return all the entities that are a group.
+ * Return all entity types that have bundles that are a group type.
  *
  * @return
  *   Array keyed with the entity type machine name and the entity human readable
