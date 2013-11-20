@@ -717,19 +717,68 @@ function og_field_delete_instance($instance) {
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_field_attach_form().
  */
-function og_form_alter(&$form, $form_state, $form_id) {
-  if (empty($form['#entity_type']) || empty($form['#bundle'])) {
-    return;
+function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  list(,, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  if (og_get_group_audience_fields($entity_type, $bundle)) {
+    $form['#validate'][] = 'og_form_group_reference_validate';
   }
-  $entity_type = $form['#entity_type'];
-  $bundle = $form['#bundle'];
 
   if ($entity_type == 'user' || !og_is_group_type($entity_type, $bundle)) {
     return;
   }
   $form['#validate'][] = 'og_form_group_manager_validate';
+}
+
+/**
+ * Validate handler; Make sure group-only content permissions are honored.
+ *
+ * If a user does not have site-wide node permissions, throw an error if they
+ * try to post site-wide instead of within a group.
+ *
+ * Note: This function does not check group -access- just if a group has been
+ * Selected.
+ */
+function og_form_group_reference_validate($form, &$form_state) {
+  global $user;
+  $entity_type = $form['#entity_type'];
+  if (empty($form_state[$entity_type])) {
+    // We are inside field settings page.
+    return;
+  }
+
+  $account = user_load($user->uid);
+  $bundle = $form['#bundle'];
+  $entity = $form['#entity'];
+  list($id) = entity_extract_ids($entity_type, $entity);
+
+  $op = empty($id) ? 'create' : 'update';
+
+  if ($entity_type == 'node') {
+    $node = empty($id) ? $bundle : $entity;
+    // We call node_node_access() directly as we just want to check the
+    // permissions using user_acces().
+    if (node_node_access($node, $op, $account)) {
+      // User has site-wide permissions to create or edit the node.
+      return;
+    }
+  }
+  elseif (entity_access($op, $entity_type, $entity, $account)) {
+    // User has site-wide permissions to create or edit the entity.
+    return;
+  }
+
+  foreach (array_keys(og_get_group_audience_fields($entity_type, $bundle)) as $field_name) {
+    // If there is at least one group selected, return.
+    if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
+      return;
+    }
+  }
+
+  // No group selected, throw an error.
+  form_set_error('og', t('You must select one or more groups for this content.'));
 }
 
 /**
