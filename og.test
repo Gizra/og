@@ -1260,7 +1260,7 @@ class OgMigrate7200TestCase extends UpdatePathTestCase {
 
     // Assert field name was registered in the OG membership.
     $og_membership = entity_load_single('og_membership', 1);
-    $this->assertEqual($og_membership->field_name, 'og_node', 'Field name was registered in the OG membership.');
+    $this->assertTrue($og_membership->field_name, 'Field name was registered in the OG membership.');
   }
 }
 
