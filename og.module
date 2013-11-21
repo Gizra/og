@@ -2511,6 +2511,8 @@ function og_get_all_group_content_bundle() {
 /**
  * Return TRUE if entity belongs to a group.
  *
+ * @param $group_type
+ *   The entity type of the group.
  * @param $gid
  *   The group ID.
  * @param $entity_type
