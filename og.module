@@ -3570,16 +3570,44 @@ function og_features_api() {
  *
  * Prevent OG related fields from being piped in features, when a content
  * type that has them is selected.
+ *
+ * This if compatible with Features 1.x and 2.x
  */
 function og_features_pipe_alter(&$pipe, $data, $export) {
-  if (!variable_get('og_features_ignore_og_fields', FALSE) || empty($pipe['field'])) {
+  if (!variable_get('og_features_ignore_og_fields', FALSE)) {
     return;
   }
-  foreach ($pipe['field'] as $delta => $value) {
-    $args = explode('-', $value);
-    $field_name = $args[2];
+
+  if (empty($pipe['field']) && empty($pipe['field_base']) && empty($pipe['field_instance'])) {
+    // The exported item is not a field.
+    return;
+  }
+
+  if (!empty($pipe['field_instance'])) {
+    $key = 'field_instance';
+    $explode = TRUE;
+  }
+  elseif (!empty($pipe['field_base'])) {
+    $key = 'field_base';
+    $explode = FALSE;
+  }
+  else {
+    $key = 'field';
+    $explode = TRUE;
+  }
+
+  foreach ($pipe[$key] as $delta => $value) {
+    if ($explode) {
+      // Get the field name from the [entity-type]-[bundle]-[field-name].
+      $args = explode('-', $value);
+      $field_name = $args[2];
+    }
+    else {
+      $field_name = $value;
+    }
+
     if (og_fields_info($field_name) || og_is_group_audience_field($field_name)) {
-      unset($pipe['field'][$delta]);
+      unset($pipe[$key][$delta]);
     }
   }
 }
