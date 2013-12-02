@@ -334,7 +334,7 @@ function og_context_provider_weight($provider) {
 function og_context_determine_context($group_type, $item = NULL) {
   // Enable url and node context handlers by default.
   $defaults = array('url' => -5, 'node' => -4);
-  if (!$enabled_providers = array_keys(variable_get("og_context_negotiation_group_context", $defaults))) {
+  if (!$enabled_providers = variable_get('og_context_negotiation_group_context', $defaults)) {
     return;
   }
 
@@ -343,8 +343,8 @@ function og_context_determine_context($group_type, $item = NULL) {
   }
 
   $providers = og_context_negotiation_info();
-  foreach ($enabled_providers as $name) {
-    if (!in_array($name, array_keys($providers))) {
+  foreach ($enabled_providers as $name => $ignore) {
+    if (empty($providers[$name])) {
       continue;
     }
     $provider = $providers[$name];
