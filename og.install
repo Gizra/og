@@ -57,6 +57,7 @@ function og_uninstall() {
     'og_upgrade_7001',
     'og_node_access_strict',
     'og_features_ignore_og_fields',
+    'og_maintain_overridden_roles',
   );
   foreach ($vars as $var) {
     variable_del($var);

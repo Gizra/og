@@ -2858,6 +2858,13 @@ function og_role_delete($rid) {
 /**
  * Delete all roles belonging to a group.
  *
+ * This will also maintain user roles when revertting an ovverriden group.
+ * For example, if in the overridden group users were assigned to the role
+ * "administrator", upon reverting back to default roles and
+ * permissions, OG will search for existing roles with that name, and re-assign
+ * the correct role ID, and the users that had "administrator" will still have
+ * it.
+ *
  * @param $group_type
  *   The group type.
  * @param $gid
@@ -2866,12 +2873,26 @@ function og_role_delete($rid) {
 function og_delete_user_roles_by_group($group_type, $group) {
   // Check if group has overriden roles defined.
   list($gid, $vid,$bundle) = entity_extract_ids($group_type, $group);
+  $global_roles = array_flip(og_roles($group_type, $bundle));
   if ($roles = og_roles($group_type, $bundle, $gid, TRUE)) {
     foreach ($roles as $rid => $name) {
+
+      if (variable_get('og_maintain_overridden_roles', TRUE) && !empty($global_roles[$name])) {
+        // Role name exists in the global roles, update the role ID to the
+        // global one.
+        db_update('og_users_roles')
+          ->fields(array('rid' => $global_roles[$name]))
+          ->condition('rid', $rid)
+          ->condition('group_type', $group_type)
+          ->condition('gid', $gid)
+          ->execute();
+      }
+
       og_role_delete($rid);
     }
   }
 }
+
 
 /**
  * Get the role names of role IDs.
