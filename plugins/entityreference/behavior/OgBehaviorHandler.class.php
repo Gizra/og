@@ -246,8 +246,6 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
       $values[$item['field_mode']][] = $item['target_id'];
     }
 
-    list(,, $bundle) = entity_extract_ids($entity_type, $entity);
-
     $field_name = $field['field_name'];
 
     foreach ($values as $field_mode => $ids) {
