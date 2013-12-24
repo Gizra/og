@@ -252,4 +252,7 @@ function og_ui_confirm_unsubscribe_submit($form, &$form_state) {
   if (entity_access('view', $group_type, $group)) {
     $form_state['redirect'] = entity_uri($group_type, $group);
   }
+  else {
+    $form_state['redirect'] = '<front>';
+  }
 }
