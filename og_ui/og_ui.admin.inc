@@ -356,7 +356,7 @@ function og_ui_edit_membership_submit($form, &$form_state) {
   $og_membership = $form_state['og_membership'];
   $og_membership->state = $form_state['values']['state'];
   field_attach_submit('og_membership', $og_membership, $form['membership_fields'], $form_state);
-  $og_membership->save();
+
   $account = user_load($og_membership->etid);
   // Assign roles.
   $og_roles = og_get_user_roles($group_type, $gid, $account->uid);
@@ -370,6 +370,11 @@ function og_ui_edit_membership_submit($form, &$form_state) {
       og_role_grant($group_type, $gid, $og_membership->etid, $rid);
     }
   }
+
+  // Saving should be last in the process, so Rules can get a chance to
+  // assign or revoke roles.
+  $og_membership->save();
+
   drupal_set_message(t('The membership has been updated.'));
 }
 
