@@ -347,6 +347,7 @@ function og_schema() {
       // Entity index; When searching for an entity, we use both the id and type.
       'entity' => array('etid', 'entity_type'),
       'group' => array('gid', 'group_type'),
+      'group_type' => array('group_type'),
     ),
     'foreign keys' => array(
       'og_membership_type' => array(
@@ -1179,4 +1180,11 @@ function og_update_7204() {
   foreach ($schema as $name => $table) {
     db_create_table($name, $table);
   }
+}
+
+/*
+ * Add an index to {og_membership} on group_type.
+ */
+function og_update_7205() {
+  db_add_index('og_membership', 'group_type', array('group_type'));
 }
