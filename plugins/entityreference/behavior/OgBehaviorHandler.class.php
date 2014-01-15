@@ -17,17 +17,25 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
    */
   public function load($entity_type, $entities, $field, $instances, $langcode, &$items) {
     // Get the OG memberships from the field.
+    $field_name = $field['field_name'];
+    $target_type = $field['settings']['target_type'];
     foreach ($entities as $entity) {
       $wrapper = entity_metadata_wrapper($entity_type, $entity);
-      if (empty($wrapper->{$field['field_name'] . '__og_membership'})) {
+      if (empty($wrapper->{$field_name})) {
         // If the entity belongs to a bundle that was deleted, return early.
         continue;
       }
       $id = $wrapper->getIdentifier();
       $items[$id] = array();
-      foreach ($wrapper->{$field['field_name'] . '__og_membership'}->value() as $og_membership) {
+      $gids = og_get_entity_groups($entity_type, $entity, array(OG_STATE_ACTIVE), $field_name);
+
+      if (empty($gids[$target_type])) {
+        continue;
+      }
+
+      foreach ($gids[$target_type] as $gid) {
         $items[$id][] = array(
-          'target_id' => $og_membership->gid,
+          'target_id' => $gid,
         );
       }
     }

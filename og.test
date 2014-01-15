@@ -406,7 +406,7 @@ class OgMetaData extends DrupalWebTestCase {
       $values += array('state' => $other_state);
       og_group('entity_test', $entity2->pid, $values);
 
-      // Subscribe node to third group, using a diffferent field.
+      // Subscribe node to third group, using a different field.
       $values += array('field_name' => 'og_ref_2');
       og_group('entity_test', $entity3->pid, $values);
 
@@ -1787,9 +1787,10 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
     og_membership_orphans_worker($item->data);
 
     // Load the node into a wrapper and verify we moved him to another group.
-    $wrapper = entity_metadata_wrapper('node', $first_node->nid);
+    $gids = og_get_entity_groups('node', $first_node->nid);
+    $gid = reset($gids['node']);
 
-    $this->assertTrue($wrapper->{OG_AUDIENCE_FIELD}->get(0)->getIdentifier() == $second_group->nid, "The node of the group moved to another group.");
+    $this->assertEqual($gid, $second_group->nid, 'The group content moved to another group.');
   }
 }
 

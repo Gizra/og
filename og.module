@@ -362,30 +362,13 @@ function og_get_field_og_membership_properties($entity, array $options, $name, $
   $field_name = substr($name, 0, $remove_char);
 
   $field_name = $args[0];
-  $state = count($args) == 2 ? FALSE : $args[2];
-  list($id) = entity_extract_ids($type, $entity);
+  $field = field_info_field($field_name);
+  $states = count($args) == 2 ? FALSE : array($args[2]);
 
-  $identifier = $type . ':' . $id . ':' . $field_name . ':' . $state;
-  $cache = &drupal_static(__FUNCTION__, array());
-  if (isset($cache[$identifier])) {
-    // Return the cached result.
-    return $cache[$identifier];
-  }
+  $result = og_get_entity_groups($type, $entity, $states, $field_name);
+  $target_type = $field['settings']['target_type'];
 
-  $query = new EntityFieldQuery();
-  $query
-    ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition('entity_type', $type, '=')
-    ->propertyCondition('etid', $id, '=')
-    ->propertyCondition('field_name', $field_name, '=');
-
-  if ($state) {
-    $query->propertyCondition('state', $state, '=');
-  }
-
-  $result = $query->execute();
-  $cache[$identifier] = !empty($result['og_membership']) ? array_keys($result['og_membership']) : array();
-  return $cache[$identifier];
+  return !empty($result[$target_type]) ? array_keys($result[$target_type]) : array();
 }
 
 /**
@@ -2261,13 +2244,15 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
  *   "user", the current user will be used.
  * @param $states
  *   (optional) Array with the state to return. Defaults to active.
+ * @param $field_name
+ *   (optional) The field name associated with the group.
  *
  * @return
  *  An array with the group's entity type as the key, and array - keyed by
  *  the OG membership ID and the group ID as the value. If nothing found,
  *  then an empty array.
  */
-function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE)) {
+function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL) {
   $cache = &drupal_static(__FUNCTION__, array());
 
   if ($entity_type == 'user' && empty($entity)) {
@@ -2288,36 +2273,47 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
     $state_identifier = implode(':', $states);
   }
   else {
-    $state_identifier = 0;
+    $state_identifier = FALSE;
   }
 
-  if (isset($cache[$entity_type][$id][$state_identifier])) {
+  $identifier = array(
+    $entity_type,
+    $id,
+    $state_identifier,
+    $field_name,
+  );
+
+  $identifier = implode(':', $identifier);
+
+  if (isset($cache[$identifier])) {
     // Return cached values.
-    return $cache[$entity_type][$id][$state_identifier];
+    return $cache[$identifier];
   }
 
-  $cache[$entity_type][$id][$state_identifier] = array();
+  $cache[$identifier] = array();
 
-  $query = new EntityFieldQuery();
-  $query
-    ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition('entity_type', $entity_type, '=')
-    ->propertyCondition('etid', $id, '=');
+  $query = db_select('og_membership', 'ogm')
+    ->fields('ogm', array('id', 'gid', 'group_type'))
+    ->condition('entity_type', $entity_type)
+    ->condition('etid', $id);
 
   if ($states) {
-    $query->propertyCondition('state', $states, 'IN');
+    $query->condition('state', $states, 'IN');
   }
 
-  $result = $query->execute();
-  if (!empty($result['og_membership'])) {
-    // Get the group ID from the group membership.
-    $og_memberships = og_membership_load_multiple(array_keys($result['og_membership']));
-    foreach ($og_memberships as $og_membership) {
-      $cache[$entity_type][$id][$state_identifier][$og_membership->group_type][$og_membership->id] = $og_membership->gid;
-    }
+  if ($field_name) {
+    $query->condition('field_name', $field_name);
   }
 
-  return $cache[$entity_type][$id][$state_identifier];
+  $result = $query
+    ->execute()
+    ->fetchAll();
+
+  foreach ($result as $row) {
+    $cache[$identifier][$row->group_type][$row->id] = $row->gid;
+  }
+
+  return $cache[$identifier];
 }
 
 
