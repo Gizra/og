@@ -1364,7 +1364,7 @@ function og_entity_query_alter(EntityFieldQuery $query) {
 }
 
 /**
- * Implements hook_query_QUERY_TAG_alter().
+ * Implements hook_query_TAG_alter().
  *
  * Join the {og_membership} table and alter the query.
  */
