@@ -1181,7 +1181,7 @@ function og_update_7204() {
   }
 }
 
-/*
+/**
  * Add an index to {og_membership} on group_type.
  */
 function og_update_7205() {
