@@ -292,6 +292,7 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
       og_field_widget_register_errors($field_name, $new_errors);
     }
 
-    $errors = array();
+    // Errors for this field now handled, removing from the referenced array.
+    unset($errors[$field_name]);
   }
 }
