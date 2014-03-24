@@ -929,9 +929,9 @@ function _og_update_entity_fields($entity_type, $entity) {
       }
     }
     else {
-      foreach ($wrapper->{$field_name . '__og_membership'}->value() as $og_membership) {
-        $gids[] = $og_membership->gid;
-      }
+      $target_type = $field['settings']['target_type'];
+      $gids = og_get_entity_groups($entity_type, $entity, array(OG_STATE_ACTIVE), $field_name);
+      $gids = !empty($gids[$target_type]) ? $gids[$target_type] : array();
     }
     if ($gids) {
       $wrapper->{$field_name}->set($gids);
