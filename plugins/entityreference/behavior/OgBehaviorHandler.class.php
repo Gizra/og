@@ -27,7 +27,7 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
       }
       $id = $wrapper->getIdentifier();
       $items[$id] = array();
-      $gids = og_get_entity_groups($entity_type, $entity, array(OG_STATE_ACTIVE), $field_name);
+      $gids = og_get_entity_groups($entity_type, $entity, array(), $field_name);
 
       if (empty($gids[$target_type])) {
         continue;
