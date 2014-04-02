@@ -2017,6 +2017,9 @@ function og_group($group_type, $gid, $values = array(), $save_created = TRUE) {
   }
 
   if (empty($og_membership->is_new) || $save_created) {
+    // Pass the entity object along to OgMembership::save() so we don't have
+    // to reload it.
+    $og_membership->entity = $entity;
     // Save the membership for update, or if the OG membership is new when
     // "save-created" is TRUE.
     $og_membership->save();

@@ -23,8 +23,8 @@ class OgMembership extends Entity {
       throw new OgException('OG membership can not be created for anonymous user.');
     }
 
-    $wrapper = entity_metadata_wrapper($entity_type, $etid);
-    $bundle = $wrapper->getBundle();
+    $entity = !empty($this->entity) ? $this->entity : entity_load_single($entity_type, $etid);
+    list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
     $group_type = $this->group_type;
     $gid = $this->gid;
