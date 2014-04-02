@@ -145,6 +145,13 @@ function og_context_og_context_negotiation_info() {
     'menu path' => array('comment/reply/%', 'comment/%'),
   );
 
+  $providers['term'] = array(
+    'name' => t('Taxonomy term'),
+    'description' => t("Determine by the context of the taxonomy term"),
+    'callback' => 'og_context_handler_taxonomy_term',
+    'menu path' => array('taxonomy/term/%'),
+  );
+
   return $providers;
 }
 
@@ -182,7 +189,8 @@ function og_context_og_invalidate_cache($gids = array()) {
 /**
  * Get or set group context using the menu system.
  * @param $group_type
- *   The context to get by group type. Defaults to "node".
+ *   The context to get by group type. Defaults to NULL to let the group type be
+ *   determined automatically.
  * @param $group
  *   Optional; The group entity to set as the context.
  *
@@ -190,7 +198,7 @@ function og_context_og_invalidate_cache($gids = array()) {
  *   Array keyed by the group type and group ID, or FALSE if no context
  *   was found.
  */
-function og_context($group_type = 'node', $group = NULL) {
+function og_context($group_type = NULL, $group = NULL) {
   global $user;
   $context = &drupal_static(__FUNCTION__, FALSE);
 
@@ -208,11 +216,10 @@ function og_context($group_type = 'node', $group = NULL) {
     $context = array('group_type' => $group_type, 'gid' => $id);
   }
   // Get context from context handlers.
-  elseif ($gid = og_context_determine_context($group_type)) {
-    $context = array('group_type' => $group_type, 'gid' => $gid);
+  elseif ($context = og_context_determine_context_info($group_type)) {
     if ($user->uid) {
       // Save the group ID in the authenticated user's session.
-      $_SESSION['og_context'] = array('group_type' => $group_type, 'gid' => $gid);
+      $_SESSION['og_context'] = $context;
     }
   }
 
@@ -325,13 +332,39 @@ function og_context_provider_weight($provider) {
  * @param $group_type
  *   The entity type of the group. For example, "node" or "user".
  * @param $item
- *   Optional; A menu item that context should be extracted from. If empty
+ *   (optional) A menu item that context should be extracted from. If empty
  *   defaults to the current menu item by using menu_get_item().
  *
  * @return
- *   The group ID for the current context.
+ *   The group ID for the current context or FALSE if no context was found.
+ *
+ * @deprecated
+ * @see og_context_determine_context_info()
  */
 function og_context_determine_context($group_type, $item = NULL) {
+  $context = og_context_determine_context_info($group_type, $item);
+  return isset($context['gid']) ? $context['gid'] : FALSE;
+}
+
+/**
+ * Determine the best matching context of a viewed page.
+ *
+ * @param $group_type
+ *   (optional) The entity type of the group. For example, "node" or "user" or
+ *   NULL if the group type should be fully determined by a provider.
+ * @param $item
+ *   (optional) A menu item that context should be extracted from. If empty
+ *   defaults to the current menu item by using menu_get_item().
+ *
+ * @return
+ *   An array describing the context, or an empty array if no context is
+ *   found. The keys are as follows:
+ *   - 'group_type': The group entity type of the context.
+ *   - 'gid': The entity id of the group context.
+ *
+ * @todo When og_context_determine_context() is removed, take over its name.
+ */
+function og_context_determine_context_info($group_type = NULL, $item = NULL) {
   // Enable url and node context handlers by default.
   $defaults = array('url' => -5, 'node' => -4);
   if (!$enabled_providers = variable_get('og_context_negotiation_group_context', $defaults)) {
@@ -365,7 +398,17 @@ function og_context_determine_context($group_type, $item = NULL) {
 
     $gids = array();
 
-    if ($invoke && ($contexts = call_user_func($provider['callback'])) && !empty($contexts[$group_type])) {
+    if ($invoke && ($contexts = call_user_func($provider['callback']))) {
+      // If we don't have a group type up-front we determine what group type to
+      // move forward with based on what the provider gave us.
+      if ($group_type === NULL) {
+        $group_types = array_keys($contexts);
+        // Grab the first group type.
+        $group_type = reset($group_types);
+      }
+      elseif (empty($contexts[$group_type])) {
+        continue;
+      }
       // Check if one of the group IDs already exists in the session, and if
       // so use it.
       $gids = $contexts[$group_type];
@@ -381,7 +424,7 @@ function og_context_determine_context($group_type, $item = NULL) {
     }
   }
 
-  return !empty($gid) ? $gid : FALSE;
+  return !empty($gid) ? array('group_type' => $group_type, 'gid' => $gid) : array();
 }
 
 /**
@@ -532,6 +575,13 @@ function og_context_handler_comment() {
     return;
   }
   return og_context_handler_node($node);
+}
+
+/**
+ * Context handler: Get group from a term.
+ */
+function og_context_handler_taxonomy_term() {
+  return _group_context_handler_entity('taxonomy_term', NULL, 2);
 }
 
 /**

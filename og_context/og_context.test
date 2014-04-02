@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * @file
+ * Testing the functionality of the OG context module.
+ */
+
+/**
+ * Creating a term and a node, define them as group and verify the OG context
+ * determine the correct context..
+ */
+class OgContextTContextTest extends DrupalWebTestCase {
+
+  public $term;
+  public $node;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Context determine',
+      'description' => 'Test determining OG Context on various group types.',
+      'group' => 'Organic groups context',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og', 'og_context', 'og_context_test');
+
+    // Define a node as group.
+    $this->drupalCreateContentType(array('type' => 'node_group'));
+    og_create_field(OG_GROUP_FIELD, 'node', 'node_group');
+    $settings = array(
+      'type' => 'node_group',
+      OG_GROUP_FIELD . '[und][0][value]' => 1,
+    );
+    $this->node = $this->drupalCreateNode($settings);
+
+    // Define a term as a group.
+    $vocabulary = new stdClass();
+    $vocabulary->name = 'Terms';
+    $vocabulary->machine_name = 'terms';
+    taxonomy_vocabulary_save($vocabulary);
+    og_create_field(OG_GROUP_FIELD, 'taxonomy_term', 'terms');
+
+    $this->term = new stdClass();
+    $this->term->name = "term 1";
+    $this->term->vid = $vocabulary->vid;
+    $this->term->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'] = 1;
+    taxonomy_term_save($this->term);
+
+    // Turn on the taxonomy term context handler.
+    variable_set("og_context_negotiation_group_context", array('node' => 0, 'term' => 0));
+  }
+
+  function testOgContextDetermineContext() {
+    $this->drupalGet('node/' . $this->node->nid);
+    $this->assertText("Got context of type node with gid 1", "The node context was correctly found.");
+
+    $this->drupalGet('taxonomy/term/' . $this->term->tid);
+    $this->assertText("Got context of type taxonomy_term with gid 1", "The taxonomy term context was correctly found.");
+  }
+}
