@@ -1474,7 +1474,28 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
     $tables = array_merge(array('ogm' => $ogm), $tables);
   }
   else {
-    $query->join('og_membership', 'ogm', "ogm.etid = $base_table_alias.entity_id");
+    // If the original EntityFieldQuery has an entity type entityCondition,
+    // restrict the join by this. Otherwise, we would bring in the IDs of
+    // entities of other types if they happen to match on the base table entity
+    // ID.
+    $query_base_entity_type = $query->alterMetaData['entity_field_query']->entityConditions['entity_type']['value'];
+    if (empty($query_base_entity_type)) {
+      // It's possible to have no entity type specified: join without it.
+      $query->join('og_membership', 'ogm', "ogm.etid = $base_table_alias.entity_id");
+    }
+    else {
+      if (is_array($query_base_entity_type)) {
+        // It's also possible for the entity type to be multiple.
+        $query->join('og_membership', 'ogm', "ogm.etid = $base_table_alias.entity_id AND ogm.entity_type IN (:entity_type)", array(
+          ':entity_type' => $query_base_entity_type,
+        ));
+      }
+      else {
+        $query->join('og_membership', 'ogm', "ogm.etid = $base_table_alias.entity_id AND ogm.entity_type = :entity_type", array(
+          ':entity_type' => $query_base_entity_type,
+        ));
+      }
+    }
   }
 
   _og_query_og_membership_alter_conditions($conditions, $aliases, $base_table_alias, $entity_info);
