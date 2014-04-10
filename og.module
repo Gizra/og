@@ -587,13 +587,13 @@ function og_field_access($op, $field, $entity_type, $entity, $account) {
 
   $field_name = $field['field_name'];
   list($id, $vid, $bundle_name) = entity_extract_ids($entity_type, $entity);
+  $instance = field_info_instance($entity_type, $field_name, $bundle_name);
   if ($field_name == OG_GROUP_FIELD) {
     $wrapper = entity_metadata_wrapper($entity_type, $entity);
     if ($wrapper->getIdentifier() && !$wrapper->{OG_GROUP_FIELD}->value()) {
       // Entity isn't an active group.
       return;
     }
-    $instance = field_info_instance($entity_type, $field_name, $bundle_name);
     if (!empty($instance['widget']['settings']['og_hide'])) {
       return FALSE;
     }
@@ -609,6 +609,10 @@ function og_field_access($op, $field, $entity_type, $entity, $account) {
 
   // Check if we are editing the user entity.
   if ($entity_type == 'user') {
+    if (!empty($instance['settings']['behaviors']['og_widget']['access_override'])) {
+      return;
+    }
+
     return user_access('administer group', $account);
   }
 }
