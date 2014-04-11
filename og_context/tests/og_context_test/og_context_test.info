@@ -1,5 +1,0 @@
-name = OG Context test
-description = Test module for OG Context.
-core = 7.x
-
-hidden = TRUE
