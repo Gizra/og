@@ -3067,6 +3067,7 @@ function og_role_revoke($group_type, $gid, $uid, $rid) {
       ->condition('group_type', $group_type)
       ->condition('gid', $gid)
       ->execute();
+    og_invalidate_cache();
     module_invoke_all('og_role_revoke', $group_type, $gid, $uid, $rid);
 
     if (module_exists('rules'))  {
