@@ -1222,17 +1222,12 @@ function og_membership_type_access($op, $entity, $account = NULL, $entity_type =
 
 /**
  * Reset static cache related to group membership.
+ *
+ * @deprecated
+ *   Use og_invalidate_cache() instead.
  */
 function og_membership_invalidate_cache() {
-  $caches = array(
-    'og_get_entity_groups',
-    'og_get_membership',
-    'og_get_field_og_membership_properties',
-  );
-
-  foreach ($caches as $cache) {
-    drupal_static_reset($cache);
-  }
+  og_invalidate_cache();
 }
 
 /**
@@ -1605,7 +1600,7 @@ function og_membership_delete($id) {
  */
 function og_membership_delete_multiple($ids = array()) {
   entity_delete_multiple('og_membership', $ids);
-  og_membership_invalidate_cache();
+  og_invalidate_cache();
 }
 
 /**
@@ -1834,14 +1829,15 @@ function og_invalidate_cache($gids = array()) {
     'og_get_user_roles',
     'og_get_permissions',
     'og_get_group_audience_fields',
+    'og_get_entity_groups',
+    'og_get_membership',
+    'og_get_field_og_membership_properties',
+    'og_get_user_roles',
   );
 
   foreach ($caches as $cache) {
     drupal_static_reset($cache);
   }
-  // Invalidate group membersihp cache.
-  og_membership_invalidate_cache();
-
   // Let other OG modules know we invalidate cache.
   module_invoke_all('og_invalidate_cache', $gids);
 }
@@ -2155,13 +2151,18 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
   // To reduce the number of SQL queries, we cache the user's permissions
   // in a static variable.
   if (!isset($perm[$identifier][$account->uid])) {
-    $roles = og_get_user_roles($group_type, $gid, $account->uid);
-    $role_permissions = og_role_permissions($roles);
-
     $perms = array();
-    foreach ($role_permissions as $one_role) {
-      $perms += $one_role;
+
+    if ($roles = og_get_user_roles($group_type, $gid, $account->uid)) {
+      // Member might not have roles if they are blocked.
+      // A pending member is treated as a non-member.
+      $role_permissions = og_role_permissions($roles);
+
+      foreach ($role_permissions as $one_role) {
+        $perms += $one_role;
+      }
     }
+
     $perm[$identifier][$account->uid] = $perms;
   }
 
@@ -2724,48 +2725,66 @@ function og_get_default_roles($include = TRUE) {
  * @param $include
  *   (optional) If TRUE also anonymous or authenticated role ID will be
  *   returned. Defaults to TRUE.
+ * @param $check_active
+ *   (optional) If TRUE, and the user is pending, only anonymous role will be
+ *   returned. If blocked, no role will be returned.
  *
  * @return
  *   Array with the role IDs of the user as the key, and the role name as
  *   the value.
  */
-function og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE) {
+function og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE, $check_active = TRUE) {
   $roles = &drupal_static(__FUNCTION__, array());
   if (empty($uid)) {
     global $user;
     $uid = $user->uid;
   }
 
+  $account = user_load($uid);
+
   $identifier = implode(':', array($group_type, $gid, $uid, $include));
   if (isset($roles[$identifier])) {
     return $roles[$identifier];
   }
 
+  $is_blocked = og_is_member($group_type, $gid, 'user', $account, array(OG_STATE_BLOCKED));
+
+  if ($check_active && $is_blocked) {
+    $roles[$identifier] = array();
+    return $roles[$identifier];
+  }
+
+  $is_member = og_is_member($group_type, $gid, 'user', $account);
+
+
+  $rids = array();
   $group = entity_load_single($group_type, $gid);
   // Get the bundle of the group.
-  list($id, $vid, $bundle) = entity_extract_ids($group_type, $group);
+  list(,, $bundle) = entity_extract_ids($group_type, $group);
 
   // Check if roles are overriden for the group.
   $query_gid = og_is_group_default_access($group_type, $gid) ? 0 : $gid;
 
-  $query = db_select('og_users_roles', 'ogur');
-  $query->innerJoin('og_role', 'ogr', 'ogur.rid = ogr.rid');
+  if (!$check_active || $is_member) {
+    $query = db_select('og_users_roles', 'ogur');
+    $query->innerJoin('og_role', 'ogr', 'ogur.rid = ogr.rid');
 
-  $rids = $query
-    ->fields('ogur', array('rid'))
-    ->fields('ogr', array('name'))
-    ->condition('ogr.group_type', $group_type, '=')
-    ->condition('ogr.group_bundle', $bundle, '=')
-    ->condition('ogr.gid', $query_gid, '=')
-    ->condition('ogur.uid', $uid, '=')
-    ->condition('ogur.gid', $gid, '=')
-    ->orderBy('rid')
-    ->execute()
-    ->fetchAllkeyed();
+    $rids = $query
+      ->fields('ogur', array('rid'))
+      ->fields('ogr', array('name'))
+      ->condition('ogr.group_type', $group_type, '=')
+      ->condition('ogr.group_bundle', $bundle, '=')
+      ->condition('ogr.gid', $query_gid, '=')
+      ->condition('ogur.uid', $uid, '=')
+      ->condition('ogur.gid', $gid, '=')
+      ->orderBy('rid')
+      ->execute()
+      ->fetchAllkeyed();
+  }
 
-  if ($include) {
-    $account = user_load($uid);
-    $role_name = og_is_member($group_type, $gid, 'user', $account) ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
+
+  if ($include && !$is_blocked) {
+    $role_name = $is_member ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
 
     $rids = db_select('og_role', 'ogr')
       ->fields('ogr', array('rid', 'name'))

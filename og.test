@@ -680,7 +680,6 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     $user1 = $this->drupalCreateUser();
 
     // Create an entity.
-    $property = OG_GROUP_FIELD;
     $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
     $wrapper = entity_metadata_wrapper('entity_test', $entity);
     $wrapper->{OG_GROUP_FIELD}->set(1);
@@ -720,6 +719,54 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
 
     $this->assertTrue(og_user_access('entity_test', $entity->pid, 'delete own article content', $user2), t('User still has "delete own article content" as they have "administer group" permission.'));
     $this->assertTrue(og_user_access('entity_test', $entity->pid, 'administer group', $user2), t('User has "administer group" permission.'));
+  }
+
+  /**
+   * Assert blocked and pending roles influence the allowed permissions.
+   */
+  function testBlockedAndPendingRoles() {
+    // Create user.
+    $user1 = $this->drupalCreateUser();
+
+    // Create an entity.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
+    $wrapper = entity_metadata_wrapper('entity_test', $entity);
+    $wrapper->{OG_GROUP_FIELD}->set(1);
+    $wrapper->save();
+
+    // Associate user to the group, and grant "admin" role.
+    $user2 = $this->drupalCreateUser();
+    $values = array('entity_type' => 'user', 'entity' => $user2);
+    og_group('entity_test', $entity->pid, $values);
+    $og_roles = og_roles('entity_test', 'main');
+
+    $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
+    og_role_grant('entity_test', $entity->pid, $user2->uid, $rid);
+
+    // Active member.
+    $roles = og_get_user_roles('entity_test', $entity->pid, $user2->uid);
+    $expected_result = array(
+      array_search(OG_AUTHENTICATED_ROLE, $og_roles) => OG_AUTHENTICATED_ROLE,
+      array_search(OG_ADMINISTRATOR_ROLE, $og_roles) => OG_ADMINISTRATOR_ROLE,
+    );
+    $this->assertEqual($roles, $expected_result, 'Active member has also the admin role.');
+    $this->assertTrue(og_user_access('entity_test', $entity->pid, 'update group', $user2), 'Active member has access.');
+
+    // Pending member.
+    $values['state'] = OG_STATE_PENDING;
+    og_group('entity_test', $entity->pid, $values);
+    $roles = og_get_user_roles('entity_test', $entity->pid, $user2->uid);
+    $rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);
+    $expected_result = array($rid => OG_ANONYMOUS_ROLE);
+    $this->assertEqual($roles, $expected_result, 'Pending member has non-member role.');
+    $this->assertFalse(og_user_access('entity_test', $entity->pid, 'update group', $user2), 'Pending member has no access.');
+
+    // Blocked member.
+    $values['state'] = OG_STATE_BLOCKED;
+    og_group('entity_test', $entity->pid, $values);
+    $roles = og_get_user_roles('entity_test', $entity->pid, $user2->uid);
+    $this->assertEqual($roles,  array(), 'Blocked member has no roles.');
+    $this->assertFalse(og_user_access('entity_test', $entity->pid, 'update group', $user2), 'Blocked member has no access.');
   }
 }
 
@@ -954,7 +1001,7 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
       // Pass also pending state, so we make sure that even if the user
       // isn't active they are considered members, to check they get the
       // correct role.
-      $this->assertEqual(array_keys(og_get_user_roles('node', 10, $uid)), array_keys($roles), format_string('User @uid has the correct roles in group.', array('@uid' => $uid)));
+      $this->assertEqual(array_keys(og_get_user_roles('node', 10, $uid, TRUE, FALSE)), array_keys($roles), format_string('User @uid has the correct roles in group.', array('@uid' => $uid)));
     }
   }
 
