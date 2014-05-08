@@ -361,9 +361,9 @@ function hook_default_og_membership_type_alter(array &$defaults) {
 * @see hook_entity_load()
 */
 function hook_og_membership_load(array $og_memberships) {
-  $result = db_query('SELECT pid, foo FROM {mytable} WHERE pid IN(:ids)', array(':ids' => array_keys($entities)));
+  $result = db_query('SELECT pid, foo FROM {mytable} WHERE pid IN(:ids)', array(':ids' => array_keys($og_memberships)));
   foreach ($result as $record) {
-    $entities[$record->pid]->foo = $record->foo;
+    $og_memberships[$record->pid]->foo = $record->foo;
   }
 }
 
