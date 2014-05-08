@@ -329,7 +329,7 @@ function og_ui_edit_membership($form, &$form_state, $group_type, $gid, $og_membe
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Update membership'));
 
   // You can't delete the group manager.
-  if ($group->uid != $account->uid) {
+  if (!isset($group->uid) || $group->uid != $account->uid) {
     $form['actions']['delete'] = array(
       '#type' => 'markup',
       '#markup' => l(t('Remove'), 'group/node/' . $gid . '/admin/people/delete-membership/' . $og_membership->id),
@@ -388,7 +388,7 @@ function og_ui_delete_membership($form, &$form_state, $group_type, $gid, $og_mem
   $account = user_load($og_membership->etid);
 
   // You can't delete the group manager.
-  if ($group->uid == $account->uid) {
+  if (isset($group->uid) && $group->uid == $account->uid) {
     drupal_set_message(t("You can't remove membership of the group manager"));
     drupal_goto('group/' . $group_type . '/' . $gid . '/admin/people');
   }
