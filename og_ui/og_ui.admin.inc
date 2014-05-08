@@ -738,17 +738,23 @@ function og_ui_admin_permissions($form, $form_state, $group_type = '', $gid = 0,
 
   // Render role/permission overview:
   $options = array();
+  // Get the list of modules and sort it by name.
   $module_info = system_get_info('module');
+
+  // Prepare the array of OG permissions so the modules are ordered by name.
+  $modules = array();
+  foreach (module_implements('og_permission') as $module) {
+    $modules[$module] = $module_info[$module]['name'];
+  }
+  asort($modules);
+  $permissions_by_module = array_fill_keys(array_keys($modules), array());
 
   // Get a list of all the modules implementing a hook_permission() and sort by
   // display name.
-  $permissions_by_module = array();
   foreach (og_get_permissions() as $perm => $value) {
     $module = $value['module'];
     $permissions_by_module[$module][$perm] = $value;
   }
-
-  asort($permissions_by_module);
 
   foreach ($permissions_by_module as $module => $permissions) {
     $form['permission'][] = array(
