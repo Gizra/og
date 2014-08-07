@@ -6,7 +6,7 @@
  */
 
 // Add field widget related code.
-require DRUPAL_ROOT . '/' . drupal_get_path('module', 'og') . '/includes/og.field.inc';
+//require DRUPAL_ROOT . '/' . drupal_get_path('module', 'og') . '/includes/og.field.inc';
 
 /**
  * Define active group content states.
