@@ -1,0 +1,21 @@
+og.og_membership_type.*:
+  type: config_entity
+  label: 'OG membership type'
+  mapping:
+    name:
+      type: string
+      label: 'Name'
+    description:
+      type: string
+      label: 'Description'
+    status:
+      type: boolean
+      label: 'Status'
+
+og.og_role_permission.*:
+  type: config_entity
+  label: 'OG role permission'
+  mapping:
+    permission:
+      type: string
+      label: 'Permission label'

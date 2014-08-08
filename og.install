@@ -11,42 +11,6 @@
 function og_schema() {
   $schema = array();
 
-  $schema['og_role_permission'] = array(
-    'description' => 'Stores the permissions assigned to user roles per group.',
-    'fields' => array(
-      'rid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Foreign Key: {role}.rid.',
-      ),
-      'permission' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'A single permission granted to the role identified by rid.',
-      ),
-      'module' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => "The module declaring the permission.",
-      ),
-    ),
-    'primary key' => array('rid', 'permission'),
-    'indexes' => array(
-      'permission' => array('permission'),
-    ),
-    'foreign keys' => array(
-      'og_role' => array(
-        'table' => 'og_role',
-        'columns' => array('rid' => 'rid'),
-      ),
-    ),
-  );
-
   $schema['og_role'] = array(
     'description' => 'Stores user roles per group.',
     'fields' => array(
@@ -131,59 +95,6 @@ function og_schema() {
         'table' => 'og_role',
         'columns' => array('rid' => 'rid'),
       ),
-    ),
-  );
-
-  $schema['og_membership_type'] = array(
-    'description' => 'The group membership type.',
-    'fields' => array(
-      // Although the "name" should be enough as the primary key, the numeric ID
-      // is required for the internal use of entity API.
-      'id' => array(
-        'type' => 'serial',
-        'not null' => TRUE,
-        'description' => 'Primary Key: Numeric group membership type ID.',
-      ),
-      'name' => array(
-        'description' => 'The unified identifier for a group membership type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'description' => array(
-        'description' => 'Description for this group membership type.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'status' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        // This is equivilent to ENTITY_CUSTOM.
-        'default' =>  0x01,
-        'size' => 'tiny',
-        'description' => 'The exportable status of the entity.',
-      ),
-      'module' => array(
-        'description' => 'The name of the providing module if the entity has been defined in code.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-      ),
-
-      'language' => array(
-        'description' => 'The {languages}.language of this membership type.',
-        'type' => 'varchar',
-        'length' => 12,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-    ),
-    'primary key' => array('id'),
-    'unique keys' => array(
-      'name' => array('name'),
     ),
   );
 
