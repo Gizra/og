@@ -114,328 +114,11 @@ function og_menu() {
 }
 
 /**
- * Implements hook_entity_info().
- */
-function og_entity_info() {
-  $items['og_membership_type'] = array(
-    'label' => t('OG membership type'),
-    'controller class' => 'EntityAPIControllerExportable',
-    'entity class' => 'OgMembershipType',
-    'base table' => 'og_membership_type',
-    'fieldable' => TRUE,
-    'entity keys' => array(
-      'id' => 'id',
-      'label' => 'description',
-      'name' => 'name',
-    ),
-    'exportable' => TRUE,
-    'export' => array(
-      'default hook' => 'default_og_membership_type',
-    ),
-    'bundle of' => 'og_membership',
-    'module' => 'og',
-    'metadata controller class' => 'EntityDefaultMetadataController',
-    'views controller class' => 'EntityDefaultViewsController',
-    'access callback' => 'og_membership_type_access',
-    'entity cache' => module_exists('entitycache'),
-  );
-
-  if (class_exists('OgMembershipTypeUIController')) {
-    $items['og_membership_type'] += array(
-      // Enable the entity API's admin UI.
-      'admin ui' => array(
-        // TODO: This path doesn't exist before OG-ui.
-        'path' => 'admin/config/group/group-membership',
-        'file' => 'includes/og.admin.inc',
-        'controller class' => 'OgMembershipTypeUIController',
-      ),
-    );
-  }
-
-  $items['og_membership'] = array(
-    'label' => t('OG membership'),
-    'entity class' => 'OgMembership',
-    'controller class' => 'EntityAPIController',
-    'base table' => 'og_membership',
-    'fieldable' => TRUE,
-    'entity keys' => array(
-      'id' => 'id',
-      // The message has no label.
-      'label' => FALSE,
-      'bundle' => 'type',
-    ),
-    'label callback' => 'og_membership_label',
-    'bundles' => array(),
-    'bundle keys' => array(
-      'bundle' => 'name',
-    ),
-    'module' => 'og',
-    'metadata controller class' => 'OgMembershipMetadataController',
-    'views controller class' => 'OgMembershipViewsController',
-    'access callback' => 'og_membership_access',
-    'entity cache' => module_exists('entitycache'),
-  );
-
-  // Add bundle info but bypass entity_load() as we cannot use it here.
-  if (db_table_exists('og_membership_type')) {
-    $memberships = db_select('og_membership_type', 'g')
-      ->fields('g')
-      ->execute()
-      ->fetchAllAssoc('name');
-
-    foreach ($memberships as $type_name => $type) {
-      $items['og_membership']['bundles'][$type_name] = array(
-        'label' => $type->name,
-        'admin' => array(
-          'path' => 'admin/config/group/group-membership/manage/%og_membership_type',
-          'real path' => 'admin/config/group/group-membership/manage/' . $type->name,
-          'bundle argument' => 5,
-          'access arguments' => array('administer group'),
-        ),
-      );
-    }
-  }
-
-  return $items;
-}
-
-/**
- * Implements hook_entity_property_info().
- */
-function og_entity_property_info() {
-  $info = array();
-
-  // Add OG membership metadata for every bundle that is a group content.
-  foreach (og_get_all_group_content_bundle() as $entity_type => $bundles) {
-    foreach ($bundles as $bundle => $bundle_value) {
-      $info[$entity_type]['bundles'][$bundle]['properties']['og_membership'] = array(
-        'label' => t("OG memberships"),
-        'type' => 'list<og_membership>',
-        'description' => t("A list of all OG memberships of the @name entity.", array('@name' => $entity_type)),
-        'getter callback' => 'og_get_og_membership_properties',
-      );
-
-      // Add per-state properties.
-      $general = $info[$entity_type]['bundles'][$bundle]['properties']['og_membership'];
-      foreach (og_group_content_states() as $state => $state_label) {
-        $params = array('@state' => $state_label, '@name' => $entity_type);
-        $info[$entity_type]['bundles'][$bundle]['properties']['og_membership__' . $state] = $general;
-        $info[$entity_type]['bundles'][$bundle]['properties']['og_membership__' . $state]['label'] = t('@state OG membership', $params);
-        $info[$entity_type]['bundles'][$bundle]['properties']['og_membership__' . $state]['description'] = t("A list of all OG memberships of the @name entity with @state state.", $params);
-      }
-
-      // Add OG membership per field in a bundle.
-      foreach (og_get_group_audience_fields($entity_type, $bundle) as $field_name => $label) {
-        $params = array('@label' => $label);
-        $field_info = field_info_field($field_name);
-        $group_type = $field_info['settings']['target_type'];
-        $info[$entity_type]['bundles'][$bundle]['properties'][$field_name . '__og_membership'] = array(
-          'label' => t('OG membership from field @label', $params),
-          'type' => 'list<og_membership>',
-          // The bundle in this context means the OG membership type.
-          'bundle' => $field_info['settings']['handler_settings']['membership_type'],
-          'description' => t('A list of all OG memberships registered in field @label.', $params),
-          'getter callback' => 'og_get_field_og_membership_properties',
-        );
-
-
-        // Add per-state properties.
-        $general = $info[$entity_type]['bundles'][$bundle]['properties'][$field_name . '__og_membership'];
-        foreach (og_group_content_states() as $state => $state_label) {
-          $params = array(
-            '@label' => $label,
-            '@label' => $label,
-            '@state' => $state_label,
-          );
-          $info[$entity_type]['bundles'][$bundle]['properties'][$field_name . '__og_membership__' . $state] = $general;
-          $info[$entity_type]['bundles'][$bundle]['properties'][$field_name . '__og_membership__' . $state]['label'] = t('@state OG memberships from field @label', $params);
-          $info[$entity_type]['bundles'][$bundle]['properties'][$field_name . '__og_membership__' . $state]['description'] = t('A list of all OG memberships with @state registered in field @label.', $params);
-        }
-      }
-    }
-  }
-
-  foreach (og_get_all_group_bundle() as $entity_type => $bundles) {
-    foreach ($bundles as $bundle => $bundle_value) {
-      $info[$entity_type]['bundles'][$bundle]['properties']['members'] = array(
-          'label' => t("Group members"),
-          'type' => 'list<user>',
-          'description' => t("A list group members of the @name entity.", array('@name' => $entity_type)),
-          'getter callback' => 'og_get_group_members_properties',
-        );
-
-        // Add per-state properties.
-        $general = $info[$entity_type]['bundles'][$bundle]['properties']['members'];
-        foreach (og_group_content_states() as $state => $state_label) {
-          $params = array('@state' => $state_label, '@name' => $entity_type);
-          $info[$entity_type]['bundles'][$bundle]['properties']['members__' . $state] = $general;
-          $info[$entity_type]['bundles'][$bundle]['properties']['members__' . $state]['label'] = t('@state group members', $params);
-          $info[$entity_type]['bundles'][$bundle]['properties']['members__' . $state]['description'] = t("A list of all users of the @name entity with @state state.", $params);
-        }
-    }
-  }
-
-  return $info;
-}
-
-/**
- * Property getter callback for group members.
- *
- * @see og_entity_property_info()
- */
-function og_get_group_members_properties($entity, array $options, $name, $type) {
-  $args = explode('__', $name);
-  $state = !empty($args[1]) ? $args[1] : FALSE;
-  list($id) = entity_extract_ids($type, $entity);
-
-  $cache = &drupal_static(__FUNCTION__, array());
-  if (isset($cache[$type][$id][$state])) {
-    // Return the cached result.
-    return $cache[$type][$id][$state];
-  }
-  $cache[$type][$id][$state] = array();
-
-  $query = new EntityFieldQuery();
-  $query
-    ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition('group_type', $type, '=')
-    ->propertyCondition('gid', $id, '=')
-    ->propertyCondition('entity_type', 'user', '=');
-
-  if ($state) {
-    $query->propertyCondition('state', $state, '=');
-  }
-
-  $result = $query->execute();
-  if (!empty($result['og_membership'])) {
-    $og_memberships = og_membership_load_multiple(array_keys($result['og_membership']));
-    foreach ($og_memberships as $og_membership) {
-      $cache[$type][$id][$state][] = $og_membership->etid;
-
-    }
-  }
-  return $cache[$type][$id][$state];
-}
-
-/**
- * Property getter callback for OG membership.
- *
- * @see og_entity_property_info()
- */
-function og_get_og_membership_properties($entity, array $options, $name, $type) {
-  // Get the state from name, if exists.
-  if ($name == 'og_membership') {
-    $state = array();
-  }
-  else {
-    $args = explode('__', $name);
-    $state = array($args[1]);
-  }
-
-  $ids = array();
-
-  if ($gids = og_get_entity_groups($type, $entity, $state)) {
-    $ids = array();
-    foreach ($gids as $group_type => $values) {
-      $ids = array_merge($ids, array_keys($values));
-    }
-  }
-
-  return $ids;
-}
-
-/**
- * Property getter callback for OG membership per field.
- *
- * @see og_entity_property_info()
- */
-function og_get_field_og_membership_properties($entity, array $options, $name, $type) {
-  $args = explode('__', $name);
-  // Field name might have double underscore as-well, so we need to make
-  // sure we get it right.
-  $last_char = substr($name, -1);
-  $state = is_numeric($last_char) ? $last_char : FALSE;
-
-  // The number of characters to ignore in the name (i.e. remove the
-  // "__og_membership" or "__og_membership__0").
-  $remove_char = $state ? -18 : -15;
-  $field_name = substr($name, 0, $remove_char);
-
-  $field_name = $args[0];
-  $field = field_info_field($field_name);
-  $states = count($args) == 2 ? FALSE : array($args[2]);
-
-  $result = og_get_entity_groups($type, $entity, $states, $field_name);
-  $target_type = $field['settings']['target_type'];
-
-  return !empty($result[$target_type]) ? array_keys($result[$target_type]) : array();
-}
-
-/**
- * Getter callback to load the 'entity' or 'group' property from OG membership.
- *
- * We have to return the entity wrapped.
- */
-function og_entity_getter($object, array $options, $property_name) {
-  switch ($property_name) {
-    case 'entity':
-      return entity_metadata_wrapper($object->entity_type, $object->etid);
-    case 'group':
-      return entity_metadata_wrapper($object->group_type, $object->gid);
-  }
-}
-
-/**
- * Entity property info setter callback to set the "entity" property for groups
- * and memberships.
- *
- * As the property is of type entity, the value will be passed as a wrapped
- * entity.
- */
-function og_entity_setter($object, $property_name, $wrapper) {
-  switch ($property_name) {
-    case 'entity':
-      $object->entity_type = $wrapper->type();
-      $object->etid = $wrapper->getIdentifier();
-      break;
-    case 'group':
-      $object->group_type = $wrapper->type();
-      $object->gid = $wrapper->getIdentifier();
-      break;
-  }
-}
-
-/**
- * Implements hook_default_og_membership_type().
- */
-function og_default_og_membership_type() {
-  $items = array();
-  $items['og_membership_type_default'] = entity_import('og_membership_type', '{
-    "name" : "og_membership_type_default",
-    "description" : "Default",
-    "rdf_mapping" : []
-  }');
-  return $items;
-}
-
-/**
  * Implements hook_modules_uninstalled().
  */
 function og_modules_uninstalled($modules) {
   // Delete module's permissions.
   og_permissions_delete_by_module($modules);
-}
-
-/**
- * Implements hook_ctools_plugin_directory().
- */
-function og_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'ctools') {
-    return 'plugins/' . $plugin;
-  }
-  elseif ($module == 'entityreference') {
-    return "plugins/entityreference/$plugin";
-  }
 }
 
 /**
@@ -565,6 +248,8 @@ function og_node_access($node, $op, $account) {
  * Implements hook_field_access().
  *
  * Hide group-audience fields from user's edit profile for non-privileged users.
+ *
+ * todo: Change to entity access.
  */
 function og_field_access($op, $field, $entity_type, $entity, $account) {
   global $user;
@@ -619,22 +304,13 @@ function og_field_access($op, $field, $entity_type, $entity, $account) {
 
 
 /**
- * Implements hook_views_api().
- */
-function og_views_api() {
-  return array(
-    'api' => 3,
-    'path' => drupal_get_path('module', 'og') . '/includes/views',
-  );
-}
-
-
-/**
  * Implements hook_field_create_instance().
  *
  * - Create default OG roles per entity-type and bundle.
  * - Create a group audience field on the user's entity, referencing the first
  *   group defined.
+ *
+ * todo: Change to hook_entity_create().
  */
 function og_field_create_instance($instance) {
   if ($instance['field_name'] != OG_GROUP_FIELD) {
@@ -686,6 +362,8 @@ function og_field_create_instance($instance) {
  *
  * - Invalidate OG's static cache if a group-audience field is deleted.
  * - Delete the default OG roles per entity-type and bundle.
+ *
+ * todo: change to hook_entity_delete().
  */
 function og_field_delete_instance($instance) {
   if (og_is_group_audience_field($instance['field_name'])) {
