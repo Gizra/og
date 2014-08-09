@@ -20,11 +20,11 @@ function og_schema() {
         'not null' => TRUE,
         'description' => 'Primary Key: Unique role ID.',
       ),
-      'gid'               => array(
-        'description'     => "The group's unique ID.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
+      'gid' => array(
+        'description' => "The group's unique ID.",
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
       ),
       'group_type' => array(
         'type' => 'varchar',
@@ -68,11 +68,11 @@ function og_schema() {
         'default' => 0,
         'description' => 'Primary Key: {og_role}.rid for role.',
       ),
-      'gid'               => array(
-        'description'     => "The group's unique ID.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
+      'gid' => array(
+        'description' => "The group's unique ID.",
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
       ),
       'group_type' => array(
         'type' => 'varchar',
@@ -128,11 +128,11 @@ function og_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-      'gid'               => array(
-        'description'     => "The group's unique ID.",
-        'type'            => 'int',
-        'size'            => 'normal',
-        'not null'        => TRUE,
+      'gid' => array(
+        'description' => "The group's unique ID.",
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
       ),
       'group_type' => array(
         'description' => "The group's entity type (e.g. node, comment, etc').",
@@ -171,7 +171,8 @@ function og_schema() {
     ),
     'primary key' => array('id'),
     'indexes' => array(
-      // Entity index; When searching for an entity, we use both the id and type.
+      // Entity index; When searching for an entity, we use both the id and
+      // type.
       'entity' => array('etid', 'entity_type'),
       'group' => array('gid', 'group_type'),
       'group_type' => array('group_type'),
@@ -187,18 +188,6 @@ function og_schema() {
       ),
     ),
   );
-
-  // Cache bins for Entity-cache module.
-  $cache_schema = drupal_get_schema_unprocessed('system', 'cache');
-  $types = array(
-    'og_membership_type',
-    'og_membership',
-  );
-
-  foreach ($types as $type) {
-    $schema["cache_entity_$type"] = $cache_schema;
-    $schema["cache_entity_$type"]['description'] = "Cache table used to store $type entity records.";
-  }
 
   return $schema;
 }
