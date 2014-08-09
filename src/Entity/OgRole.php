@@ -19,7 +19,7 @@ class OgRole extends ContentEntityBase {
    * @return $this
    */
   public function setGid($gid) {
-    $this->gid = $gid;
+    $this->set('gid', $gid);
     return $this;
   }
 
@@ -27,7 +27,7 @@ class OgRole extends ContentEntityBase {
    * @return mixed
    */
   public function getGid() {
-    return $this->gid;
+    return $this->get('gid')->value;
   }
 
   /**
@@ -36,7 +36,7 @@ class OgRole extends ContentEntityBase {
    * @return $this
    */
   public function setGroupBundle($groupBundle) {
-    $this->groupBundle = $groupBundle;
+    $this->set('group_bundle', $groupBundle);
     return $this;
   }
 
@@ -44,7 +44,7 @@ class OgRole extends ContentEntityBase {
    * @return mixed
    */
   public function getGroupBundle() {
-    return $this->groupBundle;
+    return $this->get('groupBundle')->value;
   }
 
   /**
@@ -53,15 +53,15 @@ class OgRole extends ContentEntityBase {
    * @return $this
    */
   public function setGroupType($groupType) {
-    $this->groupType = $groupType;
+    $this->set('groupType', $groupType);
     return $this;
   }
 
   /**
    * @return mixed
    */
-  public function getGroupType()  {
-    return $this->groupType;
+  public function getGroupType() {
+    return $this->get('group_type');
   }
 
   /**
@@ -70,7 +70,7 @@ class OgRole extends ContentEntityBase {
    * @return $this
    */
   public function setName($name) {
-    $this->name = $name;
+    $this->set('name', $name);
     return $this;
   }
 
@@ -78,7 +78,7 @@ class OgRole extends ContentEntityBase {
    * @return mixed
    */
   public function getName() {
-    return $this->name;
+    return $this->get('name')->value;
   }
 
   /**
@@ -87,7 +87,7 @@ class OgRole extends ContentEntityBase {
    * @return $this
    */
   public function setRid($rid) {
-    $this->rid = $rid;
+    $this->set('rid', $rid);
     return $this;
   }
 
@@ -95,7 +95,7 @@ class OgRole extends ContentEntityBase {
    * @return mixed
    */
   public function getRid() {
-    return $this->rid;
+    return $this->get('rid')->value;
   }
 
   /**

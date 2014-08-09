@@ -139,7 +139,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getCreated() {
-    return $this->created;
+    return $this->get('created')->value;
   }
 
   /**
@@ -158,7 +158,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * todo: The method collide with getEntityType method.
    */
   public function _getEntityType() {
-    return $this->entityType;
+    return $this->get('entityType')->value;
   }
 
   /**
@@ -175,7 +175,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getEtid() {
-    return $this->get('etid');
+    return $this->get('etid')->value;
   }
 
   /**
@@ -192,7 +192,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getFieldName() {
-    return $this->fieldName;
+    return $this->get('field_name')->value;
   }
 
   /**
@@ -209,7 +209,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getGid() {
-    return $this->gid;
+    return $this->get('gid')->value;
   }
 
   /**
@@ -226,7 +226,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getGroupType() {
-    return $this->groupType;
+    return $this->get('group_type')->value;
   }
 
   /**
@@ -260,7 +260,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getLanguage() {
-    return $this->language;
+    return $this->get('language')->value;
   }
 
   /**
@@ -277,7 +277,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getState() {
-    return $this->state;
+    return $this->get('state')->value;
   }
 
   /**
@@ -294,7 +294,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getType() {
-    return $this->type;
+    return $this->get('type')->value;
   }
 
   /**

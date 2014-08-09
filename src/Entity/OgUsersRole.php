@@ -50,7 +50,7 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
    * @return $this
    */
   public function setGid($gid) {
-    $this->gid = $gid;
+    $this->set('gid', $gid);
 
     return $this;
   }
@@ -58,8 +58,8 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @return mixed
    */
-  public function getGid(){
-    return $this->gid;
+  public function getGid() {
+    return $this->get('gid')->value;
   }
 
   /**
@@ -68,7 +68,7 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
    * @return $this
    */
   public function setGroupType($groupType) {
-    $this->groupType = $groupType;
+    $this->set('group_type', $groupType);
 
     return $this;
   }
@@ -77,7 +77,7 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getGroupType() {
-    return $this->groupType;
+    return $this->get('group_type')->value;
   }
 
   /**
@@ -85,8 +85,8 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return $this
    */
-  public function setRid($rid){
-    $this->rid = $rid;
+  public function setRid($rid) {
+    $this->set('rid', $rid);
 
     return $this;
   }
@@ -95,7 +95,7 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getRid() {
-    return $this->rid;
+    return $this->get('rid')->value;
   }
 
   /**
@@ -104,7 +104,7 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
    * @return $this
    */
   public function setUid($uid) {
-    $this->uid = $uid;
+    $this->set('uid', $uid);
 
     return $this;
   }
@@ -113,7 +113,7 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getUid() {
-    return $this->uid;
+    return $this->get('uid')->value;
   }
 
   /**
