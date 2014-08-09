@@ -96,6 +96,12 @@ function og_schema() {
   $schema['og_users_roles'] = array(
     'description' => 'Maps users to roles.',
     'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'description' => "The unique identifier.",
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
       'uid' => array(
         'type' => 'int',
         'unsigned' => TRUE,
@@ -124,7 +130,7 @@ function og_schema() {
         'description' => "The group's entity type.",
       ),
     ),
-    'primary key' => array('uid', 'rid', 'gid'),
+    'primary key' => array('id'),
     'indexes' => array(
       'rid' => array('rid'),
     ),

@@ -13,6 +13,15 @@ use Drupal\Core\Field\FieldDefinition;
 use Drupal\user\Entity\User;
 
 /**
+ * @ContentEntityType(
+ *   id = "os_users_role",
+ *   label = @Translation("OG users role"),
+ *   module = "og",
+ *   base_table = "og_users_roles",
+ *   entity_keys = {
+ *     "id" = "id",
+ *   },
+ * )
  */
 class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
 
@@ -121,6 +130,11 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = array();
+
+    $fields['id'] = FieldDefinition::create('integer')
+      ->setLabel(t('ID'))
+      ->setDescription(t('The unique identifier'))
+      ->setReadOnly(TRUE);
 
     $fields['uid'] = FieldDefinition::create('entity_reference')
       ->setLabel(t('User'))
