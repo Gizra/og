@@ -261,6 +261,8 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields = array();
+
     $fields['id'] = FieldDefinition::create('integer')
       ->setLabel(t('ID'))
       ->setDescription(t("The group membership's unique ID."))
