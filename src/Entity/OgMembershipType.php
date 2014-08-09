@@ -14,13 +14,24 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  * @ConfigEntityType(
  *   id = "og_membership_type",
  *   label = @Translation("OG membership type"),
- *   config_prefix = "type",
+ *   config_prefix = "og_membership_type",
  *   bundle_of = "og_membership",
  *   entity_keys = {
- *     "id" = "id",
+ *     "id" = "type",
  *     "label" = "name"
  *   }
  * )
  */
 class OgMembershipType extends ConfigEntityBase implements ConfigEntityInterface {
+
+  protected $type;
+
+  /**
+   * Return the ID of the entity.
+   *
+   * @return int|null|string
+   */
+  public function id() {
+    return $this->type;
+  }
 }

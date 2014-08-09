@@ -8,6 +8,7 @@ namespace Drupal\og\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Language\Language;
@@ -17,10 +18,14 @@ use Drupal\Core\Language\Language;
  * the connection between the group and the her content. For example we have the
  * node 1 which is a group and the node 2 which is node that belong to a group:
  * @code:
- *  OgMembership->etid = 2
- *  OgMembership->entityType = 'node'
- *  OgMembership->gid = 1
- *  OgMembership->groupType = 'node'
+ *  $membership = OgMembership::create(array('type' => 'og_membership_base'));
+ *  $membership
+ *    ->setEtid(2)
+ *    ->setEntityType('node')
+ *    ->setGid(1)
+ *    ->setEntityType('node')
+ *    ->setFieldName(OG_AUDIENCE_FIELD)
+ *    ->save();
  * @endcode
  *
  * Although the reference stored in the base table og_membership, there is a
@@ -40,7 +45,6 @@ use Drupal\Core\Language\Language;
  *   entity_keys = {
  *     "id" = "id",
  *     "bundle" = "type",
- *     "uuid" = "uuid"
  *   },
  *   bundle_keys = {
  *     "bundle" = "type"
@@ -126,7 +130,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setCreated($created) {
-    $this->created = $created;
+    $this->set('created', $created);
     return $this;
   }
 
@@ -143,14 +147,16 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setEntityType($entityType) {
-    $this->entityType = $entityType;
+    $this->set('entity_type', $entityType);
     return $this;
   }
 
   /**
    * @return mixed
+   *
+   * todo: The method collide with getEntityType method.
    */
-  public function getEntityType() {
+  public function _getEntityType() {
     return $this->entityType;
   }
 
@@ -160,7 +166,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setEtid($etid) {
-    $this->etid = $etid;
+    $this->set('etid', $etid);
     return $this;
   }
 
@@ -168,7 +174,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getEtid() {
-    return $this->etid;
+    return $this->get('etid');
   }
 
   /**
@@ -177,7 +183,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setFieldName($fieldName) {
-    $this->fieldName = $fieldName;
+    $this->set('field_name', $fieldName);
     return $this;
   }
 
@@ -194,7 +200,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setGid($gid) {
-    $this->gid = $gid;
+    $this->set('gid', $gid);
     return $this;
   }
 
@@ -211,7 +217,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setGroupType($groupType) {
-    $this->groupType = $groupType;
+    $this->set('group_type', $groupType);
     return $this;
   }
 
@@ -228,7 +234,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setId($id) {
-    $this->id = $id;
+    $this->set('id', $id);
     return $this;
   }
 
@@ -245,7 +251,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setLanguage($language) {
-    $this->language = $language;
+    $this->set('language', $language);
     return $this;
   }
 
@@ -262,7 +268,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setState($state) {
-    $this->state = $state;
+    $this->set('state', $state);
     return $this;
   }
 
@@ -279,7 +285,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return $this.
    */
   public function setType($type) {
-    $this->type = $type;
+    $this->set('type', $type);
     return $this;
   }
 
@@ -305,8 +311,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
     $fields['type'] = FieldDefinition::create('entity_reference')
       ->setLabel(t('Type'))
       ->setDescription(t('The bundle of the membership'))
-      ->setSetting('target_type', 'og_membership_type')
-      ->setSetting('default_value', 'og_membership_base');
+      ->setSetting('target_type', 'og_membership_type');
 
     $fields['etid'] = FieldDefinition::create('integer')
       ->setLabel(t('Entity ID'))
@@ -337,5 +342,17 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setDescription(t('The {languages}.language of this membership.'));
 
     return $fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function PreSave(EntityStorageInterface $storage) {
+
+    if (!$this->getFieldName()) {
+      $this->setFieldName(OG_AUDIENCE_FIELD);
+    }
+
+    parent::PreSave($storage);
   }
 }
