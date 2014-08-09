@@ -10,6 +10,16 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 
 /**
+ * @ContentEntityType(
+ *   id = "og_role",
+ *   label = @Translation("OG role"),
+ *   module = "og",
+ *   base_table = "og_role",
+ *   entity_keys = {
+ *     "id" = "rid",
+ *     "label" = "name"
+ *   },
+ * )
  */
 class OgRole extends ContentEntityBase {
 
