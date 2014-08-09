@@ -8,6 +8,7 @@ namespace Drupal\og\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
@@ -21,7 +22,7 @@ use Drupal\Core\Language\Language;
  *  $membership = OgMembership::create(array('type' => 'og_membership_base'));
  *  $membership
  *    ->setEtid(2)
- *    ->setEntityType('node')
+ *    ->setGroupType('node')
  *    ->setGid(1)
  *    ->setEntityType('node')
  *    ->setFieldName(OG_AUDIENCE_FIELD)
@@ -321,6 +322,10 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setLabel(t('Entity type'))
       ->setDescription(t("The entity type (e.g. node, comment, etc')."));
 
+    $fields['group_type'] = FieldDefinition::create('string')
+      ->setLabel(t('Entity ID'))
+      ->setDescription(t('The entity ID.'));
+
     $fields['gid'] = FieldDefinition::create('integer')
       ->setLabel(t('Group ID.'))
       ->setDescription(t("The group's entity type (e.g. node, comment, etc')."));
@@ -354,5 +359,23 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
     }
 
     parent::PreSave($storage);
+  }
+
+  /**
+   * Get the group object.
+   *
+   * @return EntityInterface
+   */
+  public function getGroup() {
+    return entity_load($this->getGroupType(), $this->getGid());
+  }
+
+  /**
+   * Get the entity belong to the current membership.
+   *
+   * @return EntityInterface
+   */
+  public function getEntityMembership() {
+    return entity_load($this->get('entity_type'), $this->getEtid());
   }
 }
