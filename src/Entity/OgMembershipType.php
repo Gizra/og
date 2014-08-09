@@ -14,7 +14,7 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  * @ConfigEntityType(
  *   id = "og_membership_type",
  *   label = @Translation("OG membership type"),
- *   config_prefix = "id",
+ *   config_prefix = "type",
  *   bundle_of = "og_membership",
  *   entity_keys = {
  *     "id" = "id",

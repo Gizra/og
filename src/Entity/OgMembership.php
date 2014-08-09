@@ -32,16 +32,19 @@ use Drupal\Core\Language\Language;
  * @ContentEntityType(
  *   id = "og_membership",
  *   label = @Translation("OG membership"),
+ *   bundle_label = @Translation("OG membership type"),
+ *   module = "og",
  *   base_table = "og_membership",
- *   bundle_entity_type = "og_membership_type",
  *   fieldable = TRUE,
+ *   bundle_entity_type = "og_membership_type",
  *   entity_keys = {
  *     "id" = "id",
- *     "bundle" = "type"
+ *     "bundle" = "type",
+ *     "uuid" = "uuid"
  *   },
  *   bundle_keys = {
  *     "bundle" = "type"
- *   },
+ *   }
  * )
  */
 class OgMembership extends ContentEntityBase implements ContentEntityInterface {

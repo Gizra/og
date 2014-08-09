@@ -2,7 +2,7 @@ og.og_membership_type.*:
   type: config_entity
   label: 'OG membership type'
   mapping:
-    id:
+    type:
       type: string
       label: 'ID'
     name:
