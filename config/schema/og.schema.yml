@@ -14,14 +14,3 @@ og.og_membership_type.*:
     status:
       type: boolean
       label: 'Status'
-
-og.og_role_permission.*:
-  type: config_entity
-  label: 'OG role permission'
-  mapping:
-    id:
-      type: string
-      label: 'ID'
-    permission:
-      type: string
-      label: 'Permission label'

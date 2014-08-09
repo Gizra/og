@@ -11,6 +11,48 @@
 function og_schema() {
   $schema = array();
 
+  $schema['og_role_permission'] = array(
+    'description' => 'Stores the permissions assigned to user roles per group.',
+    'fields' => array(
+      'id' => array(
+        'description' => "The role permission unique identifier.",
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'rid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Foreign Key: {role}.rid.',
+      ),
+      'permission' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'A single permission granted to the role identified by rid.',
+      ),
+      'module' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "The module declaring the permission.",
+      ),
+    ),
+    'primary key' => array('rid', 'permission'),
+    'indexes' => array(
+      'permission' => array('permission'),
+    ),
+    'foreign keys' => array(
+      'og_role' => array(
+        'table' => 'og_role',
+        'columns' => array('rid' => 'rid'),
+      ),
+    ),
+  );
+
   $schema['og_role'] = array(
     'description' => 'Stores user roles per group.',
     'fields' => array(
