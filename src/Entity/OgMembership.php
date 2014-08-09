@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Contain the OG membership entity definition. This will be a content entity.
+ * Contains Drupal\og\Entity\OgMembership.
  */
 
 namespace Drupal\og\Entity;
@@ -13,6 +13,36 @@ use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Language\Language;
 
 /**
+ * The OG membership is the main idea behind OG. The OG membership entity keep
+ * the connection between the group and the her content. For example we have the
+ * node 1 which is a group and the node 2 which is node that belong to a group:
+ * @code:
+ *  OgMembership->etid = 2
+ *  OgMembership->entityType = 'node'
+ *  OgMembership->gid = 1
+ *  OgMembership->groupType = 'node'
+ * @endcode
+ *
+ * Although the reference stored in the base table og_membership, there is a
+ * need for an easy way the group and the group content content via the UI. This
+ * is where the entity reference field come in: The field tables in the DB are
+ * empty, but when asking the content of the field there a is work behind the
+ * scene that structured the field value's on the fly. That's one of OG magic.
+ *
+ * @ContentEntityType(
+ *   id = "og_membership",
+ *   label = @Translation("OG membership"),
+ *   base_table = "og_membership",
+ *   bundle_entity_type = "og_membership_type",
+ *   fieldable = TRUE,
+ *   entity_keys = {
+ *     "id" = "id",
+ *     "bundle" = "type"
+ *   },
+ *   bundle_keys = {
+ *     "bundle" = "type"
+ *   },
+ * )
  */
 class OgMembership extends ContentEntityBase implements ContentEntityInterface {
 
@@ -273,7 +303,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setLabel(t('Type'))
       ->setDescription(t('The bundle of the membership'))
       ->setSetting('target_type', 'og_membership_type')
-      ->setSetting('default_value', 0);
+      ->setSetting('default_value', 'og_membership_base');
 
     $fields['etid'] = FieldDefinition::create('integer')
       ->setLabel(t('Entity ID'))
