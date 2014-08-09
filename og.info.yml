@@ -1,0 +1,11 @@
+name: Organic groups
+description: API to allow associating content with groups.
+package: Organic groups
+
+core: 8.x
+type: module
+
+dependencies:
+  - options
+  - text
+  - entity_reference
