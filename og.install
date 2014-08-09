@@ -15,8 +15,8 @@ function og_schema() {
     'description' => 'Stores the permissions assigned to user roles per group.',
     'fields' => array(
       'id' => array(
-        'description' => "The role permission unique identifier.",
         'type' => 'serial',
+        'description' => "The role permission unique identifier.",
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
@@ -41,7 +41,7 @@ function og_schema() {
         'description' => "The module declaring the permission.",
       ),
     ),
-    'primary key' => array('rid', 'permission'),
+    'primary key' => array('id'),
     'indexes' => array(
       'permission' => array('permission'),
     ),

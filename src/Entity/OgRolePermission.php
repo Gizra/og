@@ -19,16 +19,13 @@ use Drupal\Core\Field\FieldDefinition;
  *
  * @ContentEntityType(
  *   id = "og_role_permission",
- *   label = @Translation(OG role permission"),
+ *   label = @Translation("OG role permission"),
  *   module = "og",
- *   base_table = "og_membership",
+ *   base_table = "og_role_permission",
  *   entity_keys = {
  *     "id" = "id",
- *     "bundle" = "type",
+ *     "label" = "permission"
  *   },
- *   bundle_keys = {
- *     "bundle" = "type"
- *   }
  * )
  */
 class OgRolePermission extends ContentEntityBase {
