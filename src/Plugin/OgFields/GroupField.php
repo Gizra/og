@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\OgFields;
 
+use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\og\OgFieldsInterface;
 
@@ -20,15 +21,10 @@ class GroupField extends PluginBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function fieldDefinition() {
-    $config = array(
-      'field_name' => OG_GROUP_FIELD,
-      'type' => 'list_boolean',
-      'cardinality' => 1,
-      'settings' => array(
-        'allowed_values' => array(0 => 'Not a group', 1 => 'Group'),
-        'allowed_values_function' => '',
-      ),
-    );
+    return FieldDefinition::create('list_integer')
+      ->setName(OG_GROUP_FIELD)
+      ->setCardinality(1)
+      ->setSetting('allowed_values', array(0 => 'Not a group', 1 => 'Group'));
   }
 
   /**
