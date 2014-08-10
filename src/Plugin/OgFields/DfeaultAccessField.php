@@ -9,25 +9,22 @@ use Drupal\og\OgFieldsInterface;
  * Redirects to a message deletion form.
  *
  * @OgFields(
- *  id = OG_GROUP_FIELD,
+ *  id = OG_DEFAULT_ACCESS_FIELD,
  *  type = "group",
- *  description = @Translation("Determine if this should be a group.")
+ *  description = @Translation("Determine if group should use default roles and permissions.")
  * )
  */
-class FieldGroup extends PluginBase implements OgFieldsInterface {
+class DefaultAccessField extends PluginBase implements OgFieldsInterface {
 
   /**
    * {@inheritdoc}
    */
   public function fieldDefinition() {
     $config = array(
-      'field_name' => OG_GROUP_FIELD,
+      'field_name' => OG_DEFAULT_ACCESS_FIELD,
       'type' => 'list_boolean',
       'cardinality' => 1,
-      'settings' => array(
-        'allowed_values' => array(0 => 'Not a group', 1 => 'Group'),
-        'allowed_values_function' => '',
-      ),
+      'settings' => array('allowed_values' => array(0 => 'Use default roles and permissions', 1 => 'Override default roles and permissions'), 'allowed_values_function' => ''),
     );
   }
 
@@ -36,27 +33,24 @@ class FieldGroup extends PluginBase implements OgFieldsInterface {
    */
   public function instanceDefinition() {
     $config = array(
-      'label' => t('Group'),
-      'description' => t('Determine if this is an OG group.'),
-      'display_label' => 1,
+      'label' => t('Group roles and permissions'),
       'widget' => array(
         'module' => 'options',
-        'settings' => array(
-          'og_hide' => TRUE,
-        ),
-        'type' => 'options_onoff',
-        'weight' => 0,
+        'settings' => array(),
+        'type' => 'options_select',
       ),
-      'default_value' => array(0 => array('value' => 1)),
+      'required' => TRUE,
+      // Use default role and permissions as default value.
+      'default_value' => array(0 => array('value' => 0)),
       'view modes' => array(
         'full' => array(
           'label' => t('Full'),
-          'type' => 'og_group_subscribe',
+          'type' => 'list_default',
           'custom settings' => FALSE,
         ),
         'teaser' => array(
           'label' => t('Teaser'),
-          'type' => 'og_group_subscribe',
+          'type' => 'list_default',
           'custom settings' => FALSE,
         ),
       ),
