@@ -13,19 +13,20 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Language\Language;
+use Drupal\og\Controller\OG;
 
 /**
  * The OG membership is the main idea behind OG. The OG membership entity keep
  * the connection between the group and the her content. For example we have the
  * node 1 which is a group and the node 2 which is node that belong to a group:
  * @code:
- *  $membership = OgMembership::create(array('type' => 'og_membership_base'));
+ *  $membership = OgMembership::create(array('type' => 'og_membership_type_default'));
  *  $membership
  *    ->setEtid(2)
  *    ->setGroupType('node')
  *    ->setGid(1)
  *    ->setEntityType('node')
- *    ->setFieldName(OG_AUDIENCE_FIELD)
+ *    ->setFieldName(OG::AUDIENCE_FIELD)
  *    ->save();
  * @endcode
  *
@@ -355,7 +356,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   public function PreSave(EntityStorageInterface $storage) {
 
     if (!$this->getFieldName()) {
-      $this->setFieldName(OG_AUDIENCE_FIELD);
+      $this->setFieldName(OG::AUDIENCE_FIELD);
     }
 
     parent::PreSave($storage);

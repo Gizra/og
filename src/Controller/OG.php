@@ -10,7 +10,7 @@ class OG {
    * When a user has this membership state they are considered to be of
    * "member" role.
    */
-  public static $STATE_ACTIVE = 1;
+  const STATE_ACTIVE = 1;
 
   /**
    * Define pending group content states. The user is subscribed to the group
@@ -19,7 +19,7 @@ class OG {
    * When a user has this membership state they are considered to be of
    * "non-member" role.
    */
-  public static $STATE_PENDING = 2;
+  const STATE_PENDING = 2;
 
   /**
    * Define blocked group content states. The user is rejected from the group.
@@ -28,47 +28,47 @@ class OG {
    * group related action. This state, however, does not prevent user to
    * access a group or group content node.
    */
-  public static $STATE_BLOCKED = 3;
+  const STATE_BLOCKED = 3;
 
   /**
    * Group audience field.
    */
-  public static $AUDIENCE_FIELD = 'og_group_ref';
+  const AUDIENCE_FIELD = 'og_group_ref';
 
   /**
    * Group field.
    */
-  public static $GROUP_FIELD = 'group_group';
+  const GROUP_FIELD = 'group_group';
 
   /**
    * Group default roles and permissions field.
    */
-  public static $DEFAULT_ACCESS_FIELD = 'og_roles_permissions';
+  const DEFAULT_ACCESS_FIELD = 'og_roles_permissions';
 
   /**
    * The role name of group non-members.
    */
-  public static $ANONYMOUS_ROLE = 'non-member';
+  const ANONYMOUS_ROLE = 'non-member';
 
   /**
    * The role name of group member.
    */
-  public static $AUTHENTICATED_ROLE = 'member';
+  const AUTHENTICATED_ROLE = 'member';
 
   /**
    * The role name of group administrator.
    */
-  public static $ADMINISTRATOR_ROLE = 'administrator member';
+  const ADMINISTRATOR_ROLE = 'administrator member';
 
   /**
    * The default group membership type that is the bundle of group membership.
    */
-  public static $MEMBERSHIP_TYPE_DEFAULT = 'og_membership_type_default';
+  const MEMBERSHIP_TYPE_DEFAULT = 'og_membership_type_default';
 
   /**
    * The name of the user's request field in the default group membership type.
    */
-  public static $MEMBERSHIP_REQUEST_FIELD = 'og_membership_request';
+  const MEMBERSHIP_REQUEST_FIELD = 'og_membership_request';
 
   /**
    * Create an organic groups field in a bundle.
