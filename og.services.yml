@@ -1,4 +1,4 @@
 services:
   plugin.manager.og.fields:
-    class: Drupal\og\OgFieldsManger
+    class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager

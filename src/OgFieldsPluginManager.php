@@ -14,7 +14,7 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 /**
  * Manages Person plugins.
  */
-class OgFieldsManager extends DefaultPluginManager {
+class OgFieldsPluginManager extends DefaultPluginManager {
 
   /**
    * Constructs an OG field manager object.
