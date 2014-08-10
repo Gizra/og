@@ -2,6 +2,8 @@
 
 namespace Drupal\og\Controller;
 
+use Drupal\field\Entity\FieldStorageConfig;
+
 class OG {
 
   /**
@@ -86,14 +88,14 @@ class OG {
    */
   public static function CreateField($field_name, $entity_type, $bundle, $og_field = array()) {
     if (empty($og_field)) {
-      $og_field = og_fields_info($field_name);
+      $og_field = self::FieldsInfo($field_name);
     }
 
-    $field = field_info_field($field_name);
+    $field = FieldStorageConfig::load($field_name);
     // Allow overriding the field name.
     $og_field['field']['field_name'] = $field_name;
     if (empty($field)) {
-      $field = field_create_field($og_field['field']);
+      $og_field['field']->save();
     }
 
     $instance = field_info_instance($entity_type, $field_name, $bundle);
@@ -126,8 +128,8 @@ class OG {
     $return = &drupal_static(__FUNCTION__, array());
 
     if (empty($return)) {
-      foreach (module_implements('og_fields_info') as $module) {
-        if ($fields = module_invoke($module, 'og_fields_info')) {
+      foreach (\Drupal::moduleHandler()->invokeAll('og_fields_info') as $module) {
+        if ($fields = \Drupal::moduleHandler()->invoke($module, 'og_fields_info')) {
           foreach ($fields as $key => $field) {
             // Add default values.
             $field += array(
@@ -143,7 +145,7 @@ class OG {
       }
 
       // Allow other modules to alter the field info.
-      drupal_alter('og_fields_info', $return);
+      \Drupal::moduleHandler()->alter('og_fields_info', $return);
     }
 
     if (!empty($field_name)) {

@@ -9,7 +9,7 @@ use Drupal\og\Controller\OG;
 
 /**
  * Drupal 8 part. Road map:
- * 1. Fields - bring back the field mechanism
+ * 1. Fields - Upgrade the field mechanism to plugin.
  * 2. Field reference - work on the field reference and the widget of the
  *    field.
  * 3. EFQ: work on the EFQ alter so people can search with the audience field.
