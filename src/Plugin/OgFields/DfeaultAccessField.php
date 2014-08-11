@@ -57,4 +57,15 @@ class DefaultAccessField extends PluginBase implements OgFieldsInterface {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function widgetDefinition() {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function viewModesDefinition()  {
+  }
 }

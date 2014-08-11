@@ -4,6 +4,7 @@ namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\og\OgFieldsInterface;
 
 /**
@@ -31,30 +32,42 @@ class GroupField extends PluginBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function instanceDefinition() {
-    $config = array(
+    return FieldInstanceConfig::create(array(
       'label' => t('Group'),
       'description' => t('Determine if this is an OG group.'),
-      'display_label' => 1,
-      'widget' => array(
-        'module' => 'options',
-        'settings' => array(
-          'og_hide' => TRUE,
-        ),
-        'type' => 'options_onoff',
-        'weight' => 0,
-      ),
       'default_value' => array(0 => array('value' => 1)),
-      'view modes' => array(
-        'full' => array(
-          'label' => t('Full'),
-          'type' => 'og_group_subscribe',
-          'custom settings' => FALSE,
-        ),
-        'teaser' => array(
-          'label' => t('Teaser'),
-          'type' => 'og_group_subscribe',
-          'custom settings' => FALSE,
-        ),
+      'display_label' => 1,
+    ));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function widgetDefinition() {
+    $config = array(
+      'module' => 'options',
+      'settings' => array(
+        'og_hide' => TRUE,
+      ),
+      'type' => 'options_onoff',
+      'weight' => 0,
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function viewModesDefinition() {
+    $config = array(
+      'full' => array(
+        'label' => t('Full'),
+        'type' => 'og_group_subscribe',
+        'custom settings' => FALSE,
+      ),
+      'teaser' => array(
+        'label' => t('Teaser'),
+        'type' => 'og_group_subscribe',
+        'custom settings' => FALSE,
       ),
     );
   }

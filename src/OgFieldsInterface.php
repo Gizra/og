@@ -21,4 +21,16 @@ interface OgFieldsInterface {
    *   Return a new object of a FieldInstanceConfig instance.
    */
   public function instanceDefinition();
+
+  /**
+   * @return
+   *   A widget definition for the field.
+   */
+  public function widgetDefinition();
+
+  /**
+   * @return
+   *   Return view modes entities for the field.
+   */
+  public function viewModesDefinition();
 }

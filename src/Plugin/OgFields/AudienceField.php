@@ -82,4 +82,15 @@ class AudienceField extends PluginBase implements OgFieldsInterface {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function widgetDefinition() {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function viewModesDefinition() {
+  }
 }

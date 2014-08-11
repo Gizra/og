@@ -4,7 +4,6 @@
  * @file
  * Enable users to create and manage groups with roles and permissions.
  */
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\Controller\OG;
 
 /**
