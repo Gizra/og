@@ -2,9 +2,9 @@
 
 namespace Drupal\og\Plugin\OgFields;
 
-use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldsInterface;
 
 /**
@@ -16,16 +16,21 @@ use Drupal\og\OgFieldsInterface;
  *  description = @Translation("Determine if this should be a group.")
  * )
  */
-class GroupField extends PluginBase implements OgFieldsInterface {
+class FieldGroup extends PluginBase implements OgFieldsInterface {
 
   /**
    * {@inheritdoc}
    */
   public function fieldDefinition() {
-    return FieldDefinition::create('list_integer')
-      ->setName(OG_GROUP_FIELD)
-      ->setCardinality(1)
-      ->setSetting('allowed_values', array(0 => 'Not a group', 1 => 'Group'));
+    return FieldStorageConfig::create(array(
+      'name' => OG_GROUP_FIELD,
+      'entity_type' => 'node',
+      'type' => 'list_integer',
+      'cardinality' => 1,
+      'settings' => array(
+        'allowed_values' => array(0 => 'Not a group', 1 => 'Group'),
+      ),
+    ));
   }
 
   /**
@@ -37,6 +42,9 @@ class GroupField extends PluginBase implements OgFieldsInterface {
       'description' => t('Determine if this is an OG group.'),
       'default_value' => array(0 => array('value' => 1)),
       'display_label' => 1,
+      'field_name' => OG_GROUP_FIELD,
+      'entity_type' => 'node',
+      'bundle' => 'article',
     ));
   }
 

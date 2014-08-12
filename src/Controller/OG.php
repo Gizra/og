@@ -2,7 +2,7 @@
 
 namespace Drupal\og\Controller;
 
-use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\og\OgFieldsInterface;
 
 class OG {
 
@@ -25,28 +25,32 @@ class OG {
       $og_field = self::FieldsInfo($field_name);
     }
 
-    $field = FieldStorageConfig::load($field_name);
-    // Allow overriding the field name.
-    $og_field['field']['field_name'] = $field_name;
-    if (empty($field)) {
-      $og_field['field']->save();
+    $field = entity_load('field_storage_config', $entity_type . '.' . $og_field->fieldDefinition()->getName());
+
+    if (!$field) {
+      // The field storage config not exists. Create it.
+      $og_field->fieldDefinition()->save();
     }
 
-    $instance = field_info_instance($entity_type, $field_name, $bundle);
-    if (empty($instance)) {
-      $instance = $og_field['instance'];
-      $instance += array(
-        'field_name' => $field_name,
-        'bundle' => $bundle,
-        'entity_type' => $entity_type,
-      );
+    // Allow overriding the field name.
+    // todo: ask if we need this.
+//    $og_field['field']['field_name'] = $field_name;
+//    if (empty($field)) {
+//      $og_field['field']->save();
+//    }
 
-      field_create_instance($instance);
+    $instance = entity_load('field_instance_config', $entity_type . '.' . $bundle . '.' . $field_name);
+
+    if (!$instance) {
+      $og_field->instanceDefinition()->save();
       // Clear the entity property info cache, as OG fields might add different
       // entity property info.
       og_invalidate_cache();
       entity_property_info_cache_clear();
     }
+
+    // todo: Create the widget of the field.
+    // todo: Create the view modes.
   }
 
   /**
@@ -55,10 +59,12 @@ class OG {
    * @param $field_name
    *   The field name that was registered for the definition.
    *
-   * @return bool
-   *   An array with the field and instance definitions, or FALSE if not
+   * @return OgFieldsInterface|bool
+   *   An array with the field and instance definitions, or FALSE if not.
+   *
+   * todo: pass the entity type and entity bundle to plugin definition.
    */
-  function FieldsInfo($field_name = NULL) {
+  public static function FieldsInfo($field_name = NULL) {
     $config = \Drupal::service('plugin.manager.og.fields');
     $fields_config = $config->getDefinitions();
 
