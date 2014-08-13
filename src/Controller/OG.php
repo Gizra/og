@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Controller;
 
+use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
 class OG {
@@ -22,7 +23,9 @@ class OG {
    */
   public static function CreateField($field_name, $entity_type, $bundle, $og_field = array()) {
     if (empty($og_field)) {
-      $og_field = self::FieldsInfo($field_name, $entity_type, $bundle);
+      $og_field = self::FieldsInfo($field_name)
+        ->setEntityType($entity_type)
+        ->setBundle($bundle);
     }
 
     $field = entity_load('field_storage_config', $entity_type . '.' . $og_field->fieldDefinition()->getName());
@@ -59,17 +62,17 @@ class OG {
    * @param $field_name
    *   The field name that was registered for the definition.
    *
-   * @return OgFieldsInterface|bool
+   * @return OgFieldBase|bool
    *   An array with the field and instance definitions, or FALSE if not.
    *
    * todo: pass the entity type and entity bundle to plugin definition.
    */
-  public static function FieldsInfo($field_name = NULL, $entity_type = NULL, $bundle = NULL) {
+  public static function FieldsInfo($field_name = NULL) {
     $config = \Drupal::service('plugin.manager.og.fields');
     $fields_config = $config->getDefinitions();
 
     if ($field_name) {
-      return isset($fields_config[$field_name]) ? $config->createInstance($field_name, array('entity_type' => $entity_type, 'bundle' => $bundle)) : NULL;
+      return isset($fields_config[$field_name]) ? $config->createInstance($field_name) : NULL;
     }
 
     return $fields_config;
