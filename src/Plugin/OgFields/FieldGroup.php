@@ -5,6 +5,7 @@ namespace Drupal\og\Plugin\OgFields;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
 /**
@@ -16,7 +17,7 @@ use Drupal\og\OgFieldsInterface;
  *  description = @Translation("Determine if this should be a group.")
  * )
  */
-class FieldGroup extends PluginBase implements OgFieldsInterface {
+class FieldGroup extends OgFieldBase {
 
   /**
    * {@inheritdoc}
@@ -24,7 +25,7 @@ class FieldGroup extends PluginBase implements OgFieldsInterface {
   public function fieldDefinition() {
     return FieldStorageConfig::create(array(
       'name' => OG_GROUP_FIELD,
-      'entity_type' => 'node',
+      'entity_type' => $this->getEntityType(),
       'type' => 'list_integer',
       'cardinality' => 1,
       'settings' => array(
@@ -43,8 +44,8 @@ class FieldGroup extends PluginBase implements OgFieldsInterface {
       'default_value' => array(0 => array('value' => 1)),
       'display_label' => 1,
       'field_name' => OG_GROUP_FIELD,
-      'entity_type' => 'node',
-      'bundle' => 'article',
+      'entity_type' => $this->getEntityType(),
+      'bundle' => $this->getBundle(),
     ));
   }
 
