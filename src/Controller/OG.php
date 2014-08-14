@@ -53,14 +53,21 @@ class OG {
 //      entity_property_info_cache_clear();
     }
 
+    // Add the field to the form display manager.
     $displayForm = EntityFormDisplay::load($entity_type . '.' . $bundle . '.default');
-
     if (!$displayForm->getComponent($field_name) && $widgetDefinition = $og_field->widgetDefinition()) {
       $displayForm->setComponent($field_name, $widgetDefinition);
       $displayForm->save();
     }
 
-    // todo: Create the view modes.
+    // Define the view mode for the field.
+    if ($fieldViewModes = $og_field->viewModesDefinition()) {
+      $viewModes = entity_load_multiple('entity_view_display', array_keys($fieldViewModes));
+
+      foreach ($viewModes as $key => $viewMode) {
+        $viewMode->setComponent($field_name, $fieldViewModes[$key])->save();
+      }
+    }
   }
 
   /**

@@ -64,18 +64,17 @@ class FieldGroup extends OgFieldBase {
    * {@inheritdoc}
    */
   public function viewModesDefinition() {
-    $config = array(
-      'full' => array(
-        'label' => t('Full'),
-        'type' => 'og_group_subscribe',
-        'custom settings' => FALSE,
+    $prefix = $this->getEntityType() . '.' . $this->getBundle() . '.';
+
+    return array(
+      $prefix . 'default' => array(
+        'type' => 'list_key',
+        'label' => 'inline',
       ),
-      'teaser' => array(
-        'label' => t('Teaser'),
-        'type' => 'og_group_subscribe',
-        'custom settings' => FALSE,
+      $prefix . 'teaser' => array(
+        'type' => 'list_key',
+        'label' => 'inline',
       ),
     );
   }
-
 }
