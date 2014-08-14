@@ -53,13 +53,10 @@ class FieldGroup extends OgFieldBase {
    * {@inheritdoc}
    */
   public function widgetDefinition() {
-    $config = array(
-      'module' => 'options',
-      'settings' => array(
-        'og_hide' => TRUE,
-      ),
-      'type' => 'options_onoff',
-      'weight' => 0,
+    return array(
+      'type' => 'options_select',
+      'settings' => array(),
+      'third_party_settings' => array(),
     );
   }
 

@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Controller;
 
+use Drupal\entity\Entity\EntityFormDisplay;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
@@ -52,7 +53,13 @@ class OG {
 //      entity_property_info_cache_clear();
     }
 
-    // todo: Create the widget of the field.
+    $displayForm = EntityFormDisplay::load($entity_type . '.' . $bundle . '.default');
+
+    if (!$displayForm->getComponent($field_name) && $widgetDefinition = $og_field->widgetDefinition()) {
+      $displayForm->setComponent($field_name, $widgetDefinition);
+      $displayForm->save();
+    }
+
     // todo: Create the view modes.
   }
 

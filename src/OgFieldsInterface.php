@@ -23,7 +23,7 @@ interface OgFieldsInterface {
   public function instanceDefinition();
 
   /**
-   * @return
+   * @return array
    *   A widget definition for the field.
    */
   public function widgetDefinition();
