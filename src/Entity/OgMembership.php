@@ -11,7 +11,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
 use Drupal\og\Controller\OG;
 
@@ -304,46 +304,46 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = array();
 
-    $fields['id'] = FieldDefinition::create('integer')
+    $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('ID'))
       ->setDescription(t("The group membership's unique ID."))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
-    $fields['type'] = FieldDefinition::create('entity_reference')
+    $fields['type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Type'))
       ->setDescription(t('The bundle of the membership'))
       ->setSetting('target_type', 'og_membership_type');
 
-    $fields['etid'] = FieldDefinition::create('integer')
+    $fields['etid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Entity ID'))
       ->setDescription(t('The entity ID.'));
 
-    $fields['entity_type'] = FieldDefinition::create('string')
+    $fields['entity_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Entity type'))
       ->setDescription(t("The entity type (e.g. node, comment, etc')."));
 
-    $fields['group_type'] = FieldDefinition::create('string')
+    $fields['group_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Entity ID'))
       ->setDescription(t('The entity ID.'));
 
-    $fields['gid'] = FieldDefinition::create('integer')
+    $fields['gid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Group ID.'))
       ->setDescription(t("The group's entity type (e.g. node, comment, etc')."));
 
-    $fields['state'] = FieldDefinition::create('integer')
+    $fields['state'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('State'))
       ->setDescription(t("The state of the group content."));
 
-    $fields['created'] = FieldDefinition::create('created')
+    $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Create'))
       ->setDescription(t('The Unix timestamp when the group content was created.'));
 
-    $fields['field_name'] = FieldDefinition::create('string')
+    $fields['field_name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Field name'))
       ->setDescription(t("The name of the field holding the group ID, the OG membership is associated with."));
 
-    $fields['language'] = FieldDefinition::create('language')
+    $fields['language'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language'))
       ->setDescription(t('The {languages}.language of this membership.'));
 

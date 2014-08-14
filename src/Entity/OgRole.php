@@ -7,7 +7,7 @@ namespace Drupal\og\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * @ContentEntityType(
@@ -149,23 +149,23 @@ class OgRole extends ContentEntityBase {
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = array();
 
-    $fields['rid'] = FieldDefinition::create('integer')
+    $fields['rid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Role ID'))
       ->setDescription(t('Primary Key: Unique role ID.'));
 
-    $fields['gid'] = FieldDefinition::create('integer')
+    $fields['gid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Group ID'))
       ->setDescription(t("The group's unique ID."));
 
-    $fields['group_type'] = FieldDefinition::create('string')
+    $fields['group_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group type'))
       ->setDescription(t("The group's entity type."));
 
-    $fields['group_bundle'] = FieldDefinition::create('string')
+    $fields['group_bundle'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group bundle'))
       ->setDescription(t("The group's bundle name."));
 
-    $fields['name'] = FieldDefinition::create('string')
+    $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
       ->setDescription(t('Unique role name per group.'));
 

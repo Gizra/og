@@ -9,7 +9,7 @@ namespace Drupal\og\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\user\Entity\User;
 
 /**
@@ -131,26 +131,26 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = array();
 
-    $fields['id'] = FieldDefinition::create('integer')
+    $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('ID'))
       ->setDescription(t('The unique identifier'))
       ->setReadOnly(TRUE);
 
-    $fields['uid'] = FieldDefinition::create('entity_reference')
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('User'))
       ->setDescription(t("The user's role object."))
       ->setSetting('target_type', 'user');
 
-    $fields['rid'] = FieldDefinition::create('entity_reference')
+    $fields['rid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('OG role'))
       ->setDescription(t('The OG role entity.'))
       ->setSetting('target_type', 'og_role');
 
-    $fields['gid'] = FieldDefinition::create('integer')
+    $fields['gid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Group ID'))
       ->setDescription(t("The group's unique ID."));
 
-    $fields['group_type'] = FieldDefinition::create('string')
+    $fields['group_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group type'))
       ->setDescription(t("The group's entity type."));
 

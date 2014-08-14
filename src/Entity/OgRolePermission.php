@@ -9,7 +9,7 @@ namespace Drupal\og\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * OG mange permission for users per group as an autonomic authority on your
@@ -36,21 +36,21 @@ class OgRolePermission extends ContentEntityBase {
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = array();
 
-    $fields['id'] = FieldDefinition::create('integer')
+    $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('ID'))
       ->setDescription(t('The identifier of the row.'))
       ->setReadOnly(TRUE);
 
-    $fields['rid'] = FieldDefinition::create('entity_reference')
+    $fields['rid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Role ID'))
       ->setDescription(t('The role object.'))
       ->setSetting('target_type', 'og_role');
 
-    $fields['permission'] = FieldDefinition::create('string')
+    $fields['permission'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Permission'))
       ->setDescription(t('The permission it self'));
 
-    $fields['module'] = FieldDefinition::create('string')
+    $fields['module'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Module'))
       ->setDescription(t('The module defining the permission'));
 
