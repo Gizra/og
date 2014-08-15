@@ -59,19 +59,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
       'bundle' => $this->getBundle(),
-      'settings' => array(
-        'behaviors' => array(
-          'og_widget' => array(
-            'status' => TRUE,
-            'default' => array(
-              'widget_type' => 'options_select',
-            ),
-            'admin' => array(
-              'widget_type' => 'entityreference_autocomplete',
-            ),
-          ),
-        ),
-      ),
     ));
   }
 
@@ -92,17 +79,19 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function viewModesDefinition() {
-    array(
-      'view modes' => array(
-        'full' => array(
-          'label' => t('Full'),
-          'type' => 'og_list_default',
-          'custom settings' => FALSE,
+    return array(
+      'full' => array(
+        'label' => "above",
+        'type' => "entity_reference_label",
+        'settings' => array(
+          'link' => TRUE,
         ),
-        'teaser' => array(
-          'label' => t('Teaser'),
-          'type' => 'og_list_default',
-          'custom settings' => FALSE,
+      ),
+      'teaser' => array(
+        'label' => "above",
+        'type' => "entity_reference_label",
+        'settings' => array(
+          'link' => TRUE,
         ),
       ),
     );
