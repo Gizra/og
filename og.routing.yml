@@ -1,0 +1,7 @@
+og.entity_reference.autocomplete:
+  path: '/og/autocomplete/{type}/{field_name}/{entity_type}/{bundle_name}/{entity_id}'
+  defaults:
+    _controller: '\Drupal\og\Controller\OG::handleAutocomplete'
+    entity_id: 'NULL'
+  requirements:
+    _access: 'TRUE'
