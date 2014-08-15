@@ -18,9 +18,9 @@ class OG {
    *   The bundle name.
    */
   public static function CreateField($field_name, $entity_type, $bundle) {
-      $og_field = self::FieldsInfo($field_name)
-        ->setEntityType($entity_type)
-        ->setBundle($bundle);
+    $og_field = self::FieldsInfo($field_name)
+      ->setEntityType($entity_type)
+      ->setBundle($bundle);
 
     $field = entity_load('field_storage_config', $entity_type . '.' . $og_field->fieldDefinition()->getName());
 
@@ -42,8 +42,7 @@ class OG {
       $og_field->instanceDefinition()->save();
       // Clear the entity property info cache, as OG fields might add different
       // entity property info.
-//      og_invalidate_cache();
-//      entity_property_info_cache_clear();
+      self::invalidateCache();
     }
 
     // Add the field to the form display manager.
@@ -83,5 +82,34 @@ class OG {
     }
 
     return $fields_config;
+  }
+
+  /**
+   * Invalidate cache.
+   *
+   * @param $gids
+   *   Array with group IDs that their cache should be invalidated.
+   */
+  public static function invalidateCache($gids = array()) {
+    // Reset static cache.
+    $caches = array(
+      'og_user_access',
+      'og_user_access_alter',
+      'og_role_permissions',
+      'og_get_user_roles',
+      'og_get_permissions',
+      'og_get_group_audience_fields',
+      'og_get_entity_groups',
+      'og_get_membership',
+      'og_get_field_og_membership_properties',
+      'og_get_user_roles',
+    );
+
+    foreach ($caches as $cache) {
+      drupal_static_reset($cache);
+    }
+
+    // Let other OG modules know we invalidate cache.
+    \Drupal::moduleHandler()->invokeAll('og_invalidate_cache', $gids);
   }
 }

@@ -1364,36 +1364,6 @@ function _og_is_group($entity_type, $entity) {
   return !empty($wrapper->{OG_GROUP_FIELD}) && $wrapper->{OG_GROUP_FIELD}->value();
 }
 
-
-/**
- * Invalidate cache.
- *
- * @param $gids
- *   Array with group IDs that their cache should be invalidated.
- */
-function _og_invalidate_cache($gids = array()) {
-  // Reset static cache.
-  $caches = array(
-    'og_user_access',
-    'og_user_access_alter',
-    'og_role_permissions',
-    'og_get_user_roles',
-    'og_get_permissions',
-    'og_get_group_audience_fields',
-    'og_get_entity_groups',
-    'og_get_membership',
-    'og_get_field_og_membership_properties',
-    'og_get_user_roles',
-  );
-
-  foreach ($caches as $cache) {
-    drupal_static_reset($cache);
-  }
-  // Let other OG modules know we invalidate cache.
-  module_invoke_all('og_invalidate_cache', $gids);
-}
-
-
 /**
  * Return all existing groups of an entity type.
  */
