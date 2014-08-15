@@ -3,7 +3,7 @@
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\Plugin\PluginBase;
+use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
 /**
@@ -16,7 +16,7 @@ use Drupal\og\OgFieldsInterface;
  *  multiple = TRUE
  * )
  */
-class AudienceField extends PluginBase implements OgFieldsInterface {
+class AudienceField extends OgFieldBase implements OgFieldsInterface {
 
   /**
    * {@inheritdoc}

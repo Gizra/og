@@ -2,11 +2,9 @@
 
 namespace Drupal\og\Plugin\OgFields;
 
-use Drupal\Core\Plugin\PluginBase;
 use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldBase;
-use Drupal\og\OgFieldsInterface;
 
 /**
  * Redirects to a message deletion form.

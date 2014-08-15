@@ -2,7 +2,7 @@
 
 namespace Drupal\og\Plugin\OgFields;
 
-use Drupal\Core\Plugin\PluginBase;
+use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
 /**
@@ -14,7 +14,7 @@ use Drupal\og\OgFieldsInterface;
  *  description = @Translation("Determine if group should use default roles and permissions.")
  * )
  */
-class DefaultAccessField extends PluginBase implements OgFieldsInterface {
+class DefaultAccessField extends OgFieldBase implements OgFieldsInterface {
 
   /**
    * {@inheritdoc}
