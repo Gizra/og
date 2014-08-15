@@ -3,6 +3,8 @@
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
@@ -22,9 +24,10 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function fieldDefinition() {
-    $config = array(
-      'field_name' => OG_AUDIENCE_FIELD,
-      'type' => 'entityreference',
+    return FieldStorageConfig::create(array(
+      'name' => OG_AUDIENCE_FIELD,
+      'entity_type' => $this->getEntityType(),
+      'type' => 'entity_reference',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings' => array(
         'handler' => 'og',
@@ -38,22 +41,24 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
           'target_bundles' => array(),
           'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
         ),
+        // todo: allow to change the node type.
         'target_type' => 'node',
       ),
-    );
+    ));
   }
 
   /**
    * {@inheritdoc}
    */
   public function instanceDefinition() {
-    $config = array(
+    return FieldInstanceConfig::create(array(
       'label' => t('Groups audience'),
-      'widget' => array(
-        'type' => 'og_complex',
-        'module' => 'og',
-        'settings' => array(),
-      ),
+      'description' => t('Determine if this is an OG group.'),
+      'default_value' => array(0 => array('value' => 1)),
+      'display_label' => 1,
+      'field_name' => OG_AUDIENCE_FIELD,
+      'entity_type' => $this->getEntityType(),
+      'bundle' => $this->getBundle(),
       'settings' => array(
         'behaviors' => array(
           'og_widget' => array(
@@ -67,6 +72,27 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
           ),
         ),
       ),
+    ));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function widgetDefinition() {
+    // Keep this until og_complex widget is back.
+    return array(
+      'type' => "entity_reference_autocomplete",
+      'settings' => array(
+        'match_operator' => "CONTAINS"
+      ),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function viewModesDefinition() {
+    array(
       'view modes' => array(
         'full' => array(
           'label' => t('Full'),
@@ -80,17 +106,5 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
         ),
       ),
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function widgetDefinition() {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function viewModesDefinition() {
   }
 }
