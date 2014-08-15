@@ -4,7 +4,6 @@ namespace Drupal\og\Controller;
 
 use Drupal\entity\Entity\EntityFormDisplay;
 use Drupal\og\OgFieldBase;
-use Drupal\og\OgFieldsInterface;
 
 class OG {
 
@@ -17,17 +16,11 @@ class OG {
    *   The entity type.
    * @param $bundle
    *   The bundle name.
-   * @param $og_field
-   *   (optional) Array with field definitions, to allow easier overriding by
-   *   the caller. If empty, function will get the field info by calling
-   *   OG::FieldsInfo() with the field name.
    */
-  public static function CreateField($field_name, $entity_type, $bundle, $og_field = array()) {
-    if (empty($og_field)) {
+  public static function CreateField($field_name, $entity_type, $bundle) {
       $og_field = self::FieldsInfo($field_name)
         ->setEntityType($entity_type)
         ->setBundle($bundle);
-    }
 
     $field = entity_load('field_storage_config', $entity_type . '.' . $og_field->fieldDefinition()->getName());
 
