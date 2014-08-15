@@ -54,7 +54,6 @@ class FieldGroup extends OgFieldBase {
     return array(
       'type' => 'options_select',
       'settings' => array(),
-      'third_party_settings' => array(),
     );
   }
 

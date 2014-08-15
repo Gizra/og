@@ -57,12 +57,9 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function widgetDefinition() {
-    array(
-      'widget' => array(
-        'module' => 'options',
-        'settings' => array(),
-        'type' => 'options_select',
-      ),
+    return array(
+      'type' => 'options_select',
+      'settings' => array(),
     );
   }
 
@@ -70,18 +67,14 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function viewModesDefinition()  {
-    array(
-      'view modes' => array(
-        'full' => array(
-          'label' => t('Full'),
-          'type' => 'list_default',
-          'custom settings' => FALSE,
-        ),
-        'teaser' => array(
-          'label' => t('Teaser'),
-          'type' => 'list_default',
-          'custom settings' => FALSE,
-        ),
+    return array(
+      'full' => array(
+        'type' => "list_default",
+        'label' => "above",
+      ),
+      'teaser' => array(
+        'type' => "list_default",
+        'label' => "above",
       ),
     );
   }
