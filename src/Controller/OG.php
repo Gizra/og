@@ -142,6 +142,15 @@ class OG {
    *   The matched labels as json.
    */
   public static function handleAutocomplete(Request $request, $type, $field_name, $entity_type, $bundle_name, $entity_id) {
+//    dpm($request->query->get('q'));
+
+    // todo: Add the label.
+    $query = \Drupal::entityQuery($entity_type)
+      ->condition(OG_GROUP_FIELD, 1)
+      ->execute();
+
+    return;
+
     $definitions = \Drupal::entityManager()->getFieldDefinitions($entity_type, $bundle_name);
 
     if (!isset($definitions[$field_name])) {
