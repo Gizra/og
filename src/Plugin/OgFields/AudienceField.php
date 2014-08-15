@@ -15,7 +15,6 @@ use Drupal\og\OgFieldsInterface;
  *  id = OG_AUDIENCE_FIELD,
  *  type = "group",
  *  description = @Translation("Determine to which groups this group content is assigned to."),
- *  multiple = TRUE
  * )
  */
 class AudienceField extends OgFieldBase implements OgFieldsInterface {
