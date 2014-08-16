@@ -28,6 +28,7 @@ class FieldGroup extends OgFieldBase {
       'cardinality' => 1,
       'settings' => array(
         'allowed_values' => array(0 => 'Not a group', 1 => 'Group'),
+        'default_value' => 0,
       ),
     ));
   }

@@ -67,7 +67,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   public function widgetDefinition() {
     // Keep this until og_complex widget is back.
     return array(
-      'type' => "entity_reference_autocomplete",
+      'type' => "og_complex",
       'settings' => array(
         'match_operator' => "CONTAINS"
       ),
