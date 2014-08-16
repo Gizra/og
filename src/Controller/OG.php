@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Controller;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\entity\Entity\EntityFormDisplay;
 use Drupal\og\OgFieldBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -118,7 +119,8 @@ class OG {
   }
 
   /**
-   * Autocomplete the label of an entity.
+   * Autocomplete for the audience field. Return only entities which defined as
+   * group.
    *
    * @param Request $request
    *   The request object that contains the typed tags.
@@ -142,15 +144,6 @@ class OG {
    *   The matched labels as json.
    */
   public static function handleAutocomplete(Request $request, $type, $field_name, $entity_type, $bundle_name, $entity_id) {
-
-    $result = \Drupal::entityQuery($entity_type)
-      ->condition(OG_GROUP_FIELD, 1)
-      ->condition(\Drupal::entityManager()->getDefinition($entity_type)->getKey('label'), $request->query->get('q'), 'CONTAINS')
-      ->execute();
-
-
-    return;
-
     $definitions = \Drupal::entityManager()->getFieldDefinitions($entity_type, $bundle_name);
 
     if (!isset($definitions[$field_name])) {
@@ -163,11 +156,7 @@ class OG {
       throw new AccessDeniedHttpException();
     }
 
-    // Get the typed string, if exists from the URL.
-    $items_typed = $request->query->get('q');
-    $items_typed = Tags::explode($items_typed);
-    $last_item = drupal_strtolower(array_pop($items_typed));
-
+    // todo: see if we need this.
     $prefix = '';
     // The user entered a comma-separated list of entity labels, so we generate
     // a prefix.
@@ -175,8 +164,26 @@ class OG {
       $prefix = count($items_typed) ? Tags::implode($items_typed) . ', ' : '';
     }
 
-    //$matches = $this->entityReferenceAutocomplete->getMatches($field_definition, $entity_type, $bundle_name, $entity_id, $prefix, $last_item);
-    $matches[] = array('value' => $prefix . 2, 'label' => 'a');
+    $results = \Drupal::entityQuery($entity_type)
+      ->condition(OG_GROUP_FIELD, 1)
+      // todo: Use the operator define in the field settings.
+      ->condition(\Drupal::entityManager()->getDefinition($entity_type)->getKey('label'), $request->query->get('q'), 'CONTAINS')
+      ->range(0, 10)
+      ->execute();
+
+    /** @var EntityInterface[] $entities */
+    $entities = entity_load_multiple($entity_type, $results);
+
+    $matches = array();
+    foreach ($entities as $entity) {
+      $label = $entity->label();
+      $key = "$label (" . $entity->id() . ")";
+      // Strip things like starting/trailing white spaces, line breaks and tags.
+      $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
+      // Names containing commas or quotes must be wrapped in quotes.
+      $key = Tags::encode($key);
+      $matches[] = array('value' => $prefix . $key, 'label' => $label);
+    }
 
     return new JsonResponse($matches);
   }

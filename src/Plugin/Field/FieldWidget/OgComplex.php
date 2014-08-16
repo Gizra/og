@@ -36,4 +36,37 @@ class OgComplex extends AutocompleteWidget {
 
     return $return;
   }
+
+  /**
+   * Override the parent method. Additional to the entity reference validation
+   * there is another validation: check if the given entities are groups.
+   *
+   * A user can change the ID in the brackets easily and reference the group
+   * content to a non-group entity.
+   */
+  public function elementValidate($element, FormStateInterface $form_state, $form) {
+    parent::elementValidate($element, $form_state, $form);
+
+    preg_match("/.+\(([\w.]+)\)/", $element['#value'], $matches);
+
+    if (!$matches[1]) {
+      return;
+    }
+
+    $entity = entity_load($this->getFieldSetting('target_type'), $matches[1]);
+
+    $params['%label'] = $entity->label();
+
+    if (!$entity->hasField(OG_GROUP_FIELD)) {
+      $form_state->setError($element, t('The entity %label is not defined as a group.', $params));
+      return;
+    }
+
+    if (!$entity->get(OG_GROUP_FIELD)->value) {
+      $form_state->setError($element, t('The entity %label is not a group.', $params));
+      return;
+    }
+
+    // todo: Check the writing permission for the current user.
+  }
 }
