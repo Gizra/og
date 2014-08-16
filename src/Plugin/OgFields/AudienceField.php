@@ -79,7 +79,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    */
   public function viewModesDefinition() {
     return array(
-      'full' => array(
+      'default' => array(
         'label' => "above",
         'type' => "entity_reference_label",
         'settings' => array(

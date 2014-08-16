@@ -59,10 +59,11 @@ class OG {
 
     // Define the view mode for the field.
     if ($fieldViewModes = $og_field->viewModesDefinition()) {
+      $prefix = $entity_type . '.' . $bundle . '.';
       $viewModes = entity_load_multiple('entity_view_display', array_keys($fieldViewModes));
 
       foreach ($viewModes as $key => $viewMode) {
-        $viewMode->setComponent($field_name, $fieldViewModes[$key])->save();
+        $viewMode->setComponent($field_name, $fieldViewModes[$prefix . $key])->save();
       }
     }
   }

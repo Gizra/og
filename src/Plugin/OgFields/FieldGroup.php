@@ -62,14 +62,12 @@ class FieldGroup extends OgFieldBase {
    * {@inheritdoc}
    */
   public function viewModesDefinition() {
-    $prefix = $this->getEntityType() . '.' . $this->getBundle() . '.';
-
     return array(
-      $prefix . 'default' => array(
+      'default' => array(
         'type' => 'list_key',
         'label' => 'inline',
       ),
-      $prefix . 'teaser' => array(
+      'teaser' => array(
         'type' => 'list_key',
         'label' => 'inline',
       ),

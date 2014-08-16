@@ -68,7 +68,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    */
   public function viewModesDefinition()  {
     return array(
-      'full' => array(
+      'default' => array(
         'type' => "list_default",
         'label' => "above",
       ),
