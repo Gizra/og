@@ -99,32 +99,6 @@ function _og_help($path, $arg) {
 }
 
 /**
- * Implements hook_menu().
- */
-function _og_menu() {
-  $items = array();
-
-  // Add our own autocomplete callback to pass also the group and
-  // vocabulary info.
-  $items['og/autocomplete/single/%/%/%/%'] = array(
-    'title' => 'Entity Reference Autocomplete',
-    'page callback' => 'og_entityreference_autocomplete_callback',
-    'page arguments' => array(2, 3, 4, 5, 6),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-  $items['og/autocomplete/tags/%/%/%/%'] = array(
-    'title' => 'Entity Reference Autocomplete',
-    'page callback' => 'og_entityreference_autocomplete_callback',
-    'page arguments' => array(2, 3, 4, 5, 6),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-
-  return $items;
-}
-
-/**
  * Implements hook_modules_uninstalled().
  */
 function _og_modules_uninstalled($modules) {
