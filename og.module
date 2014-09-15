@@ -1459,8 +1459,16 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
     $fields['bundle']['table'] = $base_table;
     $fields['bundle']['field'] = !empty($entity_info['entity keys']['bundle']) ? $entity_info['entity keys']['bundle'] : $id;
     $fields['entity_type']['table'] = 'ogm';
+    $fields['entity_type']['field'] = 'entity_type';
     $fields['entity_id']['table'] = 'ogm';
     $fields['entity_id']['field'] = 'etid';
+
+    // Populate the alias key, as it might be empty on COUNT queries.
+    foreach (array_keys($fields) as $key) {
+      if (empty($fields[$key]['alias'])) {
+        $fields[$key]['alias'] = $key;
+      }
+    }
 
     $ogm = array(
       'join type' => NULL,
