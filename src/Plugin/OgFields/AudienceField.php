@@ -50,7 +50,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function instanceDefinition() {
-    return FieldInstanceConfig::create(array(
+    return FieldStorageConfig::create(array(
       'label' => t('Groups audience'),
       'description' => t('Determine if this is an OG group.'),
       'default_value' => array(0 => array('value' => 1)),

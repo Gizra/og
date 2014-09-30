@@ -41,7 +41,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function instanceDefinition() {
-    return FieldInstanceConfig::create(array(
+    return FieldStorageConfig::create(array(
       'label' => t('Group roles and permissions'),
       'description' => t('Determine if group should use default roles and permissions.'),
       'default_value' => array(0 => array('value' => 0)),

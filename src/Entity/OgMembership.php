@@ -356,7 +356,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   public function PreSave(EntityStorageInterface $storage) {
 
     if (!$this->getFieldName()) {
-      $this->setFieldName(OG::AUDIENCE_FIELD);
+      $this->setFieldName(OG_AUDIENCE_FIELD);
     }
 
     parent::PreSave($storage);

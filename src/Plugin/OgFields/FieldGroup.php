@@ -37,7 +37,7 @@ class FieldGroup extends OgFieldBase {
    * {@inheritdoc}
    */
   public function instanceDefinition() {
-    return FieldInstanceConfig::create(array(
+    return FieldStorageConfig::create(array(
       'label' => t('Group'),
       'description' => t('Determine if this is an OG group.'),
       'default_value' => array(0 => array('value' => 1)),
