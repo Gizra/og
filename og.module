@@ -102,20 +102,39 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
  * @param EntityInterface $entity
  */
 function og_entity_presave(EntityInterface $entity) {
-  if (OG::IsGroupContent($entity)) {
-    // Remove any values from the audience field.
-    $entity->set(OG_AUDIENCE_FIELD, NULL);
+  if (!OG::IsGroupContent($entity)) {
+    return;
+  }
 
-    // todo: check when field is multiple.
-    // todo: Handle when updating the field.
+  $field = $entity->get(OG_AUDIENCE_FIELD);
 
-    // Create the OG membership.
+  $groups = array();
+  if ($field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality()) {
+    foreach ($field as $info) {
+      $value = $info->getValue(TRUE);
+
+      $entity = $value['entity'];
+      $groups[] = array('id' => $entity->id(), 'type' => $entity->getEntityType());
+    }
+  }
+  else {
+
+  }
+
+  // Remove any values from the audience field.
+  $entity->set(OG_AUDIENCE_FIELD, NULL);
+
+  // todo: check when field is multiple.
+  // todo: Handle when updating the field.
+
+  // Create the OG membership.
+  foreach ($groups as $group) {
     $membership = OgMembership::create(array('type' => 'og_membership_type_default'));
     $membership
       ->setContentId($entity->id())
       ->setContentType($entity->getEntityTypeId())
-      ->setGid(1)
-      ->setEntityType('node')
+      ->setGid($group['id'])
+      ->setEntityType($group['type'])
       ->setFieldName(OG_AUDIENCE_FIELD)
       ->save();
   }
