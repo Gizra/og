@@ -4,7 +4,7 @@
  * @file
  * Main class for OG membership entities provided by Entity API.
  */
-class OgMembership extends Entity {
+class __OgMembership extends Entity {
   public function __construct(array $values = array(), $entityType = NULL) {
     parent::__construct($values, 'og_membership');
   }

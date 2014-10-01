@@ -7,6 +7,7 @@
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Controller\OG;
+use Drupal\og\Entity\OgMembership;
 
 /**
  * Define active group content states.
@@ -92,6 +93,31 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
   if (OG::IsGroupContent($entity)) {
 
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ *
+ * @param EntityInterface $entity
+ */
+function og_entity_presave(EntityInterface $entity) {
+  if (OG::IsGroupContent($entity)) {
+    // Remove any values from the audience field.
+    $entity->set(OG_AUDIENCE_FIELD, NULL);
+
+    // todo: check when field is multiple.
+    // todo: Handle when updating the field.
+
+    // Create the OG membership.
+    $membership = OgMembership::create(array('type' => 'og_membership_type_default'));
+    $membership
+      ->setContentId($entity->id())
+      ->setContentType($entity->getEntityTypeId())
+      ->setGid(1)
+      ->setEntityType('node')
+      ->setFieldName(OG_AUDIENCE_FIELD)
+      ->save();
   }
 }
 

@@ -22,11 +22,11 @@ use Drupal\og\Controller\OG;
  * @code:
  *  $membership = OgMembership::create(array('type' => 'og_membership_type_default'));
  *  $membership
- *    ->setEtid(2)
- *    ->setGroupType('node')
+ *    ->setContentId(2)
+ *    ->setContentType('node')
  *    ->setGid(1)
  *    ->setEntityType('node')
- *    ->setFieldName(OG::AUDIENCE_FIELD)
+ *    ->setFieldName(OG_AUDIENCE_FIELD)
  *    ->save();
  * @endcode
  *
@@ -129,7 +129,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @param mixed $created
    *
-   * @return $this.
+   * @return OgMembership.
    */
   public function setCreated($created) {
     $this->set('created', $created);
@@ -146,7 +146,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @param mixed $entityType
    *
-   * @return $this.
+   * @return OgMembership.
    */
   public function setEntityType($entityType) {
     $this->set('entity_type', $entityType);
@@ -165,9 +165,9 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @param mixed $etid
    *
-   * @return $this.
+   * @return OgMembership
    */
-  public function setEtid($etid) {
+  public function setContentId($etid) {
     $this->set('etid', $etid);
     return $this;
   }
@@ -175,14 +175,14 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @return mixed
    */
-  public function getEtid() {
+  public function getContentId() {
     return $this->get('etid')->value;
   }
 
   /**
    * @param mixed $fieldName
    *
-   * @return $this.
+   * @return OgMembership.
    */
   public function setFieldName($fieldName) {
     $this->set('field_name', $fieldName);
@@ -199,7 +199,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @param mixed $gid
    *
-   * @return $this.
+   * @return OgMembership.
    */
   public function setGid($gid) {
     $this->set('gid', $gid);
@@ -216,9 +216,9 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @param mixed $groupType
    *
-   * @return $this.
+   * @return OgMembership
    */
-  public function setGroupType($groupType) {
+  public function setContentType($groupType) {
     $this->set('group_type', $groupType);
     return $this;
   }
@@ -226,14 +226,14 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @return mixed
    */
-  public function getGroupType() {
+  public function getContentType() {
     return $this->get('group_type')->value;
   }
 
   /**
    * @param mixed $id
    *
-   * @return $this.
+   * @return OgMembership.
    */
   public function setId($id) {
     $this->set('id', $id);
@@ -250,7 +250,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @param mixed $language
    *
-   * @return $this.
+   * @return OgMembership.
    */
   public function setLanguage($language) {
     $this->set('language', $language);
@@ -267,7 +267,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @param mixed $state
    *
-   * @return $this.
+   * @return OgMembership.
    */
   public function setState($state) {
     $this->set('state', $state);
@@ -284,7 +284,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @param mixed $type
    *
-   * @return $this.
+   * @return OgMembership.
    */
   public function setType($type) {
     $this->set('type', $type);

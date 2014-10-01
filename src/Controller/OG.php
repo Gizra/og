@@ -209,6 +209,7 @@ class OG {
    * @return Bool
    */
   public static function IsGroupContent(EntityInterface $entity) {
-    // todo.
+    // todo: handle other names of the audience field.
+    return method_exists($entity, 'baseFieldDefinitions') && $entity->hasField(OG_AUDIENCE_FIELD);
   }
 }
