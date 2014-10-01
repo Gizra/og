@@ -24,13 +24,6 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   protected $bundle;
 
   /**
-   * @var String
-   *
-   * The field type.
-   */
-  protected $FieldType;
-
-  /**
    * Set the entity type.
    *
    * @param String $entity_type

@@ -4,6 +4,8 @@
  * @file
  * Enable users to create and manage groups with roles and permissions.
  */
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Controller\OG;
 
 /**
@@ -80,6 +82,18 @@ define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
  * 3. API: Move API function like og_is_group to the og controller.
  * 4. Move the define into the controller class.
  */
+
+/**
+ * Implements hook_entity_access().
+ */
+function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account, $langcode) {
+  if (OG::IsGroup($entity)) {
+  }
+
+  if (OG::IsGroupContent($entity)) {
+
+  }
+}
 
 /**
  * Drupal 7 part.
@@ -1315,25 +1329,6 @@ function _og_membership_label($og_membership) {
 function _og_membership_access($op, $entity, $account = NULL, $entity_type = 'og_membership') {
   // No-end user needs access to this entity, so restrict it to admins.
   return user_access('administer group');
-}
-
-
-/**
- * Return TRUE if the entity is acting as a group.
- *
- * @param $entity_type
- *   The entity type.
- * @param $entity
- *   The entity object, or the entity ID.
- */
-function _og_is_group($entity_type, $entity) {
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  $bundle = $wrapper->getBundle();
-
-  if (!field_info_instance($entity_type, OG_GROUP_FIELD, $bundle)) {
-    return variable_get("og_is_group__{$entity_type}__{$bundle}", FALSE);
-  }
-  return !empty($wrapper->{OG_GROUP_FIELD}) && $wrapper->{OG_GROUP_FIELD}->value();
 }
 
 /**

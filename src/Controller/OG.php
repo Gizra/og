@@ -3,6 +3,7 @@
 namespace Drupal\og\Controller;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -184,5 +185,30 @@ class OG {
     }
 
     return new JsonResponse($matches);
+  }
+
+  /**
+   * Check if the given entity is a group.
+   *
+   * @param EntityInterface $entity
+   *   The entity object.
+   *
+   * @return bool
+   *   True or false if the given entity is group.
+   */
+  public static function IsGroup(EntityInterface $entity) {
+    return method_exists($entity, 'baseFieldDefinitions') && $entity->hasField(OG_GROUP_FIELD);
+  }
+
+  /**
+   * Check if the given entity is a group content.
+   *
+   * @param EntityInterface $entity
+   *   The entity object.
+   *
+   * @return Bool
+   */
+  public static function IsGroupContent(EntityInterface $entity) {
+    // todo.
   }
 }
