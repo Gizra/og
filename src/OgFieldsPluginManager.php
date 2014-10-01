@@ -28,7 +28,7 @@ class OgFieldsPluginManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/OgFields', $namespaces, $module_handler, 'Drupal\og\Annotation\OgFields');
+    parent::__construct('Plugin/OgFields', $namespaces, $module_handler, NULL, 'Drupal\og\Annotation\OgFields');
     $this->alterInfo('og_fields_alter');
     $this->setCacheBackend($cache_backend, 'og_fields');
   }

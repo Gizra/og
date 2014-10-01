@@ -24,12 +24,19 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   protected $bundle;
 
   /**
+   * @var String
+   *
+   * The field type.
+   */
+  protected $FieldType;
+
+  /**
    * Set the entity type.
    *
    * @param String $entity_type
    *   The entity type.
    *
-   * @return $this
+   * @return OgFieldBase
    */
   public function setEntityType($entity_type) {
     $this->entityType = $entity_type;
@@ -49,7 +56,7 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
    * @param String $bundle
    *   The entity bundle.
    *
-   * @return $this
+   * @return OgFieldBase
    */
   public function setBundle($bundle) {
     $this->bundle = $bundle;

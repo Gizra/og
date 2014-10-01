@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\OgFields;
 
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldBase;
@@ -23,7 +24,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    */
   public function fieldDefinition() {
     return FieldStorageConfig::create(array(
-      'name' => OG_DEFAULT_ACCESS_FIELD,
+      'field_name' => OG_DEFAULT_ACCESS_FIELD,
       'entity_type' => $this->getEntityType(),
       'type' => 'list_integer',
       'cardinality' => 1,
@@ -41,7 +42,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function instanceDefinition() {
-    return FieldStorageConfig::create(array(
+    return FieldConfig::create(array(
       'label' => t('Group roles and permissions'),
       'description' => t('Determine if group should use default roles and permissions.'),
       'default_value' => array(0 => array('value' => 0)),

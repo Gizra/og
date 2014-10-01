@@ -2,8 +2,10 @@
 
 namespace Drupal\og\Controller;
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\entity\Entity\EntityFormDisplay;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,10 +29,7 @@ class OG {
       ->setEntityType($entity_type)
       ->setBundle($bundle);
 
-    $field = entity_load('field_storage_config', $entity_type . '.' . $og_field->fieldDefinition()->getName());
-
-    if (!$field) {
-      // The field storage config not exists. Create it.
+    if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
       $og_field->fieldDefinition()->save();
     }
 
@@ -41,9 +40,7 @@ class OG {
 //      $og_field['field']->save();
 //    }
 
-    $instance = entity_load('field_instance_config', $entity_type . '.' . $bundle . '.' . $field_name);
-
-    if (!$instance) {
+    if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
       $og_field->instanceDefinition()->save();
       // Clear the entity property info cache, as OG fields might add different
       // entity property info.

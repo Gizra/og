@@ -3,6 +3,7 @@
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldBase;
@@ -24,7 +25,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    */
   public function fieldDefinition() {
     return FieldStorageConfig::create(array(
-      'name' => OG_AUDIENCE_FIELD,
+      'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
       'type' => 'entity_reference',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
@@ -50,7 +51,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function instanceDefinition() {
-    return FieldStorageConfig::create(array(
+    return FieldConfig::create(array(
       'label' => t('Groups audience'),
       'description' => t('Determine if this is an OG group.'),
       'default_value' => array(0 => array('value' => 1)),

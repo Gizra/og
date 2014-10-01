@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\OgFields;
 
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldBase;
@@ -17,14 +18,16 @@ use Drupal\og\OgFieldBase;
  */
 class FieldGroup extends OgFieldBase {
 
+  protected $FieldType = 'list_integer';
+
   /**
    * {@inheritdoc}
    */
   public function fieldDefinition() {
     return FieldStorageConfig::create(array(
-      'name' => OG_GROUP_FIELD,
+      'field_name' => OG_GROUP_FIELD,
       'entity_type' => $this->getEntityType(),
-      'type' => 'list_integer',
+      'type' => $this->FieldType,
       'cardinality' => 1,
       'settings' => array(
         'allowed_values' => array(0 => 'Not a group', 1 => 'Group'),
@@ -37,11 +40,12 @@ class FieldGroup extends OgFieldBase {
    * {@inheritdoc}
    */
   public function instanceDefinition() {
-    return FieldStorageConfig::create(array(
+    return FieldConfig::create(array(
       'label' => t('Group'),
       'description' => t('Determine if this is an OG group.'),
       'default_value' => array(0 => array('value' => 1)),
       'display_label' => 1,
+      'type' => $this->FieldType,
       'field_name' => OG_GROUP_FIELD,
       'entity_type' => $this->getEntityType(),
       'bundle' => $this->getBundle(),
