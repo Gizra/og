@@ -10,6 +10,13 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
+ * todo: Find a way to attach the roles to group:
+ *  - UUID?
+ *  - Service?
+ *
+ * Convert into
+ *
+ *
  * @ContentEntityType(
  *   id = "og_role",
  *   label = @Translation("OG role"),

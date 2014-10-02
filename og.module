@@ -9,6 +9,8 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Controller\OG;
 use Drupal\og\Entity\OgMembership;
 
+// todo: look on: https://www.drupal.org/node/1952758.
+
 /**
  * Define active group content states.
  *
@@ -129,6 +131,11 @@ function og_entity_presave(EntityInterface $entity) {
 
   // Create the OG membership.
   foreach ($groups as $group) {
+    // Check this one.
+    $manager = \Drupal::entityManager();
+    $membership = $manager->createInstance('og_membership', array('type' => 'og_membership_type_default'));
+
+
     $membership = OgMembership::create(array('type' => 'og_membership_type_default'));
     $membership
       ->setContentId($entity->id())
