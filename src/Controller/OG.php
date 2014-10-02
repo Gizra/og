@@ -2,11 +2,13 @@
 
 namespace Drupal\og\Controller;
 
+use Drupal\Core\Entity\ContentEntityType;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgFieldBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -197,7 +199,8 @@ class OG {
    *   True or false if the given entity is group.
    */
   public static function IsGroup(EntityInterface $entity) {
-    return method_exists($entity, 'baseFieldDefinitions') && $entity->hasField(OG_GROUP_FIELD);
+    $definition = \Drupal::entityManager()->getDefinition($entity->getEntityTypeId());
+    return $definition instanceof ContentEntityType && $entity->hasField(OG_GROUP_FIELD);
   }
 
   /**
@@ -209,7 +212,23 @@ class OG {
    * @return Bool
    */
   public static function IsGroupContent(EntityInterface $entity) {
-    // todo: handle other names of the audience field.
-    return method_exists($entity, 'baseFieldDefinitions') && $entity->hasField(OG_AUDIENCE_FIELD);
+    $definition = \Drupal::entityManager()->getDefinition($entity->getEntityTypeId());
+    return $definition instanceof ContentEntityType && $entity->hasField(OG_AUDIENCE_FIELD);
+  }
+
+  /**
+   * Get the storage manage for the OG membership entity.
+   *
+   * @return OgMembership
+   */
+  public static function MembershipStorage() {
+    return \Drupal::entityManager()->getStorage('og_membership');
+  }
+
+  /**
+   * Get the default constructor parameters for OG membership.
+   */
+  public static function MembershipDefault() {
+    return array('type' => 'og_membership_type_default');
   }
 }
