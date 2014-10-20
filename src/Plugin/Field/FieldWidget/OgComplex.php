@@ -38,6 +38,16 @@ class OgComplex extends AutocompleteWidget {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
+    // todo: issue #2 in OG 8 issue queue.
+    $elements = parent::formMultipleElements($items, $form, $form_state);
+
+    return $elements;
+  }
+
+  /**
    * Override the parent method. Additional to the entity reference validation
    * there is another validation: check if the given entities are groups.
    *
