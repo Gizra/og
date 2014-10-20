@@ -90,12 +90,14 @@ define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
  * Implements hook_entity_access().
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account, $langcode) {
-  if (OG::IsGroup($entity)) {
-  }
+// todo: issue #3 in OG 8 issue queue.
 
-  if (OG::IsGroupContent($entity)) {
-
-  }
+//  if (OG::IsGroup($entity)) {
+//  }
+//
+//  if (OG::IsGroupContent($entity)) {
+//
+//  }
 }
 
 /**
@@ -124,7 +126,7 @@ function og_entity_presave(EntityInterface $entity) {
   }
 
   // Remove any values from the audience field.
-  $entity->set(OG_AUDIENCE_FIELD, NULL);
+//  $entity->set(OG_AUDIENCE_FIELD, NULL);
 
   // todo: check when field is multiple.
   // todo: Handle when updating the field.
