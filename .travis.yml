@@ -28,7 +28,7 @@ before_script:
   # reference and enable module in build site
   - ln -s $(readlink -e $(cd -)) og/drupal/sites/all/modules/og
   - cd og/drupal
-  # Enable OG-UI, so drush will auto-download all dependencies
+  # enable OG-UI, so drush will auto-download all dependencies
   - drush --yes pm-enable og_ui
 
   # start a web server on port 8080, run in the background; wait for initialization
