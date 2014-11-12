@@ -763,9 +763,8 @@ function og_ui_field_formatter_view($entity_type, $entity, $field, $instance, $l
         }
       }
       if ($private) {
-        $count = count($element);
-        $delta = $count == 0 ? 0 : $count + 1;
-        $element[$delta] = array('#markup' => '- ' . t('Private group') . ' -');
+        $element = array_values($element);
+        $element[] = array('#markup' => '- ' . t('Private group') . ' -');
       }
 
       return $element;
