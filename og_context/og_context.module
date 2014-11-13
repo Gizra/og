@@ -185,14 +185,21 @@ function og_context_og_invalidate_cache($gids = array()) {
  *   The context to get by group type. Defaults to "node".
  * @param $group
  *   Optional; The group entity to set as the context.
+ * @param bool $check_access
+ *   Determines if access to the group should be done. Defaults to TRUE.
  *
- * @return
+ * @return array
  *   Array keyed by the group type and group ID, or FALSE if no context
  *   was found.
  */
-function og_context($group_type = 'node', $group = NULL) {
+function og_context($group_type = 'node', $group = NULL, $check_access = TRUE) {
   global $user;
   $context = &drupal_static(__FUNCTION__, FALSE);
+
+  if (!empty($group) && !entity_access('view', $group_type, $group)) {
+    // User doesn't have access to the group.
+    return FALSE;
+  }
 
   if (empty($group) && $context !== FALSE && (empty($context)) || (!empty($context['group_type']) && $context['group_type'] == $group_type)) {
     return $context;
@@ -208,7 +215,7 @@ function og_context($group_type = 'node', $group = NULL) {
     $context = array('group_type' => $group_type, 'gid' => $id);
   }
   // Get context from context handlers.
-  elseif ($gid = og_context_determine_context($group_type)) {
+  elseif ($gid = og_context_determine_context($group_type, NULL, $check_access)) {
     $context = array('group_type' => $group_type, 'gid' => $gid);
     if ($user->uid) {
       // Save the group ID in the authenticated user's session.
@@ -327,11 +334,13 @@ function og_context_provider_weight($provider) {
  * @param $item
  *   Optional; A menu item that context should be extracted from. If empty
  *   defaults to the current menu item by using menu_get_item().
+ * @param bool $check_access
+ *   Determines if access to the group should be done. Defaults to TRUE.
  *
- * @return
- *   The group ID for the current context.
+ * @return int
+ *   The group ID for the current context, or FALSE if not found.
  */
-function og_context_determine_context($group_type, $item = NULL) {
+function og_context_determine_context($group_type, $item = NULL, $check_access = TRUE) {
   // Enable url and node context handlers by default.
   $defaults = array('url' => -5, 'node' => -4);
   if (!$enabled_providers = variable_get('og_context_negotiation_group_context', $defaults)) {
