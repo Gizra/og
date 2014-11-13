@@ -370,14 +370,20 @@ function og_context_determine_context($group_type, $item = NULL) {
       // so use it.
       $gids = $contexts[$group_type];
       if (!empty($_SESSION['og_context']['group_type']) && $_SESSION['og_context']['group_type'] == $group_type && in_array($_SESSION['og_context']['gid'], $gids)) {
-        $gid = $_SESSION['og_context']['gid'];
+        $check_gid = $_SESSION['og_context']['gid'];
       }
       else {
         // Grab the first group ID.
-        $gid = reset($gids);
+        $check_gid = reset($gids);
       }
-      // We found the first context, so we can break.
-      break;
+
+      // Check if user has access to the group.
+      $group = entity_load_single($group_type, $check_gid);
+      if (entity_access('view', $group_type, $group)) {
+        // We found an accessible context, so we can break.
+        $gid = $check_gid;
+        break;
+      }
     }
   }
 
