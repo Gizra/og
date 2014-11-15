@@ -196,21 +196,34 @@ function og_context($group_type = 'node', $group = NULL, $check_access = TRUE) {
   global $user;
   $context = &drupal_static(__FUNCTION__, FALSE);
 
-  if (!empty($group) && !entity_access('view', $group_type, $group)) {
-    // User doesn't have access to the group.
-    return FALSE;
+  if (empty($group) && $context !== FALSE) {
+    // Determine if we can return cached values.
+    if (empty($context)) {
+      // We already tried to find a context, but couldn't.
+      return FALSE;
+    }
+
+    if ($context['group_type'] == $group_type) {
+      // Return the cached values.
+      return $context;
+    }
   }
 
-  if (empty($group) && $context !== FALSE && (empty($context)) || (!empty($context['group_type']) && $context['group_type'] == $group_type)) {
-    return $context;
-  }
-
-  // Set the context to array, so we can now this function has been already
+  // Set the context to array, so we can know this function has been already
   // executed.
   $context = array();
 
   if (!empty($group)) {
-    // Set the group.
+    if (!og_is_group($group_type, $group)) {
+      // The passed entity isn't a valid group.
+      return FALSE;
+    }
+
+    if ($check_access && !entity_access('view', $group_type, $group)) {
+      // User doesn't have access to the group.
+      return FALSE;
+    }
+
     list($id) = entity_extract_ids($group_type, $group);
     $context = array('group_type' => $group_type, 'gid' => $id);
   }
