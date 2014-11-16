@@ -75,6 +75,12 @@ define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
 define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
 
 /**
+ * The default variable name that controls abtch processing on
+ * group privacy change.
+ */
+define('OG_PRIVACY_CHANGE_BATCH_PROCESSING', 'og_privacy_change_batch_processing');
+
+/**
  * Implements hook_help().
  */
 function og_help($path, $arg) {
@@ -869,7 +875,7 @@ function og_entity_update($entity, $entity_type) {
     return;
   }
 
-  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+  list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
   if (!empty($entity->uid) && !og_is_member($entity_type, $entity, 'user', $entity->uid)) {
     // Subscribe the group manager, in case the owner changed.
     og_group($entity_type, $id, array('entity' => $entity->uid));
@@ -893,6 +899,43 @@ function og_entity_update($entity, $entity_type) {
       // Delete overridden roles.
       og_delete_user_roles_by_group($entity_type, $entity);
     }
+  }
+
+  // Handle group privacy change.
+  og_handle_group_privacy_change($entity, $entity_type);
+}
+
+/**
+ * In case of group privacy change, create batch operation to update group content.
+ *
+ * When group privacy (OS_ACCESS_FIELD) is changed, its group content should be
+ * changed as well. Since a group might have big amount of content, it is being
+ * handled using Batch API.
+ *
+ * @param $entity
+ *   The group entity object.
+ * @param $entity_type
+ *   The group type.
+ */
+function og_handle_group_privacy_change($entity, $entity_type) {
+  if (!og_is_group($entity_type, $entity)) {
+    return;
+  }
+
+  // Check whether group privacy change batch processing is needed.
+  if (!variable_get(OG_PRIVACY_CHANGE_BATCH_PROCESSING, TRUE)) {
+    return;
+  }
+  // Check for privacy change.
+  $original_entity = $entity->original;
+  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+  $original_wrapper = entity_metadata_wrapper($entity_type, $original_entity);
+
+  $og_access = $wrapper->{OG_ACCESS_FIELD}->value();
+  $orig_og_access = $original_wrapper->{OG_ACCESS_FIELD}->value();
+  if ($og_access !== $orig_og_access) {
+    $operation = array();
+    batch_set();
   }
 }
 
@@ -2353,6 +2396,54 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
   return $cache[$identifier];
 }
 
+/**
+ * Get the group content of a group.
+ *
+ * @param $group
+ *   The group object or group ID.
+ * @param $group_type
+ *   (optional) The group type. If empty, assumed 'node'.
+ *
+ * @return
+ *  An array with the group content's entity type as the key, and array - keyed by
+ *  the OG membership ID and the entity ID as the value. If nothing found,
+ *  then an empty array.
+ */
+function c4m_og_get_group_content($group, $group_type = 'node') {
+  $cache = &drupal_static(__FUNCTION__, array());
+
+  if (is_object($group)) {
+    // Get the entity ID.
+    list($gid) = entity_extract_ids($group_type, $group);
+  }
+  else {
+    $gid = $group;
+  }
+
+  if (isset($cache[$group_type][$gid])) {
+    // Return cached values.
+    return $cache[$group_type][$gid];
+  }
+
+  $cache[$group_type][$gid] = array();
+
+  $query = new EntityFieldQuery();
+  $query
+    ->entityCondition('entity_type', 'og_membership')
+    ->propertyCondition('group_type', $group_type, '=')
+    ->propertyCondition('gid', $gid, '=');
+
+  $result = $query->execute();
+  if (!empty($result['og_membership'])) {
+    // Get the content ID from the group membership.
+    $og_memberships = og_membership_load_multiple(array_keys($result['og_membership']));
+    foreach ($og_memberships as $og_membership) {
+      $cache[$group_type][$gid][$og_membership->entity_type][$og_membership->id] = $og_membership->etid;
+    }
+  }
+
+  return $cache[$group_type][$gid];
+}
 
 /**
  * Return TRUE if field is a group audience type.
