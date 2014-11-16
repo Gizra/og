@@ -933,10 +933,68 @@ function og_handle_group_privacy_change($entity, $entity_type) {
 
   $og_access = $wrapper->{OG_ACCESS_FIELD}->value();
   $orig_og_access = $original_wrapper->{OG_ACCESS_FIELD}->value();
-  if ($og_access !== $orig_og_access) {
-    $operation = array();
-    batch_set();
+  if ($og_access == $orig_og_access) {
+    return;
   }
+
+  $batch = array(
+    'title' => t('Handle group privacy change'),
+    'operations' => array(
+      array('og_update_group_content_privacy', array($entity_type, $wrapper->getIdentifier())),
+    ),
+  );
+  batch_set($batch);
+
+  // Since batch_set() is called not from a submit handler, batch_process()
+  // should be called.
+  batch_process();
+}
+
+/**
+ * Batch API group content privacy change callback.
+ */
+function og_update_group_content_privacy($entity_type, $entity_id, &$context) {
+  if (empty($context['sandbox'])) {
+    // Count relevant nodes.
+    $query = new EntityFieldQuery();
+    $max = $query
+      ->entityCondition('entity_type', 'og_membership')
+      ->propertyCondition('group_type', $entity_type, '=')
+      ->propertyCondition('entity_type', 'node', '=')
+      ->propertyCondition('gid', $entity_id, '=')
+      ->count()->execute();
+
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['last_id'] = 0;
+    $context['sandbox']['max'] = $max;
+  }
+
+  $limit = 50;
+
+  // Retrieve the next batch.
+  $query = new EntityFieldQuery();
+  $result = $query
+    ->entityCondition('entity_type', 'og_membership')
+    ->propertyCondition('group_type', $entity_type, '=')
+    ->propertyCondition('entity_type', 'node', '=')
+    ->range(0, $limit)
+    ->propertyCondition('etid', $context['sandbox']['last_id'], '>')
+    ->propertyCondition('gid', $entity_id, '=')
+    ->execute();
+
+  if (isset($result['og_membership'])) {
+    foreach (array_keys($result['og_membership']) as $id) {
+      if (!$og_membership = entity_load_single('og_membership', $id)) {
+        continue;
+      }
+
+      $node = node_load($og_membership->etid);
+      node_access_acquire_grants($node);
+      $context['sandbox']['progress']++;
+      $context['sandbox']['last_id'] = $id;
+    }
+  }
+  $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
 }
 
 /**
@@ -2394,55 +2452,6 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
   }
 
   return $cache[$identifier];
-}
-
-/**
- * Get the group content of a group.
- *
- * @param $group
- *   The group object or group ID.
- * @param $group_type
- *   (optional) The group type. If empty, assumed 'node'.
- *
- * @return
- *  An array with the group content's entity type as the key, and array - keyed by
- *  the OG membership ID and the entity ID as the value. If nothing found,
- *  then an empty array.
- */
-function c4m_og_get_group_content($group, $group_type = 'node') {
-  $cache = &drupal_static(__FUNCTION__, array());
-
-  if (is_object($group)) {
-    // Get the entity ID.
-    list($gid) = entity_extract_ids($group_type, $group);
-  }
-  else {
-    $gid = $group;
-  }
-
-  if (isset($cache[$group_type][$gid])) {
-    // Return cached values.
-    return $cache[$group_type][$gid];
-  }
-
-  $cache[$group_type][$gid] = array();
-
-  $query = new EntityFieldQuery();
-  $query
-    ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition('group_type', $group_type, '=')
-    ->propertyCondition('gid', $gid, '=');
-
-  $result = $query->execute();
-  if (!empty($result['og_membership'])) {
-    // Get the content ID from the group membership.
-    $og_memberships = og_membership_load_multiple(array_keys($result['og_membership']));
-    foreach ($og_memberships as $og_membership) {
-      $cache[$group_type][$gid][$og_membership->entity_type][$og_membership->id] = $og_membership->etid;
-    }
-  }
-
-  return $cache[$group_type][$gid];
 }
 
 /**
