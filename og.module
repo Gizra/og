@@ -931,9 +931,13 @@ function og_handle_group_privacy_change($entity, $entity_type) {
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
   $original_wrapper = entity_metadata_wrapper($entity_type, $original_entity);
 
-  $og_access = $wrapper->{OG_ACCESS_FIELD}->value();
-  $orig_og_access = $original_wrapper->{OG_ACCESS_FIELD}->value();
-  if ($og_access == $orig_og_access) {
+  $context = array(
+    'change_detected' => FALSE,
+    'updated_group' => $wrapper,
+    'original_group' => $original_wrapper,
+  );
+  drupal_alter('og_group_privacy_change', $context);
+  if (!$context['change_detected']) {
     return;
   }
 
@@ -948,6 +952,18 @@ function og_handle_group_privacy_change($entity, $entity_type) {
   // Since batch_set() is called not from a submit handler, batch_process()
   // should be called.
   batch_process();
+}
+
+/**
+ * Implements hook_og_update_group_content_privacy_alter().
+ * Simple check whether OG_ACCESS_FIELD values was changed.
+ */
+function og_og_group_privacy_change_alter(&$context) {
+  $og_access = $context['updated_group']->{OG_ACCESS_FIELD}->value();
+  $orig_og_access = $context['original_group']->{OG_ACCESS_FIELD}->value();
+  if ($og_access !== $orig_og_access) {
+    $context['change_detected'] = TRUE;
+  }
 }
 
 /**
@@ -988,6 +1004,7 @@ function og_update_group_content_privacy($entity_type, $entity_id, &$context) {
         continue;
       }
 
+      // Load the node group content and "refresh" its grants.
       $node = node_load($og_membership->etid);
       node_access_acquire_grants($node);
       $context['sandbox']['progress']++;
