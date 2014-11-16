@@ -954,6 +954,7 @@ function og_handle_group_privacy_change($entity, $entity_type) {
 
 /**
  * Implements hook_og_update_group_content_privacy_alter().
+ *
  * Simple check whether OG_ACCESS_FIELD values was changed.
  */
 function og_og_group_privacy_change_alter(&$context) {
@@ -970,20 +971,20 @@ function og_og_group_privacy_change_alter(&$context) {
 /**
  * Batch API group content privacy change callback.
  */
-function og_update_group_content_privacy($entity_type, $entity_id, &$context) {
+function og_update_group_content_privacy($group_type, $group_id, &$context) {
   if (empty($context['sandbox'])) {
     // Count relevant nodes.
     $query = new EntityFieldQuery();
-    $max = $query
+    $total = $query
       ->entityCondition('entity_type', 'og_membership')
-      ->propertyCondition('group_type', $entity_type, '=')
+      ->propertyCondition('group_type', $group_type, '=')
       ->propertyCondition('entity_type', 'node', '=')
-      ->propertyCondition('gid', $entity_id, '=')
+      ->propertyCondition('gid', $group_id, '=')
       ->count()->execute();
 
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['last_id'] = 0;
-    $context['sandbox']['max'] = $max;
+    $context['sandbox']['total'] = $total;
   }
 
   $limit = 50;
@@ -992,27 +993,28 @@ function og_update_group_content_privacy($entity_type, $entity_id, &$context) {
   $query = new EntityFieldQuery();
   $result = $query
     ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition('group_type', $entity_type, '=')
+    ->propertyCondition('group_type', $group_type, '=')
     ->propertyCondition('entity_type', 'node', '=')
     ->range(0, $limit)
     ->propertyCondition('etid', $context['sandbox']['last_id'], '>')
-    ->propertyCondition('gid', $entity_id, '=')
+    ->propertyCondition('gid', $group_id, '=')
     ->execute();
 
-  if (isset($result['og_membership'])) {
-    foreach (array_keys($result['og_membership']) as $id) {
-      if (!$og_membership = entity_load_single('og_membership', $id)) {
-        continue;
-      }
-
-      // Load the node group content and "refresh" its grants.
-      $node = node_load($og_membership->etid);
-      node_access_acquire_grants($node);
-      $context['sandbox']['progress']++;
-      $context['sandbox']['last_id'] = $id;
-    }
+  if (!isset($result['og_membership'])) {
+    $context['finished'] = 1;
+    return;
   }
-  $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+
+  foreach (array_keys($result['og_membership']) as $id) {
+    $og_membership = entity_load_single('og_membership', $id);
+
+    // Load the node group content and "refresh" its grants.
+    $node = node_load($og_membership->etid);
+    node_access_acquire_grants($node);
+    $context['sandbox']['progress']++;
+    $context['sandbox']['last_id'] = $id;
+  }
+  $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['total'];
 }
 
 /**
