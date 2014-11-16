@@ -933,7 +933,7 @@ function og_handle_group_privacy_change($entity, $entity_type) {
     'entity' => $entity,
     'entity_type' => $entity_type,
   );
-  drupal_alter('og_group_privacy_change', $context);
+  drupal_alter('og_invoke_node_access_acquire_grants', $context);
   if (!$context['change_detected']) {
     return;
   }
@@ -942,7 +942,7 @@ function og_handle_group_privacy_change($entity, $entity_type) {
   $batch = array(
     'title' => t('Handle group privacy change'),
     'operations' => array(
-      array('og_update_group_content_privacy', array($entity_type, $wrapper->getIdentifier())),
+      array('og_invoke_node_access_acquire_grants', array($entity_type, $wrapper->getIdentifier())),
     ),
   );
   batch_set($batch);
@@ -953,11 +953,11 @@ function og_handle_group_privacy_change($entity, $entity_type) {
 }
 
 /**
- * Implements hook_og_update_group_content_privacy_alter().
+ * Implements hook_og_invoke_node_access_acquire_grants_alter().
  *
  * Simple check whether OG_ACCESS_FIELD values was changed.
  */
-function og_og_group_privacy_change_alter(&$context) {
+function og_og_invoke_node_access_acquire_grants_alter(&$context) {
   $wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']);
   $original_wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']->original);
 
@@ -971,7 +971,7 @@ function og_og_group_privacy_change_alter(&$context) {
 /**
  * Batch API group content privacy change callback.
  */
-function og_update_group_content_privacy($group_type, $group_id, &$context) {
+function og_invoke_node_access_acquire_grants($group_type, $group_id, &$context) {
   if (empty($context['sandbox'])) {
     // Count relevant nodes.
     $query = new EntityFieldQuery();
