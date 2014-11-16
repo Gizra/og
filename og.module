@@ -918,29 +918,27 @@ function og_entity_update($entity, $entity_type) {
  *   The group type.
  */
 function og_handle_group_privacy_change($entity, $entity_type) {
-  if (!og_is_group($entity_type, $entity)) {
-    return;
-  }
-
   // Check whether group privacy change batch processing is needed.
   if (!variable_get(OG_PRIVACY_CHANGE_BATCH_PROCESSING, TRUE)) {
     return;
   }
-  // Check for privacy change.
-  $original_entity = $entity->original;
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  $original_wrapper = entity_metadata_wrapper($entity_type, $original_entity);
 
+  if (!og_is_group($entity_type, $entity)) {
+    return;
+  }
+
+  // Check for privacy change.
   $context = array(
     'change_detected' => FALSE,
-    'updated_group' => $wrapper,
-    'original_group' => $original_wrapper,
+    'entity' => $entity,
+    'entity_type' => $entity_type,
   );
   drupal_alter('og_group_privacy_change', $context);
   if (!$context['change_detected']) {
     return;
   }
 
+  $wrapper = entity_metadata_wrapper($entity_type, $entity);
   $batch = array(
     'title' => t('Handle group privacy change'),
     'operations' => array(
@@ -959,8 +957,11 @@ function og_handle_group_privacy_change($entity, $entity_type) {
  * Simple check whether OG_ACCESS_FIELD values was changed.
  */
 function og_og_group_privacy_change_alter(&$context) {
-  $og_access = $context['updated_group']->{OG_ACCESS_FIELD}->value();
-  $orig_og_access = $context['original_group']->{OG_ACCESS_FIELD}->value();
+  $wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']);
+  $original_wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']->original);
+
+  $og_access = $wrapper->{OG_ACCESS_FIELD}->value();
+  $orig_og_access = $original_wrapper->{OG_ACCESS_FIELD}->value();
   if ($og_access !== $orig_og_access) {
     $context['change_detected'] = TRUE;
   }
