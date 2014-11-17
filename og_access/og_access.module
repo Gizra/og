@@ -263,6 +263,7 @@ function _og_access_verify_access_field_existence($node) {
  * Simple check whether OG_ACCESS_FIELD values was changed.
  */
 function og_access_og_invoke_node_access_acquire_grants_alter(&$context) {
+  return;
   $wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']);
   $original_wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']->original);
 
