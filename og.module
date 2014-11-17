@@ -953,22 +953,6 @@ function og_handle_group_privacy_change($entity, $entity_type) {
 }
 
 /**
- * Implements hook_og_invoke_node_access_acquire_grants_alter().
- *
- * Simple check whether OG_ACCESS_FIELD values was changed.
- */
-function og_og_invoke_node_access_acquire_grants_alter(&$context) {
-  $wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']);
-  $original_wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']->original);
-
-  $og_access = $wrapper->{OG_ACCESS_FIELD}->value();
-  $orig_og_access = $original_wrapper->{OG_ACCESS_FIELD}->value();
-  if ($og_access !== $orig_og_access) {
-    $context['change_detected'] = TRUE;
-  }
-}
-
-/**
  * Batch API group content privacy change callback.
  */
 function og_invoke_node_access_acquire_grants($group_type, $group_id, &$context) {
