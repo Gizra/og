@@ -723,6 +723,7 @@ function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $lang
     return;
   }
   $form['#validate'][] = 'og_form_group_manager_validate';
+  $form['#submit'][] = 'og_handle_group_privacy_change';
 }
 
 /**
@@ -900,24 +901,22 @@ function og_entity_update($entity, $entity_type) {
       og_delete_user_roles_by_group($entity_type, $entity);
     }
   }
-
-  // Handle group privacy change.
-  og_handle_group_privacy_change($entity, $entity_type);
 }
 
 /**
- * In case of group privacy change, create batch operation to update group content.
+ * Submit handler; In case of group privacy change, create batch operation to update group content.
  *
  * When group privacy (OS_ACCESS_FIELD) is changed, its group content should be
  * changed as well. Since a group might have big amount of content, it is being
  * handled using Batch API.
  *
- * @param $entity
- *   The group entity object.
- * @param $entity_type
- *   The group type.
+ * @param $form
+ * @param $form_state
  */
-function og_handle_group_privacy_change($entity, $entity_type) {
+function og_handle_group_privacy_change($form, &$form_state) {
+  $entity = $form['#entity'];
+  $entity_type = $form['#entity_type'];
+
   // Check whether group privacy change batch processing is needed.
   if (!variable_get(OG_PRIVACY_CHANGE_BATCH_PROCESSING, TRUE)) {
     return;
