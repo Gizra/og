@@ -263,11 +263,11 @@ function _og_access_verify_access_field_existence($node) {
 }
 
 /**
- * Implements hook_og_invoke_node_access_acquire_grants_alter().
+ * Implements hook_og_access_invoke_node_access_acquire_grants_alter().
  *
  * Simple check whether OG_ACCESS_FIELD values was changed.
  */
-function og_access_og_invoke_node_access_acquire_grants_alter(&$context) {
+function og_access_og_access_invoke_node_access_acquire_grants_alter(&$context) {
   $wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']);
   $original_wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']->original);
 
@@ -287,7 +287,7 @@ function og_access_field_attach_form($entity_type, $entity, &$form, &$form_state
   if ($entity_type == 'user' || !og_is_group_type($entity_type, $bundle)) {
     return;
   }
-  $form['#submit'][] = 'og_handle_group_privacy_change';
+  $form['#submit'][] = 'og_access_handle_group_privacy_change';
 }
 
 /**
@@ -300,7 +300,7 @@ function og_access_field_attach_form($entity_type, $entity, &$form, &$form_state
  * @param $form
  * @param $form_state
  */
-function og_handle_group_privacy_change($form, &$form_state) {
+function og_access_handle_group_privacy_change($form, &$form_state) {
   $entity = $form['#entity'];
   $entity_type = $form['#entity_type'];
 
@@ -319,7 +319,7 @@ function og_handle_group_privacy_change($form, &$form_state) {
     'entity' => $entity,
     'entity_type' => $entity_type,
   );
-  drupal_alter('og_invoke_node_access_acquire_grants', $context);
+  drupal_alter('og_access_invoke_node_access_acquire_grants', $context);
   if (!$context['change_detected']) {
     return;
   }
@@ -328,7 +328,7 @@ function og_handle_group_privacy_change($form, &$form_state) {
   $batch = array(
     'title' => t('Handle group privacy change'),
     'operations' => array(
-      array('og_invoke_node_access_acquire_grants', array($entity_type, $wrapper->getIdentifier())),
+      array('og_access_invoke_node_access_acquire_grants', array($entity_type, $wrapper->getIdentifier())),
     ),
   );
   batch_set($batch);
@@ -341,7 +341,7 @@ function og_handle_group_privacy_change($form, &$form_state) {
 /**
  * Batch API group content privacy change callback.
  */
-function og_invoke_node_access_acquire_grants($group_type, $group_id, &$context) {
+function og_access_invoke_node_access_acquire_grants($group_type, $group_id, &$context) {
   if (empty($context['sandbox'])) {
     // Count relevant nodes.
     $query = new EntityFieldQuery();
