@@ -284,20 +284,28 @@ function og_access_og_access_invoke_node_access_acquire_grants_alter(&$context) 
 function og_access_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
-  if ($entity_type == 'user' || !og_is_group_type($entity_type, $bundle)) {
+  if (!og_is_group_type($entity_type, $bundle)) {
     return;
   }
-  $form['#submit'][] = 'og_access_handle_group_privacy_change';
+  $form['#after_build'][] = 'og_access_handle_group_privacy_change_after_build';
 }
 
 /**
- * Submit handler; In case of group privacy change, create batch operation to update group content.
- *
- * When group privacy (OG_ACCESS_FIELD) is changed, its group content should be
- * changed as well. Since a group might have big amount of content, it is being
- * handled using Batch API.
+ * After_build handler. Adds a submit handler, verifying it will be called last.
  */
-function og_access_handle_group_privacy_change($form, &$form_state) {
+function og_access_handle_group_privacy_change_after_build($form, &$form_state) {
+  $form['#submit'][] = 'og_access_determine_group_privacy_change';
+  return $form;
+}
+
+/**
+ * Submit handler; In case of group privacy change, create batch operation to
+ * update group content.
+ *
+ * In case the submitted entity is group, and in case OG access was set to
+ * handle privacy changes, mark the entity for processing during entity_update.
+ */
+function og_access_determine_group_privacy_change($form, &$form_state) {
   $entity = $form['#entity'];
   $entity_type = $form['#entity_type'];
 
@@ -309,6 +317,37 @@ function og_access_handle_group_privacy_change($form, &$form_state) {
   if (!og_is_group($entity_type, $entity)) {
     return;
   }
+
+  // Mark the group entity for group privacy change handling.
+  $entity->_og_access_trigger_access_change = TRUE;
+}
+
+/**
+ * Implements hook_entity_update().
+ * In case the group entity was marked with group privacy change,
+ * create batch operation to update group content.
+ */
+function og_access_entity_update($entity, $entity_type) {
+  if (!$entity->_og_access_trigger_access_change) {
+    return;
+  }
+  // Handle group privacy change.
+  og_access_handle_group_privacy_change($entity, $entity_type);
+}
+
+/**
+ * In case of group privacy change, create batch operation to update group content.
+ *
+ * When group privacy (OG_ACCESS_FIELD) is changed, its group content should be
+ * changed as well. Since a group might have big amount of content, it is being
+ * handled using Batch API.
+ *
+ * @param $entity
+ *   The group entity object.
+ * @param $entity_type
+ *   The group type.
+ */
+function og_access_handle_group_privacy_change($entity, $entity_type) {
 
   // Check for privacy change.
   $context = array(
