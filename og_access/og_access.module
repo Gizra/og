@@ -328,7 +328,7 @@ function og_access_determine_group_privacy_change($form, &$form_state) {
  * create batch operation to update group content.
  */
 function og_access_entity_update($entity, $entity_type) {
-  if (!$entity->_og_access_trigger_access_change) {
+  if (!isset($entity->_og_access_trigger_access_change) || $entity->_og_access_trigger_access_change == FALSE) {
     return;
   }
   // Handle group privacy change.
