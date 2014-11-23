@@ -80,13 +80,6 @@ function og_ui_admin_settings($form_state) {
     '#default_value' => variable_get('og_use_queue', FALSE),
   );
 
-  $form[OG_PRIVACY_CHANGE_BATCH_PROCESSING] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Update group content privacy'),
-    '#description' => t("Upon group privacy change, create batch operation to update group content."),
-    '#default_value' => variable_get(OG_PRIVACY_CHANGE_BATCH_PROCESSING, TRUE),
-  );
-
   $form['og_orphans_delete'] = array(
     '#type' => 'checkbox',
     '#title' => t('Delete orphans'),

@@ -86,8 +86,6 @@ function og_uninstall() {
       }
     }
   }
-
-  variable_del(OG_PRIVACY_CHANGE_BATCH_PROCESSING);
 }
 
 

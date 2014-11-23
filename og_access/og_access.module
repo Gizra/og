@@ -36,6 +36,11 @@ define('OG_CONTENT_ACCESS_PUBLIC', 1);
  */
 define('OG_CONTENT_ACCESS_PRIVATE', 2);
 
+/**
+ * The default variable name that controls abtch processing on
+ * group privacy change.
+ */
+define('OG_ACCESS_PRIVACY_CHANGE_BATCH_PROCESSING', 'og_access_privacy_change_batch_processing');
 
 /**
  * Implements hook_node_grants().
@@ -271,4 +276,126 @@ function og_access_og_invoke_node_access_acquire_grants_alter(&$context) {
   if ($og_access !== $orig_og_access) {
     $context['change_detected'] = TRUE;
   }
+}
+
+/**
+ * Implements hook_field_attach_form().
+ */
+function og_access_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  list(,, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  if ($entity_type == 'user' || !og_is_group_type($entity_type, $bundle)) {
+    return;
+  }
+  $form['#submit'][] = 'og_handle_group_privacy_change';
+}
+
+/**
+ * Submit handler; In case of group privacy change, create batch operation to update group content.
+ *
+ * When group privacy (OS_ACCESS_FIELD) is changed, its group content should be
+ * changed as well. Since a group might have big amount of content, it is being
+ * handled using Batch API.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function og_handle_group_privacy_change($form, &$form_state) {
+  $entity = $form['#entity'];
+  $entity_type = $form['#entity_type'];
+
+  // Check whether group privacy change batch processing is needed.
+  if (!variable_get(OG_ACCESS_PRIVACY_CHANGE_BATCH_PROCESSING, TRUE)) {
+    return;
+  }
+
+  if (!og_is_group($entity_type, $entity)) {
+    return;
+  }
+
+  // Check for privacy change.
+  $context = array(
+    'change_detected' => FALSE,
+    'entity' => $entity,
+    'entity_type' => $entity_type,
+  );
+  drupal_alter('og_invoke_node_access_acquire_grants', $context);
+  if (!$context['change_detected']) {
+    return;
+  }
+
+  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+  $batch = array(
+    'title' => t('Handle group privacy change'),
+    'operations' => array(
+      array('og_invoke_node_access_acquire_grants', array($entity_type, $wrapper->getIdentifier())),
+    ),
+  );
+  batch_set($batch);
+
+  // Since batch_set() is called not from a submit handler, batch_process()
+  // should be called.
+  batch_process();
+}
+
+/**
+ * Batch API group content privacy change callback.
+ */
+function og_invoke_node_access_acquire_grants($group_type, $group_id, &$context) {
+  if (empty($context['sandbox'])) {
+    // Count relevant nodes.
+    $query = new EntityFieldQuery();
+    $total = $query
+      ->entityCondition('entity_type', 'og_membership')
+      ->propertyCondition('group_type', $group_type, '=')
+      ->propertyCondition('entity_type', 'node', '=')
+      ->propertyCondition('gid', $group_id, '=')
+      ->count()->execute();
+
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['last_id'] = 0;
+    $context['sandbox']['total'] = $total;
+  }
+
+  $limit = 50;
+
+  // Retrieve the next batch.
+  $query = new EntityFieldQuery();
+  $result = $query
+    ->entityCondition('entity_type', 'og_membership')
+    ->propertyCondition('group_type', $group_type, '=')
+    ->propertyCondition('entity_type', 'node', '=')
+    ->range(0, $limit)
+    ->propertyCondition('etid', $context['sandbox']['last_id'], '>')
+    ->propertyCondition('gid', $group_id, '=')
+    ->execute();
+
+  // Mark "finished" if there are no more results.
+  if (!isset($result['og_membership'])) {
+    $context['finished'] = 1;
+    return;
+  }
+
+  foreach (array_keys($result['og_membership']) as $id) {
+    $og_membership = entity_load_single('og_membership', $id);
+
+    // Load the node group content and "refresh" its grants.
+    $node = node_load($og_membership->etid);
+    node_access_acquire_grants($node);
+    $context['sandbox']['progress']++;
+    $context['sandbox']['last_id'] = $id;
+  }
+  $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['total'];
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function og_access_form_og_ui_admin_settings_alter(&$form, &$form_state) {
+  $form[OG_ACCESS_PRIVACY_CHANGE_BATCH_PROCESSING] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Update group content privacy'),
+    '#description' => t("Upon group privacy change, create batch operation to update group content."),
+    '#default_value' => variable_get(OG_ACCESS_PRIVACY_CHANGE_BATCH_PROCESSING, TRUE),
+  );
 }
