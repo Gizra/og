@@ -287,15 +287,7 @@ function og_access_field_attach_form($entity_type, $entity, &$form, &$form_state
   if (!og_is_group_type($entity_type, $bundle)) {
     return;
   }
-  $form['#after_build'][] = 'og_access_handle_group_privacy_change_after_build';
-}
-
-/**
- * After_build handler. Adds a submit handler, verifying it will be called last.
- */
-function og_access_handle_group_privacy_change_after_build($form, &$form_state) {
   $form['#submit'][] = 'og_access_determine_group_privacy_change';
-  return $form;
 }
 
 /**
@@ -328,7 +320,7 @@ function og_access_determine_group_privacy_change($form, &$form_state) {
  * create batch operation to update group content.
  */
 function og_access_entity_update($entity, $entity_type) {
-  if (!isset($entity->_og_access_trigger_access_change) || $entity->_og_access_trigger_access_change == FALSE) {
+  if (empty($entity->_og_access_trigger_access_change)) {
     return;
   }
   // Handle group privacy change.
