@@ -408,11 +408,11 @@ function og_access_invoke_node_access_acquire_grants($group_type, $group_id, &$c
     return;
   }
 
-  foreach (array_keys($result['og_membership']) as $id) {
-    $og_membership = entity_load_single('og_membership', $id);
-
+  foreach (entity_load('og_membership', array_keys($result['og_membership'])) as $og_membership)
     // Load the node group content and "refresh" its grants.
     $node = node_load($og_membership->etid);
+
+    // Rebuild the permissions for the node.
     node_access_acquire_grants($node);
     $context['sandbox']['progress']++;
     $context['sandbox']['last_id'] = $id;
@@ -421,7 +421,7 @@ function og_access_invoke_node_access_acquire_grants($group_type, $group_id, &$c
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_FORM_ID_alter().
  */
 function og_access_form_og_ui_admin_settings_alter(&$form, &$form_state) {
   $form[OG_ACCESS_PRIVACY_CHANGE_BATCH_PROCESSING] = array(
