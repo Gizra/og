@@ -408,7 +408,7 @@ function og_access_invoke_node_access_acquire_grants($group_type, $group_id, &$c
     return;
   }
 
-  foreach (entity_load('og_membership', array_keys($result['og_membership'])) as $og_membership)
+  foreach (entity_load('og_membership', array_keys($result['og_membership'])) as $og_membership) {
     // Load the node group content and "refresh" its grants.
     $node = node_load($og_membership->etid);
 
