@@ -287,31 +287,32 @@ function og_access_field_attach_form($entity_type, $entity, &$form, &$form_state
   if (!og_is_group_type($entity_type, $bundle)) {
     return;
   }
-  $form['#submit'][] = 'og_access_determine_group_privacy_change';
 }
 
 /**
- * Submit handler; In case of group privacy change, create batch operation to
- * update group content.
+ * Check if group privacy has been changed.
  *
- * In case the submitted entity is group, and in case OG access was set to
- * handle privacy changes, mark the entity for processing during entity_update.
+ * @param $entity
+ *  The group entity object.
+ * @param $entity_type
+ *   The group type.
+ *
+ * @return bool
  */
-function og_access_determine_group_privacy_change($form, &$form_state) {
-  $entity = $form['#entity'];
-  $entity_type = $form['#entity_type'];
-
+function og_access_check_group_privacy_changed($entity, $entity_type) {
   // Check whether group privacy change batch processing is needed.
   if (!variable_get(OG_ACCESS_PRIVACY_CHANGE_BATCH_PROCESSING, TRUE)) {
-    return;
+    return FALSE;
   }
 
   if (!og_is_group($entity_type, $entity)) {
-    return;
+    return FALSE;
   }
 
-  // Mark the group entity for group privacy change handling.
-  $entity->_og_access_trigger_access_change = TRUE;
+  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+  $original_wrapper = entity_metadata_wrapper($entity_type, $entity->original);
+
+  return $wrapper->{OG_ACCESS_FIELD}->value() != $original_wrapper->{OG_ACCESS_FIELD}->value();
 }
 
 /**
@@ -320,9 +321,10 @@ function og_access_determine_group_privacy_change($form, &$form_state) {
  * create batch operation to update group content.
  */
 function og_access_entity_update($entity, $entity_type) {
-  if (empty($entity->_og_access_trigger_access_change)) {
+  if (!og_access_check_group_privacy_changed($entity, $entity_type)) {
     return;
   }
+
   // Handle group privacy change.
   og_access_handle_group_privacy_change($entity, $entity_type);
 }
