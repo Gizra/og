@@ -279,17 +279,6 @@ function og_access_og_access_invoke_node_access_acquire_grants_alter(&$context) 
 }
 
 /**
- * Implements hook_field_attach_form().
- */
-function og_access_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
-  list(,, $bundle) = entity_extract_ids($entity_type, $entity);
-
-  if (!og_is_group_type($entity_type, $bundle)) {
-    return;
-  }
-}
-
-/**
  * Check if group privacy has been changed.
  *
  * @param $entity
@@ -417,7 +406,7 @@ function og_access_invoke_node_access_acquire_grants($group_type, $group_id, &$c
     // Rebuild the permissions for the node.
     node_access_acquire_grants($node);
     $context['sandbox']['progress']++;
-    $context['sandbox']['last_id'] = $id;
+    $context['sandbox']['last_id'] = $node->nid;
   }
   $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['total'];
 }

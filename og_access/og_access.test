@@ -43,6 +43,51 @@ class OgAccessTestCase extends DrupalWebTestCase {
   }
 
   /**
+   * Test if group content privacy is changing when group privacy is changed.
+   */
+  function testAccessChangeBatchApi() {
+    $settings = array(
+      'type' => $this->group_content_type,
+      'uid' => $this->user1->uid,
+    );
+
+    // Create group content.
+    $node1 = $this->drupalCreateNode($settings);
+    $values = array(
+      'entity_type' => 'node',
+      'entity' => $node1,
+    );
+    og_group('node', $this->group_node, $values);
+
+    $node1 = node_load($node1->nid);
+
+    debug($this->group_node->group_access);
+    debug($node1->uid);
+
+
+    $this->drupalLogin($this->user2);
+
+    $this->assertFalse(node_access('view', $node1, $this->user2), 'Other user can not  see the node');
+
+    $this->drupalLogin($this->user1);
+
+    // Change the access of the group via UI, in order for batch API to be
+    // invoked
+    $edit = array(
+      'group_access[und]' => '0',
+//        "{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][0][value]" => 0,
+    );
+
+    $this->drupalPost('node/' . $this->group_node->nid . '/edit', $edit, 'Save');
+
+    $this->group_node = node_load($this->group_node->nid);
+
+    debug($this->group_node->group_access);
+
+    $this->assertTrue(node_access('view', $node1, $this->user2));
+  }
+
+  /**
    * Testing special case in which a group is also group content, and it is
    * inside another group. When those groups are set to private (either when
    * set specifically or given from the group defaults), it should be verified
