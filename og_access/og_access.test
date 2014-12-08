@@ -62,20 +62,15 @@ class OgAccessTestCase extends DrupalWebTestCase {
     $node1 = node_load($node1->nid);
 
     debug($this->group_node->group_access);
-    debug($node1->uid);
 
-
-    $this->drupalLogin($this->user2);
-
-    $this->assertFalse(node_access('view', $node1, $this->user2), 'Other user can not  see the node');
+    $this->assertFalse(node_access('view', $node1, $this->user2), 'Other user should not see the node');
 
     $this->drupalLogin($this->user1);
 
     // Change the access of the group via UI, in order for batch API to be
     // invoked
     $edit = array(
-      'group_access[und]' => '0',
-//        "{OG_AUDIENCE_FIELD}[LANGUAGE_NONE][0][value]" => 0,
+      'group_access[und]' => 0,
     );
 
     $this->drupalPost('node/' . $this->group_node->nid . '/edit', $edit, 'Save');
