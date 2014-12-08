@@ -23,7 +23,9 @@ class OgAccessTestCase extends DrupalWebTestCase {
     node_access_rebuild();
 
     $this->user1 = $this->drupalCreateUser();
-    $this->user2 = $this->drupalCreateUser();
+    $this->user2 = $this->drupalCreateUser(array(
+      'access content',
+    ));
 
     // Create group and group content node types.
     $this->group_type = $this->drupalCreateContentType()->type;
@@ -63,20 +65,21 @@ class OgAccessTestCase extends DrupalWebTestCase {
 
     $this->assertFalse(node_access('view', $this->group_node, $this->user2), 'Other user should not see the group');
 
-// Group is private. We are changing it to public.
+    // Group is private. We are changing it to public.
     debug('Group is private. We are changing it to public.');
 
     $this->drupalLogin($this->user1);
 
     $edit = array(
-      'group_access[und]' => '0',
+      'group_access[und]' => 0,
     );
     $this->drupalPost('node/' . $this->group_node->nid . '/edit', $edit, 'Save');
 
-//    $this->assertTrue(node_access('view', $node1, $this->user2), 'Other user should be able to see the node');
+    drupal_static_reset();
+    $this->assertTrue(node_access('view', $node1, $this->user2), 'Other user should be able to see the node');
     $this->assertTrue(node_access('view', $this->group_node, $this->user2), 'Other user should be able to see the group');
 
-// Group is public. We are changing it to private.
+    // Group is public. We are changing it to private.
     debug('Group is public. We are changing it to private.');
 
     $this->drupalLogin($this->user1);
@@ -88,8 +91,8 @@ class OgAccessTestCase extends DrupalWebTestCase {
 
     $this->group_node = node_load($this->group_node->nid);
 
-
-//    $this->assertFalse(node_access('view', $node1, $this->user2), 'Other user should not see the node');
+    drupal_static_reset();
+    $this->assertFalse(node_access('view', $node1, $this->user2), 'Other user should not see the node');
     $this->assertFalse(node_access('view', $this->group_node, $this->user2), 'Other user should not see the group');
   }
 
@@ -99,7 +102,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
    * set specifically or given from the group defaults), it should be verified
    * groups are accessible, even for members.
    */
-  function __testSubGroupContentAccess() {
+  function testSubGroupContentAccess() {
     $subgroup_content_type = $this->drupalCreateContentType()->type;
     og_create_field(OG_AUDIENCE_FIELD, 'node', $subgroup_content_type);
     og_create_field(OG_GROUP_FIELD, 'node', $subgroup_content_type);
@@ -138,7 +141,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
   /**
    * Group with access field.
    */
-  function __testGroupAccess() {
+  function testGroupAccess() {
     $this->drupalLogin($this->user1);
     $nid = $this->group_node->nid;
 
@@ -161,7 +164,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
   /**
    * Group with access field and group content with default definition.
    */
-  function __testGroupContentAccessDefault() {
+  function testGroupContentAccessDefault() {
     og_create_field(OG_CONTENT_ACCESS_FIELD, 'node', $this->group_content_type);
 
     $this->drupalLogin($this->user1);
@@ -193,7 +196,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
    * Group with access field and group content with different definition
    * from the group.
    */
-  function __testGroupContentAccessNotDefault() {
+  function testGroupContentAccessNotDefault() {
     og_create_field(OG_CONTENT_ACCESS_FIELD, 'node', $this->group_content_type);
 
     // Test group content access, one time when the group is set to be
@@ -243,7 +246,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
   /**
    * Test group content without access field.
    */
-  function __testGroupContentAccessNotExist() {
+  function testGroupContentAccessNotExist() {
     $this->drupalLogin($this->user1);
     $nid = $this->group_node->nid;
 
@@ -272,7 +275,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
    * Test a group content that belongs to a private and non-private group
    * results in a private group content.
    */
-  function __testOgStrictPrivate() {
+  function testOgStrictPrivate() {
     $this->drupalLogin($this->user1);
 
     // Create a group node and set as private.
@@ -317,7 +320,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
   /**
    * Test unpublished node.
    */
-  function __testUnpublishedNode() {
+  function testUnpublishedNode() {
     $user1 = $this->user1;
     $user2 = $this->user2;
     $this->drupalLogin($user1);
