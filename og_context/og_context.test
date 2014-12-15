@@ -1,0 +1,67 @@
+<?php
+
+/**
+ * @file
+ * Test organic groups access module.
+ */
+
+/**
+ * Test OG access.
+ */
+class OgContextTestCase extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'OG context',
+      'description' => 'Check if context is returning only if user has right permissions.',
+      'group' => 'Organic groups context',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('og_context');
+    node_access_rebuild();
+
+    $this->user1 = $this->drupalCreateUser();
+    $this->user2 = $this->drupalCreateUser();
+
+    // Create group and group content node types.
+    $this->group_type = $this->drupalCreateContentType()->type;
+    og_create_field(OG_GROUP_FIELD, 'node', $this->group_type);
+    og_create_field(OG_ACCESS_FIELD, 'node', $this->group_type);
+
+    $this->group_content_type = $this->drupalCreateContentType()->type;
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $this->group_content_type);
+
+    // Create a group node and enable access.
+    $settings = array();
+    $settings['type'] = $this->group_type;
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $settings[OG_ACCESS_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $settings['uid'] = $this->user1->uid;
+    $this->group_node = $this->drupalCreateNode($settings);
+  }
+
+  /**
+   * Testing of the og_context returning value. Should return group id if user
+   * has permissions and NULL if he doesn't.
+   */
+  function testGettingGroupContext() {
+    $settings = array(
+      'type' => $this->group_content_type,
+      'uid' => $this->user1->uid,
+    );
+
+    // Create group content.
+    $node1 = $this->drupalCreateNode($settings);
+    $values = array(
+      'entity_type' => 'node',
+      'entity' => $node1,
+    );
+    og_group('node', $this->group_node, $values);
+
+    $node1 = node_load($node1->nid);
+
+
+  }
+}
