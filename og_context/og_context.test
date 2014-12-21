@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Test organic groups access module.
+ * Test organic groups context module.
  */
 
 /**
@@ -19,7 +19,7 @@ class OgContextTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('og_context');
+    parent::setUp('og_context', 'og_access');
     node_access_rebuild();
 
     $this->user1 = $this->drupalCreateUser();
@@ -61,7 +61,5 @@ class OgContextTestCase extends DrupalWebTestCase {
     og_group('node', $this->group_node, $values);
 
     $node1 = node_load($node1->nid);
-
-
   }
 }
