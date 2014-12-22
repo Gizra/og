@@ -61,5 +61,19 @@ class OgContextTestCase extends DrupalWebTestCase {
     og_group('node', $this->group_node, $values);
 
     $node1 = node_load($node1->nid);
+    $this->drupalLogin($this->user1);
+
+    $wrapper = entity_metadata_wrapper('node', $node1);
+    $groups = $wrapper->{OG_AUDIENCE_FIELD}->value();
+    $group = reset($groups);
+
+    $this->assertTrue(og_context('node', $group));
+
+    $this->drupalLogin($this->user2);
+
+    $this->assertFalse(og_context('node', $group));
+
+    $this->assertFalse(node_access('view', $group, $this->user2));
+
   }
 }
