@@ -47,32 +47,16 @@ class OgContextTestCase extends DrupalWebTestCase {
    * has permissions and NULL if he doesn't.
    */
   function testGettingGroupContext() {
-    $settings = array(
-      'type' => $this->group_content_type,
-      'uid' => $this->user1->uid,
-    );
-
-    // Create group content.
-    $node1 = $this->drupalCreateNode($settings);
-    $values = array(
-      'entity_type' => 'node',
-      'entity' => $node1,
-    );
-    og_group('node', $this->group_node, $values);
-
-    $node1 = node_load($node1->nid);
     $this->drupalLogin($this->user1);
+    // User can get the group context.
+    $this->assertTrue(og_context('node', $this->group_node));
 
-    $wrapper = entity_metadata_wrapper('node', $node1);
-    $groups = $wrapper->{OG_AUDIENCE_FIELD}->value();
-    $group = reset($groups);
+    // Unpublishing the group node.
+    $this->group_node->status = FALSE;
+    node_save($this->group_node);
+    $this->group_node = node_load($this->group_node->nid);
 
-    $this->assertTrue(og_context('node', $group));
-
-    drupal_static_reset('drupal_static');
-    $this->assertFalse(og_context('node', $group));
-
-    $this->assertFalse(entity_access('view', 'node', node_load(1)));
-
+    // Other user should not get the group context
+    $this->assertFalse(og_context('node', $this->group_node, $this->user2));
   }
 }
