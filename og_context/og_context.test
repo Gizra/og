@@ -70,9 +70,9 @@ class OgContextTestCase extends DrupalWebTestCase {
     $this->assertTrue(og_context('node', $group));
 
     drupal_static_reset('drupal_static');
-    $this->assertFalse(og_context('node', $group, $this->user2));
+    $this->assertFalse(og_context('node', $group));
 
-    $this->assertFalse(node_access('view', $group, $this->user2));
+    $this->assertFalse(entity_access('view', 'node', node_load(1)));
 
   }
 }
