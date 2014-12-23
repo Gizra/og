@@ -197,7 +197,7 @@ function og_context_og_invalidate_cache($gids = array()) {
 function og_context($group_type = 'node', $group = NULL, $account = NULL, $check_access = TRUE) {
   global $user;
   // User account is sent.
-  $user = $account ? $account : $user;
+  $account = $account ? $account : $user;
 
   $context = &drupal_static(__FUNCTION__, FALSE);
 
@@ -224,7 +224,7 @@ function og_context($group_type = 'node', $group = NULL, $account = NULL, $check
       return FALSE;
     }
 
-    if ($check_access && !entity_access('view', $group_type, $group)) {
+    if ($check_access && !entity_access('view', $group_type, $group, $account)) {
       // User doesn't have access to the group.
       return FALSE;
     }
