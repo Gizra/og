@@ -185,6 +185,8 @@ function og_context_og_invalidate_cache($gids = array()) {
  *   The context to get by group type. Defaults to "node".
  * @param $group
  *   Optional; The group entity to set as the context.
+ * @param $account
+ *   Optional; The user entity we are getting context for.
  * @param bool $check_access
  *   Determines if access to the group should be done. Defaults to TRUE.
  *
@@ -192,8 +194,11 @@ function og_context_og_invalidate_cache($gids = array()) {
  *   Array keyed by the group type and group ID, or FALSE if no context
  *   was found.
  */
-function og_context($group_type = 'node', $group = NULL, $check_access = TRUE) {
+function og_context($group_type = 'node', $group = NULL, $account = NULL, $check_access = TRUE) {
   global $user;
+  // User account is sent.
+  $account = $account ? $account : $user;
+
   $context = &drupal_static(__FUNCTION__, FALSE);
 
   if (empty($group) && $context !== FALSE) {
@@ -219,7 +224,7 @@ function og_context($group_type = 'node', $group = NULL, $check_access = TRUE) {
       return FALSE;
     }
 
-    if ($check_access && !entity_access('view', $group_type, $group)) {
+    if ($check_access && !entity_access('view', $group_type, $group, $account)) {
       // User doesn't have access to the group.
       return FALSE;
     }
