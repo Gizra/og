@@ -186,7 +186,8 @@ function og_context_og_invalidate_cache($gids = array()) {
  * @param $group
  *   Optional; The group entity to set as the context.
  * @param $account
- *   Optional; The user entity we are getting context for.
+ *   Optional; The user entity we are getting context for. If empty - defaults
+ *   to current user.
  * @param bool $check_access
  *   Determines if access to the group should be done. Defaults to TRUE.
  *
@@ -197,7 +198,7 @@ function og_context_og_invalidate_cache($gids = array()) {
 function og_context($group_type = 'node', $group = NULL, $account = NULL, $check_access = TRUE) {
   global $user;
   // User account is sent.
-  $account = $account ? $account : $user;
+  $account = $account ? $account : user_load($user->uid);
 
   $context = &drupal_static(__FUNCTION__, FALSE);
 
