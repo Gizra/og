@@ -302,8 +302,16 @@ function og_access_check_group_privacy_changed($entity, $entity_type) {
   $original_wrapper = entity_metadata_wrapper($entity_type, $entity->original);
 
   // Access was changed from/to restricted
-  if (!empty($entity->pluggable_node_access[LANGUAGE_NONE]) || !empty($entity->original->pluggable_node_access[LANGUAGE_NONE])) {
-    return TRUE;
+  if (module_exists('pluggable_node_access')) {
+    foreach (pluggable_node_access_get_pluggable_node_access_plugins() as $plugin_name => $plugin) {
+      $handler = pluggable_node_access_get_pluggable_node_access_handler($plugin_name, $entity);
+      $fields = $handler->getReferenceFields($entity);
+      foreach($fields as $field) {
+        if (!empty($entity->{$field}) || !empty($entity->original->{$field})) {
+          return TRUE;
+        }
+      }
+    }
   }
 
   return $wrapper->{OG_ACCESS_FIELD}->value() != $original_wrapper->{OG_ACCESS_FIELD}->value();
