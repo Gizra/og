@@ -3556,7 +3556,9 @@ function og_get_groups_by_user($account = NULL, $group_type = NULL) {
   }
 
   foreach ($og_memberships as $og_membership) {
-    $gids[$og_membership->group_type][$og_membership->gid] = $og_membership->gid;
+    if (!empty($og_membership)) {
+      $gids[$og_membership->group_type][$og_membership->gid] = $og_membership->gid;
+    }
   }
 
   if (empty($group_type)) {
