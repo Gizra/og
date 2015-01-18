@@ -269,7 +269,7 @@ function _og_access_verify_access_field_existence($node) {
  */
 function og_access_og_access_invoke_node_access_acquire_grants($context) {
   $wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']);
-  if (!isset($wrapper->OG_ACCESS_FIELD)) {
+  if (!isset($wrapper->{OG_ACCESS_FIELD})) {
     // Group doesn't have OG access field attached to it.
     return;
   }
@@ -278,6 +278,7 @@ function og_access_og_access_invoke_node_access_acquire_grants($context) {
 
   $og_access = $wrapper->{OG_ACCESS_FIELD}->value();
   $original_og_access = $original_wrapper->{OG_ACCESS_FIELD}->value();
+
   return $og_access !== $original_og_access;
 }
 
@@ -312,6 +313,7 @@ function og_access_check_node_access_grants_is_needed($entity, $entity_type) {
     'entity_type' => $entity_type,
   );
   $result = module_invoke_all('og_access_invoke_node_access_acquire_grants', $context);
+
   drupal_alter('og_access_invoke_node_access_acquire_grants', $result, $context);
 
   return in_array(TRUE, $result);
