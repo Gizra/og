@@ -58,7 +58,7 @@ function hook_og_access_invoke_node_access_acquire_grants_alter(&$result, $conte
   $og_access = $wrapper->{OG_ACCESS_FIELD}->value();
   $original_og_access = $original_wrapper->{OG_ACCESS_FIELD}->value();
   if ($og_access !== $original_og_access) {
-    $result[] = TRUE;
+    $result['my_module'] = TRUE;
   }
 }
 
