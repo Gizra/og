@@ -263,23 +263,30 @@ function _og_access_verify_access_field_existence($node) {
 }
 
 /**
- * Implements hook_og_access_invoke_node_access_acquire_grants_alter().
+ * Implements hook_og_access_invoke_node_access_acquire_grants().
  *
  * Simple check whether OG_ACCESS_FIELD values was changed.
  */
-function og_access_og_access_invoke_node_access_acquire_grants_alter(&$context) {
+function og_access_og_access_invoke_node_access_acquire_grants($context) {
   $wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']);
+  if (!isset($wrapper->{OG_ACCESS_FIELD})) {
+    // Group doesn't have OG access field attached to it.
+    return;
+  }
+
   $original_wrapper = entity_metadata_wrapper($context['entity_type'], $context['entity']->original);
 
   $og_access = $wrapper->{OG_ACCESS_FIELD}->value();
-  $orig_og_access = $original_wrapper->{OG_ACCESS_FIELD}->value();
-  if ($og_access !== $orig_og_access) {
-    $context['change_detected'] = TRUE;
-  }
+  $original_og_access = $original_wrapper->{OG_ACCESS_FIELD}->value();
+
+  return $og_access !== $original_og_access;
 }
 
 /**
- * Check if group privacy has been changed.
+ * Check whether group access changed that require batch processing.
+ *
+ * Note that batch processing is possible only when the event is triggered from
+ * the UI.
  *
  * @param $entity
  *  The group entity object.
@@ -287,40 +294,44 @@ function og_access_og_access_invoke_node_access_acquire_grants_alter(&$context) 
  *   The group type.
  *
  * @return bool
+ *  TRUE if content permissions of group content should be rebuilt.
  */
-function og_access_check_group_privacy_changed($entity, $entity_type) {
+function og_access_check_node_access_grants_is_needed($entity, $entity_type) {
   // Check whether group privacy change batch processing is needed.
   if (!variable_get(OG_ACCESS_PRIVACY_CHANGE_BATCH_PROCESSING, TRUE)) {
     return FALSE;
   }
 
+  // Check if entity is the group.
   if (!og_is_group($entity_type, $entity)) {
     return FALSE;
   }
 
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  $original_wrapper = entity_metadata_wrapper($entity_type, $entity->original);
+  // Check for access change.
+  $context = array(
+    'entity' => $entity,
+    'entity_type' => $entity_type,
+  );
+  $result = module_invoke_all('og_access_invoke_node_access_acquire_grants', $context);
 
-  // Access was changed from/to restricted
-  if (!empty($entity->pluggable_node_access[LANGUAGE_NONE]) || !empty($entity->original->pluggable_node_access[LANGUAGE_NONE])) {
-    return TRUE;
-  }
+  drupal_alter('og_access_invoke_node_access_acquire_grants', $result, $context);
 
-  return $wrapper->{OG_ACCESS_FIELD}->value() != $original_wrapper->{OG_ACCESS_FIELD}->value();
+  return in_array(TRUE, $result);
 }
 
 /**
  * Implements hook_entity_update().
+ *
  * In case the group entity was marked with group privacy change,
  * create batch operation to update group content.
  */
 function og_access_entity_update($entity, $entity_type) {
-  if (!og_access_check_group_privacy_changed($entity, $entity_type)) {
+  if (!og_access_check_node_access_grants_is_needed($entity, $entity_type)) {
     return;
   }
 
   // Handle group privacy change.
-  og_access_handle_group_privacy_change($entity, $entity_type);
+  og_access_handle_group_privacy_change($entity_type, $entity);
 }
 
 /**
@@ -330,30 +341,18 @@ function og_access_entity_update($entity, $entity_type) {
  * changed as well. Since a group might have big amount of content, it is being
  * handled using Batch API.
  *
- * @param $entity
- *   The group entity object.
+ *
  * @param $entity_type
  *   The group type.
+ * @param $entity
+ *   The group entity object.
  */
-function og_access_handle_group_privacy_change($entity, $entity_type) {
-
-  // Check for privacy change.
-  $context = array(
-    'change_detected' => FALSE,
-    'entity' => $entity,
-    'entity_type' => $entity_type,
-  );
-  drupal_alter('og_access_invoke_node_access_acquire_grants', $context);
-  if (!$context['change_detected']) {
-    // If no change detected there is nothing to handle.
-    return;
-  }
-
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+function og_access_handle_group_privacy_change($entity_type, $entity) {
+  list($id) = entity_extract_ids($entity_type, $entity);
   $batch = array(
     'title' => t('Handle group privacy change'),
     'operations' => array(
-      array('og_access_invoke_node_access_acquire_grants', array($entity_type, $wrapper->getIdentifier())),
+      array('og_access_invoke_node_access_acquire_grants', array($entity_type, $id)),
     ),
   );
   batch_set($batch);
