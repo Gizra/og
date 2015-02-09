@@ -199,19 +199,21 @@ function og_context($group_type = 'node', $group = NULL, $account = NULL, $check
   global $user;
   // User account is sent.
   $account = $account ? $account : user_load($user->uid);
+  if (!$check_access) {
+    // Check if we already have context only if we don't have to check user's
+    // permissions to access the current group.
+    $context = &drupal_static(__FUNCTION__, FALSE);
+    if (empty($group) && $context !== FALSE) {
+      // Determine if we can return cached values.
+      if (empty($context)) {
+        // We already tried to find a context, but couldn't.
+        return FALSE;
+      }
 
-  $context = &drupal_static(__FUNCTION__, FALSE);
-
-  if (empty($group) && $context !== FALSE) {
-    // Determine if we can return cached values.
-    if (empty($context)) {
-      // We already tried to find a context, but couldn't.
-      return FALSE;
-    }
-
-    if ($context['group_type'] == $group_type) {
-      // Return the cached values.
-      return $context;
+      if ($context['group_type'] == $group_type) {
+        // Return the cached values.
+        return $context;
+      }
     }
   }
 
@@ -407,7 +409,7 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
 
       // Check if user has access to the group.
       $group = entity_load_single($group_type, $check_gid);
-      if (entity_access('view', $group_type, $group)) {
+      if (!$check_access || entity_access('view', $group_type, $group)) {
         // We found an accessible context, so we can break.
         $gid = $check_gid;
         break;
