@@ -215,9 +215,8 @@ function og_context($group_type = 'node', $group = NULL, $account = NULL, $check
 
   $context = &drupal_static(__FUNCTION__, array());
 
-  if (empty($context[$cache_key])) {
+  if (!array_key_exists($cache_key, $context)) {
     // Mark that this context hasn't been checked yet.
-
     $context[$cache_key] = FALSE;
   }
 
