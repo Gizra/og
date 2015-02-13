@@ -223,7 +223,7 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
         );
 
         // Change config with settings from og_membership table.
-        foreach (array('filter', 'argument', 'sort') as $op) {
+        foreach (array('filter', 'argument', 'sort', 'relationship') as $op) {
           $data['og_membership'][$field['field_name'] . '_target_id'][$op]['field'] = 'gid';
           $data['og_membership'][$field['field_name'] . '_target_id'][$op]['table'] = 'og_membership';
           unset($data['og_membership'][$field['field_name'] . '_target_id'][$op]['additional fields']);
