@@ -58,5 +58,7 @@ class OgContextTestCase extends DrupalWebTestCase {
 
     // Other user should not get the group context
     $this->assertFalse(og_context('node', $this->group_node, $this->user2));
+    // Anybody should get existing context if checking access is FALSE.
+    $this->assertTrue(og_context('node', $this->group_node, $this->user2, FALSE));
   }
 }
