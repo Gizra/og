@@ -367,6 +367,23 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
   }
 
   $providers = og_context_negotiation_info();
+
+  // Don't call menu_get_item() directly here as it may result in a nested call
+  // to og_context() due to access check and dynamic loading. Instead, only use
+  // the parts of menu_get_item() that gets the router item and use it for
+  // comparison.
+  $current_path = current_path();
+  $original_map = arg(NULL, $current_path);
+  $parts = array_slice($original_map, 0, MENU_MAX_PARTS);
+  $ancestors = menu_get_ancestors($parts);
+  $router_item = db_query_range('SELECT * FROM {menu_router} WHERE path IN (:ancestors) ORDER BY fit DESC', 0, 1, array(':ancestors' => $ancestors))->fetchAssoc();
+  if ($router_item) {
+    drupal_alter('menu_get_item', $router_item, $current_path, $original_map);
+  }
+  else {
+    return;
+  }
+
   foreach ($enabled_providers as $name => $ignore) {
     if (empty($providers[$name])) {
       continue;
@@ -375,7 +392,7 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
     $invoke = FALSE;
     if (!empty($provider['menu path'])) {
       foreach ($provider['menu path'] as $path) {
-        if (strpos(current_path(), $path) === 0) {
+        if (strpos($router_item['path'], $path) === 0) {
           $invoke = TRUE;
           // Path matches, so we can break.
           break;
