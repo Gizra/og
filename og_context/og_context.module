@@ -386,9 +386,7 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
 
   $providers = og_context_negotiation_info();
   if (empty($item)) {
-    if (!$item = _og_context_menu_get_untranslated_item(current_path())) {
-      return;
-    }
+    $item = _og_context_menu_get_untranslated_item(current_path());
   }
 
   foreach ($enabled_providers as $name => $ignore) {
