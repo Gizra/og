@@ -370,7 +370,7 @@ function og_context_provider_weight($provider) {
  *   The entity type of the group. For example, "node" or "user".
  * @param $item
  *   Optional; A menu item that context should be extracted from. If empty
- *   defaults to the current menu item by using menu_get_item().
+ *   defaults to the untranslated menu item matching the current path.
  * @param bool $check_access
  *   Determines if access to the group should be done. Defaults to TRUE.
  *
@@ -385,8 +385,10 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
   }
 
   $providers = og_context_negotiation_info();
-  if (!$router_item = _og_context_menu_get_untranslated_item(current_path())) {
-    return;
+  if (empty($item)) {
+    if (!$item = _og_context_menu_get_untranslated_item(current_path())) {
+      return;
+    }
   }
 
   foreach ($enabled_providers as $name => $ignore) {
@@ -397,7 +399,7 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
     $invoke = FALSE;
     if (!empty($provider['menu path'])) {
       foreach ($provider['menu path'] as $path) {
-        if (strpos($router_item['path'], $path) === 0) {
+        if (strpos($item['path'], $path) === 0) {
           $invoke = TRUE;
           // Path matches, so we can break.
           break;
