@@ -384,10 +384,6 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
     return;
   }
 
-  if (empty($item)) {
-    $item = menu_get_item();
-  }
-
   $providers = og_context_negotiation_info();
   if (!$router_item = _og_context_menu_get_untranslated_item(current_path())) {
     return;
