@@ -1818,7 +1818,8 @@ function og_is_group($entity_type, $entity) {
   if (!field_info_instance($entity_type, OG_GROUP_FIELD, $bundle)) {
     return variable_get("og_is_group__{$entity_type}__{$bundle}", FALSE);
   }
-  return !empty($wrapper->{OG_GROUP_FIELD}) && $wrapper->{OG_GROUP_FIELD}->value();
+  $entity = $wrapper->value();
+  return !empty($entity->{OG_GROUP_FIELD}) && $entity->{OG_GROUP_FIELD}[$entity->language][0]['value'];
 }
 
 
