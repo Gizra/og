@@ -2383,7 +2383,7 @@ function og_is_group_audience_field($field_name) {
  */
 function og_get_group_audience_fields($entity_type = 'user', $bundle_name = 'user', $group_type = NULL, $group_bundle = NULL) {
   $return = &drupal_static(__FUNCTION__, array());
-  $identifier = $entity_type . ':' . $bundle_name . ':' . $group_type;
+  $identifier = $entity_type . ':' . $bundle_name . ':' . $group_type . ':' . $group_bundle;
   if (isset($return[$identifier])) {
     return $return[$identifier];
   }
