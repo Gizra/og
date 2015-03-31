@@ -2283,13 +2283,16 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
  *   (optional) Array with the state to return. Defaults to active.
  * @param $field_name
  *   (optional) The field name associated with the group.
+ * @param $access_check
+ *   (optional) When TRUE check if user has permissions to view the group.
+ *   When FALSE do not check user permissions. Default to TRUE.
  *
  * @return
  *  An array with the group's entity type as the key, and array - keyed by
  *  the OG membership ID and the group ID as the value. If nothing found,
  *  then an empty array.
  */
-function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL) {
+function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL, $access_check = TRUE) {
   $cache = &drupal_static(__FUNCTION__, array());
 
   if ($entity_type == 'user' && empty($entity)) {
@@ -2347,6 +2350,10 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
     ->fetchAll();
 
   foreach ($result as $row) {
+    if ($access_check && !entity_access('view', $row->group_type, entity_load_single($row->group_type, $row->id))) {
+      // User doesn't have access to the group.
+      continue;
+    }
     $cache[$identifier][$row->group_type][$row->id] = $row->gid;
   }
 
@@ -3531,11 +3538,14 @@ function og_node_create_links($group_type, $gid, $field_name, $destination = NUL
  * @param $group_type
  *   (optional) The entity type of the groups to fetch. By default all group
  *   types will be fetched.
+ * @param $access_check
+ *   (optional) When TRUE check if user has permissions to view the group.
+ *   When FALSE do not check user permissions. Default to TRUE.
  *
  * @return
  *   An array with the group IDs or an empty array.
  */
-function og_get_groups_by_user($account = NULL, $group_type = NULL) {
+function og_get_groups_by_user($account = NULL, $group_type = NULL, $access_check = TRUE) {
   if (empty($account)) {
     global $user;
     $account = $user;
@@ -3555,9 +3565,23 @@ function og_get_groups_by_user($account = NULL, $group_type = NULL) {
     return;
   }
 
+  $groups = array();
   foreach ($og_memberships as $og_membership) {
-    if (!empty($og_membership)) {
-      $gids[$og_membership->group_type][$og_membership->gid] = $og_membership->gid;
+    if (empty($og_membership)) {
+      // OG membership might have been just deleted.
+      continue;
+    }
+    $groups[$og_membership->group_type][] = $og_membership->gid;
+  }
+
+  foreach ($groups as $entity_type => $ids) {
+    foreach (entity_load($entity_type, $ids) as $entity) {
+      if ($access_check && !entity_access('view', $entity_type, $entity)) {
+        // User doesn't have access to the group.
+        continue;
+      }
+      list($id) = entity_extract_ids($entity_type, $entity);
+      $gids[$entity_type][$id] = $id;
     }
   }
 
