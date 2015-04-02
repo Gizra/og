@@ -336,7 +336,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
 
     // Add another user to group.
     og_group('node', $group_node1->nid, array('entity' => $user2));
-
+    drupal_static_reset('node_access');
     $this->assertTrue(node_access('view', $node, $user2), 'Group member can view published node.');
 
     $node->status = NODE_NOT_PUBLISHED;
@@ -344,6 +344,32 @@ class OgAccessTestCase extends DrupalWebTestCase {
     drupal_static_reset('node_access');
 
     $this->assertFalse(node_access('view', $node, $user2), 'Group member can not view unpublished node.');
+
+    $groups1 = og_get_entity_groups('user', $user2, array(OG_STATE_ACTIVE), NULL, TRUE);
+    $groups2 = og_get_groups_by_user($user2, 'node', TRUE);
+    $groups1 = $groups1 ? $groups1 : array('node' => array());
+    $groups2 = $groups2 ? $groups2 : array();
+
+
+    $this->assertTrue(node_access('view', $group_node1, $user2), 'Group member can view published group.');
+    $this->assertTrue(entity_access('view', 'node', $group_node1, $user2), 'Group member can view published group.');
+    $this->assertTrue(in_array($group_node1->nid, $groups1['node']), 'Group member can view published group.');
+    $this->assertTrue(in_array($group_node1->nid, $groups2), 'Group member can view published group.');
+
+    $group_node1->status = NODE_NOT_PUBLISHED;
+    node_save($group_node1);
+    drupal_static_reset('node_access');
+    drupal_static_reset('og_get_entity_groups');
+
+    $groups1 = og_get_entity_groups('user', $user2, array(OG_STATE_ACTIVE), NULL, TRUE);
+    $groups2 = og_get_groups_by_user($user2, 'node', TRUE);
+    $groups1 = $groups1 ? $groups1 : array('node' => array());
+    $groups2 = $groups2 ? $groups2 : array();
+
+    $this->assertFalse(node_access('view', $group_node1, $user2), 'Group member can\'t view unpublished node.');
+    $this->assertFalse(entity_access('view', 'node', $group_node1, $user2), 'Group member can\'t view unpublished node.');
+    $this->assertFalse(in_array($group_node1->nid, $groups1['node']), 'Group member can\'t view unpublished group.');
+    $this->assertFalse(in_array($group_node1->nid, $groups2), 'Group member can\'t view unpublished group.');
   }
 }
 

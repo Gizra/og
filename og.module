@@ -2285,14 +2285,14 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
  *   (optional) The field name associated with the group.
  * @param $access_check
  *   (optional) When TRUE check if user has permissions to view the group.
- *   When FALSE do not check user permissions. Default to TRUE.
+ *   When FALSE do not check user permissions. Default to FALSE.
  *
  * @return
  *  An array with the group's entity type as the key, and array - keyed by
  *  the OG membership ID and the group ID as the value. If nothing found,
  *  then an empty array.
  */
-function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL, $access_check = TRUE) {
+function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL, $access_check = FALSE) {
   $cache = &drupal_static(__FUNCTION__, array());
 
   if ($entity_type == 'user' && empty($entity)) {
@@ -2350,7 +2350,7 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
     ->fetchAll();
 
   foreach ($result as $row) {
-    if ($access_check && !entity_access('view', $row->group_type, entity_load_single($row->group_type, $row->id))) {
+    if ($access_check && !entity_access('view', $row->group_type, entity_load_single($row->group_type, $row->gid), user_load($id))) {
       // User doesn't have access to the group.
       continue;
     }
@@ -2358,8 +2358,6 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
   }
 
   return $cache[$identifier];
-
-  //This is test comment.
 }
 
 /**
@@ -3542,12 +3540,12 @@ function og_node_create_links($group_type, $gid, $field_name, $destination = NUL
  *   types will be fetched.
  * @param $access_check
  *   (optional) When TRUE check if user has permissions to view the group.
- *   When FALSE do not check user permissions. Default to TRUE.
+ *   When FALSE do not check user permissions. Default to FALSE.
  *
  * @return
  *   An array with the group IDs or an empty array.
  */
-function og_get_groups_by_user($account = NULL, $group_type = NULL, $access_check = TRUE) {
+function og_get_groups_by_user($account = NULL, $group_type = NULL, $access_check = FALSE) {
   if (empty($account)) {
     global $user;
     $account = $user;
@@ -3578,7 +3576,7 @@ function og_get_groups_by_user($account = NULL, $group_type = NULL, $access_chec
 
   foreach ($groups as $entity_type => $ids) {
     foreach (entity_load($entity_type, $ids) as $entity) {
-      if ($access_check && !entity_access('view', $entity_type, $entity)) {
+      if ($access_check && !entity_access('view', $entity_type, $entity, $account)) {
         // User doesn't have access to the group.
         continue;
       }
