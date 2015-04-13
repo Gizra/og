@@ -1938,7 +1938,7 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
     // Add OG audience field to the audience content type.
     $og_field = og_fields_info(OG_AUDIENCE_FIELD);
     $og_field['field']['settings']['target_type'] = 'node';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $type->type, $og_field);
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $this->node_type, $og_field);
 
     // Set the setting for delete a group content when deleting group.
     variable_set('og_orphans_delete', TRUE);
@@ -1976,7 +1976,7 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
     $second_node = node_load($second_node->nid);
 
     // Verify the none orphan node wasn't deleted.
-    $this->assertTrue($first_node, "The second node is realted to another group and deleted.");
+    $this->assertTrue($first_node, "The second node is related to another group and deleted.");
     // Verify the orphan node deleted.
     $this->assertFalse($second_node, "The orphan node deleted.");
   }

@@ -2294,9 +2294,9 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
  */
 function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL, $access_check = FALSE) {
   $cache = &drupal_static(__FUNCTION__, array());
+  global $user;
 
   if ($entity_type == 'user' && empty($entity)) {
-    global $user;
     $entity = clone $user;
   }
   if (is_object($entity)) {
@@ -2349,15 +2349,14 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
     ->execute()
     ->fetchAll();
 
-  $account = user_load($id);
+  $account = $entity_type == 'user' ? user_load($id) : NULL;
   foreach ($result as $row) {
-    foreach (entity_load($row->group_type, array($row->gid)) as $group) {
-      if ($access_check && !entity_access('view', $row->group_type, $group, $account)) {
-        // User doesn't have access to the group.
-        continue;
-      }
-      $cache[$identifier][$row->group_type][$row->id] = $row->gid;
+    $group = entity_load_single($row->group_type, $row->gid);
+    if ($access_check && $account && !entity_access('view', $row->group_type, $group, $account)) {
+      // User doesn't have access to the group.
+      continue;
     }
+    $cache[$identifier][$row->group_type][$row->id] = $row->gid;
   }
 
   return $cache[$identifier];
