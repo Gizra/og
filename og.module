@@ -2351,12 +2351,19 @@ function og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = a
 
   $account = $entity_type == 'user' ? user_load($id) : NULL;
   foreach ($result as $row) {
-    $group = entity_load_single($row->group_type, $row->gid);
-    if ($access_check && $account && !entity_access('view', $row->group_type, $group, $account)) {
-      // User doesn't have access to the group.
+
+    $groups = entity_load($row->group_type, array($row->gid));
+    if (empty($groups)) {
+      $cache[$identifier][$row->group_type][$row->id] = $row->gid;
       continue;
     }
-    $cache[$identifier][$row->group_type][$row->id] = $row->gid;
+    foreach ($groups as $group) {
+      if (!empty($group) && $access_check && $account && !entity_access('view', $row->group_type, $group, $account)) {
+        // User doesn't have access to the group.
+        continue;
+      }
+      $cache[$identifier][$row->group_type][$row->id] = $row->gid;
+    }
   }
 
   return $cache[$identifier];
