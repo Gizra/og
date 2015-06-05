@@ -399,7 +399,7 @@ function og_ui_delete_membership($form, &$form_state, $group_type, $gid, $og_mem
   return confirm_form($form,
     t('Remove membership in group @group', array('@group' => $label)),
     'group/' . $group_type . '/' . $gid . '/admin/people',
-    t('Are you sure you would like to remove the membership for the user @user', array('@user' => $account->name)),
+    t('Are you sure you would like to remove the membership for the user @user?', array('@user' => $account->name)),
     t('Remove'),
     t('Cancel')
   );
