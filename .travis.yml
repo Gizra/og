@@ -31,7 +31,7 @@ env:
 
     # Configuration variables.
     - DRUPAL_TI_MODULE_NAME="og"
-    - DRUPAL_TI_SIMPLETEST_GROUP='"Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI"'
+    - DRUPAL_TI_SIMPLETEST_GROUP="Organic groups,Organic groups access,Organic groups context,Organic groups field access,Organic groups UI"
 
     # Define runners and environment vars to include before and after the
     # main runners / environment vars.
