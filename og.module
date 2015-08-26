@@ -101,50 +101,6 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 }
 
 /**
- * Implements hook_node_presave().
- *
- * @param EntityInterface $entity
- */
-function og_entity_presave(EntityInterface $entity) {
-  if (!OG::IsGroupContent($entity)) {
-    return;
-  }
-
-  $field = $entity->get(OG_AUDIENCE_FIELD);
-
-  $groups = array();
-  if ($field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality()) {
-    foreach ($field as $info) {
-      $value = $info->getValue(TRUE);
-
-      $entity = $value['entity'];
-      $groups[] = array('id' => $entity->id(), 'type' => $entity->getEntityType());
-    }
-  }
-  else {
-
-  }
-
-  // Remove any values from the audience field.
-//  $entity->set(OG_AUDIENCE_FIELD, NULL);
-
-  // todo: check when field is multiple.
-  // todo: Handle when updating the field.
-
-  // Create the OG membership.
-  foreach ($groups as $group) {
-    $membership = OG::MembershipStorage()->create(OG::MembershipDefault());
-    $membership
-      ->setContentId($entity->id())
-      ->setContentType($entity->getEntityTypeId())
-      ->setGid($group['id'])
-      ->setEntityType($group['type'])
-      ->setFieldName(OG_AUDIENCE_FIELD)
-      ->save();
-  }
-}
-
-/**
  * Drupal 7 part.
  */
 

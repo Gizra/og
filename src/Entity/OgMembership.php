@@ -166,7 +166,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return OgMembership
    */
-  public function setContentId($etid) {
+  public function setEntityId($etid) {
     $this->set('etid', $etid);
     return $this;
   }
@@ -217,7 +217,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return OgMembership
    */
-  public function setContentType($groupType) {
+  public function setGroupType($groupType) {
     $this->set('group_type', $groupType);
     return $this;
   }
@@ -225,7 +225,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * @return mixed
    */
-  public function getContentType() {
+  public function getGroupType() {
     return $this->get('group_type')->value;
   }
 
