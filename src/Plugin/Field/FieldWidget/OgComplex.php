@@ -10,6 +10,8 @@ namespace Drupal\og\Plugin\Field\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\og\Controller\OG;
+use Drupal\og\Entity\OgMembership;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -33,7 +35,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $return = parent::formElement($items, $delta, $element, $form, $form_state);
 
     // todo remove this after the selection handler could be changed via th UI.
-    $return['target_id']['#selection_handler'] = 'default:node';
+    $return['target_id']['#selection_handler'] = 'default:og';
 
     return $return;
   }
@@ -70,4 +72,5 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     // todo: Check the writing permission for the current user.
   }
+
 }

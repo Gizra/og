@@ -59,6 +59,9 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
    * {@inheritdoc}
    */
   public function referencedEntities() {
+
+    // todo: Fix this one in order to get all the group the entity belong t0.
+
     // Fetch the list of memberships for this field.
     if (!$this->fetched) {
       $this->populateGroupsFromMembershipEntities();
@@ -99,10 +102,8 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
 
     $groups = \Drupal::entityManager()->getStorage($group_type)->loadMultiple($group_ids);
 
-    $delta = 0;
-    foreach ($groups as $group) {
+    foreach ($groups as $delta => $group) {
       $this->list[] = $this->createItem($delta, ['entity' => $group]);
-      $delta++;
     }
   }
 

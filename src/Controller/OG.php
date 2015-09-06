@@ -10,8 +10,6 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgFieldBase;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 
 class OG {
 
@@ -159,4 +157,5 @@ class OG {
   public static function MembershipDefault() {
     return array('type' => 'og_membership_type_default');
   }
+
 }
