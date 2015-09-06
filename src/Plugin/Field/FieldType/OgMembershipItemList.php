@@ -7,6 +7,7 @@
 
 namespace Drupal\og\Plugin\Field\FieldType;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\og\Controller\OG;
 use Drupal\og\Entity\OgMembership;
@@ -65,7 +66,7 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
       $new_groups[] = $item->getValue()['target_id'];
     }
 
-    // todo: move to API.
+    // todo: move to API function.
     $results = \Drupal::entityQuery('og_membership')
       ->condition('etid', $this->getEntity()->id())
       ->condition('entity_type', $this->getEntity()->getEntityTypeId())
@@ -76,25 +77,54 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
     /** @var OgMembership[] $memberships */
     $memberships = OgMembership::loadMultiple($results);
 
-    foreach ($memberships as $membership) {
-      if (!in_array($membership->getGroup()->id(), $new_groups)) {
-        $membership->delete();
-      }
-      else {
-        /** @var \Drupal\Core\Entity\EntityInterface $parent */
-        $parent_entity = $this->getEntity();
-        $membership = OG::MembershipStorage()->create(OG::MembershipDefault());
-
-        $membership
-          ->setFieldName($this->getName())
-          ->setEntityType($parent_entity->getEntityTypeId())
-          ->setEntityId($parent_entity->id())
-          ->setGroupType($this->entity->getEntityTypeId())
-          ->setGid($this->entity->id())
-          ->setFieldName($this->getFieldDefinition()->getName())
-          ->save();
+    $target_ids = [];
+    if ($memberships) {
+      // Collect all the previous memberships into array.
+      foreach ($memberships as $membership) {
+        $target_ids[] = $membership->getGroup()->id();
       }
     }
+
+    $deprecated_memberships = [];
+    // Iterate over the new groups and create/delete a membership according to
+    // the foreach inside logic.
+    foreach ($new_groups as $new_group) {
+      if (!$target_ids) {
+        // This is an orphan group content - group it to all groups.
+        $this->createOgMembership($new_group);
+        continue;
+      }
+
+      if (!in_array($new_group, $target_ids)) {
+        // The membership does not exists in the new groups array. Delete it.
+        $deprecated_memberships[] = $new_group;
+      }
+      else {
+        // We need to create a new membership.
+        $this->createOgMembership($new_group);
+      }
+    }
+
+    if ($deprecated_memberships) {
+      $storage_handler = \Drupal::entityManager()->getStorage('og_membership');
+      $entities = OgMembership::loadMultiple($deprecated_memberships);
+      $storage_handler->delete($entities);
+    }
+  }
+
+  private function createOgMembership($id) {
+    /** @var \Drupal\Core\Entity\EntityInterface $parent */
+    $parent_entity = $this->getEntity();
+    $membership = OG::MembershipStorage()->create(OG::MembershipDefault());
+
+    $membership
+      ->setFieldName($this->getName())
+      ->setEntityType($parent_entity->getEntityTypeId())
+      ->setEntityId($parent_entity->id())
+      ->setGroupType($this->getFieldDefinition()->getTargetEntityTypeId())
+      ->setGid($id)
+      ->setFieldName($this->getFieldDefinition()->getName())
+      ->save();
   }
 
   /**
