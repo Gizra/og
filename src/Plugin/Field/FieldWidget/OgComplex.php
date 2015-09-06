@@ -25,6 +25,8 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class OgComplex extends EntityReferenceAutocompleteWidget {
 
+  static $info = [];
+
   /**
    * The OG complex widget have a special logic on order to return the groups
    * that user can reference to.
@@ -36,6 +38,15 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $return['target_id']['#selection_handler'] = 'default:og';
 
     return $return;
+  }
+
+  protected function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
+    self::$info = [
+      'entity_id' => $items->getEntity()->id(),
+      'entity_type' => $items->getEntity()->getEntityTypeId(),
+    ];
+
+    return parent::formMultipleElements($items, $form, $form_state);
   }
 
   /**
@@ -76,7 +87,17 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    */
   public static function getWidgetState(array $parents, $field_name, FormStateInterface $form_state) {
     $widgetState = parent::getWidgetState($parents, $field_name, $form_state);
-    $widgetState['items_count'] = 2;
+
+    if (empty(self::$info)) {
+      return $widgetState;
+    }
+    $info = self::$info;
+    $results = \Drupal::entityQuery('og_membership')
+      ->condition('entity_type', $info['entity_type'])
+      ->condition('etid', $info['entity_id'])
+      ->execute();
+
+    $widgetState['items_count'] = count($results);
     return $widgetState;
   }
 
