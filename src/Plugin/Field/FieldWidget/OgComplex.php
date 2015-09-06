@@ -32,7 +32,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $return = parent::formElement($items, $delta, $element, $form, $form_state);
 
-    $return['target_id']['#autocomplete_route_name'] = 'og.entity_reference.autocomplete';
+    $return['target_id']['#selection_handler'] = 'default:og';
 
     return $return;
   }
