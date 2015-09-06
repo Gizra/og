@@ -8,6 +8,8 @@
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList;
+use Drupal\og\Controller\OG;
+use Drupal\og\Entity\OgMembership;
 
 /**
  * Defines a item list class for OG membership fields.
@@ -52,6 +54,46 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
     // For empty fields, $entity->field->property is NULL.
     if ($item = $this->first()) {
       return $item->__get($property_name);
+    }
+  }
+
+  public function postSave($update) {
+    parent::postSave($update);
+
+    $new_groups = [];
+    foreach ($this->list as $item) {
+      $new_groups[] = $item->getValue()['target_id'];
+    }
+
+    // todo: move to API.
+    $results = \Drupal::entityQuery('og_membership')
+      ->condition('etid', $this->getEntity()->id())
+      ->condition('entity_type', $this->getEntity()->getEntityTypeId())
+      ->condition('group_type', $this->getFieldDefinition()->getTargetEntityTypeId())
+      ->condition('field_name', $this->getFieldDefinition()->getName())
+      ->execute();
+
+    /** @var OgMembership[] $memberships */
+    $memberships = OgMembership::loadMultiple($results);
+
+    foreach ($memberships as $membership) {
+      if (!in_array($membership->getGroup()->id(), $new_groups)) {
+        $membership->delete();
+      }
+      else {
+        /** @var \Drupal\Core\Entity\EntityInterface $parent */
+        $parent_entity = $this->getEntity();
+        $membership = OG::MembershipStorage()->create(OG::MembershipDefault());
+
+        $membership
+          ->setFieldName($this->getName())
+          ->setEntityType($parent_entity->getEntityTypeId())
+          ->setEntityId($parent_entity->id())
+          ->setGroupType($this->entity->getEntityTypeId())
+          ->setGid($this->entity->id())
+          ->setFieldName($this->getFieldDefinition()->getName())
+          ->save();
+      }
     }
   }
 

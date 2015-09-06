@@ -34,22 +34,4 @@ class OgMembershipItem extends EntityReferenceItem {
     return [];
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function postSave($update) {
-    parent::postSave($update);
-
-    /** @var \Drupal\Core\Entity\EntityInterface $parent */
-    $parent_entity = $this->getEntity();
-    $membership = OG::MembershipStorage()->create(OG::MembershipDefault());
-
-    $membership->setFieldName($this->getName())
-      ->setEntityType($parent_entity->getEntityTypeId())
-      ->setEntityId($parent_entity->id())
-      ->setGroupType($this->entity->getEntityTypeId())
-      ->setGid($this->entity->id())
-      ->save();
-  }
-
 }

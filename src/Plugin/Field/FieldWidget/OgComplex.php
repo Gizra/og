@@ -40,10 +40,26 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     return $return;
   }
 
+  /**
+   * Override the original logic in order to pass the entity type and entity ID
+   * to the method which responsible for the multiple reference items.
+   *
+   * @param FieldItemListInterface $items
+   *   Feild items object.
+   * @param array $form
+   *   Form api array.
+   * @param FormStateInterface $form_state
+   *   The form state array.
+   *
+   * @return array
+   *   Return array of the form element.
+   */
   protected function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
     self::$info = [
       'entity_id' => $items->getEntity()->id(),
       'entity_type' => $items->getEntity()->getEntityTypeId(),
+      'field_name' => $items->getName(),
+      'group_type' => $items->getFieldDefinition()->getTargetEntityTypeId(),
     ];
 
     return parent::formMultipleElements($items, $form, $form_state);
@@ -95,6 +111,8 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $results = \Drupal::entityQuery('og_membership')
       ->condition('entity_type', $info['entity_type'])
       ->condition('etid', $info['entity_id'])
+      ->condition('field_name', $info['field_name'])
+      ->condition('group_type', $info['group_type'])
       ->execute();
 
     $widgetState['items_count'] = count($results);
