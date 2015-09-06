@@ -12,8 +12,6 @@ use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgFieldBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Drupal\Component\Utility\Tags;
 
 class OG {
 
@@ -117,77 +115,6 @@ class OG {
 
     // Let other OG modules know we invalidate cache.
     \Drupal::moduleHandler()->invokeAll('og_invalidate_cache', $gids);
-  }
-
-  /**
-   * Autocomplete for the audience field. Return only entities which defined as
-   * group.
-   *
-   * @param Request $request
-   *   The request object that contains the typed tags.
-   * @param string $type
-   *   The widget type (i.e. 'single' or 'tags').
-   * @param string $field_name
-   *   The name of the entity reference field.
-   * @param string $entity_type
-   *   The entity type.
-   * @param string $bundle_name
-   *   The bundle name.
-   * @param string $entity_id
-   *   (optional) The entity ID the entity reference field is attached to.
-   *   Defaults to ''.
-   *
-   * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
-   *   Throws access denied when either the field or field instance does not
-   *   exists or the user does not have access to edit the field.
-   *
-   * @return \Symfony\Component\HttpFoundation\JsonResponse
-   *   The matched labels as json.
-   */
-  public static function handleAutocomplete(Request $request, $type, $field_name, $entity_type, $bundle_name, $entity_id) {
-    // todo (maybe) pass this logic to a to the field handler.
-    $definitions = \Drupal::entityManager()->getFieldDefinitions($entity_type, $bundle_name);
-
-    if (!isset($definitions[$field_name])) {
-      throw new AccessDeniedHttpException();
-    }
-
-    $field_definition = $definitions[$field_name];
-    $access_control_handler = \Drupal::entityManager()->getAccessControlHandler($entity_type);
-    if ($field_definition->getType() != 'entity_reference' || !$access_control_handler->fieldAccess('edit', $field_definition)) {
-      throw new AccessDeniedHttpException();
-    }
-
-    // todo: see if we need this.
-    $prefix = '';
-    // The user entered a comma-separated list of entity labels, so we generate
-    // a prefix.
-    if ($type == 'tags' && !empty($last_item)) {
-      $prefix = count($items_typed) ? Tags::implode($items_typed) . ', ' : '';
-    }
-
-    $results = \Drupal::entityQuery($entity_type)
-      ->condition(OG_GROUP_FIELD, 1)
-      // todo: Use the operator define in the field settings.
-      ->condition(\Drupal::entityManager()->getDefinition($entity_type)->getKey('label'), $request->query->get('q'), 'CONTAINS')
-      ->range(0, 10)
-      ->execute();
-
-    /** @var EntityInterface[] $entities */
-    $entities = \Drupal::entityManager()->getStorage($entity_type)->loadMultiple($results);
-
-    $matches = array();
-    foreach ($entities as $entity) {
-      $label = $entity->label();
-      $key = "$label (" . $entity->id() . ")";
-      // Strip things like starting/trailing white spaces, line breaks and tags.
-      $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
-      // Names containing commas or quotes must be wrapped in quotes.
-      $key = Tags::encode($key);
-      $matches[] = array('value' => $prefix . $key, 'label' => $label);
-    }
-
-    return new JsonResponse($matches);
   }
 
   /**

@@ -32,19 +32,10 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $return = parent::formElement($items, $delta, $element, $form, $form_state);
 
-    $return['target_id']['#selection_handler'] = 'default:og';
+    // todo remove this after the selection handler could be changed via th UI.
+    $return['target_id']['#selection_handler'] = 'default:node';
 
     return $return;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
-    // todo: issue #2 in OG 8 issue queue.
-    $elements = parent::formMultipleElements($items, $form, $form_state);
-
-    return $elements;
   }
 
   /**
