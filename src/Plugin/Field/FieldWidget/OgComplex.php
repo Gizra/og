@@ -8,8 +8,8 @@
 namespace Drupal\og\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\entity_reference\Plugin\Field\FieldWidget\AutocompleteWidget;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -17,13 +17,15 @@ use Drupal\entity_reference\Plugin\Field\FieldWidget\AutocompleteWidget;
  * @FieldWidget(
  *   id = "og_complex",
  *   label = @Translation("OG reference"),
- *   description = @Translation("An autocomplete text for OG"),
+ *   description = @Translation("An autocompletewidget for OG"),
  *   field_types = {
- *     "entity_reference"
+ *     "og_membership_reference"
  *   }
  * )
  */
-class OgComplex extends AutocompleteWidget {
+class OgComplex extends EntityReferenceAutocompleteWidget {
+
+  static $info = [];
 
   /**
    * The OG complex widget have a special logic on order to return the groups
@@ -32,19 +34,35 @@ class OgComplex extends AutocompleteWidget {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $return = parent::formElement($items, $delta, $element, $form, $form_state);
 
-    $return['target_id']['#autocomplete_route_name'] = 'og.entity_reference.autocomplete';
+    // todo remove this after the selection handler could be changed via th UI.
+    $return['target_id']['#selection_handler'] = 'default:og';
 
     return $return;
   }
 
   /**
-   * {@inheritdoc}
+   * Override the original logic in order to pass the entity type and entity ID
+   * to the method which responsible for the multiple reference items.
+   *
+   * @param FieldItemListInterface $items
+   *   Feild items object.
+   * @param array $form
+   *   Form api array.
+   * @param FormStateInterface $form_state
+   *   The form state array.
+   *
+   * @return array
+   *   Return array of the form element.
    */
-  public function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
-    // todo: issue #2 in OG 8 issue queue.
-    $elements = parent::formMultipleElements($items, $form, $form_state);
+  protected function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
+    self::$info = [
+      'entity_id' => $items->getEntity()->id(),
+      'entity_type' => $items->getEntity()->getEntityTypeId(),
+      'field_name' => $items->getName(),
+      'group_type' => $items->getFieldDefinition()->getTargetEntityTypeId(),
+    ];
 
-    return $elements;
+    return parent::formMultipleElements($items, $form, $form_state);
   }
 
   /**
@@ -63,7 +81,7 @@ class OgComplex extends AutocompleteWidget {
       return;
     }
 
-    $entity = entity_load($this->getFieldSetting('target_type'), $matches[1]);
+    $entity = \Drupal::entityManager()->getStorage($this->getFieldSetting('target_type'))->load($matches[1]);
 
     $params['%label'] = $entity->label();
 
@@ -79,4 +97,26 @@ class OgComplex extends AutocompleteWidget {
 
     // todo: Check the writing permission for the current user.
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getWidgetState(array $parents, $field_name, FormStateInterface $form_state) {
+    $widgetState = parent::getWidgetState($parents, $field_name, $form_state);
+
+    if (empty(self::$info)) {
+      return $widgetState;
+    }
+    $info = self::$info;
+    $results = \Drupal::entityQuery('og_membership')
+      ->condition('entity_type', $info['entity_type'])
+      ->condition('etid', $info['entity_id'])
+      ->condition('field_name', $info['field_name'])
+      ->condition('group_type', $info['group_type'])
+      ->execute();
+
+    $widgetState['items_count'] = count($results);
+    return $widgetState;
+  }
+
 }
