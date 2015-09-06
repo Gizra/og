@@ -77,16 +77,6 @@ define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
  */
 define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
 
-///**
-// * Implements hook_entity_field_storage_info_alter().
-// */
-//function og_entity_field_storage_info_alter(&$fields, \Drupal\Core\Entity\EntityTypeInterface $entity_type) {
-//  if ($entity_type->id() == 'node' && !empty($fields['og_group_ref'])) {
-//    $fields[OG_AUDIENCE_FIELD] = \Drupal\Core\Field\BaseFieldDefinition::createFromFieldStorageDefinition($fields[OG_AUDIENCE_FIELD]);
-//    $fields[OG_AUDIENCE_FIELD]->setCustomStorage(TRUE);
-//  }
-//}
-
 /**
  * Drupal 8 part. Road map:
  * 1. Reference property between groups.
@@ -99,8 +89,6 @@ define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
  * Implements hook_entity_access().
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account, $langcode) {
-// todo: issue #3 in OG 8 issue queue.
-
 //  if (OG::IsGroup($entity)) {
 //  }
 //

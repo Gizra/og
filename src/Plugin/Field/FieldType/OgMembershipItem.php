@@ -52,5 +52,4 @@ class OgMembershipItem extends EntityReferenceItem {
       ->save();
   }
 
-
 }

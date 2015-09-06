@@ -63,7 +63,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
       return;
     }
 
-    $entity = entity_load($this->getFieldSetting('target_type'), $matches[1]);
+    $entity = \Drupal::entityManager()->getStorage($this->getFieldSetting('target_type'))->load($matches[1]);
 
     $params['%label'] = $entity->label();
 

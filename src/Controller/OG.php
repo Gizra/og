@@ -145,6 +145,7 @@ class OG {
    *   The matched labels as json.
    */
   public static function handleAutocomplete(Request $request, $type, $field_name, $entity_type, $bundle_name, $entity_id) {
+    // todo (maybe) pass this logic to a to the field handler.
     $definitions = \Drupal::entityManager()->getFieldDefinitions($entity_type, $bundle_name);
 
     if (!isset($definitions[$field_name])) {
@@ -173,7 +174,7 @@ class OG {
       ->execute();
 
     /** @var EntityInterface[] $entities */
-    $entities = entity_load_multiple($entity_type, $results);
+    $entities = \Drupal::entityManager()->getStorage($entity_type)->loadMultiple($results);
 
     $matches = array();
     foreach ($entities as $entity) {
