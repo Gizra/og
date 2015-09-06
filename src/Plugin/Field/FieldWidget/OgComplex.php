@@ -10,8 +10,6 @@ namespace Drupal\og\Plugin\Field\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\og\Controller\OG;
-use Drupal\og\Entity\OgMembership;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -71,6 +69,15 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     }
 
     // todo: Check the writing permission for the current user.
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getWidgetState(array $parents, $field_name, FormStateInterface $form_state) {
+    $widgetState = parent::getWidgetState($parents, $field_name, $form_state);
+    $widgetState['items_count'] = 2;
+    return $widgetState;
   }
 
 }
