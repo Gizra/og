@@ -25,6 +25,20 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
 
   /**
    * {@inheritdoc}
+   */
+  public function count() {
+    // Overrides ListItem::count, implementing \Countable::count
+    // Fetch the list of memberships for this field.
+    if (!$this->fetched) {
+      $this->populateGroupsFromMembershipEntities();
+      $this->fetched = TRUE;
+    }
+
+    return parent::count();
+  }
+
+  /**
+   * {@inheritdoc}
    *
    * @todo Need to account for new items added and not being overridden etc..
    */
