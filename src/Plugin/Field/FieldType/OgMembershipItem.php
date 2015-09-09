@@ -31,7 +31,10 @@ class OgMembershipItem extends EntityReferenceItem {
    * {@inheritdoc}
    */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
-    return [];
+    // @todo When the FieldStorageConfig::hasCustomStorage method can be changed
+    // this will not be needed to prevent errors. Can just be an empty array,
+    // similar to PathItem.
+    return ['columns' => []];
   }
 
 }
