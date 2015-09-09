@@ -8,6 +8,8 @@
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList;
+use Drupal\og\Controller\OG;
+use Drupal\og\Entity\OgMembership;
 
 /**
  * Defines a item list class for OG membership fields.
@@ -23,6 +25,8 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Need to account for new items added and not being overridden etc..
    */
   public function get($index) {
     if (!is_numeric($index)) {
@@ -41,6 +45,57 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
     }
 
     return isset($this->list[$index]) ? $this->list[$index] : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave($update) {
+    parent::postSave($update);
+
+    $group_ids = [];
+    foreach ($this->list as $item) {
+      $group_ids[] = $item->getValue()['target_id'];
+    }
+
+    // todo: move to API function.
+    $membership_ids = \Drupal::entityQuery('og_membership')
+      ->condition('etid', $this->getEntity()->id())
+      ->condition('entity_type', $this->getEntity()->getEntityTypeId())
+      ->condition('group_type', $this->getFieldDefinition()->getTargetEntityTypeId())
+      ->condition('field_name', $this->getFieldDefinition()->getName())
+      ->execute();
+
+    /** @var \Drupal\og\Entity\OgMembership[] $memberships */
+    $memberships = OgMembership::loadMultiple($membership_ids);
+
+    $target_group_ids = array_map(function($membership) {
+      return $membership->getGid();
+    }, $memberships);
+
+    $deprecated_membership_ids = array_diff($target_group_ids, $group_ids);
+    $new_membership_group_ids = array_diff($group_ids, $target_group_ids);
+
+// @todo What was this doing before, confused.
+//      if (!$target_group_ids) {
+//        // This is an orphan group content - group it to all groups.
+//        $this->createOgMembership($group_id);
+//        continue;
+//      }
+
+    // Create any new memberships.
+    foreach ($new_membership_group_ids as $new_membership_group_id) {
+      // We need to create a new membership.
+      $this->createOgMembership($new_membership_group_id);
+    }
+
+
+    if ($deprecated_membership_ids) {
+      $storage = \Drupal::entityManager()->getStorage('og_membership');
+      // Use array_keys() as the values will contain the group ID.
+      $entities = $storage->loadMultiple(array_keys($deprecated_membership_ids));
+      $storage->delete($entities);
+    }
   }
 
   /**
@@ -77,9 +132,11 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
       ->condition('entity_type', $entity->getEntityTypeId())
       ->condition('etid', $entity->id())
       ->condition('group_type', $group_type)
+      ->condition('state', 1)
       ->execute();
 
-    $memberships = \Drupal::entityManager()->getStorage('og_membership')->loadMultiple($membership_ids);
+    /** @var \Drupal\og\Entity\OgMembership[] $memberships */
+    $memberships = OgMembership::loadMultiple($membership_ids);
 
     $group_ids = array_map(function ($membership) {
       return $membership->getGid();
@@ -92,6 +149,29 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
       $this->list[] = $this->createItem($delta, ['entity' => $group]);
       $delta++;
     }
+  }
+
+  /**
+   * Creates and saves a new membership.
+   *
+   * @param int|string $group_id
+   *   The group ID to create a membership for.
+   */
+  protected function createOgMembership($group_id) {
+    /** @var \Drupal\Core\Entity\EntityInterface $parent */
+    $parent_entity = $this->getEntity();
+    $membership = OG::MembershipStorage()->create(OG::MembershipDefault());
+
+    $membership
+      ->setFieldName($this->getName())
+      ->setEntityType($parent_entity->getEntityTypeId())
+      ->setEntityId($parent_entity->id())
+      ->setGroupType($this->getFieldDefinition()->getTargetEntityTypeId())
+      ->setGid($group_id)
+      ->setFieldName($this->getFieldDefinition()->getName())
+      ->save();
+
+    return $membership;
   }
 
 }
