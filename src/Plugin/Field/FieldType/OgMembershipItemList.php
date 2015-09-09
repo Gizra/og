@@ -44,18 +44,6 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
   }
 
   /**
-   * @param $property_name
-   *
-   * @return mixed
-   */
-  public function __get($property_name) {
-    // For empty fields, $entity->field->property is NULL.
-    if ($item = $this->first()) {
-      return $item->__get($property_name);
-    }
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function referencedEntities() {
