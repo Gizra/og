@@ -175,7 +175,6 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
       ->setEntityId($parent_entity->id())
       ->setGroupType($this->getFieldDefinition()->getTargetEntityTypeId())
       ->setGid($group_id)
-      ->setFieldName($this->getFieldDefinition()->getName())
       ->save();
 
     return $membership;
