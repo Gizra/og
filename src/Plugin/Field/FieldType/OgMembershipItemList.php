@@ -12,7 +12,7 @@ use Drupal\og\Controller\OG;
 use Drupal\og\Entity\OgMembership;
 
 /**
- * Defines a item list class for OG membership fields.
+ * Defines an item list class for OG membership fields.
  */
 class OgMembershipItemList extends EntityReferenceFieldItemList {
 
@@ -90,20 +90,13 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
     $deprecated_membership_ids = array_diff($target_group_ids, $group_ids);
     $new_membership_group_ids = array_diff($group_ids, $target_group_ids);
 
-// @todo What was this doing before, confused.
-//      if (!$target_group_ids) {
-//        // This is an orphan group content - group it to all groups.
-//        $this->createOgMembership($group_id);
-//        continue;
-//      }
-
     // Create any new memberships.
     foreach ($new_membership_group_ids as $new_membership_group_id) {
       // We need to create a new membership.
       $this->createOgMembership($new_membership_group_id);
     }
 
-
+    // Remove memberships that are not referenced any more.
     if ($deprecated_membership_ids) {
       $storage = \Drupal::entityManager()->getStorage('og_membership');
       // Use array_keys() as the values will contain the group ID.
@@ -133,7 +126,7 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
   }
 
   /**
-   * Populate the list property with groups based on related memberships.
+   * Populate reference items for active group memberships.
    */
   protected function populateGroupsFromMembershipEntities() {
     // Make sure list is clear.
@@ -146,7 +139,7 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
       ->condition('entity_type', $entity->getEntityTypeId())
       ->condition('etid', $entity->id())
       ->condition('group_type', $group_type)
-      ->condition('state', 1)
+      ->condition('state', OG_STATE_ACTIVE)
       ->execute();
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
@@ -160,7 +153,7 @@ class OgMembershipItemList extends EntityReferenceFieldItemList {
 
     $delta = 0;
     foreach ($groups as $group) {
-      $this->list[] = $this->createItem($delta, ['entity' => $group]);
+      $this->list[$delta] = $this->createItem($delta, ['entity' => $group]);
       $delta++;
     }
   }
