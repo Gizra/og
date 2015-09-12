@@ -17,6 +17,16 @@ use Drupal\Core\Entity\EntityInterface;
 class Og {
 
   /**
+   * @var string
+   */
+  const MODULE_CONFIG_KEY = 'og';
+
+  /**
+   * @var string
+   */
+  const GROUP_CONFIG_KEY = 'group';
+
+  /**
    * A static cache of entity type group mappings.
    *
    * @var array
@@ -68,7 +78,7 @@ class Og {
    * @return bool
    */
   public static function isGroupEntityType(ConfigEntityInterface $entity_type) {
-    return $entity_type->getThirdPartySetting('og', 'group', FALSE);
+    return $entity_type->getThirdPartySetting(static::MODULE_CONFIG_KEY, static::GROUP_CONFIG_KEY, FALSE);
   }
 
   /**
@@ -78,17 +88,19 @@ class Og {
    */
   public static function addGroup(ConfigEntityInterface $entity_type) {
     // @todo handle other cases?
-    $entity_type->setThirdPartySetting('og', 'group', TRUE);
+    $entity_type->setThirdPartySetting(static::MODULE_CONFIG_KEY, static::GROUP_CONFIG_KEY, TRUE);
+    $entity_type->save();
   }
 
   /**
-   * removes an entity type instance as being an OG group.
+   * Removes an entity type instance as being an OG group.
    *
    * @param \Drupal\Core\Config\Entity\ConfigEntityInterface $entity_type
    */
   public static function removeGroup(ConfigEntityInterface $entity_type) {
     // @todo handle other cases?
-    $entity_type->unsetThirdPartySetting('og', 'group');
+    $entity_type->unsetThirdPartySetting(static::MODULE_CONFIG_KEY, static::GROUP_CONFIG_KEY);
+    $entity_type->save();
   }
 
 }
