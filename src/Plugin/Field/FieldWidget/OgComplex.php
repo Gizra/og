@@ -8,8 +8,8 @@
 namespace Drupal\og\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\entity_reference\Plugin\Field\FieldWidget\AutocompleteWidget;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -17,13 +17,13 @@ use Drupal\entity_reference\Plugin\Field\FieldWidget\AutocompleteWidget;
  * @FieldWidget(
  *   id = "og_complex",
  *   label = @Translation("OG reference"),
- *   description = @Translation("An autocomplete text for OG"),
+ *   description = @Translation("An autocompletewidget for OG"),
  *   field_types = {
- *     "entity_reference"
+ *     "og_membership_reference"
  *   }
  * )
  */
-class OgComplex extends AutocompleteWidget {
+class OgComplex extends EntityReferenceAutocompleteWidget {
 
   /**
    * The OG complex widget have a special logic on order to return the groups

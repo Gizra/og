@@ -24,42 +24,43 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function fieldDefinition() {
-    return FieldStorageConfig::create(array(
+    return FieldStorageConfig::create([
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
-      'type' => 'entity_reference',
+      'type' => 'og_membership_reference',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'settings' => array(
+      'custom_storage' => TRUE,
+      'settings' => [
         'handler' => 'og',
         'handler_submit' => 'Change handler',
-        'handler_settings' => array(
-          'behaviors' => array(
-            'og_behavior' => array(
+        'handler_settings' => [
+          'behaviors' => [
+            'og_behavior' => [
               'status' => TRUE,
-            ),
-          ),
-          'target_bundles' => array(),
+            ],
+          ],
+          'target_bundles' => [],
           'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
-        ),
+        ],
         // todo: allow to change the node type.
         'target_type' => 'node',
-      ),
-    ));
+      ],
+    ]);
   }
 
   /**
    * {@inheritdoc}
    */
   public function instanceDefinition() {
-    return FieldConfig::create(array(
+    return FieldConfig::create([
       'label' => t('Groups audience'),
-      'description' => t('Determine if this is an OG group.'),
-      'default_value' => array(0 => array('value' => 1)),
-      'display_label' => 1,
+      'description' => t('OG group audience reference field.'),
+      //'default_value' => array(0 => array('value' => 1)),
+      'display_label' => TRUE,
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
       'bundle' => $this->getBundle(),
-    ));
+    ]);
   }
 
   /**
@@ -68,7 +69,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   public function widgetDefinition() {
     // Keep this until og_complex widget is back.
     return array(
-      'type' => "og_complex",
+      'type' => 'og_complex',
       'settings' => array(
         'match_operator' => "CONTAINS"
       ),
