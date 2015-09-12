@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\og\Plugin\Field\FieldType\OgMembershipItem.
+ * Contains \Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItem.
  */
 
 namespace Drupal\og\Plugin\Field\FieldType;
@@ -12,7 +12,7 @@ use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\og\Controller\OG;
 
 /**
- * Class OgMembershipItem.
+ * Class OgMembershipReferenceItem.
  *
  * @FieldType(
  *   id = "og_membership_reference",
@@ -21,11 +21,11 @@ use Drupal\og\Controller\OG;
  *   category = @Translation("Reference"),
  *   no_ui = TRUE,
  *   default_formatter = "og_complex",
- *   list_class = "\Drupal\og\Plugin\Field\FieldType\OgMembershipItemList",
+ *   list_class = "\Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItemList",
  *   constraints = {"ValidReference" = {}}
  * )
  */
-class OgMembershipItem extends EntityReferenceItem {
+class OgMembershipReferenceItem extends EntityReferenceItem {
 
   /**
    * {@inheritdoc}
