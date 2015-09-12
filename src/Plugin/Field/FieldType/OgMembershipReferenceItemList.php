@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\og\Plugin\Field\FieldType\OgMembershipItemList.
+ * Contains \Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItemList.
  */
 
 namespace Drupal\og\Plugin\Field\FieldType;
@@ -14,7 +14,7 @@ use Drupal\og\Entity\OgMembership;
 /**
  * Defines an item list class for OG membership fields.
  */
-class OgMembershipItemList extends EntityReferenceFieldItemList {
+class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
   /**
    * Whether or not this list of field items has fetched membership groups.
