@@ -39,8 +39,6 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Need to account for new items added and not being overridden etc..
    */
   public function get($index) {
     if (!is_numeric($index)) {
@@ -103,6 +101,10 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       $entities = $storage->loadMultiple(array_keys($deprecated_membership_ids));
       $storage->delete($entities);
     }
+
+    // Set fetched to FALSE to force a rebuild of the membership group data if
+    // it is used after saving.
+    $this->fetched = FALSE;
   }
 
   /**
