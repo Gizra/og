@@ -7,7 +7,6 @@
 
 namespace Drupal\og;
 
-use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 
@@ -62,6 +61,18 @@ class OgGroupManager {
   }
 
   /**
+   * Check if an entity type object is group enabled.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   */
+  public function entityBundleIsGroup(EntityInterface $entity) {
+    $bundle_of_type = $entity->getEntityType()->getBundleOf();
+    $bundle_id = $entity->id();
+
+    return $this->isGroup($bundle_of_type, $bundle_id);
+  }
+
+  /**
    * Determines whether an entity type ID and bundle ID are group enabled.
    *
    * @param string $entity_type_id
@@ -110,9 +121,11 @@ class OgGroupManager {
     $groups[$entity_type_id] = array_unique($groups[$entity_type_id]);
 
     $editable->set('groups', $groups);
-    $editable->save();
+    $saved = $editable->save();
 
     $this->refreshGroupMap();
+
+    return $saved;
   }
 
   /**
@@ -131,9 +144,11 @@ class OgGroupManager {
 
       // Only update and refresh the map if a key was found and unset.
       $editable->set('groups', $groups);
-      $editable->save();
+      $saved = $editable->save();
 
       $this->refreshGroupMap();
+
+      return $saved;
     }
   }
 

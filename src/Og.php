@@ -17,23 +17,6 @@ use Drupal\Core\Entity\EntityInterface;
 class Og {
 
   /**
-   * @var string
-   */
-  const MODULE_CONFIG_KEY = 'og';
-
-  /**
-   * @var string
-   */
-  const GROUP_CONFIG_KEY = 'group';
-
-  /**
-   * A static cache of entity type group mappings.
-   *
-   * @var array
-   */
-  protected static $groupEntityCache = [];
-
-  /**
    * Check if the given entity is a group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -43,64 +26,48 @@ class Og {
    *   True or false if the given entity is group.
    */
   public static function isGroup(EntityInterface $entity) {
-    $entity_type_id = $entity->getEntityTypeId();
-    $entity_bundle = $entity->bundle();
-
-    if (isset(static::$groupEntityCache[$entity_type_id][$entity_bundle])) {
-      return static::$groupEntityCache[$entity_type_id][$entity_bundle];
-    }
-
-    if ($entity instanceof ContentEntityInterface) {
-      $entity_type = $entity->getEntityType();
-      $bundle_key = $entity_type->getKey('bundle');
-      $bundle_entity = $entity->get($bundle_key)->entity;
-
-      // @todo Or ...
-//      $bundle_entity_type = $entity_type->getBundleEntityType();
-//      /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $bundle_entity */
-//      $bundle_entity = \Drupal::entityManager()->getStorage($bundle_entity_type)->load($entity->bundle());
-
-      $is_group = static::isGroupEntityType($bundle_entity);
-      static::$groupEntityCache[$entity_type_id][$entity_bundle] = $is_group;
-
-      return $is_group;
-    }
-
-    static::$groupEntityCache[$entity_type_id][$entity_bundle] = FALSE;
-    return FALSE;
+    return static::groupManager()->entityIsGroup($entity);
   }
 
   /**
-   * Returns whether an entity type instance is a group type.
+   * Returns whether an entity bundle instance is a group type.
    *
-   * @param \Drupal\Core\Config\Entity\ConfigEntityInterface $entity_type
+   * @param \Drupal\Core\Entity\EntityInterface $entity_type
    *
    * @return bool
    */
-  public static function isGroupEntityType(ConfigEntityInterface $entity_type) {
-    return $entity_type->getThirdPartySetting(static::MODULE_CONFIG_KEY, static::GROUP_CONFIG_KEY, FALSE);
+  public static function isGroupBundle(EntityInterface $entity) {
+    return static::groupManager()->entityBundleIsGroup($entity);
   }
 
   /**
    * Sets an entity type instance as being an OG group.
    *
-   * @param \Drupal\Core\Config\Entity\ConfigEntityInterface $entity_type
+   * @param string $entity_type_id
+   * @param string $bundle_id
    */
-  public static function addGroup(ConfigEntityInterface $entity_type) {
-    // @todo handle other cases?
-    $entity_type->setThirdPartySetting(static::MODULE_CONFIG_KEY, static::GROUP_CONFIG_KEY, TRUE);
-    $entity_type->save();
+  public static function addGroup($entity_type_id, $bundle_id) {
+    return static::groupManager()->addGroup($entity_type_id, $bundle_id);
   }
 
   /**
    * Removes an entity type instance as being an OG group.
    *
-   * @param \Drupal\Core\Config\Entity\ConfigEntityInterface $entity_type
+   * @param string $entity_type_id
+   * @param string $bundle_id
    */
-  public static function removeGroup(ConfigEntityInterface $entity_type) {
-    // @todo handle other cases?
-    $entity_type->unsetThirdPartySetting(static::MODULE_CONFIG_KEY, static::GROUP_CONFIG_KEY);
-    $entity_type->save();
+  public static function removeGroup($entity_type_id, $bundle_id) {
+    return static::groupManager()->removeGroup($entity_type_id, $bundle_id);
+  }
+
+  /**
+   * Returns the group manager instance.
+   *
+   * @return \Drupal\og\OgGroupManager
+   */
+  protected static function groupManager() {
+    // @todo store static reference for this?
+    return \Drupal::service('og.group.manager');
   }
 
 }
