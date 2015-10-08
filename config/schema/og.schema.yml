@@ -1,3 +1,17 @@
+og.settings:
+  type: config_object
+  label: 'Organic Groups settings'
+  mapping:
+    groups:
+      type: mapping
+      mapping:
+        bundles:
+          type: sequence
+          label: 'OG groups'
+          sequence:
+            type: string
+            label: 'Group'
+
 og.og_membership_type.*:
   type: config_entity
   label: 'OG membership type'

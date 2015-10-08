@@ -2,3 +2,6 @@ services:
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
+  og.group.manager:
+    class: Drupal\og\GroupManager
+    arguments: ['@config.factory']

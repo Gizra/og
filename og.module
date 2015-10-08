@@ -43,11 +43,6 @@ define('OG_STATE_BLOCKED', 3);
 define('OG_AUDIENCE_FIELD', 'og_group_ref');
 
 /**
- * Group field.
- */
-define('OG_GROUP_FIELD', 'group_group');
-
-/**
  * Group default roles and permissions field.
  */
 define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
