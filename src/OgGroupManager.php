@@ -8,7 +8,6 @@
 namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityInterface;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
@@ -42,34 +41,6 @@ class OgGroupManager {
   public function __construct(ConfigFactoryInterface $config_factory) {
     $this->config = $config_factory->get('og.settings');
     $this->configFactory = $config_factory;
-  }
-
-  /**
-   * Check if the given entity is a group.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity object.
-   *
-   * @return bool
-   *   True or false if the given entity is group.
-   */
-  public function entityIsGroup(EntityInterface $entity) {
-    $entity_type_id = $entity->getEntityTypeId();
-    $entity_bundle = $entity->bundle();
-
-    return $this->isGroup($entity_type_id, $entity_bundle);
-  }
-
-  /**
-   * Check if an entity type object is group enabled.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   */
-  public function entityBundleIsGroup(EntityInterface $entity) {
-    $bundle_of_type = $entity->getEntityType()->getBundleOf();
-    $bundle_id = $entity->id();
-
-    return $this->isGroup($bundle_of_type, $bundle_id);
   }
 
   /**
