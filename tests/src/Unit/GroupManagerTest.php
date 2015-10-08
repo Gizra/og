@@ -2,19 +2,19 @@
 
 /**
  * @file
- * Contains \Drupal\Tests\og\Unit\OgGroupManagerTest.
+ * Contains \Drupal\Tests\og\Unit\GroupManagerTest.
  */
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\og\OgGroupManager;
+use Drupal\og\GroupManager;
 use Drupal\Tests\UnitTestCase;
 
 /**
  * @group og
- * @coversDefaultClass \Drupal\og\OgGroupManager
+ * @coversDefaultClass \Drupal\og\GroupManager
  */
-class OgGroupManagerTest extends UnitTestCase {
+class GroupManagerTest extends UnitTestCase {
 
   /**
    * @var \Drupal\Core\Config\Config|\Prophecy\Prophecy\ObjectProphecy
@@ -214,14 +214,14 @@ class OgGroupManagerTest extends UnitTestCase {
   /**
    * Creates a group manager instance with a mock config factory.
    *
-   * @return \Drupal\og\OgGroupManager
+   * @return \Drupal\og\GroupManager
    */
   protected function createGroupManager() {
     $this->configFactoryProphecy->get('og.settings')
       ->willReturn($this->configProphecy->reveal())
       ->shouldBeCalled();
 
-    return new OgGroupManager($this->configFactoryProphecy->reveal());
+    return new GroupManager($this->configFactoryProphecy->reveal());
   }
 
 }

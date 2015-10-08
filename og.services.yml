@@ -3,5 +3,5 @@ services:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
   og.group.manager:
-    class: Drupal\og\OgGroupManager
+    class: Drupal\og\GroupManager
     arguments: ['@config.factory']

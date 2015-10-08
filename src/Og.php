@@ -52,7 +52,7 @@ class Og {
   /**
    * Returns the group manager instance.
    *
-   * @return \Drupal\og\OgGroupManager
+   * @return \Drupal\og\GroupManager
    */
   protected static function groupManager() {
     // @todo store static reference for this?

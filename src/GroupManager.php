@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\og\OgGroupManager.
+ * Contains \Drupal\og\GroupManager.
  */
 
 namespace Drupal\og;
@@ -12,7 +12,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
  */
-class OgGroupManager {
+class GroupManager {
 
   /**
    * The config instance.
@@ -36,7 +36,7 @@ class OgGroupManager {
   protected $groupMap;
 
   /**
-   * Constructs an OgGroupManager object.
+   * Constructs an GroupManager object.
    */
   public function __construct(ConfigFactoryInterface $config_factory) {
     $this->config = $config_factory->get('og.settings');
