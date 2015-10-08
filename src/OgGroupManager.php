@@ -48,6 +48,8 @@ class OgGroupManager {
    *
    * @param string $entity_type_id
    * @param string $bundle
+   *
+   * @return bool
    */
   public function isGroup($entity_type_id, $bundle) {
     if (!isset($this->groupMap)) {

@@ -19,25 +19,14 @@ class Og {
   /**
    * Check if the given entity is a group.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity object.
+   * @param string $entity_type_id
+   * @param string $bundle
    *
    * @return bool
    *   True or false if the given entity is group.
    */
-  public static function isGroup(EntityInterface $entity) {
-    return static::groupManager()->entityIsGroup($entity);
-  }
-
-  /**
-   * Returns whether an entity bundle instance is a group type.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity_type
-   *
-   * @return bool
-   */
-  public static function isGroupBundle(EntityInterface $entity) {
-    return static::groupManager()->entityBundleIsGroup($entity);
+  public static function isGroup($entity_type_id, $bundle_id) {
+    return static::groupManager()->isGroup($entity_type_id, $bundle_id);
   }
 
   /**
