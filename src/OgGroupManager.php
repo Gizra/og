@@ -88,13 +88,15 @@ class OgGroupManager {
 
   /**
    * @param $entity_type_id
+   *
+   * @return array
    */
   public function getGroupsForEntityType($entity_type_id) {
     if (!isset($this->groupMap)) {
       $this->refreshGroupMap();
     }
 
-    return isset($this->groupMap[$entity_type_id]) ? $this->groupMap[$entity_type_id] : NULL;
+    return isset($this->groupMap[$entity_type_id]) ? $this->groupMap[$entity_type_id] : [];
   }
 
   /**
