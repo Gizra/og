@@ -57,7 +57,7 @@ class GroupManagerTest extends UnitTestCase {
 
     $manager = $this->createGroupManager();
 
-    $this->assertSame($groups, $manager->getAllGroups());
+    $this->assertSame($groups, $manager->GetAllGroupBundles());
   }
 
   /**

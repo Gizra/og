@@ -54,7 +54,7 @@ class Og {
    *
    * @return \Drupal\og\GroupManager
    */
-  protected static function groupManager() {
+  public static function groupManager() {
     // @todo store static reference for this?
     return \Drupal::service('og.group.manager');
   }

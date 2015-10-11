@@ -1,7 +1,7 @@
 uuid: f17db9d8-1866-4d3c-9305-5ddb1ae66093
 langcode: en
 status: true
-dependencies: {  }
-type: og_membership_type_default
+dependencies: {}
+type: og_membership_type
 name: 'OG membership type'
 description: 'Basic OG membership type'

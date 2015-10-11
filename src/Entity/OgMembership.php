@@ -350,7 +350,8 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
 
     $fields['field_name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Field name'))
-      ->setDescription(t("The name of the field holding the group ID, the OG membership is associated with."));
+      ->setDescription(t("The name of the field holding the group ID, the OG membership is associated with."))
+      ->setDefaultValue(OG_AUDIENCE_FIELD);
 
     $fields['language'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language'))

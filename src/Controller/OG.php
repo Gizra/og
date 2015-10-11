@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityType;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Entity\OgMembership;
@@ -120,76 +121,6 @@ class OG {
   }
 
   /**
-   * Autocomplete for the audience field. Return only entities which defined as
-   * group.
-   *
-   * @param Request $request
-   *   The request object that contains the typed tags.
-   * @param string $type
-   *   The widget type (i.e. 'single' or 'tags').
-   * @param string $field_name
-   *   The name of the entity reference field.
-   * @param string $entity_type
-   *   The entity type.
-   * @param string $bundle_name
-   *   The bundle name.
-   * @param string $entity_id
-   *   (optional) The entity ID the entity reference field is attached to.
-   *   Defaults to ''.
-   *
-   * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
-   *   Throws access denied when either the field or field instance does not
-   *   exists or the user does not have access to edit the field.
-   *
-   * @return \Symfony\Component\HttpFoundation\JsonResponse
-   *   The matched labels as json.
-   */
-  public static function handleAutocomplete(Request $request, $type, $field_name, $entity_type, $bundle_name, $entity_id) {
-    $definitions = \Drupal::entityManager()->getFieldDefinitions($entity_type, $bundle_name);
-
-    if (!isset($definitions[$field_name])) {
-      throw new AccessDeniedHttpException();
-    }
-
-    $field_definition = $definitions[$field_name];
-    $access_control_handler = \Drupal::entityManager()->getAccessControlHandler($entity_type);
-    if ($field_definition->getType() != 'entity_reference' || !$access_control_handler->fieldAccess('edit', $field_definition)) {
-      throw new AccessDeniedHttpException();
-    }
-
-    // todo: see if we need this.
-    $prefix = '';
-    // The user entered a comma-separated list of entity labels, so we generate
-    // a prefix.
-    if ($type == 'tags' && !empty($last_item)) {
-      $prefix = count($items_typed) ? Tags::implode($items_typed) . ', ' : '';
-    }
-
-    $results = \Drupal::entityQuery($entity_type)
-      ->condition(OG_GROUP_FIELD, 1)
-      // todo: Use the operator define in the field settings.
-      ->condition(\Drupal::entityManager()->getDefinition($entity_type)->getKey('label'), $request->query->get('q'), 'CONTAINS')
-      ->range(0, 10)
-      ->execute();
-
-    /** @var EntityInterface[] $entities */
-    $entities = entity_load_multiple($entity_type, $results);
-
-    $matches = array();
-    foreach ($entities as $entity) {
-      $label = $entity->label();
-      $key = "$label (" . $entity->id() . ")";
-      // Strip things like starting/trailing white spaces, line breaks and tags.
-      $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
-      // Names containing commas or quotes must be wrapped in quotes.
-      $key = Tags::encode($key);
-      $matches[] = array('value' => $prefix . $key, 'label' => $label);
-    }
-
-    return new JsonResponse($matches);
-  }
-
-  /**
    * Check if the given entity is a group content.
    *
    * @param EntityInterface $entity
@@ -216,5 +147,80 @@ class OG {
    */
   public static function MembershipDefault() {
     return array('type' => 'og_membership_type_default');
+  }
+
+  /**
+   * Get the groups an entity is associated with.
+   *
+   * @param $entity_type
+   *   The entity type. Defaults to 'user'
+   * @param $entity_id
+   *   (optional) The entity ID.
+   * @param $states
+   *   (optional) Array with the state to return. Defaults to active.
+   * @param $field_name
+   *   (optional) The field name associated with the group.
+   *
+   * @return array
+   *  An array with the group's entity type as the key, and array - keyed by
+   *  the OG membership ID and the group ID as the value. If nothing found,
+   *  then an empty array.
+   */
+  public static function getEntityGroups($entity_type = 'user', $entity_id = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL) {
+    $cache = &drupal_static(__FUNCTION__, array());
+
+    if ($entity_type == 'user' && empty($entity_id)) {
+      $account = \Drupal::currentUser()->getAccount();
+      $entity_id = $account->id();
+    }
+
+    // Get a string identifier of the states, so we can retrieve it from cache.
+    if ($states) {
+      sort($states);
+      $state_identifier = implode(':', $states);
+    }
+    else {
+      $state_identifier = FALSE;
+    }
+
+    $identifier = [
+      $entity_type,
+      $entity_id,
+      $state_identifier,
+      $field_name,
+    ];
+
+    $identifier = implode(':', $identifier);
+    if (isset($cache[$identifier])) {
+      // Return cached values.
+      return $cache[$identifier];
+    }
+
+    $cache[$identifier] = [];
+    $query = \Drupal::entityQuery('og_membership')
+      ->condition('entity_type', $entity_type)
+      ->condition('etid', $entity_id);
+
+    if ($states) {
+      $query->condition('state', $states, 'IN');
+    }
+
+    if ($field_name) {
+      $query->condition('field_name', $field_name);
+    }
+
+    $results = $query
+      ->execute();
+
+    /** @var OgMembership[] $memberships */
+    $memberships = \Drupal::entityManager()
+      ->getStorage('og_membership')
+      ->loadMultiple($results);
+
+    foreach ($memberships as $membership) {
+      $cache[$identifier][$membership->getGroupType()][$membership->id()] = $membership->getGroup();
+    }
+
+    return $cache[$identifier];
   }
 }

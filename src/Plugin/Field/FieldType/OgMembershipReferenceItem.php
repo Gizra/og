@@ -22,7 +22,7 @@ use Drupal\og\Controller\OG;
  *   no_ui = TRUE,
  *   default_formatter = "og_complex",
  *   list_class = "\Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItemList",
- *   constraints = {"ValidReference" = {}}
+ *   constraints = {"ValidReference" = {}, "ValidOgMembershipReference" = {}}
  * )
  */
 class OgMembershipReferenceItem extends EntityReferenceItem {
