@@ -141,18 +141,6 @@ function _og_modules_uninstalled($modules) {
 }
 
 /**
- * Implements hook_permission().
- */
-function _og_permission() {
-  return array(
-    'administer group' =>  array(
-      'title' => t('Administer Organic groups permissions'),
-      'description' => t('Administer all groups and permissions.'),
-    ),
-  );
-}
-
-/**
  * Implements hook_og_permission().
  */
 function _og_og_permission() {
