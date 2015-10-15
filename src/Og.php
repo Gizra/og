@@ -10,6 +10,7 @@ namespace Drupal\og;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldConfigInterface;
 
 /**
  * A static helper class for OG.
@@ -47,6 +48,18 @@ class Og {
    */
   public static function removeGroup($entity_type_id, $bundle_id) {
     return static::groupManager()->removeGroup($entity_type_id, $bundle_id);
+  }
+
+  /**
+   * Return TRUE if field is a group audience type.
+   *
+   * @param $field_config
+   *   The field config object.
+   *
+   * @return bool
+   */
+  public static function isGroupAudienceField(FieldConfigInterface $field_config) {
+    return $field_config->getType() === 'og_membership_reference';
   }
 
   /**
