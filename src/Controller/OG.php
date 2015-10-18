@@ -47,11 +47,14 @@ class OG {
       ->setBundle($bundle);
 
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
-      $og_field->fieldDefinition($settings['field'])->save();
+      $field = $og_field->fieldDefinition() + $settings['field'];
+      FieldStorageConfig::create($field)->save();
     }
 
     if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
-      $og_field->instanceDefinition($settings['instance'])->save();
+      $instance = $og_field->instanceDefinition() + $settings['instance'];
+      FieldConfig::create($instance)->save();
+
       // Clear the entity property info cache, as OG fields might add different
       // entity property info.
       self::invalidateCache();
@@ -59,13 +62,15 @@ class OG {
 
     // Add the field to the form display manager.
     $displayForm = EntityFormDisplay::load($entity_type . '.' . $bundle . '.default');
-    if (!$displayForm->getComponent($field_name) && $widgetDefinition = $og_field->widgetDefinition($settings['widget'])) {
+    if (!$displayForm->getComponent($field_name) && $widgetDefinition = $og_field->widgetDefinition()) {
+      $widgetDefinition = $widgetDefinition + $settings['widget'];
       $displayForm->setComponent($field_name, $widgetDefinition);
       $displayForm->save();
     }
 
     // Define the view mode for the field.
-    if ($fieldViewModes = $og_field->viewModesDefinition($settings['view_mode'])) {
+    if ($fieldViewModes = $og_field->viewModesDefinition()) {
+      $fieldViewModes = $fieldViewModes + $settings['view_mode'];
       $prefix = $entity_type . '.' . $bundle . '.';
       $viewModes = entity_load_multiple('entity_view_display', array_keys($fieldViewModes));
 

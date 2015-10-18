@@ -22,8 +22,8 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function fieldDefinition(array $field = []) {
-    $definition = [
+  public function fieldDefinition() {
+    return [
       'field_name' => OG_DEFAULT_ACCESS_FIELD,
       'entity_type' => $this->getEntityType(),
       'type' => 'list_integer',
@@ -35,16 +35,14 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
         ],
         'allowed_values_function' => '',
       ],
-    ] + $field;
-
-    return FieldStorageConfig::create($definition);
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function instanceDefinition(array $instance = []) {
-    $definition = [
+  public function instanceDefinition() {
+    return [
       'label' => t('Group roles and permissions'),
       'description' => t('Determine if group should use default roles and permissions.'),
       'default_value' => [0 => ['value' => 0]],
@@ -53,15 +51,13 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
       'field_name' => OG_DEFAULT_ACCESS_FIELD,
       'entity_type' => $this->getEntityType(),
       'bundle' => $this->getBundle(),
-    ] + $instance;
-
-    return FieldConfig::create($definition);
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function widgetDefinition(array $widget = []) {
+  public function widgetDefinition() {
     return [
       'type' => 'options_select',
       'settings' => [],
@@ -71,7 +67,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition(array $view_mode = [])  {
+  public function viewModesDefinition()  {
     return [
       'default' => [
         'type' => 'list_default',

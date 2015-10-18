@@ -3,9 +3,6 @@
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldInstanceConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
@@ -23,8 +20,8 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function fieldDefinition(array $field = []) {
-    $definition = [
+  public function fieldDefinition() {
+    return [
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
       'type' => 'og_membership_reference',
@@ -44,16 +41,14 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
         ],
         'target_type' => 'node',
       ],
-    ] + $field;
-
-    return FieldStorageConfig::create($definition);
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
   public function instanceDefinition(array $instance = []) {
-    $definition = [
+    return [
       'label' => t('Groups audience'),
       'description' => t('OG group audience reference field.'),
       //'default_value' => array(0 => array('value' => 1)),
@@ -61,9 +56,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
       'bundle' => $this->getBundle(),
-    ] + $instance;
-
-    return FieldConfig::create($definition);
+    ];
   }
 
   /**
