@@ -25,8 +25,6 @@ use Drupal\og\Og;
  */
 class OgSelection extends DefaultSelection {
 
-  private $targetType;
-
   /**
    * Get the current account.
    *
@@ -66,10 +64,11 @@ class OgSelection extends DefaultSelection {
   protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS') {
     $query = parent::buildEntityQuery($match, $match_operator);
 
-    $identifier_key = \Drupal::entityManager()->getDefinition($this->configuration['target_type'])->getKey('id');
-    $this->targetType = $this->configuration['target_type'];
+    $target_type = $this->configuration['target_type'];
+
+    $identifier_key = \Drupal::entityManager()->getDefinition($target_type)->getKey('id');
     $user_groups = $this->getUserGroups();
-    $bundles = Og::groupManager()->getAllGroupBundles($this->configuration['target_type']);
+    $bundles = Og::groupManager()->getAllGroupBundles($target_type);
 
     $query->condition('type', $bundles, 'IN');
 
@@ -120,7 +119,7 @@ class OgSelection extends DefaultSelection {
    * @return ContentEntityInterface[]
    */
   private function getUserGroups() {
-    $other_groups = \Drupal\og\Controller\OG::getEntityGroups('user', $this->getAccount()->id());
+    $other_groups = Og::getEntityGroups('user', $this->getAccount()->id());
     return $other_groups[$this->configuration['target_type']];
   }
 
