@@ -2,9 +2,6 @@
 
 namespace Drupal\og\Plugin\OgFields;
 
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldInstanceConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 

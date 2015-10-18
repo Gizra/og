@@ -8,7 +8,7 @@
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList;
-use Drupal\og\Controller\OG;
+use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
 
 /**
@@ -169,7 +169,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
   protected function createOgMembership($group_id) {
     /** @var \Drupal\Core\Entity\EntityInterface $parent */
     $parent_entity = $this->getEntity();
-    $membership = OG::MembershipStorage()->create(OG::MembershipDefault());
+    $membership = Og::membershipStorage()->create(Og::membershipDefault());
 
     $membership
       ->setFieldName($this->getName())
