@@ -23,8 +23,8 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function fieldDefinition() {
-    return FieldStorageConfig::create([
+  public function fieldDefinition(array $field = []) {
+    $definition = [
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
       'type' => 'og_membership_reference',
@@ -42,17 +42,18 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
           'target_bundles' => [],
           'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
         ],
-        // todo: allow to change the node type.
         'target_type' => 'node',
       ],
-    ]);
+    ] + $field;
+
+    return FieldStorageConfig::create($definition);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function instanceDefinition() {
-    return FieldConfig::create([
+  public function instanceDefinition(array $instance = []) {
+    $definition = [
       'label' => t('Groups audience'),
       'description' => t('OG group audience reference field.'),
       //'default_value' => array(0 => array('value' => 1)),
@@ -60,41 +61,43 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
       'bundle' => $this->getBundle(),
-    ]);
+    ] + $instance;
+
+    return FieldConfig::create($definition);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function widgetDefinition() {
+  public function widgetDefinition(array $widget = []) {
     // Keep this until og_complex widget is back.
-    return array(
+    return [
       'type' => 'og_complex',
-      'settings' => array(
-        'match_operator' => "CONTAINS"
-      ),
-    );
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+      ],
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition() {
-    return array(
-      'default' => array(
-        'label' => "above",
-        'type' => "entity_reference_label",
-        'settings' => array(
+  public function viewModesDefinition(array $view_mode = []) {
+    return [
+      'default' => [
+        'label' => 'above',
+        'type' => 'entity_reference_label',
+        'settings' => [
           'link' => TRUE,
-        ),
-      ),
-      'teaser' => array(
-        'label' => "above",
-        'type' => "entity_reference_label",
-        'settings' => array(
+        ]
+      ],
+      'teaser' => [
+        'label' => 'above',
+        'type' => 'entity_reference_label',
+        'settings' => [
           'link' => TRUE,
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
   }
 }

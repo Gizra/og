@@ -22,61 +22,65 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function fieldDefinition() {
-    return FieldStorageConfig::create(array(
+  public function fieldDefinition(array $field = []) {
+    $definition = [
       'field_name' => OG_DEFAULT_ACCESS_FIELD,
       'entity_type' => $this->getEntityType(),
       'type' => 'list_integer',
       'cardinality' => 1,
-      'settings' => array(
-        'allowed_values' => array(
+      'settings' => [
+        'allowed_values' => [
           0 => 'Use default roles and permissions',
           1 => 'Override default roles and permissions',
-        ),
+        ],
         'allowed_values_function' => '',
-      ),
-    ));
+      ],
+    ] + $field;
+
+    return FieldStorageConfig::create($definition);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function instanceDefinition() {
-    return FieldConfig::create(array(
+  public function instanceDefinition(array $instance = []) {
+    $definition = [
       'label' => t('Group roles and permissions'),
       'description' => t('Determine if group should use default roles and permissions.'),
-      'default_value' => array(0 => array('value' => 0)),
+      'default_value' => [0 => ['value' => 0]],
       'display_label' => 1,
       'required' => TRUE,
       'field_name' => OG_DEFAULT_ACCESS_FIELD,
       'entity_type' => $this->getEntityType(),
       'bundle' => $this->getBundle(),
-    ));
+    ] + $instance;
+
+    return FieldConfig::create($definition);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function widgetDefinition() {
-    return array(
+  public function widgetDefinition(array $widget = []) {
+    return [
       'type' => 'options_select',
-      'settings' => array(),
-    );
+      'settings' => [],
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition()  {
-    return array(
-      'default' => array(
-        'type' => "list_default",
-        'label' => "above",
-      ),
-      'teaser' => array(
-        'type' => "list_default",
-        'label' => "above",
-      ),
-    );
+  public function viewModesDefinition(array $view_mode = [])  {
+    return [
+      'default' => [
+        'type' => 'list_default',
+        'label' => 'above',
+      ],
+      'teaser' => [
+        'type' => 'list_default',
+        'label' => 'above',
+      ],
+    ];
   }
 }

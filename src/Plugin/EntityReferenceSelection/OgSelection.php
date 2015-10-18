@@ -121,7 +121,7 @@ class OgSelection extends DefaultSelection {
    */
   private function getUserGroups() {
     $other_groups = \Drupal\og\Controller\OG::getEntityGroups('user', $this->getAccount()->id());
-    return $other_groups[$this->configuration['target_type']];
+    return !empty($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : NULL;
   }
 
 }
