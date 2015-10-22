@@ -13,7 +13,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\og\Controller\OG;
+use Drupal\og\Og;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -98,7 +98,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     ];
 
     $start_key = 0;
-    $other_groups = OG::getEntityGroups();
+    $other_groups = Og::getEntityGroups('user', \Drupal::currentUser()->id());
     foreach ($other_groups[$this->fieldDefinition->getTargetEntityTypeId()] as $other_group) {
       $elements[$start_key] = $this->otherGroupsSingle($start_key, $other_group);
       $start_key++;
