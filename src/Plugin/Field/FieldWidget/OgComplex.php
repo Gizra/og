@@ -36,6 +36,8 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $parent = parent::formElement($items, $delta, $element, $form, $form_state);
     // todo: fix the definition in th UI level.
     $parent['target_id']['#selection_handler'] = 'default:og';
+    $parent['target_id']['#selection_settings']['field_mode'] = 'default';
+
     return $parent;
   }
 
@@ -48,7 +50,10 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $parent_form['other_groups'] = [];
 
     // Adding the other groups widget.
-    $this->otherGroupsWidget($parent_form['other_groups'], $form_state);
+    if ($this->isGroupAdmin()) {
+      $parent_form['other_groups'] = $this->otherGroupsWidget($items, $form_state);
+    }
+
     return $parent_form;
   }
 
@@ -58,11 +63,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * @param $elements
    *   The widget array.
    */
-  protected function otherGroupsWidget(&$elements, FormStateInterface $form_state) {
-    if (!\Drupal::currentUser()->hasPermission('administer groups')) {
-      return;
-    }
-
+  protected function otherGroupsWidget(FieldItemListInterface $items, FormStateInterface $form_state) {
     if ($this->fieldDefinition->getTargetEntityTypeId() == 'user') {
       $description = $this->t('As groups administrator, associate this user with groups you do <em>not</em> belong to.');
     }
@@ -98,8 +99,18 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     ];
 
     $start_key = 0;
+
+    $target_type = $this->fieldDefinition->getTargetEntityTypeId();
+    $entity_group_ids = array_map(function($entity) {
+      return $entity->id();
+    }, $items->referencedEntities());
+
     $other_groups = Og::getEntityGroups('user', \Drupal::currentUser()->id());
-    foreach ($other_groups[$this->fieldDefinition->getTargetEntityTypeId()] as $other_group) {
+
+    foreach ($other_groups[$target_type] as $other_group) {
+      if (!in_array($other_group->id(), $entity_group_ids)) {
+        continue;
+      }
       $elements[$start_key] = $this->otherGroupsSingle($start_key, $other_group);
       $start_key++;
     }
@@ -121,6 +132,8 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     for ($i = $start_key; $i <= $form_state->get('other_group_delta'); $i++) {
       $elements[$i] = $this->otherGroupsSingle($i);
     }
+
+    return $elements;
   }
 
   /**
@@ -143,6 +156,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
         '#selection_handler' => 'default:og',
         '#selection_settings' => [
           'other_groups' => TRUE,
+          'field_mode' => 'admin',
         ],
         '#default_value' => $entity,
       ],
@@ -181,6 +195,15 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     }
 
     return $parent_values;
+  }
+
+  /**
+   * Determines if the current has hs group admin permission.
+   *
+   * @return bool
+   */
+  protected function isGroupAdmin() {
+    return \Drupal::currentUser()->hasPermission('administer group');
   }
 
 }

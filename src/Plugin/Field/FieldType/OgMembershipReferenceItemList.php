@@ -122,9 +122,9 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     }
 
     // Entities should be populated from populateGroupsFromMembershipEntities().
-    return array_map(function($item) {
+    return array_filter(array_map(function($item) {
       return $item->entity;
-    }, $this->list);
+    }, $this->list));
   }
 
   /**

@@ -76,7 +76,7 @@ class OgSelection extends DefaultSelection {
 
     $ids = [];
 
-    if ($this->isGroupAdmin()) {
+    if ($this->configuration['handler_settings']['field_mode'] == 'admin') {
       // Don't include the groups, the user doesn't have create permission.
       foreach ($user_groups as $delta => $group) {
         $ids[] = $group->id();
@@ -154,16 +154,7 @@ class OgSelection extends DefaultSelection {
    */
   protected function getUserGroups() {
     $other_groups = Og::getEntityGroups('user', $this->getAccount()->id());
-    return $other_groups[$this->configuration['target_type']];
-  }
-
-  /**
-   * Determines if the current has hs group admin permission.
-   *
-   * @return bool
-   */
-  protected function isGroupAdmin() {
-    return $this->getAccount()->hasPermission('administer group');
+    return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 
 }
