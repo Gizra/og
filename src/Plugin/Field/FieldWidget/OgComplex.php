@@ -106,12 +106,14 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     }, $items->referencedEntities());
 
     $other_groups = Og::getEntityGroups('user', \Drupal::currentUser()->id());
+    $other_groups_target_type = isset($other_groups[$target_type]) ? $other_groups[$target_type] : [];
+    $other_groups_weight_delta = round(count($other_groups) / 2);
 
-    foreach ($other_groups[$target_type] as $other_group) {
+    foreach ($other_groups_target_type as $other_group) {
       if (!in_array($other_group->id(), $entity_group_ids)) {
         continue;
       }
-      $elements[$start_key] = $this->otherGroupsSingle($start_key, $other_group);
+      $elements[$start_key] = $this->otherGroupsSingle($start_key, $other_group, $other_groups_weight_delta);
       $start_key++;
     }
 
@@ -122,7 +124,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     // Get the trigger element and check if this the add another item button.
     $trigger_element = $form_state->getTriggeringElement();
 
-    if ( $trigger_element['#name'] == 'add_another_group') {
+    if ($trigger_element['#name'] == 'add_another_group') {
       // Increase the number of other groups.
       $delta = $form_state->get('other_group_delta') + 1;
       $form_state->set('other_group_delta', $delta);
@@ -130,7 +132,8 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     // Add another auto complete field.
     for ($i = $start_key; $i <= $form_state->get('other_group_delta'); $i++) {
-      $elements[$i] = $this->otherGroupsSingle($i);
+      // Also add one to the weight delta, just to make sure.
+      $elements[$i] = $this->otherGroupsSingle($i, NULL, $other_groups_weight_delta + 1);
     }
 
     return $elements;
@@ -147,7 +150,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * @return array
    *   A single entity reference input.
    */
-  public function otherGroupsSingle($delta, EntityInterface $entity = NULL) {
+  public function otherGroupsSingle($delta, EntityInterface $entity = NULL, $weight_delta = 10) {
     return [
       'target_id' => [
         '#type' => 'entity_autocomplete',
@@ -163,7 +166,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
       '_weight' => [
         '#type' => 'weight',
         '#title_display' => 'invisible',
-        '#delta' => $delta,
+        '#delta' => $weight_delta,
         '#default_value' => $delta,
       ],
     ];
