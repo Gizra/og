@@ -41,6 +41,8 @@ class GroupManager {
   public function __construct(ConfigFactoryInterface $config_factory) {
     $this->config = $config_factory->get('og.settings');
     $this->configFactory = $config_factory;
+
+    $this->refreshGroupMap();
   }
 
   /**
@@ -52,10 +54,6 @@ class GroupManager {
    * @return bool
    */
   public function isGroup($entity_type_id, $bundle) {
-    if (!isset($this->groupMap)) {
-      $this->refreshGroupMap();
-    }
-
     return isset($this->groupMap[$entity_type_id]) && in_array($bundle, $this->groupMap[$entity_type_id]);
   }
 
@@ -65,10 +63,6 @@ class GroupManager {
    * @return array
    */
   public function getGroupsForEntityType($entity_type_id) {
-    if (!isset($this->groupMap)) {
-      $this->refreshGroupMap();
-    }
-
     return isset($this->groupMap[$entity_type_id]) ? $this->groupMap[$entity_type_id] : [];
   }
 
@@ -78,10 +72,6 @@ class GroupManager {
    * @return array
    */
   public function getAllGroupBundles($entity_type = NULL) {
-    if (!isset($this->groupMap)) {
-      $this->refreshGroupMap();
-    }
-
     return !empty($this->groupMap[$entity_type]) ? $this->groupMap[$entity_type] : $this->groupMap;
   }
 
