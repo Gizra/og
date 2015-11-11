@@ -22,14 +22,16 @@ og.settings:
   label: 'Organic Groups settings'
   mapping:
     groups:
-      type: mapping
-      mapping:
-        bundles:
-          type: sequence
-          label: 'OG groups'
-          sequence:
-            type: string
-            label: 'Group'
+      type: sequence
+      sequence:
+        type: og.settings.group.[%key]
+
+og.settings.group.*:
+  type: sequence
+  label: 'OG groups'
+  sequence:
+    type: string
+    label: 'Group'
 
 og.og_membership_type.*:
   type: config_entity
