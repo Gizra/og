@@ -39,7 +39,7 @@ class GroupManagerTest extends UnitTestCase {
    */
   public function testInstance() {
     $this->configProphecy->get('groups')
-      ->shouldNotBeCalled();
+      ->shouldBeCalled();
 
     // Just creating an instance should not get the 'groups' config key.
     $this->createGroupManager();
