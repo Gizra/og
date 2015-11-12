@@ -1,5 +1,5 @@
-DESCRIPTION
---------------------------
+## DESCRIPTION
+
 The Organic Groups module (also referred to as the 'og' module), provides users
 the ability to create, manage, and delete their own 'groups' on a site.
 Each group can have members, and maintains a group home page which individual
@@ -8,8 +8,8 @@ posted), and individual posts (referred as 'group content') may be shared with
 members, or non-members where necessary.
 Group membership can be open, closed or moderated.
 
-TERMS AND DEFINITIONS
-------------------------------------
+## TERMS AND DEFINITIONS
+
 - GROUP: A single node which can have different content types and users
   associated with it.
 - GROUP CONTENT: Content such as nodes or users, which are associated with a
@@ -34,8 +34,8 @@ TERMS AND DEFINITIONS
   a group or with a group content. This means that you can associate different
   users (as group content) to a certain user (as a group).
 
-GROUP ARCHITECTURE
---------------------------
+## GROUP ARCHITECTURE
+
 At the lowest level the module associates content types with groups. Above this
 level is the role and permissions layer, which operates at the group level.
 The Organic Groups module leverages Drupal's core functionality, especially the
@@ -47,8 +47,7 @@ As is the case with Drupal itself, in Organic Groups different permissions can
 be assigned to different user roles. This allows group members to perform a
 different set of actions, in different group contexts.
 
-INSTALLATION DRUPAL 7.x
---------------------------------------------
+## INSTALLATION DRUPAL 8.x
 Note that the following guide is here to get you started. Names for content
 types, groups and group content given here are suggestions and are given to
 provide a quick way to get started with Organic groups.
@@ -93,8 +92,8 @@ provide a quick way to get started with Organic groups.
     the site admin, don't want to allow group admins to control who can edit
     nodes in their own group, you need to uncheck those permissions.
 
-DEVELOPERS & SITE BUILDERS
-----------------------------------------------
+## DEVELOPERS & SITE BUILDERS
+
 - Views integration: There are some default views that ship with the module.
   Follow those views configuration in terms of best practice (e.g. adding a
   relationship to the group-membership entity instead of querying directly the
@@ -122,8 +121,18 @@ DEVELOPERS & SITE BUILDERS
   "Use queue" option, and process it using for example:
   drush queue-run og_membership_orphans
 
-FAQ
-----
+## API
+
+```php
+// Define the "Page" node type as group.
+Drupal\og\Og::groupManager()->addGroup('node', 'page');
+
+// Add og audience field to "Article" node type, thus making is a group content.
+Drupal\og\Og::CreateField(OG_AUDIENCE_FIELD, 'node', 'article');
+```
+
+## FAQ
+
 Q: How should I update from Drupal 6?
 A: Run update.php; Enable the og-migrate module and execute all the migration
    plugins.
@@ -143,9 +152,9 @@ Q: Must I use Panels module along with Organic groups?
 A: No. However note that the maintainer of the module highly recommends using
    it, and considers it as good practice.
 
-CREDITS
-----------------------------
-- Organic groups for Drupal 5 and 6 authored by Moshe Weitzman -
+## CREDITS
+
+* Organic groups for Drupal 5 and 6 authored by Moshe Weitzman -
   <weitzman AT tejasa DOT com>
-- Current project maintainer and Drupal 7 author is Amitai Burstein (Amitaibu) -
+* Current project maintainer and Drupal 7 author is Amitai Burstein (Amitaibu) -
   gizra.com
