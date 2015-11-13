@@ -224,7 +224,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
       ],
     ];
 
-    $start_key = 0;
+    $delta = 0;
 
     $target_type = $this->fieldDefinition->getTargetEntityTypeId();
 
@@ -241,12 +241,12 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
         continue;
       }
 
-      $elements[$start_key] = $this->otherGroupsSingle($start_key, $group, $other_groups_weight_delta);
-      $start_key++;
+      $elements[$delta] = $this->otherGroupsSingle($delta, $group, $other_groups_weight_delta);
+      $delta++;
     }
 
     if (!$form_state->get('other_group_delta')) {
-      $form_state->set('other_group_delta', $start_key);
+      $form_state->set('other_group_delta', $delta);
     }
 
     // Get the trigger element and check if this the add another item button.
@@ -259,7 +259,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     }
 
     // Add another auto complete field.
-    for ($i = $start_key; $i <= $form_state->get('other_group_delta'); $i++) {
+    for ($i = $delta; $i <= $form_state->get('other_group_delta'); $i++) {
       // Also add one to the weight delta, just to make sure.
       $elements[$i] = $this->otherGroupsSingle($i, NULL, $other_groups_weight_delta + 1);
     }
@@ -281,6 +281,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   public function otherGroupsSingle($delta, EntityInterface $entity = NULL, $weight_delta = 10) {
     return [
       'target_id' => [
+        // @todo Allow this to be configurable with a widget setting.
         '#type' => 'entity_autocomplete',
         '#target_type' => $this->fieldDefinition->getTargetEntityTypeId(),
         // todo: fix the definition in th UI level.
@@ -312,14 +313,16 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
         continue;
       }
 
-      preg_match("/.+\(([\w.]+)\)/", $value['target_id']['#value'], $matches);
+      // Matches the entity label and ID. E.g. 'Label (123)'. The entity ID will
+      // be captured in it's own group, with the key 'id'.
+      preg_match("|.+\((?<id>[\w.]+)\)|", $value['target_id']['#value'], $matches);
 
-      if (empty($matches[1])) {
+      if (empty($matches['id'])) {
         continue;
       }
 
       $parent_values[] = [
-        'target_id' => $matches[1],
+        'target_id' => $matches['id'],
         '_weight' => $value['_weight']['#value'],
         '_original_delta' => $value['_weight']['#delta'],
       ];
@@ -329,11 +332,12 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   }
 
   /**
-   * Determines if the current has hs group admin permission.
+   * Determines if the current has group admin permission.
    *
    * @return bool
    */
   protected function isGroupAdmin() {
+    // @todo Inject current user service as a dependency.
     return \Drupal::currentUser()->hasPermission('administer group');
   }
 
