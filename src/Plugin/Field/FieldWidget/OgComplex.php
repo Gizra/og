@@ -332,7 +332,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   }
 
   /**
-   * Determines if the current has group admin permission.
+   * Determines if the current user has group admin permission.
    *
    * @return bool
    */
