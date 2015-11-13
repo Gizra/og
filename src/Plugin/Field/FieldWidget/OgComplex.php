@@ -14,6 +14,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Og;
+use Drupal\Core\Field\FieldFilteredMarkup;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -55,6 +56,131 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     }
 
     return $parent_form;
+  }
+
+  /**
+   * Special handling to create form elements for multiple values.
+   *
+   * Handles generic features for multiple fields:
+   * - number of widgets
+   * - AHAH-'add more' button
+   * - table display and drag-n-drop value reordering
+   */
+  protected function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
+    $field_name = $this->fieldDefinition->getName();
+    $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
+    $parents = $form['#parents'];
+
+    $target_type = $this->fieldDefinition->getTargetEntityTypeId();
+    $user_groups = Og::getEntityGroups('user', \Drupal::currentUser()->id());
+    $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
+    $user_group_ids = array_map(function($group) {
+      return $group->id();
+    }, $user_groups_target_type);
+
+    // Determine the number of widgets to display.
+    switch ($cardinality) {
+      case FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED:
+        $field_state = static::getWidgetState($parents, $field_name, $form_state);
+        $max = $field_state['items_count'];
+        $is_multiple = TRUE;
+        break;
+
+      default:
+        $max = $cardinality - 1;
+        $is_multiple = ($cardinality > 1);
+        break;
+    }
+
+    $title = $this->fieldDefinition->getLabel();
+    $description = FieldFilteredMarkup::create(\Drupal::token()->replace($this->fieldDefinition->getDescription()));
+
+    $elements = array();
+
+    for ($delta = 0; $delta <= $max; $delta++) {
+      // Add a new empty item if it doesn't exist yet at this delta.
+      if (!isset($items[$delta])) {
+        $items->appendItem();
+      }
+      elseif (!in_array($items[$delta]->get('target_id')->getValue(), $user_group_ids)) {
+        continue;
+      }
+
+      // For multiple fields, title and description are handled by the wrapping
+      // table.
+      if ($is_multiple) {
+        $element = [
+          '#title' => $this->t('@title (value @number)', ['@title' => $title, '@number' => $delta + 1]),
+          '#title_display' => 'invisible',
+          '#description' => '',
+        ];
+      }
+      else {
+        $element = [
+          '#title' => $title,
+          '#title_display' => 'before',
+          '#description' => $description,
+        ];
+      }
+
+      $element = $this->formSingleElement($items, $delta, $element, $form, $form_state);
+
+      if ($element) {
+        // Input field for the delta (drag-n-drop reordering).
+        if ($is_multiple) {
+          // We name the element '_weight' to avoid clashing with elements
+          // defined by widget.
+          $element['_weight'] = array(
+            '#type' => 'weight',
+            '#title' => $this->t('Weight for row @number', array('@number' => $delta + 1)),
+            '#title_display' => 'invisible',
+            // Note: this 'delta' is the FAPI #type 'weight' element's property.
+            '#delta' => $max,
+            '#default_value' => $items[$delta]->_weight ?: $delta,
+            '#weight' => 100,
+          );
+        }
+
+        $elements[$delta] = $element;
+      }
+    }
+
+    if ($elements) {
+      $elements += array(
+        '#theme' => 'field_multiple_value_form',
+        '#field_name' => $field_name,
+        '#cardinality' => $cardinality,
+        '#cardinality_multiple' => $this->fieldDefinition->getFieldStorageDefinition()->isMultiple(),
+        '#required' => $this->fieldDefinition->isRequired(),
+        '#title' => $title,
+        '#description' => $description,
+        '#max_delta' => $max,
+      );
+
+      // Add 'add more' button, if not working with a programmed form.
+      if ($cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED && !$form_state->isProgrammed()) {
+        $id_prefix = implode('-', array_merge($parents, array($field_name)));
+        $wrapper_id = Html::getUniqueId($id_prefix . '-add-more-wrapper');
+        $elements['#prefix'] = '<div id="' . $wrapper_id . '">';
+        $elements['#suffix'] = '</div>';
+
+        $elements['add_more'] = array(
+          '#type' => 'submit',
+          '#name' => strtr($id_prefix, '-', '_') . '_add_more',
+          '#value' => t('Add another item'),
+          '#attributes' => array('class' => array('field-add-more-submit')),
+          '#limit_validation_errors' => array(array_merge($parents, array($field_name))),
+          '#submit' => array(array(get_class($this), 'addMoreSubmit')),
+          '#ajax' => array(
+            'callback' => array(get_class($this), 'addMoreAjax'),
+            'wrapper' => $wrapper_id,
+            'effect' => 'fade',
+          ),
+        );
+      }
+    }
+
+    return $elements;
   }
 
   /**
@@ -101,19 +227,21 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $start_key = 0;
 
     $target_type = $this->fieldDefinition->getTargetEntityTypeId();
-    $entity_group_ids = array_map(function($entity) {
-      return $entity->id();
-    }, $items->referencedEntities());
 
-    $other_groups = Og::getEntityGroups('user', \Drupal::currentUser()->id());
-    $other_groups_target_type = isset($other_groups[$target_type]) ? $other_groups[$target_type] : [];
-    $other_groups_weight_delta = round(count($other_groups) / 2);
+    $user_groups = Og::getEntityGroups('user', \Drupal::currentUser()->id());
+    $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
+    $user_group_ids = array_map(function($group) {
+      return $group->id();
+    }, $user_groups_target_type);
 
-    foreach ($other_groups_target_type as $other_group) {
-      if (!in_array($other_group->id(), $entity_group_ids)) {
+    $other_groups_weight_delta = round(count($user_groups) / 2);
+
+    foreach ($items->referencedEntities() as $group) {
+      if (in_array($group->id(), $user_group_ids)) {
         continue;
       }
-      $elements[$start_key] = $this->otherGroupsSingle($start_key, $other_group, $other_groups_weight_delta);
+
+      $elements[$start_key] = $this->otherGroupsSingle($start_key, $group, $other_groups_weight_delta);
       $start_key++;
     }
 
