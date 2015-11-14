@@ -115,7 +115,7 @@ class Og {
       return static::$entityGroupCache[$identifier];
     }
 
-    $cache[$identifier] = [];
+    static::$entityGroupCache[$identifier] = [];
     $query = \Drupal::entityQuery('og_membership')
       ->condition('entity_type', $entity_type)
       ->condition('etid', $entity_id);
