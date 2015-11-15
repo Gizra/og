@@ -15,11 +15,18 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 class GroupManager {
 
   /**
-   * The config instance.
+   * The OG settings configuration key.
    *
-   * @var \Drupal\Core\Config\Config
+   * @var string
    */
-  protected $config;
+  const SETTINGS_CONFIG_KEY = 'og.settings';
+
+  /**
+   * The OG group settings config key.
+   *
+   * @var string
+   */
+  const GROUPS_CONFIG_KEY = 'groups';
 
   /**
    * The config factory.
@@ -39,9 +46,7 @@ class GroupManager {
    * Constructs an GroupManager object.
    */
   public function __construct(ConfigFactoryInterface $config_factory) {
-    $this->config = $config_factory->get('og.settings');
     $this->configFactory = $config_factory;
-
     $this->refreshGroupMap();
   }
 
@@ -121,7 +126,7 @@ class GroupManager {
    * Refreshes the groupMap property with currently configured groups.
    */
   protected function refreshGroupMap() {
-    $this->groupMap = $this->config->get('groups');
+    $this->groupMap = $this->configFactory->get(static::SETTINGS_CONFIG_KEY)->get(static::GROUPS_CONFIG_KEY);
   }
 
 }
