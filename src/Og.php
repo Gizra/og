@@ -42,35 +42,41 @@ class Og {
    *   - view_mode: override the view mode definitions.
    */
   public static function createField($field_name, $entity_type, $bundle, $settings = []) {
+    $settings = $settings + [
+      'field' => [],
+      'instance' => [],
+      'widget' => [],
+      'view_mode' => [],
+    ];
     $og_field = static::fieldInfo($field_name)
       ->setEntityType($entity_type)
       ->setBundle($bundle);
 
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
-      $field = $og_field->fieldDefinition() + $settings['field'];
+      $field = $settings['field'] + $og_field->fieldDefinition();
       FieldStorageConfig::create($field)->save();
     }
 
     if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
-      $instance = $og_field->instanceDefinition() + $settings['instance'];
+      $instance = $settings['instance'] + $og_field->instanceDefinition();
       FieldConfig::create($instance)->save();
 
       // Clear the entity property info cache, as OG fields might add different
       // entity property info.
       static::invalidateCache();
     }
-
+return;
     // Add the field to the form display manager.
     $displayForm = EntityFormDisplay::load($entity_type . '.' . $bundle . '.default');
     if (!$displayForm->getComponent($field_name) && $widgetDefinition = $og_field->widgetDefinition()) {
-      $widgetDefinition = $widgetDefinition + $settings['widget'];
+      $widgetDefinition = $settings['widget'] + $widgetDefinition;
       $displayForm->setComponent($field_name, $widgetDefinition);
       $displayForm->save();
     }
 
     // Define the view mode for the field.
     if ($fieldViewModes = $og_field->viewModesDefinition()) {
-      $fieldViewModes = $fieldViewModes + $settings['view_mode'];
+      $fieldViewModes = $settings['view_mode'] + $fieldViewModes;
       $prefix = $entity_type . '.' . $bundle . '.';
       $viewModes = \Drupal::entityManager()->getStorage('entity_view_display')->loadMultiple(array_keys($fieldViewModes));
 
