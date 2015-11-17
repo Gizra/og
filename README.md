@@ -125,10 +125,10 @@ provide a quick way to get started with Organic groups.
 
 ```php
 // Define the "Page" node type as group.
-Drupal\og\Og::groupManager()->addGroup('node', 'page');
+\Drupal\og\Og::groupManager()->addGroup('node', 'page');
 
 // Add og audience field to "Article" node type, thus making is a group content.
-Drupal\og\Og::CreateField(OG_AUDIENCE_FIELD, 'node', 'article');
+\Drupal\og\Og::CreateField(OG_AUDIENCE_FIELD, 'node', 'article');
 ```
 
 ## FAQ

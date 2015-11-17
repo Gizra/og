@@ -20,6 +20,7 @@ use Drupal\og\Controller\OG;
  *   description = @Translation("An entity field containing an OG membership reference."),
  *   category = @Translation("Reference"),
  *   no_ui = TRUE,
+ *   default_widget = "og_complex",
  *   default_formatter = "og_complex",
  *   list_class = "\Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItemList",
  *   constraints = {"ValidReference" = {}, "ValidOgMembershipReference" = {}}

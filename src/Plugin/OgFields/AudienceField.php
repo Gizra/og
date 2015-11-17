@@ -42,8 +42,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
           'target_bundles' => [],
           'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
         ],
-        // todo: allow to change the node type.
-        'target_type' => 'node',
+        'target_type' => $this->getEntityType(),
       ],
     ]);
   }
@@ -55,7 +54,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
     return FieldConfig::create([
       'label' => t('Groups audience'),
       'description' => t('OG group audience reference field.'),
-      //'default_value' => array(0 => array('value' => 1)),
       'display_label' => TRUE,
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
