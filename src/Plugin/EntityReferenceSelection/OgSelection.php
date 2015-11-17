@@ -32,48 +32,6 @@ use Drupal\og\Og;
 class OgSelection extends DefaultSelection {
 
   /**
-   * Get the current account.
-   *
-   * @return AccountInterface
-   */
-  public function getAccount() {
-    if (empty($this->currentUser)) {
-      $this->setAccount(\Drupal::currentUser()->getAccount());
-    }
-
-    return $this->currentUser;
-  }
-
-  /**
-   * Set the current object account.
-   *
-   * @param AccountInterface $account
-   *   The user object.
-   * @return $this
-   */
-  public function setAccount(AccountInterface $account = NULL) {
-    $this->currentUser = $account;
-    return $this;
-  }
-
-  /**
-   * Get the field configuration.
-   *
-   * @param $key
-   *   Specific key from the configuration. Optional.
-   *
-   * @return array|string
-   *   Value of a configuration or all the configurations.
-   */
-  public function getConfiguration($key = NULL) {
-    if (!isset($key)) {
-      return $this->configuration;
-    }
-
-    return isset($this->configuration[$key]) ? $this->configuration[$key] : NULL;
-  }
-
-  /**
    * Get the selection handler of the field.
    *
    * @return DefaultSelection
@@ -118,8 +76,7 @@ class OgSelection extends DefaultSelection {
 
     $ids = [];
 
-
-    if ($this->getConfiguration('is_admin')) {
+    if ($this->configuration['handler_settings']['field_mode'] == 'admin') {
       // Don't include the groups, the user doesn't have create permission.
       foreach ($user_groups as $delta => $group) {
         $ids[] = $group->id();
@@ -149,13 +106,54 @@ class OgSelection extends DefaultSelection {
   }
 
   /**
-   * Get the user's groups.
+   * Get the field configuration.
+   *
+   * @param $key
+   *   Specific key from the configuration. Optional.
+   *
+   * @return array|string
+   *   Value of a configuration or all the configurations.
+   */
+  public function getConfiguration($key = NULL) {
+    if (!isset($key)) {
+      return $this->configuration;
+    }
+
+    return isset($this->configuration[$key]) ? $this->configuration[$key] : NULL;
+  }
+
+  /**
+   * Gets the current account.
+   *
+   * @return AccountInterface
+   */
+  public function getAccount() {
+    if (empty($this->currentUser)) {
+      $this->setAccount(\Drupal::currentUser()->getAccount());
+    }
+
+    return $this->currentUser;
+  }
+
+  /**
+   * Sets the current object account.
+   *
+   * @param AccountInterface $account
+   *   The user object.
+   * @return $this
+   */
+  public function setAccount(AccountInterface $account = NULL) {
+    $this->currentUser = $account;
+    return $this;
+  }
+
+  /**
    *
    * @return ContentEntityInterface[]
    */
   protected function getUserGroups() {
-    $other_groups = Og::getEntityGroups('user', $this->getAccount()->id());
-    return $other_groups[$this->configuration['target_type']];
+    $other_groups = Og::getEntityGroups('user', $this->currentUser->id());
+    return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 
 }

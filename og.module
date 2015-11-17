@@ -6,6 +6,7 @@
  */
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
 use Drupal\user\EntityOwnerInterface;
 
@@ -98,7 +99,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
  * Implements hook_entity_insert().
  */
 function og_entity_insert(EntityInterface $entity) {
-  if (!\Drupal\og\Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+  if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
     return;
   }
 
