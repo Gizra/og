@@ -34,6 +34,9 @@ og.settings:
     node_access_strict:
       type: boolean
       label: 'Strict node access permissions'
+    orphans_delete:
+      type: boolean
+      label: 'Delete orphaned group content when a group is deleted'
     use_queue:
       type: boolean
       label: 'Use queue'

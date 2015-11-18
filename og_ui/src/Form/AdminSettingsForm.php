@@ -105,6 +105,21 @@ class AdminSettingsForm extends ConfigFormBase {
       '#default_value' => $config_og->get('use_queue'),
     ];
 
+    $form['og_orphans_delete'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Delete orphans'),
+      '#description' => $this->t('Delete orphaned group content (excluding users) when a group is deleted.'),
+      '#default_value' => $config_og->get('orphans_delete'),
+      '#states' => [
+        'visible' => [
+          ':input[name="og_use_queue"]' => ['checked' => TRUE],
+        ],
+      ],
+      '#attributes' => ['class' => ['child-item']],
+    ];
+
+    $form['#attached']['library'][] = 'og_ui/form';
+
     return $form;
   }
 
@@ -119,6 +134,7 @@ class AdminSettingsForm extends ConfigFormBase {
       ->set('node_access_strict', $form_state->getValue('og_node_access_strict'))
       ->set('features_ignore_og_fields', $form_state->getValue('og_features_ignore_og_fields'))
       ->set('use_queue', $form_state->getValue('og_use_queue'))
+      ->set('orphans_delete', $form_state->getValue('og_orphans_delete'))
       ->save();
   }
 

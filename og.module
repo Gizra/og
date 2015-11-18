@@ -1282,7 +1282,7 @@ function _og_membership_delete_by_group($entity_type, $entity) {
       // Allow implementing modules to determine the disposition (e.g. delete
       // orphan group content).
       'orphans' => array(
-        'delete' => isset($entity->og_orphans['delete']) ? $entity->og_orphans['delete'] : variable_get('og_orphans_delete', FALSE),
+        'delete' => isset($entity->og_orphans['delete']) ? $entity->og_orphans['delete'] : \Drupal::config('og.settings')->get('orphans_delete'),
         'move' => isset($entity->og_orphans['move']) ? $entity->og_orphans['move'] : array(),
       ),
     );
