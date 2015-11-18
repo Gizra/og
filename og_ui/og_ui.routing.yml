@@ -1,0 +1,9 @@
+# Routes for Organic groups UI.
+
+og_ui.admin_index:
+  path: '/admin/config/group'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Organic groups'
+  requirements:
+    _permission: 'administer group'
