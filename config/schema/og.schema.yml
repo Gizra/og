@@ -31,6 +31,9 @@ og.settings:
     node_access_strict:
       type: boolean
       label: 'Strict node access permissions'
+    features_ignore_og_fields:
+      type: boolean
+      label: 'Prevent Features export piping'
 
 og.settings.group.*:
   type: sequence
