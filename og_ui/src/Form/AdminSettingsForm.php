@@ -76,7 +76,7 @@ class AdminSettingsForm extends ConfigFormBase {
 
     $form['og_group_manager_full_access'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Group manager full permissions'),
+      '#title' => $this->t('Group manager has full permissions'),
       '#description' => $this->t('When enabled the group manager will have all the permissions in the group.'),
       '#default_value' => $config_og->get('group_manager_full_access'),
     ];
@@ -92,8 +92,8 @@ class AdminSettingsForm extends ConfigFormBase {
 
     $form['og_features_ignore_og_fields'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Prevent "Features" export piping'),
-      '#description' => $this->t('When exporting a content type using the Features module, this will prevent the OG related fields from being exported.'),
+      '#title' => $this->t('Prevent exporting OG fields'),
+      '#description' => $this->t('When exporting a content type using the Features module, prevent the OG related fields from being exported.'),
       '#default_value' => $config_og->get('features_ignore_og_fields'),
       '#access' => $this->moduleHandler->moduleExists('features'),
     ];
