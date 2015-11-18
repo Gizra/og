@@ -1,2 +1,3 @@
 groups: []
 group_manager_full_access: true
+node_access_strict: true

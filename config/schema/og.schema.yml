@@ -28,6 +28,9 @@ og.settings:
     group_manager_full_access:
       type: boolean
       label: 'Full access for group managers'
+    node_access_strict:
+      type: boolean
+      label: 'Strict node access permissions'
 
 og.settings.group.*:
   type: sequence

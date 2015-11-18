@@ -47,6 +47,13 @@ class AdminSettingsForm extends ConfigFormBase {
       '#default_value' => $config_og->get('group_manager_full_access'),
     ];
 
+    $form['og_node_access_strict'] = array(
+      '#type' => 'checkbox',
+      '#title' => $this->t('Strict node access permissions'),
+      '#description' => $this->t('When enabled Organic groups will restrict permissions for creating, updating and deleting according to the Organic groups access settings. Example: A content editor with the <em>Edit any page content</em> permission who is not a member of a group would be denied access to modifying page content in that group. (For restricting view access use the Organic groups access control module.)'),
+      '#default_value' => $config_og->get('node_access_strict'),
+    );
+
     return $form;
   }
 
@@ -58,6 +65,7 @@ class AdminSettingsForm extends ConfigFormBase {
 
     $this->config('og.settings')
       ->set('group_manager_full_access', $form_state->getValue('og_group_manager_full_access'))
+      ->set('node_access_strict', $form_state->getValue('og_node_access_strict'))
       ->save();
   }
 
