@@ -25,6 +25,9 @@ og.settings:
       type: sequence
       sequence:
         type: og.settings.group.[%key]
+    group_manager_full_access:
+      type: boolean
+      label: 'Full access for group managers'
 
 og.settings.group.*:
   type: sequence
