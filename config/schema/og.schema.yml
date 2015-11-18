@@ -21,6 +21,9 @@ og.settings:
   type: config_object
   label: 'Organic Groups settings'
   mapping:
+    features_ignore_og_fields:
+      type: boolean
+      label: 'Prevent Features export piping'
     groups:
       type: sequence
       sequence:
@@ -31,9 +34,9 @@ og.settings:
     node_access_strict:
       type: boolean
       label: 'Strict node access permissions'
-    features_ignore_og_fields:
+    use_queue:
       type: boolean
-      label: 'Prevent Features export piping'
+      label: 'Use queue'
 
 og.settings.group.*:
   type: sequence

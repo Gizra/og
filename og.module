@@ -1273,7 +1273,7 @@ function _og_membership_delete_by_group($entity_type, $entity) {
     return;
   }
 
-  if (variable_get('og_use_queue', FALSE)) {
+  if (\Drupal::config('og.settings')->get('use_queue')) {
     $queue = DrupalQueue::get('og_membership_orphans');
     // Add item to the queue.
     $data = array(

@@ -81,22 +81,29 @@ class AdminSettingsForm extends ConfigFormBase {
       '#default_value' => $config_og->get('group_manager_full_access'),
     ];
 
-    $form['og_node_access_strict'] = array(
+    $form['og_node_access_strict'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Strict node access permissions'),
       '#description' => $this->t('When enabled Organic groups will restrict permissions for creating, updating and deleting according to the Organic groups access settings. Example: A content editor with the <em>Edit any page content</em> permission who is not a member of a group would be denied access to modifying page content in that group. (For restricting view access use the Organic groups access control module.)'),
       '#default_value' => $config_og->get('node_access_strict'),
-    );
+    ];
 
     // @todo: Port og_ui_admin_people_view.
 
-    $form['og_features_ignore_og_fields'] = array(
+    $form['og_features_ignore_og_fields'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Prevent "Features" export piping'),
       '#description' => $this->t('When exporting a content type using the Features module, this will prevent the OG related fields from being exported.'),
       '#default_value' => $config_og->get('features_ignore_og_fields'),
       '#access' => $this->moduleHandler->moduleExists('features'),
-    );
+    ];
+
+    $form['og_use_queue'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Use queue'),
+      '#description' => t("Use the core's queue process for operations such as deleting memberships when groups are deleted."),
+      '#default_value' => $config_og->get('use_queue'),
+    ];
 
     return $form;
   }
@@ -111,6 +118,7 @@ class AdminSettingsForm extends ConfigFormBase {
       ->set('group_manager_full_access', $form_state->getValue('og_group_manager_full_access'))
       ->set('node_access_strict', $form_state->getValue('og_node_access_strict'))
       ->set('features_ignore_og_fields', $form_state->getValue('og_features_ignore_og_fields'))
+      ->set('use_queue', $form_state->getValue('og_use_queue'))
       ->save();
   }
 
