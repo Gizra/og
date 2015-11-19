@@ -7,47 +7,13 @@
 
 namespace Drupal\og_ui\Form;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the main administration settings form for Organic groups.
  */
 class AdminSettingsForm extends ConfigFormBase {
-
-  /**
-   * The module handler.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
-  /**
-   * Constructs an AdminSettingsForm object.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler.
-   */
-  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler) {
-    parent::__construct($config_factory);
-
-    $this->moduleHandler = $module_handler;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('module_handler')
-    );
-  }
 
   /**
    * {@inheritdoc}
@@ -90,14 +56,6 @@ class AdminSettingsForm extends ConfigFormBase {
 
     // @todo: Port og_ui_admin_people_view.
 
-    $form['og_features_ignore_og_fields'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Prevent exporting OG fields'),
-      '#description' => $this->t('When exporting a content type using the Features module, prevent the OG related fields from being exported.'),
-      '#default_value' => $config_og->get('features_ignore_og_fields'),
-      '#access' => $this->moduleHandler->moduleExists('features'),
-    ];
-
     $form['og_use_queue'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Use queue'),
@@ -132,7 +90,6 @@ class AdminSettingsForm extends ConfigFormBase {
     $this->config('og.settings')
       ->set('group_manager_full_access', $form_state->getValue('og_group_manager_full_access'))
       ->set('node_access_strict', $form_state->getValue('og_node_access_strict'))
-      ->set('features_ignore_og_fields', $form_state->getValue('og_features_ignore_og_fields'))
       ->set('use_queue', $form_state->getValue('og_use_queue'))
       ->set('orphans_delete', $form_state->getValue('og_orphans_delete'))
       ->save();
