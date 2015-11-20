@@ -123,31 +123,6 @@ class OgSelection extends DefaultSelection {
   }
 
   /**
-   * Gets the current account.
-   *
-   * @return AccountInterface
-   */
-  public function getAccount() {
-    if (empty($this->currentUser)) {
-      $this->setAccount(\Drupal::currentUser()->getAccount());
-    }
-
-    return $this->currentUser;
-  }
-
-  /**
-   * Sets the current object account.
-   *
-   * @param AccountInterface $account
-   *   The user object.
-   * @return $this
-   */
-  public function setAccount(AccountInterface $account = NULL) {
-    $this->currentUser = $account;
-    return $this;
-  }
-
-  /**
    *
    * @return ContentEntityInterface[]
    */
