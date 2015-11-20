@@ -185,7 +185,7 @@ class SelectionHandlerTest extends KernelTestBase {
    * @param \Drupal\Core\Session\AccountInterface $account
    */
   protected function setCurrentAccount(AccountInterface $account) {
-    $this->container->get('current_user')->setAccount($account);
+    $this->container->get('account_switcher')->switchTo($account);
   }
 
 }
