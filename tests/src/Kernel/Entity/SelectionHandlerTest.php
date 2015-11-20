@@ -9,6 +9,7 @@ namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
@@ -130,20 +131,24 @@ class SelectionHandlerTest extends KernelTestBase {
     $user2_groups = $this->createGroups(2, $this->user2);
 
     // Checking that the user get the groups he mange.
-    $groups = $this->selectionHandler->setAccount($this->user1)->getReferenceableEntities();
+    $this->setCurrentAccount($this->user1);
+    $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));
 
-    $groups = $this->selectionHandler->setAccount($this->user2)->getReferenceableEntities();
+    $this->setCurrentAccount($this->user2);
+    $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
     // Check the other groups.
 
     $this->selectionHandler = Og::getSelectionHandler('node', $this->groupContentBundle, OG_AUDIENCE_FIELD, ['handler_settings' => ['field_mode' => 'admin']]);
 
-    $groups = $this->selectionHandler->setAccount($this->user1)->getReferenceableEntities();
+    $this->setCurrentAccount($this->user1);
+    $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
-    $groups = $this->selectionHandler->setAccount($this->user2)->getReferenceableEntities();
+    $this->setCurrentAccount($this->user2);
+    $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));
   }
 
@@ -172,6 +177,15 @@ class SelectionHandlerTest extends KernelTestBase {
     }
 
     return $groups;
+  }
+
+  /**
+   * Sets the current account.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   */
+  protected function setCurrentAccount(AccountInterface $account) {
+    $this->container->get('account_switcher')->switchTo($account);
   }
 
 }
