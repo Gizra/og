@@ -30,7 +30,7 @@ class FieldOverrideTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['user', 'field', 'entity_reference', 'node', 'og'];
+  public static $modules = ['user', 'field', 'entity_reference', 'node', 'og', 'system'];
 
   /**
    * @var string
@@ -87,13 +87,13 @@ class FieldOverrideTest extends KernelTestBase {
    */
   public function testSelectionHandlerResults() {
     Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle1->id(), ['instance' => ['label' => 'Other groups dummy']]);
-    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle2->id(), ['field' => ['field_name' => 'og_group_ref_dummy'], 'instance' => ['field_name' => 'og_group_ref_dummy']]);
+    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle2->id(), [
+      'field' => ['field_name' => 'og_group_ref_dummy'],
+      'instance' => ['field_name' => 'og_group_ref_dummy'],
+    ]);
 
     $this->assertEquals(FieldConfig::loadByName('node', $this->bundle1->id(), OG_AUDIENCE_FIELD)->label(), 'Other groups dummy');
-
-    $og_audience2 = FieldConfig::loadByName('node', $this->bundle2->id(), OG_AUDIENCE_FIELD);
-    var_dump($og_audience2);
-
+    $this->assertEquals(FieldConfig::loadByName('node', $this->bundle2->id(), 'og_group_ref_dummy')->id(), 'node.' . $this->bundle2->id() . '.og_group_ref_dummy');
   }
 
 }

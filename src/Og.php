@@ -54,6 +54,10 @@ class Og {
       ->setEntityType($entity_type)
       ->setBundle($bundle);
 
+    if (!empty($settings['field']['field_name'])) {
+      $field_name = $settings['field']['field_name'];
+    }
+
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
       $field = $settings['field'] + $og_field->fieldDefinition();
       FieldStorageConfig::create($field)->save();
