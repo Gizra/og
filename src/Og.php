@@ -7,10 +7,12 @@
 
 namespace Drupal\og;
 
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 
 /**
  * A static helper class for OG.
@@ -65,13 +67,28 @@ class Og {
       // entity property info.
       static::invalidateCache();
     }
-return;
+
+    return;
+    $form_display_storage = \Drupal::entityManager()->getStorage('entity_form_display');
+    /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $displayForm */
+    if (!$displayForm = $form_display_storage->load($entity_type . '.' . $bundle . '.default')) {
+
+      $values = [
+        'targetEntityType' => $entity_type,
+        'bundle' => $bundle,
+        'mode' => 'default',
+        'status' => TRUE,
+      ];
+
+      $displayForm = $form_display_storage->create($values);
+    }
+
     // Add the field to the form display manager.
-    $displayForm = EntityFormDisplay::load($entity_type . '.' . $bundle . '.default');
     if (!$displayForm->getComponent($field_name) && $widgetDefinition = $og_field->widgetDefinition()) {
       $widgetDefinition = $settings['widget'] + $widgetDefinition;
       $displayForm->setComponent($field_name, $widgetDefinition);
-      $displayForm->save();
+      // todo: fix when we handling the form widget.
+//      $displayForm->save();
     }
 
     // Define the view mode for the field.
@@ -142,7 +159,7 @@ return;
     $results = $query->execute();
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
-    $memberships = \Drupal::entityManager()
+    $memberships = \Drupal::entityTypeManager()
       ->getStorage('og_membership')
       ->loadMultiple($results);
 
@@ -282,6 +299,41 @@ return;
     }
 
     return $fields_config;
+  }
+
+  /**
+   * Get the selection handler for an audience field attached to entity.
+   *
+   * @param $entity
+   *   The entity type.
+   * @param $bundle
+   *   The bundle name.
+   * @param $field_name
+   *   The field name.
+   * @param array $options
+   *   Overriding the default options of the selection handler.
+   *
+   * @return OgSelection
+   * @throws \Exception
+   */
+  public static function getSelectionHandler($entity, $bundle, $field_name, array $options = []) {
+    $field_definition = FieldConfig::loadByName($entity, $bundle, $field_name);
+
+    if (!Og::isGroupAudienceField($field_definition)) {
+      throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
+    }
+
+    $options += [
+      'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
+      'field' => $field_definition,
+      'handler' => $field_definition->getSetting('handler'),
+      'handler_settings' => [],
+    ];
+
+    // Deep merge the handler settings.
+    $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
+
+    return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
   }
 
 }

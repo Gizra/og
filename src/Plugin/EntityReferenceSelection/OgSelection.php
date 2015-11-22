@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\node\Plugin\EntityReferenceSelection\OgSelection.
+ * Contains \Drupal\og\Plugin\EntityReferenceSelection\OgSelection.
  */
 
 namespace Drupal\og\Plugin\EntityReferenceSelection;
@@ -15,10 +15,16 @@ use Drupal\og\Og;
 /**
  * Provide default OG selection handler.
  *
+ * Note that the id is correctly defined as "og:default" and not the other way
+ * around, as seen in most other default selection handler (e.g. "default:node")
+ * as OG's selection handler is a wrapper around those entity specific default
+ * ones. That is, the same selection handler will be returned no matter what is
+ * the target type of the reference field. Internally, it will call the original
+ * selection handler, and use it for building the queries.
+ *
  * @EntityReferenceSelection(
- *   id = "default:og",
+ *   id = "og:default",
  *   label = @Translation("OG selection"),
- *   entity_types = {"node"},
  *   group = "default",
  *   weight = 1
  * )
@@ -26,25 +32,12 @@ use Drupal\og\Og;
 class OgSelection extends DefaultSelection {
 
   /**
-   * Get the current account.
+   * Get the selection handler of the field.
    *
-   * @return AccountInterface
+   * @return DefaultSelection
    */
-  public function getAccount() {
-    if (empty($this->account)) {
-      $this->setAccount(\Drupal::currentUser()->getAccount());
-    }
-
-    return $this->currentUser;
-  }
-
-  /**
-   * Set the current object account.
-   *
-   * @param AccountInterface $account
-   */
-  public function setAccount(AccountInterface $account) {
-    $this->currentUser = $account;
+  public function getSelectionHandler() {
+    return \Drupal::service('plugin.manager.entity_reference_selection')->getSelectionHandler($this->getConfiguration('field'));
   }
 
   /**
@@ -62,11 +55,16 @@ class OgSelection extends DefaultSelection {
    *   it.
    */
   protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS') {
-    $query = parent::buildEntityQuery($match, $match_operator);
+
+    // Getting the original entity selection handler. OG selection handler using
+    // the default selection handler of the entity, which the field reference
+    // to, and add another logic to the query object i.e. check if the entities
+    // bundle defined as group.
+    $query = $this->getSelectionHandler()->buildEntityQuery();
 
     $target_type = $this->configuration['target_type'];
 
-    $identifier_key = \Drupal::entityManager()->getDefinition($target_type)->getKey('id');
+    $identifier_key = \Drupal::entityTypeManager()->getDefinition($target_type)->getKey('id');
     $user_groups = $this->getUserGroups();
     $bundles = Og::groupManager()->getAllGroupBundles($target_type);
 
@@ -81,27 +79,21 @@ class OgSelection extends DefaultSelection {
     if ($this->configuration['handler_settings']['field_mode'] == 'admin') {
       // Don't include the groups, the user doesn't have create permission.
       foreach ($user_groups as $delta => $group) {
-        if ($group->access('create')) {
-          $ids[] = $group->id();
-        }
+        $ids[] = $group->id();
       }
 
       if ($ids) {
-        $query->condition($identifier_key, $ids, 'IN');
+        $query->condition($identifier_key, $ids, 'NOT IN');
       }
     }
     else {
       // Determine which groups should be selectable.
       foreach ($user_groups as $group) {
-        // Check if user has "create" permissions on those groups. If the user
-        // doesn't have create permission, check if perhaps the content already
-        // exists and the user has edit permission.
-        if ($group->access('create')) {
-          $ids[] = $group->id();
-        }
+        $ids[] = $group->id();
       }
+
       if ($ids) {
-        $query->condition($identifier_key, $ids, 'NOT IN');
+        $query->condition($identifier_key, $ids, 'IN');
       }
       else {
         // User doesn't have permission to select any group so falsify this
@@ -114,13 +106,29 @@ class OgSelection extends DefaultSelection {
   }
 
   /**
-   * Get the user's groups.
+   * Get the field configuration.
+   *
+   * @param $key
+   *   Specific key from the configuration. Optional.
+   *
+   * @return array|string
+   *   Value of a configuration or all the configurations.
+   */
+  public function getConfiguration($key = NULL) {
+    if (!isset($key)) {
+      return $this->configuration;
+    }
+
+    return isset($this->configuration[$key]) ? $this->configuration[$key] : NULL;
+  }
+
+  /**
    *
    * @return ContentEntityInterface[]
    */
-  private function getUserGroups() {
-    $user_groups = Og::getEntityGroups('user', $this->getAccount()->id());
-    return !empty($user_groups[$this->configuration['target_type']]) ? $user_groups[$this->configuration['target_type']] : NULL;
+  protected function getUserGroups() {
+    $other_groups = Og::getEntityGroups('user', $this->currentUser->id());
+    return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 
 }

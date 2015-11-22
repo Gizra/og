@@ -6,8 +6,9 @@
  */
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Controller\OG;
+use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
+use Drupal\user\EntityOwnerInterface;
 
 // todo: look on: https://www.drupal.org/node/1952758.
 
@@ -98,15 +99,15 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
  * Implements hook_entity_insert().
  */
 function og_entity_insert(EntityInterface $entity) {
-  if (!\Drupal\og\Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+  if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
     return;
   }
 
-  if (!empty($entity->hasField('uid'))) {
+  if ($entity instanceof EntityOwnerInterface) {
     // Subscribe the group manager.
     $membership = OgMembership::create(array('type' => OG_MEMBERSHIP_TYPE_DEFAULT));
     $membership
-      ->setEntityId($entity->get('uid')->target_id)
+      ->setEntityId($entity->getOwnerId())
       ->setEntityType('user')
       ->setGid($entity->id())
       ->setGroupType($entity->getEntityTypeId())
