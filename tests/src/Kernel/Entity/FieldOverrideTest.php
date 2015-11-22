@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\Tests\og\Kernel\Entity\SelectionHandlerTest.
+ * Contains Drupal\Tests\og\Kernel\Entity\FieldOverrideTest.
  */
 
 namespace Drupal\Tests\og\Kernel\Entity;
@@ -14,37 +14,16 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 
 /**
- * Tests entity reference selection plugins.
+ * Testing field definition overrides.
  *
  * @group og
  */
 class FieldOverrideTest extends KernelTestBase {
 
   /**
-   * The selection handler.
-   *
-   * @var \Drupal\og\Plugin\EntityReferenceSelection\OgSelection.
-   */
-  protected $selectionHandler;
-
-  /**
    * {@inheritdoc}
    */
   public static $modules = ['user', 'field', 'entity_reference', 'node', 'og', 'system'];
-
-  /**
-   * @var string
-   *
-   * The machine name of the group node type.
-   */
-  protected $groupBundle;
-
-  /**
-   * @var string
-   *
-   * The machine name of the group content node type.
-   */
-  protected $groupContentBundle;
 
   /**
    * @var NodeType
