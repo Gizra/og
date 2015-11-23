@@ -52,8 +52,8 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    */
   public function instanceDefinition() {
     return FieldConfig::create([
-      'label' => t('Groups audience'),
-      'description' => t('OG group audience reference field.'),
+      'label' => $this->t('Groups audience'),
+      'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
