@@ -133,11 +133,9 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
 
   // Check if we are editing the user entity.
   if ($field_definition->getTargetEntityTypeId() == 'user') {
-    // @todo Not sure if we have this setting yet.
-//    $settings = $field_definition->getSettings();
-//    if (!empty($instance['settings']['behaviors']['og_widget']['access_override'])) {
-//      return AccessResult::neutral();
-//    }
+    if ($field_definition->getSetting('access_override')) {
+      return AccessResult::neutral();
+    }
 
     return AccessResult::allowedIfHasPermission($account, 'administer group');
   }
