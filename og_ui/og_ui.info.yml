@@ -1,0 +1,11 @@
+name: Organic groups UI
+description: User interface for Organic groups.
+package: Organic groups
+
+type: module
+core: 8.x
+
+dependencies:
+  - og
+
+configure: og_ui.admin_index

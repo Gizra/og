@@ -184,7 +184,7 @@ function _og_node_access($node, $op, $account) {
   if ($op == 'create' && og_is_group_content_type('node', $type)) {
     // Save some legwork if the user has the core permission and strict node
     // access is not set.
-    if (!variable_get('og_node_access_strict', TRUE) && user_access("create $type content", $account)) {
+    if (!\Drupal::config('og.settings')->get('node_access_strict') && user_access("create $type content", $account)) {
       // We just ignore: core access will take care of it.
       return NODE_ACCESS_IGNORE;
     }
@@ -219,7 +219,7 @@ function _og_node_access($node, $op, $account) {
     }
 
     // Otherwise, ignore or deny based on whether strict node access is set.
-    return variable_get('og_node_access_strict', TRUE) ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
+    return \Drupal::config('og.settings')->get('node_access_strict') ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
   }
   elseif (in_array($op, array('update', 'delete'))) {
     $access = og_user_access_entity('administer group', 'node', $node, $account);
@@ -246,7 +246,7 @@ function _og_node_access($node, $op, $account) {
     }
 
     // Check if OG should explicitly deny access or not.
-    return variable_get('og_node_access_strict', TRUE) ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
+    return \Drupal::config('og.settings')->get('node_access_strict') ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
   }
 
   return NODE_ACCESS_IGNORE;
@@ -1273,7 +1273,7 @@ function _og_membership_delete_by_group($entity_type, $entity) {
     return;
   }
 
-  if (variable_get('og_use_queue', FALSE)) {
+  if (\Drupal::config('og.settings')->get('use_queue')) {
     $queue = DrupalQueue::get('og_membership_orphans');
     // Add item to the queue.
     $data = array(
@@ -1282,7 +1282,7 @@ function _og_membership_delete_by_group($entity_type, $entity) {
       // Allow implementing modules to determine the disposition (e.g. delete
       // orphan group content).
       'orphans' => array(
-        'delete' => isset($entity->og_orphans['delete']) ? $entity->og_orphans['delete'] : variable_get('og_orphans_delete', FALSE),
+        'delete' => isset($entity->og_orphans['delete']) ? $entity->og_orphans['delete'] : \Drupal::config('og.settings')->get('orphans_delete'),
         'move' => isset($entity->og_orphans['move']) ? $entity->og_orphans['move'] : array(),
       ),
     );
@@ -1611,7 +1611,7 @@ function _og_user_access($group_type, $gid, $string, $account = NULL, $skip_alte
   }
 
   // Group manager has all privileges (if variable is TRUE).
-  if (!empty($account->uid) && variable_get('og_group_manager_full_access', TRUE)) {
+  if (!empty($account->uid) && \Drupal::config('og.settings')->get('group_manager_full_access')) {
     $group = entity_load_single($group_type, $gid);
     if (!empty($group->uid) && $group->uid == $account->uid) {
       return TRUE;
