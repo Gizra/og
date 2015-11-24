@@ -68,7 +68,7 @@ class Og {
 
 
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
-      $field =  NestedArray::mergeDeep($settings['field_storage_config'], $og_field->getFieldStorageConfigBaseDefinition());
+      $field = NestedArray::mergeDeep($settings['field_storage_config'], $og_field->getFieldStorageConfigBaseDefinition());
       FieldStorageConfig::create($field)->save();
     }
 
@@ -78,40 +78,6 @@ class Og {
 
       // @todo: Verify this is still needed here.
       static::invalidateCache();
-    }
-
-    return;
-    $form_display_storage = \Drupal::entityManager()->getStorage('entity_form_display');
-    /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $displayForm */
-    if (!$displayForm = $form_display_storage->load($entity_type . '.' . $bundle . '.default')) {
-
-      $values = [
-        'targetEntityType' => $entity_type,
-        'bundle' => $bundle,
-        'mode' => 'default',
-        'status' => TRUE,
-      ];
-
-      $displayForm = $form_display_storage->create($values);
-    }
-
-    // Add the field to the form display manager.
-    if (!$displayForm->getComponent($field_identifier) && $widgetDefinition = $og_field->widgetDefinition()) {
-      $widgetDefinition = $settings['widget'] + $widgetDefinition;
-      $displayForm->setComponent($field_identifier, $widgetDefinition);
-      // todo: fix when we handling the form widget.
-//      $displayForm->save();
-    }
-
-    // Define the view mode for the field.
-    if ($fieldViewModes = $og_field->viewModesDefinition()) {
-      $fieldViewModes = $settings['view_mode'] + $fieldViewModes;
-      $prefix = $entity_type . '.' . $bundle . '.';
-      $viewModes = \Drupal::entityManager()->getStorage('entity_view_display')->loadMultiple(array_keys($fieldViewModes));
-
-      foreach ($viewModes as $key => $viewMode) {
-        $viewMode->setComponent($field_identifier, $fieldViewModes[$prefix . $key])->save();
-      }
     }
   }
 
