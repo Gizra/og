@@ -68,7 +68,7 @@ class FieldCreateTest extends KernelTestBase {
     // Simple creation.
 
     // Override the field config.
-    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle1->id(), ['instance' => ['label' => 'Other groups dummy']]);
+    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle1->id(), ['field_config' => ['label' => 'Other groups dummy']]);
     $this->assertEquals(FieldConfig::loadByName('node', $this->bundle1->id(), OG_AUDIENCE_FIELD)->label(), 'Other groups dummy');
 
     // Override the field storage config.

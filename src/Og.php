@@ -62,13 +62,13 @@ class Og {
       ->setEntityType($entity_type);
 
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
-      $field = NestedArray::mergeDeep($settings['field_storage_config'], $og_field->getFieldStorageConfigBaseDefinition());
-      FieldStorageConfig::create($field)->save();
+      $field_storage_config = NestedArray::mergeDeep($og_field->getFieldStorageConfigBaseDefinition(), $settings['field_storage_config']);
+      FieldStorageConfig::create($field_storage_config)->save();
     }
 
     if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
-      $instance = NestedArray::mergeDeep($settings['field_config'], $og_field->getFieldConfigBaseDefinition());
-      FieldConfig::create($instance)->save();
+      $field_config = NestedArray::mergeDeep($og_field->getFieldConfigBaseDefinition(), $settings['field_config']);
+      FieldConfig::create($field_config)->save();
 
       // @todo: Verify this is still needed here.
       static::invalidateCache();
