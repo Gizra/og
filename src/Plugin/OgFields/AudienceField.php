@@ -26,13 +26,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'custom_storage' => TRUE,
       'settings' => [
         'handler' => 'og',
-        'handler_submit' => 'Change handler',
         'handler_settings' => [
-          'behaviors' => [
-            'og_behavior' => [
-              'status' => TRUE,
-            ],
-          ],
           'target_bundles' => [],
           'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
         ],
