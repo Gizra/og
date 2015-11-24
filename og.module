@@ -5,6 +5,7 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
@@ -85,20 +86,6 @@ define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
  */
 
 /**
- * Implements hook_entity_access().
- */
-function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-// todo: issue #3 in OG 8 issue queue.
-
-//  if (OG::IsGroup($entity)) {
-//  }
-//
-//  if (OG::IsGroupContent($entity)) {
-//
-//  }
-}
-
-/**
  * Implements hook_entity_insert().
  */
 function og_entity_insert(EntityInterface $entity) {
@@ -149,6 +136,269 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
   }
 
   return $account->hasPermission('administer group') ? AccessResult::allowed() : AccessResult::forbidden();
+}
+
+/**
+ * Implements hook_entity_access().
+ */
+function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // We only care about content entities.
+  if (!$entity instanceof ContentEntityInterface) {
+    return AccessResult::neutral();
+  }
+
+  $entity_type_id = $entity->getEntityTypeId();
+  $entity_bundle_id = $entity->bundle();
+
+  $entity_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
+
+  if (($operation === 'create') && Og::isGroupContent($entity)) {
+    if ($account->hasPermission('administer group')) {
+      return AccessResult::allowed();
+    }
+
+    // Save some legwork if the user has the core permission and strict node
+    // access is not set.
+    if (!$entity_access_strict && $entity->access('create', $account)) {
+      return AccessResult::neutral();
+    }
+
+    // We can't check if user has create permissions, as there is no group
+    // context. However, we can check if there are any groups the user will be
+    // able to select, and if not, we don't allow access.
+    // @see OgSelectionHandler::getReferencableEntities()
+    $required = FALSE;
+
+    foreach ($entity->getFieldDefinitions() as $field_definition) {
+      if (!Og::isGroupAudienceField($field_definition)) {
+        continue;
+      }
+
+      // @todo Change the function signature of Og::getSelectionHandler().
+      $handler = Og::getSelectionHandler($entity->getEntityTypeId(), $entity->bundle(), $field_definition->getName());
+
+      if (count($handler->getReferenceableEntities())) {
+        return Accessresult::allowed();
+      }
+
+      // Allow users to create content outside of groups, if none of the
+      // audience fields is required.
+      $required = $field_definition->isRequired();
+    }
+
+    // If no group audience field is required, we ignore.
+    if (!$required) {
+      return AccessResult::neutral();
+    }
+
+    // Otherwise, ignore or deny based on whether strict entity access is set.
+    return AccessResult::forbiddenIf($entity_access_strict);
+  }
+  elseif (in_array($operation, ['update', 'delete'])) {
+    $access = og_user_access_entity('administer group', $entity, $account);
+
+    if (is_null($access)) {
+      // The node isn't in an OG context, so no need to keep testing.
+      return AccessResult::neutral();
+    }
+    else {
+      $access = $access ||
+        // Any and own content.
+        og_user_access_entity($operation, $entity, $account);
+    }
+
+    if (!$access && ($operation === 'update') && Og::isGroup($entity_type_id, $entity_bundle_id)) {
+      // The node is a group, so check "update group" permission.
+      $access = og_user_access_entity('update group', 'node', $node, $account);
+    }
+
+    if ($access) {
+      return AccessResult::allowed();
+    }
+
+    // Otherwise, ignore or deny based on whether strict entity access is set.
+    return AccessResult::forbiddenIf($entity_access_strict);
+  }
+
+  return AccessResult::neutral();
+}
+
+/**
+ * Determine whether a user has a given privilege.
+ *
+ * All permission checks in OG should go through this function. This
+ * way, we guarantee consistent behavior, and ensure that the superuser
+ * and group administrators can perform all actions.
+ *
+ * @param $group_type
+ *   The entity type of the group.
+ * @param $gid
+ *   The entity ID of the group.
+ * @param string $operation
+ *   The entity operation being checked for.
+ * @param $account
+ *   (optional) The account to check. Defaults to the current user.
+ * @param $skip_alter
+ *   (optional) If TRUE then user access will not be sent to other modules
+ *   using drupal_alter(). This can be used by modules implementing
+ *   hook_og_user_access_alter() that still want to use og_user_access(), but
+ *   without causing a recursion. Defaults to FALSE.
+ * @param $ignore_admin
+ *   (optional) When TRUE the specific permission is checked, ignoring the
+ *   "administer group" permission if the user has it. When FALSE, a user
+ *   with "administer group" will be granted all permissions.
+ *   Defaults to FALSE.
+ *
+ * @return
+ *   TRUE or FALSE if the current user has the requested permission.
+ *   NULL, if the given group isn't a valid group.
+ */
+function og_user_access($group_type, $gid, $operation, $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
+  $perm = &drupal_static(__FUNCTION__, []);
+  // Mark the group ID and permissions that invoked an alter.
+  $perm_alter = &drupal_static(__FUNCTION__ . '_alter', []);
+
+  if (!Og::isGroup($group_type, $gid)) {
+    // Not a group.
+    return NULL;
+  }
+
+
+  if (empty($account)) {
+    $account = clone \Drupal::currentUser()->getAccount();
+  }
+
+  $account_id = $account->id();
+
+  // User #1 has all privileges.
+  if ($account_id == 1) {
+    return TRUE;
+  }
+
+  // Administer group permission.
+  if ($account->hasPermission('administer group') && !$ignore_admin) {
+    return TRUE;
+  }
+
+  // Group manager has all privileges (if variable is TRUE).
+  if (!empty($account_id) && \Drupal::config('og.settings')->get('group_manager_full_access')) {
+    $group = entity_load($group_type, $gid);
+
+    if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $account_id)) {
+      return TRUE;
+    }
+  }
+
+  $identifier = $group_type . ':' . $gid;
+
+  // To reduce the number of SQL queries, we cache the user's permissions
+  // in a static variable.
+  if (!isset($perm[$identifier][$account_id])) {
+    $perms = array();
+
+    if ($roles = og_get_user_roles($group_type, $gid, $account_id)) {
+      // Member might not have roles if they are blocked.
+      // A pending member is treated as a non-member.
+      $role_permissions = og_role_permissions($roles);
+
+      foreach ($role_permissions as $one_role) {
+        $perms += $one_role;
+      }
+    }
+
+    $perm[$identifier][$account_id] = $perms;
+  }
+
+  if (!$skip_alter && empty($perm_alter[$identifier][$account_id][$operation])) {
+    // Let modules alter the permissions. since $perm is static we create
+    // a clone of it.
+    $group = !empty($group) ? $group : entity_load($group_type, $gid);
+    $temp_perm = $perm[$identifier][$account_id];
+    $context = array(
+      'operation' => $operation,
+      'group_type' => $group_type,
+      'group' => $group,
+      'account' => $account,
+    );
+
+    drupal_alter('og_user_access', $temp_perm, $context);
+
+    // Re-assign the altered permissions.
+    $perm[$identifier][$account_id] = $temp_perm;
+
+    // Make sure alter isn't called for the same permissions.
+    $perm_alter[$identifier][$account_id][$operation] = TRUE;
+  }
+
+  return !empty($perm[$identifier][$account_id][$operation]) || (!empty($perm[$identifier][$account_id]['administer group']) && !$ignore_admin);
+}
+
+/**
+ * Check if a user has access to a permission on a certain entity context.
+ *
+ * @param string $operation
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity object, or the entity ID.
+ * @param \Drupal\Core\Session\AccountInterface $account
+ *   (optional) The user object. If empty the current user will be used.
+ *
+ * @return bool
+ *   Returns TRUE if the user has access to the permission, otherwise FALSE, or
+ *   if the entity is not in OG context, function _will return NULL. This allows
+ *   a distinction between FALSE - no access, and NULL - no access as no OG
+ *   context found.
+ */
+function og_user_access_entity($operation, EntityInterface $entity = NULL, $account = NULL) {
+  if (empty($account)) {
+    $account = clone \Drupal::currentUser()->getAccount();
+  }
+
+  // Set the default for the case there is not a group or a group content.
+  $result = NULL;
+
+  if (empty($entity)) {
+    // $entity might be NULL, so return early.
+    // @see field_access().
+    return $result;
+  }
+
+  // Entity isn't saved yet.
+  if ($entity->isNew()) {
+    return $result;
+  }
+
+  $entity_type_id = $entity->getEntityTypeId();
+  $entity_bundle_id = $entity->bundle();
+
+  $is_group = Og::isGroup($entity_type_id, $entity_bundle_id);
+  $is_group_content = Og::isGroupContent($entity);
+
+  if ($is_group) {
+    if (og_user_access($entity_type_id, $entity->id(), $operation, $account)) {
+      return TRUE;
+    }
+    else {
+      // An entity can be a group and group content in the same time. The group
+      // didn't return TRUE, but the user still might have access to the
+      // permission in group content context.
+      $result = FALSE;
+    }
+  }
+
+  if ($is_group_content && $groups = og_get_entity_groups($entity_type_id, $entity)) {
+    foreach ($groups as $group_type => $gids) {
+      foreach ($gids as $gid) {
+        if (og_user_access($group_type, $gid, $operation, $account)) {
+          return TRUE;
+        }
+      }
+    }
+    return FALSE;
+  }
+
+  // Either the user didn't have permission, or the entity might be a
+  // disabled group or an orphaned group content.
+  return $result;
 }
 
 /**
@@ -209,84 +459,6 @@ function _og_og_permission() {
 function _og_og_default_roles() {
   return array(OG_ADMINISTRATOR_ROLE);
 }
-
-/**
- * Implements hook_node_access().
- */
-function _og_node_access($node, $op, $account) {
-  $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-
-  if ($op == 'create' && og_is_group_content_type('node', $type)) {
-    // Save some legwork if the user has the core permission and strict node
-    // access is not set.
-    if (!\Drupal::config('og.settings')->get('node_access_strict') && user_access("create $type content", $account)) {
-      // We just ignore: core access will take care of it.
-      return NODE_ACCESS_IGNORE;
-    }
-
-    if (user_access('administer group', $account)) {
-      return NODE_ACCESS_ALLOW;
-    }
-    // We can't check if user has create permissions using og_user_access(), as
-    // there is no group context. However, we can check if there are any groups
-    // the user will be able to select, and if not, we don't allow access.
-    // @see OgSelectionHandler::getReferencableEntities()
-    $required = FALSE;
-    foreach (og_get_group_audience_fields('node', $type) as $field_name => $label) {
-      $field = field_info_field($field_name);
-      $instance = field_info_instance('node', $field_name, $type);
-      // Set the "field mode" to default, before passing it to the
-      // selection handler.
-      $instance['field_mode'] = 'default';
-      if (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
-        return NODE_ACCESS_ALLOW;
-      }
-
-      // Allow users to create content outside of groups, if none of the
-      // audience fields is required.
-      if ($instance['required']) {
-        $required = TRUE;
-      }
-    }
-    // If no group audience field is required, we ignore.
-    if (!$required) {
-      return NODE_ACCESS_IGNORE;
-    }
-
-    // Otherwise, ignore or deny based on whether strict node access is set.
-    return \Drupal::config('og.settings')->get('node_access_strict') ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
-  }
-  elseif (in_array($op, array('update', 'delete'))) {
-    $access = og_user_access_entity('administer group', 'node', $node, $account);
-
-    if (is_null($access)) {
-      // The node isn't in an OG context, so no need to keep testing.
-      return NODE_ACCESS_IGNORE;
-    }
-    else {
-      $access = $access ||
-        // Any content.
-        og_user_access_entity("$op any $type content", 'node', $node, $account) ||
-        // Own content.
-        ($account->uid == $node->uid && og_user_access_entity("$op own $type content", 'node', $node, $account));
-    }
-
-    if (!$access && $op == 'update' && og_is_group('node', $node)) {
-      // The node is a group, so check "update group" permission.
-      $access = og_user_access_entity('update group', 'node', $node, $account);
-    }
-
-    if ($access) {
-      return NODE_ACCESS_ALLOW;
-    }
-
-    // Check if OG should explicitly deny access or not.
-    return \Drupal::config('og.settings')->get('node_access_strict') ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
-  }
-
-  return NODE_ACCESS_IGNORE;
-}
-
 
 /**
  * Implements hook_field_create_instance().
@@ -1529,187 +1701,6 @@ function _og_ungroup($group_type, $gid, $entity_type = 'user', $etid = NULL) {
   if ($og_membership = og_get_membership($group_type, $gid, $entity_type, $etid)) {
     $og_membership->delete();
   }
-}
-
-/**
- * Determine whether a user has a given privilege.
- *
- * All permission checks in OG should go through this function. This
- * way, we guarantee consistent behavior, and ensure that the superuser
- * and group administrators can perform all actions.
- *
- * @param $group_type
- *   The entity type of the group.
- * @param $gid
- *   The entity ID of the group.
- * @param $string
- *   The permission, such as "administer group", being checked for.
- * @param $account
- *   (optional) The account to check. Defaults to the current user.
- * @param $skip_alter
- *   (optional) If TRUE then user access will not be sent to other modules
- *   using drupal_alter(). This can be used by modules implementing
- *   hook_og_user_access_alter() that still want to use og_user_access(), but
- *   without causing a recursion. Defaults to FALSE.
- * @param $ignore_admin
- *   (optional) When TRUE the specific permission is checked, ignoring the
- *   "administer group" permission if the user has it. When FALSE, a user
- *   with "administer group" will be granted all permissions.
- *   Defaults to FALSE.
- *
- * @return
- *   TRUE or FALSE if the current user has the requested permission.
- *   NULL, if the given group isn't a valid group.
- */
-function _og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
-  global $user;
-  $perm = &drupal_static(__FUNCTION__, array());
-  // Mark the group ID and permissions that invoked an alter.
-  $perm_alter = &drupal_static(__FUNCTION__ . '_alter', array());
-
-  if (!og_is_group($group_type, $gid)) {
-    // Not a group.
-    return NULL;
-  }
-
-
-  if (empty($account)) {
-    $account = clone $user;
-  }
-
-  // User #1 has all privileges.
-  if ($account->uid == 1) {
-    return TRUE;
-  }
-
-  // Administer group permission.
-  if (user_access('administer group', $account) && !$ignore_admin) {
-    return TRUE;
-  }
-
-  // Group manager has all privileges (if variable is TRUE).
-  if (!empty($account->uid) && \Drupal::config('og.settings')->get('group_manager_full_access')) {
-    $group = entity_load_single($group_type, $gid);
-    if (!empty($group->uid) && $group->uid == $account->uid) {
-      return TRUE;
-    }
-  }
-
-  $identifier = $group_type . ':' . $gid;
-
-  // To reduce the number of SQL queries, we cache the user's permissions
-  // in a static variable.
-  if (!isset($perm[$identifier][$account->uid])) {
-    $perms = array();
-
-    if ($roles = og_get_user_roles($group_type, $gid, $account->uid)) {
-      // Member might not have roles if they are blocked.
-      // A pending member is treated as a non-member.
-      $role_permissions = og_role_permissions($roles);
-
-      foreach ($role_permissions as $one_role) {
-        $perms += $one_role;
-      }
-    }
-
-    $perm[$identifier][$account->uid] = $perms;
-  }
-
-  if (!$skip_alter && empty($perm_alter[$identifier][$account->uid][$string])) {
-    // Let modules alter the permissions. since $perm is static we create
-    // a clone of it.
-    $group = !empty($group) ? $group : entity_load_single($group_type, $gid);
-    $temp_perm = $perm[$identifier][$account->uid];
-    $context = array(
-      'string' => $string,
-      'group_type' => $group_type,
-      'group' => $group,
-      'account' => $account,
-    );
-    drupal_alter('og_user_access', $temp_perm, $context);
-
-    // Re-assing the altered permissions.
-    $perm[$identifier][$account->uid] = $temp_perm;
-
-    // Make sure alter isn't called for the same permissions.
-    $perm_alter[$identifier][$account->uid][$string] = TRUE;
-  }
-
-  return !empty($perm[$identifier][$account->uid][$string]) || (!empty($perm[$identifier][$account->uid]['administer group']) && !$ignore_admin);
-}
-
-/**
- * Check if a user has access to a permission on a certain entity context.
- *
- * @param $perm
- *   The organic groups permission.
- * @param $entity_type
- *   The entity type.
- * @param $entity
- *   The entity object, or the entity ID.
- * @param $account
- *   (optional) The user object. If empty the current user will be used.
- *
- * @return
- *   Returns TRUE if the user has access to the permission, otherwise FALSE, or
- *   if the entity is not in OG context, function _will return NULL. This allows
- *   a distinction between FALSE - no access, and NULL - no access as no OG
- *   context found.
- */
-function _og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
-  if (empty($account)) {
-    global $user;
-    $account = clone $user;
-  }
-
-  // Set the default for the case there is not a group or a group content.
-  $result = NULL;
-
-  if (empty($entity)) {
-    // $entity might be NULL, so return early.
-    // @see field_access().
-    return $result;
-  }
-  elseif (is_numeric($entity)) {
-    $entity = entity_load_single($entity_type, $entity);
-  }
-
-  list($id, $vid, $bundle_name) = entity_extract_ids($entity_type, $entity);
-
-  if (empty($id)) {
-    // Entity isn't saved yet.
-    return $result;
-  }
-
-  $is_group = og_is_group($entity_type, $entity);
-  $is_group_content = og_is_group_content_type($entity_type, $bundle_name);
-
-  if ($is_group) {
-    if (og_user_access($entity_type, $id, $perm, $account)) {
-      return TRUE;
-    }
-    else {
-      // An entity can be a group and group content in the same time. The group
-      // didn't return TRUE, but the user still might have access to the
-      // permission in group content context.
-      $result = FALSE;
-    }
-  }
-
-  if ($is_group_content && $groups = og_get_entity_groups($entity_type, $entity)) {
-    foreach ($groups as $group_type => $gids) {
-      foreach ($gids as $gid) {
-        if (og_user_access($group_type, $gid, $perm, $account)) {
-          return TRUE;
-        }
-      }
-    }
-    return FALSE;
-  }
-
-  // Either the user didn't have permission, or the entity might be a
-  // disabled group or an orphaned group content.
-  return $result;
 }
 
 /**

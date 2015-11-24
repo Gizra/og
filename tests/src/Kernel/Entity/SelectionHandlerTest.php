@@ -95,7 +95,7 @@ class SelectionHandlerTest extends KernelTestBase {
     Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->groupContentBundle);
 
     // Get the storage of the field.
-    $this->selectionHandler = Og::getSelectionHandler('node', $this->groupContentBundle, OG_AUDIENCE_FIELD, ['handler_settings' => ['field_mode' => 'default']]);
+    $this->selectionHandler = Og::getSelectionHandler('node', $this->groupContentBundle, OG_AUDIENCE_FIELD);
 
     // Create two users.
     $this->user1 = User::create(['name' => $this->randomString()]);
