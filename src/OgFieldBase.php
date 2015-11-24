@@ -102,9 +102,12 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
    * @param String $fieldName
    *   The field name.
    *
+   * @return \Drupal\og\OgFieldBase
    */
   public function setFieldName($fieldName) {
     $this->fieldName = $fieldName;
+
+    return $this;
   }
 
 }

@@ -72,11 +72,8 @@ class FieldCreateTest extends KernelTestBase {
     $this->assertEquals(FieldConfig::loadByName('node', $this->bundle1->id(), OG_AUDIENCE_FIELD)->label(), 'Other groups dummy');
 
     // Override the field storage config.
-    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle2->id(), [
-      'field' => ['field_name' => 'og_group_ref_dummy'],
-      'instance' => ['field_name' => 'og_group_ref_dummy'],
-    ]);
-    $this->assertEquals(FieldConfig::loadByName('node', $this->bundle2->id(), 'og_group_ref_dummy')->id(), 'node.' . $this->bundle2->id() . '.og_group_ref_dummy');
+    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle2->id(), ['field_name' => 'override_name']);
+    $this->assertNotNull(FieldConfig::loadByName('node', $this->bundle2->id(), 'override_name')->id());
   }
 
 

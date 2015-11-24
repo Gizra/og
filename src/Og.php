@@ -67,8 +67,6 @@ class Og {
       ->setEntityType($entity_type);
 
 
-    return;
-
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
       $field = $settings['field_storage_config'] + $og_field->fieldStorageConfigBaseDefinition();
       FieldStorageConfig::create($field)->save();
