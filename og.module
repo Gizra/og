@@ -197,13 +197,7 @@ function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, 
       ->setComputed(TRUE)
       ->setTranslatable(FALSE)
       ->setDefaultValue(TRUE)
-      ->setReadOnly(TRUE)
-      ->setDisplayOptions('view', [
-        'type' => 'og_ui_group_subscribe',
-        'weight' => 0,
-        'label' => 'above',
-      ])
-      ->setDisplayConfigurable('view', TRUE);
+      ->setReadOnly(TRUE);
 
     return $fields;
   }

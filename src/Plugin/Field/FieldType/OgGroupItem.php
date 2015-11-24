@@ -24,10 +24,16 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
  */
 class OgGroupItem extends FieldItemBase {
 
+  /**
+   * {@inheritdoc}
+   */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     return [];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     return [];
   }

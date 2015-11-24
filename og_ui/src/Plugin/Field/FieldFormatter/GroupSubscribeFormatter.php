@@ -171,6 +171,22 @@ class GroupSubscribeFormatter extends FormatterBase {
     return $form;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsSummary() {
+    $summary = parent::settingsSummary();
+
+    if ($field_name = $this->getSetting('field_name')) {
+      $fields = og_get_group_audience_fields();
+      $summary[] = $this->t('Field %label', array('%label' => $fields[$field_name]));
+    }
+    else {
+      $summary[] = $this->t('No field selected (best matching)');
+    }
+
+    return $summary;
+  }
 
   /**
    * {@inheritdoc}

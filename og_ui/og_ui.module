@@ -8,6 +8,7 @@
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\BundleEntityFormBase;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
@@ -90,5 +91,18 @@ function og_ui_entity_type_save(EntityInterface $entity) {
     if ($save) {
       $field->save();
     }
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+function og_ui_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  if (isset($fields['og_group'])) {
+    $fields['og_group']->setDisplayOptions('view', [
+      'type' => 'og_ui_group_subscribe',
+      'weight' => 0,
+      'label' => 'above',
+    ])->setDisplayConfigurable('view', TRUE);
   }
 }
