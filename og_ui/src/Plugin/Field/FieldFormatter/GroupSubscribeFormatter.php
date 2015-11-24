@@ -164,7 +164,7 @@ class GroupSubscribeFormatter extends FormatterBase {
       '#title' => $this->t('Field name'),
       '#description' => $this->t('Select the field that should register the user subscription.'),
       '#type' => 'select',
-      '#options' => [0 => $this->t('Automatic (best matching)')], //+ og_get_group_audience_fields('user', 'user'),
+      '#options' => [0 => $this->t('Automatic (best matching)')] + Og::getAllGroupAudienceFields('user', 'user'),
       '#default_value' => $this->getSetting('field_name'),
     ];
 
@@ -178,7 +178,7 @@ class GroupSubscribeFormatter extends FormatterBase {
     $summary = parent::settingsSummary();
 
     if ($field_name = $this->getSetting('field_name')) {
-      $fields = og_get_group_audience_fields();
+      $fields = Og::getAllGroupAudienceFields('user', 'user');
       $summary[] = $this->t('Field %label', array('%label' => $fields[$field_name]));
     }
     else {
