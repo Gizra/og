@@ -26,14 +26,11 @@ class FieldCreateTest extends KernelTestBase {
   public static $modules = ['user', 'field', 'entity_reference', 'node', 'og', 'system'];
 
   /**
-   * @var NodeType
+   * @var Array
+   *   Array with the bundle IDs.
    */
-  protected $bundle1;
+  protected $bundles;
 
-  /**
-   * @var NodeType
-   */
-  protected $bundle2;
 
   /**
    * {@inheritdoc}
@@ -47,49 +44,49 @@ class FieldCreateTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
 
-    // Create a two bundles.
-    $this->bundle1 = NodeType::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
-      'name' => $this->randomString(),
-    ]);
-    $this->bundle1->save();
+    // Create three bundles.
+    for ($i = 0; $i <= 3; $i++) {
+      $bundle = NodeType::create([
+        'type' => Unicode::strtolower($this->randomMachineName()),
+        'name' => $this->randomString(),
+      ]);
 
-    $this->bundle2 = NodeType::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
-      'name' => $this->randomString(),
-    ]);
-    $this->bundle2->save();
+      $bundle->save();
+      $this->bundles[] = $bundle->id();
+    }
   }
 
   /**
    * Testing field creation.
    */
   public function testValidFields() {
-    // Simple creation.
+    // Simple create.
+    $bundle = $this->bundles[0];
+    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $bundle);
+    $this->assertNotNull(FieldConfig::loadByName('node', $bundle, OG_AUDIENCE_FIELD));
 
     // Override the field config.
-    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle1->id(), ['field_config' => ['label' => 'Other groups dummy']]);
-    $this->assertEquals(FieldConfig::loadByName('node', $this->bundle1->id(), OG_AUDIENCE_FIELD)->label(), 'Other groups dummy');
+    $bundle = $this->bundles[1];
+    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $bundle, ['field_config' => ['label' => 'Other groups dummy']]);
+    $this->assertEquals(FieldConfig::loadByName('node', $bundle, OG_AUDIENCE_FIELD)->label(), 'Other groups dummy');
 
     // Override the field storage config.
-    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle2->id(), ['field_name' => 'override_name']);
-    $this->assertNotNull(FieldConfig::loadByName('node', $this->bundle2->id(), 'override_name')->id());
+    $bundle = $this->bundles[2];
+    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $bundle, ['field_name' => 'override_name']);
+    $this->assertNotNull(FieldConfig::loadByName('node', $bundle, 'override_name')->id());
   }
 
   /**
    * Testing invalid field creation.
    */
   public function testInvalidFields() {
-    // Override the field config.
+    $bundle = $this->bundles[0];
     try {
-      Og::CreateField('undefined_field_name', 'node', $this->bundle1->id(), ['field_config' => ['label' => 'Other groups dummy']]);
+      Og::CreateField('undefined_field_name', 'node', $bundle, ['field_config' => ['label' => 'Other groups dummy']]);
       $this->fail('Undefined field name was attached');
     }
     catch (\Exception $e) {
     }
 
   }
-
-
-
 }
