@@ -7,6 +7,8 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgRoleInterface;
 use Drupal\og\Og;
@@ -179,6 +181,32 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
 
   // Otherwise, ignore or deny based on whether strict entity access is set.
   return $required ? AccessResult::forbiddenIf($node_access_strict) : AccessResult::neutral();
+}
+
+/**
+ *
+ * Implements hook_entity_bundle_field_info().
+ */
+function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  // Add a read only property to group entities as a group flag.
+  if (Og::isGroup($entity_type->id(), $bundle)) {
+    $fields = [];
+
+    $fields['og_group'] = BaseFieldDefinition::create('og_group')
+      ->setLabel(t('OG Group'))
+      ->setComputed(TRUE)
+      ->setTranslatable(FALSE)
+      ->setDefaultValue(TRUE)
+      ->setReadOnly(TRUE)
+      ->setDisplayOptions('view', [
+        'type' => 'og_ui_group_subscribe',
+        'weight' => 0,
+        'label' => 'above',
+      ])
+      ->setDisplayConfigurable('view', TRUE);
+
+    return $fields;
+  }
 }
 
 /**
