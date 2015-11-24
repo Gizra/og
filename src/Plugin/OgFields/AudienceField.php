@@ -20,42 +20,36 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function fieldDefinition() {
-    return [
-      'field_name' => OG_AUDIENCE_FIELD,
-      'entity_type' => $this->getEntityType(),
-      'type' => 'og_membership_reference',
+  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
+    $values = [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'custom_storage' => TRUE,
       'settings' => [
         'handler' => 'og',
-        'handler_submit' => 'Change handler',
         'handler_settings' => [
-          'behaviors' => [
-            'og_behavior' => [
-              'status' => TRUE,
-            ],
-          ],
           'target_bundles' => [],
           'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
         ],
         'target_type' => $this->getEntityType(),
       ],
+      'type' => 'og_membership_reference',
     ];
+
+    return parent::getFieldStorageConfigBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function instanceDefinition(array $instance = []) {
-    return [
-      'label' => $this->t('Groups audience'),
+  public function getFieldConfigBaseDefinition(array $values = array()) {
+    $values = [
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
-      'field_name' => OG_AUDIENCE_FIELD,
-      'entity_type' => $this->getEntityType(),
-      'bundle' => $this->getBundle(),
+      'label' => $this->t('Groups audience'),
     ];
+
+    return parent::getFieldConfigBaseDefinition($values);
+
   }
 
   /**

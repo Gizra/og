@@ -11,16 +11,25 @@ use Drupal\field\Entity\FieldStorageConfig;
 interface OgFieldsInterface {
 
   /**
-   * @return FieldStorageConfig
-   *   Return a new object of a FieldStorageConfig instance.
+   * @param array $values
+   *   The base values, to which the entity type and field name would be added.
+   *
+   * @return array
+   *   Array that will be used as the base values for
+   *   FieldStorageConfig::create().
    */
-  public function fieldDefinition();
+  public function getFieldStorageConfigBaseDefinition(array $values = array());
 
   /**
-   * @return FieldConfig
-   *   Return a new object of a FieldInstanceConfig instance.
+   * @param array $values
+   *   The base values, to which the entity type, bundle and field name would be
+   *   added.
+   *
+   * @return array
+   *   Array that will be used as the base values for
+   *   FieldConfig::create().
    */
-  public function instanceDefinition();
+  public function getFieldConfigBaseDefinition(array $values = array());
 
   /**
    * @return array
