@@ -1,0 +1,13 @@
+og_ui.admin_index:
+  title: Organic groups
+  route_name: og_ui.admin_index
+  parent: system.admin_config
+  description: 'Administer the suite of Organic groups modules.'
+  position: right
+  weight: -5
+
+og_ui.settings:
+  title: 'OG settings'
+  parent: og_ui.admin_index
+  description: 'Administer OG settings.'
+  route_name: og_ui.settings

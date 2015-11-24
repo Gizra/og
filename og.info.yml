@@ -1,6 +1,6 @@
-name: Organic groups
+name: Organic Groups
 description: API to allow associating content with groups.
-package: Organic groups
+package: Organic Groups
 
 core: 8.x
 type: module

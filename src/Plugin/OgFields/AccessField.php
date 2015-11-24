@@ -40,8 +40,8 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    */
   public function instanceDefinition() {
     return [
-      'label' => t('Group roles and permissions'),
-      'description' => t('Determine if group should use default roles and permissions.'),
+      'label' => $this->t('Group roles and permissions'),
+      'description' => $this->t('Determine if group should use default roles and permissions.'),
       'default_value' => [0 => ['value' => 0]],
       'display_label' => 1,
       'required' => TRUE,
