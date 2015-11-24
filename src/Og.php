@@ -339,14 +339,14 @@ class Og {
       throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
     }
 
-    $options += [
+    $options = NestedArray::mergeDeep([
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'field' => $field_definition,
       'handler' => $field_definition->getSetting('handler'),
       'handler_settings' => [
         'field_mode' => 'default',
       ],
-    ];
+    ], $options);
 
     // Deep merge the handler settings.
     $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);

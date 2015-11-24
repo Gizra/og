@@ -14,6 +14,13 @@ use Drupal\user\EntityOwnerInterface;
 class OgAccess {
 
   /**
+   * Administer permission string.
+   *
+   * @var string
+   */
+  const ADMINISTER_GROUP_PERMISSION = 'administer group';
+
+  /**
    * Determines whether a user has a given privilege.
    *
    * All permission checks in OG should go through this function. This
@@ -22,7 +29,7 @@ class OgAccess {
    *
    * @param $group_type
    *   The entity type of the group.
-   * @param $gid
+   * @param $group_id
    *   The entity ID of the group.
    * @param string $operation
    *   The entity operation being checked for.
@@ -43,12 +50,12 @@ class OgAccess {
    *   TRUE or FALSE if the current user has the requested permission.
    *   NULL, if the given group isn't a valid group.
    */
-  public static function userAccess($group_type, $gid, $operation, $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
+  public static function userAccess($group_type, $group_id, $operation, $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
     $perm = &drupal_static(__FUNCTION__, []);
     // Mark the group ID and permissions that invoked an alter.
     $perm_alter = &drupal_static(__FUNCTION__ . '_alter', []);
 
-    if (!Og::isGroup($group_type, $gid)) {
+    if (!Og::isGroup($group_type, $group_id)) {
       // Not a group.
       return NULL;
     }
@@ -66,27 +73,27 @@ class OgAccess {
     }
 
     // Administer group permission.
-    if (!$ignore_admin && $account->hasPermission('administer group')) {
+    if (!$ignore_admin && $account->hasPermission(static::ADMINISTER_GROUP_PERMISSION)) {
       return TRUE;
     }
 
     // Group manager has all privileges (if variable is TRUE).
     if (!empty($account_id) && \Drupal::config('og.settings')->get('group_manager_full_access')) {
-      $group = entity_load($group_type, $gid);
+      $group = entity_load($group_type, $group_id);
 
       if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $account_id)) {
         return TRUE;
       }
     }
 
-    $identifier = $group_type . ':' . $gid;
+    $identifier = $group_type . ':' . $group_id;
 
     // To reduce the number of SQL queries, we cache the user's permissions
     // in a static variable.
     if (!isset($perm[$identifier][$account_id])) {
       $perms = array();
 
-      if ($roles = og_get_user_roles($group_type, $gid, $account_id)) {
+      if ($roles = og_get_user_roles($group_type, $group_id, $account_id)) {
         // Member might not have roles if they are blocked.
         // A pending member is treated as a non-member.
         $role_permissions = og_role_permissions($roles);
@@ -102,7 +109,7 @@ class OgAccess {
     if (!$skip_alter && empty($perm_alter[$identifier][$account_id][$operation])) {
       // Let modules alter the permissions. since $perm is static we create
       // a clone of it.
-      $group = !empty($group) ? $group : entity_load($group_type, $gid);
+      $group = !empty($group) ? $group : entity_load($group_type, $group_id);
       $temp_perm = $perm[$identifier][$account_id];
       $context = array(
         'operation' => $operation,
@@ -120,7 +127,7 @@ class OgAccess {
       $perm_alter[$identifier][$account_id][$operation] = TRUE;
     }
 
-    return !empty($perm[$identifier][$account_id][$operation]) || (!empty($perm[$identifier][$account_id]['administer group']) && !$ignore_admin);
+    return !empty($perm[$identifier][$account_id][$operation]) || (!empty($perm[$identifier][$account_id][static::ADMINISTER_GROUP_PERMISSION]) && !$ignore_admin);
   }
 
   /**
@@ -176,9 +183,9 @@ class OgAccess {
     }
 
     if ($is_group_content && ($groups = Og::getEntityGroups($entity_type_id, $entity->id()))) {
-      foreach ($groups as $group_type => $gids) {
-        foreach ($gids as $gid) {
-          if (static::userAccess($group_type, $gid, $operation, $account)) {
+      foreach ($groups as $group_type => $group_ids) {
+        foreach ($group_ids as $group_id) {
+          if (static::userAccess($group_type, $group_id, $operation, $account)) {
             return TRUE;
           }
         }
