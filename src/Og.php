@@ -53,8 +53,8 @@ class Og {
 
     // Get the field definition and add the entity info to it. By doing so
     // we validate the the field can be attached to the entity. For example,
-    // the group access field can be attached only to node entities, so any
-    // other entity with throw an exception.
+    // the OG accesss module's field can be attached only to node entities, so
+    // any other entity will throw an exception.
     /** @var \Drupal\og\OgFieldBase $og_field */
     $og_field = static::getFieldBaseDefinition($field_identifier)
       ->setFieldName($field_name)
