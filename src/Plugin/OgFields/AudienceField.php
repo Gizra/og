@@ -17,19 +17,15 @@ use Drupal\og\OgFieldsInterface;
  */
 class AudienceField extends OgFieldBase implements OgFieldsInterface {
 
-  public function getFieldIdentifier() {
-    return OG_AUDIENCE_FIELD;
-  }
-
   /**
    * {@inheritdoc}
    */
-  public function fieldStorageConfigBaseDefinition() {
+  public function getFieldStorageConfigBaseDefinition() {
     return [
-      'entity_type' => $this->getEntityType(),
-      'type' => 'og_membership_reference',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'custom_storage' => TRUE,
+      'entity_type' => $this->getEntityType(),
+      'field_name' => $this->getFieldName(),
       'settings' => [
         'handler' => 'og',
         'handler_submit' => 'Change handler',
@@ -44,19 +40,20 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
         ],
         'target_type' => $this->getEntityType(),
       ],
+      'type' => 'og_membership_reference',
     ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function fieldConfigBaseDefinition(array $instance = []) {
+  public function getFieldConfigBaseDefinition(array $instance = []) {
     return [
-      'label' => $this->t('Groups audience'),
+      'bundle' => $this->getBundle(),
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
-      'entity_type' => $this->getEntityType(),
-      'bundle' => $this->getBundle(),
+      'field_name' => $this->getFieldName(),
+      'label' => $this->t('Groups audience'),
     ];
   }
 

@@ -12,6 +12,13 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   /**
    * @var String
    *
+   * The entity bundle.
+   */
+  protected $bundle;
+
+  /**
+   * @var String
+   *
    * The entity type.
    */
   protected $entityType;
@@ -19,31 +26,12 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   /**
    * @var String
    *
-   * The entity bundle.
+   * The field name if often the same as the field identifier, however it is
+   * overridable. For example, the group audience field is identified as
+   * OG_AUDIENCE_FIELD, however the actual field name attached to the bundle can
+   * be arbitrary.
    */
-  protected $bundle;
-
-  /**
-   * Set the entity type.
-   *
-   * @param String $entity_type
-   *   The entity type.
-   *
-   * @return OgFieldBase
-   */
-  public function setEntityType($entity_type) {
-    $this->entityType = $entity_type;
-
-    return $this;
-  }
-
-  /**
-   * @return String
-   *   The entity type.
-   */
-  public function getEntityType() {
-    return $this->entityType;
-  }
+  protected $fieldName;
 
   /**
    * @param String $bundle
@@ -63,6 +51,48 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
    */
   public function getBundle() {
     return $this->bundle;
+  }
+
+
+  /**
+   * @return String
+   *   The entity type name.
+   */
+  public function getEntityType() {
+    return $this->entityType;
+  }
+
+  /**
+   * Set the entity type.
+   *
+   * @param String $entity_type
+   *   The entity type.
+   *
+   * @return OgFieldBase
+   */
+  public function setEntityType($entity_type) {
+    $this->entityType = $entity_type;
+
+    return $this;
+  }
+
+  /**
+   * @return String
+   *   The field name.
+   */
+  public function getFieldName() {
+    return $this->fieldName;
+  }
+
+  /**
+   * Set the field name.
+   *
+   * @param String $fieldName
+   *   The field name.
+   *
+   */
+  public function setFieldName($fieldName) {
+    $this->fieldName = $fieldName;
   }
 
 }

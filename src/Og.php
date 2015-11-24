@@ -45,17 +45,23 @@ class Og {
    */
   public static function createField($field_identifier, $entity_type, $bundle, $settings = []) {
     $settings = $settings + [
-      'field_name' => $field_identifier,
       'field' => [],
       'instance' => [],
       'widget' => [],
       'view_mode' => [],
     ];
 
+    $field_name = !empty($settings['field_name']) ? $settings['field_name'] : $field_identifier;
+
     /** @var \Drupal\og\OgFieldBase $og_field */
     $og_field = static::getFieldBaseDefinition($field_identifier)
+      ->setBundle($bundle)
       ->setEntityType($entity_type)
-      ->setBundle($bundle);
+      ->setFieldName($field_name);
+
+    dpm($og_field->getFieldStorageConfigBaseDefinition());
+
+    return;
 
     if (!empty($settings['field']['field_name'])) {
       $field_identifier = $settings['field']['field_name'];
@@ -290,7 +296,7 @@ class Og {
   /**
    * Get an OG field base definition.
    *
-   * @param string $field_name
+   * @param string $field_identifier
    *   The field name that the definition was registered under.
    *
    * @return OgFieldBase|bool
@@ -300,15 +306,15 @@ class Og {
    * todo: pass the entity type and entity bundle to plugin definition, so for
    * example the access field could be added only to node entities.
    */
-  protected static function getFieldBaseDefinition($field_name) {
+  protected static function getFieldBaseDefinition($field_identifier) {
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
     $fields_config = $plugin_manager->getDefinitions();
 
-    if (!isset($fields_config[$field_name])) {
-      throw new \Exception(sprintf('The field name %s is not a valid Organic Groups field.', $field_name));
+    if (!isset($fields_config[$field_identifier])) {
+      throw new \Exception(sprintf('The field name %s is not a valid Organic Groups field.', $field_identifier));
     }
 
-    return $plugin_manager->createInstance($field_name);
+    return $plugin_manager->createInstance($field_identifier);
   }
 
   /**
