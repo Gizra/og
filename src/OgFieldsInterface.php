@@ -11,16 +11,18 @@ use Drupal\field\Entity\FieldStorageConfig;
 interface OgFieldsInterface {
 
   /**
-   * @return FieldStorageConfig
-   *   Return a new object of a FieldStorageConfig instance.
+   * @return array
+   *   Array that will be used as the base values for
+   *   FieldStorageConfig::create().
    */
-  public function fieldDefinition();
+  public function fieldStorageConfigBaseDefinition();
 
   /**
-   * @return FieldConfig
-   *   Return a new object of a FieldInstanceConfig instance.
+   * @return array
+   *   Array that will be used as the base values for
+   *   FieldConfig::create().
    */
-  public function instanceDefinition();
+  public function fieldConfigBaseDefinition();
 
   /**
    * @return array

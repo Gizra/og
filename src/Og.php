@@ -50,6 +50,7 @@ class Og {
       'widget' => [],
       'view_mode' => [],
     ];
+
     $og_field = static::fieldInfo($field_name)
       ->setEntityType($entity_type)
       ->setBundle($bundle);
@@ -59,12 +60,12 @@ class Og {
     }
 
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
-      $field = $settings['field'] + $og_field->fieldDefinition();
+      $field = $settings['field'] + $og_field->fieldStorageConfigBaseDefinition();
       FieldStorageConfig::create($field)->save();
     }
 
     if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
-      $instance = $settings['instance'] + $og_field->instanceDefinition();
+      $instance = $settings['instance'] + $og_field->fieldConfigBaseDefinition();
       FieldConfig::create($instance)->save();
 
       // Clear the entity property info cache, as OG fields might add different

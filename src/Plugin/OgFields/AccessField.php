@@ -19,7 +19,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function fieldDefinition() {
+  public function fieldStorageConfigBaseDefinition() {
     return [
       'field_name' => OG_DEFAULT_ACCESS_FIELD,
       'entity_type' => $this->getEntityType(),
@@ -38,7 +38,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function instanceDefinition() {
+  public function fieldConfigBaseDefinition() {
     return [
       'label' => $this->t('Group roles and permissions'),
       'description' => $this->t('Determine if group should use default roles and permissions.'),

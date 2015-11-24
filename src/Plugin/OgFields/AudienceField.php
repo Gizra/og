@@ -20,7 +20,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function fieldDefinition() {
+  public function fieldStorageConfigBaseDefinition() {
     return [
       'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
@@ -47,7 +47,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function instanceDefinition(array $instance = []) {
+  public function fieldConfigBaseDefinition(array $instance = []) {
     return [
       'label' => $this->t('Groups audience'),
       'description' => $this->t('OG group audience reference field.'),
