@@ -68,9 +68,21 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
    * @param String $entity_type
    *   The entity type.
    *
-   * @return OgFieldBase
+   * @return \Drupal\og\OgFieldBase
+   * @throws \Exception
+   *   Throw error if the field storage config definition explicitly defines to
+   *   which entities the field can be attached to.
    */
   public function setEntityType($entity_type) {
+    $field_storage = $this->getFieldStorageConfigBaseDefinition();
+
+    if (!empty($field_storage['entity']) && !in_array($entity_type, $field_storage['entity'])) {
+      // @todo: We need to make sure the field name is being set before the
+      // entity for this to work properly, which is error prone.
+      $field_name = $this->getFieldName();
+      throw new \Exception(sprintf('The field %s can not be attached to %s entity type as the field allows attachment only to certain types.', $field_name, $entity_type));
+    }
+
     $this->entityType = $entity_type;
 
     return $this;

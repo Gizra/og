@@ -38,15 +38,17 @@ class Og {
    * @param $settings
    *   (Optional) allow overriding the default definition of the field/instance.
    *   Allowed values:
-   *   - field: override the field definitions.
-   *   - instance: override the instance definitions.
+   *   - field_storage_config: Array with values to override the field storage
+   *     config definitions. Values should comply with FieldStorageConfig::create()
+   *   - field_config: Array with values to override the field config
+   *     definitions. Values should comply with FieldConfig::create()
    *   - widget: override the widget definitions.
    *   - view_mode: override the view mode definitions.
    */
   public static function createField($field_identifier, $entity_type, $bundle, $settings = []) {
     $settings = $settings + [
-      'field' => [],
-      'instance' => [],
+      'field_storage_config' => [],
+      'field_config' => [],
       'widget' => [],
       'view_mode' => [],
     ];
@@ -54,30 +56,29 @@ class Og {
     $field_name = !empty($settings['field_name']) ? $settings['field_name'] : $field_identifier;
 
     /** @var \Drupal\og\OgFieldBase $og_field */
-    $og_field = static::getFieldBaseDefinition($field_identifier)
-      ->setBundle($bundle)
-      ->setEntityType($entity_type)
-      ->setFieldName($field_name);
 
-    dpm($og_field->getFieldStorageConfigBaseDefinition());
+    // Get the field definition and add the entity info to it. By doing so
+    // we validate the the field can be attached to the entity. For example,
+    // the group access field can be attached only to node entities, so any
+    // other entity with throw an exception.
+    $og_field = static::getFieldBaseDefinition($field_identifier)
+      ->setFieldName($field_name)
+      ->setBundle($bundle)
+      ->setEntityType($entity_type);
+
 
     return;
 
-    if (!empty($settings['field']['field_name'])) {
-      $field_identifier = $settings['field']['field_name'];
-    }
-
-    if (!FieldStorageConfig::loadByName($entity_type, $field_identifier)) {
-      $field = $settings['field'] + $og_field->fieldStorageConfigBaseDefinition();
+    if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
+      $field = $settings['field_storage_config'] + $og_field->fieldStorageConfigBaseDefinition();
       FieldStorageConfig::create($field)->save();
     }
 
-    if (!FieldConfig::loadByName($entity_type, $bundle, $field_identifier)) {
-      $instance = $settings['instance'] + $og_field->fieldConfigBaseDefinition();
+    if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
+      $instance = $settings['field_config'] + $og_field->fieldConfigBaseDefinition();
       FieldConfig::create($instance)->save();
 
-      // Clear the entity property info cache, as OG fields might add different
-      // entity property info.
+      // @todo: Verify this is still needed here.
       static::invalidateCache();
     }
 
