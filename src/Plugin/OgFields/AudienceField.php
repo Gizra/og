@@ -20,12 +20,10 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageConfigBaseDefinition() {
-    return [
+  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
+    $values = [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'custom_storage' => TRUE,
-      'entity_type' => $this->getEntityType(),
-      'field_name' => $this->getFieldName(),
       'settings' => [
         'handler' => 'og',
         'handler_submit' => 'Change handler',
@@ -42,19 +40,22 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       ],
       'type' => 'og_membership_reference',
     ];
+
+    return parent::getFieldStorageConfigBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFieldConfigBaseDefinition(array $instance = []) {
-    return [
-      'bundle' => $this->getBundle(),
+  public function getFieldConfigBaseDefinition(array $values = array()) {
+    $values = [
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
-      'field_name' => $this->getFieldName(),
       'label' => $this->t('Groups audience'),
     ];
+
+    return parent::getFieldConfigBaseDefinition($values);
+
   }
 
   /**

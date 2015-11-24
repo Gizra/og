@@ -19,11 +19,9 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageConfigBaseDefinition() {
-    return [
+  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
+    $values = [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'entity_type' => $this->getEntityType(),
-      'field_name' => $this->getFieldName(),
       'settings' => [
         'allowed_values' => [
           0 => 'Use default roles and permissions',
@@ -33,22 +31,23 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
       ],
       'type' => 'list_integer',
     ];
+
+    return parent::getFieldStorageConfigBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFieldConfigBaseDefinition() {
+  public function getFieldConfigBaseDefinition(array $values = array()) {
     return [
-      'bundle' => $this->getBundle(),
       'default_value' => [0 => ['value' => 0]],
       'description' => $this->t('Determine if group should use default roles and permissions.'),
       'display_label' => TRUE,
-      'entity_type' => $this->getEntityType(),
-      'field_name' => $this->getFieldName(),
       'label' => $this->t('Group roles and permissions'),
       'required' => TRUE,
     ];
+
+    return parent::getFieldConfigBaseDefinition($values);
   }
 
   /**

@@ -51,7 +51,6 @@ class Og {
 
     $field_name = !empty($settings['field_name']) ? $settings['field_name'] : $field_identifier;
 
-
     // Get the field definition and add the entity info to it. By doing so
     // we validate the the field can be attached to the entity. For example,
     // the group access field can be attached only to node entities, so any
@@ -61,7 +60,6 @@ class Og {
       ->setFieldName($field_name)
       ->setBundle($bundle)
       ->setEntityType($entity_type);
-
 
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
       $field = NestedArray::mergeDeep($settings['field_storage_config'], $og_field->getFieldStorageConfigBaseDefinition());

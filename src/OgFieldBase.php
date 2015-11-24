@@ -110,4 +110,29 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
+    $values += [
+      'entity_type' => $this->getEntityType(),
+      'field_name' => $this->getFieldName(),
+    ];
+
+    return $values;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldConfigBaseDefinition(array $values = array()) {
+    $values += [
+      'bundle' => $this->getBundle(),
+      'entity_type' => $this->getEntityType(),
+      'field_name' => $this->getFieldName(),
+    ];
+
+    return $values;
+  }
+
 }
