@@ -68,12 +68,12 @@ class Og {
 
 
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
-      $field = $settings['field_storage_config'] + $og_field->fieldStorageConfigBaseDefinition();
+      $field = $settings['field_storage_config'] + $og_field->getFieldStorageConfigBaseDefinition();
       FieldStorageConfig::create($field)->save();
     }
 
     if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
-      $instance = $settings['field_config'] + $og_field->fieldConfigBaseDefinition();
+      $instance = $settings['field_config'] + $og_field->getFieldConfigBaseDefinition();
       FieldConfig::create($instance)->save();
 
       // @todo: Verify this is still needed here.
