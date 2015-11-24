@@ -29,7 +29,7 @@ class Og {
   /**
    * Create an organic groups field in a bundle.
    *
-   * @param $field_name
+   * @param $field_identifier
    *   The field name.
    * @param $entity_type
    *   The entity type.
@@ -43,28 +43,30 @@ class Og {
    *   - widget: override the widget definitions.
    *   - view_mode: override the view mode definitions.
    */
-  public static function createField($field_name, $entity_type, $bundle, $settings = []) {
+  public static function createField($field_identifier, $entity_type, $bundle, $settings = []) {
     $settings = $settings + [
+      'field_name' => $field_identifier,
       'field' => [],
       'instance' => [],
       'widget' => [],
       'view_mode' => [],
     ];
 
-    $og_field = static::fieldInfo($field_name)
+    /** @var \Drupal\og\OgFieldBase $og_field */
+    $og_field = static::getFieldBaseDefinition($field_identifier)
       ->setEntityType($entity_type)
       ->setBundle($bundle);
 
     if (!empty($settings['field']['field_name'])) {
-      $field_name = $settings['field']['field_name'];
+      $field_identifier = $settings['field']['field_name'];
     }
 
-    if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
+    if (!FieldStorageConfig::loadByName($entity_type, $field_identifier)) {
       $field = $settings['field'] + $og_field->fieldStorageConfigBaseDefinition();
       FieldStorageConfig::create($field)->save();
     }
 
-    if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
+    if (!FieldConfig::loadByName($entity_type, $bundle, $field_identifier)) {
       $instance = $settings['instance'] + $og_field->fieldConfigBaseDefinition();
       FieldConfig::create($instance)->save();
 
@@ -89,9 +91,9 @@ class Og {
     }
 
     // Add the field to the form display manager.
-    if (!$displayForm->getComponent($field_name) && $widgetDefinition = $og_field->widgetDefinition()) {
+    if (!$displayForm->getComponent($field_identifier) && $widgetDefinition = $og_field->widgetDefinition()) {
       $widgetDefinition = $settings['widget'] + $widgetDefinition;
-      $displayForm->setComponent($field_name, $widgetDefinition);
+      $displayForm->setComponent($field_identifier, $widgetDefinition);
       // todo: fix when we handling the form widget.
 //      $displayForm->save();
     }
@@ -103,7 +105,7 @@ class Og {
       $viewModes = \Drupal::entityManager()->getStorage('entity_view_display')->loadMultiple(array_keys($fieldViewModes));
 
       foreach ($viewModes as $key => $viewMode) {
-        $viewMode->setComponent($field_name, $fieldViewModes[$prefix . $key])->save();
+        $viewMode->setComponent($field_identifier, $fieldViewModes[$prefix . $key])->save();
       }
     }
   }
@@ -284,26 +286,29 @@ class Og {
     return ['type' => 'og_membership_type_default'];
   }
 
+
   /**
-   * Get all the modules fields that can be assigned to fieldable entities.
+   * Get an OG field base definition.
    *
-   * @param $field_name
-   *   The field name that was registered for the definition.
+   * @param string $field_name
+   *   The field name that the definition was registered under.
    *
    * @return OgFieldBase|bool
-   *   An array with the field and instance definitions, or FALSE if not.
+   *   An array with the field storage config and field config definitions, or
+   *   FALSE if none found.
    *
-   * todo: pass the entity type and entity bundle to plugin definition.
+   * todo: pass the entity type and entity bundle to plugin definition, so for
+   * example the access field could be added only to node entities.
    */
-  protected static function fieldInfo($field_name = NULL) {
-    $config = \Drupal::service('plugin.manager.og.fields');
-    $fields_config = $config->getDefinitions();
+  protected static function getFieldBaseDefinition($field_name) {
+    $plugin_manager = \Drupal::service('plugin.manager.og.fields');
+    $fields_config = $plugin_manager->getDefinitions();
 
-    if ($field_name) {
-      return isset($fields_config[$field_name]) ? $config->createInstance($field_name) : NULL;
+    if (!isset($fields_config[$field_name])) {
+      throw new \Exception(sprintf('The field name %s is not a valid Organic Groups field.', $field_name));
     }
 
-    return $fields_config;
+    return $plugin_manager->createInstance($field_name);
   }
 
   /**
@@ -325,7 +330,7 @@ class Og {
     $field_definition = FieldConfig::loadByName($entity, $bundle, $field_name);
 
     if (!Og::isGroupAudienceField($field_definition)) {
-      throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
+      throw new \Exception(sprintf('The field %s is not an audience field.', $field_name));
     }
 
     $options += [

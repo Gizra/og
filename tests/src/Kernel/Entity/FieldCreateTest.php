@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\Tests\og\Kernel\Entity\FieldOverrideTest.
+ * Contains Drupal\Tests\og\Kernel\Entity\FieldCreateTest.
  */
 
 namespace Drupal\Tests\og\Kernel\Entity;
@@ -18,7 +18,7 @@ use Drupal\og\Og;
  *
  * @group og
  */
-class FieldOverrideTest extends KernelTestBase {
+class FieldCreateTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -62,17 +62,23 @@ class FieldOverrideTest extends KernelTestBase {
   }
 
   /**
-   * Testing field definition overrides.
+   * Testing field creation.
    */
-  public function testSelectionHandlerResults() {
+  public function testValidFields() {
+    // Simple creation.
+
+    // Override the field config.
     Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle1->id(), ['instance' => ['label' => 'Other groups dummy']]);
+    $this->assertEquals(FieldConfig::loadByName('node', $this->bundle1->id(), OG_AUDIENCE_FIELD)->label(), 'Other groups dummy');
+
+    // Override the field storage config.
     Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->bundle2->id(), [
       'field' => ['field_name' => 'og_group_ref_dummy'],
       'instance' => ['field_name' => 'og_group_ref_dummy'],
     ]);
-
-    $this->assertEquals(FieldConfig::loadByName('node', $this->bundle1->id(), OG_AUDIENCE_FIELD)->label(), 'Other groups dummy');
     $this->assertEquals(FieldConfig::loadByName('node', $this->bundle2->id(), 'og_group_ref_dummy')->id(), 'node.' . $this->bundle2->id() . '.og_group_ref_dummy');
   }
+
+
 
 }

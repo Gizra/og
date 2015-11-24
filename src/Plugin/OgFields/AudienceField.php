@@ -17,12 +17,15 @@ use Drupal\og\OgFieldsInterface;
  */
 class AudienceField extends OgFieldBase implements OgFieldsInterface {
 
+  public function getFieldIdentifier() {
+    return OG_AUDIENCE_FIELD;
+  }
+
   /**
    * {@inheritdoc}
    */
   public function fieldStorageConfigBaseDefinition() {
     return [
-      'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
       'type' => 'og_membership_reference',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
@@ -52,7 +55,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'label' => $this->t('Groups audience'),
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
-      'field_name' => OG_AUDIENCE_FIELD,
       'entity_type' => $this->getEntityType(),
       'bundle' => $this->getBundle(),
     ];
