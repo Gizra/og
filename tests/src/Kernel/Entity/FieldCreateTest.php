@@ -76,6 +76,20 @@ class FieldCreateTest extends KernelTestBase {
     $this->assertNotNull(FieldConfig::loadByName('node', $this->bundle2->id(), 'override_name')->id());
   }
 
+  /**
+   * Testing invalid field creation.
+   */
+  public function testInvalidFields() {
+    // Override the field config.
+    try {
+      Og::CreateField('undefined_field_name', 'node', $this->bundle1->id(), ['field_config' => ['label' => 'Other groups dummy']]);
+      $this->fail('Undefined field name was attached');
+    }
+    catch (\Exception $e) {
+    }
+
+  }
+
 
 
 }
