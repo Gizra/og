@@ -42,25 +42,21 @@ class Og {
    *     config definitions. Values should comply with FieldStorageConfig::create()
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
-   *   - widget: override the widget definitions.
-   *   - view_mode: override the view mode definitions.
    */
   public static function createField($field_identifier, $entity_type, $bundle, $settings = []) {
     $settings = $settings + [
       'field_storage_config' => [],
       'field_config' => [],
-      'widget' => [],
-      'view_mode' => [],
     ];
 
     $field_name = !empty($settings['field_name']) ? $settings['field_name'] : $field_identifier;
 
-    /** @var \Drupal\og\OgFieldBase $og_field */
 
     // Get the field definition and add the entity info to it. By doing so
     // we validate the the field can be attached to the entity. For example,
     // the group access field can be attached only to node entities, so any
     // other entity with throw an exception.
+    /** @var \Drupal\og\OgFieldBase $og_field */
     $og_field = static::getFieldBaseDefinition($field_identifier)
       ->setFieldName($field_name)
       ->setBundle($bundle)
