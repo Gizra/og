@@ -255,25 +255,22 @@ class Og {
   /**
    * Get an OG field base definition.
    *
-   * @param string $field_identifier
-   *   The field name that the definition was registered under.
+   * @param string $plugin_id
+   *   The plugin ID, which is also the default field name.
    *
+   * @throws \Exception
    * @return OgFieldBase|bool
    *   An array with the field storage config and field config definitions, or
    *   FALSE if none found.
-   *
-   * todo: pass the entity type and entity bundle to plugin definition, so for
-   * example the access field could be added only to node entities.
    */
-  protected static function getFieldBaseDefinition($field_identifier) {
+  protected static function getFieldBaseDefinition($plugin_id) {
+    /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
-    $fields_config = $plugin_manager->getDefinitions();
-
-    if (!isset($fields_config[$field_identifier])) {
-      throw new \Exception(sprintf('The field name %s is not a valid Organic Groups field.', $field_identifier));
+    if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
+      throw new \Exception(sprintf('The OG field with plugin ID %s is not a valid Organic Groups field.', $plugin_id));
     }
 
-    return $plugin_manager->createInstance($field_identifier);
+    return $plugin_manager->createInstance($plugin_id);
   }
 
   /**
