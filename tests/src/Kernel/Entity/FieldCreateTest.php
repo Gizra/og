@@ -44,8 +44,8 @@ class FieldCreateTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
 
-    // Create three bundles.
-    for ($i = 0; $i <= 3; $i++) {
+    // Create several bundles.
+    for ($i = 0; $i <= 4; $i++) {
       $bundle = NodeType::create([
         'type' => Unicode::strtolower($this->randomMachineName()),
         'name' => $this->randomString(),
@@ -74,6 +74,11 @@ class FieldCreateTest extends KernelTestBase {
     $bundle = $this->bundles[2];
     Og::CreateField(OG_AUDIENCE_FIELD, 'node', $bundle, ['field_name' => 'override_name']);
     $this->assertNotNull(FieldConfig::loadByName('node', $bundle, 'override_name')->id());
+
+    // Field that can be added only to certain entities.
+    $bundle = $this->bundles[3];
+    Og::CreateField('entity_restricted', 'node', $bundle);
+    $this->assertNotNull(FieldConfig::loadByName('node', $bundle, 'entity_restricted')->id());
   }
 
   /**
