@@ -29,8 +29,8 @@ class Og {
   /**
    * Create an organic groups field in a bundle.
    *
-   * @param $field_identifier
-   *   The field name.
+   * @param $plugin_id
+   *   The OG field plugin ID, which is also the default field name.
    * @param $entity_type
    *   The entity type.
    * @param $bundle
@@ -44,20 +44,20 @@ class Og {
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
    */
-  public static function createField($field_identifier, $entity_type, $bundle, $settings = []) {
+  public static function createField($plugin_id, $entity_type, $bundle, $settings = []) {
     $settings = $settings + [
       'field_storage_config' => [],
       'field_config' => [],
     ];
 
-    $field_name = !empty($settings['field_name']) ? $settings['field_name'] : $field_identifier;
+    $field_name = !empty($settings['field_name']) ? $settings['field_name'] : $plugin_id;
 
     // Get the field definition and add the entity info to it. By doing so
     // we validate the the field can be attached to the entity. For example,
     // the OG accesss module's field can be attached only to node entities, so
     // any other entity will throw an exception.
     /** @var \Drupal\og\OgFieldBase $og_field */
-    $og_field = static::getFieldBaseDefinition($field_identifier)
+    $og_field = static::getFieldBaseDefinition($plugin_id)
       ->setFieldName($field_name)
       ->setBundle($bundle)
       ->setEntityType($entity_type);
