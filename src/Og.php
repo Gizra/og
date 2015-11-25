@@ -295,7 +295,7 @@ class Og {
     $field_definition = FieldConfig::loadByName($entity, $bundle, $field_name);
 
     if (!Og::isGroupAudienceField($field_definition)) {
-      throw new \Exception(sprintf('The field %s is not an audience field.', $field_name));
+      throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
     }
 
     $options += [
