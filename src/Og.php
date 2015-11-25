@@ -267,7 +267,9 @@ class Og {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
     if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
-      throw new \Exception(sprintf('The OG field with plugin ID %s is not a valid Organic Groups field.', $plugin_id));
+
+      $params = ['@plugin' => $plugin_id];
+      throw new \Exception(new FormattableMarkup('The Organic Groups field with plugin ID @plugin is not a valid plugin.', $params));
     }
 
     return $plugin_manager->createInstance($plugin_id);

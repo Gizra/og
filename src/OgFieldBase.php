@@ -77,10 +77,19 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
     $field_storage = $this->getFieldStorageConfigBaseDefinition();
 
     if (!empty($field_storage['entity']) && !in_array($entity_type, $field_storage['entity'])) {
-      // @todo: We need to make sure the field name is being set before the
-      // entity for this to work properly, which is error prone.
-      $field_name = $this->getFieldName();
-      throw new \Exception(sprintf('The field %s can not be attached to %s entity type as the field allows attachment only to certain types.', $field_name, $entity_type));
+
+      $params = [
+        '@plugin' => $this->getPluginId(),
+        '@entity' => implode(', ', $field_storage['entity']),
+      ];
+
+      if ($field_name = $this->getFieldName()) {
+        $params['field_name'] = $field_name;
+        throw new \Exception(new FormattableMarkup('The Organic Groups field with plugin ID @plugin with the name @field_name cannot be attached to the entity type. It can only be attached to the following entities: @entity.', $params));
+      }
+
+      throw new \Exception(new FormattableMarkup('The Organic Groups field with plugin ID @plugin cannot be attached to the entity type. It can only be attached to the following entities: @entity.', $params));
+
     }
 
     $this->entityType = $entity_type;
