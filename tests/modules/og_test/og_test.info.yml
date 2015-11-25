@@ -1,0 +1,8 @@
+name: 'Organic Groups test'
+type: module
+description: 'Support module for Organic Groups testing.'
+package: Testing
+version: VERSION
+core: 8.x
+dependencies:
+  - options

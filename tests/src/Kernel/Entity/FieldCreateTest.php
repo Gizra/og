@@ -23,7 +23,7 @@ class FieldCreateTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['user', 'field', 'entity_reference', 'node', 'og', 'system'];
+  public static $modules = ['user', 'field', 'entity_reference', 'node', 'og', 'og_test', 'options', 'system'];
 
   /**
    * @var Array
@@ -80,13 +80,24 @@ class FieldCreateTest extends KernelTestBase {
    * Testing invalid field creation.
    */
   public function testInvalidFields() {
+    // Unknown plugin.
     $bundle = $this->bundles[0];
     try {
-      Og::CreateField('undefined_field_name', 'node', $bundle, ['field_config' => ['label' => 'Other groups dummy']]);
+      Og::CreateField('undefined_field_name', 'node', $bundle);
       $this->fail('Undefined field name was attached');
     }
     catch (\Exception $e) {
     }
+
+    // Field that can be attached only to a certain entity type, being attached
+    // to another one.
+    try {
+      Og::CreateField('entity_restricted', 'user', 'user');
+      $this->fail('Field was attached to a prohibited entity type.');
+    }
+    catch (\Exception $e) {
+    }
+
 
   }
 }

@@ -5,6 +5,7 @@
 
 namespace Drupal\og;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Plugin\PluginBase;
 
 abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
@@ -84,7 +85,7 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
       ];
 
       if ($field_name = $this->getFieldName()) {
-        $params['field_name'] = $field_name;
+        $params['@field_name'] = $field_name;
         throw new \Exception(new FormattableMarkup('The Organic Groups field with plugin ID @plugin with the name @field_name cannot be attached to the entity type. It can only be attached to the following entities: @entity.', $params));
       }
 

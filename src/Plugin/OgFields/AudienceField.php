@@ -7,7 +7,7 @@ use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
 /**
- * Redirects to a message deletion form.
+ * Determine to which groups this group content is assigned to.
  *
  * @OgFields(
  *  id = OG_AUDIENCE_FIELD,
