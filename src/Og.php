@@ -36,7 +36,8 @@ class Og {
    * @param $bundle
    *   The bundle name.
    * @param $settings
-   *   (Optional) allow overriding the default definition of the field/instance.
+   *   (Optional) allow overriding the default definitions of the field storage
+   *   config and field config.
    *   Allowed values:
    *   - field_storage_config: Array with values to override the field storage
    *     config definitions. Values should comply with FieldStorageConfig::create()
