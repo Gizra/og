@@ -136,7 +136,7 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
     return AccessResult::neutral();
   }
 
-  return AccessResult::allowedIfHasPermission($account, 'administer group');
+  return $account->hasPermission('administer group') ? AccessResult::allowed() : AccessResult::forbidden();
 }
 
 /**

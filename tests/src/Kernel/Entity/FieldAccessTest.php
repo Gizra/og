@@ -7,7 +7,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
@@ -52,7 +51,7 @@ class FieldAccessTest extends KernelTestBase {
   protected $userAccessControlHandler;
 
   /**
-   * @var \Drupal\Core\Field\FieldDefinitionInterface
+   * @var \Drupal\field\Entity\FieldConfig
    */
   protected $fieldDefinition;
 
@@ -84,7 +83,10 @@ class FieldAccessTest extends KernelTestBase {
     // Add og audience field to users.
     Og::createField(OG_AUDIENCE_FIELD, 'user', 'user');
 
-    Role::create(['id' => 'group_admin', 'label' => 'Group Admin'])->grantPermission('administer group')->save();
+    Role::create(['id' => 'group_admin', 'label' => 'Group Admin'])
+      ->grantPermission('administer group')
+      ->grantPermission('administer users')
+      ->save();
 
     // Create two users.
     $this->adminUser = User::create(['name' => $this->randomString()]);
@@ -100,9 +102,88 @@ class FieldAccessTest extends KernelTestBase {
 
   /**
    * Test anonymous users.
+   *
+   * @dataProvider providerTestAnonymousUserAccess
+   *
+   * @param string $operation
    */
-  public function testAnonymousUserAccess() {
-    $this->assertTrue($this->userAccessControlHandler->fieldAccess('edit', $this->fieldDefinition, new AnonymousUserSession()));
+  public function testAnonymousUserAccess($operation) {
+    $this->assertTrue($this->userAccessControlHandler->fieldAccess($operation, $this->fieldDefinition, new AnonymousUserSession()));
+  }
+
+  /**
+   * Data provider for testAnonymousUserAccess.
+   *
+   * @return array
+   */
+  public function providerTestAnonymousUserAccess() {
+    return [
+      ['edit'],
+      ['view'],
+      ['delete'],
+    ];
+  }
+
+  /**
+   * Test authenticated users.
+   *
+   * @dataProvider providerTestAuthenticatedUserAccess
+   *
+   * @param string $operation
+   * @param bool $admin_account
+   * @param bool $expected
+   */
+  public function testAuthenticatedUserAccess($operation, $admin_account, $expected) {
+    $account = $admin_account ? $this->adminUser : $this->authenticatedUser;
+    $this->assertEquals($expected, $this->userAccessControlHandler->fieldAccess($operation, $this->fieldDefinition, $account));
+  }
+
+  /**
+   * Data provider for testAuthenticatedUserAccess.
+   *
+   * @return array
+   */
+  public function providerTestAuthenticatedUserAccess() {
+    return [
+      ['edit', TRUE, TRUE],
+      // Edit for an authenticated user without the 'administer group'
+      // permission should be restricted.
+      ['edit', FALSE, FALSE],
+      ['view', TRUE, TRUE],
+      ['view', FALSE, TRUE],
+    ];
+  }
+
+  /**
+   * Test authenticated users.
+   *
+   * @dataProvider providerTestAuthenticatedUserAccessWithAccessBypass
+   *
+   * @param string $operation
+   * @param bool $admin_account
+   * @param bool $expected
+   */
+  public function testAuthenticatedUserAccessWithAccessBypass($operation, $admin_account, $expected) {
+    $account = $admin_account ? $this->adminUser : $this->authenticatedUser;
+    // Set the access bypass setting in the storage definition.
+    $this->fieldDefinition->setSetting('access_override', TRUE);
+    $this->assertEquals($expected, $this->userAccessControlHandler->fieldAccess($operation, $this->fieldDefinition, $account));
+  }
+
+  /**
+   * Data provider for testAuthenticatedUserAccessWithAccessBypass.
+   *
+   * @return array
+   */
+  public function providerTestAuthenticatedUserAccessWithAccessBypass() {
+    return [
+      ['edit', TRUE, TRUE],
+      // Access bypass for the field definition is enabled. So auth users should
+      // now see this field.
+      ['edit', FALSE, TRUE],
+      ['view', TRUE, TRUE],
+      ['view', FALSE, TRUE],
+    ];
   }
 
 }
