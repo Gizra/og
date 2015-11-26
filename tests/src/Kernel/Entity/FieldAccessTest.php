@@ -14,7 +14,6 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\User;
 use Drupal\user\Entity\Role;
-use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Tests OG specific field access.
@@ -51,6 +50,8 @@ class FieldAccessTest extends KernelTestBase {
   protected $userAccessControlHandler;
 
   /**
+   * The audience field definition.
+   *
    * @var \Drupal\field\Entity\FieldConfig
    */
   protected $fieldDefinition;
