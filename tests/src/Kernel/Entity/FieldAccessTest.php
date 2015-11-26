@@ -8,10 +8,10 @@
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Session\AnonymousUserSession;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\Component\Utility\Unicode;
-use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\User;
 use Drupal\user\Entity\Role;
 
@@ -25,7 +25,7 @@ class FieldAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'entity_reference', 'node', 'og'];
+  public static $modules = ['system', 'user', 'field', 'entity_reference', 'entity_test', 'og'];
 
   /**
    * @var string
@@ -66,20 +66,20 @@ class FieldAccessTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
-    $this->installEntitySchema('node');
+    $this->installEntitySchema('entity_test');
     $this->installSchema('system', 'sequences');
 
     // Setting up variables.
     $this->groupBundle = Unicode::strtolower($this->randomMachineName());
 
     // Create a group.
-    NodeType::create([
+    EntityTest::create([
       'type' => $this->groupBundle,
       'name' => $this->randomString(),
     ])->save();
 
     // Define the group content as group.
-    Og::groupManager()->addGroup('node', $this->groupBundle);
+    Og::groupManager()->addGroup('entity_test', $this->groupBundle);
 
     // Add og audience field to users.
     Og::createField(OG_AUDIENCE_FIELD, 'user', 'user');
