@@ -152,6 +152,8 @@ class FieldAccessTest extends KernelTestBase {
       ['edit', FALSE, FALSE],
       ['view', TRUE, TRUE],
       ['view', FALSE, TRUE],
+      ['delete', TRUE, TRUE],
+      ['delete', FALSE, TRUE],
     ];
   }
 
@@ -184,6 +186,8 @@ class FieldAccessTest extends KernelTestBase {
       ['edit', FALSE, TRUE],
       ['view', TRUE, TRUE],
       ['view', FALSE, TRUE],
+      ['delete', TRUE, TRUE],
+      ['delete', FALSE, TRUE],
     ];
   }
 
