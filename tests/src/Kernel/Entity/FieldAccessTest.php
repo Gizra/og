@@ -69,7 +69,7 @@ class FieldAccessTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installSchema('system', 'sequences');
 
-    // Setting up variables.
+    // Create a group bundle type.
     $this->groupBundle = Unicode::strtolower($this->randomMachineName());
 
     // Create a group.
@@ -81,7 +81,7 @@ class FieldAccessTest extends KernelTestBase {
     // Define the group content as group.
     Og::groupManager()->addGroup('entity_test', $this->groupBundle);
 
-    // Add og audience field to users.
+    // Add OG audience field to users.
     Og::createField(OG_AUDIENCE_FIELD, 'user', 'user');
 
     Role::create(['id' => 'group_admin', 'label' => 'Group Admin'])
