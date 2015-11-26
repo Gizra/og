@@ -16,6 +16,9 @@ field.field_settings.og_membership_reference:
     handler_settings:
       type: entity_reference_selection.[%parent.handler]
       label: 'Organic Groups reference selection plugin settings'
+    access_override:
+      type: boolean
+      label: 'Access Override'
 
 og.settings:
   type: config_object

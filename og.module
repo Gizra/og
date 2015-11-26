@@ -4,11 +4,14 @@
  * @file
  * Enable users to create and manage groups with roles and permissions.
  */
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 
 // todo: look on: https://www.drupal.org/node/1952758.
 
@@ -114,6 +117,38 @@ function og_entity_insert(EntityInterface $entity) {
       ->setFieldName($membership->getFieldName())
       ->save();
   }
+}
+
+/**
+ * Implements hook_entity_field_access().
+ *
+ * Hide group-audience fields from user's edit profile for non-privileged users.
+ */
+function og_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+  // Check if we are editing the user entity.
+  if ($field_definition->getTargetEntityTypeId() !== 'user') {
+    return AccessResult::neutral();
+  }
+
+  if ($operation !== 'edit') {
+    return AccessResult::neutral();
+  }
+
+  // User is anonymous, and user register might try to add the group-audience
+  // field.
+  if ($account->isAnonymous()) {
+    return AccessResult::neutral();
+  }
+
+  if (!Og::isGroupAudienceField($field_definition)) {
+    return AccessResult::neutral();
+  }
+
+  if ($field_definition->getSetting('access_override')) {
+    return AccessResult::neutral();
+  }
+
+  return $account->hasPermission('administer group') ? AccessResult::allowed() : AccessResult::forbidden();
 }
 
 /**
@@ -250,64 +285,6 @@ function _og_node_access($node, $op, $account) {
   }
 
   return NODE_ACCESS_IGNORE;
-}
-
-/**
- * Implements hook_field_access().
- *
- * Hide group-audience fields from user's edit profile for non-privileged users.
- *
- * todo: Change to entity access.
- */
-function _og_field_access($op, $field, $entity_type, $entity, $account) {
-  global $user;
-
-  if (empty($entity)) {
-    // We are in field settings page.
-    return;
-  }
-
-
-  if (!$user->uid) {
-    // User is anonymous, and user register might try to add the
-    // group-audience field.
-    return;
-  }
-
-  if ($op != 'edit') {
-    return;
-  }
-
-  $field_name = $field['field_name'];
-  list($id, $vid, $bundle_name) = entity_extract_ids($entity_type, $entity);
-  $instance = field_info_instance($entity_type, $field_name, $bundle_name);
-  if ($field_name == OG_GROUP_FIELD) {
-    $wrapper = entity_metadata_wrapper($entity_type, $entity);
-    if ($wrapper->getIdentifier() && !$wrapper->{OG_GROUP_FIELD}->value()) {
-      // Entity isn't an active group.
-      return;
-    }
-    if (!empty($instance['widget']['settings']['og_hide'])) {
-      return FALSE;
-    }
-    return;
-  }
-
-  if (!og_is_group_audience_field($field_name)) {
-    return;
-  }
-
-  $field = field_info_field($field_name);
-  $settings = $field['settings']['handler_settings'];
-
-  // Check if we are editing the user entity.
-  if ($entity_type == 'user') {
-    if (!empty($instance['settings']['behaviors']['og_widget']['access_override'])) {
-      return;
-    }
-
-    return user_access('administer group', $account);
-  }
 }
 
 
