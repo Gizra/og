@@ -29,13 +29,13 @@ class Og {
   /**
    * Create an organic groups field in a bundle.
    *
-   * @param $plugin_id
+   * @param string $plugin_id
    *   The OG field plugin ID, which is also the default field name.
    * @param $entity_type
    *   The entity type.
-   * @param $bundle
+   * @param string $bundle
    *   The bundle name.
-   * @param $settings
+   * @param array $settings
    *   (Optional) allow overriding the default definitions of the field storage
    *   config and field config.
    *   Allowed values:
@@ -44,7 +44,7 @@ class Og {
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
    */
-  public static function createField($plugin_id, $entity_type, $bundle, $settings = []) {
+  public static function createField($plugin_id, $entity_type, $bundle, array $settings = []) {
     $settings = $settings + [
       'field_storage_config' => [],
       'field_config' => [],
