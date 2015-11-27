@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\OgFields;
 
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
