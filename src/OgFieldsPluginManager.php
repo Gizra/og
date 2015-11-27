@@ -12,7 +12,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- * Manages Person plugins.
+ * Manages OG fields plugins.
  */
 class OgFieldsPluginManager extends DefaultPluginManager {
 
