@@ -11,34 +11,29 @@ use Drupal\Core\Plugin\PluginBase;
 abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
   /**
-   * @var String
-   *
    * The entity bundle.
+   *
+   * @var string
    */
   protected $bundle;
 
   /**
-   * @var String
-   *
    * The entity type.
+   * 
+   * @var string
    */
   protected $entityType;
 
   /**
-   * @var String
+   * The field name.
    *
-   * The field name if often the same as the plugin ID, however it is
-   * overridable. For example, the group audience field is identified as
-   * OG_AUDIENCE_FIELD, however the actual field name attached to the bundle can
-   * be arbitrary.
+   *
+   * @var string
    */
   protected $fieldName;
 
   /**
-   * @param String $bundle
-   *   The entity bundle.
-   *
-   * @return OgFieldBase
+   * {@inheritdoc}
    */
   public function setBundle($bundle) {
     $this->bundle = $bundle;
@@ -47,8 +42,7 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   }
 
   /**
-   * @return String
-   *   The entity bundle.
+   * {@inheritdoc}
    */
   public function getBundle() {
     return $this->bundle;
@@ -56,23 +50,14 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
 
   /**
-   * @return String
-   *   The entity type name.
+   * {@inheritdoc}
    */
   public function getEntityType() {
     return $this->entityType;
   }
 
   /**
-   * Set the entity type.
-   *
-   * @param String $entity_type
-   *   The entity type.
-   *
-   * @return \Drupal\og\OgFieldBase
-   * @throws \Exception
-   *   Throw error if the field storage config definition explicitly defines to
-   *   which entities the field can be attached to.
+   * {@inheritdoc}
    */
   public function setEntityType($entity_type) {
     $field_storage = $this->getFieldStorageConfigBaseDefinition();
@@ -99,20 +84,14 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   }
 
   /**
-   * @return String
-   *   The field name.
+   * {@inheritdoc}
    */
   public function getFieldName() {
     return $this->fieldName;
   }
 
   /**
-   * Set the field name.
-   *
-   * @param String $fieldName
-   *   The field name.
-   *
-   * @return \Drupal\og\OgFieldBase
+   * {@inheritdoc}
    */
   public function setFieldName($fieldName) {
     $this->fieldName = $fieldName;
