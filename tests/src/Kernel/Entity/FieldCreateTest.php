@@ -102,7 +102,5 @@ class FieldCreateTest extends KernelTestBase {
     }
     catch (\Exception $e) {
     }
-
-
   }
 }
