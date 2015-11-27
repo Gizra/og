@@ -40,7 +40,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFieldConfigBaseDefinition(array $values = array()) {
-    return [
+    $values = [
       'default_value' => [0 => ['value' => 0]],
       'description' => $this->t('Determine if group should use default roles and permissions.'),
       'display_label' => TRUE,

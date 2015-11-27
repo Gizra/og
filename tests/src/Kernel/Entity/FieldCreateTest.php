@@ -60,10 +60,18 @@ class FieldCreateTest extends KernelTestBase {
    * Testing field creation.
    */
   public function testValidFields() {
-    // Simple create.
-    $bundle = $this->bundles[0];
-    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $bundle);
-    $this->assertNotNull(FieldConfig::loadByName('node', $bundle, OG_AUDIENCE_FIELD));
+    // Simple create, for all the fields defined by OG core.
+    $field_names = array(
+      OG_AUDIENCE_FIELD,
+      OG_DEFAULT_ACCESS_FIELD,
+    );
+
+    foreach ($field_names as $field_name) {
+      $bundle = $this->bundles[0];
+      Og::CreateField($field_name, 'node', $bundle);
+      $this->assertNotNull(FieldConfig::loadByName('node', $bundle, $field_name));
+    }
+
 
     // Override the field config.
     $bundle = $this->bundles[1];

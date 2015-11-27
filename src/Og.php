@@ -67,6 +67,7 @@ class Og {
       FieldStorageConfig::create($field_storage_config)->save();
     }
 
+
     if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
       $field_config = NestedArray::mergeDeep($og_field->getFieldConfigBaseDefinition(), $settings['field_config']);
       FieldConfig::create($field_config)->save();
@@ -74,6 +75,7 @@ class Og {
       // @todo: Verify this is still needed here.
       static::invalidateCache();
     }
+
   }
 
   /**
