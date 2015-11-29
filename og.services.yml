@@ -5,3 +5,6 @@ services:
   og.group.manager:
     class: Drupal\og\GroupManager
     arguments: ['@config.factory']
+  og.permissions:
+    class: Drupal\og\OgPermissionHandler
+    arguments: ['@module_handler', '@string_translation', '@controller_resolver']
