@@ -234,7 +234,7 @@ class Og {
 
       $handler_settings = $field_definition->getSetting('handler_settings');
 
-      if ($group_bundle && !empty($handler_settings['target_bundles']) && !in_array($group_bundle, $handler_settings['target_bundles'])) {
+      if (isset($group_bundle) && !empty($handler_settings['target_bundles']) && !in_array($group_bundle, $handler_settings['target_bundles'])) {
         continue;
       }
 

@@ -76,30 +76,43 @@ class GroupAudienceTest extends KernelTestBase {
 
     $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle);
     $this->assertEquals(array($field_name1, $field_name2), array_keys($field_names));
+  }
 
-    // Test filtering by group name.
-    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test');
-    $this->assertEquals(array($field_name1, $field_name2), array_keys($field_names));
+  /**
+   * Testing getting group audience fields filtered by group bundle.
+   */
+  public function testGetAllGroupAudienceFieldsFilterBundle() {
+    // Set bundles as groups.
+    Og::groupManager()->addGroup('entity_test', $this->bundles[0]);
+    Og::groupManager()->addGroup('entity_test', $this->bundles[1]);
 
+    $group_bundle1 = $this->bundles[0];
+    $group_bundle2 = $this->bundles[1];
 
-    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $this->bundles[0]);
-    $this->assertEquals(array($field_name1, $field_name2), array_keys($field_names));
+    $bundle = $this->bundles[2];
 
-    // Add field that explicitly references a bundle.
-    $group_bundle = $this->bundles[3];
-    $field_name3 = Unicode::strtolower($this->randomMachineName());
+    // Set bundles as group content.
+    $field_name1 = Unicode::strtolower($this->randomMachineName());
+    $field_name2 = Unicode::strtolower($this->randomMachineName());
+
+    // Add fields that explicitly references a bundle.
     $overrides = [
-      'field_name' => $field_name3,
+      'field_name' => $field_name1,
       'field_config' => [
         'settings' => [
           'handler_settings' => [
-            'target_bundles' => [$group_bundle  => $group_bundle]
+            'target_bundles' => [$group_bundle1  => $group_bundle1],
           ],
         ],
       ],
     ];
     Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, $overrides);
-    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $this->bundles[3]);
-    $this->assertEquals(array($field_name3), array_keys($field_names));
+
+    $overrides['field_name'] = $field_name2;
+    $overrides['field_config']['settings']['handler_settings']['target_bundles'] = [$group_bundle2 => $group_bundle2];
+    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, $overrides);
+
+    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $group_bundle1);
+    $this->assertEquals(array($field_name1), array_keys($field_names));
   }
 }
