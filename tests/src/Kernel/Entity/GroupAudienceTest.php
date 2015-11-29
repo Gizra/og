@@ -146,4 +146,5 @@ class GroupAudienceTest extends KernelTestBase {
     $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $group_bundle1);
     $this->assertEquals(array($field_name1), array_keys($field_names));
   }
+  
 }
