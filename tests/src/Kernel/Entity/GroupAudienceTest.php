@@ -84,7 +84,7 @@ class GroupAudienceTest extends KernelTestBase {
   public function testGetAllGroupAudienceFieldsFilterGroupType() {
     Og::groupManager()->addGroup('entity_test', $this->bundles[0]);
 
-    $bundle = $this->bundles[2];
+    $bundle = $this->bundles[1];
 
     // Set bundle as group content.
     $field_name1 = Unicode::strtolower($this->randomMachineName());
@@ -92,7 +92,7 @@ class GroupAudienceTest extends KernelTestBase {
 
     $overrides = [
       'field_name' => $field_name1,
-      'field_config' => [
+      'field_storage_config' => [
         'settings' => [
           'target_type' => 'user',
         ],
@@ -100,7 +100,7 @@ class GroupAudienceTest extends KernelTestBase {
     ];
     Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, $overrides);
 
-    // Add a default field.
+    // Add a default field, which will use the "entity_test" as target type.
     Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
 
     $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test');
