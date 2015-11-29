@@ -91,10 +91,6 @@ class OgPermissionHandlerTest extends UnitTestCase {
    * @covers ::moduleProvidesPermissions
    */
   public function testBuildPermissionsYaml() {
-    // defining OG_ANONYMOUS_ROLE on the fly since OG isn't enabled for this
-    // test and that could cause for a test's failure.
-    define('OG_ANONYMOUS_ROLE', 'non-member');
-
     vfsStreamWrapper::register();
     $root = new vfsStreamDirectory('modules');
     vfsStreamWrapper::setRoot($root);
@@ -146,12 +142,15 @@ class OgPermissionHandlerTest extends UnitTestCase {
   }
 
   /**
-   * Checks that the permissions are like expected.
+   * Checks that the permissions are as expected.
    *
    * @param array $actual_permissions
-   *   The actual permissions
+   *   The actual permissions.
    */
   protected function assertPermissions(array $actual_permissions) {
+    // Define OG_ANONYMOUS_ROLE as OG module isn't loaded in the unit test.
+    define('OG_ANONYMOUS_ROLE', 'non-member');
+
     $this->assertCount(2, $actual_permissions);
 
     $this->assertEquals($actual_permissions['access_module_a']['title'], 'single_description');
