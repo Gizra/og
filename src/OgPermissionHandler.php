@@ -14,7 +14,7 @@ use Drupal\user\PermissionHandlerInterface;
 /**
  * Provides permissions for groups based on YNL files.
  *
- * The permissions file should be formatted by the next format(with comments):
+ * The permissions file should be constructed by the next format(with comments):
  * @code
  * # The key is the permission machine name, and is required.
  * update group:
