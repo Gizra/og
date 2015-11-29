@@ -1795,47 +1795,6 @@ function _og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = 
 }
 
 /**
- * Get the name of the group-audience type field.
- *
- * @param $entity_type
- *   The entity type.
- * @param $bundle_name
- *   The bundle name to be checked.
- * @param $group_type
- *   Filter list to only include fields referencing a specific group type.
- * @param $group_bundle
- *   Filter list to only include fields referencing a specific group bundle.
- *   Fields that do not specify any bundle restrictions at all are also
- *   included.
- *
- * @return
- *   Array keyed with the field name and the field label as the value.
- */
-function _Og::getAllGroupAudienceFields($entity_type = 'user', $bundle_name = 'user', $group_type = NULL, $group_bundle = NULL) {
-  $return = &drupal_static(__FUNCTION__, array());
-  $identifier = $entity_type . ':' . $bundle_name . ':' . $group_type;
-  if (isset($return[$identifier])) {
-    return $return[$identifier];
-  }
-  $return[$identifier] = array();
-
-  foreach (field_info_instances($entity_type, $bundle_name) as $field_name => $instance) {
-    if (!og_is_group_audience_field($field_name)) {
-      continue;
-    }
-    $field_info = field_info_field($instance['field_name']);
-    if (isset($group_type) && $field_info['settings']['target_type'] != $group_type) {
-      continue;
-    }
-    if ($group_bundle && !empty($field_info['settings']['handler_settings']['target_bundles']) && !in_array($group_bundle, $field_info['settings']['handler_settings']['target_bundles'])) {
-      continue;
-    }
-    $return[$identifier][$field_name] = $instance['label'];
-  }
-  return $return[$identifier];
-}
-
-/**
  * Return the group type (i.e. "group" or "group_content") of an entity.
  *
  * @param $entity_type
