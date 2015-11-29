@@ -24,7 +24,7 @@ function hook_og_permission() {
       // need it.
       'roles' => array(OG_ANONYMOUS_ROLE),
       // Determine to which roles the permissions will be enabled by default.
-      'default role' => array(OG_ANONYMOUS_ROLE),
+      'default roles' => array(OG_ANONYMOUS_ROLE),
     ),
   );
 }

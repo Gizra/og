@@ -26,7 +26,7 @@ use Drupal\user\PermissionHandlerInterface;
  *   # be displayed on the Permissions page. Defaults to false.
  *   restrict access: false
  *   # Determine to which roles the permissions will be enabled by default.
- *   'default role':
+ *   'default roles':
  *     - OG_AUTHENTICATED_ROLE
  *   # Determine to which role to limit the permission. For example the
  *   # "subscribe" can be assigned only to a non-member, as a member doesn't
@@ -57,13 +57,15 @@ class OgPermissionHandler extends PermissionHandler {
 
     foreach ($permissions as &$permission) {
       // Add default values.
+
       $permission += [
-        'role' => [OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE],
-        'default role' => [],
+        'roles' => [OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE],
+        'default roles' => [],
       ];
 
-      $permission['role'] = $this->parseRoles($permission['role']);
-      $permission['default role'] = $this->parseRoles($permission['default role']);
+
+      $permission['roles'] = $this->parseRoles($permission['roles']);
+      $permission['default roles'] = $this->parseRoles($permission['default roles']);
     }
 
     return $permissions;
@@ -80,6 +82,7 @@ class OgPermissionHandler extends PermissionHandler {
    */
   protected function parseRoles(array $roles = array()) {
     $parsed = [];
+
     foreach ($roles as $role) {
       if ($role === 'OG_ANONYMOUS_ROLE') {
         $parsed[] = OG_ANONYMOUS_ROLE;
