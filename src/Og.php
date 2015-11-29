@@ -9,6 +9,7 @@ namespace Drupal\og;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -43,6 +44,9 @@ class Og {
    *     config definitions. Values should comply with FieldStorageConfig::create()
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
+   *
+   * @return \Drupal\Core\Field\FieldConfigInterface
+   *   The created or existing field config.
    */
   public static function createField($plugin_id, $entity_type, $bundle, array $settings = []) {
     $settings = $settings + [
@@ -68,14 +72,15 @@ class Og {
     }
 
 
-    if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
+    if (!$field_definition = FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
       $field_config = NestedArray::mergeDeep($og_field->getFieldConfigBaseDefinition(), $settings['field_config']);
-      FieldConfig::create($field_config)->save();
+      $field_definition = FieldConfig::create($field_config)->save();
 
       // @todo: Verify this is still needed here.
       static::invalidateCache();
     }
 
+    return $field_definition;
   }
 
   /**
