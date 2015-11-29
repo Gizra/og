@@ -89,8 +89,10 @@ class GroupAudienceTest extends KernelTestBase {
     $field_name3 = Unicode::strtolower($this->randomMachineName());
     $overrides = [
       'field_name' => $field_name3,
-      'handler_settings' => [
-        'target_bundles' => [$this->bundles[3]]
+      'field_config' => [
+        'handler_settings' => [
+          'target_bundles' => [$this->bundles[3]]
+        ],
       ],
     ];
     Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, $overrides);
