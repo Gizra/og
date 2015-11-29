@@ -24,8 +24,9 @@ class GroupAudienceTest extends KernelTestBase {
   public static $modules = ['entity_test', 'user', 'field', 'entity_reference', 'og', 'system'];
 
   /**
+   * Array with the bundle IDs.
+   *
    * @var Array
-   *   Array with the bundle IDs.
    */
   protected $bundles;
 
