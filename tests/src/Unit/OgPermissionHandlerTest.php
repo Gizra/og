@@ -148,21 +148,20 @@ class OgPermissionHandlerTest extends UnitTestCase {
    *   The actual permissions.
    */
   protected function assertPermissions(array $actual_permissions) {
-    // We cannot use the constant OG_ANONYMOUS_ROLE as OG module isn't loaded in
-    // the unit test.
-    $anonymous_role = 'non-member';
+    // Define OG_ANONYMOUS_ROLE as OG module isn't loaded in the unit test.
+    define('OG_ANONYMOUS_ROLE', 'non-member');
 
     $this->assertCount(2, $actual_permissions);
 
     $this->assertEquals($actual_permissions['access_module_a']['title'], 'single_description');
     $this->assertEquals($actual_permissions['access_module_a']['provider'], 'module_a');
-    $this->assertEquals($actual_permissions['access_module_a']['default role'], [$anonymous_role]);
-    $this->assertEquals($actual_permissions['access_module_a']['role'], [$anonymous_role]);
+    $this->assertEquals($actual_permissions['access_module_a']['default role'], [OG_ANONYMOUS_ROLE]);
+    $this->assertEquals($actual_permissions['access_module_a']['role'], [OG_ANONYMOUS_ROLE]);
 
     $this->assertEquals($actual_permissions['access module b']['title'], 'Access B');
     $this->assertEquals($actual_permissions['access module b']['provider'], 'module_b');
-    $this->assertEquals($actual_permissions['access module b']['default role'], [$anonymous_role]);
-    $this->assertEquals($actual_permissions['access module b']['role'], [$anonymous_role]);
+    $this->assertEquals($actual_permissions['access module b']['default role'], [OG_ANONYMOUS_ROLE]);
+    $this->assertEquals($actual_permissions['access module b']['role'], [OG_ANONYMOUS_ROLE]);
   }
 
 }
