@@ -87,7 +87,6 @@ class OgPermissionHandler extends PermissionHandler {
       }
       elseif ($role === 'OG_AUTHENTICATED_ROLE') {
         $parsed[] = OG_AUTHENTICATED_ROLE;
-
       }
       elseif ($role === 'OG_ADMINISTRATOR_ROLE') {
         $parsed[] = OG_ADMINISTRATOR_ROLE;
