@@ -91,8 +91,8 @@ class OgPermissionHandlerTest extends UnitTestCase {
    * @covers ::moduleProvidesPermissions
    */
   public function testBuildPermissionsYaml() {
-    // defining OG_ANONYMOUS_ROLE on the fly since OG isn't enabled for this
-    // test and that could cause for a test's failure.
+    // defining OG_ANONYMOUS_ROLE on the fly since OG isn't and
+    // \Drupal\og\OgPermissionHandler::buildPermissionsYaml is using it.
     define('OG_ANONYMOUS_ROLE', 'non-member');
 
     vfsStreamWrapper::register();
