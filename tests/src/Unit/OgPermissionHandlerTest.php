@@ -115,13 +115,13 @@ class OgPermissionHandlerTest extends UnitTestCase {
   title: 'Access B'
   description: 'bla bla'
   roles:
-    - OG_ANONYMOUS_ROLE
-    - OG_AUTHENTICATED_ROLE
-    - Og::ADMINISTRATOR_ROLE
+    - ANONYMOUS_ROLE
+    - AUTHENTICATED_ROLE
+    - ADMINISTRATOR_ROLE
   default roles:
-    - OG_ANONYMOUS_ROLE
-    - OG_AUTHENTICATED_ROLE
-    - Og::ADMINISTRATOR_ROLE
+    - ANONYMOUS_ROLE
+    - AUTHENTICATED_ROLE
+    - ADMINISTRATOR_ROLE
 ");
 
     $modules = array('module_a', 'module_b');
