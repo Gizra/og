@@ -199,7 +199,7 @@ class Og {
   }
 
   /**
-   * Return all the group audience fields in an entity.
+   * Return all the group audience fields of a certain bundle.
    *
    * @param string $entity_type_id
    *   The entity type.
