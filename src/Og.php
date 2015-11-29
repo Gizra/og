@@ -216,7 +216,7 @@ class Og {
    *   An array of field definitions, keyed by field name; Or an empty array if
    *   none found.
    */
-  public static function getAllGroupAudienceFields($entity_type_id = 'user', $bundle = 'user', $group_type_id = NULL, $group_bundle = NULL) {
+  public static function getAllGroupAudienceFields($entity_type_id, $bundle, $group_type_id = NULL, $group_bundle = NULL) {
     $return = [];
 
     foreach (\Drupal::entityManager()->getFieldDefinitions($entity_type_id, $bundle) as $field_definition) {

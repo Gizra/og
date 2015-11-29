@@ -309,7 +309,7 @@ function _og_field_create_instance($instance) {
   // We add a different field, so each field can be set differently.
   $entity_type = $instance['entity_type'];
   $bundle = $instance['bundle'];
-  foreach (array_keys(Og::getAllGroupAudienceFields()) as $field_name) {
+  foreach (array_keys(Og::getAllGroupAudienceFields('user', 'user')) as $field_name) {
     $field = field_info_field($field_name);
 
     if ($field['settings']['target_type'] == $entity_type  && empty($field['settings']['handler_settings']['target_bundles'])) {
@@ -2758,7 +2758,7 @@ function _og_get_groups_by_user($account = NULL, $group_type = NULL) {
     $account = $user;
   }
 
-  if (!Og::getAllGroupAudienceFields()) {
+  if (!Og::getAllGroupAudienceFields('user', 'user')) {
     // User entity doesn't have group audience fields.
     return;
   }
