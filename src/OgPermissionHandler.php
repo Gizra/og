@@ -28,6 +28,11 @@ use Drupal\user\PermissionHandlerInterface;
  *   # Determine to which roles the permissions will be enabled by default.
  *   'default role':
  *     - OG_ADMINISTRATOR_ROLE
+ *   # Determine to which role to limit the permission. For example the
+ *   # "subscribe" can't be assigned only to a non-member, as a member doesn't
+ *   # need it
+ *   'roles':
+ *     - OG_ANONYMOUS_ROLE
  * @endcode
  *
  * @see \Drupal\user\PermissionHandler
@@ -42,6 +47,22 @@ class OgPermissionHandler extends PermissionHandler implements PermissionHandler
       $this->yamlDiscovery = new YamlDiscovery('og_permissions', $this->moduleHandler->getModuleDirectories());
     }
     return $this->yamlDiscovery;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function buildPermissionsYaml() {
+    $permissions = parent::buildPermissionsYaml();
+
+    foreach ($permissions as &$permission) {
+      $permission += [
+        'role' => [OG_ANONYMOUS_ROLE],
+        'default role' => [OG_ANONYMOUS_ROLE],
+      ];
+    }
+
+    return $permissions;
   }
 
 }

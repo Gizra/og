@@ -90,6 +90,8 @@ class OgPermissionHandlerTest extends UnitTestCase {
    * @covers ::moduleProvidesPermissions
    */
   public function testBuildPermissionsYaml() {
+    define('OG_ANONYMOUS_ROLE', 'non-member');
+
     vfsStreamWrapper::register();
     $root = new vfsStreamDirectory('modules');
     vfsStreamWrapper::setRoot($root);
@@ -148,10 +150,16 @@ class OgPermissionHandlerTest extends UnitTestCase {
    */
   protected function assertPermissions(array $actual_permissions) {
     $this->assertCount(2, $actual_permissions);
+
     $this->assertEquals($actual_permissions['access_module_a']['title'], 'single_description');
     $this->assertEquals($actual_permissions['access_module_a']['provider'], 'module_a');
+    $this->assertEquals($actual_permissions['access_module_a']['default role'], [OG_ANONYMOUS_ROLE]);
+    $this->assertEquals($actual_permissions['access_module_a']['role'], [OG_ANONYMOUS_ROLE]);
+
     $this->assertEquals($actual_permissions['access module b']['title'], 'Access B');
     $this->assertEquals($actual_permissions['access module b']['provider'], 'module_b');
+    $this->assertEquals($actual_permissions['access module b']['default role'], [OG_ANONYMOUS_ROLE]);
+    $this->assertEquals($actual_permissions['access module b']['role'], [OG_ANONYMOUS_ROLE]);
   }
 
 }
