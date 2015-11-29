@@ -2,11 +2,10 @@ update group:
   title: 'Edit group'
   description: 'Edit the group. Note: This permission controls only node entity type groups.'
   'default role':
-    # We cannot use the OG_ADMINISTRATOR_ROLE constant in this context so we use its value.
-    - 'administrator member'
+    - OG_ADMINISTRATOR_ROLE
 administer group:
   title: 'Administer group'
   description: 'Manage group members and content in the group.'
   'restrict access': TRUE
   'default role':
-    - 'administrator member'
+    - OG_ADMINISTRATOR_ROLE

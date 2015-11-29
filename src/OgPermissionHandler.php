@@ -26,15 +26,13 @@ use Drupal\user\PermissionHandlerInterface;
  *   # be displayed on the Permissions page. Defaults to false.
  *   restrict access: false
  *   # Determine to which roles the permissions will be enabled by default.
- *   # Since we cannot use the OG constants in this context, one should use the
- *   # value (e.g. 'administrator member' instead of OG_ADMINISTRATOR_ROLE).
  *   'default role':
- *     - 'administrator member'
+ *     - OG_AUTHENTICATED_ROLE
  *   # Determine to which role to limit the permission. For example the
  *   # "subscribe" can be assigned only to a non-member, as a member doesn't
  *   # need it
  *   'roles':
- *     - 'non-member'
+ *     - OG_ANONYMOUS_ROLE
  * @endcode
  *
  * @see \Drupal\user\PermissionHandler
@@ -60,12 +58,45 @@ class OgPermissionHandler extends PermissionHandler {
     foreach ($permissions as &$permission) {
       // Add default values.
       $permission += [
-        'role' => [OG_ANONYMOUS_ROLE],
-        'default role' => [OG_ANONYMOUS_ROLE],
+        'role' => [OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE],
+        'default role' => [],
       ];
+
+      $permission['role'] = $this->parseRoles($permission['role']);
+      $permission['default role'] = $this->parseRoles($permission['default role']);
     }
 
     return $permissions;
+  }
+
+  /**
+   * Convert the roles special name, into the actual string value.
+   *
+   * @param array $roles
+   *   Array with roles name.
+   *
+   * @return array
+   *   The parsed array with the roles names.
+   */
+  protected function parseRoles(array $roles = array()) {
+    $parsed = [];
+    foreach ($roles as $role) {
+      if ($role === 'OG_ANONYMOUS_ROLE') {
+        $parsed[] = OG_ANONYMOUS_ROLE;
+      }
+      elseif ($role === 'OG_AUTHENTICATED_ROLE') {
+        $parsed[] = OG_AUTHENTICATED_ROLE;
+
+      }
+      elseif ($role === 'OG_ADMINISTRATOR_ROLE') {
+        $parsed[] = OG_ADMINISTRATOR_ROLE;
+      }
+      else {
+        $parsed[] = $role;
+      }
+    }
+
+    return $parsed;
   }
 
 }

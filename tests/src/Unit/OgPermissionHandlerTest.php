@@ -117,6 +117,8 @@ class OgPermissionHandlerTest extends UnitTestCase {
       "'access module b':
   title: 'Access B'
   description: 'bla bla'
+  roles:
+    - OG_ANONYMOUS_ROLE
 ");
 
     $modules = array('module_a', 'module_b');
