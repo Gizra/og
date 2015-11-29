@@ -74,7 +74,9 @@ class Og {
 
     if (!$field_definition = FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
       $field_config = NestedArray::mergeDeep($og_field->getFieldConfigBaseDefinition(), $settings['field_config']);
-      $field_definition = FieldConfig::create($field_config)->save();
+
+      $field_definition = FieldConfig::create($field_config);
+      $field_definition->save();
 
       // @todo: Verify this is still needed here.
       static::invalidateCache();
