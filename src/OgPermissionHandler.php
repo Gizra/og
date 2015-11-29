@@ -26,18 +26,18 @@ use Drupal\user\PermissionHandlerInterface;
  *   # be displayed on the Permissions page. Defaults to false.
  *   restrict access: false
  *   # Determine to which roles the permissions will be enabled by default.
- *   'default role':
- *     - OG_ADMINISTRATOR_ROLE
+ *   'default roles':
+ *     - AUTHENTICATED_ROLE
  *   # Determine to which role to limit the permission. For example the
  *   # "subscribe" can be assigned only to a non-member, as a member doesn't
  *   # need it
  *   'roles':
- *     - OG_ANONYMOUS_ROLE
+ *     - ANONYMOUS_ROLE
  * @endcode
  *
  * @see \Drupal\user\PermissionHandler
  */
-class OgPermissionHandler extends PermissionHandler implements PermissionHandlerInterface {
+class OgPermissionHandler extends PermissionHandler {
 
   /**
    * {@inheritdoc}
@@ -58,12 +58,45 @@ class OgPermissionHandler extends PermissionHandler implements PermissionHandler
     foreach ($permissions as &$permission) {
       // Add default values.
       $permission += [
-        'role' => [OG_ANONYMOUS_ROLE],
-        'default role' => [OG_ANONYMOUS_ROLE],
+        'roles' => [Og::ANONYMOUS_ROLE, Og::AUTHENTICATED_ROLE],
+        'default roles' => [],
       ];
+
+      $permission['roles'] = $this->parseRoles($permission['roles']);
+      $permission['default roles'] = $this->parseRoles($permission['default roles']);
     }
 
     return $permissions;
+  }
+
+  /**
+   * Convert the roles special name, into the actual string value.
+   *
+   * @param array $roles
+   *   Array with roles name.
+   *
+   * @return array
+   *   The parsed array with the roles names.
+   */
+  protected function parseRoles(array $roles = array()) {
+    $parsed = [];
+
+    foreach ($roles as $role) {
+      if ($role === 'ANONYMOUS_ROLE') {
+        $parsed[] = Og::ANONYMOUS_ROLE;
+      }
+      elseif ($role === 'AUTHENTICATED_ROLE') {
+        $parsed[] = Og::AUTHENTICATED_ROLE;
+      }
+      elseif ($role === 'ADMINISTRATOR_ROLE') {
+        $parsed[] = Og::ADMINISTRATOR_ROLE;
+      }
+      else {
+        $parsed[] = $role;
+      }
+    }
+
+    return $parsed;
   }
 
 }

@@ -21,6 +21,21 @@ use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 class Og {
 
   /**
+   * The role name of the group non-member.
+   */
+ const ANONYMOUS_ROLE = 'non-member';
+
+  /**
+   * The role name of the group member.
+   */
+  const AUTHENTICATED_ROLE = 'member';
+
+  /**
+   * The role name of the group administrator.
+   */
+  const ADMINISTRATOR_ROLE = 'administrator member';
+
+  /**
    * Static cache for groups per entity.
    *
    * @var array
