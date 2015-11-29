@@ -192,6 +192,39 @@ class Og {
   }
 
   /**
+   * Return all the group audience fields in an entity.
+   *
+   * @param string $entity_type_id
+   *   The entity type.
+   * @param string  $bundle
+   *   The bundle name to be checked.
+   * @param string $group_type_id
+   *   Filter list to only include fields referencing a specific group type.
+   * @param string $group_bundle
+   *   Filter list to only include fields referencing a specific group bundle.
+   *   Fields that do not specify any bundle restrictions at all are also
+   *   included.
+   *
+   * @return \Drupal\Core\Field\FieldDefinitionInterface[]
+   *   An array of field definitions, keyed by field name; Or an empty array if
+   *   none found, or the entity is not a group content.
+   */
+  public static function getAllGroupAudienceFields($entity_type_id = 'user', $bundle = 'user', $group_type_id = NULL, $group_bundle = NULL) {
+    $return = [];
+
+    foreach (\Drupal::entityManager()->getFieldDefinitions($entity_type_id, $bundle) as $field_definition) {
+      if (!static::isGroupAudienceField($field_definition)) {
+        continue;
+      }
+
+      $field_name = $field_definition->getName();
+      $return[$field_name] = $field_definition;
+    }
+
+    return $return;
+  }
+
+  /**
    * Returns the group manager instance.
    *
    * @return \Drupal\og\GroupManager
