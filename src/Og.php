@@ -202,6 +202,15 @@ class Og {
   }
 
   /**
+   * Return the og permission handler instance.
+   *
+   * @return \Drupal\og\OgPermissionHandler;
+   */
+  public static function permissionHandler() {
+    return \Drupal::service('og.permissions');
+  }
+
+  /**
    * Invalidate cache.
    *
    * @param $group_ids
