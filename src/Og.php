@@ -160,6 +160,20 @@ class Og {
   }
 
   /**
+   * Return TRUE if the entity type is a "group content" type.
+   *
+   * @param $entity_type_id
+   *   The entity type ID: node, comment etc. etc.
+   * @param $bundle_id
+   *   The entity bundle: article, page etc. etc.
+   * @return bool
+   */
+  public static function isGroupContentType($entity_type_id, $bundle_id) {
+    // Wait until #46 will be merged.
+    return TRUE;
+  }
+
+  /**
    * Sets an entity type instance as being an OG group.
    *
    * @param string $entity_type_id
