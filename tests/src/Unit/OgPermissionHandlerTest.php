@@ -11,6 +11,7 @@ use Drupal\Core\Extension\Extension;
 use Drupal\Core\StringTranslation\PluralTranslatableMarkup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\og\Og;
 use Drupal\og\OgPermissionHandler;
 use Drupal\Tests\UnitTestCase;
 use org\bovigo\vfs\vfsStream;
@@ -91,12 +92,6 @@ class OgPermissionHandlerTest extends UnitTestCase {
    * @covers ::moduleProvidesPermissions
    */
   public function testBuildPermissionsYaml() {
-    // Define the OG role constants since OG isn't enabled, however
-    // \Drupal\og\OgPermissionHandler::buildPermissionsYaml is using it.
-    define('OG_ANONYMOUS_ROLE', 'non-member');
-    define('OG_AUTHENTICATED_ROLE', 'member');
-    define('OG_ADMINISTRATOR_ROLE', 'administrator member');
-
     vfsStreamWrapper::register();
     $root = new vfsStreamDirectory('modules');
     vfsStreamWrapper::setRoot($root);
@@ -166,12 +161,12 @@ class OgPermissionHandlerTest extends UnitTestCase {
 
     $this->assertEquals([], $actual_permissions['access_module_a']['default roles']);
     $this->assertEquals('module_a', $actual_permissions['access_module_a']['provider']);
-    $this->assertEquals([OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE], $actual_permissions['access_module_a']['roles']);
+    $this->assertEquals([Og::OG_ANONYMOUS_ROLE, Og::OG_AUTHENTICATED_ROLE], $actual_permissions['access_module_a']['roles']);
     $this->assertEquals('single_description', $actual_permissions['access_module_a']['title']);
 
-    $this->assertEquals([OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE], $actual_permissions['access module b']['default roles']);
+    $this->assertEquals([Og::OG_ANONYMOUS_ROLE, Og::OG_AUTHENTICATED_ROLE, Og::OG_ADMINISTRATOR_ROLE], $actual_permissions['access module b']['default roles']);
     $this->assertEquals('module_b', $actual_permissions['access module b']['provider']);
-    $this->assertEquals([OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE], $actual_permissions['access module b']['roles']);
+    $this->assertEquals([Og::OG_ANONYMOUS_ROLE, Og::OG_AUTHENTICATED_ROLE, Og::OG_ADMINISTRATOR_ROLE], $actual_permissions['access module b']['roles']);
     $this->assertEquals('Access B', $actual_permissions['access module b']['title']);
   }
 

@@ -58,7 +58,7 @@ class OgPermissionHandler extends PermissionHandler {
     foreach ($permissions as &$permission) {
       // Add default values.
       $permission += [
-        'roles' => [OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE],
+        'roles' => [Og::OG_ANONYMOUS_ROLE, Og::OG_AUTHENTICATED_ROLE],
         'default roles' => [],
       ];
 
@@ -83,13 +83,13 @@ class OgPermissionHandler extends PermissionHandler {
 
     foreach ($roles as $role) {
       if ($role === 'OG_ANONYMOUS_ROLE') {
-        $parsed[] = OG_ANONYMOUS_ROLE;
+        $parsed[] = Og::OG_ANONYMOUS_ROLE;
       }
       elseif ($role === 'OG_AUTHENTICATED_ROLE') {
-        $parsed[] = OG_AUTHENTICATED_ROLE;
+        $parsed[] = Og::OG_AUTHENTICATED_ROLE;
       }
       elseif ($role === 'OG_ADMINISTRATOR_ROLE') {
-        $parsed[] = OG_ADMINISTRATOR_ROLE;
+        $parsed[] = Og::OG_ADMINISTRATOR_ROLE;
       }
       else {
         $parsed[] = $role;

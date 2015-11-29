@@ -22,9 +22,9 @@ function hook_og_permission() {
       // Determine to which role to limit the permission. For example the
       // "subscribe" can't be assigned only to a non-member, as a member doesn't
       // need it.
-      'roles' => array(OG_ANONYMOUS_ROLE),
+      'roles' => array(Og::OG_ANONYMOUS_ROLE),
       // Determine to which roles the permissions will be enabled by default.
-      'default roles' => array(OG_ANONYMOUS_ROLE),
+      'default roles' => array(Og::OG_ANONYMOUS_ROLE),
     ),
   );
 }
