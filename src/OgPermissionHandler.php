@@ -57,12 +57,10 @@ class OgPermissionHandler extends PermissionHandler {
 
     foreach ($permissions as &$permission) {
       // Add default values.
-
       $permission += [
         'roles' => [OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE],
         'default roles' => [],
       ];
-
 
       $permission['roles'] = $this->parseRoles($permission['roles']);
       $permission['default roles'] = $this->parseRoles($permission['default roles']);
