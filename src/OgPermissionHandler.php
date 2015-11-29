@@ -26,18 +26,20 @@ use Drupal\user\PermissionHandlerInterface;
  *   # be displayed on the Permissions page. Defaults to false.
  *   restrict access: false
  *   # Determine to which roles the permissions will be enabled by default.
+ *   # Since we cannot use the OG constants in this context, one should use the
+ *   # value (e.g. 'administrator member' instead of OG_ADMINISTRATOR_ROLE).
  *   'default role':
- *     - OG_ADMINISTRATOR_ROLE
+ *     - 'administrator member'
  *   # Determine to which role to limit the permission. For example the
  *   # "subscribe" can be assigned only to a non-member, as a member doesn't
  *   # need it
  *   'roles':
- *     - OG_ANONYMOUS_ROLE
+ *     - 'non-member'
  * @endcode
  *
  * @see \Drupal\user\PermissionHandler
  */
-class OgPermissionHandler extends PermissionHandler implements PermissionHandlerInterface {
+class OgPermissionHandler extends PermissionHandler {
 
   /**
    * {@inheritdoc}
