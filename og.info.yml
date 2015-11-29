@@ -6,7 +6,6 @@ core: 8.x
 type: module
 
 dependencies:
-  - entity_reference
   - options
   - text
   - user
