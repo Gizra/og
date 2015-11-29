@@ -79,9 +79,39 @@ class GroupAudienceTest extends KernelTestBase {
   }
 
   /**
+   * Testing getting group audience fields filtered by group type.
+   */
+  public function testGetAllGroupAudienceFieldsFilterGroupType() {
+    Og::groupManager()->addGroup('entity_test', $this->bundles[0]);
+
+    $bundle = $this->bundles[2];
+
+    // Set bundle as group content.
+    $field_name1 = Unicode::strtolower($this->randomMachineName());
+    $field_name2 = Unicode::strtolower($this->randomMachineName());
+
+    $overrides = [
+      'field_name' => $field_name1,
+      'field_config' => [
+        'settings' => [
+          'target_type' => 'user',
+        ],
+      ],
+    ];
+    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, $overrides);
+
+    // Add a default field.
+    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
+
+    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test');
+    $this->assertEquals(array($field_name2), array_keys($field_names));
+
+  }
+
+  /**
    * Testing getting group audience fields filtered by group bundle.
    */
-  public function testGetAllGroupAudienceFieldsFilterBundle() {
+  public function testGetAllGroupAudienceFieldsFilterGroupBundle() {
     // Set bundles as groups.
     Og::groupManager()->addGroup('entity_test', $this->bundles[0]);
     Og::groupManager()->addGroup('entity_test', $this->bundles[1]);
@@ -91,7 +121,7 @@ class GroupAudienceTest extends KernelTestBase {
 
     $bundle = $this->bundles[2];
 
-    // Set bundles as group content.
+    // Set bundle as group content.
     $field_name1 = Unicode::strtolower($this->randomMachineName());
     $field_name2 = Unicode::strtolower($this->randomMachineName());
 
