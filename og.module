@@ -232,7 +232,7 @@ function _og_node_access($node, $op, $account) {
     // the user will be able to select, and if not, we don't allow access.
     // @see OgSelectionHandler::getReferencableEntities()
     $required = FALSE;
-    foreach (og_get_group_audience_fields('node', $type) as $field_name => $label) {
+    foreach (Og::getAllGroupAudienceFields('node', $type) as $field_name => $label) {
       $field = field_info_field($field_name);
       $instance = field_info_instance('node', $field_name, $type);
       // Set the "field mode" to default, before passing it to the
@@ -309,7 +309,7 @@ function _og_field_create_instance($instance) {
   // We add a different field, so each field can be set differently.
   $entity_type = $instance['entity_type'];
   $bundle = $instance['bundle'];
-  foreach (array_keys(og_get_group_audience_fields()) as $field_name) {
+  foreach (array_keys(Og::getAllGroupAudienceFields()) as $field_name) {
     $field = field_info_field($field_name);
 
     if ($field['settings']['target_type'] == $entity_type  && empty($field['settings']['handler_settings']['target_bundles'])) {
@@ -372,7 +372,7 @@ function _og_field_delete_instance($instance) {
 function _og_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
-  if (og_get_group_audience_fields($entity_type, $bundle)) {
+  if (Og::getAllGroupAudienceFields($entity_type, $bundle)) {
     $form['#validate'][] = 'og_form_group_reference_validate';
   }
 
@@ -420,7 +420,7 @@ function _og_form_group_reference_validate($form, &$form_state) {
     return;
   }
 
-  foreach (array_keys(og_get_group_audience_fields($entity_type, $bundle)) as $field_name) {
+  foreach (array_keys(Og::getAllGroupAudienceFields($entity_type, $bundle)) as $field_name) {
     // If there is at least one group selected, return.
     if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
       return;
@@ -561,7 +561,7 @@ function __og_update_entity_fields($entity_type, $entity) {
   }
 
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  foreach (og_get_group_audience_fields($entity_type, $bundle) as $field_name => $label) {
+  foreach (Og::getAllGroupAudienceFields($entity_type, $bundle) as $field_name => $label) {
     $field = field_info_field($field_name);
     $gids = array();
     if ($field['cardinality'] == 1) {
@@ -1327,7 +1327,7 @@ function _og_get_all_group($group_type = 'node') {
 function _og_get_best_group_audience_field($entity_type, $entity, $group_type, $group_bundle, $skip_access = FALSE) {
   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
-  $field_names = og_get_group_audience_fields($entity_type, $bundle);
+  $field_names = Og::getAllGroupAudienceFields($entity_type, $bundle);
   if (!$field_names) {
     return;
   }
@@ -1811,7 +1811,7 @@ function _og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = 
  * @return
  *   Array keyed with the field name and the field label as the value.
  */
-function _og_get_group_audience_fields($entity_type = 'user', $bundle_name = 'user', $group_type = NULL, $group_bundle = NULL) {
+function _Og::getAllGroupAudienceFields($entity_type = 'user', $bundle_name = 'user', $group_type = NULL, $group_bundle = NULL) {
   $return = &drupal_static(__FUNCTION__, array());
   $identifier = $entity_type . ':' . $bundle_name . ':' . $group_type;
   if (isset($return[$identifier])) {
@@ -1854,7 +1854,7 @@ function _og_get_group_type($entity_type, $bundle_name, $type = 'group') {
     return (bool)field_info_instance($entity_type, OG_GROUP_FIELD, $bundle_name);
   }
   elseif ($type == 'group content') {
-    return (bool)og_get_group_audience_fields($entity_type, $bundle_name);
+    return (bool)Og::getAllGroupAudienceFields($entity_type, $bundle_name);
   }
 }
 
@@ -2799,7 +2799,7 @@ function _og_get_groups_by_user($account = NULL, $group_type = NULL) {
     $account = $user;
   }
 
-  if (!og_get_group_audience_fields()) {
+  if (!Og::getAllGroupAudienceFields()) {
     // User entity doesn't have group audience fields.
     return;
   }

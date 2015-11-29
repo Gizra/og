@@ -249,7 +249,6 @@ class Og {
       'og_role_permissions',
       'og_get_user_roles',
       'og_get_permissions',
-      'og_get_group_audience_fields',
       'og_get_entity_groups',
       'og_get_membership',
       'og_get_field_og_membership_properties',
