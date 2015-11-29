@@ -9,6 +9,7 @@ namespace Drupal\og;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -43,6 +44,9 @@ class Og {
    *     config definitions. Values should comply with FieldStorageConfig::create()
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
+   *
+   * @return \Drupal\Core\Field\FieldConfigInterface
+   *   The created or existing field config.
    */
   public static function createField($plugin_id, $entity_type, $bundle, array $settings = []) {
     $settings = $settings + [
@@ -68,14 +72,17 @@ class Og {
     }
 
 
-    if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
+    if (!$field_definition = FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
       $field_config = NestedArray::mergeDeep($og_field->getFieldConfigBaseDefinition(), $settings['field_config']);
-      FieldConfig::create($field_config)->save();
+
+      $field_definition = FieldConfig::create($field_config);
+      $field_definition->save();
 
       // @todo: Verify this is still needed here.
       static::invalidateCache();
     }
 
+    return $field_definition;
   }
 
   /**
@@ -192,6 +199,53 @@ class Og {
   }
 
   /**
+   * Return all the group audience fields of a certain bundle.
+   *
+   * @param string $entity_type_id
+   *   The entity type.
+   * @param string  $bundle
+   *   The bundle name to be checked.
+   * @param string $group_type_id
+   *   Filter list to only include fields referencing a specific group type.
+   * @param string $group_bundle
+   *   Filter list to only include fields referencing a specific group bundle.
+   *   Fields that do not specify any bundle restrictions at all are also
+   *   included.
+   *
+   * @return \Drupal\Core\Field\FieldDefinitionInterface[]
+   *   An array of field definitions, keyed by field name; Or an empty array if
+   *   none found.
+   */
+  public static function getAllGroupAudienceFields($entity_type_id, $bundle, $group_type_id = NULL, $group_bundle = NULL) {
+    $return = [];
+
+    foreach (\Drupal::entityManager()->getFieldDefinitions($entity_type_id, $bundle) as $field_definition) {
+      if (!static::isGroupAudienceField($field_definition)) {
+        // Not a group audience field.
+        continue;
+      }
+
+      $target_type = $field_definition->getFieldStorageDefinition()->getSetting('target_type');
+
+      if (isset($group_type_id) && $target_type != $group_type_id) {
+        // Field doesn't reference this group type.
+        continue;
+      }
+
+      $handler_settings = $field_definition->getSetting('handler_settings');
+
+      if (isset($group_bundle) && !empty($handler_settings['target_bundles']) && !in_array($group_bundle, $handler_settings['target_bundles'])) {
+        continue;
+      }
+
+      $field_name = $field_definition->getName();
+      $return[$field_name] = $field_definition;
+    }
+
+    return $return;
+  }
+
+  /**
    * Returns the group manager instance.
    *
    * @return \Drupal\og\GroupManager
@@ -225,7 +279,6 @@ class Og {
       'og_role_permissions',
       'og_get_user_roles',
       'og_get_permissions',
-      'og_get_group_audience_fields',
       'og_get_entity_groups',
       'og_get_membership',
       'og_get_field_og_membership_properties',
