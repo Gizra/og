@@ -1,11 +1,11 @@
 update group:
   title: 'Edit group'
   description: 'Edit the group. Note: This permission controls only node entity type groups.'
-  'default role':
+  'default roles':
     - ADMINISTRATOR_ROLE
 administer group:
   title: 'Administer group'
   description: 'Manage group members and content in the group.'
   'restrict access': TRUE
-  'default role':
+  'default roles':
     - ADMINISTRATOR_ROLE
