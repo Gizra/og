@@ -58,8 +58,16 @@ class GroupAudienceTest extends KernelTestBase {
    * Testing getting all group audience fields.
    */
   public function testGetAllGroupAudienceFields() {
-    $bundle = $this->bundles[0];
+    // Set bundles as groups.
+    Og::groupManager()->addGroup('entity_test', $this->bundles[0]);
+    Og::groupManager()->addGroup('entity_test', $this->bundles[1]);
 
+    $bundle = $this->bundles[2];
+
+    // Test no values returned for a non-group content.
+    $this->assertEmpty(Og::getAllGroupAudienceFields('entity_test', $bundle));
+
+    // Set bundles as group content.
     $field_name1 = Unicode::strtolower($this->randomMachineName());
     $field_name2 = Unicode::strtolower($this->randomMachineName());
 
@@ -67,9 +75,26 @@ class GroupAudienceTest extends KernelTestBase {
     Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
 
     $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle);
-
     $this->assertEquals(array_keys($field_names), array($field_name1, $field_name2));
+
+    // Test filtering by group name.
+    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test');
+    $this->assertEquals(array_keys($field_names), array($field_name1, $field_name2));
+
+
+    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $this->bundles[0]);
+    $this->assertEquals(array_keys($field_names), array($field_name1, $field_name2));
+
+    // Add field that explicitly references a bundle.
+    $field_name3 = Unicode::strtolower($this->randomMachineName());
+    $overrides = [
+      'field_name' => $field_name3,
+      'handler_settings' => [
+        'target_bundles' => [$this->bundles[3]]
+      ],
+    ];
+    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, $overrides);
+    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $this->bundles[3]);
+    $this->assertEquals(array_keys($field_names), array($field_name3));
   }
-
-
 }
