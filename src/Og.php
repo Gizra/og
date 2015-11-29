@@ -22,17 +22,17 @@ class Og {
   /**
    * The role name of the group non-member.
    */
- const OG_ANONYMOUS_ROLE = 'non-member';
+ const ANONYMOUS_ROLE = 'non-member';
 
   /**
    * The role name of the group member.
    */
-  const OG_AUTHENTICATED_ROLE = 'member';
+  const AUTHENTICATED_ROLE = 'member';
 
   /**
    * The role name of the group administrator.
    */
-  const OG_ADMINISTRATOR_ROLE = 'administrator member';
+  const ADMINISTRATOR_ROLE = 'administrator member';
 
   /**
    * Static cache for groups per entity.

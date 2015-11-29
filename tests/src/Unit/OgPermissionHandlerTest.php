@@ -161,12 +161,12 @@ class OgPermissionHandlerTest extends UnitTestCase {
 
     $this->assertEquals([], $actual_permissions['access_module_a']['default roles']);
     $this->assertEquals('module_a', $actual_permissions['access_module_a']['provider']);
-    $this->assertEquals([Og::OG_ANONYMOUS_ROLE, Og::OG_AUTHENTICATED_ROLE], $actual_permissions['access_module_a']['roles']);
+    $this->assertEquals([Og::ANONYMOUS_ROLE, Og::AUTHENTICATED_ROLE], $actual_permissions['access_module_a']['roles']);
     $this->assertEquals('single_description', $actual_permissions['access_module_a']['title']);
 
-    $this->assertEquals([Og::OG_ANONYMOUS_ROLE, Og::OG_AUTHENTICATED_ROLE, Og::OG_ADMINISTRATOR_ROLE], $actual_permissions['access module b']['default roles']);
+    $this->assertEquals([Og::ANONYMOUS_ROLE, Og::AUTHENTICATED_ROLE, Og::ADMINISTRATOR_ROLE], $actual_permissions['access module b']['default roles']);
     $this->assertEquals('module_b', $actual_permissions['access module b']['provider']);
-    $this->assertEquals([Og::OG_ANONYMOUS_ROLE, Og::OG_AUTHENTICATED_ROLE, Og::OG_ADMINISTRATOR_ROLE], $actual_permissions['access module b']['roles']);
+    $this->assertEquals([Og::ANONYMOUS_ROLE, Og::AUTHENTICATED_ROLE, Og::ADMINISTRATOR_ROLE], $actual_permissions['access module b']['roles']);
     $this->assertEquals('Access B', $actual_permissions['access module b']['title']);
   }
 

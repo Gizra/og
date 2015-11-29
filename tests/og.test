@@ -992,7 +992,7 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
       $roles[$rid] = TRUE;
 
       if ($value['admin']) {
-        // Og::OG_ADMINISTRATOR_ROLE
+        // Og::ADMINISTRATOR_ROLE
         $rid = array_search(Og::OG_ADMINISTRATOR_ROLE, $og_roles);
         $roles[$rid] = TRUE;
       }
