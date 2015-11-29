@@ -94,8 +94,8 @@ class OgPermissionHandlerTest extends UnitTestCase {
     // Define the OG role constants since OG isn't enabled, however
     // \Drupal\og\OgPermissionHandler::buildPermissionsYaml is using it.
     define('OG_ANONYMOUS_ROLE', 'non-member');
-
     define('OG_AUTHENTICATED_ROLE', 'member');
+    define('OG_ADMINISTRATOR_ROLE', 'administrator member');
 
     vfsStreamWrapper::register();
     $root = new vfsStreamDirectory('modules');
@@ -121,6 +121,12 @@ class OgPermissionHandlerTest extends UnitTestCase {
   description: 'bla bla'
   roles:
     - OG_ANONYMOUS_ROLE
+    - OG_AUTHENTICATED_ROLE
+    - OG_ADMINISTRATOR_ROLE
+  default roles:
+    - OG_ANONYMOUS_ROLE
+    - OG_AUTHENTICATED_ROLE
+    - OG_ADMINISTRATOR_ROLE
 ");
 
     $modules = array('module_a', 'module_b');
@@ -158,15 +164,15 @@ class OgPermissionHandlerTest extends UnitTestCase {
   protected function assertPermissions(array $actual_permissions) {
     $this->assertCount(2, $actual_permissions);
 
-    $this->assertEquals($actual_permissions['access_module_a']['title'], 'single_description');
-    $this->assertEquals($actual_permissions['access_module_a']['provider'], 'module_a');
-    $this->assertEquals($actual_permissions['access_module_a']['default role'], [OG_ANONYMOUS_ROLE]);
-    $this->assertEquals($actual_permissions['access_module_a']['role'], [OG_ANONYMOUS_ROLE]);
+    $this->assertEquals([], $actual_permissions['access_module_a']['default role']);
+    $this->assertEquals('module_a', $actual_permissions['access_module_a']['provider']);
+    $this->assertEquals([OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE], $actual_permissions['access_module_a']['role']);
+    $this->assertEquals('single_description', $actual_permissions['access_module_a']['title']);
 
-    $this->assertEquals($actual_permissions['access module b']['title'], 'Access B');
-    $this->assertEquals($actual_permissions['access module b']['provider'], 'module_b');
-    $this->assertEquals($actual_permissions['access module b']['default role'], [OG_ANONYMOUS_ROLE]);
-    $this->assertEquals($actual_permissions['access module b']['role'], [OG_ANONYMOUS_ROLE]);
+    $this->assertEquals([OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE], $actual_permissions['access module b']['default role']);
+    $this->assertEquals('module_b', $actual_permissions['access module b']['provider']);
+    $this->assertEquals([OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE, OG_ADMINISTRATOR_ROLE], $actual_permissions['access module b']['role']);
+    $this->assertEquals('Access B', $actual_permissions['access module b']['title']);
   }
 
 }
