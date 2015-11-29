@@ -86,12 +86,15 @@ class GroupAudienceTest extends KernelTestBase {
     $this->assertEquals(array($field_name1, $field_name2), array_keys($field_names));
 
     // Add field that explicitly references a bundle.
+    $group_bundle = $this->bundles[3];
     $field_name3 = Unicode::strtolower($this->randomMachineName());
     $overrides = [
       'field_name' => $field_name3,
       'field_config' => [
-        'handler_settings' => [
-          'target_bundles' => [$this->bundles[3]]
+        'settings' => [
+          'handler_settings' => [
+            'target_bundles' => [$group_bundle  => $group_bundle]
+          ],
         ],
       ],
     ];
