@@ -29,7 +29,7 @@ use Drupal\user\PermissionHandlerInterface;
  *   'default role':
  *     - OG_ADMINISTRATOR_ROLE
  *   # Determine to which role to limit the permission. For example the
- *   # "subscribe" can't be assigned only to a non-member, as a member doesn't
+ *   # "subscribe" can be assigned only to a non-member, as a member doesn't
  *   # need it
  *   'roles':
  *     - OG_ANONYMOUS_ROLE
@@ -56,6 +56,7 @@ class OgPermissionHandler extends PermissionHandler implements PermissionHandler
     $permissions = parent::buildPermissionsYaml();
 
     foreach ($permissions as &$permission) {
+      // Add default values.
       $permission += [
         'role' => [OG_ANONYMOUS_ROLE],
         'default role' => [OG_ANONYMOUS_ROLE],

@@ -23,6 +23,7 @@ use org\bovigo\vfs\vfsStreamWrapper;
  * @group og
  *
  * @coversDefaultClass \Drupal\og\OgPermissionHandler
+ * @see \Drupal\Tests\user\Unit\PermissionHandlerTest
  */
 class OgPermissionHandlerTest extends UnitTestCase {
 
