@@ -9,6 +9,7 @@ namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\TypedData\DataDefinition;
 
 /**
  * OG Group Data class to return TRUE always.
@@ -35,16 +36,16 @@ class OgGroupItem extends FieldItemBase {
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
-    return [];
+    $definitions = [];
+
+    $definitions['value'] = DataDefinition::create('boolean')
+      ->setLabel('Group item value')
+      ->setReadOnly(TRUE)
+      ->setComputed(TRUE)
+      ->setClass('\Drupal\og\OgGroupBoolean')
+      ->setSetting('group_value', TRUE);
+
+    return $definitions;
   }
-
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getValue() {
-    return TRUE;
-  }
-
 
 }
