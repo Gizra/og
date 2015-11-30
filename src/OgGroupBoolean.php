@@ -18,7 +18,7 @@ class OgGroupBoolean extends BooleanData {
    * {@inheritdoc}
    */
   public function getValue() {
-    return $this->definition->getSetting('group_value');
+    return TRUE;
   }
 
   /**

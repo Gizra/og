@@ -46,8 +46,7 @@ class OgGroupItem extends FieldItemBase {
       ->setLabel('Group item value')
       ->setReadOnly(TRUE)
       ->setComputed(TRUE)
-      ->setClass('\Drupal\og\OgGroupBoolean')
-      ->setSetting('group_value', TRUE);
+      ->setClass('\Drupal\og\OgGroupBoolean');
 
     return $definitions;
   }
