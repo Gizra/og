@@ -169,10 +169,12 @@ class Og {
   }
 
   /**
-   * Check if the given entity is a group.
+   * Check if the given entity type and bundle is a group.
    *
    * @param string $entity_type_id
-   * @param string $bundle
+   *   The entity type.
+   * @param string $bundle_id
+   *   The bundle name.
    *
    * @return bool
    *   True or false if the given entity is group.
@@ -182,10 +184,32 @@ class Og {
   }
 
   /**
+   * Check if the given entity type and bundle is a group content.
+   *
+   * This is just a convenience wrapper around Og::getAllGroupAudienceFields().
+   *
+   * @param string $entity_type_id
+   *   The entity type.
+   * @param string $bundle_id
+   *   The bundle name.
+   *
+   * @return bool
+   *   True or false if the given entity is group.
+   */
+  public static function isGroupContent($entity_type_id, $bundle_id) {
+    return (bool)static::getAllGroupAudienceFields($entity_type_id, $bundle_id);
+  }
+
+  /**
    * Sets an entity type instance as being an OG group.
    *
    * @param string $entity_type_id
+   *   The entity type.
    * @param string $bundle_id
+   *   The bundle name.
+   *
+   * @return bool
+   *   True or false if the action succeeded.
    */
   public static function addGroup($entity_type_id, $bundle_id) {
     return static::groupManager()->addGroup($entity_type_id, $bundle_id);
@@ -195,7 +219,12 @@ class Og {
    * Removes an entity type instance as being an OG group.
    *
    * @param string $entity_type_id
+   *   The entity type.
    * @param string $bundle_id
+   *   The bundle name.
+   *
+   * @return bool
+   *   True or false if the action succeeded.
    */
   public static function removeGroup($entity_type_id, $bundle_id) {
     return static::groupManager()->removeGroup($entity_type_id, $bundle_id);
