@@ -186,21 +186,24 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
 /**
  *
  * Implements hook_entity_bundle_field_info().
+ *
+ * Add a read only property to group entities as a group flag.
  */
 function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
-  // Add a read only property to group entities as a group flag.
-  if (Og::isGroup($entity_type->id(), $bundle)) {
-    $fields = [];
-
-    $fields['og_group'] = BaseFieldDefinition::create('og_group')
-      ->setLabel(t('OG Group'))
-      ->setComputed(TRUE)
-      ->setTranslatable(FALSE)
-      ->setDefaultValue(TRUE)
-      ->setReadOnly(TRUE);
-
-    return $fields;
+  if (!Og::isGroup($entity_type->id(), $bundle)) {
+    return NULL;
   }
+
+  $fields = [];
+
+  $fields['og_group'] = BaseFieldDefinition::create('og_group')
+    ->setLabel(t('OG Group'))
+    ->setComputed(TRUE)
+    ->setTranslatable(FALSE)
+    ->setDefaultValue(TRUE)
+    ->setReadOnly(TRUE);
+
+  return $fields;
 }
 
 /**

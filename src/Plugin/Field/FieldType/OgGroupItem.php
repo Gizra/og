@@ -14,6 +14,10 @@ use Drupal\Core\TypedData\DataDefinition;
 /**
  * OG Group Data class to return TRUE always.
  *
+ * This field type is used simply as a placeholder for a field formatter that
+ * would allow non-groups members, members, and group managers to join, request
+ * or leave a group.
+ *
  * @FieldType(
  *   id = "og_group",
  *   label = @Translation("OG Group"),

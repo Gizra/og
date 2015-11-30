@@ -38,9 +38,9 @@ class GroupSubscribeFormatter extends FormatterBase {
     $elements = [];
 
     $entity = $items->getEntity();
-    // @todo Inject this properly.
     $account = \Drupal::currentUser()->getAccount();
 
+    // Entity is not a group.
     if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
       return [];
     }
@@ -50,8 +50,11 @@ class GroupSubscribeFormatter extends FormatterBase {
       $elements[0] = [
         '#type' => 'html_tag',
         '#tag' => 'span',
-        '#attributes' => ['title' => t('You are the group manager'), 'class' => 'group manager'],
-        '#value' => t('You are the group manager'),
+        '#attributes' => [
+          'title' => $this->t('You are the group manager'),
+          'class' => ['group', 'manager'],
+        ],
+        '#value' => $this->t('You are the group manager'),
       ];
 
       return $elements;
@@ -61,7 +64,7 @@ class GroupSubscribeFormatter extends FormatterBase {
       if (og_user_access($entity_type, $id, 'unsubscribe', $account)) {
         $links['title'] = $this->t('Unsubscribe from group');
         $links['href'] = "group/$entity_type/$id/unsubscribe";
-        $links['class'] = 'group unsubscribe';
+        $links['class'] = ['group', 'unsubscribe'];
       }
     }
     else {
@@ -79,25 +82,32 @@ class GroupSubscribeFormatter extends FormatterBase {
         return [];
       }
 
-      $field_info = field_info_field($settings['field_name']);
-
       // Check if entity is referencable.
-      if ($field_info['settings']['target_type'] != $entity_type) {
+      if ($this->getSetting('target_type') != $entity_type) {
         // Group type doesn't match.
         return [];
       }
-      if (!empty($field_info['settings']['handler_settings']['target_bundles']) && !in_array($bundle, $field_info['settings']['handler_settings']['target_bundles'])) {
+
+      // Check handler bundles, if any.
+      $handler_settings = $this->getSetting('handler_settings');
+
+      if (!empty($handler_settings['target_bundles']) && !in_array($bundle, $handler_settings['target_bundles'])) {
         // Bundles don't match.
         return [];
       }
 
       if (!og_check_field_cardinality('user', $account, $settings['field_name'])) {
-        $elements[0] = array(
+        $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
+
+        $elements[0] = [
           '#type' => 'html_tag',
           '#tag' => 'span',
-          '#attributes' => array('title' => format_plural($field_info['cardinality'], 'You are already registered to another group', 'You are already registered to @count groups'), 'class' => 'group other'),
-          '#value' => format_plural($field_info['cardinality'], 'You are already registered to another group', 'You are already registered to @count groups'),
-        );
+          '#attributes' => [
+            'title' => $this->formatPlural($cardinality, 'You are already registered to another group', 'You are already registered to @count groups'),
+            'class' => ['group', 'other'],
+          ],
+          '#value' => $this->formatPlural($cardinality, 'You are already registered to another group', 'You are already registered to @count groups'),
+        ];
 
         return $elements;
       }
@@ -108,47 +118,64 @@ class GroupSubscribeFormatter extends FormatterBase {
       }
 
       if (og_user_access($entity_type, $id, 'subscribe without approval', $account)) {
-        $links['title'] = t('Subscribe to group');
-        $links['class'] = 'group subscribe';
-        if ($account->uid) {
+        $links['title'] = $this->t('Subscribe to group');
+        $links['class'] = ['group', 'subscribe'];
+        if ($account->isAuthenticated()) {
           $links['href'] = $url;
         }
         else {
           $links['href'] = 'user/login';
-          $links['options'] = array('query' => array('destination' => $url));
+          $links['options'] = [
+            'query' => [
+              'destination' => $url],
+          ];
         }
       }
       elseif (og_user_access($entity_type, $id, 'subscribe')) {
-        $links['title'] = t('Request group membership');
-        $links['class'] = 'group subscribe request';
-        if ($account->uid) {
+        $links['title'] = $this->t('Request group membership');
+        $links['class'] = ['group', 'subscribe', 'request'];
+        if ($account->isAuthenticated()) {
           $links['href'] = $url;
         }
         else {
           $links['href'] = 'user/login';
-          $links['options'] = array('query' => array('destination' => $url));
+          $links['options'] = [
+            'query' => [
+              'destination' => $url],
+          ];
         }
       }
       else {
-        $elements[0] = array(
+        $elements[0] = [
           '#type' => 'html_tag',
           '#tag' => 'span',
-          '#attributes' => array('title' => t('This is a closed group. Only a group administrator can add you.'), 'class' => 'group closed'),
-          '#value' => t('This is a closed group. Only a group administrator can add you.'),
-        );
+          '#attributes' => [
+            'title' => $this->t('This is a closed group. Only a group administrator can add you.'),
+            'class' => ['group', 'closed'],
+          ],
+          '#value' => $this->t('This is a closed group. Only a group administrator can add you.'),
+        ];
 
         return $elements;
       }
     }
 
     if (!empty($links['title'])) {
-      $links += array('options' => array('attributes' => array('title' => $links['title'], 'class' => array($links['class']))));
-      $elements[0] = array(
+      $links += [
+        'options' => [
+          'attributes' => [
+            'title' => $links['title'],
+            'class' => [$links['class']],
+          ],
+        ],
+      ];
+
+      $elements[0] = [
         '#type' => 'link',
         '#title' => $links['title'],
         '#href' => $links['href'],
         '#options' => $links['options'],
-      );
+      ];
     }
 
     return $elements;
@@ -222,8 +249,6 @@ class GroupSubscribeFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity) {
-    // Always allow an entity author's username to be read, even if the current
-    // user does not have permission to view the entity author's profile.
     return AccessResult::allowed();
   }
 
