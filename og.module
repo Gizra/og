@@ -167,7 +167,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
       $handler = Og::getSelectionHandler($entity->getEntityTypeId(), $entity->bundle(), $field_definition->getName());
 
-      if (count($handler->getReferenceableEntities())) {
+      if ($handler->getReferenceableEntities()) {
         return Accessresult::allowed();
       }
 
