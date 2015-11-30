@@ -77,6 +77,13 @@ class GroupAudienceTest extends KernelTestBase {
 
     $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle);
     $this->assertEquals(array($field_name1, $field_name2), array_keys($field_names));
+
+    // Test Og::isGroupContent method, which is just a wrapper around
+    // Og::getAllGroupAudienceFields.
+    $this->assertTrue(Og::isGroupContent('entity_test', $bundle));
+
+    $bundle = $this->bundles[3];
+    $this->assertFalse(Og::isGroupContent('entity_test', $bundle));
   }
 
   /**
@@ -146,5 +153,5 @@ class GroupAudienceTest extends KernelTestBase {
     $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $group_bundle1);
     $this->assertEquals(array($field_name1), array_keys($field_names));
   }
-  
+
 }
