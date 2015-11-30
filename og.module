@@ -52,21 +52,6 @@ define('OG_AUDIENCE_FIELD', 'og_group_ref');
 define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
 
 /**
- * The role name of group non-members.
- */
-define('OG_ANONYMOUS_ROLE', 'non-member');
-
-/**
- * The role name of group member.
- */
-define('OG_AUTHENTICATED_ROLE', 'member');
-
-/**
- * The role name of group administrator.
- */
-define('OG_ADMINISTRATOR_ROLE', 'administrator member');
-
-/**
  * The default group membership type that is the bundle of group membership.
  */
 define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
@@ -242,12 +227,12 @@ function _og_og_permission() {
   $perms['update group'] = array(
     'title' => t('Edit group'),
     'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
-    'default role' => array(OG_ADMINISTRATOR_ROLE),
+    'default role' => array(Og::ADMINISTRATOR_ROLE),
   );
   $perms['administer group'] = array(
     'title' => t('Administer group'),
     'description' => t('Manage group members and content in the group.'),
-    'default role' => array(OG_ADMINISTRATOR_ROLE),
+    'default role' => array(Og::ADMINISTRATOR_ROLE),
     'restrict access' => TRUE,
   );
 
@@ -263,7 +248,7 @@ function _og_og_permission() {
  * Implements hook_og_default_roles().
  */
 function _og_og_default_roles() {
-  return array(OG_ADMINISTRATOR_ROLE);
+  return array(Og::ADMINISTRATOR_ROLE);
 }
 
 /**
@@ -287,7 +272,7 @@ function _og_field_create_instance($instance) {
   // We add a different field, so each field can be set differently.
   $entity_type = $instance['entity_type'];
   $bundle = $instance['bundle'];
-  foreach (array_keys(og_get_group_audience_fields()) as $field_name) {
+  foreach (array_keys(Og::getAllGroupAudienceFields('user', 'user')) as $field_name) {
     $field = field_info_field($field_name);
 
     if ($field['settings']['target_type'] == $entity_type  && empty($field['settings']['handler_settings']['target_bundles'])) {
@@ -350,7 +335,7 @@ function _og_field_delete_instance($instance) {
 function _og_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
-  if (og_get_group_audience_fields($entity_type, $bundle)) {
+  if (Og::getAllGroupAudienceFields($entity_type, $bundle)) {
     $form['#validate'][] = 'og_form_group_reference_validate';
   }
 
@@ -398,7 +383,7 @@ function _og_form_group_reference_validate($form, &$form_state) {
     return;
   }
 
-  foreach (array_keys(og_get_group_audience_fields($entity_type, $bundle)) as $field_name) {
+  foreach (array_keys(Og::getAllGroupAudienceFields($entity_type, $bundle)) as $field_name) {
     // If there is at least one group selected, return.
     if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
       return;
@@ -539,7 +524,7 @@ function __og_update_entity_fields($entity_type, $entity) {
   }
 
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  foreach (og_get_group_audience_fields($entity_type, $bundle) as $field_name => $label) {
+  foreach (Og::getAllGroupAudienceFields($entity_type, $bundle) as $field_name => $label) {
     $field = field_info_field($field_name);
     $gids = array();
     if ($field['cardinality'] == 1) {
@@ -1305,7 +1290,7 @@ function _og_get_all_group($group_type = 'node') {
 function _og_get_best_group_audience_field($entity_type, $entity, $group_type, $group_bundle, $skip_access = FALSE) {
   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
-  $field_names = og_get_group_audience_fields($entity_type, $bundle);
+  $field_names = Og::getAllGroupAudienceFields($entity_type, $bundle);
   if (!$field_names) {
     return;
   }
@@ -1510,44 +1495,266 @@ function _og_ungroup($group_type, $gid, $entity_type = 'user', $etid = NULL) {
 }
 
 /**
- * Get the name of the group-audience type field.
+ * Determine whether a user has a given privilege.
  *
- * @param $entity_type
- *   The entity type.
- * @param $bundle_name
- *   The bundle name to be checked.
+ * All permission checks in OG should go through this function. This
+ * way, we guarantee consistent behavior, and ensure that the superuser
+ * and group administrators can perform all actions.
+ *
  * @param $group_type
- *   Filter list to only include fields referencing a specific group type.
- * @param $group_bundle
- *   Filter list to only include fields referencing a specific group bundle.
- *   Fields that do not specify any bundle restrictions at all are also
- *   included.
+ *   The entity type of the group.
+ * @param $gid
+ *   The entity ID of the group.
+ * @param $string
+ *   The permission, such as "administer group", being checked for.
+ * @param $account
+ *   (optional) The account to check. Defaults to the current user.
+ * @param $skip_alter
+ *   (optional) If TRUE then user access will not be sent to other modules
+ *   using drupal_alter(). This can be used by modules implementing
+ *   hook_og_user_access_alter() that still want to use og_user_access(), but
+ *   without causing a recursion. Defaults to FALSE.
+ * @param $ignore_admin
+ *   (optional) When TRUE the specific permission is checked, ignoring the
+ *   "administer group" permission if the user has it. When FALSE, a user
+ *   with "administer group" will be granted all permissions.
+ *   Defaults to FALSE.
  *
  * @return
- *   Array keyed with the field name and the field label as the value.
+ *   TRUE or FALSE if the current user has the requested permission.
+ *   NULL, if the given group isn't a valid group.
  */
-function _og_get_group_audience_fields($entity_type = 'user', $bundle_name = 'user', $group_type = NULL, $group_bundle = NULL) {
-  $return = &drupal_static(__FUNCTION__, array());
-  $identifier = $entity_type . ':' . $bundle_name . ':' . $group_type;
-  if (isset($return[$identifier])) {
-    return $return[$identifier];
-  }
-  $return[$identifier] = array();
+function _og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
+  global $user;
+  $perm = &drupal_static(__FUNCTION__, array());
+  // Mark the group ID and permissions that invoked an alter.
+  $perm_alter = &drupal_static(__FUNCTION__ . '_alter', array());
 
-  foreach (field_info_instances($entity_type, $bundle_name) as $field_name => $instance) {
-    if (!og_is_group_audience_field($field_name)) {
-      continue;
-    }
-    $field_info = field_info_field($instance['field_name']);
-    if (isset($group_type) && $field_info['settings']['target_type'] != $group_type) {
-      continue;
-    }
-    if ($group_bundle && !empty($field_info['settings']['handler_settings']['target_bundles']) && !in_array($group_bundle, $field_info['settings']['handler_settings']['target_bundles'])) {
-      continue;
-    }
-    $return[$identifier][$field_name] = $instance['label'];
+  if (!og_is_group($group_type, $gid)) {
+    // Not a group.
+    return NULL;
   }
-  return $return[$identifier];
+
+
+  if (empty($account)) {
+    $account = clone $user;
+  }
+
+  // User #1 has all privileges.
+  if ($account->uid == 1) {
+    return TRUE;
+  }
+
+  // Administer group permission.
+  if (user_access('administer group', $account) && !$ignore_admin) {
+    return TRUE;
+  }
+
+  // Group manager has all privileges (if variable is TRUE).
+  if (!empty($account->uid) && \Drupal::config('og.settings')->get('group_manager_full_access')) {
+    $group = entity_load_single($group_type, $gid);
+    if (!empty($group->uid) && $group->uid == $account->uid) {
+      return TRUE;
+    }
+  }
+
+  $identifier = $group_type . ':' . $gid;
+
+  // To reduce the number of SQL queries, we cache the user's permissions
+  // in a static variable.
+  if (!isset($perm[$identifier][$account->uid])) {
+    $perms = array();
+
+    if ($roles = og_get_user_roles($group_type, $gid, $account->uid)) {
+      // Member might not have roles if they are blocked.
+      // A pending member is treated as a non-member.
+      $role_permissions = og_role_permissions($roles);
+
+      foreach ($role_permissions as $one_role) {
+        $perms += $one_role;
+      }
+    }
+
+    $perm[$identifier][$account->uid] = $perms;
+  }
+
+  if (!$skip_alter && empty($perm_alter[$identifier][$account->uid][$string])) {
+    // Let modules alter the permissions. since $perm is static we create
+    // a clone of it.
+    $group = !empty($group) ? $group : entity_load_single($group_type, $gid);
+    $temp_perm = $perm[$identifier][$account->uid];
+    $context = array(
+      'string' => $string,
+      'group_type' => $group_type,
+      'group' => $group,
+      'account' => $account,
+    );
+    drupal_alter('og_user_access', $temp_perm, $context);
+
+    // Re-assing the altered permissions.
+    $perm[$identifier][$account->uid] = $temp_perm;
+
+    // Make sure alter isn't called for the same permissions.
+    $perm_alter[$identifier][$account->uid][$string] = TRUE;
+  }
+
+  return !empty($perm[$identifier][$account->uid][$string]) || (!empty($perm[$identifier][$account->uid]['administer group']) && !$ignore_admin);
+}
+
+/**
+ * Check if a user has access to a permission on a certain entity context.
+ *
+ * @param $perm
+ *   The organic groups permission.
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity
+ *   The entity object, or the entity ID.
+ * @param $account
+ *   (optional) The user object. If empty the current user will be used.
+ *
+ * @return
+ *   Returns TRUE if the user has access to the permission, otherwise FALSE, or
+ *   if the entity is not in OG context, function _will return NULL. This allows
+ *   a distinction between FALSE - no access, and NULL - no access as no OG
+ *   context found.
+ */
+function _og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
+  if (empty($account)) {
+    global $user;
+    $account = clone $user;
+  }
+
+  // Set the default for the case there is not a group or a group content.
+  $result = NULL;
+
+  if (empty($entity)) {
+    // $entity might be NULL, so return early.
+    // @see field_access().
+    return $result;
+  }
+  elseif (is_numeric($entity)) {
+    $entity = entity_load_single($entity_type, $entity);
+  }
+
+  list($id, $vid, $bundle_name) = entity_extract_ids($entity_type, $entity);
+
+  if (empty($id)) {
+    // Entity isn't saved yet.
+    return $result;
+  }
+
+  $is_group = og_is_group($entity_type, $entity);
+  $is_group_content = og_is_group_content_type($entity_type, $bundle_name);
+
+  if ($is_group) {
+    if (og_user_access($entity_type, $id, $perm, $account)) {
+      return TRUE;
+    }
+    else {
+      // An entity can be a group and group content in the same time. The group
+      // didn't return TRUE, but the user still might have access to the
+      // permission in group content context.
+      $result = FALSE;
+    }
+  }
+
+  if ($is_group_content && $groups = og_get_entity_groups($entity_type, $entity)) {
+    foreach ($groups as $group_type => $gids) {
+      foreach ($gids as $gid) {
+        if (og_user_access($group_type, $gid, $perm, $account)) {
+          return TRUE;
+        }
+      }
+    }
+    return FALSE;
+  }
+
+  // Either the user didn't have permission, or the entity might be a
+  // disabled group or an orphaned group content.
+  return $result;
+}
+
+/**
+ * Get the groups an entity is associated with.
+ *
+ * @param $entity_type
+ *   The entity type. Defaults to 'user'
+ * @param $entity
+ *   (optional) The entity object or entity ID. If empty, and $entity_type is
+ *   "user", the current user will be used.
+ * @param $states
+ *   (optional) Array with the state to return. Defaults to active.
+ * @param $field_name
+ *   (optional) The field name associated with the group.
+ *
+ * @return
+ *  An array with the group's entity type as the key, and array - keyed by
+ *  the OG membership ID and the group ID as the value. If nothing found,
+ *  then an empty array.
+ */
+function _og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL) {
+  $cache = &drupal_static(__FUNCTION__, array());
+
+  if ($entity_type == 'user' && empty($entity)) {
+    global $user;
+    $entity = clone $user;
+  }
+  if (is_object($entity)) {
+    // Get the entity ID.
+    list($id) = entity_extract_ids($entity_type, $entity);
+  }
+  else {
+    $id = $entity;
+  }
+
+  // Get a string identifier of the states, so we can retrieve it from cache.
+  if ($states) {
+    sort($states);
+    $state_identifier = implode(':', $states);
+  }
+  else {
+    $state_identifier = FALSE;
+  }
+
+  $identifier = array(
+    $entity_type,
+    $id,
+    $state_identifier,
+    $field_name,
+  );
+
+  $identifier = implode(':', $identifier);
+
+  if (isset($cache[$identifier])) {
+    // Return cached values.
+    return $cache[$identifier];
+  }
+
+  $cache[$identifier] = array();
+
+  $query = db_select('og_membership', 'ogm')
+    ->fields('ogm', array('id', 'gid', 'group_type'))
+    ->condition('entity_type', $entity_type)
+    ->condition('etid', $id);
+
+  if ($states) {
+    $query->condition('state', $states, 'IN');
+  }
+
+  if ($field_name) {
+    $query->condition('field_name', $field_name);
+  }
+
+  $result = $query
+    ->execute()
+    ->fetchAll();
+
+  foreach ($result as $row) {
+    $cache[$identifier][$row->group_type][$row->id] = $row->gid;
+  }
+
+  return $cache[$identifier];
 }
 
 /**
@@ -1569,7 +1776,7 @@ function _og_get_group_type($entity_type, $bundle_name, $type = 'group') {
     return (bool)field_info_instance($entity_type, OG_GROUP_FIELD, $bundle_name);
   }
   elseif ($type == 'group content') {
-    return (bool)og_get_group_audience_fields($entity_type, $bundle_name);
+    return (bool)Og::getAllGroupAudienceFields($entity_type, $bundle_name);
   }
 }
 
@@ -1827,7 +2034,7 @@ function _og_roles($group_type, $bundle, $gid = 0, $force_group = FALSE, $includ
     ->orderBy('rid', 'ASC');
 
   if (!$include_all) {
-    $query->condition('name', array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), 'NOT IN');
+    $query->condition('name', array(Og::ANONYMOUS_ROLE, Og::AUTHENTICATED_ROLE), 'NOT IN');
   }
   $rids = $query
     ->execute()
@@ -1857,8 +2064,8 @@ function _og_get_default_roles($include = TRUE) {
   drupal_alter('og_default_roles', $roles);
 
   if ($include) {
-    array_unshift($roles, OG_AUTHENTICATED_ROLE);
-    array_unshift($roles, OG_ANONYMOUS_ROLE);
+    array_unshift($roles, Og::AUTHENTICATED_ROLE);
+    array_unshift($roles, Og::ANONYMOUS_ROLE);
   }
 
   return $roles;
@@ -1936,7 +2143,7 @@ function _og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE, $ch
 
 
   if ($include && !$is_blocked) {
-    $role_name = $is_member ? OG_AUTHENTICATED_ROLE : OG_ANONYMOUS_ROLE;
+    $role_name = $is_member ? Og::AUTHENTICATED_ROLE : Og::ANONYMOUS_ROLE;
 
     $rids = db_select('og_role', 'ogr')
       ->fields('ogr', array('rid', 'name'))
@@ -2365,7 +2572,7 @@ function _og_get_permissions() {
           // Initialize the roles key, if other modules haven't set it
           // explicetly. This means the permissions can apply to anonymous and
           // authenticated members as-well.
-          'roles' => array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE),
+          'roles' => array(Og::ANONYMOUS_ROLE, Og::AUTHENTICATED_ROLE),
           'default role' => array(),
           'module' => $module,
         );
@@ -2484,12 +2691,12 @@ function _og_list_permissions($type) {
       // We allow the create permission only on members, as otherwise we would
       // have to iterate over every single group to decide if the user has
       // permissions for it.
-      $perms["create $type content"]['roles'] = array(OG_AUTHENTICATED_ROLE);
+      $perms["create $type content"]['roles'] = array(Og::AUTHENTICATED_ROLE);
     }
 
     // Add default permissions.
     foreach ($perms as $key => $value) {
-      $perms[$key]['default role'] = array(OG_AUTHENTICATED_ROLE);
+      $perms[$key]['default role'] = array(Og::AUTHENTICATED_ROLE);
     }
   }
   return $perms;
@@ -2514,7 +2721,7 @@ function _og_get_groups_by_user($account = NULL, $group_type = NULL) {
     $account = $user;
   }
 
-  if (!og_get_group_audience_fields()) {
+  if (!Og::getAllGroupAudienceFields('user', 'user')) {
     // User entity doesn't have group audience fields.
     return;
   }
