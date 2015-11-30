@@ -214,17 +214,11 @@ class GroupSubscribeFormatter extends FormatterBase {
    */
   public function settingsSummary() {
     $summary = parent::settingsSummary();
-
-    // 0 will be the 'Automatic' option.
-    $selection = 0;
-
-    // If a field name is configured, use that.
-    if ($field_name = $this->getSetting('field_name')) {
-      $selection = $field_name;
-    }
-
     $options = $this->getAudienceFieldOptions();
-    $summary[] = $this->t('Field: %label', array('%label' => $options[$selection]));
+
+    $field_name = $this->getSetting('field_name');
+
+    $summary[] = $this->t('Field: %label', array('%label' => $options[$field_name]));
 
     return $summary;
   }
