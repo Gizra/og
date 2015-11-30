@@ -197,7 +197,7 @@ class Og {
    *   True or false if the given entity is group.
    */
   public static function isGroupContent($entity_type_id, $bundle_id) {
-    return (bool)static::getAllGroupAudienceFields($entity_type_id, $bundle_id);
+    return (bool) static::getAllGroupAudienceFields($entity_type_id, $bundle_id);
   }
 
   /**
