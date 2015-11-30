@@ -167,7 +167,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     // We can't check if user has create permissions, as there is no group
     // context. However, we can check if there are any groups the user will be
     // able to select, and if not, we don't allow access.
-    // @see OgSelectionHandler::getReferencableEntities()
+    // @see \Drupal\og\Plugin\EntityReferenceSelection\OgSelection::buildEntityQuery()
     $required = FALSE;
 
     foreach ($entity->getFieldDefinitions() as $field_definition) {
@@ -175,7 +175,6 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
         continue;
       }
 
-      // @todo Change the function signature of Og::getSelectionHandler().
       $handler = Og::getSelectionHandler($entity->getEntityTypeId(), $entity->bundle(), $field_definition->getName());
 
       if (count($handler->getReferenceableEntities())) {
