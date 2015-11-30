@@ -164,7 +164,7 @@ class GroupSubscribeFormatter extends FormatterBase {
       '#title' => $this->t('Field name'),
       '#description' => $this->t('Select the field that should register the user subscription.'),
       '#type' => 'select',
-      '#options' => [0 => $this->t('Automatic (best matching)')] + Og::getAllGroupAudienceFields('user', 'user'),
+      '#options' => $this->getAudienceFieldOptions(),
       '#default_value' => $this->getSetting('field_name'),
     ];
 
@@ -178,14 +178,30 @@ class GroupSubscribeFormatter extends FormatterBase {
     $summary = parent::settingsSummary();
 
     if ($field_name = $this->getSetting('field_name')) {
-      $fields = Og::getAllGroupAudienceFields('user', 'user');
-      $summary[] = $this->t('Field %label', array('%label' => $fields[$field_name]));
+      $options = $this->getAudienceFieldOptions();
+      $summary[] = $this->t('Field %label', array('%label' => $options[$field_name]));
     }
     else {
       $summary[] = $this->t('No field selected (best matching)');
     }
 
     return $summary;
+  }
+
+  /**
+   * Returns audience field options.
+   *
+   * @return array
+   *   An array of audience field options.
+   */
+  protected function getAudienceFieldOptions() {
+    $options = [0 => $this->t('Automatic (best matching)')];
+
+    foreach (Og::getAllGroupAudienceFields('user', 'user') as $field_name => $field_definition) {
+      $options[$field_name] = $field_definition->getLabel();
+    }
+
+    return $options;
   }
 
   /**
