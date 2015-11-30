@@ -15,8 +15,6 @@ use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 
-// todo: look on: https://www.drupal.org/node/1952758.
-
 /**
  * Define active group content states.
  *
@@ -77,14 +75,6 @@ define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
  * The name of the user's request field in the default group membership type.
  */
 define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
-
-/**
- * Drupal 8 part. Road map:
- * 1. Reference property between groups.
- * 2. EFQ: work on the EFQ alter so people can search with the audience field.
- * 3. API: Move API function like og_is_group to the og controller.
- * 4. Move the define into the controller class.
- */
 
 /**
  * Implements hook_entity_insert().
@@ -153,7 +143,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
   $entity_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
 
-  if (($operation === 'create') && Og::isGroupContent($entity)) {
+  if ($operation === 'create' && Og::isGroupContent($entity)) {
     if ($account->hasPermission('administer group')) {
       return AccessResult::allowed();
     }
@@ -220,10 +210,6 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
   return AccessResult::neutral();
 }
-
-/**
- * Drupal 7 part.
- */
 
 /**
  * Implements hook_help().
