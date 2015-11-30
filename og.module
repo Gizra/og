@@ -124,11 +124,11 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   }
 
   $entity_type_id = $entity->getEntityTypeId();
-  $entity_bundle_id = $entity->bundle();
+  $bundle_id = $entity->bundle();
 
   $entity_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
 
-  if ($operation === 'create' && Og::isGroupContent($entity)) {
+  if ($operation === 'create' && Og::isGroupContent($entity_type_id, $bundle_id)) {
     if ($account->hasPermission('administer group')) {
       return AccessResult::allowed();
     }
@@ -181,7 +181,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
       $access = $access || OgAccess::userAccessEntity($operation, $entity, $account);
     }
 
-    if (!$access && ($operation === 'update') && Og::isGroup($entity_type_id, $entity_bundle_id)) {
+    if (!$access && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
       $access = OgAccess::userAccessEntity($operation, $entity, $account);
     }
 
