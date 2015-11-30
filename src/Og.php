@@ -162,16 +162,35 @@ class Og {
   }
 
   /**
-   * Check if the given entity is a group.
+   * Check if the given entity type and bundle is a group.
    *
    * @param string $entity_type_id
-   * @param string $bundle
+   *   The entity type.
+   * @param string $bundle_id
+   *   The bundle name.
    *
    * @return bool
    *   True or false if the given entity is group.
    */
   public static function isGroup($entity_type_id, $bundle_id) {
-    return static::groupManager()->isGroup($entity_type_id, $bundle_id);
+    return (bool)static::groupManager()->isGroup($entity_type_id, $bundle_id);
+  }
+
+  /**
+   * Check if the given entity type and bundle is a group content.
+   *
+   * This is just a convenience wrapper around Og::getAllGroupAudienceFields().
+   *
+   * @param string $entity_type_id
+   *   The entity type.
+   * @param string $bundle_id
+   *   The bundle name.
+   *
+   * @return bool
+   *   True or false if the given entity is group.
+   */
+  public static function isGroupContent($entity_type_id, $bundle_id) {
+    return static::getAllGroupAudienceFields($entity_type_id, $bundle_id);
   }
 
   /**
@@ -192,32 +211,6 @@ class Og {
    */
   public static function removeGroup($entity_type_id, $bundle_id) {
     return static::groupManager()->removeGroup($entity_type_id, $bundle_id);
-  }
-
-  /**
-   * Returns whether an entity is group content.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   Group content has to implement ContentEntityInterface but this is checked
-   *   inside the method for easier usage in calling code.
-   *
-   * @return bool
-   */
-  public static function isGroupContent(EntityInterface $entity) {
-    if (!$entity instanceof ContentEntityInterface) {
-      return FALSE;
-    }
-    // @todo Consider using bundleFieldDefinitions() method so there is less to
-    // iterate over. However, that is not really used and has a warning next to
-    // it. Also, probably makes sense to cache the entity types and bundles so
-    // we can just look this up from a simpel mapping.
-    foreach ($entity->getFieldDefinitions() as $field_definition) {
-      if (static::isGroupAudienceField($field_definition)) {
-        return TRUE;
-      }
-    }
-
-    return FALSE;
   }
 
   /**
