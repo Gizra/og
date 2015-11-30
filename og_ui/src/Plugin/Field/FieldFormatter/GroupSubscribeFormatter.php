@@ -157,6 +157,17 @@ class GroupSubscribeFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
+  public static function defaultSettings() {
+    $options = parent::defaultSettings();
+
+    $options['field_name'] = 0;
+
+    return $options;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $form = parent::settingsForm($form, $form_state);
 
@@ -177,13 +188,16 @@ class GroupSubscribeFormatter extends FormatterBase {
   public function settingsSummary() {
     $summary = parent::settingsSummary();
 
+    // 0 will be the 'Automatic' option.
+    $selection = 0;
+
+    // If a field name is configured, use that.
     if ($field_name = $this->getSetting('field_name')) {
-      $options = $this->getAudienceFieldOptions();
-      $summary[] = $this->t('Field %label', array('%label' => $options[$field_name]));
+      $selection = $field_name;
     }
-    else {
-      $summary[] = $this->t('No field selected (best matching)');
-    }
+
+    $options = $this->getAudienceFieldOptions();
+    $summary[] = $this->t('Field: %label', array('%label' => $options[$selection]));
 
     return $summary;
   }
