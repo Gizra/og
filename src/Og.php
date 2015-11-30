@@ -9,10 +9,7 @@ namespace Drupal\og;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
@@ -182,24 +179,7 @@ class Og {
    *   True or false if the given entity is group.
    */
   public static function isGroup($entity_type_id, $bundle_id) {
-    return (bool)static::groupManager()->isGroup($entity_type_id, $bundle_id);
-  }
-
-  /**
-   * Check if the given entity type and bundle is a group content.
-   *
-   * This is just a convenience wrapper around Og::getAllGroupAudienceFields().
-   *
-   * @param string $entity_type_id
-   *   The entity type.
-   * @param string $bundle_id
-   *   The bundle name.
-   *
-   * @return bool
-   *   True or false if the given entity is group.
-   */
-  public static function isGroupContent($entity_type_id, $bundle_id) {
-    return (bool)static::getAllGroupAudienceFields($entity_type_id, $bundle_id);
+    return static::groupManager()->isGroup($entity_type_id, $bundle_id);
   }
 
   /**
