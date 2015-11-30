@@ -169,6 +169,32 @@ class Og {
   }
 
   /**
+   * Return TRUE if entity belongs to a group.
+   *
+   * @param string $group_entity_type
+   *   The entity type of the group.
+   * @param string|int $group_id
+   *   The group ID.
+   * @param string $entity_type
+   *   The entity type.
+   * @param string|int $entity_id
+   *   The entity ID.
+   * @param array $states
+   *   (optional) Array with the state to return. If empty groups of all state
+   *   will return.
+   *
+   * @return bool
+   *   TRUE if the entity (e.g. the user) belongs to a group and is not pending
+   *   or blocked.
+   */
+  public static function isMember($group_entity_type, $group_id, $entity_type, $entity_id = NULL, $states = [OG_STATE_ACTIVE]) {
+    $groups = static::getEntityGroups($entity_type, $entity_id, $states);
+    return !empty($groups[$group_entity_type]) && in_array($group_id, array_map(function($group) {
+      return $group->id();
+    }, $groups[$group_entity_type]));
+  }
+
+  /**
    * Check if the given entity type and bundle is a group.
    *
    * @param string $entity_type_id
