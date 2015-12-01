@@ -14,11 +14,45 @@ use Drupal\user\EntityOwnerInterface;
 class OgAccess {
 
   /**
+   * Static cache that contains cache permissions.
+   *
+   * @var array
+   *   Array keyed by the following keys:
+   *   - alter: The permissions after altered by implementing modules.
+   *   - pre_alter: The pre-altered permissions, as read from the config.
+   */
+  protected static $permissionsCache = ['pre_alter' => [], 'post_alter' => []];
+
+
+  /**
    * Administer permission string.
    *
    * @var string
    */
   const ADMINISTER_GROUP_PERMISSION = 'administer group';
+
+  /**
+   * Allow access to the entity.
+   *
+   * @var string
+   */
+  const ALLOW_ACCESS = TRUE;
+
+  /**
+   * Deny access to the entity.
+   *
+   * @var string
+   */
+  const DENY_ACCESS = FALSE;
+
+  /**
+   * Entity is not in OG context, so we are neutral regarding access to it.
+   *
+   * @var string
+   */
+  const NEUTRAL = NULL;
+
+
 
   /**
    * Determines whether a user has a given privilege.
@@ -27,13 +61,11 @@ class OgAccess {
    * way, we guarantee consistent behavior, and ensure that the superuser
    * and group administrators can perform all actions.
    *
-   * @param $group_type
-   *   The entity type of the group.
-   * @param $group_id
-   *   The entity ID of the group.
+   * @param EntityInterface $group_entity
+   *   The group entity.
    * @param string $operation
    *   The entity operation being checked for.
-   * @param $account
+   * @param AccountInterface $account
    *   (optional) The account to check. Defaults to the current user.
    * @param $skip_alter
    *   (optional) If TRUE then user access will not be sent to other modules
@@ -50,84 +82,78 @@ class OgAccess {
    *   TRUE or FALSE if the current user has the requested permission.
    *   NULL, if the given group isn't a valid group.
    */
-  public static function userAccess($group_type, $group_id, $operation, $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
-    $perm = &drupal_static(__FUNCTION__, []);
-    // Mark the group ID and permissions that invoked an alter.
-    $perm_alter = &drupal_static(__FUNCTION__ . '_alter', []);
+  public static function userAccess(EntityInterface $group_entity, $operation, AccountInterface $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
+    $group_type_id = $group_entity->getEntityTypeId();
+    $bundle = $group_entity->bundle();
+    $group_id = $group_entity->id();
 
-    if (!Og::isGroup($group_type, $group_id)) {
+    if (!Og::isGroup($group_type_id, $bundle)) {
       // Not a group.
-      return NULL;
+      return static::NEUTRAL;
     }
 
-
-    if (empty($account)) {
-      $account = clone \Drupal::currentUser()->getAccount();
-    }
-
+    $account = $account ?: \Drupal::currentUser()->getAccount();
     $account_id = $account->id();
 
-    // User #1 has all privileges.
+    // User ID 1 has all privileges.
     if ($account_id == 1) {
-      return TRUE;
+      return static::ALLOW_ACCESS;
     }
 
     // Administer group permission.
     if (!$ignore_admin && $account->hasPermission(static::ADMINISTER_GROUP_PERMISSION)) {
-      return TRUE;
+      return static::ALLOW_ACCESS;
     }
 
-    // Group manager has all privileges (if variable is TRUE).
-    if (!empty($account_id) && \Drupal::config('og.settings')->get('group_manager_full_access')) {
-      $group = entity_load($group_type, $group_id);
-
-      if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $account_id)) {
-        return TRUE;
+    // Group manager has all privileges (if variable is TRUE) and they are
+    // authenticated.
+    if (\Drupal::config('og.settings')->get('group_manager_full_access')) {
+      if (!empty($account_id) && $group_entity instanceof EntityOwnerInterface && $group_entity->getOwnerId() == $account_id) {
+        return static::ALLOW_ACCESS;
       }
     }
 
-    $identifier = $group_type . ':' . $group_id;
+    $identifier = $group_type_id . ':' . $group_id;
+
+    $pre_alter_cache = static::getPermissionCache($group_entity, $account, TRUE);
+    $post_alter_cache = static::getPermissionCache($group_entity, $account, FALSE);
 
     // To reduce the number of SQL queries, we cache the user's permissions
     // in a static variable.
-    if (!isset($perm[$identifier][$account_id])) {
-      $perms = array();
+    if (!$pre_alter_cache) {
+      $permissions = array();
 
-      if ($roles = og_get_user_roles($group_type, $group_id, $account_id)) {
-        // Member might not have roles if they are blocked.
-        // A pending member is treated as a non-member.
-        $role_permissions = og_role_permissions($roles);
+      // @todo: Getting permissions from OG Roles will be added here.
 
-        foreach ($role_permissions as $one_role) {
-          $perms += $one_role;
-        }
-      }
-
-      $perm[$identifier][$account_id] = $perms;
+      static::setPermissionCache($group_entity, $account, TRUE, $permissions);
     }
 
-    if (!$skip_alter && empty($perm_alter[$identifier][$account_id][$operation])) {
-      // Let modules alter the permissions. since $perm is static we create
-      // a clone of it.
-      $group = !empty($group) ? $group : entity_load($group_type, $group_id);
-      $temp_perm = $perm[$identifier][$account_id];
+    if (!$skip_alter && !isset($post_alter_cache[$operation])) {
+      // Let modules alter the permissions. So we get the original ones, and
+      // pass them along to the implementing modules.
+      // @todo: Check if still needed to do a clone, since the cache is static
+      // we don't want it to be altered.
+      $alterable_permissions = static::getPermissionCache($group_entity, $account, TRUE);
       $context = array(
         'operation' => $operation,
-        'group_type' => $group_type,
-        'group' => $group,
+        'group_entity' => $group_entity,
         'account' => $account,
       );
 
-      drupal_alter('og_user_access', $temp_perm, $context);
+      \Drupal::moduleHandler()->alter('og_user_access', $alterable_permissions, $context);
 
-      // Re-assign the altered permissions.
-      $perm[$identifier][$account_id] = $temp_perm;
-
-      // Make sure alter isn't called for the same permissions.
-      $perm_alter[$identifier][$account_id][$operation] = TRUE;
+      static::setPermissionCache($group_entity, $account, FALSE, $alterable_permissions);
     }
 
-    return !empty($perm[$identifier][$account_id][$operation]) || (!empty($perm[$identifier][$account_id][static::ADMINISTER_GROUP_PERMISSION]) && !$ignore_admin);
+    $altered_permissions = static::getPermissionCache($group_entity, $account, TRUE);
+
+    if (!empty($altered_permissions[static::ADMINISTER_GROUP_PERMISSION]) && !$ignore_admin) {
+      // User is a group admin, and we do not ignore this special permission
+      // that grants access to all the group permissions.
+      return static::ALLOW_ACCESS;
+    }
+
+    return !empty($altered_permissions[$operation]);
   }
 
   /**
@@ -139,7 +165,7 @@ class OgAccess {
    * @param \Drupal\Core\Session\AccountInterface $account
    *   (optional) The user object. If empty the current user will be used.
    *
-   * @return bool
+   * @return bool|NULL
    *   Returns TRUE if the user has access to the permission, otherwise FALSE, or
    *   if the entity is not in OG context, function _will return NULL. This allows
    *   a distinction between FALSE - no access, and NULL - no access as no OG
@@ -197,6 +223,36 @@ class OgAccess {
     // Either the user didn't have permission, or the entity might be a
     // disabled group or an orphaned group content.
     return $result;
+  }
+
+  /**
+   * Set the permissions in the static cache.
+   *
+   * @param EntityInterface $group_entity
+   * @param AccountInterface $account
+   * @param $pre_alter $type
+   * @param $permissions
+   */
+  public static function setPermissionCache(EntityInterface $group_entity, AccountInterface $account, $pre_alter, $permissions) {
+
+  }
+
+  /**
+   * Get the permissions from the static cache.
+   *
+   * @param EntityInterface $group_entity
+   * @param AccountInterface $account
+   * @param bool $pre_alter
+   */
+  public static function getPermissionCache(EntityInterface $group_entity, AccountInterface $account, $pre_alter) {
+
+  }
+
+  /**
+   * Resets the static cache.
+   */
+  public static function reset() {
+    static::$permissionsCache = [];
   }
 
 }
