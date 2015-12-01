@@ -23,8 +23,32 @@ class OgAccessTest extends UnitTestCase {
   public function testPermissionsCache() {
     $expected = ['pre_alter' => [], 'post_alter' => []];
 
-    $permissions = OgAccess::getPermissionsCache($group, $user)
+    $permissions = OgAccess::getPermissionsCache($group, $user, TRUE);
+    $this->assertSame([], $permissions);
 
+    $permissions = OgAccess::getPermissionsCache($group, $user, FALSE);
+    $this->assertSame([], $permissions);
+
+    $new_permissions = [
+      'pre_alter' => [
+        'foo' => TRUE,
+      ],
+      'post_alter' => [
+        'foo' => FALSE,
+      ],
+    ];
+
+    OgAccess::setPermissionCache($group, $user, TRUE, $new_permissions['pre_alter']);
+    $permissions = OgAccess::getPermissionsCache($group, $user, TRUE);
+    $this->assertSame($new_permissions['pre_alter'], $permissions);
+
+    OgAccess::setPermissionCache($group, $user, TRUE, $new_permissions['post_alter']);
+    $permissions = OgAccess::getPermissionsCache($group, $user, FALSE);
+    $this->assertSame($new_permissions['post_alter'], $permissions);
+
+    OgAccess::reset();
+    $permissions = OgAccess::getPermissionsCache($group, $user, TRUE);
+    $this->assertSame([], $permissions);
   }
 
 
