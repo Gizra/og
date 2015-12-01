@@ -61,11 +61,11 @@ class OgAccess {
    * way, we guarantee consistent behavior, and ensure that the superuser
    * and group administrators can perform all actions.
    *
-   * @param EntityInterface $group_entity
+   * @param \Drupal\Core\Entity\EntityInterface $group_entity
    *   The group entity.
    * @param string $operation
    *   The entity operation being checked for.
-   * @param AccountInterface $account
+   * @param \Drupal\Core\Session\AccountInterface $account
    *   (optional) The account to check. Defaults to the current user.
    * @param $skip_alter
    *   (optional) If TRUE then user access will not be sent to other modules
@@ -112,8 +112,6 @@ class OgAccess {
         return static::ALLOW_ACCESS;
       }
     }
-
-    $identifier = $group_type_id . ':' . $group_id;
 
     $pre_alter_cache = static::getPermissionCache($group_entity, $account, TRUE);
     $post_alter_cache = static::getPermissionCache($group_entity, $account, FALSE);
@@ -171,57 +169,46 @@ class OgAccess {
    *   a distinction between FALSE - no access, and NULL - no access as no OG
    *   context found.
    */
-  public static function userAccessEntity($operation, EntityInterface $entity = NULL, AccountInterface $account = NULL) {
-    if (empty($account)) {
-      $account = clone \Drupal::currentUser()->getAccount();
-    }
-
-    // Set the default for the case there is not a group or a group content.
-    $result = NULL;
-
-    if (empty($entity)) {
-      // $entity might be NULL, so return early.
-      // @see field_access().
-      return $result;
-    }
-
+  public static function userAccessEntity($operation, EntityInterface $entity, AccountInterface $account = NULL) {
     // Entity isn't saved yet.
     if ($entity->isNew()) {
-      return $result;
+      return static::NEUTRAL;
     }
 
-    $entity_type_id = $entity->getEntityTypeId();
-    $entity_bundle_id = $entity->bundle();
+    $entity_type = $entity->getEntityTypeId();
+    $bundle = $entity->bundle();
 
-    $is_group = Og::isGroup($entity_type_id, $entity_bundle_id);
-    $is_group_content = Og::isGroupContent($entity);
+    $is_group_content = Og::isGroupContent($entity_type, $bundle);
 
-    if ($is_group) {
-      if (static::userAccess($entity_type_id, $entity->id(), $operation, $account)) {
+    $result = static::NEUTRAL;
+
+    if (Og::isGroup($entity_type, $bundle)) {
+      if (static::userAccess($entity, $operation, $account)) {
         return TRUE;
       }
       else {
-        // An entity can be a group and group content in the same time. The group
-        // didn't return TRUE, but the user still might have access to the
-        // permission in group content context.
-        $result = FALSE;
+        // An entity can be a group and group content in the same time. The
+        // group didn't return TRUE, but the user still might have access to the
+        // permission in group content context. So instead of retuning a deny
+        // here, we set the result, that might change if an access is found.
+        $result = static::DENY_ACCESS;
       }
     }
 
-    if ($is_group_content && ($groups = Og::getEntityGroups($entity_type_id, $entity->id()))) {
+    if ($is_group_content && ($groups = Og::getEntityGroups($entity_type, $entity->id()))) {
       foreach ($groups as $group_type => $group_ids) {
         foreach ($group_ids as $group_id) {
           if (static::userAccess($group_type, $group_id, $operation, $account)) {
-            return TRUE;
+            return static::ALLOW_ACCESS;
           }
         }
       }
 
-      return FALSE;
+      return static::DENY_ACCESS;
     }
 
-    // Either the user didn't have permission, or the entity might be a
-    // disabled group or an orphaned group content.
+    // Either the user didn't have permission, or the entity might be an
+    // orphaned group content.
     return $result;
   }
 
