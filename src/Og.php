@@ -189,6 +189,8 @@ class Og {
    */
   public static function isMember($group_entity_type, $group_id, $entity_type, $entity_id = NULL, $states = [OG_STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity_type, $entity_id, $states);
+    // We need to create a map of the group ids as getEntityGroups returns a map
+    // of membership_id => group entity for each type.
     return !empty($groups[$group_entity_type]) && in_array($group_id, array_map(function($group) {
       return $group->id();
     }, $groups[$group_entity_type]));

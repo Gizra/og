@@ -52,16 +52,16 @@ class EntityGroupsTest extends KernelTestBase {
   protected $group2;
 
   /**
-   * @var string
-   *
    * The machine name of the group node type.
+   *
+   * @var string
    */
   protected $groupBundle;
 
   /**
-   * @var string
-   *
    * The machine name of the group content node type.
+   *
+   * @var string
    */
   protected $groupContentBundle;
 
@@ -111,12 +111,11 @@ class EntityGroupsTest extends KernelTestBase {
   }
 
   /**
-   * Tests owner groups are returned correctly.
+   * Tests group owners have the correct groups.
    */
   public function testOwnerGroupsOnly() {
     $actual = Og::getEntityGroups('user', $this->user1->id());
 
-    $this->assertArrayHasKey('entity_test', $actual);
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
 
@@ -126,7 +125,6 @@ class EntityGroupsTest extends KernelTestBase {
 
     $actual = Og::getEntityGroups('user', $this->user2->id());
 
-    $this->assertArrayHasKey('entity_test', $actual);
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group2, $actual);
 
@@ -144,14 +142,15 @@ class EntityGroupsTest extends KernelTestBase {
     $this->assertFalse(Og::isMember('entity_test', $this->group1->id(), 'user', $this->user3->id()));
     $this->assertFalse(Og::isMember('entity_test', $this->group2->id(), 'user', $this->user3->id()));
 
+    // Invalidate the caches so the static cache is cleared and group data is
+    // fetched again for the user.
     Og::invalidateCache();
 
-    // Add to group 1 should return that.
+    // Add user to group 1 should now return that group only.
     $this->createMembership($this->user3, $this->group1);
 
     $actual = Og::getEntityGroups('user', $this->user3->id());
 
-    $this->assertArrayHasKey('entity_test', $actual);
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
 
@@ -165,7 +164,6 @@ class EntityGroupsTest extends KernelTestBase {
 
     $actual = Og::getEntityGroups('user', $this->user3->id());
 
-    $this->assertArrayHasKey('entity_test', $actual);
     $this->assertCount(2, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
     $this->assertGroupExistsInResults($this->group2, $actual);
@@ -175,7 +173,9 @@ class EntityGroupsTest extends KernelTestBase {
   }
 
   /**
-   * Creates an Og membership entity,
+   * Creates an Og membership entity.
+   *
+   * @todo This is a temp function, which will be later replaced by Og::group().
    *
    * @param \Drupal\user\Entity\User $user
    * @param \Drupal\Core\Entity\EntityInterface $group
