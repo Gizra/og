@@ -224,7 +224,12 @@ class OgAccess {
    *   Array of permissions to set.
    */
   public static function setPermissionCache(EntityInterface $group, AccountInterface $account, $pre_alter, array $permissions) {
+    $entity_type_id = $group->getEntityTypeId();
+    $group_id = $group->id();
+    $account_id = $account->id();
+    $type = $pre_alter ? 'pre_alter' : 'post_alter';
 
+    static::$permissionsCache[$entity_type_id][$group_id][$account_id][$type] = $permissions;
   }
 
   /**
