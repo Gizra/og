@@ -178,8 +178,8 @@ class Og {
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity to get groups for.
    * @param array $states
-   *   (optional) Array with the state to return. If empty groups of all state
-   *   will return.
+   *   (optional) Array with the membership states to check the membership.
+   *   Defaults to active memberships.
    *
    * @return bool
    *   TRUE if the entity (e.g. the user) belongs to a group and is not pending
@@ -188,8 +188,8 @@ class Og {
   public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OG_STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity, $states);
     $group_entity_type = $group->getEntityTypeId();
-    // We need to create a map of the group ids as getEntityGroups returns a map
-    // of membership_id => group entity for each type.
+    // We need to create a map of the group ids as Og::getEntityGroups returns a
+    // map of membership_id => group entity for each type.
     return !empty($groups[$group_entity_type]) && in_array($group->id(), array_map(function($group_entity) {
       return $group_entity->id();
     }, $groups[$group_entity_type]));

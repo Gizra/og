@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\Tests\og\Kernel\Entity\EntityGroupsTest.
+ * Contains \Drupal\Tests\og\Kernel\Entity\GetEntityGroupsTest.
  */
 
 namespace Drupal\Tests\og\Kernel\Entity;
@@ -15,11 +15,11 @@ use Drupal\og\Og;
 use Drupal\user\Entity\User;
 
 /**
- * Tests entity group methods
+ * Tests getting the memberships of an entity.
  *
  * @group og
  */
-class EntityGroupsTest extends KernelTestBase {
+class GetEntityGroupsTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
