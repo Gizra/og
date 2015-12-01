@@ -115,7 +115,7 @@ class Og {
    *  the OG membership ID and the group ID as the value. If nothing found,
    *  then an empty array.
    */
-  public static function getEntityGroups(EntityInterface $entity, $states = [OG_STATE_ACTIVE], $field_name = NULL) {
+  public static function getEntityGroups(EntityInterface $entity, array $states = [OG_STATE_ACTIVE], $field_name = NULL) {
     $entity_type_id = $entity->getEntityTypeId();
     $entity_id = $entity->id();
 

@@ -194,7 +194,7 @@ class OgAccess {
       }
     }
 
-    if ($is_group_content && $result = Og::getEntityGroups($entity_type, $entity->id())) {
+    if ($is_group_content && $result = Og::getEntityGroups($entity)) {
       foreach ($result as $groups) {
         foreach ($groups as $group) {
           if (static::userAccess($group,$operation, $account)) {
