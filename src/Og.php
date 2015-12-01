@@ -9,6 +9,7 @@ namespace Drupal\og;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
@@ -103,10 +104,8 @@ class Og {
   /**
    * Gets the groups an entity is associated with.
    *
-   * @param $entity_type
-   *   The entity type.
-   * @param $entity_id
-   *   The entity ID.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to get groups for.
    * @param $states
    *   (optional) Array with the state to return. Defaults to active.
    * @param $field_name
@@ -117,7 +116,10 @@ class Og {
    *  the OG membership ID and the group ID as the value. If nothing found,
    *  then an empty array.
    */
-  public static function getEntityGroups($entity_type, $entity_id, $states = [OG_STATE_ACTIVE], $field_name = NULL) {
+  public static function getEntityGroups(EntityInterface $entity, $states = [OG_STATE_ACTIVE], $field_name = NULL) {
+    $entity_type_id = $entity->getEntityTypeId();
+    $entity_id = $entity->id();
+
     // Get a string identifier of the states, so we can retrieve it from cache.
     if ($states) {
       sort($states);
@@ -128,7 +130,7 @@ class Og {
     }
 
     $identifier = [
-      $entity_type,
+      $entity_type_id,
       $entity_id,
       $state_identifier,
       $field_name,
@@ -142,7 +144,7 @@ class Og {
 
     static::$entityGroupCache[$identifier] = [];
     $query = \Drupal::entityQuery('og_membership')
-      ->condition('entity_type', $entity_type)
+      ->condition('entity_type', $entity_type_id)
       ->condition('etid', $entity_id);
 
     if ($states) {
@@ -166,6 +168,31 @@ class Og {
     }
 
     return static::$entityGroupCache[$identifier];
+  }
+
+  /**
+   * Return TRUE if entity belongs to a group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity to check.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to get groups for.
+   * @param array $states
+   *   (optional) Array with the membership states to check the membership.
+   *   Defaults to active memberships.
+   *
+   * @return bool
+   *   TRUE if the entity (e.g. the user) belongs to a group and is not pending
+   *   or blocked.
+   */
+  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OG_STATE_ACTIVE]) {
+    $groups = static::getEntityGroups($entity, $states);
+    $group_entity_type_id = $group->getEntityTypeId();
+    // We need to create a map of the group ids as Og::getEntityGroups returns a
+    // map of membership_id => group entity for each type.
+    return !empty($groups[$group_entity_type_id]) && in_array($group->id(), array_map(function($group_entity) {
+      return $group_entity->id();
+    }, $groups[$group_entity_type_id]));
   }
 
   /**
