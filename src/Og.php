@@ -117,7 +117,7 @@ class Og {
    *  then an empty array.
    */
   public static function getEntityGroups(EntityInterface $entity, $states = [OG_STATE_ACTIVE], $field_name = NULL) {
-    $entity_type = $entity->getEntityTypeId();
+    $entity_type_id = $entity->getEntityTypeId();
     $entity_id = $entity->id();
 
     // Get a string identifier of the states, so we can retrieve it from cache.
@@ -130,7 +130,7 @@ class Og {
     }
 
     $identifier = [
-      $entity_type,
+      $entity_type_id,
       $entity_id,
       $state_identifier,
       $field_name,
@@ -144,7 +144,7 @@ class Og {
 
     static::$entityGroupCache[$identifier] = [];
     $query = \Drupal::entityQuery('og_membership')
-      ->condition('entity_type', $entity_type)
+      ->condition('entity_type', $entity_type_id)
       ->condition('etid', $entity_id);
 
     if ($states) {
@@ -187,12 +187,12 @@ class Og {
    */
   public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OG_STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity, $states);
-    $group_entity_type = $group->getEntityTypeId();
+    $group_entity_type_id = $group->getEntityTypeId();
     // We need to create a map of the group ids as Og::getEntityGroups returns a
     // map of membership_id => group entity for each type.
-    return !empty($groups[$group_entity_type]) && in_array($group->id(), array_map(function($group_entity) {
+    return !empty($groups[$group_entity_type_id]) && in_array($group->id(), array_map(function($group_entity) {
       return $group_entity->id();
-    }, $groups[$group_entity_type]));
+    }, $groups[$group_entity_type_id]));
   }
 
   /**
