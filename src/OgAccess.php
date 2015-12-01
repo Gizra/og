@@ -85,7 +85,6 @@ class OgAccess {
   public static function userAccess(EntityInterface $group_entity, $operation, AccountInterface $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
     $group_type_id = $group_entity->getEntityTypeId();
     $bundle = $group_entity->bundle();
-    $group_id = $group_entity->id();
 
     if (!Og::isGroup($group_type_id, $bundle)) {
       // Not a group.
