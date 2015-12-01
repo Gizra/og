@@ -72,7 +72,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $parents = $form['#parents'];
 
     $target_type = $this->fieldDefinition->getTargetEntityTypeId();
-    $user_groups = Og::getEntityGroups('user', \Drupal::currentUser()->id());
+    $user_groups = Og::getEntityGroups(\Drupal::currentUser()->getAccount());
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
     $user_group_ids = array_map(function($group) {
       return $group->id();
@@ -228,7 +228,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $target_type = $this->fieldDefinition->getTargetEntityTypeId();
 
-    $user_groups = Og::getEntityGroups('user', \Drupal::currentUser()->id());
+    $user_groups = Og::getEntityGroups(\Drupal::currentUser()->getAccount());
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
     $user_group_ids = array_map(function($group) {
       return $group->id();

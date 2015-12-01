@@ -114,23 +114,23 @@ class EntityGroupsTest extends KernelTestBase {
    * Tests group owners have the correct groups.
    */
   public function testOwnerGroupsOnly() {
-    $actual = Og::getEntityGroups('user', $this->user1->id());
+    $actual = Og::getEntityGroups($this->user1);
 
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
 
     // Also check isMember.
-    $this->assertTrue(Og::isMember('entity_test', $this->group1->id(), 'user', $this->user1->id()));
-    $this->assertFalse(Og::isMember('entity_test', $this->group1->id(), 'user', $this->user2->id()));
+    $this->assertTrue(Og::isMember($this->group1, $this->user1));
+    $this->assertFalse(Og::isMember($this->group1, $this->user2));
 
-    $actual = Og::getEntityGroups('user', $this->user2->id());
+    $actual = Og::getEntityGroups($this->user2);
 
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group2, $actual);
 
     // Also check isMember.
-    $this->assertTrue(Og::isMember('entity_test', $this->group2->id(), 'user', $this->user2->id()));
-    $this->assertFalse(Og::isMember('entity_test', $this->group2->id(), 'user', $this->user1->id()));
+    $this->assertTrue(Og::isMember($this->group2, $this->user2));
+    $this->assertFalse(Og::isMember($this->group2, $this->user1));
   }
 
   /**
@@ -138,9 +138,9 @@ class EntityGroupsTest extends KernelTestBase {
    */
   public function testOtherGroups() {
     // Should be a part of no groups.
-    $this->assertEquals([], Og::getEntityGroups('user', $this->user3->id()));
-    $this->assertFalse(Og::isMember('entity_test', $this->group1->id(), 'user', $this->user3->id()));
-    $this->assertFalse(Og::isMember('entity_test', $this->group2->id(), 'user', $this->user3->id()));
+    $this->assertEquals([], Og::getEntityGroups($this->user3));
+    $this->assertFalse(Og::isMember($this->group1, $this->user3));
+    $this->assertFalse(Og::isMember($this->group2, $this->user3));
 
     // Invalidate the caches so the static cache is cleared and group data is
     // fetched again for the user.
@@ -149,27 +149,27 @@ class EntityGroupsTest extends KernelTestBase {
     // Add user to group 1 should now return that group only.
     $this->createMembership($this->user3, $this->group1);
 
-    $actual = Og::getEntityGroups('user', $this->user3->id());
+    $actual = Og::getEntityGroups($this->user3);
 
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
 
-    $this->assertTrue(Og::isMember('entity_test', $this->group1->id(), 'user', $this->user3->id()));
-    $this->assertFalse(Og::isMember('entity_test', $this->group2->id(), 'user', $this->user3->id()));
+    $this->assertTrue(Og::isMember($this->group1, $this->user3));
+    $this->assertFalse(Og::isMember($this->group2, $this->user3));
 
     Og::invalidateCache();
 
     // Add to group 2 should also return that.
     $this->createMembership($this->user3, $this->group2);
 
-    $actual = Og::getEntityGroups('user', $this->user3->id());
+    $actual = Og::getEntityGroups($this->user3);
 
     $this->assertCount(2, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
     $this->assertGroupExistsInResults($this->group2, $actual);
 
-    $this->assertTrue(Og::isMember('entity_test', $this->group1->id(), 'user', $this->user3->id()));
-    $this->assertTrue(Og::isMember('entity_test', $this->group2->id(), 'user', $this->user3->id()));
+    $this->assertTrue(Og::isMember($this->group1, $this->user3));
+    $this->assertTrue(Og::isMember($this->group2, $this->user3));
   }
 
   /**
