@@ -113,8 +113,8 @@ class OgAccess {
       }
     }
 
-    $pre_alter_cache = static::getPermissionCache($group_entity, $account, TRUE);
-    $post_alter_cache = static::getPermissionCache($group_entity, $account, FALSE);
+    $pre_alter_cache = static::getPermissionsCache($group_entity, $account, TRUE);
+    $post_alter_cache = static::getPermissionsCache($group_entity, $account, FALSE);
 
     // To reduce the number of SQL queries, we cache the user's permissions
     // in a static variable.
@@ -131,7 +131,7 @@ class OgAccess {
       // pass them along to the implementing modules.
       // @todo: Check if still needed to do a clone, since the cache is static
       // we don't want it to be altered.
-      $alterable_permissions = static::getPermissionCache($group_entity, $account, TRUE);
+      $alterable_permissions = static::getPermissionsCache($group_entity, $account, TRUE);
       $context = array(
         'operation' => $operation,
         'group_entity' => $group_entity,
@@ -143,7 +143,7 @@ class OgAccess {
       static::setPermissionCache($group_entity, $account, FALSE, $alterable_permissions);
     }
 
-    $altered_permissions = static::getPermissionCache($group_entity, $account, TRUE);
+    $altered_permissions = static::getPermissionsCache($group_entity, $account, TRUE);
 
     if (!empty($altered_permissions[static::ADMINISTER_GROUP_PERMISSION]) && !$ignore_admin) {
       // User is a group admin, and we do not ignore this special permission
@@ -159,7 +159,7 @@ class OgAccess {
    *
    * @param string $operation
    * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity object, or the entity ID.
+   *   The entity object.
    * @param \Drupal\Core\Session\AccountInterface $account
    *   (optional) The user object. If empty the current user will be used.
    *
@@ -195,10 +195,10 @@ class OgAccess {
       }
     }
 
-    if ($is_group_content && ($groups = Og::getEntityGroups($entity_type, $entity->id()))) {
-      foreach ($groups as $group_type => $group_ids) {
-        foreach ($group_ids as $group_id) {
-          if (static::userAccess($group_type, $group_id, $operation, $account)) {
+    if ($is_group_content && $result = Og::getEntityGroups($entity_type, $entity->id())) {
+      foreach ($result as $groups) {
+        foreach ($groups as $group) {
+          if (static::userAccess($group,$operation, $account)) {
             return static::ALLOW_ACCESS;
           }
         }
@@ -215,31 +215,46 @@ class OgAccess {
   /**
    * Set the permissions in the static cache.
    *
-   * @param EntityInterface $group_entity
-   * @param AccountInterface $account
-   * @param $pre_alter $type
-   * @param $permissions
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The entity object.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user object.
+   * @param bool $pre_alter $type
+   *   Determines if the type of permissions is pre-alter or post-alter.
+   * @param array $permissions
+   *   Array of permissions to set.
    */
-  public static function setPermissionCache(EntityInterface $group_entity, AccountInterface $account, $pre_alter, $permissions) {
+  public static function setPermissionCache(EntityInterface $group, AccountInterface $account, $pre_alter, array $permissions) {
 
   }
 
   /**
    * Get the permissions from the static cache.
    *
-   * @param EntityInterface $group_entity
-   * @param AccountInterface $account
-   * @param bool $pre_alter
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The entity object.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user object.
+   * @param bool $pre_alter $type
+   *   Determines if the type of permissions is pre-alter or post-alter.
+   *
+   * @return array
+   *   Array of permissions if cached, or an empty array.
    */
-  public static function getPermissionCache(EntityInterface $group_entity, AccountInterface $account, $pre_alter) {
+  public static function getPermissionsCache(EntityInterface $group, AccountInterface $account, $pre_alter) {
+    $entity_type_id = $group->getEntityTypeId();
+    $group_id = $group->id();
+    $account_id = $account->id();
+    $type = $pre_alter ? 'pre_alter' : 'post_alter';
 
+    return static::$permissionsCache[$entity_type_id][$group_id][$account_id][$type];
   }
 
   /**
    * Resets the static cache.
    */
   public static function reset() {
-    static::$permissionsCache = [];
+    static::$permissionsCache = ['pre_alter' => [], 'post_alter' => []];
   }
 
 }
