@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * @file
+ * Contains \Drupal\og_ui\Access\GroupCheck.
+ */
+
+namespace Drupal\og_ui\Access;
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Routing\Access\AccessInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Og;
+use Symfony\Component\Routing\Route;
+
+/**
+ * Determines access to routes based on group access for the current user.
+ */
+class GroupCheck implements AccessInterface {
+
+  /**
+   * The entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
+   */
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+    $this->entityTypeManager = $entity_type_manager;
+  }
+
+  /**
+   * Checks access.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The currently logged in account.
+   * @param \Symfony\Component\Routing\Route $route
+   *   The route to check against.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function access(AccountInterface $account, Route $route, $entity_type_id, $entity_id) {
+    // No access if the entity type doesn't exist.
+    if (!$this->entityTypeManager->getDefinition($entity_type_id, FALSE)) {
+      return AccessResult::forbidden();
+    }
+
+    $entity_storage = $this->entityTypeManager->getStorage($entity_type_id);
+    $group = $entity_storage->load($entity_id);
+
+    // No access if no entity was loaded or it's not a group.
+    if (!$group || !Og::isGroup($entity_type_id, $group->bundle())) {
+      return AccessResult::forbidden();
+    }
+
+    // @todo This is just temporary until we can resolve the below.
+    return AccessResult::allowed();
+//    // Verify the bundle has roles
+//    if (!og_roles($group_type, $bundle, $gid)) {
+//      return AccessResult::forbidden();
+//    }
+//
+//    return og_user_access($group_type, $gid, $perm);
+  }
+
+}
+

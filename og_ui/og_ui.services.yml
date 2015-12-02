@@ -1,0 +1,6 @@
+services:
+  access_check.og.user_access_group:
+    class: Drupal\og_ui\Access\GroupCheck
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: access_check, applies_to: _og_ui_user_access_group }
