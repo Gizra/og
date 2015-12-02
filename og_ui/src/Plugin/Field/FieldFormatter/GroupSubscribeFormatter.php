@@ -14,6 +14,8 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RedirectDestinationTrait;
+use Drupal\Core\Url;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\user\EntityOwnerInterface;
@@ -31,6 +33,8 @@ use Drupal\user\EntityOwnerInterface;
  * )
  */
 class GroupSubscribeFormatter extends FormatterBase {
+
+  use RedirectDestinationTrait;
 
   /**
    * {@inheritdoc}
@@ -64,9 +68,10 @@ class GroupSubscribeFormatter extends FormatterBase {
 
     if (Og::isMember($entity, $account, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
       if (og_user_access($entity_type, $id, 'unsubscribe', $account)) {
-        $links['title'] = $this->t('Unsubscribe from group');
-        $links['href'] = "group/$entity_type/$id/unsubscribe";
-        $links['class'] = ['group', 'unsubscribe'];
+        $link['title'] = $this->t('Unsubscribe from group');
+        $link['href'] = "group/$entity_type/$id/unsubscribe";
+        $link['url'] = Url::fromRoute('og_ui.entity.unsubscribe', ['entity_type_id' => $entity->getEntityTypeId(), 'entity_id' => $entity->id()]);
+        $link['class'] = ['unsubscribe'];
       }
     }
     else {
@@ -116,38 +121,34 @@ class GroupSubscribeFormatter extends FormatterBase {
         return $elements;
       }
 
-      $url = "group/$entity_type/$id/subscribe";
-      if (!empty($field_name)) {
-        $url .= '/' . $field_name;
+      // If hte user is authenticated, set up the subscribe link.
+      if ($account->isAuthenticated()) {
+        $parameters = [
+          'entity_type_id' => $entity->getEntityTypeId(),
+          'entity_id' => $entity->id(),
+        ];
+
+        // Add the field name as an additional query parameter.
+        if (!empty($field_name)) {
+          $parameters['field_name'] = $field_name;
+        }
+
+        $url = Url::fromRoute('og_ui.entity.subscribe', $parameters);
+      }
+      // Otherwise, link to user login and redirect back to here.
+      else {
+        $url = Url::fromRoute('user.login', [], ['query' => $this->getDestinationArray()]);
       }
 
       if (og_user_access($entity_type, $id, 'subscribe without approval', $account)) {
-        $links['title'] = $this->t('Subscribe to group');
-        $links['class'] = ['group', 'subscribe'];
-        if ($account->isAuthenticated()) {
-          $links['href'] = $url;
-        }
-        else {
-          $links['href'] = 'user/login';
-          $links['options'] = [
-            'query' => [
-              'destination' => $url],
-          ];
-        }
+        $link['title'] = $this->t('Subscribe to group');
+        $link['class'] = ['subscribe'];
+        $link['url'] = $url;
       }
       elseif (og_user_access($entity_type, $id, 'subscribe')) {
-        $links['title'] = $this->t('Request group membership');
-        $links['class'] = ['group', 'subscribe', 'request'];
-        if ($account->isAuthenticated()) {
-          $links['href'] = $url;
-        }
-        else {
-          $links['href'] = 'user/login';
-          $links['options'] = [
-            'query' => [
-              'destination' => $url],
-          ];
-        }
+        $link['title'] = $this->t('Request group membership');
+        $link['class'] = ['subscribe', 'request'];
+        $link['url'] = $url;
       }
       else {
         $elements[0] = [
@@ -164,21 +165,20 @@ class GroupSubscribeFormatter extends FormatterBase {
       }
     }
 
-    if (!empty($links['title'])) {
-      $links += [
+    if (!empty($link['title'])) {
+      $link += [
         'options' => [
           'attributes' => [
-            'title' => $links['title'],
-            'class' => [$links['class']],
+            'title' => $link['title'],
+            'class' => ['group'] + $link['class'],
           ],
         ],
       ];
 
       $elements[0] = [
         '#type' => 'link',
-        '#title' => $links['title'],
-        '#href' => $links['href'],
-        '#options' => $links['options'],
+        '#title' => $link['title'],
+        '#url' => $link['url'],
       ];
     }
 
@@ -251,4 +251,3 @@ class GroupSubscribeFormatter extends FormatterBase {
   }
 
 }
-
