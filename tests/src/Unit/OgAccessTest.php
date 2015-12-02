@@ -7,50 +7,52 @@
 
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Core\Config\Config;
+use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
 use Drupal\Tests\UnitTestCase;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * @group og
- * @coversDefaultClass \Drupal\og\OgAccessTest
+ * @coversDefaultClass \Drupal\og\OgAccess
  */
 class OgAccessTest extends UnitTestCase {
 
   /**
-   * @covers ::getPermissionsCache
-   * @covers ::setPermissionsCache
+   * @coversDefaultmethod ::userAccess
    */
-  public function testPermissionsCache() {
-    $expected = ['pre_alter' => [], 'post_alter' => []];
+  public function testUserAccess() {
+    $entity_type_id = $this->randomMachineName();
+    $bundle = $this->randomMachineName();;
 
-    $permissions = OgAccess::getPermissionsCache($group, $user, TRUE);
-    $this->assertSame([], $permissions);
+    $group_manager = $this->prophesize(GroupManager::class);
+    $group_manager->isGroup($entity_type_id, $bundle)->willReturn(TRUE);
 
-    $permissions = OgAccess::getPermissionsCache($group, $user, FALSE);
-    $this->assertSame([], $permissions);
+    $config = $this->prophesize(Config::class);
+    $config->get('group_manager_full_access')->willReturn(TRUE);
 
-    $new_permissions = [
-      'pre_alter' => [
-        'foo' => TRUE,
-      ],
-      'post_alter' => [
-        'foo' => FALSE,
-      ],
-    ];
+    $config_factory = $this->prophesize(ConfigFactory::class);
+    $config_factory->get('og.settings')->willReturn($config);
 
-    OgAccess::setPermissionCache($group, $user, TRUE, $new_permissions['pre_alter']);
-    $permissions = OgAccess::getPermissionsCache($group, $user, TRUE);
-    $this->assertSame($new_permissions['pre_alter'], $permissions);
+    $container = new ContainerBuilder();
+    $container->set('og.group.manager', $group_manager->reveal());
+    $container->set('config.factory', $config_factory);
+    \Drupal::setContainer($container);
 
-    OgAccess::setPermissionCache($group, $user, TRUE, $new_permissions['post_alter']);
-    $permissions = OgAccess::getPermissionsCache($group, $user, FALSE);
-    $this->assertSame($new_permissions['post_alter'], $permissions);
+    $group_entity = $this->prophesize(EntityOwnerInterface::class);
+    $group_entity->willImplement(EntityInterface::class);
+    $group_entity->getEntityTypeId()->willReturn($entity_type_id);
+    $group_entity->bundle()->willReturn($bundle);
 
-    OgAccess::reset();
-    $permissions = OgAccess::getPermissionsCache($group, $user, TRUE);
-    $this->assertSame([], $permissions);
+    $user = $this->prophesize(AccountInterface::class);
+    $user->id()->willReturn(1);
+
+    OgAccess::userAccess($group_entity->reveal(), 'view', $user->reveal());
   }
-
-
 
 }
