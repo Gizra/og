@@ -60,7 +60,7 @@ class GroupSubscribeFormatter extends FormatterBase {
       return $elements;
     }
 
-    if (og_is_member($entity_type, $id, 'user', $account, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
+    if (Og::isMember($entity, $account, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
       if (og_user_access($entity_type, $id, 'unsubscribe', $account)) {
         $links['title'] = $this->t('Unsubscribe from group');
         $links['href'] = "group/$entity_type/$id/unsubscribe";
@@ -68,7 +68,7 @@ class GroupSubscribeFormatter extends FormatterBase {
       }
     }
     else {
-      if (og_is_member($entity_type, $id, 'user', $account, array(OG_STATE_BLOCKED))) {
+      if (Og::isMember($entity, $account, [OG_STATE_BLOCKED])) {
         // If user is blocked, they should not be able to apply for
         // membership.
         return [];
