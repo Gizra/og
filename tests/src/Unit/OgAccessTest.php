@@ -137,15 +137,15 @@ class OgAccessTest extends UnitTestCase {
 
   public function testOgUserAccessAlter() {
     $permissions[OgAccess::ADMINISTER_GROUP_PERMISSION] = TRUE;
-    \Drupal::getContainer()->set('module_handler', new OgAccessTestAllter($permissions));
+    \Drupal::getContainer()->set('module_handler', new OgAccessTestAlter($permissions));
     $group_entity = $this->groupEntity();
-    $group_entity->id()->willReturn($this->randomMachineName());
+    $group_entity->id()->willReturn(mt_rand(5, 10));
     $user_access = OgAccess::userAccess($group_entity->reveal(), 'view', $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }
 }
 
-class OgAccessTestAllter {
+class OgAccessTestAlter {
   public function __construct($data) {
     $this->data = $data;
   }
