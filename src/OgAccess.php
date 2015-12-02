@@ -89,7 +89,7 @@ class OgAccess {
 
     if (!Og::isGroup($group_type_id, $bundle)) {
       // Not a group.
-      return AccessResult::neutral()->addCacheableDependency($group_entity);
+      return AccessResult::neutral();
     }
 
     $user = $user ?: \Drupal::currentUser()->getAccount();
@@ -114,8 +114,7 @@ class OgAccess {
     if ($config->get('group_manager_full_access')) {
       if (!empty($user_id) && $group_entity instanceof EntityOwnerInterface && $group_entity->getOwnerId() == $user_id) {
         // @TODO do we need to add the user here?
-        return AccessResult::allowed()
-          ->addCacheableDependency($config);
+        return AccessResult::allowed();
       }
     }
 
@@ -159,7 +158,7 @@ class OgAccess {
     }
 
     // @TODO is this the right thing to do?
-    return AccessResult::allowedIf(!empty($altered_permissions[$operation]))->addCacheContexts(array('user.permissions'));
+    return AccessResult::allowedIf(!empty($altered_permissions[$operation]));
   }
 
   /**
@@ -178,9 +177,7 @@ class OgAccess {
    *   context found.
    */
   public static function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL) {
-    $result = AccessResult::neutral()
-      ->addCacheableDependency($entity)
-      ->addCacheableDependency($user);
+    $result = AccessResult::neutral();
 
     // Entity isn't saved yet.
     if ($entity->isNew()) {
@@ -217,7 +214,7 @@ class OgAccess {
         }
       }
       // @TODO Change something about caching and user?
-      return AccessResult::forbidden()->addCacheableDependency($entity);
+      return AccessResult::forbidden();
     }
 
     // Either the user didn't have permission, or the entity might be an

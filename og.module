@@ -120,7 +120,7 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   // We only care about content entities.
   if (!$entity instanceof ContentEntityInterface) {
-    return AccessResult::neutral()->addCacheableDependency($entity);
+    return AccessResult::neutral();
   }
 
   $entity_type_id = $entity->getEntityTypeId();
@@ -131,7 +131,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   if ($operation === 'create' && Og::isGroupContent($entity_type_id, $bundle_id)) {
     $access_result = AccessResult::allowedIfHasPermission($account, 'administer group');
     if ($access_result->isAllowed()) {
-      return $access_result->addCacheableDependency($entity);
+      return $access_result;
     }
 
     // Save some legwork if the user has the core permission and strict node
@@ -164,11 +164,11 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
     // If no group audience field is required, we ignore.
     if (!$required) {
-      return AccessResult::neutral()->addCacheableDependency($entity);
+      return AccessResult::neutral();
     }
 
     // Otherwise, ignore or deny based on whether strict entity access is set.
-    return AccessResult::forbiddenIf($entity_access_strict)->addCacheableDependency($entity);
+    return AccessResult::forbiddenIf($entity_access_strict);
   }
   elseif (in_array($operation, ['update', 'delete'])) {
     $access = OgAccess::userAccessEntity('administer group', $entity, $account);
@@ -191,10 +191,10 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     }
 
     // Otherwise, ignore or deny based on whether strict entity access is set.
-    return AccessResult::forbiddenIf($entity_access_strict)->addCacheableDependency($entity);
+    return AccessResult::forbiddenIf($entity_access_strict);
   }
 
-  return AccessResult::neutral()->addCacheableDependency($entity);
+  return AccessResult::neutral();
 }
 
 /**
