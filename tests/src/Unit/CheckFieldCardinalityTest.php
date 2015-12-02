@@ -51,15 +51,13 @@ class CheckFieldCardinalityTest extends UnitTestCase {
    * @expectedException \Drupal\Core\Field\FieldException
    */
   public function testFieldCardinalityNotAudienceField() {
-    $field_name = 'test_field_no_definition';
+    $field_name = 'test_field_not_og_audience';
     $entity_prophecy = $this->prophesize(ContentEntityInterface::class);
 
     $field_definition_prophecy = $this->prophesize(FieldDefinitionInterface::class);
     $field_definition_prophecy->getType()
       ->willReturn('invalid_field_type')
       ->shouldBeCalled();
-    $field_definition_prophecy->getFieldStorageDefinition()
-      ->shouldNotBeCalled();
 
     $entity_prophecy->getFieldDefinition($field_name)
       ->willReturn($field_definition_prophecy->reveal());
@@ -125,6 +123,11 @@ class CheckFieldCardinalityTest extends UnitTestCase {
    * Data provider for testFieldCardinality.
    *
    * @return array
+   *   The values to test which correspond to:
+   *     - The count of existing items in the field.
+   *     - Field cardinality.
+   *     - The expected result where TRUE signifies the field may be populated
+   *       by another value.
    */
   public function providerTestFieldCardinality() {
     return [
