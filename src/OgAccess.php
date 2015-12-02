@@ -119,8 +119,8 @@ class OgAccess {
       }
     }
 
-    $pre_alter_cache = [];//static::getPermissionsCache($group_entity, $user, TRUE);
-    $post_alter_cache = [];//static::getPermissionsCache($group_entity, $user, FALSE);
+    $pre_alter_cache = static::getPermissionsCache($group_entity, $user, TRUE);
+    $post_alter_cache = static::getPermissionsCache($group_entity, $user, FALSE);
 
     // To reduce the number of SQL queries, we cache the user's permissions
     // in a static variable.
@@ -237,7 +237,7 @@ class OgAccess {
    * @param array $permissions
    *   Array of permissions to set.
    */
-  public static function setPermissionCache(EntityInterface $group, AccountInterface $user, $pre_alter, array $permissions) {
+  protected static function setPermissionCache(EntityInterface $group, AccountInterface $user, $pre_alter, array $permissions) {
     $entity_type_id = $group->getEntityTypeId();
     $group_id = $group->id();
     $user_id = $user->id();
@@ -259,13 +259,15 @@ class OgAccess {
    * @return array
    *   Array of permissions if cached, or an empty array.
    */
-  public static function getPermissionsCache(EntityInterface $group, AccountInterface $user, $pre_alter) {
+  protected static function getPermissionsCache(EntityInterface $group, AccountInterface $user, $pre_alter) {
     $entity_type_id = $group->getEntityTypeId();
     $group_id = $group->id();
     $user_id = $user->id();
     $type = $pre_alter ? 'pre_alter' : 'post_alter';
 
-    return static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type];
+    return isset(static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type]) ?
+      static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type] :
+      [];
   }
 
   /**
