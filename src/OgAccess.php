@@ -97,7 +97,7 @@ class OgAccess {
 
     // User ID 1 has all privileges.
     if ($user_id == 1) {
-      return AccessResult::allowed()->cachePerUser();
+      return AccessResult::allowed();
     }
 
     // Administer group permission.
