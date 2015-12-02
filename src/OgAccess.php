@@ -119,8 +119,8 @@ class OgAccess {
       }
     }
 
-    $pre_alter_cache = static::getPermissionsCache($group_entity, $user, TRUE);
-    $post_alter_cache = static::getPermissionsCache($group_entity, $user, FALSE);
+    $pre_alter_cache = [];//static::getPermissionsCache($group_entity, $user, TRUE);
+    $post_alter_cache = [];//static::getPermissionsCache($group_entity, $user, FALSE);
 
     // To reduce the number of SQL queries, we cache the user's permissions
     // in a static variable.
@@ -149,7 +149,7 @@ class OgAccess {
       static::setPermissionCache($group_entity, $user, FALSE, $alterable_permissions);
     }
 
-    $altered_permissions = static::getPermissionsCache($group_entity, $user, TRUE);
+    $altered_permissions = static::getPermissionsCache($group_entity, $user, FALSE);
 
     if (!empty($altered_permissions[static::ADMINISTER_GROUP_PERMISSION]) && !$ignore_admin) {
       // User is a group admin, and we do not ignore this special permission

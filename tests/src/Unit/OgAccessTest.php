@@ -12,6 +12,8 @@ use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
@@ -133,4 +135,21 @@ class OgAccessTest extends UnitTestCase {
     $this->assertTrue($user_access->isAllowed());
   }
 
+  public function testOgUserAccessAlter() {
+    $permissions[OgAccess::ADMINISTER_GROUP_PERMISSION] = TRUE;
+    \Drupal::getContainer()->set('module_handler', new OgAccessTestAllter($permissions));
+    $group_entity = $this->groupEntity();
+    $group_entity->id()->willReturn($this->randomMachineName());
+    $user_access = OgAccess::userAccess($group_entity->reveal(), 'view', $this->user->reveal());
+    $this->assertTrue($user_access->isAllowed());
+  }
+}
+
+class OgAccessTestAllter {
+  public function __construct($data) {
+    $this->data = $data;
+  }
+  public function alter($op, &$data) {
+    $data = $this->data;
+  }
 }
