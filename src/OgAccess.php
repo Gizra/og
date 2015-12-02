@@ -7,6 +7,7 @@
 
 namespace Drupal\og;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\user\EntityOwnerInterface;
@@ -78,7 +79,7 @@ class OgAccess {
    *   with "administer group" will be granted all permissions.
    *   Defaults to FALSE.
    *
-   * @return bool
+   * @return \Drupal\Core\Access\AccessResultInterface
    *   TRUE or FALSE if the current user has the requested permission.
    *   NULL, if the given group isn't a valid group.
    */
@@ -88,7 +89,7 @@ class OgAccess {
 
     if (!Og::isGroup($group_type_id, $bundle)) {
       // Not a group.
-      return static::NEUTRAL;
+      return AccessResult::neutral()->addCacheableDependency($group_entity);
     }
 
     $user = $user ?: \Drupal::currentUser()->getAccount();
@@ -96,19 +97,25 @@ class OgAccess {
 
     // User ID 1 has all privileges.
     if ($user_id == 1) {
-      return static::ALLOW_ACCESS;
+      return AccessResult::allowed()->cachePerUser();
     }
 
     // Administer group permission.
-    if (!$ignore_admin && $user->hasPermission(static::ADMINISTER_GROUP_PERMISSION)) {
-      return static::ALLOW_ACCESS;
+    if (!$ignore_admin) {
+      $user_access = AccessResult::allowedIfHasPermission($user, static::ADMINISTER_GROUP_PERMISSION);
+      if ($user_access->isAllowed()) {
+        return $user_access;
+      }
     }
 
     // Group manager has all privileges (if variable is TRUE) and they are
     // authenticated.
-    if (\Drupal::config('og.settings')->get('group_manager_full_access')) {
+    $config = \Drupal::config('og.settings');
+    if ($config->get('group_manager_full_access')) {
       if (!empty($user_id) && $group_entity instanceof EntityOwnerInterface && $group_entity->getOwnerId() == $user_id) {
-        return static::ALLOW_ACCESS;
+        // @TODO do we need to add the user here?
+        return AccessResult::allowed()
+          ->addCacheableDependency($config);
       }
     }
 
@@ -147,10 +154,12 @@ class OgAccess {
     if (!empty($altered_permissions[static::ADMINISTER_GROUP_PERMISSION]) && !$ignore_admin) {
       // User is a group admin, and we do not ignore this special permission
       // that grants access to all the group permissions.
-      return static::ALLOW_ACCESS;
+      // @TODO what about caching?
+      return AccessResult::allowed();
     }
 
-    return !empty($altered_permissions[$operation]);
+    // @TODO is this the right thing to do?
+    return AccessResult::allowedIf(!empty($altered_permissions[$operation]))->addCacheContexts(array('user.permissions'));
   }
 
   /**
@@ -162,16 +171,20 @@ class OgAccess {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   (optional) The user object. If empty the current user will be used.
    *
-   * @return bool|NULL
+   * @return \Drupal\Core\Access\AccessResultInterface
    *   Returns TRUE if the user has access to the permission, otherwise FALSE, or
    *   if the entity is not in OG context, function _will return NULL. This allows
    *   a distinction between FALSE - no access, and NULL - no access as no OG
    *   context found.
    */
   public static function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL) {
+    $result = AccessResult::neutral()
+      ->addCacheableDependency($entity)
+      ->addCacheableDependency($user);
+
     // Entity isn't saved yet.
     if ($entity->isNew()) {
-      return static::NEUTRAL;
+      return $result;
     }
 
     $entity_type = $entity->getEntityTypeId();
@@ -179,31 +192,32 @@ class OgAccess {
 
     $is_group_content = Og::isGroupContent($entity_type, $bundle);
 
-    $result = static::NEUTRAL;
-
     if (Og::isGroup($entity_type, $bundle)) {
-      if (static::userAccess($entity, $operation, $user)) {
-        return TRUE;
+      $user_access = static::userAccess($entity, $operation, $user);
+      if ($user_access->isAllowed()) {
+        return $user_access;
       }
       else {
         // An entity can be a group and group content in the same time. The
         // group didn't return TRUE, but the user still might have access to the
         // permission in group content context. So instead of retuning a deny
         // here, we set the result, that might change if an access is found.
-        $result = static::DENY_ACCESS;
+        // @TODO Change something about caching and user?
+        $result = AccessResult::forbidden()->addCacheableDependency($entity);
       }
     }
 
     if ($is_group_content && $result = Og::getEntityGroups($entity)) {
       foreach ($result as $groups) {
         foreach ($groups as $group) {
-          if (static::userAccess($group,$operation, $user)) {
-            return static::ALLOW_ACCESS;
+          $user_access = static::userAccess($group, $operation, $user);
+          if ($user_access->isAllowed()) {
+            return $user_access;
           }
         }
       }
-
-      return static::DENY_ACCESS;
+      // @TODO Change something about caching and user?
+      return AccessResult::forbidden()->addCacheableDependency($entity);
     }
 
     // Either the user didn't have permission, or the entity might be an

@@ -120,7 +120,7 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   // We only care about content entities.
   if (!$entity instanceof ContentEntityInterface) {
-    return AccessResult::neutral();
+    return AccessResult::neutral()->addCacheableDependency($entity);
   }
 
   $entity_type_id = $entity->getEntityTypeId();
@@ -129,8 +129,9 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   $entity_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
 
   if ($operation === 'create' && Og::isGroupContent($entity_type_id, $bundle_id)) {
-    if ($account->hasPermission('administer group')) {
-      return AccessResult::allowed();
+    $access_result = AccessResult::allowedIfHasPermission($account, 'administer group');
+    if ($access_result->isAllowed()) {
+      return $access_result->addCacheableDependency($entity);
     }
 
     // Save some legwork if the user has the core permission and strict node
@@ -163,37 +164,37 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
     // If no group audience field is required, we ignore.
     if (!$required) {
-      return AccessResult::neutral();
+      return AccessResult::neutral()->addCacheableDependency($entity);
     }
 
     // Otherwise, ignore or deny based on whether strict entity access is set.
-    return AccessResult::forbiddenIf($entity_access_strict);
+    return AccessResult::forbiddenIf($entity_access_strict)->addCacheableDependency($entity);
   }
   elseif (in_array($operation, ['update', 'delete'])) {
     $access = OgAccess::userAccessEntity('administer group', $entity, $account);
 
-    if (is_null($access)) {
+    if ($access->isNeutral()) {
       // The node isn't in an OG context, so no need to keep testing.
-      return AccessResult::neutral();
+      return $access;
     }
     else {
       // Any and own content.
-      $access = $access || OgAccess::userAccessEntity($operation, $entity, $account);
+      $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
     }
 
-    if (!$access && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
+    if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
       $access = OgAccess::userAccessEntity($operation, $entity, $account);
     }
 
-    if ($access) {
-      return AccessResult::allowed();
+    if ($access->isAllowed()) {
+      return $access;
     }
 
     // Otherwise, ignore or deny based on whether strict entity access is set.
-    return AccessResult::forbiddenIf($entity_access_strict);
+    return AccessResult::forbiddenIf($entity_access_strict)->addCacheableDependency($entity);
   }
 
-  return AccessResult::neutral();
+  return AccessResult::neutral()->addCacheableDependency($entity);
 }
 
 /**
