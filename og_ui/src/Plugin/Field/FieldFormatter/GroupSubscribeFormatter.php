@@ -15,6 +15,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -39,6 +40,7 @@ class GroupSubscribeFormatter extends FormatterBase {
 
     $entity = $items->getEntity();
     $account = \Drupal::currentUser()->getAccount();
+    $field_name = $this->fieldDefinition->getName();
 
     // Entity is not a group.
     if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
@@ -74,19 +76,19 @@ class GroupSubscribeFormatter extends FormatterBase {
         return [];
       }
 
-      // Check if user can subscribe to the field.
-      if (empty($settings['field_name']) && $audience_field_name = og_get_best_group_audience_field('user', $account, $entity_type, $bundle)) {
-        $settings['field_name'] = $audience_field_name;
-      }
-      if (!$settings['field_name']) {
-        return [];
-      }
-
-      // Check if entity is referencable.
-      if ($this->getSetting('target_type') != $entity_type) {
-        // Group type doesn't match.
-        return [];
-      }
+//      // Check if user can subscribe to the field.
+//      if (empty($settings['field_name']) && $audience_field_name = og_get_best_group_audience_field('user', $account, $entity_type, $bundle)) {
+//        $settings['field_name'] = $audience_field_name;
+//      }
+//      if (!$settings['field_name']) {
+//        return [];
+//      }
+//
+//      // Check if entity is referencable.
+//      if ($this->getSetting('target_type') != $entity_type) {
+//        // Group type doesn't match.
+//        return [];
+//      }
 
       // Check handler bundles, if any.
       $handler_settings = $this->getSetting('handler_settings');
@@ -96,7 +98,7 @@ class GroupSubscribeFormatter extends FormatterBase {
         return [];
       }
 
-      if (!og_check_field_cardinality('user', $account, $settings['field_name'])) {
+      if (!OgGroupAudienceHelper::checkFieldCardinality($account, $field_name)) {
         $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
 
         $elements[0] = [
