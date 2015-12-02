@@ -21,6 +21,8 @@ class OgHelper {
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The content entity to check the field cardinality for.
+   * @param string $field_name
+   *   The field name to check the cardinality of.
    *
    * @return bool
    */
