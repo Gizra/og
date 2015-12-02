@@ -1342,26 +1342,6 @@ function _og_get_best_group_audience_field($entity_type, $entity, $group_type, $
 }
 
 /**
- * Return TRUE if a field can be used and has not reached maximum values.
- *
- * @param $entity_type
- *   The entity type.
- * @param $entity
- *   The entity object or entity ID.
- * @param $field_name
- *   The group audience field name.
- */
-function _og_check_field_cardinality($entity_type, $entity, $field_name) {
-  $field = field_info_field($field_name);
-  if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-    return TRUE;
-  }
-
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  return count($wrapper->{$field_name . '__og_membership'}->value(array('identifier' => TRUE))) < $field['cardinality'];
-}
-
-/**
  * Set an association (e.g. subscribe) an entity to a group.
  *
  * @param $group_type
