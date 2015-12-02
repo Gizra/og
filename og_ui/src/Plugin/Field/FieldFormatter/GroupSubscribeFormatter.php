@@ -40,7 +40,7 @@ class GroupSubscribeFormatter extends FormatterBase {
 
     $entity = $items->getEntity();
     $account = \Drupal::currentUser()->getAccount();
-    $field_name = $this->fieldDefinition->getName();
+    $field_name = $this->getSetting('field_name');
 
     // Entity is not a group.
     if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
@@ -76,19 +76,21 @@ class GroupSubscribeFormatter extends FormatterBase {
         return [];
       }
 
-//      // Check if user can subscribe to the field.
-//      if (empty($settings['field_name']) && $audience_field_name = og_get_best_group_audience_field('user', $account, $entity_type, $bundle)) {
-//        $settings['field_name'] = $audience_field_name;
-//      }
-//      if (!$settings['field_name']) {
-//        return [];
-//      }
-//
-//      // Check if entity is referencable.
-//      if ($this->getSetting('target_type') != $entity_type) {
-//        // Group type doesn't match.
-//        return [];
-//      }
+      // Check if user can subscribe to the field.
+      if (empty($field_name) && $audience_field_name = og_get_best_group_audience_field('user', $account, $entity_type, $bundle)) {
+        $settings['field_name'] = $audience_field_name;
+      }
+      if (!$field_name) {
+        return [];
+      }
+
+      // @todo Not sure this is applicable now we have our own dedicated field
+      // type?
+      // Check if entity is referencable.
+      if ($this->getSetting('target_type') !== $entity->getEntityTypeId()) {
+        // Group type doesn't match.
+        return [];
+      }
 
       // Check handler bundles, if any.
       $handler_settings = $this->getSetting('handler_settings');
@@ -115,8 +117,8 @@ class GroupSubscribeFormatter extends FormatterBase {
       }
 
       $url = "group/$entity_type/$id/subscribe";
-      if ($settings['field_name']) {
-        $url .= '/' . $settings['field_name'];
+      if (!empty($field_name)) {
+        $url .= '/' . $field_name;
       }
 
       if (og_user_access($entity_type, $id, 'subscribe without approval', $account)) {
