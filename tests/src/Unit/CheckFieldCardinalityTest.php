@@ -12,14 +12,14 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Tests\UnitTestCase;
-use Drupal\og\OgHelper;
+use Drupal\og\OgGroupAudienceHelper;
 
 /**
- * Tests the OgHelper::checkFieldCardinality method.
+ * Tests the OgGroupAudienceHelper::checkFieldCardinality method.
  *
  * @group og
  *
- * @coversDefaultClass \Drupal\og\OgHelper
+ * @coversDefaultClass \Drupal\og\OgGroupAudienceHelper
  */
 class CheckFieldCardinalityTest extends UnitTestCase {
 
@@ -34,6 +34,7 @@ class CheckFieldCardinalityTest extends UnitTestCase {
 
     $entity_prophecy->getFieldDefinition($field_name)
       ->willReturn(NULL);
+
     // The bundle() and getEntityTypeId() methods will be called for the
     // exception string.
     $entity_prophecy->bundle()
@@ -41,7 +42,7 @@ class CheckFieldCardinalityTest extends UnitTestCase {
     $entity_prophecy->getEntityTypeId()
       ->shouldBeCalled();
 
-    OgHelper::checkFieldCardinality($entity_prophecy->reveal(), $field_name);
+    OgGroupAudienceHelper::checkFieldCardinality($entity_prophecy->reveal(), $field_name);
   }
 
   /**
@@ -85,7 +86,7 @@ class CheckFieldCardinalityTest extends UnitTestCase {
         ->shouldBeCalled();
     }
 
-    $this->assertSame(OgHelper::checkFieldCardinality($entity_prophecy->reveal(), $field_name), $expected);
+    $this->assertSame(OgGroupAudienceHelper::checkFieldCardinality($entity_prophecy->reveal(), $field_name), $expected);
   }
 
   /**

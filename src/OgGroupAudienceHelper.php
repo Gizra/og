@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\og\OgHelper.
+ * Contains \Drupal\og\OgGroupAudienceHelper.
  */
 
 namespace Drupal\og;
@@ -14,7 +14,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 /**
  * OG helper methods.
  */
-class OgHelper {
+class OgGroupAudienceHelper {
 
   /**
    * Return TRUE if a field can be used and has not reached maximum values.
