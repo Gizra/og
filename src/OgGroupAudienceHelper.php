@@ -25,12 +25,18 @@ class OgGroupAudienceHelper {
    *   The field name to check the cardinality of.
    *
    * @return bool
+   *
+   * @throws \Drupal\Core\Field\FieldException
    */
   public static function checkFieldCardinality(ContentEntityInterface $entity, $field_name) {
     $field_definition = $entity->getFieldDefinition($field_name);
 
     if (!$field_definition) {
       throw new FieldException(sprintf('No "%s" field found for %s %s entity', $field_name, $entity->bundle(), $entity->getEntityTypeId()));
+    }
+
+    if (!Og::isGroupAudienceField($field_definition)) {
+      throw new FieldException(sprintf('"%s" field on %s %s entity is not an audience field.', $field_name, $entity->bundle(), $entity->getEntityTypeId()));
     }
 
     $cardinality = $field_definition->getFieldStorageDefinition()->getCardinality();

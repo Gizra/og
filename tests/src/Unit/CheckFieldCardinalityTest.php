@@ -48,6 +48,35 @@ class CheckFieldCardinalityTest extends UnitTestCase {
   /**
    * @covers ::checkFieldCardinality
    *
+   * @expectedException \Drupal\Core\Field\FieldException
+   */
+  public function testFieldCardinalityNotAudienceField() {
+    $field_name = 'test_field_no_definition';
+    $entity_prophecy = $this->prophesize(ContentEntityInterface::class);
+
+    $field_definition_prophecy = $this->prophesize(FieldDefinitionInterface::class);
+    $field_definition_prophecy->getType()
+      ->willReturn('invalid_field_type')
+      ->shouldBeCalled();
+    $field_definition_prophecy->getFieldStorageDefinition()
+      ->shouldNotBeCalled();
+
+    $entity_prophecy->getFieldDefinition($field_name)
+      ->willReturn($field_definition_prophecy->reveal());
+
+    // The bundle() and getEntityTypeId() methods will be called for the
+    // exception string.
+    $entity_prophecy->bundle()
+      ->shouldBeCalled();
+    $entity_prophecy->getEntityTypeId()
+      ->shouldBeCalled();
+
+    OgGroupAudienceHelper::checkFieldCardinality($entity_prophecy->reveal(), $field_name);
+  }
+
+  /**
+   * @covers ::checkFieldCardinality
+   *
    * @dataProvider providerTestFieldCardinality
    */
   public function testFieldCardinality($field_count, $cardinality, $expected) {
@@ -61,6 +90,9 @@ class CheckFieldCardinalityTest extends UnitTestCase {
     $field_definition_prophecy = $this->prophesize(FieldDefinitionInterface::class);
     $field_definition_prophecy->getFieldStorageDefinition()
       ->willReturn($field_storage_definition_prophecy->reveal())
+      ->shouldBeCalled();
+    $field_definition_prophecy->getType()
+      ->willReturn('og_membership_reference')
       ->shouldBeCalled();
 
     $entity_prophecy = $this->prophesize(ContentEntityInterface::class);
