@@ -12,7 +12,7 @@ use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
- * OG helper methods.
+ * OG audience helper methods.
  */
 class OgGroupAudienceHelper {
 
