@@ -2,14 +2,12 @@
 
 namespace Drupal\og\Plugin\OgFields;
 
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldInstanceConfig;
-use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
 /**
- * Redirects to a message deletion form.
+ * Determine if group should use default roles and permissions.
  *
  * @OgFields(
  *  id = OG_DEFAULT_ACCESS_FIELD,
@@ -22,61 +20,60 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function fieldDefinition() {
-    return FieldStorageConfig::create(array(
-      'field_name' => OG_DEFAULT_ACCESS_FIELD,
-      'entity_type' => $this->getEntityType(),
-      'type' => 'list_integer',
-      'cardinality' => 1,
-      'settings' => array(
-        'allowed_values' => array(
+  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
+    $values = [
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings' => [
+        'allowed_values' => [
           0 => 'Use default roles and permissions',
           1 => 'Override default roles and permissions',
-        ),
+        ],
         'allowed_values_function' => '',
-      ),
-    ));
+      ],
+      'type' => 'list_integer',
+    ];
+
+    return parent::getFieldStorageConfigBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function instanceDefinition() {
-    return FieldConfig::create(array(
-      'label' => t('Group roles and permissions'),
-      'description' => t('Determine if group should use default roles and permissions.'),
-      'default_value' => array(0 => array('value' => 0)),
-      'display_label' => 1,
+  public function getFieldConfigBaseDefinition(array $values = array()) {
+    $values = [
+      'default_value' => [0 => ['value' => 0]],
+      'description' => $this->t('Determine if group should use default roles and permissions.'),
+      'display_label' => TRUE,
+      'label' => $this->t('Group roles and permissions'),
       'required' => TRUE,
-      'field_name' => OG_DEFAULT_ACCESS_FIELD,
-      'entity_type' => $this->getEntityType(),
-      'bundle' => $this->getBundle(),
-    ));
+    ];
+
+    return parent::getFieldConfigBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
   public function widgetDefinition() {
-    return array(
+    return [
       'type' => 'options_select',
-      'settings' => array(),
-    );
+      'settings' => [],
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
   public function viewModesDefinition()  {
-    return array(
-      'default' => array(
-        'type' => "list_default",
-        'label' => "above",
-      ),
-      'teaser' => array(
-        'type' => "list_default",
-        'label' => "above",
-      ),
-    );
+    return [
+      'default' => [
+        'type' => 'list_default',
+        'label' => 'above',
+      ],
+      'teaser' => [
+        'type' => 'list_default',
+        'label' => 'above',
+      ],
+    ];
   }
 }
