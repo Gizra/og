@@ -9,12 +9,13 @@ namespace Drupal\og\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Og;
-use Drupal\Core\Field\FieldFilteredMarkup;
+use Drupal\user\Entity\User;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -72,7 +73,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $parents = $form['#parents'];
 
     $target_type = $this->fieldDefinition->getTargetEntityTypeId();
-    $user_groups = Og::getEntityGroups(\Drupal::currentUser()->getAccount());
+    $user_groups = Og::getEntityGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
     $user_group_ids = array_map(function($group) {
       return $group->id();
@@ -228,7 +229,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $target_type = $this->fieldDefinition->getTargetEntityTypeId();
 
-    $user_groups = Og::getEntityGroups(\Drupal::currentUser()->getAccount());
+    $user_groups = Og::getEntityGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
     $user_group_ids = array_map(function($group) {
       return $group->id();
