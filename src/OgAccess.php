@@ -59,8 +59,7 @@ class OgAccess {
    *   Defaults to FALSE.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
-   *   TRUE or FALSE if the current user has the requested permission.
-   *   NULL, if the given group isn't a valid group.
+   *   An access result object.
    */
   public static function userAccess(EntityInterface $group_entity, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
     $group_type_id = $group_entity->getEntityTypeId();
@@ -150,10 +149,7 @@ class OgAccess {
    *   (optional) The user object. If empty the current user will be used.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
-   *   Returns TRUE if the user has access to the permission, otherwise FALSE, or
-   *   if the entity is not in OG context, function _will return NULL. This allows
-   *   a distinction between FALSE - no access, and NULL - no access as no OG
-   *   context found.
+   *   An access result object.
    */
   public static function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL) {
     $result = AccessResult::neutral();
@@ -174,7 +170,7 @@ class OgAccess {
         return $user_access;
       }
       else {
-        // An entity can't be a group and group content in the same time. The
+        // An entity can be a group and group content in the same time. The
         // group didn't allow access, but the user still might have access to
         // the permission in group content context. So instead of retuning a
         // deny here, we set the result, that might change if an access is
