@@ -128,7 +128,42 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
   $entity_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
 
-  if ($operation === 'create' && Og::isGroupContent($entity_type_id, $bundle_id)) {
+  if (in_array($operation, ['update', 'delete'])) {
+    $access = OgAccess::userAccessEntity('administer group', $entity, $account);
+
+    if ($access->isNeutral()) {
+      // The node isn't in an OG context, so no need to keep testing.
+      return $access;
+    }
+    else {
+      // Any and own content.
+      $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
+    }
+
+    if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
+      $access = OgAccess::userAccessEntity($operation, $entity, $account);
+    }
+
+    if ($access->isAllowed()) {
+      return $access;
+    }
+
+    // Otherwise, ignore or deny based on whether strict entity access is set.
+    return AccessResult::forbiddenIf($entity_access_strict);
+  }
+
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_entity_create_access().
+ */
+function og_entity_create_access(\Drupal\Core\Session\AccountInterface $account, array $context, $entity_bundle) {
+  $entity_type_id = $context;
+  $bundle_id = $entity->bundle();
+
+  $entity_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
+  if (Og::isGroupContent($entity_type_id, $bundle_id)) {
     $access_result = AccessResult::allowedIfHasPermission($account, 'administer group');
     if ($access_result->isAllowed()) {
       return $access_result;
@@ -170,31 +205,6 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     // Otherwise, ignore or deny based on whether strict entity access is set.
     return AccessResult::forbiddenIf($entity_access_strict);
   }
-  elseif (in_array($operation, ['update', 'delete'])) {
-    $access = OgAccess::userAccessEntity('administer group', $entity, $account);
-
-    if ($access->isNeutral()) {
-      // The node isn't in an OG context, so no need to keep testing.
-      return $access;
-    }
-    else {
-      // Any and own content.
-      $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
-    }
-
-    if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
-      $access = OgAccess::userAccessEntity($operation, $entity, $account);
-    }
-
-    if ($access->isAllowed()) {
-      return $access;
-    }
-
-    // Otherwise, ignore or deny based on whether strict entity access is set.
-    return AccessResult::forbiddenIf($entity_access_strict);
-  }
-
-  return AccessResult::neutral();
 }
 
 /**

@@ -8,6 +8,8 @@
 namespace Drupal\og;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\user\EntityOwnerInterface;
@@ -113,8 +115,8 @@ class OgAccess {
     $config = \Drupal::config('og.settings');
     if ($config->get('group_manager_full_access')) {
       if (!empty($user_id) && $group_entity instanceof EntityOwnerInterface && $group_entity->getOwnerId() == $user_id) {
-        // @TODO do we need to add the user here?
-        return AccessResult::allowed();
+        return AccessResult::allowed()
+          ->addCacheableDependency($group_entity);
       }
     }
 
@@ -128,7 +130,7 @@ class OgAccess {
 
       // @todo: Getting permissions from OG Roles will be added here.
 
-      static::setPermissionCache($group_entity, $user, TRUE, $permissions);
+      //static::setPermissionCache($group_entity, $user, TRUE, $permissions);
     }
 
     if (!$skip_alter && !isset($post_alter_cache[$operation])) {
@@ -142,23 +144,23 @@ class OgAccess {
         'group' => $group_entity,
         'user' => $user,
       );
+      $cacheable_metadata = new CacheableMetadata;
+      \Drupal::moduleHandler()->alter('og_user_access', $alterable_permissions, $cacheable_metadata, $context);
 
-      \Drupal::moduleHandler()->alter('og_user_access', $alterable_permissions, $context);
-
-      static::setPermissionCache($group_entity, $user, FALSE, $alterable_permissions);
+      static::setPermissionCache($group_entity, $user, FALSE, $alterable_permissions, $cacheable_metadata);
     }
 
     $altered_permissions = static::getPermissionsCache($group_entity, $user, FALSE);
 
-    if (!empty($altered_permissions[static::ADMINISTER_GROUP_PERMISSION]) && !$ignore_admin) {
+    $user_is_group_admin = !empty($altered_permissions['permissions'][static::ADMINISTER_GROUP_PERMISSION]);
+    if (($user_is_group_admin && !$ignore_admin) || !empty($altered_permissions['permissions'][$operation])) {
       // User is a group admin, and we do not ignore this special permission
       // that grants access to all the group permissions.
-      // @TODO what about caching?
-      return AccessResult::allowed();
+      return AccessResult::allowed()->addCacheableDependency($altered_permissions['cacheable_metadata']);
     }
-
-    // @TODO is this the right thing to do?
-    return AccessResult::allowedIf(!empty($altered_permissions[$operation]));
+    else {
+      return AccessResult::forbidden();
+    }
   }
 
   /**
@@ -181,7 +183,7 @@ class OgAccess {
 
     // Entity isn't saved yet.
     if ($entity->isNew()) {
-      return $result;
+      return $result->addCacheableDependency($entity);
     }
 
     $entity_type = $entity->getEntityTypeId();
@@ -195,17 +197,17 @@ class OgAccess {
         return $user_access;
       }
       else {
-        // An entity can be a group and group content in the same time. The
-        // group didn't return TRUE, but the user still might have access to the
-        // permission in group content context. So instead of retuning a deny
-        // here, we set the result, that might change if an access is found.
-        // @TODO Change something about caching and user?
-        $result = AccessResult::forbidden()->addCacheableDependency($entity);
+        // An entity can't be a group and group content in the same time. The
+        // group didn't allow access, but the user still might have access to
+        // the permission in group content context. So instead of retuning a
+        // deny here, we set the result, that might change if an access is
+        // found.
+        $result = AccessResult::forbidden()->inheritCacheability($user_access);
       }
     }
 
-    if ($is_group_content && $result = Og::getEntityGroups($entity)) {
-      foreach ($result as $groups) {
+    if ($is_group_content && $entity_groups = Og::getEntityGroups($entity)) {
+      foreach ($entity_groups as $groups) {
         foreach ($groups as $group) {
           $user_access = static::userAccess($group, $operation, $user);
           if ($user_access->isAllowed()) {
@@ -213,7 +215,6 @@ class OgAccess {
           }
         }
       }
-      // @TODO Change something about caching and user?
       return AccessResult::forbidden();
     }
 
@@ -234,13 +235,16 @@ class OgAccess {
    * @param array $permissions
    *   Array of permissions to set.
    */
-  protected static function setPermissionCache(EntityInterface $group, AccountInterface $user, $pre_alter, array $permissions) {
+  protected static function setPermissionCache(EntityInterface $group, AccountInterface $user, $pre_alter, array $permissions, RefinableCacheableDependencyInterface $cacheable_metadata) {
     $entity_type_id = $group->getEntityTypeId();
     $group_id = $group->id();
     $user_id = $user->id();
     $type = $pre_alter ? 'pre_alter' : 'post_alter';
 
-    static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type] = $permissions;
+    static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type] = [
+      'permissions' => $permissions,
+      'cacheable_metadata' => $cacheable_metadata,
+    ];
   }
 
   /**
