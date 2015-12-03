@@ -132,7 +132,7 @@ class OgAccess {
       // that grants access to all the group permissions.
       return AccessResult::allowed()->addCacheableDependency($altered_permissions['cacheable_metadata']);
     }
-    
+
     return AccessResult::forbidden();
   }
 
@@ -204,6 +204,8 @@ class OgAccess {
    *   Determines if the type of permissions is pre-alter or post-alter.
    * @param array $permissions
    *   Array of permissions to set.
+   * @param \Drupal\Core\Cache\RefinableCacheableDependencyInterface $cacheable_metadata
+   *   A cacheable metadata object.
    */
   protected static function setPermissionCache(EntityInterface $group, AccountInterface $user, $pre_alter, array $permissions, RefinableCacheableDependencyInterface $cacheable_metadata) {
     $entity_type_id = $group->getEntityTypeId();
