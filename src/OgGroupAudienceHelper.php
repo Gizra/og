@@ -69,7 +69,7 @@ class OgGroupAudienceHelper {
    * @return string
    *   The name of the group audience field.
    */
-  function getBestField(ContentEntityInterface $entity, $group_type, $group_bundle, $skip_access_check = FALSE) {
+  public static function getBestField(ContentEntityInterface $entity, $group_type, $group_bundle, $skip_access_check = FALSE) {
     $entity_type = $entity->getEntityTypeId();
     list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
