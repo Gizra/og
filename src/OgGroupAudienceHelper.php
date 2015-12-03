@@ -54,19 +54,22 @@ class OgGroupAudienceHelper {
   }
 
   /**
-   * Get the first best matching group-audience field.
+   * Returns the first group audience field that matches the given entity.
    *
-   * @param $entity
-   *   The entity object.
-   * @param $group_type
-   *   The group type.
-   * @param $group_bundle
-   *   The group bundle.
-   * @param $skip_access
-   *   TRUE, if current user access to the field, should be skipped.
-   *   Defaults to FALSE.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The content entity to find a matching group audience field for.
+   * @param string $group_type
+   *   The group type that should be referenced by the group audience field.
+   * @param string $group_bundle
+   *   The group bundle that should be referenced by the group audience field.
+   * @param bool $skip_access_check
+   *   Set this to TRUE to not check if the current user has access to the
+   *   field. Defaults to FALSE.
+   *
+   * @return string
+   *   The name of the group audience field.
    */
-  function getBestField($entity, $group_type, $group_bundle, $skip_access = FALSE) {
+  function getBestField(ContentEntityInterface $entity, $group_type, $group_bundle, $skip_access_check = FALSE) {
     $entity_type = $entity->getEntityTypeId();
     list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
@@ -91,7 +94,7 @@ class OgGroupAudienceHelper {
         continue;
       }
 
-      if (!$skip_access && !field_access('view', $field, $entity_type, $entity)) {
+      if (!$skip_access_check && !field_access('view', $field, $entity_type, $entity)) {
         // User can't access field.
         continue;
       }
