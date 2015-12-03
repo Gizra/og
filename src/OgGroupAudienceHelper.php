@@ -53,4 +53,52 @@ class OgGroupAudienceHelper {
     return $entity->get($field_name)->count() < $cardinality;
   }
 
+  /**
+   * Get the first best matching group-audience field.
+   *
+   * @param $entity_type
+   *   The entity type.
+   * @param $entity
+   *   The entity object.
+   * @param $group_type
+   *   The group type.
+   * @param $group_bundle
+   *   The group bundle.
+   * @param $skip_access
+   *   TRUE, if current user access to the field, should be skipped.
+   *   Defaults to FALSE.
+   */
+  function getBestField($entity_type, $entity, $group_type, $group_bundle, $skip_access = FALSE) {
+    list(,, $bundle) = entity_extract_ids($entity_type, $entity);
+
+    $field_names = Og::getAllGroupAudienceFields($entity_type, $bundle);
+    if (!$field_names) {
+      return;
+    }
+    foreach ($field_names as $field_name => $label) {
+      $field = field_info_field($field_name);
+      $settings = $field['settings'];
+      if ($settings['target_type'] != $group_type) {
+        // Group type doesn't match.
+        continue;
+      }
+      if (!empty($settings['handler_settings']['target_bundles']) && !in_array($group_bundle, $settings['handler_settings']['target_bundles'])) {
+        // Bundles don't match.
+        continue;
+      }
+
+      if (!og_check_field_cardinality($entity_type, $entity, $field_name)) {
+        // Field reached maximum.
+        continue;
+      }
+
+      if (!$skip_access && !field_access('view', $field, $entity_type, $entity)) {
+        // User can't access field.
+        continue;
+      }
+
+      return $field_name;
+    }
+  }
+
 }
