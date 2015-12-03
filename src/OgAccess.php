@@ -35,29 +35,6 @@ class OgAccess {
   const ADMINISTER_GROUP_PERMISSION = 'administer group';
 
   /**
-   * Allow access to the entity.
-   *
-   * @var string
-   */
-  const ALLOW_ACCESS = TRUE;
-
-  /**
-   * Deny access to the entity.
-   *
-   * @var string
-   */
-  const DENY_ACCESS = FALSE;
-
-  /**
-   * Entity is not in OG context, so we are neutral regarding access to it.
-   *
-   * @var string
-   */
-  const NEUTRAL = NULL;
-
-
-
-  /**
    * Determines whether a user has a given privilege.
    *
    * All permission checks in OG should go through this function. This
