@@ -41,7 +41,7 @@ class OgAccess {
    * way, we guarantee consistent behavior, and ensure that the superuser
    * and group administrators can perform all actions.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $group_entity
+   * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
    * @param string $operation
    *   The entity operation being checked for.
@@ -61,9 +61,9 @@ class OgAccess {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result object.
    */
-  public static function userAccess(EntityInterface $group_entity, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
-    $group_type_id = $group_entity->getEntityTypeId();
-    $bundle = $group_entity->bundle();
+  public static function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
+    $group_type_id = $group->getEntityTypeId();
+    $bundle = $group->bundle();
 
     if (!Og::isGroup($group_type_id, $bundle)) {
       // Not a group.
@@ -90,14 +90,14 @@ class OgAccess {
     // authenticated.
     $config = \Drupal::config('og.settings');
     if ($config->get('group_manager_full_access')) {
-      if (!empty($user_id) && $group_entity instanceof EntityOwnerInterface && $group_entity->getOwnerId() == $user_id) {
+      if (!empty($user_id) && $group instanceof EntityOwnerInterface && $group->getOwnerId() == $user_id) {
         return AccessResult::allowed()
-          ->addCacheableDependency($group_entity);
+          ->addCacheableDependency($group);
       }
     }
 
-    $pre_alter_cache = static::getPermissionsCache($group_entity, $user, TRUE);
-    $post_alter_cache = static::getPermissionsCache($group_entity, $user, FALSE);
+    $pre_alter_cache = static::getPermissionsCache($group, $user, TRUE);
+    $post_alter_cache = static::getPermissionsCache($group, $user, FALSE);
 
     // To reduce the number of SQL queries, we cache the user's permissions
     // in a static variable.
@@ -112,21 +112,19 @@ class OgAccess {
     if (!$skip_alter && !isset($post_alter_cache[$operation])) {
       // Let modules alter the permissions. So we get the original ones, and
       // pass them along to the implementing modules.
-      // @todo: Check if still needed to do a clone, since the cache is static
-      // we don't want it to be altered.
-      $alterable_permissions = static::getPermissionsCache($group_entity, $user, TRUE);
+      $alterable_permissions = static::getPermissionsCache($group, $user, TRUE);
       $context = array(
         'operation' => $operation,
-        'group' => $group_entity,
+        'group' => $group,
         'user' => $user,
       );
       $cacheable_metadata = new CacheableMetadata;
       \Drupal::moduleHandler()->alter('og_user_access', $alterable_permissions, $cacheable_metadata, $context);
 
-      static::setPermissionCache($group_entity, $user, FALSE, $alterable_permissions, $cacheable_metadata);
+      static::setPermissionCache($group, $user, FALSE, $alterable_permissions, $cacheable_metadata);
     }
 
-    $altered_permissions = static::getPermissionsCache($group_entity, $user, FALSE);
+    $altered_permissions = static::getPermissionsCache($group, $user, FALSE);
 
     $user_is_group_admin = !empty($altered_permissions['permissions'][static::ADMINISTER_GROUP_PERMISSION]);
     if (($user_is_group_admin && !$ignore_admin) || !empty($altered_permissions['permissions'][$operation])) {
