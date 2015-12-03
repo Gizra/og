@@ -132,9 +132,8 @@ class OgAccess {
       // that grants access to all the group permissions.
       return AccessResult::allowed()->addCacheableDependency($altered_permissions['cacheable_metadata']);
     }
-    else {
-      return AccessResult::forbidden();
-    }
+    
+    return AccessResult::forbidden();
   }
 
   /**
