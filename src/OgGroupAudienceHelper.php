@@ -71,7 +71,7 @@ class OgGroupAudienceHelper {
    */
   public static function getBestField(ContentEntityInterface $entity, $group_type, $group_bundle, $skip_access_check = FALSE) {
     $entity_type = $entity->getEntityTypeId();
-    list(,, $bundle) = entity_extract_ids($entity_type, $entity);
+    $bundle = $entity->bundle();
 
     $field_names = Og::getAllGroupAudienceFields($entity_type, $bundle);
     if (!$field_names) {
