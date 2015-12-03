@@ -56,8 +56,6 @@ class OgGroupAudienceHelper {
   /**
    * Get the first best matching group-audience field.
    *
-   * @param $entity_type
-   *   The entity type.
    * @param $entity
    *   The entity object.
    * @param $group_type
@@ -68,7 +66,8 @@ class OgGroupAudienceHelper {
    *   TRUE, if current user access to the field, should be skipped.
    *   Defaults to FALSE.
    */
-  function getBestField($entity_type, $entity, $group_type, $group_bundle, $skip_access = FALSE) {
+  function getBestField($entity, $group_type, $group_bundle, $skip_access = FALSE) {
+    $entity_type = $entity->getEntityTypeId();
     list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
     $field_names = Og::getAllGroupAudienceFields($entity_type, $bundle);
