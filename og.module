@@ -123,36 +123,38 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::neutral();
   }
 
+  if ($operation == 'view') {
+    return AccessResult::neutral();
+  }
+
   $entity_type_id = $entity->getEntityTypeId();
   $bundle_id = $entity->bundle();
 
   $entity_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
 
-  if (in_array($operation, ['update', 'delete'])) {
-    $access = OgAccess::userAccessEntity('administer group', $entity, $account);
+  $access = OgAccess::userAccessEntity('administer group', $entity, $account);
 
-    if ($access->isNeutral()) {
-      // The node isn't in an OG context, so no need to keep testing.
-      return $access;
-    }
-    else {
-      // Any and own content.
-      $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
-    }
-
-    if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
-      $access = OgAccess::userAccessEntity($operation, $entity, $account);
-    }
-
-    if ($access->isAllowed()) {
-      return $access;
-    }
-
-    // Otherwise, ignore or deny based on whether strict entity access is set.
-    return AccessResult::forbiddenIf($entity_access_strict);
+  if ($access->isNeutral()) {
+    // The node isn't in an OG context, so no need to keep testing.
+    return $access;
+  }
+  else {
+    // Any and own content.
+    $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
   }
 
-  return AccessResult::neutral();
+  if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
+    $access = OgAccess::userAccessEntity($operation, $entity, $account);
+  }
+
+  if ($access->isAllowed()) {
+    return $access;
+  }
+
+  // Otherwise, ignore or deny based on whether strict entity access is set.
+  return AccessResult::forbiddenIf($entity_access_strict);
+
+
 }
 
 /**
