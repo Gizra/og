@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\og\Plugin\OgFields\AudienceField.
+ */
+
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
