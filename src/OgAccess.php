@@ -8,6 +8,7 @@
 namespace Drupal\og;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -62,6 +63,17 @@ class OgAccess {
    *   An access result object.
    */
   public static function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
+    return static::wrap(static::doUserAccess($group, $operation, $user, $skip_alter), $user);
+  }
+
+  protected function wrap(AccessResultInterface $access_result, AccountInterface $user) {
+    if ($user->id() === \Drupal::currentUser()->id()) {
+      $access_result->cachePerUser();
+    }
+    return $access_result;
+  }
+
+  protected static function doUserAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
     $group_type_id = $group->getEntityTypeId();
     $bundle = $group->bundle();
 
@@ -178,6 +190,7 @@ class OgAccess {
     $is_group_content = Og::isGroupContent($entity_type, $bundle);
     if ($is_group_content && $entity_groups = Og::getEntityGroups($entity)) {
       $cache_tags = $entity->getEntityType()->getListCacheTags();
+      static::wrap($result, $user);
       foreach ($entity_groups as $groups) {
         foreach ($groups as $group) {
           $user_access = static::userAccess($group, $operation, $user);
@@ -186,7 +199,7 @@ class OgAccess {
           }
         }
       }
-      return AccessResult::forbidden()->addCacheTags($cache_tags);
+      return static::wrap(AccessResult::forbidden()->addCacheTags($cache_tags), $user);
     }
 
     // Either the user didn't have permission, or the entity might be an
