@@ -11,4 +11,4 @@ administer group:
     - ADMINISTRATOR_ROLE
 
 permission_callbacks:
-  - \Drupal\og\OgPermissions::ogNodeTypesPermission
+  - \Drupal\og\OgNodePermissions::nodeTypePermissions
