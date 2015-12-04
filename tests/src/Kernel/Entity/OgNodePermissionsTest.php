@@ -25,18 +25,6 @@ class OgNodePermissionsTest extends KernelTestBase {
   public static $modules = ['node', 'field', 'og', 'system', 'user'];
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
-
-    // Install needed config and schema.
-    $this->installConfig(['og']);
-    $this->installEntitySchema('og_membership');
-    $this->installEntitySchema('user');
-  }
-
-  /**
    * Testing group content node permissions.
    */
   public function testGetPermissions() {
