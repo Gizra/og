@@ -17,8 +17,13 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 class OgGroupAudienceHelper {
 
   /**
+   * The default OG audience field name.
+   */
+  const DEFAULT_FIELD = 'og_group_ref';
+
+  /**
    * Return TRUE if a field can be used and has not reached maximum values.
-   *
+   *d
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The content entity to check the field cardinality for.
    * @param string $field_name

@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
+use Drupal\og\OgGroupAudienceHelper;
 
 /**
  * The OG membership is the main idea behind OG. The OG membership entity keep
@@ -25,7 +26,7 @@ use Drupal\Core\Language\Language;
  *    ->setContentType('node')
  *    ->setGid(1)
  *    ->setEntityType('node')
- *    ->setFieldName(OG_AUDIENCE_FIELD)
+ *    ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
  *    ->save();
  * @endcode
  *
@@ -351,7 +352,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
     $fields['field_name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Field name'))
       ->setDescription(t("The name of the field holding the group ID, the OG membership is associated with."))
-      ->setDefaultValue(OG_AUDIENCE_FIELD);
+      ->setDefaultValue(OgGroupAudienceHelper::DEFAULT_FIELD);
 
     $fields['language'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language'))
@@ -366,7 +367,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   public function PreSave(EntityStorageInterface $storage) {
 
     if (!$this->getFieldName()) {
-      $this->setFieldName(OG_AUDIENCE_FIELD);
+      $this->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD);
     }
 
     parent::PreSave($storage);

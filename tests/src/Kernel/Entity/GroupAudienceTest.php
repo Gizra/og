@@ -11,6 +11,7 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\Component\Utility\Unicode;
+use Drupal\og\OgGroupAudienceHelper;
 
 /**
  * @group og
@@ -72,8 +73,8 @@ class GroupAudienceTest extends KernelTestBase {
     $field_name1 = Unicode::strtolower($this->randomMachineName());
     $field_name2 = Unicode::strtolower($this->randomMachineName());
 
-    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, ['field_name' => $field_name1]);
-    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name1]);
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
 
     $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle);
     $this->assertEquals(array($field_name1, $field_name2), array_keys($field_names));
@@ -106,10 +107,10 @@ class GroupAudienceTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, $overrides);
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $overrides);
 
     // Add a default field, which will use the "entity_test" as target type.
-    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
 
     $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test');
     $this->assertEquals(array($field_name2), array_keys($field_names));
@@ -144,11 +145,11 @@ class GroupAudienceTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, $overrides);
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $overrides);
 
     $overrides['field_name'] = $field_name2;
     $overrides['field_config']['settings']['handler_settings']['target_bundles'] = [$group_bundle2 => $group_bundle2];
-    Og::CreateField(OG_AUDIENCE_FIELD, 'entity_test', $bundle, $overrides);
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $overrides);
 
     $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $group_bundle1);
     $this->assertEquals(array($field_name1), array_keys($field_names));
