@@ -89,10 +89,12 @@ class OgAccess {
     // Group manager has all privileges (if variable is TRUE) and they are
     // authenticated.
     $config = \Drupal::config('og.settings');
-    if ($config->get('group_manager_full_access')) {
-      if (!empty($user_id) && $group instanceof EntityOwnerInterface && $group->getOwnerId() == $user_id) {
-        return AccessResult::allowed()
-          ->addCacheableDependency($group);
+    $cacheable_metadata = (new CacheableMetadata)
+        ->addCacheableDependency($config);
+    if ($config->get('group_manager_full_access') && !empty($user_id) && $group instanceof EntityOwnerInterface) {
+      $cacheable_metadata->addCacheableDependency($group);
+      if ($group->getOwnerId() == $user_id) {
+        return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
       }
     }
 
@@ -106,7 +108,7 @@ class OgAccess {
 
       // @todo: Getting permissions from OG Roles will be added here.
 
-      //static::setPermissionCache($group_entity, $user, TRUE, $permissions);
+      static::setPermissionCache($group, $user, TRUE, $permissions, $cacheable_metadata);
     }
 
     if (!$skip_alter && !isset($post_alter_cache[$operation])) {
@@ -118,7 +120,6 @@ class OgAccess {
         'group' => $group,
         'user' => $user,
       );
-      $cacheable_metadata = new CacheableMetadata;
       \Drupal::moduleHandler()->alter('og_user_access', $alterable_permissions, $cacheable_metadata, $context);
 
       static::setPermissionCache($group, $user, FALSE, $alterable_permissions, $cacheable_metadata);
