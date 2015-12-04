@@ -49,18 +49,18 @@ class OgNodePermissionsTest extends KernelTestBase {
     $bundle->save();
     Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $bundle->id());
 
-    $label = $bundle->label();
+    $name = $bundle->id();
     $expected = [
       'administer group',
       'update group',
-      "create $label content",
-      "delete any $label content",
-      "delete own $label content",
-      "delete $label revisions",
-      "edit any $label content",
-      "edit own $label content",
-      "revert $label revisions",
-      "view $label revisions",
+      "create $name content",
+      "delete any $name content",
+      "delete own $name content",
+      "delete $name revisions",
+      "edit any $name content",
+      "edit own $name content",
+      "revert $name revisions",
+      "view $name revisions",
     ];
 
     $permissions = Og::permissionHandler()->getPermissions();
