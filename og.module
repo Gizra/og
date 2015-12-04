@@ -153,18 +153,15 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
   // Otherwise, ignore or deny based on whether strict entity access is set.
   return AccessResult::forbiddenIf($entity_access_strict);
-
-
 }
 
 /**
  * Implements hook_entity_create_access().
  */
-function og_entity_create_access(\Drupal\Core\Session\AccountInterface $account, array $context, $entity_bundle) {
-  $entity_type_id = $context;
+function og_entity_create_access(AccountInterface $account, array $context, $bundle) {
+  $entity_type_id = $context['entity_type_id'];
 
-  $entity_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
-  if (!Og::isGroupContent($entity_type_id, $entity_bundle)) {
+  if (!Og::isGroupContent($entity_type_id, $bundle)) {
     // Not a group content.
     return AccessResult::neutral();
   }
@@ -177,11 +174,14 @@ function og_entity_create_access(\Drupal\Core\Session\AccountInterface $account,
   // Save some legwork if the user has the core permission and strict node
   // access is not set.
 
+  $config = \Drupal::config('og.settings');
+  $entity_access_strict = $config->get('node_access_strict');
   // @todo: $entity isn't passed.
-  
+  /*
   if (!$entity_access_strict && $entity->access('create', $account)) {
     return AccessResult::neutral();
   }
+  */
 
   // We can't check if user has create permissions, as there is no group
   // context. However, we can check if there are any groups the user will be
@@ -189,12 +189,14 @@ function og_entity_create_access(\Drupal\Core\Session\AccountInterface $account,
   // @see \Drupal\og\Plugin\EntityReferenceSelection\OgSelection::buildEntityQuery()
   $required = FALSE;
 
-  foreach ($entity->getFieldDefinitions() as $field_definition) {
+  $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+  foreach ($field_definitions as $field_name => $field_definition) {
+    /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
     if (!Og::isGroupAudienceField($field_definition)) {
       continue;
     }
 
-    $handler = Og::getSelectionHandler($entity->getEntityTypeId(), $entity->bundle(), $field_definition->getName());
+    $handler = Og::getSelectionHandler($entity_type_id, $bundle, $field_definition);
 
     if ($handler->getReferenceableEntities()) {
       return Accessresult::allowed();
@@ -205,13 +207,8 @@ function og_entity_create_access(\Drupal\Core\Session\AccountInterface $account,
     $required = $field_definition->isRequired();
   }
 
-  // If no group audience field is required, we ignore.
-  if (!$required) {
-    return AccessResult::neutral();
-  }
-
   // Otherwise, ignore or deny based on whether strict entity access is set.
-  return AccessResult::forbiddenIf($entity_access_strict);
+  return $required ? AccessResult::forbiddenIf($entity_access_strict) : AccessResult::neutral();
 }
 
 /**
