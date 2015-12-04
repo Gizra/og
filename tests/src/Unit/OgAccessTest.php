@@ -101,56 +101,73 @@ class OgAccessTest extends UnitTestCase {
 
   /**
    * @coversDefaultmethod ::userAccess
+   * @dataProvider operationProvider
    */
-  public function testNotAGroup() {
+  public function testNotAGroup($operation) {
     $this->isGroup->willReturn(FALSE);
-    $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), 'view');
+    $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), $operation);
     $this->assertTrue($user_access->isNeutral());
   }
 
   /**
    * @coversDefaultmethod ::userAccess
+   * @dataProvider operationProvider
    */
-  public function testForbiddenByDefault() {
-    $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), 'view', $this->user->reveal());
+  public function testForbiddenByDefault($operation) {
+    $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isForbidden());
   }
 
   /**
    * @coversDefaultmethod ::userAccess
+   * @dataProvider operationProvider
    */
-  public function testUser1() {
+  public function testUser1($operation) {
     $this->user->id()->willReturn(1);
-    $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), 'view', $this->user->reveal());
+    $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }
 
   /**
    * @coversDefaultmethod ::userAccess
+   * @dataProvider operationProvider
    */
-  public function testAdminPermission() {
+  public function testAdminPermission($operation) {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
-    $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), 'view', $this->user->reveal());
+    $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }
 
   /**
    * @coversDefaultmethod ::userAccess
+   * @dataProvider operationProvider
    */
-  public function testOwner() {
+  public function testOwner($operation) {
     $this->config->get('group_manager_full_access')->willReturn(TRUE);
     $this->addCache($this->config);
-    $user_access = OgAccess::userAccess($this->groupEntity(TRUE)->reveal(), 'view', $this->user->reveal());
+    $user_access = OgAccess::userAccess($this->groupEntity(TRUE)->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }
 
-  public function testOgUserAccessAlter() {
+  /**
+   * @coversDefaultmethod ::userAccess
+   * @dataProvider operationProvider
+   */
+  public function testOgUserAccessAlter($operation) {
     $permissions[OgAccess::ADMINISTER_GROUP_PERMISSION] = TRUE;
     \Drupal::getContainer()->set('module_handler', new OgAccessTestAlter($permissions));
     $group_entity = $this->groupEntity();
     $group_entity->id()->willReturn(mt_rand(5, 10));
-    $user_access = OgAccess::userAccess($group_entity->reveal(), 'view', $this->user->reveal());
+    $user_access = OgAccess::userAccess($group_entity->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
+  }
+
+  public function operationProvider() {
+    return [
+      ['view'],
+      ['update'],
+      ['delete'],
+    ];
   }
 }
 
