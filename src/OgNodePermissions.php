@@ -29,13 +29,11 @@ class OgNodePermissions extends NodePermissions {
     // Generate node permissions for all group content node types.
     foreach (NodeType::loadMultiple() as $bundle) {
 
-      $bundle_name = $bundle->id();
-
-      if (!Og::isGroupContentType('node', $bundle_name)) {
+      if (!Og::isGroupContent('node', $bundle->id())) {
         continue;
       }
 
-      $perms += $this->buildPermissions($bundle_name);
+      $perms += $this->buildPermissions($bundle);
     }
 
     return $perms;
