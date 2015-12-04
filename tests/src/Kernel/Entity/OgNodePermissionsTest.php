@@ -7,10 +7,10 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\Component\Utility\Unicode;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
