@@ -7,8 +7,8 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\Component\Utility\Unicode;
 use Drupal\og\OgGroupAudienceHelper;
@@ -22,15 +22,7 @@ class OgNodePermissionsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'field', 'og', 'system'];
-
-  /**
-   * Array with the bundle IDs.
-   *
-   * @var Array
-   */
-  protected $bundles;
-
+  public static $modules = ['node', 'field', 'og', 'system', 'user'];
 
   /**
    * {@inheritdoc}
@@ -38,8 +30,10 @@ class OgNodePermissionsTest extends KernelTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Add membership and config schema.
+    // Install needed config and schema.
     $this->installConfig(['og']);
+    $this->installEntitySchema('og_membership');
+    $this->installEntitySchema('user');
   }
 
   /**
