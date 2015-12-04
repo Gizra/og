@@ -58,7 +58,7 @@ class OgAccess {
    *   with "administer group" will be granted all permissions.
    *   Defaults to FALSE.
    *
-   * @return \Drupal\Core\Access\AccessResultInterface
+   * @return \Drupal\Core\Access\AccessResult
    *   An access result object.
    */
   public static function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
@@ -146,7 +146,7 @@ class OgAccess {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   (optional) The user object. If empty the current user will be used.
    *
-   * @return \Drupal\Core\Access\AccessResultInterface
+   * @return \Drupal\Core\Access\AccessResult
    *   An access result object.
    */
   public static function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL) {
@@ -177,15 +177,16 @@ class OgAccess {
 
     $is_group_content = Og::isGroupContent($entity_type, $bundle);
     if ($is_group_content && $entity_groups = Og::getEntityGroups($entity)) {
+      $cache_tags = $entity->getEntityType()->getListCacheTags();
       foreach ($entity_groups as $groups) {
         foreach ($groups as $group) {
           $user_access = static::userAccess($group, $operation, $user);
           if ($user_access->isAllowed()) {
-            return $user_access;
+            return $user_access->addCacheTags($cache_tags);
           }
         }
       }
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()->addCacheTags($cache_tags);
     }
 
     // Either the user didn't have permission, or the entity might be an

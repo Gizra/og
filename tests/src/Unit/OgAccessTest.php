@@ -172,6 +172,14 @@ class OgAccessTest extends UnitTestCase {
     $this->assertTrue($user_access->isNeutral());
   }
 
+  /**
+   * @coversDefaultmethod ::userAccessEntity
+   * @dataProvider operationProvider
+   */
+  public function testUserAccessGetEntityGroups($operation) {
+
+  }
+
   public function operationProvider() {
     return [
       ['view'],
