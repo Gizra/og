@@ -160,8 +160,6 @@ class OgAccess {
     $entity_type = $entity->getEntityTypeId();
     $bundle = $entity->bundle();
 
-    $is_group_content = Og::isGroupContent($entity_type, $bundle);
-
     if (Og::isGroup($entity_type, $bundle)) {
       $user_access = static::userAccess($entity, $operation, $user);
       if ($user_access->isAllowed()) {
@@ -177,6 +175,7 @@ class OgAccess {
       }
     }
 
+    $is_group_content = Og::isGroupContent($entity_type, $bundle);
     if ($is_group_content && $entity_groups = Og::getEntityGroups($entity)) {
       foreach ($entity_groups as $groups) {
         foreach ($groups as $group) {
