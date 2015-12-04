@@ -12,6 +12,7 @@ use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
@@ -67,6 +68,7 @@ class OgAccessTest extends UnitTestCase {
     $container->set('og.group.manager', $group_manager->reveal());
     $container->set('cache_contexts_manager', $cache_contexts_manager->reveal());
     $container->set('config.factory', $config_factory->reveal());
+    $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
     \Drupal::setContainer($container);
   }
 
@@ -83,6 +85,7 @@ class OgAccessTest extends UnitTestCase {
     }
     $group_entity->getEntityTypeId()->willReturn($this->entityTypeId);
     $group_entity->bundle()->willReturn($this->bundle);
+    $group_entity->id()->willReturn($this->randomMachineName());
     return $this->addCache($group_entity);
   }
 
@@ -103,6 +106,14 @@ class OgAccessTest extends UnitTestCase {
     $this->isGroup->willReturn(FALSE);
     $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), 'view');
     $this->assertTrue($user_access->isNeutral());
+  }
+
+  /**
+   * @coversDefaultmethod ::userAccess
+   */
+  public function testForbiddenByDefault() {
+    $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), 'view', $this->user->reveal());
+    $this->assertTrue($user_access->isForbidden());
   }
 
   /**
