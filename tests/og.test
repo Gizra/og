@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\og\OgGroupAudienceHelper;
+
 class OgAccess extends DrupalWebTestCase {
 
   public static function getInfo() {
@@ -22,14 +24,14 @@ class OgAccess extends DrupalWebTestCase {
     // Change permissions to authenticated member.
 
     // Add OG group fields.
-    og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', 'main');
     $roles = array_flip(og_roles('entity_test', 'main'));
     og_role_change_permissions($roles[Og::AUTHENTICATED_ROLE], array($perm => 1));
 
 
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article', $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article', $og_field);
 
     $user1 = $this->drupalCreateUser();
     $user2 = $this->drupalCreateUser();
@@ -57,7 +59,7 @@ class OgAccess extends DrupalWebTestCase {
 
     // Make group content also a group.
     og_create_field(OG_GROUP_FIELD, 'node', 'article');
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     og_create_field('og_group_ref_2', 'user', 'user', $og_field);
 
     $settings['uid'] = $user2->uid;
@@ -127,7 +129,7 @@ class OgNodeAccess extends DrupalWebTestCase {
     og_create_field(OG_GROUP_FIELD, 'node', 'page');
 
     // Add OG audience field to the node's "article" bundle.
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article');
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article');
 
     // Create an editor user and a group manager for these tests.
     $this->editor_user = $this->drupalCreateUser(array('access content', 'edit any page content', 'edit any article content', 'create article content'));
@@ -196,7 +198,7 @@ class OgNodeAccess extends DrupalWebTestCase {
     $this->drupalGet('node/add/article');
     $this->assertResponse('200', t('User can access node create with non-required field.'));
 
-    $instance = field_info_instance('node', OG_AUDIENCE_FIELD, 'article');
+    $instance = field_info_instance('node', OgGroupAudienceHelper::DEFAULT_FIELD, 'article');
     $instance['required'] = TRUE;
     field_update_instance($instance);
 
@@ -365,9 +367,9 @@ class OgMetaData extends DrupalWebTestCase {
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
     // Add OG audience field to the node's "article" bundle.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article', $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article', $og_field);
 
     // Add a second audience field.
     og_create_field('og_ref_2', 'node', 'article', $og_field);
@@ -417,14 +419,14 @@ class OgMetaData extends DrupalWebTestCase {
       $this->assertEqual(count($og_memberships), 1, t('Found 1 OG membership with state @state.', array('@state' => $value)));
       $this->assertEqual($og_memberships[0]->state, $state, t('OG membership has correct @state state.', array('@state' => $value)));
 
-      $og_memberships = $wrapper->{OG_AUDIENCE_FIELD . '__og_membership__' . $state}->value();
+      $og_memberships = $wrapper->{OgGroupAudienceHelper::DEFAULT_FIELD . '__og_membership__' . $state}->value();
       $this->assertEqual(count($og_memberships), 1, t('Found 1 OG membership with state @state in group-audience field.', array('@state' => $value)));
-      $this->assertEqual($og_memberships[0]->field_name, OG_AUDIENCE_FIELD, t('OG membership with state @state is referencing correct field name in group-audience field.', array('@state' => $value)));
+      $this->assertEqual($og_memberships[0]->field_name, OgGroupAudienceHelper::DEFAULT_FIELD, t('OG membership with state @state is referencing correct field name in group-audience field.', array('@state' => $value)));
     }
 
-    $og_memberships = $wrapper->{OG_AUDIENCE_FIELD . '__og_membership'}->value();
+    $og_memberships = $wrapper->{OgGroupAudienceHelper::DEFAULT_FIELD . '__og_membership'}->value();
     $this->assertEqual(count($og_memberships), 2, t('Found 2 OG membership in group-audience field.', array('@state' => $value)));
-    $this->assertEqual($og_memberships[0]->field_name, OG_AUDIENCE_FIELD, t('OG membership has correct group-audience field.'));
+    $this->assertEqual($og_memberships[0]->field_name, OgGroupAudienceHelper::DEFAULT_FIELD, t('OG membership has correct group-audience field.'));
 
     $og_memberships = $wrapper->{'og_ref_2__og_membership'}->value();
     $this->assertEqual(count($og_memberships), 1, t('Found 2 OG membership in second group-audience field.', array('@state' => $value)));
@@ -454,9 +456,9 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
     // Add OG audience field to the node's "article" bundle.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article', $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article', $og_field);
   }
 
   /**
@@ -488,7 +490,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
 
     // Exception on OG membership for anonymous user.
     try {
-      og_membership_create('entity_test', $entity1->pid, 'user', 0, OG_AUDIENCE_FIELD)->save();
+      og_membership_create('entity_test', $entity1->pid, 'user', 0, OgGroupAudienceHelper::DEFAULT_FIELD)->save();
       $this->fail('OG membership can be created for anonymous user.');
     }
     catch (OgException $e) {
@@ -511,7 +513,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
 
     // Exception on existing OG membership.
     try {
-      og_membership_create('entity_test', $entity1->pid, 'node', $node->nid, OG_AUDIENCE_FIELD)->save();
+      og_membership_create('entity_test', $entity1->pid, 'node', $node->nid, OgGroupAudienceHelper::DEFAULT_FIELD)->save();
       $this->fail('Saving multiple OG membership for same entity and group works.');
     }
     catch (OgException $e) {
@@ -519,7 +521,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     }
 
     // Add a second audience field.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
     $og_field['field']['cardinality'] = 2;
     og_create_field('og_ref_2', 'node', 'article', $og_field);
@@ -553,7 +555,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     }
 
     // Exception on audience field, referencing wrong target type.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'node';
     og_create_field('og_ref_3', 'node', 'article', $og_field);
     $values['field_name'] = 'og_ref_3';
@@ -567,7 +569,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
 
     // Exception on audience field, referencing correct target type, but wrong
     // bundles.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
     $og_field['field']['settings']['handler_settings']['target_bundles'] = array('test');
     og_create_field('og_ref_4', 'node', 'article', $og_field);
@@ -666,9 +668,9 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
     // Add OG audience field to the node's "article" bundle.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'article', $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article', $og_field);
   }
 
 
@@ -1043,9 +1045,9 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
 
     // Add OG audience field to the node's "post" bundle.
     $this->drupalCreateContentType(array('type' => 'post'));
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['instance']['required'] = TRUE;
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'post', $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'post', $og_field);
   }
 
   /**
@@ -1156,7 +1158,7 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
    */
   function testMultipleFields() {
     // Add another group-audience field.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     og_create_field('another_field', 'node', 'post', $og_field);
 
     $user1 = $this->drupalCreateUser();
@@ -1177,7 +1179,7 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
     );
     $post1 = $this->drupalCreateNode($settings);
 
-    og_group('node', $group1->nid, array('entity_type' => 'node', 'entity' => $post1, 'field_name' => OG_AUDIENCE_FIELD));
+    og_group('node', $group1->nid, array('entity_type' => 'node', 'entity' => $post1, 'field_name' => OgGroupAudienceHelper::DEFAULT_FIELD));
     og_group('node', $group2->nid, array('entity_type' => 'node', 'entity' => $post1, 'field_name' => 'another_field'));
 
     $this->drupalLogin($user1);
@@ -1356,7 +1358,7 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
     // Add audience field to reference node.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     og_create_field('og_node', 'node', $group_content_type, $og_field);
     og_create_field('og_node', 'entity_test', 'test', $og_field);
 
@@ -1587,11 +1589,11 @@ class OgEntityFieldQueryFieldConditionTestCase extends DrupalWebTestCase {
     og_create_field(OG_GROUP_FIELD, 'node', $this->group_type);
 
     // Add audience field to group content node type.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $this->group_content_type, $og_field);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->group_content_type, $og_field);
     // Add audience field to group content test entity type.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
-    og_create_field(OG_AUDIENCE_FIELD, 'entity_test', 'main', $og_field);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', 'main', $og_field);
 
     // Create a simple text list field.
     $field = array(
@@ -1696,7 +1698,7 @@ class OgEntityFieldQueryFieldConditionTestCase extends DrupalWebTestCase {
     $query->entityCondition('entity_type', 'node');
     $query->entityCondition('bundle', $this->group_content_type);
     // Condition on the group audience field.
-    $query->fieldCondition(OG_AUDIENCE_FIELD, 'target_id', $this->group1->nid);
+    $query->fieldCondition(OgGroupAudienceHelper::DEFAULT_FIELD, 'target_id', $this->group1->nid);
     $result = $query->execute();
 
     $this->assertEqual(count($result['node']), 1, "The correct number of nodes was returned for the query with only the OG field condition.");
@@ -1706,7 +1708,7 @@ class OgEntityFieldQueryFieldConditionTestCase extends DrupalWebTestCase {
     $query->entityCondition('entity_type', 'node');
     $query->entityCondition('bundle', $this->group_content_type);
     // Condition on the group audience field.
-    $query->fieldCondition(OG_AUDIENCE_FIELD, 'target_id', $this->group1->nid);
+    $query->fieldCondition(OgGroupAudienceHelper::DEFAULT_FIELD, 'target_id', $this->group1->nid);
     $query->fieldCondition('list_text', 'value', 'red');
     $result = $query->execute();
 
@@ -1719,7 +1721,7 @@ class OgEntityFieldQueryFieldConditionTestCase extends DrupalWebTestCase {
     $query->entityCondition('bundle', $this->group_content_type);
     $query->fieldCondition('list_text', 'value', 'red');
     // Condition on the group audience field.
-    $query->fieldCondition(OG_AUDIENCE_FIELD, 'target_id', $this->group1->nid);
+    $query->fieldCondition(OgGroupAudienceHelper::DEFAULT_FIELD, 'target_id', $this->group1->nid);
     $result = $query->execute();
 
     $this->assertEqual(count($result['node']), 1, "The correct number of nodes was returned for the query with the OG field condition second.");
@@ -1788,9 +1790,9 @@ class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
     $this->group_content = $type->type;
 
     // Add OG audience field to the new bundle.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $type->type, $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $type->type, $og_field);
   }
 
   /**
@@ -1813,13 +1815,13 @@ class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
     $wrapper = entity_metadata_wrapper('node', $node);
 
     $this->assertFalse(og_is_member('entity_test', $entity1->pid, 'node', $node), t('Node is not assigned to group1.'));
-    $wrapper->{OG_AUDIENCE_FIELD}[] = $entity1->pid;
+    $wrapper->{OgGroupAudienceHelper::DEFAULT_FIELD}[] = $entity1->pid;
     $wrapper->save();
     $og_membership = og_get_membership('entity_test', $entity1->pid, 'node', $node->nid);
     $id = $og_membership->id;
     $this->assertTrue(og_is_member('entity_test', $entity1->pid, 'node', $node), t('Node is assigned to group1 with active state.'));
 
-    $wrapper->{OG_AUDIENCE_FIELD}->set(NULL);
+    $wrapper->{OgGroupAudienceHelper::DEFAULT_FIELD}->set(NULL);
     $wrapper->save();
     $this->assertFalse(og_get_entity_groups('node', $node), t('Node is not associated with any group.'));
   }
@@ -1936,9 +1938,9 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
     $this->node_type = $type->type;
 
     // Add OG audience field to the audience content type.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'node';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $type->type, $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $type->type, $og_field);
 
     // Set the setting for delete a group content when deleting group.
     variable_set('og_orphans_delete', TRUE);
@@ -2052,12 +2054,12 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
     $this->drupalCreateContentType(array('name' => 'Group content', 'type' => 'group_content'));
 
     // Attach the audience field and enable the prepopulate behavior.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['instance']['settings']['behaviors']['prepopulate'] = array(
       'status' => TRUE,
       'action' => 'none',
     );
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'group_content', $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $og_field);
 
     // Add permission to the group.
     $og_roles = og_roles('node', 'group');
@@ -2085,7 +2087,7 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
     $result = $query
       ->entityCondition('entity_type', 'node')
       ->propertyCondition('title', 'foo')
-      ->fieldCondition(OG_AUDIENCE_FIELD, 'target_id', $this->group->nid)
+      ->fieldCondition(OgGroupAudienceHelper::DEFAULT_FIELD, 'target_id', $this->group->nid)
       ->execute();
 
     $this->assertTrue(!empty($result['node']), 'The node was added to the group.');
@@ -2138,7 +2140,7 @@ class OgUserCanPublishGroupContentTypeOnlyInGroup extends DrupalWebTestCase {
     $this->group_content = $this->drupalCreateContentType();
 
     // Attach the audience field.
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $this->group_content->type);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->group_content->type);
 
     // Add permission to the group.
     $og_roles = og_roles('node', $group->type);
@@ -2179,7 +2181,7 @@ class OgUserCanPublishGroupContentTypeOnlyInGroup extends DrupalWebTestCase {
     $result = $query
       ->entityCondition('entity_type', 'node')
       ->propertyCondition('title', $node_title)
-      ->fieldCondition(OG_AUDIENCE_FIELD, 'target_id', $this->group->nid)
+      ->fieldCondition(OgGroupAudienceHelper::DEFAULT_FIELD, 'target_id', $this->group->nid)
       ->execute();
     $node_title = $this->randomName();
 
@@ -2261,9 +2263,9 @@ class OgAutoCompleteAccessibleGroupsValidation extends DrupalWebTestCase {
     $this->drupalCreateContentType(array( 'name' => 'Group content', 'type' => 'group_content'));
     $this->drupalCreateContentType(array( 'name' => 'Group', 'type' => 'group'));
 
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['instance']['settings']['behaviors']['og_widget']['default']['widget_type'] = 'entityreference_autocomplete';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'group_content', $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $og_field);
     og_create_field(OG_GROUP_FIELD, 'node', 'group');
 
     // Create users.
@@ -2343,9 +2345,9 @@ class OgSelectAccessibleGroupsValidation extends DrupalWebTestCase {
     $this->drupalCreateContentType(array( 'name' => 'Group content', 'type' => 'group_content'));
     $this->drupalCreateContentType(array( 'name' => 'Group', 'type' => 'group'));
 
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
+    $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['instance']['settings']['behaviors']['og_widget']['default']['widget_type'] = 'options_select';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', 'group_content', $og_field);
+    og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $og_field);
     og_create_field(OG_GROUP_FIELD, 'node', 'group');
 
     // Create users.

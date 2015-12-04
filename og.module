@@ -40,11 +40,6 @@ define('OG_STATE_PENDING', 2);
 define('OG_STATE_BLOCKED', 3);
 
 /**
- * Group audience field.
- */
-define('OG_AUDIENCE_FIELD', 'og_group_ref');
-
-/**
  * Group default roles and permissions field.
  */
 define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
@@ -1342,26 +1337,6 @@ function _og_get_best_group_audience_field($entity_type, $entity, $group_type, $
 }
 
 /**
- * Return TRUE if a field can be used and has not reached maximum values.
- *
- * @param $entity_type
- *   The entity type.
- * @param $entity
- *   The entity object or entity ID.
- * @param $field_name
- *   The group audience field name.
- */
-function _og_check_field_cardinality($entity_type, $entity, $field_name) {
-  $field = field_info_field($field_name);
-  if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-    return TRUE;
-  }
-
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  return count($wrapper->{$field_name . '__og_membership'}->value(array('identifier' => TRUE))) < $field['cardinality'];
-}
-
-/**
  * Set an association (e.g. subscribe) an entity to a group.
  *
  * @param $group_type
@@ -1910,30 +1885,6 @@ function _og_get_all_group_content_bundle() {
     }
   }
   return $return;
-}
-
-/**
- * Return TRUE if entity belongs to a group.
- *
- * @param $group_type
- *   The entity type of the group.
- * @param $gid
- *   The group ID.
- * @param $entity_type
- *   The entity type.
- * @param $entity
- *   The entity object. If empty the current user will be used.
- * @param $states
- *   (optional) Array with the state to return. If empty groups of all state will
- *   return.
- *
- * @return
- *   TRUE if the entity (e.g. the user) belongs to a group and is not pending or
- *   blocked.
- */
-function _og_is_member($group_type, $gid, $entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE)) {
-  $groups = og_get_entity_groups($entity_type, $entity, $states);
-  return !empty($groups[$group_type]) && in_array($gid, $groups[$group_type]);
 }
 
 /**
