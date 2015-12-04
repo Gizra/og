@@ -54,7 +54,7 @@ class OgAccessTest extends UnitTestCase {
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens(["user.permissions"])->willReturn(TRUE);
 
-    $this->config = $this->prophesize(Config::class);
+    $this->config = $this->addCache($this->prophesize(Config::class));
     $this->config->get('group_manager_full_access')->willReturn(FALSE);
 
     $config_factory = $this->prophesize(ConfigFactory::class);
@@ -144,7 +144,6 @@ class OgAccessTest extends UnitTestCase {
    */
   public function testUserAccessOwner($operation) {
     $this->config->get('group_manager_full_access')->willReturn(TRUE);
-    $this->addCache($this->config);
     $user_access = OgAccess::userAccess($this->groupEntity(TRUE)->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }
@@ -160,6 +159,17 @@ class OgAccessTest extends UnitTestCase {
     $group_entity->id()->willReturn(mt_rand(5, 10));
     $user_access = OgAccess::userAccess($group_entity->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
+  }
+
+  /**
+   * @coversDefaultmethod ::userAccessEntity
+   * @dataProvider operationProvider
+   */
+  public function testUserAccessEntityNew($operation) {
+    $group_entity = $this->groupEntity();
+    $group_entity->isNew()->willReturn(TRUE);
+    $user_access = OgAccess::userAccessEntity($operation, $group_entity->reveal(), $this->user->reveal());
+    $this->assertTrue($user_access->isNeutral());
   }
 
   public function operationProvider() {
