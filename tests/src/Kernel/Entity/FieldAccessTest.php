@@ -12,6 +12,7 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\Component\Utility\Unicode;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\user\Entity\User;
 use Drupal\user\Entity\Role;
 
@@ -82,7 +83,7 @@ class FieldAccessTest extends KernelTestBase {
     Og::groupManager()->addGroup('entity_test', $this->groupBundle);
 
     // Add OG audience field to users.
-    Og::createField(OG_AUDIENCE_FIELD, 'user', 'user');
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', 'user');
 
     Role::create(['id' => 'group_admin', 'label' => 'Group Admin'])
       ->grantPermission('administer group')
@@ -97,7 +98,7 @@ class FieldAccessTest extends KernelTestBase {
     $this->authenticatedUser = User::create(['name' => $this->randomString()]);
     $this->authenticatedUser->save();
 
-    $this->fieldDefinition = $this->adminUser->getFieldDefinition(OG_AUDIENCE_FIELD);
+    $this->fieldDefinition = $this->adminUser->getFieldDefinition(OgGroupAudienceHelper::DEFAULT_FIELD);
     $this->userAccessControlHandler = \Drupal::entityManager()->getAccessControlHandler('user');
   }
 

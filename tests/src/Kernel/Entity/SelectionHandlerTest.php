@@ -14,6 +14,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\user\Entity\User;
 
 /**
@@ -92,10 +93,10 @@ class SelectionHandlerTest extends KernelTestBase {
     Og::groupManager()->addGroup('node', $this->groupBundle);
 
     // Add og audience field to group content.
-    Og::CreateField(OG_AUDIENCE_FIELD, 'node', $this->groupContentBundle);
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
     // Get the storage of the field.
-    $this->selectionHandler = Og::getSelectionHandler('node', $this->groupContentBundle, OG_AUDIENCE_FIELD, ['handler_settings' => ['field_mode' => 'default']]);
+    $this->selectionHandler = Og::getSelectionHandler('node', $this->groupContentBundle, OgGroupAudienceHelper::DEFAULT_FIELD, ['handler_settings' => ['field_mode' => 'default']]);
 
     // Create two users.
     $this->user1 = User::create(['name' => $this->randomString()]);
@@ -141,7 +142,7 @@ class SelectionHandlerTest extends KernelTestBase {
 
     // Check the other groups.
 
-    $this->selectionHandler = Og::getSelectionHandler('node', $this->groupContentBundle, OG_AUDIENCE_FIELD, ['handler_settings' => ['field_mode' => 'admin']]);
+    $this->selectionHandler = Og::getSelectionHandler('node', $this->groupContentBundle, OgGroupAudienceHelper::DEFAULT_FIELD, ['handler_settings' => ['field_mode' => 'admin']]);
 
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
