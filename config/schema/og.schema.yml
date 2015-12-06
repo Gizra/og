@@ -64,3 +64,32 @@ og.og_membership_type.*:
     status:
       type: boolean
       label: 'Status'
+
+og_role.*:
+  type: config_entity
+  label: 'OG user role settings'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    group_id:
+      type: string
+      label: 'Group ID'
+    group_type:
+      type: label
+      label: 'Group type'
+    group_bundle:
+      type: label
+      label: 'Group bundle'
+    uid:
+      type: integer
+      label: 'user ID'
+    permissions:
+      type: sequence
+      label: 'Permissions'
+      sequence:
+        type: string
+        label: 'Permission'

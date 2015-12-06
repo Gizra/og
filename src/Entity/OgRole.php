@@ -6,177 +6,206 @@
  */
 namespace Drupal\og\Entity;
 
-use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Config\Entity\ConfigEntityBase;
 
 /**
- * todo: Find a way to attach the roles to group:
- *  - UUID?
- *  - Service?
- *
- * Convert into
- *
- *
- * @ContentEntityType(
+ * @ConfigEntityType(
  *   id = "og_role",
  *   label = @Translation("OG role"),
- *   module = "og",
- *   base_table = "og_role",
+ *   static_cache = TRUE,
  *   entity_keys = {
- *     "id" = "rid",
- *     "label" = "name"
+ *     "id" = "id",
+ *     "label" = "label",
+ *     "group_type" = "groupType",
+ *     "group_bundle" = "groupBundle",
+ *     "uid" = "uid",
+ *     "permissions" = "permissions"
  *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "group_type",
+ *     "group_bundle",
+ *     "uid",
+ *     "permissions"
+ *   }
  * )
  */
-class OgRole extends ContentEntityBase {
+class OgRole extends ConfigEntityBase {
 
   /**
-   * @param mixed $gid
+   * @var integer
    *
-   * @return $this
+   * The identifier of the role.
    */
-  public function setGid($gid) {
-    $this->set('gid', $gid);
+  protected $id;
+
+  /**
+   * @var string
+   *
+   * The label of the role.
+   */
+  protected $label;
+
+  /**
+   * @var integer
+   *
+   * The group ID.
+   */
+  protected $groupID;
+
+  /**
+   * @var string
+   *
+   * The group type. i.e: node, user
+   */
+  protected $groupType;
+
+  /**
+   * @var string
+   *
+   * The group bundle. i.e: article, page
+   */
+  protected $groupBundle;
+
+  /**
+   * @var integer
+   *
+   * The user ID which the role assign to.
+   */
+  protected $uid;
+
+  /**
+   * @var array
+   *
+   * List of permissions.
+   */
+  protected $permissions;
+
+  /**
+   * @return int
+   */
+  public function getId() {
+    return $this->get('id');
+  }
+
+  /**
+   * @param int $id
+   *
+   * @return OgRole
+   */
+  public function setId($id) {
+    $this->id = $id;
+    $this->set('id', $id);
     return $this;
   }
 
   /**
-   * @return mixed
+   * @return string
    */
-  public function getGid() {
-    return $this->get('gid')->value;
+  public function getLabel() {
+    return $this->get('label');
   }
 
   /**
-   * @param mixed $groupBundle
+   * @param string $label
    *
-   * @return $this
+   * @return OgRole
    */
-  public function setGroupBundle($groupBundle) {
-    $this->set('group_bundle', $groupBundle);
+  public function setLabel($label) {
+    $this->label = $label;
+    $this->set('label', $label);
     return $this;
   }
 
   /**
-   * @return mixed
+   * @return int
    */
-  public function getGroupBundle() {
-    return $this->get('groupBundle')->value;
+  public function getGroupID() {
+    return $this->get('group_id');
   }
 
   /**
-   * @param mixed $groupType
+   * @param int $groupID
    *
-   * @return $this
+   * @return OgRole
    */
-  public function setGroupType($groupType) {
-    $this->set('groupType', $groupType);
+  public function setGroupID($groupID) {
+    $this->groupID = $groupID;
+    $this->set('group_id', $groupID);
     return $this;
   }
 
   /**
-   * @return mixed
+   * @return string
    */
   public function getGroupType() {
     return $this->get('group_type');
   }
 
   /**
-   * @param mixed $name
+   * @param string $groupType
    *
-   * @return $this
+   * @return OgRole
    */
-  public function setName($name) {
-    $this->set('name', $name);
+  public function setGroupType($groupType) {
+    $this->groupType = $groupType;
+    $this->set('group_type', $groupType);
     return $this;
   }
 
   /**
-   * @return mixed
+   * @return string
    */
-  public function getName() {
-    return $this->get('name')->value;
+  public function getGroupBundle() {
+    return $this->get('group_bundle');
   }
 
   /**
-   * @param mixed $rid
+   * @param string $groupBundle
    *
-   * @return $this
+   * @return OgRole
    */
-  public function setRid($rid) {
-    $this->set('rid', $rid);
+  public function setGroupBundle($groupBundle) {
+    $this->groupBundle = $groupBundle;
+    $this->set('group_bundle', $groupBundle);
     return $this;
   }
 
   /**
-   * @return mixed
+   * @return int
    */
-  public function getRid() {
-    return $this->get('rid')->value;
+  public function getUid() {
+    return $this->get('uid');
   }
 
   /**
-   * @var Integer
+   * @param int $uid
    *
-   * The identifier.
+   * @return OgRole
    */
-  protected $rid;
-
-  /**
-   * @var Integer
-   *
-   * The group ID.
-   */
-  protected $gid;
-
-  /**
-   * @var String
-   *
-   * The group group's entity type.
-   */
-  protected $groupType;
-
-  /**
-   * @var String
-   *
-   * The group's bundle name.
-   */
-  protected $groupBundle;
-
-  /**
-   * @var String
-   *
-   * Unique role name per group.
-   */
-  protected $name;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = array();
-
-    $fields['rid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Role ID'))
-      ->setDescription(t('Primary Key: Unique role ID.'));
-
-    $fields['gid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Group ID'))
-      ->setDescription(t("The group's unique ID."));
-
-    $fields['group_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group type'))
-      ->setDescription(t("The group's entity type."));
-
-    $fields['group_bundle'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group bundle'))
-      ->setDescription(t("The group's bundle name."));
-
-    $fields['name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Name'))
-      ->setDescription(t('Unique role name per group.'));
-
-    return $fields;
+  public function setUid($uid) {
+    $this->uid = $uid;
+    $this->set('uid', $uid);
+    return $this;
   }
+
+  /**
+   * @return array
+   */
+  public function getPermissions() {
+    return $this->get('permissions');;
+  }
+
+  /**
+   * @param array $permissions
+   *
+   * @return OgRole
+   */
+  public function setPermissions($permissions) {
+    $this->permissions = $permissions;
+    $this->set('permissions', $permissions);
+    return $this;
+  }
+
 }
