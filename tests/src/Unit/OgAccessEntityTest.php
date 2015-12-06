@@ -23,7 +23,7 @@ class OgAccessEntityTest extends OgAccessTestBase  {
   protected $entity;
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
