@@ -12,7 +12,11 @@ use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
@@ -43,14 +47,17 @@ class OgAccessTest extends UnitTestCase {
    */
   protected $bundle;
 
+  /**
+   * @var \Drupal\og\GroupManager
+   */
+  protected $groupManager;
+
   public function setUp() {
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
 
-    $group_manager = $this->prophesize(GroupManager::class);
-
-    $this->isGroup = $group_manager->isGroup($this->entityTypeId, $this->bundle);
-    $this->isGroup->willReturn(TRUE);
+    $this->groupManager = $this->prophesize(GroupManager::class);
+    $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
 
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens(Argument::any())->willReturn(TRUE);
@@ -67,7 +74,7 @@ class OgAccessTest extends UnitTestCase {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(FALSE);
 
     $container = new ContainerBuilder();
-    $container->set('og.group.manager', $group_manager->reveal());
+    $container->set('og.group.manager', $this->groupManager->reveal());
     $container->set('cache_contexts_manager', $cache_contexts_manager->reveal());
     $container->set('config.factory', $config_factory->reveal());
     $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
@@ -108,7 +115,7 @@ class OgAccessTest extends UnitTestCase {
    * @dataProvider operationProvider
    */
   public function testUserAccessNotAGroup($operation) {
-    $this->isGroup->willReturn(FALSE);
+    $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(FALSE);
     $user_access = OgAccess::userAccess($this->groupEntity()->reveal(), $operation);
     $this->assertTrue($user_access->isNeutral());
   }
@@ -147,9 +154,8 @@ class OgAccessTest extends UnitTestCase {
    * @dataProvider operationProvider
    */
   public function testUserAccessOwner($operation) {
-    $user = $this->user->reveal();
     $this->config->get('group_manager_full_access')->willReturn(TRUE);
-    $user_access = OgAccess::userAccess($this->groupEntity(TRUE)->reveal(), $operation, $user);
+    $user_access = OgAccess::userAccess($this->groupEntity(TRUE)->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }
 
@@ -164,25 +170,6 @@ class OgAccessTest extends UnitTestCase {
     $group_entity->id()->willReturn(mt_rand(5, 10));
     $user_access = OgAccess::userAccess($group_entity->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
-  }
-
-  /**
-   * @coversDefaultmethod ::userAccessEntity
-   * @dataProvider operationProvider
-   */
-  public function testUserAccessEntityNew($operation) {
-    $group_entity = $this->groupEntity();
-    $group_entity->isNew()->willReturn(TRUE);
-    $user_access = OgAccess::userAccessEntity($operation, $group_entity->reveal(), $this->user->reveal());
-    $this->assertTrue($user_access->isNeutral());
-  }
-
-  /**
-   * @coversDefaultmethod ::userAccessEntity
-   * @dataProvider operationProvider
-   */
-  public function testUserAccessGetEntityGroups($operation) {
-
   }
 
   public function operationProvider() {

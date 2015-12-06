@@ -164,10 +164,11 @@ class OgAccess {
       return $result->addCacheableDependency($entity);
     }
 
-    $entity_type = $entity->getEntityTypeId();
+    $entity_type = $entity->getEntityType();
+    $entity_type_id = $entity_type->id();
     $bundle = $entity->bundle();
 
-    if (Og::isGroup($entity_type, $bundle)) {
+    if (Og::isGroup($entity_type_id, $bundle)) {
       $user_access = static::userAccess($entity, $operation, $user);
       if ($user_access->isAllowed()) {
         return $user_access;
@@ -182,9 +183,10 @@ class OgAccess {
       }
     }
 
-    $is_group_content = Og::isGroupContent($entity_type, $bundle);
+    // @TODO: add caching on Og::isGroupContent.
+    $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
+    $cache_tags = $entity_type->getListCacheTags();
     if ($is_group_content && $entity_groups = Og::getEntityGroups($entity)) {
-      $cache_tags = $entity->getEntityType()->getListCacheTags();
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
       foreach ($entity_groups as $groups) {
         foreach ($groups as $group) {
@@ -198,6 +200,9 @@ class OgAccess {
         }
       }
       return $forbidden;
+    }
+    if ($is_group_content) {
+      $result->addCacheTags($cache_tags);
     }
 
     // Either the user didn't have permission, or the entity might be an

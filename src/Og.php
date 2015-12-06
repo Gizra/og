@@ -259,13 +259,13 @@ class Og {
   /**
    * Return TRUE if field is a group audience type.
    *
-   * @param $field_config
-   *   The field config object.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The field definition object.
    *
    * @return bool
    */
-  public static function isGroupAudienceField(FieldDefinitionInterface $field_config) {
-    return $field_config->getType() === 'og_membership_reference';
+  public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
+    return $field_definition->getType() === 'og_membership_reference';
   }
 
   /**
