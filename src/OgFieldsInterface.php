@@ -1,12 +1,11 @@
 <?php
+
 /**
- * Contains
+ * @file
+ * Contains \Drupal\og\OgFieldsInterface.
  */
 
 namespace Drupal\og;
-
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 
 interface OgFieldsInterface {
 

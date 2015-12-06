@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Contain the OG role permission entity definition. This will be a content
- * entity.
+ * @file
+ * Contains Drupal\og\Entity\OgRolePermission.
  */
 
 namespace Drupal\og\Entity;

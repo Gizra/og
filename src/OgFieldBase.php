@@ -1,6 +1,8 @@
 <?php
+
 /**
- * Base class for OG field plugin.
+ * @file
+ * Contains \Drupal\og\OgFieldBase.
  */
 
 namespace Drupal\og;
