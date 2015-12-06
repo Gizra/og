@@ -263,6 +263,7 @@ class Og {
    *   The field definition object.
    *
    * @return bool
+   *   TRUE if the field is a group audience type, FALSE otherwise.
    */
   public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
     return $field_definition->getType() === 'og_membership_reference';
@@ -428,7 +429,7 @@ class Og {
   public static function getSelectionHandler($entity, $bundle, $field_name, array $options = []) {
     $field_definition = FieldConfig::loadByName($entity, $bundle, $field_name);
 
-    if (!Og::isGroupAudienceField($field_definition)) {
+    if (!static::isGroupAudienceField($field_definition)) {
       throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
     }
 

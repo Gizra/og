@@ -1,0 +1,92 @@
+<?php
+/**
+ * @file
+ * Main functions and hook implementations of the Organic Groups UI module.
+ */
+
+use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
+use Drupal\Core\Entity\BundleEntityFormBase;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\og\Og;
+use Drupal\og_ui\BundleFormAlter;
+
+/**
+ * Implements hook_form_alter().
+ */
+function og_ui_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  if ($form_state->getFormObject() instanceof BundleEntityFormBase) {
+    (new BundleFormAlter($form_state->getFormObject()->getEntity()))
+      ->formAlter($form, $form_state);
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function og_ui_entity_insert(EntityInterface $entity) {
+  og_ui_entity_type_save($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function og_ui_entity_update(EntityInterface $entity) {
+  og_ui_entity_type_save($entity);
+}
+
+/**
+ * Helper to save group information.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ */
+function og_ui_entity_type_save(EntityInterface $entity) {
+  if (!$entity instanceof ConfigEntityBundleBase || !isset($entity->og_is_group)) {
+    return;
+  }
+
+  $bundle = $entity->id();
+  $definition = \Drupal::entityTypeManager()->getDefinition($entity->getEntityTypeId());
+  $entity_type_id = $definition->getBundleOf();
+
+  // Add/remove the group itself.
+  $is_group = Og::isGroup($entity_type_id, $bundle);
+  if ($entity->og_is_group != $is_group) {
+    if ($entity->og_is_group) {
+      Og::groupManager()->addGroup($entity_type_id, $bundle);
+    }
+    else {
+      Og::groupManager()->removeGroup($entity_type_id, $bundle);
+    }
+  }
+
+  // Add remove the relevant field.
+  $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
+  if ($entity->og_group_content_bundle != $is_group_content) {
+    if ($entity->og_group_content_bundle) {
+      Og::createField(OG_AUDIENCE_FIELD, $entity_type_id, $bundle);
+    }
+    elseif ($field = FieldConfig::loadByName($entity_type_id, $bundle, OG_AUDIENCE_FIELD)) {
+      $field->delete();
+      return;
+    }
+  }
+
+  // Change the field target type and bundle.
+  if ($field = FieldConfig::loadByName($entity_type_id, $bundle, OG_AUDIENCE_FIELD)) {
+    $handler_settings = $field->getSetting('handler_settings');
+    $save = FALSE;
+    foreach (['target_type', 'target_bundles'] as $key) {
+      $entity_key = 'og_' . $key;
+      if (!isset($handler_settings[$key]) || $entity->$entity_key != $handler_settings[$key]) {
+        $handler_settings[$key] = $entity->$entity_key;
+        $field->setSetting('handler_settings', $handler_settings);
+        $save = TRUE;
+      }
+    }
+    if ($save) {
+      $field->save();
+    }
+  }
+}
