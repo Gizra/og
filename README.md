@@ -128,7 +128,7 @@ provide a quick way to get started with Organic groups.
 \Drupal\og\Og::groupManager()->addGroup('node', 'page');
 
 // Add og audience field to "Article" node type, thus making is a group content.
-\Drupal\og\Og::createField(OG_AUDIENCE_FIELD, 'node', 'article');
+\Drupal\og\Og::createField(\Drupal\og\OgAudienceFieldHelper::DEFAULT_FIELD, 'node', 'article');
 ```
 
 ## FAQ

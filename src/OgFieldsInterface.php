@@ -1,12 +1,11 @@
 <?php
+
 /**
- * Contains
+ * @file
+ * Contains \Drupal\og\OgFieldsInterface.
  */
 
 namespace Drupal\og;
-
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 
 interface OgFieldsInterface {
 
@@ -63,8 +62,8 @@ interface OgFieldsInterface {
    *
    * The field name is often the same as the plugin ID, however it is
    * overridable. For example, the group audience field is identified as
-   * OG_AUDIENCE_FIELD, however the actual field name attached to the bundle can
-   * be arbitrary.
+   * \Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, however the actual field name
+   * attached to the bundle can be arbitrary.
    *
    * @param String $fieldName
    *   The field name.
