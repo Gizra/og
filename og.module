@@ -5,9 +5,11 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 use Drupal\og\Entity\OgMembership;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -53,28 +55,6 @@ define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
  * The name of the user's request field in the default group membership type.
  */
 define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
-
-/**
- * Drupal 8 part. Road map:
- * 1. Reference property between groups.
- * 2. EFQ: work on the EFQ alter so people can search with the audience field.
- * 3. API: Move API function like og_is_group to the og controller.
- * 4. Move the define into the controller class.
- */
-
-/**
- * Implements hook_entity_access().
- */
-function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-// todo: issue #3 in OG 8 issue queue.
-
-//  if (OG::IsGroup($entity)) {
-//  }
-//
-//  if (OG::IsGroupContent($entity)) {
-//
-//  }
-}
 
 /**
  * Implements hook_entity_insert().
@@ -130,8 +110,101 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
 }
 
 /**
- * Drupal 7 part.
+ * Implements hook_entity_access().
  */
+function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // We only care about content entities.
+  if (!$entity instanceof ContentEntityInterface) {
+    return AccessResult::neutral();
+  }
+
+  if ($operation == 'view') {
+    return AccessResult::neutral();
+  }
+
+  $entity_type_id = $entity->getEntityTypeId();
+  $bundle_id = $entity->bundle();
+
+  $entity_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
+
+  $access = OgAccess::userAccessEntity('administer group', $entity, $account);
+
+  if ($access->isNeutral()) {
+    // The node isn't in an OG context, so no need to keep testing.
+    return $access;
+  }
+  else {
+    // Any and own content.
+    $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
+  }
+
+  if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
+    $access = OgAccess::userAccessEntity($operation, $entity, $account);
+  }
+
+  if ($access->isAllowed()) {
+    return $access;
+  }
+
+  // Otherwise, ignore or deny based on whether strict entity access is set.
+  return AccessResult::forbiddenIf($entity_access_strict);
+}
+
+/**
+ * Implements hook_entity_create_access().
+ */
+function og_entity_create_access(AccountInterface $account, array $context, $bundle) {
+  $entity_type_id = $context['entity_type_id'];
+
+  if (!Og::isGroupContent($entity_type_id, $bundle)) {
+    // Not a group content.
+    return AccessResult::neutral();
+  }
+
+  $access_result = AccessResult::allowedIfHasPermission($account, 'administer group');
+  if ($access_result->isAllowed()) {
+    return $access_result;
+  }
+
+  // Save some legwork if the user has the core permission and strict node
+  // access is not set.
+
+  $config = \Drupal::config('og.settings');
+  $entity_access_strict = $config->get('node_access_strict');
+  // @todo: $entity isn't passed.
+  /*
+  if (!$entity_access_strict && $entity->access('create', $account)) {
+    return AccessResult::neutral();
+  }
+  */
+
+  // We can't check if user has create permissions, as there is no group
+  // context. However, we can check if there are any groups the user will be
+  // able to select, and if not, we don't allow access.
+  // @see \Drupal\og\Plugin\EntityReferenceSelection\OgSelection::buildEntityQuery()
+  $required = FALSE;
+
+  $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+  foreach ($field_definitions as $field_name => $field_definition) {
+    /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
+    if (!Og::isGroupAudienceField($field_definition)) {
+      continue;
+    }
+
+    $handler = Og::getSelectionHandler($entity_type_id, $bundle, $field_definition);
+
+    if ($handler->getReferenceableEntities()) {
+      return Accessresult::allowed();
+    }
+
+    // Allow users to create content outside of groups, if none of the
+    // audience fields is required.
+    $required = $field_definition->isRequired();
+  }
+
+  // Otherwise, ignore or deny based on whether strict entity access is set.
+  return $required ? AccessResult::forbiddenIf($entity_access_strict) : AccessResult::neutral();
+}
 
 /**
  * Implements hook_help().
@@ -187,84 +260,6 @@ function _og_og_permission() {
 function _og_og_default_roles() {
   return array(Og::ADMINISTRATOR_ROLE);
 }
-
-/**
- * Implements hook_node_access().
- */
-function _og_node_access($node, $op, $account) {
-  $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-
-  if ($op == 'create' && og_is_group_content_type('node', $type)) {
-    // Save some legwork if the user has the core permission and strict node
-    // access is not set.
-    if (!\Drupal::config('og.settings')->get('node_access_strict') && user_access("create $type content", $account)) {
-      // We just ignore: core access will take care of it.
-      return NODE_ACCESS_IGNORE;
-    }
-
-    if (user_access('administer group', $account)) {
-      return NODE_ACCESS_ALLOW;
-    }
-    // We can't check if user has create permissions using og_user_access(), as
-    // there is no group context. However, we can check if there are any groups
-    // the user will be able to select, and if not, we don't allow access.
-    // @see OgSelectionHandler::getReferencableEntities()
-    $required = FALSE;
-    foreach (Og::getAllGroupAudienceFields('node', $type) as $field_name => $label) {
-      $field = field_info_field($field_name);
-      $instance = field_info_instance('node', $field_name, $type);
-      // Set the "field mode" to default, before passing it to the
-      // selection handler.
-      $instance['field_mode'] = 'default';
-      if (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
-        return NODE_ACCESS_ALLOW;
-      }
-
-      // Allow users to create content outside of groups, if none of the
-      // audience fields is required.
-      if ($instance['required']) {
-        $required = TRUE;
-      }
-    }
-    // If no group audience field is required, we ignore.
-    if (!$required) {
-      return NODE_ACCESS_IGNORE;
-    }
-
-    // Otherwise, ignore or deny based on whether strict node access is set.
-    return \Drupal::config('og.settings')->get('node_access_strict') ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
-  }
-  elseif (in_array($op, array('update', 'delete'))) {
-    $access = og_user_access_entity('administer group', 'node', $node, $account);
-
-    if (is_null($access)) {
-      // The node isn't in an OG context, so no need to keep testing.
-      return NODE_ACCESS_IGNORE;
-    }
-    else {
-      $access = $access ||
-        // Any content.
-        og_user_access_entity("$op any $type content", 'node', $node, $account) ||
-        // Own content.
-        ($account->uid == $node->uid && og_user_access_entity("$op own $type content", 'node', $node, $account));
-    }
-
-    if (!$access && $op == 'update' && og_is_group('node', $node)) {
-      // The node is a group, so check "update group" permission.
-      $access = og_user_access_entity('update group', 'node', $node, $account);
-    }
-
-    if ($access) {
-      return NODE_ACCESS_ALLOW;
-    }
-
-    // Check if OG should explicitly deny access or not.
-    return \Drupal::config('og.settings')->get('node_access_strict') ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
-  }
-
-  return NODE_ACCESS_IGNORE;
-}
-
 
 /**
  * Implements hook_field_create_instance().

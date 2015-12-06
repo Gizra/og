@@ -10,7 +10,6 @@ namespace Drupal\og;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -116,7 +115,7 @@ class Og {
    *  the OG membership ID and the group ID as the value. If nothing found,
    *  then an empty array.
    */
-  public static function getEntityGroups(EntityInterface $entity, $states = [OG_STATE_ACTIVE], $field_name = NULL) {
+  public static function getEntityGroups(EntityInterface $entity, array $states = [OG_STATE_ACTIVE], $field_name = NULL) {
     $entity_type_id = $entity->getEntityTypeId();
     $entity_id = $entity->id();
 
@@ -260,13 +259,13 @@ class Og {
   /**
    * Return TRUE if field is a group audience type.
    *
-   * @param $field_config
-   *   The field config object.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The field definition object.
    *
    * @return bool
    */
-  public static function isGroupAudienceField(FieldDefinitionInterface $field_config) {
-    return $field_config->getType() === 'og_membership_reference';
+  public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
+    return $field_definition->getType() === 'og_membership_reference';
   }
 
   /**
@@ -433,12 +432,14 @@ class Og {
       throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
     }
 
-    $options += [
+    $options = NestedArray::mergeDeep([
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'field' => $field_definition,
       'handler' => $field_definition->getSetting('handler'),
-      'handler_settings' => [],
-    ];
+      'handler_settings' => [
+        'field_mode' => 'default',
+      ],
+    ], $options);
 
     // Deep merge the handler settings.
     $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);

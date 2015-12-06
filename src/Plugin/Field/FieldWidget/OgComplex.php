@@ -15,6 +15,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 use Drupal\user\Entity\User;
 
 /**
@@ -339,7 +340,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    */
   protected function isGroupAdmin() {
     // @todo Inject current user service as a dependency.
-    return \Drupal::currentUser()->hasPermission('administer group');
+    return \Drupal::currentUser()->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION);
   }
 
 }
