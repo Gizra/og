@@ -40,14 +40,14 @@ class OgAccessEntityTest extends OgAccessTest  {
 
     $entity_type_id = $this->randomMachineName();
     $bundle = $this->randomMachineName();
-    $this->entity_id = mt_rand(20, 30);
+    $entity_id = mt_rand(20, 30);
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->getListCacheTags()->willReturn([]);
     $entity_type->id()->willReturn($entity_type_id);
 
     $this->entity = $this->prophesize(EntityInterface::class);
-    $this->entity->id()->willReturn($this->entity_id);
+    $this->entity->id()->willReturn($entity_id);
     $this->entity->bundle()->willReturn($bundle);
     $this->entity->isNew()->willReturn(FALSE);
     $this->entity->getEntityType()->willReturn($entity_type->reveal());
@@ -62,7 +62,7 @@ class OgAccessEntityTest extends OgAccessTest  {
     $r = new \ReflectionClass('Drupal\og\Og');
     $reflection_property = $r->getProperty('entityGroupCache');
     $reflection_property->setAccessible(TRUE);
-    $reflection_property->setValue(["$entity_type_id:$this->entity_id:1:" => [[$this->groupEntity()->reveal()]]]);
+    $reflection_property->setValue(["$entity_type_id:$entity_id:1:" => [[$this->groupEntity()->reveal()]]]);
   }
 
   /**
@@ -85,4 +85,5 @@ class OgAccessEntityTest extends OgAccessTest  {
     $user_entity_access = OgAccess::userAccessEntity($operation, $this->entity->reveal(), $this->user->reveal());
     $this->assertTrue($user_entity_access->isAllowed());
   }
+
 }
