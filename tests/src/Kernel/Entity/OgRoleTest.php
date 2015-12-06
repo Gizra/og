@@ -47,12 +47,12 @@ class OgRoleTest extends KernelTestBase {
       ->setLabel('Content editor')
       ->setGroupType('node')
       ->setGroupBundle('group')
-      ->setPermissions(['bypass content restrictions'])
+      ->setPermissions(['administer group'])
       ->setUid(1)
       ->save();
 
     // Checking assigning of the role.
-    $this->assertEquals($this->ogRole->getPermissions(), ['bypass content restrictions']);
+    $this->assertEquals($this->ogRole->getPermissions(), ['administer group']);
   }
 
 }
