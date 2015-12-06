@@ -5,9 +5,7 @@
  * Contains \Drupal\og_ui\BundleFormAlter.
  */
 
-
 namespace Drupal\og_ui;
-
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
@@ -15,6 +13,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
 
+/**
+ * Helper for og_ui_form_alter().
+ */
 class BundleFormAlter {
 
   /**
@@ -37,20 +38,40 @@ class BundleFormAlter {
    */
   protected $entityTypeId;
 
+  /**
+   * Construct a BundleFormAlter object.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   */
   public function __construct(EntityInterface $entity) {
     $this->entity = $entity;
   }
 
+  /**
+   * This is a helper for og_ui_form_alter().
+   *
+   * @param array $form
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   */
   public function formAlter(array &$form, FormStateInterface $form_state) {
     $this->prepare($form, $form_state);
     $this->addGroupType($form, $form_state);
     $this->addGroupContent($form, $form_state);
   }
 
+  /**
+   * AJAX callback displaying the target bundles select box.
+   */
   public function ajaxCallback(array $form, array &$form_state) {
     return $form['og']['target_bundles'];
   }
 
+  /**
+   * Prepares object properties and adds the og details element.
+   *
+   * @param array $form
+   * @param $form_state
+   */
   protected function prepare(array &$form, $form_state) {
     // Example: article.
     $this->bundle = $this->entity->id();
@@ -69,9 +90,11 @@ class BundleFormAlter {
         '%bundle' => $this->bundleLabel,
       ]),
     );
-
   }
 
+  /**
+   * Adds the "is group?" checkbox.
+   */
   protected function addGroupType(array &$form, $form_state) {
     $form['og']['og_is_group'] = array(
       '#type' => 'checkbox',
@@ -83,6 +106,10 @@ class BundleFormAlter {
     );
   }
 
+
+  /**
+   * Adds the "is group content?" checkbox and target settings elements.
+   */
   protected function addGroupContent(array &$form, $form_state) {
     $is_group_content = Og::isGroupContent($this->entityTypeId, $this->bundle);
 

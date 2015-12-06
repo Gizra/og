@@ -30,19 +30,27 @@ function og_ui_entity_insert(EntityInterface $entity) {
 }
 
 /**
- * Implements hook_entity_insert().
+ * Implements hook_entity_update().
  */
 function og_ui_entity_update(EntityInterface $entity) {
   og_ui_entity_type_save($entity);
 }
 
+/**
+ * Helper to save group information.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ */
 function og_ui_entity_type_save(EntityInterface $entity) {
   if (!$entity instanceof ConfigEntityBundleBase || !isset($entity->og_is_group)) {
     return;
   }
+
   $bundle = $entity->id();
   $definition = \Drupal::entityTypeManager()->getDefinition($entity->getEntityTypeId());
   $entity_type_id = $definition->getBundleOf();
+
+  // Add/remove the group itself.
   $is_group = Og::isGroup($entity_type_id, $bundle);
   if ($entity->og_is_group != $is_group) {
     if ($entity->og_is_group) {
@@ -52,6 +60,8 @@ function og_ui_entity_type_save(EntityInterface $entity) {
       Og::groupManager()->removeGroup($entity_type_id, $bundle);
     }
   }
+
+  // Add remove the relevant field.
   $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
   if ($entity->og_group_content_bundle != $is_group_content) {
     if ($entity->og_group_content_bundle) {
@@ -62,6 +72,8 @@ function og_ui_entity_type_save(EntityInterface $entity) {
       return;
     }
   }
+
+  // Change the field target type and bundle.
   if ($field = FieldConfig::loadByName($entity_type_id, $bundle, OG_AUDIENCE_FIELD)) {
     $handler_settings = $field->getSetting('handler_settings');
     $save = FALSE;
@@ -77,4 +89,5 @@ function og_ui_entity_type_save(EntityInterface $entity) {
       $field->save();
     }
   }
+
 }
