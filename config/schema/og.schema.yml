@@ -65,7 +65,7 @@ og.og_membership_type.*:
       type: boolean
       label: 'Status'
 
-og_role.*:
+og.og_role.*:
   type: config_entity
   label: 'OG user role settings'
   mapping:
