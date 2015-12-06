@@ -12,24 +12,6 @@
  */
 
 /**
- * Add group permissions.
- */
-function hook_og_permission() {
-  return array(
-    'subscribe' => array(
-      'title' => t('Subscribe user to group'),
-      'description' => t("Allow user to be a member of a group (approval required)."),
-      // Determine to which role to limit the permission. For example the
-      // "subscribe" can't be assigned only to a non-member, as a member doesn't
-      // need it.
-      'roles' => array(Og::ANONYMOUS_ROLE),
-      // Determine to which roles the permissions will be enabled by default.
-      'default roles' => array(Og::ANONYMOUS_ROLE),
-    ),
-  );
-}
-
-/**
  * Alter the organic groups permissions.
  *
  * @param $perms

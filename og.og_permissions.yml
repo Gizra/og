@@ -9,3 +9,6 @@ administer group:
   'restrict access': TRUE
   'default roles':
     - ADMINISTRATOR_ROLE
+
+permission_callbacks:
+  - \Drupal\og\OgNodePermissions::nodeTypePermissions
