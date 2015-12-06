@@ -64,36 +64,43 @@ class OgAccess {
   public static function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
     $group_type_id = $group->getEntityTypeId();
     $bundle = $group->bundle();
-
+    // As Og::isGroup depends on this config, we retrieve it here and set it as
+    // the minimal caching data.
+    $config = \Drupal::config('og.settings');
+    $cacheable_metadata = (new CacheableMetadata)
+        ->addCacheableDependency($config);
     if (!Og::isGroup($group_type_id, $bundle)) {
       // Not a group.
-      return AccessResult::neutral();
+      return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
     }
 
-    $user = $user ?: \Drupal::currentUser()->getAccount();
-    $user_id = $user->id();
+    if (!isset($user)) {
+      $user = \Drupal::currentUser()->getAccount();
+    }
+
+    // From this point on, every result also depends on the user so check
+    // whether it is the current. See https://www.drupal.org/node/2628870
+    if ($user->id() == \Drupal::currentUser()->id()) {
+      $cacheable_metadata->addCacheContexts(['user']);
+    }
 
     // User ID 1 has all privileges.
-    if ($user_id == 1) {
-      return AccessResult::allowed();
+    if ($user->id() == 1) {
+      return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
     }
 
     // Administer group permission.
     if (!$ignore_admin) {
       $user_access = AccessResult::allowedIfHasPermission($user, static::ADMINISTER_GROUP_PERMISSION);
       if ($user_access->isAllowed()) {
-        return $user_access;
+        return $user_access->addCacheableDependency($cacheable_metadata);
       }
     }
 
     // Group manager has all privileges (if variable is TRUE) and they are
-    // authenticated.
-    $config = \Drupal::config('og.settings');
-    $cacheable_metadata = (new CacheableMetadata)
-        ->addCacheableDependency($config);
-    if ($config->get('group_manager_full_access') && !empty($user_id) && $group instanceof EntityOwnerInterface) {
+    if ($config->get('group_manager_full_access') && $user->isAuthenticated() && $group instanceof EntityOwnerInterface) {
       $cacheable_metadata->addCacheableDependency($group);
-      if ($group->getOwnerId() == $user_id) {
+      if ($group->getOwnerId() == $user->id()) {
         return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
       }
     }
@@ -134,7 +141,7 @@ class OgAccess {
       return AccessResult::allowed()->addCacheableDependency($altered_permissions['cacheable_metadata']);
     }
 
-    return AccessResult::forbidden();
+    return AccessResult::forbidden()->addCacheableDependency($cacheable_metadata);
   }
 
   /**
@@ -178,15 +185,19 @@ class OgAccess {
     $is_group_content = Og::isGroupContent($entity_type, $bundle);
     if ($is_group_content && $entity_groups = Og::getEntityGroups($entity)) {
       $cache_tags = $entity->getEntityType()->getListCacheTags();
+      $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
       foreach ($entity_groups as $groups) {
         foreach ($groups as $group) {
           $user_access = static::userAccess($group, $operation, $user);
           if ($user_access->isAllowed()) {
             return $user_access->addCacheTags($cache_tags);
           }
+          else {
+            $forbidden->inheritCacheability($user_access);
+          }
         }
       }
-      return AccessResult::forbidden()->addCacheTags($cache_tags);
+      return $forbidden;
     }
 
     // Either the user didn't have permission, or the entity might be an

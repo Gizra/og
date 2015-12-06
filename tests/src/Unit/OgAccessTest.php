@@ -18,6 +18,7 @@ use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
+use Prophecy\Argument;
 
 /**
  * @group og
@@ -52,7 +53,7 @@ class OgAccessTest extends UnitTestCase {
     $this->isGroup->willReturn(TRUE);
 
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
-    $cache_contexts_manager->assertValidTokens(["user.permissions"])->willReturn(TRUE);
+    $cache_contexts_manager->assertValidTokens(Argument::any())->willReturn(TRUE);
 
     $this->config = $this->addCache($this->prophesize(Config::class));
     $this->config->get('group_manager_full_access')->willReturn(FALSE);
@@ -61,6 +62,7 @@ class OgAccessTest extends UnitTestCase {
     $config_factory->get('og.settings')->willReturn($this->config);
 
     $this->user = $this->prophesize(AccountInterface::class);
+    $this->user->isAuthenticated()->willReturn(TRUE);
     $this->user->id()->willReturn(2);
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(FALSE);
 
@@ -69,6 +71,8 @@ class OgAccessTest extends UnitTestCase {
     $container->set('cache_contexts_manager', $cache_contexts_manager->reveal());
     $container->set('config.factory', $config_factory->reveal());
     $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
+    // This is for caching purposes only.
+    $container->set('current_user', $this->user->reveal());
     \Drupal::setContainer($container);
   }
 
@@ -143,8 +147,9 @@ class OgAccessTest extends UnitTestCase {
    * @dataProvider operationProvider
    */
   public function testUserAccessOwner($operation) {
+    $user = $this->user->reveal();
     $this->config->get('group_manager_full_access')->willReturn(TRUE);
-    $user_access = OgAccess::userAccess($this->groupEntity(TRUE)->reveal(), $operation, $this->user->reveal());
+    $user_access = OgAccess::userAccess($this->groupEntity(TRUE)->reveal(), $operation, $user);
     $this->assertTrue($user_access->isAllowed());
   }
 
