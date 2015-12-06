@@ -180,7 +180,6 @@ class BundleFormAlter {
         '#title' => t('Target bundles'),
         '#options' => $bundle_options,
         '#default_value' => isset($handler_settings['target_bundles']) ? $handler_settings['target_bundles'] : [],
-        '#size' => 6,
         '#multiple' => TRUE,
         '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.'),
         '#states' => array(
