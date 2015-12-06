@@ -31,9 +31,9 @@ og.settings:
     group_manager_full_access:
       type: boolean
       label: 'Full access for group managers'
-    node_access_strict:
+    entity_access_strict:
       type: boolean
-      label: 'Strict node access permissions'
+      label: 'Strict entity access permissions'
     orphans_delete:
       type: boolean
       label: 'Delete orphaned group content when a group is deleted'

@@ -1,16 +1,22 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\og\Plugin\OgFields\AudienceField.
+ */
+
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
+use Drupal\og\OgGroupAudienceHelper;
 
 /**
  * Determine to which groups this group content is assigned to.
  *
  * @OgFields(
- *  id = OG_AUDIENCE_FIELD,
+ *  id = "og_group_ref",
  *  type = "group",
  *  description = @Translation("Determine to which groups this group content is assigned to."),
  * )

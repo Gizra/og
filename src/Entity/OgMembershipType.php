@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Contain the OG membership type entity definition. This will be a config
- * entity.
+ * @file
+ * Contains Drupal\og\Entity\OgMembershipType.
  */
 
 namespace Drupal\og\Entity;
