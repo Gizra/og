@@ -33,7 +33,7 @@ class OgRoleTest extends KernelTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Add membership and config schema.
+    // Installing needed schema.
     $this->installConfig(['og']);
   }
 
