@@ -89,5 +89,4 @@ function og_ui_entity_type_save(EntityInterface $entity) {
       $field->save();
     }
   }
-
 }

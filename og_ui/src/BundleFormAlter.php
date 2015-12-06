@@ -106,7 +106,6 @@ class BundleFormAlter {
     );
   }
 
-
   /**
    * Adds the "is group content?" checkbox and target settings elements.
    */
@@ -195,4 +194,5 @@ class BundleFormAlter {
       $form['og']['og_group_content_bundle']['#disabled'] = TRUE;
     }
   }
+
 }
