@@ -86,9 +86,7 @@ class BundleFormAlter {
       '#title' => t('Organic groups'),
       '#collapsible' => TRUE,
       '#group' => 'additional_settings',
-      '#description' => t('Each "%bundle" may serve as a group, may belong to a group, or may not participate in OG at all.', [
-        '%bundle' => $this->bundleLabel,
-      ]),
+      '#description' => t('This bundle may serve as a group, may belong to a group, or may not participate in OG at all.'),
     );
   }
 
