@@ -18,7 +18,6 @@ use Drupal\og\OgGroupAudienceHelper;
  */
 class OgNodePermissionsTest extends KernelTestBase {
 
-
   /**
    * {@inheritdoc}
    */
