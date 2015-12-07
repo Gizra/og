@@ -16,32 +16,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 
 /**
- * Define active group content states.
- *
- * When a user has this membership state they are considered to be of
- * "member" role.
- */
-define('OG_STATE_ACTIVE', 1);
-
-/**
- * Define pending group content states. The user is subscribed to the group
- * but isn't an active member yet.
- *
- * When a user has this membership state they are considered to be of
- * "non-member" role.
- */
-define('OG_STATE_PENDING', 2);
-
-/**
- * Define blocked group content states. The user is rejected from the group.
- *
- * When a user has this membership state they are denided access to any
- * group related action. This state, however, does not prevent user to
- * access a group or group content node.
- */
-define('OG_STATE_BLOCKED', 3);
-
-/**
  * Group default roles and permissions field.
  */
 define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
@@ -591,10 +565,10 @@ function _og_og_membership_insert($og_membership) {
  */
 function _og_og_membership_update($og_membership) {
   if ($og_membership->entity_type == 'user' && module_exists('rules')) {
-    if ($og_membership->original->state != OG_STATE_ACTIVE && $og_membership->state == OG_STATE_ACTIVE) {
+    if ($og_membership->original->state != Og::STATE_ACTIVE && $og_membership->state == Og::STATE_ACTIVE) {
       rules_invoke_event('og_user_approved', $og_membership, entity_metadata_wrapper('user', $og_membership->etid));
     }
-    if ($og_membership->original->state != OG_STATE_BLOCKED && $og_membership->state == OG_STATE_BLOCKED) {
+    if ($og_membership->original->state != Og::STATE_BLOCKED && $og_membership->state == Og::STATE_BLOCKED) {
       rules_invoke_event('og_user_blocked', $og_membership, entity_metadata_wrapper('user', $og_membership->etid));
     }
   }
@@ -738,7 +712,7 @@ function _og_membership_create($group_type, $gid, $entity_type, $etid, $field_na
     'gid' => $gid,
     'entity_type' => $entity_type,
     'etid' => $etid,
-    'state' => OG_STATE_ACTIVE,
+    'state' => OG::STATE_ACTIVE,
     'created' => time(),
     'field_name' => $field_name,
     'language' => $language->language,
@@ -1368,7 +1342,7 @@ function _og_group($group_type, $gid, $values = array(), $save_created = TRUE) {
     'entity_type' => 'user',
     'entity' => FALSE,
     'field_name' => FALSE,
-    'state' => OG_STATE_ACTIVE,
+    'state' => OG::STATE_ACTIVE,
   );
 
   $entity_type = $values['entity_type'];
@@ -1688,7 +1662,7 @@ function _og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
  *  the OG membership ID and the group ID as the value. If nothing found,
  *  then an empty array.
  */
-function _og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL) {
+function _og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG::STATE_ACTIVE), $field_name = NULL) {
   $cache = &drupal_static(__FUNCTION__, array());
 
   if ($entity_type == 'user' && empty($entity)) {
@@ -2077,7 +2051,7 @@ function _og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE, $ch
     return $roles[$identifier];
   }
 
-  $is_blocked = og_is_member($group_type, $gid, 'user', $account, array(OG_STATE_BLOCKED));
+  $is_blocked = og_is_member($group_type, $gid, 'user', $account, array(Og::STATE_BLOCKED));
 
   if ($check_active && $is_blocked) {
     $roles[$identifier] = array();
@@ -2606,8 +2580,8 @@ function _og_set_breadcrumb($entity_type, $etid, $path = array()) {
  */
 function _og_group_states() {
   return array(
-    OG_STATE_ACTIVE => t('Active'),
-    OG_STATE_PENDING => t('Pending'),
+    OG::STATE_ACTIVE => t('Active'),
+    OG::STATE_PENDING => t('Pending'),
   );
 }
 
@@ -2616,9 +2590,9 @@ function _og_group_states() {
  */
 function _og_group_content_states() {
   return array(
-    OG_STATE_ACTIVE => t('Active'),
-    OG_STATE_PENDING => t('Pending'),
-    OG_STATE_BLOCKED => t('Blocked'),
+    OG::STATE_ACTIVE => t('Active'),
+    OG::STATE_PENDING => t('Pending'),
+    OG::STATE_BLOCKED => t('Blocked'),
   );
 }
 
@@ -2701,7 +2675,7 @@ function _og_get_groups_by_user($account = NULL, $group_type = NULL) {
 
   // Get all active OG membership that belong to the user.
   $wrapper = entity_metadata_wrapper('user', $account->uid);
-  $og_memberships = $wrapper->{'og_membership__' . OG_STATE_ACTIVE}->value();
+  $og_memberships = $wrapper->{'og_membership__' . OG::STATE_ACTIVE}->value();
   if (!$og_memberships) {
     return;
   }

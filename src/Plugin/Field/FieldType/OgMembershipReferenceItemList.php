@@ -141,7 +141,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       ->condition('entity_type', $entity->getEntityTypeId())
       ->condition('etid', $entity->id())
       ->condition('group_type', $group_type)
-      ->condition('state', OG_STATE_ACTIVE)
+      ->condition('state', OG::STATE_ACTIVE)
       ->execute();
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
