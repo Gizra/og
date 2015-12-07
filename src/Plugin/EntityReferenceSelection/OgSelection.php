@@ -37,7 +37,11 @@ class OgSelection extends DefaultSelection {
    * @return DefaultSelection
    */
   public function getSelectionHandler() {
-    return \Drupal::service('plugin.manager.entity_reference_selection')->getSelectionHandler($this->getConfiguration('field'));
+    $field = $this->getConfiguration('field');
+
+    if ($field) {
+      return \Drupal::service('plugin.manager.entity_reference_selection')->getSelectionHandler($field);
+    }
   }
 
   /**
@@ -60,7 +64,14 @@ class OgSelection extends DefaultSelection {
     // the default selection handler of the entity, which the field reference
     // to, and add another logic to the query object i.e. check if the entities
     // bundle defined as group.
-    $query = $this->getSelectionHandler()->buildEntityQuery();
+    $selection_handler = $this->getSelectionHandler();
+
+    if (empty($selection_handler)) {
+      return $query = parent::buildEntityQuery($match, $match_operator);
+    }
+    else {
+      $query = $selection_handler->buildEntityQuery($match, $match_operator);
+    }
 
     $target_type = $this->configuration['target_type'];
 
