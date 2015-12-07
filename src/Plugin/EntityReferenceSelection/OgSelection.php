@@ -39,12 +39,11 @@ class OgSelection extends DefaultSelection {
   public function getSelectionHandler() {
     $options = [
       'target_type' => $this->configuration['target_type'],
-      // This is intentionally NULL as we want the selection manager to choose
-      // the best option.
-      'handler' => NULL,
+      // 'handler' key intentionally absent as we want the selection manager to
+      // choose the best option.
+      // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
       'handler_settings' => $this->configuration['handler_settings'],
     ];
-
     return \Drupal::service('plugin.manager.entity_reference_selection')->getInstance($options);
   }
 
@@ -69,6 +68,7 @@ class OgSelection extends DefaultSelection {
     // to, and add another logic to the query object i.e. check if the entities
     // bundle defined as group.
     $selection_handler = $this->getSelectionHandler();
+    $query = $selection_handler->buildEntityQuery($match, $match_operator);
 
     $target_type = $this->configuration['target_type'];
 
