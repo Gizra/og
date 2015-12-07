@@ -9,6 +9,7 @@ namespace Drupal\og_ui\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\og\OgAccess;
 
 /**
  * Provides a confirmation form for OG subscriptions.
@@ -48,7 +49,7 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Indicate the OG membership state (active or pending).
-    $state = og_user_access($this->entity, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
+    $state = OgAccess::userAccess($this->entity, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
 
     if ($this->entity->access('view')) {
       $label = $this->entity->label();

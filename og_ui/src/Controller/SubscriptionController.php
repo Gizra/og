@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 
 /**
  * Controller for OG subscription routes.
@@ -124,9 +125,9 @@ class SubscriptionController extends ControllerBase {
       return new RedirectResponse($group->toUrl()->setAbsolute(TRUE)->toString());
     }
 
-    if (og_user_access($group, 'subscribe', $account) || og_user_access($group, 'subscribe without approval', $account)) {
+    if (OgAccess::userAccess($group, 'subscribe', $account) || OgAccess::userAccess($group, 'subscribe without approval', $account)) {
       // Show the user a subscription confirmation.
-      return drupal_get_form('og_ui_confirm_subscribe', $group, $account, $field_name);
+      return $this->formBuilder()->buildForm('og_ui_confirm_subscribe', $group, $account, $field_name);
     }
 
     throw new AccessDeniedHttpException();
@@ -148,7 +149,7 @@ class SubscriptionController extends ControllerBase {
     if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() !== $account->id())) {
       if (Og::isMember($group, $account, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
         // Show the user a subscription confirmation.
-        return drupal_get_form('og_ui_confirm_unsubscribe', $group);
+        return $this->formBuilder()->buildForm('og_ui_confirm_unsubscribe', $group);
       }
 
       throw new AccessDeniedHttpException();
