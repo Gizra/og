@@ -25,7 +25,7 @@ use Drupal\og\Og;
  * @EntityReferenceSelection(
  *   id = "og:default",
  *   label = @Translation("OG selection"),
- *   group = "default",
+ *   group = "og",
  *   weight = 1
  * )
  */
