@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og_ui\BundleFormAlter;
 
 /**
@@ -65,16 +66,16 @@ function og_ui_entity_type_save(EntityInterface $entity) {
   $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
   if ($entity->og_group_content_bundle != $is_group_content) {
     if ($entity->og_group_content_bundle) {
-      Og::createField(OG_AUDIENCE_FIELD, $entity_type_id, $bundle);
+      Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, $entity_type_id, $bundle);
     }
-    elseif ($field = FieldConfig::loadByName($entity_type_id, $bundle, OG_AUDIENCE_FIELD)) {
+    elseif ($field = FieldConfig::loadByName($entity_type_id, $bundle, OgGroupAudienceHelper::DEFAULT_FIELD)) {
       $field->delete();
       return;
     }
   }
 
   // Change the field target type and bundle.
-  if ($field = FieldConfig::loadByName($entity_type_id, $bundle, OG_AUDIENCE_FIELD)) {
+  if ($field = FieldConfig::loadByName($entity_type_id, $bundle, OgGroupAudienceHelper::DEFAULT_FIELD)) {
     $handler_settings = $field->getSetting('handler_settings');
     $save = FALSE;
     foreach (['target_type', 'target_bundles'] as $key) {
