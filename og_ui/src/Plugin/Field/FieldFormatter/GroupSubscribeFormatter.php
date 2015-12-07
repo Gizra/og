@@ -10,14 +10,15 @@ namespace Drupal\og_ui\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RedirectDestinationTrait;
 use Drupal\Core\Url;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -43,7 +44,7 @@ class GroupSubscribeFormatter extends FormatterBase {
     $elements = [];
 
     $entity = $items->getEntity();
-    $account = \Drupal::currentUser()->getAccount();
+    $account = User::load(\Drupal::currentUser()->id());
     $field_name = $this->getSetting('field_name');
 
     // Entity is not a group.
@@ -67,9 +68,8 @@ class GroupSubscribeFormatter extends FormatterBase {
     }
 
     if (Og::isMember($entity, $account, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
-      if (og_user_access($entity_type, $id, 'unsubscribe', $account)) {
+      if (OgAccess::userAccess($entity, 'unsubscribe', $account)) {
         $link['title'] = $this->t('Unsubscribe from group');
-        $link['href'] = "group/$entity_type/$id/unsubscribe";
         $link['url'] = Url::fromRoute('og_ui.entity.unsubscribe', ['entity_type_id' => $entity->getEntityTypeId(), 'entity_id' => $entity->id()]);
         $link['class'] = ['unsubscribe'];
       }
@@ -140,12 +140,12 @@ class GroupSubscribeFormatter extends FormatterBase {
         $url = Url::fromRoute('user.login', [], ['query' => $this->getDestinationArray()]);
       }
 
-      if (og_user_access($entity_type, $id, 'subscribe without approval', $account)) {
+      if (OgAccess::userAccess($entity, 'subscribe without approval', $account)) {
         $link['title'] = $this->t('Subscribe to group');
         $link['class'] = ['subscribe'];
         $link['url'] = $url;
       }
-      elseif (og_user_access($entity_type, $id, 'subscribe')) {
+      elseif (OgAccess::userAccess($entity, 'subscribe')) {
         $link['title'] = $this->t('Request group membership');
         $link['class'] = ['subscribe', 'request'];
         $link['url'] = $url;
