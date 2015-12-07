@@ -30,4 +30,4 @@ og_ui.unsubscribe:
     _controller: '\Drupal\og_ui\Controller\SubscriptionController::unsubscribe'
     _title: 'Leave Group'
   requirements:
-    _og_ui_user_access_group: 'TRUE'
+    _og_ui_user_access_group: 'unsubscribe'

@@ -63,11 +63,11 @@ class SubscriptionController extends ControllerBase {
       // @todo I think this is correct? Other options are visitors or require
       // approval both of which apply to the else instead of here.
       if ($this->config('user.settings')->get('register') === USER_REGISTER_ADMINISTRATORS_ONLY) {
-        drupal_set_message($this->t('In order to join any group, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', ['!login' => $user_login_url]));
+        drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a>. After you have successfully done so, you will need to request membership again.', [':login' => $user_login_url]));
       }
       else {
         $user_register_url = Url::fromRoute('user.register', [], $destination);
-        drupal_set_message($this->t('In order to join any group, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', ['!register' => $user_register_url, '!login' => $user_login_url]));
+        drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a> or <a href=":register">register</a> a new account. After you have successfully done so, you will need to request membership again.', [':register' => $user_register_url, ':login' => $user_login_url]));
       }
 
       return new RedirectResponse(Url::fromRoute('user.page')->setAbsolute(TRUE)->toString());

@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -27,7 +28,9 @@ class GroupCheck implements AccessInterface {
   protected $entityTypeManager;
 
   /**
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
+   * Constructs a GroupCheck object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->entityTypeManager = $entity_type_manager;
@@ -58,14 +61,15 @@ class GroupCheck implements AccessInterface {
       return AccessResult::forbidden();
     }
 
-    // @todo This is just temporary until we can resolve the below.
-    return AccessResult::allowed();
-//    // Verify the bundle has roles
+    // @otdo Convert when Role checking is added and has API to use.
+    // Verify the bundle has roles
 //    if (!og_roles($group_type, $bundle, $gid)) {
 //      return AccessResult::forbidden();
 //    }
-//
-//    return og_user_access($group_type, $gid, $perm);
+
+    $permission = $permission = $route->getRequirement('_og_ui_user_access_group');
+
+    return OgAccess::userAccess($group, $permission);
   }
 
 }
