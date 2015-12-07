@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 
 /**
  * Helper for og_ui_form_alter().
@@ -112,7 +113,7 @@ class BundleFormAlter {
 
     $target_type_default = FALSE;
     $handler_settings = [];
-    if ($field = FieldConfig::loadByName($this->entityTypeId, $this->bundle, OG_AUDIENCE_FIELD)) {
+    if ($field = FieldConfig::loadByName($this->entityTypeId, $this->bundle, OgGroupAudienceHelper::DEFAULT_FIELD)) {
       $handler_settings = $field->getSetting('handler_settings');
       if (isset($handler_settings['target_type'])) {
         $target_type_default = $handler_settings['target_type'];
