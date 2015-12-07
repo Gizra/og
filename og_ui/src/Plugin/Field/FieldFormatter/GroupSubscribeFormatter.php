@@ -70,7 +70,7 @@ class GroupSubscribeFormatter extends FormatterBase {
     if (Og::isMember($entity, $account, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
       if (OgAccess::userAccess($entity, 'unsubscribe', $account)) {
         $link['title'] = $this->t('Unsubscribe from group');
-        $link['url'] = Url::fromRoute('og_ui.entity.unsubscribe', ['entity_type_id' => $entity->getEntityTypeId(), 'entity_id' => $entity->id()]);
+        $link['url'] = Url::fromRoute('og_ui.unsubscribe', ['entity_type_id' => $entity->getEntityTypeId(), 'entity_id' => $entity->id()]);
         $link['class'] = ['unsubscribe'];
       }
     }
@@ -133,7 +133,7 @@ class GroupSubscribeFormatter extends FormatterBase {
           $parameters['field_name'] = $field_name;
         }
 
-        $url = Url::fromRoute('og_ui.entity.subscribe', $parameters);
+        $url = Url::fromRoute('og_ui.subscribe', $parameters);
       }
       // Otherwise, link to user login and redirect back to here.
       else {
