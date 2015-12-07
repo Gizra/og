@@ -10,7 +10,7 @@ namespace Drupal\og_ui\Tests;
 use Drupal\simpletest\WebTestBase;
 
 /**
- * Create a new og group and content
+ * Test making a bundle a group and a group content.
  *
  * @group og
  */
