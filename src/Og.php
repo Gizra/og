@@ -414,9 +414,9 @@ class Og {
   /**
    * Get the selection handler for an audience field attached to entity.
    *
-   * @param $entity
+   * @param string $entity_type_id
    *   The entity type.
-   * @param $bundle
+   * @param string $bundle_id
    *   The bundle name.
    * @param $field_name
    *   The field name.
@@ -426,8 +426,8 @@ class Og {
    * @return OgSelection
    * @throws \Exception
    */
-  public static function getSelectionHandler($entity, $bundle, $field_name, array $options = []) {
-    $field_definition = FieldConfig::loadByName($entity, $bundle, $field_name);
+  public static function getSelectionHandler($entity_type_id, $bundle_id, $field_name, array $options = []) {
+    $field_definition = FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name);
 
     if (!static::isGroupAudienceField($field_definition)) {
       throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
@@ -435,7 +435,6 @@ class Og {
 
     $options = NestedArray::mergeDeep([
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
-      'field' => $field_definition,
       'handler' => $field_definition->getSetting('handler'),
       'handler_settings' => [
         'field_mode' => 'default',
