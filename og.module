@@ -156,7 +156,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 function og_entity_create_access(AccountInterface $account, array $context, $bundle) {
   // @todo: Remove when https://www.drupal.org/node/2627852 lands.
   if (empty($context['entity_type_id'])) {
-    return;
+    return AccessResult::neutral();
   }
 
   $entity_type_id = $context['entity_type_id'];
