@@ -10,6 +10,7 @@ namespace Drupal\og_ui\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Url;
+use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,7 +37,7 @@ class SubscriptionController extends ControllerBase {
     $entity_access = $this->entityTypeManager()->getAccessControlHandler($entity_type_id);
     $group = $entity_storage->load($entity_id);
 
-    $account = $this->currentUser();
+    $account = User::load($this->currentUser()->id());
     $field_name = $request->query->get('field_name');
 
     if (empty($field_name)) {
@@ -101,17 +102,16 @@ class SubscriptionController extends ControllerBase {
       $redirect = TRUE;
     }
 
-    $cardinality = $field['cardinality'];
+    $cardinality = $field->getStorageDefinition()->getCardinality();
 
     if (!$message && ($cardinality != FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)) {
       // Check if user is already registered as active or pending in the maximum
       // allowed values.
-      $wrapper = entity_metadata_wrapper('user', $account->uid);
       if ($cardinality === 1) {
-        $count = $wrapper->{$field_name}->value() ? 1 : 0;
+        $count = $account->get($field_name)->value ? 1 : 0;
       }
       else {
-        $count = $wrapper->{$field_name}->count();
+        $count = $account->get($field_name)->count();
       }
 
       if ($count >= $cardinality) {
