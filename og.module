@@ -125,7 +125,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   $entity_type_id = $entity->getEntityTypeId();
   $bundle_id = $entity->bundle();
 
-  $entity_access_strict = \Drupal::config('og.settings')->get('entity_access_strict');
+  $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
 
   $access = OgAccess::userAccessEntity('administer group', $entity, $account);
 
@@ -147,7 +147,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   }
 
   // Otherwise, ignore or deny based on whether strict entity access is set.
-  return AccessResult::forbiddenIf($entity_access_strict);
+  return AccessResult::forbiddenIf($node_access_strict);
 }
 
 /**
@@ -172,9 +172,9 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   }
 
   $config = \Drupal::config('og.settings');
-  $entity_access_strict = $config->get('entity_access_strict');
+  $node_access_strict = $config->get('node_access_strict');
 
-  if (!$entity_access_strict && $account->hasPermission("create $entity_type_id content")) {
+  if (!$node_access_strict && $account->hasPermission("create $entity_type_id content")) {
     // The user has the core permission and strict node access is not set.
     return AccessResult::neutral();
   }
@@ -205,7 +205,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   }
 
   // Otherwise, ignore or deny based on whether strict entity access is set.
-  return $required ? AccessResult::forbiddenIf($entity_access_strict) : AccessResult::neutral();
+  return $required ? AccessResult::forbiddenIf($node_access_strict) : AccessResult::neutral();
 }
 
 /**

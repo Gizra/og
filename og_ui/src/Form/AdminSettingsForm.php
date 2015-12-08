@@ -47,11 +47,11 @@ class AdminSettingsForm extends ConfigFormBase {
       '#default_value' => $config_og->get('group_manager_full_access'),
     ];
 
-    $form['og_entity_access_strict'] = [
+    $form['og_node_access_strict'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Strict node access permissions'),
       '#description' => $this->t('When enabled Organic groups will restrict permissions for creating, updating and deleting according to the Organic groups access settings. Example: A content editor with the <em>Edit any page content</em> permission who is not a member of a group would be denied access to modifying page content in that group. (For restricting view access use the Organic groups access control module.)'),
-      '#default_value' => $config_og->get('entity_access_strict'),
+      '#default_value' => $config_og->get('node_access_strict'),
     ];
 
     // @todo: Port og_ui_admin_people_view.
@@ -89,7 +89,7 @@ class AdminSettingsForm extends ConfigFormBase {
 
     $this->config('og.settings')
       ->set('group_manager_full_access', $form_state->getValue('og_group_manager_full_access'))
-      ->set('entity_access_strict', $form_state->getValue('og_entity_access_strict'))
+      ->set('node_access_strict', $form_state->getValue('og_node_access_strict'))
       ->set('use_queue', $form_state->getValue('og_use_queue'))
       ->set('orphans_delete', $form_state->getValue('og_orphans_delete'))
       ->save();
