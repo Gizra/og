@@ -7,7 +7,6 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Plugin\PluginBase;
 
 abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
@@ -21,7 +20,7 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
   /**
    * The entity type.
-   * 
+   *
    * @var string
    */
   protected $entityType;
@@ -66,17 +65,16 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
     if (!empty($field_storage['entity']) && !in_array($entity_type, $field_storage['entity'])) {
 
-      $params = [
-        '@plugin' => $this->getPluginId(),
-        '@entity' => implode(', ', $field_storage['entity']),
-      ];
+
+      $plugin_id = $this->getPluginId();
+      $entities = implode(', ', $field_storage['entity']);
 
       if ($field_name = $this->getFieldName()) {
         $params['@field_name'] = $field_name;
-        throw new \Exception(new FormattableMarkup('The Organic Groups field with plugin ID @plugin with the name @field_name cannot be attached to the entity type. It can only be attached to the following entities: @entity.', $params));
+        throw new \Exception(sprintf('The Organic Groups field with plugin ID %s with the name %s cannot be attached to the entity type. It can only be attached to the following entities: %s.', $plugin_id, $field_name, $entities));
       }
 
-      throw new \Exception(new FormattableMarkup('The Organic Groups field with plugin ID @plugin cannot be attached to the entity type. It can only be attached to the following entities: @entity.', $params));
+      throw new \Exception(sprintf('The Organic Groups field with plugin ID %s cannot be attached to the entity type. It can only be attached to the following entities: %s.', $plugin_id, $entities));
 
     }
 
