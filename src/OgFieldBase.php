@@ -71,10 +71,10 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
       if ($field_name = $this->getFieldName()) {
         $params['@field_name'] = $field_name;
-        throw new \Exception(sprintf('The Organic Groups field with plugin ID %s with the name %s cannot be attached to the entity type. It can only be attached to the following entities: %s.', $plugin_id, $field_name, $entities));
+        throw new \Exception("The Organic Groups field with plugin ID $plugin_id with the name $field_name cannot be attached to the entity type. It can only be attached to the following entities: $entities.");
       }
 
-      throw new \Exception(sprintf('The Organic Groups field with plugin ID %s cannot be attached to the entity type. It can only be attached to the following entities: %s.', $plugin_id, $entities));
+      throw new \Exception("The Organic Groups field with plugin ID $plugin_id cannot be attached to the entity type. It can only be attached to the following entities: $entities.");
 
     }
 

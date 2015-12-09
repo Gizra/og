@@ -402,7 +402,7 @@ class Og {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
     if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
-      throw new \Exception(sprintf('The Organic Groups field with plugin ID %s is not a valid plugin.', $plugin_id));
+      throw new \Exception("The Organic Groups field with plugin ID $plugin_id is not a valid plugin.");
     }
 
     return $plugin_manager->createInstance($plugin_id);
@@ -427,7 +427,7 @@ class Og {
     $field_definition = FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name);
 
     if (!static::isGroupAudienceField($field_definition)) {
-      throw new \Exception(sprintf('The field %s is not an audience field.', $field_name));
+      throw new \Exception("The field $field_name is not an audience field.");
     }
 
     $options = NestedArray::mergeDeep([
