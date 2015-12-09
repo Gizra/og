@@ -51,9 +51,10 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       $this->fetched = TRUE;
     }
 
-    // Automatically create the first item for computed fields.
+    // Just return an empty item if the first item is requested and the list is
+    // empty. Storing this in the list would lead to an incorrect count.
     if ($index == 0 && !isset($this->list[0])) {
-      $this->list[0] = $this->createItem(0);
+      return $this->createItem(0);
     }
 
     return isset($this->list[$index]) ? $this->list[$index] : NULL;
