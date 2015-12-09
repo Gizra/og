@@ -35,8 +35,7 @@ class CheckFieldCardinalityTest extends UnitTestCase {
     $entity_prophecy->getFieldDefinition($field_name)
       ->willReturn(NULL);
 
-    // The bundle() and getEntityTypeId() methods will be called for the
-    // exception string.
+    // The bundle() and getEntityTypeId() methods will be called.
     $entity_prophecy->bundle()
       ->shouldBeCalled();
     $entity_prophecy->getEntityTypeId()
@@ -62,8 +61,7 @@ class CheckFieldCardinalityTest extends UnitTestCase {
     $entity_prophecy->getFieldDefinition($field_name)
       ->willReturn($field_definition_prophecy->reveal());
 
-    // The bundle() and getEntityTypeId() methods will be called for the
-    // exception string.
+    // The bundle() and getEntityTypeId() will be called.
     $entity_prophecy->bundle()
       ->shouldBeCalled();
     $entity_prophecy->getEntityTypeId()
