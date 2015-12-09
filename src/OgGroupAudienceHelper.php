@@ -72,10 +72,8 @@ class OgGroupAudienceHelper {
    *   found.
    */
   public static function getMatchingField(ContentEntityInterface $entity, $group_type, $group_bundle, $check_access = TRUE) {
-    $entity_type_id = $entity->getEntityTypeId();
-    $bundle_id = $entity->bundle();
+    $field_names = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
 
-    $field_names = Og::getAllGroupAudienceFields($entity_type_id, $bundle_id);
     if (!$field_names) {
       // @todo Throw an exception or return an empty string instead of returning
       //   NULL?
