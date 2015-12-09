@@ -115,7 +115,7 @@ class Og {
    *  the OG membership ID and the group ID as the value. If nothing found,
    *  then an empty array.
    */
-  public static function getEntityGroups(EntityInterface $entity, array $states = [OG_STATE_ACTIVE], $field_name = NULL) {
+  public static function getEntityGroups(EntityInterface $entity, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     $entity_type_id = $entity->getEntityTypeId();
     $entity_id = $entity->id();
 
@@ -184,7 +184,7 @@ class Og {
    *   TRUE if the entity (e.g. the user) belongs to a group and is not pending
    *   or blocked.
    */
-  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OG_STATE_ACTIVE]) {
+  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity, $states);
     $group_entity_type_id = $group->getEntityTypeId();
     // We need to create a map of the group ids as Og::getEntityGroups returns a

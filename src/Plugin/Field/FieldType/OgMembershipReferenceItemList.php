@@ -10,6 +10,7 @@ namespace Drupal\og\Plugin\Field\FieldType;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\OgMembershipInterface;
 
 /**
  * Defines an item list class for OG membership fields.
@@ -142,7 +143,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       ->condition('entity_type', $entity->getEntityTypeId())
       ->condition('etid', $entity->id())
       ->condition('group_type', $group_type)
-      ->condition('state', OG_STATE_ACTIVE)
+      ->condition('state', OgMembershipInterface::STATE_ACTIVE)
       ->execute();
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
