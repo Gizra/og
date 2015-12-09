@@ -27,10 +27,11 @@ class SubscriptionController extends ControllerBase {
   /**
    * @param string $entity_type_id
    * @param string|int $entity_id
+   * @param NULL|string $field_name
    *
    * @return mixed
    */
-  public function subscribe(Request $request, $entity_type_id, $entity_id) {
+  public function subscribe(Request $request, $entity_type_id, $entity_id, $field_name) {
     // @todo We don't need to re-validate the entity type and entity group here,
     // as it's already been done in the access check?
     $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
@@ -38,10 +39,9 @@ class SubscriptionController extends ControllerBase {
     $group = $entity_storage->load($entity_id);
 
     $account = User::load($this->currentUser()->id());
-    $field_name = $request->query->get('field_name');
 
     if (empty($field_name)) {
-      $field_name = og_get_best_group_audience_field('user', $account, $entity_type, $bundle);
+      $field_name = og_get_best_group_audience_field('user', $account, $entity_type_id, $group->bundle());
       if (empty($field_name)) {
         throw new NotFoundHttpException();
       }
@@ -59,7 +59,7 @@ class SubscriptionController extends ControllerBase {
       // Anonymous user can't request membership.
       $destination = $this->getDestinationArray();
 
-      $user_login_url = Url::fromRoute('user.login', [], $destination);
+      $user_login_url = Url::fromRoute('user.login', [], $destination)->toString();
 
       // @todo I think this is correct? Other options are visitors or require
       // approval both of which apply to the else instead of here.
@@ -67,7 +67,7 @@ class SubscriptionController extends ControllerBase {
         drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a>. After you have successfully done so, you will need to request membership again.', [':login' => $user_login_url]));
       }
       else {
-        $user_register_url = Url::fromRoute('user.register', [], $destination);
+        $user_register_url = Url::fromRoute('user.register', [], $destination)->toString();
         drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a> or <a href=":register">register</a> a new account. After you have successfully done so, you will need to request membership again.', [':register' => $user_register_url, ':login' => $user_login_url]));
       }
 

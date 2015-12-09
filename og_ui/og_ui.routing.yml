@@ -17,10 +17,11 @@ og_ui.settings:
     _permission: 'administer group'
 
 og_ui.subscribe:
-  path: 'group/{entity_type_id}/{entity_id}/subscribe'
+  path: 'group/{entity_type_id}/{entity_id}/subscribe/{field_name}'
   defaults:
     _controller: '\Drupal\og_ui\Controller\SubscriptionController::subscribe'
     _title: 'Join Group'
+    field_name: null
   requirements:
     _user_is_logged_in: 'TRUE'
 
