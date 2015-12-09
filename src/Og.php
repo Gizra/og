@@ -36,32 +36,6 @@ class Og {
   const ADMINISTRATOR_ROLE = 'administrator member';
 
   /**
-   * Define active group content states.
-   *
-   * When a user has this membership state they are considered to be of
-   * "member" role.
-   */
-  const STATE_ACTIVE = 1;
-
-  /**
-   * Define pending group content states. The user is subscribed to the group
-   * but isn't an active member yet.
-   *
-   * When a user has this membership state they are considered to be of
-   * "non-member" role.
-   */
-   const STATE_PENDING = 2;
-
-  /**
-   * Define blocked group content states. The user is rejected from the group.
-   *
-   * When a user has this membership state they are denided access to any
-   * group related action. This state, however, does not prevent user to
-   * access a group or group content node.
-   */
-  const STATE_BLOCKED = 3;
-
-  /**
    * Static cache for groups per entity.
    *
    * @var array
@@ -141,7 +115,7 @@ class Og {
    *  the OG membership ID and the group ID as the value. If nothing found,
    *  then an empty array.
    */
-  public static function getEntityGroups(EntityInterface $entity, array $states = [OG::STATE_ACTIVE], $field_name = NULL) {
+  public static function getEntityGroups(EntityInterface $entity, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     $entity_type_id = $entity->getEntityTypeId();
     $entity_id = $entity->id();
 
@@ -210,7 +184,7 @@ class Og {
    *   TRUE if the entity (e.g. the user) belongs to a group and is not pending
    *   or blocked.
    */
-  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OG::STATE_ACTIVE]) {
+  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity, $states);
     $group_entity_type_id = $group->getEntityTypeId();
     // We need to create a map of the group ids as Og::getEntityGroups returns a
