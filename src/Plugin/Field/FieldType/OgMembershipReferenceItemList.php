@@ -52,7 +52,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     }
 
     // Just return an empty item if the first item is requested and the list is
-    // empty.
+    // empty. Storing this in the list would lead to an incorrect count.
     if ($index == 0 && !isset($this->list[0])) {
       return $this->createItem(0);
     }
