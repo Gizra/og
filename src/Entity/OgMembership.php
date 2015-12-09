@@ -380,7 +380,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return EntityInterface
    */
   public function getGroup() {
-    return \Drupal::entityManager()->getStorage($this->getGroupType())->load($this->getGid());
+    return \Drupal::entityTypeManager()->getStorage($this->getGroupType())->load($this->getGid());
   }
 
   /**
@@ -389,6 +389,6 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return EntityInterface
    */
   public function getEntityMembership() {
-    return \Drupal::entityManager()->getStorage($this->get('entity_type'))->load($this->getContentId());
+    return \Drupal::entityTypeManager()->getStorage($this->get('entity_type'))->load($this->getContentId());
   }
 }
