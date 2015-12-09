@@ -80,23 +80,21 @@ class OgGroupAudienceHelper {
       return NULL;
     }
     foreach ($fields as $field_name => $field) {
-      $settings = $field['settings'];
-      if ($settings['target_type'] != $group_type) {
-        // Group type doesn't match.
-        continue;
-      }
-      if (!empty($settings['handler_settings']['target_bundles']) && !in_array($group_bundle, $settings['handler_settings']['target_bundles'])) {
-        // Bundles don't match.
-        continue;
-      }
+      $handler_settings = $field->getSetting('handler_settings');
 
-      if (!static::checkFieldCardinality($entity, $field_name)) {
-        // Field reached maximum.
-        continue;
-      }
+      if (
+        // Skip if the group type doesn't match.
+        $field->getSetting('target_type') !== $group_type ||
 
-      if ($check_access && !$entity->$field_name->access('view')) {
-        // User can't access field.
+        // Skip if the bundle doesn't match.
+        (!empty($handler_settings['target_bundles']) && !in_array($group_bundle, $handler_settings['target_bundles'])) ||
+
+        // Skip if the field reached maximum.
+        !static::checkFieldCardinality($entity, $field_name) ||
+
+        // Skip if the user doesn't have access to the field.
+        ($check_access && !$entity->$field_name->access('view'))
+      ) {
         continue;
       }
 
