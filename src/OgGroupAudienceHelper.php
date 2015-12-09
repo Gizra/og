@@ -74,11 +74,13 @@ class OgGroupAudienceHelper {
   public static function getMatchingField(ContentEntityInterface $entity, $group_type, $group_bundle, $check_access = TRUE) {
     $fields = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
 
+    // Bail out if there are no group audience fields.
     if (!$fields) {
       // @todo Throw an exception or return an empty string instead of returning
       //   NULL?
       return NULL;
     }
+
     foreach ($fields as $field_name => $field) {
       $handler_settings = $field->getSetting('handler_settings');
 
@@ -100,6 +102,8 @@ class OgGroupAudienceHelper {
 
       return $field_name;
     }
+
+    return NULL;
   }
 
 }
