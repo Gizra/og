@@ -62,18 +62,18 @@ class OgGroupAudienceHelper {
    *   The group type that should be referenced by the group audience field.
    * @param string $group_bundle
    *   The group bundle that should be referenced by the group audience field.
-   * @param bool $skip_access_check
-   *   Set this to TRUE to not check if the current user has access to the
-   *   field. Defaults to FALSE.
+   * @param bool $check_access
+   *   Set this to FALSE to not check if the current user has access to the
+   *   field. Defaults to TRUE.
    *
    * @return string
    *   The name of the group audience field.
    */
-  public static function getBestField(ContentEntityInterface $entity, $group_type, $group_bundle, $skip_access_check = FALSE) {
-    $entity_type = $entity->getEntityTypeId();
-    $bundle = $entity->bundle();
+  public static function getMatchingField(ContentEntityInterface $entity, $group_type, $group_bundle, $check_access = TRUE) {
+    $entity_type_id = $entity->getEntityTypeId();
+    $bundle_id = $entity->bundle();
 
-    $field_names = Og::getAllGroupAudienceFields($entity_type, $bundle);
+    $field_names = Og::getAllGroupAudienceFields($entity_type_id, $bundle_id);
     if (!$field_names) {
       return;
     }
@@ -89,12 +89,12 @@ class OgGroupAudienceHelper {
         continue;
       }
 
-      if (!og_check_field_cardinality($entity_type, $entity, $field_name)) {
+      if (!og_check_field_cardinality($entity_type_id, $entity, $field_name)) {
         // Field reached maximum.
         continue;
       }
 
-      if (!$skip_access_check && !field_access('view', $field, $entity_type, $entity)) {
+      if ($check_access && !field_access('view', $field, $entity_type_id, $entity)) {
         // User can't access field.
         continue;
       }
