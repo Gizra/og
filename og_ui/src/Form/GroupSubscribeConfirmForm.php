@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\OgAccess;
 
 /**
- * Provides a confirmation form for OG subscriptions.
+ * Provides a confirmation form for subscribing form a group.
  */
 class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
 
@@ -20,7 +20,7 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'og_ui_subscription_confirm_form';
+    return 'og_ui_subscribe_confirm_form';
   }
 
   /**
