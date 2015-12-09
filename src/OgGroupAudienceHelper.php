@@ -66,8 +66,9 @@ class OgGroupAudienceHelper {
    *   Set this to FALSE to not check if the current user has access to the
    *   field. Defaults to TRUE.
    *
-   * @return string
-   *   The name of the group audience field.
+   * @return string|NULL
+   *   The name of the group audience field, or NULL if no matching field was
+   *   found.
    */
   public static function getMatchingField(ContentEntityInterface $entity, $group_type, $group_bundle, $check_access = TRUE) {
     $entity_type_id = $entity->getEntityTypeId();
@@ -75,7 +76,9 @@ class OgGroupAudienceHelper {
 
     $field_names = Og::getAllGroupAudienceFields($entity_type_id, $bundle_id);
     if (!$field_names) {
-      return;
+      // @todo Throw an exception or return an empty string instead of returning
+      //   NULL?
+      return NULL;
     }
     foreach ($field_names as $field_name => $label) {
       $field = field_info_field($field_name);
