@@ -10,6 +10,7 @@ namespace Drupal\og;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * OG audience field helper methods.
@@ -81,7 +82,8 @@ class OgGroupAudienceHelper {
       return NULL;
     }
     foreach ($field_names as $field_name => $label) {
-      $field = field_info_field($field_name);
+      // @todo This should be retrievable from the $entity.
+      $field = FieldStorageConfig::loadByName($entity_type_id, $field_name);
       $settings = $field['settings'];
       if ($settings['target_type'] != $group_type) {
         // Group type doesn't match.
@@ -92,12 +94,12 @@ class OgGroupAudienceHelper {
         continue;
       }
 
-      if (!og_check_field_cardinality($entity_type_id, $entity, $field_name)) {
+      if (!static::checkFieldCardinality($entity, $field_name)) {
         // Field reached maximum.
         continue;
       }
 
-      if ($check_access && !field_access('view', $field, $entity_type_id, $entity)) {
+      if ($check_access && !$entity->$field_name->access('view')) {
         // User can't access field.
         continue;
       }
