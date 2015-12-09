@@ -96,7 +96,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     // Remove memberships that are not referenced any more.
     if ($deprecated_membership_ids) {
-      $storage = \Drupal::entityManager()->getStorage('og_membership');
+      $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
       // Use array_keys() as the values will contain the group ID.
       $entities = $storage->loadMultiple(array_keys($deprecated_membership_ids));
       $storage->delete($entities);
@@ -151,7 +151,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       return $membership->getGid();
     }, $memberships);
 
-    $groups = \Drupal::entityManager()->getStorage($group_type)->loadMultiple($group_ids);
+    $groups = \Drupal::entityTypeManager()->getStorage($group_type)->loadMultiple($group_ids);
 
     $delta = 0;
     foreach ($groups as $group) {

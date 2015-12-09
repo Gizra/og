@@ -364,7 +364,7 @@ class Og {
     static::$entityGroupCache = [];
 
     // Invalidate the entity property cache.
-    \Drupal::entityManager()->clearCachedDefinitions();
+    \Drupal::entityTypeManager()->clearCachedDefinitions();
     \Drupal::entityManager()->clearCachedFieldDefinitions();
 
     // Let other OG modules know we invalidate cache.
@@ -377,7 +377,7 @@ class Og {
    * @return \Drupal\Core\Entity\EntityStorageInterface
    */
   public static function membershipStorage() {
-    return \Drupal::entityManager()->getStorage('og_membership');
+    return \Drupal::entityTypeManager()->getStorage('og_membership');
   }
 
   /**
