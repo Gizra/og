@@ -72,16 +72,14 @@ class OgGroupAudienceHelper {
    *   found.
    */
   public static function getMatchingField(ContentEntityInterface $entity, $group_type, $group_bundle, $check_access = TRUE) {
-    $field_names = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
+    $fields = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
 
-    if (!$field_names) {
+    if (!$fields) {
       // @todo Throw an exception or return an empty string instead of returning
       //   NULL?
       return NULL;
     }
-    foreach ($field_names as $field_name => $label) {
-      // @todo This should be retrievable from the $entity.
-      $field = FieldStorageConfig::loadByName($entity_type_id, $field_name);
+    foreach ($fields as $field_name => $field) {
       $settings = $field['settings'];
       if ($settings['target_type'] != $group_type) {
         // Group type doesn't match.
