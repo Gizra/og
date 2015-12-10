@@ -76,6 +76,9 @@ og.og_role.*:
     label:
       type: label
       label: 'Label'
+    weight:
+      type: integer
+      label: 'User role weight'
     group_id:
       type: string
       label: 'Group ID'

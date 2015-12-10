@@ -7,8 +7,13 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
+ * Defines the OG user role entity class.
+ *
+ * @see \Drupal\user\Entity\Role
+ *
  * @ConfigEntityType(
  *   id = "og_role",
  *   label = @Translation("OG role"),
@@ -16,6 +21,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
+ *     "weight" = "weight",
  *     "group_type" = "groupType",
  *     "group_bundle" = "groupBundle",
  *     "uid" = "uid",
@@ -24,6 +30,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   config_export = {
  *     "id",
  *     "label",
+ *     "weight",
  *     "group_type",
  *     "group_bundle",
  *     "uid",
@@ -31,21 +38,28 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   }
  * )
  */
-class OgRole extends ConfigEntityBase {
+class OgRole extends ConfigEntityBase implements OgRoleInterface {
 
   /**
-   * @var integer
+   * The machine name of this role.
    *
-   * The identifier of the role.
+   * @var string
    */
   protected $id;
 
   /**
-   * @var string
+   * The human-readable label of this role.
    *
-   * The label of the role.
+   * @var string
    */
   protected $label;
+
+  /**
+   * The weight of this role in administrative listings.
+   *
+   * @var int
+   */
+  protected $weight;
 
   /**
    * @var integer
@@ -55,50 +69,33 @@ class OgRole extends ConfigEntityBase {
   protected $groupID;
 
   /**
-   * @var string
+   * The entity type ID of the group.
    *
-   * The group type. i.e: node, user
+   * @var string
    */
   protected $groupType;
 
   /**
-   * @var string
+   * The bundle ID of the group.
    *
-   * The group bundle. i.e: article, page
+   * @var string
    */
   protected $groupBundle;
 
-  /**
-   * @var integer
-   *
-   * The user ID which the role assign to.
-   */
-  protected $uid;
 
   /**
+   * The permissions belonging to this role.
+   *
    * @var array
-   *
-   * List of permissions.
    */
-  protected $permissions;
+  protected $permissions = array();
 
   /**
-   * @return int
-   */
-  public function getId() {
-    return $this->get('id');
-  }
-
-  /**
-   * @param int $id
+   * An indicator whether the role has all permissions.
    *
-   * @return OgRole
+   * @var bool
    */
-  public function setId($id) {
-    $this->id = $id;
-    $this->set('id', $id);
-    return $this;
-  }
+  protected $is_admin;
 
   /**
    * @return string
@@ -173,39 +170,102 @@ class OgRole extends ConfigEntityBase {
   }
 
   /**
-   * @return int
-   */
-  public function getUid() {
-    return $this->get('uid');
-  }
-
-  /**
-   * @param int $uid
-   *
-   * @return OgRole
-   */
-  public function setUid($uid) {
-    $this->uid = $uid;
-    $this->set('uid', $uid);
-    return $this;
-  }
-
-  /**
-   * @return array
+   * {@inheritdoc}
    */
   public function getPermissions() {
-    return $this->get('permissions');;
+    if ($this->isAdmin()) {
+      return [];
+    }
+    return $this->permissions;
   }
 
   /**
-   * @param array $permissions
-   *
-   * @return OgRole
+   * {@inheritdoc}
    */
-  public function setPermissions($permissions) {
-    $this->permissions = $permissions;
-    $this->set('permissions', $permissions);
+  public function getWeight() {
+    return $this->get('weight');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setWeight($weight) {
+    $this->set('weight', $weight);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasPermission($permission) {
+    if ($this->isAdmin()) {
+      return TRUE;
+    }
+    return in_array($permission, $this->permissions);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function grantPermission($permission) {
+    if ($this->isAdmin()) {
+      return $this;
+    }
+    if (!$this->hasPermission($permission)) {
+      $this->permissions[] = $permission;
+    }
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function revokePermission($permission) {
+    if ($this->isAdmin()) {
+      return $this;
+    }
+    $this->permissions = array_diff($this->permissions, array($permission));
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isAdmin() {
+    return (bool) $this->is_admin;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setIsAdmin($is_admin) {
+    $this->is_admin = $is_admin;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function postLoad(EntityStorageInterface $storage, array &$entities) {
+    parent::postLoad($storage, $entities);
+    // Sort the queried roles by their weight.
+    // See \Drupal\Core\Config\Entity\ConfigEntityBase::sort().
+    uasort($entities, 'static::sort');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+
+    if (!isset($this->weight) && ($roles = $storage->loadMultiple())) {
+      // Set a role weight to make this new role last.
+      $max = array_reduce($roles, function($max, $role) {
+        return $max > $role->weight ? $max : $role->weight;
+      });
+      $this->weight = $max + 1;
+    }
   }
 
 }

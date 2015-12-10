@@ -7,6 +7,7 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Entity\OgRoleInterface;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
 use Drupal\user\EntityOwnerInterface;
@@ -164,12 +165,12 @@ function _og_og_permission() {
   $perms['update group'] = array(
     'title' => t('Edit group'),
     'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
-    'default role' => array(Og::ADMINISTRATOR_ROLE),
+    'default role' => array(OgRoleInterface::ADMINISTRATOR),
   );
   $perms['administer group'] = array(
     'title' => t('Administer group'),
     'description' => t('Manage group members and content in the group.'),
-    'default role' => array(Og::ADMINISTRATOR_ROLE),
+    'default role' => array(OgRoleInterface::ADMINISTRATOR),
     'restrict access' => TRUE,
   );
 
@@ -185,7 +186,7 @@ function _og_og_permission() {
  * Implements hook_og_default_roles().
  */
 function _og_og_default_roles() {
-  return array(Og::ADMINISTRATOR_ROLE);
+  return array(OgRoleInterface::ADMINISTRATOR);
 }
 
 /**
@@ -2005,7 +2006,7 @@ function _og_roles($group_type, $bundle, $gid = 0, $force_group = FALSE, $includ
     ->orderBy('rid', 'ASC');
 
   if (!$include_all) {
-    $query->condition('name', array(Og::ANONYMOUS_ROLE, Og::AUTHENTICATED_ROLE), 'NOT IN');
+    $query->condition('name', array(OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED), 'NOT IN');
   }
   $rids = $query
     ->execute()
@@ -2035,8 +2036,8 @@ function _og_get_default_roles($include = TRUE) {
   drupal_alter('og_default_roles', $roles);
 
   if ($include) {
-    array_unshift($roles, Og::AUTHENTICATED_ROLE);
-    array_unshift($roles, Og::ANONYMOUS_ROLE);
+    array_unshift($roles, OgRoleInterface::AUTHENTICATED);
+    array_unshift($roles, OgRoleInterface::ANONYMOUS);
   }
 
   return $roles;
@@ -2114,7 +2115,7 @@ function _og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE, $ch
 
 
   if ($include && !$is_blocked) {
-    $role_name = $is_member ? Og::AUTHENTICATED_ROLE : Og::ANONYMOUS_ROLE;
+    $role_name = $is_member ? OgRoleInterface::AUTHENTICATED : OgRoleInterface::ANONYMOUS;
 
     $rids = db_select('og_role', 'ogr')
       ->fields('ogr', array('rid', 'name'))
@@ -2543,7 +2544,7 @@ function _og_get_permissions() {
           // Initialize the roles key, if other modules haven't set it
           // explicetly. This means the permissions can apply to anonymous and
           // authenticated members as-well.
-          'roles' => array(Og::ANONYMOUS_ROLE, Og::AUTHENTICATED_ROLE),
+          'roles' => array(OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED),
           'default role' => array(),
           'module' => $module,
         );
@@ -2662,12 +2663,12 @@ function _og_list_permissions($type) {
       // We allow the create permission only on members, as otherwise we would
       // have to iterate over every single group to decide if the user has
       // permissions for it.
-      $perms["create $type content"]['roles'] = array(Og::AUTHENTICATED_ROLE);
+      $perms["create $type content"]['roles'] = array(OgRoleInterface::AUTHENTICATED);
     }
 
     // Add default permissions.
     foreach ($perms as $key => $value) {
-      $perms[$key]['default role'] = array(Og::AUTHENTICATED_ROLE);
+      $perms[$key]['default role'] = array(OgRoleInterface::AUTHENTICATED);
     }
   }
   return $perms;
