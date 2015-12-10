@@ -21,10 +21,11 @@ class OgAccessHookTest extends OgAccessTestBase {
   /**
    * @dataProvider operationProvider
    */
-  function testNotContentEntity($operation) {
+  public function testNotContentEntity($operation) {
     $entity = $this->prophesize(EntityInterface::class);
     $access = og_entity_access($entity->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($access->isNeutral());
   }
+
 
 }
