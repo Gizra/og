@@ -106,7 +106,7 @@ class OgAccessTestBase extends UnitTestCase {
     return [
       ['view'],
       ['update'],
-      ['delete'],
+      ['administer group'],
     ];
   }
 

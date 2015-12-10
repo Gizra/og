@@ -16,8 +16,6 @@ use Drupal\og\OgAccess;
  */
 class OgAccessEntityTest extends OgAccessEntityTestBase {
 
-  protected $entity;
-
   /**
    * @coversDefaultmethod ::userAccessEntity
    * @dataProvider operationProvider

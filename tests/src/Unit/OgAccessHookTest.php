@@ -7,11 +7,12 @@
 
 namespace Drupal\Tests\og\Unit;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\og\OgAccess;
 
 /**
  * @group og
  */
-class OgAccessHookTest extends OgAccessTestBase {
+class OgAccessHookTest extends OgAccessEntityTestBase {
 
   public function setUp() {
     parent::setUp();
@@ -27,5 +28,17 @@ class OgAccessHookTest extends OgAccessTestBase {
     $this->assertTrue($access->isNeutral());
   }
 
-
+  /**
+   * @dataProvider operationProvider
+   */
+  public function testGetEntityGroups($operation) {
+    $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
+    $user_entity_access = og_entity_access($this->entity->reveal(), $operation, $this->user->reveal());
+    if ($operation == 'view') {
+      $this->assertTrue($user_entity_access->isNeutral());
+    }
+    else {
+      $this->assertTrue($user_entity_access->isAllowed());
+    }
+  }
 }

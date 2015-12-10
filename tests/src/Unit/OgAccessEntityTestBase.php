@@ -7,13 +7,15 @@
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 class OgAccessEntityTestBase extends OgAccessTestBase {
+
+  protected $entity;
 
   public function setup() {
     parent::setUp();
@@ -36,7 +38,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $entity_type->getListCacheTags()->willReturn([]);
     $entity_type->id()->willReturn($entity_type_id);
 
-    $this->entity = $this->prophesize(EntityInterface::class);
+    $this->entity = $this->prophesize(ContentEntityInterface::class);
     $this->entity->id()->willReturn($entity_id);
     $this->entity->bundle()->willReturn($bundle);
     $this->entity->isNew()->willReturn(FALSE);
