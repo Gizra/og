@@ -7,7 +7,6 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -403,9 +402,7 @@ class Og {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
     if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
-
-      $params = ['@plugin' => $plugin_id];
-      throw new \Exception(new FormattableMarkup('The Organic Groups field with plugin ID @plugin is not a valid plugin.', $params));
+      throw new \Exception("The Organic Groups field with plugin ID $plugin_id is not a valid plugin.");
     }
 
     return $plugin_manager->createInstance($plugin_id);
@@ -430,7 +427,7 @@ class Og {
     $field_definition = FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name);
 
     if (!static::isGroupAudienceField($field_definition)) {
-      throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
+      throw new \Exception("The field $field_name is not an audience field.");
     }
 
     $options = NestedArray::mergeDeep([
