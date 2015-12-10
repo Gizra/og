@@ -65,6 +65,7 @@ og.og_membership_type.*:
       type: boolean
       label: 'Status'
 
+# Copied and adapted from user.schema.yml
 og.og_role.*:
   type: config_entity
   label: 'OG user role settings'
