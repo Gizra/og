@@ -78,7 +78,7 @@ class BundleFormAlter {
     $this->bundle = $this->entity->id();
     // Example: Article.
     $this->bundleLabel = Unicode::lcfirst($this->entity->label());
-    $this->definition = \Drupal::entityTypeManager()->getDefinition($this->entity->getEntityTypeId());
+    $this->definition = $this->entity->getEntityType();
     // Example: node.
     $this->entityTypeId = $this->definition->getBundleOf();
 
