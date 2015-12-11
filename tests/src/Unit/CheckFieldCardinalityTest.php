@@ -35,8 +35,6 @@ class CheckFieldCardinalityTest extends UnitTestCase {
     $entity_prophecy->getFieldDefinition($field_name)
       ->willReturn(NULL);
 
-    // The bundle() and getEntityTypeId() methods will be called for the
-    // exception string.
     $entity_prophecy->bundle()
       ->shouldBeCalled();
     $entity_prophecy->getEntityTypeId()
@@ -62,8 +60,6 @@ class CheckFieldCardinalityTest extends UnitTestCase {
     $entity_prophecy->getFieldDefinition($field_name)
       ->willReturn($field_definition_prophecy->reveal());
 
-    // The bundle() and getEntityTypeId() methods will be called for the
-    // exception string.
     $entity_prophecy->bundle()
       ->shouldBeCalled();
     $entity_prophecy->getEntityTypeId()
@@ -97,6 +93,11 @@ class CheckFieldCardinalityTest extends UnitTestCase {
 
     $entity_prophecy->getFieldDefinition($field_name)
       ->willReturn($field_definition_prophecy->reveal());
+
+    $entity_prophecy->bundle()
+      ->shouldBeCalled();
+    $entity_prophecy->getEntityTypeId()
+      ->shouldBeCalled();
 
     // If the cardinality is unlimited getting a cound of the field items is
     // never expected, so just check it's not called.

@@ -27,7 +27,7 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
       return;
     }
 
-    $entity = \Drupal::entityManager()
+    $entity = \Drupal::entityTypeManager()
       ->getStorage($value->getFieldDefinition()->getTargetEntityTypeId())
       ->load($value->get('target_id')->getValue());
 

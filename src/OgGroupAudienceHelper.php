@@ -37,12 +37,15 @@ class OgGroupAudienceHelper {
   public static function checkFieldCardinality(ContentEntityInterface $entity, $field_name) {
     $field_definition = $entity->getFieldDefinition($field_name);
 
+    $entity_type_id = $entity->getEntityTypeId();
+    $bundle_id = $entity->bundle();
+
     if (!$field_definition) {
-      throw new FieldException(sprintf('No "%s" field found for %s %s entity', $field_name, $entity->bundle(), $entity->getEntityTypeId()));
+      throw new FieldException("No field with the name $field_name found for $bundle_id $entity_type_id entity.");
     }
 
     if (!Og::isGroupAudienceField($field_definition)) {
-      throw new FieldException(sprintf('"%s" field on %s %s entity is not an audience field.', $field_name, $entity->bundle(), $entity->getEntityTypeId()));
+      throw new FieldException("$field_name field on $bundle_id $entity_type_id entity is not an audience field.");
     }
 
     $cardinality = $field_definition->getFieldStorageDefinition()->getCardinality();

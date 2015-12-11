@@ -10,6 +10,7 @@ namespace Drupal\og\Plugin\Field\FieldType;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\OgMembershipInterface;
 
 /**
  * Defines an item list class for OG membership fields.
@@ -51,9 +52,10 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       $this->fetched = TRUE;
     }
 
-    // Automatically create the first item for computed fields.
+    // Just return an empty item if the first item is requested and the list is
+    // empty. Storing this in the list would lead to an incorrect count.
     if ($index == 0 && !isset($this->list[0])) {
-      $this->list[0] = $this->createItem(0);
+      return $this->createItem(0);
     }
 
     return isset($this->list[$index]) ? $this->list[$index] : NULL;
@@ -96,7 +98,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     // Remove memberships that are not referenced any more.
     if ($deprecated_membership_ids) {
-      $storage = \Drupal::entityManager()->getStorage('og_membership');
+      $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
       // Use array_keys() as the values will contain the group ID.
       $entities = $storage->loadMultiple(array_keys($deprecated_membership_ids));
       $storage->delete($entities);
@@ -141,7 +143,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       ->condition('entity_type', $entity->getEntityTypeId())
       ->condition('etid', $entity->id())
       ->condition('group_type', $group_type)
-      ->condition('state', OG_STATE_ACTIVE)
+      ->condition('state', OgMembershipInterface::STATE_ACTIVE)
       ->execute();
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
@@ -151,7 +153,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       return $membership->getGid();
     }, $memberships);
 
-    $groups = \Drupal::entityManager()->getStorage($group_type)->loadMultiple($group_ids);
+    $groups = \Drupal::entityTypeManager()->getStorage($group_type)->loadMultiple($group_ids);
 
     $delta = 0;
     foreach ($groups as $group) {

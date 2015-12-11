@@ -7,7 +7,6 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -115,7 +114,7 @@ class Og {
    *  the OG membership ID and the group ID as the value. If nothing found,
    *  then an empty array.
    */
-  public static function getEntityGroups(EntityInterface $entity, array $states = [OG_STATE_ACTIVE], $field_name = NULL) {
+  public static function getEntityGroups(EntityInterface $entity, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     $entity_type_id = $entity->getEntityTypeId();
     $entity_id = $entity->id();
 
@@ -184,7 +183,7 @@ class Og {
    *   TRUE if the entity (e.g. the user) belongs to a group and is not pending
    *   or blocked.
    */
-  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OG_STATE_ACTIVE]) {
+  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity, $states);
     $group_entity_type_id = $group->getEntityTypeId();
     // We need to create a map of the group ids as Og::getEntityGroups returns a
@@ -364,7 +363,7 @@ class Og {
     static::$entityGroupCache = [];
 
     // Invalidate the entity property cache.
-    \Drupal::entityManager()->clearCachedDefinitions();
+    \Drupal::entityTypeManager()->clearCachedDefinitions();
     \Drupal::entityManager()->clearCachedFieldDefinitions();
 
     // Let other OG modules know we invalidate cache.
@@ -377,7 +376,7 @@ class Og {
    * @return \Drupal\Core\Entity\EntityStorageInterface
    */
   public static function membershipStorage() {
-    return \Drupal::entityManager()->getStorage('og_membership');
+    return \Drupal::entityTypeManager()->getStorage('og_membership');
   }
 
   /**
@@ -403,9 +402,7 @@ class Og {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
     if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
-
-      $params = ['@plugin' => $plugin_id];
-      throw new \Exception(new FormattableMarkup('The Organic Groups field with plugin ID @plugin is not a valid plugin.', $params));
+      throw new \Exception("The Organic Groups field with plugin ID $plugin_id is not a valid plugin.");
     }
 
     return $plugin_manager->createInstance($plugin_id);
@@ -430,7 +427,7 @@ class Og {
     $field_definition = FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name);
 
     if (!static::isGroupAudienceField($field_definition)) {
-      throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
+      throw new \Exception("The field $field_name is not an audience field.");
     }
 
     $options = NestedArray::mergeDeep([
