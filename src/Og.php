@@ -383,7 +383,7 @@ class Og {
    * Gets the default constructor parameters for OG membership.
    */
   public static function membershipDefault() {
-    return ['type' => 'og_membership_type_default'];
+    return ['type' => OgMembershipInterface::TYPE_DEFAULT];
   }
 
 

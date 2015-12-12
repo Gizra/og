@@ -12,6 +12,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\Component\Utility\Unicode;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -183,7 +184,7 @@ class GetEntityGroupsTest extends KernelTestBase {
    * @return \Drupal\og\Entity|OgMembership
    */
   protected function createMembership($user, $group) {
-    $membership = OgMembership::create(['type' => OG_MEMBERSHIP_TYPE_DEFAULT])
+    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT])
       ->setEntityId($user->id())
       ->setEntityType('user')
       ->setGid($group->id())
