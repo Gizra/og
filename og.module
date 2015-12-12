@@ -22,16 +22,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
 
 /**
- * The default group membership type that is the bundle of group membership.
- */
-define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
-
-/**
- * The name of the user's request field in the default group membership type.
- */
-define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
-
-/**
  * Implements hook_entity_insert().
  */
 function og_entity_insert(EntityInterface $entity) {
@@ -41,7 +31,7 @@ function og_entity_insert(EntityInterface $entity) {
 
   if ($entity instanceof EntityOwnerInterface) {
     // Subscribe the group manager.
-    $membership = OgMembership::create(array('type' => OG_MEMBERSHIP_TYPE_DEFAULT));
+    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setEntityId($entity->getOwnerId())
       ->setEntityType('user')
