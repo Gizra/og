@@ -61,6 +61,20 @@ class OgRole extends Role implements OgRoleInterface {
   protected $group_bundle;
 
   /**
+   * Set the ID of the role.
+   *
+   * @param string $id
+   *   The machine name of the role.
+   *
+   * @return OgRole
+   */
+  public function setId($id) {
+    $this->id = $id;
+    $this->set('id', $id);
+    return $this;
+  }
+
+  /**
    * @return string
    */
   public function getLabel() {

@@ -47,8 +47,7 @@ class OgRoleTest extends KernelTestBase {
       ->setLabel('Content editor')
       ->setGroupType('node')
       ->setGroupBundle('group')
-      ->setPermissions(['administer group'])
-      ->setUid(1)
+      ->grantPermission('administer group')
       ->save();
 
     // Checking assigning of the role.
