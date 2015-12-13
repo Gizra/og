@@ -174,22 +174,67 @@ class GetEntityGroupsTest extends KernelTestBase {
   }
 
   /**
+   * Tests member methods for states that other groups users are added to.
+   */
+  public function testIsMemberStates() {
+    // Add user to group 1 should now return that group only.
+    $membership = $this->createMembership($this->user3, $this->group1);
+
+    // Default param is ACTIVE.
+    $this->assertTrue(Og::isMember($this->group1, $this->user3));
+
+    $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
+    $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_BLOCKED]));
+    $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING, OgMembershipInterface::STATE_BLOCKED]));
+    $this->assertFalse(Og::isMemberPending($this->group1, $this->user3));
+    $this->assertFalse(Og::isMemberBlocked($this->group1, $this->user3));
+
+    // Change the membership state to PENDING.
+    $membership->setState(OgMembershipInterface::STATE_PENDING)->save();
+
+    Og::invalidateCache();
+
+    $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
+    $this->assertTrue(Og::isMemberPending($this->group1, $this->user3));
+    $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING, OgMembershipInterface::STATE_BLOCKED]));
+
+    $this->assertFalse(Og::isMember($this->group1, $this->user3));
+    $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_BLOCKED]));
+    $this->assertFalse(Og::isMemberBlocked($this->group1, $this->user3));
+
+    // Change the membership state to BLOCKED.
+    $membership->setState(OgMembershipInterface::STATE_BLOCKED)->save();
+
+    Og::invalidateCache();
+
+    $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_BLOCKED]));
+    $this->assertTrue(Og::isMemberBlocked($this->group1, $this->user3));
+    $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING, OgMembershipInterface::STATE_BLOCKED]));
+
+    $this->assertFalse(Og::isMember($this->group1, $this->user3));
+    $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
+    $this->assertFalse(Og::isMemberPending($this->group1, $this->user3));
+  }
+
+  /**
    * Creates an Og membership entity.
    *
    * @todo This is a temp function, which will be later replaced by Og::group().
    *
    * @param \Drupal\user\Entity\User $user
    * @param \Drupal\Core\Entity\EntityInterface $group
+   * @param int $state
    *
    * @return \Drupal\og\Entity|OgMembership
    */
-  protected function createMembership($user, $group) {
+  protected function createMembership($user, $group, $state = OgMembershipInterface::STATE_ACTIVE) {
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT])
       ->setEntityId($user->id())
       ->setEntityType('user')
       ->setGid($group->id())
       ->setGroupType($group->getEntityTypeId())
-      ->save();
+      ->setState($state);
+    $membership->save();
 
     return $membership;
   }

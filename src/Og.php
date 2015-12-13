@@ -194,6 +194,34 @@ class Og {
   }
 
   /**
+   * Returns whether an entity belongs to a group with a pending status.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *
+   * @return bool
+   *
+   * @see \Drupal\og\Og::isMember
+   */
+  public static function isMemberPending(EntityInterface $group, EntityInterface $entity) {
+    return static::isMember($group, $entity, [OgMembershipInterface::STATE_PENDING]);
+  }
+
+  /**
+   * Returns whether an entity belongs to a group with a blocked status.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *
+   * @return bool
+   *
+   * @see \Drupal\og\Og::isMember
+   */
+  public static function isMemberBlocked(EntityInterface $group, EntityInterface $entity) {
+    return static::isMember($group, $entity, [OgMembershipInterface::STATE_BLOCKED]);
+  }
+
+  /**
    * Check if the given entity type and bundle is a group.
    *
    * @param string $entity_type_id
