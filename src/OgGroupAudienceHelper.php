@@ -100,7 +100,7 @@ class OgGroupAudienceHelper {
         continue;
       }
 
-      if ($check_access && !$entity->$field_name->access('view')) {
+      if ($check_access && !$entity->get($field_name)->access('view')) {
         // The user doesn't have access to the field.
         continue;
       }
