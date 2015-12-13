@@ -10,6 +10,7 @@ namespace Drupal\og;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * OG audience field helper methods.
@@ -54,6 +55,60 @@ class OgGroupAudienceHelper {
     }
 
     return $entity->get($field_name)->count() < $cardinality;
+  }
+
+  /**
+   * Returns the first group audience field that matches the given entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The group content to find a matching group audience field for.
+   * @param string $group_type
+   *   The group type that should be referenced by the group audience field.
+   * @param string $group_bundle
+   *   The group bundle that should be referenced by the group audience field.
+   * @param bool $check_access
+   *   (optional) Set this to FALSE to not check if the current user has access
+   *   to the field. Defaults to TRUE.
+   *
+   * @return string|NULL
+   *   The name of the group audience field, or NULL if no matching field was
+   *   found.
+   */
+  public static function getMatchingField(ContentEntityInterface $entity, $group_type, $group_bundle, $check_access = TRUE) {
+    $fields = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
+
+    // Bail out if there are no group audience fields.
+    if (!$fields) {
+      return NULL;
+    }
+
+    foreach ($fields as $field_name => $field) {
+      $handler_settings = $field->getSetting('handler_settings');
+
+      if ($field->getSetting('target_type') !== $group_type) {
+        // Group type doesn't match.
+        continue;
+      }
+
+      if (!empty($handler_settings['target_bundles']) && !in_array($group_bundle, $handler_settings['target_bundles'])) {
+        // Bundle doesn't match.
+        continue;
+      }
+
+      if (!static::checkFieldCardinality($entity, $field_name)) {
+        // The field cardinality has reached its maximum
+        continue;
+      }
+
+      if ($check_access && !$entity->get($field_name)->access('view')) {
+        // The user doesn't have access to the field.
+        continue;
+      }
+
+      return $field_name;
+    }
+
+    return NULL;
   }
 
 }
