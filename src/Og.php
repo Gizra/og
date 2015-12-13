@@ -169,19 +169,19 @@ class Og {
   }
 
   /**
-   * Return TRUE if entity belongs to a group.
+   * Return whether a group content belongs to a group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
-   *   The group entity to check.
+   *   The group entity.
    * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to get groups for.
+   *   The entity to test the membership for.
    * @param array $states
    *   (optional) Array with the membership states to check the membership.
    *   Defaults to active memberships.
    *
    * @return bool
-   *   TRUE if the entity (e.g. the user) belongs to a group and is not pending
-   *   or blocked.
+   *   TRUE if the entity (e.g. the user or node) belongs to a group with
+   *   a certain state.
    */
   public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity, $states);
@@ -197,9 +197,12 @@ class Og {
    * Returns whether an entity belongs to a group with a pending status.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity.
    * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The group content entity.
    *
    * @return bool
+   *   True if the membership is pending.
    *
    * @see \Drupal\og\Og::isMember
    */
@@ -211,9 +214,12 @@ class Og {
    * Returns whether an entity belongs to a group with a blocked status.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity.
    * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to test the membership for.
    *
    * @return bool
+   *   True if the membership is blocked.
    *
    * @see \Drupal\og\Og::isMember
    */
