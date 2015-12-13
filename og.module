@@ -5,77 +5,22 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgRoleInterface;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\OgMembershipInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 
 /**
- * Define active group content states.
- *
- * When a user has this membership state they are considered to be of
- * "member" role.
- */
-define('OG_STATE_ACTIVE', 1);
-
-/**
- * Define pending group content states. The user is subscribed to the group
- * but isn't an active member yet.
- *
- * When a user has this membership state they are considered to be of
- * "non-member" role.
- */
-define('OG_STATE_PENDING', 2);
-
-/**
- * Define blocked group content states. The user is rejected from the group.
- *
- * When a user has this membership state they are denided access to any
- * group related action. This state, however, does not prevent user to
- * access a group or group content node.
- */
-define('OG_STATE_BLOCKED', 3);
-
-/**
  * Group default roles and permissions field.
  */
 define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
-
-/**
- * The default group membership type that is the bundle of group membership.
- */
-define('OG_MEMBERSHIP_TYPE_DEFAULT', 'og_membership_type_default');
-
-/**
- * The name of the user's request field in the default group membership type.
- */
-define('OG_MEMBERSHIP_REQUEST_FIELD', 'og_membership_request');
-
-/**
- * Drupal 8 part. Road map:
- * 1. Reference property between groups.
- * 2. EFQ: work on the EFQ alter so people can search with the audience field.
- * 3. API: Move API function like og_is_group to the og controller.
- * 4. Move the define into the controller class.
- */
-
-/**
- * Implements hook_entity_access().
- */
-function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-// todo: issue #3 in OG 8 issue queue.
-
-//  if (OG::IsGroup($entity)) {
-//  }
-//
-//  if (OG::IsGroupContent($entity)) {
-//
-//  }
-}
 
 /**
  * Implements hook_entity_insert().
@@ -87,7 +32,7 @@ function og_entity_insert(EntityInterface $entity) {
 
   if ($entity instanceof EntityOwnerInterface) {
     // Subscribe the group manager.
-    $membership = OgMembership::create(array('type' => OG_MEMBERSHIP_TYPE_DEFAULT));
+    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setEntityId($entity->getOwnerId())
       ->setEntityType('user')
@@ -131,8 +76,110 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
 }
 
 /**
- * Drupal 7 part.
+ * Implements hook_entity_access().
  */
+function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // We only care about content entities.
+  if (!$entity instanceof ContentEntityInterface) {
+    return AccessResult::neutral();
+  }
+
+  if ($operation == 'view') {
+    return AccessResult::neutral();
+  }
+
+  $entity_type_id = $entity->getEntityTypeId();
+  $bundle_id = $entity->bundle();
+
+  $access = OgAccess::userAccessEntity('administer group', $entity, $account);
+
+  if ($access->isNeutral()) {
+    // The node isn't in an OG context, so no need to keep testing.
+    return $access;
+  }
+  else {
+    // Any and own content.
+    $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
+  }
+
+  if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
+    $access = OgAccess::userAccessEntity($operation, $entity, $account);
+  }
+
+  if ($access->isAllowed()) {
+    return $access;
+  }
+
+  if ($entity_type_id == 'node') {
+    $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
+
+    // Otherwise, ignore or deny based on whether strict node access is set.
+    return AccessResult::forbiddenIf($node_access_strict);
+  }
+
+  return AccessResult::forbidden();
+}
+
+/**
+ * Implements hook_entity_create_access().
+ */
+function og_entity_create_access(AccountInterface $account, array $context, $bundle) {
+  // @todo: Remove when https://www.drupal.org/node/2627852 lands.
+  if (empty($context['entity_type_id'])) {
+    return AccessResult::neutral();
+  }
+
+  $entity_type_id = $context['entity_type_id'];
+
+  if (!Og::isGroupContent($entity_type_id, $bundle)) {
+    // Not a group content.
+    return AccessResult::neutral();
+  }
+
+  $access_result = AccessResult::allowedIfHasPermission($account, 'administer group');
+  if ($access_result->isAllowed()) {
+    return $access_result;
+  }
+
+  if ($entity_type_id == 'node') {
+    $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
+
+    if (!$node_access_strict && $account->hasPermission("create $bundle content")) {
+      // The user has the core permission and strict node access is not set.
+      return AccessResult::neutral();
+    }
+  }
+
+
+
+
+  // We can't check if user has create permissions, as there is no group
+  // context. However, we can check if there are any groups the user will be
+  // able to select, and if not, we don't allow access.
+  // @see \Drupal\og\Plugin\EntityReferenceSelection\OgSelection::buildEntityQuery()
+  $required = FALSE;
+
+  $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+  foreach ($field_definitions as $field_name => $field_definition) {
+    /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
+    if (!Og::isGroupAudienceField($field_definition)) {
+      continue;
+    }
+
+    $handler = Og::getSelectionHandler($entity_type_id, $bundle, $field_definition);
+
+    if ($handler->getReferenceableEntities()) {
+      return Accessresult::allowed();
+    }
+
+    // Allow users to create content outside of groups, if none of the
+    // audience fields is required.
+    $required = $field_definition->isRequired();
+  }
+
+  // Otherwise, ignore or deny based on whether strict entity access is set.
+  return $required ? AccessResult::forbiddenIf($node_access_strict) : AccessResult::neutral();
+}
 
 /**
  * Implements hook_help().
@@ -188,84 +235,6 @@ function _og_og_permission() {
 function _og_og_default_roles() {
   return array(OgRoleInterface::ADMINISTRATOR);
 }
-
-/**
- * Implements hook_node_access().
- */
-function _og_node_access($node, $op, $account) {
-  $type = is_string($node) ? $node : (is_array($node) ? $node['type'] : $node->type);
-
-  if ($op == 'create' && og_is_group_content_type('node', $type)) {
-    // Save some legwork if the user has the core permission and strict node
-    // access is not set.
-    if (!\Drupal::config('og.settings')->get('node_access_strict') && user_access("create $type content", $account)) {
-      // We just ignore: core access will take care of it.
-      return NODE_ACCESS_IGNORE;
-    }
-
-    if (user_access('administer group', $account)) {
-      return NODE_ACCESS_ALLOW;
-    }
-    // We can't check if user has create permissions using og_user_access(), as
-    // there is no group context. However, we can check if there are any groups
-    // the user will be able to select, and if not, we don't allow access.
-    // @see OgSelectionHandler::getReferencableEntities()
-    $required = FALSE;
-    foreach (Og::getAllGroupAudienceFields('node', $type) as $field_name => $label) {
-      $field = field_info_field($field_name);
-      $instance = field_info_instance('node', $field_name, $type);
-      // Set the "field mode" to default, before passing it to the
-      // selection handler.
-      $instance['field_mode'] = 'default';
-      if (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
-        return NODE_ACCESS_ALLOW;
-      }
-
-      // Allow users to create content outside of groups, if none of the
-      // audience fields is required.
-      if ($instance['required']) {
-        $required = TRUE;
-      }
-    }
-    // If no group audience field is required, we ignore.
-    if (!$required) {
-      return NODE_ACCESS_IGNORE;
-    }
-
-    // Otherwise, ignore or deny based on whether strict node access is set.
-    return \Drupal::config('og.settings')->get('node_access_strict') ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
-  }
-  elseif (in_array($op, array('update', 'delete'))) {
-    $access = og_user_access_entity('administer group', 'node', $node, $account);
-
-    if (is_null($access)) {
-      // The node isn't in an OG context, so no need to keep testing.
-      return NODE_ACCESS_IGNORE;
-    }
-    else {
-      $access = $access ||
-        // Any content.
-        og_user_access_entity("$op any $type content", 'node', $node, $account) ||
-        // Own content.
-        ($account->uid == $node->uid && og_user_access_entity("$op own $type content", 'node', $node, $account));
-    }
-
-    if (!$access && $op == 'update' && og_is_group('node', $node)) {
-      // The node is a group, so check "update group" permission.
-      $access = og_user_access_entity('update group', 'node', $node, $account);
-    }
-
-    if ($access) {
-      return NODE_ACCESS_ALLOW;
-    }
-
-    // Check if OG should explicitly deny access or not.
-    return \Drupal::config('og.settings')->get('node_access_strict') ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
-  }
-
-  return NODE_ACCESS_IGNORE;
-}
-
 
 /**
  * Implements hook_field_create_instance().
@@ -592,10 +561,10 @@ function _og_og_membership_insert($og_membership) {
  */
 function _og_og_membership_update($og_membership) {
   if ($og_membership->entity_type == 'user' && module_exists('rules')) {
-    if ($og_membership->original->state != OG_STATE_ACTIVE && $og_membership->state == OG_STATE_ACTIVE) {
+    if ($og_membership->original->state != OgMembershipInterface::STATE_ACTIVE && $og_membership->state == OgMembershipInterface::STATE_ACTIVE) {
       rules_invoke_event('og_user_approved', $og_membership, entity_metadata_wrapper('user', $og_membership->etid));
     }
-    if ($og_membership->original->state != OG_STATE_BLOCKED && $og_membership->state == OG_STATE_BLOCKED) {
+    if ($og_membership->original->state != OgMembershipInterface::STATE_BLOCKED && $og_membership->state == OgMembershipInterface::STATE_BLOCKED) {
       rules_invoke_event('og_user_blocked', $og_membership, entity_metadata_wrapper('user', $og_membership->etid));
     }
   }
@@ -739,7 +708,7 @@ function _og_membership_create($group_type, $gid, $entity_type, $etid, $field_na
     'gid' => $gid,
     'entity_type' => $entity_type,
     'etid' => $etid,
-    'state' => OG_STATE_ACTIVE,
+    'state' => OgMembershipInterface::STATE_ACTIVE,
     'created' => time(),
     'field_name' => $field_name,
     'language' => $language->language,
@@ -1369,7 +1338,7 @@ function _og_group($group_type, $gid, $values = array(), $save_created = TRUE) {
     'entity_type' => 'user',
     'entity' => FALSE,
     'field_name' => FALSE,
-    'state' => OG_STATE_ACTIVE,
+    'state' => OgMembershipInterface::STATE_ACTIVE,
   );
 
   $entity_type = $values['entity_type'];
@@ -1689,7 +1658,7 @@ function _og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
  *  the OG membership ID and the group ID as the value. If nothing found,
  *  then an empty array.
  */
-function _og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OG_STATE_ACTIVE), $field_name = NULL) {
+function _og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = array(OgMembershipInterface::STATE_ACTIVE), $field_name = NULL) {
   $cache = &drupal_static(__FUNCTION__, array());
 
   if ($entity_type == 'user' && empty($entity)) {
@@ -2078,7 +2047,7 @@ function _og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE, $ch
     return $roles[$identifier];
   }
 
-  $is_blocked = og_is_member($group_type, $gid, 'user', $account, array(OG_STATE_BLOCKED));
+  $is_blocked = og_is_member($group_type, $gid, 'user', $account, array(OgMembershipInterface::STATE_BLOCKED));
 
   if ($check_active && $is_blocked) {
     $roles[$identifier] = array();
@@ -2607,8 +2576,8 @@ function _og_set_breadcrumb($entity_type, $etid, $path = array()) {
  */
 function _og_group_states() {
   return array(
-    OG_STATE_ACTIVE => t('Active'),
-    OG_STATE_PENDING => t('Pending'),
+    OgMembershipInterface::STATE_ACTIVE => t('Active'),
+    OgMembershipInterface::STATE_PENDING => t('Pending'),
   );
 }
 
@@ -2617,9 +2586,9 @@ function _og_group_states() {
  */
 function _og_group_content_states() {
   return array(
-    OG_STATE_ACTIVE => t('Active'),
-    OG_STATE_PENDING => t('Pending'),
-    OG_STATE_BLOCKED => t('Blocked'),
+    OgMembershipInterface::STATE_ACTIVE => t('Active'),
+    OgMembershipInterface::STATE_PENDING => t('Pending'),
+    OgMembershipInterface::STATE_BLOCKED => t('Blocked'),
   );
 }
 
@@ -2702,7 +2671,7 @@ function _og_get_groups_by_user($account = NULL, $group_type = NULL) {
 
   // Get all active OG membership that belong to the user.
   $wrapper = entity_metadata_wrapper('user', $account->uid);
-  $og_memberships = $wrapper->{'og_membership__' . OG_STATE_ACTIVE}->value();
+  $og_memberships = $wrapper->{'og_membership__' . OgMembershipInterface::STATE_ACTIVE}->value();
   if (!$og_memberships) {
     return;
   }

@@ -11,6 +11,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgMembershipInterface;
 
 /**
  * Determine to which groups this group content is assigned to.
@@ -34,7 +35,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
         'handler' => 'og',
         'handler_settings' => [
           'target_bundles' => [],
-          'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
+          'membership_type' => OgMembershipInterface::TYPE_DEFAULT,
         ],
         'target_type' => $this->getEntityType(),
       ],

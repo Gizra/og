@@ -7,10 +7,8 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -101,7 +99,7 @@ class Og {
    *  the OG membership ID and the group ID as the value. If nothing found,
    *  then an empty array.
    */
-  public static function getEntityGroups(EntityInterface $entity, $states = [OG_STATE_ACTIVE], $field_name = NULL) {
+  public static function getEntityGroups(EntityInterface $entity, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     $entity_type_id = $entity->getEntityTypeId();
     $entity_id = $entity->id();
 
@@ -170,7 +168,7 @@ class Og {
    *   TRUE if the entity (e.g. the user) belongs to a group and is not pending
    *   or blocked.
    */
-  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OG_STATE_ACTIVE]) {
+  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity, $states);
     $group_entity_type_id = $group->getEntityTypeId();
     // We need to create a map of the group ids as Og::getEntityGroups returns a
@@ -178,6 +176,34 @@ class Og {
     return !empty($groups[$group_entity_type_id]) && in_array($group->id(), array_map(function($group_entity) {
       return $group_entity->id();
     }, $groups[$group_entity_type_id]));
+  }
+
+  /**
+   * Returns whether an entity belongs to a group with a pending status.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *
+   * @return bool
+   *
+   * @see \Drupal\og\Og::isMember
+   */
+  public static function isMemberPending(EntityInterface $group, EntityInterface $entity) {
+    return static::isMember($group, $entity, [OgMembershipInterface::STATE_PENDING]);
+  }
+
+  /**
+   * Returns whether an entity belongs to a group with a blocked status.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *
+   * @return bool
+   *
+   * @see \Drupal\og\Og::isMember
+   */
+  public static function isMemberBlocked(EntityInterface $group, EntityInterface $entity) {
+    return static::isMember($group, $entity, [OgMembershipInterface::STATE_BLOCKED]);
   }
 
   /**
@@ -245,13 +271,14 @@ class Og {
   /**
    * Return TRUE if field is a group audience type.
    *
-   * @param $field_config
-   *   The field config object.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The field definition object.
    *
    * @return bool
+   *   TRUE if the field is a group audience type, FALSE otherwise.
    */
-  public static function isGroupAudienceField(FieldDefinitionInterface $field_config) {
-    return $field_config->getType() === 'og_membership_reference';
+  public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
+    return $field_definition->getType() === 'og_membership_reference';
   }
 
   /**
@@ -349,7 +376,7 @@ class Og {
     static::$entityGroupCache = [];
 
     // Invalidate the entity property cache.
-    \Drupal::entityManager()->clearCachedDefinitions();
+    \Drupal::entityTypeManager()->clearCachedDefinitions();
     \Drupal::entityManager()->clearCachedFieldDefinitions();
 
     // Let other OG modules know we invalidate cache.
@@ -362,14 +389,14 @@ class Og {
    * @return \Drupal\Core\Entity\EntityStorageInterface
    */
   public static function membershipStorage() {
-    return \Drupal::entityManager()->getStorage('og_membership');
+    return \Drupal::entityTypeManager()->getStorage('og_membership');
   }
 
   /**
    * Gets the default constructor parameters for OG membership.
    */
   public static function membershipDefault() {
-    return ['type' => 'og_membership_type_default'];
+    return ['type' => OgMembershipInterface::TYPE_DEFAULT];
   }
 
 
@@ -388,9 +415,7 @@ class Og {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
     if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
-
-      $params = ['@plugin' => $plugin_id];
-      throw new \Exception(new FormattableMarkup('The Organic Groups field with plugin ID @plugin is not a valid plugin.', $params));
+      throw new \Exception("The Organic Groups field with plugin ID $plugin_id is not a valid plugin.");
     }
 
     return $plugin_manager->createInstance($plugin_id);
@@ -399,9 +424,9 @@ class Og {
   /**
    * Get the selection handler for an audience field attached to entity.
    *
-   * @param $entity
+   * @param string $entity_type_id
    *   The entity type.
-   * @param $bundle
+   * @param string $bundle_id
    *   The bundle name.
    * @param $field_name
    *   The field name.
@@ -411,19 +436,20 @@ class Og {
    * @return OgSelection
    * @throws \Exception
    */
-  public static function getSelectionHandler($entity, $bundle, $field_name, array $options = []) {
-    $field_definition = FieldConfig::loadByName($entity, $bundle, $field_name);
+  public static function getSelectionHandler($entity_type_id, $bundle_id, $field_name, array $options = []) {
+    $field_definition = FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name);
 
-    if (!Og::isGroupAudienceField($field_definition)) {
-      throw new \Exception(new FormattableMarkup('The field @name is not an audience field.', ['@name' => $field_name]));
+    if (!static::isGroupAudienceField($field_definition)) {
+      throw new \Exception("The field $field_name is not an audience field.");
     }
 
-    $options += [
+    $options = NestedArray::mergeDeep([
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
-      'field' => $field_definition,
       'handler' => $field_definition->getSetting('handler'),
-      'handler_settings' => [],
-    ];
+      'handler_settings' => [
+        'field_mode' => 'default',
+      ],
+    ], $options);
 
     // Deep merge the handler settings.
     $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);

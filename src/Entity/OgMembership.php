@@ -21,7 +21,7 @@ use Drupal\og\OgGroupAudienceHelper;
  * the connection between the group and the her content. For example we have the
  * node 1 which is a group and the node 2 which is node that belong to a group:
  * @code:
- *  $membership = OgMembership::create(array('type' => 'og_membership_type_default'));
+ *  $membership = OgMembership::create(array('type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT));
  *  $membership
  *    ->setContentId(2)
  *    ->setContentType('node')
@@ -380,7 +380,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return EntityInterface
    */
   public function getGroup() {
-    return \Drupal::entityManager()->getStorage($this->getGroupType())->load($this->getGid());
+    return \Drupal::entityTypeManager()->getStorage($this->getGroupType())->load($this->getGid());
   }
 
   /**
@@ -389,6 +389,6 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return EntityInterface
    */
   public function getEntityMembership() {
-    return \Drupal::entityManager()->getStorage($this->get('entity_type'))->load($this->getContentId());
+    return \Drupal::entityTypeManager()->getStorage($this->get('entity_type'))->load($this->getContentId());
   }
 }

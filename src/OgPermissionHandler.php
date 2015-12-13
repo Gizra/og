@@ -13,7 +13,7 @@ use Drupal\user\PermissionHandler;
 
 
 /**
- * Provides permissions for groups based on YNL files.
+ * Provides permissions for groups based on YAML files.
  *
  * The permissions file should be constructed by the next format(with comments):
  * @code

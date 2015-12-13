@@ -9,7 +9,7 @@ namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\user\Entity\User;
 use Drupal\og\Og;
 
 /**
@@ -25,7 +25,7 @@ use Drupal\og\Og;
  * @EntityReferenceSelection(
  *   id = "og:default",
  *   label = @Translation("OG selection"),
- *   group = "default",
+ *   group = "og",
  *   weight = 1
  * )
  */
@@ -37,7 +37,14 @@ class OgSelection extends DefaultSelection {
    * @return DefaultSelection
    */
   public function getSelectionHandler() {
-    return \Drupal::service('plugin.manager.entity_reference_selection')->getSelectionHandler($this->getConfiguration('field'));
+    $options = [
+      'target_type' => $this->configuration['target_type'],
+      // 'handler' key intentionally absent as we want the selection manager to
+      // choose the best option.
+      // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
+      'handler_settings' => $this->configuration['handler_settings'],
+    ];
+    return \Drupal::service('plugin.manager.entity_reference_selection')->getInstance($options);
   }
 
   /**
@@ -60,7 +67,8 @@ class OgSelection extends DefaultSelection {
     // the default selection handler of the entity, which the field reference
     // to, and add another logic to the query object i.e. check if the entities
     // bundle defined as group.
-    $query = $this->getSelectionHandler()->buildEntityQuery();
+    $selection_handler = $this->getSelectionHandler();
+    $query = $selection_handler->buildEntityQuery($match, $match_operator);
 
     $target_type = $this->configuration['target_type'];
 
@@ -106,28 +114,11 @@ class OgSelection extends DefaultSelection {
   }
 
   /**
-   * Get the field configuration.
-   *
-   * @param $key
-   *   Specific key from the configuration. Optional.
-   *
-   * @return array|string
-   *   Value of a configuration or all the configurations.
-   */
-  public function getConfiguration($key = NULL) {
-    if (!isset($key)) {
-      return $this->configuration;
-    }
-
-    return isset($this->configuration[$key]) ? $this->configuration[$key] : NULL;
-  }
-
-  /**
    *
    * @return ContentEntityInterface[]
    */
   protected function getUserGroups() {
-    $other_groups = Og::getEntityGroups($this->currentUser->getAccount());
+    $other_groups = Og::getEntityGroups(User::load($this->currentUser->id()));
     return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 

@@ -99,7 +99,7 @@ class FieldAccessTest extends KernelTestBase {
     $this->authenticatedUser->save();
 
     $this->fieldDefinition = $this->adminUser->getFieldDefinition(OgGroupAudienceHelper::DEFAULT_FIELD);
-    $this->userAccessControlHandler = \Drupal::entityManager()->getAccessControlHandler('user');
+    $this->userAccessControlHandler = \Drupal::entityTypeManager()->getAccessControlHandler('user');
   }
 
   /**
