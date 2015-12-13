@@ -23,7 +23,6 @@ use Drupal\user\Entity\Role;
  *     "weight" = "weight",
  *     "group_type" = "groupType",
  *     "group_bundle" = "groupBundle",
- *     "uid" = "uid",
  *     "permissions" = "permissions"
  *   },
  *   config_export = {
@@ -32,7 +31,6 @@ use Drupal\user\Entity\Role;
  *     "weight",
  *     "group_type",
  *     "group_bundle",
- *     "uid",
  *     "permissions"
  *   }
  * )
