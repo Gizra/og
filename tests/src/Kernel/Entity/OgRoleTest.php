@@ -50,7 +50,7 @@ class OgRoleTest extends KernelTestBase {
       ->grantPermission('administer group')
       ->save();
 
-    // Checking assigning of the role.
+    // Checking creation of the role.
     $this->assertEquals($this->ogRole->getPermissions(), ['administer group']);
   }
 

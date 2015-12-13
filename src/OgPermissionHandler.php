@@ -11,7 +11,6 @@ use Drupal\Component\Discovery\YamlDiscovery;
 use Drupal\og\Entity\OgRoleInterface;
 use Drupal\user\PermissionHandler;
 
-
 /**
  * Provides permissions for groups based on YAML files.
  *
