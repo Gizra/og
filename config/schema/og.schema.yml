@@ -88,9 +88,6 @@ og.og_role.*:
     group_bundle:
       type: label
       label: 'Group bundle'
-    uid:
-      type: integer
-      label: 'user ID'
     permissions:
       type: sequence
       label: 'Permissions'
