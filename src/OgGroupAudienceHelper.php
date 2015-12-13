@@ -67,8 +67,8 @@ class OgGroupAudienceHelper {
    * @param string $group_bundle
    *   The group bundle that should be referenced by the group audience field.
    * @param bool $check_access
-   *   Set this to FALSE to not check if the current user has access to the
-   *   field. Defaults to TRUE.
+   *   (optional) Set this to FALSE to not check if the current user has access
+   *   to the field. Defaults to TRUE.
    *
    * @return string|NULL
    *   The name of the group audience field, or NULL if no matching field was
