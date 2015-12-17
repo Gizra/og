@@ -339,7 +339,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
 
     $fields['gid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Group ID.'))
-      ->setDescription(t("The group's entity type (e.g. node, comment, etc')."));
+      ->setDescription(t("The group's entity id (e.g. node nid, comment cid, etc')."));
 
     $fields['state'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('State'))

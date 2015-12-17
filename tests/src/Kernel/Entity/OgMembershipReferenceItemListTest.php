@@ -8,10 +8,12 @@
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 
@@ -132,6 +134,32 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 2);
     $this->assertSame(count($run_query($entity->id())), 2);
+  }
+
+  /**
+   * Test loading og membership reference field items.
+   */
+  public function testMembershipLoad() {
+    $reload = function (EntityInterface &$entity) {
+      $entity = \Drupal::entityTypeManager()->getStorage('entity_test')->loadUnchanged($entity->id());
+    };
+    $entity = EntityTest::create([
+      'type' => $this->bundles[2],
+    ]);
+    $this->assertSame(count($entity->{$this->fieldName}), 0);
+    $entity->save();
+    $this->assertSame(count($entity->{$this->fieldName}), 0);
+    $membership = OgMembership::create([
+      'etid' => $entity->id(),
+      'field_name' => $this->fieldName,
+      'type' => $this->bundles[0],
+      'group_type' => 'entity_test',
+      'entity_type' => 'entity_test',
+      'gid' => $this->groups[0]->id(),
+    ]);
+    $membership->save();
+    $reload($entity);
+    $this->assertSame(count($entity->{$this->fieldName}), 1);
   }
 
 }
