@@ -19,9 +19,6 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
   public function setup() {
     parent::setUp();
-    if (!defined('OG_STATE_ACTIVE')) {
-      define('OG_STATE_ACTIVE', 1);
-    }
 
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
     $field_definition->getType()->willReturn('og_membership_reference');
@@ -51,6 +48,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $entity_manager->getFieldDefinitions($entity_type_id, $bundle)->willReturn([$field_definition->reveal()]);
     \Drupal::getContainer()->set('entity.manager', $entity_manager->reveal());
 
+    // Mock the results of Og::getEntityGroups().
     $r = new \ReflectionClass('Drupal\og\Og');
     $reflection_property = $r->getProperty('entityGroupCache');
     $reflection_property->setAccessible(TRUE);
