@@ -61,6 +61,13 @@ class SelectionHandlerTest extends KernelTestBase {
   protected $groupContentBundle;
 
   /**
+   * The field definition used in this test.
+   *
+   * @var \Drupal\Core\Field\FieldDefinitionInterface
+   */
+  protected $fieldDefinition;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -93,10 +100,10 @@ class SelectionHandlerTest extends KernelTestBase {
     Og::groupManager()->addGroup('node', $this->groupBundle);
 
     // Add og audience field to group content.
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
+    $this->fieldDefinition = Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
     // Get the storage of the field.
-    $this->selectionHandler = Og::getSelectionHandler('node', $this->groupContentBundle, OgGroupAudienceHelper::DEFAULT_FIELD, ['handler_settings' => ['field_mode' => 'default']]);
+    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'default']]);
 
     // Create two users.
     $this->user1 = User::create(['name' => $this->randomString()]);
@@ -140,7 +147,7 @@ class SelectionHandlerTest extends KernelTestBase {
 
     // Check the other groups.
 
-    $this->selectionHandler = Og::getSelectionHandler('node', $this->groupContentBundle, OgGroupAudienceHelper::DEFAULT_FIELD, ['handler_settings' => ['field_mode' => 'admin']]);
+    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'admin']]);
 
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
