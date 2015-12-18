@@ -13,7 +13,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Language\Language;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
@@ -57,117 +56,37 @@ use Drupal\og\OgGroupAudienceHelper;
 class OgMembership extends ContentEntityBase implements ContentEntityInterface {
 
   /**
-   * @var Integer
-   *
-   * The identifier of the row.
+   * {@inheritdoc}
    */
-  protected $id;
+  public function getCreatedTime() {
+    return $this->get('created')->value;
+  }
+
 
   /**
-   * @var string
-   *
-   * The UUID.
+   * {@inheritdoc}
    */
-  protected $uuid;
-
-  /**
-   * @var OgMembershipType
-   *
-   * The membership type of the current membership instance.
-   */
-  protected $type;
-
-  /**
-   * @var Integer
-   *
-   * The entity ID.
-   */
-  protected $etid;
-
-  /**
-   * @var String
-   *
-   * The entity type.
-   */
-  protected $entityType;
-
-  /**
-   * @var Integer
-   *
-   * The group ID.
-   */
-  protected $gid;
-
-  /**
-   * @var String
-   *
-   * The group type.
-   */
-  protected $groupType;
-
-  /**
-   * @var Integer
-   *
-   * The state of the membership.
-   */
-  protected $state;
-
-  /**
-   * @var Integer
-   *
-   * The unix time stamp the membership was created.
-   */
-  protected $created;
-
-  /**
-   * @var String
-   *
-   * The name of the field holding the group ID, the OG membership is associated
-   * with.
-   */
-  protected $fieldName;
-
-  /**
-   * @var Language
-   *
-   * The language of the membership.
-   */
-  protected $language;
-
-  /**
-   * @param mixed $created
-   *
-   * @return OgMembership.
-   */
-  public function setCreated($created) {
-    $this->set('created', $created);
+  public function setCreatedTime($timestamp) {
+    $this->set('created', $timestamp);
     return $this;
   }
 
-  /**
-   * @return mixed
-   */
-  public function getCreated() {
-    return $this->get('created')->value;
-  }
 
   /**
    * @param mixed $entityType
    *
    * @return OgMembership.
    */
-  public function setEntityType($entityType) {
-    $this->set('entity_type', $entityType);
+  public function setMemberEntityType($entityType) {
+    $this->set('member_entity_type', $entityType);
     return $this;
   }
 
   /**
-   * @return mixed
-   *
-   * todo: The method collide with getEntityType method.
+   * @return string
    */
-  public function _getEntityType() {
-    return $this->get('entityType')->value;
+  public function getMemberEntityType() {
+    return $this->get('member_entity_type')->value;
   }
 
   /**
@@ -175,16 +94,16 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return OgMembership
    */
-  public function setEntityId($etid) {
-    $this->set('etid', $etid);
+  public function setMemberEntityId($etid) {
+    $this->set('member_entity_id', $etid);
     return $this;
   }
 
   /**
    * @return mixed
    */
-  public function getContentId() {
-    return $this->get('etid')->value;
+  public function getMemberEntityId() {
+    return $this->get('member_entity_type')->value;
   }
 
   /**
@@ -209,16 +128,16 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return OgMembership.
    */
-  public function setGid($gid) {
-    $this->set('gid', $gid);
+  public function setGroupEntityid($gid) {
+    $this->set('group_entity_id', $gid);
     return $this;
   }
 
   /**
    * @return mixed
    */
-  public function getGid() {
-    return $this->get('gid')->value;
+  public function getGroupEntityid() {
+    return $this->get('group_entity_id')->value;
   }
 
   /**
@@ -226,47 +145,16 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return OgMembership
    */
-  public function setGroupType($groupType) {
-    $this->set('group_type', $groupType);
+  public function setGroupEntityType($groupType) {
+    $this->set('group_entity_type', $groupType);
     return $this;
   }
 
   /**
    * @return mixed
    */
-  public function getGroupType() {
-    return $this->get('group_type')->value;
-  }
-
-  /**
-   * @return mixed
-   */
-  public function getId() {
-    return $this->id;
-  }
-
-  /**
-   * @return string
-   */
-  public function getUuid() {
-    return $this->uuid;
-  }
-
-  /**
-   * @param mixed $language
-   *
-   * @return OgMembership.
-   */
-  public function setLanguage($language) {
-    $this->set('language', $language);
-    return $this;
-  }
-
-  /**
-   * @return mixed
-   */
-  public function getLanguage() {
-    return $this->get('language')->value;
+  public function getGroupEntityType() {
+    return $this->get('group_entity_type')->value;
   }
 
   /**
@@ -287,20 +175,10 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * @param mixed $type
-   *
-   * @return OgMembership.
-   */
-  public function setType($type) {
-    $this->set('type', $type);
-    return $this;
-  }
-
-  /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function getType() {
-    return $this->get('type')->value;
+    return $this->bundle();
   }
 
   /**
@@ -325,21 +203,21 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setDescription(t('The bundle of the membership'))
       ->setSetting('target_type', 'og_membership_type');
 
-    $fields['etid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Entity ID'))
-      ->setDescription(t('The entity ID.'));
+    $fields['member_entity_type'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Member entity type.'))
+      ->setDescription(t("The entity type (e.g. node, comment, etc') of the member."));
 
-    $fields['entity_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Entity type'))
-      ->setDescription(t("The entity type (e.g. node, comment, etc')."));
+    $fields['member_entity_id'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Member entity ID'))
+      ->setDescription(t('The entity ID of the member.'));
 
-    $fields['group_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Entity ID'))
-      ->setDescription(t('The entity ID.'));
+    $fields['group_entity_type'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Group entity type'))
+      ->setDescription(t('The entity type of the group.'));
 
-    $fields['gid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Group ID.'))
-      ->setDescription(t("The group's entity id (e.g. node nid, comment cid, etc')."));
+    $fields['group_entity_id'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Group entity id.'))
+      ->setDescription(t("The entity ID of the group."));
 
     $fields['state'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('State'))
