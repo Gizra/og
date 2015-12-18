@@ -16,6 +16,8 @@ class OgAccessHookTest extends OgAccessEntityTestBase {
 
   public function setUp() {
     parent::setUp();
+    // Since this is a unit test, we don't enable the module. However, we test
+    // a hook implementation inside the module so include the module manually.
     include_once __DIR__ . '/../../../og.module';
   }
 
