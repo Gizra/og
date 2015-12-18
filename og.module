@@ -165,7 +165,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
       continue;
     }
 
-    $handler = Og::getSelectionHandler($entity_type_id, $bundle, $field_definition);
+    $handler = Og::getSelectionHandler($field_definition);
 
     if ($handler->getReferenceableEntities()) {
       return Accessresult::allowed();

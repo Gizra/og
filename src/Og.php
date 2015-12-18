@@ -445,22 +445,17 @@ class Og {
   /**
    * Get the selection handler for an audience field attached to entity.
    *
-   * @param string $entity_type_id
-   *   The entity type.
-   * @param string $bundle_id
-   *   The bundle name.
-   * @param $field_name
-   *   The field name.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The field definition.
    * @param array $options
    *   Overriding the default options of the selection handler.
    *
    * @return OgSelection
    * @throws \Exception
    */
-  public static function getSelectionHandler($entity_type_id, $bundle_id, $field_name, array $options = []) {
-    $field_definition = FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name);
-
+  public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
     if (!static::isGroupAudienceField($field_definition)) {
+      $field_name = $field_definition->getName();
       throw new \Exception("The field $field_name is not an audience field.");
     }
 
