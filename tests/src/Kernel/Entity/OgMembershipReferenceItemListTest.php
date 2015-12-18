@@ -117,8 +117,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
       'type' => $this->bundles[2],
       $this->fieldName => [['target_id' => $this->groups[0]->id()]],
     ]);
-    // @TODO: this fails here but that's very wrong!
-    #$this->assertSame(count($ennity->{$this->fieldName}), 1);
+    $this->assertSame(count($entity->{$this->fieldName}), 1);
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 1);
     $this->assertSame(count($run_query($entity->id())), 1);
@@ -129,8 +128,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
         ['target_id' => $this->groups[1]->id()],
       ],
     ]);
-    // @TODO: this fails here but that's very wrong!
-    #$this->assertSame(count($ennity->{$this->fieldName}), 2);
+    $this->assertSame(count($entity->{$this->fieldName}), 2);
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 2);
     $this->assertSame(count($run_query($entity->id())), 2);

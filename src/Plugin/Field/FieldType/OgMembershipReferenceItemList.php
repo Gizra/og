@@ -133,6 +133,11 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
    * Populate reference items for active group memberships.
    */
   protected function populateGroupsFromMembershipEntities() {
+    // Save the current list.
+    $old_list = [];
+    foreach ($this->list as $item) {
+      $old_list[$item->target_id] = $item;
+    }
     // Make sure list is clear.
     $this->list = [];
     $entity = $this->getEntity();
@@ -155,11 +160,12 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $groups = \Drupal::entityTypeManager()->getStorage($group_type)->loadMultiple($group_ids);
 
-    $delta = 0;
-    foreach ($groups as $group) {
-      $this->list[$delta] = $this->createItem($delta, ['entity' => $group]);
-      $delta++;
+    $new_list = [];
+    foreach ($groups as $group_id => $group) {
+      unset($old_list[$group_id]);
+      $new_list[] = $this->createItem(count($new_list), ['entity' => $group]);
     }
+    $this->list = array_merge($old_list, $new_list);
   }
 
   /**
