@@ -23,11 +23,6 @@ class OgRoleTest extends KernelTestBase {
   public static $modules = ['og'];
 
   /**
-   * @var OgRole
-   */
-  protected $ogRole;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -41,17 +36,26 @@ class OgRoleTest extends KernelTestBase {
    * Testing OG role creation.
    */
   public function testSelectionHandler() {
-    $this->ogRole = OgRole::create();
-    $this->ogRole
+    $og_role = OgRole::create();
+    $og_role
       ->setId('content_editor')
       ->setLabel('Content editor')
-      ->setGroupType('node')
-      ->setGroupBundle('group')
       ->grantPermission('administer group')
       ->save();
 
     // Checking creation of the role.
-    $this->assertEquals($this->ogRole->getPermissions(), ['administer group']);
+    $this->assertEquals($og_role->getPermissions(), ['administer group']);
+
+    // Create a role assigned to a group type.
+    $og_role = OgRole::create();
+    $og_role
+      ->setId('content_editor')
+      ->setLabel('Content editor')
+      ->setGroupType('entity_test')
+      ->setGroupBundle('group')
+      ->save();
+
+    $this->assertEquals('entity_test-group-content_editor', $og_role->id());
   }
 
 }

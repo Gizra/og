@@ -6,6 +6,7 @@
  */
 namespace Drupal\og\Entity;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\user\Entity\Role;
 
 /**
@@ -142,4 +143,23 @@ class OgRole extends Role implements OgRoleInterface {
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function save() {
+
+    if ($this->isNew()) {
+      // When assigning a role to group we need to add a suffix to the ID in
+      // order to prevent duplicate IDs.
+      $suffix = $this->group_type . '-' . $this->group_bundle . '-';
+
+      if (!empty($this->group_id)) {
+        $suffix .= $this->group_id . '-';
+      }
+
+      $this->id = $suffix . $this->id();
+    }
+
+    parent::save();
+  }
 }
