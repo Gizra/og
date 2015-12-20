@@ -267,6 +267,6 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return EntityInterface
    */
   public function getEntityMembership() {
-    return \Drupal::entityTypeManager()->getStorage($this->get('entity_type'))->load($this->getContentId());
+    return \Drupal::entityTypeManager()->getStorage($this->get('member_entity_type'))->load($this->getMemberEntityId());
   }
 }
