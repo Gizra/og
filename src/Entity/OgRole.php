@@ -20,10 +20,7 @@ use Drupal\user\Entity\Role;
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
- *     "weight" = "weight",
- *     "group_type" = "groupType",
- *     "group_bundle" = "groupBundle",
- *     "permissions" = "permissions"
+ *     "weight" = "weight"
  *   },
  *   config_export = {
  *     "id",
@@ -31,6 +28,7 @@ use Drupal\user\Entity\Role;
  *     "weight",
  *     "group_type",
  *     "group_bundle",
+ *     "group_id",
  *     "permissions"
  *   }
  * )
