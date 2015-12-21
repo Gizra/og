@@ -83,8 +83,8 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
     $memberships = OgMembership::loadMultiple($membership_ids);
 
-    $target_group_ids = array_map(function($membership) {
-      return $membership->getGid();
+    $target_group_ids = array_map(function(OgMembership $membership) {
+      return $membership->getGroupEntityid();
     }, $memberships);
 
     $deprecated_membership_ids = array_diff($target_group_ids, $group_ids);
@@ -162,6 +162,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $new_list = [];
     foreach ($groups as $group_id => $group) {
+      // Avoid duplicates.
       unset($old_list[$group_id]);
       $new_list[] = $this->createItem(count($new_list), ['entity' => $group]);
     }

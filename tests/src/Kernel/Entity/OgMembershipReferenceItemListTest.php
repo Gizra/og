@@ -28,7 +28,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['entity_test', 'user', 'field', 'entity_reference', 'og', 'system'];
+  public static $modules = ['entity_test', 'user', 'field', 'og', 'system'];
 
   /**
    * Array with the bundle IDs.
@@ -94,7 +94,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
   }
 
   /**
-   * Test creating and saving og membership reference field items.
+   * Test creating and saving OG membership reference field items.
    */
   public function testMembershipSave() {
     $run_query = function ($id) {
@@ -109,29 +109,35 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $entity = EntityTest::create([
       'type' => $this->bundles[2],
     ]);
+    // Assert no membership for a group membership with no references.
     $this->assertSame(count($entity->{$this->fieldName}), 0);
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 0);
     $this->assertSame($run_query($entity->id()), []);
-    $entity = EntityTest::create([
+    $member_in_single_grpup = EntityTest::create([
       'type' => $this->bundles[2],
       $this->fieldName => [['target_id' => $this->groups[0]->id()]],
     ]);
-    $this->assertSame(count($entity->{$this->fieldName}), 1);
-    $entity->save();
-    $this->assertSame(count($entity->{$this->fieldName}), 1);
-    $this->assertSame(count($run_query($entity->id())), 1);
-    $entity = EntityTest::create([
+    // Assert group membership is found before save.
+    $this->assertSame(count($member_in_single_grpup->{$this->fieldName}), 1);
+    $member_in_single_grpup->save();
+    $this->assertSame(count($member_in_single_grpup->{$this->fieldName}), 1);
+    $this->assertSame(count($run_query($member_in_single_grpup->id())), 1);
+    $member_in_two_groups = EntityTest::create([
       'type' => $this->bundles[2],
       $this->fieldName => [
         ['target_id' => $this->groups[0]->id()],
         ['target_id' => $this->groups[1]->id()],
       ],
     ]);
-    $this->assertSame(count($entity->{$this->fieldName}), 2);
-    $entity->save();
-    $this->assertSame(count($entity->{$this->fieldName}), 2);
-    $this->assertSame(count($run_query($entity->id())), 2);
+    $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
+    $member_in_two_groups->save();
+    $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
+    $this->assertSame(count($run_query($member_in_two_groups->id())), 2);
+    // Test re-save.
+    $member_in_two_groups->save();
+    $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
+    $this->assertSame(count($run_query($member_in_two_groups->id())), 2);
   }
 
   /**
