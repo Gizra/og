@@ -150,6 +150,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $entity = EntityTest::create([
       'type' => $this->bundles[2],
     ]);
+    // Assert no membership for a group membership with no references.
     $this->assertSame(count($entity->{$this->fieldName}), 0);
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 0);
@@ -163,6 +164,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     ]);
     $membership->save();
     $reload($entity);
+    // Assert membership is picked up after a load from database.
     $this->assertSame(count($entity->{$this->fieldName}), 1);
   }
 
