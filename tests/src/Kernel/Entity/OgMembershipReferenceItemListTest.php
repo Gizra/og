@@ -15,6 +15,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 
 /**
@@ -65,27 +66,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     }
     $this->fieldName = strtolower($this->randomMachineName());
 
-    FieldStorageConfig::create([
-      'field_name' => $this->fieldName,
-      'type' => 'og_membership_reference',
-      'entity_type' => 'entity_test',
-      'cardinality' => -1,
-      'settings' => [
-        'target_type' => 'entity_test',
-      ],
-    ])->save();
-    FieldConfig::create([
-      'field_name' => $this->fieldName,
-      'entity_type' => 'entity_test',
-      'bundle' => $this->bundles[2],
-      'label' => $this->randomString(),
-      'settings' => [
-        'handler' => 'default',
-        'handler_settings' => [
-          'target_bundles' => [$this->bundles[0], $this->bundles[1]],
-        ],
-      ],
-    ])->save();
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $this->bundles[2], ['field_name' => $this->fieldName]);
   }
 
   /**
