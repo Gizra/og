@@ -30,11 +30,6 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
    */
   public static $modules = ['entity_test', 'user', 'field', 'og', 'system'];
 
-  /**
-   * Array with the bundle IDs.
-   *
-   * @var array
-   */
   protected $bundles;
   protected $fieldName;
   protected $groups;
