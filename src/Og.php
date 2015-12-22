@@ -7,6 +7,7 @@
 
 namespace Drupal\og;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -142,8 +143,8 @@ class Og {
 
     static::$entityGroupCache[$identifier] = [];
     $query = \Drupal::entityQuery('og_membership')
-      ->condition('entity_type', $entity_type_id)
-      ->condition('etid', $entity_id);
+      ->condition('member_entity_type', $entity_type_id)
+      ->condition('member_entity_id', $entity_id);
 
     if ($states) {
       $query->condition('state', $states, 'IN');
@@ -162,7 +163,7 @@ class Og {
 
     /** @var \Drupal\og\Entity\OgMembership $membership */
     foreach ($memberships as $membership) {
-      static::$entityGroupCache[$identifier][$membership->getGroupType()][$membership->id()] = $membership->getGroup();
+      static::$entityGroupCache[$identifier][$membership->getGroupEntityType()][$membership->id()] = $membership->getGroup();
     }
 
     return static::$entityGroupCache[$identifier];
