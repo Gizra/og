@@ -149,15 +149,15 @@ class OgRole extends Role implements OgRoleInterface {
   public function save() {
 
     if ($this->isNew()) {
-      // When assigning a role to group we need to add a suffix to the ID in
+      // When assigning a role to group we need to add a prefix to the ID in
       // order to prevent duplicate IDs.
-      $suffix = $this->group_type . '-' . $this->group_bundle . '-';
+      $prefix = $this->group_type . '-' . $this->group_bundle . '-';
 
       if (!empty($this->group_id)) {
-        $suffix .= $this->group_id . '-';
+        $prefix .= $this->group_id . '-';
       }
 
-      $this->id = $suffix . $this->id();
+      $this->id = $prefix . $this->id();
     }
 
     parent::save();
