@@ -6,7 +6,7 @@
  */
 namespace Drupal\og\Entity;
 
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
 
 /**
