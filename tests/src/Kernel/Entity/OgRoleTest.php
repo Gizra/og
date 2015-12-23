@@ -36,7 +36,7 @@ class OgRoleTest extends KernelTestBase {
   /**
    * Testing OG role creation.
    */
-  public function testSelectionHandler() {
+  public function testRoleCreate() {
     $og_role = OgRole::create();
     $og_role
       ->setId('content_editor')
