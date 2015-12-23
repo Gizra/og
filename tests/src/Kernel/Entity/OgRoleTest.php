@@ -55,6 +55,8 @@ class OgRoleTest extends KernelTestBase {
         ->setLabel('Content editor')
         ->grantPermission('administer group')
         ->save();
+
+      $this->fail('OG role with the same ID can be saved.');
     }
     catch (EntityStorageException $e) {
       $this->assertTrue(TRUE, "OG role with the same ID can not be saved.");
@@ -81,6 +83,7 @@ class OgRoleTest extends KernelTestBase {
         ->setGroupBundle('group')
         ->save();
 
+      $this->fail('OG role with the same ID on the same group can be saved.');
     }
     catch (EntityStorageException $e) {
       $this->assertTrue(TRUE, "OG role with the same ID on the same group can not be saved.");
