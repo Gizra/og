@@ -26,7 +26,7 @@ class OgAccess extends DrupalWebTestCase {
     // Add OG group fields.
     og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', 'main');
     $roles = array_flip(og_roles('entity_test', 'main'));
-    og_role_change_permissions($roles[Og::AUTHENTICATED_ROLE], array($perm => 1));
+    og_role_change_permissions($roles[OgRoleInterface::AUTHENTICATED], array($perm => 1));
 
 
     $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
@@ -217,7 +217,7 @@ class OgNodeAccess extends DrupalWebTestCase {
     );
 
     // Add update permission.
-    og_role_change_permissions($roles[Og::AUTHENTICATED_ROLE], $permissions);
+    og_role_change_permissions($roles[OgRoleInterface::AUTHENTICATED], $permissions);
     $this->drupalGet('node/add/article');
     $this->assertResponse('403', 'Group member cannot create node.');
 
@@ -227,7 +227,7 @@ class OgNodeAccess extends DrupalWebTestCase {
       'update own article content' => 0,
       'update any article content' => 0,
     );
-    og_role_change_permissions($roles[Og::AUTHENTICATED_ROLE], $permissions);
+    og_role_change_permissions($roles[OgRoleInterface::AUTHENTICATED], $permissions);
     $this->drupalGet('node/add/article');
     $this->assertResponse('200', 'Group member can create node.');
   }
@@ -282,7 +282,7 @@ class OgNodeAccess extends DrupalWebTestCase {
       'update own article content' => 0,
       'update any article content' => 0,
     );
-    og_role_change_permissions($roles[Og::AUTHENTICATED_ROLE], $permissions);
+    og_role_change_permissions($roles[OgRoleInterface::AUTHENTICATED], $permissions);
     $this->drupalGet('node/add/article');
     $this->assertResponse('200', 'Group member can create node.');
   }
@@ -309,7 +309,7 @@ class OgNodeAccess extends DrupalWebTestCase {
       'create article content' => 1,
       'update any article content' => 1,
     );
-    og_role_change_permissions($og_roles[Og::AUTHENTICATED_ROLE], $permissions);
+    og_role_change_permissions($og_roles[OgRoleInterface::AUTHENTICATED], $permissions);
 
     // Login and try to edit this node
     $this->drupalLogin($this->editor_user);
@@ -326,7 +326,7 @@ class OgNodeAccess extends DrupalWebTestCase {
       'create article content' => 0,
       'update any article content' => 1,
     );
-    og_role_change_permissions($og_roles[Og::AUTHENTICATED_ROLE], $permissions);
+    og_role_change_permissions($og_roles[OgRoleInterface::AUTHENTICATED], $permissions);
 
     $this->drupalGet('node/'. $this->group_content->nid .'/edit');
     $xpath = $this->buildXPathQuery('//select[@name=:name]', array(':name' => $name));
@@ -702,7 +702,7 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     // Change permissions to authenticated member.
     $og_roles = array_flip(og_roles('entity_test', 'main', $entity->pid));
     // Authenticated role ID.
-    $rid = $og_roles[Og::AUTHENTICATED_ROLE];
+    $rid = $og_roles[OgRoleInterface::AUTHENTICATED];
 
     $permissions = array(
       'delete own article content' => 1,
@@ -742,14 +742,14 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     og_group('entity_test', $entity->pid, $values);
     $og_roles = og_roles('entity_test', 'main');
 
-    $rid = array_search(Og::ADMINISTRATOR_ROLE, $og_roles);
+    $rid = array_search(OgRoleInterface::ADMINISTRATOR, $og_roles);
     og_role_grant('entity_test', $entity->pid, $user2->uid, $rid);
 
     // Active member.
     $roles = og_get_user_roles('entity_test', $entity->pid, $user2->uid);
     $expected_result = array(
-      array_search(Og::AUTHENTICATED_ROLE, $og_roles) => Og::AUTHENTICATED_ROLE,
-      array_search(Og::ADMINISTRATOR_ROLE, $og_roles) => Og::ADMINISTRATOR_ROLE,
+      array_search(OgRoleInterface::AUTHENTICATED, $og_roles) => OgRoleInterface::AUTHENTICATED,
+      array_search(OgRoleInterface::ADMINISTRATOR, $og_roles) => OgRoleInterface::ADMINISTRATOR,
     );
     $this->assertEqual($roles, $expected_result, 'Active member has also the admin role.');
     $this->assertTrue(og_user_access('entity_test', $entity->pid, 'update group', $user2), 'Active member has access.');
@@ -758,8 +758,8 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     $values['state'] = OG_STATE_PENDING;
     og_group('entity_test', $entity->pid, $values);
     $roles = og_get_user_roles('entity_test', $entity->pid, $user2->uid);
-    $rid = array_search(Og::ANONYMOUS_ROLE, $og_roles);
-    $expected_result = array($rid => Og::ANONYMOUS_ROLE);
+    $rid = array_search(OgRoleInterface::ANONYMOUS, $og_roles);
+    $expected_result = array($rid => OgRoleInterface::ANONYMOUS);
     $this->assertEqual($roles, $expected_result, 'Pending member has non-member role.');
     $this->assertFalse(og_user_access('entity_test', $entity->pid, 'update group', $user2), 'Pending member has no access.');
 
@@ -817,10 +817,10 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $this->assertEqual($og_roles, og_roles('entity_test', 'main', $entity->pid), t('Group with default access field disabled is assigned to the global roles and permissions settings.'));
 
     // Add admin role to a user.
-    $rid = array_search(Og::ADMINISTRATOR_ROLE, $og_roles);
+    $rid = array_search(OgRoleInterface::ADMINISTRATOR, $og_roles);
     og_role_grant('entity_test', $entity->pid, $user1->uid, $rid);
     $user_roles = og_get_user_roles('entity_test', $entity->pid, $user1->uid);
-    $this->assertTrue(array_search(Og::ADMINISTRATOR_ROLE, $user_roles), t('User has default "admin" role.'));
+    $this->assertTrue(array_search(OgRoleInterface::ADMINISTRATOR, $user_roles), t('User has default "admin" role.'));
 
     // Group with default access field enabled.
     $wrapper->{OG_DEFAULT_ACCESS_FIELD}->set(1);
@@ -830,7 +830,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
 
     // Assert the newley created admin role was mapped to the default one.
     $user_roles = og_get_user_roles('entity_test', $entity->pid, $user1->uid, FALSE);
-    $this->assertTrue(array_search(Og::ADMINISTRATOR_ROLE, $user_roles), t('User has overriden "admin" role.'));
+    $this->assertTrue(array_search(OgRoleInterface::ADMINISTRATOR, $user_roles), t('User has overriden "admin" role.'));
 
     // Disable existing group's default access field.
     variable_set('og_maintain_overridden_roles', TRUE);
@@ -840,7 +840,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
 
     // Assert admin role was maintained from the overriden group.
     $user_roles = og_get_user_roles('entity_test', $entity->pid, $user1->uid, FALSE);
-    $this->assertTrue(array_search(Og::ADMINISTRATOR_ROLE, $user_roles), t('"admin" role maintained from overriden group.'));
+    $this->assertTrue(array_search(OgRoleInterface::ADMINISTRATOR, $user_roles), t('"admin" role maintained from overriden group.'));
 
     // Override group.
     $wrapper->{OG_DEFAULT_ACCESS_FIELD}->set(1);
@@ -852,7 +852,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $wrapper->save();
 
     $user_roles = og_get_user_roles('entity_test', $entity->pid, $user1->uid, FALSE);
-    $this->assertFalse(array_search(Og::ADMINISTRATOR_ROLE, $user_roles), t('"admin" role not maintained from overriden group.'));
+    $this->assertFalse(array_search(OgRoleInterface::ADMINISTRATOR, $user_roles), t('"admin" role not maintained from overriden group.'));
   }
 }
 
@@ -982,20 +982,20 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
       if ($value['active']) {
         $op = 'active';
         $states = array(OG_STATE_ACTIVE);
-        $rid = array_search(Og::AUTHENTICATED_ROLE, $og_roles);
+        $rid = array_search(OgRoleInterface::AUTHENTICATED, $og_roles);
       }
       else {
         $op = 'pending';
         $states = array(OG_STATE_PENDING);
         // If the member is pending then they have the anonymous role.
-        $rid = array_search(Og::ANONYMOUS_ROLE, $og_roles);
+        $rid = array_search(OgRoleInterface::ANONYMOUS, $og_roles);
       }
 
       $roles[$rid] = TRUE;
 
       if ($value['admin']) {
-        // Og::ADMINISTRATOR_ROLE
-        $rid = array_search(Og::ADMINISTRATOR_ROLE, $og_roles);
+        // OgRoleInterface::ADMINISTRATOR
+        $rid = array_search(OgRoleInterface::ADMINISTRATOR, $og_roles);
         $roles[$rid] = TRUE;
       }
 
@@ -2063,7 +2063,7 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
 
     // Add permission to the group.
     $og_roles = og_roles('node', 'group');
-    $rid = array_search(Og::ANONYMOUS_ROLE, $og_roles);
+    $rid = array_search(OgRoleInterface::ANONYMOUS, $og_roles);
     og_role_change_permissions($rid, array('create group_content content' => 1));
   }
 
@@ -2144,7 +2144,7 @@ class OgUserCanPublishGroupContentTypeOnlyInGroup extends DrupalWebTestCase {
 
     // Add permission to the group.
     $og_roles = og_roles('node', $group->type);
-    $rid = array_search(Og::AUTHENTICATED_ROLE, $og_roles);
+    $rid = array_search(OgRoleInterface::AUTHENTICATED, $og_roles);
     og_role_change_permissions($rid, array(
       'create ' . $this->group_content->type . ' content' => 1,
       'update own ' . $this->group_content->type . ' content' => 1,

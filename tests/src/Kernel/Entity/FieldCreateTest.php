@@ -32,7 +32,6 @@ class FieldCreateTest extends KernelTestBase {
    */
   protected $bundles;
 
-
   /**
    * {@inheritdoc}
    */

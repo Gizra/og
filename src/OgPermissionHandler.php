@@ -8,8 +8,8 @@
 namespace Drupal\og;
 
 use Drupal\Component\Discovery\YamlDiscovery;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\PermissionHandler;
-use Drupal\user\PermissionHandlerInterface;
 
 /**
  * Provides permissions for groups based on YAML files.
@@ -58,7 +58,7 @@ class OgPermissionHandler extends PermissionHandler {
     foreach ($permissions as &$permission) {
       // Add default values.
       $permission += [
-        'roles' => [Og::ANONYMOUS_ROLE, Og::AUTHENTICATED_ROLE],
+        'roles' => [OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED],
         'default roles' => [],
       ];
 
@@ -83,13 +83,13 @@ class OgPermissionHandler extends PermissionHandler {
 
     foreach ($roles as $role) {
       if ($role === 'ANONYMOUS_ROLE') {
-        $parsed[] = Og::ANONYMOUS_ROLE;
+        $parsed[] = OgRoleInterface::ANONYMOUS;
       }
       elseif ($role === 'AUTHENTICATED_ROLE') {
-        $parsed[] = Og::AUTHENTICATED_ROLE;
+        $parsed[] = OgRoleInterface::AUTHENTICATED;
       }
       elseif ($role === 'ADMINISTRATOR_ROLE') {
-        $parsed[] = Og::ADMINISTRATOR_ROLE;
+        $parsed[] = OgRoleInterface::ADMINISTRATOR;
       }
       else {
         $parsed[] = $role;
