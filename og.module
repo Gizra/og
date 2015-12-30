@@ -2924,3 +2924,22 @@ function _og_get_groups_by_user($account = NULL, $group_type = NULL) {
     return $gids[$group_type];
   }
 }
+
+
+/**
+ * implements hook_entity_delete().
+ * remove memberships of deleted group entities
+ */
+function og_entity_delete($entity) {
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+    $membership_ids = \Drupal::entityQuery('og_membership')
+      ->condition('group_entity_type', $entity->getEntityTypeId())
+      ->condition('group_entity_id', $entity->id())
+      ->execute();
+    foreach (OgMembership::loadMultiple($membership_ids) as $membership) {
+      $membership->delete();
+    }
+  }
+}
+
+
