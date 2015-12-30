@@ -10,6 +10,7 @@ namespace Drupal\og_ui\Form;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\OgAccess;
+use Drupal\og\OgMembershipInterface;
 
 /**
  * Provides a confirmation form for subscribing form a group.
@@ -49,7 +50,7 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Indicate the OG membership state (active or pending).
-    $state = OgAccess::userAccess($this->entity, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING;
+    $state = OgAccess::userAccess($this->entity, 'subscribe without approval') ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
 
     if ($this->entity->access('view')) {
       $label = $this->entity->label();
@@ -57,10 +58,10 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
     else {
       $label = $this->t('Private group');
 
-      if ($state === OG_STATE_ACTIVE) {
+      if ($state === OgMembershipInterface::STATE_ACTIVE) {
         // Determine if a user can subscribe to a private group, when OG-access
         // module is enabled, and the group is set to private.
-        $state = $this->config('og_ui.settings')->get('deny_subscribe_without_approval') ? OG_STATE_PENDING : OG_STATE_ACTIVE;
+        $state = $this->config('og_ui.settings')->get('deny_subscribe_without_approval') ? OgMembershipInterface::STATE_PENDING : OgMembershipInterface::STATE_ACTIVE;
       }
     }
 

@@ -61,7 +61,7 @@ class GroupCheck implements AccessInterface {
       return AccessResult::forbidden();
     }
 
-    // @otdo Convert when Role checking is added and has API to use.
+    // @todo Convert when Role checking is added and has API to use.
     // Verify the bundle has roles
 //    if (!og_roles($group_type, $bundle, $gid)) {
 //      return AccessResult::forbidden();

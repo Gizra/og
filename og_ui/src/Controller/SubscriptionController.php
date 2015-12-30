@@ -10,6 +10,7 @@ namespace Drupal\og_ui\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Url;
+use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -83,22 +84,20 @@ class SubscriptionController extends ControllerBase {
     // Show the group name only if user has access to it.
     $params['@group'] = $group->access('view', $account) ?  $group->label() : $this->t('Private group');
 
-    if (Og::isMember($group, $account, [OG_STATE_BLOCKED])) {
+    if (Og::isMemberBlocked($group, $account)) {
       // User is blocked, access denied.
       throw new AccessDeniedHttpException();
     }
 
-    if (Og::isMember($group, $account, [OG_STATE_PENDING])) {
+    if (Og::isMemberPending($group, $account)) {
       // User is pending, return them back.
-      // @todo Amitai, what is the purpose of this $user->uid == $user->uid
-      // check? This will always be true?!
-      $message = $account->id() == $account->id() ? $this->t('You already have a pending membership for the group @group.', $params) : $this->t('@user already has a pending membership for the  the group @group.', $params);
+      $message = $this->t('@user already has a pending membership for the  the group @group.', $params);
       $redirect = TRUE;
     }
 
-    if (Og::isMember($group, $account, [OG_STATE_ACTIVE])) {
+    if (Og::isMember($group, $account)) {
       // User is already a member, return them back.
-      $message = $account->id() == $account->id() ? $this->t('You are already a member of the group @group.', $params) : $this->t('@user is already a member of the group @group.', $params);
+      $message = $this->t('You are already a member of the group @group.', $params);
       $redirect = TRUE;
     }
 
@@ -149,7 +148,7 @@ class SubscriptionController extends ControllerBase {
 
     // Check the user isn't the manager of the group.
     if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() !== $account->id())) {
-      if (Og::isMember($group, $account, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
+      if (Og::isMember($group, $account, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])) {
         // Show the user a subscription confirmation.
         return $this->formBuilder()->getForm('\Drupal\og_ui\Form\GroupUnsubscribeConfirmForm', $group);
       }
