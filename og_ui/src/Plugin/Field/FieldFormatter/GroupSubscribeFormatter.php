@@ -44,6 +44,9 @@ class GroupSubscribeFormatter extends FormatterBase {
     $elements = [];
 
     $entity = $items->getEntity();
+    $entity_type_id = $entity->getEntityTypeId();
+    $bundle_id = $entity->bundle();
+
     $account = User::load(\Drupal::currentUser()->id());
     $field_name = $this->getSetting('field_name');
 
@@ -70,7 +73,7 @@ class GroupSubscribeFormatter extends FormatterBase {
     if (Og::isMember($entity, $account, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
       if (OgAccess::userAccess($entity, 'unsubscribe', $account)) {
         $link['title'] = $this->t('Unsubscribe from group');
-        $link['url'] = Url::fromRoute('og_ui.unsubscribe', ['entity_type_id' => $entity->getEntityTypeId(), 'entity_id' => $entity->id()]);
+        $link['url'] = Url::fromRoute('og_ui.unsubscribe', ['entity_type_id' => $entity_type_id, 'entity_id' => $entity->id()]);
         $link['class'] = ['unsubscribe'];
       }
     }
@@ -82,15 +85,14 @@ class GroupSubscribeFormatter extends FormatterBase {
       }
 
       // Check if user can subscribe to the field.
-      if (empty($field_name) && $audience_field_name = og_get_best_group_audience_field('user', $account, $entity_type, $bundle)) {
-        $settings['field_name'] = $audience_field_name;
+      if (empty($field_name) && ($audience_field_name = OgGroupAudienceHelper::getMatchingField($account, $entity_type_id, $bundle_id))) {
+        $field_name = $audience_field_name;
       }
-      if (!$field_name) {
+
+      if (empty($field_name)) {
         return [];
       }
 
-      // @todo Not sure this is applicable now we have our own dedicated field
-      // type?
       // Check if entity is referencable.
       if ($this->getSetting('target_type') !== $entity->getEntityTypeId()) {
         // Group type doesn't match.
@@ -100,7 +102,7 @@ class GroupSubscribeFormatter extends FormatterBase {
       // Check handler bundles, if any.
       $handler_settings = $this->getSetting('handler_settings');
 
-      if (!empty($handler_settings['target_bundles']) && !in_array($bundle, $handler_settings['target_bundles'])) {
+      if (!empty($handler_settings['target_bundles']) && !in_array($bundle_id, $handler_settings['target_bundles'])) {
         // Bundles don't match.
         return [];
       }
