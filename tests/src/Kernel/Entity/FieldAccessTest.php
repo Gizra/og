@@ -136,6 +136,7 @@ class FieldAccessTest extends KernelTestBase {
    * @param bool $expected
    */
   public function testAuthenticatedUserAccess($operation, $admin_account, $expected) {
+    var_dump($operation);
     $account = $admin_account ? $this->adminUser : $this->authenticatedUser;
     $this->assertEquals($expected, $this->userAccessControlHandler->fieldAccess($operation, $this->fieldDefinition, $account));
   }
