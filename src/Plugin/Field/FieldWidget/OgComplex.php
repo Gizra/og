@@ -26,7 +26,7 @@ use Drupal\user\Entity\User;
  *   label = @Translation("OG reference"),
  *   description = @Translation("An autocompletewidget for OG"),
  *   field_types = {
- *     "og_membership_reference"
+ *     "og_standard_reference"
  *   }
  * )
  */

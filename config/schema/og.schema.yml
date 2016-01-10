@@ -1,4 +1,4 @@
-field.storage_settings.og_membership_reference:
+field.storage_settings.og_standard_reference:
   type: mapping
   label: 'Organic Groups reference field storage settings'
   mapping:
@@ -6,7 +6,7 @@ field.storage_settings.og_membership_reference:
       type: string
       label: 'Type of entity to reference'
 
-field.field_settings.og_membership_reference:
+field.field_settings.og_standard_reference:
   type: mapping
   label: 'Organic Groups reference field settings'
   mapping:

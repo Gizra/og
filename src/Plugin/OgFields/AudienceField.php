@@ -39,7 +39,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
         ],
         'target_type' => $this->getEntityType(),
       ],
-      'type' => 'og_membership_reference',
+      'type' => 'og_standard_reference',
     ];
 
     return parent::getFieldStorageConfigBaseDefinition($values);
