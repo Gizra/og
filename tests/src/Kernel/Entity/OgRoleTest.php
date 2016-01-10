@@ -7,6 +7,7 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
+use Drupal\Core\Config\ConfigValueException;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
@@ -41,8 +42,22 @@ class OgRoleTest extends KernelTestBase {
     $og_role
       ->setId('content_editor')
       ->setLabel('Content editor')
-      ->grantPermission('administer group')
+      ->grantPermission('administer group');
+
+    try {
+      $og_role->save();
+      $this->fail('Creating OG role without group type/bundle is not allowed.');
+    }
+    catch (ConfigValueException $e) {
+      $this->assertTrue(TRUE, 'OG role without bundle/group was not saved.');
+    }
+
+    $og_role
+      ->setGroupType('node')
+      ->setGroupBundle('group')
       ->save();
+
+    $this->assertNotEmpty(OgRole::load('node-group-content_editor'), 'The role was created with the expected ID.');
 
     // Checking creation of the role.
     $this->assertEquals($og_role->getPermissions(), ['administer group']);
@@ -53,6 +68,8 @@ class OgRoleTest extends KernelTestBase {
       $og_role
         ->setId('content_editor')
         ->setLabel('Content editor')
+        ->setGroupType('node')
+        ->setGroupBundle('group')
         ->grantPermission('administer group')
         ->save();
 
@@ -69,9 +86,10 @@ class OgRoleTest extends KernelTestBase {
       ->setLabel('Content editor')
       ->setGroupType('entity_test')
       ->setGroupBundle('group')
+      ->setGroupID(1)
       ->save();
 
-    $this->assertEquals('entity_test-group-content_editor', $og_role->id());
+    $this->assertEquals('entity_test-group-1-content_editor', $og_role->id());
 
     // Try to create the same role again.
     try {
@@ -81,6 +99,7 @@ class OgRoleTest extends KernelTestBase {
         ->setLabel('Content editor')
         ->setGroupType('entity_test')
         ->setGroupBundle('group')
+        ->setGroupID(1)
         ->save();
 
       $this->fail('OG role with the same ID on the same group can be saved.');
