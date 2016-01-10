@@ -135,16 +135,17 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 0);
     $membership = OgMembership::create([
-      'type' => $this->bundles[0],
-      'field_name' => $this->fieldName,
+      'type' => 'og_membership_type_default',
+//      'field_name' => $this->fieldName,
       'member_entity_type' => 'user',
       'member_entity_id' => $entity->id(),
-      'group_entity_type' => 'user',
-      'group_entity_id' => $this->groups[0]->id(),
+//      'group_entity_type' => 'user',
+//      'group_entity_id' => $this->groups[0]->id(),
     ]);
     $membership->save();
     $reload($entity);
     // Assert membership is picked up after a load from database.
+    var_dump($entity->{$this->fieldName}->getValue());
     $this->assertSame(count($entity->{$this->fieldName}), 1);
   }
 

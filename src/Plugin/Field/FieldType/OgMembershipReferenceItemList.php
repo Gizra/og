@@ -69,7 +69,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $group_ids = [];
     foreach ($this->list as $item) {
-      $group_ids[] = $item->getValue()['target_id'];
+      $group_ids[] = $item->getValue()->target_id;
     }
 
     // todo: move to API function.
@@ -130,6 +130,32 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getValue() {
+    $membership_ids = \Drupal::entityQuery('og_membership')
+      ->condition('field_name', $this->getName())
+      ->condition('member_entity_type', 'user')
+      ->condition('member_entity_id', $this->getEntity()->id())
+      ->condition('state', OgMembershipInterface::STATE_ACTIVE)
+      ->execute();
+
+    if (!$memberships = OgMembership::loadMultiple($membership_ids)) {
+      return [];
+    }
+
+    /** @var OgMembership[] $memberships */
+    $memberships;
+
+    $return = [];
+    foreach ($memberships as $membership) {
+      $return[] = ['target_id' => $membership->getGroupEntityid()];
+    }
+
+    return $return;
+  }
+
+  /**
    * Populate reference items for active group memberships.
    */
   protected function populateGroupsFromMembershipEntities() {
@@ -180,6 +206,8 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $parent_entity = $this->getEntity();
     /** @var OgMembership $membership */
     $membership = Og::membershipStorage()->create(Og::membershipDefault());
+
+//    var_dump([$parent_entity->getEntityTypeId(), $parent_entity->id()]);
 
     $membership
       ->setFieldName($this->getName())
