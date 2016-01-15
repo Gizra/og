@@ -1,0 +1,13 @@
+{
+    "name": "drupal/og",
+    "description": "API to allow associating content with groups.",
+    "type": "drupal-module",
+    "license": "GPL-2.0+",
+    "homepage": "https://drupal.org/project/og",
+    "support": {
+        "issues": "https://drupal.org/project/issues/og",
+        "irc": "irc://irc.freenode.org/drupal-og",
+        "source": "https://cgit.drupalcode.org/og"
+    },
+    "minimum-stability": "dev"
+}
