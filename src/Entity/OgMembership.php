@@ -76,7 +76,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return OgMembership
    */
-  public function setMember($etid) {
+  public function setUser($etid) {
     $this->set('uid', $etid);
     return $this;
   }
