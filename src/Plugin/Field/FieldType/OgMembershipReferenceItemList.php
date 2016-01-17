@@ -83,7 +83,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $memberships = OgMembership::loadMultiple($membership_ids);
 
     $target_group_ids = array_map(function(OgMembership $membership) {
-      return $membership->getGroupEntityid();
+      return $membership->getEntityId();
     }, $memberships);
 
     $deprecated_membership_ids = array_diff($target_group_ids, $group_ids);
@@ -144,7 +144,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $return = [];
     foreach ($memberships as $membership) {
-      $return[] = ['target_id' => $membership->getGroupEntityid()];
+      $return[] = ['target_id' => $membership->getEntityid()];
     }
 
     return $return;
@@ -175,7 +175,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $memberships = OgMembership::loadMultiple($membership_ids);
 
     $group_ids = array_map(function (OgMembership $membership) {
-      return $membership->getGroupEntityid();
+      return $membership->getEntityId();
     }, $memberships);
 
     $groups = \Drupal::entityTypeManager()->getStorage($group_type)->loadMultiple($group_ids);
@@ -205,7 +205,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       ->setFieldName($this->getName())
       ->setUser($parent_entity->id())
       ->setEntityType($this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
-      ->setGroupEntityid($group_id)
+      ->setEntityId($group_id)
       ->save();
 
     return $membership;

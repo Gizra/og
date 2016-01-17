@@ -103,16 +103,16 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return OgMembership.
    */
-  public function setGroupEntityid($gid) {
-    $this->set('group_entity_id', $gid);
+  public function setEntityId($gid) {
+    $this->set('entity_id', $gid);
     return $this;
   }
 
   /**
    * @return mixed
    */
-  public function getGroupEntityid() {
-    return $this->get('group_entity_id')->value;
+  public function getEntityId() {
+    return $this->get('entity_id')->value;
   }
 
   /**
@@ -187,7 +187,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setLabel(t('Group entity type'))
       ->setDescription(t('The entity type of the group.'));
 
-    $fields['group_entity_id'] = BaseFieldDefinition::create('integer')
+    $fields['entity_id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Group entity id.'))
       ->setDescription(t("The entity ID of the group."));
 
@@ -230,7 +230,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return EntityInterface
    */
   public function getGroup() {
-    return \Drupal::entityTypeManager()->getStorage($this->getGroupEntityType())->load($this->getGroupEntityid());
+    return \Drupal::entityTypeManager()->getStorage($this->getGroupEntityType())->load($this->getEntityId());
   }
 
 }

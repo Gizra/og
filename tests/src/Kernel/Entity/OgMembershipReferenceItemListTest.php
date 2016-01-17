@@ -139,7 +139,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
       'field_name' => $this->fieldName,
       'uid' => $entity->id(),
       'entity_type' => 'user',
-      'group_entity_id' => $this->groups[0]->id(),
+      'entity_id' => $this->groups[0]->id(),
     ]);
     $membership->save();
     $reload($entity);
