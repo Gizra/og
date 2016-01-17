@@ -12,7 +12,7 @@ use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class OgMembershipReferenceItem.
+ * Class OgStandardReferenceItem.
  *
  * @FieldType(
  *   id = "og_standard_reference",

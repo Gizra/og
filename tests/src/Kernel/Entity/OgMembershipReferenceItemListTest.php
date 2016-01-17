@@ -136,7 +136,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 0);
     $membership = OgMembership::create([
-      'type' => 'og_membership_type_default',
+      'type' => $this->bundles[0],
       'field_name' => $this->fieldName,
       'member_entity_type' => 'user',
       'member_entity_id' => $entity->id(),
