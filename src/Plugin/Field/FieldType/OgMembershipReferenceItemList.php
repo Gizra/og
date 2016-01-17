@@ -69,7 +69,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $group_ids = [];
     foreach ($this->list as $item) {
-      $group_ids[] = $item->getValue()->target_id;
+      $group_ids[] = $item->getValue()['target_id'];
     }
 
     // todo: move to API function.
@@ -206,8 +206,6 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $parent_entity = $this->getEntity();
     /** @var OgMembership $membership */
     $membership = Og::membershipStorage()->create(Og::membershipDefault());
-
-//    var_dump([$parent_entity->getEntityTypeId(), $parent_entity->id()]);
 
     $membership
       ->setFieldName($this->getName())
