@@ -96,6 +96,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
       'name' => $this->randomString(),
       $this->fieldName => [['target_id' => $this->groups[0]->id()]],
     ]);
+
     // Assert group membership is found before save.
     $this->assertSame(count($member_in_single_grpup->{$this->fieldName}), 1);
     $member_in_single_grpup->save();

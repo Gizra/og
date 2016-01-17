@@ -144,9 +144,6 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
       return [];
     }
 
-    /** @var OgMembership[] $memberships */
-    $memberships;
-
     $return = [];
     foreach ($memberships as $membership) {
       $return[] = ['target_id' => $membership->getGroupEntityid()];
