@@ -128,7 +128,6 @@ class Og {
 
     static::$entityGroupCache[$identifier] = [];
     $query = \Drupal::entityQuery('og_membership')
-      ->condition('member_entity_type', $entity_type_id)
       ->condition('member_entity_id', $entity_id);
 
     if ($states) {

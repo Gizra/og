@@ -71,24 +71,6 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
     return $this;
   }
 
-
-  /**
-   * @param mixed $entityType
-   *
-   * @return OgMembership.
-   */
-  public function setMemberEntityType($entityType) {
-    $this->set('member_entity_type', $entityType);
-    return $this;
-  }
-
-  /**
-   * @return string
-   */
-  public function getMemberEntityType() {
-    return $this->get('member_entity_type')->value;
-  }
-
   /**
    * @param mixed $etid
    *
@@ -97,13 +79,6 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   public function setMemberEntityId($etid) {
     $this->set('member_entity_id', $etid);
     return $this;
-  }
-
-  /**
-   * @return mixed
-   */
-  public function getMemberEntityId() {
-    return $this->get('member_entity_type')->value;
   }
 
   /**
@@ -203,10 +178,6 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setDescription(t('The bundle of the membership'))
       ->setSetting('target_type', 'og_membership_type');
 
-    $fields['member_entity_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Member entity type.'))
-      ->setDescription(t("The entity type (e.g. node, comment, etc') of the member."));
-
     $fields['member_entity_id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Member entity ID'))
       ->setDescription(t('The entity ID of the member.'));
@@ -261,12 +232,4 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
     return \Drupal::entityTypeManager()->getStorage($this->getGroupEntityType())->load($this->getGroupEntityid());
   }
 
-  /**
-   * Get the entity belong to the current membership.
-   *
-   * @return EntityInterface
-   */
-  public function getEntityMembership() {
-    return \Drupal::entityTypeManager()->getStorage($this->get('member_entity_type'))->load($this->getMemberEntityId());
-  }
 }
