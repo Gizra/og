@@ -285,7 +285,7 @@ class Og {
    *   TRUE if the field is a group audience type, FALSE otherwise.
    */
   public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
-    return $field_definition->getType() === 'og_standard_reference';
+    return in_array($field_definition->getType(), ['og_standard_reference', 'og_membership_reference']);
   }
 
   /**
