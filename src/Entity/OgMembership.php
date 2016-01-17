@@ -76,8 +76,8 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return OgMembership
    */
-  public function setMemberEntityId($etid) {
-    $this->set('member_entity_id', $etid);
+  public function setMember($etid) {
+    $this->set('uid', $etid);
     return $this;
   }
 
@@ -178,9 +178,10 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setDescription(t('The bundle of the membership'))
       ->setSetting('target_type', 'og_membership_type');
 
-    $fields['member_entity_id'] = BaseFieldDefinition::create('integer')
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Member entity ID'))
-      ->setDescription(t('The entity ID of the member.'));
+      ->setDescription(t('The entity ID of the member.'))
+      ->setTargetEntityTypeId('user');
 
     $fields['group_entity_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group entity type'))

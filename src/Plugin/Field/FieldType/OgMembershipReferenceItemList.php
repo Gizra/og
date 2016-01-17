@@ -74,7 +74,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     // todo: move to API function.
     $membership_ids = \Drupal::entityQuery('og_membership')
-      ->condition('member_entity_id', $this->getEntity()->id())
+      ->condition('uid', $this->getEntity()->id())
       ->condition('group_entity_type', $this->getFieldDefinition()->getTargetEntityTypeId())
       ->condition('field_name', $this->getFieldDefinition()->getName())
       ->execute();
@@ -134,7 +134,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
   public function getValue() {
     $membership_ids = \Drupal::entityQuery('og_membership')
       ->condition('field_name', $this->getName())
-      ->condition('member_entity_id', $this->getEntity()->id())
+      ->condition('uid', $this->getEntity()->id())
       ->condition('state', OgMembershipInterface::STATE_ACTIVE)
       ->execute();
 
@@ -166,7 +166,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $membership_ids = \Drupal::entityQuery('og_membership')
       ->condition('field_name', $this->getName())
-      ->condition('member_entity_id', $entity->id())
+      ->condition('uid', $entity->id())
       ->condition('group_entity_type', $group_type)
       ->condition('state', OgMembershipInterface::STATE_ACTIVE)
       ->execute();
@@ -203,7 +203,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $membership
       ->setFieldName($this->getName())
-      ->setMemberEntityId($parent_entity->id())
+      ->setMember($parent_entity->id())
       ->setGroupEntityType($this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
       ->setGroupEntityid($group_id)
       ->save();

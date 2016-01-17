@@ -76,7 +76,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $run_query = function ($id) {
       return $this->container->get('entity.query')->get('og_membership')
         ->condition('field_name', $this->fieldName)
-        ->condition('member_entity_id', $id)
+        ->condition('uid', $id)
         ->condition('group_entity_type', 'user')
         ->condition('state', OgMembershipInterface::STATE_ACTIVE)
         ->execute();
@@ -137,7 +137,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $membership = OgMembership::create([
       'type' => $this->bundles[0],
       'field_name' => $this->fieldName,
-      'member_entity_id' => $entity->id(),
+      'uid' => $entity->id(),
       'group_entity_type' => 'user',
       'group_entity_id' => $this->groups[0]->id(),
     ]);
