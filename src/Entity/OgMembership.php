@@ -120,8 +120,8 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *
    * @return OgMembership
    */
-  public function setGroupEntityType($groupType) {
-    $this->set('group_entity_type', $groupType);
+  public function setEntityType($groupType) {
+    $this->set('entity_type', $groupType);
     return $this;
   }
 
@@ -129,7 +129,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return mixed
    */
   public function getGroupEntityType() {
-    return $this->get('group_entity_type')->value;
+    return $this->get('entity_type')->value;
   }
 
   /**
@@ -183,7 +183,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setDescription(t('The entity ID of the member.'))
       ->setTargetEntityTypeId('user');
 
-    $fields['group_entity_type'] = BaseFieldDefinition::create('string')
+    $fields['entity_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group entity type'))
       ->setDescription(t('The entity type of the group.'));
 

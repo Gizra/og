@@ -231,7 +231,7 @@ class GetEntityGroupsTest extends KernelTestBase {
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT])
       ->setUser($user->id())
       ->setGroupEntityid($group->id())
-      ->setGroupEntityType($group->getEntityTypeId())
+      ->setEntityType($group->getEntityTypeId())
       ->setState($state);
     $membership->save();
 

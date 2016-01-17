@@ -170,12 +170,12 @@ class Og {
    */
   public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity, $states);
-    $group_entity_type_id = $group->getEntityTypeId();
+    $entity_type_id = $group->getEntityTypeId();
     // We need to create a map of the group ids as Og::getEntityGroups returns a
     // map of membership_id => group entity for each type.
-    return !empty($groups[$group_entity_type_id]) && in_array($group->id(), array_map(function($group_entity) {
+    return !empty($groups[$entity_type_id]) && in_array($group->id(), array_map(function($group_entity) {
       return $group_entity->id();
-    }, $groups[$group_entity_type_id]));
+    }, $groups[$entity_type_id]));
   }
 
   /**
