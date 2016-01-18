@@ -309,7 +309,7 @@ class Og {
   public static function getAllGroupAudienceFields($entity_type_id, $bundle, $group_type_id = NULL, $group_bundle = NULL) {
     $return = [];
 
-    foreach (\Drupal::entityManager()->getFieldDefinitions($entity_type_id, $bundle) as $field_definition) {
+    foreach (\Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle) as $field_definition) {
       if (!static::isGroupAudienceField($field_definition)) {
         // Not a group audience field.
         continue;
@@ -384,7 +384,7 @@ class Og {
 
     // Invalidate the entity property cache.
     \Drupal::entityTypeManager()->clearCachedDefinitions();
-    \Drupal::entityManager()->clearCachedFieldDefinitions();
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Let other OG modules know we invalidate cache.
     \Drupal::moduleHandler()->invokeAll('og_invalidate_cache', $group_ids);
