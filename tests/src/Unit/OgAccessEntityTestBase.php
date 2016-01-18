@@ -46,7 +46,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $entity_field_manager = $this->prophesize(EntityFieldManagerInterface::class);
     $entity_field_manager->getFieldDefinitions($entity_type_id, $bundle)->willReturn([$field_definition->reveal()]);
-    \Drupal::getContainer()->set('entity.manager', $entity_manager->reveal());
+    \Drupal::getContainer()->set('entity.manager', $entity_field_manager->reveal());
 
     // Mock the results of Og::getEntityGroups().
     $r = new \ReflectionClass('Drupal\og\Og');
