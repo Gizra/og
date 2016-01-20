@@ -95,13 +95,19 @@ class BundleFormAlter {
    * Adds the "is group?" checkbox.
    */
   protected function addGroupType(array &$form, $form_state) {
+    if ($this->entity->isNew()) {
+      $description = t('Every entity in this bundle is a group which can contain entities and can have members.');
+    }
+    else {
+      $description = t('Every "%bundle" is a group which can contain entities and can have members.', [
+        '%bundle' => Unicode::lcfirst($this->bundleLabel),
+      ]);
+    }
     $form['og']['og_is_group'] = array(
       '#type' => 'checkbox',
       '#title' => t('Group'),
       '#default_value' => Og::isGroup($this->entityTypeId, $this->bundle),
-      '#description' => t('Every "%bundle" is a group which can contain entities and can have members.', [
-        '%bundle' => Unicode::lcfirst($this->bundleLabel),
-      ]),
+      '#description' => $description,
     );
   }
 
