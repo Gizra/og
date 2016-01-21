@@ -191,7 +191,7 @@ class OgAccess {
       foreach ($entity_groups as $groups) {
         foreach ($groups as $group) {
           $user_access = static::userAccess($group, $operation, $user);
-          if (!$user_access->isForbidden()) {
+          if (if ($user_access->isAllowed()) {
             //this covers allowed and neutral
             return $user_access->addCacheTags($cache_tags);
           }
