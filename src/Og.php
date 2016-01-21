@@ -10,6 +10,7 @@ namespace Drupal\og;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -308,8 +309,16 @@ class Og {
    */
   public static function getAllGroupAudienceFields($entity_type_id, $bundle, $group_type_id = NULL, $group_bundle = NULL) {
     $return = [];
+    $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
 
-    foreach (\Drupal::entityManager()->getFieldDefinitions($entity_type_id, $bundle) as $field_definition) {
+    if ($entity_type->isSubclassOf(FieldableEntityInterface::class)) {
+      $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+    }
+    else {
+      // This entity type is not fieldable, return early.
+      return $return;
+    }
+    foreach ($field_definitions as $field_definition) {
       if (!static::isGroupAudienceField($field_definition)) {
         // Not a group audience field.
         continue;
