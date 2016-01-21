@@ -1,181 +1,175 @@
 <?php
 
 /**
- * Contain the OG role entity definition. This will be a content entity.
+ * @file
+ * Contains Drupal\og\Entity\OgRole.
  */
 namespace Drupal\og\Entity;
 
-use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Config\ConfigValueException;
+use Drupal\og\OgRoleInterface;
+use Drupal\user\Entity\Role;
 
 /**
- * todo: Find a way to attach the roles to group:
- *  - UUID?
- *  - Service?
+ * Defines the OG user role entity class.
  *
- * Convert into
+ * @see \Drupal\user\Entity\Role
  *
- *
- * @ContentEntityType(
+ * @ConfigEntityType(
  *   id = "og_role",
  *   label = @Translation("OG role"),
- *   module = "og",
- *   base_table = "og_role",
+ *   static_cache = TRUE,
  *   entity_keys = {
- *     "id" = "rid",
- *     "label" = "name"
+ *     "id" = "id",
+ *     "label" = "label",
+ *     "weight" = "weight"
  *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "weight",
+ *     "group_type",
+ *     "group_bundle",
+ *     "group_id",
+ *     "permissions"
+ *   }
  * )
  */
-class OgRole extends ContentEntityBase {
+class OgRole extends Role implements OgRoleInterface {
 
   /**
-   * @param mixed $gid
+   * @var integer
    *
-   * @return $this
+   * The group ID.
    */
-  public function setGid($gid) {
-    $this->set('gid', $gid);
+  protected $group_id;
+
+  /**
+   * The entity type ID of the group.
+   *
+   * @var string
+   */
+  protected $group_type;
+
+  /**
+   * The bundle ID of the group.
+   *
+   * @var string
+   */
+  protected $group_bundle;
+
+  /**
+   * Set the ID of the role.
+   *
+   * @param string $id
+   *   The machine name of the role.
+   *
+   * @return OgRole
+   */
+  public function setId($id) {
+    $this->id = $id;
+    $this->set('id', $id);
     return $this;
   }
 
   /**
-   * @return mixed
+   * @return string
    */
-  public function getGid() {
-    return $this->get('gid')->value;
+  public function getLabel() {
+    return $this->get('label');
   }
 
   /**
-   * @param mixed $groupBundle
+   * @param string $label
    *
-   * @return $this
+   * @return OgRole
    */
-  public function setGroupBundle($groupBundle) {
-    $this->set('group_bundle', $groupBundle);
+  public function setLabel($label) {
+    $this->label = $label;
+    $this->set('label', $label);
     return $this;
   }
 
   /**
-   * @return mixed
+   * @return int
    */
-  public function getGroupBundle() {
-    return $this->get('groupBundle')->value;
+  public function getGroupID() {
+    return $this->get('group_id');
   }
 
   /**
-   * @param mixed $groupType
+   * @param int $groupID
    *
-   * @return $this
+   * @return OgRole
    */
-  public function setGroupType($groupType) {
-    $this->set('groupType', $groupType);
+  public function setGroupID($groupID) {
+    $this->group_id = $groupID;
+    $this->set('group_id', $groupID);
     return $this;
   }
 
   /**
-   * @return mixed
+   * @return string
    */
   public function getGroupType() {
     return $this->get('group_type');
   }
 
   /**
-   * @param mixed $name
+   * @param string $groupType
    *
-   * @return $this
+   * @return OgRole
    */
-  public function setName($name) {
-    $this->set('name', $name);
+  public function setGroupType($groupType) {
+    $this->group_type = $groupType;
+    $this->set('group_type', $groupType);
     return $this;
   }
 
   /**
-   * @return mixed
+   * @return string
    */
-  public function getName() {
-    return $this->get('name')->value;
+  public function getGroupBundle() {
+    return $this->get('group_bundle');
   }
 
   /**
-   * @param mixed $rid
+   * @param string $groupBundle
    *
-   * @return $this
+   * @return OgRole
    */
-  public function setRid($rid) {
-    $this->set('rid', $rid);
+  public function setGroupBundle($groupBundle) {
+    $this->group_bundle = $groupBundle;
+    $this->set('group_bundle', $groupBundle);
     return $this;
   }
-
-  /**
-   * @return mixed
-   */
-  public function getRid() {
-    return $this->get('rid')->value;
-  }
-
-  /**
-   * @var Integer
-   *
-   * The identifier.
-   */
-  protected $rid;
-
-  /**
-   * @var Integer
-   *
-   * The group ID.
-   */
-  protected $gid;
-
-  /**
-   * @var String
-   *
-   * The group group's entity type.
-   */
-  protected $groupType;
-
-  /**
-   * @var String
-   *
-   * The group's bundle name.
-   */
-  protected $groupBundle;
-
-  /**
-   * @var String
-   *
-   * Unique role name per group.
-   */
-  protected $name;
 
   /**
    * {@inheritdoc}
    */
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = array();
+  public function save() {
 
-    $fields['rid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Role ID'))
-      ->setDescription(t('Primary Key: Unique role ID.'));
+    if ($this->isNew()) {
 
-    $fields['gid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Group ID'))
-      ->setDescription(t("The group's unique ID."));
+      if (empty($this->group_type)) {
+        throw new ConfigValueException('The group type can not be empty.');
+      }
 
-    $fields['group_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group type'))
-      ->setDescription(t("The group's entity type."));
+      if (empty($this->group_bundle)) {
+        throw new ConfigValueException('The group bundle can not be empty.');
+      }
 
-    $fields['group_bundle'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group bundle'))
-      ->setDescription(t("The group's bundle name."));
+      // When assigning a role to group we need to add a prefix to the ID in
+      // order to prevent duplicate IDs.
+      $prefix = $this->group_type . '-' . $this->group_bundle . '-';
 
-    $fields['name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Name'))
-      ->setDescription(t('Unique role name per group.'));
+      if (!empty($this->group_id)) {
+        $prefix .= $this->group_id . '-';
+      }
 
-    return $fields;
+      $this->id = $prefix . $this->id();
+    }
+
+    parent::save();
   }
 }

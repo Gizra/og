@@ -1,19 +1,23 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\og\Plugin\OgFields\AudienceField.
+ */
+
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldInstanceConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
+use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgMembershipInterface;
 
 /**
- * Redirects to a message deletion form.
+ * Determine to which groups this group content is assigned to.
  *
  * @OgFields(
- *  id = OG_AUDIENCE_FIELD,
+ *  id = "og_group_ref",
  *  type = "group",
  *  description = @Translation("Determine to which groups this group content is assigned to."),
  * )
@@ -23,77 +27,70 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function fieldDefinition() {
-    return FieldStorageConfig::create(array(
-      'field_name' => OG_AUDIENCE_FIELD,
-      'entity_type' => $this->getEntityType(),
-      'type' => 'entity_reference',
+  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
+    $values = [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'settings' => array(
+      'custom_storage' => TRUE,
+      'settings' => [
         'handler' => 'og',
-        'handler_submit' => 'Change handler',
-        'handler_settings' => array(
-          'behaviors' => array(
-            'og_behavior' => array(
-              'status' => TRUE,
-            ),
-          ),
-          'target_bundles' => array(),
-          'membership_type' => OG_MEMBERSHIP_TYPE_DEFAULT,
-        ),
-        // todo: allow to change the node type.
-        'target_type' => 'node',
-      ),
-    ));
+        'handler_settings' => [
+          'target_bundles' => [],
+          'membership_type' => OgMembershipInterface::TYPE_DEFAULT,
+        ],
+        'target_type' => $this->getEntityType(),
+      ],
+      'type' => 'og_membership_reference',
+    ];
+
+    return parent::getFieldStorageConfigBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function instanceDefinition() {
-    return FieldConfig::create(array(
-      'label' => t('Groups audience'),
-      'description' => t('Determine if this is an OG group.'),
-      'default_value' => array(0 => array('value' => 1)),
-      'display_label' => 1,
-      'field_name' => OG_AUDIENCE_FIELD,
-      'entity_type' => $this->getEntityType(),
-      'bundle' => $this->getBundle(),
-    ));
+  public function getFieldConfigBaseDefinition(array $values = array()) {
+    $values = [
+      'description' => $this->t('OG group audience reference field.'),
+      'display_label' => TRUE,
+      'label' => $this->t('Groups audience'),
+    ];
+
+    return parent::getFieldConfigBaseDefinition($values);
+
   }
 
   /**
    * {@inheritdoc}
    */
-  public function widgetDefinition() {
+  public function widgetDefinition(array $widget = []) {
     // Keep this until og_complex widget is back.
-    return array(
-      'type' => "og_complex",
-      'settings' => array(
-        'match_operator' => "CONTAINS"
-      ),
-    );
+    return [
+      'type' => 'og_complex',
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+      ],
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition() {
-    return array(
-      'default' => array(
-        'label' => "above",
-        'type' => "entity_reference_label",
-        'settings' => array(
+  public function viewModesDefinition(array $view_mode = []) {
+    return [
+      'default' => [
+        'label' => 'above',
+        'type' => 'entity_reference_label',
+        'settings' => [
           'link' => TRUE,
-        ),
-      ),
-      'teaser' => array(
-        'label' => "above",
-        'type' => "entity_reference_label",
-        'settings' => array(
+        ]
+      ],
+      'teaser' => [
+        'label' => 'above',
+        'type' => 'entity_reference_label',
+        'settings' => [
           'link' => TRUE,
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
   }
 }
