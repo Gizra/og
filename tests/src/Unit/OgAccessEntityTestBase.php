@@ -10,6 +10,8 @@ namespace Drupal\Tests\og\Unit;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
@@ -33,6 +35,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->getListCacheTags()->willReturn([]);
+    $entity_type->isSubclassOf(FieldableEntityInterface::class)->willReturn(TRUE);
     $entity_type->id()->willReturn($entity_type_id);
 
     $this->entity = $this->prophesize(ContentEntityInterface::class);
@@ -46,7 +49,13 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $entity_field_manager = $this->prophesize(EntityFieldManagerInterface::class);
     $entity_field_manager->getFieldDefinitions($entity_type_id, $bundle)->willReturn([$field_definition->reveal()]);
-    \Drupal::getContainer()->set('entity_field.manager', $entity_field_manager->reveal());
+
+    $entity_type_manager = $this->prophesize(EntityTypeManagerInterface::class);
+    $entity_type_manager->getDefinition($entity_type_id)->willReturn($entity_type->reveal());
+
+    $container = \Drupal::getContainer();
+    $container->set('entity_type.manager', $entity_type_manager->reveal());
+    $container->set('entity_field.manager', $entity_field_manager->reveal());
 
     // Mock the results of Og::getEntityGroups().
     $r = new \ReflectionClass('Drupal\og\Og');
