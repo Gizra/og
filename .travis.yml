@@ -45,7 +45,7 @@ before_script:
   - nohup php -S localhost:8888 > /dev/null 2>&1 &
 
   # Wait until the web server is responding.
-  - until curl -s 127.0.0.1:8888; do true; done > /dev/null
+  - until curl -s localhost:8888; do true; done > /dev/null
 
   # Export web server URL for browser tests.
   - export SIMPLETEST_BASE_URL=http://localhost:8888
