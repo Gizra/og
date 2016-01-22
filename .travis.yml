@@ -16,23 +16,39 @@ mysql:
   encoding: utf8
 
 before_script:
-  # Remember the current rules test directory for later use in the Drupal
-  # installation.
+  # Remove Xdebug as we don't need it and it causes "PHP Fatal error: Maximum
+  # function nesting level of '256' reached."
+  # We also don't care if that file exists or not on PHP 7.
+  - phpenv config-rm xdebug.ini || true
+
+  # Remember the current directory for later use in the Drupal installation.
   - TESTDIR=$(pwd)
+
   # Navigate out of module directory to prevent blown stack by recursive module
   # lookup.
   - cd ..
 
   # Create database.
   - mysql -e 'create database og'
+
+  # Export database variable for kernel tests.
+  - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og
+
   # Download Drupal 8 core.
-  - git clone --branch $DRUPAL_CORE --depth 1 http://git.drupal.org/project/drupal.git
+  - travis_retry git clone --branch $DRUPAL_CORE --depth 1 https://git.drupal.org/project/drupal.git
   - cd drupal
 
+  # Reference OG in the Drupal site.
   - ln -s $TESTDIR modules/og
 
-  # Adding DB so PHPUnit could mock the environment.
-  - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og;
+  # Start a web server on port 8888 in the background.
+  - nohup php -S localhost:8888 > /dev/null 2>&1 &
+
+  # Wait until the web server is responding.
+  - until curl -s 127.0.0.1:8888; do true; done > /dev/null
+
+  # Export web server URL for browser tests.
+  - export SIMPLETEST_BASE_URL=http://localhost:8888
 
 script:
   # Run the PHPUnit tests which also include the kernel tests.
