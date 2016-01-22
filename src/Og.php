@@ -393,7 +393,7 @@ class Og {
 
     // Invalidate the entity property cache.
     \Drupal::entityTypeManager()->clearCachedDefinitions();
-    \Drupal::entityManager()->clearCachedFieldDefinitions();
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Let other OG modules know we invalidate cache.
     \Drupal::moduleHandler()->invokeAll('og_invalidate_cache', $group_ids);
