@@ -309,7 +309,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $parent_values = $values;
 
     // Get the groups from the other groups widget.
-    foreach ($form[$this->fieldDefinition->getName()]['other_groups'] as $key => $value) {
+    foreach ($form['other_groups'] as $key => $value) {
       if (!is_int($key)) {
         continue;
       }
