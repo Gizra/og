@@ -165,7 +165,7 @@ class BundleFormAlter {
         '#title' => t('Target type'),
         '#options' => $target_types,
         '#default_value' => $target_type_default,
-        '#description' => t('The entity type that can be referenced thru this field.'),
+        '#description' => t('The entity type that can be referenced through this field.'),
         '#ajax' => array(
           'callback' => [$this, 'ajaxCallback'],
           'wrapper' => 'og-settings-wrapper',
@@ -184,7 +184,7 @@ class BundleFormAlter {
         '#type' => 'select',
         '#title' => t('Target bundles'),
         '#options' => $bundle_options,
-        '#default_value' => isset($handler_settings['target_bundles']) ? $handler_settings['target_bundles'] : [],
+        '#default_value' => !empty($handler_settings['target_bundles']) ? $handler_settings['target_bundles'] : NULL,
         '#multiple' => TRUE,
         '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.'),
         '#states' => array(
@@ -193,10 +193,25 @@ class BundleFormAlter {
           ),
         ),
       );
+      $form['#validate'][] = [get_class($this), 'validateTargetBundleElement'];
     }
     else {
       $form['og']['og_group_content_bundle']['#disabled'] = TRUE;
     }
   }
+
+  /**
+   * Element validate handler for the og_target_bundles element.
+   */
+  public static function validateTargetBundleElement(array &$form, FormStateInterface $form_state) {
+    // If no checkboxes were checked for 'og_target_bundles', store NULL ("all
+    // bundles are referenceable") rather than empty array ("no bundle is
+    // referenceable" - typically happens when all referenceable bundles have
+    // been deleted).
+    if ($form_state->getValue('og_target_bundles') === []) {
+      $form_state->setValue('og_target_bundles', NULL);
+    }
+  }
+
 
 }
