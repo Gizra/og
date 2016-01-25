@@ -8,14 +8,19 @@
 namespace Drupal\og_ui\Tests;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\simpletest\WebTestBase;
+use Drupal\KernelTests\AssertLegacyTrait;
+use Drupal\simpletest\AssertContentTrait;
+use Drupal\simpletest\BrowserTestBase;
 
 /**
  * Test making a bundle a group and a group content.
  *
  * @group og
  */
-class BundleFormAlterTest extends WebTestBase {
+class BundleFormAlterTest extends BrowserTestBase {
+
+  use AssertContentTrait;
+  use AssertLegacyTrait;
 
   /**
    * Modules to enable.
@@ -32,7 +37,8 @@ class BundleFormAlterTest extends WebTestBase {
       'type' => 'school',
       'og_is_group' => 1,
     ];
-    $this->drupalPostForm('admin/structure/types/add', $edit, t('Save content type'));
+    $this->drupalGet('admin/structure/types/add');
+    $this->submitForm($edit, t('Save content type'));
     $edit = [
       'name' => 'class',
       'type' => 'class',
@@ -40,8 +46,9 @@ class BundleFormAlterTest extends WebTestBase {
       'og_target_type' => 'node',
       'og_target_bundles[]' => ['school'],
     ];
-    $this->drupalPostForm('admin/structure/types/add', $edit, t('Save content type'));
-    $this->drupalGet('admin/structure/types/manage/class');
+    $this->drupalGet('admin/structure/types/add');
+    $this->submitForm($edit, t('Save content type'));
+    $this->content = $this->drupalGet('admin/structure/types/manage/class');
     $this->assertOptionSelected('edit-og-target-bundles', 'school');
     $this->assertTargetBundles(['school' => 'school'], 'The target bundles are set to the "school" bundle.');
 
@@ -56,7 +63,8 @@ class BundleFormAlterTest extends WebTestBase {
       'og_target_type' => 'node',
       'og_target_bundles[]' => [],
     ];
-    $this->drupalPostForm('admin/structure/types/manage/class', $edit, t('Save content type'));
+    $this->drupalGet('admin/structure/types/manage/class');
+    $this->submitForm($edit, t('Save content type'));
     $this->assertTargetBundles(NULL, 'When the target bundle field is cleared from all values, it takes on the value NULL.');
   }
 
@@ -74,7 +82,7 @@ class BundleFormAlterTest extends WebTestBase {
     $entity_field_manager->clearCachedFieldDefinitions();
     $field_definitions = $entity_field_manager->getFieldDefinitions('node', 'class');
     $settings = $field_definitions['og_group_ref']->getSetting('handler_settings');
-    $this->assertIdentical($settings['target_bundles'], $expected, $message);
+    $this->assertEquals($expected, $settings['target_bundles'], $message);
   }
 
 }
