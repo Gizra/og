@@ -311,13 +311,12 @@ class Og {
     $return = [];
     $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
 
-    if ($entity_type->isSubclassOf(FieldableEntityInterface::class)) {
-      $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+    if (!$entity_type->isSubclassOf(FieldableEntityInterface::class)) {
+      // This entity type is not fieldable.
+      return [];
     }
-    else {
-      // This entity type is not fieldable, return early.
-      return $return;
-    }
+    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+
     foreach ($field_definitions as $field_definition) {
       if (!static::isGroupAudienceField($field_definition)) {
         // Not a group audience field.
