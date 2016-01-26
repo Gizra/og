@@ -314,7 +314,6 @@ class Og {
     if (!$entity_type->isSubclassOf(FieldableEntityInterface::class)) {
       // This entity type is not fieldable.
       return [];
-
     }
     $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
 
