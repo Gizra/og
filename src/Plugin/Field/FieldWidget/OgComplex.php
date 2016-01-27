@@ -312,8 +312,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     });
 
     // Get the groups from the other groups widget.
-    // @todo Don't hardcode 'og_group_ref' - there can be multiple fields.
-    foreach ($form['og_group_ref']['other_groups'] as $key => $value) {
+    foreach ($form[$this->fieldDefinition->getName()]['other_groups'] as $key => $value) {
       if (!is_int($key)) {
         continue;
       }
