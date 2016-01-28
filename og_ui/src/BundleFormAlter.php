@@ -201,7 +201,7 @@ class BundleFormAlter {
   }
 
   /**
-   * Element validate handler for the og_target_bundles element.
+   * Form validate handler.
    */
   public static function validateTargetBundleElement(array &$form, FormStateInterface $form_state) {
     // If no checkboxes were checked for 'og_target_bundles', store NULL ("all
