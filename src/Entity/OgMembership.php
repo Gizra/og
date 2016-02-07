@@ -62,6 +62,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
     return $this->get('created')->value;
   }
 
+
   /**
    * {@inheritdoc}
    */
@@ -98,26 +99,37 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * @param ContentEntityBase $group
-   *   The group object.
+   * @param mixed $gid
    *
-   * @return OgMembership
+   * @return OgMembership.
    */
-  public function setGroup(ContentEntityBase $group) {
-    $this
-      ->set('entity_id', $group->id())
-      ->set('entity_type', $group->getEntityTypeId());
-
+  public function setEntityId($gid) {
+    $this->set('entity_id', $gid);
     return $this;
   }
 
   /**
-   * @return ContentEntityBase
+   * @return mixed
    */
-  public function getGroup() {
-    return \Drupal::entityTypeManager()
-      ->getStorage($this->get('entity_type')->value)
-      ->load($this->get('entity_id')->value);
+  public function getEntityId() {
+    return $this->get('entity_id')->value;
+  }
+
+  /**
+   * @param mixed $groupType
+   *
+   * @return OgMembership
+   */
+  public function setEntityType($groupType) {
+    $this->set('entity_type', $groupType);
+    return $this;
+  }
+
+  /**
+   * @return mixed
+   */
+  public function getGroupEntityType() {
+    return $this->get('entity_type')->value;
   }
 
   /**
@@ -210,6 +222,15 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
     }
 
     parent::PreSave($storage);
+  }
+
+  /**
+   * Get the group object.
+   *
+   * @return EntityInterface
+   */
+  public function getGroup() {
+    return \Drupal::entityTypeManager()->getStorage($this->getGroupEntityType())->load($this->getEntityId());
   }
 
 }

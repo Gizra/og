@@ -147,8 +147,7 @@ class Og {
 
     /** @var \Drupal\og\Entity\OgMembership $membership */
     foreach ($memberships as $membership) {
-      $group = $membership->getGroup();
-      static::$entityGroupCache[$identifier][$group->getEntityTypeId()][$membership->id()] = $membership->getGroup();
+      static::$entityGroupCache[$identifier][$membership->getGroupEntityType()][$membership->id()] = $membership->getGroup();
     }
 
     return static::$entityGroupCache[$identifier];

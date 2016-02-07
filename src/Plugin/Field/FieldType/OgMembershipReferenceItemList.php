@@ -7,7 +7,6 @@
 
 namespace Drupal\og\Plugin\Field\FieldType;
 
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
@@ -84,19 +83,16 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $memberships = OgMembership::loadMultiple($membership_ids);
 
     $target_group_ids = array_map(function(OgMembership $membership) {
-      return $membership->getGroup()->id();
+      return $membership->getEntityId();
     }, $memberships);
 
     $deprecated_membership_ids = array_diff($target_group_ids, $group_ids);
     $new_membership_group_ids = array_diff($group_ids, $target_group_ids);
 
-    $entity_type_id = $this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type');
-    $groups = \Drupal::entityTypeManager()->getStorage($entity_type_id)->loadMultiple($new_membership_group_ids);
-
     // Create any new memberships.
-    foreach ($groups as $group) {
+    foreach ($new_membership_group_ids as $new_membership_group_id) {
       // We need to create a new membership.
-      $this->createOgMembership($group);
+      $this->createOgMembership($new_membership_group_id);
     }
 
     // Remove memberships that are not referenced any more.
@@ -148,7 +144,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $return = [];
     foreach ($memberships as $membership) {
-      $return[] = ['target_id' => $membership->getGroup()->id()];
+      $return[] = ['target_id' => $membership->getEntityid()];
     }
 
     return $return;
@@ -179,8 +175,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $memberships = OgMembership::loadMultiple($membership_ids);
 
     $group_ids = array_map(function (OgMembership $membership) {
-      var_dump($membership->get('entity_type')->value);
-      return $membership->getGroup()->id();
+      return $membership->getEntityId();
     }, $memberships);
 
     $groups = \Drupal::entityTypeManager()->getStorage($group_type)->loadMultiple($group_ids);
@@ -197,12 +192,10 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
   /**
    * Creates and saves a new membership.
    *
-   * @param ContentEntityBase $group
+   * @param int|string $group_id
    *   The group ID to create a membership for.
-   *
-   * @return OgMembership
    */
-  protected function createOgMembership(ContentEntityBase $group) {
+  protected function createOgMembership($group_id) {
     /** @var \Drupal\Core\Entity\EntityInterface $parent */
     $parent_entity = $this->getEntity();
     /** @var OgMembership $membership */
@@ -211,7 +204,8 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $membership
       ->setFieldName($this->getName())
       ->setUser($parent_entity->id())
-      ->setGroup($group)
+      ->setEntityType($this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
+      ->setEntityId($group_id)
       ->save();
 
     return $membership;

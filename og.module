@@ -35,7 +35,8 @@ function og_entity_insert(EntityInterface $entity) {
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setUser($entity->getOwnerId())
-      ->setGroup($entity)
+      ->setEntityId($entity->id())
+      ->setEntityType($entity->getEntityTypeId())
       ->setFieldName($membership->getFieldName())
       ->save();
   }
