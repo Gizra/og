@@ -7,7 +7,6 @@
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
@@ -47,21 +46,6 @@ class OgComplexWidgetTest extends BrowserTestBase {
     // group content type.
     $this->createContentType(['type' => 'post']);
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'post');
-
-    // Make the group audience field visible in the default form display.
-    // @todo Remove this once issue #144 is in.
-    // @see https://github.com/amitaibu/og/issues/144
-    /** @var EntityFormDisplayInterface $form_display */
-    $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load('node.post.default');
-    $widget = $form_display->getComponent('og_group_ref');
-    $widget['type'] = 'og_complex';
-    $widget['settings'] = [
-      'match_operator' => 'CONTAINS',
-      'size' => 60,
-      'placeholder' => '',
-    ];
-    $form_display->setComponent('og_group_ref', $widget);
-    $form_display->save();
   }
 
   /**
