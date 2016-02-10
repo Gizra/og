@@ -9,6 +9,7 @@ namespace Drupal\og;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -81,6 +82,19 @@ class Og {
       // @todo: Verify this is still needed here.
       static::invalidateCache();
     }
+
+    // Make the field visible in the default form display.
+    /** @var EntityFormDisplayInterface $form_display */
+    $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load("$entity_type.$bundle.default");
+    $widget = $form_display->getComponent($plugin_id);
+    $widget['type'] = 'og_complex';
+    $widget['settings'] = [
+      'match_operator' => 'CONTAINS',
+      'size' => 60,
+      'placeholder' => '',
+    ];
+    $form_display->setComponent($plugin_id, $widget);
+    $form_display->save();
 
     return $field_definition;
   }
