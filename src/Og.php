@@ -59,7 +59,7 @@ class Og {
 
     // Get the field definition and add the entity info to it. By doing so
     // we validate the the field can be attached to the entity. For example,
-    // the OG accesss module's field can be attached only to node entities, so
+    // the OG access module's field can be attached only to node entities, so
     // any other entity will throw an exception.
     /** @var \Drupal\og\OgFieldBase $og_field */
     $og_field = static::getFieldBaseDefinition($plugin_id)
@@ -71,7 +71,6 @@ class Og {
       $field_storage_config = NestedArray::mergeDeep($og_field->getFieldStorageConfigBaseDefinition(), $settings['field_storage_config']);
       FieldStorageConfig::create($field_storage_config)->save();
     }
-
 
     if (!$field_definition = FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
       $field_config = NestedArray::mergeDeep($og_field->getFieldConfigBaseDefinition(), $settings['field_config']);
