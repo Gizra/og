@@ -86,6 +86,20 @@ class Og {
     // Make the field visible in the default form display.
     /** @var EntityFormDisplayInterface $form_display */
     $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load("$entity_type.$bundle.default");
+
+    // If not found, create a fresh form display object. This is by design,
+    // configuration entries are only created when an entity form display is
+    // explicitly configured and saved.
+    // @see entity_get_form_display()
+    if (!$form_display) {
+      $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->create([
+        'targetEntityType' => $entity_type,
+        'bundle' => $bundle,
+        'mode' => 'default',
+        'status' => TRUE,
+      ]);
+    }
+
     $widget = $form_display->getComponent($plugin_id);
     $widget['type'] = 'og_complex';
     $widget['settings'] = [
@@ -93,6 +107,7 @@ class Og {
       'size' => 60,
       'placeholder' => '',
     ];
+
     $form_display->setComponent($plugin_id, $widget);
     $form_display->save();
 
