@@ -129,12 +129,12 @@ class BundleFormAlter {
     $target_types = [];
     $bundle_options = [];
     $all_group_bundles = Og::groupManager()->getAllGroupBundles();
-    foreach ($all_group_bundles as $group_entity_type => $bundles) {
+    foreach ($all_group_bundles as $entity_type => $bundles) {
       if (!$target_type_default) {
-        $target_type_default = $group_entity_type;
+        $target_type_default = $entity_type;
       }
-      $target_types[$group_entity_type] = \Drupal::entityTypeManager()
-        ->getDefinition($group_entity_type)
+      $target_types[$entity_type] = \Drupal::entityTypeManager()
+        ->getDefinition($entity_type)
         ->getLabel();
     }
 

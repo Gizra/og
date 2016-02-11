@@ -157,8 +157,7 @@ class Og {
 
     static::$entityGroupCache[$identifier] = [];
     $query = \Drupal::entityQuery('og_membership')
-      ->condition('member_entity_type', $entity_type_id)
-      ->condition('member_entity_id', $entity_id);
+      ->condition('uid', $entity_id);
 
     if ($states) {
       $query->condition('state', $states, 'IN');
@@ -200,12 +199,12 @@ class Og {
    */
   public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     $groups = static::getEntityGroups($entity, $states);
-    $group_entity_type_id = $group->getEntityTypeId();
+    $entity_type_id = $group->getEntityTypeId();
     // We need to create a map of the group ids as Og::getEntityGroups returns a
     // map of membership_id => group entity for each type.
-    return !empty($groups[$group_entity_type_id]) && in_array($group->id(), array_map(function($group_entity) {
+    return !empty($groups[$entity_type_id]) && in_array($group->id(), array_map(function($group_entity) {
       return $group_entity->id();
-    }, $groups[$group_entity_type_id]));
+    }, $groups[$entity_type_id]));
   }
 
   /**
@@ -314,7 +313,7 @@ class Og {
    *   TRUE if the field is a group audience type, FALSE otherwise.
    */
   public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
-    return $field_definition->getType() === 'og_membership_reference';
+    return in_array($field_definition->getType(), ['og_standard_reference', 'og_membership_reference']);
   }
 
   /**
