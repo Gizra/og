@@ -97,7 +97,7 @@ og.og_role.*:
 
 field.widget.settings.og_complex:
   type: mapping
-  label: 'OG complex widget display format settings'
+  label: 'OG Group Audience field widget'
   mapping:
     match_operator:
       type: string
