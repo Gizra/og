@@ -157,14 +157,57 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
     return $this->bundle();
   }
 
+  /**
+   * Set the group's role's for the current user group membership's.
+   *
+   * @param $roles
+   *   List of og roles ids.
+   *
+   * @return OgMembership
+   */
   public function setRoles($roles) {
     $this->set('roles', $roles);
 
     return $this;
   }
 
+  /**
+   * Adding a role to the user membership.
+   *
+   * @param $role_id
+   *   The OG role ID.
+   *
+   * @return OgMembership
+   */
+  public function addRole($role_id) {
+    return $this;
+  }
+
+  /**
+   * Revoking a role from the user's membership's.
+   *
+   * @param $role_id
+   *   The OG role ID.
+   *
+   * @return OgMembership
+   */
+  public function revokeRole($role_id) {
+    return $this;
+  }
+
+  /**
+   * todo: check why i need to do this in that way.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   */
   public function getRoles() {
-    return $this->get('roles')->entity;
+    $ids = [];
+
+    foreach ($this->get('roles') as $role) {
+      $ids[] = $role->target_id;
+    }
+
+    return \Drupal::entityTypeManager()->getStorage('og_role')->loadMultiple($ids);
   }
 
   /**
