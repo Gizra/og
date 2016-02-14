@@ -14,6 +14,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\TypedData\DataDefinition;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
@@ -201,13 +202,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return \Drupal\Core\Entity\EntityInterface[]
    */
   public function getRoles() {
-    $ids = [];
-
-    foreach ($this->get('roles') as $role) {
-      $ids[] = $role->target_id;
-    }
-
-    return \Drupal::entityTypeManager()->getStorage('og_role')->loadMultiple($ids);
+    return $this->get('roles')->referencedEntities();
   }
 
   /**
@@ -250,12 +245,13 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setDescription(t("The state of the group content."))
       ->setDefaultValue(TRUE);
 
-    $fields['roles'] = BaseFieldDefinition::create('entity_reference')
+    $fields['roles'] = BaseFieldDefinition::create('og_role_reference')
       ->setLabel(t('Roles'))
       ->setDescription(t("The user's group's roles."))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDefaultValue(OgGroupAudienceHelper::DEFAULT_FIELD)
-      ->setTargetEntityTypeId('og_role');
+      ->setTargetEntityTypeId('og_role')
+      ->setSetting('target_type', 'og_role');
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Create'))
