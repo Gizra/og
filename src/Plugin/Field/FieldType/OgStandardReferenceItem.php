@@ -23,7 +23,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   default_widget = "og_complex",
  *   default_formatter = "og_complex",
  *   list_class = "\Drupal\Core\Field\EntityReferenceFieldItemList",
- *   constraints = {"ValidReference" = {}, "ValidOgMembershipReference" = {}}
+ *   constraints = {"ValidOgMembershipReference" = {}}
  * )
  */
 class OgStandardReferenceItem extends EntityReferenceItem {

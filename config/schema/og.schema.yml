@@ -116,3 +116,17 @@ og.og_role.*:
       sequence:
         type: string
         label: 'Permission'
+
+field.widget.settings.og_complex:
+  type: mapping
+  label: 'OG Group Audience field widget'
+  mapping:
+    match_operator:
+      type: string
+      label: 'Autocomplete matching'
+    size:
+      type: integer
+      label: 'Size of textfield'
+    placeholder:
+      type: label
+      label: 'Placeholder'

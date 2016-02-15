@@ -9,6 +9,7 @@ namespace Drupal\og;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -59,7 +60,7 @@ class Og {
 
     // Get the field definition and add the entity info to it. By doing so
     // we validate the the field can be attached to the entity. For example,
-    // the OG accesss module's field can be attached only to node entities, so
+    // the OG access module's field can be attached only to node entities, so
     // any other entity will throw an exception.
     /** @var \Drupal\og\OgFieldBase $og_field */
     $og_field = static::getFieldBaseDefinition($plugin_id)
@@ -72,7 +73,6 @@ class Og {
       FieldStorageConfig::create($field_storage_config)->save();
     }
 
-
     if (!$field_definition = FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
       $field_config = NestedArray::mergeDeep($og_field->getFieldConfigBaseDefinition(), $settings['field_config']);
 
@@ -82,6 +82,34 @@ class Og {
       // @todo: Verify this is still needed here.
       static::invalidateCache();
     }
+
+    // Make the field visible in the default form display.
+    /** @var EntityFormDisplayInterface $form_display */
+    $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->load("$entity_type.$bundle.default");
+
+    // If not found, create a fresh form display object. This is by design,
+    // configuration entries are only created when an entity form display is
+    // explicitly configured and saved.
+    // @see entity_get_form_display()
+    if (!$form_display) {
+      $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->create([
+        'targetEntityType' => $entity_type,
+        'bundle' => $bundle,
+        'mode' => 'default',
+        'status' => TRUE,
+      ]);
+    }
+
+    $widget = $form_display->getComponent($plugin_id);
+    $widget['type'] = 'og_complex';
+    $widget['settings'] = [
+      'match_operator' => 'CONTAINS',
+      'size' => 60,
+      'placeholder' => '',
+    ];
+
+    $form_display->setComponent($plugin_id, $widget);
+    $form_display->save();
 
     return $field_definition;
   }
