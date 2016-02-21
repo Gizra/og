@@ -181,7 +181,10 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return OgMembership
    */
   public function addRole($role_id) {
-    return $this;
+    $rids = $this->getRoles(TRUE);
+    $rids[] = $role_id;
+
+    return $this->setRoles(array_unique($rids));
   }
 
   /**
@@ -193,16 +196,57 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return OgMembership
    */
   public function revokeRole($role_id) {
-    return $this;
+    $rids = $this->getRoles(TRUE);
+    $key = array_search($role_id, $rids);
+    unset($rids[$key]);
+
+    return $this->setRoles(array_unique($rids));
   }
 
   /**
    * Get all the referenced OG roles.
    *
-   * @return \Drupal\Core\Entity\EntityInterface[]
+   * @param $return_ids
+   *   Determine if we need to return just the role IDs or jus the OG roles
+   *   objects.
+   *
+   * @return OgRole[]
    */
-  public function getRoles() {
-    return $this->get('roles')->referencedEntities();
+  public function getRoles($return_ids = FALSE) {
+    $roles = $this->get('roles')->referencedEntities();
+
+    if ($return_ids) {
+      $rids = [];
+
+      foreach ($roles as $role) {
+        $rids[] = $role->id();
+      }
+
+      return $rids;
+    }
+
+    return $roles;
+  }
+
+  /**
+   * Check if the user can commit an action according to the permission the
+   * membership own.
+   *
+   * @param $permission
+   *   The name of the permission.
+   *
+   * @return bool
+   */
+  public function hasPermission($permission) {
+    $roles = $this->getRoles();
+
+    foreach ($roles as $role) {
+      if ($role->hasPermission($permission)) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
   /**

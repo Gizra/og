@@ -73,14 +73,24 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
    * Testing OG membership role referencing.
    */
   public function testRoleCreate() {
-    $og_role = OgRole::create();
-    $og_role
-      ->setId('content_editor')
-      ->setLabel('Content editor')
+    // Creating a content editor role.
+    $content_editor = OgRole::create();
+    $content_editor
       ->setGroupType('node')
       ->setGroupBundle('group')
-      ->grantPermission('administer group')
-      ->save();
+      ->setId('content_editor')
+      ->setLabel('Content editor')
+      ->grantPermission('administer group');
+    $content_editor->save();
+
+    // Create a group member role.
+    $group_member = OgRole::create();
+    $group_member
+      ->setGroupType('node')
+      ->setGroupBundle('group')
+      ->setId('group_member')
+      ->setLabel('Group member');
+    $group_member->save();
 
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
@@ -88,11 +98,30 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       ->setEntityType('node')
       ->setEntityId($this->group->id())
       ->setUser($this->user)
-      ->setRoles([$og_role->id()])
+      ->setRoles([$content_editor->id()])
       ->save();
 
-    $roles = $membership->getRoles();
-    $this->assertEquals(reset($roles)->id(), $og_role->id(), 'The membership referenced to the correct role.');
+    $roles_ids = $membership->getRoles(TRUE);
+    $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership own the content editor role.');
+
+    // Adding another role to the membership.
+    $membership->addRole($group_member->id());
+    $roles_ids = $membership->getRoles(TRUE);
+
+    $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership own the content editor role.');
+    $this->assertTrue(in_array($group_member->id(), $roles_ids), 'The membership own the group member role.');
+
+    // Remove a role.
+    $membership->revokeRole($content_editor->id());
+
+    $roles_ids = $membership->getRoles(TRUE);
+    $this->assertFalse(in_array($content_editor->id(), $roles_ids), 'The membership does not own content editor role after it revoked.');
+    $this->assertTrue(in_array($group_member->id(), $roles_ids), 'The membership own the group member role.');
+
+    // Check if the role permission by from the membership.
+    $this->assertFalse($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
+    $membership->addRole($content_editor->id());
+    $this->assertTrue($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
   }
 
 }
