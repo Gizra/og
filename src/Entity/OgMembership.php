@@ -207,8 +207,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * Get all the referenced OG roles.
    *
    * @param $return_ids
-   *   Determine if we need to return just the role IDs or jus the OG roles
-   *   objects.
+   *   Determine if we need to return the role IDs or the roles object's.
    *
    * @return OgRole[]
    */
@@ -229,8 +228,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * Check if the user can commit an action according to the permission the
-   * membership own.
+   * Checks if the user has a permission inside the group.
    *
    * @param $permission
    *   The name of the permission.
