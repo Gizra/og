@@ -22,7 +22,7 @@ use Drupal\og\OgGroupAudienceHelper;
  * the connection between the group and the her content. For example we have the
  * node 1 which is a group and the node 2 which is node that belong to a group:
  * @code:
- *  $membership = OgMembership::create(array('type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT));
+ *  $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
  *  $membership
  *    ->setContentId(2)
  *    ->setContentType('node')
@@ -161,13 +161,13 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * Set the group's role's for the current user group membership's.
    *
-   * @param $roles
+   * @param $roles_ids
    *   List of og roles ids.
    *
    * @return OgMembership
    */
-  public function setRoles($roles) {
-    $this->set('roles', $roles);
+  public function setRoles($roles_ids) {
+    $this->set('roles', $roles_ids);
 
     return $this;
   }
@@ -197,7 +197,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * todo: check why i need to do this in that way.
+   * Get all the referenced OG roles.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
    */
@@ -245,7 +245,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setDescription(t("The state of the group content."))
       ->setDefaultValue(TRUE);
 
-    $fields['roles'] = BaseFieldDefinition::create('og_role_reference')
+    $fields['roles'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Roles'))
       ->setDescription(t("The user's group's roles."))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
