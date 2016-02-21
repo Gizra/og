@@ -181,7 +181,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return OgMembership
    */
   public function addRole($role_id) {
-    $rids = $this->getRoles(TRUE);
+    $rids = $this->getRolesIds();
     $rids[] = $role_id;
 
     return $this->setRoles(array_unique($rids));
@@ -196,7 +196,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return OgMembership
    */
   public function revokeRole($role_id) {
-    $rids = $this->getRoles(TRUE);
+    $rids = $this->getRolesIds();
     $key = array_search($role_id, $rids);
     unset($rids[$key]);
 
@@ -206,25 +206,27 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * Get all the referenced OG roles.
    *
-   * @param $return_ids
-   *   Determine if we need to return the role IDs or the roles object's.
-   *
    * @return OgRole[]
    */
-  public function getRoles($return_ids = FALSE) {
-    $roles = $this->get('roles')->referencedEntities();
+  public function getRoles() {
+    return $this->get('roles')->referencedEntities();
+  }
 
-    if ($return_ids) {
-      $rids = [];
+  /**
+   * Get list of OG role IDs.
+   *
+   * @return array
+   *   List of OG roles ids.
+   */
+  public function getRolesIds() {
+    $roles = $this->getRoles();
+    $rids = [];
 
-      foreach ($roles as $role) {
-        $rids[] = $role->id();
-      }
-
-      return $rids;
+    foreach ($roles as $role) {
+      $rids[] = $role->id();
     }
 
-    return $roles;
+    return $rids;
   }
 
   /**
@@ -236,15 +238,9 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    * @return bool
    */
   public function hasPermission($permission) {
-    $roles = $this->getRoles();
-
-    foreach ($roles as $role) {
-      if ($role->hasPermission($permission)) {
-        return TRUE;
-      }
-    }
-
-    return FALSE;
+    return array_filter($this->getRoles(), function (OgRole $role) use ($permission) {
+      return $role->hasPermission($permission);
+    });
   }
 
   /**

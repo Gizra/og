@@ -57,7 +57,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installSchema('system', 'sequences');
 
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = $this->randomMachineName();
 
     $this->user = User::create(['name' => $this->randomString()]);
     $this->user->save();
@@ -101,12 +101,12 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       ->setRoles([$content_editor->id()])
       ->save();
 
-    $roles_ids = $membership->getRoles(TRUE);
+    $roles_ids = $membership->getRolesIds();
     $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership own the content editor role.');
 
     // Adding another role to the membership.
     $membership->addRole($group_member->id());
-    $roles_ids = $membership->getRoles(TRUE);
+    $roles_ids = $membership->getRolesIds();
 
     $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership own the content editor role.');
     $this->assertTrue(in_array($group_member->id(), $roles_ids), 'The membership own the group member role.');
@@ -114,7 +114,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     // Remove a role.
     $membership->revokeRole($content_editor->id());
 
-    $roles_ids = $membership->getRoles(TRUE);
+    $roles_ids = $membership->getRolesIds();
     $this->assertFalse(in_array($content_editor->id(), $roles_ids), 'The membership does not own content editor role after it revoked.');
     $this->assertTrue(in_array($group_member->id(), $roles_ids), 'The membership own the group member role.');
 
