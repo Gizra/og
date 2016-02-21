@@ -291,8 +291,6 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setLabel(t('Roles'))
       ->setDescription(t("The user's group's roles."))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
-      ->setDefaultValue(OgGroupAudienceHelper::DEFAULT_FIELD)
-      ->setTargetEntityTypeId('og_role')
       ->setSetting('target_type', 'og_role');
 
     $fields['created'] = BaseFieldDefinition::create('created')
