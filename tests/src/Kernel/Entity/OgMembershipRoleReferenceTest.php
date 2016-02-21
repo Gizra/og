@@ -82,6 +82,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       ->grantPermission('administer group')
       ->save();
 
+    /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setEntityType('node')
@@ -89,6 +90,9 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       ->setUser($this->user)
       ->setRoles([$og_role->id()])
       ->save();
+
+    $roles = $membership->getRoles();
+    $this->assertEquals(reset($roles)->id(), $og_role->id(), 'The membership referenced to the correct role.');
   }
 
 }
