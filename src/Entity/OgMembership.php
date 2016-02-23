@@ -161,13 +161,13 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   /**
    * Set the group's role's for the current user group membership's.
    *
-   * @param $roles_ids
+   * @param $role_ids
    *   List of og roles ids.
    *
    * @return OgMembership
    */
-  public function setRoles($roles_ids) {
-    $this->set('roles', $roles_ids);
+  public function setRoles($role_ids) {
+    $this->set('roles', $role_ids);
 
     return $this;
   }
@@ -188,7 +188,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * Revoking a role from the user's membership's.
+   * Revoking a role from the OG membership.
    *
    * @param $role_id
    *   The OG role ID.
@@ -219,14 +219,9 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
    *   List of OG roles ids.
    */
   public function getRolesIds() {
-    $roles = $this->getRoles();
-    $rids = [];
-
-    foreach ($roles as $role) {
-      $rids[] = $role->id();
-    }
-
-    return $rids;
+    return array_map(function (OgRole $role) {
+      return $role->id();
+    }, $this->getRoles());
   }
 
   /**
@@ -285,7 +280,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
 
     $fields['roles'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Roles'))
-      ->setDescription(t("The user's group's roles."))
+      ->setDescription(t('The OG roles related to an OG membership entity.'))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setSetting('target_type', 'og_role');
 
