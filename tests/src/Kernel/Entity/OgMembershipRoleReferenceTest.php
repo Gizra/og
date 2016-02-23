@@ -91,13 +91,13 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       ->setLabel('Group member');
     $group_member->save();
 
-    // Assign only the content editor role for now.
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setEntityType('node')
       ->setEntityId($this->group->id())
       ->setUser($this->user)
+      // Assign only the content editor role for now.
       ->setRoles([$content_editor->id()])
       ->save();
 
