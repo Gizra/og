@@ -13,6 +13,8 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\TypedData\DataDefinition;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
@@ -20,7 +22,7 @@ use Drupal\og\OgGroupAudienceHelper;
  * the connection between the group and the her content. For example we have the
  * node 1 which is a group and the node 2 which is node that belong to a group:
  * @code:
- *  $membership = OgMembership::create(array('type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT));
+ *  $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
  *  $membership
  *    ->setContentId(2)
  *    ->setContentType('node')
@@ -157,6 +159,86 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
+   * Set the group's role's for the current user group membership's.
+   *
+   * @param $role_ids
+   *   List of og roles ids.
+   *
+   * @return OgMembership
+   */
+  public function setRoles($role_ids) {
+    $this->set('roles', $role_ids);
+
+    return $this;
+  }
+
+  /**
+   * Adding a role to the user membership.
+   *
+   * @param $role_id
+   *   The OG role ID.
+   *
+   * @return OgMembership
+   */
+  public function addRole($role_id) {
+    $rids = $this->getRolesIds();
+    $rids[] = $role_id;
+
+    return $this->setRoles(array_unique($rids));
+  }
+
+  /**
+   * Revoking a role from the OG membership.
+   *
+   * @param $role_id
+   *   The OG role ID.
+   *
+   * @return OgMembership
+   */
+  public function revokeRole($role_id) {
+    $rids = $this->getRolesIds();
+    $key = array_search($role_id, $rids);
+    unset($rids[$key]);
+
+    return $this->setRoles(array_unique($rids));
+  }
+
+  /**
+   * Get all the referenced OG roles.
+   *
+   * @return OgRole[]
+   */
+  public function getRoles() {
+    return $this->get('roles')->referencedEntities();
+  }
+
+  /**
+   * Get list of OG role IDs.
+   *
+   * @return array
+   *   List of OG roles ids.
+   */
+  public function getRolesIds() {
+    return array_map(function (OgRole $role) {
+      return $role->id();
+    }, $this->getRoles());
+  }
+
+  /**
+   * Checks if the user has a permission inside the group.
+   *
+   * @param $permission
+   *   The name of the permission.
+   *
+   * @return bool
+   */
+  public function hasPermission($permission) {
+    return array_filter($this->getRoles(), function (OgRole $role) use ($permission) {
+      return $role->hasPermission($permission);
+    });
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
@@ -195,6 +277,12 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
       ->setLabel(t('State'))
       ->setDescription(t("The state of the group content."))
       ->setDefaultValue(TRUE);
+
+    $fields['roles'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Roles'))
+      ->setDescription(t('The OG roles related to an OG membership entity.'))
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('target_type', 'og_role');
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Create'))
