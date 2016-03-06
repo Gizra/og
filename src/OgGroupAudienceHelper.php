@@ -10,6 +10,7 @@ namespace Drupal\og;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
 /**
@@ -109,6 +110,92 @@ class OgGroupAudienceHelper {
     }
 
     return NULL;
+  }
+
+  /**
+   * Get list of available widgets.
+   *
+   * @return array
+   *   List of available entity reference widgets.
+   */
+  public static function getAvailableWidgets() {
+    $widget_manager = \Drupal::getContainer()->get('plugin.manager.field.widget');
+    $definitions = $widget_manager->getDefinitions();
+
+    $widgets = [];
+    foreach ($definitions as $id => $definition) {
+
+      if (!in_array('entity_reference', $definition['field_types'])) {
+        continue;
+      }
+
+      $widgets[] = $id;
+    }
+
+    return $widgets;
+  }
+
+  /**
+   * Set the field mode widget.
+   *
+   * @param $entity_id
+   *   The entity id.
+   * @param $bundle
+   *   The bundle.
+   * @param $field_name
+   *   The field name.
+   * @param array $modes
+   *   The field modes. Available keys: default, admin.
+   *
+   * @return int
+   *   Either SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
+   */
+  public static function setWidgets($entity_id, $bundle, $field_name, array $modes) {
+    $field = FieldConfig::loadByName($entity_id, $bundle, $field_name);
+    $handler = $field->getSetting('handler_settings');
+    $handler['handler_settings']['widgets'] = $modes;
+    $field->setSetting('handler_settings', $handler);
+    return $field->save();
+  }
+
+  /**
+   * get the field mode widget.
+   *
+   * @param $entity_id
+   *   The entity id.
+   * @param $bundle
+   *   The bundle.
+   * @param $field_name
+   *   The field name.
+   * @param null $mode
+   *   The field mode - admin or default.
+   *
+   * @return array.
+   *   The field modes.
+   */
+  public static function getWidgets($entity_id, $bundle, $field_name, $mode = NULL) {
+    $field = FieldConfig::loadByName($entity_id, $bundle, $field_name);
+    $handler = $field->getSetting('handler_settings');
+    return $mode ? $handler['handler_settings']['widgets'][$mode] : $handler['handler_settings']['widgets'];
+  }
+
+  /**
+   * @param $entity_id
+   *   The enitty type ID.
+   * @param $bundle
+   *   The entity bundle.
+   * @param $field_name
+   *   The field name.
+   * @param $values
+   *   The default values of the field.
+   * @param $mode
+   *   The field mode - admin or default.
+   *
+   * @return array
+   *   The form API widget element.
+   */
+  public static function renderWidget($entity_id, $bundle, $field_name, $mode, $values) {
+
   }
 
 }
