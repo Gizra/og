@@ -10,6 +10,7 @@ namespace Drupal\og;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Field\WidgetBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
@@ -188,14 +189,30 @@ class OgGroupAudienceHelper {
    *   The field name.
    * @param $values
    *   The default values of the field.
-   * @param $mode
+   * @param $widget_id
    *   The field mode - admin or default.
    *
-   * @return array
+   * @return WidgetBase
    *   The form API widget element.
    */
-  public static function renderWidget($entity_id, $bundle, $field_name, $mode, $values) {
+  public static function renderWidget($entity_id, $bundle, $field_name, $widget_id, $values) {
+    $config = FieldConfig::load($entity_id . '.' . $bundle . '.' . $field_name);
+    $configuration = [
+      'type' => 'og_complex',
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'size' => 60,
+        'placeholder' => '',
+      ],
+      'weight' => 1,
+      'third_party_settings' => [],
+      'field_definition' => $config,
+    ];
 
+
+    $field = \Drupal::getContainer()->get('plugin.manager.field.widget');
+
+    return $field->createInstance($widget_id, $configuration);
   }
 
 }

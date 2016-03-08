@@ -9,6 +9,7 @@ namespace Drupal\og\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -16,6 +17,7 @@ use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\user\Entity\User;
 
 /**
@@ -126,7 +128,19 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
         ];
       }
 
-      $element = $this->formSingleElement($items, $delta, $element, $form, $form_state);
+      $widget_one = OgGroupAudienceHelper::renderWidget('node', 'group_content', OgGroupAudienceHelper::DEFAULT_FIELD, 'options_select', []);
+      $widget_two = OgGroupAudienceHelper::renderWidget('node', 'group_content', OgGroupAudienceHelper::DEFAULT_FIELD, 'options_buttons', []);
+      $widget_three = OgGroupAudienceHelper::renderWidget('node', 'group_content', OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_reference_autocomplete', []);
+      $widget_four = OgGroupAudienceHelper::renderWidget('node', 'group_content', OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_reference_autocomplete_tags', []);
+
+      return [
+        $widget_one->formElement($items, 0, $element, $form, $form_state),
+        $widget_two->formElement($items, 0, $element, $form, $form_state),
+        $widget_three->formElement($items, 0, $element, $form, $form_state),
+        $widget_four->formElement($items, 0, $element, $form, $form_state),
+      ];
+
+//      $element = $this->formSingleElement($items, $delta, $element, $form, $form_state);
 
       if ($element) {
         // Input field for the delta (drag-n-drop reordering).
