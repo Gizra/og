@@ -7,7 +7,6 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -414,7 +413,6 @@ class Og {
     return ['type' => OgMembershipInterface::TYPE_DEFAULT];
   }
 
-
   /**
    * Get an OG field base definition.
    *
@@ -465,6 +463,58 @@ class Og {
     $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
+  }
+
+  /**
+   * Deletes memberships, or registers them for deletion if queueing is enabled.
+   *
+   * If the property "skip_og_membership_delete_by_group" exists on the entity,
+   * this function will return early, and allow other implementing modules to
+   * deal with the deletion logic.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The group entity.
+   */
+  public static function deleteMembershipsByGroup(EntityInterface $entity) {
+    // @todo This is how it was done in D7. Find a cleaner way that does not
+    // involve hacking new properties onto the entity object.
+    if (!empty($entity->skip_og_membership_delete_by_group)) {
+      return;
+    }
+
+    list($gid) = entity_extract_ids($entity_type, $entity);
+    $query = new EntityFieldQuery();
+    $result = $query
+      ->entityCondition('entity_type', 'og_membership')
+      ->propertyCondition('group_type', $entity_type, '=')
+      ->propertyCondition('gid', $gid, '=')
+      ->execute();
+
+    if (empty($result['og_membership'])) {
+      return;
+    }
+
+    if (\Drupal::config('og.settings')->get('use_queue')) {
+      $queue = DrupalQueue::get('og_membership_orphans');
+      // Add item to the queue.
+      $data = array(
+        'group_type' => $entity_type,
+        'gid' => $gid,
+        // Allow implementing modules to determine the disposition (e.g. delete
+        // orphan group content).
+        'orphans' => array(
+          'delete' => isset($entity->og_orphans['delete']) ? $entity->og_orphans['delete'] : \Drupal::config('og.settings')->get('orphans_delete'),
+          'move' => isset($entity->og_orphans['move']) ? $entity->og_orphans['move'] : array(),
+        ),
+      );
+
+      // Exit now, as the task will be processed via queue.
+      return $queue->createItem($data);
+    }
+
+    // No scalable solution was chosen, so just delete OG memberships.
+    og_membership_delete_multiple(array_keys($result['og_membership']));
+
   }
 
 }
