@@ -2,4 +2,4 @@ group_manager_full_access: true
 groups: []
 node_access_strict: true
 orphans_delete: false
-use_queue: false
+orphans_delete_method: simple

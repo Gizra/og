@@ -37,9 +37,9 @@ og.settings:
     orphans_delete:
       type: boolean
       label: 'Delete orphaned group content when a group is deleted'
-    use_queue:
-      type: boolean
-      label: 'Use queue'
+    orphans_delete_method:
+      type: string
+      label: 'The method to use when deleting orphaned group content'
 
 og.settings.group.*:
   type: sequence

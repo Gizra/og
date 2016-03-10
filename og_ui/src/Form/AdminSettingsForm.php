@@ -7,13 +7,46 @@
 
 namespace Drupal\og_ui\Form;
 
+use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the main administration settings form for Organic groups.
  */
 class AdminSettingsForm extends ConfigFormBase {
+
+  /**
+   * The manager for OgDeleteOrphans plugins.
+   *
+   * @var \Drupal\Component\Plugin\PluginManagerInterface
+   */
+  protected $ogDeleteOrphansPluginManager;
+
+  /**
+   * Constructs an AdminSettingsForm object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The factory for configuration objects.
+   * @param \Drupal\Component\Plugin\PluginManagerInterface $delete_orphans_plugin_manager
+   *   The manager for OgDeleteOrphans plugins.
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, PluginManagerInterface $delete_orphans_plugin_manager) {
+    parent::__construct($config_factory);
+    $this->ogDeleteOrphansPluginManager = $delete_orphans_plugin_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('plugin.manager.og.delete_orphans')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -56,25 +89,38 @@ class AdminSettingsForm extends ConfigFormBase {
 
     // @todo: Port og_ui_admin_people_view.
 
-    $form['og_use_queue'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Use queue'),
-      '#description' => t("Use the core's queue process for operations such as deleting memberships when groups are deleted."),
-      '#default_value' => $config_og->get('use_queue'),
-    ];
-
     $form['og_orphans_delete'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Delete orphans'),
       '#description' => $this->t('Delete orphaned group content (excluding users) when a group is deleted.'),
       '#default_value' => $config_og->get('orphans_delete'),
+    ];
+
+    $definitions = $this->ogDeleteOrphansPluginManager->getDefinitions();
+    $options = array_map(function ($definition) {
+      return $definition['label'];
+    }, $definitions);
+
+    $form['og_orphans_delete_method'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Deletion method'),
+      '#default_value' => $config_og->get('orphans_delete_method'),
+      '#options' => $options,
       '#states' => [
         'visible' => [
-          ':input[name="og_use_queue"]' => ['checked' => TRUE],
+          ':input[name="og_orphans_delete"]' => ['checked' => TRUE],
         ],
       ],
       '#attributes' => ['class' => ['child-item']],
     ];
+
+    // Add the description and weight for each delete method.
+    foreach ($definitions as $id => $definition) {
+      $form['og_orphans_delete_method'][$id] = [
+        '#description' => $definition['description'],
+        '#weight' => !empty($definition['weight']) ? $definition['weight'] : 0,
+      ];
+    }
 
     $form['#attached']['library'][] = 'og_ui/form';
 
@@ -92,6 +138,7 @@ class AdminSettingsForm extends ConfigFormBase {
       ->set('node_access_strict', $form_state->getValue('og_node_access_strict'))
       ->set('use_queue', $form_state->getValue('og_use_queue'))
       ->set('orphans_delete', $form_state->getValue('og_orphans_delete'))
+      ->set('orphans_delete_method', $form_state->getValue('og_orphans_delete_method'))
       ->save();
   }
 
