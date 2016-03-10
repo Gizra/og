@@ -9,8 +9,9 @@ use Drupal\og\OgDeleteOrphansBase;
  *
  * @OgDeleteOrphans(
  *  id = "cron",
- *  label = @Translation("Cron"),
- *  description = @Translation("The deletion is done in the background during cron. Best overall solution but requires cron to run regularly.")
+ *  label = @Translation("Cron", context = "OgDeleteOrphans"),
+ *  description = @Translation("The deletion is done in the background during cron. Best overall solution but requires cron to run regularly."),
+ *  weight = 3
  * )
  */
 class Cron extends OgDeleteOrphansBase {

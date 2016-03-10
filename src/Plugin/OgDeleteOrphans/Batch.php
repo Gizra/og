@@ -9,8 +9,9 @@ use Drupal\og\OgDeleteOrphansBase;
  *
  * @OgDeleteOrphans(
  *  id = "batch",
- *  label = @Translation("Batch"),
- *  description = @Translation("The deletion is done in a batch operation. Good for large websites with a lot of content.")
+ *  label = @Translation("Batch", context = "OgDeleteOrphans"),
+ *  description = @Translation("The deletion is done in a batch operation. Good for large websites with a lot of content."),
+ *  weight = 2
  * )
  */
 class Batch extends OgDeleteOrphansBase {
