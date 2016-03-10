@@ -96,6 +96,7 @@ class AdminSettingsForm extends ConfigFormBase {
       '#default_value' => $config_og->get('orphans_delete'),
     ];
 
+    // @todo Show additional configuration options for the orphans delete plugins.
     $definitions = $this->ogDeleteOrphansPluginManager->getDefinitions();
     $options = array_map(function ($definition) {
       return $definition['label'];

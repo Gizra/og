@@ -28,6 +28,7 @@ abstract class OgDeleteOrphansBase implements OgDeleteOrphansInterface {
    * {@inheritdoc}
    */
   public function configurationForm($form, FormStateInterface $form_state) {
+    // @todo Provide an example implementation in one of the plugins.
     return [];
   }
 
