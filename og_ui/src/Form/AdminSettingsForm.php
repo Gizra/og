@@ -89,11 +89,11 @@ class AdminSettingsForm extends ConfigFormBase {
 
     // @todo: Port og_ui_admin_people_view.
 
-    $form['og_orphans_delete'] = [
+    $form['og_delete_orphans'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Delete orphans'),
       '#description' => $this->t('Delete orphaned group content (excluding users) when a group is deleted.'),
-      '#default_value' => $config_og->get('orphans_delete'),
+      '#default_value' => $config_og->get('delete_orphans'),
     ];
 
     // @todo Show additional configuration options for the orphans delete plugins.
@@ -102,14 +102,14 @@ class AdminSettingsForm extends ConfigFormBase {
       return $definition['label'];
     }, $definitions);
 
-    $form['og_orphans_delete_method'] = [
+    $form['og_delete_orphans_plugin_id'] = [
       '#type' => 'radios',
       '#title' => $this->t('Deletion method'),
-      '#default_value' => $config_og->get('orphans_delete_method'),
+      '#default_value' => $config_og->get('delete_orphans_plugin_id'),
       '#options' => $options,
       '#states' => [
         'visible' => [
-          ':input[name="og_orphans_delete"]' => ['checked' => TRUE],
+          ':input[name="og_delete_orphans"]' => ['checked' => TRUE],
         ],
       ],
       '#attributes' => ['class' => ['child-item']],
@@ -117,7 +117,7 @@ class AdminSettingsForm extends ConfigFormBase {
 
     // Add the description and weight for each delete method.
     foreach ($definitions as $id => $definition) {
-      $form['og_orphans_delete_method'][$id] = [
+      $form['og_delete_orphans_plugin_id'][$id] = [
         '#description' => $definition['description'],
         '#weight' => !empty($definition['weight']) ? $definition['weight'] : 0,
       ];
@@ -138,8 +138,8 @@ class AdminSettingsForm extends ConfigFormBase {
       ->set('group_manager_full_access', $form_state->getValue('og_group_manager_full_access'))
       ->set('node_access_strict', $form_state->getValue('og_node_access_strict'))
       ->set('use_queue', $form_state->getValue('og_use_queue'))
-      ->set('orphans_delete', $form_state->getValue('og_orphans_delete'))
-      ->set('orphans_delete_method', $form_state->getValue('og_orphans_delete_method'))
+      ->set('delete_orphans', $form_state->getValue('og_delete_orphans'))
+      ->set('delete_orphans_plugin_id', $form_state->getValue('og_delete_orphans_plugin_id'))
       ->save();
   }
 
