@@ -63,7 +63,7 @@ class BundleFormAlter {
   /**
    * AJAX callback displaying the target bundles select box.
    */
-  public function ajaxCallback(array $form, array &$form_state) {
+  public function ajaxCallback(array $form, FormStateInterface $form_state) {
     return $form['og']['target_bundles'];
   }
 
@@ -73,7 +73,7 @@ class BundleFormAlter {
    * @param array $form
    * @param $form_state
    */
-  protected function prepare(array &$form, $form_state) {
+  protected function prepare(array &$form, FormStateInterface $form_state) {
     // Example: article.
     $this->bundle = $this->entity->id();
     // Example: Article.
@@ -94,7 +94,7 @@ class BundleFormAlter {
   /**
    * Adds the "is group?" checkbox.
    */
-  protected function addGroupType(array &$form, $form_state) {
+  protected function addGroupType(array &$form, FormStateInterface $form_state) {
     if ($this->entity->isNew()) {
       $description = t('Every entity in this bundle is a group which can contain entities and can have members.');
     }
@@ -114,7 +114,7 @@ class BundleFormAlter {
   /**
    * Adds the "is group content?" checkbox and target settings elements.
    */
-  protected function addGroupContent(array &$form, $form_state) {
+  protected function addGroupContent(array &$form, FormStateInterface $form_state) {
     $is_group_content = Og::isGroupContent($this->entityTypeId, $this->bundle);
 
     $target_type_default = FALSE;
