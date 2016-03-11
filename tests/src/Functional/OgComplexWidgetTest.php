@@ -45,7 +45,16 @@ class OgComplexWidgetTest extends BrowserTestBase {
     // Add a group audience field to the "post" node type, turning it into a
     // group content type.
     $this->createContentType(['type' => 'post']);
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'post');
+    $settings = [
+      'field_config' => [
+        'settings' => [
+          'handler_settings' => [
+            'target_type' => 'node',
+          ],
+        ],
+      ],
+    ];
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'post', $settings);
   }
 
   /**
