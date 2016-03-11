@@ -82,13 +82,13 @@ class BundleFormAlter {
     // Example: node.
     $this->entityTypeId = $this->definition->getBundleOf();
 
-    $form['og'] = array(
+    $form['og'] = [
       '#type' => 'details',
       '#title' => t('Organic groups'),
       '#collapsible' => TRUE,
       '#group' => 'additional_settings',
       '#description' => t('This bundle may serve as a group, may belong to a group, or may not participate in OG at all.'),
-    );
+    ];
   }
 
   /**
@@ -103,12 +103,12 @@ class BundleFormAlter {
         '%bundle' => Unicode::lcfirst($this->bundleLabel),
       ]);
     }
-    $form['og']['og_is_group'] = array(
+    $form['og']['og_is_group'] = [
       '#type' => 'checkbox',
       '#title' => t('Group'),
       '#default_value' => Og::isGroup($this->entityTypeId, $this->bundle),
       '#description' => $description,
-    );
+    ];
   }
 
   /**
@@ -150,35 +150,35 @@ class BundleFormAlter {
       $description = t('There are no group bundles defined.');
     }
 
-    $form['og']['og_group_content_bundle'] = array(
+    $form['og']['og_group_content_bundle'] = [
       '#type' => 'checkbox',
       '#title' => t('Group content'),
       '#default_value' => $is_group_content,
       '#description' => $description,
-    );
+    ];
 
     if ($target_types) {
       // Don't show the settings, as there might be multiple OG audience fields
       // in the same bundle.
-      $form['og']['og_target_type'] = array(
+      $form['og']['og_target_type'] = [
         '#type' => 'select',
         '#title' => t('Target type'),
         '#options' => $target_types,
         '#default_value' => $target_type_default,
         '#description' => t('The entity type that can be referenced through this field.'),
-        '#ajax' => array(
+        '#ajax' => [
           'callback' => [$this, 'ajaxCallback'],
           'wrapper' => 'og-settings-wrapper',
-        ),
-        '#states' => array(
-          'visible' => array(
-            ':input[name="og_group_content_bundle"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
+        ],
+        '#states' => [
+          'visible' => [
+            ':input[name="og_group_content_bundle"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
 
       // Get the bundles that are acting as group.
-      $form['og']['og_target_bundles'] = array(
+      $form['og']['og_target_bundles'] = [
         '#prefix' => '<div id="og-settings-wrapper">',
         '#suffix' => '</div>',
         '#type' => 'select',
@@ -187,12 +187,12 @@ class BundleFormAlter {
         '#default_value' => !empty($handler_settings['target_bundles']) ? $handler_settings['target_bundles'] : NULL,
         '#multiple' => TRUE,
         '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.'),
-        '#states' => array(
-          'visible' => array(
-            ':input[name="og_group_content_bundle"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
+        '#states' => [
+          'visible' => [
+            ':input[name="og_group_content_bundle"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
       $form['#validate'][] = [get_class($this), 'validateTargetBundleElement'];
     }
     else {
