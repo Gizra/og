@@ -8,7 +8,11 @@
 namespace Drupal\og_ui\Tests;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\AssertLegacyTrait;
+use Drupal\node\Entity\NodeType;
+use Drupal\og\Og;
+use Drupal\og_ui\BundleFormAlter;
 use Drupal\simpletest\AssertContentTrait;
 use Drupal\simpletest\BrowserTestBase;
 
@@ -23,15 +27,41 @@ class BundleFormAlterTest extends BrowserTestBase {
   use AssertLegacyTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  public static $modules = ['node', 'og_ui'];
+  public static $modules = ['entity_test', 'node', 'og_ui'];
 
+  /**
+   * An administrator user.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $adminUser;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    $this->entityTypeManager = \Drupal::entityTypeManager();
+
+    // Log in as an administrator that can manage content types.
+    $this->adminUser = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
+    $this->drupalLogin($this->adminUser);
+  }
+
+  /**
+   * Test that group and group content bundles can be created through the UI.
+   */
   public function testCreate() {
-    $web_user = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
-    $this->drupalLogin($web_user);
     $edit = [
       'name' => 'school',
       'type' => 'school',
@@ -39,6 +69,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     ];
     $this->drupalGet('admin/structure/types/add');
     $this->submitForm($edit, t('Save content type'));
+
     $edit = [
       'name' => 'class',
       'type' => 'class',
@@ -66,6 +97,29 @@ class BundleFormAlterTest extends BrowserTestBase {
     $this->drupalGet('admin/structure/types/manage/class');
     $this->submitForm($edit, t('Save content type'));
     $this->assertTargetBundles(NULL, 'When the target bundle field is cleared from all values, it takes on the value NULL.');
+  }
+
+  /**
+   * Tests AJAX behavior for selecting group content entity types and bundles.
+   */
+  public function testGroupContentAjax() {
+    // Create two group bundles of different entity types.
+    NodeType::create(['name' => 'group node', 'type' => 'group'])->save();
+    Og::groupManager()->addGroup('node', 'group');
+    Og::groupManager()->addGroup('entity_test', 'entity_test');
+
+    // BrowserTestBase doesn't support JavaScript yet. Replace the following
+    // unit test with a functional test once JavaScript support is added.
+    // @see https://www.drupal.org/node/2469713
+    $form = [];
+    $form_state = new FormState();
+    // Set the form state as if the 'entity_test' option was chosen with AJAX.
+    $form_state->setValue('og_target_type', 'entity_test');
+    $entity = $this->entityTypeManager->getStorage('node_type')->create([]);
+    (new BundleFormAlter($entity))->formAlter($form, $form_state);
+
+    // Check that the target bundles are set to the test entity bundle.
+    $this->assertEquals(['entity_test' => 'Entity Test Bundle'], $form['og']['og_target_bundles']['#options']);
   }
 
   /**
