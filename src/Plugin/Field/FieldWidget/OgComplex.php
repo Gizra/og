@@ -286,7 +286,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
       'target_id' => [
         // @todo Allow this to be configurable with a widget setting.
         '#type' => 'entity_autocomplete',
-        '#target_type' => $this->fieldDefinition->getTargetEntityTypeId(),
+        '#target_type' => $this->getFieldSetting('target_type'),
         '#selection_handler' => 'og:default',
         '#selection_settings' => [
           'other_groups' => TRUE,
