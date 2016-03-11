@@ -158,8 +158,6 @@ class BundleFormAlter {
     ];
 
     if ($target_types) {
-      // Don't show the settings, as there might be multiple OG audience fields
-      // in the same bundle.
       $form['og']['og_target_type'] = [
         '#type' => 'select',
         '#title' => t('Target type'),
@@ -196,6 +194,8 @@ class BundleFormAlter {
       $form['#validate'][] = [get_class($this), 'validateTargetBundleElement'];
     }
     else {
+      // Don't show the settings, as there might be multiple OG audience fields
+      // in the same bundle.
       $form['og']['og_group_content_bundle']['#disabled'] = TRUE;
     }
   }
