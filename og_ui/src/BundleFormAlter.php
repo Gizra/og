@@ -64,7 +64,7 @@ class BundleFormAlter {
    * AJAX callback displaying the target bundles select box.
    */
   public function ajaxCallback(array $form, FormStateInterface $form_state) {
-    return $form['og']['target_bundles'];
+    return $form['og']['og_target_bundles'];
   }
 
   /**
@@ -142,6 +142,10 @@ class BundleFormAlter {
       // back to the first entity type that was returned.
       reset($target_types);
       $target_type_default = isset($handler_settings['target_type']) ? $handler_settings['target_type'] : key($target_types);
+
+      // If the target type was set using AJAX, use that instead of the default.
+      $ajax_value = $form_state->getValue('og_target_type');
+      $target_type_default = $ajax_value ? $ajax_value : $target_type_default;
 
       $form['og']['og_target_type'] = [
         '#type' => 'select',
