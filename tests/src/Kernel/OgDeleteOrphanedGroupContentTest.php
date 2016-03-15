@@ -40,12 +40,13 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
+    $this->installSchema('node', ['node_access']);
     $this->installSchema('system', 'sequences');
 
     /** @var \Drupal\og\OgDeleteOrphansPluginManager ogDeleteOrphansPluginManager */
     $this->ogDeleteOrphansPluginManager = \Drupal::service('plugin.manager.og.delete_orphans');
 
-    // Create a group.
+    // Create a group entity type.
     $this->groupBundle = Unicode::strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $this->groupBundle,
@@ -53,7 +54,7 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     ])->save();
     Og::groupManager()->addGroup('node', $this->groupBundle);
 
-    // Create a group content type.
+    // Create a group content entity type.
     $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $this->groupContentBundle,
@@ -84,6 +85,13 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
       OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $group->id()]],
     ]);
     $group_content->save();
+
+    // Turn on deletion of orphans in the configuration and configure the chosen
+    // plugin.
+    $this->config('og.settings')
+      ->set('delete_orphans', TRUE)
+      ->set('delete_orphans_plugin_id', $plugin_id)
+      ->save();
 
     // Delete the group.
     $group->delete();
