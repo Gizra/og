@@ -86,7 +86,7 @@ class CheckFieldCardinalityTest extends UnitTestCase {
       ->willReturn($field_storage_definition_prophecy->reveal())
       ->shouldBeCalled();
     $field_definition_prophecy->getType()
-      ->willReturn('og_membership_reference')
+      ->willReturn('og_standard_reference')
       ->shouldBeCalled();
 
     $entity_prophecy = $this->prophesize(ContentEntityInterface::class);
