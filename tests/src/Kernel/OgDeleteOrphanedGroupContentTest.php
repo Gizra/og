@@ -9,7 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
  *
  * @group og
  */
-class OgDeleteOrphansTest extends KernelTestBase {
+class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
 
   protected $group_type;
   protected $node_type;
