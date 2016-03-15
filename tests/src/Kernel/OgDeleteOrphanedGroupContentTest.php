@@ -2,7 +2,13 @@
 
 namespace Drupal\Tests\og\Kernel;
 
+use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\Entity;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 
 /**
  * Tests deletion of orphaned group content.
@@ -11,35 +17,100 @@ use Drupal\KernelTests\KernelTestBase;
  */
 class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
 
-  protected $group_type;
-  protected $node_type;
-
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['og', 'og_test'];
+  public static $modules = ['system', 'user', 'field', 'entity_reference', 'node', 'og'];
+
+  /**
+   * The plugin manager for OgDeleteOrphans plugins.
+   *
+   * @var \Drupal\Component\Plugin\PluginManagerInterface
+   */
+  protected $ogDeleteOrphansPluginManager;
 
   /**
    * {@inheritdoc}
    */
   public function setUp() {
+    parent::setUp();
+
+    // Add membership and config schema.
+    $this->installConfig(['og']);
+    $this->installEntitySchema('og_membership');
+    $this->installEntitySchema('user');
+    $this->installEntitySchema('node');
+    $this->installSchema('system', 'sequences');
+
+    /** @var \Drupal\og\OgDeleteOrphansPluginManager ogDeleteOrphansPluginManager */
+    $this->ogDeleteOrphansPluginManager = \Drupal::service('plugin.manager.og.delete_orphans');
+
+    // Create a group.
+    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+    NodeType::create([
+      'type' => $this->groupBundle,
+      'name' => $this->randomString(),
+    ])->save();
+    Og::groupManager()->addGroup('node', $this->groupBundle);
+
     // Create a group content type.
-    $group = $this->drupalCreateContentType();
-    og_create_field(OG_GROUP_FIELD, 'node', $group->type);
-    $this->group_type = $group->type;
+    $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
+    NodeType::create([
+      'type' => $this->groupContentBundle,
+      'name' => $this->randomString(),
+    ])->save();
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
+  }
 
-    // Create group audience content type.
-    $type = $this->drupalCreateContentType();
-    $this->node_type = $type->type;
+  /**
+   * Tests that orphaned group content is deleted when the group is deleted.
+   *
+   * @dataProvider ogDeleteOrphansPluginProvider
+   *
+   * @param string $plugin_id
+   */
+  public function testDeleteOrphans($plugin_id) {
+    // Create a group.
+    $group = Node::create([
+      'title' => $this->randomString(),
+      'type' => $this->groupBundle,
+    ]);
+    $group->save();
 
-    // Add OG audience field to the audience content type.
-    $og_field = og_fields_info(OG_AUDIENCE_FIELD);
-    $og_field['field']['settings']['target_type'] = 'node';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $type->type, $og_field);
+    // Create a group content item.
+    $group_content = Node::create([
+      'title' => $this->randomString(),
+      'type' => $this->groupContentBundle,
+      OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $group->id()]],
+    ]);
+    $group_content->save();
 
-    // Set the setting for delete a group content when deleting group.
-    variable_set('og_orphans_delete', TRUE);
-    variable_set('og_use_queue', TRUE);
+    // Delete the group.
+    $group->delete();
+
+    // Invoke the processing of the orphans.
+    /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
+    $plugin = $this->ogDeleteOrphansPluginManager->createInstance($plugin_id, []);
+    $plugin->process();
+
+    // Reload the group content that was used during the test.
+    $group_content = Node::load($group_content->id());
+
+    // Verify the orphaned node is deleted.
+    $this->assertFalse($group_content, 'The orphaned node is deleted.');
+  }
+
+  /**
+   * Provides OgDeleteOrphans plugins for the tests.
+   *
+   * @return array
+   */
+  public function ogDeleteOrphansPluginProvider() {
+    return [
+      ['batch'],
+      ['cron'],
+      ['simple'],
+    ];
   }
 
   /**
@@ -49,7 +120,7 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    * - Group content associated with multiple groups should not be deleted, but
    *   its references should be updated.
    */
-  function testDeleteGroup() {
+  function _testDeleteGroup() {
     // Creating two groups.
     $first_group = $this->drupalCreateNode(array('type' => $this->group_type));
     $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
