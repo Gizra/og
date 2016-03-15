@@ -44,20 +44,17 @@ function og_entity_insert(EntityInterface $entity) {
 }
 
 /**
- * Implements hook_entity_delete().
+ * Implements hook_entity_predelete().
  */
-function og_entity_delete(EntityInterface $entity) {
-  list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
-  if (og_is_group($entity_type, $entity)) {
-    og_delete_user_roles_by_group($entity_type, $entity);
-    og_membership_delete_by_group($entity_type, $entity);
+function og_entity_predelete(EntityInterface $entity) {
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+    Og::deleteMemberships($entity);
+
+    // @todo Delete user roles.
+    // og_delete_user_roles_by_group($entity_type, $entity);
   }
-  if (og_is_group_content_type($entity_type, $bundle)) {
-    // As the field attachers are called after hook_entity_presave() we
-    // can't delete the OG memberships here. So we just mark the entity
-    // as being deleted, and we will do the actual delete in
-    // OgBehaviorHandler::delete().
-    $entity->delete_og_membership = TRUE;
+  if ($entity instanceof \Drupal\user\UserInterface) {
+    // @todo Delete memberships when deleting users.
   }
 }
 
