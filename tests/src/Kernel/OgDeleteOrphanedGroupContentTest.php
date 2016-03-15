@@ -61,6 +61,22 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
       'name' => $this->randomString(),
     ])->save();
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
+
+    // Create a group.
+    $this->group = Node::create([
+      'title' => $this->randomString(),
+      'type' => $this->groupBundle,
+    ]);
+    $this->group->save();
+
+    // Create a group content item.
+    $this->groupContent = Node::create([
+      'title' => $this->randomString(),
+      'type' => $this->groupContentBundle,
+      OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
+    ]);
+    $this->groupContent->save();
+
   }
 
   /**
@@ -71,21 +87,6 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    * @param string $plugin_id
    */
   public function testDeleteOrphans($plugin_id) {
-    // Create a group.
-    $group = Node::create([
-      'title' => $this->randomString(),
-      'type' => $this->groupBundle,
-    ]);
-    $group->save();
-
-    // Create a group content item.
-    $group_content = Node::create([
-      'title' => $this->randomString(),
-      'type' => $this->groupContentBundle,
-      OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $group->id()]],
-    ]);
-    $group_content->save();
-
     // Turn on deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')
@@ -94,7 +95,7 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
       ->save();
 
     // Delete the group.
-    $group->delete();
+    $this->group->delete();
 
     // Invoke the processing of the orphans.
     /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
@@ -102,7 +103,7 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     $plugin->process();
 
     // Reload the group content that was used during the test.
-    $group_content = Node::load($group_content->id());
+    $group_content = Node::load($this->group_content->id());
 
     // Verify the orphaned node is deleted.
     $this->assertFalse($group_content, 'The orphaned node is deleted.');
