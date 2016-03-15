@@ -110,6 +110,34 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
   }
 
   /**
+   * Tests that orphaned content is not deleted when the option is disabled.
+   *
+   * @dataProvider ogDeleteOrphansPluginProvider
+   */
+  function testDisabled($plugin_id) {
+    // Disable deletion of orphans in the configuration and configure the chosen
+    // plugin.
+    $this->config('og.settings')
+      ->set('delete_orphans', FALSE)
+      ->set('delete_orphans_plugin_id', $plugin_id)
+      ->save();
+
+    // Delete the group.
+    $this->group->delete();
+
+    // Invoke the processing of the orphans.
+    /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
+    $plugin = $this->ogDeleteOrphansPluginManager->createInstance($plugin_id, []);
+    $plugin->process();
+
+    // Reload the group content that was used during the test.
+    $group_content = Node::load($this->group_content->id());
+
+    // Verify the orphaned node is not deleted.
+    $this->assertTrue($group_content, 'The orphaned node is not deleted.');
+  }
+
+  /**
    * Provides OgDeleteOrphans plugins for the tests.
    *
    * @return array
