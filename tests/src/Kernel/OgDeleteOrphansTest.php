@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\og\Tests;
+namespace Drupal\Tests\og\Kernel;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Tests deletion of orphaned group content.
  *
  * @group og
  */
-class OgDeleteOrphansTest extends WebTestBase {
+class OgDeleteOrphansTest extends KernelTestBase {
 
   protected $group_type;
   protected $node_type;
