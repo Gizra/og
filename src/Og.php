@@ -475,7 +475,7 @@ class Og {
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group entity.
    */
-  public static function deleteMembershipsByGroup(EntityInterface $entity) {
+  public static function deleteMemberships(EntityInterface $entity) {
     // @todo This is how it was done in D7. Find a cleaner way that does not
     // involve hacking new properties onto the entity object.
     if (!empty($entity->skip_og_membership_delete_by_group)) {
