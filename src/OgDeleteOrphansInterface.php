@@ -19,7 +19,9 @@ use Drupal\Core\Form\FormStateInterface;
 interface OgDeleteOrphansInterface {
 
   /**
-   * Registers a group entity for deletion of its orphaned members and content.
+   * Registers a soon to be deleted group entity, for processing.
+   *
+   * During processing its orphaned members or content will be deletion.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group entity to register.
