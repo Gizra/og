@@ -226,15 +226,27 @@ class Og {
       return $type_matches && $bundle_matches;
     });
 
+    // Compile the group content.
     foreach ($fields as $field) {
+      $entity_type = $field->getTargetEntityTypeId();
+
+      // Group the group content per entity type.
+      if (!isset($group_content[$entity_type])) {
+        $group_content[$entity_type] = [];
+      }
+
       // Query all group content that references the group through this field.
-      $results = \Drupal::entityQuery($field->getTargetEntityTypeId())
+      $results = \Drupal::entityQuery($entity_type)
         // @todo If I match here on [$entity->id()] as an array value, would
         //   this mean that it only matches items that exclusively reference the
         //   entity? I hope so. Time to write a test to find out.
-        ->condition($field->getName(), $entity->id())
+        ->condition($field->getName(), [$entity->id()])
         ->execute();
+
+      $group_content[$entity_type] = array_merge($group_content[$entity_type], $results);
     }
+
+    return $group_content;
   }
 
   /**
