@@ -182,6 +182,62 @@ class Og {
   }
 
   /**
+   * Returns all the group content associated with a given group entity.
+   *
+   * This does not return users that are members of the given group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The group entity for which to return group content.
+   * @param array $entity_types
+   *   Optional list of group content entity types to return. If an empty array
+   *   is passed, the group content is not filtered. Defaults to an empty array.
+   * @param bool $exclusive
+   *   Optionally return only group content that is exclusively associating the
+   *   given group entity. If set to TRUE it will not return group content that
+   *   references multiple groups. Defaults to FALSE.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   The group content.
+   *
+   * @todo It's probably better to not return fully loaded entities, but an
+   *   associative array keyed by entity type, containing an array of entity
+   *   IDs. There might be thousands of group content items in large sites.
+   */
+  public static function getGroupContent(EntityInterface $entity, array $entity_types = [], $exclusive = FALSE) {
+    $group_content = [];
+
+    // Retrieve the fields which reference our entity type and bundle.
+    $query = \Drupal::entityQuery('field_storage_config')
+      // @todo For the moment retrieving both group types, since there seems to
+      //   be some confusion about which field type is used for users.
+      ->condition('type', ['og_standard_reference', 'og_membership_reference'], 'IN');
+
+    // Optionally filter group content entity types.
+    if ($entity_types) {
+      $query->condition('entity_type', $entity_types, 'IN');
+    }
+
+    /** @var \Drupal\field\FieldStorageConfigInterface[] $fields */
+    $fields = array_filter(FieldStorageConfig::loadMultiple($query->execute()), function ($field) use ($entity) {
+      /** @var \Drupal\field\FieldStorageConfigInterface $field */
+      $type_matches = $field->getSetting('target_type') === $entity->getEntityTypeId();
+      // If the list of target bundles is empty, it targets all bundles.
+      $bundle_matches = empty($field->getSetting('target_bundles')) || in_array($entity->bundle(), $field->getSetting('target_bundles'));
+      return $type_matches && $bundle_matches;
+    });
+
+    foreach ($fields as $field) {
+      // Query all group content that references the group through this field.
+      $results = \Drupal::entityQuery($field->getTargetEntityTypeId())
+        // @todo If I match here on [$entity->id()] as an array value, would
+        //   this mean that it only matches items that exclusively reference the
+        //   entity? I hope so. Time to write a test to find out.
+        ->condition($field->getName(), $entity->id())
+        ->execute();
+    }
+  }
+
+  /**
    * Return whether a group content belongs to a group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
