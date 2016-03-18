@@ -24,24 +24,4 @@ abstract class OgDeleteOrphansBase implements OgDeleteOrphansInterface {
     throw new \Exception(__METHOD__ . ' is not implemented.');
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function configurationForm($form, FormStateInterface $form_state) {
-    // @todo Provide an example implementation in one of the plugins.
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function configurationFormValidate($form, FormStateInterface $form_state) {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function configurationFormSubmit($form, FormStateInterface $form_state) {
-  }
-
 }
