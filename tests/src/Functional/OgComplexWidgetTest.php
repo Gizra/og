@@ -46,11 +46,9 @@ class OgComplexWidgetTest extends BrowserTestBase {
     // group content type.
     $this->createContentType(['type' => 'post']);
     $settings = [
-      'field_config' => [
+      'field_storage_config' => [
         'settings' => [
-          'handler_settings' => [
-            'target_type' => 'node',
-          ],
+          'target_type' => 'node',
         ],
       ],
     ];
