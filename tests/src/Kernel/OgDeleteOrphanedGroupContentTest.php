@@ -115,6 +115,8 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    * @dataProvider ogDeleteOrphansPluginProvider
    */
   function testDisabled($plugin_id) {
+    $this->markTestSkipped();
+    return;
     // Disable deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')
