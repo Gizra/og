@@ -38,6 +38,9 @@ before_script:
   - travis_retry git clone --branch $DRUPAL_CORE --depth 1 https://git.drupal.org/project/drupal.git
   - cd drupal
 
+  # Install Composer dependencies on 8.1.x.
+  - test ${DRUPAL_CORE} == "8.1.x" && composer self-update && composer install || true
+
   # Reference OG in the Drupal site.
   - ln -s $TESTDIR modules/og
 
