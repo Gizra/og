@@ -7,6 +7,8 @@
 
 namespace Drupal\Tests\og\Functional;
 
+use Drupal\block_content\Entity\BlockContent;
+use Drupal\block_content\Entity\BlockContentType;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
@@ -30,7 +32,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og'];
+  public static $modules = ['block_content', 'node', 'og'];
 
   /**
    * {@inheritdoc}
@@ -38,9 +40,11 @@ class OgComplexWidgetTest extends BrowserTestBase {
   function setUp() {
     parent::setUp();
 
-    // Create a "group" node type and turn it into a group type.
-    $this->createContentType(['type' => 'group']);
-    Og::groupManager()->addGroup('node', 'group');
+    // Create a "group" bundle on the Custom Block entity type and turn it into
+    // a group. Note we're not using the Entity Test entity for this since it
+    // does not have real support for multiple bundles.
+    BlockContentType::create(['type' => 'group']);
+    Og::groupManager()->addGroup('block_content', 'group');
 
     // Add a group audience field to the "post" node type, turning it into a
     // group content type.
@@ -48,7 +52,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
     $settings = [
       'field_storage_config' => [
         'settings' => [
-          'target_type' => 'node',
+          'target_type' => 'block_content',
         ],
       ],
     ];
@@ -63,11 +67,12 @@ class OgComplexWidgetTest extends BrowserTestBase {
     $group_owner = $this->drupalCreateUser(['access content', 'create post content']);
 
     // Create a group content type owned by the group owner.
-    $settings = [
+    $values = [
       'type' => 'group',
       'uid' => $group_owner->id(),
     ];
-    $group = $this->createNode($settings);
+    $group = BlockContent::create($values);
+    $group->save();
 
     // Log in as administrator.
     $this->drupalLogin($admin_user);
