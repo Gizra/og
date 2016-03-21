@@ -3,7 +3,6 @@
 namespace Drupal\og;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Base implementation for OgDeleteOrphans plugins.
@@ -22,6 +21,19 @@ abstract class OgDeleteOrphansBase implements OgDeleteOrphansInterface {
    */
   public function query() {
     throw new \Exception(__METHOD__ . ' is not implemented.');
+  }
+
+  /**
+   * Returns the group content associated with the given group entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The group entity.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   An array of group content.
+   */
+  protected function getGroupContent(EntityInterface $entity) {
+    return Og::getGroupContent($entity);
   }
 
 }
