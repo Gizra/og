@@ -13,6 +13,8 @@ use Drupal\user\Entity\User;
 
 /**
  * Checks that groups with string IDs can be referenced.
+ *
+ * @group og
  */
 class ReferenceStringIdTest extends KernelTestBase {
 

@@ -164,12 +164,11 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     }
   }
 
-
-
-
   // We can't check if user has create permissions, as there is no group
   // context. However, we can check if there are any groups the user will be
-  // able to select, and if not, we don't allow access.
+  // able to select, and if not, we don't allow access but if there are,
+  // AccessResult::neutral() will be returned in order to not override other
+  // access results.
   // @see \Drupal\og\Plugin\EntityReferenceSelection\OgSelection::buildEntityQuery()
   $required = FALSE;
 
@@ -183,7 +182,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     $handler = Og::getSelectionHandler($field_definition);
 
     if ($handler->getReferenceableEntities()) {
-      return Accessresult::allowed();
+      return Accessresult::neutral();
     }
 
     // Allow users to create content outside of groups, if none of the

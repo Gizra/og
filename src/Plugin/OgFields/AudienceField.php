@@ -32,11 +32,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'custom_storage' => $this->getEntityType() == 'user',
       'settings' => [
-        'handler' => 'og',
-        'handler_settings' => [
-          'target_bundles' => [],
-          'membership_type' => OgMembershipInterface::TYPE_DEFAULT,
-        ],
         'target_type' => $this->getEntityType(),
       ],
       // @todo Is this correct? The description of OgStandardReferenceItem says:
@@ -56,6 +51,10 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
       'label' => $this->t('Groups audience'),
+      'settings' => [
+        'handler' => 'og',
+        'handler_settings' => [],
+      ],
     ];
 
     return parent::getFieldConfigBaseDefinition($values);
