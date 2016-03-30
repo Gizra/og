@@ -29,7 +29,7 @@ class BundleFormAlterTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['entity_test', 'node', 'og_ui'];
+  public static $modules = ['block_content', 'entity_test', 'node', 'og_ui'];
 
   /**
    * An administrator user.
@@ -53,8 +53,12 @@ class BundleFormAlterTest extends BrowserTestBase {
 
     $this->entityTypeManager = \Drupal::entityTypeManager();
 
-    // Log in as an administrator that can manage content types.
-    $this->adminUser = $this->drupalCreateUser(array('bypass node access', 'administer content types'));
+    // Log in as an administrator that can manage blocks and content types.
+    $this->adminUser = $this->drupalCreateUser([
+      'administer blocks',
+      'administer content types',
+      'bypass node access',
+    ]);
     $this->drupalLogin($this->adminUser);
   }
 
@@ -62,25 +66,29 @@ class BundleFormAlterTest extends BrowserTestBase {
    * Test that group and group content bundles can be created through the UI.
    */
   public function testCreate() {
+    // Create a custom block and define it as a group type. We make sure the
+    // group and group content are of different entity types so we can test that
+    // the correct entity type is referenced.
     $edit = [
-      'name' => 'school',
-      'type' => 'school',
+      'label' => 'school',
+      'id' => 'school',
       'og_is_group' => 1,
     ];
-    $this->drupalGet('admin/structure/types/add');
-    $this->submitForm($edit, t('Save content type'));
+    $this->drupalGet('admin/structure/block/block-content/types/add');
+    $this->submitForm($edit, t('Save'));
 
     $edit = [
       'name' => 'class',
       'type' => 'class',
       'og_group_content_bundle' => 1,
-      'og_target_type' => 'node',
+      'og_target_type' => 'block_content',
       'og_target_bundles[]' => ['school'],
     ];
     $this->drupalGet('admin/structure/types/add');
     $this->submitForm($edit, t('Save content type'));
     $this->content = $this->drupalGet('admin/structure/types/manage/class');
     $this->assertOptionSelected('edit-og-target-bundles', 'school');
+    $this->assertTargetType('block_content', 'The target type is set to the "Custom Block" entity type.');
     $this->assertTargetBundles(['school' => 'school'], 'The target bundles are set to the "school" bundle.');
 
     // Test that if the target bundles are unselected, the value for the target
@@ -91,7 +99,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     $edit = [
       'name' => 'class',
       'og_group_content_bundle' => 1,
-      'og_target_type' => 'node',
+      'og_target_type' => 'block_content',
       'og_target_bundles[]' => [],
     ];
     $this->drupalGet('admin/structure/types/manage/class');
@@ -127,7 +135,7 @@ class BundleFormAlterTest extends BrowserTestBase {
    *
    * @param array|NULL $expected
    *   The expected value for the target bundles.
-   * @param $message
+   * @param string $message
    *   The message to display with the assertion.
    */
   protected function assertTargetBundles($expected, $message) {
@@ -137,6 +145,23 @@ class BundleFormAlterTest extends BrowserTestBase {
     $field_definitions = $entity_field_manager->getFieldDefinitions('node', 'class');
     $settings = $field_definitions['og_group_ref']->getSetting('handler_settings');
     $this->assertEquals($expected, $settings['target_bundles'], $message);
+  }
+
+  /**
+   * Checks whether the target entity type in the group content is as expected.
+   *
+   * @param string $expected
+   *   The expected target entity type.
+   * @param string $message
+   *   The message to display with the assertion.
+   */
+  protected function assertTargetType($expected, $message) {
+    /** @var EntityFieldManagerInterface $entity_field_manager */
+    $entity_field_manager = $this->container->get('entity_field.manager');
+    $entity_field_manager->clearCachedFieldDefinitions();
+    $field_definitions = $entity_field_manager->getFieldStorageDefinitions('node');
+    $setting = $field_definitions['og_group_ref']->getSetting('target_type');
+    $this->assertEquals($expected, $setting, $message);
   }
 
 }
