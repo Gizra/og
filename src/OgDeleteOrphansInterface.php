@@ -21,7 +21,7 @@ interface OgDeleteOrphansInterface {
   /**
    * Registers a soon to be deleted group entity, for processing.
    *
-   * During processing its orphaned members or content will be deletion.
+   * During processing its orphaned members or content will be deleted.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group entity to register.
