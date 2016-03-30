@@ -60,9 +60,11 @@ class OgComplexWidgetTest extends BrowserTestBase {
   }
 
   /**
-   * Tests the "Other Groups" field.
+   * Tests adding groups with the "Groups audience" and "Other Groups" fields.
+   *
+   * @dataProvider ogComplexFieldsProvider
    */
-  function testOtherGroups() {
+  function testFields($field, $field_name) {
     $admin_user = $this->drupalCreateUser(['administer group', 'access content', 'create post content']);
     $group_owner = $this->drupalCreateUser(['access content', 'create post content']);
 
@@ -77,11 +79,10 @@ class OgComplexWidgetTest extends BrowserTestBase {
     // Log in as administrator.
     $this->drupalLogin($admin_user);
 
-    // Create a new post in the group by using the "Other Groups" field in the
-    // UI.
+    // Create a new post in the group by using the given field in the UI.
     $edit = [
       'title[0][value]' => "Group owner's post.",
-      'other_groups[0][target_id]' => "group ({$group->id()})",
+      $field_name => "group ({$group->id()})",
     ];
     $this->drupalGet('node/add/post');
     $this->submitForm($edit, 'Save');
@@ -103,8 +104,20 @@ class OgComplexWidgetTest extends BrowserTestBase {
     // Check that the post references the group correctly.
     /** @var OgMembershipReferenceItemList $reference_list */
     $reference_list = $post->get(OgGroupAudienceHelper::DEFAULT_FIELD);
-    $this->assertEquals(1, $reference_list->count(), 'There is 1 reference after adding a group to the "Other Groups" field.');
-    $this->assertEquals($group->id(), $reference_list->first()->getValue()['target_id'], 'The "Other Groups" field references the correct group.');
+    $this->assertEquals(1, $reference_list->count(), "There is 1 reference after adding a group to the '$field' field.");
+    $this->assertEquals($group->id(), $reference_list->first()->getValue()['target_id'], "The '$field' field references the correct group.");
+  }
+
+  /**
+   * Data provider for ::testFields()
+   *
+   * @return array
+   */
+  public function ogComplexFieldsProvider() {
+    return [
+      ['Groups audience', 'og_group_ref[0][target_id]'],
+      ['Other groups', 'other_groups[0][target_id]'],
+    ];
   }
 
 }
