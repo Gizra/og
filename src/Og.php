@@ -192,12 +192,9 @@ class Og {
    *   Optional list of group content entity types to return. If an empty array
    *   is passed, the group content is not filtered. Defaults to an empty array.
    *
-   * @return \Drupal\Core\Entity\EntityInterface[]
-   *   The group content.
-   *
-   * @todo It's probably better to not return fully loaded entities, but an
-   *   associative array keyed by entity type, containing an array of entity
-   *   IDs. There might be thousands of group content items in large sites.
+   * @return array
+   *   An associative array, keyed by group content entity type, each item an
+   *   array of group content entity IDs.
    */
   public static function getGroupContent(EntityInterface $entity, array $entity_types = []) {
     $group_content = [];
