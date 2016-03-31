@@ -29,24 +29,18 @@ class EntityRestrictedField extends OgFieldBase implements OgFieldsInterface {
     return parent::getFieldStorageBaseDefinition($values);
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getFieldBaseDefinition(array $values = []) {
-    return parent::getFieldBaseDefinition($values);
-  }
 
   /**
    * {@inheritdoc}
    */
-  public function getWidgetDefinition(array $values = []) {
+  public function getFormDisplayDefinition(array $values = []) {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getViewModesDefinition(array $values = [])  {
+  public function getViewDisplayDefinition(array $values = [])  {
     return [];
   }
 }

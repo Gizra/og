@@ -7,8 +7,8 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\Display\EntityDisplayInterface;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -46,7 +46,10 @@ class Og {
    *     config definitions. Values should comply with FieldStorageConfig::create()
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
-   *   - widget: Array with values to override the widget definitions.
+   *   - form_display: Array with values to override the form display
+   *     definitions.
+   *   - view_display: Array with values to override the view display
+   *     definitions.
    *
    * @return \Drupal\Core\Field\FieldConfigInterface
    *   The created or existing field config.
@@ -55,7 +58,8 @@ class Og {
     $settings = $settings + [
       'field_storage_config' => [],
       'field_config' => [],
-      'widget' => [],
+      'form_display' => [],
+      'view_display' => [],
     ];
 
     $field_name = !empty($settings['field_name']) ? $settings['field_name'] : $plugin_id;
@@ -102,11 +106,24 @@ class Og {
       ]);
     }
 
-    $widget = $og_field->getWidgetDefinition($settings['widget']);
+    $form_display_definition = $og_field->getFormDisplayDefinition($settings['widget']);
 
 
-    $form_display->setComponent($plugin_id, $widget);
+    $form_display->setComponent($plugin_id, $form_display_definition);
     $form_display->save();
+
+
+    // Set the view display for the "default" and "teaser" types.
+    $view_display_definition = $og_field->getViewDisplayDefinition($settings['view_display']);
+
+    foreach (['default', 'teaser'] as $type) {
+      /** @var EntityDisplayInterface $view_display */
+      $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.' . $type);
+      $view_display->setComponent($plugin_id, $view_display_definition);
+      $view_display->save();
+
+    }
+
 
     return $field_definition;
   }

@@ -26,7 +26,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFieldStorageBaseDefinition(array $values = []) {
-    $values = [
+    $values += [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings' => [
         'allowed_values' => [
@@ -45,7 +45,7 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFieldBaseDefinition(array $values = []) {
-    $values = [
+    $values += [
       'default_value' => [0 => ['value' => 0]],
       'description' => $this->t('Determine if group should use default roles and permissions.'),
       'display_label' => TRUE,
@@ -59,9 +59,12 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getWidgetDefinition(array $values = []) {
-    $values['type'] = 'options_select';
-    $values['settings'] = [];
+  public function getFormDisplayDefinition(array $values = []) {
+    $values += [
+      'type' => 'options_select',
+      'settings' => [],
+    ];
+
 
     return $values;
   }
@@ -69,17 +72,11 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getViewModesDefinition(array $values = [])  {
-    $values['default'] = [
+  public function getViewDisplayDefinition(array $values = [])  {
+    $values += [
       'type' => 'list_default',
       'label' => 'above',
     ];
-
-    $values['teaser'] = [
-      'type' => 'list_default',
-      'label' => 'above',
-    ];
-
 
     return $values;
   }

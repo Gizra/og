@@ -76,7 +76,7 @@ interface OgFieldsInterface {
    * Get the field storage config base definition.
    *
    * @param [] $values
-   *   The base values, to which the entity type and field name would be added.
+   *   Values to override the base definitions.
    *
    * @return []
    *   Array that will be used as the base values for
@@ -88,8 +88,7 @@ interface OgFieldsInterface {
    * Get the field config base definition.
    *
    * @param [] $values
-   *   The base values, to which the entity type, bundle and field name would be
-   *   added.
+   *   Values to override the base definitions.
    *
    * @return []
    *   Array that will be used as the base values for
@@ -98,29 +97,27 @@ interface OgFieldsInterface {
   public function getFieldBaseDefinition(array $values = []);
 
   /**
-   * Get the field's widget definition.
+   * Get the field's form display definition.
    *
    * @param [] $values
-   *   The base values, to which the entity type, bundle and field name would be
-   *   added.
+   *   Values to override the base definitions.
    *
    * @return []
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
-  public function getWidgetDefinition(array $values = []);
+  public function getFormDisplayDefinition(array $values = []);
 
 
   /**
    * Get the field's view modes definition.
    *
    * @param [] $values
-   *   The base values, to which the entity type, bundle and field name would be
-   *   added.
+   *   Values to override the base definitions.
    *
    * @return []
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
-  public function getViewModesDefinition(array $values = []);
+  public function getViewDisplayDefinition(array $values = []);
 }

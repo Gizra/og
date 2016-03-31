@@ -28,7 +28,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFieldStorageBaseDefinition(array $values = array()) {
-    $values = [
+    $values += [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'custom_storage' => $this->getEntityType() == 'user',
       'settings' => [
@@ -44,7 +44,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFieldBaseDefinition(array $values = array()) {
-    $values = [
+    $values += [
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
       'label' => $this->t('Groups audience'),
@@ -61,7 +61,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getWidgetDefinition(array $values = []) {
+  public function getFormDisplayDefinition(array $values = []) {
     $values['type'] = 'og_complex';
     $values['settings'] = [
       'match_operator' => 'CONTAINS',
@@ -75,21 +75,13 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getViewModesDefinition(array $values = []) {
-    $values['default'] = [
-        'label' => 'above',
-        'type' => 'entity_reference_label',
-        'settings' => [
-          'link' => TRUE,
-        ]
-      ];
-
-    $values['teaser'] = [
+  public function getViewDisplayDefinition(array $values = []) {
+    $values += [
       'label' => 'above',
       'type' => 'entity_reference_label',
       'settings' => [
         'link' => TRUE,
-      ],
+      ]
     ];
 
     return $values;
