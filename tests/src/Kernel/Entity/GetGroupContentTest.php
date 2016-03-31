@@ -149,4 +149,58 @@ class GetGroupContentTest extends KernelTestBase {
     }
   }
 
+  /**
+   * Test retrieval of group content that references multiple groups.
+   */
+  public function testMultipleGroupReferences() {
+    $groups = [];
+
+    // Create two groups.
+    $bundle = Unicode::strtolower($this->randomMachineName());
+    NodeType::create([
+      'name' => $this->randomString(),
+      'type' => $bundle,
+    ])->save();
+    Og::groupManager()->addGroup('node', $bundle);
+
+    for ($i = 0; $i < 2; $i++) {
+      $groups[$i] = Node::create([
+        'title' => $this->randomString(),
+        'type' => $bundle,
+      ]);
+      $groups[$i]->save();
+    }
+
+    // Create a group content type.
+    $bundle = Unicode::strtolower($this->randomMachineName());
+
+    $settings = [
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => 'node',
+        ],
+      ],
+    ];
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
+
+    // Create a group content entity that references both groups.
+    $group_content = $this->entityTypeManager->getStorage('entity_test')->create([
+      'name' => $this->randomString(),
+      'type' => $bundle,
+      OgGroupAudienceHelper::DEFAULT_FIELD => [
+        ['target_id' => $groups[0]->id()],
+        ['target_id' => $groups[1]->id()],
+      ],
+    ]);
+    $group_content->save();
+
+    // Check that Og::getGroupContent() returns the group content entity for
+    // both groups.
+    $expected = ['entity_test' => [$group_content->id()]];
+    foreach ($groups as $key => $groups) {
+      $result = Og::getGroupContent($groups);
+      $this->assertEquals($expected, $result, "The group content entity is returned for group $key.");
+    }
+  }
+
 }
