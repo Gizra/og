@@ -46,6 +46,7 @@ class Og {
    *     config definitions. Values should comply with FieldStorageConfig::create()
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
+   *   - widget: Array with values to override the widget definitions.
    *
    * @return \Drupal\Core\Field\FieldConfigInterface
    *   The created or existing field config.
@@ -54,6 +55,7 @@ class Og {
     $settings = $settings + [
       'field_storage_config' => [],
       'field_config' => [],
+      'widget' => [],
     ];
 
     $field_name = !empty($settings['field_name']) ? $settings['field_name'] : $plugin_id;
@@ -100,13 +102,8 @@ class Og {
       ]);
     }
 
-    $widget = $form_display->getComponent($plugin_id);
-    $widget['type'] = 'og_complex';
-    $widget['settings'] = [
-      'match_operator' => 'CONTAINS',
-      'size' => 60,
-      'placeholder' => '',
-    ];
+    $widget = $og_field->getWidgetDefinition($settings['widget']);
+
 
     $form_display->setComponent($plugin_id, $widget);
     $form_display->save();

@@ -75,52 +75,52 @@ interface OgFieldsInterface {
   /**
    * Get the field storage config base definition.
    *
-   * @param array $values
+   * @param [] $values
    *   The base values, to which the entity type and field name would be added.
    *
-   * @return array
+   * @return []
    *   Array that will be used as the base values for
    *   FieldStorageConfig::create().
    */
-  public function getFieldStorageBaseDefinition(array $values = array());
+  public function getFieldStorageBaseDefinition(array $values = []);
 
   /**
    * Get the field config base definition.
    *
-   * @param array $values
+   * @param [] $values
    *   The base values, to which the entity type, bundle and field name would be
    *   added.
    *
-   * @return array
+   * @return []
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
-  public function getFieldBaseDefinition(array $values = array());
+  public function getFieldBaseDefinition(array $values = []);
 
   /**
    * Get the field's widget definition.
    *
-   * @param array $values
+   * @param [] $values
    *   The base values, to which the entity type, bundle and field name would be
    *   added.
    *
-   * @return array
+   * @return []
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
-  public function getWidgetDefinition(array $values = array());
+  public function getWidgetDefinition(array $values = []);
 
 
   /**
    * Get the field's view modes definition.
    *
-   * @param array $values
+   * @param [] $values
    *   The base values, to which the entity type, bundle and field name would be
    *   added.
    *
-   * @return array
+   * @return []
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
-  public function getViewModesDefinition(array $values = array());
+  public function getViewModesDefinition(array $values = []);
 }

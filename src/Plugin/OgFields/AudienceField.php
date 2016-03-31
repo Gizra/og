@@ -61,35 +61,37 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getWidgetDefinition(array $widget = []) {
-    // Keep this until og_complex widget is back.
-    return [
-      'type' => 'og_complex',
-      'settings' => [
-        'match_operator' => 'CONTAINS',
-      ],
+  public function getWidgetDefinition(array $values = []) {
+    $values['type'] = 'og_complex';
+    $values['settings'] = [
+      'match_operator' => 'CONTAINS',
+      'size' => 60,
+      'placeholder' => '',
     ];
+
+    return $values;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getViewModesDefinition(array $view_mode = []) {
-    return [
-      'default' => [
+  public function getViewModesDefinition(array $values = []) {
+    $values['default'] = [
         'label' => 'above',
         'type' => 'entity_reference_label',
         'settings' => [
           'link' => TRUE,
         ]
-      ],
-      'teaser' => [
-        'label' => 'above',
-        'type' => 'entity_reference_label',
-        'settings' => [
-          'link' => TRUE,
-        ],
+      ];
+
+    $values['teaser'] = [
+      'label' => 'above',
+      'type' => 'entity_reference_label',
+      'settings' => [
+        'link' => TRUE,
       ],
     ];
+
+    return $values;
   }
 }

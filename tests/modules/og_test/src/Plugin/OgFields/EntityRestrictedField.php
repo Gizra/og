@@ -19,7 +19,7 @@ class EntityRestrictedField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageBaseDefinition(array $values = array()) {
+  public function getFieldStorageBaseDefinition(array $values = []) {
     $values = [
       // Restrict the allowed entities.
       'entity' => ['node'],
@@ -32,21 +32,21 @@ class EntityRestrictedField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldBaseDefinition(array $values = array()) {
+  public function getFieldBaseDefinition(array $values = []) {
     return parent::getFieldBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getWidgetDefinition() {
+  public function getWidgetDefinition(array $values = []) {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getViewModesDefinition()  {
+  public function getViewModesDefinition(array $values = [])  {
     return [];
   }
 }
