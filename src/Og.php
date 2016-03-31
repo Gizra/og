@@ -121,7 +121,6 @@ class Og {
       $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.' . $type);
       $view_display->setComponent($plugin_id, $view_display_definition);
       $view_display->save();
-
     }
 
 

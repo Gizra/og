@@ -62,12 +62,15 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFormDisplayDefinition(array $values = []) {
-    $values['type'] = 'og_complex';
-    $values['settings'] = [
-      'match_operator' => 'CONTAINS',
-      'size' => 60,
-      'placeholder' => '',
+    $values += [
+      'type' => 'og_complex',
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'size' => 60,
+        'placeholder' => '',
+      ],
     ];
+
 
     return $values;
   }
