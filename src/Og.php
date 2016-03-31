@@ -102,7 +102,6 @@ class Og {
         'targetEntityType' => $entity_type,
         'bundle' => $bundle,
         'mode' => 'default',
-        'status' => TRUE,
       ]);
     }
 
@@ -117,13 +116,13 @@ class Og {
     $view_display_definition = $og_field->getViewDisplayDefinition($settings['view_display']);
 
     foreach (['default', 'teaser'] as $mode) {
+
       /** @var EntityDisplayInterface $view_display */
       if (!$view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.' . $mode)) {
         $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->create([
           'targetEntityType' => $entity_type,
           'bundle' => $bundle,
           'mode' => $mode,
-          'status' => TRUE,
         ]);
       }
 
@@ -131,7 +130,6 @@ class Og {
       $view_display->setComponent($plugin_id, $view_display_definition);
       $view_display->save();
     }
-
 
     return $field_definition;
   }
