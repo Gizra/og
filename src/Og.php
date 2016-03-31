@@ -106,7 +106,7 @@ class Og {
       ]);
     }
 
-    $form_display_definition = $og_field->getFormDisplayDefinition($settings['widget']);
+    $form_display_definition = $og_field->getFormDisplayDefinition($settings['form_display']);
 
 
     $form_display->setComponent($plugin_id, $form_display_definition);
