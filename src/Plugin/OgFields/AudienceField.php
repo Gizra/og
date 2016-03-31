@@ -27,7 +27,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
+  public function getFieldStorageBaseDefinition(array $values = array()) {
     $values = [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'custom_storage' => $this->getEntityType() == 'user',
@@ -37,13 +37,13 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'type' => $this->getEntityType() == 'user' ? 'og_membership_reference' : 'og_standard_reference',
     ];
 
-    return parent::getFieldStorageConfigBaseDefinition($values);
+    return parent::getFieldStorageBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFieldConfigBaseDefinition(array $values = array()) {
+  public function getFieldBaseDefinition(array $values = array()) {
     $values = [
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
@@ -54,14 +54,14 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       ],
     ];
 
-    return parent::getFieldConfigBaseDefinition($values);
+    return parent::getFieldBaseDefinition($values);
 
   }
 
   /**
    * {@inheritdoc}
    */
-  public function widgetDefinition(array $widget = []) {
+  public function getWidgetDefinition(array $widget = []) {
     // Keep this until og_complex widget is back.
     return [
       'type' => 'og_complex',
@@ -74,7 +74,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition(array $view_mode = []) {
+  public function getViewModesDefinition(array $view_mode = []) {
     return [
       'default' => [
         'label' => 'above',

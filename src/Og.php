@@ -69,12 +69,12 @@ class Og {
       ->setEntityType($entity_type);
 
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
-      $field_storage_config = NestedArray::mergeDeep($og_field->getFieldStorageConfigBaseDefinition(), $settings['field_storage_config']);
+      $field_storage_config = NestedArray::mergeDeep($og_field->getFieldStorageBaseDefinition(), $settings['field_storage_config']);
       FieldStorageConfig::create($field_storage_config)->save();
     }
 
     if (!$field_definition = FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
-      $field_config = NestedArray::mergeDeep($og_field->getFieldConfigBaseDefinition(), $settings['field_config']);
+      $field_config = NestedArray::mergeDeep($og_field->getFieldBaseDefinition(), $settings['field_config']);
 
       $field_definition = FieldConfig::create($field_config);
       $field_definition->save();
