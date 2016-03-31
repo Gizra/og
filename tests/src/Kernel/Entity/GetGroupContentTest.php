@@ -58,49 +58,61 @@ class GetGroupContentTest extends KernelTestBase {
    * Test retrieval of group content that references a single group.
    */
   public function testBasicGroupReferences() {
+    $groups = [];
+
     // Create two groups of different entity types.
-    $node_group_bundle = 'node_g_' . Unicode::strtolower($this->randomMachineName());
+    $bundle = Unicode::strtolower($this->randomMachineName());
     NodeType::create([
       'name' => $this->randomString(),
-      'type' => $node_group_bundle,
+      'type' => $bundle,
     ])->save();
-    Og::groupManager()->addGroup('node', $node_group_bundle);
+    Og::groupManager()->addGroup('node', $bundle);
 
-    $node_group = Node::create([
+    $groups['node'] = Node::create([
       'title' => $this->randomString(),
-      'type' => $node_group_bundle,
+      'type' => $bundle,
     ]);
-    $node_group->save();
+    $groups['node']->save();
 
-    $entity_test_group_bundle = 'entity_test_g' . Unicode::strtolower($this->randomMachineName());
-    Og::groupManager()->addGroup('entity_test', $entity_test_group_bundle);
+    // The Entity Test entity doesn't have 'real' bundles, so we don't need to
+    // create one, we can just add the group to the fake bundle.
+    $bundle = Unicode::strtolower($this->randomMachineName());
+    Og::groupManager()->addGroup('entity_test', $bundle);
 
-    $entity_test_group = EntityTest::create([
-      'type' => $entity_test_group_bundle,
+    $groups['entity_test'] = EntityTest::create([
+      'type' => $bundle,
       'name' => $this->randomString(),
     ]);
-    $entity_test_group->save();
+    $groups['entity_test']->save();
 
     // Create 4 group content types, two for each entity type referencing each
     // group. Create a group content entity for each.
     $group_content = [];
     foreach (['node', 'entity_test'] as $entity_type) {
-      foreach (['node_group', 'entity_test_group'] as $target_group) {
-        // Create the group content type.
-        $bundle = $entity_type . Unicode::strtolower($this->randomMachineName());
+      foreach (['node', 'entity_test'] as $target_group_type) {
+        // Create the group content bundle if it's a node. Entity Test doesn't
+        // have real bundles.
+        $bundle = Unicode::strtolower($this->randomMachineName());
         if ($entity_type === 'node') {
           NodeType::create([
             'type' => $bundle,
             'name' => $this->randomString(),
           ])->save();
         }
+
+        // Create the groups audience field.
+        $field_name = "og_$target_group_type";
         $settings = [
-          'field_name' => Unicode::strtolower($this->randomMachineName()),
+          'field_name' => $field_name,
           'field_storage_config' => [
             'settings' => [
+              'target_type' => $groups[$target_group_type]->getEntityTypeId(),
+            ],
+          ],
+          'field_config' => [
+            'settings' => [
               'handler_settings' => [
-                'target_bundles' => [$$target_group->bundle()  => $$target_group->bundle()],
-                'target_type' => $$target_group->getEntityTypeId(),
+                'target_bundles' => [$groups[$target_group_type]->bundle()  => $groups[$target_group_type]->bundle()],
               ],
             ],
           ],
@@ -112,19 +124,21 @@ class GetGroupContentTest extends KernelTestBase {
         $entity = $this->entityTypeManager->getStorage($entity_type)->create([
           $label_field => $this->randomString(),
           'type' => $bundle,
-          OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $$target_group->id()]],
+          $field_name => [['target_id' => $groups[$target_group_type]->id()]],
         ]);
         $entity->save();
 
-        $group_content[$entity_type][$target_group] = $entity;
+        $group_content[$entity_type][$target_group_type] = $entity;
       }
     }
 
     // Check that Og::getGroupContent() returns the correct group content for
     // each group.
-    foreach (['node_group', 'entity_test_group'] as $group) {
-      $result = Og::getGroupContent($$group);
-
+    foreach (['node', 'entity_test'] as $group_type) {
+      $result = Og::getGroupContent($groups[$group_type]);
+      foreach (['node', 'entity_test'] as $group_content_type) {
+        $this->assertEquals([$group_content[$group_content_type][$group_type]->id()], $result[$group_content_type], "The correct $group_content_type group content is returned for the $group_type group.");
+      }
     }
   }
 
