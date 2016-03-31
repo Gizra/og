@@ -191,10 +191,6 @@ class Og {
    * @param array $entity_types
    *   Optional list of group content entity types to return. If an empty array
    *   is passed, the group content is not filtered. Defaults to an empty array.
-   * @param bool $exclusive
-   *   Optionally return only group content that is exclusively associating the
-   *   given group entity. If set to TRUE it will not return group content that
-   *   references multiple groups. Defaults to FALSE.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
    *   The group content.
@@ -203,7 +199,7 @@ class Og {
    *   associative array keyed by entity type, containing an array of entity
    *   IDs. There might be thousands of group content items in large sites.
    */
-  public static function getGroupContent(EntityInterface $entity, array $entity_types = [], $exclusive = FALSE) {
+  public static function getGroupContent(EntityInterface $entity, array $entity_types = []) {
     $group_content = [];
 
     // Retrieve the fields which reference our entity type and bundle.
@@ -237,9 +233,6 @@ class Og {
 
       // Query all group content that references the group through this field.
       $results = \Drupal::entityQuery($group_content_entity_type)
-        // @todo If I match here on [$entity->id()] as an array value, would
-        //   this mean that it only matches items that exclusively reference the
-        //   entity? I hope so. Time to write a test to find out.
         ->condition($field->getName() . '.target_id', $entity->id())
         ->execute();
 
