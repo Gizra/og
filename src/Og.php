@@ -240,7 +240,7 @@ class Og {
         // @todo If I match here on [$entity->id()] as an array value, would
         //   this mean that it only matches items that exclusively reference the
         //   entity? I hope so. Time to write a test to find out.
-        ->condition($field->getName(), [$entity->id()])
+        ->condition($field->getName() . '.target_id', [$entity->id()])
         ->execute();
 
       $group_content[$entity_type] = array_merge($group_content[$entity_type], $results);
