@@ -392,8 +392,6 @@ function og_field_formatter_info_alter(array &$info) {
 
     $info[$key]['field_types'][] = 'og_membership_reference';
     $info[$key]['field_types'][] = 'og_standard_reference';
-
-    dpm($info[$key]);
   }
 }
 
