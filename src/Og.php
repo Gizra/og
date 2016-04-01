@@ -182,6 +182,107 @@ class Og {
   }
 
   /**
+   * Returns all group IDs associated with the given group content entity.
+   *
+   * Do not use this to retrieve group IDs associated with a user entity. Use
+   * Og::GetEntityGroups() instead.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The group content entity for which to return the associated groups.
+   * @param string $group_type_id
+   *   Filter results to only include group IDs of this entity type.
+   * @param string $group_bundle
+   *   Filter list to only include group IDs with this bundle.
+   *
+   * @return array
+   *   An associative array, keyed by group entity type, each item an array of
+   *   group entity IDs.
+   */
+  public static function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
+    $group_ids = [];
+
+    $fields = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle(), $group_type_id, $group_bundle);
+    foreach ($fields as $field) {
+      $target_type = $field->getFieldStorageDefinition()->getSetting('target_type');
+
+      // Optionally filter by group type.
+      if (!empty($group_type_id) && $group_type_id !== $target_type) {
+        continue;
+      }
+
+      // Compile a list of group target IDs.
+      $target_ids = array_map(function ($value) {
+        return $value['target_id'];
+      }, $entity->get($field->getName())->getValue());
+
+      // Query the database to get the actual list of groups. The target IDs may
+      // contain groups that no longer exist. Entityreference doesn't clean up
+      // orphaned target IDs.
+      $entity_type = \Drupal::entityTypeManager()->getDefinition($target_type);
+      $query = \Drupal::entityQuery($target_type)
+        ->condition($entity_type->getKey('id'), $target_ids);
+
+      // Optionally filter by group bundle.
+      if (!empty($group_bundle)) {
+        $query->condition($entity_type->getKey('bundle'), $group_bundle);
+      }
+
+      $group_ids = NestedArray::mergeDeep($group_ids, [$target_type => $query->execute()]);
+    }
+
+    return $group_ids;
+  }
+
+  /**
+   * Returns all groups that are associated with the given group content entity.
+   *
+   * Do not use this to retrieve group memberships for a user entity. Use
+   * Og::GetEntityGroups() instead.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The group content entity for which to return the groups.
+   * @param string $group_type_id
+   *   Filter results to only include groups of this entity type.
+   * @param string $group_bundle
+   *   Filter results to only include groups of this bundle.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   An array of group entities.
+   */
+  public static function getGroups(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
+    $groups = [];
+
+    foreach (static::getGroupIds($entity, $group_type_id, $group_bundle) as $entity_type => $entity_ids) {
+      $entities = \Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($entity_ids);
+      $groups = array_merge($groups, array_values($entities));
+    }
+
+    return $groups;
+  }
+
+  /**
+   * Returns the number of groups associated with a given group content entity.
+   *
+   * Do not use this to retrieve the group membership count for a user entity.
+   * Use count(Og::GetEntityGroups()) instead.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The group content entity for which to count the associated groups.
+   * @param string $group_type_id
+   *   Only count groups of this entity type.
+   * @param string $group_bundle
+   *   Only count groups of this bundle.
+   *
+   * @return int
+   *   The number of associated groups.
+   */
+  public static function getGroupCount(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
+    return array_reduce(static::getGroupIds($entity, $group_type_id, $group_bundle), function ($carry, $item) {
+      return $carry + count($item);
+    }, 0);
+  }
+
+  /**
    * Returns all the group content associated with a given group entity.
    *
    * This does not return users that are members of the given group.
