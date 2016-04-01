@@ -76,7 +76,6 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
       OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
     ]);
     $this->groupContent->save();
-
   }
 
   /**
@@ -102,11 +101,8 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     $plugin = $this->ogDeleteOrphansPluginManager->createInstance($plugin_id, []);
     $plugin->process();
 
-    // Reload the group content that was used during the test.
-    $group_content = Node::load($this->group_content->id());
-
-    // Verify the orphaned node is deleted.
-    $this->assertFalse($group_content, 'The orphaned node is deleted.');
+    // Verify the group content is deleted.
+    $this->assertFalse($this->group_content, 'The orphaned node is deleted.');
   }
 
   /**
