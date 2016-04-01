@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\OgDeleteOrphans;
 
+use Drupal\og\Og;
 use Drupal\og\OgDeleteOrphansBase;
 
 /**
@@ -20,7 +21,17 @@ class Simple extends OgDeleteOrphansBase {
    * {@inheritdoc}
    */
   public function process() {
-    throw new \Exception(__METHOD__ . ' is not implemented.');
+    $orphans = $this->state->get('og.orphaned_group_content', []);
+    foreach ($orphans as $orphan_type => $orphan_ids) {
+      foreach ($this->entityTypeManager->getStorage($orphan_type)->loadMultiple($orphan_ids) as $entity) {
+        // Only delete content that is fully orphaned, i.e. it is no longer
+        // associated with any groups.
+        $group_count = Og::getGroupCount($entity);
+        if ($group_count == 0) {
+          $entity->delete();
+        }
+      }
+    }
   }
 
 }
