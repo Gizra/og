@@ -1,7 +1,8 @@
 <?php
 
 namespace Drupal\og;
-use Drupal\Core\Form\FormStateInterface;
+
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Interface for OgDeleteOrphans plugins.
@@ -26,15 +27,19 @@ interface OgDeleteOrphansInterface {
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group entity to register.
    */
-  public function register(\Drupal\Core\Entity\EntityInterface $entity);
+  public function register(EntityInterface $entity);
 
   /**
    * Queries the registered group entity for orphaned members to delete.
    *
-   * @return \Drupal\Core\Entity\EntityInterface[]
-   *   An array of member entities to delete.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The group entity that is the basis for the query.
+   *
+   * @return array
+   *   An associative array, keyed by group content entity type, each item an
+   *   array of group content entity IDs to delete.
    */
-  public function query();
+  public function query(EntityInterface $entity);
 
   /**
    * Starts the deletion process.

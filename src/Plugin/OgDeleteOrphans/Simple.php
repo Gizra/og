@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Plugin\OgDeleteOrphans;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\OgDeleteOrphansBase;
 
 /**
@@ -16,35 +15,6 @@ use Drupal\og\OgDeleteOrphansBase;
  * )
  */
 class Simple extends OgDeleteOrphansBase {
-
-  /**
-   * The parent entity which is about to be deleted.
-   *
-   * @var \Drupal\Core\Entity\EntityInterface
-   */
-  protected $parent;
-
-  /**
-   * The orphans to delete.
-   *
-   * @var \Drupal\Core\Entity\EntityInterface[]
-   */
-  protected $orphans;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function register(EntityInterface $entity) {
-    $this->parent = $entity;
-    $this->orphans = $this->query();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function query() {
-    return $this->getGroupContent($this->parent);
-  }
 
   /**
    * {@inheritdoc}
