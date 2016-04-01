@@ -142,8 +142,8 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    */
   public function ogDeleteOrphansPluginProvider() {
     return [
-      ['batch'],
-      ['cron'],
+//      ['batch'],
+//      ['cron'],
       ['simple'],
     ];
   }
