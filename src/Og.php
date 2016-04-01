@@ -101,6 +101,7 @@ class Og {
         'targetEntityType' => $entity_type,
         'bundle' => $bundle,
         'mode' => 'default',
+        'status' => TRUE,
       ]);
     }
 
@@ -118,11 +119,13 @@ class Og {
 
       /** @var EntityDisplayInterface $view_display */
       $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.' . $mode);
+
       if (!$view_display) {
         $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->create([
           'targetEntityType' => $entity_type,
           'bundle' => $bundle,
           'mode' => $mode,
+          'status' => TRUE,
         ]);
       }
 
