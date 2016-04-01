@@ -20,25 +20,8 @@ class AudienceFieldFormatterTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['field', 'og', 'options', 'system', 'user'];
+  public static $modules = ['field', 'og'];
 
-  /**
-   * @var Array
-   *   Array with the bundle IDs.
-   */
-  protected $bundles;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
-
-    // Add membership and config schema.
-    $this->installConfig(['og']);
-    $this->installEntitySchema('og_membership');
-    $this->installEntitySchema('user');
-  }
 
   /**
    * Testing og_field_formatter_info_alter().
