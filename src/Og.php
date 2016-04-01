@@ -96,7 +96,6 @@ class Og {
     // If not found, create a fresh form display object. This is by design,
     // configuration entries are only created when an entity form display is
     // explicitly configured and saved.
-    // @see entity_get_form_display()
     if (!$form_display) {
       $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->create([
         'targetEntityType' => $entity_type,
@@ -118,7 +117,8 @@ class Og {
     foreach (['default', 'teaser'] as $mode) {
 
       /** @var EntityDisplayInterface $view_display */
-      if (!$view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.' . $mode)) {
+      $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load($entity_type . '.' . $bundle . '.' . $mode)
+      if (!$view_display) {
         $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->create([
           'targetEntityType' => $entity_type,
           'bundle' => $bundle,
