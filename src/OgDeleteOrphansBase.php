@@ -2,39 +2,17 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Queue\QueueFactory;
-use Drupal\Core\State\StateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base implementation for OgDeleteOrphans plugins.
  */
-abstract class OgDeleteOrphansBase implements OgDeleteOrphansInterface, ContainerFactoryPluginInterface {
-
-  /**
-   * A configuration array containing information about the plugin instance.
-   *
-   * @var array
-   */
-  protected $configuration;
-
-  /**
-   * The plugin ID for the plugin instance.
-   *
-   * @var string
-   */
-  protected $pluginId;
-
-  /**
-   * The plugin implementation definition.
-   *
-   * @var mixed
-   */
-  protected $pluginDefinition;
+abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphansInterface, ContainerFactoryPluginInterface {
 
   /**
    * The entity type manager.
@@ -65,9 +43,7 @@ abstract class OgDeleteOrphansBase implements OgDeleteOrphansInterface, Containe
    *   The queue factory.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueueFactory $queue_factory) {
-    $this->configuration = $configuration;
-    $this->pluginId = $plugin_id;
-    $this->pluginDefinition = $plugin_definition;
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->queue = $queue_factory->get('og_orphaned_group_content', TRUE);
   }
