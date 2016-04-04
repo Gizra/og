@@ -30,18 +30,6 @@ interface OgDeleteOrphansInterface {
   public function register(EntityInterface $entity);
 
   /**
-   * Queries the registered group entity for orphaned members to delete.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The group entity that is the basis for the query.
-   *
-   * @return array
-   *   An associative array, keyed by group content entity type, each item an
-   *   array of group content entity IDs to delete.
-   */
-  public function query(EntityInterface $entity);
-
-  /**
    * Starts the deletion process.
    */
   public function process();
