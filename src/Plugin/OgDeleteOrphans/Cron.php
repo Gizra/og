@@ -20,7 +20,8 @@ class Cron extends OgDeleteOrphansBase {
    * {@inheritdoc}
    */
   public function process() {
-    throw new \Exception(__METHOD__ . ' is not implemented.');
+    // Processing of orphans happens in the background during cron runs.
+    // @see \Drupal\og\Plugin\QueueWorker\DeleteOrphan
   }
 
 }

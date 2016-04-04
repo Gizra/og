@@ -84,8 +84,11 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    * @dataProvider ogDeleteOrphansPluginProvider
    *
    * @param string $plugin_id
+   *   The machine name of the plugin under test.
+   * @param bool $run_cron
+   *   Whether or not cron jobs should be run as part of the test.
    */
-  public function testDeleteOrphans($plugin_id) {
+  public function testDeleteOrphans($plugin_id, $run_cron) {
     // Turn on deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')
@@ -100,6 +103,11 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     /** @var \Drupal\Core\Queue\QueueInterface $queue */
     $queue = $this->container->get('queue')->get('og_orphaned_group_content');
     $this->assertEquals(1, $queue->numberOfItems());
+
+    // Run cron jobs if needed.
+    if ($run_cron) {
+      $this->container->get('cron')->run();
+    }
 
     // Invoke the processing of the orphans.
     /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
@@ -147,12 +155,16 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    * Provides OgDeleteOrphans plugins for the tests.
    *
    * @return array
+   *   An array of test properties. Each property is an indexed array with the
+   *   following items:
+   *   - A string containing the plugin name being tested.
+   *   - A boolean indicating whether or not cron jobs should be run.
    */
   public function ogDeleteOrphansPluginProvider() {
     return [
 //      ['batch'],
-//      ['cron'],
-      ['simple'],
+      ['cron', TRUE],
+      ['simple', FALSE],
     ];
   }
 
