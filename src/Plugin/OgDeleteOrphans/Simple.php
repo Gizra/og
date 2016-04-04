@@ -23,7 +23,7 @@ class Simple extends OgDeleteOrphansBase {
   public function process() {
     while ($item = $this->queue->claimItem()) {
       $data = $item->data;
-      $this->deleteOrphan($data[$type], $data['id']);
+      $this->deleteOrphan($data['type'], $data['id']);
       $this->queue->deleteItem($item);
     }
   }
