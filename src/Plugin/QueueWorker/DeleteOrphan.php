@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Deletes orphaned group content.
  *
  * @QueueWorker(
- *   id = "og_orphaned_group_content",
+ *   id = "og_orphaned_group_content_cron",
  *   title = @Translation("Delete orphaned group content"),
  *   cron = {"time" = 60}
  * )

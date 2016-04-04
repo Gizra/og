@@ -22,11 +22,11 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
   protected $entityTypeManager;
 
   /**
-   * The queue of orphans to delete.
+   * The queue factory.
    *
-   * @var \Drupal\Core\Queue\QueueInterface
+   * @var \Drupal\Core\Queue\QueueFactory
    */
-  protected $queue;
+  protected $queueFactory;
 
   /**
    * Constructs an OgDeleteOrphansBase object.
@@ -45,7 +45,7 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueueFactory $queue_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
-    $this->queue = $queue_factory->get('og_orphaned_group_content', TRUE);
+    $this->queueFactory = $queue_factory;
   }
 
   /**
@@ -67,7 +67,7 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
   public function register(EntityInterface $entity) {
     foreach ($this->query($entity) as $entity_type => $orphans) {
       foreach ($orphans as $orphan) {
-        $this->queue->createItem([
+        $this->getQueue()->createItem([
           'type' => $entity_type,
           'id'=> $orphan,
         ]);
@@ -105,6 +105,16 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
     if ($group_count == 0) {
       $entity->delete();
     }
+  }
+
+  /**
+   * Returns the queue of orphans to delete.
+   *
+   * @return \Drupal\Core\Queue\QueueInterface
+   *   The queue.
+   */
+  protected function getQueue() {
+    return $this->queueFactory->get('og_orphaned_group_content', TRUE);
   }
 
 }

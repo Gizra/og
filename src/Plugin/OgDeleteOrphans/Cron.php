@@ -24,4 +24,13 @@ class Cron extends OgDeleteOrphansBase {
     // @see \Drupal\og\Plugin\QueueWorker\DeleteOrphan
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function getQueue() {
+    // Use a separate queue for the cron deletion, to prevent the cron job from
+    // cleaning up items from another plugin.
+    return $this->queueFactory->get('og_orphaned_group_content_cron', TRUE);
+  }
+
 }

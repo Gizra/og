@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Plugin\OgDeleteOrphans;
 
-use Drupal\og\Og;
 use Drupal\og\OgDeleteOrphansBase;
 
 /**
@@ -21,10 +20,11 @@ class Simple extends OgDeleteOrphansBase {
    * {@inheritdoc}
    */
   public function process() {
-    while ($item = $this->queue->claimItem()) {
+    $queue = $this->getQueue();
+    while ($item = $queue->claimItem()) {
       $data = $item->data;
       $this->deleteOrphan($data['type'], $data['id']);
-      $this->queue->deleteItem($item);
+      $queue->deleteItem($item);
     }
   }
 
