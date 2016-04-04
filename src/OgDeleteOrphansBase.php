@@ -89,4 +89,22 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
     return Og::getGroupContent($entity);
   }
 
+  /**
+   * Deletes an orphaned group content entity if it is fully orphaned.
+   *
+   * @param string $entity_type
+   *   The group content entity type.
+   * @param string $entity_id
+   *   The group content entity ID.
+   */
+  protected function deleteOrphan($entity_type, $entity_id) {
+    $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id);
+    // Only delete content that is fully orphaned, i.e. it is no longer
+    // associated with any groups.
+    $group_count = Og::getGroupCount($entity);
+    if ($group_count == 0) {
+      $entity->delete();
+    }
+  }
+
 }

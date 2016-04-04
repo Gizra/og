@@ -23,13 +23,7 @@ class Simple extends OgDeleteOrphansBase {
   public function process() {
     while ($item = $this->queue->claimItem()) {
       $data = $item->data;
-      $entity = $this->entityTypeManager->getStorage($data['type'])->load($data['id']);
-      // Only delete content that is fully orphaned, i.e. it is no longer
-      // associated with any groups.
-      $group_count = Og::getGroupCount($entity);
-      if ($group_count == 0) {
-        $entity->delete();
-      }
+      $this->deleteOrphan($data[$type], $data['id']);
       $this->queue->deleteItem($item);
     }
   }
