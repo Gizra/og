@@ -21,16 +21,16 @@ class Simple extends OgDeleteOrphansBase {
    * {@inheritdoc}
    */
   public function process() {
-    $orphans = $this->state->get('og.orphaned_group_content', []);
-    foreach ($orphans as $orphan_type => $orphan_ids) {
-      foreach ($this->entityTypeManager->getStorage($orphan_type)->loadMultiple($orphan_ids) as $entity) {
-        // Only delete content that is fully orphaned, i.e. it is no longer
-        // associated with any groups.
-        $group_count = Og::getGroupCount($entity);
-        if ($group_count == 0) {
-          $entity->delete();
-        }
+    while ($item = $this->queue->claimItem()) {
+      $data = $item->data;
+      $entity = $this->entityTypeManager->getStorage($data['type'])->load($data['id']);
+      // Only delete content that is fully orphaned, i.e. it is no longer
+      // associated with any groups.
+      $group_count = Og::getGroupCount($entity);
+      if ($group_count == 0) {
+        $entity->delete();
       }
+      $this->queue->deleteItem($item);
     }
   }
 

@@ -6,6 +6,13 @@
  */
 
 /**
+ * Implements hook_uninstall().
+ */
+function og_uninstall() {
+  \Drupal::queue('og_orphaned_group_content')->deleteQueue();
+}
+
+/**
  * Implements hook_schema().
  */
 function og_schema() {

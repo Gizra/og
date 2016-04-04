@@ -6,6 +6,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\State\StateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -43,11 +44,11 @@ abstract class OgDeleteOrphansBase implements OgDeleteOrphansInterface, Containe
   protected $entityTypeManager;
 
   /**
-   * The state system.
+   * The queue of orphans to delete.
    *
-   * @var \Drupal\Core\State\StateInterface
+   * @var \Drupal\Core\Queue\QueueInterface
    */
-  protected $state;
+  protected $queue;
 
   /**
    * Constructs an OgDeleteOrphansBase object.
@@ -60,15 +61,15 @@ abstract class OgDeleteOrphansBase implements OgDeleteOrphansInterface, Containe
    *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\Core\State\StateInterface $state
-   *   The state system.
+   * @param \Drupal\Core\Queue\QueueFactory $queue_factory
+   *   The queue factory.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, StateInterface $state) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueueFactory $queue_factory) {
     $this->configuration = $configuration;
     $this->pluginId = $plugin_id;
     $this->pluginDefinition = $plugin_definition;
     $this->entityTypeManager = $entity_type_manager;
-    $this->state = $state;
+    $this->queue = $queue_factory->get('og_orphaned_group_content', TRUE);
   }
 
   /**
@@ -80,7 +81,7 @@ abstract class OgDeleteOrphansBase implements OgDeleteOrphansInterface, Containe
       $plugin_id,
       $plugin_definition,
       $container->get('entity_type.manager'),
-      $container->get('state')
+      $container->get('queue')
     );
   }
 
@@ -88,8 +89,14 @@ abstract class OgDeleteOrphansBase implements OgDeleteOrphansInterface, Containe
    * {@inheritdoc}
    */
   public function register(EntityInterface $entity) {
-    $registered_orphans = $this->state->get('og.orphaned_group_content', []);
-    $this->state->set('og.orphaned_group_content', NestedArray::mergeDeep($registered_orphans, $this->query($entity)));
+    foreach ($this->query($entity) as $entity_type => $orphans) {
+      foreach ($orphans as $orphan) {
+        $this->queue->createItem([
+          'type' => $entity_type,
+          'id'=> $orphan,
+        ]);
+      }
+    }
   }
 
   /**

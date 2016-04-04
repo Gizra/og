@@ -40,8 +40,8 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
-    $this->installSchema('node', ['node_access']);
-    $this->installSchema('system', 'sequences');
+    $this->installSchema('node', 'node_access');
+    $this->installSchema('system', ['queue', 'sequences']);
 
     /** @var \Drupal\og\OgDeleteOrphansPluginManager ogDeleteOrphansPluginManager */
     $this->ogDeleteOrphansPluginManager = \Drupal::service('plugin.manager.og.delete_orphans');
@@ -96,6 +96,11 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     // Delete the group.
     $this->group->delete();
 
+    // Check that the orphan is queued.
+    /** @var \Drupal\Core\Queue\QueueInterface $queue */
+    $queue = $this->container->get('queue')->get('og_orphaned_group_content');
+    $this->assertEquals(1, $queue->numberOfItems());
+
     // Invoke the processing of the orphans.
     /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
     $plugin = $this->ogDeleteOrphansPluginManager->createInstance($plugin_id, []);
@@ -103,6 +108,9 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
 
     // Verify the group content is deleted.
     $this->assertFalse($this->group_content, 'The orphaned node is deleted.');
+
+    // Check that the queue is now empty.
+    $this->assertEquals(0, $queue->numberOfItems());
   }
 
   /**
