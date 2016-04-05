@@ -172,44 +172,6 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
   }
 
   /**
-   * Tests that group content is handled appropriately when a group is deleted.
-   *
-   * - Group content that only belongs to a single group should be deleted.
-   * - Group content associated with multiple groups should not be deleted, but
-   *   its references should be updated.
-   */
-  function _testDeleteGroup() {
-    // Creating two groups.
-    $first_group = $this->drupalCreateNode(array('type' => $this->group_type));
-    $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
-
-    // Create two nodes.
-    $first_node = $this->drupalCreateNode(array('type' => $this->node_type));
-    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $first_node));
-    og_group('node', $second_group, array('entity_type' => 'node', 'entity' => $first_node));
-
-    $second_node = $this->drupalCreateNode(array('type' => $this->node_type));
-    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $second_node));
-
-    // Delete the group.
-    node_delete($first_group->nid);
-
-    // Execute manually the queue worker.
-    $queue = DrupalQueue::get('og_membership_orphans');
-    $item = $queue->claimItem();
-    og_membership_orphans_worker($item->data);
-
-    // Load the nodes we used during the test.
-    $first_node = node_load($first_node->nid);
-    $second_node = node_load($second_node->nid);
-
-    // Verify the none orphan node wasn't deleted.
-    $this->assertTrue($first_node, "The second node is realted to another group and deleted.");
-    // Verify the orphan node deleted.
-    $this->assertFalse($second_node, "The orphan node deleted.");
-  }
-
-  /**
    * Tests the moving of the node to another group when deleting a group.
    *
    * @todo This test doesn't make any sense to me. The way I read it is that if
