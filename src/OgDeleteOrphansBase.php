@@ -125,16 +125,4 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
     return [];
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function configurationFormValidate($form, FormStateInterface $form_state) {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function configurationFormSubmit($form, FormStateInterface $form_state) {
-  }
-
 }
