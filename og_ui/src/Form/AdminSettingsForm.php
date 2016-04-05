@@ -96,7 +96,6 @@ class AdminSettingsForm extends ConfigFormBase {
       '#default_value' => $config_og->get('delete_orphans'),
     ];
 
-    // @todo Show additional configuration options for the orphans delete plugins.
     $definitions = $this->ogDeleteOrphansPluginManager->getDefinitions();
     $options = array_map(function ($definition) {
       return $definition['label'];
@@ -115,12 +114,28 @@ class AdminSettingsForm extends ConfigFormBase {
       '#attributes' => ['class' => ['child-item']],
     ];
 
-    // Add the description and weight for each delete method.
     foreach ($definitions as $id => $definition) {
+      /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
+      $plugin = $this->ogDeleteOrphansPluginManager->createInstance($id, []);
+
+      // Add the description and weight for each delete method.
       $form['og_delete_orphans_plugin_id'][$id] = [
         '#description' => $definition['description'],
         '#weight' => !empty($definition['weight']) ? $definition['weight'] : 0,
       ];
+
+      // Show the configuration options for the chosen plugin.
+      $configuration = $plugin->configurationForm($form, $form_state);
+      if ($configuration) {
+        $form['og_delete_orphans_options_' . $id] = $configuration + [
+          '#states' => [
+            'visible' => [
+              ':input[name="og_delete_orphans"]' => ['checked' => TRUE],
+              ':input[name="og_delete_orphans_plugin_id"]' => ['value' => $id],
+            ],
+          ],
+        ];
+      }
     }
 
     $form['#attached']['library'][] = 'og_ui/form';
