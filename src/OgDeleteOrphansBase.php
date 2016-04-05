@@ -117,4 +117,24 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
     return $this->queueFactory->get('og_orphaned_group_content', TRUE);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function configurationForm($form, FormStateInterface $form_state) {
+    // @todo Provide an example implementation in one of the plugins.
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function configurationFormValidate($form, FormStateInterface $form_state) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function configurationFormSubmit($form, FormStateInterface $form_state) {
+  }
+
 }
