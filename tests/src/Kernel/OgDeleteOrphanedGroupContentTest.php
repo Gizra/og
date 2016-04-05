@@ -81,14 +81,14 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
   /**
    * Tests that orphaned group content is deleted when the group is deleted.
    *
-   * @dataProvider ogDeleteOrphansPluginProvider
-   *
    * @param string $plugin_id
    *   The machine name of the plugin under test.
    * @param bool $run_cron
    *   Whether or not cron jobs should be run as part of the test.
    * @param string $queue_id
    *   The ID of the queue that is used by the plugin under test.
+   *
+   * @dataProvider ogDeleteOrphansPluginProvider
    */
   public function testDeleteOrphans($plugin_id, $run_cron, $queue_id) {
     // Turn on deletion of orphans in the configuration and configure the chosen
@@ -126,11 +126,17 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
   /**
    * Tests that orphaned content is not deleted when the option is disabled.
    *
+   * @param string $plugin_id
+   *   The machine name of the plugin under test.
+   * @param bool $run_cron
+   *   Whether or not cron jobs should be run as part of the test. Unused in
+   *   this test.
+   * @param string $queue_id
+   *   The ID of the queue that is used by the plugin under test.
+   *
    * @dataProvider ogDeleteOrphansPluginProvider
    */
-  function testDisabled($plugin_id) {
-    $this->markTestSkipped();
-    return;
+  function testDisabled($plugin_id, $run_cron, $queue_id) {
     // Disable deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')
@@ -141,16 +147,10 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     // Delete the group.
     $this->group->delete();
 
-    // Invoke the processing of the orphans.
-    /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
-    $plugin = $this->ogDeleteOrphansPluginManager->createInstance($plugin_id, []);
-    $plugin->process();
-
-    // Reload the group content that was used during the test.
-    $group_content = Node::load($this->group_content->id());
-
-    // Verify the orphaned node is not deleted.
-    $this->assertTrue($group_content, 'The orphaned node is not deleted.');
+    // Check that no orphans are queued for deletion.
+    /** @var \Drupal\Core\Queue\QueueInterface $queue */
+    $queue = $this->container->get('queue')->get($queue_id);
+    $this->assertEquals(0, $queue->numberOfItems());
   }
 
   /**
