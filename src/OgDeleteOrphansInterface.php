@@ -3,6 +3,7 @@
 namespace Drupal\og;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Interface for OgDeleteOrphans plugins.

@@ -2,17 +2,21 @@
 
 namespace Drupal\og;
 
+use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Queue\QueueFactory;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base implementation for OgDeleteOrphans plugins.
  */
 abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphansInterface, ContainerFactoryPluginInterface {
+
+  use StringTranslationTrait;
 
   /**
    * The entity type manager.
@@ -121,7 +125,6 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
    * {@inheritdoc}
    */
   public function configurationForm($form, FormStateInterface $form_state) {
-    // @todo Provide an example implementation in one of the plugins.
     return [];
   }
 
