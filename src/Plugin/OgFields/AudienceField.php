@@ -37,6 +37,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       // @todo Is this correct? The description of OgStandardReferenceItem says:
       //   "An entity field containing an OG membership reference for user based
       //   entity."
+      // @see https://github.com/amitaibu/og/issues/177
       'type' => $this->getEntityType() == 'user' ? 'og_membership_reference' : 'og_standard_reference',
     ];
 

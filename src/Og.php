@@ -304,6 +304,7 @@ class Og {
     $query = \Drupal::entityQuery('field_storage_config')
       // @todo For the moment retrieving both group types, since there seems to
       //   be some confusion about which field type is used for users.
+      // @see https://github.com/amitaibu/og/issues/177
       ->condition('type', ['og_standard_reference', 'og_membership_reference'], 'IN');
 
     // Optionally filter group content entity types.
