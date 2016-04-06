@@ -112,7 +112,7 @@ class Og {
     $form_display->save();
 
 
-    // Set the view display for the "default" and "teaser" types.
+    // Set the view display for the "default" view display.
     $view_display_definition = $og_field->getViewDisplayDefinition($settings['view_display']);
 
     /** @var EntityDisplayInterface $view_display */
@@ -129,7 +129,7 @@ class Og {
 
     $view_display->setComponent($plugin_id, $view_display_definition);
     $view_display->save();
-    
+
 
     return $field_definition;
   }

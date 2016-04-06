@@ -385,7 +385,7 @@ function _og_form_group_reference_validate($form, &$form_state) {
  */
 function og_field_formatter_info_alter(array &$info) {
   foreach (array_keys($info) as $key) {
-    if (strpos($key, 'entity_reference_') !== 0) {
+    if (!in_array('entity_reference', $info[$key]['field_types'])) {
       // Not an entity reference formatter.
       continue;
     }
