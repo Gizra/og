@@ -27,8 +27,8 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
-    $values = [
+  public function getFieldStorageBaseDefinition(array $values = array()) {
+    $values += [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'custom_storage' => $this->getEntityType() == 'user',
       'settings' => [
@@ -37,14 +37,14 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'type' => $this->getEntityType() == 'user' ? 'og_membership_reference' : 'og_standard_reference',
     ];
 
-    return parent::getFieldStorageConfigBaseDefinition($values);
+    return parent::getFieldStorageBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFieldConfigBaseDefinition(array $values = array()) {
-    $values = [
+  public function getFieldBaseDefinition(array $values = array()) {
+    $values += [
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
       'label' => $this->t('Groups audience'),
@@ -54,42 +54,39 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       ],
     ];
 
-    return parent::getFieldConfigBaseDefinition($values);
+    return parent::getFieldBaseDefinition($values);
 
   }
 
   /**
    * {@inheritdoc}
    */
-  public function widgetDefinition(array $widget = []) {
-    // Keep this until og_complex widget is back.
-    return [
+  public function getFormDisplayDefinition(array $values = []) {
+    $values += [
       'type' => 'og_complex',
       'settings' => [
         'match_operator' => 'CONTAINS',
+        'size' => 60,
+        'placeholder' => '',
       ],
     ];
+
+
+    return $values;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition(array $view_mode = []) {
-    return [
-      'default' => [
-        'label' => 'above',
-        'type' => 'entity_reference_label',
-        'settings' => [
-          'link' => TRUE,
-        ]
-      ],
-      'teaser' => [
-        'label' => 'above',
-        'type' => 'entity_reference_label',
-        'settings' => [
-          'link' => TRUE,
-        ],
-      ],
+  public function getViewDisplayDefinition(array $values = []) {
+    $values += [
+      'label' => 'above',
+      'type' => 'entity_reference_label',
+      'settings' => [
+        'link' => TRUE,
+      ]
     ];
+
+    return $values;
   }
 }

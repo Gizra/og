@@ -7,8 +7,8 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\Display\EntityDisplayInterface;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -46,6 +46,10 @@ class Og {
    *     config definitions. Values should comply with FieldStorageConfig::create()
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
+   *   - form_display: Array with values to override the form display
+   *     definitions.
+   *   - view_display: Array with values to override the view display
+   *     definitions.
    *
    * @return \Drupal\Core\Field\FieldConfigInterface
    *   The created or existing field config.
@@ -54,6 +58,8 @@ class Og {
     $settings = $settings + [
       'field_storage_config' => [],
       'field_config' => [],
+      'form_display' => [],
+      'view_display' => [],
     ];
 
     $field_name = !empty($settings['field_name']) ? $settings['field_name'] : $plugin_id;
@@ -69,12 +75,12 @@ class Og {
       ->setEntityType($entity_type);
 
     if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
-      $field_storage_config = NestedArray::mergeDeep($og_field->getFieldStorageConfigBaseDefinition(), $settings['field_storage_config']);
+      $field_storage_config = NestedArray::mergeDeep($og_field->getFieldStorageBaseDefinition(), $settings['field_storage_config']);
       FieldStorageConfig::create($field_storage_config)->save();
     }
 
     if (!$field_definition = FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
-      $field_config = NestedArray::mergeDeep($og_field->getFieldConfigBaseDefinition(), $settings['field_config']);
+      $field_config = NestedArray::mergeDeep($og_field->getFieldBaseDefinition(), $settings['field_config']);
 
       $field_definition = FieldConfig::create($field_config);
       $field_definition->save();
@@ -90,7 +96,6 @@ class Og {
     // If not found, create a fresh form display object. This is by design,
     // configuration entries are only created when an entity form display is
     // explicitly configured and saved.
-    // @see entity_get_form_display()
     if (!$form_display) {
       $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display')->create([
         'targetEntityType' => $entity_type,
@@ -100,16 +105,31 @@ class Og {
       ]);
     }
 
-    $widget = $form_display->getComponent($plugin_id);
-    $widget['type'] = 'og_complex';
-    $widget['settings'] = [
-      'match_operator' => 'CONTAINS',
-      'size' => 60,
-      'placeholder' => '',
-    ];
+    $form_display_definition = $og_field->getFormDisplayDefinition($settings['form_display']);
 
-    $form_display->setComponent($plugin_id, $widget);
+
+    $form_display->setComponent($plugin_id, $form_display_definition);
     $form_display->save();
+
+
+    // Set the view display for the "default" view display.
+    $view_display_definition = $og_field->getViewDisplayDefinition($settings['view_display']);
+
+    /** @var EntityDisplayInterface $view_display */
+    $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load("$entity_type.$bundle.default");
+
+    if (!$view_display) {
+      $view_display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->create([
+        'targetEntityType' => $entity_type,
+        'bundle' => $bundle,
+        'mode' => 'default',
+        'status' => TRUE,
+      ]);
+    }
+
+    $view_display->setComponent($plugin_id, $view_display_definition);
+    $view_display->save();
+
 
     return $field_definition;
   }
