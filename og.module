@@ -47,7 +47,15 @@ function og_entity_insert(EntityInterface $entity) {
  */
 function og_entity_predelete(EntityInterface $entity) {
   if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-    Og::deleteMemberships($entity);
+    // Register orphaned group content for deletion, if this option has been
+    // enabled.
+    $config = \Drupal::config('og.settings');
+    if ($config->get('delete_orphans')) {
+      $plugin_id = $config->get('delete_orphans_plugin_id');
+      /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
+      $plugin = \Drupal::service('plugin.manager.og.delete_orphans')->createInstance($plugin_id, []);
+      $plugin->register($entity);
+    }
 
     // @todo Delete user roles.
     // og_delete_user_roles_by_group($entity_type, $entity);

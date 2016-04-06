@@ -651,30 +651,4 @@ class Og {
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
   }
 
-  /**
-   * Initiates the deletion of memberships for the given group entity.
-   *
-   * This is intended to be called when a group entity is deleted, to clean up
-   * orphaned group content.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The group entity.
-   *
-   * @see og_entity_predelete()
-   */
-  public static function deleteMemberships(EntityInterface $entity) {
-    $config = \Drupal::config('og.settings');
-
-    // Register orphaned group content for deletion, if this option has been
-    // enabled.
-    if ($config->get('delete_orphans')) {
-      $plugin_id = $config->get('delete_orphans_plugin_id');
-      // @todo Implement plugin specific configuration.
-      $configuration = [];
-      /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
-      $plugin = \Drupal::service('plugin.manager.og.delete_orphans')->createInstance($plugin_id, $configuration);
-      $plugin->register($entity);
-    }
-  }
-
 }
