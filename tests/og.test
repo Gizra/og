@@ -1910,6 +1910,39 @@ class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
 }
 
 /**
+ * Tests the moving of the node to another group when deleting a group.
+ *
+ * @todo This functionality still needs to be ported to Drupal 8.
+ *
+ * @see og_membership_delete_by_group()
+ * @see og_test_entity_delete()
+ * @see https://github.com/amitaibu/og/issues/178
+ */
+function testMoveOrphans() {
+  // Creating two groups.
+  $first_group = $this->drupalCreateNode(array('type' => $this->group_type, 'title' => 'move'));
+  $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
+
+  // Create a group and relate it to the first group.
+  $first_node = $this->drupalCreateNode(array('type' => $this->node_type));
+  og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $first_node));
+
+  // Delete the group.
+  node_delete($first_group->nid);
+
+  // Execute manually the queue worker.
+  $queue = DrupalQueue::get('og_membership_orphans');
+  $item = $queue->claimItem();
+  og_membership_orphans_worker($item->data);
+
+  // Load the node into a wrapper and verify we moved him to another group.
+  $gids = og_get_entity_groups('node', $first_node->nid);
+  $gid = reset($gids['node']);
+
+  $this->assertEqual($gid, $second_group->nid, 'The group content moved to another group.');
+}
+
+/**
  * Testing publishing content in a group for non members users.
  */
 class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {

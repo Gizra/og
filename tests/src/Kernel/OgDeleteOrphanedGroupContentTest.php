@@ -171,42 +171,4 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     ];
   }
 
-  /**
-   * Tests the moving of the node to another group when deleting a group.
-   *
-   * @todo This test doesn't make any sense to me. The way I read it is that if
-   *   multiple groups are present and one of the groups is deleted then its
-   *   content is expected to be moved into a random other group? This seems
-   *   dangerous, it might expose private data.
-   *
-   *   This might be useful for child groups that are related to parent groups,
-   *   so that when a child group is deleted its content will be moved to the
-   *   parent, but then there should be a very clear indication of the parent-
-   *   child relation which is missing in this test. Here the content just moves
-   *   to whatever random group that is available.
-   */
-  function _testMoveOrphans() {
-    // Creating two groups.
-    $first_group = $this->drupalCreateNode(array('type' => $this->group_type, 'title' => 'move'));
-    $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
-
-    // Create a group and relate it to the first group.
-    $first_node = $this->drupalCreateNode(array('type' => $this->node_type));
-    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $first_node));
-
-    // Delete the group.
-    node_delete($first_group->nid);
-
-    // Execute manually the queue worker.
-    $queue = DrupalQueue::get('og_membership_orphans');
-    $item = $queue->claimItem();
-    og_membership_orphans_worker($item->data);
-
-    // Load the node into a wrapper and verify we moved him to another group.
-    $gids = og_get_entity_groups('node', $first_node->nid);
-    $gid = reset($gids['node']);
-
-    $this->assertEqual($gid, $second_group->nid, 'The group content moved to another group.');
-  }
-
 }
