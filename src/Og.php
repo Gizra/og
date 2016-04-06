@@ -220,7 +220,7 @@ class Og {
       // orphaned target IDs.
       $entity_type = \Drupal::entityTypeManager()->getDefinition($target_type);
       $query = \Drupal::entityQuery($target_type)
-        ->condition($entity_type->getKey('id'), $target_ids);
+        ->condition($entity_type->getKey('id'), $target_ids, 'IN');
 
       // Optionally filter by group bundle.
       if (!empty($group_bundle)) {
