@@ -203,4 +203,73 @@ class GetGroupContentTest extends KernelTestBase {
     }
   }
 
+  /**
+   * Test retrieval of group content with multiple group audience fields.
+   */
+  public function testMultipleGroupAudienceFields() {
+    $groups = [];
+
+    // Create two groups of different entity types.
+    $bundle = Unicode::strtolower($this->randomMachineName());
+    NodeType::create([
+      'name' => $this->randomString(),
+      'type' => $bundle,
+    ])->save();
+    Og::groupManager()->addGroup('node', $bundle);
+
+    $groups['node'] = Node::create([
+      'title' => $this->randomString(),
+      'type' => $bundle,
+    ]);
+    $groups['node']->save();
+
+    // The Entity Test entity doesn't have 'real' bundles, so we don't need to
+    // create one, we can just add the group to the fake bundle.
+    $bundle = Unicode::strtolower($this->randomMachineName());
+    Og::groupManager()->addGroup('entity_test', $bundle);
+
+    $groups['entity_test'] = EntityTest::create([
+      'type' => $bundle,
+      'name' => $this->randomString(),
+    ]);
+    $groups['entity_test']->save();
+
+    // Create a group content type with two group audience fields, one for each
+    // group.
+    $bundle = Unicode::strtolower($this->randomMachineName());
+    foreach (['entity_test', 'node'] as $target_type) {
+      $settings = [
+        'field_name' => 'group_audience_' . $target_type,
+        'field_storage_config' => [
+          'settings' => [
+            'target_type' => $target_type,
+          ],
+        ],
+      ];
+      Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
+    }
+
+    // Create a group content entity that references both groups.
+    $values = [
+      'name' => $this->randomString(),
+      'type' => $bundle,
+    ];
+    foreach (['entity_test', 'node'] as $target_type) {
+      $values['group_audience_' . $target_type] = [
+        ['target_id' => $groups[$target_type]->id()],
+      ];
+    }
+
+    $group_content = $this->entityTypeManager->getStorage('entity_test')->create($values);
+    $group_content->save();
+
+    // Check that Og::getGroupContent() returns the group content entity for
+    // both groups.
+    $expected = ['entity_test' => [$group_content->id()]];
+    foreach ($groups as $key => $groups) {
+      $result = Og::getGroupContent($groups);
+      $this->assertEquals($expected, $result, "The group content entity is returned for group $key.");
+    }
+  }
+
 }
