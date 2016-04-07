@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\OgDeleteOrphans;
 
+use Drupal\Core\Queue\QueueWorkerInterface;
 use Drupal\og\OgDeleteOrphansBase;
 
 /**
@@ -14,16 +15,25 @@ use Drupal\og\OgDeleteOrphansBase;
  *  weight = 3
  * )
  */
-class Cron extends OgDeleteOrphansBase {
+class Cron extends OgDeleteOrphansBase implements QueueWorkerInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function process($entity_type, $entity_id) {
+  public function process() {
+    // No online processing is done in this plugin. Instead, all orphans are
+    // deleted during offline cron jobs by the DeleteOrphan queue worker.
+    // @see \Drupal\og\Plugin\QueueWorker\DeleteOrphan
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processItem($data) {
     // Orphans are processed one by one by the QueueWorker during cron runs
     // until the alotted time expires.
     // @see \Drupal\og\Plugin\QueueWorker\DeleteOrphan
-    $this->deleteOrphan($entity_type, $entity_id);
+    $this->deleteOrphan($data['type'], $data['id']);
   }
 
   /**
