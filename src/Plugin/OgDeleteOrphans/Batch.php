@@ -66,7 +66,7 @@ class Batch extends OgDeleteOrphansBase {
    * Batch step definition callback to process one queue item.
    */
   public static function step($context) {
-    if (isset($context['interrupted']) && $context['interrupted']) {
+    if (!empty($context['interrupted'])) {
       return;
     }
     \Drupal::getContainer()->get('plugin.manager.og.delete_orphans')->createInstance('batch', [])->process();

@@ -90,7 +90,7 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
    *   array of group content entity IDs to delete.
    */
   protected function query(EntityInterface $entity) {
-    return Og::getGroupContent($entity);
+    return Og::getGroupContentIds($entity);
   }
 
   /**

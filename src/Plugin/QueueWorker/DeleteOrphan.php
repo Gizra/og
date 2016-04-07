@@ -2,10 +2,9 @@
 
 namespace Drupal\og\Plugin\QueueWorker;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
-use Drupal\og\Og;
+use Drupal\og\OgDeleteOrphansPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -20,11 +19,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class DeleteOrphan extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 
   /**
-   * The entity type manager.
+   * The plugin manager for OgDeleteOrphans plugins.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\og\OgDeleteOrphansPluginManager
    */
-  protected $entityTypeManager;
+  protected $ogDeleteOrphansPluginManager;
 
   /**
    * Constructs a DeleteOrphan object.
@@ -35,12 +34,12 @@ class DeleteOrphan extends QueueWorkerBase implements ContainerFactoryPluginInte
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
+   * @param \Drupal\og\OgDeleteOrphansPluginManager $og_delete_orphans_plugin_manager
+   *   The plugin manager for OgDeleteOrphans plugins.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, OgDeleteOrphansPluginManager $og_delete_orphans_plugin_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->entityTypeManager = $entity_type_manager;
+    $this->ogDeleteOrphansPluginManager = $og_delete_orphans_plugin_manager;
   }
 
   /**
@@ -51,7 +50,7 @@ class DeleteOrphan extends QueueWorkerBase implements ContainerFactoryPluginInte
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity_type.manager')
+      $container->get('plugin.manager.og.delete_orphans')
     );
   }
 
@@ -59,14 +58,7 @@ class DeleteOrphan extends QueueWorkerBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public function processItem($data) {
-    /** @var \Drupal\core\Entity\EntityInterface $entity */
-    $entity = $this->entityTypeManager->getStorage($data['type'])->load($data['id']);
-    // Only delete content that is fully orphaned, i.e. is no longer associated
-    // with any groups.
-    $group_count = Og::getGroupCount($entity);
-    if ($group_count == 0) {
-      $entity->delete();
-    }
+    $this->ogDeleteOrphansPluginManager->createInstance('batch', [])->process($data['type'], $data['id']);
   }
 
 }

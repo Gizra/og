@@ -185,7 +185,7 @@ class Og {
    * Returns all group IDs associated with the given group content entity.
    *
    * Do not use this to retrieve group IDs associated with a user entity. Use
-   * Og::GetEntityGroups() instead.
+   * Og::getEntityGroups() instead.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group content entity for which to return the associated groups.
@@ -197,8 +197,15 @@ class Og {
    * @return array
    *   An associative array, keyed by group entity type, each item an array of
    *   group entity IDs.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when a user entity is passed in.
    */
   public static function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
+    // This does not work for user entities.
+    if ($entity->getEntityTypeId() === 'user') {
+      throw new \InvalidArgumentException('\\Og::getGroupIds() cannot be used for user entities. Use \\Og::getEntityGroups() instead.');
+    }
     $group_ids = [];
 
     $fields = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle(), $group_type_id, $group_bundle);
@@ -216,7 +223,7 @@ class Og {
       }, $entity->get($field->getName())->getValue());
 
       // Query the database to get the actual list of groups. The target IDs may
-      // contain groups that no longer exist. Entityreference doesn't clean up
+      // contain groups that no longer exist. Entity reference doesn't clean up
       // orphaned target IDs.
       $entity_type = \Drupal::entityTypeManager()->getDefinition($target_type);
       $query = \Drupal::entityQuery($target_type)
@@ -283,21 +290,23 @@ class Og {
   }
 
   /**
-   * Returns all the group content associated with a given group entity.
+   * Returns all the group content IDs associated with a given group entity.
    *
-   * This does not return users that are members of the given group.
+   * This does not return information about users that are members of the given
+   * group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The group entity for which to return group content.
+   *   The group entity for which to return group content IDs.
    * @param array $entity_types
-   *   Optional list of group content entity types to return. If an empty array
-   *   is passed, the group content is not filtered. Defaults to an empty array.
+   *   Optional list of group content entity types for which to return results.
+   *   If an empty array is passed, the group content is not filtered. Defaults
+   *   to an empty array.
    *
    * @return array
    *   An associative array, keyed by group content entity type, each item an
    *   array of group content entity IDs.
    */
-  public static function getGroupContent(EntityInterface $entity, array $entity_types = []) {
+  public static function getGroupContentIds(EntityInterface $entity, array $entity_types = []) {
     $group_content = [];
 
     // Retrieve the fields which reference our entity type and bundle.

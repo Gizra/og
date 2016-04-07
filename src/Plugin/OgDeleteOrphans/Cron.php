@@ -19,17 +19,21 @@ class Cron extends OgDeleteOrphansBase {
   /**
    * {@inheritdoc}
    */
-  public function process() {
-    // Processing of orphans happens in the background during cron runs.
+  public function process($entity_type, $entity_id) {
+    // Orphans are processed one by one by the QueueWorker during cron runs
+    // until the alotted time expires.
     // @see \Drupal\og\Plugin\QueueWorker\DeleteOrphan
+    $this->deleteOrphan($entity_type, $entity_id);
   }
 
   /**
    * {@inheritdoc}
    */
   protected function getQueue() {
-    // Use a separate queue for the cron deletion, to prevent the cron job from
-    // cleaning up items from another plugin.
+    // By design, every QueueWorker is executed on every cron run and will
+    // start processing its designated queue. To make sure that our DeleteOrphan
+    // queue worker will not start processing orphans that have been registered
+    // by another plugin (e.g. the Batch plugin) we are using a dedicated queue.
     return $this->queueFactory->get('og_orphaned_group_content_cron', TRUE);
   }
 

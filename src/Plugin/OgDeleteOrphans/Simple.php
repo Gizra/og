@@ -5,7 +5,7 @@ namespace Drupal\og\Plugin\OgDeleteOrphans;
 use Drupal\og\OgDeleteOrphansBase;
 
 /**
- * Performs a simple deletion of orphans.
+ * Performs an on-the-fly deletion of orphans.
  *
  * @OgDeleteOrphans(
  *  id = "simple",

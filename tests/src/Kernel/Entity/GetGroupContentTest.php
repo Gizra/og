@@ -135,14 +135,14 @@ class GetGroupContentTest extends KernelTestBase {
     // Check that Og::getGroupContent() returns the correct group content for
     // each group.
     foreach (['node', 'entity_test'] as $group_type) {
-      $result = Og::getGroupContent($groups[$group_type]);
+      $result = Og::getGroupContentIds($groups[$group_type]);
       foreach (['node', 'entity_test'] as $group_content_type) {
         $this->assertEquals([$group_content[$group_content_type][$group_type]->id()], $result[$group_content_type], "The correct $group_content_type group content is returned for the $group_type group.");
       }
       // Test that the correct results are returned when filtering by entity
       // type.
       foreach (['node', 'entity_test'] as $filter) {
-        $result = Og::getGroupContent($groups[$group_type], [$filter]);
+        $result = Og::getGroupContentIds($groups[$group_type], [$filter]);
         $this->assertEquals(1, count($result), "Only one entity type is returned when getting $group_type results filtered by $group_content_type group content.");
         $this->assertEquals([$group_content[$filter][$group_type]->id()], $result[$filter], "The correct result is returned for the $group_type group, filtered by $group_content_type group content.");
       }
@@ -198,7 +198,7 @@ class GetGroupContentTest extends KernelTestBase {
     // both groups.
     $expected = ['entity_test' => [$group_content->id()]];
     foreach ($groups as $key => $groups) {
-      $result = Og::getGroupContent($groups);
+      $result = Og::getGroupContentIds($groups);
       $this->assertEquals($expected, $result, "The group content entity is returned for group $key.");
     }
   }
@@ -267,7 +267,7 @@ class GetGroupContentTest extends KernelTestBase {
     // both groups.
     $expected = ['entity_test' => [$group_content->id()]];
     foreach ($groups as $key => $groups) {
-      $result = Og::getGroupContent($groups);
+      $result = Og::getGroupContentIds($groups);
       $this->assertEquals($expected, $result, "The group content entity is returned for group $key.");
     }
   }
