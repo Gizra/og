@@ -12,7 +12,6 @@ use Drupal\og\OgDeleteOrphansBase;
  *  id = "cron",
  *  label = @Translation("Cron", context = "OgDeleteOrphans"),
  *  description = @Translation("The deletion is done in the background during cron. Best overall solution but requires cron to run regularly."),
- *  weight = 3
  * )
  */
 class Cron extends OgDeleteOrphansBase implements QueueWorkerInterface {

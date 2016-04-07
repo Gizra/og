@@ -97,6 +97,7 @@ class AdminSettingsForm extends ConfigFormBase {
     ];
 
     $definitions = $this->ogDeleteOrphansPluginManager->getDefinitions();
+    ksort($definitions);
     $options = array_map(function ($definition) {
       return $definition['label'];
     }, $definitions);
@@ -118,10 +119,9 @@ class AdminSettingsForm extends ConfigFormBase {
       /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
       $plugin = $this->ogDeleteOrphansPluginManager->createInstance($id, []);
 
-      // Add the description and weight for each delete method.
+      // Add the description for each delete method.
       $form['og_delete_orphans_plugin_id'][$id] = [
         '#description' => $definition['description'],
-        '#weight' => !empty($definition['weight']) ? $definition['weight'] : 0,
       ];
 
       // Show the configuration options for the chosen plugin.

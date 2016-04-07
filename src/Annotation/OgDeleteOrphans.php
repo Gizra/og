@@ -36,14 +36,4 @@ class OgDeleteOrphans extends Plugin {
    */
   public $description;
 
-  /**
-   * An integer to determine the weight of this plugin.
-   *
-   * This is used to show the plugin relative to other plugins in the
-   * administration form.
-   *
-   * @var int optional
-   */
-  public $weight = NULL;
-
 }
