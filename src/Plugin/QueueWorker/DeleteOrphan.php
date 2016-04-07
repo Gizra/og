@@ -58,7 +58,7 @@ class DeleteOrphan extends QueueWorkerBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public function processItem($data) {
-    $this->ogDeleteOrphansPluginManager->createInstance('batch', [])->processItem($data);
+    $this->ogDeleteOrphansPluginManager->createInstance('cron', [])->processItem($data);
   }
 
 }
