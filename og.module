@@ -413,6 +413,25 @@ function _og_form_group_reference_validate($form, &$form_state) {
   form_set_error('og', t('You must select one or more groups for this content.'));
 }
 
+
+/**
+ * Implements hook_field_formatter_info_alter()
+ *
+ * Allow OG audience fields to have entity reference formatters.
+ */
+function og_field_formatter_info_alter(array &$info) {
+  foreach (array_keys($info) as $key) {
+    if (!in_array('entity_reference', $info[$key]['field_types'])) {
+      // Not an entity reference formatter.
+      continue;
+    }
+
+    $info[$key]['field_types'][] = 'og_membership_reference';
+    $info[$key]['field_types'][] = 'og_standard_reference';
+  }
+}
+
+
 /**
  * Validate handler; Make sure a group can be created.
  *

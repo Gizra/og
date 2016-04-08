@@ -30,6 +30,13 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
   protected $ogDeleteOrphansPluginManager;
 
   /**
+   * A test group.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface
+   */
+  protected $group;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -47,35 +54,35 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     $this->ogDeleteOrphansPluginManager = \Drupal::service('plugin.manager.og.delete_orphans');
 
     // Create a group entity type.
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+    $group_bundle = Unicode::strtolower($this->randomMachineName());
     NodeType::create([
-      'type' => $this->groupBundle,
+      'type' => $group_bundle,
       'name' => $this->randomString(),
     ])->save();
-    Og::groupManager()->addGroup('node', $this->groupBundle);
+    Og::groupManager()->addGroup('node', $group_bundle);
 
     // Create a group content entity type.
-    $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
+    $group_content_bundle = Unicode::strtolower($this->randomMachineName());
     NodeType::create([
-      'type' => $this->groupContentBundle,
+      'type' => $group_content_bundle,
       'name' => $this->randomString(),
     ])->save();
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $group_content_bundle);
 
     // Create a group.
     $this->group = Node::create([
       'title' => $this->randomString(),
-      'type' => $this->groupBundle,
+      'type' => $group_bundle,
     ]);
     $this->group->save();
 
     // Create a group content item.
-    $this->groupContent = Node::create([
+    $group_content = Node::create([
       'title' => $this->randomString(),
-      'type' => $this->groupContentBundle,
+      'type' => $group_content_bundle,
       OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
     ]);
-    $this->groupContent->save();
+    $group_content->save();
   }
 
   /**

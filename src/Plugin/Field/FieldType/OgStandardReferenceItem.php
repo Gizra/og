@@ -21,7 +21,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   category = @Translation("Reference"),
  *   no_ui = TRUE,
  *   default_widget = "og_complex",
- *   default_formatter = "og_complex",
+ *   default_formatter = "entity_reference_label",
  *   list_class = "\Drupal\Core\Field\EntityReferenceFieldItemList",
  *   constraints = {"ValidOgMembershipReference" = {}}
  * )

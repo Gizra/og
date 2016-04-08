@@ -19,34 +19,28 @@ class EntityRestrictedField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
+  public function getFieldStorageBaseDefinition(array $values = []) {
     $values = [
       // Restrict the allowed entities.
       'entity' => ['node'],
       'type' => 'list_integer',
     ];
 
-    return parent::getFieldStorageConfigBaseDefinition($values);
+    return parent::getFieldStorageBaseDefinition($values);
   }
+
 
   /**
    * {@inheritdoc}
    */
-  public function getFieldConfigBaseDefinition(array $values = array()) {
-    return parent::getFieldConfigBaseDefinition($values);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function widgetDefinition() {
+  public function getFormDisplayDefinition(array $values = []) {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition()  {
+  public function getViewDisplayDefinition(array $values = [])  {
     return [];
   }
 }
