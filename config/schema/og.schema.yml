@@ -56,12 +56,12 @@ og.settings:
     node_access_strict:
       type: boolean
       label: 'Strict node access permissions'
-    orphans_delete:
+    delete_orphans:
       type: boolean
       label: 'Delete orphaned group content when a group is deleted'
-    use_queue:
-      type: boolean
-      label: 'Use queue'
+    delete_orphans_plugin_id:
+      type: string
+      label: 'The method to use when deleting orphaned group content'
 
 og.settings.group.*:
   type: sequence

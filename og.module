@@ -43,6 +43,31 @@ function og_entity_insert(EntityInterface $entity) {
 }
 
 /**
+ * Implements hook_entity_predelete().
+ */
+function og_entity_predelete(EntityInterface $entity) {
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+    // Register orphaned group content for deletion, if this option has been
+    // enabled.
+    $config = \Drupal::config('og.settings');
+    if ($config->get('delete_orphans')) {
+      $plugin_id = $config->get('delete_orphans_plugin_id');
+      /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
+      $plugin = \Drupal::service('plugin.manager.og.delete_orphans')->createInstance($plugin_id, []);
+      $plugin->register($entity);
+    }
+
+    // @todo Delete user roles.
+    // @see https://github.com/amitaibu/og/issues/175
+    // og_delete_user_roles_by_group($entity_type, $entity);
+  }
+  if ($entity instanceof \Drupal\user\UserInterface) {
+    // @todo Delete memberships when deleting users.
+    // @see https://github.com/amitaibu/og/issues/176
+  }
+}
+
+/**
  * Implements hook_entity_field_access().
  *
  * Hide group-audience fields from user's edit profile for non-privileged users.
@@ -543,24 +568,6 @@ function __og_update_entity_fields($entity_type, $entity) {
     if ($gids) {
       $wrapper->{$field_name}->set($gids);
     }
-  }
-}
-
-/**
- * Implements hook_entity_delete().
- */
-function _og_entity_delete($entity, $entity_type) {
-  list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
-  if (og_is_group($entity_type, $entity)) {
-    og_delete_user_roles_by_group($entity_type, $entity);
-    og_membership_delete_by_group($entity_type, $entity);
-  }
-  if (og_is_group_content_type($entity_type, $bundle)) {
-    // As the field attachers are called after hook_entity_presave() we
-    // can't delete the OG memberships here. So we just mark the entity
-    // as being deleted, and we will do the actual delete in
-    // OgBehaviorHandler::delete().
-    $entity->delete_og_membership = TRUE;
   }
 }
 
@@ -1184,57 +1191,6 @@ function __og_orphans_move($ids, $group_type, $gid) {
     $og_membership->gid = $gid;
     $og_membership->save();
   }
-}
-
-/**
- * Register memberships for deletion.
- *
- * if the property "skip_og_membership_delete_by_group" exists on the
- * entity, this function _will return early, and allow other implementing
- * modules to deal with the deletion logic.
- *
- * @param $entity_type
- *   The group type.
- * @param $entity
- *   The group entity object.
- */
-function _og_membership_delete_by_group($entity_type, $entity) {
-  if (!empty($entity->skip_og_membership_delete_by_group)) {
-    return;
-  }
-
-  list($gid) = entity_extract_ids($entity_type, $entity);
-  $query = new EntityFieldQuery();
-  $result = $query
-    ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition('group_type', $entity_type, '=')
-    ->propertyCondition('gid', $gid, '=')
-    ->execute();
-
-  if (empty($result['og_membership'])) {
-    return;
-  }
-
-  if (\Drupal::config('og.settings')->get('use_queue')) {
-    $queue = DrupalQueue::get('og_membership_orphans');
-    // Add item to the queue.
-    $data = array(
-      'group_type' => $entity_type,
-      'gid' => $gid,
-      // Allow implementing modules to determine the disposition (e.g. delete
-      // orphan group content).
-      'orphans' => array(
-        'delete' => isset($entity->og_orphans['delete']) ? $entity->og_orphans['delete'] : \Drupal::config('og.settings')->get('orphans_delete'),
-        'move' => isset($entity->og_orphans['move']) ? $entity->og_orphans['move'] : array(),
-      ),
-    );
-
-    // Exit now, as the task will be processed via queue.
-    return $queue->createItem($data);
-  }
-
-  // No scalable solution was chosen, so just delete OG memberships.
-  og_membership_delete_multiple(array_keys($result['og_membership']));
 }
 
 /**

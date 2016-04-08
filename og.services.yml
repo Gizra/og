@@ -1,10 +1,13 @@
 services:
-  plugin.manager.og.fields:
-    class: Drupal\og\OgFieldsPluginManager
-    parent: default_plugin_manager
   og.group.manager:
     class: Drupal\og\GroupManager
     arguments: ['@config.factory']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
+  plugin.manager.og.delete_orphans:
+    class: Drupal\og\OgDeleteOrphansPluginManager
+    parent: default_plugin_manager
+  plugin.manager.og.fields:
+    class: Drupal\og\OgFieldsPluginManager
+    parent: default_plugin_manager

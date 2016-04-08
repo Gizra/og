@@ -1948,43 +1948,13 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Testing two things:
-   *  When deleting a group, the node of the group will be deleted.
-   *  Associated node with the deleted group and another group won't be deleted.
-   */
-  function testDeleteGroup() {
-    // Creating two groups.
-    $first_group = $this->drupalCreateNode(array('type' => $this->group_type));
-    $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
-
-    // Create two nodes.
-    $first_node = $this->drupalCreateNode(array('type' => $this->node_type));
-    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $first_node));
-    og_group('node', $second_group, array('entity_type' => 'node', 'entity' => $first_node));
-
-    $second_node = $this->drupalCreateNode(array('type' => $this->node_type));
-    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $second_node));
-
-    // Delete the group.
-    node_delete($first_group->nid);
-
-    // Execute manually the queue worker.
-    $queue = DrupalQueue::get('og_membership_orphans');
-    $item = $queue->claimItem();
-    og_membership_orphans_worker($item->data);
-
-    // Load the nodes we used during the test.
-    $first_node = node_load($first_node->nid);
-    $second_node = node_load($second_node->nid);
-
-    // Verify the none orphan node wasn't deleted.
-    $this->assertTrue($first_node, "The second node is realted to another group and deleted.");
-    // Verify the orphan node deleted.
-    $this->assertFalse($second_node, "The orphan node deleted.");
-  }
-
-  /**
    * Testing the moving of the node to another group when deleting a group.
+   *
+   * @todo This functionality still needs to be ported to Drupal 8.
+   *
+   * @see og_membership_delete_by_group()
+   * @see og_test_entity_delete()
+   * @see https://github.com/amitaibu/og/issues/178
    */
   function testMoveOrphans() {
     // Creating two groups.
