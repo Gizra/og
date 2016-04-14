@@ -78,7 +78,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $identifier = implode(':', $identifier);
 
 
-    $group_ids = [$group_type_id => $group->id()];
+    $group_ids = [$group_type_id => [$group->id()]];
 
     $reflection_property->setValue([$identifier => $group_ids]);
   }
