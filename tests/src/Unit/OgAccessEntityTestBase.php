@@ -61,13 +61,12 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $entity_type_manager->getDefinition($entity_type_id)->willReturn($entity_type->reveal());
     $entity_type_manager->getStorage($group_type_id)->willReturn($storage->reveal());
 
-    $storage->loadMultiple(Argument::type('array'))->willReturn([$group]);
 
     $container = \Drupal::getContainer();
     $container->set('entity_type.manager', $entity_type_manager->reveal());
     $container->set('entity_field.manager', $entity_field_manager->reveal());
 
-    // Mock the results of Og::getUserMembershipsAndGroups().
+    // Mock the results of Og::getGroupIds().
     $r = new \ReflectionClass('Drupal\og\Og');
     $reflection_property = $r->getProperty('cache');
     $reflection_property->setAccessible(TRUE);
@@ -82,6 +81,9 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $group_ids = [$group_type_id => [$group->id()]];
     $reflection_property->setValue([$identifier => $group_ids]);
+
+    // Mock the results of Og::getGroups().
+    $storage->loadMultiple(Argument::type('array'))->willReturn([$group]);
   }
 
 }
