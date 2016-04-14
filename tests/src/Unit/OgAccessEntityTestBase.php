@@ -57,7 +57,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $container->set('entity_type.manager', $entity_type_manager->reveal());
     $container->set('entity_field.manager', $entity_field_manager->reveal());
 
-    // Mock the results of Og::getEntityGroups().
+    // Mock the results of Og::getUserMembershipsAndGroups().
     $r = new \ReflectionClass('Drupal\og\Og');
     $reflection_property = $r->getProperty('entityGroupCache');
     $reflection_property->setAccessible(TRUE);
