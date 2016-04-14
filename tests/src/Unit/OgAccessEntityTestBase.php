@@ -63,7 +63,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $reflection_property->setAccessible(TRUE);
 
     $identifier = [
-      $entity_type_id,
+      $entity_id,
       NULL,
       NULL,
     ];
