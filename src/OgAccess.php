@@ -186,18 +186,16 @@ class OgAccess {
     // @TODO: add caching on Og::isGroupContent.
     $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
     $cache_tags = $entity_type->getListCacheTags();
-    if ($is_group_content && $entity_groups = Og::getUserMembershipsAndGroups($entity)) {
+
+    if ($is_group_content && $groups = Og::getGroups($entity)) {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
-      foreach ($entity_groups as $groups) {
-        foreach ($groups as $group) {
-          $user_access = static::userAccess($group, $operation, $user);
-          if ($user_access->isAllowed()) {
-            return $user_access->addCacheTags($cache_tags);
-          }
-          else {
-            $forbidden->inheritCacheability($user_access);
-          }
+      foreach ($groups as $group) {
+        $user_access = static::userAccess($group, $operation, $user);
+        if ($user_access->isAllowed()) {
+          return $user_access->addCacheTags($cache_tags);
         }
+        
+        $forbidden->inheritCacheability($user_access);
       }
       return $forbidden;
     }
