@@ -61,7 +61,17 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $r = new \ReflectionClass('Drupal\og\Og');
     $reflection_property = $r->getProperty('entityGroupCache');
     $reflection_property->setAccessible(TRUE);
-    $reflection_property->setValue(["$entity_type_id:$entity_id:1:" => [[$this->groupEntity()->reveal()]]]);
+
+    $identifier = [
+      $entity_type_id,
+      NULL,
+      NULL,
+    ];
+
+    $identifier = implode(':', $identifier);
+
+    $group_ids = $this->groupEntity()->reveal()->id();
+    $reflection_property->setValue([$identifier => [$group_ids]]);
 
   }
 }

@@ -194,7 +194,7 @@ class OgAccess {
         if ($user_access->isAllowed()) {
           return $user_access->addCacheTags($cache_tags);
         }
-        
+
         $forbidden->inheritCacheability($user_access);
       }
       return $forbidden;

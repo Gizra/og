@@ -225,6 +225,20 @@ class Og {
     if ($entity->getEntityTypeId() === 'user') {
       throw new \InvalidArgumentException('\\Og::getGroupIds() cannot be used for user entities. Use \\Og::getUserMembershipsAndGroups() instead.');
     }
+
+    $identifier = [
+      $entity->id(),
+      $group_type_id,
+      $group_bundle,
+    ];
+
+    $identifier = implode(':', $identifier);
+
+    if (isset(static::$entityGroupCache[$identifier])) {
+      // Return cached values.
+      return static::$entityGroupCache[$identifier];
+    }
+
     $group_ids = [];
 
     $fields = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle(), $group_type_id, $group_bundle);
@@ -255,6 +269,8 @@ class Og {
 
       $group_ids = NestedArray::mergeDeep($group_ids, [$target_type => $query->execute()]);
     }
+
+    static::$entityGroupCache[$identifier] = $group_ids;
 
     return $group_ids;
   }
