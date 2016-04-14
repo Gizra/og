@@ -59,7 +59,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     // Mock the results of Og::getUserMembershipsAndGroups().
     $r = new \ReflectionClass('Drupal\og\Og');
-    $reflection_property = $r->getProperty('entityGroupCache');
+    $reflection_property = $r->getProperty('cache');
     $reflection_property->setAccessible(TRUE);
 
     $identifier = [

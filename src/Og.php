@@ -24,11 +24,11 @@ use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 class Og {
 
   /**
-   * Static cache for groups per entity.
+   * Static cache for heavy queries.
    *
    * @var array
    */
-  protected static $entityGroupCache = [];
+  protected static $cache = [];
 
   /**
    * Create an organic groups field in a bundle.
@@ -168,12 +168,12 @@ class Og {
     ];
 
     $identifier = implode(':', $identifier);
-    if (isset(static::$entityGroupCache[$identifier])) {
+    if (isset(static::$cache[$identifier])) {
       // Return cached values.
-      return static::$entityGroupCache[$identifier];
+      return static::$cache[$identifier];
     }
 
-    static::$entityGroupCache[$identifier] = [];
+    static::$cache[$identifier] = [];
     $query = \Drupal::entityQuery('og_membership')
       ->condition('uid', $user->id());
 
@@ -194,10 +194,10 @@ class Og {
 
     /** @var \Drupal\og\Entity\OgMembership $membership */
     foreach ($memberships as $membership) {
-      static::$entityGroupCache[$identifier][$membership->getGroupEntityType()][$membership->id()] = $membership->getGroup();
+      static::$cache[$identifier][$membership->getGroupEntityType()][$membership->id()] = $membership->getGroup();
     }
 
-    return static::$entityGroupCache[$identifier];
+    return static::$cache[$identifier];
   }
 
   /**
@@ -234,9 +234,9 @@ class Og {
 
     $identifier = implode(':', $identifier);
 
-    if (isset(static::$entityGroupCache[$identifier])) {
+    if (isset(static::$cache[$identifier])) {
       // Return cached values.
-      return static::$entityGroupCache[$identifier];
+      return static::$cache[$identifier];
     }
 
     $group_ids = [];
@@ -270,7 +270,7 @@ class Og {
       $group_ids = NestedArray::mergeDeep($group_ids, [$target_type => $query->execute()]);
     }
 
-    static::$entityGroupCache[$identifier] = $group_ids;
+    static::$cache[$identifier] = $group_ids;
 
     return $group_ids;
   }
@@ -618,7 +618,7 @@ class Og {
     }
 
     // @todo Consider using a reset() method.
-    static::$entityGroupCache = [];
+    static::$cache = [];
 
     // Invalidate the entity property cache.
     \Drupal::entityTypeManager()->clearCachedDefinitions();
