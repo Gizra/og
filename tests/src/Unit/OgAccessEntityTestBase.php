@@ -51,12 +51,14 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $entity_field_manager = $this->prophesize(EntityFieldManagerInterface::class);
     $entity_field_manager->getFieldDefinitions($entity_type_id, $bundle)->willReturn([$field_definition->reveal()]);
 
+    $group = $this->groupEntity()->reveal();
+    $group_type_id = $group->getEntityTypeId();
 
     $storage = $this->prophesize(EntityStorageInterface::class);
 
     $entity_type_manager = $this->prophesize(EntityTypeManagerInterface::class);
     $entity_type_manager->getDefinition($entity_type_id)->willReturn($entity_type->reveal());
-    $entity_type_manager->getStorage($entity_type_id)->willReturn($storage->reveal());
+    $entity_type_manager->getStorage($group_type_id)->willReturn($storage->reveal());
 
     $container = \Drupal::getContainer();
     $container->set('entity_type.manager', $entity_type_manager->reveal());
@@ -75,9 +77,8 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $identifier = implode(':', $identifier);
 
-    $group = $this->groupEntity()->reveal();
-    $group_ids = [$group->bundle() => $group->id()];
 
+    $group_ids = [$group_type_id => $group->id()];
 
     $reflection_property->setValue([$identifier => $group_ids]);
   }

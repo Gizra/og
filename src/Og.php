@@ -226,6 +226,7 @@ class Og {
       throw new \InvalidArgumentException('\\Og::getGroupIds() cannot be used for user entities. Use \\Og::getUserMembershipsAndGroups() instead.');
     }
 
+
     $identifier = [
       $entity->id(),
       $group_type_id,
