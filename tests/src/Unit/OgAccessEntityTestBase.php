@@ -15,6 +15,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Prophecy\Argument;
 
 class OgAccessEntityTestBase extends OgAccessTestBase {
 
@@ -60,6 +61,8 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $entity_type_manager->getDefinition($entity_type_id)->willReturn($entity_type->reveal());
     $entity_type_manager->getStorage($group_type_id)->willReturn($storage->reveal());
 
+    $storage->loadMultiple(Argument::type('array'))->willReturn([$group]);
+
     $container = \Drupal::getContainer();
     $container->set('entity_type.manager', $entity_type_manager->reveal());
     $container->set('entity_field.manager', $entity_field_manager->reveal());
@@ -77,9 +80,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $identifier = implode(':', $identifier);
 
-
     $group_ids = [$group_type_id => [$group->id()]];
-
     $reflection_property->setValue([$identifier => $group_ids]);
   }
 
