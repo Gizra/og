@@ -16,25 +16,34 @@ use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 
 /**
- * The OG membership is the main idea behind OG. The OG membership entity keep
- * the connection between the group and the her content. For example we have the
- * node 1 which is a group and the node 2 which is node that belong to a group:
+ * While referencing content to a group done using the normal entity storage in
+ * the case of a user we have couple of things we need to handle. When a user is
+ * a member of a group we need to know if the membership is active, pending or
+ * blocking. Another use case we need to cover is the roles the user own in a
+ * specific group: member, content editor, manager etc. etc.
+ *
+ * This is the main reason we need the OG membership. The OG membership entity
+ * keeps the connection between the group and the user. For example we have node
+ * 1 which is a group and user 2 which is a user that belong to a group:
  * @code:
  *  $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
  *  $membership
- *    ->setContentId(2)
- *    ->setContentType('node')
- *    ->setGid(1)
+ *    ->setUser(2)
+ *    ->setEntityId(1)
  *    ->setEntityType('node')
  *    ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
  *    ->save();
  * @endcode
  *
- * Although the reference stored in the base table og_membership, there is a
- * need for an easy way the group and the group content content via the UI. This
- * is where the entity reference field come in: The field tables in the DB are
- * empty, but when asking the content of the field there a is work behind the
- * scene that structured the field value's on the fly. That's one of OG magic.
+ * Although the reference between non-user entity and a group stored in the
+ * default field storage, the reference between user and a group stored in
+ * the base table og_membership. Because of this data modeling there is a need
+ * for an easy way the group and the group's user(s) will be referenced via the
+ * UI. This is where the entity reference field come in: The field tables in the
+ * DB does not exists but when asking the content of the field there a is work
+ * behind the scene that structured the field value's on the fly.
+ *
+ * That's one of OG magic.
  *
  * @ContentEntityType(
  *   id = "og_membership",
