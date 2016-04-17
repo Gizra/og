@@ -85,6 +85,12 @@ class GroupManager {
    */
   public function addGroup($entity_type_id, $bundle_id) {
     $editable = $this->configFactory->getEditable('og.settings');
+
+    // Notify the event subscriber we added a new group.
+    $data = $editable->getRawData();
+    $data['group_added'] = TRUE;
+    $editable->setData($data);
+
     $groups = $editable->get('groups');
     $groups[$entity_type_id][] = $bundle_id;
     // @todo, just key by bundle ID instead?

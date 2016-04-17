@@ -11,3 +11,7 @@ services:
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
+  og.config_subscriber:
+    class: Drupal\og\EventSubscriber\OgConfigSubscriber
+    tags:
+      - { name: event_subscriber }
