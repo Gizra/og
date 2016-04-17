@@ -10,6 +10,7 @@ namespace Drupal\og;
 use \Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\Entity\OgRole;
+use Drupal\user\Entity\User;
 
 /**
  * Provides an interface for OG memberships.
@@ -57,6 +58,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Gets the membership creation timestamp.
    *
    * @return int
+   *   The membership creation timestamp.
    */
   public function getCreatedTime();
 
@@ -71,6 +73,8 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function setCreatedTime($timestamp);
 
   /**
+   * Sets the membership's owner.
+   *
    * @param mixed $etid
    *   The user's ID or object.
    *
@@ -79,10 +83,18 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function setUser($etid);
 
   /**
+   * Gets the membership's owner.
+   * 
+   * @return User
+   *   The user object.
+   */
+  public function getUser();
+
+  /**
    * Sets the membership field name.
    *
-   * A group content can have two group reference fields. The field name
-   * property helps us to know to which field the membership belongs.
+   * A user can have two group reference fields. The field name property helps
+   * us to know to which field the membership belongs.
    *
    * @param string $fieldName
    *   The group reference field name.
@@ -112,7 +124,8 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the group entity type ID.
    *
-   * @return mixed
+   * @return integer
+   *   The entity identifier.
    */
   public function getEntityId();
 
@@ -193,6 +206,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Gets all the referenced OG roles.
    *
    * @return OgRole[]
+   *   List of OG roles the user own for the current membership instance.
    */
   public function getRoles();
 
@@ -218,6 +232,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Gets the group object.
    *
    * @return EntityInterface
+   *   The group object which the membership reference to.
    */
   public function getGroup();
 
