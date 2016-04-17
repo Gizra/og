@@ -120,13 +120,17 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Sets the group entity type ID.
    *
    * @param mixed $groupType
+   *   The group entity type ID or object.
    *
    * @return OgMembershipInterface
    */
   public function setEntityType($groupType);
 
   /**
-   * @return mixed
+   * Gets the group entity type ID.
+   *
+   * @return string
+   *   The group entity type ID.
    */
   public function getGroupEntityType();
 
@@ -134,6 +138,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Sets the membership state.
    *
    * @param bool $state
+   *   TRUE or FALSE.
    *
    * @return OgMembershipInterface
    */
@@ -142,15 +147,15 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the membership state.
    *
-   * @return mixed
+   * @return bool
    */
   public function getState();
 
   /**
-   * Gets the membership type
+   * Gets the membership type.
    *
    * @return string
-   *
+   *   The bundle of the membership type.
    */
   public function getType();
 
