@@ -229,7 +229,7 @@ class Og {
     }
     $group_ids = [];
 
-    $fields = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle(), $group_type_id, $group_bundle);
+    $fields = OgGroupAudienceHelper::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle(), $group_type_id, $group_bundle);
     foreach ($fields as $field) {
       $target_type = $field->getFieldStorageDefinition()->getSetting('target_type');
 
@@ -459,7 +459,7 @@ class Og {
    *   True or false if the given entity is group content.
    */
   public static function isGroupContent($entity_type_id, $bundle_id) {
-    return (bool) static::getAllGroupAudienceFields($entity_type_id, $bundle_id);
+    return (bool) OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type_id, $bundle_id);
   }
 
   /**
@@ -492,72 +492,6 @@ class Og {
     return static::groupManager()->removeGroup($entity_type_id, $bundle_id);
   }
 
-  /**
-   * Return TRUE if field is a group audience type.
-   *
-   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
-   *   The field definition object.
-   *
-   * @return bool
-   *   TRUE if the field is a group audience type, FALSE otherwise.
-   */
-  public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
-    return in_array($field_definition->getType(), ['og_standard_reference', 'og_membership_reference']);
-  }
-
-  /**
-   * Return all the group audience fields of a certain bundle.
-   *
-   * @param string $entity_type_id
-   *   The entity type.
-   * @param string  $bundle
-   *   The bundle name to be checked.
-   * @param string $group_type_id
-   *   Filter list to only include fields referencing a specific group type.
-   * @param string $group_bundle
-   *   Filter list to only include fields referencing a specific group bundle.
-   *   Fields that do not specify any bundle restrictions at all are also
-   *   included.
-   *
-   * @return \Drupal\Core\Field\FieldDefinitionInterface[]
-   *   An array of field definitions, keyed by field name; Or an empty array if
-   *   none found.
-   */
-  public static function getAllGroupAudienceFields($entity_type_id, $bundle, $group_type_id = NULL, $group_bundle = NULL) {
-    $return = [];
-    $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
-
-    if (!$entity_type->isSubclassOf(FieldableEntityInterface::class)) {
-      // This entity type is not fieldable.
-      return [];
-    }
-    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
-
-    foreach ($field_definitions as $field_definition) {
-      if (!static::isGroupAudienceField($field_definition)) {
-        // Not a group audience field.
-        continue;
-      }
-
-      $target_type = $field_definition->getFieldStorageDefinition()->getSetting('target_type');
-
-      if (isset($group_type_id) && $target_type != $group_type_id) {
-        // Field doesn't reference this group type.
-        continue;
-      }
-
-      $handler_settings = $field_definition->getSetting('handler_settings');
-
-      if (isset($group_bundle) && !empty($handler_settings['target_bundles']) && !in_array($group_bundle, $handler_settings['target_bundles'])) {
-        continue;
-      }
-
-      $field_name = $field_definition->getName();
-      $return[$field_name] = $field_definition;
-    }
-
-    return $return;
-  }
 
   /**
    * Returns the group manager instance.
@@ -663,7 +597,7 @@ class Og {
    * @throws \Exception
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
-    if (!static::isGroupAudienceField($field_definition)) {
+    if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
       throw new \Exception("The field $field_name is not an audience field.");
     }
