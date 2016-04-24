@@ -7,7 +7,7 @@
 
 namespace Drupal\og;
 
-use \Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\user\Entity\User;
@@ -115,14 +115,14 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Sets the group entity type ID.
    *
    * @param mixed $gid
-   *   The group entity type ID or name.
+   *   The group entity ID.
    *
    * @return OgMembershipInterface
    */
   public function setEntityId($gid);
 
   /**
-   * Gets the group entity type ID.
+   * Gets the group entity ID.
    *
    * @return integer
    *   The entity identifier.
@@ -173,17 +173,17 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function getType();
 
   /**
-   * Sets the group's role's for the current user group membership's.
+   * Sets the group's roles for the current user group membership.
    *
    * @param $role_ids
-   *   List of og roles ids.
+   *   List of OG roles ids.
    *
    * @return OgMembershipInterface
    */
   public function setRoles($role_ids);
 
   /**
-   * Adding a role to the user membership.
+   * Adds a role to the user membership.
    *
    * @param $role_id
    *   The OG role ID.
@@ -193,7 +193,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function addRole($role_id);
 
   /**
-   * Revoking a role from the OG membership.
+   * Revokes a role from the OG membership.
    *
    * @param $role_id
    *   The OG role ID.
