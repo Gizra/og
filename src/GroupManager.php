@@ -88,10 +88,8 @@ class GroupManager {
 
     // Notify the event subscriber we added a new group.
     $data = $editable->getRawData();
-    $data['group_added'] = [
-      'entity_type_id' => $entity_type_id,
-      'bundle' => $bundle_id,
-    ];
+    $data['group_entity_id'] = $entity_type_id;
+    $data['group_bundle'] = $bundle_id;
 
     $editable->setData($data);
 

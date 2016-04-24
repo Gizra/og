@@ -28,8 +28,8 @@ class OgConfigSubscriber implements EventSubscriberInterface {
     // Check if we need to add a group audience on the user's entity.
     // We add a different field, so each field can be set differently.
 
-    $entity_type = $raw_data['group_added']['entity_type_id'];
-    $bundle = $raw_data['group_added']['bundle'];
+    $entity_type = $raw_data['group_entity_id'];
+    $bundle = $raw_data['group_bundle'];
 
     $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user');
 
