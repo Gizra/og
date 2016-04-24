@@ -8,6 +8,7 @@
 namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
@@ -36,6 +37,11 @@ class GroupManager {
   protected $configFactory;
 
   /**
+   * @var ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * A map of entity types and bundles.
    *
    * @var array
@@ -45,8 +51,9 @@ class GroupManager {
   /**
    * Constructs an GroupManager object.
    */
-  public function __construct(ConfigFactoryInterface $config_factory) {
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler) {
     $this->configFactory = $config_factory;
+    $this->moduleHandler = $module_handler;
     $this->refreshGroupMap();
   }
 
@@ -86,13 +93,6 @@ class GroupManager {
   public function addGroup($entity_type_id, $bundle_id) {
     $editable = $this->configFactory->getEditable('og.settings');
 
-    // Notify the event subscriber we added a new group.
-    $data = $editable->getRawData();
-    $data['group_entity_id'] = $entity_type_id;
-    $data['group_bundle'] = $bundle_id;
-
-    $editable->setData($data);
-
     $groups = $editable->get('groups');
     $groups[$entity_type_id][] = $bundle_id;
     // @todo, just key by bundle ID instead?
@@ -100,6 +100,10 @@ class GroupManager {
 
     $editable->set('groups', $groups);
     $saved = $editable->save();
+
+    // Notify other module we added a new group.
+    // todo: should this be an event?
+    $this->moduleHandler->invokeAll('og_group_created', [$entity_type_id, $bundle_id]);
 
     $this->refreshGroupMap();
 

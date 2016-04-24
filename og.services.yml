@@ -1,7 +1,7 @@
 services:
   og.group.manager:
     class: Drupal\og\GroupManager
-    arguments: ['@config.factory']
+    arguments: ['@config.factory', '@module_handler']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
@@ -11,7 +11,3 @@ services:
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
-  og.config_subscriber:
-    class: Drupal\og\EventSubscriber\OgConfigSubscriber
-    tags:
-      - { name: event_subscriber }

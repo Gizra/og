@@ -62,12 +62,6 @@ og.settings:
     delete_orphans_plugin_id:
       type: string
       label: 'The method to use when deleting orphaned group content'
-    group_entity_id:
-      type: string
-      label: 'Determine if group were added'
-    group_bundle:
-      type: string
-      label: 'Determine if group were added'
 
 og.settings.group.*:
   type: sequence
