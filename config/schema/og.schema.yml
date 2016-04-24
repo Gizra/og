@@ -63,8 +63,10 @@ og.settings:
       type: string
       label: 'The method to use when deleting orphaned group content'
     group_added:
-      type: boolean
+      type: sequence
       label: 'Determine if group were added'
+      sequence:
+        type: og.settings.group_added.[%key]
 
 og.settings.group.*:
   type: sequence
@@ -72,6 +74,17 @@ og.settings.group.*:
   sequence:
     type: string
     label: 'Group'
+
+og.settings.group_added.*:
+  type: sequence
+  label: 'OG groups'
+  mapping:
+    entity_type_id:
+      type: string
+      label: 'ID'
+    bundle:
+      type: string
+      label: 'Bundle'
 
 og.og_membership_type.*:
   type: config_entity
