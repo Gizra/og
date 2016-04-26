@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\OgDeleteOrphans;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\OgDeleteOrphansBase;
 
 /**
@@ -14,6 +15,15 @@ use Drupal\og\OgDeleteOrphansBase;
  * )
  */
 class Simple extends OgDeleteOrphansBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function register(EntityInterface $entity) {
+    parent::register($entity);
+    // Delete the orphans on the fly.
+    $this->process();
+  }
 
   /**
    * {@inheritdoc}
