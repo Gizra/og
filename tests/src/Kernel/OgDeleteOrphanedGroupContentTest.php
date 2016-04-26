@@ -92,12 +92,16 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    *   The machine name of the plugin under test.
    * @param bool $run_cron
    *   Whether or not cron jobs should be run as part of the test.
+   * @param bool $asynchronous
+   *   Whether or not the actual deletion of the orphans happens in an
+   *   asynchronous operation (e.g. pressing the button that launches the batch
+   *   process).
    * @param string $queue_id
    *   The ID of the queue that is used by the plugin under test.
    *
    * @dataProvider ogDeleteOrphansPluginProvider
    */
-  public function testDeleteOrphans($plugin_id, $run_cron, $queue_id) {
+  public function testDeleteOrphans($plugin_id, $run_cron, $asynchronous, $queue_id) {
     // Turn on deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')
@@ -108,20 +112,26 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     // Delete the group.
     $this->group->delete();
 
-    // Check that the orphan is queued.
     /** @var \Drupal\Core\Queue\QueueInterface $queue */
     $queue = $this->container->get('queue')->get($queue_id);
-    $this->assertEquals(1, $queue->numberOfItems());
+
+    // Check that the orphan is queued for asynchronous processing.
+    if ($asynchronous) {
+      $this->assertEquals(1, $queue->numberOfItems());
+    }
 
     // Run cron jobs if needed.
     if ($run_cron) {
       $this->container->get('cron')->run();
     }
 
-    // Invoke the processing of the orphans.
-    /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
-    $plugin = $this->ogDeleteOrphansPluginManager->createInstance($plugin_id, []);
-    $plugin->process();
+    // Simulate the initiation of the queue process by an asynchronous operation
+    // (such as pressing the button that starts a batch operation).
+    if ($asynchronous) {
+      /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
+      $plugin = $this->ogDeleteOrphansPluginManager->createInstance($plugin_id, []);
+      $plugin->process();
+    }
 
     // Verify the group content is deleted.
     $this->assertFalse($this->group_content, 'The orphaned node is deleted.');
@@ -138,12 +148,16 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    * @param bool $run_cron
    *   Whether or not cron jobs should be run as part of the test. Unused in
    *   this test.
+   * @param bool $asynchronous
+   *   Whether or not the actual deletion of the orphans happens in an
+   *   asynchronous operation (e.g. pressing the button that launches the batch
+   *   process). Unused in this test.
    * @param string $queue_id
    *   The ID of the queue that is used by the plugin under test.
    *
    * @dataProvider ogDeleteOrphansPluginProvider
    */
-  function testDisabled($plugin_id, $run_cron, $queue_id) {
+  function testDisabled($plugin_id, $run_cron, $asynchronous, $queue_id) {
     // Disable deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')
@@ -168,13 +182,15 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    *   following items:
    *   - A string containing the plugin name being tested.
    *   - A boolean indicating whether or not cron jobs should be run.
+   *   - A boolean indicating whether the deletion happens in an asynchronous
+   *     process.
    *   - A string defining the queue that is used by the plugin.
    */
   public function ogDeleteOrphansPluginProvider() {
     return [
-      ['batch', FALSE, 'og_orphaned_group_content'],
-      ['cron', TRUE, 'og_orphaned_group_content_cron'],
-      ['simple', FALSE, 'og_orphaned_group_content'],
+      ['batch', FALSE, TRUE, 'og_orphaned_group_content'],
+      ['cron', TRUE, FALSE, 'og_orphaned_group_content_cron'],
+      ['simple', FALSE, FALSE, 'og_orphaned_group_content'],
     ];
   }
 
