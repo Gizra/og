@@ -243,6 +243,10 @@ class Og {
         return $value['target_id'];
       }, $entity->get($field->getName())->getValue());
 
+      if (empty($target_ids)) {
+        continue;
+      }
+
       // Query the database to get the actual list of groups. The target IDs may
       // contain groups that no longer exist. Entity reference doesn't clean up
       // orphaned target IDs.
