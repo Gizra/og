@@ -58,17 +58,6 @@ function og_entity_predelete(EntityInterface $entity) {
       $plugin->register($entity);
     }
 
-    // Delete user memberships.
-    $membership_ids = \Drupal::entityQuery('og_membership')
-      ->condition('entity_type', $entity->getEntityTypeId())
-      ->condition('entity_id', $entity->id())
-      ->execute();
-
-    /** @var \Drupal\og\Entity\OgMembership $membership */
-    foreach (OgMembership::loadMultiple($membership_ids) as $membership) {
-      $membership->delete();
-    }
-
     // @todo Delete user roles.
     // @see https://github.com/amitaibu/og/issues/175
     // og_delete_user_roles_by_group($entity_type, $entity);
