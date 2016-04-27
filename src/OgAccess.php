@@ -187,7 +187,10 @@ class OgAccess {
     $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
     $cache_tags = $entity_type->getListCacheTags();
 
-    if ($is_group_content && $groups = Og::getGroups($entity)) {
+    // The entity might be a user or a non-user entity.
+    $groups = $entity->getEntityTypeId() == 'user' ? Og::getUserMembershipsAndGroups($entity) : Og::getGroups($entity);
+
+    if ($is_group_content && $groups) {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
       foreach ($groups as $group) {
         $user_access = static::userAccess($group, $operation, $user);
