@@ -86,11 +86,24 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
    *   The group entity that is the basis for the query.
    *
    * @return array
-   *   An associative array, keyed by group content entity type, each item an
-   *   array of group content entity IDs to delete.
+   *   An associative array, keyed by entity type, each item an array of entity
+   *   IDs to delete.
    */
   protected function query(EntityInterface $entity) {
-    return Og::getGroupContentIds($entity);
+    // Register orphaned group content.
+    $orphans = Og::getGroupContentIds($entity);
+
+    // Register orphaned user memberships.
+    $membership_ids = \Drupal::entityQuery('og_membership')
+      ->condition('entity_type', $entity->getEntityTypeId())
+      ->condition('entity_id', $entity->id())
+      ->execute();
+
+    if (!empty($membership_ids)) {
+      $orphans['og_membership'] = $membership_ids;
+    }
+
+    return $orphans;
   }
 
   /**
