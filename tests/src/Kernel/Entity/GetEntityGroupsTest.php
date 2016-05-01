@@ -217,6 +217,14 @@ class GetEntityGroupsTest extends KernelTestBase {
   }
 
   /**
+   * Test field creation for user upon group creation.
+   */
+  protected function testFieldCreationValidation() {
+    $fields = array_keys(\Drupal::getContainer()->get('entity_field.manager')->getFieldDefinitions('user', 'user'));
+    $this->assertTrue(in_array('og_user_entity_test', $fields));
+  }
+
+  /**
    * Creates an Og membership entity.
    *
    * @todo This is a temp function, which will be later replaced by Og::group().
