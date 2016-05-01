@@ -91,7 +91,7 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
    */
   protected function query(EntityInterface $entity) {
     // Register orphaned group content.
-    $orphans = Og::getGroupContentIds($entity);
+    $orphans = Og::getNonUserIds($entity);
 
     // Register orphaned user memberships.
     $membership_ids = \Drupal::entityQuery('og_membership')
