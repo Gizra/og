@@ -79,7 +79,6 @@ class OgSelection extends DefaultSelection {
     }
 
     $user_groups = $this->getUserGroups();
-    print_r($this->getUserGroups());
     if (!$user_groups) {
       return $query;
     }
