@@ -332,7 +332,7 @@ class Og {
    *   An associative array, keyed by group content entity type, each item an
    *   array of group content entity IDs.
    */
-  public static function getNonUserIds(EntityInterface $entity, array $entity_types = []) {
+  public static function getNonUserReferencedGroups(EntityInterface $entity, array $entity_types = []) {
     return self::getGroupContentIds($entity, FALSE, $entity_types);
   }
 
@@ -353,7 +353,7 @@ class Og {
    *   An associative array, keyed by group content entity type, each item an
    *   array of group content entity IDs.
    */
-  public static function getUserIds(EntityInterface $entity, array $entity_types = []) {
+  public static function getUserReferencedGroups(EntityInterface $entity, array $entity_types = []) {
     return self::getGroupContentIds($entity, TRUE, $entity_types);
   }
 
