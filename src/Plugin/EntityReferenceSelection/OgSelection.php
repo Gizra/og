@@ -9,6 +9,7 @@ namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
+use Drupal\Core\Session\AccountProxy;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
 
@@ -78,6 +79,7 @@ class OgSelection extends DefaultSelection {
     }
 
     $user_groups = $this->getUserGroups();
+    print_r($this->getUserGroups());
     if (!$user_groups) {
       return $query;
     }
