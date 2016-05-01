@@ -11,11 +11,11 @@ use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
- * Tests deletion of orphaned group content.
+ * Tests deletion of orphaned group content and memberships.
  *
  * @group og
  */
-class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
+class OgDeleteOrphansTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -92,12 +92,16 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    *   The machine name of the plugin under test.
    * @param bool $run_cron
    *   Whether or not cron jobs should be run as part of the test.
+   * @param bool $asynchronous
+   *   Whether or not the actual deletion of the orphans happens in an
+   *   asynchronous operation (e.g. pressing the button that launches the batch
+   *   process).
    * @param string $queue_id
    *   The ID of the queue that is used by the plugin under test.
    *
    * @dataProvider ogDeleteOrphansPluginProvider
    */
-  public function testDeleteOrphans($plugin_id, $run_cron, $queue_id) {
+  public function testDeleteOrphans($plugin_id, $run_cron, $asynchronous, $queue_id) {
     // Turn on deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')
@@ -105,29 +109,40 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
       ->set('delete_orphans_plugin_id', $plugin_id)
       ->save();
 
+    // Check that the queue is initially empty.
+    $this->assertQueueCount($queue_id, 0);
+
+    // Check that the group owner has initially been subscribed to the group.
+    $this->assertUserMembershipCount(1);
+
     // Delete the group.
     $this->group->delete();
 
-    // Check that the orphan is queued.
-    /** @var \Drupal\Core\Queue\QueueInterface $queue */
-    $queue = $this->container->get('queue')->get($queue_id);
-    $this->assertEquals(1, $queue->numberOfItems());
+    // Check that 2 orphans are queued for asynchronous processing: 1 group
+    // content item and 1 user membership.
+    if ($asynchronous) {
+      $this->assertQueueCount($queue_id, 2);
+    }
 
     // Run cron jobs if needed.
     if ($run_cron) {
       $this->container->get('cron')->run();
     }
 
-    // Invoke the processing of the orphans.
-    /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
-    $plugin = $this->ogDeleteOrphansPluginManager->createInstance($plugin_id, []);
-    $plugin->process();
+    // Simulate the initiation of the queue process by an asynchronous operation
+    // (such as pressing the button that starts a batch operation).
+    if ($asynchronous) {
+      $this->process($queue_id, $plugin_id);
+    }
 
     // Verify the group content is deleted.
     $this->assertFalse($this->group_content, 'The orphaned node is deleted.');
 
+    // Verify that the user membership is now deleted.
+    $this->assertUserMembershipCount(0);
+
     // Check that the queue is now empty.
-    $this->assertEquals(0, $queue->numberOfItems());
+    $this->assertQueueCount($queue_id, 0);
   }
 
   /**
@@ -138,12 +153,16 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    * @param bool $run_cron
    *   Whether or not cron jobs should be run as part of the test. Unused in
    *   this test.
+   * @param bool $asynchronous
+   *   Whether or not the actual deletion of the orphans happens in an
+   *   asynchronous operation (e.g. pressing the button that launches the batch
+   *   process). Unused in this test.
    * @param string $queue_id
    *   The ID of the queue that is used by the plugin under test.
    *
    * @dataProvider ogDeleteOrphansPluginProvider
    */
-  function testDisabled($plugin_id, $run_cron, $queue_id) {
+  function testDisabled($plugin_id, $run_cron, $asynchronous, $queue_id) {
     // Disable deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')
@@ -155,9 +174,7 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
     $this->group->delete();
 
     // Check that no orphans are queued for deletion.
-    /** @var \Drupal\Core\Queue\QueueInterface $queue */
-    $queue = $this->container->get('queue')->get($queue_id);
-    $this->assertEquals(0, $queue->numberOfItems());
+    $this->assertQueueCount($queue_id, 0);
   }
 
   /**
@@ -168,14 +185,65 @@ class OgDeleteOrphanedGroupContentTest extends KernelTestBase {
    *   following items:
    *   - A string containing the plugin name being tested.
    *   - A boolean indicating whether or not cron jobs should be run.
+   *   - A boolean indicating whether the deletion happens in an asynchronous
+   *     process.
    *   - A string defining the queue that is used by the plugin.
    */
   public function ogDeleteOrphansPluginProvider() {
     return [
-      ['batch', FALSE, 'og_orphaned_group_content'],
-      ['cron', TRUE, 'og_orphaned_group_content_cron'],
-      ['simple', FALSE, 'og_orphaned_group_content'],
+      ['batch', FALSE, TRUE, 'og_orphaned_group_content'],
+      ['cron', TRUE, FALSE, 'og_orphaned_group_content_cron'],
+      ['simple', FALSE, FALSE, 'og_orphaned_group_content'],
     ];
+  }
+
+  /**
+   * Returns the number of items a given queue contains.
+   *
+   * @param string $queue_id
+   *   The ID of the queue for which to count the items.
+   */
+  protected function getQueueCount($queue_id) {
+    return $this->container->get('queue')->get($queue_id)->numberOfItems();
+  }
+
+  /**
+   * Checks that the given queue contains the expected number of items.
+   *
+   * @param string $queue_id
+   *   The ID of the queue to check.
+   * @param int $count
+   *   The expected number of items in the queue.
+   */
+  protected function assertQueueCount($queue_id, $count) {
+    $this->assertEquals($count, $this->getQueueCount($queue_id));
+  }
+
+  /**
+   * Checks the number of user memberships.
+   *
+   * @param int $expected
+   *   The expected number of user memberships.
+   */
+  protected function assertUserMembershipCount($expected) {
+    $count = \Drupal::entityQuery('og_membership')->count()->execute();
+    $this->assertEquals($expected, $count);
+  }
+
+  /**
+   * Processes the given queue.
+   *
+   * @param string $queue_id
+   *   The ID of the queue to process.
+   * @param string $plugin_id
+   *   The ID of the plugin that is responsible for processing the queue.
+   */
+  protected function process($queue_id, $plugin_id) {
+    /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
+    $plugin = $this->ogDeleteOrphansPluginManager->createInstance($plugin_id, []);
+    while ($this->getQueueCount($queue_id) > 0) {
+      $plugin->process();
+    }
   }
 
 }
