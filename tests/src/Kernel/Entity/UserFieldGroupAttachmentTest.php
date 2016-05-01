@@ -110,10 +110,9 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
     $field_config = FieldConfig::loadByName('user', 'user', 'og_user_entity_test');
 
     $this->container->get('account_switcher')->switchTo($this->user1);
-    $referenceable_entities = Og::getSelectionHandler($field_config);
-    $referenceable_entities->getReferenceableEntities();
+    $referenceable_entities = Og::getSelectionHandler($field_config)->getReferenceableEntities();
 
-    $this->assertTrue(1,1);
+    $this->assertEquals(array_keys($referenceable_entities[$this->group1->bundle()]), [$this->group1->id()]);
   }
 
 }
