@@ -161,6 +161,7 @@ class Og {
     }
 
     $identifier = [
+      'getUserGroups',
       $user->id(),
       $state_identifier,
       $field_name,
@@ -218,7 +219,7 @@ class Og {
     $states_identifier = implode('|', array_unique($states));
 
     $identifier = [
-      'OgMembership',
+      'getUserMemberships',
       $user->id(),
       $states_identifier,
       $field_name,
@@ -278,6 +279,7 @@ class Og {
     }
 
     $identifier = [
+      'getGroupIds',
       $entity->id(),
       $group_type_id,
       $group_bundle,
