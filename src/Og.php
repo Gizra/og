@@ -11,7 +11,6 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Display\EntityDisplayInterface;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
@@ -201,6 +200,58 @@ class Og {
   }
 
   /**
+   * Returns the group memberships a user is associated with.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get groups for.
+   * @param array $states
+   *   (optional) Array with the state to return. Defaults to active.
+   * @param string $field_name
+   *   (optional) The field name associated with the group.
+   *
+   * @return \Drupal\og\Entity\OgMembership[]
+   *  An array of OgMembership entities, keyed by ID.
+   */
+  public static function getUserMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
+    // Get a string identifier of the states, so we can retrieve it from cache.
+    sort($states);
+    $states_identifier = implode('|', array_unique($states));
+
+    $identifier = [
+      'OgMembership',
+      $user->id(),
+      $states_identifier,
+      $field_name,
+    ];
+    $identifier = implode(':', $identifier);
+
+    // Return cached result if it exists.
+    if (isset(static::$cache[$identifier])) {
+      return static::$cache[$identifier];
+    }
+
+    $query = \Drupal::entityQuery('og_membership')
+      ->condition('uid', $user->id());
+
+    if ($states) {
+      $query->condition('state', $states, 'IN');
+    }
+
+    if ($field_name) {
+      $query->condition('field_name', $field_name);
+    }
+
+    $results = $query->execute();
+
+    /** @var \Drupal\og\Entity\OgMembership[] $memberships */
+    static::$cache[$identifier] = \Drupal::entityTypeManager()
+      ->getStorage('og_membership')
+      ->loadMultiple($results);
+
+    return static::$cache[$identifier];
+  }
+
+  /**
    * Returns all group IDs associated with the given group content entity.
    *
    * Do not use this to retrieve group IDs associated with a user entity. Use
@@ -225,7 +276,6 @@ class Og {
     if ($entity->getEntityTypeId() === 'user') {
       throw new \InvalidArgumentException('\\Og::getGroupIds() cannot be used for user entities. Use \\Og::getUserMembershipsAndGroups() instead.');
     }
-
 
     $identifier = [
       $entity->id(),
