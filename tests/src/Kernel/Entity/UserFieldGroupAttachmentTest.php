@@ -11,6 +11,7 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Component\Utility\Unicode;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
@@ -26,32 +27,17 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'og', 'entity_test'];
+  public static $modules = ['system', 'user', 'field', 'og', 'entity_test', 'node'];
 
   /**
    * @var \Drupal\user\Entity\User
    */
-  protected $user1;
-
-  /**
-   * @var \Drupal\user\Entity\User
-   */
-  protected $user2;
-
-  /**
-   * @var \Drupal\user\Entity\User
-   */
-  protected $user3;
+  protected $user;
 
   /**
    * @var \Drupal\entity_test\Entity\EntityTest
    */
-  protected $group1;
-
-  /**
-   * @var \Drupal\entity_test\Entity\EntityTest
-   */
-  protected $group2;
+  protected $group;
 
   /**
    * The machine name of the group node type.
@@ -76,6 +62,7 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
+    $this->installEntitySchema('node');
     $this->installEntitySchema('entity_test');
     $this->installSchema('system', 'sequences');
 
@@ -83,19 +70,26 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
     $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
 
     // Create users.
-    $this->user1 = User::create(['name' => $this->randomString()]);
-    $this->user1->save();
+    $this->user= User::create(['name' => $this->randomString()]);
+    $this->user->save();
 
     // Define the group content as group.
     Og::groupManager()->addGroup('entity_test', $this->groupBundle);
 
     // Create a group and associate with user 1.
-    $this->group1 = EntityTest::create([
+    $this->group = EntityTest::create([
       'type' => $this->groupBundle,
       'name' => $this->randomString(),
-      'user_id' => $this->user1->id(),
+      'user_id' => $this->user->id(),
     ]);
-    $this->group1->save();
+    $this->group->save();
+
+    // Creating a node type and define it as a group.
+    NodeType::create([
+      'type' => 'post',
+      'name' => $this->randomString(),
+    ]);
+    Og::groupManager()->addGroup('node', 'post');
   }
 
   /**
@@ -105,14 +99,14 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
     $fields = array_keys(\Drupal::getContainer()->get('entity_field.manager')->getFieldDefinitions('user', 'user'));
 
     // Verify the field exists.
-    $this->assertTrue(in_array('og_user_entity_test', $fields));
+    $this->assertTrue(in_array('og_user_entity_test', $fields) && in_array('og_user_node', $fields));
 
     $field_config = FieldConfig::loadByName('user', 'user', 'og_user_entity_test');
 
-    $this->container->get('account_switcher')->switchTo($this->user1);
+    $this->container->get('account_switcher')->switchTo($this->user);
     $referenceable_entities = Og::getSelectionHandler($field_config)->getReferenceableEntities();
 
-    $this->assertEquals(array_keys($referenceable_entities[$this->group1->bundle()]), [$this->group1->id()]);
+    $this->assertEquals(array_keys($referenceable_entities[$this->group->bundle()]), [$this->group->id()]);
   }
 
 }
