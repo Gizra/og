@@ -12,6 +12,7 @@ use Drupal\og\Entity\OgRoleInterface;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -88,7 +89,7 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
     return AccessResult::neutral();
   }
 
-  if (!Og::isGroupAudienceField($field_definition)) {
+  if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
     return AccessResult::neutral();
   }
 
@@ -180,7 +181,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
   foreach ($field_definitions as $field_name => $field_definition) {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
-    if (!Og::isGroupAudienceField($field_definition)) {
+    if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
       continue;
     }
 
@@ -275,7 +276,7 @@ function _og_field_create_instance($instance) {
   // We add a different field, so each field can be set differently.
   $entity_type = $instance['entity_type'];
   $bundle = $instance['bundle'];
-  foreach (array_keys(Og::getAllGroupAudienceFields('user', 'user')) as $field_name) {
+  foreach (array_keys(OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user')) as $field_name) {
     $field = field_info_field($field_name);
 
     if ($field['settings']['target_type'] == $entity_type  && empty($field['settings']['handler_settings']['target_bundles'])) {
@@ -338,7 +339,7 @@ function _og_field_delete_instance($instance) {
 function _og_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
-  if (Og::getAllGroupAudienceFields($entity_type, $bundle)) {
+  if (OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle)) {
     $form['#validate'][] = 'og_form_group_reference_validate';
   }
 
@@ -386,7 +387,7 @@ function _og_form_group_reference_validate($form, &$form_state) {
     return;
   }
 
-  foreach (array_keys(Og::getAllGroupAudienceFields($entity_type, $bundle)) as $field_name) {
+  foreach (array_keys(OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle)) as $field_name) {
     // If there is at least one group selected, return.
     if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
       return;
@@ -546,7 +547,7 @@ function __og_update_entity_fields($entity_type, $entity) {
   }
 
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  foreach (Og::getAllGroupAudienceFields($entity_type, $bundle) as $field_name => $label) {
+  foreach (OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle) as $field_name => $label) {
     $field = field_info_field($field_name);
     $gids = array();
     if ($field['cardinality'] == 1) {
@@ -1660,7 +1661,7 @@ function _og_get_group_type($entity_type, $bundle_name, $type = 'group') {
     return (bool)field_info_instance($entity_type, OG_GROUP_FIELD, $bundle_name);
   }
   elseif ($type == 'group content') {
-    return (bool)Og::getAllGroupAudienceFields($entity_type, $bundle_name);
+    return (bool)OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle_name);
   }
 }
 
@@ -2581,7 +2582,7 @@ function _og_get_groups_by_user($account = NULL, $group_type = NULL) {
     $account = $user;
   }
 
-  if (!Og::getAllGroupAudienceFields('user', 'user')) {
+  if (!OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user')) {
     // User entity doesn't have group audience fields.
     return;
   }

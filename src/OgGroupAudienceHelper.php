@@ -8,6 +8,8 @@
 namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -21,6 +23,21 @@ class OgGroupAudienceHelper {
    * The default OG audience field name.
    */
   const DEFAULT_FIELD = 'og_group_ref';
+
+
+  /**
+   * Return TRUE if field is a group audience type.
+   *
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The field definition object.
+   *
+   * @return bool
+   *   TRUE if the field is a group audience type, FALSE otherwise.
+   */
+  public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
+    return in_array($field_definition->getType(), ['og_standard_reference', 'og_membership_reference']);
+  }
+
 
   /**
    * Return TRUE if a field can be used and has not reached maximum values.
@@ -44,7 +61,7 @@ class OgGroupAudienceHelper {
       throw new FieldException("No field with the name $field_name found for $bundle_id $entity_type_id entity.");
     }
 
-    if (!Og::isGroupAudienceField($field_definition)) {
+    if (!static::isGroupAudienceField($field_definition)) {
       throw new FieldException("$field_name field on $bundle_id $entity_type_id entity is not an audience field.");
     }
 
@@ -75,7 +92,7 @@ class OgGroupAudienceHelper {
    *   found.
    */
   public static function getMatchingField(ContentEntityInterface $entity, $group_type, $group_bundle, $check_access = TRUE) {
-    $fields = Og::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
+    $fields = static::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
 
     // Bail out if there are no group audience fields.
     if (!$fields) {
@@ -109,6 +126,60 @@ class OgGroupAudienceHelper {
     }
 
     return NULL;
+  }
+
+  /**
+   * Return all the group audience fields of a certain bundle.
+   *
+   * @param string $entity_type_id
+   *   The entity type.
+   * @param string  $bundle
+   *   The bundle name to be checked.
+   * @param string $group_type_id
+   *   Filter list to only include fields referencing a specific group type.
+   * @param string $group_bundle
+   *   Filter list to only include fields referencing a specific group bundle.
+   *   Fields that do not specify any bundle restrictions at all are also
+   *   included.
+   *
+   * @return \Drupal\Core\Field\FieldDefinitionInterface[]
+   *   An array of field definitions, keyed by field name; Or an empty array if
+   *   none found.
+   */
+  public static function getAllGroupAudienceFields($entity_type_id, $bundle, $group_type_id = NULL, $group_bundle = NULL) {
+    $return = [];
+    $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+
+    if (!$entity_type->isSubclassOf(FieldableEntityInterface::class)) {
+      // This entity type is not fieldable.
+      return [];
+    }
+    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+
+    foreach ($field_definitions as $field_definition) {
+      if (!static::isGroupAudienceField($field_definition)) {
+        // Not a group audience field.
+        continue;
+      }
+
+      $target_type = $field_definition->getFieldStorageDefinition()->getSetting('target_type');
+
+      if (isset($group_type_id) && $target_type != $group_type_id) {
+        // Field doesn't reference this group type.
+        continue;
+      }
+
+      $handler_settings = $field_definition->getSetting('handler_settings');
+
+      if (isset($group_bundle) && !empty($handler_settings['target_bundles']) && !in_array($group_bundle, $handler_settings['target_bundles'])) {
+        continue;
+      }
+
+      $field_name = $field_definition->getName();
+      $return[$field_name] = $field_definition;
+    }
+
+    return $return;
   }
 
 }
