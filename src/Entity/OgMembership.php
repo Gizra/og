@@ -111,6 +111,8 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
+   * Returns the group entity ID.
+   *
    * @return mixed
    */
   public function getEntityId() {
