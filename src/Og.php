@@ -473,20 +473,20 @@ class Og {
   }
 
   /**
-   * Returns whether an entity belongs to a group with a pending status.
+   * Returns whether a user belongs to a group with a pending status.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The group content entity.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user entity.
    *
    * @return bool
    *   True if the membership is pending.
    *
    * @see \Drupal\og\Og::isMember
    */
-  public static function isMemberPending(EntityInterface $group, EntityInterface $entity) {
-    return static::isMember($group, $entity, [OgMembershipInterface::STATE_PENDING]);
+  public static function isMemberPending(EntityInterface $group, AccountInterface $user) {
+    return static::isMember($group, $user, [OgMembershipInterface::STATE_PENDING]);
   }
 
   /**
