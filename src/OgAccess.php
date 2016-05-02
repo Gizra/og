@@ -188,7 +188,7 @@ class OgAccess {
     $cache_tags = $entity_type->getListCacheTags();
 
     // The entity might be a user or a non-user entity.
-    $groups = $entity->getEntityTypeId() == 'user' ? Og::getUserMembershipsAndGroups($entity) : Og::getGroups($entity);
+    $groups = $entity->getEntityTypeId() == 'user' ? Og::getUserGroups($entity) : Og::getGroups($entity);
 
     if ($is_group_content && $groups) {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
