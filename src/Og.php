@@ -452,12 +452,12 @@ class Og {
   }
 
   /**
-   * Return whether a group content belongs to a group.
+   * Returns whether a user belongs to a group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to test the membership for.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to test the membership for.
    * @param array $states
    *   (optional) Array with the membership states to check the membership.
    *   Defaults to active memberships.
@@ -466,14 +466,10 @@ class Og {
    *   TRUE if the entity (e.g. the user or node) belongs to a group with
    *   a certain state.
    */
-  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    $groups = static::getUserMembershipsAndGroups($entity, $states);
+  public static function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    $group_ids = static::getUserGroupIds($user, $states);
     $entity_type_id = $group->getEntityTypeId();
-    // We need to create a map of the group ids as Og::getUserMembershipsAndGroups returns a
-    // map of membership_id => group entity for each type.
-    return !empty($groups[$entity_type_id]) && in_array($group->id(), array_map(function($group_entity) {
-      return $group_entity->id();
-    }, $groups[$entity_type_id]));
+    return !empty($group_ids[$entity_type_id]) && in_array($group->id(), $group_ids[$entity_type_id]);
   }
 
   /**
