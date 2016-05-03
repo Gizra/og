@@ -353,8 +353,9 @@ class Og {
    * @param string $group_bundle
    *   Filter results to only include groups of this bundle.
    *
-   * @return \Drupal\Core\Entity\EntityInterface[]
-   *   An array of group entities.
+   * @return array
+   *   An associative array, keyed by group entity type, each item an array of
+   *   group entities.
    *
    * @see \Og::getUserGroups()
    */
@@ -362,8 +363,7 @@ class Og {
     $groups = [];
 
     foreach (static::getGroupIds($entity, $group_type_id, $group_bundle) as $entity_type => $entity_ids) {
-      $entities = \Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($entity_ids);
-      $groups = array_merge($groups, array_values($entities));
+      $groups[$entity_type] = \Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($entity_ids);
     }
 
     return $groups;

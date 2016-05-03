@@ -192,13 +192,15 @@ class OgAccess {
 
     if ($is_group_content && $groups) {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
-      foreach ($groups as $group) {
-        $user_access = static::userAccess($group, $operation, $user);
-        if ($user_access->isAllowed()) {
-          return $user_access->addCacheTags($cache_tags);
-        }
+      foreach ($groups as $entity_groups) {
+        foreach ($entity_groups as $group) {
+          $user_access = static::userAccess($group, $operation, $user);
+          if ($user_access->isAllowed()) {
+            return $user_access->addCacheTags($cache_tags);
+          }
 
-        $forbidden->inheritCacheability($user_access);
+          $forbidden->inheritCacheability($user_access);
+        }
       }
       return $forbidden;
     }
