@@ -72,7 +72,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $reflection_property->setAccessible(TRUE);
 
     $identifier = [
-      'getGroupIds',
+      'Drupal\og\Og::getGroupIds',
       $entity_id,
       NULL,
       NULL,
