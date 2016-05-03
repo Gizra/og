@@ -137,11 +137,11 @@ class Og {
   /**
    * Returns all group IDs associated with the given user.
    *
-   * This is similar to \Og::getGroupIds() but for users. The reason there is a
-   * separate method for user entities is because the storage is handled
-   * differently. For group content the relation to the group is stored on a
-   * field attached to the content entity, while user memberships are tracked in
-   * OgMembership entities.
+   * This is similar to \Drupal\og\Og::getGroupIds() but for users. The reason
+   * there is a separate method for user entities is because the storage is
+   * handled differently. For group content the relation to the group is stored
+   * on a field attached to the content entity, while user memberships are
+   * tracked in OgMembership entities.
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get groups for.
@@ -154,7 +154,7 @@ class Og {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entity IDs.
    *
-   * @see \Og::getGroupIds()
+   * @see \Drupal\og\Og::getGroupIds()
    */
   public static function getUserGroupIds(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     $group_ids = [];
@@ -171,11 +171,11 @@ class Og {
   /**
    * Returns all groups associated with the given user.
    *
-   * This is similar to \Og::getGroups() but for users. The reason there is a
-   * separate method for user entities is because the storage is handled
-   * differently. For group content the relation to the group is stored on a
-   * field attached to the content entity, while user memberships are tracked in
-   * OgMembership entities.
+   * This is similar to \Drupal\og\Og::getGroups() but for users. The reason
+   * there is a separate method for user entities is because the storage is
+   * handled differently. For group content the relation to the group is stored
+   * on a field attached to the content entity, while user memberships are
+   * tracked in OgMembership entities.
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get groups for.
@@ -188,8 +188,8 @@ class Og {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    *
-   * @see \Og::getGroups()
-   * @see \Og::getUserMemberships()
+   * @see \Drupal\og\Og::getGroups()
+   * @see \Drupal\og\Og::getUserMemberships()
    */
   public static function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     $groups = [];
@@ -273,12 +273,12 @@ class Og {
    * @throws \InvalidArgumentException
    *   Thrown when a user entity is passed in.
    *
-   * @see \Og::getUserGroups()
+   * @see \Drupal\og\Og::getUserGroups()
    */
   public static function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
     // This does not work for user entities.
     if ($entity->getEntityTypeId() === 'user') {
-      throw new \InvalidArgumentException('\\Og::getGroupIds() cannot be used for user entities. Use \\Og::getUserGroups() instead.');
+      throw new \InvalidArgumentException('\Drupal\og\Og::getGroupIds() cannot be used for user entities. Use \Drupal\og\Og::getUserGroups() instead.');
     }
 
     $identifier = [
@@ -357,7 +357,7 @@ class Og {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    *
-   * @see \Og::getUserGroups()
+   * @see \Drupal\og\Og::getUserGroups()
    */
   public static function getGroups(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
     $groups = [];
