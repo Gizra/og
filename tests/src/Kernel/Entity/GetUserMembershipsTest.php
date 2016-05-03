@@ -137,6 +137,7 @@ class GetUserMembershipsTest extends KernelTestBase {
       // Check that all result items are OgMembership objects.
       // @todo Check for \Drupal\og\OgMembershipInterface once OgMembership
       //   implements it.
+      // @see https://github.com/amitaibu/og/issues/183
       $this->assertInstanceOf('Drupal\og\Entity\OgMembership', $membership);
       // Check that the results are keyed by OgMembership ID.
       $this->assertEquals($membership->id(), $key);
