@@ -16,15 +16,25 @@ use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 
 /**
- * While referencing content to a group done using the normal entity storage in
- * the case of a user we have couple of things we need to handle. When a user is
- * a member of a group we need to know if the membership is active, pending or
- * blocking. Another use case we need to cover is the roles the user own in a
- * specific group: member, content editor, manager etc. etc.
+ * The membership entity the connects a group and a user.
  *
- * This is the main reason we need the OG membership. The OG membership entity
- * keeps the connection between the group and the user. For example we have node
- * 1 which is a group and user 2 which is a user that belong to a group:
+ * When dealing with non-user entities that are group content, that is, content
+ * that is associated with a group we do it via an entity reference field that
+ * has the default storage. The only information that we hold is that a group
+ * content is referencing a group.
+ *
+ * However, when dealing with the user entity we recognize that we need to
+ * special case. It won't suffice to just hold the reference between the user
+ * and the group content as it will be laking crucial information such as: the
+ * state of the user's membership in the group (active, pending or blocked), the
+ * time the membership was created, the user's OG role in the group, etc.
+ *
+ * For this meta data we have the fieldable OgMembership entity, which is always
+ * connecting between a user and a group. There cannot be an OgMembership entity
+ * connecting two non-user entities.
+ *
+ * Creating such a relation is done for example in the following way:
+ *
  * @code:
  *  $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
  *  $membership
@@ -35,15 +45,17 @@ use Drupal\og\OgMembershipInterface;
  *    ->save();
  * @endcode
  *
- * Although the reference between non-user entity and a group stored in the
- * default field storage, the reference between user and a group stored in
- * the base table og_membership. Because of this data modeling there is a need
- * for an easy way the group and the group's user(s) will be referenced via the
- * UI. This is where the entity reference field come in: The field tables in the
- * DB does not exists but when asking the content of the field there a is work
- * behind the scene that structured the field value's on the fly.
+ * Notice how the relation of the user to the group also includes the OG
+ * audience field name this association was done by. Like this, we are able to
+ * express different membership types such as the default membership that comes
+ * out of the box, or a "premium membership" that can be for example expired
+ * after a certain amount of time (the logic for the expired membership in the
+ * example is out of the scope of OG core).
  *
- * That's one of OG magic.
+ * Having this field separation is what allows having multiple OG audience
+ * fields attached to the user, where each group they are associated with may be
+ * a result of different membership types.
+ *
  *
  * @ContentEntityType(
  *   id = "og_membership",
