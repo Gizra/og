@@ -36,7 +36,7 @@ class GetUserMembershipsTest extends KernelTestBase {
    * @var \Drupal\Core\Entity\EntityInterface[]
    */
   protected $groups = [];
-  
+
   /**
    * Test users.
    *
@@ -131,7 +131,7 @@ class GetUserMembershipsTest extends KernelTestBase {
 
     // Check that the correct number of results is returned.
     $this->assertEquals(count($expected), count($result));
-    
+
     // Inspect the results that were returned.
     foreach ($result as $key => $membership) {
       // Check that all result items are OgMembership objects.
@@ -155,7 +155,7 @@ class GetUserMembershipsTest extends KernelTestBase {
       $this->fail("The expected group with ID $expected_id was not found.");
     }
   }
-  
+
   /**
    * Provides test data to test retrieval of memberships.
    *
@@ -181,7 +181,7 @@ class GetUserMembershipsTest extends KernelTestBase {
       // Filter by a non-existing field name. This should not return any
       // matches.
       [0, [], 'non_existing_field_name', []],
-      
+
       // The second user is a pending member of the second group.
       // Query default values. The group should be returned.
       [1, [], NULL, [1]],
