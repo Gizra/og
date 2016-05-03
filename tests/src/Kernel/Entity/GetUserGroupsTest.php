@@ -20,7 +20,7 @@ use Drupal\user\Entity\User;
  *
  * @group og
  */
-class GetEntityGroupsTest extends KernelTestBase {
+class GetUserGroupsTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
