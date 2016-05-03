@@ -162,8 +162,10 @@ class GetUserMembershipsTest extends KernelTestBase {
    * @return array
    *   An array of test properties. Each property is an indexed array with the
    *   following items:
-   *   - An optional string indicating the group type ID to be returned.
-   *   - An optional string indicating the group bundle to be returned.
+   *   - The key of the user in the $this->users array for which to retrieve
+   *     memberships.
+   *   - An array of membership states to filter on.
+   *   - The field name to filter on.
    *   - An array containing the expected results to be returned.
    */
   public function membershipDataProvider() {
