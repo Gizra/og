@@ -2,15 +2,11 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
