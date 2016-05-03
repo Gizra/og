@@ -154,7 +154,7 @@ class Og {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entity IDs.
    *
-   * @see ::getGroupIds()
+   * @see \Og::getGroupIds()
    */
   public static function getUserGroupIds(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     $group_ids = [];
@@ -188,7 +188,8 @@ class Og {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    *
-   * @see ::getGroups()
+   * @see \Og::getGroups()
+   * @see \Og::getUserMemberships()
    */
   public static function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     $groups = [];
@@ -219,7 +220,7 @@ class Og {
     $states_identifier = implode('|', array_unique($states));
 
     $identifier = [
-      'getUserMemberships',
+      __METHOD__,
       $user->id(),
       $states_identifier,
       $field_name,
@@ -272,7 +273,7 @@ class Og {
    * @throws \InvalidArgumentException
    *   Thrown when a user entity is passed in.
    *
-   * @see ::getUserGroups()
+   * @see \Og::getUserGroups()
    */
   public static function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
     // This does not work for user entities.
@@ -281,7 +282,7 @@ class Og {
     }
 
     $identifier = [
-      'getGroupIds',
+      __METHOD__,
       $entity->id(),
       $group_type_id,
       $group_bundle,
@@ -355,7 +356,7 @@ class Og {
    * @return \Drupal\Core\Entity\EntityInterface[]
    *   An array of group entities.
    *
-   * @see ::getUserGroups()
+   * @see \Og::getUserGroups()
    */
   public static function getGroups(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
     $groups = [];
