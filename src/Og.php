@@ -184,7 +184,7 @@ class Og {
    * @param string $field_name
    *   (optional) The field name associated with the group.
    *
-   * @return array
+   * @return \Drupal\Core\Entity\EntityInterface[][]
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    *
@@ -353,7 +353,7 @@ class Og {
    * @param string $group_bundle
    *   Filter results to only include groups of this bundle.
    *
-   * @return array
+   * @return \Drupal\Core\Entity\EntityInterface[][]
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    *
