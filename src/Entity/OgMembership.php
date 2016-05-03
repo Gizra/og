@@ -40,7 +40,7 @@ use Drupal\og\OgMembershipInterface;
  *  $membership
  *    ->setUser(2)
  *    ->setEntityId(1)
- *    ->setEntityType('node')
+ *    ->setGroupEntityType('node')
  *    ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
  *    ->save();
  * @endcode
@@ -139,7 +139,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setEntityType($groupType) {
+  public function setGroupEntityType($groupType) {
     $this->set('entity_type', $groupType);
     return $this;
   }

@@ -73,7 +73,7 @@ $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::
 $membership
 ->setUser(2)
 ->setEntityId(1)
-->setEntityType('node')
+->setGroupEntityType('node')
 ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
 ->save();
 ```

@@ -137,7 +137,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    *
    * @return OgMembershipInterface
    */
-  public function setEntityType($groupType);
+  public function setGroupEntityType($groupType);
 
   /**
    * Gets the group entity type ID.
