@@ -216,7 +216,7 @@ function og_context_is_init($called = FALSE) {
  *   Array keyed by the group type and group ID, or FALSE if no context
  *   was found.
  */
-function og_context($group_type = 'node', $group = NULL, $account = NULL, $check_access = TRUE) {
+function og_context($group_type = 'node', $group = NULL, $account = NULL, $check_access = FALSE) {
   global $user;
   // User account is sent.
   $account = $account ? $account : user_load($user->uid);
