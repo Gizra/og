@@ -103,7 +103,7 @@ class GetUserMembershipsTest extends KernelTestBase {
           $membership
             ->setUser($user->id())
             ->setEntityId($group->id())
-            ->setEntityType($group->getEntityTypeId())
+            ->setGroupEntityType($group->getEntityTypeId())
             ->setState($status)
             ->save();
         }
