@@ -198,13 +198,13 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
   protected function createOgMembership($group_id) {
     /** @var \Drupal\Core\Entity\EntityInterface $parent */
     $parent_entity = $this->getEntity();
-    /** @var OgMembership $membership */
+    /** @var OgMembershipInterface $membership */
     $membership = Og::membershipStorage()->create(Og::membershipDefault());
 
     $membership
       ->setFieldName($this->getName())
       ->setUser($parent_entity->id())
-      ->setEntityType($this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
+      ->setGroupEntityType($this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
       ->setEntityId($group_id)
       ->save();
 
