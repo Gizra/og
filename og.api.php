@@ -12,6 +12,23 @@
  */
 
 /**
+ * Act on a og group creation.
+ *
+ * Unlike Drupal 7, when groups were defined by a field, in Drupal 8 groups are
+ * defined by config schema.
+ *
+ * @param $entity_type
+ *   The entity type.
+ * @param $bundle
+ *   The entity bundle.
+ *
+ * @see og_og_group_created()
+ */
+function hook_og_group_created($entity_type, $bundle) {
+
+}
+
+/**
  * Alter the organic groups permissions.
  *
  * @param $perms
@@ -20,7 +37,6 @@
 function hook_og_permission_alter(&$perms) {
 
 }
-
 
 /**
  * Set a default role that will be used as a global role.

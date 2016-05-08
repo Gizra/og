@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\Tests\og\Kernel\Entity\UserFieldGroupAttachmentTest.php.
+ * Contains \Drupal\Tests\og\Kernel\Entity\UserFieldGroupAttachmentTest
  */
 
 namespace Drupal\Tests\og\Kernel\Entity;
@@ -12,13 +12,12 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\NodeType;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
-use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
 /**
- * Tests getting the memberships of an entity.
+ * Tests that a group reference field attached to the user entity upon group
+ * type creation.
  *
  * @group og
  */
@@ -40,20 +39,6 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
   protected $group;
 
   /**
-   * The machine name of the group node type.
-   *
-   * @var string
-   */
-  protected $groupBundle;
-
-  /**
-   * The machine name of the group content node type.
-   *
-   * @var string
-   */
-  protected $groupContentBundle;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -66,19 +51,18 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installSchema('system', 'sequences');
 
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
-    $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
+    $group_bundle = Unicode::strtolower($this->randomMachineName());
 
     // Create users.
     $this->user= User::create(['name' => $this->randomString()]);
     $this->user->save();
 
     // Define the group content as group.
-    Og::groupManager()->addGroup('entity_test', $this->groupBundle);
+    Og::groupManager()->addGroup('entity_test', $group_bundle);
 
     // Create a group and associate with user 1.
     $this->group = EntityTest::create([
-      'type' => $this->groupBundle,
+      'type' => $group_bundle,
       'name' => $this->randomString(),
       'user_id' => $this->user->id(),
     ]);
