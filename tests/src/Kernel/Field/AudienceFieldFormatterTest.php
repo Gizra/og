@@ -8,6 +8,7 @@
 namespace Drupal\Tests\og\Kernel\Field;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\og\OgGroupAudienceHelper;
 
 
 /**
@@ -36,7 +37,7 @@ class AudienceFieldFormatterTest extends KernelTestBase {
       'entity_reference_label',
     ];
 
-    foreach (['og_standard_reference', 'og_membership_reference'] as $field_type) {
+    foreach ([OgGroupAudienceHelper::NON_USER_REFERENCE_FIELD, OgGroupAudienceHelper::USER_REFERENCE_FIELD] as $field_type) {
       $actual = array_keys($formatter_manager->getOptions($field_type));
       sort($actual);
       $this->assertEquals($expected, $actual);
