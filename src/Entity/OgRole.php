@@ -248,7 +248,9 @@ class OgRole extends Role implements OgRoleInterface {
   public function delete() {
     // The default roles are required. Prevent them from being deleted for as
     // long as the group still exists.
-    if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && !empty($this->getGroup())) {
+    /** @var \Drupal\og\GroupManager $group_manager */
+    $group_manager = \Drupal::getContainer()->get('og.group.manager');
+    if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && $group_manager->isGroup($this->getGroupType(), $this->getGroupBundle())) {
       throw new OgRoleRequiredException('The default roles "non-member" and "member" cannot be deleted.');
     }
     parent::delete();
