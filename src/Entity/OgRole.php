@@ -226,9 +226,18 @@ class OgRole extends Role implements OgRoleInterface {
    * {@inheritdoc}
    */
   public function set($property_name, $value) {
-    // Prevent the ID of the default roles from being changed.
-    if ($property_name === 'id' && in_array($this->get('id'), [self::ANONYMOUS, self::AUTHENTICATED_ID]) && !$this->isNew()) {
-      throw new OgRoleRequiredException('The ID of the default roles "non-member" and "member" cannot be changed.');
+    // Prevent the ID, role type, entity type or bundle to be changed for any of
+    // the default roles. These default roles are required and shouldn't be
+    // tampered with.
+    $is_locked_property = in_array($property_name, [
+      'id',
+      'role_type',
+      'group_type',
+      'group_bundle',
+    ]);
+    $is_default_role = $this->getRoleType() !== self::ROLE_TYPE_STANDARD;
+    if ($is_locked_property && $is_default_role && !$this->isNew()) {
+      throw new OgRoleRequiredException("The $property_name of the default roles 'non-member' and 'member' cannot be changed.");
     }
     return parent::set($property_name, $value);
   }
