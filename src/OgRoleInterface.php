@@ -25,4 +25,20 @@ interface OgRoleInterface {
    * The role name of the group administrator.
    */
   const ADMINISTRATOR = 'administrator member';
+
+  /**
+   * The required default role type for non-members.
+   */
+  const ROLE_TYPE_ANONYMOUS = 'non-member';
+
+  /**
+   * The required default role type for members.
+   */
+  const ROLE_TYPE_AUTHENTICATED = 'member';
+
+  /**
+   * The standard, optional, role type.
+   */
+  const ROLE_TYPE_STANDARD = 'standard';
+
 }

@@ -32,7 +32,8 @@ use Drupal\user\Entity\Role;
  *     "group_type",
  *     "group_bundle",
  *     "group_id",
- *     "permissions"
+ *     "permissions",
+ *     "role_type"
  *   }
  * )
  */
@@ -143,6 +144,42 @@ class OgRole extends Role implements OgRoleInterface {
     $this->group_bundle = $groupBundle;
     $this->set('group_bundle', $groupBundle);
     return $this;
+  }
+
+  /**
+   * Returns the role type.
+   *
+   * @return string
+   *   The role type. One of OgRoleInterface::ROLE_TYPE_ANONYMOUS,
+   *   OgRoleInterface::ROLE_TYPE_AUTHENTICATED or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   */
+  public function getRoleType() {
+    return $this->get('role_type');
+  }
+
+  /**
+   * Sets the role type.
+   *
+   * @param string $role_type
+   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_ANONYMOUS,
+   *   OgRoleInterface::ROLE_TYPE_AUTHENTICATED or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   *
+   * @return $this
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when an invalid role type is given.
+   */
+  public function setRoleType($role_type) {
+    if (!in_array($role_type, [
+      self::ROLE_TYPE_ANONYMOUS,
+      self::ROLE_TYPE_AUTHENTICATED,
+      self::ROLE_TYPE_STANDARD,
+    ])) {
+      throw new \InvalidArgumentException("'$role_type' is not a valid role type.");
+    }
+    return $this->set('role_type', $role_type);
   }
 
   /**
