@@ -183,4 +183,17 @@ class OgRole extends Role implements OgRoleInterface {
 
     parent::save();
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function delete() {
+    // The default roles are required. Prevent them from being deleted for as
+    // long as the group still exists.
+    if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && !empty($this->getGroup())) {
+      throw new \Exception('The default roles "non-member" and "member" cannot be deleted.');
+    }
+    parent::delete();
+  }
+
 }
