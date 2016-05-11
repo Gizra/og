@@ -188,6 +188,17 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
+  public function set($property_name, $value) {
+    // Prevent the ID of the default roles from being changed.
+    if ($property_name === 'id' && in_array($this->get('id'), [self::ANONYMOUS, self::AUTHENTICATED_ID]) && !$this->isNew()) {
+      throw new OgRoleRequiredException('The ID of the default roles "non-member" and "member" cannot be changed.');
+    }
+    return parent::set($property_name, $value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function delete() {
     // The default roles are required. Prevent them from being deleted for as
     // long as the group still exists.
