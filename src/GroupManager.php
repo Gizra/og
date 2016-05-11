@@ -132,6 +132,9 @@ class GroupManager {
       $editable->set('groups', $groups);
       $saved = $editable->save();
 
+      // Remove all roles associated with this group type.
+      $this->removeRoles($entity_type_id, $bundle_id);
+
       $this->refreshGroupMap();
 
       return $saved;
@@ -161,6 +164,24 @@ class GroupManager {
         $role->setId("$entity_type_id.$bundle_id.$role_type");
         $role->save();
       }
+    }
+  }
+
+  /**
+   * Deletes the roles associated with a group type.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the group for which to delete the roles.
+   * @param string $bundle_id
+   *   The bundle ID of the group for which to delete the roles.
+   */
+  protected function removeRoles($entity_type_id, $bundle_id) {
+    $properties = [
+      'group_type' => $entity_type_id,
+      'group_bundle' => $bundle_id,
+    ];
+    foreach ($this->entityTypeManager->getStorage('og_role')->loadByProperties($properties) as $role) {
+      $role->delete();
     }
   }
 
