@@ -145,6 +145,17 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
+   * Returns the group this role is associated with.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|NULL
+   *   The group, or NULL if the role is not associated with a group.
+   */
+  public function getGroup() {
+    $entity_storage = \Drupal::entityTypeManager()->getStorage($this->getGroupType());
+    return $entity_storage->load($this->getGroupID());
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function save() {
