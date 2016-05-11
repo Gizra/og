@@ -8,6 +8,8 @@
 namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\og\Entity\OgRole;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
@@ -36,6 +38,13 @@ class GroupManager {
   protected $configFactory;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * A map of entity types and bundles.
    *
    * @var array
@@ -44,9 +53,15 @@ class GroupManager {
 
   /**
    * Constructs an GroupManager object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager) {
     $this->configFactory = $config_factory;
+    $this->entityTypeManager = $entity_type_manager;
     $this->refreshGroupMap();
   }
 
@@ -93,6 +108,7 @@ class GroupManager {
     $editable->set('groups', $groups);
     $saved = $editable->save();
 
+    $this->createDefaultRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
 
     return $saved;
@@ -119,6 +135,32 @@ class GroupManager {
       $this->refreshGroupMap();
 
       return $saved;
+    }
+  }
+
+  /**
+   * Creates default roles for the given group type.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the group for which to create default roles.
+   * @param string $bundle_id
+   *   The bundle ID of the group for which to create default roles.
+   */
+  protected function createDefaultRoles($entity_type_id, $bundle_id) {
+    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR] as $role_type) {
+      // Only create the default role if it doesn't exist yet.
+      $properties = [
+        'role_type' => $role_type,
+        'group_type' => $entity_type_id,
+        'group_bundle' => $bundle_id,
+      ];
+      if (!$this->entityTypeManager->getStorage('og_role')->loadByProperties($properties)) {
+        $properties += OgRole::getDefaultProperties($role_type);
+        $role = OgRole::create($properties);
+        // @todo: Find a way to deal with potential ID collisions.
+        $role->setId("$entity_type_id.$bundle_id.$role_type");
+        $role->save();
+      }
     }
   }
 

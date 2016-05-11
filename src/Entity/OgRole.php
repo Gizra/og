@@ -256,4 +256,52 @@ class OgRole extends Role implements OgRoleInterface {
     parent::delete();
   }
 
+  /**
+   * Returns default properties for each of the standard role names.
+   *
+   * @param string $role_name
+   *   A role name, one of OgRoleInterface::ANONYMOUS,
+   *   OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR.
+   *
+   * @return array
+   *   An array of default properties, to pass to OgRole::create().
+   */
+  public static function getDefaultProperties($role_name) {
+    if (!in_array($role_name, [
+      self::ANONYMOUS,
+      self::AUTHENTICATED,
+      self::ADMINISTRATOR,
+    ])) {
+      throw new \InvalidArgumentException("$role_name is not a valid role name.");
+    }
+
+    $default_properties = [
+      self::ANONYMOUS => [
+        'role_type' => OgRoleInterface::ROLE_TYPE_ANONYMOUS,
+        'label' => 'Non-member',
+        'permissions' => ['subscribe'],
+      ],
+      self::AUTHENTICATED => [
+        'role_type' => OgRoleInterface::ROLE_TYPE_AUTHENTICATED,
+        'label' => 'Member',
+        'permissions' => ['unsubscribe'],
+      ],
+      self::ADMINISTRATOR => [
+        'role_type' => OgRoleInterface::ROLE_TYPE_AUTHENTICATED,
+        'label' => 'Administrator',
+        'permissions' => [
+          'add user',
+          'administer group',
+          'approve and deny subscription',
+          'manage members',
+          'manage permissions',
+          'manage roles',
+          'update group',
+        ],
+      ],
+    ];
+
+    return $default_properties[$role_name];
+  }
+
 }
