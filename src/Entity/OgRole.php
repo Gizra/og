@@ -7,6 +7,7 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
+use Drupal\og\Exception\OgRoleRequiredException;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
 
@@ -191,7 +192,7 @@ class OgRole extends Role implements OgRoleInterface {
     // The default roles are required. Prevent them from being deleted for as
     // long as the group still exists.
     if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && !empty($this->getGroup())) {
-      throw new \Exception('The default roles "non-member" and "member" cannot be deleted.');
+      throw new OgRoleRequiredException('The default roles "non-member" and "member" cannot be deleted.');
     }
     parent::delete();
   }
