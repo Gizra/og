@@ -6,10 +6,12 @@
  */
 namespace Drupal\og;
 
+use Drupal\user\RoleInterface;
+
 /**
  * Provides an interface defining an OG user role entity.
  */
-interface OgRoleInterface {
+interface OgRoleInterface extends RoleInterface {
 
   /**
    * The role name of the group non-member.
@@ -37,5 +39,15 @@ interface OgRoleInterface {
    * Role type for standard roles that are editable and deletable.
    */
   const ROLE_TYPE_STANDARD = 'standard';
+
+  /**
+   * Sets the ID of the role.
+   *
+   * @param string $id
+   *   The machine name of the role.
+   *
+   * @return $this
+   */
+  public function setId($id);
 
 }
