@@ -39,7 +39,7 @@ class GroupManagerTest extends UnitTestCase {
   protected $entityStorageProphecy;
 
   /**
-   * @var \Drupal\og\OgRoleInterface|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\Entity\OgRole|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $ogRoleProphecy;
 
@@ -51,7 +51,7 @@ class GroupManagerTest extends UnitTestCase {
     $this->configFactoryProphecy = $this->prophesize('Drupal\Core\Config\ConfigFactoryInterface');
     $this->entityTypeManagerProphecy = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
     $this->entityStorageProphecy = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
-    $this->ogRoleProphecy = $this->prophesize('Drupal\og\OgRoleInterface');
+    $this->ogRoleProphecy = $this->prophesize('Drupal\og\Entity\OgRole');
   }
 
   /**
