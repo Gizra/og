@@ -27,17 +27,14 @@ interface OgRoleInterface {
   const ADMINISTRATOR = 'administrator member';
 
   /**
-   * The required default role type for non-members.
+   * Role type for default roles which should not be changed.
+   *
+   * This is intended for the 'non-member' and 'member' roles.
    */
-  const ROLE_TYPE_ANONYMOUS = 'non-member';
+  const ROLE_TYPE_IMMUTABLE = 'immutable';
 
   /**
-   * The required default role type for members.
-   */
-  const ROLE_TYPE_AUTHENTICATED = 'member';
-
-  /**
-   * The standard, optional, role type.
+   * Role type for standard roles that are editable and deletable.
    */
   const ROLE_TYPE_STANDARD = 'standard';
 
