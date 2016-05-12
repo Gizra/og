@@ -259,7 +259,7 @@ class OgRole extends Role implements OgRoleInterface {
       self::AUTHENTICATED,
       self::ADMINISTRATOR,
     ])) {
-      throw new \InvalidArgumentException("$role_name is not a valid role name.");
+      throw new \InvalidArgumentException("$role_name is not a default role name.");
     }
 
     $default_properties = [
