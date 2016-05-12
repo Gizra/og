@@ -7,7 +7,9 @@
 
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\og\Entity\OgRole;
 use Drupal\og\GroupManager;
+use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -27,11 +29,29 @@ class GroupManagerTest extends UnitTestCase {
   protected $configFactoryProphecy;
 
   /**
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeManagerProphecy;
+
+  /**
+   * @var \Drupal\Core\Entity\EntityStorageInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityStorageProphecy;
+
+  /**
+   * @var \Drupal\og\OgRoleInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $ogRoleProphecy;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
     $this->configProphecy = $this->prophesize('Drupal\Core\Config\Config');
     $this->configFactoryProphecy = $this->prophesize('Drupal\Core\Config\ConfigFactoryInterface');
+    $this->entityTypeManagerProphecy = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
+    $this->entityStorageProphecy = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
+    $this->ogRoleProphecy = $this->prophesize('Drupal\og\OgRoleInterface');
   }
 
   /**
@@ -134,6 +154,8 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($groups_after)
       ->shouldBeCalled();
 
+    $this->expectDefaultRoleCreation('test_entity', 'c', TRUE);
+
     $manager = $this->createGroupManager();
 
     // Add to existing.
@@ -167,6 +189,8 @@ class GroupManagerTest extends UnitTestCase {
     $this->configProphecy->get('groups')
       ->willReturn($groups_after)
       ->shouldBeCalled();
+
+    $this->expectDefaultRoleCreation('test_entity_new', 'a', FALSE);
 
     $manager = $this->createGroupManager();
 
@@ -202,6 +226,8 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($groups_after)
       ->shouldBeCalled();
 
+    $this->expectRoleRemoval('test_entity', 'b');
+
     $manager = $this->createGroupManager();
 
     // Add to existing.
@@ -220,8 +246,121 @@ class GroupManagerTest extends UnitTestCase {
     $this->configFactoryProphecy->get('og.settings')
       ->willReturn($this->configProphecy->reveal())
       ->shouldBeCalled();
+    $this->entityTypeManagerProphecy->getStorage('og_role')
+      ->willReturn($this->entityStorageProphecy->reveal())
+      ->shouldBeCalled();
 
-    return new GroupManager($this->configFactoryProphecy->reveal());
+    return new GroupManager($this->configFactoryProphecy->reveal(), $this->entityTypeManagerProphecy->reveal());
+  }
+
+  /**
+   * Mocked method calls when system under test should create default roles.
+   *
+   * @param string $entity_type
+   *   The entity type for which default roles should be created.
+   * @param string $bundle
+   *   The bundle for which default roles should be created.
+   * @param bool $entity_exists
+   *   Whether or not the default roles are being created for an entity that
+   *   already exists.
+   */
+  protected function expectDefaultRoleCreation($entity_type, $bundle, $entity_exists) {
+    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR] as $role_name) {
+      // If the entity exists, then the default role also should exist.
+      if ($entity_exists) {
+        $this->addExistingDefaultRole($entity_type, $bundle, $role_name);
+      }
+      else {
+        $this->addNewDefaultRole($entity_type, $bundle, $role_name);
+      }
+    }
+  }
+
+  /**
+   * Expected method calls when recreating an already existing default role.
+   *
+   * @param string $entity_type
+   *   The entity type for which the default role should be created.
+   * @param string $bundle
+   *   The bundle for which the default role should be created.
+   * @param string $role_name
+   *   The name of the role being created.
+   */
+  protected function addExistingDefaultRole($entity_type, $bundle, $role_name) {
+    // It is expected that a call is done to see if the role already exists.
+    // This will return a role entity.
+    $properties = [
+      'group_type' => $entity_type,
+      'group_bundle' => $bundle,
+      'role_type' => OgRole::getRoleTypeByName($role_name),
+    ];
+    $this->entityStorageProphecy->loadByProperties($properties)
+      ->willReturn($this->ogRoleProphecy->reveal())
+      ->shouldBeCalled();
+  }
+
+  /**
+   * Expected method calls when creating a new default role.
+   *
+   * @param string $entity_type
+   *   The entity type for which the default role should be created.
+   * @param string $bundle
+   *   The bundle for which the default role should be created.
+   * @param string $role_name
+   *   The name of the role being created.
+   */
+  protected function addNewDefaultRole($entity_type, $bundle, $role_name) {
+    // It is expected that a call is done to see if the role already exists.
+    // This will return nothing.
+    $properties = [
+      'group_type' => $entity_type,
+      'group_bundle' => $bundle,
+      'role_type' => OgRole::getRoleTypeByName($role_name),
+    ];
+    $this->entityStorageProphecy->loadByProperties($properties)
+      ->willReturn([])
+      ->shouldBeCalled();
+    // It is expected that the role will be created with default properties.
+    $this->entityStorageProphecy->create($properties + OgRole::getDefaultProperties($role_name))
+      ->willReturn($this->ogRoleProphecy->reveal())
+      ->shouldBeCalled();
+    // The role ID will be set.
+    $this->ogRoleProphecy->setId("$entity_type.$bundle.$role_name")
+      ->willReturn($this->ogRoleProphecy->reveal())
+      ->shouldBeCalled();
+    // The role is expected to be saved.
+    $this->ogRoleProphecy->save()
+      ->willReturn(1)
+      ->shouldBeCalled();
+  }
+
+  /**
+   * Expected method calls when deleting roles after a group is deleted.
+   *
+   * @param string $entity_type_id
+   *   The entity type for which the roles should be deleted.
+   * @param string $bundle_id
+   *   The bundle for which the roles should be deleted.
+   */
+  protected function expectRoleRemoval($entity_type_id, $bundle_id) {
+    // It is expected that a call is done to retrieve all roles associated with
+    // the group. This will return the 3 default role entities.
+    $properties = [
+      'group_type' => $entity_type_id,
+      'group_bundle' => $bundle_id,
+    ];
+    $this->entityStorageProphecy->loadByProperties($properties)
+      ->willReturn([
+        $this->ogRoleProphecy->reveal(),
+        $this->ogRoleProphecy->reveal(),
+        $this->ogRoleProphecy->reveal(),
+      ])
+      ->shouldBeCalled();
+
+    // It is expected that all roles will be deleted, so three delete() calls
+    // will be made.
+    $this->ogRoleProphecy->delete()
+      ->shouldBeCalledTimes(3);
   }
 
 }
