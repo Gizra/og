@@ -284,6 +284,29 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
+   * Maps role names to role types.
+   *
+   * The 'anonymous' and 'authenticated' roles should not be changed or deleted.
+   * All others are standard roles.
+   *
+   * @param string $role_name
+   *   The role name for which to return the type.
+   *
+   * @return string
+   *   The role type, either OgRoleInterface::ROLE_TYPE_IMMUTABLE or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   */
+  public static function getRoleTypeByName($role_name) {
+    switch ($role_name) {
+      case OgRoleInterface::ANONYMOUS:
+      case OgRoleInterface::AUTHENTICATED:
+        return OgRoleInterface::ROLE_TYPE_IMMUTABLE;
+      default:
+        return OgRoleInterface::ROLE_TYPE_STANDARD;
+    }
+  }
+
+  /**
    * Gets the group manager.
    *
    * @return \Drupal\og\GroupManager
