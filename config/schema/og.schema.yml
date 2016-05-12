@@ -116,6 +116,9 @@ og.og_role.*:
       sequence:
         type: string
         label: 'Permission'
+    role_type:
+      type: string
+      label: 'Role type'
 
 field.widget.settings.og_complex:
   type: mapping
