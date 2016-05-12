@@ -38,11 +38,11 @@ class GroupManager {
   protected $configFactory;
 
   /**
-   * The entity type manager.
+   * The entity storage for OgRole entities.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $entityTypeManager;
+  protected $ogRoleStorage;
 
   /**
    * A map of entity types and bundles.
@@ -61,7 +61,7 @@ class GroupManager {
    */
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager) {
     $this->configFactory = $config_factory;
-    $this->entityTypeManager = $entity_type_manager;
+    $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->refreshGroupMap();
   }
 
@@ -150,18 +150,18 @@ class GroupManager {
    *   The bundle ID of the group for which to create default roles.
    */
   protected function createDefaultRoles($entity_type_id, $bundle_id) {
-    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR] as $role_type) {
+    $properties = [
+      'group_type' => $entity_type_id,
+      'group_bundle' => $bundle_id,
+    ];
+    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR] as $role_name) {
+      $properties['role_type'] = OgRole::getRoleType($role_name);
       // Only create the default role if it doesn't exist yet.
-      $properties = [
-        'role_type' => $role_type,
-        'group_type' => $entity_type_id,
-        'group_bundle' => $bundle_id,
-      ];
-      if (!$this->entityTypeManager->getStorage('og_role')->loadByProperties($properties)) {
-        $properties += OgRole::getDefaultProperties($role_type);
-        $role = OgRole::create($properties);
+      if (!$this->ogRoleStorage->loadByProperties($properties)) {
+        $properties += OgRole::getDefaultProperties($role_name);
+        $role = $this->ogRoleStorage->create($properties);
         // @todo: Find a way to deal with potential ID collisions.
-        $role->setId("$entity_type_id.$bundle_id.$role_type");
+        $role->setId("$entity_type_id.$bundle_id.$role_name");
         $role->save();
       }
     }
@@ -180,7 +180,7 @@ class GroupManager {
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle_id,
     ];
-    foreach ($this->entityTypeManager->getStorage('og_role')->loadByProperties($properties) as $role) {
+    foreach ($this->ogRoleStorage->loadByProperties($properties) as $role) {
       $role->delete();
     }
   }
