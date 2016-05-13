@@ -29,7 +29,7 @@ og_ui.roles_form:
   path: 'admin/config/group/roles/{entity_type}/{bundle}'
   defaults:
     _form: '\Drupal\og_ui\Form\OgRolesForm'
-    _title: '@todo - create title callback'
+    _title_callback: '\Drupal\og_ui\Form\OgRolesForm::titleCallback'
   requirements:
     _permission: 'administer organic groups'
 
