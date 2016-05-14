@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\og\GroupManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -75,7 +76,7 @@ class OgRolesForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $entity_type = '', $bundle = '') {
-    $header = [t('Role name'), t('Operations')];
+    $header = [t('Role name'), ['data' => t('Operations'), 'colspan' => 2]];
     $rows = [];
     $properties = [
       'group_type' => $entity_type,
@@ -83,36 +84,29 @@ class OgRolesForm extends FormBase {
     ];
     /** @var \Drupal\og\Entity\OgRole $role */
     foreach ($this->entityTypeManager->getStorage('og_role')->loadByProperties($properties) as $role) {
-      $rows[] = [
-        [
-          'data' => $role->getLabel(),
-        ],
-        [
-          'data' => [
-            // @todo Don't use a dropbutton, this doesn't work well with the
-            // locked fields.
-            '#type' => 'dropbutton',
-            '#links' => [
-              'simple_form' => [
-                'title' => $this->t('Edit role'),
-                // @todo update route.
-                'url' => Url::fromRoute('og_ui.roles_form', [
-                  'entity_type' => $entity_type,
-                  'bundle' => $bundle,
-                ]),
-              ],
-              'demo' => [
-                'title' => $this->t('Edit permissions'),
-                // @todo update route.
-                'url' => Url::fromRoute('og_ui.roles_form', [
-                  'entity_type' => $entity_type,
-                  'bundle' => $bundle,
-                ]),
-              ],
-            ],
-          ],
-        ],
+      // Add the role name cell.
+      $columns = [['data' => $role->getLabel()]];
+
+      // Add the edit role link if the role is editable.
+      if ($role->isMutable()) {
+        $columns[] = [
+          'data' => Link::createFromRoute(t('Edit role'), 'og_ui.roles_edit_form', [
+            'og_role' => $role->id(),
+          ]),
+        ];
+      }
+      else {
+        $columns[] = ['data' => t('Locked')];
+      }
+
+      // Add the edit permissions link.
+      $columns[] = [
+        'data' => Link::createFromRoute(t('Edit permissions'), 'og_ui.permissions_edit_form', [
+          'og_role' => $role->id(),
+        ]),
       ];
+
+      $rows[] = $columns;
     }
 
     $form['roles_table'] = [
