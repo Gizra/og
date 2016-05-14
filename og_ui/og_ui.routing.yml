@@ -33,6 +33,14 @@ og_ui.roles_overview:
   requirements:
     _permission: 'administer organic groups'
 
+og_ui.role_add_form:
+  path: 'admin/config/group/role/{entity_type}/{bundle}/add'
+  defaults:
+    _form: '\Drupal\og_ui\Form\OgRoleAddForm'
+    _title_callback: '\Drupal\og_ui\Form\OgRoleAddForm::titleCallback'
+  requirements:
+    _permission: 'administer group'
+
 og_ui.role_edit_form:
   path: 'admin/config/group/role/{og_role}/edit'
   defaults:
