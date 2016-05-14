@@ -7,8 +7,10 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
 use Drupal\og\GroupManager;
+use Drupal\og\Og;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class OgUiController extends ControllerBase {
 
@@ -126,6 +128,11 @@ class OgUiController extends ControllerBase {
    *   The overview as a render array.
    */
   public function rolesOverviewPage($entity_type = '', $bundle = '') {
+    // Return a 404 error when this is not a group.
+    if (!Og::isGroup($entity_type, $bundle)) {
+      throw new NotFoundHttpException();
+    }
+
     $rows = [];
 
     $properties = [
