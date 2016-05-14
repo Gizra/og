@@ -164,6 +164,13 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
+  public function isMutable() {
+    return $this->get('role_type') === OgRoleInterface::ROLE_TYPE_STANDARD;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function loadByGroupAndName(EntityInterface $group, $name) {
     $role_id = "{$group->getEntityTypeId()}-{$group->bundle()}-$name";
     return self::load($role_id);
