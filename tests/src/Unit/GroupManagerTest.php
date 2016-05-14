@@ -293,6 +293,7 @@ class GroupManagerTest extends UnitTestCase {
       'group_type' => $entity_type,
       'group_bundle' => $bundle,
       'role_type' => OgRole::getRoleTypeByName($role_name),
+      'id' => "$entity_type.$bundle.$role_name",
     ];
     $this->entityStorageProphecy->loadByProperties($properties)
       ->willReturn($this->ogRoleProphecy->reveal())
@@ -316,16 +317,13 @@ class GroupManagerTest extends UnitTestCase {
       'group_type' => $entity_type,
       'group_bundle' => $bundle,
       'role_type' => OgRole::getRoleTypeByName($role_name),
+      'id' => "$entity_type.$bundle.$role_name",
     ];
     $this->entityStorageProphecy->loadByProperties($properties)
       ->willReturn([])
       ->shouldBeCalled();
     // It is expected that the role will be created with default properties.
     $this->entityStorageProphecy->create($properties + OgRole::getDefaultProperties($role_name))
-      ->willReturn($this->ogRoleProphecy->reveal())
-      ->shouldBeCalled();
-    // The role ID will be set.
-    $this->ogRoleProphecy->setId("$entity_type.$bundle.$role_name")
       ->willReturn($this->ogRoleProphecy->reveal())
       ->shouldBeCalled();
     // The role is expected to be saved.
