@@ -177,6 +177,13 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
+  public function isMutable() {
+    return $this->get('role_type') === OgRoleInterface::ROLE_TYPE_STANDARD;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save() {
 
     if ($this->isNew()) {
