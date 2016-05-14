@@ -1,0 +1,5 @@
+og_ui.role_add:
+  route_name: og_ui.role_add_form
+  title: 'Add role'
+  appears_on:
+    - og_ui.roles_overview
