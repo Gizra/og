@@ -25,23 +25,23 @@ og_ui.roles_permissions_overview:
     _permission: 'administer group'
     type: '^(roles|permissions)$'
 
-og_ui.roles_form:
+og_ui.roles_overview:
   path: 'admin/config/group/roles/{entity_type}/{bundle}'
   defaults:
-    _form: '\Drupal\og_ui\Form\OgRolesForm'
-    _title_callback: '\Drupal\og_ui\Form\OgRolesForm::titleCallback'
+    _controller: '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPage'
+    _title_callback: '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPageTitleCallback'
   requirements:
     _permission: 'administer group'
 
-og_ui.roles_edit_form:
+og_ui.role_edit_form:
   path: 'admin/config/group/role/{og_role}/edit'
   defaults:
-    _form: '\Drupal\og_ui\Form\OgRolesEditForm'
-    _title_callback: '\Drupal\og_ui\Form\OgRolesEditForm::titleCallback'
+    _form: '\Drupal\og_ui\Form\OgRoleEditForm'
+    _title_callback: '\Drupal\og_ui\Form\OgRoleEditForm::titleCallback'
   requirements:
     _permission: 'administer group'
 
-og_ui.permissions_form:
+og_ui.permissions_overview:
   path: 'admin/config/group/permissions/{entity_type}/{bundle}'
   defaults:
     _form: '\Drupal\og_ui\Form\OgPermissionsForm'
