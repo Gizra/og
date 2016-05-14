@@ -21,7 +21,6 @@ og_ui.roles_permissions_overview:
   defaults:
     _controller: '\Drupal\og_ui\Controller\OgUiController::rolesPermissionsOverviewPage'
     _title_callback: '\Drupal\og_ui\Controller\OgUiController::rolesPermissionsOverviewTitleCallback'
-    type: 'roles'
   requirements:
     _permission: 'administer group'
     type: '^(roles|permissions)$'
