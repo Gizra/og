@@ -24,7 +24,7 @@ interface OgRoleInterface {
   /**
    * The role name of the group administrator.
    */
-  const ADMINISTRATOR = 'administrator member';
+  const ADMINISTRATOR = 'administrator';
 
   /**
    * Role type for default roles which should not be changed.
