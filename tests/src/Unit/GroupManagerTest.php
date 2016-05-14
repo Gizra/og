@@ -293,7 +293,7 @@ class GroupManagerTest extends UnitTestCase {
       'group_type' => $entity_type,
       'group_bundle' => $bundle,
       'role_type' => OgRole::getRoleTypeByName($role_name),
-      'id' => "$entity_type.$bundle.$role_name",
+      'id' => $role_name,
     ];
     $this->entityStorageProphecy->loadByProperties($properties)
       ->willReturn($this->ogRoleProphecy->reveal())
@@ -317,7 +317,7 @@ class GroupManagerTest extends UnitTestCase {
       'group_type' => $entity_type,
       'group_bundle' => $bundle,
       'role_type' => OgRole::getRoleTypeByName($role_name),
-      'id' => "$entity_type.$bundle.$role_name",
+      'id' => $role_name,
     ];
     $this->entityStorageProphecy->loadByProperties($properties)
       ->willReturn([])

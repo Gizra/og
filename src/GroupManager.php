@@ -156,7 +156,7 @@ class GroupManager {
     ];
     foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR] as $role_name) {
       // @todo: Find a way to deal with potential ID collisions.
-      $properties['id'] = "$entity_type_id.$bundle_id.$role_name";
+      $properties['id'] = $role_name;
       $properties['role_type'] = OgRole::getRoleTypeByName($role_name);
       // Only create the default role if it doesn't exist yet.
       if (!$this->ogRoleStorage->loadByProperties($properties)) {
