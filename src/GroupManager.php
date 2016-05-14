@@ -110,6 +110,11 @@ class GroupManager {
 
       if ($search_key !== FALSE) {
         unset($groups[$entity_type_id][$search_key]);
+        // If the last group of this entity type is removed, also remove the
+        // empty container.
+        if (empty($groups[$entity_type_id])) {
+          unset($groups[$entity_type_id]);
+        }
       }
 
       // Only update and refresh the map if a key was found and unset.
