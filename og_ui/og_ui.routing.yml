@@ -33,10 +33,26 @@ og_ui.roles_form:
   requirements:
     _permission: 'administer group'
 
+og_ui.roles_edit_form:
+  path: 'admin/config/group/role/{og_role}/edit'
+  defaults:
+    _form: '\Drupal\og_ui\Form\OgRolesEditForm'
+    _title_callback: '\Drupal\og_ui\Form\OgRolesEditForm::titleCallback'
+  requirements:
+    _permission: 'administer group'
+
 og_ui.permissions_form:
   path: 'admin/config/group/permissions/{entity_type}/{bundle}'
   defaults:
     _form: '\Drupal\og_ui\Form\OgPermissionsForm'
     _title: '@todo - create title callback'
+  requirements:
+    _permission: 'administer group'
+
+og_ui.permissions_edit_form:
+  path: 'admin/config/group/permission/{og_role}/edit'
+  defaults:
+    _form: '\Drupal\og_ui\Form\OgPermissionsEditForm'
+    _title_callback: '\Drupal\og_ui\Form\OgPermissionsEditForm::titleCallback'
   requirements:
     _permission: 'administer group'
