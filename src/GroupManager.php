@@ -9,6 +9,7 @@ namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
@@ -103,6 +104,7 @@ class GroupManager {
 
     // Notify other module we added a new group.
     // todo: should this be an event?
+    $this->attachUserField($entity_type_id, $bundle_id);
     $this->moduleHandler->invokeAll('og_group_created', [$entity_type_id, $bundle_id]);
 
     $this->refreshGroupMap();
@@ -139,6 +141,67 @@ class GroupManager {
    */
   protected function refreshGroupMap() {
     $this->groupMap = $this->configFactory->get(static::SETTINGS_CONFIG_KEY)->get(static::GROUPS_CONFIG_KEY);
+  }
+
+  /**
+   * Attaching an audience field to the user.
+   *
+   * @param $entity_type_id
+   *   The group entity type ID i.e: node, comment.
+   * @param $bundle_id
+   *   The group bundle ID i.e.: article, blog.
+   */
+  protected function attachUserField($entity_type_id, $bundle_id) {
+    $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user');
+
+    foreach ($fields as $field) {
+
+      if ($field->getFieldStorageDefinition()->getSetting('target_type') == $entity_type_id) {
+
+        if (!$field->getSetting('handler_settings')['target_bundles']) {
+          return;
+        }
+
+        if (in_array($bundle_id, $field->getSetting('handler_settings')['target_bundles'])) {
+          return;
+        }
+      }
+    }
+
+    // If we reached here, it means we need to create a field.
+    // Pick an unused name.
+    $field_name = substr("og_user_$entity_type_id", 0, 32);
+    $i = 1;
+    while (FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name)) {
+      $field_name = substr("og_user_$entity_type_id", 0, 32 - strlen($i)) . $i;
+      ++$i;
+    }
+
+    if (!$user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle_id')) {
+      $user_bundles = [];
+    }
+
+    $user_bundles[] = 'user';
+
+    $settings = [
+      'field_name' => $field_name,
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => $entity_type_id,
+        ],
+      ],
+      'field_config' => [
+        'settings' => [
+          'handler_settings' => [
+            'target_bundles' => [$bundle_id => $bundle_id],
+          ],
+        ],
+      ],
+    ];
+
+    foreach ($user_bundles as $user_bundle) {
+      Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', $user_bundle, $settings);
+    }
   }
 
 }
