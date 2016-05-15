@@ -8,35 +8,54 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\TypedData\DataDefinition;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgMembershipInterface;
 
 /**
- * The OG membership is the main idea behind OG. The OG membership entity keep
- * the connection between the group and the her content. For example we have the
- * node 1 which is a group and the node 2 which is node that belong to a group:
+ * The membership entity that connects a group and a user.
+ *
+ * When dealing with non-user entities that are group content, that is content
+ * that is associated with a group, we do it via an entity reference field that
+ * has the default storage. The only information that we hold is that a group
+ * content is referencing a group.
+ *
+ * However, when dealing with the user entity we recognize that we need to
+ * special case it. It won't suffice to just hold the reference between the user
+ * and the group content as it will be laking crucial information such as: the
+ * state of the user's membership in the group (active, pending or blocked), the
+ * time the membership was created, the user's OG role in the group, etc.
+ *
+ * For this meta data we have the fieldable OgMembership entity, that is always
+ * connecting between a user and a group. There cannot be an OgMembership entity
+ * connecting two non-user entities.
+ *
+ * Creating such a relation is done for example in the following way:
+ *
  * @code:
  *  $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
  *  $membership
- *    ->setContentId(2)
- *    ->setContentType('node')
- *    ->setGid(1)
- *    ->setEntityType('node')
+ *    ->setUser(2)
+ *    ->setEntityId(1)
+ *    ->setGroupEntityType('node')
  *    ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
  *    ->save();
  * @endcode
  *
- * Although the reference stored in the base table og_membership, there is a
- * need for an easy way the group and the group content content via the UI. This
- * is where the entity reference field come in: The field tables in the DB are
- * empty, but when asking the content of the field there a is work behind the
- * scene that structured the field value's on the fly. That's one of OG magic.
+ * Notice how the relation of the user to the group also includes the OG
+ * audience field name this association was done by. Like this we are able to
+ * express different membership types such as the default membership that comes
+ * out of the box, or a "premium membership" that can be for example expired
+ * after a certain amount of time (the logic for the expired membership in the
+ * example is out of the scope of OG core).
+ *
+ * Having this field separation is what allows having multiple OG audience
+ * fields attached to the user, where each group they are associated with may be
+ * a result of different membership types.
+ *
  *
  * @ContentEntityType(
  *   id = "og_membership",
@@ -55,7 +74,7 @@ use Drupal\og\OgGroupAudienceHelper;
  *   }
  * )
  */
-class OgMembership extends ContentEntityBase implements ContentEntityInterface {
+class OgMembership extends ContentEntityBase implements OgMembershipInterface {
 
   /**
    * {@inheritdoc}
@@ -63,7 +82,6 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   public function getCreatedTime() {
     return $this->get('created')->value;
   }
-
 
   /**
    * {@inheritdoc}
@@ -74,9 +92,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * @param mixed $etid
-   *
-   * @return OgMembership
+   * {@inheritdoc}
    */
   public function setUser($etid) {
     $this->set('uid', $etid);
@@ -84,9 +100,14 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * @param mixed $fieldName
-   *
-   * @return OgMembership.
+   * {@inheritdoc}
+   */
+  public function getUser() {
+    return $this->get('uid')->value;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function setFieldName($fieldName) {
     $this->set('field_name', $fieldName);
@@ -94,16 +115,14 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function getFieldName() {
     return $this->get('field_name')->value;
   }
 
   /**
-   * @param mixed $gid
-   *
-   * @return OgMembership.
+   * {@inheritdoc}
    */
   public function setEntityId($gid) {
     $this->set('entity_id', $gid);
@@ -111,33 +130,29 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function getEntityId() {
     return $this->get('entity_id')->value;
   }
 
   /**
-   * @param mixed $groupType
-   *
-   * @return OgMembership
+   * {@inheritdoc}
    */
-  public function setEntityType($groupType) {
+  public function setGroupEntityType($groupType) {
     $this->set('entity_type', $groupType);
     return $this;
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function getGroupEntityType() {
     return $this->get('entity_type')->value;
   }
 
   /**
-   * @param mixed $state
-   *
-   * @return OgMembership.
+   * {@inheritdoc}
    */
   public function setState($state) {
     $this->set('state', $state);
@@ -145,7 +160,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * @return mixed
+   * {@inheritdoc}
    */
   public function getState() {
     return $this->get('state')->value;
@@ -159,12 +174,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * Set the group's role's for the current user group membership's.
-   *
-   * @param $role_ids
-   *   List of og roles ids.
-   *
-   * @return OgMembership
+   * {@inheritdoc}
    */
   public function setRoles($role_ids) {
     $this->set('roles', $role_ids);
@@ -173,12 +183,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * Adding a role to the user membership.
-   *
-   * @param $role_id
-   *   The OG role ID.
-   *
-   * @return OgMembership
+   * {@inheritdoc}
    */
   public function addRole($role_id) {
     $rids = $this->getRolesIds();
@@ -188,12 +193,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * Revoking a role from the OG membership.
-   *
-   * @param $role_id
-   *   The OG role ID.
-   *
-   * @return OgMembership
+   * {@inheritdoc}
    */
   public function revokeRole($role_id) {
     $rids = $this->getRolesIds();
@@ -204,19 +204,14 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * Get all the referenced OG roles.
-   *
-   * @return OgRole[]
+   * {@inheritdoc}
    */
   public function getRoles() {
     return $this->get('roles')->referencedEntities();
   }
 
   /**
-   * Get list of OG role IDs.
-   *
-   * @return array
-   *   List of OG roles ids.
+   * {@inheritdoc}
    */
   public function getRolesIds() {
     return array_map(function (OgRole $role) {
@@ -225,12 +220,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * Checks if the user has a permission inside the group.
-   *
-   * @param $permission
-   *   The name of the permission.
-   *
-   * @return bool
+   * {@inheritdoc}
    */
   public function hasPermission($permission) {
     return array_filter($this->getRoles(), function (OgRole $role) use ($permission) {
@@ -313,9 +303,7 @@ class OgMembership extends ContentEntityBase implements ContentEntityInterface {
   }
 
   /**
-   * Get the group object.
-   *
-   * @return EntityInterface
+   * {@inheritdoc}
    */
   public function getGroup() {
     return \Drupal::entityTypeManager()->getStorage($this->getGroupEntityType())->load($this->getEntityId());
