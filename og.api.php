@@ -22,7 +22,7 @@
  * @param $bundle_id
  *   The entity bundle.
  *
- * @see \Drupal\og\GroupManager::attachUserField();
+ * @see og_og_group_created()
  */
 function hook_og_group_created($entity_type_id, $bundle_id) {
 
