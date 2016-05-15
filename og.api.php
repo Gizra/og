@@ -17,14 +17,14 @@
  * Unlike Drupal 7, when groups were defined by a field, in Drupal 8 groups are
  * defined by config schema.
  *
- * @param $entity_type
+ * @param $entity_type_id
  *   The entity type.
- * @param $bundle
+ * @param $bundle_id
  *   The entity bundle.
  *
  * @see \Drupal\og\GroupManager::attachUserField();
  */
-function hook_og_group_created($entity_type, $bundle) {
+function hook_og_group_created($entity_type_id, $bundle_id) {
 
 }
 
