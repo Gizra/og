@@ -47,18 +47,18 @@ function og_entity_insert(EntityInterface $entity) {
 /**
  * Implements hook_og_group_created().
  */
-function og_og_group_created($entity_type, $bundle) {
+function og_og_group_created($entity_type_id, $bundle_id) {
   $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user');
 
   foreach ($fields as $field) {
 
-    if ($field->getFieldStorageDefinition()->getSetting('target_type') == $entity_type) {
+    if ($field->getFieldStorageDefinition()->getSetting('target_type') == $entity_type_id) {
 
       if (!$field->getSetting('handler_settings')['target_bundles']) {
         return;
       }
 
-      if (in_array($bundle, $field->getSetting('handler_settings')['target_bundles'])) {
+      if (in_array($bundle_id, $field->getSetting('handler_settings')['target_bundles'])) {
         return;
       }
     }
@@ -66,10 +66,10 @@ function og_og_group_created($entity_type, $bundle) {
 
   // If we reached here, it means we need to create a field.
   // Pick an unused name.
-  $field_name = substr("og_user_$entity_type", 0, 32);
+  $field_name = substr("og_user_$entity_type_id", 0, 32);
   $i = 1;
-  while (FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
-    $field_name = substr("og_user_$entity_type", 0, 32 - strlen($i)) . $i;
+  while (FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name)) {
+    $field_name = substr("og_user_$entity_type_id", 0, 32 - strlen($i)) . $i;
     ++$i;
   }
 
@@ -83,13 +83,13 @@ function og_og_group_created($entity_type, $bundle) {
     'field_name' => $field_name,
     'field_storage_config' => [
       'settings' => [
-        'target_type' => $entity_type,
+        'target_type' => $entity_type_id,
       ],
     ],
     'field_config' => [
       'settings' => [
         'handler_settings' => [
-          'target_bundles' => [$bundle => $bundle],
+          'target_bundles' => [$bundle_id => $bundle_id],
         ],
       ],
     ],
