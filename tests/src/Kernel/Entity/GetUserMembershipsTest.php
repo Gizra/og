@@ -114,8 +114,8 @@ class GetUserMembershipsTest extends KernelTestBase {
   /**
    * Tests retrieval of OG Membership entities associated with a given user.
    *
-   * @param int $user
-   *   The key of the user in the $this->users array.
+   * @param int $index
+   *   The array index in the $this->users array of the user to test.
    * @param array $states
    *   Array with the states to retrieve.
    * @param string $field_name
@@ -126,8 +126,8 @@ class GetUserMembershipsTest extends KernelTestBase {
    * @covers ::getUserMemberships
    * @dataProvider membershipDataProvider
    */
-  public function testGetUserMemberships($user, array $states, $field_name, array $expected) {
-    $result = Og::getUserMemberships($this->users[$user], $states, $field_name);
+  public function testGetUserMemberships($index, array $states, $field_name, array $expected) {
+    $result = Og::getUserMemberships($this->users[$index], $states, $field_name);
 
     // Check that the correct number of results is returned.
     $this->assertEquals(count($expected), count($result));
@@ -135,10 +135,7 @@ class GetUserMembershipsTest extends KernelTestBase {
     // Inspect the results that were returned.
     foreach ($result as $key => $membership) {
       // Check that all result items are OgMembership objects.
-      // @todo Check for \Drupal\og\OgMembershipInterface once OgMembership
-      //   implements it.
-      // @see https://github.com/amitaibu/og/issues/183
-      $this->assertInstanceOf('Drupal\og\Entity\OgMembership', $membership);
+      $this->assertInstanceOf('Drupal\og\OgMembershipInterface', $membership);
       // Check that the results are keyed by OgMembership ID.
       $this->assertEquals($membership->id(), $key);
     }
