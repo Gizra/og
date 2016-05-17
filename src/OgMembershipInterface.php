@@ -112,7 +112,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function getFieldName();
 
   /**
-   * Sets the group entity type ID.
+   * Sets the group entity ID.
    *
    * @param mixed $gid
    *   The group entity ID.
