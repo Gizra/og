@@ -75,6 +75,8 @@ class GroupManager {
    * Get all group bundles keyed by entity type.
    *
    * @return array
+   *   An associative array, keyed by entity type, each value an indexed array
+   *   of bundle IDs.
    */
   public function getAllGroupBundles($entity_type = NULL) {
     return !empty($this->groupMap[$entity_type]) ? $this->groupMap[$entity_type] : $this->groupMap;
