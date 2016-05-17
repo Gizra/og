@@ -114,6 +114,9 @@ class GroupManager {
         unset($groups[$entity_type_id][$search_key]);
       }
 
+      // Clean up entity types that have become empty.
+      $groups = array_filter($groups);
+
       // Only update and refresh the map if a key was found and unset.
       $editable->set('groups', $groups);
       $saved = $editable->save();
