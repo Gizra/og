@@ -243,7 +243,7 @@ class OgRole extends Role implements OgRoleInterface {
    * @return array
    *   An array of default properties, to pass to OgRole::create().
    */
-  public static function getDefaultProperties($role_name) {
+  public static function getProperties($role_name) {
     if (!in_array($role_name, [
       self::ANONYMOUS,
       self::AUTHENTICATED,

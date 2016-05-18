@@ -165,7 +165,7 @@ class GroupManager {
       $properties['role_type'] = OgRole::getRoleTypeByName($role_name);
       // Only create the default role if it doesn't exist yet.
       if (!$this->ogRoleStorage->loadByProperties($properties)) {
-        $role = $this->ogRoleStorage->create($properties + OgRole::getDefaultProperties($role_name));
+        $role = $this->ogRoleStorage->create($properties + OgRole::getProperties($role_name));
         $role->save();
       }
     }

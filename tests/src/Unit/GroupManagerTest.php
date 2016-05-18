@@ -323,7 +323,7 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn([])
       ->shouldBeCalled();
     // It is expected that the role will be created with default properties.
-    $this->entityStorageProphecy->create($properties + OgRole::getDefaultProperties($role_name))
+    $this->entityStorageProphecy->create($properties + OgRole::getProperties($role_name))
       ->willReturn($this->ogRoleProphecy->reveal())
       ->shouldBeCalled();
     // The role is expected to be saved.
