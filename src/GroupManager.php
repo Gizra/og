@@ -110,7 +110,7 @@ class GroupManager {
     $editable->set('groups', $groups);
     $saved = $editable->save();
 
-    $this->createDefaultRoles($entity_type_id, $bundle_id);
+    $this->createRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
 
     return $saved;
@@ -154,7 +154,7 @@ class GroupManager {
    * @param string $bundle_id
    *   The bundle ID of the group for which to create default roles.
    */
-  protected function createDefaultRoles($entity_type_id, $bundle_id) {
+  protected function createRoles($entity_type_id, $bundle_id) {
     $properties = [
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle_id,
