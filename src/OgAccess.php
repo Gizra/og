@@ -114,8 +114,8 @@ class OgAccess {
       $permissions = array();
 
       foreach (Og::getUserMemberships($user) as $membership) {
-        /** @var $membership OgMembershipInterface */
         foreach ($membership->getRoles() as $role) {
+
           /** @var $role OgMembershipInterface */
           $permissions = array_merge($permissions, $role->getPermissions());
         }
