@@ -295,13 +295,10 @@ class OgRole extends Role implements OgRoleInterface {
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    */
   public static function getRoleTypeByName($role_name) {
-    switch ($role_name) {
-      case OgRoleInterface::ANONYMOUS:
-      case OgRoleInterface::AUTHENTICATED:
-        return OgRoleInterface::ROLE_TYPE_REQUIRED;
-      default:
-        return OgRoleInterface::ROLE_TYPE_STANDARD;
-    }
+    return in_array($role_name, [
+      OgRoleInterface::ANONYMOUS,
+      OgRoleInterface::AUTHENTICATED,
+    ]) ? OgRoleInterface::ROLE_TYPE_REQUIRED : OgRoleInterface::ROLE_TYPE_STANDARD;
   }
 
   /**
