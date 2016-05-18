@@ -76,6 +76,8 @@ class OgEntityAccessTest extends KernelTestBase {
 
 
     // Create users, and make sure user ID 1 isn't used.
+    User::create(['name' => $this->randomString()]);
+
     $this->user1 = User::create(['name' => $this->randomString()]);
     $this->user1->save();
 
