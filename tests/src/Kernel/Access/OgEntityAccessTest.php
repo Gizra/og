@@ -88,14 +88,12 @@ class OgEntityAccessTest extends KernelTestBase {
     ]);
     $this->group1->save();
 
-    $group_entity_type_id = $this->group1->getEntityTypeId();
-
     /** @var OgRole $role */
-    $role = OgRole::create();
-    $role
+    $this->ogRole= OgRole::create();
+    $this->ogRole
       ->setId($this->randomMachineName())
       ->setLabel($this->randomString())
-      ->setGroupType($group_entity_type_id)
+      ->setGroupType($this->group1->getEntityTypeId())
       ->setGroupBundle($this->groupBundle)
       // Associate an arbitrary permission with the role.
       ->grantPermission('some_perm')
@@ -107,8 +105,8 @@ class OgEntityAccessTest extends KernelTestBase {
     $membership
       ->setUser($this->user1->id())
       ->setEntityId($this->group1->id())
-      ->setGroupEntityType($group_entity_type_id)
-      ->addRole($role->id())
+      ->setGroupEntityType($this->group1->getEntityTypeId())
+      ->addRole($this->ogRole->id())
       ->save();
   }
 
@@ -121,6 +119,22 @@ class OgEntityAccessTest extends KernelTestBase {
 
     // A non-member user.
     $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user2)->isForbidden());
+
+    // Add membership to user 2.
+    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership
+      ->setUser($this->user2->id())
+      ->setEntityId($this->group1->id())
+      ->setGroupEntityType($this->group1->getEntityTypeId())
+      ->save();
+
+    // Add role with the permission to the membership.
+    $membership
+      ->addRole($this->ogRole->id())
+      ->save();
+
+
+    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user2)->isAllowed());
   }
 
 
