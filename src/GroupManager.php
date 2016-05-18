@@ -10,6 +10,7 @@ namespace Drupal\og;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Exception\OgRoleException;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
@@ -163,11 +164,12 @@ class GroupManager {
       // @todo: Find a way to deal with potential ID collisions.
       $properties['id'] = $role_name;
       $properties['role_type'] = OgRole::getRoleTypeByName($role_name);
-      // Only create the default role if it doesn't exist yet.
-      if (!$this->ogRoleStorage->loadByProperties($properties)) {
-        $role = $this->ogRoleStorage->create($properties + OgRole::getProperties($role_name));
-        $role->save();
+      // If the role already exists we have data corruption.
+      if ($this->ogRoleStorage->loadByProperties($properties)) {
+        throw new OgRoleException('The role with ID "' . $properties['id'] . '" cannot be created since it already exists.');
       }
+      $role = $this->ogRoleStorage->create($properties + OgRole::getProperties($role_name));
+      $role->save();
     }
   }
 
