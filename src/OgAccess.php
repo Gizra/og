@@ -7,6 +7,7 @@
 
 namespace Drupal\og;
 
+use Behat\Mink\Exception\Exception;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
@@ -120,7 +121,6 @@ class OgAccess {
           $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
-
 
       static::setPermissionCache($group, $user, TRUE, $permissions, $cacheable_metadata);
     }

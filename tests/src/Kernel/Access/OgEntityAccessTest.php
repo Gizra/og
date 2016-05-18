@@ -33,6 +33,11 @@ class OgEntityAccessTest extends KernelTestBase {
    */
   protected $user2;
 
+  /**
+   * @var \Drupal\user\Entity\User
+   */
+  protected $user3;
+
 
   /**
    * @var \Drupal\entity_test\Entity\EntityTest
@@ -69,12 +74,16 @@ class OgEntityAccessTest extends KernelTestBase {
 
     $this->groupBundle = Unicode::strtolower($this->randomMachineName());
 
-    // Create users.
+
+    // Create users, and make sure user ID 1 isn't used.
     $this->user1 = User::create(['name' => $this->randomString()]);
     $this->user1->save();
 
     $this->user2 = User::create(['name' => $this->randomString()]);
     $this->user2->save();
+
+    $this->user3 = User::create(['name' => $this->randomString()]);
+    $this->user3->save();
 
 
     // Define the group content as group.
@@ -103,7 +112,7 @@ class OgEntityAccessTest extends KernelTestBase {
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->user1->id())
+      ->setUser($this->user2->id())
       ->setEntityId($this->group1->id())
       ->setGroupEntityType($this->group1->getEntityTypeId())
       ->addRole($this->ogRole->id())
@@ -115,26 +124,21 @@ class OgEntityAccessTest extends KernelTestBase {
    */
   public function testAccess() {
     // User is the group owner, thus they have an Og membership.
-    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user1)->isAllowed());
+    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user2)->isAllowed());
 
     // A non-member user.
-    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user2)->isForbidden());
+    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user3)->isForbidden());
 
     // Add membership to user 2.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->user2->id())
+      ->setUser($this->user3->id())
       ->setEntityId($this->group1->id())
       ->setGroupEntityType($this->group1->getEntityTypeId())
-      ->save();
-
-    // Add role with the permission to the membership.
-    $membership
       ->addRole($this->ogRole->id())
       ->save();
 
-
-    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user2)->isAllowed());
+    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
   }
 
 
