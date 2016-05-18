@@ -129,7 +129,7 @@ class OgEntityAccessTest extends KernelTestBase {
     // A non-member user.
     $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user3)->isForbidden());
 
-    // Add membership to user 2.
+    // Add membership to user 3.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setUser($this->user3->id())
@@ -137,6 +137,10 @@ class OgEntityAccessTest extends KernelTestBase {
       ->setGroupEntityType($this->group1->getEntityTypeId())
       ->addRole($this->ogRole->id())
       ->save();
+
+    // Reset static caches.
+    Og::reset();
+    OgAccess::reset();
 
     $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
   }
