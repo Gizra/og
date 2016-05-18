@@ -15,6 +15,7 @@ use Drupal\og\Og;
 use Drupal\og\OgAccess;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgPermissionHelper;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\EntityOwnerInterface;
 
@@ -224,29 +225,29 @@ function _og_modules_uninstalled($modules) {
 /**
  * Implements hook_og_permission().
  */
-function _og_og_permission() {
-  // Generate standard node permissions for all applicable node types.
-  $perms = array();
+function og_og_permission() {
+  $permissions = [
+    'update group' => [
+      'title' => t('Edit group'),
+      'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
+      'default role' => array(OgRoleInterface::ADMINISTRATOR),
+    ],
+    'administer group' => [
+      'title' => t('Administer group'),
+      'description' => t('Manage group members and content in the group.'),
+      'default role' => array(OgRoleInterface::ADMINISTRATOR),
+      'restrict access' => TRUE,
+    ],
+  ];
 
-  $perms['update group'] = array(
-    'title' => t('Edit group'),
-    'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
-    'default role' => array(OgRoleInterface::ADMINISTRATOR),
-  );
-  $perms['administer group'] = array(
-    'title' => t('Administer group'),
-    'description' => t('Manage group members and content in the group.'),
-    'default role' => array(OgRoleInterface::ADMINISTRATOR),
-    'restrict access' => TRUE,
-  );
-
-  foreach (node_permissions_get_configured_types() as $type) {
-    $perms = array_merge($perms, og_list_permissions($type));
+  foreach (Og::groupManager()->getAllGroupBundles() as $entity_type_id => $bundle_ids) {
+    foreach ($bundle_ids as $bundle_id) {
+      $permissions = array_merge($permissions, OgPermissionHelper::generatePermissionList($entity_type_id, $bundle_id));
+    }
   }
 
-  return $perms;
+  return $permissions;
 }
-
 
 /**
  * Implements hook_og_default_roles().
