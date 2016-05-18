@@ -233,14 +233,14 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns default properties for each of the standard role names.
+   * Returns default properties for an OG role.
    *
    * @param string $role_name
    *   A role name, one of OgRoleInterface::ANONYMOUS,
    *   OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR.
    *
    * @return array
-   *   An array of default properties, to pass to OgRole::create().
+   *   An array of properties, to pass to OgRole::create().
    */
   public static function getProperties($role_name) {
     if (!in_array($role_name, [
