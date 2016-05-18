@@ -3,7 +3,7 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
-use Drupal\og\Exception\OgRoleRequiredException;
+use Drupal\og\Exception\OgRoleException;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
 
@@ -216,7 +216,7 @@ class OgRole extends Role implements OgRoleInterface {
     ]);
     $is_default_role = $this->getRoleType() !== self::ROLE_TYPE_STANDARD;
     if ($is_locked_property && $is_default_role && !$this->isNew()) {
-      throw new OgRoleRequiredException("The $property_name of the default roles 'non-member' and 'member' cannot be changed.");
+      throw new OgRoleException("The $property_name of the default roles 'non-member' and 'member' cannot be changed.");
     }
     return parent::set($property_name, $value);
   }
@@ -228,7 +228,7 @@ class OgRole extends Role implements OgRoleInterface {
     // The default roles are required. Prevent them from being deleted for as
     // long as the group still exists.
     if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && $this->groupManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
-      throw new OgRoleRequiredException('The default roles "non-member" and "member" cannot be deleted.');
+      throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
     }
     parent::delete();
   }
