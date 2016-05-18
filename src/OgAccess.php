@@ -113,14 +113,11 @@ class OgAccess {
     if (!$pre_alter_cache) {
       $permissions = array();
 
-      $membership_ids = array_keys(Og::getUserMembershipsAndGroups($user));
-      if ($membership_ids) {
-        foreach (OgMembership::loadMultiple($membership_ids) as $membership) {
-          /** @var $membership OgMembershipInterface */
-          foreach ($membership->getRoles() as $role) {
-            /** @var $role OgMembershipInterface */
-            $permissions = array_merge($permissions, $role->getPermissions());
-          }
+      foreach (Og::getUserMemberships($user) as $membership) {
+        /** @var $membership OgMembershipInterface */
+        foreach ($membership->getRoles() as $role) {
+          /** @var $role OgMembershipInterface */
+          $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
 
