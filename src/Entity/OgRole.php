@@ -144,7 +144,7 @@ class OgRole extends Role implements OgRoleInterface {
    * Returns the role type.
    *
    * @return string
-   *   The role type. One of OgRoleInterface::ROLE_TYPE_IMMUTABLE or
+   *   The role type. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    */
   public function getRoleType() {
@@ -155,7 +155,7 @@ class OgRole extends Role implements OgRoleInterface {
    * Sets the role type.
    *
    * @param string $role_type
-   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_IMMUTABLE or
+   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    *
    * @return $this
@@ -165,7 +165,7 @@ class OgRole extends Role implements OgRoleInterface {
    */
   public function setRoleType($role_type) {
     if (!in_array($role_type, [
-      self::ROLE_TYPE_IMMUTABLE,
+      self::ROLE_TYPE_REQUIRED,
       self::ROLE_TYPE_STANDARD,
     ])) {
       throw new \InvalidArgumentException("'$role_type' is not a valid role type.");
@@ -254,12 +254,12 @@ class OgRole extends Role implements OgRoleInterface {
 
     $default_properties = [
       self::ANONYMOUS => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_IMMUTABLE,
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
         'label' => 'Non-member',
         'permissions' => ['subscribe'],
       ],
       self::AUTHENTICATED => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_IMMUTABLE,
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
         'label' => 'Member',
         'permissions' => ['unsubscribe'],
       ],
@@ -291,14 +291,14 @@ class OgRole extends Role implements OgRoleInterface {
    *   The role name for which to return the type.
    *
    * @return string
-   *   The role type, either OgRoleInterface::ROLE_TYPE_IMMUTABLE or
+   *   The role type, either OgRoleInterface::ROLE_TYPE_REQUIRED or
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    */
   public static function getRoleTypeByName($role_name) {
     switch ($role_name) {
       case OgRoleInterface::ANONYMOUS:
       case OgRoleInterface::AUTHENTICATED:
-        return OgRoleInterface::ROLE_TYPE_IMMUTABLE;
+        return OgRoleInterface::ROLE_TYPE_REQUIRED;
       default:
         return OgRoleInterface::ROLE_TYPE_STANDARD;
     }
