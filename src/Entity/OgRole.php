@@ -204,12 +204,13 @@ class OgRole extends Role implements OgRoleInterface {
    * {@inheritdoc}
    */
   public function set($property_name, $value) {
-    // Prevent the ID, role type, entity type or bundle to be changed for any of
-    // the default roles. These default roles are required and shouldn't be
-    // tampered with.
+    // Prevent the ID, role type, group ID, group entity type or bundle to be
+    // changed for any of the default roles. These default roles are required
+    // and shouldn't be tampered with.
     $is_locked_property = in_array($property_name, [
       'id',
       'role_type',
+      'group_id',
       'group_type',
       'group_bundle',
     ]);
