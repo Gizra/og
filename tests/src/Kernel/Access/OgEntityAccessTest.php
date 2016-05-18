@@ -113,9 +113,9 @@ class OgEntityAccessTest extends KernelTestBase {
   }
 
   public function testAccess() {
-    $this->assertTrue((bool) OgAccess::userAccess($this->group1, 'some_perm', $this->user1));
+    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user1)->isAllowed());
 
-    $this->assertFalse((bool) OgAccess::userAccess($this->group1, 'some_perm', $this->user2));
+    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user2)->isForbidden());
   }
 
 
