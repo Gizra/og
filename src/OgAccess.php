@@ -7,7 +7,6 @@
 
 namespace Drupal\og;
 
-use Behat\Mink\Exception\Exception;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
