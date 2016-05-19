@@ -13,6 +13,7 @@ use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\RoleInterface;
 
 class OgAccess {
 
@@ -117,7 +118,7 @@ class OgAccess {
 
         foreach ($membership->getRoles() as $role) {
 
-          /** @var $role OgRoleInterface */
+          /** @var $role RoleInterface */
           $permissions = array_unique(array_merge($permissions, $role->getPermissions()));
         }
       }
