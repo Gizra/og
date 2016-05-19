@@ -131,13 +131,13 @@ class OgGroupAudienceHelper {
   /**
    * Return all the group audience fields of a certain bundle.
    *
-   * @param string $entity_type_id
+   * @param string $group_content_entity_type_id
    *   The entity type.
-   * @param string  $bundle
+   * @param string  $group_content_bundle_id
    *   The bundle name to be checked.
-   * @param string $group_type_id
+   * @param string $group_entity_type_id
    *   Filter list to only include fields referencing a specific group type.
-   * @param string $group_bundle
+   * @param string $group_bundle_id
    *   Filter list to only include fields referencing a specific group bundle.
    *   Fields that do not specify any bundle restrictions at all are also
    *   included.
@@ -146,15 +146,15 @@ class OgGroupAudienceHelper {
    *   An array of field definitions, keyed by field name; Or an empty array if
    *   none found.
    */
-  public static function getAllGroupAudienceFields($entity_type_id, $bundle, $group_type_id = NULL, $group_bundle = NULL) {
+  public static function getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id, $group_entity_type_id = NULL, $group_bundle_id = NULL) {
     $return = [];
-    $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+    $entity_type = \Drupal::entityTypeManager()->getDefinition($group_content_entity_type_id);
 
     if (!$entity_type->isSubclassOf(FieldableEntityInterface::class)) {
       // This entity type is not fieldable.
       return [];
     }
-    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($group_content_entity_type_id, $group_content_bundle_id);
 
     foreach ($field_definitions as $field_definition) {
       if (!static::isGroupAudienceField($field_definition)) {
@@ -164,14 +164,14 @@ class OgGroupAudienceHelper {
 
       $target_type = $field_definition->getFieldStorageDefinition()->getSetting('target_type');
 
-      if (isset($group_type_id) && $target_type != $group_type_id) {
+      if (isset($group_entity_type_id) && $target_type != $group_entity_type_id) {
         // Field doesn't reference this group type.
         continue;
       }
 
       $handler_settings = $field_definition->getSetting('handler_settings');
 
-      if (isset($group_bundle) && !empty($handler_settings['target_bundles']) && !in_array($group_bundle, $handler_settings['target_bundles'])) {
+      if (isset($group_bundle_id) && !empty($handler_settings['target_bundles']) && !in_array($group_bundle_id, $handler_settings['target_bundles'])) {
         continue;
       }
 
