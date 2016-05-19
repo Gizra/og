@@ -107,14 +107,16 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
 
 
+    // Set the the allowed permissions cache.
     $r = new \ReflectionClass('Drupal\og\OgAccess');
     $reflection_property = $r->getProperty('permissionsCache');
     $reflection_property->setAccessible(TRUE);
 
 
     $values = [];
-    $values[$group_type_id][$group->id()][2]['pre_alter'] = ['permissions' => ['update group']];
-    $values[$group_type_id][$group->id()][2]['post_alter'] = ['permissions' => ['update group']];
+    foreach (['pre_alter', 'post_alter'] as $key) {
+      $values[$group_type_id][$group->id()][2][$key] = ['permissions' => ['update group']];
+    }
 
     $reflection_property->setValue($values);
 
