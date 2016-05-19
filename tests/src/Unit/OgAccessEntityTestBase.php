@@ -53,7 +53,6 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $entity_field_manager = $this->prophesize(EntityFieldManagerInterface::class);
     $entity_field_manager->getFieldDefinitions($entity_type_id, $bundle)->willReturn([$field_definition->reveal()]);
 
-    $group = $this->groupEntity()->reveal();
     $group_type_id = $this->group->getEntityTypeId();
 
     $storage = $this->prophesize(EntityStorageInterface::class);
