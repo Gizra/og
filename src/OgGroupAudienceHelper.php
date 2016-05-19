@@ -134,7 +134,7 @@ class OgGroupAudienceHelper {
    * @param string $group_content_entity_type_id
    *   The entity type ID of the group content for which to return audience
    *   fields.
-   * @param string  $group_content_bundle_id
+   * @param string $group_content_bundle_id
    *   The bundle name of the group content for which to return audience fields.
    * @param string $group_entity_type_id
    *   Filter list to only include fields referencing a specific group type. If
