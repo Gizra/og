@@ -126,7 +126,6 @@ class OgAccessTestBase extends UnitTestCase {
 
     $values = [];
     foreach (['pre_alter', 'post_alter'] as $key) {
-      $values[$group_type_id][$this->group->id()][1][$key] = ['permissions' => ['update group']];
       $values[$group_type_id][$this->group->id()][2][$key] = ['permissions' => ['update group']];
     }
 
