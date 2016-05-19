@@ -69,26 +69,4 @@ class OgAccessTest extends OgAccessTestBase {
     $this->assertTrue($user_access->isAllowed());
   }
 
-  /**
-   * @coversDefaultmethod ::userAccess
-   * @dataProvider operationProvider
-   */
-  public function testUserAccessOgUserAccessAlter($operation) {
-    $permissions = [OgAccess::ADMINISTER_GROUP_PERMISSION];
-    \Drupal::getContainer()->set('module_handler', new OgAccessTestAlter($permissions));
-    $group_entity = $this->groupEntity();
-    $group_entity->id()->willReturn(mt_rand(5, 10));
-    $user_access = OgAccess::userAccess($group_entity->reveal(), $operation, $this->user->reveal());
-    $this->assertTrue($user_access->isAllowed());
-  }
-
-}
-
-class OgAccessTestAlter {
-  public function __construct($data) {
-    $this->data = $data;
-  }
-  public function alter($op, &$data) {
-    $data = $this->data;
-  }
 }
