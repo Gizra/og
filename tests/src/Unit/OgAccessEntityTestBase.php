@@ -113,8 +113,8 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
 
     $values = [];
-    $values[$group_type_id][$group->id()][2]['pre_alter'] = ['update group'];
-    $values[$group_type_id][$group->id()][2]['post_alter'] = ['update group'];
+    $values[$group_type_id][$group->id()][2]['pre_alter'] = ['permissions' => ['update group']];
+    $values[$group_type_id][$group->id()][2]['post_alter'] = ['permissions' => ['update group']];
 
     $reflection_property->setValue($values);
 
