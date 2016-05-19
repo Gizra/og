@@ -140,10 +140,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->addRole($this->ogRole->id())
       ->save();
 
-    // Reset static caches.
-    Og::reset();
-    OgAccess::reset();
-
     $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
   }
 
