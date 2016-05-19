@@ -15,7 +15,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\og\OgMembershipInterface;
 use Prophecy\Argument;
 
 
@@ -35,7 +34,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $entity_type_id = $this->randomMachineName();
     $bundle = $this->randomMachineName();
-    $entity_id = mt_rand(20, 30);
+    $entity_id = 20;
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->getListCacheTags()->willReturn([]);
@@ -55,7 +54,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $entity_field_manager->getFieldDefinitions($entity_type_id, $bundle)->willReturn([$field_definition->reveal()]);
 
     $group = $this->groupEntity()->reveal();
-    $group_type_id = $group->getEntityTypeId();
+    $group_type_id = $this->group->getEntityTypeId();
 
     $storage = $this->prophesize(EntityStorageInterface::class);
 
@@ -68,61 +67,8 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $container->set('entity_type.manager', $entity_type_manager->reveal());
     $container->set('entity_field.manager', $entity_field_manager->reveal());
 
-
-    // Set the Og::cache property values, to skip calculations.
-    $values = [];
-
-    $r = new \ReflectionClass('Drupal\og\Og');
-    $reflection_property = $r->getProperty('cache');
-    $reflection_property->setAccessible(TRUE);
-
-    // Mock the results of Og::getGroupIds().
-    $identifier = [
-      'Drupal\og\Og::getGroupIds',
-      $entity_id,
-      NULL,
-      NULL,
-    ];
-
-    $identifier = implode(':', $identifier);
-
-    $group_ids = [$group_type_id => [$group->id()]];
-    $values[$identifier] = $group_ids;
-
-    // Mock the results of Og::getUserMemberships().
-    $identifier = [
-      'Drupal\og\Og::getUserMemberships',
-      2,
-      OgMembershipInterface::STATE_ACTIVE,
-      // The field name.
-      NULL,
-    ];
-    $identifier = implode(':', $identifier);
-
-    // The cache is really holding the OG membership, however it is not used in
-    // the tests, so we just set a TRUE value.
-    $values[$identifier] = TRUE;
-
-    $reflection_property->setValue($values);
-
-
-
-    // Set the the allowed permissions cache.
-    $r = new \ReflectionClass('Drupal\og\OgAccess');
-    $reflection_property = $r->getProperty('permissionsCache');
-    $reflection_property->setAccessible(TRUE);
-
-
-    $values = [];
-    foreach (['pre_alter', 'post_alter'] as $key) {
-      $values[$group_type_id][$group->id()][2][$key] = ['permissions' => ['update group']];
-    }
-
-    $reflection_property->setValue($values);
-
-
     // Mock the results of Og::getGroups().
-    $storage->loadMultiple(Argument::type('array'))->willReturn([$group]);
+    $storage->loadMultiple(Argument::type('array'))->willReturn([$this->group]);
   }
 
 }
