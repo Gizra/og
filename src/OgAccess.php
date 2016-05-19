@@ -24,7 +24,7 @@ class OgAccess {
    *   - alter: The permissions after altered by implementing modules.
    *   - pre_alter: The pre-altered permissions, as read from the config.
    */
-  protected static $permissionsCache = ['pre_alter' => [], 'post_alter' => []];
+  protected static $permissionsCache = [];
 
 
   /**
@@ -117,7 +117,7 @@ class OgAccess {
 
         foreach ($membership->getRoles() as $role) {
 
-          /** @var $role OgMembershipInterface */
+          /** @var $role OgRoleInterface */
           $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
@@ -125,7 +125,7 @@ class OgAccess {
       static::setPermissionCache($group, $user, TRUE, $permissions, $cacheable_metadata);
     }
 
-    if (!$skip_alter && !isset($post_alter_cache[$operation])) {
+    if (!$skip_alter && !in_array($operation, $post_alter_cache)) {
       // Let modules alter the permissions. So we get the original ones, and
       // pass them along to the implementing modules.
       $alterable_permissions = static::getPermissionsCache($group, $user, TRUE);
@@ -275,7 +275,7 @@ class OgAccess {
    * Resets the static cache.
    */
   public static function reset() {
-    static::$permissionsCache = ['pre_alter' => [], 'post_alter' => []];
+    static::$permissionsCache = [];
   }
 
 }

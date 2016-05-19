@@ -5,11 +5,12 @@
  * Contains Drupal\og\OgRoleInterface.
  */
 namespace Drupal\og;
+use Drupal\user\RoleInterface;
 
 /**
  * Provides an interface defining an OG user role entity.
  */
-interface OgRoleInterface {
+interface OgRoleInterface extends RoleInterface {
 
   /**
    * The role name of the group non-member.

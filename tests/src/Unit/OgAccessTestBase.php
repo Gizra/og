@@ -107,7 +107,7 @@ class OgAccessTestBase extends UnitTestCase {
       // In the unit tests we don't really care about the permission name - it
       // can be an arbitrary string; except for OgAccessTest::testUserAccessAdminPermission
       // test which checks for "administer group" permission.
-      ['foo bar'],
+      ['update group'],
       ['administer group'],
     ];
   }
