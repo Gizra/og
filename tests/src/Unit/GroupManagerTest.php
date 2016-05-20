@@ -27,11 +27,17 @@ class GroupManagerTest extends UnitTestCase {
   protected $configFactoryProphecy;
 
   /**
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeBundleInfoProphecy;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
     $this->configProphecy = $this->prophesize('Drupal\Core\Config\Config');
     $this->configFactoryProphecy = $this->prophesize('Drupal\Core\Config\ConfigFactoryInterface');
+    $this->entityTypeBundleInfoProphecy = $this->prophesize('Drupal\Core\Entity\EntityTypeBundleInfoInterface');
   }
 
   /**
@@ -221,7 +227,7 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->configProphecy->reveal())
       ->shouldBeCalled();
 
-    return new GroupManager($this->configFactoryProphecy->reveal());
+    return new GroupManager($this->configFactoryProphecy->reveal(), $this->entityTypeBundleInfoProphecy->reveal());
   }
 
 }
