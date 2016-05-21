@@ -60,14 +60,12 @@ class PermissionManager {
    * @return array
    *   The list of permissions.
    */
-  public function generatePermissionList($entity_type_id = NULL, $bundle_id = NULL) {
+  public function generatePermissionList($entity_type_id, $bundle_id) {
     $permissions = [];
 
-    // If the passed in arguments are empty, return permissions for all groups.
-    $target_entity_type_ids = empty($entity_type_id) && empty($bundle_id) ? $this->groupManager->getAllGroupBundles() : [$entity_type_id => [$bundle_id]];
-    foreach ($target_entity_type_ids as $target_entity_type_id => $target_bundle_ids) {
-      foreach ($target_bundle_ids as $target_bundle_id) {
-        $permissions += $this->generateCrudPermissionList($target_entity_type_id, $target_bundle_id);
+    foreach ($this->groupManager->getGroupContentBundleIdsByGroupBundle($entity_type_id, $bundle_id) as $group_content_entity_type_id => $group_content_bundle_ids) {
+      foreach ($group_content_bundle_ids as $group_content_bundle_id) {
+        $permissions += $this->generateCrudPermissionList($group_content_entity_type_id, $group_content_bundle_id);
       }
     }
 
