@@ -229,6 +229,17 @@ class GroupManager {
   }
 
   /**
+   * Refreshes the locally stored data.
+   *
+   * Call this after making a change to a relationship between a group type and
+   * a group content type.
+   */
+  public function refresh() {
+    $this->refreshGroupMap();
+    unset($this->groupRelationMap);
+  }
+
+  /**
    * Refreshes the groupMap property with currently configured groups.
    */
   protected function refreshGroupMap() {
