@@ -9,8 +9,6 @@ namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\og\Entity\OgRole;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
