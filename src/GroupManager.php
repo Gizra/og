@@ -221,12 +221,10 @@ class GroupManager {
     $groups[$entity_type_id] = array_unique($groups[$entity_type_id]);
 
     $editable->set('groups', $groups);
-    $saved = $editable->save();
+    $editable->save();
 
     $this->createRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
-
-    return $saved;
   }
 
   /**
