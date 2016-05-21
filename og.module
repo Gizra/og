@@ -223,33 +223,6 @@ function _og_modules_uninstalled($modules) {
 }
 
 /**
- * Implements hook_og_permission().
- */
-function og_og_permission() {
-  $permissions = [
-    'update group' => [
-      'title' => t('Edit group'),
-      'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
-      'default role' => array(OgRoleInterface::ADMINISTRATOR),
-    ],
-    'administer group' => [
-      'title' => t('Administer group'),
-      'description' => t('Manage group members and content in the group.'),
-      'default role' => array(OgRoleInterface::ADMINISTRATOR),
-      'restrict access' => TRUE,
-    ],
-  ];
-
-  foreach (Og::groupManager()->getAllGroupBundles() as $entity_type_id => $bundle_ids) {
-    foreach ($bundle_ids as $bundle_id) {
-      $permissions = array_merge($permissions, OgPermissionHelper::generatePermissionList($entity_type_id, $bundle_id));
-    }
-  }
-
-  return $permissions;
-}
-
-/**
  * Implements hook_og_default_roles().
  */
 function _og_og_default_roles() {
