@@ -141,7 +141,7 @@ class BundleFormAlter {
       // If a group audience field already exists, use its value. Otherwise fall
       // back to the first entity type that was returned.
       reset($target_types);
-      $target_type_default = isset($handler_settings['target_type']) ? $handler_settings['target_type'] : key($target_types);
+      $target_type_default = $field && !empty($field->getSetting('target_type')) ? $field->getSetting('target_type') : key($target_types);
 
       // If the target type was set using AJAX, use that instead of the default.
       $ajax_value = $form_state->getValue('og_target_type');
