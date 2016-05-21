@@ -233,35 +233,13 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns default properties for an OG role.
-   *
-   * @param string $role_name
-   *   A role name, one of OgRoleInterface::ANONYMOUS,
-   *   OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR.
-   *
-   * @return array
-   *   An array of properties, to pass to OgRole::create().
-   */
-  public static function getProperties($role_name) {
-    if (!in_array($role_name, [
-      self::ANONYMOUS,
-      self::AUTHENTICATED,
-      self::ADMINISTRATOR,
-    ])) {
-      throw new \InvalidArgumentException("$role_name is not a default role name.");
-    }
-
-    return self::getAllProperties()[$role_name];
-  }
-
-  /**
-   * Returns default properties for all OG roles.
+   * Returns default properties for the default OG roles.
    *
    * @return array
    *   An array of properties, keyed by OG role.
    */
-  public static function getAllProperties() {
-    $default_properties = [
+  public static function getDefaultProperties() {
+    return [
       self::ANONYMOUS => [
         'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
         'label' => 'Non-member',
@@ -275,17 +253,6 @@ class OgRole extends Role implements OgRoleInterface {
         'label' => 'Administrator',
       ],
     ];
-
-    // Populate the default permissions.
-    foreach (\Drupal::moduleHandler()->invokeAll('og_permission') as $permission => $properties) {
-      foreach (array_keys($default_properties) as $role) {
-        if (!empty($properties['default role']) && in_array($role, $properties['default role'])) {
-          $default_properties[$role]['permissions'][] = $permission;
-        }
-      }
-    }
-
-    return $default_properties;
   }
 
   /**
