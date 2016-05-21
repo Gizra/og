@@ -11,6 +11,9 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Event\PermissionEvent;
+use Drupal\og\Event\PermissionEventInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
@@ -75,6 +78,13 @@ class GroupManager {
   protected $groupMap;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * Constructs an GroupManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -83,11 +93,14 @@ class GroupManager {
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The service providing information about bundles.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   *   The event dispatcher.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
+    $this->eventDispatcher = $event_dispatcher;
     $this->refreshGroupMap();
   }
 
@@ -273,6 +286,12 @@ class GroupManager {
     foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR] as $role_name) {
       $properties['id'] = $role_name;
       $properties['role_type'] = OgRole::getRoleTypeByName($role_name);
+
+      // Populate the default permissions.
+      $event = new PermissionEvent($entity_type_id, $bundle_id);
+      /** @var \Drupal\og\Event\PermissionEventInterface $permissions */
+      $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
+      $properties['permissions'] = array_keys($permissions->filterByRole($role_name));
 
       $role = $this->ogRoleStorage->create($properties + OgRole::getDefaultProperties()[$role_name]);
       $role->save();
