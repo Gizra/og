@@ -44,6 +44,11 @@ class GroupManagerTest extends UnitTestCase {
   protected $ogRoleProphecy;
 
   /**
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeBundleInfoProphecy;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -52,6 +57,7 @@ class GroupManagerTest extends UnitTestCase {
     $this->entityTypeManagerProphecy = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
     $this->entityStorageProphecy = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
     $this->ogRoleProphecy = $this->prophesize('Drupal\og\Entity\OgRole');
+    $this->entityTypeBundleInfoProphecy = $this->prophesize('Drupal\Core\Entity\EntityTypeBundleInfoInterface');
   }
 
   /**
@@ -250,7 +256,7 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->entityStorageProphecy->reveal())
       ->shouldBeCalled();
 
-    return new GroupManager($this->configFactoryProphecy->reveal(), $this->entityTypeManagerProphecy->reveal());
+    return new GroupManager($this->configFactoryProphecy->reveal(), $this->entityTypeManagerProphecy->reveal(), $this->entityTypeBundleInfoProphecy->reveal());
   }
 
   /**
