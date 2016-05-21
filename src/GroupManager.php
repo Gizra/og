@@ -200,8 +200,20 @@ class GroupManager {
 
   /**
    * Sets an entity type instance as being an OG group.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the bundle to declare as being a group.
+   * @param string $bundle_id
+   *   The bundle ID of the bundle to declare as being a group.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when the given bundle is already a group.
    */
   public function addGroup($entity_type_id, $bundle_id) {
+    // Throw an error if the entity type is already defined as a group.
+    if ($this->isGroup($entity_type_id, $bundle_id)) {
+      throw new \InvalidArgumentException("The '$entity_type_id' of type '$bundle_id' is already a group.");
+    }
     $editable = $this->configFactory->getEditable('og.settings');
     $groups = $editable->get('groups');
     $groups[$entity_type_id][] = $bundle_id;
