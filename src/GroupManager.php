@@ -271,6 +271,17 @@ class GroupManager {
   }
 
   /**
+   * Refreshes the locally stored data.
+   *
+   * Call this after making a change to a relationship between a group type and
+   * a group content type.
+   */
+  public function refresh() {
+    $this->refreshGroupMap();
+    unset($this->groupRelationMap);
+  }
+
+  /**
    * Creates default roles for the given group type.
    *
    * @param string $entity_type_id
