@@ -8,9 +8,12 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Event\PermissionEvent;
+use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupManager;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
 
 /**
  * @group og
@@ -49,6 +52,16 @@ class GroupManagerTest extends UnitTestCase {
   protected $entityTypeBundleInfoProphecy;
 
   /**
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $eventDispatcherProphecy;
+
+  /**
+   * @var \Drupal\og\Event\PermissionEventInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $permissionEventProphecy;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -58,6 +71,8 @@ class GroupManagerTest extends UnitTestCase {
     $this->entityStorageProphecy = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
     $this->ogRoleProphecy = $this->prophesize('Drupal\og\Entity\OgRole');
     $this->entityTypeBundleInfoProphecy = $this->prophesize('Drupal\Core\Entity\EntityTypeBundleInfoInterface');
+    $this->eventDispatcherProphecy = $this->prophesize('\Symfony\Component\EventDispatcher\EventDispatcherInterface');
+    $this->permissionEventProphecy = $this->prophesize('\Drupal\og\Event\PermissionEventInterface');
   }
 
   /**
@@ -248,7 +263,12 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->entityStorageProphecy->reveal())
       ->shouldBeCalled();
 
-    return new GroupManager($this->configFactoryProphecy->reveal(), $this->entityTypeManagerProphecy->reveal(), $this->entityTypeBundleInfoProphecy->reveal());
+    return new GroupManager(
+      $this->configFactoryProphecy->reveal(),
+      $this->entityTypeManagerProphecy->reveal(),
+      $this->entityTypeBundleInfoProphecy->reveal(),
+      $this->eventDispatcherProphecy->reveal()
+    );
   }
 
   /**
@@ -275,15 +295,26 @@ class GroupManagerTest extends UnitTestCase {
    * @param string $role_name
    *   The name of the role being created.
    */
-  protected function addNewDefaultRole($entity_type, $bundle, $role_name) {
+  protected function addNewDefaultRole($entity_type, $bundle, $role_name)
+  {
+    // It is expected that the OG permissions that need to be populated on the
+    // new role will be requested from the PermissionEvent listener.
+    $this->eventDispatcherProphecy->dispatch(PermissionEventInterface::EVENT_NAME, Argument::type('\Drupal\og\Event\PermissionEvent'))
+      ->willReturn($this->permissionEventProphecy->reveal())
+      ->shouldBeCalled();
+    $this->permissionEventProphecy->filterByRole($role_name)
+      ->willReturn([])
+      ->shouldBeCalled();
+
     // It is expected that the role will be created with default properties.
     $properties = [
       'group_type' => $entity_type,
       'group_bundle' => $bundle,
       'role_type' => OgRole::getRoleTypeByName($role_name),
       'id' => $role_name,
+      'permissions' => [],
     ];
-    $this->entityStorageProphecy->create($properties + OgRole::getProperties($role_name))
+    $this->entityStorageProphecy->create($properties + OgRole::getDefaultProperties()[$role_name])
       ->willReturn($this->ogRoleProphecy->reveal())
       ->shouldBeCalled();
 
