@@ -178,14 +178,15 @@ class GetGroupsTest extends KernelTestBase {
     $result = Og::getGroups($this->groupContent, $group_type_id, $group_bundle);
 
     // Check that the correct number of results is returned.
-    $this->assertEquals(count($expected, COUNT_RECURSIVE) - count($expected), count($result));
+    $this->assertEquals(count($expected, COUNT_RECURSIVE), count($result, COUNT_RECURSIVE));
 
     // Check that all expected results are returned.
     foreach ($expected as $expected_type => $expected_keys) {
       foreach ($expected_keys as $expected_key) {
         /** @var \Drupal\Core\Entity\EntityInterface $expected_group */
         $expected_group = $this->groups[$expected_type][$expected_key];
-        foreach ($result as $key => $group) {
+        /** @var \Drupal\Core\Entity\EntityInterface $group */
+        foreach ($result[$expected_type] as $key => $group) {
           if ($group->getEntityTypeId() === $expected_group->getEntityTypeId() && $group->id() === $expected_group->id()) {
             // The expected result was found. Continue the test.
             continue 2;

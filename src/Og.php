@@ -11,8 +11,8 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Display\EntityDisplayInterface;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
@@ -24,11 +24,11 @@ use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 class Og {
 
   /**
-   * Static cache for groups per entity.
+   * Static cache for heavy queries.
    *
    * @var array
    */
-  protected static $entityGroupCache = [];
+  protected static $cache = [];
 
   /**
    * Create an organic groups field in a bundle.
@@ -136,49 +136,105 @@ class Og {
   }
 
   /**
-   * Gets the groups an entity is associated with.
+   * Returns all group IDs associated with the given user.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to get groups for.
-   * @param $states
+   * This is similar to \Drupal\og\Og::getGroupIds() but for users. The reason
+   * there is a separate method for user entities is because the storage is
+   * handled differently. For group content the relation to the group is stored
+   * on a field attached to the content entity, while user memberships are
+   * tracked in OgMembership entities.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get groups for.
+   * @param array $states
    *   (optional) Array with the state to return. Defaults to active.
-   * @param $field_name
+   * @param string $field_name
    *   (optional) The field name associated with the group.
    *
    * @return array
-   *  An array with the group's entity type as the key, and array - keyed by
-   *  the OG membership ID and the group ID as the value. If nothing found,
-   *  then an empty array.
+   *   An associative array, keyed by group entity type, each item an array of
+   *   group entity IDs.
+   *
+   * @see \Drupal\og\Og::getGroupIds()
    */
-  public static function getEntityGroups(EntityInterface $entity, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
-    $entity_type_id = $entity->getEntityTypeId();
-    $entity_id = $entity->id();
+  public static function getUserGroupIds(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
+    $group_ids = [];
 
+    /** @var \Drupal\og\Entity\OgMembership[] $memberships */
+    $memberships = static::getUserMemberships($user, $states, $field_name);
+    foreach ($memberships as $membership) {
+      $group_ids[$membership->getGroupEntityType()][] = $membership->getEntityId();
+    }
+
+    return $group_ids;
+  }
+
+  /**
+   * Returns all groups associated with the given user.
+   *
+   * This is similar to \Drupal\og\Og::getGroups() but for users. The reason
+   * there is a separate method for user entities is because the storage is
+   * handled differently. For group content the relation to the group is stored
+   * on a field attached to the content entity, while user memberships are
+   * tracked in OgMembership entities.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get groups for.
+   * @param array $states
+   *   (optional) Array with the states to return. Defaults to active.
+   * @param string $field_name
+   *   (optional) The field name associated with the group.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[][]
+   *   An associative array, keyed by group entity type, each item an array of
+   *   group entities.
+   *
+   * @see \Drupal\og\Og::getGroups()
+   * @see \Drupal\og\Og::getUserMemberships()
+   */
+  public static function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
+    $groups = [];
+
+    foreach (static::getUserGroupIds($user, $states, $field_name) as $entity_type => $entity_ids) {
+      $groups[$entity_type] = \Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($entity_ids);
+    }
+
+    return $groups;
+  }
+
+  /**
+   * Returns the group memberships a user is associated with.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get groups for.
+   * @param array $states
+   *   (optional) Array with the state to return. Defaults to active.
+   * @param string $field_name
+   *   (optional) The field name associated with the group.
+   *
+   * @return \Drupal\og\Entity\OgMembership[]
+   *  An array of OgMembership entities, keyed by ID.
+   */
+  public static function getUserMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     // Get a string identifier of the states, so we can retrieve it from cache.
-    if ($states) {
-      sort($states);
-      $state_identifier = implode(':', $states);
-    }
-    else {
-      $state_identifier = FALSE;
-    }
+    sort($states);
+    $states_identifier = implode('|', array_unique($states));
 
     $identifier = [
-      $entity_type_id,
-      $entity_id,
-      $state_identifier,
+      __METHOD__,
+      $user->id(),
+      $states_identifier,
       $field_name,
     ];
-
     $identifier = implode(':', $identifier);
-    if (isset(static::$entityGroupCache[$identifier])) {
-      // Return cached values.
-      return static::$entityGroupCache[$identifier];
+
+    // Return cached result if it exists.
+    if (isset(static::$cache[$identifier])) {
+      return static::$cache[$identifier];
     }
 
-    static::$entityGroupCache[$identifier] = [];
     $query = \Drupal::entityQuery('og_membership')
-      ->condition('uid', $entity_id);
+      ->condition('uid', $user->id());
 
     if ($states) {
       $query->condition('state', $states, 'IN');
@@ -191,23 +247,18 @@ class Og {
     $results = $query->execute();
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
-    $memberships = \Drupal::entityTypeManager()
+    static::$cache[$identifier] = \Drupal::entityTypeManager()
       ->getStorage('og_membership')
       ->loadMultiple($results);
 
-    /** @var \Drupal\og\Entity\OgMembership $membership */
-    foreach ($memberships as $membership) {
-      static::$entityGroupCache[$identifier][$membership->getGroupEntityType()][$membership->id()] = $membership->getGroup();
-    }
-
-    return static::$entityGroupCache[$identifier];
+    return static::$cache[$identifier];
   }
 
   /**
    * Returns all group IDs associated with the given group content entity.
    *
    * Do not use this to retrieve group IDs associated with a user entity. Use
-   * Og::getEntityGroups() instead.
+   * Og::getUserGroups() instead.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group content entity for which to return the associated groups.
@@ -222,12 +273,29 @@ class Og {
    *
    * @throws \InvalidArgumentException
    *   Thrown when a user entity is passed in.
+   *
+   * @see \Drupal\og\Og::getUserGroups()
    */
   public static function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
     // This does not work for user entities.
     if ($entity->getEntityTypeId() === 'user') {
-      throw new \InvalidArgumentException('\\Og::getGroupIds() cannot be used for user entities. Use \\Og::getEntityGroups() instead.');
+      throw new \InvalidArgumentException('\Drupal\og\Og::getGroupIds() cannot be used for user entities. Use \Drupal\og\Og::getUserGroups() instead.');
     }
+
+    $identifier = [
+      __METHOD__,
+      $entity->id(),
+      $group_type_id,
+      $group_bundle,
+    ];
+
+    $identifier = implode(':', $identifier);
+
+    if (isset(static::$cache[$identifier])) {
+      // Return cached values.
+      return static::$cache[$identifier];
+    }
+
     $group_ids = [];
 
     $fields = OgGroupAudienceHelper::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle(), $group_type_id, $group_bundle);
@@ -263,6 +331,8 @@ class Og {
       $group_ids = NestedArray::mergeDeep($group_ids, [$target_type => $query->execute()]);
     }
 
+    static::$cache[$identifier] = $group_ids;
+
     return $group_ids;
   }
 
@@ -270,7 +340,12 @@ class Og {
    * Returns all groups that are associated with the given group content entity.
    *
    * Do not use this to retrieve group memberships for a user entity. Use
-   * Og::GetEntityGroups() instead.
+   * Og::getUserGroups() instead.
+   *
+   * The reason there are separate method for group content and user entities is
+   * because the storage is handled differently. For group content the relation
+   * to the group is stored on a field attached to the content entity, while
+   * user memberships are tracked in OgMembership entities.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group content entity for which to return the groups.
@@ -279,15 +354,17 @@ class Og {
    * @param string $group_bundle
    *   Filter results to only include groups of this bundle.
    *
-   * @return \Drupal\Core\Entity\EntityInterface[]
-   *   An array of group entities.
+   * @return \Drupal\Core\Entity\EntityInterface[][]
+   *   An associative array, keyed by group entity type, each item an array of
+   *   group entities.
+   *
+   * @see \Drupal\og\Og::getUserGroups()
    */
   public static function getGroups(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
     $groups = [];
 
     foreach (static::getGroupIds($entity, $group_type_id, $group_bundle) as $entity_type => $entity_ids) {
-      $entities = \Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($entity_ids);
-      $groups = array_merge($groups, array_values($entities));
+      $groups[$entity_type] = \Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($entity_ids);
     }
 
     return $groups;
@@ -422,12 +499,12 @@ class Og {
   }
 
   /**
-   * Return whether a group content belongs to a group.
+   * Returns whether a user belongs to a group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to test the membership for.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to test the membership for.
    * @param array $states
    *   (optional) Array with the membership states to check the membership.
    *   Defaults to active memberships.
@@ -436,31 +513,27 @@ class Og {
    *   TRUE if the entity (e.g. the user or node) belongs to a group with
    *   a certain state.
    */
-  public static function isMember(EntityInterface $group, EntityInterface $entity, $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    $groups = static::getEntityGroups($entity, $states);
+  public static function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    $group_ids = static::getUserGroupIds($user, $states);
     $entity_type_id = $group->getEntityTypeId();
-    // We need to create a map of the group ids as Og::getEntityGroups returns a
-    // map of membership_id => group entity for each type.
-    return !empty($groups[$entity_type_id]) && in_array($group->id(), array_map(function($group_entity) {
-      return $group_entity->id();
-    }, $groups[$entity_type_id]));
+    return !empty($group_ids[$entity_type_id]) && in_array($group->id(), $group_ids[$entity_type_id]);
   }
 
   /**
-   * Returns whether an entity belongs to a group with a pending status.
+   * Returns whether a user belongs to a group with a pending status.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The group content entity.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user entity.
    *
    * @return bool
    *   True if the membership is pending.
    *
    * @see \Drupal\og\Og::isMember
    */
-  public static function isMemberPending(EntityInterface $group, EntityInterface $entity) {
-    return static::isMember($group, $entity, [OgMembershipInterface::STATE_PENDING]);
+  public static function isMemberPending(EntityInterface $group, AccountInterface $user) {
+    return static::isMember($group, $user, [OgMembershipInterface::STATE_PENDING]);
   }
 
   /**
@@ -588,7 +661,7 @@ class Og {
     }
 
     // @todo Consider using a reset() method.
-    static::$entityGroupCache = [];
+    static::$cache = [];
 
     // Invalidate the entity property cache.
     \Drupal::entityTypeManager()->clearCachedDefinitions();
