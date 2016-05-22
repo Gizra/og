@@ -9,7 +9,7 @@ use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
- * Tests retrieving group (content) bundles by group (content) bundles.
+ * Tests retrieving group content bundles by group bundles and vice versa.
  *
  * @group og
  * @coversDefaultClass \Drupal\og\GroupManager
