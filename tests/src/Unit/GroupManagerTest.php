@@ -194,17 +194,19 @@ class GroupManagerTest extends UnitTestCase {
 
     $groups_after = ['test_entity_new' => ['a']];
 
+    $config_prophecy = $this->configProphecy;
     $this->configProphecy->set('groups', $groups_after)
+      ->will(function () use ($groups_after, $config_prophecy) {
+        $config_prophecy->get('groups')
+          ->willReturn($groups_after)
+          ->shouldBeCalled();
+      })
       ->shouldBeCalled();
 
     $this->configProphecy->save()
       ->shouldBeCalled();
 
     $manager = $this->createGroupManager();
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups_after)
-      ->shouldBeCalled();
 
     $this->expectDefaultRoleCreation('test_entity_new', 'a');
 
