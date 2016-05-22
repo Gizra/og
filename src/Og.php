@@ -695,4 +695,11 @@ class Og {
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
   }
 
+  /**
+   * Resets the static cache.
+   */
+  public static function reset() {
+    static::$cache = [];
+  }
+
 }

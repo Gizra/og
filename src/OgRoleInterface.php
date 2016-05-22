@@ -8,6 +8,8 @@ namespace Drupal\og;
 
 /**
  * Provides an interface defining an OG user role entity.
+ *
+ * Class cannot extend RoleInterface due to PHP 5 limitations.
  */
 interface OgRoleInterface {
 

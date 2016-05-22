@@ -13,6 +13,7 @@ use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\RoleInterface;
 
 class OgAccess {
 
@@ -24,7 +25,7 @@ class OgAccess {
    *   - alter: The permissions after altered by implementing modules.
    *   - pre_alter: The pre-altered permissions, as read from the config.
    */
-  protected static $permissionsCache = ['pre_alter' => [], 'post_alter' => []];
+  protected static $permissionsCache = [];
 
 
   /**
@@ -113,29 +114,37 @@ class OgAccess {
     if (!$pre_alter_cache) {
       $permissions = array();
 
-      // @todo: Getting permissions from OG Roles will be added here.
+      foreach (Og::getUserMemberships($user) as $membership) {
+
+        foreach ($membership->getRoles() as $role) {
+
+          /** @var $role RoleInterface */
+          $permissions = array_unique(array_merge($permissions, $role->getPermissions()));
+        }
+      }
 
       static::setPermissionCache($group, $user, TRUE, $permissions, $cacheable_metadata);
     }
 
-    if (!$skip_alter && !isset($post_alter_cache[$operation])) {
+    if (!$skip_alter && !in_array($operation, $post_alter_cache)) {
       // Let modules alter the permissions. So we get the original ones, and
       // pass them along to the implementing modules.
       $alterable_permissions = static::getPermissionsCache($group, $user, TRUE);
+
       $context = array(
         'operation' => $operation,
         'group' => $group,
         'user' => $user,
       );
-      \Drupal::moduleHandler()->alter('og_user_access', $alterable_permissions, $cacheable_metadata, $context);
+      \Drupal::moduleHandler()->alter('og_user_access', $alterable_permissions['permissions'], $cacheable_metadata, $context);
 
-      static::setPermissionCache($group, $user, FALSE, $alterable_permissions, $cacheable_metadata);
+      static::setPermissionCache($group, $user, FALSE, $alterable_permissions['permissions'], $cacheable_metadata);
     }
 
     $altered_permissions = static::getPermissionsCache($group, $user, FALSE);
 
     $user_is_group_admin = !empty($altered_permissions['permissions'][static::ADMINISTER_GROUP_PERMISSION]);
-    if (($user_is_group_admin && !$ignore_admin) || !empty($altered_permissions['permissions'][$operation])) {
+    if (($user_is_group_admin && !$ignore_admin) || in_array($operation, $altered_permissions['permissions'])) {
       // User is a group admin, and we do not ignore this special permission
       // that grants access to all the group permissions.
       return AccessResult::allowed()->addCacheableDependency($altered_permissions['cacheable_metadata']);
@@ -267,7 +276,7 @@ class OgAccess {
    * Resets the static cache.
    */
   public static function reset() {
-    static::$permissionsCache = ['pre_alter' => [], 'post_alter' => []];
+    static::$permissionsCache = [];
   }
 
 }
