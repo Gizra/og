@@ -7,8 +7,11 @@
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\og\GroupManager;
+use Drupal\Core\Config\Config;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\og\GroupManager;
 
 /**
  * @group og
@@ -35,9 +38,9 @@ class GroupManagerTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    $this->configProphecy = $this->prophesize('Drupal\Core\Config\Config');
-    $this->configFactoryProphecy = $this->prophesize('Drupal\Core\Config\ConfigFactoryInterface');
-    $this->entityTypeBundleInfoProphecy = $this->prophesize('Drupal\Core\Entity\EntityTypeBundleInfoInterface');
+    $this->configProphecy = $this->prophesize(Config::class);
+    $this->configFactoryProphecy = $this->prophesize(ConfigFactoryInterface::class);
+    $this->entityTypeBundleInfoProphecy = $this->prophesize(EntityTypeBundleInfoInterface::class);
   }
 
   /**
