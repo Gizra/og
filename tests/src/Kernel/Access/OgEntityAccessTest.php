@@ -125,7 +125,7 @@ class OgEntityAccessTest extends KernelTestBase {
    * Test access to an arbitrary permission.
    */
   public function testAccess() {
-    // User is the group owner, thus they have an Og membership.
+    // A member user.
     $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user2)->isAllowed());
 
     // A non-member user.
