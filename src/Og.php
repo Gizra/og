@@ -130,6 +130,8 @@ class Og {
     $view_display->setComponent($plugin_id, $view_display_definition);
     $view_display->save();
 
+    // Refresh the group manager data, we have added a group type.
+    static::groupManager()->resetGroupRelationMap();
 
     return $field_definition;
   }
