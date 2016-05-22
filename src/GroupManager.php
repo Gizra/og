@@ -12,21 +12,6 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
- *
- * @property array $groupRelationMap
- *   A map of group and group content relations. This is an associative array
- *   representing group and group content relations, in the following format:
- *   @code
- *   [
- *     'group_entity_type_id' => [
- *       'group_bundle_id' => [
- *         'group_content_entity_type_id' => [
- *           'group_content_bundle_id',
- *         ],
- *       ],
- *     ],
- *   ]
- *   @endcode
  */
 class GroupManager {
 
@@ -66,6 +51,29 @@ class GroupManager {
   protected $groupMap;
 
   /**
+   * A map of group and group content relations.
+   *
+   * Do not access this property directly, use $this->getGroupRelationMap()
+   * instead.
+   *
+   * @var array $groupRelationMap
+   *   An associative array representing group and group content relations, in
+   *   the following format:
+   *   @code
+   *   [
+   *     'group_entity_type_id' => [
+   *       'group_bundle_id' => [
+   *         'group_content_entity_type_id' => [
+   *           'group_content_bundle_id',
+   *         ],
+   *       ],
+   *     ],
+   *   ]
+   *   @endcode
+   */
+  protected $groupRelationMap = [];
+
+  /**
    * Constructs an GroupManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -77,28 +85,6 @@ class GroupManager {
     $this->configFactory = $config_factory;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->refreshGroupMap();
-  }
-
-  /**
-   * Magic getter.
-   *
-   * @param string $property
-   *   The property being gotten.
-   *
-   * @return mixed
-   *   The property value.
-   *
-   * @throws \InvalidArgumentException
-   *   Thrown when an invalid property is passed.
-   */
-  public function __get($property) {
-    // Computing the group relation map is expensive, do it only on demand.
-    if ($property === 'groupRelationMap') {
-      $this->refreshGroupRelationMap();
-      return $this->groupRelationMap;
-    }
-
-    throw new \InvalidArgumentException(__CLASS__ . '->' . $property . ' is undefined.');
   }
 
   /**
@@ -183,7 +169,8 @@ class GroupManager {
    *   ID.
    */
   public function getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id) {
-    return isset($this->groupRelationMap[$group_entity_type_id][$group_bundle_id]) ? $this->groupRelationMap[$group_entity_type_id][$group_bundle_id] : [];
+    $group_relation_map = $this->getGroupRelationMap();
+    return isset($group_relation_map[$group_entity_type_id][$group_bundle_id]) ? $group_relation_map[$group_entity_type_id][$group_bundle_id] : [];
   }
 
   /**
@@ -239,7 +226,30 @@ class GroupManager {
    */
   public function refresh() {
     $this->refreshGroupMap();
-    unset($this->groupRelationMap);
+    $this->resetGroupRelationMap();
+  }
+
+  /**
+   * Resets the cached group relation map.
+   *
+   * Call this after making a change to the relationship between a group type
+   * and a group content type.
+   */
+  public function resetGroupRelationMap() {
+    $this->groupRelationMap = [];
+  }
+
+  /**
+   * Returns the group relation map.
+   *
+   * @return array
+   *   The group relation map.
+   */
+  protected function getGroupRelationMap() {
+    if (empty($this->groupRelationMap)) {
+      $this->refreshGroupRelationMap();
+    }
+    return $this->groupRelationMap;
   }
 
   /**

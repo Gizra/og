@@ -131,7 +131,7 @@ class Og {
     $view_display->save();
 
     // Refresh the group manager data, we have added a group type.
-    static::groupManager()->refresh();
+    static::groupManager()->resetGroupRelationMap();
 
     return $field_definition;
   }
