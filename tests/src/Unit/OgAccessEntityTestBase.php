@@ -34,6 +34,8 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $entity_type_id = $this->randomMachineName();
     $bundle = $this->randomMachineName();
+
+    // Just a random entity ID.
     $entity_id = 20;
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
