@@ -12,6 +12,8 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\og\Og;
+use Drupal\og\OgAccess;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 
@@ -300,6 +302,19 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     }
 
     parent::PreSave($storage);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function save() {
+    $result = parent::save();
+
+    // Reset internal cache.
+    Og::reset();
+    OgAccess::reset();
+
+    return $result;
   }
 
   /**

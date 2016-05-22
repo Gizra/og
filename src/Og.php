@@ -131,7 +131,7 @@ class Og {
     $view_display->save();
 
     // Refresh the group manager data, we have added a group type.
-    static::groupManager()->refresh();
+    static::groupManager()->resetGroupRelationMap();
 
     return $field_definition;
   }
@@ -690,6 +690,13 @@ class Og {
     $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
+  }
+
+  /**
+   * Resets the static cache.
+   */
+  public static function reset() {
+    static::$cache = [];
   }
 
 }

@@ -20,11 +20,15 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
    * @coversDefaultmethod ::userAccessEntity
    * @dataProvider operationProvider
    */
-  public function testDefaultForbidden($operation) {
+  public function testAccessByOperation($operation) {
     $group_entity = $this->groupEntity();
     $group_entity->isNew()->willReturn(FALSE);
     $user_access = OgAccess::userAccessEntity($operation, $this->entity->reveal(), $this->user->reveal());
-    $this->assertTrue($user_access->isForbidden());
+
+    // We populate the allowed permissions cache in
+    // OgAccessEntityTestBase::setup().
+    $condition = $operation == 'update group' ? $user_access->isAllowed() : $user_access->isForbidden();
+    $this->assertTrue($condition);
   }
 
   /**
