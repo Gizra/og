@@ -142,6 +142,15 @@ class OgEntityAccessTest extends KernelTestBase {
       ->setGroupEntityType($this->group1->getEntityTypeId())
       ->addRole($this->ogRoleWithPermission->id())
       ->save();
+
+    /** @var OgMembership $membership */
+    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership
+      ->setUser($this->user2->id())
+      ->setEntityId($this->group1->id())
+      ->setGroupEntityType($this->group1->getEntityTypeId())
+      ->addRole($this->ogRoleWithoutPermission->id())
+      ->save();
   }
 
   /**
