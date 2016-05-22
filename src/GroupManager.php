@@ -266,14 +266,12 @@ class GroupManager {
 
       // Only update and refresh the map if a key was found and unset.
       $editable->set('groups', $groups);
-      $saved = $editable->save();
+      $editable->save();
 
       // Remove all roles associated with this group type.
       $this->removeRoles($entity_type_id, $bundle_id);
 
       $this->resetGroupMap();
-
-      return $saved;
     }
   }
 
