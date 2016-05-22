@@ -9,15 +9,17 @@ namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
-use Drupal\og\Event\PermissionEvent;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupManager;
 use Drupal\og\OgRoleInterface;
 use Prophecy\Argument;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @group og
@@ -76,12 +78,12 @@ class GroupManagerTest extends UnitTestCase {
   public function setUp() {
     $this->configProphecy = $this->prophesize(Config::class);
     $this->configFactoryProphecy = $this->prophesize(ConfigFactoryInterface::class);
-    $this->entityTypeManagerProphecy = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
-    $this->entityStorageProphecy = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
-    $this->ogRoleProphecy = $this->prophesize('Drupal\og\Entity\OgRole');
+    $this->entityTypeManagerProphecy = $this->prophesize(EntityTypeManagerInterface::class);
+    $this->entityStorageProphecy = $this->prophesize(EntityStorageInterface::class);
+    $this->ogRoleProphecy = $this->prophesize(OgRole::class);
     $this->entityTypeBundleInfoProphecy = $this->prophesize(EntityTypeBundleInfoInterface::class);
-    $this->eventDispatcherProphecy = $this->prophesize('\Symfony\Component\EventDispatcher\EventDispatcherInterface');
-    $this->permissionEventProphecy = $this->prophesize('\Drupal\og\Event\PermissionEventInterface');
+    $this->eventDispatcherProphecy = $this->prophesize(EventDispatcherInterface::class);
+    $this->permissionEventProphecy = $this->prophesize(PermissionEventInterface::class);
     $this->stateProphecy = $this->prophesize(StateInterface::class);
   }
 
