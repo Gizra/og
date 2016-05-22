@@ -46,6 +46,8 @@ class GroupManager {
   /**
    * A map of entity types and bundles.
    *
+   * Do not access this property directly, use $this->getGroupMap() instead.
+   *
    * @var array
    */
   protected $groupMap;
@@ -84,7 +86,6 @@ class GroupManager {
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
     $this->configFactory = $config_factory;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
-    $this->refreshGroupMap();
   }
 
   /**
@@ -96,7 +97,8 @@ class GroupManager {
    * @return bool
    */
   public function isGroup($entity_type_id, $bundle) {
-    return isset($this->groupMap[$entity_type_id]) && in_array($bundle, $this->groupMap[$entity_type_id]);
+    $group_map = $this->getGroupMap();
+    return isset($group_map[$entity_type_id]) && in_array($bundle, $group_map[$entity_type_id]);
   }
 
   /**
@@ -105,7 +107,8 @@ class GroupManager {
    * @return array
    */
   public function getGroupsForEntityType($entity_type_id) {
-    return isset($this->groupMap[$entity_type_id]) ? $this->groupMap[$entity_type_id] : [];
+    $group_map = $this->getGroupMap();
+    return isset($group_map[$entity_type_id]) ? $group_map[$entity_type_id] : [];
   }
 
   /**
@@ -116,7 +119,8 @@ class GroupManager {
    *   of bundle IDs.
    */
   public function getAllGroupBundles($entity_type = NULL) {
-    return !empty($this->groupMap[$entity_type]) ? $this->groupMap[$entity_type] : $this->groupMap;
+    $group_map = $this->getGroupMap();
+    return !empty($group_map[$entity_type]) ? $group_map[$entity_type] : $group_map;
   }
 
   /**
@@ -143,7 +147,7 @@ class GroupManager {
       // If the group bundles are empty, it means that all bundles are
       // referenced.
       if (empty($group_bundle_ids)) {
-        $group_bundle_ids = $this->groupMap[$group_entity_type_id];
+        $group_bundle_ids = $this->getGroupMap()[$group_entity_type_id];
       }
 
       foreach ($group_bundle_ids as $group_bundle_id) {
@@ -212,21 +216,27 @@ class GroupManager {
       $editable->set('groups', $groups);
       $saved = $editable->save();
 
-      $this->refreshGroupMap();
+      $this->resetGroupMap();
 
       return $saved;
     }
   }
 
   /**
-   * Refreshes the locally stored data.
-   *
-   * Call this after making a change to a relationship between a group type and
-   * a group content type.
+   * Resets all locally stored data.
    */
-  public function refresh() {
-    $this->refreshGroupMap();
+  public function reset() {
+    $this->resetGroupMap();
     $this->resetGroupRelationMap();
+  }
+
+  /**
+   * Resets the cached group map.
+   *
+   * Call this after adding or removing a group type.
+   */
+  public function resetGroupMap() {
+    $this->groupMap = [];
   }
 
   /**
@@ -237,6 +247,19 @@ class GroupManager {
    */
   public function resetGroupRelationMap() {
     $this->groupRelationMap = [];
+  }
+
+  /**
+   * Returns the group map.
+   *
+   * @return array
+   *   The group map.
+   */
+  protected function getGroupMap() {
+    if (empty($this->groupMap)) {
+      $this->refreshGroupMap();
+    }
+    return $this->groupMap;
   }
 
   /**
