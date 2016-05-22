@@ -257,6 +257,11 @@ class GroupManagerTest extends UnitTestCase {
    * @return \Drupal\og\GroupManager
    */
   protected function createGroupManager() {
+    // It is expected that the role storage will be initialized.
+    $this->entityTypeManagerProphecy->getStorage('og_role')
+      ->willReturn($this->entityStorageProphecy->reveal())
+      ->shouldBeCalled();
+
     return new GroupManager(
       $this->configFactoryProphecy->reveal(),
       $this->entityTypeManagerProphecy->reveal(),
