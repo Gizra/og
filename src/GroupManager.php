@@ -9,11 +9,17 @@ namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\State\StateInterface;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
  */
 class GroupManager {
+
+  /**
+   * The key used to identify the cached version of the group relation map.
+   */
+  const GROUP_RELATION_MAP_CACHE_KEY = 'og.group_manager.group_relation_map';
 
   /**
    * The OG settings configuration key.
@@ -42,6 +48,13 @@ class GroupManager {
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
   protected $entityTypeBundleInfo;
+
+  /**
+   * The state service.
+   *
+   * @var \Drupal\Core\State\StateInterface
+   */
+  protected $state;
 
   /**
    * A map of entity types and bundles.
@@ -82,10 +95,13 @@ class GroupManager {
    *   The config factory.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The service providing information about bundles.
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The state service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeBundleInfoInterface $entity_type_bundle_info, StateInterface $state) {
     $this->configFactory = $config_factory;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
+    $this->state = $state;
   }
 
   /**
@@ -247,6 +263,7 @@ class GroupManager {
    */
   public function resetGroupRelationMap() {
     $this->groupRelationMap = [];
+    $this->state->delete(self::GROUP_RELATION_MAP_CACHE_KEY);
   }
 
   /**
@@ -284,19 +301,27 @@ class GroupManager {
   }
 
   /**
-   * Builds the map of relations between group types and group content types.
+   * Populates the map of relations between group types and group content types.
    */
   protected function refreshGroupRelationMap() {
-    $this->groupRelationMap = [];
+    // Retrieve a cached version of the map if it exists.
+    if ($group_relation_map = $this->state->get(self::GROUP_RELATION_MAP_CACHE_KEY)) {
+      $this->groupRelationMap = $group_relation_map;
+    }
+    else {
+      $this->groupRelationMap = [];
 
-    foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
-      foreach ($bundles as $group_content_bundle_id => $bundle_info) {
-        foreach ($this->getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) as $group_entity_type_id => $group_bundle_ids) {
-          foreach ($group_bundle_ids as $group_bundle_id) {
-            $this->groupRelationMap[$group_entity_type_id][$group_bundle_id][$group_content_entity_type_id][$group_content_bundle_id] = $group_content_bundle_id;
+      foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
+        foreach ($bundles as $group_content_bundle_id => $bundle_info) {
+          foreach ($this->getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) as $group_entity_type_id => $group_bundle_ids) {
+            foreach ($group_bundle_ids as $group_bundle_id) {
+              $this->groupRelationMap[$group_entity_type_id][$group_bundle_id][$group_content_entity_type_id][$group_content_bundle_id] = $group_content_bundle_id;
+            }
           }
         }
       }
+      // Cache the map.
+      $this->state->set(self::GROUP_RELATION_MAP_CACHE_KEY, $this->groupRelationMap);
     }
   }
 
