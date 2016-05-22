@@ -54,22 +54,19 @@ class GroupManagerTest extends UnitTestCase {
    * @covers ::__construct
    */
   public function testInstance() {
-    $this->configProphecy->get('groups')
-      ->shouldBeCalled();
-
-    // Just creating an instance should not get the 'groups' config key.
-    $this->createGroupManager();
+    // Just creating an instance should be lightweight, no methods should be
+    // called.
+    $group_manager = $this->createGroupManager();
+    $this->assertInstanceOf(GroupManager::class, $group_manager);
   }
 
   /**
    * @covers ::getAllGroupBundles
    */
   public function testGetAllGroupBundles() {
+    // It is expected that the group map will be retrieved from config.
     $groups = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups);
 
     $manager = $this->createGroupManager();
 
@@ -82,11 +79,9 @@ class GroupManagerTest extends UnitTestCase {
    * @dataProvider providerTestIsGroup
    */
   public function testIsGroup($entity_type_id, $bundle_id, $expected) {
+    // It is expected that the group map will be retrieved from config.
     $groups = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups);
 
     $manager = $this->createGroupManager();
 
@@ -112,11 +107,9 @@ class GroupManagerTest extends UnitTestCase {
    * @covers ::getGroupsForEntityType
    */
   public function testGetGroupsForEntityType() {
+    // It is expected that the group map will be retrieved from config.
     $groups = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups);
 
     $manager = $this->createGroupManager();
 
@@ -132,11 +125,9 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->configProphecy->reveal())
       ->shouldBeCalled();
 
+    // It is expected that the group map will be retrieved from config.
     $groups_before = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups_before)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups_before);
 
     $groups_after = ['test_entity' => ['a', 'b', 'c']];
 
@@ -166,11 +157,9 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->configProphecy->reveal())
       ->shouldBeCalled();
 
+    // It is expected that the group map will be retrieved from config.
     $groups_before = [];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups_before)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups_before);
 
     $groups_after = ['test_entity_new' => ['a']];
 
@@ -200,11 +189,9 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->configProphecy->reveal())
       ->shouldBeCalled();
 
+    // It is expected that the group map will be retrieved from config.
     $groups_before = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups_before)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups_before);
 
     $groups_after = ['test_entity' => ['a']];
 
@@ -233,15 +220,27 @@ class GroupManagerTest extends UnitTestCase {
    * @return \Drupal\og\GroupManager
    */
   protected function createGroupManager() {
-    $this->configFactoryProphecy->get('og.settings')
-      ->willReturn($this->configProphecy->reveal())
-      ->shouldBeCalled();
-
     return new GroupManager(
       $this->configFactoryProphecy->reveal(),
       $this->entityTypeBundleInfoProphecy->reveal(),
       $this->stateProphecy->reveal()
     );
+  }
+
+  /**
+   * Sets up an expectation that the group map will be retrieved from config.
+   *
+   * @param array $groups
+   *   The expected group map that will be returned by the mocked config.
+   */
+  protected function expectGroupMapRetrieval($groups = []) {
+    $this->configFactoryProphecy->get('og.settings')
+      ->willReturn($this->configProphecy->reveal())
+      ->shouldBeCalled();
+
+    $this->configProphecy->get('groups')
+      ->willReturn($groups)
+      ->shouldBeCalled();
   }
 
 }
