@@ -10,6 +10,7 @@ namespace Drupal\Tests\og\Unit;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\State\StateInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupManager;
 
@@ -35,12 +36,18 @@ class GroupManagerTest extends UnitTestCase {
   protected $entityTypeBundleInfoProphecy;
 
   /**
+   * @var \Drupal\Core\State\StateInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $stateProphecy;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
     $this->configProphecy = $this->prophesize(Config::class);
     $this->configFactoryProphecy = $this->prophesize(ConfigFactoryInterface::class);
     $this->entityTypeBundleInfoProphecy = $this->prophesize(EntityTypeBundleInfoInterface::class);
+    $this->stateProphecy = $this->prophesize(StateInterface::class);
   }
 
   /**
@@ -230,7 +237,11 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->configProphecy->reveal())
       ->shouldBeCalled();
 
-    return new GroupManager($this->configFactoryProphecy->reveal(), $this->entityTypeBundleInfoProphecy->reveal());
+    return new GroupManager(
+      $this->configFactoryProphecy->reveal(),
+      $this->entityTypeBundleInfoProphecy->reveal(),
+      $this->stateProphecy->reveal()
+    );
   }
 
 }
