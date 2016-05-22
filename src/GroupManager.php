@@ -126,6 +126,8 @@ class GroupManager {
    * Get all group bundles keyed by entity type.
    *
    * @return array
+   *   An associative array, keyed by entity type, each value an indexed array
+   *   of bundle IDs.
    */
   public function getAllGroupBundles($entity_type = NULL) {
     return !empty($this->groupMap[$entity_type]) ? $this->groupMap[$entity_type] : $this->groupMap;
@@ -215,6 +217,9 @@ class GroupManager {
       if ($search_key !== FALSE) {
         unset($groups[$entity_type_id][$search_key]);
       }
+
+      // Clean up entity types that have become empty.
+      $groups = array_filter($groups);
 
       // Only update and refresh the map if a key was found and unset.
       $editable->set('groups', $groups);

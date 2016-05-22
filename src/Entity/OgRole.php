@@ -1,9 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\og\Entity\OgRole.
- */
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
@@ -38,109 +34,107 @@ use Drupal\user\Entity\Role;
 class OgRole extends Role implements OgRoleInterface {
 
   /**
-   * @var integer
-   *
-   * The group ID.
-   */
-  protected $group_id;
-
-  /**
-   * The entity type ID of the group.
-   *
-   * @var string
-   */
-  protected $group_type;
-
-  /**
-   * The bundle ID of the group.
-   *
-   * @var string
-   */
-  protected $group_bundle;
-
-  /**
    * Set the ID of the role.
    *
    * @param string $id
    *   The machine name of the role.
    *
-   * @return OgRole
+   * @return $this
    */
   public function setId($id) {
-    $this->id = $id;
     $this->set('id', $id);
     return $this;
   }
 
   /**
+   * Returns the label.
+   *
    * @return string
+   *   The label.
    */
   public function getLabel() {
     return $this->get('label');
   }
 
   /**
-   * @param string $label
+   * Sets the label.
    *
-   * @return OgRole
+   * @param string $label
+   *   The label to set.
+   *
+   * @return $this
    */
   public function setLabel($label) {
-    $this->label = $label;
     $this->set('label', $label);
     return $this;
   }
 
   /**
+   * Returns the group ID.
+   *
    * @return int
+   *   The group ID.
    */
-  public function getGroupID() {
+  public function getGroupId() {
     return $this->get('group_id');
   }
 
   /**
-   * @param int $groupID
+   * Sets the group ID.
    *
-   * @return OgRole
+   * @param int $group_id
+   *   The group ID to set.
+   *
+   * @return $this
    */
-  public function setGroupID($groupID) {
-    $this->group_id = $groupID;
-    $this->set('group_id', $groupID);
+  public function setGroupId($group_id) {
+    $this->set('group_id', $group_id);
     return $this;
   }
 
   /**
+   * Returns the group type.
+   *
    * @return string
+   *   The group type.
    */
   public function getGroupType() {
     return $this->get('group_type');
   }
 
   /**
-   * @param string $groupType
+   * Sets the group type.
    *
-   * @return OgRole
+   * @param string $group_type
+   *   The group type to set.
+   *
+   * @return $this
    */
-  public function setGroupType($groupType) {
-    $this->group_type = $groupType;
-    $this->set('group_type', $groupType);
+  public function setGroupType($group_type) {
+    $this->set('group_type', $group_type);
     return $this;
   }
 
   /**
+   * Returns the group bundle.
+   *
    * @return string
+   *   The group bundle.
    */
   public function getGroupBundle() {
     return $this->get('group_bundle');
   }
 
   /**
-   * @param string $groupBundle
+   * Sets the group bundle.
    *
-   * @return OgRole
+   * @param string $group_bundle
+   *   The group bundle to set.
+   *
+   * @return $this
    */
-  public function setGroupBundle($groupBundle) {
-    $this->group_bundle = $groupBundle;
-    $this->set('group_bundle', $groupBundle);
+  public function setGroupBundle($group_bundle) {
+    $this->set('group_bundle', $group_bundle);
     return $this;
   }
 
@@ -148,23 +142,21 @@ class OgRole extends Role implements OgRoleInterface {
    * {@inheritdoc}
    */
   public function save() {
-
     if ($this->isNew()) {
-
-      if (empty($this->group_type)) {
+      if (empty($this->getGroupType())) {
         throw new ConfigValueException('The group type can not be empty.');
       }
 
-      if (empty($this->group_bundle)) {
+      if (empty($this->getGroupBundle())) {
         throw new ConfigValueException('The group bundle can not be empty.');
       }
 
       // When assigning a role to group we need to add a prefix to the ID in
       // order to prevent duplicate IDs.
-      $prefix = $this->group_type . '-' . $this->group_bundle . '-';
+      $prefix = $this->getGroupType() . '-' . $this->getGroupBundle() . '-';
 
-      if (!empty($this->group_id)) {
-        $prefix .= $this->group_id . '-';
+      if (!empty($this->getGroupId())) {
+        $prefix .= $this->getGroupId() . '-';
       }
 
       $this->id = $prefix . $this->id();
@@ -172,4 +164,5 @@ class OgRole extends Role implements OgRoleInterface {
 
     parent::save();
   }
+
 }
