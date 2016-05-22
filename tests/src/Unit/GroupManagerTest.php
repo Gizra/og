@@ -311,8 +311,7 @@ class GroupManagerTest extends UnitTestCase {
    * @param string $role_name
    *   The name of the role being created.
    */
-  protected function addNewDefaultRole($entity_type, $bundle, $role_name)
-  {
+  protected function addNewDefaultRole($entity_type, $bundle, $role_name) {
     // It is expected that the OG permissions that need to be populated on the
     // new role will be requested from the PermissionEvent listener.
     $this->eventDispatcherProphecy->dispatch(PermissionEventInterface::EVENT_NAME, Argument::type('\Drupal\og\Event\PermissionEvent'))
