@@ -48,6 +48,8 @@ function og_entity_insert(EntityInterface $entity) {
  * Implements hook_og_group_created().
  */
 function og_og_group_created($entity_type_id, $bundle_id) {
+  // create a group audience field which will reference to groups from the given
+  // entity type ID and attach it to the user.
   $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user');
 
   foreach ($fields as $field) {

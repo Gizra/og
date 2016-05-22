@@ -396,27 +396,6 @@ class Og {
    * Returns all the group content IDs associated with a given group entity.
    *
    * This does not return information about users that are members of the given
-   * group - only non-user entity.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The group entity for which to return group content IDs.
-   * @param array $entity_types
-   *   Optional list of group content entity types for which to return results.
-   *   If an empty array is passed, the group content is not filtered. Defaults
-   *   to an empty array.
-   *
-   * @return array
-   *   An associative array, keyed by group content entity type, each item an
-   *   array of group content entity IDs.
-   */
-  public static function getNonUserReferencedGroups(EntityInterface $entity, array $entity_types = []) {
-    return self::getGroupContentIds($entity, FALSE, $entity_types);
-  }
-
-  /**
-   * Returns all the group content IDs associated with a given user.
-   *
-   * This does return information about users that are members of the given
    * group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -430,40 +409,15 @@ class Og {
    *   An associative array, keyed by group content entity type, each item an
    *   array of group content entity IDs.
    */
-  public static function getUserReferencedGroups(EntityInterface $entity, array $entity_types = []) {
-    return self::getGroupContentIds($entity, TRUE, $entity_types);
-  }
-
-  /**
-   * Returns all the group content IDs associated with a given group entity.
-   *
-   * This does not return information about users that are members of the given
-   * group - only non-user entity.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The group entity for which to return group content IDs.
-   * @param $is_user
-   *   Determine if the entity is a user type or not.
-   * @param array $entity_types
-   *   Optional list of group content entity types for which to return results.
-   *   If an empty array is passed, the group content is not filtered. Defaults
-   *   to an empty array.
-   *
-   * @return array
-   *   An associative array, keyed by group content entity type, each item an
-   *   array of group content entity IDs.
-   */
-  protected static function getGroupContentIds(EntityInterface $entity, $is_user = FALSE, array $entity_types = []) {
+  public static function getGroupContentIds(EntityInterface $entity, array $entity_types = []) {
     $group_content = [];
-
-    $field_type = $is_user ? 'og_membership_reference' : 'og_standard_reference';
 
     // Retrieve the fields which reference our entity type and bundle.
     $query = \Drupal::entityQuery('field_storage_config')
       // @todo For the moment retrieving both group types, since there seems to
       //   be some confusion about which field type is used for users.
       // @see https://github.com/amitaibu/og/issues/177
-      ->condition('type', $field_type);
+      ->condition('type', 'og_standard_reference');
 
     // Optionally filter group content entity types.
     if ($entity_types) {

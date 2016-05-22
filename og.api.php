@@ -5,6 +5,7 @@
  * @file
  * Hooks provided by the Organic groups module.
  */
+use Drupal\og\Og;
 
 /**
  * @addtogroup hooks
@@ -14,18 +15,17 @@
 /**
  * Act on a og group creation.
  *
- * Unlike Drupal 7, when groups were defined by a field, in Drupal 8 groups are
- * defined by config schema.
  *
  * @param $entity_type_id
- *   The entity type.
+ *   The entity type ID.
  * @param $bundle_id
- *   The entity bundle.
+ *   The entity bundle ID.
  *
  * @see og_og_group_created()
  */
 function hook_og_group_created($entity_type_id, $bundle_id) {
-
+  // Adding custom fields related to the group.
+  Og::createField('og_roles_permissions', $entity_type_id, $bundle_id);
 }
 
 /**
