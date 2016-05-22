@@ -390,22 +390,22 @@ class GroupManager {
     // Retrieve a cached version of the map if it exists.
     if ($group_relation_map = $this->state->get(self::GROUP_RELATION_MAP_CACHE_KEY)) {
       $this->groupRelationMap = $group_relation_map;
+      return;
     }
-    else {
-      $this->groupRelationMap = [];
 
-      foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
-        foreach ($bundles as $group_content_bundle_id => $bundle_info) {
-          foreach ($this->getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) as $group_entity_type_id => $group_bundle_ids) {
-            foreach ($group_bundle_ids as $group_bundle_id) {
-              $this->groupRelationMap[$group_entity_type_id][$group_bundle_id][$group_content_entity_type_id][$group_content_bundle_id] = $group_content_bundle_id;
-            }
+    $this->groupRelationMap = [];
+
+    foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
+      foreach ($bundles as $group_content_bundle_id => $bundle_info) {
+        foreach ($this->getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) as $group_entity_type_id => $group_bundle_ids) {
+          foreach ($group_bundle_ids as $group_bundle_id) {
+            $this->groupRelationMap[$group_entity_type_id][$group_bundle_id][$group_content_entity_type_id][$group_content_bundle_id] = $group_content_bundle_id;
           }
         }
       }
-      // Cache the map.
-      $this->state->set(self::GROUP_RELATION_MAP_CACHE_KEY, $this->groupRelationMap);
     }
+    // Cache the map.
+    $this->state->set(self::GROUP_RELATION_MAP_CACHE_KEY, $this->groupRelationMap);
   }
 
 }
