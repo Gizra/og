@@ -416,9 +416,6 @@ class Og {
 
     // Retrieve the fields which reference our entity type and bundle.
     $query = \Drupal::entityQuery('field_storage_config')
-      // @todo For the moment retrieving both group types, since there seems to
-      //   be some confusion about which field type is used for users.
-      // @see https://github.com/amitaibu/og/issues/177
       ->condition('type', OgGroupAudienceHelper::NON_USER_REFERENCE_FIELD);
 
     // Optionally filter group content entity types.
