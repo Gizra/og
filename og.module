@@ -411,7 +411,7 @@ function og_field_formatter_info_alter(array &$info) {
       continue;
     }
 
-    $info[$key]['field_types'][] = OgGroupAudienceHelper::USER_REFERENCE_FIELD;
+    $info[$key]['field_types'][] = OgGroupAudienceHelper::USER_TO_GROUP_VIA_MEMBERSHIP_FIELD_TYPE;
     $info[$key]['field_types'][] = OgGroupAudienceHelper::NON_USER_REFERENCE_FIELD;
   }
 }
