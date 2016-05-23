@@ -44,7 +44,7 @@ class OgGroupAudienceHelper {
    *   TRUE if the field is a group audience type, FALSE otherwise.
    */
   public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
-    return in_array($field_definition->getType(), [OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE, OgGroupAudienceHelper::USER_TO_GROUP_VIA_MEMBERSHIP_FIELD_TYPE]);
+    return in_array($field_definition->getType(), [OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE, OgGroupAudienceHelper::USER_TO_GROUP_REFERENCE_FIELD_TYPE]);
   }
 
 
