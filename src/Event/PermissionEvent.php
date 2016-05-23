@@ -52,6 +52,9 @@ class PermissionEvent extends Event implements PermissionEventInterface {
    * {@inheritdoc}
    */
   public function getPermission($name) {
+    if (!isset($this->permissions[$name])) {
+      throw new \InvalidArgumentException("The '$name' permission does not exist.'");
+    }
     return $this->permissions[$name];
   }
 
@@ -65,14 +68,20 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function setPermission($name, $permission) {
+  public function setPermission($name, array $permission) {
+    if (empty($name)) {
+      throw new \InvalidArgumentException('Permission name is required.');
+    }
+    if (empty($permission['title'])) {
+      throw new \InvalidArgumentException('The permission title is required.');
+    }
     $this->permissions[$name] = $permission;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setPermissions($permissions) {
+  public function setPermissions(array $permissions) {
     foreach ($permissions as $name => $permission) {
       $this->setPermission($name, $permission);
     }
@@ -111,7 +120,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function filterByRole($role_name) {
+  public function filterByDefaultRole($role_name) {
     return array_filter($this->permissions, function ($permission) use ($role_name) {
       return !empty($permission['default roles']) && in_array($role_name, $permission['default roles']);
     });

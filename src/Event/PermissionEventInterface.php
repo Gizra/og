@@ -40,6 +40,9 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    *     permission that requires elevated privileges. Use this for permissions
    *     that are mainly intended for the group administrator or similar roles.
    *     Defaults to FALSE.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when the permission with the given name does not exist.
    */
   public function getPermission($name) ;
 
@@ -58,8 +61,12 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    *   The name of the permission to set.
    * @param array $permission
    *   The permission array to set.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when no name is given, or when the permission array does not have
+   *   a title key.
    */
-  public function setPermission($name, $permission);
+  public function setPermission($name, array $permission);
 
   /**
    * Sets multiple permissions
@@ -67,7 +74,7 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @param array $permissions
    *   The permissions to set, keyed by permission name.
    */
-  public function setPermissions($permissions);
+  public function setPermissions(array $permissions);
 
   /**
    * Deletes the given permission.
@@ -114,6 +121,6 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @return array
    *   An array of permissions that are enabled by default for the given role.
    */
-  public function filterByRole($role_name);
+  public function filterByDefaultRole($role_name);
 
 }

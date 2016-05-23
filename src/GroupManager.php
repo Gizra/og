@@ -296,7 +296,7 @@ class GroupManager {
       $event = new PermissionEvent($entity_type_id, $bundle_id);
       /** @var \Drupal\og\Event\PermissionEventInterface $permissions */
       $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
-      $properties['permissions'] = array_keys($permissions->filterByRole($role_name));
+      $properties['permissions'] = array_keys($permissions->filterByDefaultRole($role_name));
 
       $role = $this->ogRoleStorage->create($properties + OgRole::getDefaultProperties()[$role_name]);
       $role->save();
