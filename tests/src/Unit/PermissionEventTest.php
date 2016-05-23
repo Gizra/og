@@ -367,6 +367,9 @@ class PermissionEventTest extends UnitTestCase {
       $this->assertEquals($expected_permission, $permission);
       array_shift($permissions);
     }
+
+    // Check that the iterator has looped over all permissions correctly.
+    $this->assertEmpty($permissions);
   }
 
   /**
