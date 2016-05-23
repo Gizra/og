@@ -26,7 +26,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     parent::setUp();
 
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
-    $field_definition->getType()->willReturn(OgGroupAudienceHelper::NON_USER_REFERENCE_FIELD);
+    $field_definition->getType()->willReturn(OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE);
     $field_definition->getFieldStorageDefinition()
       ->willReturn($this->prophesize(FieldStorageDefinitionInterface::class)->reveal());
     $field_definition->getSetting("handler_settings")->willReturn([]);
