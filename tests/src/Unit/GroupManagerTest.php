@@ -317,7 +317,7 @@ class GroupManagerTest extends UnitTestCase {
     $this->eventDispatcherProphecy->dispatch(PermissionEventInterface::EVENT_NAME, Argument::type('\Drupal\og\Event\PermissionEvent'))
       ->willReturn($this->permissionEventProphecy->reveal())
       ->shouldBeCalled();
-    $this->permissionEventProphecy->filterByRole($role_name)
+    $this->permissionEventProphecy->filterByDefaultRole($role_name)
       ->willReturn([])
       ->shouldBeCalled();
 
