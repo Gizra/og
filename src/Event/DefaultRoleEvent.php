@@ -40,7 +40,7 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function addRole($name, $properties) {
+  public function addRole($name, array $properties) {
     if (array_key_exists($name, $this->roles)) {
       throw new \InvalidArgumentException("The '$name' role already exists.");
     }

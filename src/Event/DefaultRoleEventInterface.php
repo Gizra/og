@@ -47,7 +47,7 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    *   Thrown when the role that is added already exists, when the role name is
    *   empty, or when the 'label' property is missing.
    */
-  public function addRole($name, $properties);
+  public function addRole($name, array $properties);
 
   /**
    * Adds multiple default roles.
@@ -70,7 +70,7 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    *   Thrown when the role name is empty, or when the 'label' property is
    *   missing.
    */
-  public function setRole($name, $properties);
+  public function setRole($name, array $properties);
 
   /**
    * Sets multiple default roles.
