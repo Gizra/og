@@ -12,6 +12,8 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Event\DefaultRoleEvent;
+use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\Event\PermissionEventInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -298,9 +300,30 @@ class GroupManager {
       $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
       $properties['permissions'] = array_keys($permissions->filterByDefaultRole($role_name));
 
-      $role = $this->ogRoleStorage->create($properties + OgRole::getDefaultProperties()[$role_name]);
+      $role = $this->ogRoleStorage->create($properties + $this->getDefaultRoles()[$role_name]);
       $role->save();
     }
+  }
+
+  /**
+   * Returns the default roles.
+   *
+   * @return array
+   *   An associative array of default role properties, keyed by role name. Each
+   *   role property is an associative array with the following keys:
+   *   - 'label': The human readable label.
+   *   - 'role_type': Either OgRoleInterface::ROLE_TYPE_STANDARD or
+   *     OgRoleInterface::ROLE_TYPE_REQUIRED.
+   */
+  public function getDefaultRoles() {
+    /** @var \Drupal\og\Event\DefaultRoleEvent $default_role_event */
+    $event = new DefaultRoleEvent();
+    $default_role_event = $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+
+    // @todo: Do we want projects to be able to override the two required
+    //   default roles for 'member' and 'non-member'? People might want for
+    //   example to change the labels.
+    return OgRole::getDefaultRoles() + $default_role_event->getRoles();
   }
 
   /**

@@ -246,7 +246,7 @@ class OgRole extends Role implements OgRoleInterface {
    * @see \Drupal\og\Event\DefaultRoleEventInterface
    * @see \Drupal\og\GroupManager::getDefaultRoles()
    */
-  public static function getDefaultProperties() {
+  public static function getDefaultRoles() {
     return [
       self::ANONYMOUS => [
         'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
