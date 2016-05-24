@@ -235,8 +235,16 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * Returns default properties for the default OG roles.
    *
+   * These are the two roles that are required by every group: the 'member' and
+   * 'non-member' roles.
+   *
+   * All other default roles are provided by DefaultRoleEvent.
+   *
    * @return array
    *   An array of properties, keyed by OG role.
+   *
+   * @see \Drupal\og\Event\DefaultRoleEventInterface
+   * @see \Drupal\og\GroupManager::getDefaultRoles()
    */
   public static function getDefaultProperties() {
     return [
@@ -247,10 +255,6 @@ class OgRole extends Role implements OgRoleInterface {
       self::AUTHENTICATED => [
         'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
         'label' => 'Member',
-      ],
-      self::ADMINISTRATOR => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
-        'label' => 'Administrator',
       ],
     ];
   }
