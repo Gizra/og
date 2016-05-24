@@ -44,7 +44,7 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @throws \InvalidArgumentException
    *   Thrown when the permission with the given name does not exist.
    */
-  public function getPermission($name) ;
+  public function getPermission($name);
 
   /**
    * Returns all the permissions.
@@ -69,7 +69,7 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
   public function setPermission($name, array $permission);
 
   /**
-   * Sets multiple permissions
+   * Sets multiple permissions.
    *
    * @param array $permissions
    *   The permissions to set, keyed by permission name.
