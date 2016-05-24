@@ -284,6 +284,8 @@ class GroupManager {
    *   The entity type ID of the group for which to create default roles.
    * @param string $bundle_id
    *   The bundle ID of the group for which to create default roles.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
    */
   protected function createRoles($entity_type_id, $bundle_id) {
     $properties = [
@@ -314,6 +316,8 @@ class GroupManager {
    *   - 'label': The human readable label.
    *   - 'role_type': Either OgRoleInterface::ROLE_TYPE_STANDARD or
    *     OgRoleInterface::ROLE_TYPE_REQUIRED.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
    */
   public function getDefaultRoles() {
     /** @var \Drupal\og\Event\DefaultRoleEvent $default_role_event */
@@ -333,6 +337,8 @@ class GroupManager {
    *   The entity type ID of the group for which to delete the roles.
    * @param string $bundle_id
    *   The bundle ID of the group for which to delete the roles.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
    */
   protected function removeRoles($entity_type_id, $bundle_id) {
     $properties = [
