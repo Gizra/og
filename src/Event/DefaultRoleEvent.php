@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Event;
 
+use Drupal\og\OgRoleInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -45,6 +46,12 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
       throw new \InvalidArgumentException("The '$name' role already exists.");
     }
     $this->validate($name, $properties);
+
+    // Provide default value for the role type.
+    if (empty($properties['role_type'])) {
+      $properties['role_type'] = OgRoleInterface::ROLE_TYPE_STANDARD;
+    }
+
     $this->roles[$name] = $properties;
   }
 
@@ -132,14 +139,24 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
    *   The role properties to validate.
    *
    * @throws \InvalidArgumentException
-   *   Thrown when the role name is empty, or a required property is missing.
+   *   Thrown when the role name is empty, the 'label' property is missing, or
+   *   the 'role_type' property is invalid.
    */
   protected function validate($name, $properties) {
     if (empty($name)) {
       throw new \InvalidArgumentException('Role name is required.');
     }
+
     if (empty($properties['label'])) {
       throw new \InvalidArgumentException('The label property is required.');
+    }
+
+    $legal_role_types = [
+      OgRoleInterface::ROLE_TYPE_STANDARD,
+      OgRoleInterface::ROLE_TYPE_REQUIRED,
+    ];
+    if (!empty($properties['role_type']) && !in_array($properties['role_type'], $legal_role_types)) {
+      throw new \InvalidArgumentException('The role type is invalid.');
     }
   }
 

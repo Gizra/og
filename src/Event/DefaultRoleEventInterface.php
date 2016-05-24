@@ -42,6 +42,9 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @param array $properties
    *   An associative array of role properties, keyed by the following:
    *   - 'label': The human readable label.
+   *   - 'role_type': Either OgRoleInterface::ROLE_TYPE_STANDARD or
+   *     OgRoleInterface::ROLE_TYPE_REQUIRED. Defaults to
+   *     OgRoleInterface::ROLE_TYPE_STANDARD.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the role that is added already exists, when the role name is
