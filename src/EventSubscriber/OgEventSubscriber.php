@@ -2,6 +2,7 @@
 
 namespace Drupal\og\EventSubscriber;
 
+use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionManager;
@@ -35,6 +36,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
   public static function getSubscribedEvents() {
     return [
       PermissionEventInterface::EVENT_NAME => [['provideDefaultOgPermissions']],
+      DefaultRoleEventInterface::EVENT_NAME => [['provideDefaultRoles']],
     ];
   }
 
@@ -58,6 +60,16 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'restrict access' => TRUE,
       ],
     ] + $this->permissionManager->generatePermissionList($event->getEntityTypeId(), $event->getBundleId()));
+  }
+
+  /**
+   * Provides a default role for the group administrator.
+   *
+   * @param \Drupal\og\Event\DefaultRoleEventInterface $event
+   *   The default role event.
+   */
+  public function provideDefaultRoles(DefaultRoleEventInterface $event) {
+    $event->addRole(OgRoleInterface::ADMINISTRATOR, ['label' => 'Administrator']);
   }
 
 }

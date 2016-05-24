@@ -222,13 +222,6 @@ function _og_modules_uninstalled($modules) {
 }
 
 /**
- * Implements hook_og_default_roles().
- */
-function _og_og_default_roles() {
-  return array(OgRoleInterface::ADMINISTRATOR);
-}
-
-/**
  * Implements hook_field_create_instance().
  *
  * - Create default OG roles per entity-type and bundle.
