@@ -329,7 +329,7 @@ class GroupManagerTest extends UnitTestCase {
       'id' => $role_name,
       'permissions' => [],
     ];
-    $this->entityStorageProphecy->create($properties + OgRole::getDefaultProperties()[$role_name])
+    $this->entityStorageProphecy->create($properties + OgRole::getDefaultRoles()[$role_name])
       ->willReturn($this->ogRoleProphecy->reveal())
       ->shouldBeCalled();
 
