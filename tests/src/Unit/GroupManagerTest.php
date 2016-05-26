@@ -230,7 +230,8 @@ class GroupManagerTest extends UnitTestCase {
     return new GroupManager(
       $this->configFactoryProphecy->reveal(),
       $this->entityTypeBundleInfoProphecy->reveal(),
-      $this->stateProphecy->reveal()
+      $this->stateProphecy->reveal(),
+      $this->moduleHandlerProphecy->reveal()
     );
   }
 
