@@ -62,7 +62,7 @@ class PermissionEventIntegrationTest extends KernelTestBase {
   }
 
   /**
-   * Tests that orphaned group content is deleted when the group is deleted.
+   * Tests that the two OG modules can provide their own OG permissions.
    *
    * @param bool $use_group
    *   Whether or not to request permissions for the actual group that was
