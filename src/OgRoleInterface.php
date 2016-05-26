@@ -8,6 +8,8 @@ namespace Drupal\og;
 
 /**
  * Provides an interface defining an OG user role entity.
+ *
+ * Class cannot extend RoleInterface due to PHP 5 limitations.
  */
 interface OgRoleInterface {
 
@@ -27,11 +29,12 @@ interface OgRoleInterface {
   const ADMINISTRATOR = 'administrator';
 
   /**
-   * Role type for default roles which should not be changed.
+   * Role type for required roles.
    *
-   * This is intended for the 'non-member' and 'member' roles.
+   * This is intended for the 'non-member' and 'member' roles. These cannot be
+   * changed or deleted.
    */
-  const ROLE_TYPE_IMMUTABLE = 'immutable';
+  const ROLE_TYPE_REQUIRED = 'required';
 
   /**
    * Role type for standard roles that are editable and deletable.

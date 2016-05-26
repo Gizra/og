@@ -7,10 +7,21 @@
 
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Core\Config\Config;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\State\StateInterface;
+use Drupal\og\Event\DefaultRoleEvent;
+use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupManager;
 use Drupal\og\OgRoleInterface;
-use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @group og
@@ -44,36 +55,63 @@ class GroupManagerTest extends UnitTestCase {
   protected $ogRoleProphecy;
 
   /**
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeBundleInfoProphecy;
+
+  /**
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $eventDispatcherProphecy;
+
+  /**
+   * @var \Drupal\og\Event\PermissionEventInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $permissionEventProphecy;
+
+  /**
+   * @var \Drupal\Core\State\StateInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $stateProphecy;
+
+  /**
+   * @var \Drupal\og\Event\DefaultRoleEventInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $defaultRoleEventProphecy;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
-    $this->configProphecy = $this->prophesize('Drupal\Core\Config\Config');
-    $this->configFactoryProphecy = $this->prophesize('Drupal\Core\Config\ConfigFactoryInterface');
-    $this->entityTypeManagerProphecy = $this->prophesize('Drupal\Core\Entity\EntityTypeManagerInterface');
-    $this->entityStorageProphecy = $this->prophesize('Drupal\Core\Entity\EntityStorageInterface');
-    $this->ogRoleProphecy = $this->prophesize('Drupal\og\Entity\OgRole');
+    $this->configProphecy = $this->prophesize(Config::class);
+    $this->configFactoryProphecy = $this->prophesize(ConfigFactoryInterface::class);
+    $this->entityTypeManagerProphecy = $this->prophesize(EntityTypeManagerInterface::class);
+    $this->entityStorageProphecy = $this->prophesize(EntityStorageInterface::class);
+    $this->ogRoleProphecy = $this->prophesize(OgRole::class);
+    $this->entityTypeBundleInfoProphecy = $this->prophesize(EntityTypeBundleInfoInterface::class);
+    $this->eventDispatcherProphecy = $this->prophesize(EventDispatcherInterface::class);
+    $this->permissionEventProphecy = $this->prophesize(PermissionEventInterface::class);
+    $this->stateProphecy = $this->prophesize(StateInterface::class);
+    $this->defaultRoleEventProphecy = $this->prophesize(DefaultRoleEvent::class);
   }
 
   /**
    * @covers ::__construct
    */
   public function testInstance() {
-    $this->configProphecy->get('groups')
-      ->shouldBeCalled();
-
-    // Just creating an instance should not get the 'groups' config key.
-    $this->createGroupManager();
+    // Just creating an instance should be lightweight, no methods should be
+    // called.
+    $group_manager = $this->createGroupManager();
+    $this->assertInstanceOf(GroupManager::class, $group_manager);
   }
 
   /**
    * @covers ::getAllGroupBundles
    */
   public function testGetAllGroupBundles() {
+    // It is expected that the group map will be retrieved from config.
     $groups = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups);
 
     $manager = $this->createGroupManager();
 
@@ -86,11 +124,9 @@ class GroupManagerTest extends UnitTestCase {
    * @dataProvider providerTestIsGroup
    */
   public function testIsGroup($entity_type_id, $bundle_id, $expected) {
+    // It is expected that the group map will be retrieved from config.
     $groups = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups);
 
     $manager = $this->createGroupManager();
 
@@ -116,11 +152,9 @@ class GroupManagerTest extends UnitTestCase {
    * @covers ::getGroupsForEntityType
    */
   public function testGetGroupsForEntityType() {
+    // It is expected that the group map will be retrieved from config.
     $groups = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups);
 
     $manager = $this->createGroupManager();
 
@@ -132,36 +166,26 @@ class GroupManagerTest extends UnitTestCase {
    * @covers ::addGroup
    */
   public function testAddGroupExisting() {
-    $this->configFactoryProphecy->getEditable('og.settings')
-      ->willReturn($this->configProphecy->reveal())
-      ->shouldBeCalled();
-
+    // It is expected that the group map will be retrieved from config.
     $groups_before = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups_before)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups_before);
 
     $groups_after = ['test_entity' => ['a', 'b', 'c']];
-
-    $this->configProphecy->set('groups', $groups_after)
-      ->shouldBeCalled();
-
-    $this->configProphecy->save()
-      ->shouldBeCalled();
 
     $this->configProphecy->get('groups')
       ->willReturn($groups_after)
       ->shouldBeCalled();
 
-    $this->expectDefaultRoleCreation('test_entity', 'c', TRUE);
-
     $manager = $this->createGroupManager();
 
     // Add to existing.
-    $manager->addGroup('test_entity', 'c');
-    $this->assertSame(['a', 'b', 'c'], $manager->getGroupsForEntityType('test_entity'));
-    $this->assertTrue($manager->isGroup('test_entity', 'c'));
+    try {
+      $manager->addGroup('test_entity', 'c');
+      $this->fail('An entity type that was already declared as a group, was redeclared as a group');
+    } catch (\InvalidArgumentException $e) {
+      // Expected result. An exception should be thrown when an entity type is
+      // redeclared as a group.
+    }
   }
 
   /**
@@ -172,27 +196,27 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->configProphecy->reveal())
       ->shouldBeCalled();
 
+    // It is expected that the group map will be retrieved from config.
     $groups_before = [];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups_before)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups_before);
 
     $groups_after = ['test_entity_new' => ['a']];
 
+    $config_prophecy = $this->configProphecy;
     $this->configProphecy->set('groups', $groups_after)
+      ->will(function () use ($groups_after, $config_prophecy) {
+        $config_prophecy->get('groups')
+          ->willReturn($groups_after)
+          ->shouldBeCalled();
+      })
       ->shouldBeCalled();
 
     $this->configProphecy->save()
       ->shouldBeCalled();
 
-    $this->configProphecy->get('groups')
-      ->willReturn($groups_after)
-      ->shouldBeCalled();
-
-    $this->expectDefaultRoleCreation('test_entity_new', 'a', FALSE);
-
     $manager = $this->createGroupManager();
+
+    $this->expectDefaultRoleCreation('test_entity_new', 'a');
 
     // Add a new entity type.
     $manager->addGroup('test_entity_new', 'a');
@@ -208,11 +232,9 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->configProphecy->reveal())
       ->shouldBeCalled();
 
+    // It is expected that the group map will be retrieved from config.
     $groups_before = ['test_entity' => ['a', 'b']];
-
-    $this->configProphecy->get('groups')
-      ->willReturn($groups_before)
-      ->shouldBeCalled();
+    $this->expectGroupMapRetrieval($groups_before);
 
     $groups_after = ['test_entity' => ['a']];
 
@@ -243,14 +265,34 @@ class GroupManagerTest extends UnitTestCase {
    * @return \Drupal\og\GroupManager
    */
   protected function createGroupManager() {
-    $this->configFactoryProphecy->get('og.settings')
-      ->willReturn($this->configProphecy->reveal())
-      ->shouldBeCalled();
+    // It is expected that the role storage will be initialized.
     $this->entityTypeManagerProphecy->getStorage('og_role')
       ->willReturn($this->entityStorageProphecy->reveal())
       ->shouldBeCalled();
 
-    return new GroupManager($this->configFactoryProphecy->reveal(), $this->entityTypeManagerProphecy->reveal());
+    return new GroupManager(
+      $this->configFactoryProphecy->reveal(),
+      $this->entityTypeManagerProphecy->reveal(),
+      $this->entityTypeBundleInfoProphecy->reveal(),
+      $this->eventDispatcherProphecy->reveal(),
+      $this->stateProphecy->reveal()
+    );
+  }
+
+  /**
+   * Sets up an expectation that the group map will be retrieved from config.
+   *
+   * @param array $groups
+   *   The expected group map that will be returned by the mocked config.
+   */
+  protected function expectGroupMapRetrieval($groups = []) {
+    $this->configFactoryProphecy->get('og.settings')
+      ->willReturn($this->configProphecy->reveal())
+      ->shouldBeCalled();
+
+    $this->configProphecy->get('groups')
+      ->willReturn($groups)
+      ->shouldBeCalled();
   }
 
   /**
@@ -260,44 +302,21 @@ class GroupManagerTest extends UnitTestCase {
    *   The entity type for which default roles should be created.
    * @param string $bundle
    *   The bundle for which default roles should be created.
-   * @param bool $entity_exists
-   *   Whether or not the default roles are being created for an entity that
-   *   already exists.
    */
-  protected function expectDefaultRoleCreation($entity_type, $bundle, $entity_exists) {
-    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR] as $role_name) {
-      // If the entity exists, then the default role also should exist.
-      if ($entity_exists) {
-        $this->addExistingDefaultRole($entity_type, $bundle, $role_name);
-      }
-      else {
-        $this->addNewDefaultRole($entity_type, $bundle, $role_name);
-      }
-    }
-  }
-
-  /**
-   * Expected method calls when recreating an already existing default role.
-   *
-   * @param string $entity_type
-   *   The entity type for which the default role should be created.
-   * @param string $bundle
-   *   The bundle for which the default role should be created.
-   * @param string $role_name
-   *   The name of the role being created.
-   */
-  protected function addExistingDefaultRole($entity_type, $bundle, $role_name) {
-    // It is expected that a call is done to see if the role already exists.
-    // This will return a role entity.
-    $properties = [
-      'group_type' => $entity_type,
-      'group_bundle' => $bundle,
-      'role_type' => OgRole::getRoleTypeByName($role_name),
-      'id' => $role_name,
-    ];
-    $this->entityStorageProphecy->loadByProperties($properties)
-      ->willReturn($this->ogRoleProphecy->reveal())
+  protected function expectDefaultRoleCreation($entity_type, $bundle) {
+    // In order to populate the default roles for a new group type, it is
+    // expected that the list of default roles to populate will be retrieved
+    // from the event listener.
+    $this->eventDispatcherProphecy->dispatch(DefaultRoleEventInterface::EVENT_NAME, Argument::type(DefaultRoleEvent::class))
+      ->willReturn($this->defaultRoleEventProphecy->reveal())
       ->shouldBeCalled();
+    $this->defaultRoleEventProphecy->getRoles()
+      ->willReturn([])
+      ->shouldBeCalled();
+
+    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED] as $role_name) {
+      $this->addNewDefaultRole($entity_type, $bundle, $role_name);
+    }
   }
 
   /**
@@ -311,21 +330,27 @@ class GroupManagerTest extends UnitTestCase {
    *   The name of the role being created.
    */
   protected function addNewDefaultRole($entity_type, $bundle, $role_name) {
-    // It is expected that a call is done to see if the role already exists.
-    // This will return nothing.
+    // It is expected that the OG permissions that need to be populated on the
+    // new role will be requested from the PermissionEvent listener.
+    $this->eventDispatcherProphecy->dispatch(PermissionEventInterface::EVENT_NAME, Argument::type('\Drupal\og\Event\PermissionEvent'))
+      ->willReturn($this->permissionEventProphecy->reveal())
+      ->shouldBeCalled();
+    $this->permissionEventProphecy->filterByDefaultRole($role_name)
+      ->willReturn([])
+      ->shouldBeCalled();
+
+    // It is expected that the role will be created with default properties.
     $properties = [
       'group_type' => $entity_type,
       'group_bundle' => $bundle,
       'role_type' => OgRole::getRoleTypeByName($role_name),
       'id' => $role_name,
+      'permissions' => [],
     ];
-    $this->entityStorageProphecy->loadByProperties($properties)
-      ->willReturn([])
-      ->shouldBeCalled();
-    // It is expected that the role will be created with default properties.
-    $this->entityStorageProphecy->create($properties + OgRole::getDefaultProperties($role_name))
+    $this->entityStorageProphecy->create($properties + OgRole::getDefaultRoles()[$role_name])
       ->willReturn($this->ogRoleProphecy->reveal())
       ->shouldBeCalled();
+
     // The role is expected to be saved.
     $this->ogRoleProphecy->save()
       ->willReturn(1)
@@ -343,6 +368,10 @@ class GroupManagerTest extends UnitTestCase {
   protected function expectRoleRemoval($entity_type_id, $bundle_id) {
     // It is expected that a call is done to retrieve all roles associated with
     // the group. This will return the 3 default role entities.
+    $this->entityTypeManagerProphecy->getStorage('og_role')
+      ->willReturn($this->entityStorageProphecy->reveal())
+      ->shouldBeCalled();
+
     $properties = [
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle_id,

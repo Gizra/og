@@ -3,7 +3,7 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
-use Drupal\og\Exception\OgRoleRequiredException;
+use Drupal\og\Exception\OgRoleException;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
 
@@ -144,7 +144,7 @@ class OgRole extends Role implements OgRoleInterface {
    * Returns the role type.
    *
    * @return string
-   *   The role type. One of OgRoleInterface::ROLE_TYPE_IMMUTABLE or
+   *   The role type. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    */
   public function getRoleType() {
@@ -155,7 +155,7 @@ class OgRole extends Role implements OgRoleInterface {
    * Sets the role type.
    *
    * @param string $role_type
-   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_IMMUTABLE or
+   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    *
    * @return $this
@@ -165,7 +165,7 @@ class OgRole extends Role implements OgRoleInterface {
    */
   public function setRoleType($role_type) {
     if (!in_array($role_type, [
-      self::ROLE_TYPE_IMMUTABLE,
+      self::ROLE_TYPE_REQUIRED,
       self::ROLE_TYPE_STANDARD,
     ])) {
       throw new \InvalidArgumentException("'$role_type' is not a valid role type.");
@@ -211,18 +211,18 @@ class OgRole extends Role implements OgRoleInterface {
    * {@inheritdoc}
    */
   public function set($property_name, $value) {
-    // Prevent the ID, role type, entity type or bundle to be changed for any of
-    // the default roles. These default roles are required and shouldn't be
-    // tampered with.
+    // Prevent the ID, role type, group ID, group entity type or bundle from
+    // being changed once they are set. These properties are required and
+    // shouldn't be tampered with.
     $is_locked_property = in_array($property_name, [
       'id',
       'role_type',
+      'group_id',
       'group_type',
       'group_bundle',
     ]);
-    $is_default_role = $this->getRoleType() !== self::ROLE_TYPE_STANDARD;
-    if ($is_locked_property && $is_default_role && !$this->isNew()) {
-      throw new OgRoleRequiredException("The $property_name of the default roles 'non-member' and 'member' cannot be changed.");
+    if ($is_locked_property && !$this->isNew()) {
+      throw new OgRoleException("The $property_name cannot be changed.");
     }
     return parent::set($property_name, $value);
   }
@@ -234,57 +234,36 @@ class OgRole extends Role implements OgRoleInterface {
     // The default roles are required. Prevent them from being deleted for as
     // long as the group still exists.
     if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && $this->groupManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
-      throw new OgRoleRequiredException('The default roles "non-member" and "member" cannot be deleted.');
+      throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
     }
     parent::delete();
   }
 
   /**
-   * Returns default properties for each of the standard role names.
+   * Returns default properties for the default OG roles.
    *
-   * @param string $role_name
-   *   A role name, one of OgRoleInterface::ANONYMOUS,
-   *   OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR.
+   * These are the two roles that are required by every group: the 'member' and
+   * 'non-member' roles.
+   *
+   * All other default roles are provided by DefaultRoleEvent.
    *
    * @return array
-   *   An array of default properties, to pass to OgRole::create().
+   *   An array of properties, keyed by OG role.
+   *
+   * @see \Drupal\og\Event\DefaultRoleEventInterface
+   * @see \Drupal\og\GroupManager::getDefaultRoles()
    */
-  public static function getDefaultProperties($role_name) {
-    if (!in_array($role_name, [
-      self::ANONYMOUS,
-      self::AUTHENTICATED,
-      self::ADMINISTRATOR,
-    ])) {
-      throw new \InvalidArgumentException("$role_name is not a default role name.");
-    }
-
-    $default_properties = [
+  public static function getDefaultRoles() {
+    return [
       self::ANONYMOUS => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_IMMUTABLE,
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
         'label' => 'Non-member',
-        'permissions' => ['subscribe'],
       ],
       self::AUTHENTICATED => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_IMMUTABLE,
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
         'label' => 'Member',
-        'permissions' => ['unsubscribe'],
-      ],
-      self::ADMINISTRATOR => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
-        'label' => 'Administrator',
-        'permissions' => [
-          'add user',
-          'administer group',
-          'approve and deny subscription',
-          'manage members',
-          'manage permissions',
-          'manage roles',
-          'update group',
-        ],
       ],
     ];
-
-    return $default_properties[$role_name];
   }
 
   /**
@@ -297,17 +276,14 @@ class OgRole extends Role implements OgRoleInterface {
    *   The role name for which to return the type.
    *
    * @return string
-   *   The role type, either OgRoleInterface::ROLE_TYPE_IMMUTABLE or
+   *   The role type, either OgRoleInterface::ROLE_TYPE_REQUIRED or
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    */
   public static function getRoleTypeByName($role_name) {
-    switch ($role_name) {
-      case OgRoleInterface::ANONYMOUS:
-      case OgRoleInterface::AUTHENTICATED:
-        return OgRoleInterface::ROLE_TYPE_IMMUTABLE;
-      default:
-        return OgRoleInterface::ROLE_TYPE_STANDARD;
-    }
+    return in_array($role_name, [
+      OgRoleInterface::ANONYMOUS,
+      OgRoleInterface::AUTHENTICATED,
+    ]) ? OgRoleInterface::ROLE_TYPE_REQUIRED : OgRoleInterface::ROLE_TYPE_STANDARD;
   }
 
   /**

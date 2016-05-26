@@ -130,6 +130,8 @@ class Og {
     $view_display->setComponent($plugin_id, $view_display_definition);
     $view_display->save();
 
+    // Refresh the group manager data, we have added a group type.
+    static::groupManager()->resetGroupRelationMap();
 
     return $field_definition;
   }
@@ -546,12 +548,9 @@ class Og {
    *   The entity type.
    * @param string $bundle_id
    *   The bundle name.
-   *
-   * @return bool
-   *   TRUE if the action succeeded, FALSE otherwise.
    */
   public static function addGroup($entity_type_id, $bundle_id) {
-    return static::groupManager()->addGroup($entity_type_id, $bundle_id);
+    static::groupManager()->addGroup($entity_type_id, $bundle_id);
   }
 
   /**
@@ -691,6 +690,13 @@ class Og {
     $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
+  }
+
+  /**
+   * Resets the static cache.
+   */
+  public static function reset() {
+    static::$cache = [];
   }
 
 }

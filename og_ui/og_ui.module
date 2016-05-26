@@ -13,6 +13,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og_ui\BundleFormAlter;
+use Drupal\og\OgRoleInterface;
 
 /**
  * Implements hook_form_alter().
