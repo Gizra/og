@@ -288,13 +288,13 @@ class GroupManager {
    * @todo: Would a dedicated RoleManager service be a better place for this?
    */
   protected function createRoles($entity_type_id, $bundle_id) {
-    $properties = [
-      'group_type' => $entity_type_id,
-      'group_bundle' => $bundle_id,
-    ];
-    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR] as $role_name) {
-      $properties['id'] = $role_name;
-      $properties['role_type'] = OgRole::getRoleTypeByName($role_name);
+    foreach ($this->getDefaultRoles() as $role_name => $default_properties) {
+      $properties = [
+        'group_type' => $entity_type_id,
+        'group_bundle' => $bundle_id,
+        'id' => $role_name,
+        'role_type' => OgRole::getRoleTypeByName($role_name),
+      ];
 
       // Populate the default permissions.
       $event = new PermissionEvent($entity_type_id, $bundle_id);
@@ -302,7 +302,7 @@ class GroupManager {
       $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
       $properties['permissions'] = array_keys($permissions->filterByDefaultRole($role_name));
 
-      $role = $this->ogRoleStorage->create($properties + $this->getDefaultRoles()[$role_name]);
+      $role = $this->ogRoleStorage->create($properties + $default_properties);
       $role->save();
     }
   }
