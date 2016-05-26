@@ -28,7 +28,7 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
     if (!isset($this->roles[$name])) {
       throw new \InvalidArgumentException("The '$name' role does not exist.'");
     }
-    return $this->roles;
+    return $this->roles[$name];
   }
 
   /**
