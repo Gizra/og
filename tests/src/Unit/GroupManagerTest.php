@@ -13,6 +13,8 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
+use Drupal\og\Event\DefaultRoleEvent;
+use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\PermissionEventInterface;
@@ -73,6 +75,11 @@ class GroupManagerTest extends UnitTestCase {
   protected $stateProphecy;
 
   /**
+   * @var \Drupal\og\Event\DefaultRoleEventInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $defaultRoleEventProphecy;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -85,6 +92,7 @@ class GroupManagerTest extends UnitTestCase {
     $this->eventDispatcherProphecy = $this->prophesize(EventDispatcherInterface::class);
     $this->permissionEventProphecy = $this->prophesize(PermissionEventInterface::class);
     $this->stateProphecy = $this->prophesize(StateInterface::class);
+    $this->defaultRoleEventProphecy = $this->prophesize(DefaultRoleEvent::class);
   }
 
   /**
@@ -296,7 +304,17 @@ class GroupManagerTest extends UnitTestCase {
    *   The bundle for which default roles should be created.
    */
   protected function expectDefaultRoleCreation($entity_type, $bundle) {
-    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR] as $role_name) {
+    // In order to populate the default roles for a new group type, it is
+    // expected that the list of default roles to populate will be retrieved
+    // from the event listener.
+    $this->eventDispatcherProphecy->dispatch(DefaultRoleEventInterface::EVENT_NAME, Argument::type(DefaultRoleEvent::class))
+      ->willReturn($this->defaultRoleEventProphecy->reveal())
+      ->shouldBeCalled();
+    $this->defaultRoleEventProphecy->getRoles()
+      ->willReturn([])
+      ->shouldBeCalled();
+
+    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED] as $role_name) {
       $this->addNewDefaultRole($entity_type, $bundle, $role_name);
     }
   }
