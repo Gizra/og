@@ -324,7 +324,7 @@ class DefaultRoleEventTest extends UnitTestCase {
     $event = new DefaultRoleEvent();
     try {
       $event->setRoles($invalid_roles);
-      $this->fail('An array of invalid roles cannot be added.');
+      $this->fail('An array of invalid roles cannot be set.');
     }
     catch (\InvalidArgumentException $e) {
       // Expected result. Do an arbitrary assertion so the test is not marked as
@@ -347,7 +347,7 @@ class DefaultRoleEventTest extends UnitTestCase {
       foreach ($invalid_roles as $name => $invalid_role) {
         $event[$name] = $invalid_role;
       }
-      $this->fail('An invalid role cannot be set.');
+      $this->fail('An invalid role cannot be set through ArrayAccess.');
     }
     catch (\InvalidArgumentException $e) {
       // Expected result. Do an arbitrary assertion so the test is not marked as
