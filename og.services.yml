@@ -1,7 +1,7 @@
 services:
   og.group.manager:
     class: Drupal\og\GroupManager
-    arguments: ['@config.factory', '@module_handler']
+    arguments: ['@config.factory', '@entity_type.bundle.info', '@state', '@module_handler']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
