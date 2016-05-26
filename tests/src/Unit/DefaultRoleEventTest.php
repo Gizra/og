@@ -220,27 +220,33 @@ class DefaultRoleEventTest extends UnitTestCase {
     return [
       // Test adding a single administrator role with only a label.
       [
-        OgRoleInterface::ADMINISTRATOR => ['label' => $this->t('Administrator')],
+        [
+          OgRoleInterface::ADMINISTRATOR => ['label' => $this->t('Administrator')],
+        ],
       ],
       // Test adding a single administrator role with a label and role type.
       [
-        OgRoleInterface::ADMINISTRATOR => [
-          'label' => $this->t('Administrator'),
-          'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        [
+          OgRoleInterface::ADMINISTRATOR => [
+            'label' => $this->t('Administrator'),
+            'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+          ],
         ],
       ],
       // Test adding multiple roles.
       [
-        OgRoleInterface::ADMINISTRATOR => [
-          'label' => $this->t('Administrator'),
-          'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-        ],
-        'moderator' => [
-          'label' => $this->t('Moderator'),
-          'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
-        ],
-        'contributor' => [
-          'label' => $this->t('Contributor'),
+        [
+          OgRoleInterface::ADMINISTRATOR => [
+            'label' => $this->t('Administrator'),
+            'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+          ],
+          'moderator' => [
+            'label' => $this->t('Moderator'),
+            'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
+          ],
+          'contributor' => [
+            'label' => $this->t('Contributor'),
+          ],
         ],
       ],
     ];
@@ -257,35 +263,43 @@ class DefaultRoleEventTest extends UnitTestCase {
     return [
       // A role with a missing name.
       [
-        '' => ['label' => $this->t('Administrator')],
+        [
+          '' => ['label' => $this->t('Administrator')],
+        ],
       ],
       // A role without a label.
       [
-        OgRoleInterface::ADMINISTRATOR => [
-          'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        [
+          OgRoleInterface::ADMINISTRATOR => [
+            'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+          ],
         ],
       ],
       // A role with an invalid role type.
       [
-        OgRoleInterface::ADMINISTRATOR => [
-          'label' => $this->t('Administrator'),
-          'role_type' => 'Some non-existing role type',
+        [
+          OgRoleInterface::ADMINISTRATOR => [
+            'label' => $this->t('Administrator'),
+            'role_type' => 'Some non-existing role type',
+          ],
         ],
       ],
       // An array of multiple correct roles, with one invalid role type sneaked
       // in.
       [
-        OgRoleInterface::ADMINISTRATOR => [
-          'label' => $this->t('Administrator'),
-          'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-        ],
-        'moderator' => [
-          'label' => $this->t('Moderator'),
-          'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
-        ],
-        'contributor' => [
-          'label' => $this->t('Contributor'),
-          'role_type' => 'Some non-existing role type',
+        [
+          OgRoleInterface::ADMINISTRATOR => [
+            'label' => $this->t('Administrator'),
+            'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+          ],
+          'moderator' => [
+            'label' => $this->t('Moderator'),
+            'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
+          ],
+          'contributor' => [
+            'label' => $this->t('Contributor'),
+            'role_type' => 'Some non-existing role type',
+          ],
         ],
       ],
     ];
