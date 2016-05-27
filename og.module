@@ -113,28 +113,18 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::neutral();
   }
 
-  $entity_type_id = $entity->getEntityTypeId();
-  $bundle_id = $entity->bundle();
-
-  $access = OgAccess::userAccessEntity('administer group', $entity, $account);
-
-  if ($access->isNeutral()) {
-    // The node isn't in an OG context, so no need to keep testing.
-    return $access;
-  }
-  else {
-    // Any and own content.
-    $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
+  // If the user has permission to administer all groups, allow access.
+  if ($account->hasPermission('administer group')) {
+    return AccessResult::neutral();
   }
 
-  if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
-    $access = OgAccess::userAccessEntity($operation, $entity, $account);
-  }
+  $access = OgAccess::userAccessEntity($operation, $entity, $account);
 
   if ($access->isAllowed()) {
     return $access;
   }
 
+  $entity_type_id = $entity->getEntityTypeId();
   if ($entity_type_id == 'node') {
     $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
 
