@@ -211,6 +211,10 @@ class OgAccess implements OgAccessInterface {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
       foreach ($groups as $entity_groups) {
         foreach ($entity_groups as $group) {
+          $crud_access = $this->userAccessGroupContentEntityCrud($operation, $group, $entity, $user);
+          if ($crud_access->isAllowed()) {
+            return $crud_access->addCacheTags($cache_tags);
+          }
           $user_access = $this->userAccess($group, $operation, $user);
           if ($user_access->isAllowed()) {
             return $user_access->addCacheTags($cache_tags);
@@ -228,6 +232,83 @@ class OgAccess implements OgAccessInterface {
     // Either the user didn't have permission, or the entity might be an
     // orphaned group content.
     return $result;
+  }
+
+  /**
+   * Checks access for CRUD operations on group content entities.
+   *
+   * This checks access for the default CRUD operations added by the permission
+   * manager.
+   *
+   * @param string $operation
+   *   The entity operation.
+   * @param \Drupal\Core\Entity\EntityInterface $group_entity
+   *   The group entity, to retrieve the permissions from.
+   * @param \Drupal\Core\Entity\EntityInterface $group_content_entity
+   *   The group content entity for which the CRUD operation access is
+   *   requested.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user for which to check access.
+   *
+   * @return \Drupal\Core\Access\AccessResult
+   *   The access result object.
+   *
+   * @see \Drupal\og\PermissionManager::generateCrudPermissionList()
+   */
+  public static function userAccessGroupContentEntityCrud($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
+    if (!in_array($operation, ['create', 'update', 'delete'])) {
+      return AccessResult::neutral();
+    }
+
+    // Default to the current user.
+    if (!isset($user)) {
+      $user = \Drupal::currentUser()->getAccount();
+    }
+
+    // From this point on, every result also depends on the user so check
+    // whether it is the current. See https://www.drupal.org/node/2628870
+    $cacheable_metadata = new CacheableMetadata;
+    $cacheable_metadata->addCacheableDependency($group_content_entity);
+    if ($user->id() == \Drupal::currentUser()->id()) {
+      $cacheable_metadata->addCacheContexts(['user']);
+    }
+
+    $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
+    $group_content_entity_type_id = $group_content_entity->getEntityTypeId();
+    $group_content_bundle_id = $group_content_entity->bundle();
+
+    // Generate the permissions to check.
+    switch ($operation) {
+      case 'create':
+        $permissions = ["create $group_content_bundle_id $group_content_entity_type_id"];
+        break;
+
+      case 'update':
+        $permissions = ["update any $group_content_bundle_id $group_content_entity_type_id"];
+        if ($is_owner) {
+          $permissions[] = "update own $group_content_bundle_id $group_content_entity_type_id";
+        }
+        break;
+
+      case 'delete':
+        $permissions = ["delete any $group_content_bundle_id $group_content_entity_type_id"];
+        if ($is_owner) {
+          $permissions[] = "delete own $group_content_bundle_id $group_content_entity_type_id";
+        }
+        break;
+    }
+
+    // @todo Also deal with the use case that CRUD operations are granted to
+    //   non-members.
+    if ($membership = Og::getUserMembership($user, $group_entity)) {
+      foreach ($permissions as $permission) {
+        if ($membership->hasPermission($permission)) {
+          return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
+        }
+      }
+    }
+
+    return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
   }
 
   /**
