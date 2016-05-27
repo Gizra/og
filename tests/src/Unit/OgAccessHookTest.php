@@ -36,6 +36,11 @@ class OgAccessHookTest extends OgAccessEntityTestBase {
   public function testGetEntityGroups($operation) {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
     $user_entity_access = og_entity_access($this->entity->reveal(), $operation, $this->user->reveal());
-    $this->assertTrue($user_entity_access->isAllowed());
+    if ($operation == 'view') {
+      $this->assertTrue($user_entity_access->isNeutral());
+    }
+    else {
+      $this->assertTrue($user_entity_access->isAllowed());
+    }
   }
 }
