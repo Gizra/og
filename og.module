@@ -109,13 +109,9 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::neutral();
   }
 
-  if ($operation == 'view') {
-    return AccessResult::neutral();
-  }
-
   // If the user has permission to administer all groups, allow access.
   if ($account->hasPermission('administer group')) {
-    return AccessResult::neutral();
+    return AccessResult::allowed();
   }
 
   $access = OgAccess::userAccessEntity($operation, $entity, $account);
