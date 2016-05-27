@@ -104,8 +104,15 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
  * Implements hook_entity_access().
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  // We only care about content entities.
+  // We only care about content entities that are groups or group content.
   if (!$entity instanceof ContentEntityInterface) {
+    return AccessResult::neutral();
+  }
+
+  $entity_type_id = $entity->getEntityTypeId();
+  $bundle_id = $entity->bundle();
+
+  if (!Og::isGroup($entity_type_id, $bundle_id) && !Og::isGroupContent($entity_type_id, $bundle_id)) {
     return AccessResult::neutral();
   }
 
@@ -120,7 +127,6 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return $access;
   }
 
-  $entity_type_id = $entity->getEntityTypeId();
   if ($entity_type_id == 'node') {
     $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
 
