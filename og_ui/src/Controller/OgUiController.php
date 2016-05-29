@@ -114,4 +114,13 @@ class OgUiController extends ControllerBase {
     return $this->t('OG @type overview', ['@type' => $type]);
   }
   
+  public function ogTasks() {
+    $build['roles_table'] = [
+      '#theme' => 'item',
+      '#markup' => $this->t('No group types available.'),
+    ];
+
+    return $build;
+  }
+  
 }

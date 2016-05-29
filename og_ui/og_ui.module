@@ -6,6 +6,7 @@
 
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\BundleEntityFormBase;
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\Entity\FieldConfig;
@@ -92,5 +93,22 @@ function og_ui_entity_type_save(EntityInterface $entity) {
       $field->setSetting('handler_settings', $handler_settings);
       $field->save();
     }
+  }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function og_ui_entity_type_alter(array &$entity_types) {
+  $group_manager = Og::groupManager();
+  
+  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  foreach ($entity_types as $entity_type_id => $entity_type) {
+
+    if (!$group_manager->getGroupsForEntityType($entity_type_id)) {
+      continue;
+    }
+
+    $entity_type->setLinkTemplate('og-group-admin-pages', "/$entity_type_id/{{$entity_type_id}}/group");
   }
 }

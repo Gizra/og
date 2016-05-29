@@ -1,0 +1,5 @@
+services:
+  og_ui.route_subscriber:
+    class: Drupal\og_ui\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }
