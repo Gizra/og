@@ -30,6 +30,11 @@ class OgUiRoutingAccess implements AccessInterface {
     /** @var ContentEntityBase $entity */
     $entity = $parameters->get(reset($keys));
 
+    if (!is_object($entity)) {
+      $path = explode('/', \Drupal::routeMatch()->getRouteObject()->getPath());
+      $entity = \Drupal::entityTypeManager()->getStorage($path[1])->load($entity);
+    }
+
     if (!\Drupal\og\Og::groupManager()->isGroup($entity->getEntityTypeId(), $entity->bundle())) {
       // Not a group. return.
       return AccessResultForbidden::forbidden();
