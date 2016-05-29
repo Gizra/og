@@ -24,6 +24,15 @@ class OgGroupAudienceHelper {
    */
   const DEFAULT_FIELD = 'og_group_ref';
 
+  /**
+   * The name of the field type that references user to groups via membership.
+   */
+  const USER_TO_GROUP_REFERENCE_FIELD_TYPE = 'og_membership_reference';
+
+  /**
+   * The name of the field type that references non-user entities to groups.
+   */
+  const NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE = 'og_standard_reference';
 
   /**
    * Return TRUE if field is a group audience type.
@@ -35,7 +44,7 @@ class OgGroupAudienceHelper {
    *   TRUE if the field is a group audience type, FALSE otherwise.
    */
   public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
-    return in_array($field_definition->getType(), ['og_standard_reference', 'og_membership_reference']);
+    return in_array($field_definition->getType(), [OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE, OgGroupAudienceHelper::USER_TO_GROUP_REFERENCE_FIELD_TYPE]);
   }
 
 
