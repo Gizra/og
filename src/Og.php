@@ -413,12 +413,10 @@ class Og {
   public static function getGroupContentIds(EntityInterface $entity, array $entity_types = []) {
     $group_content = [];
 
+
     // Retrieve the fields which reference our entity type and bundle.
     $query = \Drupal::entityQuery('field_storage_config')
-      // @todo For the moment retrieving both group types, since there seems to
-      //   be some confusion about which field type is used for users.
-      // @see https://github.com/amitaibu/og/issues/177
-      ->condition('type', ['og_standard_reference', 'og_membership_reference'], 'IN');
+      ->condition('type', OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE);
 
     // Optionally filter group content entity types.
     if ($entity_types) {
