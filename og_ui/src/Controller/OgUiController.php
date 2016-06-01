@@ -110,7 +110,7 @@ class OgUiController extends ControllerBase {
   }
 
   /**
-   * Title callback for rolesPermissionsOverviewPage.
+   * Title callback for rolesPermissionsOverviewPage().
    *
    * @param string $type
    *   The type of overview, either 'roles' or 'permissions'.
