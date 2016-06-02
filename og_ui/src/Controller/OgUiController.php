@@ -153,7 +153,7 @@ class OgUiController extends ControllerBase {
       // Add the edit role link if the role is editable.
       if (!$role->isLocked()) {
         $columns[] = [
-          'data' => Link::createFromRoute($this->t('Edit role'), 'og_ui.role_edit_form', [
+          'data' => Link::createFromRoute($this->t('Edit role'), 'entity.og_role.edit_form', [
             'og_role' => $role->id(),
           ]),
         ];
