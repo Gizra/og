@@ -18,6 +18,12 @@ use Drupal\user\Entity\Role;
  * @ConfigEntityType(
  *   id = "og_role",
  *   label = @Translation("OG role"),
+ *   handlers = {
+ *     "form" = {
+ *       "default" = "Drupal\og_ui\Form\OgRoleForm",
+ *       "delete" = "Drupal\Core\Entity\EntityDeleteForm"
+ *     }
+ *   },
  *   static_cache = TRUE,
  *   entity_keys = {
  *     "id" = "id",

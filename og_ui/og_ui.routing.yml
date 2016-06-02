@@ -44,9 +44,11 @@ og_ui.role_add_form:
 og_ui.role_edit_form:
   path: 'admin/config/group/role/{og_role}/edit'
   defaults:
-    _form: '\Drupal\og_ui\Form\OgRoleEditForm'
-    _title_callback: '\Drupal\og_ui\Form\OgRoleEditForm::titleCallback'
+    _entity_form: og_role.default
+    _title_callback: '\Drupal\og_ui\Form\OgRoleForm::editRoleTitleCallback'
   requirements:
+    # Todo: This should become a dedicated permission:
+    # _entity_access: og_role.update
     _permission: 'administer group'
 
 og_ui.permissions_overview:
