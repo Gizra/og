@@ -41,7 +41,7 @@ og_ui.role_add_form:
   requirements:
     _permission: 'administer group'
 
-og_ui.role_edit_form:
+entity.og_role.edit_form:
   path: 'admin/config/group/role/{og_role}/edit'
   defaults:
     _entity_form: og_role.default
