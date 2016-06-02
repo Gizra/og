@@ -21,6 +21,12 @@ use Drupal\user\Entity\Role;
  *     "label" = "label",
  *     "weight" = "weight"
  *   },
+ *   links = {
+ *     "delete-form" = "/admin/config/group/role/{og_role}/delete",
+ *     "edit-form" = "/admin/config/group/role/{og_role}/edit",
+ *     "edit-permissions-form" = "/admin/config/group/permission/{og_role}/edit",
+ *     "collection" = "/admin/config/group/roles",
+ *   },
  *   config_export = {
  *     "id",
  *     "label",
