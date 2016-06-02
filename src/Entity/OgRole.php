@@ -233,7 +233,7 @@ class OgRole extends Role implements OgRoleInterface {
       'group_type',
       'group_bundle',
     ]);
-    if ($is_locked_property && !$this->isNew()) {
+    if ($is_locked_property && !$this->isNew() && $value !== $this->get($property_name)) {
       throw new OgRoleException("The $property_name cannot be changed.");
     }
     return parent::set($property_name, $value);
