@@ -380,7 +380,7 @@ function og_entity_getter($object, array $options, $property_name) {
   // Check that property name contains double underscores, ignoring ones that
   // start with a double underscore.
   if (strpos($property_name, '__')) {
-    list($real_property, $sub_property) = explode('__', $property_name);
+    list($real_property, $sub_property) = explode('__', $property_name, 2);
   }
   else {
     $real_property = $property_name;
@@ -410,7 +410,7 @@ function og_entity_setter($object, $property_name, $wrapper) {
   // Check that property name contains double underscores, ignoring ones that
   // start with a double underscore.
   if (strpos($property_name, '__')) {
-    list($real_property, $sub_property) = explode('__', $property_name);
+    list($real_property, $sub_property) = explode('__', $property_name, 2);
   }
   else {
     $real_property = $property_name;
