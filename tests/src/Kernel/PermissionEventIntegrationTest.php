@@ -37,6 +37,13 @@ class PermissionEventIntegrationTest extends KernelTestBase {
   protected $eventDispatcher;
 
   /**
+   * The bundle ID used for the test group.
+   *
+   * @var string
+   */
+  protected $groupBundleId;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -45,12 +52,12 @@ class PermissionEventIntegrationTest extends KernelTestBase {
     $this->eventDispatcher = $this->container->get('event_dispatcher');
 
     // Create a group entity type.
-    $group_bundle_id = 'test_group';
+    $this->groupBundleId = 'test_group';
     NodeType::create([
-      'type' => $group_bundle_id,
+      'type' => $this->groupBundleId,
       'name' => $this->randomString(),
     ])->save();
-    Og::groupManager()->addGroup('node', $group_bundle_id);
+    Og::groupManager()->addGroup('node', $this->groupBundleId);
 
     // Create a group content entity type.
     $group_content_bundle_id = 'test_group_content';
@@ -121,7 +128,7 @@ class PermissionEventIntegrationTest extends KernelTestBase {
     ];
     return [
       [FALSE, $default_permissions],
-      [TRUE, $default_permissions + $group_content_permissions],
+      [TRUE, array_merge($default_permissions, $group_content_permissions)],
     ];
   }
 
