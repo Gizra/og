@@ -59,6 +59,8 @@ class PermissionManager {
    *
    * @return array
    *   The list of permissions.
+   *
+   * @todo Provide an alter hook.
    */
   public function generatePermissionList($entity_type_id, $bundle_id) {
     $permissions = [];
@@ -96,6 +98,9 @@ class PermissionManager {
         '%bundle' => $bundle_info['label'],
         '@entity' => $entity_info->getPluralLabel(),
       ];
+      // @todo This needs to support all entity operations for the given entity
+      //    type, not just the standard CRUD operations.
+      // @see https://github.com/amitaibu/og/issues/222
       $permissions += [
         "create $group_content_bundle_id $group_content_entity_type_id" => [
           'title' => t('Create %bundle @entity', $args),
