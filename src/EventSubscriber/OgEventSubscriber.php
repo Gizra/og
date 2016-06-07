@@ -59,7 +59,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
         'restrict access' => TRUE,
       ],
-    ] + $this->permissionManager->generatePermissionList($event->getEntityTypeId(), $event->getBundleId()));
+    ] + $this->permissionManager->getPermissionList($event->getEntityTypeId(), $event->getBundleId()));
   }
 
   /**

@@ -35,7 +35,7 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
   public function getRoles();
 
   /**
-   * Adds a default roles.
+   * Adds a default role.
    *
    * @param string $name
    *   The name of the role to add.

@@ -278,7 +278,9 @@ class GroupManager {
   }
 
   /**
-   * Creates default roles for the given group type.
+   * Creates the roles for the given group type, based on the default roles.
+   *
+   * This is intended to be called after a new group type has been created.
    *
    * @param string $entity_type_id
    *   The entity type ID of the group for which to create default roles.
@@ -324,9 +326,6 @@ class GroupManager {
     $event = new DefaultRoleEvent();
     $default_role_event = $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
 
-    // @todo: Do we want projects to be able to override the two required
-    //   default roles for 'member' and 'non-member'? People might want for
-    //   example to change the labels.
     return OgRole::getDefaultRoles() + $default_role_event->getRoles();
   }
 

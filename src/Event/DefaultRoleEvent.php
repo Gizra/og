@@ -151,11 +151,11 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
       throw new \InvalidArgumentException('The label property is required.');
     }
 
-    $legal_role_types = [
+    $valid_role_types = [
       OgRoleInterface::ROLE_TYPE_STANDARD,
       OgRoleInterface::ROLE_TYPE_REQUIRED,
     ];
-    if (!empty($properties['role_type']) && !in_array($properties['role_type'], $legal_role_types)) {
+    if (!empty($properties['role_type']) && !in_array($properties['role_type'], $valid_role_types)) {
       throw new \InvalidArgumentException('The role type is invalid.');
     }
   }
