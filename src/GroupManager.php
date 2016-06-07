@@ -245,7 +245,7 @@ class GroupManager {
     $editable->set('groups', $groups);
     $editable->save();
 
-    $this->createRoles($entity_type_id, $bundle_id);
+    $this->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
   }
 
@@ -289,7 +289,7 @@ class GroupManager {
    *
    * @todo: Would a dedicated RoleManager service be a better place for this?
    */
-  protected function createRoles($entity_type_id, $bundle_id) {
+  protected function createPerBundleRoles($entity_type_id, $bundle_id) {
     foreach ($this->getDefaultRoles() as $role_name => $default_properties) {
       $properties = [
         'group_type' => $entity_type_id,
