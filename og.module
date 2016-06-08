@@ -104,7 +104,7 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
  * Implements hook_entity_access().
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  // We only care about content entities.
+  // We only care about content entities that are groups or group content.
   if (!$entity instanceof ContentEntityInterface) {
     return AccessResult::neutral();
   }
@@ -116,20 +116,16 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   $entity_type_id = $entity->getEntityTypeId();
   $bundle_id = $entity->bundle();
 
-  $access = OgAccess::userAccessEntity('administer group', $entity, $account);
-
-  if ($access->isNeutral()) {
-    // The node isn't in an OG context, so no need to keep testing.
-    return $access;
-  }
-  else {
-    // Any and own content.
-    $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
+  if (!Og::isGroup($entity_type_id, $bundle_id) && !Og::isGroupContent($entity_type_id, $bundle_id)) {
+    return AccessResult::neutral();
   }
 
-  if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
-    $access = OgAccess::userAccessEntity($operation, $entity, $account);
+  // If the user has permission to administer all groups, allow access.
+  if ($account->hasPermission('administer group')) {
+    return AccessResult::allowed();
   }
+
+  $access = OgAccess::userAccessEntity($operation, $entity, $account);
 
   if ($access->isAllowed()) {
     return $access;
