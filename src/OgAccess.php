@@ -256,7 +256,13 @@ class OgAccess implements OgAccessInterface {
    * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
    */
   public static function userAccessGroupContentEntityOperations($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
-    if (!in_array($operation, ['create', 'update', 'delete'])) {
+    // Retrieve the permissions and check if our operation is supported.
+    $group_content_entity_type_id = $group_content_entity->getEntityTypeId();
+    $group_content_bundle_id = $group_content_entity->bundle();
+    $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
+    $permissions = \Drupal::service('og.permission_manager')->getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id, $is_owner);
+
+    if (!array_key_exists($operation, $permissions)) {
       return AccessResult::neutral();
     }
 
@@ -273,35 +279,10 @@ class OgAccess implements OgAccessInterface {
       $cacheable_metadata->addCacheContexts(['user']);
     }
 
-    $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
-    $group_content_entity_type_id = $group_content_entity->getEntityTypeId();
-    $group_content_bundle_id = $group_content_entity->bundle();
-
-    // Generate the permissions to check.
-    switch ($operation) {
-      case 'create':
-        $permissions = ["create $group_content_bundle_id $group_content_entity_type_id"];
-        break;
-
-      case 'update':
-        $permissions = ["update any $group_content_bundle_id $group_content_entity_type_id"];
-        if ($is_owner) {
-          $permissions[] = "update own $group_content_bundle_id $group_content_entity_type_id";
-        }
-        break;
-
-      case 'delete':
-        $permissions = ["delete any $group_content_bundle_id $group_content_entity_type_id"];
-        if ($is_owner) {
-          $permissions[] = "delete own $group_content_bundle_id $group_content_entity_type_id";
-        }
-        break;
-    }
-
     // @todo Also deal with the use case that CRUD operations are granted to
     //   non-members.
     if ($membership = Og::getUserMembership($user, $group_entity)) {
-      foreach ($permissions as $permission) {
+      foreach (array_keys($permissions[$operation]) as $permission) {
         if ($membership->hasPermission($permission)) {
           return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
         }
