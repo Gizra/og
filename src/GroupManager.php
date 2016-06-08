@@ -245,7 +245,7 @@ class GroupManager {
     $editable->set('groups', $groups);
     $editable->save();
 
-    $this->createRoles($entity_type_id, $bundle_id);
+    $this->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
   }
 
@@ -278,7 +278,9 @@ class GroupManager {
   }
 
   /**
-   * Creates default roles for the given group type.
+   * Creates the roles for the given group type, based on the default roles.
+   *
+   * This is intended to be called after a new group type has been created.
    *
    * @param string $entity_type_id
    *   The entity type ID of the group for which to create default roles.
@@ -287,7 +289,7 @@ class GroupManager {
    *
    * @todo: Would a dedicated RoleManager service be a better place for this?
    */
-  protected function createRoles($entity_type_id, $bundle_id) {
+  protected function createPerBundleRoles($entity_type_id, $bundle_id) {
     foreach ($this->getDefaultRoles() as $role_name => $default_properties) {
       $properties = [
         'group_type' => $entity_type_id,
@@ -324,9 +326,6 @@ class GroupManager {
     $event = new DefaultRoleEvent();
     $default_role_event = $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
 
-    // @todo: Do we want projects to be able to override the two required
-    //   default roles for 'member' and 'non-member'? People might want for
-    //   example to change the labels.
     return OgRole::getDefaultRoles() + $default_role_event->getRoles();
   }
 

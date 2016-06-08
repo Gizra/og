@@ -15,7 +15,7 @@ use Drupal\og\OgGroupAudienceHelper;
  *
  * @group og
  */
-class PermissionEventIntegrationTest extends KernelTestBase {
+class PermissionEventTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -37,6 +37,13 @@ class PermissionEventIntegrationTest extends KernelTestBase {
   protected $eventDispatcher;
 
   /**
+   * The bundle ID used for the test group.
+   *
+   * @var string
+   */
+  protected $groupBundleId;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -45,12 +52,12 @@ class PermissionEventIntegrationTest extends KernelTestBase {
     $this->eventDispatcher = $this->container->get('event_dispatcher');
 
     // Create a group entity type.
-    $group_bundle_id = 'test_group';
+    $this->groupBundleId = 'test_group';
     NodeType::create([
-      'type' => $group_bundle_id,
+      'type' => $this->groupBundleId,
       'name' => $this->randomString(),
     ])->save();
-    Og::groupManager()->addGroup('node', $group_bundle_id);
+    Og::groupManager()->addGroup('node', $this->groupBundleId);
 
     // Create a group content entity type.
     $group_content_bundle_id = 'test_group_content';
@@ -64,17 +71,29 @@ class PermissionEventIntegrationTest extends KernelTestBase {
   /**
    * Tests that the two OG modules can provide their own OG permissions.
    *
-   * @param bool $use_group
-   *   Whether or not to request permissions for the actual group that was
-   *   created in the setup.
+   * Some permissions (such as 'subscribe', 'manage members', etc.) are
+   * available for all group types. In addition to this there are also OG
+   * permissions for creating, editing and deleting the group content that
+   * associated with the group.
+   *
+   * In this test we will check that the correct permissions are generated for
+   * our test group (which includes permissions to create, edit and delete group
+   * content of type 'test_group_content'), as well as a control group which
+   * doesn't have any group content - in this case it should only return the
+   * default permissions that are available to all group types.
+   *
+   * @param bool $test_group_content_permissions
+   *   TRUE to check the permissions expected for a group type that has group
+   *   content of type 'test_group_content'. FALSE to only check for the
+   *   expected default permissions that are valid for any group type.
    * @param array $expected_permissions
    *   An array of permission names that are expected to be returned.
    *
    * @dataProvider permissionEventDataProvider
    */
-  public function testPermissionEventIntegration($use_group, $expected_permissions) {
-    $entity_type_id = $use_group ? 'node' : $this->randomMachineName();
-    $bundle_id = $use_group ? $this->groupBundleId : $this->randomMachineName();
+  public function testPermissionEventIntegration($test_group_content_permissions, $expected_permissions) {
+    $entity_type_id = $test_group_content_permissions ? 'node' : $this->randomMachineName();
+    $bundle_id = $test_group_content_permissions ? $this->groupBundleId : $this->randomMachineName();
 
     // Retrieve the permissions from the listeners.
     /** @var PermissionEvent $permission_event */
@@ -95,8 +114,9 @@ class PermissionEventIntegrationTest extends KernelTestBase {
    * @return array
    *   An array of test properties. Each property is an indexed array with the
    *   following items:
-   *   - A boolean indication whether or not to request permissions for the
-   *     actual group that was created in the setup.
+   *   - A boolean indication whether or not to request permissions for a group
+   *     that has group content of type 'test_group_content'. If FALSE only the
+   *     default permissions that are valid for any group type are returned.
    *   - An array of permission names that are expected to be returned.
    */
   public function permissionEventDataProvider() {
@@ -121,7 +141,7 @@ class PermissionEventIntegrationTest extends KernelTestBase {
     ];
     return [
       [FALSE, $default_permissions],
-      [TRUE, $default_permissions + $group_content_permissions],
+      [TRUE, array_merge($default_permissions, $group_content_permissions)],
     ];
   }
 

@@ -164,4 +164,15 @@ class BundleFormAlterTest extends BrowserTestBase {
     $this->assertEquals($expected, $setting, $message);
   }
 
+  /**
+   * Temporary workaround for a core bug that has the visibility wrong for this.
+   *
+   * Remove this once issue #2744089 is fixed.
+   *
+   * @see https://www.drupal.org/node/2744089
+   */
+  public function assertLink($label, $index = 0) {
+    return $this->assertSession()->linkExists($label, $index);
+  }
+
 }
