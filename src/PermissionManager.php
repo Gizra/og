@@ -67,7 +67,7 @@ class PermissionManager {
 
     foreach ($this->groupManager->getGroupContentBundleIdsByGroupBundle($entity_type_id, $bundle_id) as $group_content_entity_type_id => $group_content_bundle_ids) {
       foreach ($group_content_bundle_ids as $group_content_bundle_id) {
-        $permissions += $this->generateCrudPermissionList($group_content_entity_type_id, $group_content_bundle_id);
+        $permissions += $this->getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id);
       }
     }
 
@@ -75,7 +75,7 @@ class PermissionManager {
   }
 
   /**
-   * Helper function to generate default crud permissions for a given bundle.
+   * Returns permissions related to entity operations for a given bundle.
    *
    * @param $group_content_entity_type_id
    *   The entity type ID for which to generate the permission list.
@@ -86,7 +86,7 @@ class PermissionManager {
    *   An array of permission names and descriptions.
    *
    */
-  public function generateCrudPermissionList($group_content_entity_type_id, $group_content_bundle_id) {
+  public function getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id) {
     $permissions = [];
 
     // Check if the bundle is a group content type.

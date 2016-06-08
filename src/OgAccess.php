@@ -211,7 +211,7 @@ class OgAccess implements OgAccessInterface {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
       foreach ($groups as $entity_groups) {
         foreach ($entity_groups as $group) {
-          $crud_access = $this->userAccessGroupContentEntityCrud($operation, $group, $entity, $user);
+          $crud_access = $this->userAccessGroupContentEntityOperations($operation, $group, $entity, $user);
           if ($crud_access->isAllowed()) {
             return $crud_access->addCacheTags($cache_tags);
           }
@@ -235,7 +235,7 @@ class OgAccess implements OgAccessInterface {
   }
 
   /**
-   * Checks access for CRUD operations on group content entities.
+   * Checks access for entity operations on group content entities.
    *
    * This checks access for the default CRUD operations added by the permission
    * manager.
@@ -253,9 +253,9 @@ class OgAccess implements OgAccessInterface {
    * @return \Drupal\Core\Access\AccessResult
    *   The access result object.
    *
-   * @see \Drupal\og\PermissionManager::generateCrudPermissionList()
+   * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
    */
-  public static function userAccessGroupContentEntityCrud($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
+  public static function userAccessGroupContentEntityOperations($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
     if (!in_array($operation, ['create', 'update', 'delete'])) {
       return AccessResult::neutral();
     }
