@@ -546,12 +546,9 @@ class Og {
    *   The entity type.
    * @param string $bundle_id
    *   The bundle name.
-   *
-   * @return bool
-   *   True or false if the action succeeded.
    */
   public static function addGroup($entity_type_id, $bundle_id) {
-    return static::groupManager()->addGroup($entity_type_id, $bundle_id);
+    static::groupManager()->addGroup($entity_type_id, $bundle_id);
   }
 
   /**

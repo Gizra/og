@@ -7,16 +7,16 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Entity\OgRoleInterface;
-use Drupal\og\Og;
-use Drupal\og\OgAccess;
-use Drupal\og\Entity\OgMembership;
-use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\OgMembershipInterface;
-use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Entity\OgMembership;
+use Drupal\og\Og;
+use Drupal\og\OgAccess;
+use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * Group default roles and permissions field.
@@ -215,40 +215,6 @@ function _og_help($path, $arg) {
 function _og_modules_uninstalled($modules) {
   // Delete module's permissions.
   og_permissions_delete_by_module($modules);
-}
-
-/**
- * Implements hook_og_permission().
- */
-function _og_og_permission() {
-  // Generate standard node permissions for all applicable node types.
-  $perms = array();
-
-  $perms['update group'] = array(
-    'title' => t('Edit group'),
-    'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
-    'default role' => array(OgRoleInterface::ADMINISTRATOR),
-  );
-  $perms['administer group'] = array(
-    'title' => t('Administer group'),
-    'description' => t('Manage group members and content in the group.'),
-    'default role' => array(OgRoleInterface::ADMINISTRATOR),
-    'restrict access' => TRUE,
-  );
-
-  foreach (node_permissions_get_configured_types() as $type) {
-    $perms = array_merge($perms, og_list_permissions($type));
-  }
-
-  return $perms;
-}
-
-
-/**
- * Implements hook_og_default_roles().
- */
-function _og_og_default_roles() {
-  return array(OgRoleInterface::ADMINISTRATOR);
 }
 
 /**

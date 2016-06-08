@@ -105,10 +105,10 @@ og.og_role.*:
       type: string
       label: 'Group ID'
     group_type:
-      type: label
+      type: string
       label: 'Group type'
     group_bundle:
-      type: label
+      type: string
       label: 'Group bundle'
     permissions:
       type: sequence
@@ -116,6 +116,9 @@ og.og_role.*:
       sequence:
         type: string
         label: 'Permission'
+    role_type:
+      type: string
+      label: 'Role type'
 
 field.widget.settings.og_complex:
   type: mapping
