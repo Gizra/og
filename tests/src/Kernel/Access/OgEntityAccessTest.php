@@ -157,14 +157,16 @@ class OgEntityAccessTest extends KernelTestBase {
    * Test access to an arbitrary permission.
    */
   public function testAccess() {
+    $og_access = $this->container->get('og.access');
+
     // A member user.
-    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user1)->isAllowed());
+    $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user1)->isAllowed());
 
     // A member user without the correct role.
-    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user2)->isForbidden());
+    $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user2)->isForbidden());
 
     // A non-member user.
-    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user3)->isForbidden());
+    $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isForbidden());
 
     // Add membership to user 3.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
@@ -175,7 +177,7 @@ class OgEntityAccessTest extends KernelTestBase {
       ->addRole($this->ogRoleWithPermission->id())
       ->save();
 
-    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
+    $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
   }
 
 
