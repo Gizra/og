@@ -62,6 +62,16 @@ class OgAccess implements OgAccessInterface {
   protected $moduleHandler;
 
   /**
+   * The OG permission manager.
+   *
+   * @var \Drupal\og\PermissionManager
+   *
+   * @todo This should be PermissionManagerInterface.
+   * @see https://github.com/amitaibu/og/issues/228
+   */
+  protected $permissionManager;
+
+  /**
    * Constructs an OgManager service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -70,11 +80,16 @@ class OgAccess implements OgAccessInterface {
    *   The service that contains the current active user.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
+   * @param \Drupal\og\PermissionManager $permission_manager
+   *   The permission manager.
+   *   @todo This should be PermissionManagerInterface.
+   *   @see https://github.com/amitaibu/og/issues/228
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, PermissionManager $permission_manager) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;
+    $this->permissionManager = $permission_manager;
   }
 
   /**
@@ -255,12 +270,12 @@ class OgAccess implements OgAccessInterface {
    *
    * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
    */
-  public static function userAccessGroupContentEntityOperations($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
+  public function userAccessGroupContentEntityOperations($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
     // Retrieve the permissions and check if our operation is supported.
     $group_content_entity_type_id = $group_content_entity->getEntityTypeId();
     $group_content_bundle_id = $group_content_entity->bundle();
     $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
-    $permissions = \Drupal::service('og.permission_manager')->getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id, $is_owner);
+    $permissions = $this->permissionManager->getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id, $is_owner);
 
     if (!array_key_exists($operation, $permissions)) {
       return AccessResult::neutral();
