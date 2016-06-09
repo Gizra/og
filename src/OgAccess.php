@@ -27,7 +27,6 @@ class OgAccess {
    */
   protected static $permissionsCache = [];
 
-
   /**
    * Administer permission string.
    *
@@ -112,18 +111,25 @@ class OgAccess {
     // To reduce the number of SQL queries, we cache the user's permissions
     // in a static variable.
     if (!$pre_alter_cache) {
-      $permissions = array();
+      $permissions = [];
+      $user_is_group_admin = FALSE;
 
       foreach (Og::getUserMemberships($user) as $membership) {
-
         foreach ($membership->getRoles() as $role) {
 
           /** @var $role RoleInterface */
-          $permissions = array_unique(array_merge($permissions, $role->getPermissions()));
+          $permissions = array_merge($permissions, $role->getPermissions());
+
+          // Set an is_admin flag.
+          if ($role->isAdmin()) {
+            $user_is_group_admin = TRUE;
+          }
         }
       }
 
-      static::setPermissionCache($group, $user, TRUE, $permissions, $cacheable_metadata);
+      $permissions = array_unique($permissions);
+
+      static::setPermissionCache($group, $user, TRUE, $permissions, $user_is_group_admin, $cacheable_metadata);
     }
 
     if (!$skip_alter && !in_array($operation, $post_alter_cache)) {
@@ -138,12 +144,13 @@ class OgAccess {
       );
       \Drupal::moduleHandler()->alter('og_user_access', $alterable_permissions['permissions'], $cacheable_metadata, $context);
 
-      static::setPermissionCache($group, $user, FALSE, $alterable_permissions['permissions'], $cacheable_metadata);
+      static::setPermissionCache($group, $user, FALSE, $alterable_permissions['permissions'], $alterable_permissions['is_admin'], $cacheable_metadata);
     }
 
     $altered_permissions = static::getPermissionsCache($group, $user, FALSE);
 
-    $user_is_group_admin = !empty($altered_permissions['permissions'][static::ADMINISTER_GROUP_PERMISSION]);
+    $user_is_group_admin = !empty($altered_permissions['is_admin']);
+
     if (($user_is_group_admin && !$ignore_admin) || in_array($operation, $altered_permissions['permissions'])) {
       // User is a group admin, and we do not ignore this special permission
       // that grants access to all the group permissions.
@@ -233,16 +240,19 @@ class OgAccess {
    *   Determines if the type of permissions is pre-alter or post-alter.
    * @param array $permissions
    *   Array of permissions to set.
+   * @param bool @is_admin
+   *   Whether or not the user is a group administrator.
    * @param \Drupal\Core\Cache\RefinableCacheableDependencyInterface $cacheable_metadata
    *   A cacheable metadata object.
    */
-  protected static function setPermissionCache(EntityInterface $group, AccountInterface $user, $pre_alter, array $permissions, RefinableCacheableDependencyInterface $cacheable_metadata) {
+  protected static function setPermissionCache(EntityInterface $group, AccountInterface $user, $pre_alter, array $permissions, $is_admin, RefinableCacheableDependencyInterface $cacheable_metadata) {
     $entity_type_id = $group->getEntityTypeId();
     $group_id = $group->id();
     $user_id = $user->id();
     $type = $pre_alter ? 'pre_alter' : 'post_alter';
 
     static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type] = [
+      'is_admin' => $is_admin,
       'permissions' => $permissions,
       'cacheable_metadata' => $cacheable_metadata,
     ];

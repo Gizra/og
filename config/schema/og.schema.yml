@@ -110,6 +110,9 @@ og.og_role.*:
     group_bundle:
       type: string
       label: 'Group bundle'
+    is_admin:
+      type: boolean
+      label: 'User is group admin'
     permissions:
       type: sequence
       label: 'Permissions'
