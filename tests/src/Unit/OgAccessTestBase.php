@@ -73,15 +73,19 @@ class OgAccessTestBase extends UnitTestCase {
     $this->config = $this->addCache($this->prophesize(Config::class));
     $this->config->get('group_manager_full_access')->willReturn(FALSE);
 
-    // Since access depends on the 'group_manager_full_access' setting this
-    // means that access varies by the config object that contains this setting.
-    // It is expected that the cacheability metadata is retrieved from it.
+    // Whether or not the user has access to a certain operation depends in part
+    // on the 'group_manager_full_access' setting which is stored in config.
+    // Since the access is cached, this means that from the point of view from
+    // the caching system this access varies by the 'og.settings' config object
+    // that contains this setting. It is hence expected that the cacheability
+    // metadata is retrieved from the config object so it can be attached to the
+    // access result object.
+    $config_factory = $this->prophesize(ConfigFactoryInterface::class);
+    $config_factory->get('og.settings')->willReturn($this->config);
+
     $this->config->getCacheContexts()->willReturn([]);
     $this->config->getCacheTags()->willReturn([]);
     $this->config->getCacheMaxAge()->willReturn(0);
-
-    $config_factory = $this->prophesize(ConfigFactoryInterface::class);
-    $config_factory->get('og.settings')->willReturn($this->config);
 
     $this->user = $this->prophesize(AccountInterface::class);
     $this->user->isAuthenticated()->willReturn(TRUE);
