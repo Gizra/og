@@ -123,7 +123,6 @@ class OgAccessTestBase extends UnitTestCase {
     $reflection_property = $r->getProperty('permissionsCache');
     $reflection_property->setAccessible(TRUE);
 
-
     $values = [];
     foreach (['pre_alter', 'post_alter'] as $key) {
       $values[$group_type_id][$this->group->id()][2][$key] = ['permissions' => ['update group'], 'is_admin' => FALSE];

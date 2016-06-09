@@ -43,12 +43,15 @@ class OgEntityAccessTest extends KernelTestBase {
    */
   protected $adminUser;
 
-
   /**
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group1;
 
+  /**
+   * @var \Drupal\entity_test\Entity\EntityTest
+   */
+  protected $group2;
 
   /**
    * The machine name of the group's bundle.
@@ -57,13 +60,19 @@ class OgEntityAccessTest extends KernelTestBase {
    */
   protected $groupBundle;
 
-
   /**
    * The OG role that has the permission we check for.
    *
    * @var OgRole
    */
   protected $ogRoleWithPermission;
+
+  /**
+   * The OG role that has the permission we check for.
+   *
+   * @var OgRole
+   */
+  protected $ogRoleWithPermission2;
 
   /**
    * The OG role that doesn't have the permission we check for.
@@ -128,6 +137,15 @@ class OgEntityAccessTest extends KernelTestBase {
     ]);
     $this->group1->save();
 
+    // Create another group to help test per group/per account permission
+    // caching.
+    $this->group2 = EntityTest::create([
+      'type' => $this->groupBundle,
+      'name' => $this->randomString(),
+      'user_id' => $group_owner->id(),
+    ]);
+    $this->group2->save();
+
     /** @var OgRole ogRoleWithPermission */
     $this->ogRoleWithPermission = OgRole::create();
     $this->ogRoleWithPermission
@@ -137,6 +155,16 @@ class OgEntityAccessTest extends KernelTestBase {
       ->setGroupBundle($this->groupBundle)
       // Associate an arbitrary permission with the role.
       ->grantPermission('some_perm')
+      ->save();
+
+    $this->ogRoleWithPermission2 = OgRole::create();
+    $this->ogRoleWithPermission2
+      ->setId($this->randomMachineName())
+      ->setLabel($this->randomString())
+      ->setGroupType($this->group1->getEntityTypeId())
+      ->setGroupBundle($this->groupBundle)
+      // Associate an arbitrary permission with the role.
+      ->grantPermission('some_perm_2')
       ->save();
 
     /** @var OgRole ogRoleWithoutPermission */
@@ -168,6 +196,16 @@ class OgEntityAccessTest extends KernelTestBase {
       ->addRole($this->ogRoleWithPermission->id())
       ->save();
 
+    // Also create a membership to the other group. From this we can verify that
+    // permissions are not bled between groups.
+    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership
+      ->setUser($this->user1->id())
+      ->setEntityId($this->group2->id())
+      ->setGroupEntityType($this->group2->getEntityTypeId())
+      ->addRole($this->ogRoleWithPermission2->id())
+      ->save();
+
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
@@ -193,6 +231,9 @@ class OgEntityAccessTest extends KernelTestBase {
   public function testAccess() {
     // A member user.
     $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user1)->isAllowed());
+    // This user should not have access to 'some_perm_2' as that was only
+    // assigned to group 2.
+    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm_2', $this->user1)->isForbidden());
 
     // A member user without the correct role.
     $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->user2)->isForbidden());

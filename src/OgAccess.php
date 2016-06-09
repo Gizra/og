@@ -114,9 +114,8 @@ class OgAccess {
       $permissions = [];
       $user_is_group_admin = FALSE;
 
-      foreach (Og::getUserMemberships($user) as $membership) {
+      if ($membership = Og::getUserMembership($user, $group)) {
         foreach ($membership->getRoles() as $role) {
-
           /** @var $role RoleInterface */
           $permissions = array_merge($permissions, $role->getPermissions());
 
