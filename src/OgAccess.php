@@ -283,14 +283,14 @@ class OgAccess implements OgAccessInterface {
 
     // Default to the current user.
     if (!isset($user)) {
-      $user = \Drupal::currentUser()->getAccount();
+      $user = $this->accountProxy->getAccount();
     }
 
     // From this point on, every result also depends on the user so check
     // whether it is the current. See https://www.drupal.org/node/2628870
     $cacheable_metadata = new CacheableMetadata;
     $cacheable_metadata->addCacheableDependency($group_content_entity);
-    if ($user->id() == \Drupal::currentUser()->id()) {
+    if ($user->id() == $this->accountProxy->id()) {
       $cacheable_metadata->addCacheContexts(['user']);
     }
 
