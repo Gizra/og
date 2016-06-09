@@ -279,11 +279,7 @@ class OgAccess {
 
     return isset(static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type]) ?
       static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type] :
-      [
-        'permissions' => [],
-        'is_admin' => FALSE,
-        'cacheable_metadata' => NULL,
-      ];
+      [];
   }
 
   /**
