@@ -15,6 +15,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgGroupAudienceHelper;
 use Prophecy\Argument;
 

@@ -125,7 +125,8 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::allowed();
   }
 
-  $access = OgAccess::userAccessEntity($operation, $entity, $account);
+  /** @var \Drupal\Core\Access\AccessResult $access */
+  $access = \Drupal::service('og.access')->userAccessEntity($operation, $entity, $account);
 
   if ($access->isAllowed()) {
     return $access;
