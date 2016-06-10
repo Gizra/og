@@ -271,7 +271,7 @@ class Og {
    *   The OgMembership entity, or NULL if the user is not a member of the
    *   group.
    */
-  public static function getUserMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
+  public static function getMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     foreach (static::getUserMemberships($user, $states, $field_name) as $membership) {
       if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getEntityId() === $group->id()) {
         return $membership;

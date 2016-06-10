@@ -114,15 +114,16 @@ class OgAccess {
       $permissions = [];
       $user_is_group_admin = FALSE;
 
-      if ($membership = Og::getUserMembership($user, $group)) {
+      if ($membership = Og::getMembership($user, $group)) {
         foreach ($membership->getRoles() as $role) {
-          /** @var $role RoleInterface */
-          $permissions = array_merge($permissions, $role->getPermissions());
-
-          // Set an is_admin flag.
+          // Check for the is_admin flag.
           if ($role->isAdmin()) {
             $user_is_group_admin = TRUE;
+            break;
           }
+
+          /** @var $role RoleInterface */
+          $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
 
