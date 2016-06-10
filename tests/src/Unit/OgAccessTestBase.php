@@ -19,6 +19,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
 use Prophecy\Argument;
 
@@ -47,6 +48,13 @@ class OgAccessTestBase extends UnitTestCase {
    * @var \Drupal\og\GroupManager
    */
   protected $groupManager;
+
+  /**
+   * The mocked permission manager.
+   *
+   * @var \Drupal\og\PermissionManager|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $permissionManager;
 
   /**
    * The OgAccess class, this is the system under test.
@@ -108,9 +116,10 @@ class OgAccessTestBase extends UnitTestCase {
 
     $account_proxy = $this->prophesize(AccountProxyInterface::class);
     $module_handler = $this->prophesize(ModuleHandlerInterface::class);
+    $this->permissionManager = $this->prophesize(PermissionManager::class);
 
     // Instantiate the system under test.
-    $this->ogAccess = new OgAccess($config_factory->reveal(), $account_proxy->reveal(), $module_handler->reveal());
+    $this->ogAccess = new OgAccess($config_factory->reveal(), $account_proxy->reveal(), $module_handler->reveal(), $this->permissionManager->reveal());
 
     // Set the Og::cache property values, to skip calculations.
     $values = [];
