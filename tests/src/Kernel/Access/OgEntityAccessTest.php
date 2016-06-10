@@ -246,8 +246,8 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isForbidden());
 
     // Group admin user should have access regardless.
-    $this->assertTrue(OgAccess::userAccess($this->group1, 'some_perm', $this->adminUser)->isAllowed());
-    $this->assertTrue(OgAccess::userAccess($this->group1, $this->randomMachineName(), $this->adminUser)->isAllowed());
+    $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->adminUser)->isAllowed());
+    $this->assertTrue($og_access->userAccess($this->group1, $this->randomMachineName(), $this->adminUser)->isAllowed());
 
     // Add membership to user 3.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
@@ -260,5 +260,5 @@ class OgEntityAccessTest extends KernelTestBase {
 
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
   }
-  
+
 }
