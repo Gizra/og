@@ -51,6 +51,13 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $this->entity->getEntityType()->willReturn($entity_type->reveal());
     $this->entity->getEntityTypeId()->willReturn($entity_type_id);
 
+    // It is expected that a list of entity operation permissions is retrieved
+    // from the permission manager so that the passed in permission can be
+    // checked against this list. Our permissions are not in the list, so it is
+    // of no importance what we return here, an empty array is sufficient.
+    $this->permissionManager->getEntityOperationPermissions($this->entity->reveal()->getEntityTypeId(), $this->entity->reveal()->bundle(), FALSE)
+      ->willReturn([]);
+
     $this->groupManager->isGroup($entity_type_id, $bundle)->willReturn(FALSE);
 
     $entity_field_manager = $this->prophesize(EntityFieldManagerInterface::class);
