@@ -256,6 +256,30 @@ class Og {
   }
 
   /**
+   * Returns the group membership for a given user and group.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get the membership for.
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group to get the membership for.
+   * @param array $states
+   *   (optional) Array with the state to return. Defaults to active.
+   * @param string $field_name
+   *   (optional) The field name associated with the group.
+   *
+   * @return \Drupal\og\Entity\OgMembership|NULL
+   *   The OgMembership entity, or NULL if the user is not a member of the
+   *   group.
+   */
+  public static function getMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
+    foreach (static::getUserMemberships($user, $states, $field_name) as $membership) {
+      if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getEntityId() === $group->id()) {
+        return $membership;
+      }
+    }
+  }
+
+  /**
    * Returns all group IDs associated with the given group content entity.
    *
    * Do not use this to retrieve group IDs associated with a user entity. Use
