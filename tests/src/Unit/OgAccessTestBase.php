@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Unit\OgAccessTestBase.
- */
-
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Cache\Context\CacheContextsManager;
@@ -22,29 +17,50 @@ use Drupal\og\OgMembershipInterface;
 use Drupal\user\EntityOwnerInterface;
 use Prophecy\Argument;
 
+/**
+ * Base class for tests of the OgAccess class.
+ */
 class OgAccessTestBase extends UnitTestCase {
 
+  /**
+   * The mocked config handler.
+   *
+   * @var \Drupal\Core\Config\Config|\Prophecy\Prophecy\ObjectProphecy
+   */
   protected $config;
 
   /**
-   * @var \Drupal\user\UserInterface
+   * A mocked test user.
+   *
+   * @var \Drupal\user\UserInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $user;
 
   /**
+   * The entity type ID of the test group.
+   *
    * @var string
    */
   protected $entityTypeId;
 
   /**
+   * The bundle ID of the test group.
+   *
    * @var string
    */
   protected $bundle;
 
+  /**
+   * The mocked test group.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
   protected $group;
 
   /**
-   * @var \Drupal\og\GroupManager
+   * The mocked group manager.
+   *
+   * @var \Drupal\og\GroupManager|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $groupManager;
 
@@ -87,6 +103,7 @@ class OgAccessTestBase extends UnitTestCase {
     $this->config->getCacheTags()->willReturn([]);
     $this->config->getCacheMaxAge()->willReturn(0);
 
+    // Create a mocked test user.
     $this->user = $this->prophesize(AccountInterface::class);
     $this->user->isAuthenticated()->willReturn(TRUE);
     $this->user->id()->willReturn(2);
@@ -106,6 +123,7 @@ class OgAccessTestBase extends UnitTestCase {
 
     $entity_id = 20;
 
+    // Mock all dependencies for the system under test.
     $account_proxy = $this->prophesize(AccountProxyInterface::class);
     $module_handler = $this->prophesize(ModuleHandlerInterface::class);
 
@@ -148,7 +166,9 @@ class OgAccessTestBase extends UnitTestCase {
 
     $reflection_property->setValue($values);
 
-    // Set the allowed permissions cache.
+    // Set the allowed permissions cache. This simulates that the access results
+    // have been retrieved from the database in an earlier pass. This saves us
+    // from having to mock all the database interaction.
     $r = new \ReflectionClass('Drupal\og\OgAccess');
     $reflection_property = $r->getProperty('permissionsCache');
     $reflection_property->setAccessible(TRUE);
@@ -162,19 +182,26 @@ class OgAccessTestBase extends UnitTestCase {
   }
 
   /**
-   * @param bool $is_owner
+   * Returns a mocked test group.
    *
-   * @return \Drupal\Core\Entity\EntityInterface
+   * @param bool $is_owner
+   *   Whether or not this test group should be owned by the test user which is
+   *   used in the test.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|\Prophecy\Prophecy\ObjectProphecy
+   *   The test group.
    */
   protected function groupEntity($is_owner = FALSE) {
     $group_entity = $this->prophesize(EntityInterface::class);
     if ($is_owner) {
       $group_entity->willImplement(EntityOwnerInterface::class);
+      // Our test user is hardcoded to have UID 2.
       $group_entity->getOwnerId()->willReturn(2);
     }
     $group_entity->getEntityTypeId()->willReturn($this->entityTypeId);
     $group_entity->bundle()->willReturn($this->bundle);
     $group_entity->id()->willReturn($this->randomMachineName());
+
     return $this->addCache($group_entity);
   }
 
@@ -188,6 +215,15 @@ class OgAccessTestBase extends UnitTestCase {
     return $prophecy;
   }
 
+  /**
+   * Provides operations to use in access tests.
+   *
+   * @return array
+   *   An array of test operations.
+   *
+   * @todo These are not really 'operations' but rather 'permissions', rename
+   *   this?
+   */
   public function operationProvider() {
     return [
       // In the unit tests we don't really care about the permission name - it
