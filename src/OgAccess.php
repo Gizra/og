@@ -10,22 +10,18 @@ namespace Drupal\og;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\RoleInterface;
 
-class OgAccess {
-
-  /**
-   * Static cache that contains cache permissions.
-   *
-   * @var array
-   *   Array keyed by the following keys:
-   *   - alter: The permissions after altered by implementing modules.
-   *   - pre_alter: The pre-altered permissions, as read from the config.
-   */
-  protected static $permissionsCache = [];
+/**
+ * The service that determines if users have access to groups and group content.
+ */
+class OgAccess implements OgAccessInterface {
 
   /**
    * Administer permission string.
@@ -35,38 +31,61 @@ class OgAccess {
   const ADMINISTER_GROUP_PERMISSION = 'administer group';
 
   /**
-   * Determines whether a user has a given privilege.
+   * Static cache that contains cache permissions.
    *
-   * All permission checks in OG should go through this function. This
-   * way, we guarantee consistent behavior, and ensure that the superuser
-   * and group administrators can perform all actions.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $group
-   *   The group entity.
-   * @param string $operation
-   *   The entity operation being checked for.
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   (optional) The user to check. Defaults to the current user.
-   * @param $skip_alter
-   *   (optional) If TRUE then user access will not be sent to other modules
-   *   using drupal_alter(). This can be used by modules implementing
-   *   hook_og_user_access_alter() that still want to use og_user_access(), but
-   *   without causing a recursion. Defaults to FALSE.
-   * @param $ignore_admin
-   *   (optional) When TRUE the specific permission is checked, ignoring the
-   *   "administer group" permission if the user has it. When FALSE, a user
-   *   with "administer group" will be granted all permissions.
-   *   Defaults to FALSE.
-   *
-   * @return \Drupal\Core\Access\AccessResult
-   *   An access result object.
+   * @var array
+   *   Array keyed by the following keys:
+   *   - alter: The permissions after altered by implementing modules.
+   *   - pre_alter: The pre-altered permissions, as read from the config.
    */
-  public static function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
+  protected $permissionsCache = [];
+
+  /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * The service that contains the current active user.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected $accountProxy;
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * Constructs an OgManager service.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\Core\Session\AccountProxyInterface $account_proxy
+   *   The service that contains the current active user.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler) {
+    $this->configFactory = $config_factory;
+    $this->accountProxy = $account_proxy;
+    $this->moduleHandler = $module_handler;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
     $group_type_id = $group->getEntityTypeId();
     $bundle = $group->bundle();
     // As Og::isGroup depends on this config, we retrieve it here and set it as
     // the minimal caching data.
-    $config = \Drupal::config('og.settings');
+    $config = $this->configFactory->get('og.settings');
     $cacheable_metadata = (new CacheableMetadata)
         ->addCacheableDependency($config);
     if (!Og::isGroup($group_type_id, $bundle)) {
@@ -75,12 +94,12 @@ class OgAccess {
     }
 
     if (!isset($user)) {
-      $user = \Drupal::currentUser()->getAccount();
+      $user = $this->accountProxy->getAccount();
     }
 
     // From this point on, every result also depends on the user so check
     // whether it is the current. See https://www.drupal.org/node/2628870
-    if ($user->id() == \Drupal::currentUser()->id()) {
+    if ($user->id() == $this->accountProxy->id()) {
       $cacheable_metadata->addCacheContexts(['user']);
     }
 
@@ -91,7 +110,7 @@ class OgAccess {
 
     // Administer group permission.
     if (!$ignore_admin) {
-      $user_access = AccessResult::allowedIfHasPermission($user, static::ADMINISTER_GROUP_PERMISSION);
+      $user_access = AccessResult::allowedIfHasPermission($user, self::ADMINISTER_GROUP_PERMISSION);
       if ($user_access->isAllowed()) {
         return $user_access->addCacheableDependency($cacheable_metadata);
       }
@@ -105,11 +124,10 @@ class OgAccess {
       }
     }
 
-    $pre_alter_cache = static::getPermissionsCache($group, $user, TRUE);
-    $post_alter_cache = static::getPermissionsCache($group, $user, FALSE);
+    $pre_alter_cache = $this->getPermissionsCache($group, $user, TRUE);
+    $post_alter_cache = $this->getPermissionsCache($group, $user, FALSE);
 
-    // To reduce the number of SQL queries, we cache the user's permissions
-    // in a static variable.
+    // To reduce the number of SQL queries, we cache the user's permissions.
     if (!$pre_alter_cache) {
       $permissions = [];
       $user_is_group_admin = FALSE;
@@ -129,25 +147,25 @@ class OgAccess {
 
       $permissions = array_unique($permissions);
 
-      static::setPermissionCache($group, $user, TRUE, $permissions, $user_is_group_admin, $cacheable_metadata);
+      $this->setPermissionCache($group, $user, TRUE, $permissions, $user_is_group_admin, $cacheable_metadata);
     }
 
     if (!$skip_alter && !in_array($operation, $post_alter_cache)) {
       // Let modules alter the permissions. So we get the original ones, and
       // pass them along to the implementing modules.
-      $alterable_permissions = static::getPermissionsCache($group, $user, TRUE);
+      $alterable_permissions = $this->getPermissionsCache($group, $user, TRUE);
 
       $context = array(
         'operation' => $operation,
         'group' => $group,
         'user' => $user,
       );
-      \Drupal::moduleHandler()->alter('og_user_access', $alterable_permissions['permissions'], $cacheable_metadata, $context);
+      $this->moduleHandler->alter('og_user_access', $alterable_permissions['permissions'], $cacheable_metadata, $context);
 
-      static::setPermissionCache($group, $user, FALSE, $alterable_permissions['permissions'], $alterable_permissions['is_admin'], $cacheable_metadata);
+      $this->setPermissionCache($group, $user, FALSE, $alterable_permissions['permissions'], $alterable_permissions['is_admin'], $cacheable_metadata);
     }
 
-    $altered_permissions = static::getPermissionsCache($group, $user, FALSE);
+    $altered_permissions = $this->getPermissionsCache($group, $user, FALSE);
 
     $user_is_group_admin = !empty($altered_permissions['is_admin']);
 
@@ -161,18 +179,9 @@ class OgAccess {
   }
 
   /**
-   * Check if a user has access to a permission on a certain entity context.
-   *
-   * @param string $operation
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity object.
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   (optional) The user object. If empty the current user will be used.
-   *
-   * @return \Drupal\Core\Access\AccessResult
-   *   An access result object.
+   * {@inheritdoc}
    */
-  public static function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL) {
+  public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL) {
     $result = AccessResult::neutral();
 
     // Entity isn't saved yet.
@@ -185,7 +194,7 @@ class OgAccess {
     $bundle = $entity->bundle();
 
     if (Og::isGroup($entity_type_id, $bundle)) {
-      $user_access = static::userAccess($entity, $operation, $user);
+      $user_access = $this->userAccess($entity, $operation, $user);
       if ($user_access->isAllowed()) {
         return $user_access;
       }
@@ -210,7 +219,7 @@ class OgAccess {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
       foreach ($groups as $entity_groups) {
         foreach ($entity_groups as $group) {
-          $user_access = static::userAccess($group, $operation, $user);
+          $user_access = $this->userAccess($group, $operation, $user);
           if ($user_access->isAllowed()) {
             return $user_access->addCacheTags($cache_tags);
           }
@@ -245,13 +254,13 @@ class OgAccess {
    * @param \Drupal\Core\Cache\RefinableCacheableDependencyInterface $cacheable_metadata
    *   A cacheable metadata object.
    */
-  protected static function setPermissionCache(EntityInterface $group, AccountInterface $user, $pre_alter, array $permissions, $is_admin, RefinableCacheableDependencyInterface $cacheable_metadata) {
+  protected function setPermissionCache(EntityInterface $group, AccountInterface $user, $pre_alter, array $permissions, $is_admin, RefinableCacheableDependencyInterface $cacheable_metadata) {
     $entity_type_id = $group->getEntityTypeId();
     $group_id = $group->id();
     $user_id = $user->id();
     $type = $pre_alter ? 'pre_alter' : 'post_alter';
 
-    static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type] = [
+    $this->permissionsCache[$entity_type_id][$group_id][$user_id][$type] = [
       'is_admin' => $is_admin,
       'permissions' => $permissions,
       'cacheable_metadata' => $cacheable_metadata,
@@ -271,22 +280,22 @@ class OgAccess {
    * @return array
    *   Array of permissions if cached, or an empty array.
    */
-  protected static function getPermissionsCache(EntityInterface $group, AccountInterface $user, $pre_alter) {
+  protected function getPermissionsCache(EntityInterface $group, AccountInterface $user, $pre_alter) {
     $entity_type_id = $group->getEntityTypeId();
     $group_id = $group->id();
     $user_id = $user->id();
     $type = $pre_alter ? 'pre_alter' : 'post_alter';
 
-    return isset(static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type]) ?
-      static::$permissionsCache[$entity_type_id][$group_id][$user_id][$type] :
+    return isset($this->permissionsCache[$entity_type_id][$group_id][$user_id][$type]) ?
+      $this->permissionsCache[$entity_type_id][$group_id][$user_id][$type] :
       [];
   }
 
   /**
-   * Resets the static cache.
+   * {@inheritdoc}
    */
-  public static function reset() {
-    static::$permissionsCache = [];
+  public function reset() {
+    $this->permissionsCache = [];
   }
 
 }
