@@ -11,6 +11,8 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
@@ -61,10 +63,10 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->installEntitySchema('entity_test_mul');
 
     // Create reference from entity_test to entity_test_mul.
-    $this->createEntityReferenceField('entity_test', 'entity_test', 'field_test_data', 'field_test_data', 'entity_test_mul');
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', 'entity_test', ['field_name' => 'field_test_data', 'field_storage_config' => ['settings' => ['target_type' => 'entity_test_mul']]]);
 
     // Create reference from entity_test_mul to entity_test.
-    $this->createEntityReferenceField('entity_test_mul', 'entity_test_mul', 'field_data_test', 'field_data_test', 'entity_test');
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test_mul', 'entity_test_mul', ['field_name' => 'field_data_test', 'field_storage_config' => ['settings' => ['target_type' => 'entity_test']]]);
 
     ViewTestData::createTestViews(get_class($this), ['og_standard_reference_test_views']);
   }
@@ -226,57 +228,6 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
       // Test that the correct relationship entity is on the row.
       $this->assertEqual($row->_relationship_entities['reverse__entity_test_mul__field_data_test']->id(), $this->entities[$index]->id());
       $this->assertEqual($row->_relationship_entities['reverse__entity_test_mul__field_data_test']->bundle(), 'entity_test_mul');
-    }
-  }
-
-  /**
-   * Creates a field of an entity reference field storage on the specified bundle.
-   *
-   * @param string $entity_type
-   *   The type of entity the field will be attached to.
-   * @param string $bundle
-   *   The bundle name of the entity the field will be attached to.
-   * @param string $field_name
-   *   The name of the field; if it already exists, a new instance of the existing
-   *   field will be created.
-   * @param string $field_label
-   *   The label of the field.
-   * @param string $target_entity_type
-   *   The type of the referenced entity.
-   * @param string $selection_handler
-   *   The selection handler used by this field.
-   * @param array $selection_handler_settings
-   *   An array of settings supported by the selection handler specified above.
-   *   (e.g. 'target_bundles', 'sort', 'auto_create', etc).
-   * @param int $cardinality
-   *   The cardinality of the field.
-   *
-   * @see \Drupal\Core\Entity\Plugin\EntityReferenceSelection\SelectionBase::buildConfigurationForm()
-   */
-  protected function createEntityReferenceField($entity_type, $bundle, $field_name, $field_label, $target_entity_type, $selection_handler = 'default', $selection_handler_settings = [], $cardinality = -1) {
-    // Look for or add the specified field to the requested entity bundle.
-    if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
-      FieldStorageConfig::create([
-        'field_name' => $field_name,
-        'type' => 'og_standard_reference',
-        'entity_type' => $entity_type,
-        'cardinality' => $cardinality,
-        'settings' => [
-          'target_type' => $target_entity_type,
-        ],
-      ])->save();
-    }
-    if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
-      FieldConfig::create([
-        'field_name' => $field_name,
-        'entity_type' => $entity_type,
-        'bundle' => $bundle,
-        'label' => $field_label,
-        'settings' => [
-          'handler' => $selection_handler,
-          'handler_settings' => $selection_handler_settings,
-        ],
-      ])->save();
     }
   }
 
