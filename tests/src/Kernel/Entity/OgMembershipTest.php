@@ -1,21 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\Entity\OgMembershipTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\node\Entity\Node;
-use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
+use Drupal\user\UserInterface;
 
 /**
  * Tests the OgMembership entity.
@@ -44,7 +38,7 @@ class OgMembershipTest extends KernelTestBase {
   protected $group;
 
   /**
-   * Test users.
+   * Test user.
    *
    * @var \Drupal\user\UserInterface
    */
@@ -82,7 +76,7 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
-   * Tests getting abd setting users on OgMemberships.
+   * Tests getting and setting users on OgMemberships.
    *
    * @covers ::getUser
    * @covers ::setUser
@@ -90,17 +84,19 @@ class OgMembershipTest extends KernelTestBase {
   public function testGetSetUser() {
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->user)
+      ->setUser($this->user->id())
       ->setEntityId($this->group->id())
       ->setGroupEntityType($this->group->getEntityTypeId())
       ->save();
 
     // Check the user is returned.
+    $this->assertInstanceOf(UserInterface::class, $membership->getUser());
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
 
     // And after re-loading.
     $membership = Og::membershipStorage()->loadUnchanged($membership->id());
 
+    $this->assertInstanceOf(UserInterface::class, $membership->getUser());
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
   }
 
