@@ -63,18 +63,15 @@ class PermissionManager {
    * @todo Provide an alter hook.
    */
   public function getPermissionList($entity_type_id, $bundle_id) {
-    $permission_list = [];
+    $permissions = [];
 
     foreach ($this->groupManager->getGroupContentBundleIdsByGroupBundle($entity_type_id, $bundle_id) as $group_content_entity_type_id => $group_content_bundle_ids) {
       foreach ($group_content_bundle_ids as $group_content_bundle_id) {
-        $operation_permissions = $this->getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id);
-        foreach ($operation_permissions as $operation => $permissions) {
-          $permission_list = array_merge($permission_list, $permissions);
-        }
+        $permissions += $this->getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id);
       }
     }
 
-    return $permission_list;
+    return $permissions;
   }
 
   /**
@@ -108,44 +105,45 @@ class PermissionManager {
     // @todo This needs to support all entity operations for the given entity
     //    type, not just the standard CRUD operations.
     // @see https://github.com/amitaibu/og/issues/222
-    $operation_permissions = [
-      'create' => [
-        "create $group_content_bundle_id $group_content_entity_type_id" => [
-          'title' => t('Create %bundle @entity', $args),
-        ],
+    $permissions = [
+      "create $group_content_bundle_id $group_content_entity_type_id" => [
+        'title' => t('Create %bundle @entity', $args),
+        'operation' => 'create',
       ],
-      'update' => [
-        "update any $group_content_bundle_id $group_content_entity_type_id" => [
-          'title' => t('Edit any %bundle @entity', $args),
-        ],
+      "update any $group_content_bundle_id $group_content_entity_type_id" => [
+        'title' => t('Edit any %bundle @entity', $args),
+        'operation' => 'update',
       ],
-      'delete' => [
-        "delete any $group_content_bundle_id $group_content_entity_type_id" => [
-          'title' => t('Delete any %bundle @entity', $args),
-        ],
+      "delete any $group_content_bundle_id $group_content_entity_type_id" => [
+        'title' => t('Delete any %bundle @entity', $args),
+        'operation' => 'delete',
       ],
     ];
 
     // Add the permissions for the owner of the entity if needed.
     if ($is_owner) {
-      $operation_permissions['update']["update own $group_content_bundle_id $group_content_entity_type_id"] = [
+      $permissions["update own $group_content_bundle_id $group_content_entity_type_id"] = [
         'title' => t('Edit own %bundle @entity', $args),
+        'operation' => 'update',
+        'ownership' => 'own',
       ];
-      $operation_permissions['delete']["delete own $group_content_bundle_id $group_content_entity_type_id"] = [
+      $permissions["delete own $group_content_bundle_id $group_content_entity_type_id"] = [
         'title' => t('Delete own %bundle @entity', $args),
+        'operation' => 'delete',
+        'ownership' => 'own',
       ];
     }
 
-    // Enable each permission for the administrator role by default.
-    foreach ($operation_permissions as $operation => $permissions) {
-      foreach ($permissions as $key => $permission) {
-        $operation_permissions[$operation][$key]['default role'] = [OgRoleInterface::ADMINISTRATOR];
-      }
+    foreach ($permissions as &$permission) {
+      $permission['entity type'] = $group_content_entity_type_id;
+      $permission['bundle'] = $group_content_bundle_id;
+      // Enable each permission for the administrator role by default.
+      $permission['default role'] = [OgRoleInterface::ADMINISTRATOR];
     }
 
     // @todo Allow to alter the permissions.
 
-    return $operation_permissions;
+    return $permissions;
   }
 
 }
