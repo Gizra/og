@@ -63,15 +63,18 @@ class PermissionManager {
    * @todo Provide an alter hook.
    */
   public function getPermissionList($entity_type_id, $bundle_id) {
-    $permissions = [];
+    $permission_list = [];
 
     foreach ($this->groupManager->getGroupContentBundleIdsByGroupBundle($entity_type_id, $bundle_id) as $group_content_entity_type_id => $group_content_bundle_ids) {
       foreach ($group_content_bundle_ids as $group_content_bundle_id) {
-        $permissions += $this->getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id);
+        $operation_permissions = $this->getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id);
+        foreach ($operation_permissions as $operation => $permissions) {
+          $permission_list = array_merge($permission_list, $permissions);
+        }
       }
     }
 
-    return $permissions;
+    return $permission_list;
   }
 
   /**
