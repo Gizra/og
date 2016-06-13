@@ -75,6 +75,13 @@ class PermissionEvent extends Event implements PermissionEventInterface {
     if (empty($permission['title'])) {
       throw new \InvalidArgumentException('The permission title is required.');
     }
+    if (!empty($permission['operation']) && (empty($permission['entity type']) || empty($permission['bundle']))) {
+      throw new \InvalidArgumentException('When an operation is provided, the entity type and bundle to which this operation applies should also be provided.');
+    }
+    // Default the ownership to 'any' for operations.
+    if (!empty($permission['operation']) && empty($permission['ownership'])) {
+      $permission['ownership'] = 'any';
+    }
     $this->permissions[$name] = $permission;
   }
 
