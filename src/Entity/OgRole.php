@@ -25,6 +25,7 @@ use Drupal\user\Entity\Role;
  *     "id",
  *     "label",
  *     "weight",
+ *     "is_admin",
  *     "group_type",
  *     "group_bundle",
  *     "group_id",
