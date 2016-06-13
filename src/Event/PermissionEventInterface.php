@@ -40,6 +40,13 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    *     permission that requires elevated privileges. Use this for permissions
    *     that are mainly intended for the group administrator or similar roles.
    *     Defaults to FALSE.
+   *   - 'operation': Optional operation that is applicable to this permission
+   *     in case this is about granting access to an entity operation. Example:
+   *     if the permission was 'create any article content', the operation would
+   *     be 'create'.
+   *   - 'entity type': @todo
+   *   - 'bundle': @todo
+   *   - 'ownership': @todo
    *
    * @throws \InvalidArgumentException
    *   Thrown when the permission with the given name does not exist.

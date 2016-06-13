@@ -133,6 +133,8 @@ class PermissionManager {
     }
 
     foreach ($permissions as &$permission) {
+      // Set the entity type and bundle IDs of the group content to which this
+      // operation applies.
       $permission['entity type'] = $group_content_entity_type_id;
       $permission['bundle'] = $group_content_bundle_id;
       // Enable each permission for the administrator role by default.
