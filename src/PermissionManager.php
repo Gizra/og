@@ -59,8 +59,6 @@ class PermissionManager {
    *
    * @return array
    *   The list of permissions.
-   *
-   * @todo Provide an alter hook.
    */
   public function getPermissionList($entity_type_id, $bundle_id) {
     $permissions = [];
@@ -140,8 +138,6 @@ class PermissionManager {
       // Enable each permission for the administrator role by default.
       $permission['default role'] = [OgRoleInterface::ADMINISTRATOR];
     }
-
-    // @todo Allow to alter the permissions.
 
     return $permissions;
   }
