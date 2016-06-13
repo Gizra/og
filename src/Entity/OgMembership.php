@@ -105,7 +105,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getUser() {
-    return $this->get('uid')->value;
+    return $this->get('uid')->entity;
   }
 
   /**
@@ -255,7 +255,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Member entity ID'))
       ->setDescription(t('The entity ID of the member.'))
-      ->setTargetEntityTypeId('user');
+      ->setSetting('target_type', 'user')
+      ->setDefaultValue(0);
 
     $fields['entity_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group entity type'))
