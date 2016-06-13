@@ -9,6 +9,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\user\Entity\User;
 
 /**
  * Tests deletion of orphaned group content and memberships.
@@ -69,10 +70,15 @@ class OgDeleteOrphansTest extends KernelTestBase {
     ])->save();
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $group_content_bundle);
 
+    // Create group admin user.
+    $group_admin = User::create(['name' => $this->randomString()]);
+    $group_admin->save();
+
     // Create a group.
     $this->group = Node::create([
       'title' => $this->randomString(),
       'type' => $group_bundle,
+      'uid' => $group_admin->id(),
     ]);
     $this->group->save();
 

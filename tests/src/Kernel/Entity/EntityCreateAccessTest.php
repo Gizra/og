@@ -82,10 +82,15 @@ class EntityCreateAccessTest extends KernelTestBase {
    * Tests that users that can only view cannot access the entity creation form.
    */
   function testViewPermissionDoesNotGrantCreateAccess() {
+    // Create test user.
+    $user = User::create(['name' => $this->randomString()]);
+    $user->save();
+
     // Create a group.
     Node::create([
       'title' => $this->randomString(),
       'type' => 'group',
+      'uid' => $user->id(),
     ])->save();
 
     // Make sure the anonymous user exists. This normally is created in the
