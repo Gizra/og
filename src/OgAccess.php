@@ -260,8 +260,11 @@ class OgAccess implements OgAccessInterface {
   /**
    * Checks access for entity operations on group content entities.
    *
-   * This checks access for the default CRUD operations added by the permission
-   * manager.
+   * This checks if the user has permission to perform the requested operation
+   * on the given group content entity according to the user's membership status
+   * in the given group. There is no formal support for access control on entity
+   * operations in core, so the mapping of permissions to operations is provided
+   * by PermissionManager::getEntityOperationPermissions().
    *
    * @param string $operation
    *   The entity operation.
