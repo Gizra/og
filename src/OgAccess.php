@@ -234,9 +234,9 @@ class OgAccess implements OgAccessInterface {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
       foreach ($groups as $entity_groups) {
         foreach ($entity_groups as $group) {
-          $crud_access = $this->userAccessGroupContentEntityOperations($operation, $group, $entity, $user);
-          if ($crud_access->isAllowed()) {
-            return $crud_access->addCacheTags($cache_tags);
+          $operation_access = $this->userAccessGroupContentEntityOperations($operation, $group, $entity, $user);
+          if ($operation_access->isAllowed()) {
+            return $operation_access->addCacheTags($cache_tags);
           }
           $user_access = $this->userAccess($group, $operation, $user);
           if ($user_access->isAllowed()) {
@@ -268,7 +268,7 @@ class OgAccess implements OgAccessInterface {
    * @param \Drupal\Core\Entity\EntityInterface $group_entity
    *   The group entity, to retrieve the permissions from.
    * @param \Drupal\Core\Entity\EntityInterface $group_content_entity
-   *   The group content entity for which the CRUD operation access is
+   *   The group content entity for which access to the entity operation is
    *   requested.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user for which to check access.
@@ -302,7 +302,7 @@ class OgAccess implements OgAccessInterface {
       $cacheable_metadata->addCacheContexts(['user']);
     }
 
-    // @todo Also deal with the use case that CRUD operations are granted to
+    // @todo Also deal with the use case that entity operations are granted to
     //   non-members.
     if ($membership = Og::getUserMembership($user, $group_entity)) {
       foreach (array_keys($permissions[$operation]) as $permission) {
