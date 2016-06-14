@@ -5,7 +5,7 @@ namespace Drupal\og\EventSubscriber;
 use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\OgRoleInterface;
-use Drupal\og\PermissionManager;
+use Drupal\og\PermissionManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -16,17 +16,17 @@ class OgEventSubscriber implements EventSubscriberInterface {
   /**
    * The OG permission manager.
    *
-   * @var \Drupal\og\PermissionManager
+   * @var \Drupal\og\PermissionManagerInterface
    */
   protected $permissionManager;
 
   /**
    * Constructs an OgEventSubscriber object.
    *
-   * @param \Drupal\og\PermissionManager $permission_manager
+   * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The OG permission manager.
    */
-  public function __construct(PermissionManager $permission_manager) {
+  public function __construct(PermissionManagerInterface $permission_manager) {
     $this->permissionManager = $permission_manager;
   }
 

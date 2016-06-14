@@ -7,10 +7,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Manager for OG permissions.
- *
- * @todo Provide an interface.
  */
-class PermissionManager {
+class PermissionManager implements PermissionManagerInterface {
 
   /**
    * The OG group manager.
@@ -50,15 +48,7 @@ class PermissionManager {
   }
 
   /**
-   * Generates the OG permission list for the given group type.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID of the group for which to generate the permissions.
-   * @param string $bundle_id
-   *   The bundle ID of the group for which to generate the permissions.
-   *
-   * @return array
-   *   The list of permissions.
+   * {@inheritdoc}
    *
    * @todo Provide an alter hook.
    */
@@ -75,16 +65,7 @@ class PermissionManager {
   }
 
   /**
-   * Helper function to generate default crud permissions for a given bundle.
-   *
-   * @param $group_content_entity_type_id
-   *   The entity type ID for which to generate the permission list.
-   * @param $group_content_bundle_id
-   *   The bundle ID for which to generate the permission list.
-   *
-   * @return array
-   *   An array of permission names and descriptions.
-   *
+   * {@inheritdoc}
    */
   public function generateCrudPermissionList($group_content_entity_type_id, $group_content_bundle_id) {
     $permissions = [];
