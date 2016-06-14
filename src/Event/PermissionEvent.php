@@ -128,6 +128,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
    * {@inheritdoc}
    */
   public function filterByDefaultRole($role_name) {
+    throw new \Exception('Move this to PermissionManager');
     return array_filter($this->permissions, function ($permission) use ($role_name) {
       return !empty($permission['default roles']) && in_array($role_name, $permission['default roles']);
     });
