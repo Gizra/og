@@ -85,6 +85,15 @@ class GroupManager {
   protected $state;
 
   /**
+   * The OG permission manager.
+   *
+   * @var \Drupal\og\PermissionManager
+   *
+   * @todo This should be PermissionManagerInterface.
+   */
+  protected $permissionManager;
+
+  /**
    * A map of entity types and bundles.
    *
    * Do not access this property directly, use $this->getGroupMap() instead.
@@ -131,14 +140,17 @@ class GroupManager {
    *   The default role event listener.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
+   * @param \Drupal\og\PermissionManager $permission_manager
+   *   The OG permission manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, DefaultRoleEventInterface $default_role_event, StateInterface $state) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, DefaultRoleEventInterface $default_role_event,, StateInterface $state, PermissionManager $permission_manager) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->defaultRoleEvent = $default_role_event;
     $this->state = $state;
+    $this->permissionManager = $permission_manager;
   }
 
   /**
