@@ -72,6 +72,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
     $event->addRole([
       'name' => OgRoleInterface::ADMINISTRATOR,
       'label' => 'Administrator',
+      'is_admin' => TRUE,
     ]);
   }
 

@@ -459,6 +459,16 @@ class DefaultRoleEventTest extends UnitTestCase {
           ],
         ],
       ],
+      // A role with an invalid is_admin value.
+      [
+        [
+          OgRoleInterface::ADMINISTRATOR => [
+            'name' => OgRole::ADMINISTRATOR,
+            'label' => $this->t('Administrator'),
+            'is_admin' => 'An invalid value',
+          ],
+        ],
+      ],
       // An array of multiple correct roles, with one invalid role type sneaked
       // in.
       [
@@ -509,7 +519,7 @@ class DefaultRoleEventTest extends UnitTestCase {
   protected function assertRoleEquals(array $expected, OgRole $actual) {
     // Provide default values.
     $this->addDefaultRoleProperties($expected);
-    foreach (['name', 'label', 'role_type'] as $property) {
+    foreach (['name', 'label', 'role_type', 'is_admin'] as $property) {
       $this->assertEquals($expected[$property], $actual->get($property));
     }
   }
@@ -539,6 +549,7 @@ class DefaultRoleEventTest extends UnitTestCase {
   protected function addDefaultRoleProperties(&$properties) {
     $properties += [
       'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
+      'is_admin' => FALSE,
     ];
   }
 

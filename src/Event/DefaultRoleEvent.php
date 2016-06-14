@@ -62,14 +62,15 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   public function addRole(array $properties) {
     $this->validate($properties);
 
-    // Provide default value for the role type.
-    if (empty($properties['role_type'])) {
-      $properties['role_type'] = OgRoleInterface::ROLE_TYPE_STANDARD;
-    }
-
     if (array_key_exists($properties['name'], $this->roles)) {
       throw new \InvalidArgumentException("The '{$properties['name']}' role already exists.");
     }
+
+    // Provide default values.
+    $properties += [
+      'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
+      'is_admin' => FALSE,
+    ];
 
     $this->roles[$properties['name']] = $this->ogRoleStorage->create($properties);
   }
@@ -178,6 +179,10 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
 
     if (empty($properties['label'])) {
       throw new \InvalidArgumentException('The label property is required.');
+    }
+
+    if (!empty($properties['is_admin']) && !is_bool($properties['is_admin'])) {
+      throw new \InvalidArgumentException('The is_admin property should be a boolean.');
     }
 
     $valid_role_types = [

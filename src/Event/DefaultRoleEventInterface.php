@@ -48,6 +48,8 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    *   - 'role_type': Either OgRoleInterface::ROLE_TYPE_STANDARD or
    *     OgRoleInterface::ROLE_TYPE_REQUIRED. Defaults to
    *     OgRoleInterface::ROLE_TYPE_STANDARD.
+   *   - 'is_admin': Whether or not the role is an administration role. Defaults
+   *     to FALSE.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the role that is added already exists, when the role name is
@@ -73,6 +75,8 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    *   - 'role_type': Either OgRoleInterface::ROLE_TYPE_STANDARD or
    *     OgRoleInterface::ROLE_TYPE_REQUIRED. Defaults to
    *     OgRoleInterface::ROLE_TYPE_STANDARD.
+   *   - 'is_admin': Whether or not the role is an administration role. Defaults
+   *     to FALSE.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the role name is empty, or when the 'label' property is

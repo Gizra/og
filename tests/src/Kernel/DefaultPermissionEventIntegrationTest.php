@@ -78,6 +78,7 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
     $this->assertEquals(OgRoleInterface::ADMINISTRATOR, $role->getName());
     $this->assertEquals('Administrator', $role->getLabel());
     $this->assertEquals(OgRoleInterface::ROLE_TYPE_STANDARD, $role->getRoleType());
+    $this->assertTrue($role->isAdmin());
 
     // Check that the per-group-type default roles are populated.
     $expected_roles = [
