@@ -104,7 +104,7 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    * Returns whether or not the given role exists.
    *
    * @param string $name
-   *   The name of the role for which to verify the existance.
+   *   The name of the role for which to verify the existence.
    *
    * @return bool
    *   TRUE if the role exists, FALSE otherwise.
