@@ -164,6 +164,7 @@ class GroupManagerTest extends UnitTestCase {
 
   /**
    * @covers ::addGroup
+   * @expectedException \InvalidArgumentException
    */
   public function testAddGroupExisting() {
     // It is expected that the group map will be retrieved from config.
@@ -179,13 +180,7 @@ class GroupManagerTest extends UnitTestCase {
     $manager = $this->createGroupManager();
 
     // Add to existing.
-    try {
-      $manager->addGroup('test_entity', 'c');
-      $this->fail('An entity type that was already declared as a group, was redeclared as a group');
-    } catch (\InvalidArgumentException $e) {
-      // Expected result. An exception should be thrown when an entity type is
-      // redeclared as a group.
-    }
+    $manager->addGroup('test_entity', 'c');
   }
 
   /**
