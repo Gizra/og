@@ -71,6 +71,13 @@ class GroupManager {
   protected $eventDispatcher;
 
   /**
+   * The default role event.
+   *
+   * @var \Drupal\og\Event\DefaultRoleEventInterface
+   */
+  protected $defaultRoleEvent;
+
+  /**
    * The state service.
    *
    * @var \Drupal\Core\State\StateInterface
@@ -120,14 +127,17 @@ class GroupManager {
    *   The service providing information about bundles.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface
    *   The event dispatcher.
+   * @param \Drupal\og\Event\DefaultRoleEventInterface $default_role_event
+   *   The default role event listener.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, DefaultRoleEventInterface $default_role_event, StateInterface $state) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
+    $this->defaultRoleEvent = $default_role_event;
     $this->state = $state;
   }
 
