@@ -233,7 +233,7 @@ class GroupManager {
   }
 
   /**
-   * Sets an entity type instance as being an OG group.
+   * Declares a bundle of an entity type as being an OG group.
    *
    * @param string $entity_type_id
    *   The entity type ID of the bundle to declare as being a group.
