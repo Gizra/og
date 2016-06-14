@@ -21,6 +21,10 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @param $name
    *   The name of the role to return.
    *
+   * @return \Drupal\og\Entity\OgRole
+   *   The OgRole entity. Note that we cannot specify OgRoleInterface here
+   *   because of limitations in interface inheritance in PHP 5.
+   *
    * @throws \InvalidArgumentException
    *   Thrown when the role with the given name does not exist.
    */
@@ -37,10 +41,9 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
   /**
    * Adds a default role.
    *
-   * @param string $name
-   *   The name of the role to add.
    * @param array $properties
    *   An associative array of role properties, keyed by the following:
+   *   - 'name': The machine name of the role.
    *   - 'label': The human readable label.
    *   - 'role_type': Either OgRoleInterface::ROLE_TYPE_STANDARD or
    *     OgRoleInterface::ROLE_TYPE_REQUIRED. Defaults to
@@ -50,7 +53,7 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    *   Thrown when the role that is added already exists, when the role name is
    *   empty, or when the 'label' property is missing.
    */
-  public function addRole($name, array $properties);
+  public function addRole(array $properties);
 
   /**
    * Adds multiple default roles.
@@ -63,17 +66,19 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
   /**
    * Sets a default roles.
    *
-   * @param string $name
-   *   The name of the role to set.
    * @param array $properties
    *   An associative array of role properties to set, keyed by the following:
+   *   - 'name': The machine name of the role.
    *   - 'label': The human readable label.
+   *   - 'role_type': Either OgRoleInterface::ROLE_TYPE_STANDARD or
+   *     OgRoleInterface::ROLE_TYPE_REQUIRED. Defaults to
+   *     OgRoleInterface::ROLE_TYPE_STANDARD.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the role name is empty, or when the 'label' property is
    *   missing.
    */
-  public function setRole($name, array $properties);
+  public function setRole(array $properties);
 
   /**
    * Sets multiple default roles.
@@ -101,5 +106,12 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    *   TRUE if the role exists, FALSE otherwise.
    */
   public function hasRole($name);
+
+  /**
+   * Resets the internal static cache.
+   *
+   * Call this before dispatching the event.
+   */
+  public function reset();
 
 }
