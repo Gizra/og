@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
@@ -13,6 +16,32 @@ use Drupal\Tests\UnitTestCase;
 class DefaultRoleEventTest extends UnitTestCase {
 
   /**
+   * The DefaultRoleEvent class, which is the system under test.
+   *
+   * @var \Drupal\og\Event\DefaultRoleEvent
+   */
+  protected $defaultRoleEvent;
+
+  /**
+   * The mocked OgRole entity storage.
+   *
+   * @var \Drupal\core\Entity\EntityStorageInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $ogRoleStorage;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    $entity_type_manager = $this->prophesize(EntityTypeManagerInterface::class);
+    $this->ogRoleStorage = $this->prophesize(EntityStorageInterface::class);
+    $entity_type_manager->getStorage('og_role')->willReturn($this->ogRoleStorage->reveal());
+    $this->defaultRoleEvent = new DefaultRoleEvent($entity_type_manager->reveal());
+  }
+
+  /**
    * @param array $roles
    *   An array of test default roles.
    *
@@ -21,11 +50,12 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testGetRole($roles) {
-    $event = new DefaultRoleEvent();
-    $event->setRoles($roles);
+    $this->expectOgRoleCreation($roles);
+
+    $this->defaultRoleEvent->setRoles($roles);
 
     foreach ($roles as $name => $role) {
-      $this->assertRoleEquals($role, $event->getRole($name));
+      $this->assertRoleEquals($role, $this->defaultRoleEvent->getRole($name));
     }
   }
 
@@ -39,10 +69,11 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testGetRoles($roles) {
-    $event = new DefaultRoleEvent();
-    $event->setRoles($roles);
+    $this->expectOgRoleCreation($roles);
 
-    $actual_roles = $event->getRoles();
+    $this->defaultRoleEvent->setRoles($roles);
+
+    $actual_roles = $this->defaultRoleEvent->getRoles();
     foreach ($roles as $name => $role) {
       $this->assertRoleEquals($role, $actual_roles[$name]);
     }
@@ -59,15 +90,16 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testAddRole($roles) {
-    $event = new DefaultRoleEvent();
+    $this->expectOgRoleCreation($roles);
+
     foreach ($roles as $name => $role) {
-      $this->assertFalse($event->hasRole($name));
-      $event->addRole($name, $role);
-      $this->assertRoleEquals($role, $event->getRole($name));
+      $this->assertFalse($this->defaultRoleEvent->hasRole($name));
+      $this->defaultRoleEvent->addRole($role);
+      $this->assertRoleEquals($role, $this->defaultRoleEvent->getRole($name));
 
       // Adding a role a second time should throw an exception.
       try {
-        $event->addRole($name, $role);
+        $this->defaultRoleEvent->addRole($role);
         $this->fail('It should not be possible to add a role with the same name a second time.');
       }
       catch (\InvalidArgumentException $e) {
@@ -85,10 +117,11 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testAddRoles($roles) {
-    $event = new DefaultRoleEvent();
-    $event->addRoles($roles);
+    $this->expectOgRoleCreation($roles);
 
-    $actual_roles = $event->getRoles();
+    $this->defaultRoleEvent->addRoles($roles);
+
+    $actual_roles = $this->defaultRoleEvent->getRoles();
     foreach ($roles as $name => $role) {
       $this->assertRoleEquals($role, $actual_roles[$name]);
     }
@@ -105,15 +138,16 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testSetRole($roles) {
-    $event = new DefaultRoleEvent();
+    $this->expectOgRoleCreation($roles);
+
     foreach ($roles as $name => $role) {
-      $this->assertFalse($event->hasRole($name));
-      $event->setRole($name, $role);
-      $this->assertRoleEquals($role, $event->getRole($name));
+      $this->assertFalse($this->defaultRoleEvent->hasRole($name));
+      $this->defaultRoleEvent->setRole($role);
+      $this->assertRoleEquals($role, $this->defaultRoleEvent->getRole($name));
 
       // Setting a role a second time should be possible. No exception should be
       // thrown.
-      $event->setRole($name, $role);
+      $this->defaultRoleEvent->setRole($role);
     }
   }
 
@@ -126,13 +160,14 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testDeleteRole($roles) {
-    $event = new DefaultRoleEvent();
-    $event->setRoles($roles);
+    $this->expectOgRoleCreation($roles);
+
+    $this->defaultRoleEvent->setRoles($roles);
 
     foreach ($roles as $name => $role) {
-      $this->assertTrue($event->hasRole($name));
-      $event->deleteRole($name);
-      $this->assertFalse($event->hasRole($name));
+      $this->assertTrue($this->defaultRoleEvent->hasRole($name));
+      $this->defaultRoleEvent->deleteRole($name);
+      $this->assertFalse($this->defaultRoleEvent->hasRole($name));
     }
   }
 
@@ -145,11 +180,12 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testHasRole($roles) {
-    $event = new DefaultRoleEvent();
+    $this->expectOgRoleCreation($roles);
+
     foreach ($roles as $name => $role) {
-      $this->assertFalse($event->hasRole($name));
-      $event->addRole($name, $role);
-      $this->assertTrue($event->hasRole($name));
+      $this->assertFalse($this->defaultRoleEvent->hasRole($name));
+      $this->defaultRoleEvent->addRole($role);
+      $this->assertTrue($this->defaultRoleEvent->hasRole($name));
     }
   }
 
@@ -162,11 +198,12 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testOffsetGet($roles) {
-    $event = new DefaultRoleEvent();
-    $event->setRoles($roles);
+    $this->expectOgRoleCreation($roles);
+
+    $this->defaultRoleEvent->setRoles($roles);
 
     foreach ($roles as $name => $role) {
-      $this->assertRoleEquals($role, $event[$name]);
+      $this->assertRoleEquals($role, $this->defaultRoleEvent[$name]);
     }
   }
 
@@ -179,12 +216,12 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testOffsetSet($roles) {
-    $event = new DefaultRoleEvent();
+    $this->expectOgRoleCreation($roles);
 
     foreach ($roles as $name => $role) {
-      $this->assertFalse($event->hasRole($name));
-      $event[$name] = $role;
-      $this->assertRoleEquals($role, $event->getRole($name));
+      $this->assertFalse($this->defaultRoleEvent->hasRole($name));
+      $this->defaultRoleEvent[$name] = $role;
+      $this->assertRoleEquals($role, $this->defaultRoleEvent->getRole($name));
     }
   }
 
@@ -197,13 +234,14 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testOffsetUnset($roles) {
-    $event = new DefaultRoleEvent();
-    $event->setRoles($roles);
+    $this->expectOgRoleCreation($roles);
+
+    $this->defaultRoleEvent->setRoles($roles);
 
     foreach ($roles as $name => $role) {
-      $this->assertTrue($event->hasRole($name));
-      unset($event[$name]);
-      $this->assertFalse($event->hasRole($name));
+      $this->assertTrue($this->defaultRoleEvent->hasRole($name));
+      unset($this->defaultRoleEvent[$name]);
+      $this->assertFalse($this->defaultRoleEvent->hasRole($name));
     }
   }
 
@@ -216,11 +254,12 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testOffsetExists($roles) {
-    $event = new DefaultRoleEvent();
+    $this->expectOgRoleCreation($roles);
+
     foreach ($roles as $name => $role) {
-      $this->assertFalse(isset($event[$name]));
-      $event->addRole($name, $role);
-      $this->assertTrue(isset($event[$name]));
+      $this->assertFalse(isset($this->defaultRoleEvent[$name]));
+      $this->defaultRoleEvent->addRole($role);
+      $this->assertTrue(isset($this->defaultRoleEvent[$name]));
     }
   }
 
@@ -233,10 +272,11 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider defaultRoleProvider
    */
   public function testIteratorAggregate($roles) {
-    $event = new DefaultRoleEvent();
-    $event->setRoles($roles);
+    $this->expectOgRoleCreation($roles);
 
-    foreach ($event as $name => $role) {
+    $this->defaultRoleEvent->setRoles($roles);
+
+    foreach ($this->defaultRoleEvent as $name => $role) {
       $this->assertRoleEquals($roles[$name], $role);
       unset($roles[$name]);
     }
@@ -254,10 +294,11 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider invalidDefaultRoleProvider
    */
   public function testAddInvalidRole($invalid_roles) {
-    $event = new DefaultRoleEvent();
+    $this->expectOgRoleCreation($invalid_roles);
+
     try {
       foreach ($invalid_roles as $name => $invalid_role) {
-        $event->addRole($name, $invalid_role);
+        $this->defaultRoleEvent->addRole($invalid_role);
       }
       $this->fail('An invalid role cannot be added.');
     }
@@ -275,18 +316,13 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @covers ::addRoles
    *
    * @dataProvider invalidDefaultRoleProvider
+   * @expectedException \InvalidArgumentException
    */
   public function testAddInvalidRoles($invalid_roles) {
-    $event = new DefaultRoleEvent();
-    try {
-      $event->addRoles($invalid_roles);
-      $this->fail('An array of invalid roles cannot be added.');
-    }
-    catch (\InvalidArgumentException $e) {
-      // Expected result. Do an arbitrary assertion so the test is not marked as
-      // risky.
-      $this->assertTrue(TRUE);
-    }
+    $this->expectOgRoleCreation($invalid_roles);
+
+    $this->defaultRoleEvent->addRoles($invalid_roles);
+    $this->fail('An array of invalid roles cannot be added.');
   }
 
   /**
@@ -296,19 +332,13 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @covers ::setRole
    *
    * @dataProvider invalidDefaultRoleProvider
+   * @expectedException \InvalidArgumentException
    */
   public function testSetInvalidRole($invalid_roles) {
-    $event = new DefaultRoleEvent();
-    try {
-      foreach ($invalid_roles as $name => $invalid_role) {
-        $event->setRole($name, $invalid_role);
-      }
-      $this->fail('An invalid role cannot be set.');
-    }
-    catch (\InvalidArgumentException $e) {
-      // Expected result. Do an arbitrary assertion so the test is not marked as
-      // risky.
-      $this->assertTrue(TRUE);
+    $this->expectOgRoleCreation($invalid_roles);
+
+    foreach ($invalid_roles as $name => $invalid_role) {
+      $this->defaultRoleEvent->setRole($invalid_role);
     }
   }
 
@@ -319,18 +349,12 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @covers ::setRoles
    *
    * @dataProvider invalidDefaultRoleProvider
+   * @expectedException \InvalidArgumentException
    */
   public function testSetInvalidRoles($invalid_roles) {
-    $event = new DefaultRoleEvent();
-    try {
-      $event->setRoles($invalid_roles);
-      $this->fail('An array of invalid roles cannot be set.');
-    }
-    catch (\InvalidArgumentException $e) {
-      // Expected result. Do an arbitrary assertion so the test is not marked as
-      // risky.
-      $this->assertTrue(TRUE);
-    }
+    $this->expectOgRoleCreation($invalid_roles);
+
+    $this->defaultRoleEvent->setRoles($invalid_roles);
   }
 
   /**
@@ -340,19 +364,13 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @covers ::offsetSet
    *
    * @dataProvider invalidDefaultRoleProvider
+   * @expectedException \InvalidArgumentException
    */
   public function testInvalidOffsetSet($invalid_roles) {
-    $event = new DefaultRoleEvent();
-    try {
-      foreach ($invalid_roles as $name => $invalid_role) {
-        $event[$name] = $invalid_role;
-      }
-      $this->fail('An invalid role cannot be set through ArrayAccess.');
-    }
-    catch (\InvalidArgumentException $e) {
-      // Expected result. Do an arbitrary assertion so the test is not marked as
-      // risky.
-      $this->assertTrue(TRUE);
+    $this->expectOgRoleCreation($invalid_roles);
+
+    foreach ($invalid_roles as $name => $invalid_role) {
+      $this->defaultRoleEvent[$name] = $invalid_role;
     }
   }
 
@@ -365,16 +383,21 @@ class DefaultRoleEventTest extends UnitTestCase {
    */
   public function defaultRoleProvider() {
     return [
-      // Test adding a single administrator role with only a label.
+      // Test adding a single administrator role with only the required
+      // properties.
       [
         [
-          OgRoleInterface::ADMINISTRATOR => ['label' => $this->t('Administrator')],
+          OgRoleInterface::ADMINISTRATOR => [
+            'name' => OgRoleInterface::ADMINISTRATOR,
+            'label' => $this->t('Administrator'),
+          ],
         ],
       ],
       // Test adding a single administrator role with a label and role type.
       [
         [
           OgRoleInterface::ADMINISTRATOR => [
+            'name' => OgRoleInterface::ADMINISTRATOR,
             'label' => $this->t('Administrator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
           ],
@@ -384,14 +407,17 @@ class DefaultRoleEventTest extends UnitTestCase {
       [
         [
           OgRoleInterface::ADMINISTRATOR => [
+            'name' => OgRoleInterface::ADMINISTRATOR,
             'label' => $this->t('Administrator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
           ],
           'moderator' => [
+            'name' => 'moderator',
             'label' => $this->t('Moderator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
           ],
           'contributor' => [
+            'name' => 'contributor',
             'label' => $this->t('Contributor'),
           ],
         ],
@@ -418,6 +444,7 @@ class DefaultRoleEventTest extends UnitTestCase {
       [
         [
           OgRoleInterface::ADMINISTRATOR => [
+            'name' => OgRole::ADMINISTRATOR,
             'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
           ],
         ],
@@ -426,8 +453,19 @@ class DefaultRoleEventTest extends UnitTestCase {
       [
         [
           OgRoleInterface::ADMINISTRATOR => [
+            'name' => OgRole::ADMINISTRATOR,
             'label' => $this->t('Administrator'),
             'role_type' => 'Some non-existing role type',
+          ],
+        ],
+      ],
+      // A role with an invalid is_admin value.
+      [
+        [
+          OgRoleInterface::ADMINISTRATOR => [
+            'name' => OgRole::ADMINISTRATOR,
+            'label' => $this->t('Administrator'),
+            'is_admin' => 'An invalid value',
           ],
         ],
       ],
@@ -436,14 +474,17 @@ class DefaultRoleEventTest extends UnitTestCase {
       [
         [
           OgRoleInterface::ADMINISTRATOR => [
+            'name' => OgRoleInterface::ADMINISTRATOR,
             'label' => $this->t('Administrator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
           ],
           'moderator' => [
+            'name' => 'moderator',
             'label' => $this->t('Moderator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
           ],
           'contributor' => [
+            'name' => 'contributor',
             'label' => $this->t('Contributor'),
             'role_type' => 'Some non-existing role type',
           ],
@@ -471,15 +512,45 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @param array $expected
    *   An array of expected role properties.
-   * @param array $actual
-   *   An array of actual role properties.
+   * @param \Drupal\og\Entity\OgRole $actual
+   *   The actual OgRole entity to check. Note that we are not specifying the
+   *   OgRoleInterface type because of a PHP 5 class inheritance limitation.
    */
-  protected function assertRoleEquals(array $expected, array $actual) {
-    // Provide default value for the role type.
-    if (empty($expected['role_type'])) {
-      $expected['role_type'] = OgRoleInterface::ROLE_TYPE_STANDARD;
+  protected function assertRoleEquals(array $expected, OgRole $actual) {
+    // Provide default values.
+    $this->addDefaultRoleProperties($expected);
+    foreach (['name', 'label', 'role_type', 'is_admin'] as $property) {
+      $this->assertEquals($expected[$property], $actual->get($property));
     }
-    $this->assertEquals($expected, $actual);
+  }
+
+  /**
+   * Adds an expectation that roles with the given properties should be created.
+   *
+   * @param array $roles
+   *   An array of role properties that are expected to be passed to the roles
+   *   that should be created.
+   */
+  protected function expectOgRoleCreation($roles) {
+    foreach ($roles as $properties) {
+      // Provide default values.
+      $this->addDefaultRoleProperties($properties);
+      $og_role = new OgRole($properties, 'og_role');
+      $this->ogRoleStorage->create($properties)->willReturn($og_role);
+    }
+  }
+
+  /**
+   * Enriches the passed in role properties with default properties.
+   *
+   * @param array $properties
+   *   The role properties to enrich.
+   */
+  protected function addDefaultRoleProperties(&$properties) {
+    $properties += [
+      'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
+      'is_admin' => FALSE,
+    ];
   }
 
 }

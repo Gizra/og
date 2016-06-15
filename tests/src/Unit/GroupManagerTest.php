@@ -164,6 +164,7 @@ class GroupManagerTest extends UnitTestCase {
 
   /**
    * @covers ::addGroup
+   * @expectedException \InvalidArgumentException
    */
   public function testAddGroupExisting() {
     // It is expected that the group map will be retrieved from config.
@@ -179,13 +180,7 @@ class GroupManagerTest extends UnitTestCase {
     $manager = $this->createGroupManager();
 
     // Add to existing.
-    try {
-      $manager->addGroup('test_entity', 'c');
-      $this->fail('An entity type that was already declared as a group, was redeclared as a group');
-    } catch (\InvalidArgumentException $e) {
-      // Expected result. An exception should be thrown when an entity type is
-      // redeclared as a group.
-    }
+    $manager->addGroup('test_entity', 'c');
   }
 
   /**
@@ -275,6 +270,7 @@ class GroupManagerTest extends UnitTestCase {
       $this->entityTypeManagerProphecy->reveal(),
       $this->entityTypeBundleInfoProphecy->reveal(),
       $this->eventDispatcherProphecy->reveal(),
+      $this->defaultRoleEventProphecy->reveal(),
       $this->stateProphecy->reveal()
     );
   }
@@ -306,7 +302,10 @@ class GroupManagerTest extends UnitTestCase {
   protected function expectDefaultRoleCreation($entity_type, $bundle) {
     // In order to populate the default roles for a new group type, it is
     // expected that the list of default roles to populate will be retrieved
-    // from the event listener.
+    // from the event listener. The event is a service which persists in memory,
+    // so it should be reset before being dispatched.
+    $this->defaultRoleEventProphecy->reset()
+      ->shouldBeCalled();
     $this->eventDispatcherProphecy->dispatch(DefaultRoleEventInterface::EVENT_NAME, Argument::type(DefaultRoleEvent::class))
       ->willReturn($this->defaultRoleEventProphecy->reveal())
       ->shouldBeCalled();
@@ -330,25 +329,44 @@ class GroupManagerTest extends UnitTestCase {
    *   The name of the role being created.
    */
   protected function addNewDefaultRole($entity_type, $bundle, $role_name) {
+    // Make references of class properties in the local scope so that we can
+    // pass them to anonymous functions which are used as Prophecy promises.
+    $permission_event = $this->permissionEventProphecy;
+    $og_role = $this->ogRoleProphecy;
+
     // It is expected that the OG permissions that need to be populated on the
-    // new role will be requested from the PermissionEvent listener.
+    // new role will be requested from the PermissionEvent listener. In order to
+    // get the role name, this will be requested from the OgRole object.
     $this->eventDispatcherProphecy->dispatch(PermissionEventInterface::EVENT_NAME, Argument::type('\Drupal\og\Event\PermissionEvent'))
       ->willReturn($this->permissionEventProphecy->reveal())
       ->shouldBeCalled();
-    $this->permissionEventProphecy->filterByDefaultRole($role_name)
-      ->willReturn([])
-      ->shouldBeCalled();
 
     // It is expected that the role will be created with default properties.
-    $properties = [
-      'group_type' => $entity_type,
-      'group_bundle' => $bundle,
-      'role_type' => OgRole::getRoleTypeByName($role_name),
-      'id' => $role_name,
-      'permissions' => [],
-    ];
-    $this->entityStorageProphecy->create($properties + OgRole::getDefaultRoles()[$role_name])
-      ->willReturn($this->ogRoleProphecy->reveal())
+    $this->entityStorageProphecy->create(OgRole::getDefaultRoleProperties($role_name))
+      ->will(function () use ($entity_type, $bundle, $role_name, $permission_event, $og_role) {
+        // For each role that is created it is expected that the role name will
+        // be retrieved, so that the role name can be used to filter the
+        // permissions.
+        // This type of behavior is mocked in Prophecy using a 'promise' - the
+        // call to getName() returns a different result depending on the last
+        // call that was made to EntityStorageInterface::create(), and by itself
+        // it changes the argument that is used for filterByDefaultRole().
+        // @see https://github.com/phpspec/prophecy#arguments-wildcarding
+        $og_role->getName()
+          ->will(function () use ($role_name, $permission_event) {
+            $permission_event->filterByDefaultRole($role_name)
+              ->willReturn([])
+              ->shouldBeCalled();
+            return $role_name;
+          })
+          ->shouldBeCalled();
+
+        // The group type, bundle and permissions will have to be set on the new
+        // role.
+        $og_role->setGroupType($entity_type)->shouldBeCalled();
+        $og_role->setGroupBundle($bundle)->shouldBeCalled();
+        return $og_role->reveal();
+      })
       ->shouldBeCalled();
 
     // The role is expected to be saved.

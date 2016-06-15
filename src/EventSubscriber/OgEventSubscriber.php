@@ -69,7 +69,11 @@ class OgEventSubscriber implements EventSubscriberInterface {
    *   The default role event.
    */
   public function provideDefaultRoles(DefaultRoleEventInterface $event) {
-    $event->addRole(OgRoleInterface::ADMINISTRATOR, ['label' => 'Administrator']);
+    $event->addRole([
+      'name' => OgRoleInterface::ADMINISTRATOR,
+      'label' => 'Administrator',
+      'is_admin' => TRUE,
+    ]);
   }
 
 }

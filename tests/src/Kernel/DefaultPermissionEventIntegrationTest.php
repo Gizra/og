@@ -62,17 +62,23 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
    * Tests that OG correctly provides the group administrator default role.
    */
   public function testPermissionEventIntegration() {
+    /** @var DefaultRoleEvent $event */
+    $event = $this->container->get('og.default_role_event');
+    // The DefaultRoleEvent is a service which means it persists in memory,
+    // similar to a singleton. Clear it so roles from previous tests are gone.
+    $event->reset();
+
     // Query the event listener directly to see if the administrator role is
     // present.
-    /** @var DefaultRoleEvent $event */
-    $event = $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, new DefaultRoleEvent());
-    $expected_roles = [
-      OgRoleInterface::ADMINISTRATOR => [
-        'label' => 'Administrator',
-        'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
-      ],
-    ];
-    $this->assertEquals($event->getRoles(), $expected_roles);
+    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+    $this->assertEquals([OgRoleInterface::ADMINISTRATOR], array_keys($event->getRoles()));
+
+    // Check that the role was created with the correct values.
+    $role = $event->getRole(OgRoleInterface::ADMINISTRATOR);
+    $this->assertEquals(OgRoleInterface::ADMINISTRATOR, $role->getName());
+    $this->assertEquals('Administrator', $role->getLabel());
+    $this->assertEquals(OgRoleInterface::ROLE_TYPE_STANDARD, $role->getRoleType());
+    $this->assertTrue($role->isAdmin());
 
     // Check that the per-group-type default roles are populated.
     $expected_roles = [

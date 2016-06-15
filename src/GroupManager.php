@@ -71,6 +71,13 @@ class GroupManager {
   protected $eventDispatcher;
 
   /**
+   * The default role event.
+   *
+   * @var \Drupal\og\Event\DefaultRoleEventInterface
+   */
+  protected $defaultRoleEvent;
+
+  /**
    * The state service.
    *
    * @var \Drupal\Core\State\StateInterface
@@ -129,16 +136,19 @@ class GroupManager {
    *   The service providing information about bundles.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface
    *   The event dispatcher.
+   * @param \Drupal\og\Event\DefaultRoleEventInterface $default_role_event
+   *   The default role event listener.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
    * @param \Drupal\og\PermissionManager $permission_manager
    *   The OG permission manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManager $permission_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, DefaultRoleEventInterface $default_role_event, StateInterface $state, PermissionManager $permission_manager) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
+    $this->defaultRoleEvent = $default_role_event;
     $this->state = $state;
     $this->permissionManager = $permission_manager;
   }
@@ -302,21 +312,17 @@ class GroupManager {
    * @todo: Would a dedicated RoleManager service be a better place for this?
    */
   protected function createPerBundleRoles($entity_type_id, $bundle_id) {
-    foreach ($this->getDefaultRoles() as $role_name => $default_properties) {
-      $properties = [
-        'group_type' => $entity_type_id,
-        'group_bundle' => $bundle_id,
-        'id' => $role_name,
-        'role_type' => OgRole::getRoleTypeByName($role_name),
-      ];
+    foreach ($this->getDefaultRoles() as $role) {
+      $role->setGroupType($entity_type_id);
+      $role->setGroupBundle($bundle_id);
 
       // Populate the default permissions.
       $event = new PermissionEvent($entity_type_id, $bundle_id);
       /** @var \Drupal\og\Event\PermissionEventInterface $permissions */
       $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
-      $properties['permissions'] = array_keys($permissions->filterByDefaultRole($role_name));
-
-      $role = $this->ogRoleStorage->create($properties + $default_properties);
+      foreach (array_keys($permissions->filterByDefaultRole($role->getName())) as $permission) {
+        $role->grantPermission($permission);
+      }
       $role->save();
     }
   }
@@ -324,21 +330,22 @@ class GroupManager {
   /**
    * Returns the default roles.
    *
-   * @return array
-   *   An associative array of default role properties, keyed by role name. Each
-   *   role property is an associative array with the following keys:
-   *   - 'label': The human readable label.
-   *   - 'role_type': Either OgRoleInterface::ROLE_TYPE_STANDARD or
-   *     OgRoleInterface::ROLE_TYPE_REQUIRED.
+   * @return \Drupal\og\Entity\OgRole[]
+   *   An associative array of (unsaved) OgRole entities, keyed by role name.
    *
    * @todo: Would a dedicated RoleManager service be a better place for this?
    */
   public function getDefaultRoles() {
-    /** @var \Drupal\og\Event\DefaultRoleEvent $default_role_event */
-    $event = new DefaultRoleEvent();
-    $default_role_event = $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+    $default_roles = [
+      OgRoleInterface::ANONYMOUS => $this->ogRoleStorage->create(OgRole::getDefaultRoleProperties(OgRoleInterface::ANONYMOUS)),
+      OgRoleInterface::AUTHENTICATED => $this->ogRoleStorage->create(OgRole::getDefaultRoleProperties(OgRoleInterface::AUTHENTICATED)),
+    ];
+    // The DefaultRoleEvent is a service which means that it persists in memory.
+    // Make sure it is reset before dispatching to clear any old values.
+    $this->defaultRoleEvent->reset();
+    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $this->defaultRoleEvent);
 
-    return OgRole::getDefaultRoles() + $default_role_event->getRoles();
+    return $default_roles + $this->defaultRoleEvent->getRoles();
   }
 
   /**
