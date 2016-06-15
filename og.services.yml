@@ -12,7 +12,7 @@ services:
       - { name: 'event_subscriber' }
   og.group.manager:
     class: Drupal\og\GroupManager
-    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@og.default_role_event', '@state']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@og.default_role_event', '@state', '@og.permission_manager']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
