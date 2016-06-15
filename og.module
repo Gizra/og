@@ -760,7 +760,7 @@ function og_form_group_reference_validate($form, &$form_state) {
 
   $account = user_load($user->uid);
   $bundle = $form['#bundle'];
-  $entity = $form['#entity'];
+  $entity = isset($form["#$entity_type"]) ? $form["#$entity_type"] : $form['#entity'];
   list($id) = entity_extract_ids($entity_type, $entity);
 
   $op = empty($id) ? 'create' : 'update';
