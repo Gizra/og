@@ -276,19 +276,19 @@ class OgRole extends Role implements OgRoleInterface {
    * {@inheritdoc}
    */
   public static function getDefaultRoleProperties($default_role_name) {
-    if (!in_array($default_role_name, [self::ANONYMOUS, self::AUTHENTICATED])) {
+    if (!in_array($default_role_name, [static::ANONYMOUS, static::AUTHENTICATED])) {
       throw new \InvalidArgumentException('Invalid role name.');
     }
     $default_properties = [
-      self::ANONYMOUS => [
+      static::ANONYMOUS => [
         'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
         'label' => 'Non-member',
-        'name' => self::ANONYMOUS,
+        'name' => static::ANONYMOUS,
       ],
-      self::AUTHENTICATED => [
+      static::AUTHENTICATED => [
         'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
         'label' => 'Member',
-        'name' => self::AUTHENTICATED,
+        'name' => static::AUTHENTICATED,
       ],
     ];
 

@@ -459,16 +459,6 @@ class DefaultRoleEventTest extends UnitTestCase {
           ],
         ],
       ],
-      // A role with an invalid is_admin value.
-      [
-        [
-          OgRoleInterface::ADMINISTRATOR => [
-            'name' => OgRole::ADMINISTRATOR,
-            'label' => $this->t('Administrator'),
-            'is_admin' => 'An invalid value',
-          ],
-        ],
-      ],
       // An array of multiple correct roles, with one invalid role type sneaked
       // in.
       [

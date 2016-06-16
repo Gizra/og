@@ -181,10 +181,6 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
       throw new \InvalidArgumentException('The label property is required.');
     }
 
-    if (!empty($properties['is_admin']) && !is_bool($properties['is_admin'])) {
-      throw new \InvalidArgumentException('The is_admin property should be a boolean.');
-    }
-
     $valid_role_types = [
       OgRoleInterface::ROLE_TYPE_STANDARD,
       OgRoleInterface::ROLE_TYPE_REQUIRED,
