@@ -18,7 +18,7 @@ services:
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
   og.permission_manager:
     class: Drupal\og\PermissionManager
-    arguments: ['@og.group.manager', '@entity_type.manager', '@entity_type.bundle.info']
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher']
   plugin.manager.og.delete_orphans:
     class: Drupal\og\OgDeleteOrphansPluginManager
     parent: default_plugin_manager

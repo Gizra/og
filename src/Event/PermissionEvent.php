@@ -9,6 +9,9 @@ use Symfony\Component\EventDispatcher\Event;
  *
  * This event allows implementing modules to provide their own OG permissions or
  * alter existing permissions that are provided by other modules.
+ *
+ * The entity types and bundles of both the group and the related group content
+ * are available and can be used to determine the applicable permissions.
  */
 class PermissionEvent extends Event implements PermissionEventInterface {
 
@@ -25,27 +28,40 @@ class PermissionEvent extends Event implements PermissionEventInterface {
    *
    * @var string
    */
-  protected $entityTypeId;
+  protected $groupEntityTypeId;
 
   /**
    * The bundle ID of the group type to which the permissions apply.
    *
    * @var string
    */
-  protected $bundleId;
+  protected $groupBundleId;
+
+  /**
+   * The bundle IDs of the group content types to which the permissions apply.
+   *
+   * @var array
+   *   An array of group content bundle IDs, keyed by group content entity type
+   *   ID.
+   */
+  protected $groupContentBundleIds;
 
   /**
    * Constructs a PermissionEvent object.
    *
-   * @param string $entity_type_id
+   * @param string $group_entity_type_id
    *   The entity type ID of the group type for which the permissions are
    *   collected.
-   * @param string $bundle_id
+   * @param string $group_bundle_id
    *   The bundle ID of the group type for which the permissions are collected.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs, keyed by group content entity type
+   *   ID.
    */
-  public function __construct($entity_type_id, $bundle_id) {
-    $this->entityTypeId = $entity_type_id;
-    $this->bundleId = $bundle_id;
+  public function __construct($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids) {
+    $this->groupEntityTypeId = $group_entity_type_id;
+    $this->groupBundleId = $group_bundle_id;
+    $this->groupContentBundleIds = $group_content_bundle_ids;
   }
 
   /**
@@ -106,24 +122,22 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function getEntityTypeId() {
-    return $this->entityTypeId;
+  public function getGroupEntityTypeId() {
+    return $this->groupEntityTypeId;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getBundleId() {
-    return $this->bundleId;
+  public function getGroupBundleId() {
+    return $this->groupBundleId;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function filterByDefaultRole($role_name) {
-    return array_filter($this->permissions, function ($permission) use ($role_name) {
-      return !empty($permission['default roles']) && in_array($role_name, $permission['default roles']);
-    });
+  public function getGroupContentBundleIds() {
+    return $this->groupContentBundleIds;
   }
 
   /**
