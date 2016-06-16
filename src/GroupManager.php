@@ -316,13 +316,12 @@ class GroupManager {
       $role->setGroupType($entity_type_id);
       $role->setGroupBundle($bundle_id);
 
-      // Populate the default permissions.
-      $event = new PermissionEvent($entity_type_id, $bundle_id);
-      /** @var \Drupal\og\Event\PermissionEventInterface $permissions */
-      $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
-      foreach (array_keys($permissions->filterByDefaultRole($role->getName())) as $permission) {
+      // Populate the default roles with a set of default permissions.
+      $permissions = $this->permissionManager->getDefaultPermissions($entity_type_id, $bundle_id, [], $role->getName());
+      foreach (array_keys($permissions) as $permission) {
         $role->grantPermission($permission);
       }
+
       $role->save();
     }
   }
