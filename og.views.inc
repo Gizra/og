@@ -3,6 +3,21 @@
 use Drupal\field\FieldStorageConfigInterface;
 
 /**
+ * Implements hook_views_data_alter().
+ */
+function og_views_data_alter(array &$data) {
+  // Add relationship to og_membership from users.
+  $data['users']['og_membership']['relationship'] = [
+    'real field' => 'uid',
+    'base' => 'og_membership',
+    'base field' => 'uid',
+    'label' => t('OG Membership'),
+    'title' => t('OG Membership'),
+    'id' => 'standard',
+  ];
+}
+
+/**
  * Implements hook_field_views_data().
  *
  * This is an almost verbatim copy of core_field_views_data() except for the
