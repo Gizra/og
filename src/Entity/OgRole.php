@@ -149,7 +149,7 @@ class OgRole extends Role implements OgRoleInterface {
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    */
   public function getRoleType() {
-    return $this->get('role_type');
+    return $this->get('role_type') ?: OgRoleInterface::ROLE_TYPE_STANDARD;
   }
 
   /**
@@ -187,7 +187,7 @@ class OgRole extends Role implements OgRoleInterface {
         $this->setName($matches[1]);
       }
     }
-    return $this->name;
+    return $this->get('name');
   }
 
   /**

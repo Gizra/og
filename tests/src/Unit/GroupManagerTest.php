@@ -302,10 +302,7 @@ class GroupManagerTest extends UnitTestCase {
   protected function expectDefaultRoleCreation($entity_type, $bundle) {
     // In order to populate the default roles for a new group type, it is
     // expected that the list of default roles to populate will be retrieved
-    // from the event listener. The event is a service which persists in memory,
-    // so it should be reset before being dispatched.
-    $this->defaultRoleEventProphecy->reset()
-      ->shouldBeCalled();
+    // from the event listener.
     $this->eventDispatcherProphecy->dispatch(DefaultRoleEventInterface::EVENT_NAME, Argument::type(DefaultRoleEvent::class))
       ->willReturn($this->defaultRoleEventProphecy->reveal())
       ->shouldBeCalled();

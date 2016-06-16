@@ -63,10 +63,7 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
    */
   public function testPermissionEventIntegration() {
     /** @var DefaultRoleEvent $event */
-    $event = $this->container->get('og.default_role_event');
-    // The DefaultRoleEvent is a service which means it persists in memory,
-    // similar to a singleton. Clear it so roles from previous tests are gone.
-    $event->reset();
+    $event = new DefaultRoleEvent();
 
     // Query the event listener directly to see if the administrator role is
     // present.

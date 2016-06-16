@@ -71,13 +71,6 @@ class GroupManager {
   protected $eventDispatcher;
 
   /**
-   * The default role event.
-   *
-   * @var \Drupal\og\Event\DefaultRoleEventInterface
-   */
-  protected $defaultRoleEvent;
-
-  /**
    * The state service.
    *
    * @var \Drupal\Core\State\StateInterface
@@ -127,17 +120,14 @@ class GroupManager {
    *   The service providing information about bundles.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface
    *   The event dispatcher.
-   * @param \Drupal\og\Event\DefaultRoleEventInterface $default_role_event
-   *   The default role event listener.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, DefaultRoleEventInterface $default_role_event, StateInterface $state) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
-    $this->defaultRoleEvent = $default_role_event;
     $this->state = $state;
   }
 
@@ -328,12 +318,10 @@ class GroupManager {
       OgRoleInterface::ANONYMOUS => $this->ogRoleStorage->create(OgRole::getDefaultRoleProperties(OgRoleInterface::ANONYMOUS)),
       OgRoleInterface::AUTHENTICATED => $this->ogRoleStorage->create(OgRole::getDefaultRoleProperties(OgRoleInterface::AUTHENTICATED)),
     ];
-    // The DefaultRoleEvent is a service which means that it persists in memory.
-    // Make sure it is reset before dispatching to clear any old values.
-    $this->defaultRoleEvent->reset();
-    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $this->defaultRoleEvent);
+    $event = new DefaultRoleEvent();
+    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
 
-    return $default_roles + $this->defaultRoleEvent->getRoles();
+    return $default_roles + $event->getRoles();
   }
 
   /**
