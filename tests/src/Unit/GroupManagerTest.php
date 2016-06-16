@@ -342,7 +342,7 @@ class GroupManagerTest extends UnitTestCase {
       ->shouldBeCalled();
 
     // It is expected that the role will be created with default properties.
-    $this->entityStorageProphecy->create(OgRole::getDefaultRoleProperties($role_name))
+    $this->entityStorageProphecy->create($this->getDefaultRoleProperties($role_name))
       ->will(function () use ($entity_type, $bundle, $role_name, $permission_event, $og_role) {
         // For each role that is created it is expected that the role name will
         // be retrieved, so that the role name can be used to filter the
@@ -373,6 +373,32 @@ class GroupManagerTest extends UnitTestCase {
     $this->ogRoleProphecy->save()
       ->willReturn(1)
       ->shouldBeCalled();
+  }
+
+  /**
+   * Returns the expected properties of the default role with the given name.
+   *
+   * @param string $role_name
+   *   The name of the default role for which to return the properties.
+   *
+   * @return array
+   *   The default properties.
+   */
+  protected function getDefaultRoleProperties($role_name) {
+    $role_properties = [
+      OgRoleInterface::ANONYMOUS => [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Non-member',
+        'name' => OgRoleInterface::ANONYMOUS,
+      ],
+      OgRoleInterface::AUTHENTICATED => [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Member',
+        'name' => OgRoleInterface::AUTHENTICATED,
+      ],
+    ];
+
+    return $role_properties[$role_name];
   }
 
   /**

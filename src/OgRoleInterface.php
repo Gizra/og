@@ -52,26 +52,6 @@ interface OgRoleInterface {
   public function setId($id);
 
   /**
-   * Returns default properties for the given default OG role name.
-   *
-   * These are the properties used to create the two roles that are required by
-   * every group: the 'member' and 'non-member' roles.
-   *
-   * @param string $default_role_name
-   *   The name of the default role for which to return the properties. Can be
-   *   either OgRoleInterface::ANONYMOUS or OgRoleInterface::AUTHENTICATED.
-   *
-   * @return array
-   *   An array of properties, keyed by OG role.
-   *
-   * @throws \InvalidArgumentException
-   *   Thrown when an invalid default role name is passed.
-   *
-   * @see \Drupal\og\Entity\OgRole::getDefaultRoles()
-   */
-  public static function getDefaultRoleProperties($default_role_name);
-
-  /**
    * Returns the role name.
    *
    * @return string

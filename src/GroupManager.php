@@ -332,20 +332,63 @@ class GroupManager {
    *
    * @return \Drupal\og\Entity\OgRole[]
    *   An associative array of (unsaved) OgRole entities, keyed by role name.
+   *   These are populated with the basic properties: name, label, role_type and
+   *   is_admin.
    *
    * @todo: Would a dedicated RoleManager service be a better place for this?
    */
-  public function getDefaultRoles() {
-    $default_roles = [
-      OgRoleInterface::ANONYMOUS => $this->ogRoleStorage->create(OgRole::getDefaultRoleProperties(OgRoleInterface::ANONYMOUS)),
-      OgRoleInterface::AUTHENTICATED => $this->ogRoleStorage->create(OgRole::getDefaultRoleProperties(OgRoleInterface::AUTHENTICATED)),
-    ];
+  protected function getDefaultRoles() {
+    // Provide the required default roles: 'member' and 'non-member'.
+    $roles = $this->getRequiredDefaultRoles();
+
+    // Request the optional default roles from the DefaultRoleEvent listener.
     // The DefaultRoleEvent is a service which means that it persists in memory.
-    // Make sure it is reset before dispatching to clear any old values.
+    // We need to reset it before dispatching to ensure any old values are
+    // cleared.
     $this->defaultRoleEvent->reset();
     $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $this->defaultRoleEvent);
 
-    return $default_roles + $this->defaultRoleEvent->getRoles();
+    // Use the array union operator '+=' to ensure the default roles cannot be
+    // altered by event subscribers.
+    $roles += $this->defaultRoleEvent->getRoles();
+
+    return $roles;
+  }
+
+  /**
+   * Returns the roles which every group type requires.
+   *
+   * This provides the 'member' and 'non-member' roles. These are hard coded
+   * because they are strictly required and should not be altered.
+   *
+   * @return \Drupal\og\Entity\OgRole[]
+   *   An associative array of (unsaved) required OgRole entities, keyed by role
+   *   name. These are populated with the basic properties: name, label and
+   *   role_type.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  protected function getRequiredDefaultRoles() {
+    $roles = [];
+
+    $role_properties = [
+      [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Non-member',
+        'name' => OgRoleInterface::ANONYMOUS,
+      ],
+      [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Member',
+        'name' => OgRoleInterface::AUTHENTICATED,
+      ],
+    ];
+
+    foreach ($role_properties as $properties) {
+      $roles[$properties['name']] = $this->ogRoleStorage->create($properties);
+    }
+
+    return $roles;
   }
 
   /**
