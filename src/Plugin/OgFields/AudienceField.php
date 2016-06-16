@@ -27,70 +27,66 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
-    $values = [
+  public function getFieldStorageBaseDefinition(array $values = array()) {
+    $values += [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'custom_storage' => TRUE,
+      'custom_storage' => $this->getEntityType() == 'user',
       'settings' => [
-        'handler' => 'og',
-        'handler_settings' => [
-          'target_bundles' => [],
-          'membership_type' => OgMembershipInterface::TYPE_DEFAULT,
-        ],
         'target_type' => $this->getEntityType(),
       ],
-      'type' => 'og_membership_reference',
+      'type' => $this->getEntityType() == 'user' ? OgGroupAudienceHelper::USER_TO_GROUP_REFERENCE_FIELD_TYPE : OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE,
     ];
 
-    return parent::getFieldStorageConfigBaseDefinition($values);
+    return parent::getFieldStorageBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFieldConfigBaseDefinition(array $values = array()) {
-    $values = [
+  public function getFieldBaseDefinition(array $values = array()) {
+    $values += [
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
       'label' => $this->t('Groups audience'),
+      'settings' => [
+        'handler' => 'og',
+        'handler_settings' => [],
+      ],
     ];
 
-    return parent::getFieldConfigBaseDefinition($values);
+    return parent::getFieldBaseDefinition($values);
 
   }
 
   /**
    * {@inheritdoc}
    */
-  public function widgetDefinition(array $widget = []) {
-    // Keep this until og_complex widget is back.
-    return [
+  public function getFormDisplayDefinition(array $values = []) {
+    $values += [
       'type' => 'og_complex',
       'settings' => [
         'match_operator' => 'CONTAINS',
+        'size' => 60,
+        'placeholder' => '',
       ],
     ];
+
+
+    return $values;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition(array $view_mode = []) {
-    return [
-      'default' => [
-        'label' => 'above',
-        'type' => 'entity_reference_label',
-        'settings' => [
-          'link' => TRUE,
-        ]
-      ],
-      'teaser' => [
-        'label' => 'above',
-        'type' => 'entity_reference_label',
-        'settings' => [
-          'link' => TRUE,
-        ],
-      ],
+  public function getViewDisplayDefinition(array $values = []) {
+    $values += [
+      'label' => 'above',
+      'type' => 'entity_reference_label',
+      'settings' => [
+        'link' => TRUE,
+      ]
     ];
+
+    return $values;
   }
 }

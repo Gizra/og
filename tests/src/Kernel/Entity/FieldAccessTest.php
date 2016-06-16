@@ -26,7 +26,7 @@ class FieldAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'entity_reference', 'entity_test', 'og'];
+  public static $modules = ['system', 'user', 'field', 'entity_test', 'og'];
 
   /**
    * @var string

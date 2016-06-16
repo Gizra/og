@@ -61,7 +61,7 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function setEntityType($entity_type) {
-    $field_storage = $this->getFieldStorageConfigBaseDefinition();
+    $field_storage = $this->getFieldStorageBaseDefinition();
 
     if (!empty($field_storage['entity']) && !in_array($entity_type, $field_storage['entity'])) {
 
@@ -102,7 +102,7 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
+  public function getFieldStorageBaseDefinition(array $values = array()) {
     $values += [
       'entity_type' => $this->getEntityType(),
       'field_name' => $this->getFieldName(),
@@ -114,7 +114,7 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldConfigBaseDefinition(array $values = array()) {
+  public function getFieldBaseDefinition(array $values = array()) {
     $values += [
       'bundle' => $this->getBundle(),
       'entity_type' => $this->getEntityType(),

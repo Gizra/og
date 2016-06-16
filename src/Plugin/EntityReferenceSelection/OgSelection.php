@@ -67,23 +67,24 @@ class OgSelection extends DefaultSelection {
     // the default selection handler of the entity, which the field reference
     // to, and add another logic to the query object i.e. check if the entities
     // bundle defined as group.
-    $selection_handler = $this->getSelectionHandler();
-    $query = $selection_handler->buildEntityQuery($match, $match_operator);
 
+    $query = $this->getSelectionHandler()->buildEntityQuery($match, $match_operator);
     $target_type = $this->configuration['target_type'];
+    $entityDefinition = \Drupal::entityTypeManager()->getDefinition($target_type);
 
-    $identifier_key = \Drupal::entityTypeManager()->getDefinition($target_type)->getKey('id');
+    if ($bundle_key = $entityDefinition->getKey('bundle')) {
+      $bundles = Og::groupManager()->getAllGroupBundles($target_type);
+      $query->condition($bundle_key, $bundles, 'IN');
+    }
+
     $user_groups = $this->getUserGroups();
-    $bundles = Og::groupManager()->getAllGroupBundles($target_type);
-
-    $query->condition('type', $bundles, 'IN');
-
     if (!$user_groups) {
       return $query;
     }
 
-    $ids = [];
+    $identifier_key = $entityDefinition->getKey('id');
 
+    $ids = [];
     if ($this->configuration['handler_settings']['field_mode'] == 'admin') {
       // Don't include the groups, the user doesn't have create permission.
       foreach ($user_groups as $delta => $group) {
@@ -99,7 +100,6 @@ class OgSelection extends DefaultSelection {
       foreach ($user_groups as $group) {
         $ids[] = $group->id();
       }
-
       if ($ids) {
         $query->condition($identifier_key, $ids, 'IN');
       }
@@ -118,7 +118,7 @@ class OgSelection extends DefaultSelection {
    * @return ContentEntityInterface[]
    */
   protected function getUserGroups() {
-    $other_groups = Og::getEntityGroups(User::load($this->currentUser->id()));
+    $other_groups = Og::getUserGroups(User::load($this->currentUser->id()));
     return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 

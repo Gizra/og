@@ -24,7 +24,7 @@ class FieldCreateTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['user', 'field', 'entity_reference', 'node', 'og', 'og_test', 'options', 'system'];
+  public static $modules = ['user', 'field', 'node', 'og', 'og_test', 'options', 'system'];
 
   /**
    * @var Array

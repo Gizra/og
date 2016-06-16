@@ -47,6 +47,48 @@ As is the case with Drupal itself, in Organic Groups different permissions can
 be assigned to different user roles. This allows group members to perform a
 different set of actions, in different group contexts.
 
+### OG Membership Entity
+
+The membership entity that connects a group and a user.
+
+When dealing with non-user entities that are group content, that is content
+that is associated with a group, we do it via an entity reference field that
+has the default storage. The only information that we hold is that a group
+content is referencing a group.
+
+However, when dealing with the user entity we recognize that we need to
+special case it. It won't suffice to just hold the reference between the user
+and the group content as it will be laking crucial information such as: the
+state of the user's membership in the group (active, pending or blocked), the
+time the membership was created, the user's OG role in the group, etc.
+
+For this meta data we have the fieldable OgMembership entity, that is always
+connecting between a user and a group. There cannot be an OgMembership entity
+connecting two non-user entities.
+
+Creating such a relation is done for example in the following way:
+
+```php
+ $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
+ $membership
+   ->setUser(2)
+   ->setEntityId(1)
+   ->setGroupEntityType('node')
+   ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
+   ->save();
+```
+
+Notice how the relation of the user to the group also includes the OG
+audience field name this association was done by. Like this we are able to
+express different membership types such as the default membership that comes
+out of the box, or a "premium membership" that can be for example expired
+after a certain amount of time (the logic for the expired membership in the
+example is out of the scope of OG core).
+
+Having this field separation is what allows having multiple OG audience
+fields attached to the user, where each group they are associated with may be
+a result of different membership types.
+
 ## INSTALLATION DRUPAL 8.x
 Note that the following guide is here to get you started. Names for content
 types, groups and group content given here are suggestions and are given to

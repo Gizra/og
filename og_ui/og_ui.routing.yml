@@ -15,3 +15,28 @@ og_ui.settings:
     _title: 'OG settings'
   requirements:
     _permission: 'administer group'
+
+og_ui.roles_permissions_overview:
+  path: 'admin/config/group/{type}'
+  defaults:
+    _controller: '\Drupal\og_ui\Controller\OgUiController::rolesPermissionsOverviewPage'
+    _title_callback: '\Drupal\og_ui\Controller\OgUiController::rolesPermissionsOverviewTitleCallback'
+  requirements:
+    _permission: 'administer group'
+    type: '^(roles|permissions)$'
+
+og_ui.roles_form:
+  path: 'admin/config/group/roles/{entity_type}/{bundle}'
+  defaults:
+    _form: '\Drupal\og_ui\Form\OgRolesForm'
+    _title: '@todo - create title callback'
+  requirements:
+    _permission: 'administer group'
+
+og_ui.permissions_form:
+  path: 'admin/config/group/permissions/{entity_type}/{bundle}'
+  defaults:
+    _form: '\Drupal\og_ui\Form\OgPermissionsForm'
+    _title: '@todo - create title callback'
+  requirements:
+    _permission: 'administer group'

@@ -7,15 +7,16 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Entity\OgRoleInterface;
-use Drupal\og\Og;
-use Drupal\og\OgAccess;
-use Drupal\og\Entity\OgMembership;
-use Drupal\og\OgMembershipInterface;
-use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Entity\OgMembership;
+use Drupal\og\Og;
+use Drupal\og\OgAccess;
+use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * Group default roles and permissions field.
@@ -34,12 +35,36 @@ function og_entity_insert(EntityInterface $entity) {
     // Subscribe the group manager.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setMemberEntityId($entity->getOwnerId())
-      ->setMemberEntityType('user')
-      ->setGroupEntityid($entity->id())
+      ->setUser($entity->getOwnerId())
+      ->setEntityId($entity->id())
       ->setGroupEntityType($entity->getEntityTypeId())
       ->setFieldName($membership->getFieldName())
       ->save();
+  }
+}
+
+/**
+ * Implements hook_entity_predelete().
+ */
+function og_entity_predelete(EntityInterface $entity) {
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+    // Register orphaned group content for deletion, if this option has been
+    // enabled.
+    $config = \Drupal::config('og.settings');
+    if ($config->get('delete_orphans')) {
+      $plugin_id = $config->get('delete_orphans_plugin_id');
+      /** @var \Drupal\og\OgDeleteOrphansInterface $plugin */
+      $plugin = \Drupal::service('plugin.manager.og.delete_orphans')->createInstance($plugin_id, []);
+      $plugin->register($entity);
+    }
+
+    // @todo Delete user roles.
+    // @see https://github.com/amitaibu/og/issues/175
+    // og_delete_user_roles_by_group($entity_type, $entity);
+  }
+  if ($entity instanceof \Drupal\user\UserInterface) {
+    // @todo Delete memberships when deleting users.
+    // @see https://github.com/amitaibu/og/issues/176
   }
 }
 
@@ -64,7 +89,7 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
     return AccessResult::neutral();
   }
 
-  if (!Og::isGroupAudienceField($field_definition)) {
+  if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
     return AccessResult::neutral();
   }
 
@@ -79,7 +104,7 @@ function og_entity_field_access($operation, FieldDefinitionInterface $field_defi
  * Implements hook_entity_access().
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  // We only care about content entities.
+  // We only care about content entities that are groups or group content.
   if (!$entity instanceof ContentEntityInterface) {
     return AccessResult::neutral();
   }
@@ -91,20 +116,17 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   $entity_type_id = $entity->getEntityTypeId();
   $bundle_id = $entity->bundle();
 
-  $access = OgAccess::userAccessEntity('administer group', $entity, $account);
-
-  if ($access->isNeutral()) {
-    // The node isn't in an OG context, so no need to keep testing.
-    return $access;
-  }
-  else {
-    // Any and own content.
-    $access = $access->orIf(OgAccess::userAccessEntity($operation, $entity, $account));
+  if (!Og::isGroup($entity_type_id, $bundle_id) && !Og::isGroupContent($entity_type_id, $bundle_id)) {
+    return AccessResult::neutral();
   }
 
-  if (!$access->isAllowed() && ($operation === 'update') && Og::isGroup($entity_type_id, $bundle_id)) {
-    $access = OgAccess::userAccessEntity($operation, $entity, $account);
+  // If the user has permission to administer all groups, allow access.
+  if ($account->hasPermission('administer group')) {
+    return AccessResult::allowed();
   }
+
+  /** @var \Drupal\Core\Access\AccessResult $access */
+  $access = \Drupal::service('og.access')->userAccessEntity($operation, $entity, $account);
 
   if ($access->isAllowed()) {
     return $access;
@@ -124,11 +146,6 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
  * Implements hook_entity_create_access().
  */
 function og_entity_create_access(AccountInterface $account, array $context, $bundle) {
-  // @todo: Remove when https://www.drupal.org/node/2627852 lands.
-  if (empty($context['entity_type_id'])) {
-    return AccessResult::neutral();
-  }
-
   $entity_type_id = $context['entity_type_id'];
 
   if (!Og::isGroupContent($entity_type_id, $bundle)) {
@@ -150,26 +167,25 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     }
   }
 
-
-
-
   // We can't check if user has create permissions, as there is no group
   // context. However, we can check if there are any groups the user will be
-  // able to select, and if not, we don't allow access.
+  // able to select, and if not, we don't allow access but if there are,
+  // AccessResult::neutral() will be returned in order to not override other
+  // access results.
   // @see \Drupal\og\Plugin\EntityReferenceSelection\OgSelection::buildEntityQuery()
   $required = FALSE;
 
   $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
   foreach ($field_definitions as $field_name => $field_definition) {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
-    if (!Og::isGroupAudienceField($field_definition)) {
+    if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
       continue;
     }
 
     $handler = Og::getSelectionHandler($field_definition);
 
     if ($handler->getReferenceableEntities()) {
-      return Accessresult::allowed();
+      return Accessresult::neutral();
     }
 
     // Allow users to create content outside of groups, if none of the
@@ -203,40 +219,6 @@ function _og_modules_uninstalled($modules) {
 }
 
 /**
- * Implements hook_og_permission().
- */
-function _og_og_permission() {
-  // Generate standard node permissions for all applicable node types.
-  $perms = array();
-
-  $perms['update group'] = array(
-    'title' => t('Edit group'),
-    'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
-    'default role' => array(OgRoleInterface::ADMINISTRATOR),
-  );
-  $perms['administer group'] = array(
-    'title' => t('Administer group'),
-    'description' => t('Manage group members and content in the group.'),
-    'default role' => array(OgRoleInterface::ADMINISTRATOR),
-    'restrict access' => TRUE,
-  );
-
-  foreach (node_permissions_get_configured_types() as $type) {
-    $perms = array_merge($perms, og_list_permissions($type));
-  }
-
-  return $perms;
-}
-
-
-/**
- * Implements hook_og_default_roles().
- */
-function _og_og_default_roles() {
-  return array(OgRoleInterface::ADMINISTRATOR);
-}
-
-/**
  * Implements hook_field_create_instance().
  *
  * - Create default OG roles per entity-type and bundle.
@@ -257,7 +239,7 @@ function _og_field_create_instance($instance) {
   // We add a different field, so each field can be set differently.
   $entity_type = $instance['entity_type'];
   $bundle = $instance['bundle'];
-  foreach (array_keys(Og::getAllGroupAudienceFields('user', 'user')) as $field_name) {
+  foreach (array_keys(OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user')) as $field_name) {
     $field = field_info_field($field_name);
 
     if ($field['settings']['target_type'] == $entity_type  && empty($field['settings']['handler_settings']['target_bundles'])) {
@@ -320,7 +302,7 @@ function _og_field_delete_instance($instance) {
 function _og_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
-  if (Og::getAllGroupAudienceFields($entity_type, $bundle)) {
+  if (OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle)) {
     $form['#validate'][] = 'og_form_group_reference_validate';
   }
 
@@ -368,7 +350,7 @@ function _og_form_group_reference_validate($form, &$form_state) {
     return;
   }
 
-  foreach (array_keys(Og::getAllGroupAudienceFields($entity_type, $bundle)) as $field_name) {
+  foreach (array_keys(OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle)) as $field_name) {
     // If there is at least one group selected, return.
     if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
       return;
@@ -378,6 +360,25 @@ function _og_form_group_reference_validate($form, &$form_state) {
   // No group selected, throw an error.
   form_set_error('og', t('You must select one or more groups for this content.'));
 }
+
+
+/**
+ * Implements hook_field_formatter_info_alter()
+ *
+ * Allow OG audience fields to have entity reference formatters.
+ */
+function og_field_formatter_info_alter(array &$info) {
+  foreach (array_keys($info) as $key) {
+    if (!in_array('entity_reference', $info[$key]['field_types'])) {
+      // Not an entity reference formatter.
+      continue;
+    }
+
+    $info[$key]['field_types'][] = OgGroupAudienceHelper::USER_TO_GROUP_REFERENCE_FIELD_TYPE;
+    $info[$key]['field_types'][] = OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE;
+  }
+}
+
 
 /**
  * Validate handler; Make sure a group can be created.
@@ -509,7 +510,7 @@ function __og_update_entity_fields($entity_type, $entity) {
   }
 
   $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  foreach (Og::getAllGroupAudienceFields($entity_type, $bundle) as $field_name => $label) {
+  foreach (OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle) as $field_name => $label) {
     $field = field_info_field($field_name);
     $gids = array();
     if ($field['cardinality'] == 1) {
@@ -526,24 +527,6 @@ function __og_update_entity_fields($entity_type, $entity) {
     if ($gids) {
       $wrapper->{$field_name}->set($gids);
     }
-  }
-}
-
-/**
- * Implements hook_entity_delete().
- */
-function _og_entity_delete($entity, $entity_type) {
-  list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
-  if (og_is_group($entity_type, $entity)) {
-    og_delete_user_roles_by_group($entity_type, $entity);
-    og_membership_delete_by_group($entity_type, $entity);
-  }
-  if (og_is_group_content_type($entity_type, $bundle)) {
-    // As the field attachers are called after hook_entity_presave() we
-    // can't delete the OG memberships here. So we just mark the entity
-    // as being deleted, and we will do the actual delete in
-    // OgBehaviorHandler::delete().
-    $entity->delete_og_membership = TRUE;
   }
 }
 
@@ -1170,57 +1153,6 @@ function __og_orphans_move($ids, $group_type, $gid) {
 }
 
 /**
- * Register memberships for deletion.
- *
- * if the property "skip_og_membership_delete_by_group" exists on the
- * entity, this function _will return early, and allow other implementing
- * modules to deal with the deletion logic.
- *
- * @param $entity_type
- *   The group type.
- * @param $entity
- *   The group entity object.
- */
-function _og_membership_delete_by_group($entity_type, $entity) {
-  if (!empty($entity->skip_og_membership_delete_by_group)) {
-    return;
-  }
-
-  list($gid) = entity_extract_ids($entity_type, $entity);
-  $query = new EntityFieldQuery();
-  $result = $query
-    ->entityCondition('entity_type', 'og_membership')
-    ->propertyCondition('group_type', $entity_type, '=')
-    ->propertyCondition('gid', $gid, '=')
-    ->execute();
-
-  if (empty($result['og_membership'])) {
-    return;
-  }
-
-  if (\Drupal::config('og.settings')->get('use_queue')) {
-    $queue = DrupalQueue::get('og_membership_orphans');
-    // Add item to the queue.
-    $data = array(
-      'group_type' => $entity_type,
-      'gid' => $gid,
-      // Allow implementing modules to determine the disposition (e.g. delete
-      // orphan group content).
-      'orphans' => array(
-        'delete' => isset($entity->og_orphans['delete']) ? $entity->og_orphans['delete'] : \Drupal::config('og.settings')->get('orphans_delete'),
-        'move' => isset($entity->og_orphans['move']) ? $entity->og_orphans['move'] : array(),
-      ),
-    );
-
-    // Exit now, as the task will be processed via queue.
-    return $queue->createItem($data);
-  }
-
-  // No scalable solution was chosen, so just delete OG memberships.
-  og_membership_delete_multiple(array_keys($result['og_membership']));
-}
-
-/**
  * Label callback; Return the label of OG membership entity.
  */
 function _og_membership_label($og_membership) {
@@ -1692,7 +1624,7 @@ function _og_get_group_type($entity_type, $bundle_name, $type = 'group') {
     return (bool)field_info_instance($entity_type, OG_GROUP_FIELD, $bundle_name);
   }
   elseif ($type == 'group content') {
-    return (bool)Og::getAllGroupAudienceFields($entity_type, $bundle_name);
+    return (bool)OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle_name);
   }
 }
 
@@ -2613,7 +2545,7 @@ function _og_get_groups_by_user($account = NULL, $group_type = NULL) {
     $account = $user;
   }
 
-  if (!Og::getAllGroupAudienceFields('user', 'user')) {
+  if (!OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user')) {
     // User entity doesn't have group audience fields.
     return;
   }

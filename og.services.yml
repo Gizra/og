@@ -1,10 +1,24 @@
 services:
-  plugin.manager.og.fields:
-    class: Drupal\og\OgFieldsPluginManager
-    parent: default_plugin_manager
+  og.access:
+    class: Drupal\og\OgAccess
+    arguments: ['@config.factory', '@current_user', '@module_handler']
+  og.event_subscriber:
+    class: Drupal\og\EventSubscriber\OgEventSubscriber
+    arguments: ['@og.permission_manager']
+    tags:
+      - { name: 'event_subscriber' }
   og.group.manager:
     class: Drupal\og\GroupManager
-    arguments: ['@config.factory']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
+  og.permission_manager:
+    class: Drupal\og\PermissionManager
+    arguments: ['@og.group.manager', '@entity_type.manager', '@entity_type.bundle.info']
+  plugin.manager.og.delete_orphans:
+    class: Drupal\og\OgDeleteOrphansPluginManager
+    parent: default_plugin_manager
+  plugin.manager.og.fields:
+    class: Drupal\og\OgFieldsPluginManager
+    parent: default_plugin_manager

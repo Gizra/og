@@ -1,36 +1,38 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\Entity\GroupAudienceTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\entity_test\Entity\EntityTest;
-use Drupal\KernelTests\KernelTestBase;
-use Drupal\og\Og;
 use Drupal\Component\Utility\Unicode;
+use Drupal\KernelTests\KernelTestBase;
+use Drupal\entity_test\Entity\EntityTest;
+use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
+ * Tests the group audience field.
+ *
  * @group og
  */
 class GroupAudienceTest extends KernelTestBase {
 
-
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['entity_test', 'user', 'field', 'entity_reference', 'og', 'system'];
+  public static $modules = [
+    'entity_reference',
+    'entity_test',
+    'field',
+    'og',
+    'system',
+    'user',
+  ];
 
   /**
    * Array with the bundle IDs.
    *
-   * @var Array
+   * @var array
    */
   protected $bundles;
-
 
   /**
    * {@inheritdoc}
@@ -67,20 +69,20 @@ class GroupAudienceTest extends KernelTestBase {
     $bundle = $this->bundles[2];
 
     // Test no values returned for a non-group content.
-    $this->assertEmpty(Og::getAllGroupAudienceFields('entity_test', $bundle));
+    $this->assertEmpty(OgGroupAudienceHelper::getAllGroupAudienceFields('entity_test', $bundle));
 
     // Set bundles as group content.
     $field_name1 = Unicode::strtolower($this->randomMachineName());
     $field_name2 = Unicode::strtolower($this->randomMachineName());
 
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name1]);
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name1]);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
 
-    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle);
-    $this->assertEquals(array($field_name1, $field_name2), array_keys($field_names));
+    $field_names = OgGroupAudienceHelper::getAllGroupAudienceFields('entity_test', $bundle);
+    $this->assertEquals([$field_name1, $field_name2], array_keys($field_names));
 
     // Test Og::isGroupContent method, which is just a wrapper around
-    // Og::getAllGroupAudienceFields.
+    // OgGroupAudienceHelper::getAllGroupAudienceFields.
     $this->assertTrue(Og::isGroupContent('entity_test', $bundle));
 
     $bundle = $this->bundles[3];
@@ -107,14 +109,13 @@ class GroupAudienceTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $overrides);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $overrides);
 
     // Add a default field, which will use the "entity_test" as target type.
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
 
-    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test');
-    $this->assertEquals(array($field_name2), array_keys($field_names));
-
+    $field_names = OgGroupAudienceHelper::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test');
+    $this->assertEquals([$field_name2], array_keys($field_names));
   }
 
   /**
@@ -145,14 +146,14 @@ class GroupAudienceTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $overrides);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $overrides);
 
     $overrides['field_name'] = $field_name2;
     $overrides['field_config']['settings']['handler_settings']['target_bundles'] = [$group_bundle2 => $group_bundle2];
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $overrides);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $overrides);
 
-    $field_names = Og::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $group_bundle1);
-    $this->assertEquals(array($field_name1), array_keys($field_names));
+    $field_names = OgGroupAudienceHelper::getAllGroupAudienceFields('entity_test', $bundle, 'entity_test', $group_bundle1);
+    $this->assertEquals([$field_name1], array_keys($field_names));
   }
 
 }
