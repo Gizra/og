@@ -75,11 +75,6 @@ class GroupManagerTest extends UnitTestCase {
   protected $stateProphecy;
 
   /**
-   * @var \Drupal\og\Event\DefaultRoleEventInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $defaultRoleEventProphecy;
-
-  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -92,7 +87,6 @@ class GroupManagerTest extends UnitTestCase {
     $this->eventDispatcherProphecy = $this->prophesize(EventDispatcherInterface::class);
     $this->permissionEventProphecy = $this->prophesize(PermissionEventInterface::class);
     $this->stateProphecy = $this->prophesize(StateInterface::class);
-    $this->defaultRoleEventProphecy = $this->prophesize(DefaultRoleEvent::class);
   }
 
   /**
@@ -270,7 +264,6 @@ class GroupManagerTest extends UnitTestCase {
       $this->entityTypeManagerProphecy->reveal(),
       $this->entityTypeBundleInfoProphecy->reveal(),
       $this->eventDispatcherProphecy->reveal(),
-      $this->defaultRoleEventProphecy->reveal(),
       $this->stateProphecy->reveal()
     );
   }
@@ -304,10 +297,6 @@ class GroupManagerTest extends UnitTestCase {
     // expected that the list of default roles to populate will be retrieved
     // from the event listener.
     $this->eventDispatcherProphecy->dispatch(DefaultRoleEventInterface::EVENT_NAME, Argument::type(DefaultRoleEvent::class))
-      ->willReturn($this->defaultRoleEventProphecy->reveal())
-      ->shouldBeCalled();
-    $this->defaultRoleEventProphecy->getRoles()
-      ->willReturn([])
       ->shouldBeCalled();
 
     foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED] as $role_name) {
