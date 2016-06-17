@@ -58,6 +58,13 @@ class OgEventSubscriber implements EventSubscriberInterface {
    *   The OG permission event.
    */
   public function provideDefaultOgPermissions(PermissionEventInterface $event) {
+    // @todo This currently sets both the group level and group content level
+    //   permissions. In order to make it easier for other modules to alter
+    //   these permissions, we should split this up somehow. We can for example
+    //   provide 2 separate methods `$event->setGroupPermissions()` and
+    //   `$event->setGroupContentPermissions()`, or we could store these
+    //   settings in two separate objects `OgGroupPermission` and
+    //   `OgGroupContentPermission`, and let the event listener handle it.
     $event->setPermissions([
       'update group' => [
         'title' => t('Edit group'),
@@ -80,6 +87,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
    *   The default role event.
    */
   public function provideDefaultRoles(DefaultRoleEventInterface $event) {
+    /** @var \Drupal\og\Entity\OgRole $role */
     $role = $this->ogRoleStorage->create([
       'name' => OgRoleInterface::ADMINISTRATOR,
       'label' => 'Administrator',
