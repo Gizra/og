@@ -73,6 +73,9 @@ use Drupal\og\OgMembershipInterface;
  *   },
  *   bundle_keys = {
  *     "bundle" = "type"
+ *   },
+ *   handlers = {
+ *     "views_data" = "Drupal\og\OgMembershipViewsData",
  *   }
  * )
  */
