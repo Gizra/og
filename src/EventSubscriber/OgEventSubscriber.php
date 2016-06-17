@@ -2,6 +2,7 @@
 
 namespace Drupal\og\EventSubscriber;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\OgRoleInterface;
@@ -21,13 +22,23 @@ class OgEventSubscriber implements EventSubscriberInterface {
   protected $permissionManager;
 
   /**
+   * The storage handler for OgRole entities.
+   *
+   * @var \Drupal\core\Entity\EntityStorageInterface
+   */
+  protected $ogRoleStorage;
+
+  /**
    * Constructs an OgEventSubscriber object.
    *
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The OG permission manager.
+   * @param \Drupal\core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
-  public function __construct(PermissionManagerInterface $permission_manager) {
+  public function __construct(PermissionManagerInterface $permission_manager, EntityTypeManagerInterface $entity_type_manager) {
     $this->permissionManager = $permission_manager;
+    $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
   }
 
   /**
@@ -69,7 +80,12 @@ class OgEventSubscriber implements EventSubscriberInterface {
    *   The default role event.
    */
   public function provideDefaultRoles(DefaultRoleEventInterface $event) {
-    $event->addRole(OgRoleInterface::ADMINISTRATOR, ['label' => 'Administrator']);
+    $role = $this->ogRoleStorage->create([
+      'name' => OgRoleInterface::ADMINISTRATOR,
+      'label' => 'Administrator',
+      'is_admin' => TRUE,
+    ]);
+    $event->addRole($role);
   }
 
 }

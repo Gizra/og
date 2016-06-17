@@ -2,7 +2,7 @@
 
 namespace Drupal\og\Event;
 
-use Drupal\og\OgRoleInterface;
+use Drupal\og\Entity\OgRole;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -41,35 +41,32 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function addRole($name, array $properties) {
-    if (array_key_exists($name, $this->roles)) {
-      throw new \InvalidArgumentException("The '$name' role already exists.");
-    }
-    $this->validate($name, $properties);
+  public function addRole(OgRole $role) {
+    $this->validate($role);
 
-    // Provide default value for the role type.
-    if (empty($properties['role_type'])) {
-      $properties['role_type'] = OgRoleInterface::ROLE_TYPE_STANDARD;
+    if (array_key_exists($role->getName(), $this->roles)) {
+      throw new \InvalidArgumentException("The '{$role->getName()}' role already exists.");
     }
 
-    $this->roles[$name] = $properties;
+    $this->roles[$role->getName()] = $role;
   }
 
   /**
    * {@inheritdoc}
    */
   public function addRoles(array $roles) {
-    foreach ($roles as $role => $properties) {
-      $this->addRole($role, $properties);
+    foreach ($roles as $role) {
+      $this->addRole($role);
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setRole($name, array $properties) {
-    $this->deleteRole($name);
-    $this->addRole($name, $properties);
+  public function setRole(OgRole $role) {
+    $this->validate($role);
+    $this->deleteRole($role->getName());
+    $this->addRole($role);
   }
 
   /**
@@ -77,7 +74,7 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
    */
   public function setRoles(array $roles) {
     foreach ($roles as $name => $properties) {
-      $this->setRole($name, $properties);
+      $this->setRole($properties);
     }
   }
 
@@ -105,8 +102,12 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function offsetSet($key, $value) {
-    $this->setRole($key, $value);
+  public function offsetSet($key, $role) {
+    $this->validate($role);
+    if ($role->getName() !== $key) {
+      throw new \InvalidArgumentException('The key and the "name" property of the role should be identical.');
+    }
+    $this->setRole($role);
   }
 
   /**
@@ -131,32 +132,19 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   }
 
   /**
-   * Validates a role that is about to be set or added.
+   * Validates that a role that is about to be set or added has a name.
    *
-   * @param string $name
-   *   The name of the role to add or set.
-   * @param array $properties
-   *   The role properties to validate.
+   * The roles are stored locally keyed by role name.
+   *
+   * @param \Drupal\og\Entity\OgRole $role
+   *   The role to validate.
    *
    * @throws \InvalidArgumentException
-   *   Thrown when the role name is empty, the 'label' property is missing, or
-   *   the 'role_type' property is invalid.
+   *   Thrown when the role name is empty.
    */
-  protected function validate($name, $properties) {
-    if (empty($name)) {
+  protected function validate(OgRole $role) {
+    if (empty($role->getName())) {
       throw new \InvalidArgumentException('Role name is required.');
-    }
-
-    if (empty($properties['label'])) {
-      throw new \InvalidArgumentException('The label property is required.');
-    }
-
-    $valid_role_types = [
-      OgRoleInterface::ROLE_TYPE_STANDARD,
-      OgRoleInterface::ROLE_TYPE_REQUIRED,
-    ];
-    if (!empty($properties['role_type']) && !in_array($properties['role_type'], $valid_role_types)) {
-      throw new \InvalidArgumentException('The role type is invalid.');
     }
   }
 

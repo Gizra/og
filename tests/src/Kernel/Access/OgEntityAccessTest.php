@@ -149,7 +149,7 @@ class OgEntityAccessTest extends KernelTestBase {
     /** @var OgRole ogRoleWithPermission */
     $this->ogRoleWithPermission = OgRole::create();
     $this->ogRoleWithPermission
-      ->setId($this->randomMachineName())
+      ->setName($this->randomMachineName())
       ->setLabel($this->randomString())
       ->setGroupType($this->group1->getEntityTypeId())
       ->setGroupBundle($this->groupBundle)
@@ -159,7 +159,7 @@ class OgEntityAccessTest extends KernelTestBase {
 
     $this->ogRoleWithPermission2 = OgRole::create();
     $this->ogRoleWithPermission2
-      ->setId($this->randomMachineName())
+      ->setName($this->randomMachineName())
       ->setLabel($this->randomString())
       ->setGroupType($this->group1->getEntityTypeId())
       ->setGroupBundle($this->groupBundle)
@@ -170,7 +170,7 @@ class OgEntityAccessTest extends KernelTestBase {
     /** @var OgRole ogRoleWithoutPermission */
     $this->ogRoleWithoutPermission = OgRole::create();
     $this->ogRoleWithoutPermission
-      ->setId($this->randomMachineName())
+      ->setName($this->randomMachineName())
       ->setLabel($this->randomString())
       ->setGroupType($this->group1->getEntityTypeId())
       ->setGroupBundle($this->groupBundle)
@@ -179,7 +179,7 @@ class OgEntityAccessTest extends KernelTestBase {
 
     $this->ogAdminRole = OgRole::create();
     $this->ogAdminRole
-      ->setId($this->randomMachineName())
+      ->setName($this->randomMachineName())
       ->setLabel($this->randomString())
       ->setGroupType($this->group1->getEntityTypeId())
       ->setGroupBundle($this->groupBundle)

@@ -4,7 +4,7 @@ services:
     arguments: ['@config.factory', '@current_user', '@module_handler']
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
-    arguments: ['@og.permission_manager']
+    arguments: ['@og.permission_manager', '@entity_type.manager']
     tags:
       - { name: 'event_subscriber' }
   og.group.manager:
