@@ -9,4 +9,44 @@ namespace Drupal\og;
  * 'subscribe without approval' and 'administer group'.
  */
 class GroupPermission extends Permission {
+
+  /**
+   * A list of roles to which this permission can be applied.
+   *
+   * For example, the 'subscribe' permission only applies to non-members. If
+   * left empty, this permission applies to all roles.
+   *
+   * @var array
+   */
+  protected $roles = [];
+
+  /**
+   * Returns the roles to which this permission can be applied.
+   *
+   * For example, the 'subscribe' permission only applies to non-members.
+   *
+   * @return array
+   *   An array of roles to which this permission applies. If empty, the
+   *   permission applies to all roles.
+   */
+  public function getRoles() {
+    return $this->get('roles');
+  }
+
+  /**
+   * Returns the roles to which this permission can be applied.
+   *
+   * For example, the 'subscribe' permission only applies to non-members.
+   *
+   * @param array $roles
+   *   An array of roles to which this permission applies. If empty, the
+   *   permission applies to all roles.
+   *
+   * @return $this
+   */
+  public function setRoles(array $roles) {
+    $this->set('roles' , $roles);
+    return $this;
+  }
+
 }
