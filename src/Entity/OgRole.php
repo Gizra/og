@@ -149,7 +149,7 @@ class OgRole extends Role implements OgRoleInterface {
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    */
   public function getRoleType() {
-    return $this->get('role_type');
+    return $this->get('role_type') ?: OgRoleInterface::ROLE_TYPE_STANDARD;
   }
 
   /**
@@ -179,11 +179,15 @@ class OgRole extends Role implements OgRoleInterface {
    */
   public function getName() {
     // If the name is not set yet, try to derive it from the ID.
-    if (empty($this->name) && !empty($this->id())) {
-      list(, , $name) = explode('-', $this->id());
-      $this->setName($name);
+    if (empty($this->name) && !empty($this->id()) && !empty($this->getGroupType()) && !empty($this->getGroupBundle())) {
+      // Check if the ID matches the pattern '{entity type}-{bundle}-{name}'.
+      $pattern = preg_quote("{$this->getGroupType()}-{$this->getGroupBundle()}-");
+      preg_match("/$pattern(.+)/", $this->id(), $matches);
+      if (!empty($matches[1])) {
+        $this->setName($matches[1]);
+      }
     }
-    return $this->name;
+    return $this->get('name');
   }
 
   /**

@@ -2,8 +2,7 @@
 
 namespace Drupal\og\Event;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\og\OgRoleInterface;
+use Drupal\og\Entity\OgRole;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -21,23 +20,6 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
    *   An associative array of default role properties, keyed by role name.
    */
   protected $roles = [];
-
-  /**
-   * The OG Role entity storage handler.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $ogRoleStorage;
-
-  /**
-   * Constructs a DefaultRoleEvent object.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
-    $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
-  }
 
   /**
    * {@inheritdoc}
@@ -59,38 +41,32 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function addRole(array $properties) {
-    $this->validate($properties);
+  public function addRole(OgRole $role) {
+    $this->validate($role);
 
-    if (array_key_exists($properties['name'], $this->roles)) {
-      throw new \InvalidArgumentException("The '{$properties['name']}' role already exists.");
+    if (array_key_exists($role->getName(), $this->roles)) {
+      throw new \InvalidArgumentException("The '{$role->getName()}' role already exists.");
     }
 
-    // Provide default values.
-    $properties += [
-      'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
-      'is_admin' => FALSE,
-    ];
-
-    $this->roles[$properties['name']] = $this->ogRoleStorage->create($properties);
+    $this->roles[$role->getName()] = $role;
   }
 
   /**
    * {@inheritdoc}
    */
   public function addRoles(array $roles) {
-    foreach ($roles as $role => $properties) {
-      $this->addRole($properties);
+    foreach ($roles as $role) {
+      $this->addRole($role);
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setRole(array $properties) {
-    $this->validate($properties);
-    $this->deleteRole($properties['name']);
-    $this->addRole($properties);
+  public function setRole(OgRole $role) {
+    $this->validate($role);
+    $this->deleteRole($role->getName());
+    $this->addRole($role);
   }
 
   /**
@@ -126,12 +102,12 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function offsetSet($key, $value) {
-    $this->validate($value);
-    if ($value['name'] !== $key) {
+  public function offsetSet($key, $role) {
+    $this->validate($role);
+    if ($role->getName() !== $key) {
       throw new \InvalidArgumentException('The key and the "name" property of the role should be identical.');
     }
-    $this->setRole($value);
+    $this->setRole($role);
   }
 
   /**
@@ -156,41 +132,19 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function reset() {
-    $this->roles = [];
-  }
-
-  /**
-   * Validates a role that is about to be set or added.
+   * Validates that a role that is about to be set or added has a name.
    *
-   * @param array $properties
-   *   The role properties to validate.
+   * The roles are stored locally keyed by role name.
+   *
+   * @param \Drupal\og\Entity\OgRole $role
+   *   The role to validate.
    *
    * @throws \InvalidArgumentException
-   *   Thrown when the role name is empty, the 'label' property is missing, or
-   *   the 'role_type' property is invalid.
+   *   Thrown when the role name is empty.
    */
-  protected function validate($properties) {
-    if (empty($properties['name'])) {
+  protected function validate(OgRole $role) {
+    if (empty($role->getName())) {
       throw new \InvalidArgumentException('Role name is required.');
-    }
-
-    if (empty($properties['label'])) {
-      throw new \InvalidArgumentException('The label property is required.');
-    }
-
-    if (!empty($properties['is_admin']) && !is_bool($properties['is_admin'])) {
-      throw new \InvalidArgumentException('The is_admin property should be a boolean.');
-    }
-
-    $valid_role_types = [
-      OgRoleInterface::ROLE_TYPE_STANDARD,
-      OgRoleInterface::ROLE_TYPE_REQUIRED,
-    ];
-    if (!empty($properties['role_type']) && !in_array($properties['role_type'], $valid_role_types)) {
-      throw new \InvalidArgumentException('The role type is invalid.');
     }
   }
 

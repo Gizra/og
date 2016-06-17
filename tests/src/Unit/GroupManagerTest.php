@@ -76,11 +76,6 @@ class GroupManagerTest extends UnitTestCase {
   protected $stateProphecy;
 
   /**
-   * @var \Drupal\og\Event\DefaultRoleEventInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $defaultRoleEventProphecy;
-
-  /**
    * @var \Drupal\og\PermissionManager|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $permissionManagerProphecy;
@@ -98,7 +93,6 @@ class GroupManagerTest extends UnitTestCase {
     $this->eventDispatcherProphecy = $this->prophesize(EventDispatcherInterface::class);
     $this->permissionEventProphecy = $this->prophesize(PermissionEventInterface::class);
     $this->stateProphecy = $this->prophesize(StateInterface::class);
-    $this->defaultRoleEventProphecy = $this->prophesize(DefaultRoleEvent::class);
     $this->permissionManagerProphecy = $this->prophesize(PermissionManager::class);
   }
 
@@ -277,7 +271,6 @@ class GroupManagerTest extends UnitTestCase {
       $this->entityTypeManagerProphecy->reveal(),
       $this->entityTypeBundleInfoProphecy->reveal(),
       $this->eventDispatcherProphecy->reveal(),
-      $this->defaultRoleEventProphecy->reveal(),
       $this->stateProphecy->reveal(),
       $this->permissionManagerProphecy->reveal()
     );
@@ -310,15 +303,8 @@ class GroupManagerTest extends UnitTestCase {
   protected function expectDefaultRoleCreation($entity_type, $bundle) {
     // In order to populate the default roles for a new group type, it is
     // expected that the list of default roles to populate will be retrieved
-    // from the event listener. The event is a service which persists in memory,
-    // so it should be reset before being dispatched.
-    $this->defaultRoleEventProphecy->reset()
-      ->shouldBeCalled();
+    // from the event listener.
     $this->eventDispatcherProphecy->dispatch(DefaultRoleEventInterface::EVENT_NAME, Argument::type(DefaultRoleEvent::class))
-      ->willReturn($this->defaultRoleEventProphecy->reveal())
-      ->shouldBeCalled();
-    $this->defaultRoleEventProphecy->getRoles()
-      ->willReturn([])
       ->shouldBeCalled();
 
     foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED] as $role_name) {
