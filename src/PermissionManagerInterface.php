@@ -22,7 +22,7 @@ interface PermissionManagerInterface {
   public function getEntityOperationPermissions(array $group_content_bundle_ids);
 
   /**
-   * Helper function to generate default crud permissions for a given bundle.
+   * Helper method to generate entity operation permissions for a given bundle.
    *
    * @param $group_content_entity_type_id
    *   The entity type ID for which to generate the permission list.
