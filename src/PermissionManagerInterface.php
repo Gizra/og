@@ -32,6 +32,6 @@ interface PermissionManagerInterface {
    * @return array
    *   An array of permission names and descriptions.
    */
-  public function generateCrudPermissionList($group_content_entity_type_id, $group_content_bundle_id);
+  public function generateEntityOperationPermissionList($group_content_entity_type_id, $group_content_bundle_id);
 
 }

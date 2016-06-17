@@ -58,7 +58,7 @@ class PermissionManager implements PermissionManagerInterface {
 
     foreach ($group_content_bundle_ids as $group_content_entity_type_id => $bundle_ids) {
       foreach ($bundle_ids as $bundle_id) {
-        $permissions += $this->generateCrudPermissionList($group_content_entity_type_id, $bundle_id);
+        $permissions += $this->generateEntityOperationPermissionList($group_content_entity_type_id, $bundle_id);
       }
     }
 
@@ -68,7 +68,7 @@ class PermissionManager implements PermissionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function generateCrudPermissionList($group_content_entity_type_id, $group_content_bundle_id) {
+  public function generateEntityOperationPermissionList($group_content_entity_type_id, $group_content_bundle_id) {
     $permissions = [];
 
     $entity_info = $this->entityTypeManager->getDefinition($group_content_entity_type_id);
