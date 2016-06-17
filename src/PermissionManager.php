@@ -52,12 +52,8 @@ class PermissionManager implements PermissionManagerInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Provide an alter hook.
-   * @todo This only returns permissions related to entity operations on group
-   *   content. Rename it accordingly and clarify in documentation.
    */
-  public function getPermissionList(array $group_content_bundle_ids) {
+  public function getEntityOperationPermissions(array $group_content_bundle_ids) {
     $permissions = [];
 
     foreach ($group_content_bundle_ids as $group_content_entity_type_id => $bundle_ids) {

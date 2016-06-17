@@ -8,17 +8,18 @@ namespace Drupal\og;
 interface PermissionManagerInterface {
 
   /**
-   * Generates the OG permission list for the given group type.
+   * Returns the list of entity operation permissions for a given group content.
    *
-   * @param string $entity_type_id
-   *   The entity type ID of the group for which to generate the permissions.
-   * @param string $bundle_id
-   *   The bundle ID of the group for which to generate the permissions.
+   * These are permissions such as 'edit own article content'.
+   *
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs, keyed by group content entity type
+   *   ID.
    *
    * @return array
    *   The list of permissions.
    */
-  public function getPermissionList($entity_type_id, $bundle_id);
+  public function getEntityOperationPermissions(array $group_content_bundle_ids);
 
   /**
    * Helper function to generate default crud permissions for a given bundle.
