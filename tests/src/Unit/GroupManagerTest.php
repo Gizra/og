@@ -15,7 +15,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
-use Drupal\og\PermissionManager;
+use Drupal\og\PermissionManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\PermissionEventInterface;
@@ -76,7 +76,7 @@ class GroupManagerTest extends UnitTestCase {
   protected $stateProphecy;
 
   /**
-   * @var \Drupal\og\PermissionManager|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\PermissionManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $permissionManagerProphecy;
 
@@ -93,7 +93,7 @@ class GroupManagerTest extends UnitTestCase {
     $this->eventDispatcherProphecy = $this->prophesize(EventDispatcherInterface::class);
     $this->permissionEventProphecy = $this->prophesize(PermissionEventInterface::class);
     $this->stateProphecy = $this->prophesize(StateInterface::class);
-    $this->permissionManagerProphecy = $this->prophesize(PermissionManager::class);
+    $this->permissionManagerProphecy = $this->prophesize(PermissionManagerInterface::class);
   }
 
   /**
