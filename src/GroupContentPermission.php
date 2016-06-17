@@ -1,5 +1,7 @@
 <?php
 
+namespace Drupal\og;
+
 /**
  * A group level permission.
  *

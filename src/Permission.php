@@ -1,6 +1,6 @@
 <?php
 
-use Drupal\og\OgRoleInterface;
+namespace Drupal\og;
 
 /**
  * Base class for OG permissions.
