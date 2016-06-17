@@ -48,7 +48,7 @@ abstract class Permission {
    * @param array $values
    *   An associative array of values, keyed by property.
    */
-  public function __construct(array $values) {
+  public function __construct(array $values = []) {
     foreach ($values as $property => $value) {
       $this->set($property, $value);
     }
