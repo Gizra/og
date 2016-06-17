@@ -82,7 +82,7 @@ class PermissionManager implements PermissionManagerInterface {
     // @todo This needs to support all entity operations for the given entity
     //    type, not just the standard CRUD operations.
     // @see https://github.com/amitaibu/og/issues/222
-    $permissions += [
+    $operations = [
       "create $group_content_bundle_id $group_content_entity_type_id" => [
         'title' => t('Create %bundle @entity', $args),
       ],
@@ -101,8 +101,14 @@ class PermissionManager implements PermissionManagerInterface {
     ];
 
     // Add default permissions.
-    foreach ($permissions as $key => $value) {
-      $permissions[$key]['default role'] = [OgRoleInterface::ADMINISTRATOR];
+    foreach ($operations as $name => $title) {
+      $permission = new GroupContentPermission();
+      $permission
+        ->setName($name)
+        ->setTitle($title)
+        ->setEntityType($group_content_entity_type_id)
+        ->setBundle($group_content_bundle_id);
+      $permissions[] = $permission;
     }
 
     return $permissions;
