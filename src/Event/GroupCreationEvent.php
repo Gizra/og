@@ -48,4 +48,3 @@ class GroupCreationEvent extends Event implements GroupCreationEventInterface {
   }
 
 }
-

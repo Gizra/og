@@ -51,7 +51,7 @@ class GroupManager {
    */
   protected $configFactory;
 
-   /**
+  /**
    * The entity storage for OgRole entities.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface

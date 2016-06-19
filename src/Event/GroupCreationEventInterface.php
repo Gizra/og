@@ -26,5 +26,3 @@ interface GroupCreationEventInterface {
   public function getBundleId();
 
 }
-
-
