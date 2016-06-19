@@ -130,6 +130,8 @@ class Og {
     $view_display->setComponent($plugin_id, $view_display_definition);
     $view_display->save();
 
+    // Refresh the group manager data, we have added a group type.
+    static::groupManager()->resetGroupRelationMap();
 
     return $field_definition;
   }
@@ -251,6 +253,30 @@ class Og {
       ->loadMultiple($results);
 
     return static::$cache[$identifier];
+  }
+
+  /**
+   * Returns the group membership for a given user and group.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get the membership for.
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group to get the membership for.
+   * @param array $states
+   *   (optional) Array with the state to return. Defaults to active.
+   * @param string $field_name
+   *   (optional) The field name associated with the group.
+   *
+   * @return \Drupal\og\Entity\OgMembership|NULL
+   *   The OgMembership entity, or NULL if the user is not a member of the
+   *   group.
+   */
+  public static function getMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
+    foreach (static::getUserMemberships($user, $states, $field_name) as $membership) {
+      if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getEntityId() === $group->id()) {
+        return $membership;
+      }
+    }
   }
 
   /**
@@ -411,12 +437,10 @@ class Og {
   public static function getGroupContentIds(EntityInterface $entity, array $entity_types = []) {
     $group_content = [];
 
+
     // Retrieve the fields which reference our entity type and bundle.
     $query = \Drupal::entityQuery('field_storage_config')
-      // @todo For the moment retrieving both group types, since there seems to
-      //   be some confusion about which field type is used for users.
-      // @see https://github.com/amitaibu/og/issues/177
-      ->condition('type', ['og_standard_reference', 'og_membership_reference'], 'IN');
+      ->condition('type', OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE);
 
     // Optionally filter group content entity types.
     if ($entity_types) {
@@ -546,12 +570,9 @@ class Og {
    *   The entity type.
    * @param string $bundle_id
    *   The bundle name.
-   *
-   * @return bool
-   *   True or false if the action succeeded.
    */
   public static function addGroup($entity_type_id, $bundle_id) {
-    return static::groupManager()->addGroup($entity_type_id, $bundle_id);
+    static::groupManager()->addGroup($entity_type_id, $bundle_id);
   }
 
   /**
@@ -691,6 +712,13 @@ class Og {
     $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
+  }
+
+  /**
+   * Resets the static cache.
+   */
+  public static function reset() {
+    static::$cache = [];
   }
 
 }

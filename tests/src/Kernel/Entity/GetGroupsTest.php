@@ -9,6 +9,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\user\Entity\User;
 
 /**
  * Tests retrieving groups associated with a given group content.
@@ -69,6 +70,10 @@ class GetGroupsTest extends KernelTestBase {
 
     $this->groups = [];
 
+    // Create group admin user.
+    $group_admin = User::create(['name' => $this->randomString()]);
+    $group_admin->save();
+
     // Create four groups of two different entity types.
     for ($i = 0; $i < 2; $i++) {
       $bundle = "node_$i";
@@ -81,6 +86,7 @@ class GetGroupsTest extends KernelTestBase {
       $group = Node::create([
         'title' => $this->randomString(),
         'type' => $bundle,
+        'uid' => $group_admin->id(),
       ]);
       $group->save();
       $this->groups['node'][] = $group;
@@ -93,6 +99,7 @@ class GetGroupsTest extends KernelTestBase {
       $group = EntityTest::create([
         'type' => $bundle,
         'name' => $this->randomString(),
+        'uid' => $group_admin->id(),
       ]);
       $group->save();
       $this->groups['entity_test'][] = $group;

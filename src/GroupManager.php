@@ -8,11 +8,25 @@
 namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\State\StateInterface;
+use Drupal\og\Entity\OgRole;
+use Drupal\og\Event\DefaultRoleEvent;
+use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\og\Event\PermissionEvent;
+use Drupal\og\Event\PermissionEventInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
  */
 class GroupManager {
+
+  /**
+   * The key used to identify the cached version of the group relation map.
+   */
+  const GROUP_RELATION_MAP_CACHE_KEY = 'og.group_manager.group_relation_map';
 
   /**
    * The OG settings configuration key.
@@ -36,18 +50,85 @@ class GroupManager {
   protected $configFactory;
 
   /**
+   * The entity storage for OgRole entities.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $ogRoleStorage;
+
+  /**
+   * The service providing information about bundles.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
+   */
+  protected $entityTypeBundleInfo;
+
+  /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
+   * The state service.
+   *
+   * @var \Drupal\Core\State\StateInterface
+   */
+  protected $state;
+
+  /**
    * A map of entity types and bundles.
+   *
+   * Do not access this property directly, use $this->getGroupMap() instead.
    *
    * @var array
    */
   protected $groupMap;
 
   /**
-   * Constructs an GroupManager object.
+   * A map of group and group content relations.
+   *
+   * Do not access this property directly, use $this->getGroupRelationMap()
+   * instead.
+   *
+   * @var array $groupRelationMap
+   *   An associative array representing group and group content relations, in
+   *   the following format:
+   *   @code
+   *   [
+   *     'group_entity_type_id' => [
+   *       'group_bundle_id' => [
+   *         'group_content_entity_type_id' => [
+   *           'group_content_bundle_id',
+   *         ],
+   *       ],
+   *     ],
+   *   ]
+   *   @endcode
    */
-  public function __construct(ConfigFactoryInterface $config_factory) {
+  protected $groupRelationMap = [];
+
+  /**
+   * Constructs an GroupManager object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The service providing information about bundles.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   *   The event dispatcher.
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The state service.
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state) {
     $this->configFactory = $config_factory;
-    $this->refreshGroupMap();
+    $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
+    $this->entityTypeBundleInfo = $entity_type_bundle_info;
+    $this->eventDispatcher = $event_dispatcher;
+    $this->state = $state;
   }
 
   /**
@@ -59,7 +140,8 @@ class GroupManager {
    * @return bool
    */
   public function isGroup($entity_type_id, $bundle) {
-    return isset($this->groupMap[$entity_type_id]) && in_array($bundle, $this->groupMap[$entity_type_id]);
+    $group_map = $this->getGroupMap();
+    return isset($group_map[$entity_type_id]) && in_array($bundle, $group_map[$entity_type_id]);
   }
 
   /**
@@ -68,7 +150,8 @@ class GroupManager {
    * @return array
    */
   public function getGroupsForEntityType($entity_type_id) {
-    return isset($this->groupMap[$entity_type_id]) ? $this->groupMap[$entity_type_id] : [];
+    $group_map = $this->getGroupMap();
+    return isset($group_map[$entity_type_id]) ? $group_map[$entity_type_id] : [];
   }
 
   /**
@@ -79,13 +162,80 @@ class GroupManager {
    *   of bundle IDs.
    */
   public function getAllGroupBundles($entity_type = NULL) {
-    return !empty($this->groupMap[$entity_type]) ? $this->groupMap[$entity_type] : $this->groupMap;
+    $group_map = $this->getGroupMap();
+    return !empty($group_map[$entity_type]) ? $group_map[$entity_type] : $group_map;
+  }
+
+  /**
+   * Returns all group bundles that are referenced by the given group content.
+   *
+   * @param string $group_content_entity_type_id
+   *   The entity type ID of the group content type for which to return
+   *   associated group bundle IDs.
+   * @param string $group_content_bundle_id
+   *   The bundle ID of the group content type for which to return associated
+   *   group bundle IDs.
+   *
+   * @return array
+   *   An array of group bundle IDs, keyed by group entity type ID.
+   */
+  public function getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) {
+    $bundles = [];
+
+    foreach (OgGroupAudienceHelper::getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id) as $field) {
+      $group_entity_type_id = $field->getSetting('target_type');
+      $handler_settings = $field->getSetting('handler_settings');
+      $group_bundle_ids = !empty($handler_settings['target_bundles']) ? $handler_settings['target_bundles'] : [];
+
+      // If the group bundles are empty, it means that all bundles are
+      // referenced.
+      if (empty($group_bundle_ids)) {
+        $group_bundle_ids = $this->getGroupMap()[$group_entity_type_id];
+      }
+
+      foreach ($group_bundle_ids as $group_bundle_id) {
+        $bundles[$group_entity_type_id][$group_bundle_id] = $group_bundle_id;
+      }
+    }
+
+    return $bundles;
+  }
+
+  /**
+   * Returns group content bundles that are referencing the given group content.
+   *
+   * @param string $group_entity_type_id
+   *   The entity type ID of the group type for which to return associated group
+   *   content bundle IDs.
+   * @param string $group_bundle_id
+   *   The bundle ID of the group type for which to return associated group
+   *   content bundle IDs.
+   *
+   * @return array
+   *   An array of group content bundle IDs, keyed by group content entity type
+   *   ID.
+   */
+  public function getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id) {
+    $group_relation_map = $this->getGroupRelationMap();
+    return isset($group_relation_map[$group_entity_type_id][$group_bundle_id]) ? $group_relation_map[$group_entity_type_id][$group_bundle_id] : [];
   }
 
   /**
    * Sets an entity type instance as being an OG group.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the bundle to declare as being a group.
+   * @param string $bundle_id
+   *   The bundle ID of the bundle to declare as being a group.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when the given bundle is already a group.
    */
   public function addGroup($entity_type_id, $bundle_id) {
+    // Throw an error if the entity type is already defined as a group.
+    if ($this->isGroup($entity_type_id, $bundle_id)) {
+      throw new \InvalidArgumentException("The '$entity_type_id' of type '$bundle_id' is already a group.");
+    }
     $editable = $this->configFactory->getEditable('og.settings');
     $groups = $editable->get('groups');
     $groups[$entity_type_id][] = $bundle_id;
@@ -93,11 +243,10 @@ class GroupManager {
     $groups[$entity_type_id] = array_unique($groups[$entity_type_id]);
 
     $editable->set('groups', $groups);
-    $saved = $editable->save();
+    $editable->save();
 
+    $this->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
-
-    return $saved;
   }
 
   /**
@@ -119,19 +268,206 @@ class GroupManager {
 
       // Only update and refresh the map if a key was found and unset.
       $editable->set('groups', $groups);
-      $saved = $editable->save();
+      $editable->save();
 
-      $this->refreshGroupMap();
+      // Remove all roles associated with this group type.
+      $this->removeRoles($entity_type_id, $bundle_id);
 
-      return $saved;
+      $this->resetGroupMap();
     }
+  }
+
+  /**
+   * Creates the roles for the given group type, based on the default roles.
+   *
+   * This is intended to be called after a new group type has been created.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the group for which to create default roles.
+   * @param string $bundle_id
+   *   The bundle ID of the group for which to create default roles.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  protected function createPerBundleRoles($entity_type_id, $bundle_id) {
+    foreach ($this->getDefaultRoles() as $role) {
+      $role->setGroupType($entity_type_id);
+      $role->setGroupBundle($bundle_id);
+
+      // Populate the default permissions.
+      $event = new PermissionEvent($entity_type_id, $bundle_id);
+      /** @var \Drupal\og\Event\PermissionEventInterface $permissions */
+      $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
+      foreach (array_keys($permissions->filterByDefaultRole($role->getName())) as $permission) {
+        $role->grantPermission($permission);
+      }
+      $role->save();
+    }
+  }
+
+  /**
+   * Returns the default roles.
+   *
+   * @return \Drupal\og\Entity\OgRole[]
+   *   An associative array of (unsaved) OgRole entities, keyed by role name.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  public function getDefaultRoles() {
+    // Provide the required default roles: 'member' and 'non-member'.
+    $roles = $this->getRequiredDefaultRoles();
+
+    $event = new DefaultRoleEvent();
+    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+
+    // Use the array union operator '+=' to ensure the default roles cannot be
+    // altered by event subscribers.
+    $roles += $event->getRoles();
+
+    return $roles;
+  }
+
+  /**
+   * Returns the roles which every group type requires.
+   *
+   * This provides the 'member' and 'non-member' roles. These are hard coded
+   * because they are strictly required and should not be altered.
+   *
+   * @return \Drupal\og\Entity\OgRole[]
+   *   An associative array of (unsaved) required OgRole entities, keyed by role
+   *   name. These are populated with the basic properties: name, label and
+   *   role_type.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  protected function getRequiredDefaultRoles() {
+    $roles = [];
+
+    $role_properties = [
+      [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Non-member',
+        'name' => OgRoleInterface::ANONYMOUS,
+      ],
+      [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Member',
+        'name' => OgRoleInterface::AUTHENTICATED,
+      ],
+    ];
+
+    foreach ($role_properties as $properties) {
+      $roles[$properties['name']] = $this->ogRoleStorage->create($properties);
+    }
+
+    return $roles;
+  }
+
+  /**
+   * Deletes the roles associated with a group type.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the group for which to delete the roles.
+   * @param string $bundle_id
+   *   The bundle ID of the group for which to delete the roles.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  protected function removeRoles($entity_type_id, $bundle_id) {
+    $properties = [
+      'group_type' => $entity_type_id,
+      'group_bundle' => $bundle_id,
+    ];
+    foreach ($this->ogRoleStorage->loadByProperties($properties) as $role) {
+      $role->delete();
+    }
+  }
+
+  /**
+   * Resets all locally stored data.
+   */
+  public function reset() {
+    $this->resetGroupMap();
+    $this->resetGroupRelationMap();
+  }
+
+  /**
+   * Resets the cached group map.
+   *
+   * Call this after adding or removing a group type.
+   */
+  public function resetGroupMap() {
+    $this->groupMap = [];
+  }
+
+  /**
+   * Resets the cached group relation map.
+   *
+   * Call this after making a change to the relationship between a group type
+   * and a group content type.
+   */
+  public function resetGroupRelationMap() {
+    $this->groupRelationMap = [];
+    $this->state->delete(self::GROUP_RELATION_MAP_CACHE_KEY);
+  }
+
+  /**
+   * Returns the group map.
+   *
+   * @return array
+   *   The group map.
+   */
+  protected function getGroupMap() {
+    if (empty($this->groupMap)) {
+      $this->refreshGroupMap();
+    }
+    return $this->groupMap;
+  }
+
+  /**
+   * Returns the group relation map.
+   *
+   * @return array
+   *   The group relation map.
+   */
+  protected function getGroupRelationMap() {
+    if (empty($this->groupRelationMap)) {
+      $this->refreshGroupRelationMap();
+    }
+    return $this->groupRelationMap;
   }
 
   /**
    * Refreshes the groupMap property with currently configured groups.
    */
   protected function refreshGroupMap() {
-    $this->groupMap = $this->configFactory->get(static::SETTINGS_CONFIG_KEY)->get(static::GROUPS_CONFIG_KEY);
+    $group_map = $this->configFactory->get(static::SETTINGS_CONFIG_KEY)->get(static::GROUPS_CONFIG_KEY);
+    $this->groupMap = !empty($group_map) ? $group_map : [];
+  }
+
+  /**
+   * Populates the map of relations between group types and group content types.
+   */
+  protected function refreshGroupRelationMap() {
+    // Retrieve a cached version of the map if it exists.
+    if ($group_relation_map = $this->state->get(self::GROUP_RELATION_MAP_CACHE_KEY)) {
+      $this->groupRelationMap = $group_relation_map;
+      return;
+    }
+
+    $this->groupRelationMap = [];
+
+    foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
+      foreach ($bundles as $group_content_bundle_id => $bundle_info) {
+        foreach ($this->getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) as $group_entity_type_id => $group_bundle_ids) {
+          foreach ($group_bundle_ids as $group_bundle_id) {
+            $this->groupRelationMap[$group_entity_type_id][$group_bundle_id][$group_content_entity_type_id][$group_content_bundle_id] = $group_content_bundle_id;
+          }
+        }
+      }
+    }
+    // Cache the map.
+    $this->state->set(self::GROUP_RELATION_MAP_CACHE_KEY, $this->groupRelationMap);
   }
 
 }

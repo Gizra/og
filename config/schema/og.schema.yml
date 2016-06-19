@@ -105,17 +105,23 @@ og.og_role.*:
       type: string
       label: 'Group ID'
     group_type:
-      type: label
+      type: string
       label: 'Group type'
     group_bundle:
-      type: label
+      type: string
       label: 'Group bundle'
+    is_admin:
+      type: boolean
+      label: 'User is group admin'
     permissions:
       type: sequence
       label: 'Permissions'
       sequence:
         type: string
         label: 'Permission'
+    role_type:
+      type: string
+      label: 'Role type'
 
 field.widget.settings.og_complex:
   type: mapping
