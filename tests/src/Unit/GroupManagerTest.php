@@ -75,11 +75,6 @@ class GroupManagerTest extends UnitTestCase {
   protected $stateProphecy;
 
   /**
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $moduleHandlerProphecy;
-
-  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -92,7 +87,6 @@ class GroupManagerTest extends UnitTestCase {
     $this->eventDispatcherProphecy = $this->prophesize(EventDispatcherInterface::class);
     $this->permissionEventProphecy = $this->prophesize(PermissionEventInterface::class);
     $this->stateProphecy = $this->prophesize(StateInterface::class);
-    $this->moduleHandlerProphecy = $this->prophesize('Drupal\Core\Extension\ModuleHandlerInterface');
   }
 
   /**
@@ -273,8 +267,7 @@ class GroupManagerTest extends UnitTestCase {
       $this->entityTypeManagerProphecy->reveal(),
       $this->entityTypeBundleInfoProphecy->reveal(),
       $this->eventDispatcherProphecy->reveal(),
-      $this->stateProphecy->reveal(),
-      $this->moduleHandlerProphecy->reveal()
+      $this->stateProphecy->reveal()
     );
   }
 

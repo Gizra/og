@@ -3,8 +3,12 @@
 namespace Drupal\og\EventSubscriber;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -48,6 +52,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
     return [
       PermissionEventInterface::EVENT_NAME => [['provideDefaultOgPermissions']],
       DefaultRoleEventInterface::EVENT_NAME => [['provideDefaultRoles']],
+      GroupCreationEventInterface::EVENT_NAME => [['createUserGroupAudienceField']]
     ];
   }
 
@@ -86,6 +91,70 @@ class OgEventSubscriber implements EventSubscriberInterface {
       'is_admin' => TRUE,
     ]);
     $event->addRole($role);
+  }
+
+  /**
+   * Acting upon group creation and attach an og audience field to the user.
+   *
+   * @param GroupCreationEventInterface $event
+   *   The created group.
+   */
+  public function createUserGroupAudienceField(GroupCreationEventInterface $event) {
+    $entity_type_id = $event->getEntityTypeId();
+    $bundle_id = $event->getBundleId();
+
+    // create a group audience field which will reference to groups from the given
+    // entity type ID and attach it to the user.
+    $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user');
+
+    foreach ($fields as $field) {
+
+      if ($field->getFieldStorageDefinition()->getSetting('target_type') == $entity_type_id) {
+
+        if (!$field->getSetting('handler_settings')['target_bundles']) {
+          return;
+        }
+
+        if (in_array($bundle_id, $field->getSetting('handler_settings')['target_bundles'])) {
+          return;
+        }
+      }
+    }
+
+    // If we reached here, it means we need to create a field.
+    // Pick an unused name.
+    $field_name = substr("og_user_$entity_type_id", 0, 32);
+    $i = 1;
+    while (FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name)) {
+      $field_name = substr("og_user_$entity_type_id", 0, 32 - strlen($i)) . $i;
+      ++$i;
+    }
+
+    if (!$user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle')) {
+      $user_bundles = [];
+    }
+
+    $user_bundles[] = 'user';
+
+    $settings = [
+      'field_name' => $field_name,
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => $entity_type_id,
+        ],
+      ],
+      'field_config' => [
+        'settings' => [
+          'handler_settings' => [
+            'target_bundles' => [$bundle_id => $bundle_id],
+          ],
+        ],
+      ],
+    ];
+
+    foreach ($user_bundles as $user_bundle) {
+      Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', $user_bundle, $settings);
+    }
   }
 
 }

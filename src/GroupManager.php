@@ -12,9 +12,10 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
-use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\og\Event\GroupCreationEvent;
+use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\Event\PermissionEventInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -128,15 +129,13 @@ class GroupManager {
    *   The event dispatcher.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, ModuleHandlerInterface $module_handler) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->state = $state;
-    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -225,10 +224,6 @@ class GroupManager {
    */
   public function getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id) {
     $group_relation_map = $this->getGroupRelationMap();
-
-    // User is not a group content per se. Remove it.
-    unset($group_relation_map[$group_entity_type_id][$group_bundle_id]['user']);
-
     return isset($group_relation_map[$group_entity_type_id][$group_bundle_id]) ? $group_relation_map[$group_entity_type_id][$group_bundle_id] : [];
   }
 
@@ -259,8 +254,8 @@ class GroupManager {
     $editable->save();
 
     // Notify other module we added a new group.
-    // todo: should this be an event?
-    $this->moduleHandler->invokeAll('og_group_created', [$entity_type_id, $bundle_id]);
+    $event = new GroupCreationEvent($entity_type_id, $bundle_id);
+    $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, $event);
 
     $this->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
@@ -476,6 +471,12 @@ class GroupManager {
 
     foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
       foreach ($bundles as $group_content_bundle_id => $bundle_info) {
+
+        if ($group_content_bundle_id == 'user') {
+          // User is not a group content per se. Remove it.
+          continue;
+        }
+
         foreach ($this->getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) as $group_entity_type_id => $group_bundle_ids) {
           foreach ($group_bundle_ids as $group_bundle_id) {
             $this->groupRelationMap[$group_entity_type_id][$group_bundle_id][$group_content_entity_type_id][$group_content_bundle_id] = $group_content_bundle_id;
