@@ -115,9 +115,16 @@ class OgUiController extends ControllerBase {
   }
   
   public function ogTasks() {
+
+    $plugins = \Drupal::service('plugin.manager.og_ui.group_admin_route');
+    $list = '';
+    foreach ($plugins->getDefinitions() as $definition) {
+      $list .= $definition['id'] . "</br />";
+    }
+
     $build['roles_table'] = [
       '#theme' => 'item',
-      '#markup' => $this->t('No group types available.'),
+      '#markup' => $list,
     ];
 
     return $build;
