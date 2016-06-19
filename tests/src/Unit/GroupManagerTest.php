@@ -273,7 +273,8 @@ class GroupManagerTest extends UnitTestCase {
       $this->entityTypeManagerProphecy->reveal(),
       $this->entityTypeBundleInfoProphecy->reveal(),
       $this->eventDispatcherProphecy->reveal(),
-      $this->stateProphecy->reveal()
+      $this->stateProphecy->reveal(),
+      $this->moduleHandlerProphecy->reveal()
     );
   }
 

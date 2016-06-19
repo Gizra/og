@@ -111,6 +111,11 @@ class GroupManager {
   protected $groupRelationMap = [];
 
   /**
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * Constructs an GroupManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -119,17 +124,19 @@ class GroupManager {
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The service providing information about bundles.
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   * @param EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, ModuleHandlerInterface $module_handler) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->state = $state;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -246,6 +253,10 @@ class GroupManager {
 
     $editable->set('groups', $groups);
     $editable->save();
+
+    // Notify other module we added a new group.
+    // todo: should this be an event?
+    $this->moduleHandler->invokeAll('og_group_created', [$entity_type_id, $bundle_id]);
 
     $this->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
