@@ -21,7 +21,7 @@ class OgAccessTest extends OgAccessTestBase {
    */
   public function testUserAccessNotAGroup($operation) {
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(FALSE);
-    $user_access = OgAccess::userAccess($this->group, $operation);
+    $user_access = $this->ogAccess->userAccess($this->group, $operation);
     $this->assertTrue($user_access->isNeutral());
   }
 
@@ -30,7 +30,7 @@ class OgAccessTest extends OgAccessTestBase {
    * @dataProvider operationProvider
    */
   public function testAccessByOperation($operation) {
-    $user_access = OgAccess::userAccess($this->group, $operation, $this->user->reveal());
+    $user_access = $this->ogAccess->userAccess($this->group, $operation, $this->user->reveal());
 
     // We populate the allowed permissions cache in
     // OgAccessTestBase::setup().
@@ -45,7 +45,7 @@ class OgAccessTest extends OgAccessTestBase {
    */
   public function testUserAccessUser1($operation) {
     $this->user->id()->willReturn(1);
-    $user_access = OgAccess::userAccess($this->group, $operation, $this->user->reveal());
+    $user_access = $this->ogAccess->userAccess($this->group, $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }
 
@@ -55,7 +55,7 @@ class OgAccessTest extends OgAccessTestBase {
    */
   public function testUserAccessAdminPermission($operation) {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
-    $user_access = OgAccess::userAccess($this->group, $operation, $this->user->reveal());
+    $user_access = $this->ogAccess->userAccess($this->group, $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }
 
@@ -65,7 +65,7 @@ class OgAccessTest extends OgAccessTestBase {
    */
   public function testUserAccessOwner($operation) {
     $this->config->get('group_manager_full_access')->willReturn(TRUE);
-    $user_access = OgAccess::userAccess($this->groupEntity(TRUE)->reveal(), $operation, $this->user->reveal());
+    $user_access = $this->ogAccess->userAccess($this->groupEntity(TRUE)->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }
 

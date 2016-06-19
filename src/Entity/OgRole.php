@@ -3,6 +3,7 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
+use Drupal\og\Exception\OgRoleException;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
 
@@ -24,17 +25,19 @@ use Drupal\user\Entity\Role;
  *     "id",
  *     "label",
  *     "weight",
+ *     "is_admin",
  *     "group_type",
  *     "group_bundle",
  *     "group_id",
- *     "permissions"
+ *     "permissions",
+ *     "role_type"
  *   }
  * )
  */
 class OgRole extends Role implements OgRoleInterface {
 
   /**
-   * Set the ID of the role.
+   * Sets the ID of the role.
    *
    * @param string $id
    *   The machine name of the role.
@@ -139,16 +142,88 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
+   * Returns the role type.
+   *
+   * @return string
+   *   The role type. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   */
+  public function getRoleType() {
+    return $this->get('role_type') ?: OgRoleInterface::ROLE_TYPE_STANDARD;
+  }
+
+  /**
+   * Sets the role type.
+   *
+   * @param string $role_type
+   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   *
+   * @return $this
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when an invalid role type is given.
+   */
+  public function setRoleType($role_type) {
+    if (!in_array($role_type, [
+      self::ROLE_TYPE_REQUIRED,
+      self::ROLE_TYPE_STANDARD,
+    ])) {
+      throw new \InvalidArgumentException("'$role_type' is not a valid role type.");
+    }
+    return $this->set('role_type', $role_type);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getName() {
+    // If the name is not set yet, try to derive it from the ID.
+    if (empty($this->name) && !empty($this->id()) && !empty($this->getGroupType()) && !empty($this->getGroupBundle())) {
+      // Check if the ID matches the pattern '{entity type}-{bundle}-{name}'.
+      $pattern = preg_quote("{$this->getGroupType()}-{$this->getGroupBundle()}-");
+      preg_match("/$pattern(.+)/", $this->id(), $matches);
+      if (!empty($matches[1])) {
+        $this->setName($matches[1]);
+      }
+    }
+    return $this->get('name');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setName($name) {
+    $this->name = $name;
+    return $this;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function save() {
-    if ($this->isNew()) {
+    // The ID of a new OgRole has to consist of the entity type ID, bundle ID
+    // and role name, separated by dashes.
+    if ($this->isNew() && !empty($this->id())) {
+      list($entity_type_id, $bundle_id, $name) = explode('-', $this->id());
+      if ($entity_type_id !== $this->getGroupType() || $bundle_id !== $this->getGroupBundle() || $name !== $this->getName()) {
+        throw new ConfigValueException('The ID should consist of the group entity type ID, group bundle ID and role name, separated by dashes.');
+      }
+    }
+
+    // If a new OgRole is saved and the ID is not set, construct the ID from
+    // the entity type ID, bundle ID and role name.
+    if ($this->isNew() && empty($this->id())) {
       if (empty($this->getGroupType())) {
         throw new ConfigValueException('The group type can not be empty.');
       }
 
       if (empty($this->getGroupBundle())) {
         throw new ConfigValueException('The group bundle can not be empty.');
+      }
+
+      if (empty($this->getName())) {
+        throw new ConfigValueException('The role name can not be empty.');
       }
 
       // When assigning a role to group we need to add a prefix to the ID in
@@ -159,10 +234,78 @@ class OgRole extends Role implements OgRoleInterface {
         $prefix .= $this->getGroupId() . '-';
       }
 
-      $this->id = $prefix . $this->id();
+      $this->id = $prefix . $this->getName();
     }
 
     parent::save();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function set($property_name, $value) {
+    // Prevent the ID, role type, group ID, group entity type or bundle from
+    // being changed once they are set. These properties are required and
+    // shouldn't be tampered with.
+    $is_locked_property = in_array($property_name, [
+      'id',
+      'role_type',
+      'group_id',
+      'group_type',
+      'group_bundle',
+    ]);
+    if ($is_locked_property && !$this->isNew()) {
+      throw new OgRoleException("The $property_name cannot be changed.");
+    }
+    return parent::set($property_name, $value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function delete() {
+    // The default roles are required. Prevent them from being deleted for as
+    // long as the group still exists.
+    if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && $this->groupManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
+      throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
+    }
+    parent::delete();
+  }
+
+  /**
+   * Maps role names to role types.
+   *
+   * The 'anonymous' and 'authenticated' roles should not be changed or deleted.
+   * All others are standard roles.
+   *
+   * @param string $role_name
+   *   The role name for which to return the type.
+   *
+   * @return string
+   *   The role type, either OgRoleInterface::ROLE_TYPE_REQUIRED or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   */
+  public static function getRoleTypeByName($role_name) {
+    return in_array($role_name, [
+      OgRoleInterface::ANONYMOUS,
+      OgRoleInterface::AUTHENTICATED,
+    ]) ? OgRoleInterface::ROLE_TYPE_REQUIRED : OgRoleInterface::ROLE_TYPE_STANDARD;
+  }
+
+  /**
+   * Gets the group manager.
+   *
+   * @return \Drupal\og\GroupManager
+   *   The group manager.
+   */
+  protected function groupManager() {
+    // Returning the group manager by calling the global factory method might
+    // seem less than ideal, but Entity classes are not designed to work with
+    // proper dependency injection. The ::create() method only accepts a $values
+    // array, which is not compatible with ContainerInjectionInterface.
+    // See for example Entity::uuidGenerator() in the base Entity class, it
+    // also uses this pattern.
+    return \Drupal::service('og.group.manager');
   }
 
 }

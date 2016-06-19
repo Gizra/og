@@ -9,6 +9,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\user\Entity\User;
 
 /**
  * Tests getting the group content of a group.
@@ -38,6 +39,13 @@ class GetGroupContentTest extends KernelTestBase {
   protected $entityTypeManager;
 
   /**
+   * The group admin user.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $groupAdmin;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -52,6 +60,10 @@ class GetGroupContentTest extends KernelTestBase {
 
     /** @var \Drupal\Core\Entity\EntityTypeManagerInterface entityTypeManager */
     $this->entityTypeManager = $this->container->get('entity_type.manager');
+
+    // Create group admin user.
+    $this->groupAdmin = User::create(['name' => $this->randomString()]);
+    $this->groupAdmin->save();
   }
 
   /**
@@ -71,6 +83,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups['node'] = Node::create([
       'title' => $this->randomString(),
       'type' => $bundle,
+      'uid' => $this->groupAdmin->id(),
     ]);
     $groups['node']->save();
 
@@ -82,6 +95,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups['entity_test'] = EntityTest::create([
       'type' => $bundle,
       'name' => $this->randomString(),
+      'uid' => $this->groupAdmin->id(),
     ]);
     $groups['entity_test']->save();
 
@@ -167,6 +181,7 @@ class GetGroupContentTest extends KernelTestBase {
       $groups[$i] = Node::create([
         'title' => $this->randomString(),
         'type' => $bundle,
+        'uid' => $this->groupAdmin->id(),
       ]);
       $groups[$i]->save();
     }
@@ -220,6 +235,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups['node'] = Node::create([
       'title' => $this->randomString(),
       'type' => $bundle,
+      'uid' => $this->groupAdmin->id()
     ]);
     $groups['node']->save();
 
@@ -231,6 +247,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups['entity_test'] = EntityTest::create([
       'type' => $bundle,
       'name' => $this->randomString(),
+      'uid' => $this->groupAdmin->id(),
     ]);
     $groups['entity_test']->save();
 

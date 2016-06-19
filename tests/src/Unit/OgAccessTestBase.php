@@ -7,18 +7,19 @@
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\user\EntityOwnerInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Cache\Context\CacheContextsManager;
 use Drupal\Core\Config\Config;
-use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\og\OgAccess;
-use Drupal\og\OgMembershipInterface;
-use Drupal\Tests\UnitTestCase;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupManager;
+use Drupal\og\OgAccess;
+use Drupal\og\OgMembershipInterface;
+use Drupal\user\EntityOwnerInterface;
 use Prophecy\Argument;
 
 class OgAccessTestBase extends UnitTestCase {
@@ -47,6 +48,16 @@ class OgAccessTestBase extends UnitTestCase {
    */
   protected $groupManager;
 
+  /**
+   * The OgAccess class, this is the system under test.
+   *
+   * @var \Drupal\og\OgAccessInterface
+   */
+  protected $ogAccess;
+
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
@@ -57,11 +68,24 @@ class OgAccessTestBase extends UnitTestCase {
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens(Argument::any())->willReturn(TRUE);
 
+    // It is expected that any access check will retrieve the settings, because
+    // it contains an option to give full access to to the group manager.
     $this->config = $this->addCache($this->prophesize(Config::class));
     $this->config->get('group_manager_full_access')->willReturn(FALSE);
 
-    $config_factory = $this->prophesize(ConfigFactory::class);
+    // Whether or not the user has access to a certain operation depends in part
+    // on the 'group_manager_full_access' setting which is stored in config.
+    // Since the access is cached, this means that from the point of view from
+    // the caching system this access varies by the 'og.settings' config object
+    // that contains this setting. It is hence expected that the cacheability
+    // metadata is retrieved from the config object so it can be attached to the
+    // access result object.
+    $config_factory = $this->prophesize(ConfigFactoryInterface::class);
     $config_factory->get('og.settings')->willReturn($this->config);
+
+    $this->config->getCacheContexts()->willReturn([]);
+    $this->config->getCacheTags()->willReturn([]);
+    $this->config->getCacheMaxAge()->willReturn(0);
 
     $this->user = $this->prophesize(AccountInterface::class);
     $this->user->isAuthenticated()->willReturn(TRUE);
@@ -81,6 +105,12 @@ class OgAccessTestBase extends UnitTestCase {
     $group_type_id = $this->group->getEntityTypeId();
 
     $entity_id = 20;
+
+    $account_proxy = $this->prophesize(AccountProxyInterface::class);
+    $module_handler = $this->prophesize(ModuleHandlerInterface::class);
+
+    // Instantiate the system under test.
+    $this->ogAccess = new OgAccess($config_factory->reveal(), $account_proxy->reveal(), $module_handler->reveal());
 
     // Set the Og::cache property values, to skip calculations.
     $values = [];
@@ -112,9 +142,9 @@ class OgAccessTestBase extends UnitTestCase {
     ];
     $identifier = implode(':', $identifier);
 
-    // The cache is supposed to be holding the OG membership, however it is not
-    // used in the tests, so we just set a TRUE value.
-    $values[$identifier] = TRUE;
+    // The cache is supposed to be holding the OG memberships, however it is not
+    // used in the tests, so we just set an empty array.
+    $values[$identifier] = [];
 
     $reflection_property->setValue($values);
 
@@ -123,13 +153,12 @@ class OgAccessTestBase extends UnitTestCase {
     $reflection_property = $r->getProperty('permissionsCache');
     $reflection_property->setAccessible(TRUE);
 
-
     $values = [];
     foreach (['pre_alter', 'post_alter'] as $key) {
-      $values[$group_type_id][$this->group->id()][2][$key] = ['permissions' => ['update group']];
+      $values[$group_type_id][$this->group->id()][2][$key] = ['permissions' => ['update group'], 'is_admin' => FALSE];
     }
 
-    $reflection_property->setValue($values);
+    $reflection_property->setValue($this->ogAccess, $values);
   }
 
   /**

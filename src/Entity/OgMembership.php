@@ -12,8 +12,8 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\og\Exception\OgException;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 
@@ -73,6 +73,9 @@ use Drupal\og\OgMembershipInterface;
  *   },
  *   bundle_keys = {
  *     "bundle" = "type"
+ *   },
+ *   handlers = {
+ *     "views_data" = "Drupal\og\OgMembershipViewsData",
  *   }
  * )
  */
@@ -105,7 +108,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getUser() {
-    return $this->get('uid')->value;
+    return $this->get('uid')->entity;
   }
 
   /**
@@ -253,9 +256,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setSetting('target_type', 'og_membership_type');
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Member entity ID'))
-      ->setDescription(t('The entity ID of the member.'))
-      ->setTargetEntityTypeId('user');
+      ->setLabel(t('Member User ID'))
+      ->setDescription(t('The user ID of the member.'))
+      ->setSetting('target_type', 'user');
 
     $fields['entity_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group entity type'))
@@ -295,13 +298,22 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function PreSave(EntityStorageInterface $storage) {
+  public function preSave(EntityStorageInterface $storage) {
 
     if (!$this->getFieldName()) {
       $this->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD);
     }
 
-    parent::PreSave($storage);
+    // Check the value directly rather than using the entity, if there is one.
+    // This will watch actual empty values and '0'.
+    if (!$this->get('uid')->target_id) {
+      // Throw a generic logic exception as this will likely get caught in
+      // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned in an
+      // EntityStorageException anyway.
+      throw new \LogicException('OG membership can not be created for an empty or anonymous user.');
+    }
+
+    parent::preSave($storage);
   }
 
   /**
@@ -312,7 +324,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
 
     // Reset internal cache.
     Og::reset();
-    OgAccess::reset();
+    \Drupal::service('og.access')->reset();
 
     return $result;
   }

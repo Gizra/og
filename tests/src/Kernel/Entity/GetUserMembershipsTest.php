@@ -56,6 +56,10 @@ class GetUserMembershipsTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
+    // Create group admin user.
+    $group_admin = User::create(['name' => $this->randomString()]);
+    $group_admin->save();
+
     // Create two groups.
     for ($i = 0; $i < 2; $i++) {
       $bundle = "node_$i";
@@ -68,6 +72,7 @@ class GetUserMembershipsTest extends KernelTestBase {
       $group = Node::create([
         'title' => $this->randomString(),
         'type' => $bundle,
+        'uid' => $group_admin->id(),
       ]);
       $group->save();
       $this->groups[] = $group;

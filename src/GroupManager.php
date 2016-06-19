@@ -10,7 +10,14 @@ namespace Drupal\og;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
+use Drupal\og\Entity\OgRole;
+use Drupal\og\Event\DefaultRoleEvent;
+use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\og\Event\PermissionEvent;
+use Drupal\og\Event\PermissionEventInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
@@ -43,19 +50,26 @@ class GroupManager {
    */
   protected $configFactory;
 
-  /**
-   * The module handler service.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
    /**
+   * The entity storage for OgRole entities.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $ogRoleStorage;
+
+  /**
    * The service providing information about bundles.
    *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
   protected $entityTypeBundleInfo;
+
+  /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
 
   /**
    * The state service.
@@ -101,16 +115,21 @@ class GroupManager {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The service providing information about bundles.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   *   The event dispatcher.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeBundleInfoInterface $entity_type_bundle_info, StateInterface $state, ModuleHandlerInterface $module_handler) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state) {
     $this->configFactory = $config_factory;
+    $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
+    $this->eventDispatcher = $event_dispatcher;
     $this->state = $state;
-    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -204,8 +223,20 @@ class GroupManager {
 
   /**
    * Sets an entity type instance as being an OG group.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the bundle to declare as being a group.
+   * @param string $bundle_id
+   *   The bundle ID of the bundle to declare as being a group.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when the given bundle is already a group.
    */
   public function addGroup($entity_type_id, $bundle_id) {
+    // Throw an error if the entity type is already defined as a group.
+    if ($this->isGroup($entity_type_id, $bundle_id)) {
+      throw new \InvalidArgumentException("The '$entity_type_id' of type '$bundle_id' is already a group.");
+    }
     $editable = $this->configFactory->getEditable('og.settings');
 
     $groups = $editable->get('groups');
@@ -214,15 +245,10 @@ class GroupManager {
     $groups[$entity_type_id] = array_unique($groups[$entity_type_id]);
 
     $editable->set('groups', $groups);
-    $saved = $editable->save();
+    $editable->save();
 
-    // Notify other module we added a new group.
-    // todo: should this be an event?
-    $this->moduleHandler->invokeAll('og_group_created', [$entity_type_id, $bundle_id]);
-
+    $this->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
-
-    return $saved;
   }
 
   /**
@@ -244,11 +270,118 @@ class GroupManager {
 
       // Only update and refresh the map if a key was found and unset.
       $editable->set('groups', $groups);
-      $saved = $editable->save();
+      $editable->save();
+
+      // Remove all roles associated with this group type.
+      $this->removeRoles($entity_type_id, $bundle_id);
 
       $this->resetGroupMap();
+    }
+  }
 
-      return $saved;
+  /**
+   * Creates the roles for the given group type, based on the default roles.
+   *
+   * This is intended to be called after a new group type has been created.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the group for which to create default roles.
+   * @param string $bundle_id
+   *   The bundle ID of the group for which to create default roles.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  protected function createPerBundleRoles($entity_type_id, $bundle_id) {
+    foreach ($this->getDefaultRoles() as $role) {
+      $role->setGroupType($entity_type_id);
+      $role->setGroupBundle($bundle_id);
+
+      // Populate the default permissions.
+      $event = new PermissionEvent($entity_type_id, $bundle_id);
+      /** @var \Drupal\og\Event\PermissionEventInterface $permissions */
+      $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
+      foreach (array_keys($permissions->filterByDefaultRole($role->getName())) as $permission) {
+        $role->grantPermission($permission);
+      }
+      $role->save();
+    }
+  }
+
+  /**
+   * Returns the default roles.
+   *
+   * @return \Drupal\og\Entity\OgRole[]
+   *   An associative array of (unsaved) OgRole entities, keyed by role name.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  public function getDefaultRoles() {
+    // Provide the required default roles: 'member' and 'non-member'.
+    $roles = $this->getRequiredDefaultRoles();
+
+    $event = new DefaultRoleEvent();
+    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+
+    // Use the array union operator '+=' to ensure the default roles cannot be
+    // altered by event subscribers.
+    $roles += $event->getRoles();
+
+    return $roles;
+  }
+
+  /**
+   * Returns the roles which every group type requires.
+   *
+   * This provides the 'member' and 'non-member' roles. These are hard coded
+   * because they are strictly required and should not be altered.
+   *
+   * @return \Drupal\og\Entity\OgRole[]
+   *   An associative array of (unsaved) required OgRole entities, keyed by role
+   *   name. These are populated with the basic properties: name, label and
+   *   role_type.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  protected function getRequiredDefaultRoles() {
+    $roles = [];
+
+    $role_properties = [
+      [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Non-member',
+        'name' => OgRoleInterface::ANONYMOUS,
+      ],
+      [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Member',
+        'name' => OgRoleInterface::AUTHENTICATED,
+      ],
+    ];
+
+    foreach ($role_properties as $properties) {
+      $roles[$properties['name']] = $this->ogRoleStorage->create($properties);
+    }
+
+    return $roles;
+  }
+
+  /**
+   * Deletes the roles associated with a group type.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the group for which to delete the roles.
+   * @param string $bundle_id
+   *   The bundle ID of the group for which to delete the roles.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  protected function removeRoles($entity_type_id, $bundle_id) {
+    $properties = [
+      'group_type' => $entity_type_id,
+      'group_bundle' => $bundle_id,
+    ];
+    foreach ($this->ogRoleStorage->loadByProperties($properties) as $role) {
+      $role->delete();
     }
   }
 
