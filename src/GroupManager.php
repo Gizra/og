@@ -225,6 +225,10 @@ class GroupManager {
    */
   public function getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id) {
     $group_relation_map = $this->getGroupRelationMap();
+
+    // User is not a group content per se. Remove it.
+    unset($group_relation_map[$group_entity_type_id][$group_bundle_id]['user']);
+
     return isset($group_relation_map[$group_entity_type_id][$group_bundle_id]) ? $group_relation_map[$group_entity_type_id][$group_bundle_id] : [];
   }
 
