@@ -101,12 +101,18 @@ function og_ui_entity_type_save(EntityInterface $entity) {
  * Implements hook_entity_type_alter().
  */
 function og_ui_entity_type_alter(array &$entity_types) {
-  $group_manager = Og::groupManager();
+//  $group_manager = Og::groupManager();
   
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   foreach ($entity_types as $entity_type_id => $entity_type) {
 
-    if (!$group_manager->getGroupsForEntityType($entity_type_id)) {
+//    if (!$group_manager->getGroupsForEntityType($entity_type_id)) {
+//      continue;
+//    }
+
+    // Adding the group manager causing for a circular dependency because the
+    // group manager the the entity manager as a dependency.
+    if ($entity_type_id != 'node') {
       continue;
     }
 

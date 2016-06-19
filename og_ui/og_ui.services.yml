@@ -7,4 +7,4 @@ services:
   og_ui.event_subscriber:
     class: Drupal\og_ui\EventSubscriber\OgUiEventSubscriber
     tags:
-      - { name: 'event_subscriber' }
+      - { name: event_subscriber }
