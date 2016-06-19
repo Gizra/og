@@ -15,6 +15,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\og\Event\GroupCreationEvent;
+use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\PermissionEventInterface;
@@ -210,6 +212,8 @@ class GroupManagerTest extends UnitTestCase {
 
     $this->expectDefaultRoleCreation('test_entity_new', 'a');
 
+    $this->expectGroupCreation();
+
     // Add a new entity type.
     $manager->addGroup('test_entity_new', 'a');
     $this->assertSame(['a'], $manager->getGroupsForEntityType('test_entity_new'));
@@ -305,6 +309,15 @@ class GroupManagerTest extends UnitTestCase {
     foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED] as $role_name) {
       $this->addNewDefaultRole($entity_type, $bundle, $role_name);
     }
+  }
+
+  /**
+   * Mocked method calls when system under test should attach og audience field
+   * on the user.
+   */
+  protected function expectGroupCreation() {
+    $this->eventDispatcherProphecy->dispatch(GroupCreationEventInterface::EVENT_NAME, Argument::type(GroupCreationEvent::class))
+      ->shouldBeCalled();
   }
 
   /**
