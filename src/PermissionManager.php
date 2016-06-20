@@ -102,7 +102,7 @@ class PermissionManager implements PermissionManagerInterface {
 
     // Add default permissions.
     foreach ($operations as $name => $title) {
-      $permission = new GroupContentPermission();
+      $permission = new GroupContentOperationPermission();
       $permission
         ->setName($name)
         ->setTitle($title)

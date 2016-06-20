@@ -5,10 +5,10 @@ namespace Drupal\og;
 /**
  * A group level permission.
  *
- * This is used for permissions that apply to the group as a whole, such as
- * 'subscribe without approval' and 'administer group'.
+ * This is used for permissions to perform operations on group content, for
+ * example 'edit own article content'.
  */
-class GroupContentPermission extends Permission {
+class GroupContentOperationPermission extends Permission {
 
   /**
    * The group content entity type ID to which this permission applies.
