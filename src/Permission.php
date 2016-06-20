@@ -5,7 +5,7 @@ namespace Drupal\og;
 /**
  * Base class for OG permissions.
  */
-abstract class Permission {
+abstract class Permission implements PermissionInterface {
 
   /**
    * The name of the permission.
@@ -86,22 +86,14 @@ abstract class Permission {
   }
 
   /**
-   * Returns the machine name of the permission.
-   *
-   * @return string
-   *   The permission machine name.
+   * {@inheritdoc}
    */
   public function getName() {
     return $this->get('name');
   }
 
   /**
-   * Sets the machine name of the permission.
-   *
-   * @param string $name
-   *   The machine name.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setName($name) {
     $this->set('name' , $name);
@@ -109,22 +101,14 @@ abstract class Permission {
   }
 
   /**
-   * Returns the human readable permission title.
-   *
-   * @return string
-   *   The human readable permission title.
+   * {@inheritdoc}
    */
   public function getTitle() {
     return $this->get('title');
   }
 
   /**
-   * Sets the human readable permission title.
-   *
-   * @param string $title
-   *   The human readable title.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setTitle($title) {
     $this->set('title' , $title);
@@ -132,22 +116,14 @@ abstract class Permission {
   }
 
   /**
-   * Returns the description.
-   *
-   * @return string
-   *   The description.
+   * {@inheritdoc}
    */
   public function getDescription() {
     return $this->get('description');
   }
 
   /**
-   * Sets the description.
-   *
-   * @param string $description
-   *   The machine description.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setDescription($description) {
     $this->set('description' , $description);
@@ -155,22 +131,14 @@ abstract class Permission {
   }
 
   /**
-   * Returns the default roles.
-   *
-   * @return array
-   *   The default roles.
+   * {@inheritdoc}
    */
   public function getDefaultRoles() {
     return $this->get('default roles');
   }
 
   /**
-   * Sets the default roles.
-   *
-   * @param array $default_roles
-   *   The default roles.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setDefaultRoles(array $default_roles) {
     $this->set('default roles' , $default_roles);
@@ -178,23 +146,14 @@ abstract class Permission {
   }
 
   /**
-   * Returns whether or not access is restricted.
-   *
-   * @return bool
-   *   Whether or not access is restricted.
+   * {@inheritdoc}
    */
   public function getRestrictAccess() {
     return $this->get('restrict access');
   }
 
   /**
-   * Sets the access restriction.
-   *
-   * @param bool $access
-   *   Whether or not this permission is security sensitive and should only be
-   *   granted to administrators.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setRestrictAccess($access) {
     $this->set('restrict access' , $access);
@@ -209,7 +168,7 @@ abstract class Permission {
    * @param mixed $value
    *   The value to validate.
    */
-  public function validate($property, $value) {
+  protected function validate($property, $value) {
     if (!property_exists($this, $property)) {
       throw new \InvalidArgumentException("Invalid property $property.");
     }
