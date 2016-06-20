@@ -83,26 +83,31 @@ class PermissionManager implements PermissionManagerInterface {
     //    type, not just the standard CRUD operations.
     // @see https://github.com/amitaibu/og/issues/222
     $operations = [
-      "create $group_content_bundle_id $group_content_entity_type_id" => [
+      [
+        'name' => "create $group_content_bundle_id $group_content_entity_type_id",
         'title' => t('Create %bundle @entity', $args),
         'operation' => 'create',
       ],
-      "update own $group_content_bundle_id $group_content_entity_type_id" => [
+      [
+        'name' => "update own $group_content_bundle_id $group_content_entity_type_id",
         'title' => t('Edit own %bundle @entity', $args),
         'operation' => 'update',
         'ownership' => 'own',
       ],
-      "update any $group_content_bundle_id $group_content_entity_type_id" => [
+      [
+        'name' => "update any $group_content_bundle_id $group_content_entity_type_id",
         'title' => t('Edit any %bundle @entity', $args),
         'operation' => 'update',
         'ownership' => 'any',
       ],
-      "delete own $group_content_bundle_id $group_content_entity_type_id" => [
+      [
+        'name' => "delete own $group_content_bundle_id $group_content_entity_type_id",
         'title' => t('Delete own %bundle @entity', $args),
         'operation' => 'delete',
         'ownership' => 'own',
       ],
-      "delete any $group_content_bundle_id $group_content_entity_type_id" => [
+      [
+        'name' => "delete any $group_content_bundle_id $group_content_entity_type_id",
         'title' => t('Delete any %bundle @entity', $args),
         'operation' => 'delete',
         'ownership' => 'any',
@@ -110,13 +115,12 @@ class PermissionManager implements PermissionManagerInterface {
     ];
 
     // Add default permissions.
-    foreach ($operations as $name => $title) {
-      $permission = new GroupContentOperationPermission();
+    foreach ($operations as $values) {
+      $permission = new GroupContentOperationPermission($values);
       $permission
-        ->setName($name)
-        ->setTitle($title)
         ->setEntityType($group_content_entity_type_id)
-        ->setBundle($group_content_bundle_id);
+        ->setBundle($group_content_bundle_id)
+        ->setDefaultRoles([OgRoleInterface::ADMINISTRATOR]);
       $permissions[] = $permission;
     }
 

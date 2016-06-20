@@ -3,6 +3,7 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\og\Event\PermissionEvent;
+use Drupal\og\GroupPermission;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
@@ -44,8 +45,8 @@ class PermissionEventTest extends UnitTestCase {
     // Test that it can retrieve the permissions correctly after they are set.
     $event->setPermissions($permissions);
 
-    foreach ($permissions as $name => $permission) {
-      $this->assertEquals($permission, $event->getPermission($name));
+    foreach ($permissions as $permission) {
+      $this->assertEquals($permission, $event->getPermission($permission->getName()));
     }
   }
 
@@ -92,7 +93,7 @@ class PermissionEventTest extends UnitTestCase {
 
     // Test that an exception is thrown when setting a nameless permission.
     try {
-      $event->setPermission('', ['title' => 'A permission without a name']);
+      $event->setPermission(new GroupPermission(['title' => 'A permission without a name']));
       $this->fail('An exception is thrown when a nameless permission is set.');
     }
     catch (\InvalidArgumentException $e) {
@@ -101,15 +102,15 @@ class PermissionEventTest extends UnitTestCase {
 
     // Test that an exception is thrown when setting permission without a title.
     try {
-      $event->setPermission('an-invalid-permission', []);
+      $event->setPermission(new GroupPermission(['name' => 'an-invalid-permission']));
       $this->fail('An exception is thrown when a permission without a title is set.');
     }
     catch (\InvalidArgumentException $e) {
       // Expected result.
     }
 
-    foreach ($permissions as $name => $permission) {
-      $event->setPermission($name, $permission);
+    foreach ($permissions as $permission) {
+      $event->setPermission($permission);
     }
 
     $this->assertEquals($permissions, $event->getPermissions());
@@ -164,7 +165,7 @@ class PermissionEventTest extends UnitTestCase {
 
     foreach ($permissions as $name => $permission) {
       $this->assertFalse($event->hasPermission($name));
-      $event->setPermission($name, $permission);
+      $event->setPermission($permission);
       $this->assertTrue($event->hasPermission($name));
     }
   }
@@ -343,7 +344,7 @@ class PermissionEventTest extends UnitTestCase {
 
     foreach ($permissions as $name => $permission) {
       $this->assertFalse(isset($event[$name]));
-      $event->setPermission($name, $permission);
+      $event->setPermission($permission);
       $this->assertTrue(isset($event[$name]));
     }
   }
@@ -395,53 +396,59 @@ class PermissionEventTest extends UnitTestCase {
       // A simple permission with only the required option.
       [
         [
-          'appreciate nature' => [
+          'appreciate nature' => new GroupPermission([
+            'name' => 'appreciate nature',
             'title' => $this->t('Allows the member to go outdoors and appreciate the landscape.'),
-          ],
+          ]),
         ],
       ],
       // A single permission with restricted access and a default role.
       [
         [
-          'administer group' => [
+          'administer group' => new GroupPermission([
+            'name' => 'administer group',
             'title' => $this->t('Administer group'),
             'description' => $this->t('Manage group members and content in the group.'),
             'default roles' => [OgRoleInterface::ADMINISTRATOR],
             'restrict access' => TRUE,
-          ],
+          ]),
         ],
       ],
       // A permission restricted to a specific role, and having a default role.
       [
         [
-          'unsubscribe' => [
+          'unsubscribe' => new GroupPermission([
+            'name' => 'unsubscribe',
             'title' => $this->t('Unsubscribe from group'),
             'description' => $this->t('Allow members to unsubscribe themselves from a group, removing their membership.'),
             'roles' => [OgRoleInterface::AUTHENTICATED],
             'default roles' => [OgRoleInterface::AUTHENTICATED],
-          ],
+          ]),
         ],
       ],
       // Simulate a subscriber providing multiple permissions.
       [
         [
-          'subscribe' => [
+          'subscribe' => new GroupPermission([
+            'name' => 'subscribe',
             'title' => $this->t('Subscribe to group'),
             'description' => $this->t('Allow non-members to request membership to a group (approval required).'),
             'roles' => [OgRoleInterface::ANONYMOUS],
             'default roles' => [OgRoleInterface::ANONYMOUS],
-          ],
-          'subscribe without approval' => [
+          ]),
+          'subscribe without approval' => new GroupPermission([
+            'name' => 'subscribe without approval',
             'title' => $this->t('Subscribe to group (no approval required)'),
             'description' => $this->t('Allow non-members to join a group without an approval from group administrators.'),
             'roles' => [OgRoleInterface::ANONYMOUS],
-          ],
-          'unsubscribe' => [
+          ]),
+          'unsubscribe' => new GroupPermission([
+            'name' => 'unsubscribe',
             'title' => $this->t('Unsubscribe from group'),
             'description' => $this->t('Allow members to unsubscribe themselves from a group, removing their membership.'),
             'roles' => [OgRoleInterface::AUTHENTICATED],
             'default roles' => [OgRoleInterface::AUTHENTICATED],
-          ],
+          ]),
         ],
       ],
     ];
