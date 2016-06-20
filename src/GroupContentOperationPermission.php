@@ -139,7 +139,7 @@ class GroupContentOperationPermission extends Permission {
   /**
    * {@inheritdoc}
    */
-  public function validate($property, $value) {
+  protected function validate($property, $value) {
     parent::validate($property, $value);
 
     if ($property === 'ownership' && !in_array($value, ['any', 'own'])) {
