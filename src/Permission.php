@@ -33,7 +33,7 @@ abstract class Permission {
    *
    * @var array
    */
-  protected $defaultRoles = [OgRoleInterface::ADMINISTRATOR];
+  protected $defaultRoles = [];
 
   /**
    * If the permission is security sensitive and should be limited to admins.

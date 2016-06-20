@@ -63,11 +63,13 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'name' => 'update group',
         'title' => t('Edit group'),
         'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
+        'default roles' => [OgRoleInterface::ADMINISTRATOR],
       ]),
       new GroupPermission([
         'name' => 'administer group',
         'title' => t('Administer group'),
         'description' => t('Manage group members and content in the group.'),
+        'default roles' => [OgRoleInterface::ADMINISTRATOR],
         'restrict access' => TRUE,
       ]),
     ] + $this->permissionManager->getEntityOperationPermissions($event->getGroupContentBundleIds()));
