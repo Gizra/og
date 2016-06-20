@@ -55,34 +55,23 @@ abstract class Permission implements PermissionInterface {
   }
 
   /**
-   * Sets the value for the given property.
-   *
-   * @param string $property
-   *   The name of the property to set.
-   * @param mixed $value
-   *   The value to set.
+   * {@inheritdoc}
    */
-  protected function set($property, $value) {
-    $property = $this->lowerCamelize($property);
-    $this->validate($property, $value);
-    $this->$property = $value;
-  }
-
-  /**
-   * Returns the value for the given property.
-   *
-   * @param string $property
-   *   The property to return.
-   *
-   * @return mixed
-   *   The value.
-   */
-  protected function get($property) {
+  public function get($property) {
     $property = $this->lowerCamelize($property);
     if (!property_exists($this, $property)) {
       throw new \InvalidArgumentException("Invalid property $property.");
     }
     return $this->$property;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function set($property, $value) {
+    $property = $this->lowerCamelize($property);
+    $this->validate($property, $value);
+    $this->$property = $value;
   }
 
   /**

@@ -8,6 +8,27 @@ namespace Drupal\og;
 interface PermissionInterface {
 
   /**
+   * Returns the value for the given property.
+   *
+   * @param string $property
+   *   The property to return.
+   *
+   * @return mixed
+   *   The value.
+   */
+  public function get($property);
+
+  /**
+   * Sets the value for the given property.
+   *
+   * @param string $property
+   *   The name of the property to set.
+   * @param mixed $value
+   *   The value to set.
+   */
+  public function set($property, $value);
+
+  /**
    * Returns the machine name of the permission.
    *
    * @return string
