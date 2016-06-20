@@ -85,18 +85,27 @@ class PermissionManager implements PermissionManagerInterface {
     $operations = [
       "create $group_content_bundle_id $group_content_entity_type_id" => [
         'title' => t('Create %bundle @entity', $args),
+        'operation' => 'create',
       ],
       "update own $group_content_bundle_id $group_content_entity_type_id" => [
         'title' => t('Edit own %bundle @entity', $args),
+        'operation' => 'update',
+        'ownership' => 'own',
       ],
       "update any $group_content_bundle_id $group_content_entity_type_id" => [
         'title' => t('Edit any %bundle @entity', $args),
+        'operation' => 'update',
+        'ownership' => 'any',
       ],
       "delete own $group_content_bundle_id $group_content_entity_type_id" => [
         'title' => t('Delete own %bundle @entity', $args),
+        'operation' => 'delete',
+        'ownership' => 'own',
       ],
       "delete any $group_content_bundle_id $group_content_entity_type_id" => [
         'title' => t('Delete any %bundle @entity', $args),
+        'operation' => 'delete',
+        'ownership' => 'any',
       ],
     ];
 
@@ -124,8 +133,8 @@ class PermissionManager implements PermissionManagerInterface {
 
     $permissions = $event->getPermissions();
     if (!empty($role_name)) {
-      $permissions = array_filter($permissions, function ($permission) use ($role_name) {
-        return !empty($permission['default roles']) && in_array($role_name, $permission['default roles']);
+      $permissions = array_filter($permissions, function (PermissionInterface $permission) use ($role_name) {
+        return !empty($permission->getDefaultRoles()) && in_array($role_name, $permission->getDefaultRoles());
       });
     }
 
