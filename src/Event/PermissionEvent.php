@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Event;
 
+use Drupal\og\PermissionInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -84,22 +85,22 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function setPermission($name, array $permission) {
-    if (empty($name)) {
+  public function setPermission(PermissionInterface $permission) {
+    if (empty($permission->getName())) {
       throw new \InvalidArgumentException('Permission name is required.');
     }
-    if (empty($permission['title'])) {
+    if (empty($permission->getTitle())) {
       throw new \InvalidArgumentException('The permission title is required.');
     }
-    $this->permissions[$name] = $permission;
+    $this->permissions[$permission->getName()] = $permission;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setPermissions(array $permissions) {
-    foreach ($permissions as $name => $permission) {
-      $this->setPermission($name, $permission);
+    foreach ($permissions as $permission) {
+      $this->setPermission($permission);
     }
   }
 
@@ -151,7 +152,13 @@ class PermissionEvent extends Event implements PermissionEventInterface {
    * {@inheritdoc}
    */
   public function offsetSet($key, $value) {
-    $this->setPermission($key, $value);
+    if (!$value instanceof PermissionInterface) {
+      throw new \InvalidArgumentException('The value must be an object of type PermissionInterface.');
+    }
+    if ($value->getName() !== $key) {
+      throw new \InvalidArgumentException('The key and the permission name must be identical.');
+    }
+    $this->setpermission($value);
   }
 
   /**

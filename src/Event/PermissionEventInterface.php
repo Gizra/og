@@ -2,6 +2,8 @@
 
 namespace Drupal\og\Event;
 
+use Drupal\og\PermissionInterface;
+
 /**
  * Interface for PermissionEvent classes.
  *
@@ -57,21 +59,18 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
   /**
    * Sets the permission with the given data.
    *
-   * @param string $name
-   *   The name of the permission to set.
-   * @param array $permission
-   *   The permission array to set.
+   * @param \Drupal\og\PermissionInterface $permission
+   *   The permission to set.
    *
    * @throws \InvalidArgumentException
-   *   Thrown when no name is given, or when the permission array does not have
-   *   a title key.
+   *   Thrown when the permission has no name or title.
    */
-  public function setPermission($name, array $permission);
+  public function setPermission(PermissionInterface $permission);
 
   /**
    * Sets multiple permissions.
    *
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   The permissions to set, keyed by permission name.
    */
   public function setPermissions(array $permissions);
