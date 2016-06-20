@@ -5,6 +5,7 @@ namespace Drupal\og\EventSubscriber;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
+use Drupal\og\GroupPermission;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -72,7 +73,11 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
         'restrict access' => TRUE,
       ]),
-    ] + $this->permissionManager->getEntityOperationPermissions($event->getGroupContentBundleIds()));
+    ]);
+
+    // Add a list of generic CRUD permissions for all group content.
+    $group_content_permissions = $this->permissionManager->getEntityOperationPermissions($event->getGroupContentBundleIds());
+    $event->setPermissions($group_content_permissions);
   }
 
   /**
