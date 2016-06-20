@@ -72,14 +72,14 @@ class OgUiEventSubscriber implements EventSubscriberInterface {
       new GroupPermission([
         'name' => 'manage roles',
         'title' => t('Add roles'),
-        'description' => t('Users may view group roles and add new roles if group default roless are overridden.'),
+        'description' => t('Users may view group roles and add new roles if group default roles are overridden.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
         'restrict access' => TRUE,
       ]),
       new GroupPermission([
         'name' => 'manage permissions',
         'title' => t('Manage permissions'),
-        'description' => t('Users may view the group permissions page and change permissions if group default roless are overridden.'),
+        'description' => t('Users may view the group permissions page and change permissions if group default roles are overridden.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
         'restrict access' => TRUE,
       ]),
