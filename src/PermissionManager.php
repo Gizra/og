@@ -31,17 +31,27 @@ class PermissionManager implements PermissionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultPermissions($group_entity_type_id, $group_bundle_id, $role_name = NULL) {
-    // Populate the default permissions.
+  public function getDefaultPermissions($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids, $role_name = NULL) {
     $event = new PermissionEvent($group_entity_type_id, $group_bundle_id, []);
     $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
+    return $event->getPermissions();
+  }
 
-    $permissions = $event->getPermissions();
-    if (!empty($role_name)) {
-      $permissions = array_filter($permissions, function (PermissionInterface $permission) use ($role_name) {
-        return !empty($permission->getDefaultRoles()) && in_array($role_name, $permission->getDefaultRoles());
-      });
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultGroupPermissions($group_entity_type_id, $group_bundle_id, $role_name = NULL) {
+    $permissions = $this->getDefaultPermissions($group_entity_type_id, $group_bundle_id, [], $role_name);
+
+    $permissions = array_filter($permissions, function (PermissionInterface $permission) use ($role_name) {
+      // Only keep group permissions.
+      if (!$permission instanceof GroupPermission) {
+        return FALSE;
+      }
+
+      // Optionally filter on role name.
+      return empty($role_name) || (!empty($permission->getDefaultRoles()) && in_array($role_name, $permission->getDefaultRoles()));
+    });
 
     return $permissions;
   }

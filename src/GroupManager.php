@@ -302,7 +302,7 @@ class GroupManager {
       $role->setGroupBundle($bundle_id);
 
       // Populate the default roles with a set of default permissions.
-      $permissions = $this->permissionManager->getDefaultPermissions($entity_type_id, $bundle_id, $role->getName());
+      $permissions = $this->permissionManager->getDefaultGroupPermissions($entity_type_id, $bundle_id, $role->getName());
       foreach (array_keys($permissions) as $permission) {
         $role->grantPermission($permission);
       }
