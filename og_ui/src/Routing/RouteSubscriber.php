@@ -9,7 +9,9 @@ namespace Drupal\og_ui\Routing;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\Routing\RouteSubscriberBase;
+use Drupal\Core\Url;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -58,6 +60,31 @@ class RouteSubscriber extends RouteSubscriberBase {
         $collection->add('entity.' . $entity_type_id . '.og_group_admin_pages', $route);
       }
     }
+
+    $this->createRoutesFromAdminRoutesPlugins($collection);
+  }
+
+  protected function createRoutesFromAdminRoutesPlugins(RouteCollection $collection) {
+//    print_r(Url::fromRoute('entity.node.canonical')->getInternalPath());
+    /** @var RouteProvider $route_provider */
+    $route_provider = \Drupal::getContainer()->get('router.route_provider');
+
+    $node_path = $route_provider->getRouteByName('entity.node.canonical')->getPath();
+
+    $route = new Route($node_path . '/group/people');
+
+    // tbd.
+    $route
+      ->addDefaults([
+        '_controller' => '\Drupal\og_ui\Controller\OgUiController::ogTasks',
+        '_title' => 'Tasks',
+      ])
+      ->addRequirements([
+        '_custom_access' => '\Drupal\og_ui\Access\OgUiRoutingAccess::GroupTabAccess',
+      ])
+      ->setOption('_admin_route', TRUE);
+
+    $collection->add('foo', $route);
   }
 
 }

@@ -10,7 +10,10 @@ use Drupal\og_ui\OgUiAdminRouteInterface;
  *   id = "people",
  *   path = "people",
  *   title = @Translation("People"),
- *   description = @Translation("Manage the group's members")
+ *   description = @Translation("Manage the group's members"),
+ *   parents_routes = {
+ *    "entity.node.canonical"
+ *   }
  * )
  */
 class People extends OgUiAdminRouteAbstract {
@@ -19,7 +22,7 @@ class People extends OgUiAdminRouteAbstract {
    * {@inheritdoc}
    */
   public function access() {
-    return AccessResultAllowed::allowedIf($this->gerPermission()->hasPermission('administer group'));
+    return AccessResultAllowed::allowedIf($this->getMembership()->hasPermission('administer group'));
   }
 
   /**
