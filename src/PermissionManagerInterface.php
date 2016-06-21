@@ -41,9 +41,6 @@ interface PermissionManagerInterface {
    *   The entity type ID of the group for which to return permissions.
    * @param string $group_bundle_id
    *   The bundle ID of the group for which to return permissions.
-   * @param array $group_content_bundle_ids
-   *   The bundle IDs of the group content associated with the group for which
-   *   to return permissions, keyed by group content entity type ID.
    * @param string $role_name
    *   Optional default role name to filter the permissions on. If omitted, all
    *   permissions will be returned.
@@ -51,6 +48,6 @@ interface PermissionManagerInterface {
    * @return array
    *   An array of permissions that are enabled by default for the given role.
    */
-  public function getDefaultPermissions($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids, $role_name = NULL);
+  public function getDefaultPermissions($group_entity_type_id, $group_bundle_id, $role_name = NULL);
 
 }
