@@ -161,7 +161,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       }
     }
 
-    return $permissions;
+    $event->setPermissions($permissions);
   }
 
   /**

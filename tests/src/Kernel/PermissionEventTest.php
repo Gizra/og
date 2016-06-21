@@ -143,11 +143,11 @@ class PermissionEventTest extends KernelTestBase {
     // Test permissions that should only be available for the test group that
     // has group content.
     $group_content_permissions = [
-      'create test_group_content node',
-      'delete any test_group_content node',
-      'delete own test_group_content node',
-      'update any test_group_content node',
-      'update own test_group_content node',
+      'create test_group_content content',
+      'delete any test_group_content content',
+      'delete own test_group_content content',
+      'edit any test_group_content content',
+      'edit own test_group_content content',
     ];
     // A full permission that should be available in both test groups. This is
     // used to test that all properties are correctly applied.
@@ -161,15 +161,17 @@ class PermissionEventTest extends KernelTestBase {
     // A full permission that should only be available for the test group that
     // has group content.
     $group_content_operation_permission = new GroupContentOperationPermission([
-      'name' => 'create test_group_content node',
-      'title' => $this->t('Create %bundle @entity', [
+      'name' => 'create test_group_content content',
+      'title' => $this->t('%bundle: Create new content', [
         '%bundle' => 'Test Group Content',
-        '@entity' => 'content items',
       ]),
       'entity type' => 'node',
       'bundle' => 'test_group_content',
       'operation' => 'create',
-      'default roles' => [OgRoleInterface::ADMINISTRATOR],
+      'default roles' => [
+        OgRoleInterface::ADMINISTRATOR,
+        OgRoleInterface::AUTHENTICATED,
+      ],
     ]);
     return [
       // Test retrieving permissions for a group that has no group content types
