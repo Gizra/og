@@ -49,6 +49,27 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
   public function getPermission($name);
 
   /**
+   * Returns a group content operation permission by its identifying properties.
+   *
+   * @param string $entity_type_id
+   *   The group content entity type ID to which this permission applies.
+   * @param string $bundle_id
+   *    The group content bundle ID to which this permission applies.
+   * @param string $operation
+   *   The entity operation to which this permission applies.
+   * @param string $ownership
+   *   If this applies to all entities, or only to the ones owned by the user.
+   *   Can be either 'any' or 'own'. Defaults to 'any'.
+   *
+   * @return \Drupal\og\GroupContentOperationPermission
+   *   The permission.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown if the permission with the given properties does not exist.
+   */
+  public function getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership = 'any');
+
+  /**
    * Returns all the permissions.
    *
    * @return array
@@ -84,6 +105,21 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
   public function deletePermission($name);
 
   /**
+   * Deletes a group content operation permission by its identifying properties.
+   *
+   * @param string $entity_type_id
+   *   The group content entity type ID to which this permission applies.
+   * @param string $bundle_id
+   *    The group content bundle ID to which this permission applies.
+   * @param string $operation
+   *   The entity operation to which this permission applies.
+   * @param string $ownership
+   *   If this applies to all entities, or only to the ones owned by the user.
+   *   Can be either 'any' or 'own'. Defaults to 'any'.
+   */
+  public function deleteGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership = 'any');
+
+  /**
    * Returns whether or not the given permission exists.
    *
    * @param string $name
@@ -93,6 +129,24 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    *   TRUE if the permission exists, FALSE otherwise.
    */
   public function hasPermission($name);
+
+  /**
+   * Returns if a group content operation permission matches given properties.
+   *
+   * @param string $entity_type_id
+   *   The group content entity type ID to which this permission applies.
+   * @param string $bundle_id
+   *    The group content bundle ID to which this permission applies.
+   * @param string $operation
+   *   The entity operation to which this permission applies.
+   * @param string $ownership
+   *   If this applies to all entities, or only to the ones owned by the user.
+   *   Can be either 'any' or 'own'. Defaults to 'any'.
+   *
+   * @return bool
+   *   Whether or not the permission exists.
+   */
+  public function hasGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership = 'any');
 
   /**
    * Returns the entity type ID of the group to which the permissions apply.

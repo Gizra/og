@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Event;
 
+use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\PermissionInterface;
 use Symfony\Component\EventDispatcher\Event;
 
@@ -78,6 +79,25 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
+  public function getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership = 'any') {
+    foreach ($this->getPermissions() as $permission) {
+      if (
+        $permission instanceof GroupContentOperationPermission
+        && $permission->getEntityType() === $entity_type_id
+        && $permission->getBundle() === $bundle_id
+        && $permission->getOperation() === $operation
+        && $permission->getOwnership() === $ownership
+      ) {
+        return $permission;
+      }
+    }
+
+    throw new \InvalidArgumentException('The permission with the given properties does not exist.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getPermissions() {
     return $this->permissions;
   }
@@ -116,8 +136,29 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
+  public function deleteGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership = 'any') {
+    $permission = $this->getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership);
+    $this->deletePermission($permission->getName());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function hasPermission($name) {
     return isset($this->permissions[$name]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership = 'any') {
+    try {
+      $this->getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership);
+    }
+    catch (\InvalidArgumentException $e) {
+      return FALSE;
+    }
+    return TRUE;
   }
 
   /**
