@@ -6,7 +6,10 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Drupal\og\GroupManager;
+use Drupal\og_ui\OgUiAdminRouteInterface;
+use Drupal\og_ui\OgUiAdminRoutesPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -113,19 +116,32 @@ class OgUiController extends ControllerBase {
   public function rolesPermissionsOverviewTitleCallback($type) {
     return $this->t('OG @type overview', ['@type' => $type]);
   }
-  
-  public function ogTasks() {
 
+  /**
+   * Show all the available admin pages.
+   *
+   * @return mixed
+   */
+  public function ogTasks() {
+    /** @var OgUiAdminRoutesPluginManager $plugins */
     $plugins = \Drupal::service('plugin.manager.og_ui.group_admin_route');
-    $list = '';
+    $list = [];
+
     foreach ($plugins->getDefinitions() as $definition) {
-      $list .= $definition['id'] . "</br />";
+      /** @var OgUiAdminRouteInterface $plugin */
+      $plugin = $plugins->createInstance($definition['id']);
+
+      $list[] = [
+        'title' => $definition['title'],
+        'description' => $definition['description'],
+        'url' => $plugin->getUrlFromRoute(OgUiAdminRouteInterface::MAIN, \Drupal::request()),
+      ];
     }
 
-    $build['roles_table'] = [
-      '#theme' => 'item',
-      '#markup' => $list,
-    ];
+    $build['roles_table'] = array(
+      '#theme' => 'admin_block_content',
+      '#content' => $list,
+    );
 
     return $build;
   }

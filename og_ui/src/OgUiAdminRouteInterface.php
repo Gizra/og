@@ -4,8 +4,14 @@ namespace Drupal\og_ui;
 
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\ContentEntityBase;
+use Symfony\Component\HttpFoundation\Request;
 
 interface OgUiAdminRouteInterface {
+
+  /**
+   * Represent the main route key in the sub array routes.
+   */
+  const MAIN = 'main';
 
   /**
    * @return ContentEntityBase
@@ -38,6 +44,29 @@ interface OgUiAdminRouteInterface {
    *
    * @return array
    */
-  public function routes();
-  
+  public function getRoutes();
+
+  /**
+   * Get the routes easily.
+   *
+   * @param $key
+   *   The key which represent the route in the array.
+   *
+   * @return array
+   */
+  public function getRoute($key);
+
+  /**
+   * Get URL route from request.
+   *
+   * @param $route_key
+   *   The key of the route as defined in the route list array.
+   * @param Request $request
+   *   The current request object or a request object for a given route.
+   *   Used to construct the path of the link.
+   *
+   * @return mixed
+   */
+  public function getUrlFromRoute($route_key, Request $request);
+
 }
