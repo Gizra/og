@@ -56,4 +56,23 @@ class PermissionManager implements PermissionManagerInterface {
     return $permissions;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids, $role_name = NULL) {
+    $permissions = $this->getDefaultPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids, $role_name);
+
+    $permissions = array_filter($permissions, function (PermissionInterface $permission) use ($role_name) {
+      // Only keep entity operation permissions.
+      if (!$permission instanceof GroupContentOperationPermission) {
+        return FALSE;
+      }
+
+      // Optionally filter on role name.
+      return empty($role_name) || (!empty($permission->getDefaultRoles()) && in_array($role_name, $permission->getDefaultRoles()));
+    });
+
+    return $permissions;
+  }
+
 }
