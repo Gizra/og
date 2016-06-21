@@ -1,6 +1,8 @@
 <?php
 
 namespace Drupal\og_ui\Plugin\GroupAdminRoutes;
+use Drupal\Core\Access\AccessResultAllowed;
+use Drupal\og\Og;
 use Drupal\og_ui\OgUiAdminRouteAbstract;
 use Drupal\og_ui\OgUiAdminRouteInterface;
 
@@ -18,6 +20,10 @@ class People extends OgUiAdminRouteAbstract {
    * {@inheritdoc}
    */
   public function access() {
+//    $this->getGroup();
+
+//    $foo = Og::permissionHandler();
+    return AccessResultAllowed::allowedIf(1 == 1);
   }
 
   /**

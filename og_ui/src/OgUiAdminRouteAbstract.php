@@ -18,6 +18,7 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
    * @inheritDoc
    */
   public function getGroup() {
+    return $this->group;
   }
 
   /**

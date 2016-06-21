@@ -127,9 +127,21 @@ class OgUiController extends ControllerBase {
     $plugins = \Drupal::service('plugin.manager.og_ui.group_admin_route');
     $list = [];
 
+    $route_match = \Drupal::routeMatch();
+    $parameters = $route_match->getParameters();
+    $keys = $parameters->keys();
+
+    $path = explode('/', $route_match->getRouteObject()->getPath());
+    $entity = \Drupal::entityTypeManager()->getStorage($path[1])->load($parameters->get(reset($keys)));
+
     foreach ($plugins->getDefinitions() as $definition) {
       /** @var OgUiAdminRouteInterface $plugin */
-      $plugin = $plugins->createInstance($definition['id']);
+      $plugin = $plugins->createInstance($definition['id'])->setGroup($entity);
+
+      if ($plugin->access()->isForbidden()) {
+        // The user does not have permission for the current admin page.
+        continue;
+      }
 
       $list[] = [
         'title' => $definition['title'],
