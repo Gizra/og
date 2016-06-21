@@ -62,7 +62,10 @@ class OgEventSubscriber implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents() {
     return [
-      PermissionEventInterface::EVENT_NAME => [['provideDefaultOgPermissions']],
+      PermissionEventInterface::EVENT_NAME => [
+        ['provideDefaultOgPermissions', 10],
+        ['provideDefaultNodePermissions']
+      ],
       DefaultRoleEventInterface::EVENT_NAME => [['provideDefaultRoles']],
     ];
   }
@@ -93,6 +96,72 @@ class OgEventSubscriber implements EventSubscriberInterface {
     // Add a list of generic CRUD permissions for all group content.
     $group_content_permissions = $this->getDefaultEntityOperationPermissions($event->getGroupContentBundleIds());
     $event->setPermissions($group_content_permissions);
+  }
+
+  /**
+   * Provides default permissions for the Node entity.
+   *
+   * @param \Drupal\og\Event\PermissionEventInterface $event
+   *   The OG permission event.
+   */
+  public function provideDefaultNodePermissions(PermissionEventInterface $event) {
+    $bundle_ids = $event->getGroupContentBundleIds();
+
+    if (!array_key_exists('node', $bundle_ids)) {
+      return;
+    }
+
+    $permissions = [];
+    $bundle_info = $this->entityTypeBundleInfo->getBundleInfo('node');
+
+    foreach ($bundle_ids['node'] as $bundle_id) {
+      $args = ['%type_name' => $bundle_info[$bundle_id]['label']];
+      $permission_values = [
+        [
+          'name' => "create $bundle_id content",
+          'title' => $this->t('%type_name: Create new content', $args),
+          'operation' => 'create',
+          'default roles' => [OgRoleInterface::ADMINISTRATOR, OgRoleInterface::AUTHENTICATED],
+        ],
+        [
+          'name' => "edit own $bundle_id content",
+          'title' => $this->t('%type_name: Edit own content', $args),
+          'operation' => 'update',
+          'ownership' => 'own',
+          'default roles' => [OgRoleInterface::ADMINISTRATOR, OgRoleInterface::AUTHENTICATED],
+        ],
+        [
+          'name' => "edit any $bundle_id content",
+          'title' => $this->t('%type_name: Edit any content', $args),
+          'operation' => 'update',
+          'ownership' => 'any',
+          'default roles' => [OgRoleInterface::ADMINISTRATOR],
+        ],
+        [
+          'name' => "delete own $bundle_id content",
+          'title' => $this->t('%type_name: Delete own content', $args),
+          'operation' => 'delete',
+          'ownership' => 'own',
+          'default roles' => [OgRoleInterface::ADMINISTRATOR, OgRoleInterface::AUTHENTICATED],
+        ],
+        [
+          'name' => "delete any $bundle_id content",
+          'title' => $this->t('%type_name: Delete any content', $args),
+          'operation' => 'delete',
+          'ownership' => 'any',
+          'default roles' => [OgRoleInterface::ADMINISTRATOR],
+        ],
+      ];
+      foreach ($permission_values as $values) {
+        $values += [
+          'entity type' => 'node',
+          'bundle' => $bundle_id,
+        ];
+        $permissions[] = new GroupContentOperationPermission($values);
+      }
+    }
+
+    return $permissions;
   }
 
   /**
