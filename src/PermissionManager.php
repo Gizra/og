@@ -2,8 +2,6 @@
 
 namespace Drupal\og;
 
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\Event\PermissionEventInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -12,20 +10,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * Manager for OG permissions.
  */
 class PermissionManager implements PermissionManagerInterface {
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The service providing information about bundles.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
-   */
-  protected $entityTypeBundleInfo;
 
   /**
    * The event dispatcher.
@@ -37,94 +21,11 @@ class PermissionManager implements PermissionManagerInterface {
   /**
    * Constructs a PermissionManager object.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
-   *   The service providing information about bundles.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher) {
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityTypeBundleInfo = $entity_type_bundle_info;
+  public function __construct(EventDispatcherInterface $event_dispatcher) {
     $this->eventDispatcher = $event_dispatcher;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getEntityOperationPermissions(array $group_content_bundle_ids) {
-    $permissions = [];
-
-    foreach ($group_content_bundle_ids as $group_content_entity_type_id => $bundle_ids) {
-      foreach ($bundle_ids as $bundle_id) {
-        $permissions += $this->generateEntityOperationPermissionList($group_content_entity_type_id, $bundle_id);
-      }
-    }
-
-    return $permissions;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function generateEntityOperationPermissionList($group_content_entity_type_id, $group_content_bundle_id) {
-    $permissions = [];
-
-    $entity_info = $this->entityTypeManager->getDefinition($group_content_entity_type_id);
-    $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($group_content_entity_type_id)[$group_content_bundle_id];
-
-    // Build standard list of permissions for this bundle.
-    $args = [
-      '%bundle' => $bundle_info['label'],
-      '@entity' => $entity_info->getPluralLabel(),
-    ];
-    // @todo This needs to support all entity operations for the given entity
-    //    type, not just the standard CRUD operations.
-    // @see https://github.com/amitaibu/og/issues/222
-    $operations = [
-      [
-        'name' => "create $group_content_bundle_id $group_content_entity_type_id",
-        'title' => t('Create %bundle @entity', $args),
-        'operation' => 'create',
-      ],
-      [
-        'name' => "update own $group_content_bundle_id $group_content_entity_type_id",
-        'title' => t('Edit own %bundle @entity', $args),
-        'operation' => 'update',
-        'ownership' => 'own',
-      ],
-      [
-        'name' => "update any $group_content_bundle_id $group_content_entity_type_id",
-        'title' => t('Edit any %bundle @entity', $args),
-        'operation' => 'update',
-        'ownership' => 'any',
-      ],
-      [
-        'name' => "delete own $group_content_bundle_id $group_content_entity_type_id",
-        'title' => t('Delete own %bundle @entity', $args),
-        'operation' => 'delete',
-        'ownership' => 'own',
-      ],
-      [
-        'name' => "delete any $group_content_bundle_id $group_content_entity_type_id",
-        'title' => t('Delete any %bundle @entity', $args),
-        'operation' => 'delete',
-        'ownership' => 'any',
-      ],
-    ];
-
-    // Add default permissions.
-    foreach ($operations as $values) {
-      $permission = new GroupContentOperationPermission($values);
-      $permission
-        ->setEntityType($group_content_entity_type_id)
-        ->setBundle($group_content_bundle_id)
-        ->setDefaultRoles([OgRoleInterface::ADMINISTRATOR]);
-      $permissions[] = $permission;
-    }
-
-    return $permissions;
   }
 
   /**
