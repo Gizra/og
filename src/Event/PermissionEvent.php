@@ -71,7 +71,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
    */
   public function getPermission($name) {
     if (!isset($this->permissions[$name])) {
-      throw new \InvalidArgumentException("The '$name' permission does not exist.'");
+      throw new \InvalidArgumentException("The '$name' permission does not exist.");
     }
     return $this->permissions[$name];
   }
