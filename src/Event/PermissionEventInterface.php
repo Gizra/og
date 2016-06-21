@@ -23,25 +23,8 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @param string $name
    *   The name of the permission to return.
    *
-   * @return array
-   *   An associative array, keyed by permission name, with the following keys:
-   *   - 'title': The human readable permission title. Make sure this is
-   *     translated with t().
-   *   - 'description': Optional longer description to show alongside the
-   *     permission. Make sure this is translated with t().
-   *   - 'roles': Optional array of default role names to which the permission
-   *     is limited. For example the 'subscribe' permission can only be assigned
-   *     to non-members, as a member doesn't need it. Values can be one or more
-   *     of OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, or
-   *     OgRoleInterface::ADMINISTRATOR.
-   *   - 'default roles': Optional array of default role names for which the
-   *     permission will be enabled by default. Values can be one or more of
-   *     OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, or
-   *     OgRoleInterface::ADMINISTRATOR.
-   *   - 'restrict access': Optional boolean indicating whether or not this is a
-   *     permission that requires elevated privileges. Use this for permissions
-   *     that are mainly intended for the group administrator or similar roles.
-   *     Defaults to FALSE.
+   * @return \Drupal\og\PermissionInterface
+   *   The permission.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the permission with the given name does not exist.
@@ -72,8 +55,8 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
   /**
    * Returns all the permissions.
    *
-   * @return array
-   *   An associative array of permission arrays, keyed by permission name.
+   * @return \Drupal\og\PermissionInterface[]
+   *   An associative array of permissions, keyed by permission name.
    */
   public function getPermissions();
 
