@@ -7,10 +7,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Manager for OG permissions.
- *
- * @todo Provide an interface.
  */
-class PermissionManager {
+class PermissionManager implements PermissionManagerInterface {
 
   /**
    * The OG group manager.
@@ -50,15 +48,9 @@ class PermissionManager {
   }
 
   /**
-   * Generates the OG permission list for the given group type.
+   * {@inheritdoc}
    *
-   * @param string $entity_type_id
-   *   The entity type ID of the group for which to generate the permissions.
-   * @param string $bundle_id
-   *   The bundle ID of the group for which to generate the permissions.
-   *
-   * @return array
-   *   The list of permissions.
+   * @todo Provide an alter hook.
    */
   public function getPermissionList($entity_type_id, $bundle_id) {
     $permissions = [];
@@ -73,18 +65,7 @@ class PermissionManager {
   }
 
   /**
-   * Returns permissions related to entity operations for a given bundle.
-   *
-   * @param $group_content_entity_type_id
-   *   The entity type ID for which to generate the permission list.
-   * @param $group_content_bundle_id
-   *   The bundle ID for which to generate the permission list.
-   * @param bool $is_owner
-   *   Boolean indication whether or not the permissions are being retrieved for
-   *   a user that is the owner of the entity in question.
-   *
-   * @return array
-   *   An array of permission names and descriptions, keyed by operation.
+   * {@inheritdoc}
    */
   public function getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id, $is_owner = TRUE) {
     // Check if the bundle is a group content type.

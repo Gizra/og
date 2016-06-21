@@ -440,35 +440,6 @@ class DefaultRoleEventTest extends UnitTestCase {
           '' => ['label' => $this->t('Administrator')],
         ],
       ],
-      // A role without a label.
-      [
-        [
-          OgRoleInterface::ADMINISTRATOR => [
-            'name' => OgRole::ADMINISTRATOR,
-            'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-          ],
-        ],
-      ],
-      // A role with an invalid role type.
-      [
-        [
-          OgRoleInterface::ADMINISTRATOR => [
-            'name' => OgRole::ADMINISTRATOR,
-            'label' => $this->t('Administrator'),
-            'role_type' => 'Some non-existing role type',
-          ],
-        ],
-      ],
-      // A role with an invalid is_admin value.
-      [
-        [
-          OgRoleInterface::ADMINISTRATOR => [
-            'name' => OgRole::ADMINISTRATOR,
-            'label' => $this->t('Administrator'),
-            'is_admin' => 'An invalid value',
-          ],
-        ],
-      ],
       // An array of multiple correct roles, with one invalid role type sneaked
       // in.
       [
@@ -483,10 +454,8 @@ class DefaultRoleEventTest extends UnitTestCase {
             'label' => $this->t('Moderator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
           ],
-          'contributor' => [
-            'name' => 'contributor',
-            'label' => $this->t('Contributor'),
-            'role_type' => 'Some non-existing role type',
+          'role with missing name' => [
+            'label' => $this->t('Invalid role'),
           ],
         ],
       ],
@@ -510,47 +479,32 @@ class DefaultRoleEventTest extends UnitTestCase {
   /**
    * Asserts that the given role properties matches the expected result.
    *
-   * @param array $expected
-   *   An array of expected role properties.
+   * @param \Drupal\og\Entity\OgRole $expected
+   *   The expected role.
    * @param \Drupal\og\Entity\OgRole $actual
-   *   The actual OgRole entity to check. Note that we are not specifying the
-   *   OgRoleInterface type because of a PHP 5 class inheritance limitation.
+   *   The actual OgRole entity to check.
+   *
+   * Note that we are not specifying the OgRoleInterface type because of a PHP 5
+   * class inheritance limitation.
    */
-  protected function assertRoleEquals(array $expected, OgRole $actual) {
-    // Provide default values.
-    $this->addDefaultRoleProperties($expected);
+  protected function assertRoleEquals(OgRole $expected, OgRole $actual) {
     foreach (['name', 'label', 'role_type', 'is_admin'] as $property) {
-      $this->assertEquals($expected[$property], $actual->get($property));
+      $this->assertEquals($expected->get($property), $actual->get($property));
     }
   }
 
   /**
    * Adds an expectation that roles with the given properties should be created.
    *
-   * @param array $roles
+   * @param \Drupal\og\Entity\OgRole[] $roles
    *   An array of role properties that are expected to be passed to the roles
    *   that should be created.
    */
-  protected function expectOgRoleCreation($roles) {
-    foreach ($roles as $properties) {
-      // Provide default values.
-      $this->addDefaultRoleProperties($properties);
-      $og_role = new OgRole($properties, 'og_role');
-      $this->ogRoleStorage->create($properties)->willReturn($og_role);
+  protected function expectOgRoleCreation(array &$roles) {
+    foreach ($roles as &$properties) {
+      $role = new OgRole($properties, 'og_role');
+      $properties = $role;
     }
-  }
-
-  /**
-   * Enriches the passed in role properties with default properties.
-   *
-   * @param array $properties
-   *   The role properties to enrich.
-   */
-  protected function addDefaultRoleProperties(&$properties) {
-    $properties += [
-      'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
-      'is_admin' => FALSE,
-    ];
   }
 
 }

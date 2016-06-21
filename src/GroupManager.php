@@ -71,13 +71,6 @@ class GroupManager {
   protected $eventDispatcher;
 
   /**
-   * The default role event.
-   *
-   * @var \Drupal\og\Event\DefaultRoleEventInterface
-   */
-  protected $defaultRoleEvent;
-
-  /**
    * The state service.
    *
    * @var \Drupal\Core\State\StateInterface
@@ -136,19 +129,16 @@ class GroupManager {
    *   The service providing information about bundles.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface
    *   The event dispatcher.
-   * @param \Drupal\og\Event\DefaultRoleEventInterface $default_role_event
-   *   The default role event listener.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
    * @param \Drupal\og\PermissionManager $permission_manager
    *   The OG permission manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, DefaultRoleEventInterface $default_role_event, StateInterface $state, PermissionManager $permission_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManager $permission_manager) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
-    $this->defaultRoleEvent = $default_role_event;
     $this->state = $state;
     $this->permissionManager = $permission_manager;
   }
@@ -336,16 +326,53 @@ class GroupManager {
    * @todo: Would a dedicated RoleManager service be a better place for this?
    */
   public function getDefaultRoles() {
-    $default_roles = [
-      OgRoleInterface::ANONYMOUS => $this->ogRoleStorage->create(OgRole::getDefaultRoleProperties(OgRoleInterface::ANONYMOUS)),
-      OgRoleInterface::AUTHENTICATED => $this->ogRoleStorage->create(OgRole::getDefaultRoleProperties(OgRoleInterface::AUTHENTICATED)),
-    ];
-    // The DefaultRoleEvent is a service which means that it persists in memory.
-    // Make sure it is reset before dispatching to clear any old values.
-    $this->defaultRoleEvent->reset();
-    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $this->defaultRoleEvent);
+    // Provide the required default roles: 'member' and 'non-member'.
+    $roles = $this->getRequiredDefaultRoles();
 
-    return $default_roles + $this->defaultRoleEvent->getRoles();
+    $event = new DefaultRoleEvent();
+    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+
+    // Use the array union operator '+=' to ensure the default roles cannot be
+    // altered by event subscribers.
+    $roles += $event->getRoles();
+
+    return $roles;
+  }
+
+  /**
+   * Returns the roles which every group type requires.
+   *
+   * This provides the 'member' and 'non-member' roles. These are hard coded
+   * because they are strictly required and should not be altered.
+   *
+   * @return \Drupal\og\Entity\OgRole[]
+   *   An associative array of (unsaved) required OgRole entities, keyed by role
+   *   name. These are populated with the basic properties: name, label and
+   *   role_type.
+   *
+   * @todo: Would a dedicated RoleManager service be a better place for this?
+   */
+  protected function getRequiredDefaultRoles() {
+    $roles = [];
+
+    $role_properties = [
+      [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Non-member',
+        'name' => OgRoleInterface::ANONYMOUS,
+      ],
+      [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Member',
+        'name' => OgRoleInterface::AUTHENTICATED,
+      ],
+    ];
+
+    foreach ($role_properties as $properties) {
+      $roles[$properties['name']] = $this->ogRoleStorage->create($properties);
+    }
+
+    return $roles;
   }
 
   /**
