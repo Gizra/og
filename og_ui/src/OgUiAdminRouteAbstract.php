@@ -5,6 +5,7 @@ namespace Drupal\og_ui;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Url;
+use Drupal\og\Entity\OgMembership;
 use Symfony\Component\HttpFoundation\Request;
 
 abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRouteInterface {
@@ -65,6 +66,23 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
     ];
 
     return Url::fromUserInput(implode('/', $route_info));
+  }
+
+  /**
+   * Get the permission
+   *
+   * @return OgMembership
+   */
+  protected function gerPermission() {
+    $ids = \Drupal::entityQuery('og_membership')
+      ->condition('entity_id', $this->getGroup()->id())
+      ->condition('entity_type', $this->getGroup()->getEntityTypeid())
+      ->condition('uid', \Drupal::currentUser()->id())
+      ->execute();
+
+    $memberships = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($ids);
+
+    return reset($memberships);
   }
 
 }
