@@ -11,11 +11,8 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
-use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
-use Drupal\og\Event\PermissionEvent;
-use Drupal\og\Event\PermissionEventInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -80,9 +77,7 @@ class GroupManager {
   /**
    * The OG permission manager.
    *
-   * @var \Drupal\og\PermissionManager
-   *
-   * @todo This should be PermissionManagerInterface.
+   * @var \Drupal\og\PermissionManagerInterface
    */
   protected $permissionManager;
 
@@ -131,10 +126,10 @@ class GroupManager {
    *   The event dispatcher.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
-   * @param \Drupal\og\PermissionManager $permission_manager
+   * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The OG permission manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManager $permission_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
@@ -306,13 +301,12 @@ class GroupManager {
       $role->setGroupType($entity_type_id);
       $role->setGroupBundle($bundle_id);
 
-      // Populate the default permissions.
-      $event = new PermissionEvent($entity_type_id, $bundle_id);
-      /** @var \Drupal\og\Event\PermissionEventInterface $permissions */
-      $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
-      foreach (array_keys($permissions->filterByDefaultRole($role->getName())) as $permission) {
+      // Populate the default roles with a set of default permissions.
+      $permissions = $this->permissionManager->getDefaultGroupPermissions($entity_type_id, $bundle_id, $role->getName());
+      foreach (array_keys($permissions) as $permission) {
         $role->grantPermission($permission);
       }
+
       $role->save();
     }
   }
@@ -322,6 +316,8 @@ class GroupManager {
    *
    * @return \Drupal\og\Entity\OgRole[]
    *   An associative array of (unsaved) OgRole entities, keyed by role name.
+   *   These are populated with the basic properties: name, label, role_type and
+   *   is_admin.
    *
    * @todo: Would a dedicated RoleManager service be a better place for this?
    */
