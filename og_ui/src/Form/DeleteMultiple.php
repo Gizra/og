@@ -95,24 +95,24 @@ class DeleteMultiple extends ConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Not working. Port badly from Message.
-    $this->og_uis = $this->tempStoreFactory->get('og_ui_multiple_delete_confirm')->get(\Drupal::currentUser()->id());
+    $this->og_uis = $this->tempStoreFactory->get('og_membership_multiple_delete_confirm')->get(\Drupal::currentUser()->id());
     if (empty($this->og_uis)) {
       return new RedirectResponse($this->getCancelUrl()->setAbsolute()->toString());
     }
 
     $form['og_uis'] = [
       '#theme' => 'item_list',
-      '#items' => array_map(function (OgMembership $og_ui) {
+      '#items' => array_map(function (OgMembership $membership) {
         $params = [
-          '@id' => $og_ui->id(),
-          '@type' => $og_ui->getType()->label(),
+          '@id' => $membership->id(),
+          '@name' => $membership->getUser()->label(),
         ];
-        return t('Delete og_ui ID @id fo type @type', $params);
+        return t('Delete membership ID @id for @name', $params);
       }, $this->og_uis),
     ];
     $form = parent::buildForm($form, $form_state);
 
-    $form['actions']['cancel']['#href'] = $this->getCancelRoute();
+    $form['actions']['cancel']['#href'] = $this->getCancelUrl();
     return $form;
   }
 
@@ -127,7 +127,7 @@ class DeleteMultiple extends ConfirmFormBase {
       $this->logger('og_ui')->notice('Deleted @count posts.', ['@count' => $count]);
       drupal_set_message(\Drupal::translation()->formatPlural($count, 'Deleted 1 og_ui.', 'Deleted @count og_uis.'));
     }
-    $form_state->setRedirectUrl($this->tempStoreFactory->get('og_ui')->get('people_url'));
+    $form_state->setRedirectUrl(Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_url')));
   }
 
   /**
