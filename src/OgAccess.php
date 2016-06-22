@@ -207,9 +207,13 @@ class OgAccess implements OgAccessInterface {
     $result = AccessResult::neutral();
 
     // Entity isn't saved yet.
-    if ($entity->isNew()) {
-      return $result->addCacheableDependency($entity);
-    }
+    // @todo This messes with checking access to create group content, since in
+    //   this case the content is not saved yet. This will now always return
+    //   neutral, but it should check if the user has permission to create a new
+    //   entity..
+//    if ($entity->isNew()) {
+//      return $result->addCacheableDependency($entity);
+//    }
 
     $entity_type = $entity->getEntityType();
     $entity_type_id = $entity_type->id();
