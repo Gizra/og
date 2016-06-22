@@ -96,6 +96,7 @@ class DeleteMultiple extends ConfirmFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Not working. Port badly from Message.
     $this->og_uis = $this->tempStoreFactory->get('og_membership_multiple_delete_confirm')->get(\Drupal::currentUser()->id());
+   
     if (empty($this->og_uis)) {
       return new RedirectResponse($this->getCancelUrl()->setAbsolute()->toString());
     }

@@ -3,10 +3,12 @@
 namespace Drupal\og_ui\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Element\Dropbutton;
 use Drupal\Core\Session\SessionManager;
 use Drupal\Core\Url;
+use Drupal\og_ui\Form\OgUiAddPeopleForm;
 use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgUiAdminRouteInterface;
 use Drupal\user\PrivateTempStoreFactory;
@@ -56,21 +58,8 @@ class PeopleController extends ControllerBase {
    * Add people to the group.
    */
   public function addPeopleForm() {
-    return array(
-      '#type' => 'item',
-      '#markup' => 'form',
-    );
+    return \Drupal::formBuilder()->getForm('\Drupal\og_ui\Form\OgUiAddPeopleForm');
   }
 
-  /**
-   * Delete members from group.
-   */
-  public function deletePeopleForm() {
-    return array(
-      '#type' => 'item',
-      '#markup' => 'delete pople',
-    );
-  }
-  
 }
 
