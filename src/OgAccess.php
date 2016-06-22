@@ -309,6 +309,7 @@ class OgAccess implements OgAccessInterface {
 
     // From this point on, every result also depends on the user so check
     // whether it is the current. See https://www.drupal.org/node/2628870
+    // @todo Should we make a cache context for OgRole entities?
     $cacheable_metadata = new CacheableMetadata;
     $cacheable_metadata->addCacheableDependency($group_content_entity);
     if ($user->id() == $this->accountProxy->id()) {
