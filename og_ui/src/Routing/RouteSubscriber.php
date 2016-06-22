@@ -91,6 +91,7 @@ class RouteSubscriber extends RouteSubscriberBase {
             ])
             ->addRequirements([
               '_custom_access' => $definition['access'],
+              '_plugin_id' => $definition['id'],
             ])
             ->setOption('_admin_route', TRUE);
 

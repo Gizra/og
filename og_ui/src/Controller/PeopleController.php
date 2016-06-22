@@ -3,18 +3,20 @@
 namespace Drupal\og_ui\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Routing\CurrentRouteMatch;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Og;
 use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgUiAdminRouteInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\views\Entity\View;
+use Drupal\views\Views;
 
 class PeopleController extends ControllerBase {
 
 
   public static function access() {
     /** @var OgUiAdminRouteInterface $plugin */
-    $plugin = OgUi::getGroupAdminPlugins()->createInstance('people');
+    $plugin = OgUi::getGroupAdminPlugins()->createInstance(
+      \Drupal::routeMatch()->getRouteObject()->getRequirement('_plugin_id')
+    );
 
     return $plugin
       ->setGroup(OgUi::getEntity())
@@ -25,10 +27,9 @@ class PeopleController extends ControllerBase {
    * Display list of people which belong to the group.
    */
   public function PeopleList() {
-    return array(
-      '#type' => 'item',
-      '#markup' => 'people list',
-    );
+    $entity = OgUi::getEntity();
+    $arguments = [$entity->getEntityTypeId(), $entity->id()];
+    return Views::getView('group_members')->executeDisplay('default', $arguments);
   }
 
   /**

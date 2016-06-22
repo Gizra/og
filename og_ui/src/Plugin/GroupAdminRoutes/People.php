@@ -26,7 +26,7 @@ class People extends OgUiAdminRouteAbstract {
    */
   public function access() {
     return AccessResultAllowed::allowedIf(TRUE);
-    return AccessResultAllowed::allowedIf($this->getMembership()->hasPermission('administer group'));
+//    return AccessResultAllowed::allowedIf($this->getMembership()->hasPermission('administer group'));
   }
 
   /**
