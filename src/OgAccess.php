@@ -298,21 +298,22 @@ class OgAccess implements OgAccessInterface {
     $group_bundle_id = $group_entity->bundle();
     $group_content_bundle_ids = [$group_content_entity->getEntityTypeId() => [$group_content_entity->bundle()]];
 
-    $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
-
-    $permissions = $this->permissionManager->getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
-
-    if (!array_key_exists($operation, $permissions)) {
-      return AccessResult::neutral();
-    }
-
     // Default to the current user.
     if (!isset($user)) {
       $user = $this->accountProxy->getAccount();
     }
 
-    // From this point on, every result also depends on the user so check
-    // whether it is the current. See https://www.drupal.org/node/2628870
+
+    $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
+
+    $permissions = $this->permissionManager->getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
+
+    // Filter the permissions by operation and ownership.
+    $ownerships = $is_owner ? ['any', 'own'] : ['any'];
+    $permissions = array_filter($permissions, function (GroupContentOperationPermission $permission) use ($operation, $ownerships) {
+      return $permission->getOperation() === $operation && in_array($permission->getOwnership(), $ownerships);
+    });
+
     // @todo Should we make a cache context for OgRole entities?
     $cacheable_metadata = new CacheableMetadata;
     $cacheable_metadata->addCacheableDependency($group_content_entity);
@@ -322,11 +323,10 @@ class OgAccess implements OgAccessInterface {
 
     // @todo Also deal with the use case that entity operations are granted to
     //   non-members.
-    if ($membership = Og::getUserMembership($user, $group_entity)) {
-      foreach (array_keys($permissions[$operation]) as $permission) {
-        if ($membership->hasPermission($permission)) {
-          return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
-        }
+    $membership = Og::getMembership($user, $group_entity);
+    foreach ($permissions as $permission) {
+      if ($membership->hasPermission($permission->getName())) {
+        return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
       }
     }
 
