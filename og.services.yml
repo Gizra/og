@@ -1,7 +1,7 @@
 services:
   og.access:
     class: Drupal\og\OgAccess
-    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.permission_manager']
+    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_manager', '@og.permission_manager']
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']

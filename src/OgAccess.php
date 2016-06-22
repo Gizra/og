@@ -62,12 +62,18 @@ class OgAccess implements OgAccessInterface {
   protected $moduleHandler;
 
   /**
+   * The group manager.
+   *
+   * @var \Drupal\og\GroupManager
+   *
+   * @todo This should be GroupManagerInterface.
+   */
+  protected $groupManager;
+
+  /**
    * The OG permission manager.
    *
-   * @var \Drupal\og\PermissionManager
-   *
-   * @todo This should be PermissionManagerInterface.
-   * @see https://github.com/amitaibu/og/issues/228
+   * @var \Drupal\og\PermissionManagerInterface
    */
   protected $permissionManager;
 
@@ -80,15 +86,16 @@ class OgAccess implements OgAccessInterface {
    *   The service that contains the current active user.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
-   * @param \Drupal\og\PermissionManager $permission_manager
+   * @param \Drupal\og\GroupManager
+   *   The group manager.
+   * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The permission manager.
-   *   @todo This should be PermissionManagerInterface.
-   *   @see https://github.com/amitaibu/og/issues/228
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, PermissionManager $permission_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupManager $group_manager, PermissionManagerInterface $permission_manager) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;
+    $this->groupManager = $group_manager;
     $this->permissionManager = $permission_manager;
   }
 
@@ -283,10 +290,13 @@ class OgAccess implements OgAccessInterface {
    */
   public function userAccessGroupContentEntityOperations($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
     // Retrieve the permissions and check if our operation is supported.
-    $group_content_entity_type_id = $group_content_entity->getEntityTypeId();
-    $group_content_bundle_id = $group_content_entity->bundle();
+    $group_entity_type_id = $group_entity->getEntityTypeId();
+    $group_bundle_id = $group_entity->bundle();
+    $group_content_bundle_ids = [$group_content_entity->getEntityTypeId() => [$group_content_entity->bundle()]];
+
     $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
-    $permissions = $this->permissionManager->getEntityOperationPermissions($group_content_entity_type_id, $group_content_bundle_id, $is_owner);
+
+    $permissions = $this->permissionManager->getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
 
     if (!array_key_exists($operation, $permissions)) {
       return AccessResult::neutral();
