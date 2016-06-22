@@ -3,8 +3,10 @@
 namespace Drupal\og_ui\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Link;
 use Drupal\Core\Render\Element\Dropbutton;
 use Drupal\Core\Session\SessionManager;
+use Drupal\Core\Url;
 use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgUiAdminRouteInterface;
 use Drupal\user\PrivateTempStoreFactory;
@@ -35,7 +37,19 @@ class PeopleController extends ControllerBase {
 
     $entity = OgUi::getEntity();
     $arguments = [$entity->getEntityTypeId(), $entity->id()];
-    return Views::getView('group_members')->executeDisplay('default', $arguments);
+
+    $view = Views::getView('group_members')->executeDisplay('default', $arguments);
+
+    // Get the add people.
+    $route_parameters = [
+      OgUi::getEntity()->getEntityTypeId() => OgUi::getEntity()->id()
+    ];
+
+    $route = str_replace('.main', '.add', \Drupal::routeMatch()->getRouteName());
+
+    $view['#prefix'] = Link::createFromRoute($this->t('Add people'), $route, $route_parameters)->toString();
+
+    return $view;
   }
 
   /**
