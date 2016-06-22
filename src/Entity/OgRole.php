@@ -205,8 +205,8 @@ class OgRole extends Role implements OgRoleInterface {
     // The ID of a new OgRole has to consist of the entity type ID, bundle ID
     // and role name, separated by dashes.
     if ($this->isNew() && !empty($this->id())) {
-      list($entity_type_id, $bundle_id, $name) = explode('-', $this->id());
-      if ($entity_type_id !== $this->getGroupType() || $bundle_id !== $this->getGroupBundle() || $name !== $this->getName()) {
+      $pattern = preg_quote("{$this->getGroupType()}-{$this->getGroupBundle()}-{$this->getName()}");
+      if (!preg_match("/$pattern/", $this->id())) {
         throw new ConfigValueException('The ID should consist of the group entity type ID, group bundle ID and role name, separated by dashes.');
       }
     }
