@@ -118,4 +118,6 @@ function og_ui_entity_type_alter(array &$entity_types) {
 
     $entity_type->setLinkTemplate('og-group-admin-pages', "/$entity_type_id/{{$entity_type_id}}/group");
   }
+
+  $entity_types['og_membership']->setHandlerClass('views_data', 'Drupal\og_ui\OgMembershipViewsData');
 }

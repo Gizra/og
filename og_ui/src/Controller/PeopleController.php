@@ -3,10 +3,11 @@
 namespace Drupal\og_ui\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\og\Og;
+use Drupal\Core\Render\Element\Dropbutton;
+use Drupal\Core\Session\SessionManager;
 use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgUiAdminRouteInterface;
-use Drupal\views\Entity\View;
+use Drupal\user\PrivateTempStoreFactory;
 use Drupal\views\Views;
 
 class PeopleController extends ControllerBase {
@@ -27,6 +28,11 @@ class PeopleController extends ControllerBase {
    * Display list of people which belong to the group.
    */
   public function PeopleList() {
+    /** @var PrivateTempStoreFactory $session_storage */
+    $session_storage = \Drupal::service('user.private_tempstore');
+    $temp_storage = $session_storage->get('og_ui');
+    $temp_storage->set('people_url', \Drupal::request()->getRequestUri());
+
     $entity = OgUi::getEntity();
     $arguments = [$entity->getEntityTypeId(), $entity->id()];
     return Views::getView('group_members')->executeDisplay('default', $arguments);

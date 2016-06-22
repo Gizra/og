@@ -40,3 +40,11 @@ og_ui.permissions_form:
     _title: '@todo - create title callback'
   requirements:
     _permission: 'administer group'
+
+og_ui.multiple_delete_confirm:
+  path: '/admin/group/delete_membership'
+  defaults:
+    _form: '\Drupal\og_ui\Form\DeleteMultiple'
+  requirements:
+    _permission: 'administer group'
+    #todo: a less generic permission

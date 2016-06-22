@@ -1,0 +1,9 @@
+id: membership_delete_action
+label: 'Delete selected memberships'
+status: true
+langcode: en
+type: og_membership
+plugin: membership_delete_action
+dependencies:
+  module:
+    - og
