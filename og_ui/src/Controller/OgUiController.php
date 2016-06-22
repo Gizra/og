@@ -6,15 +6,10 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Url;
 use Drupal\og\GroupManager;
+use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgUiAdminRouteInterface;
-use Drupal\og_ui\OgUiAdminRoutesPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Drupal\Core\Plugin\Context\Context;
-use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\Core\Plugin\Context\ContextProviderInterface;
 
 class OgUiController extends ControllerBase {
 
@@ -126,18 +121,11 @@ class OgUiController extends ControllerBase {
    * @return mixed
    */
   public function ogTasks() {
-    /** @var OgUiAdminRoutesPluginManager $plugins */
-    $plugins = \Drupal::service('plugin.manager.og_ui.group_admin_route');
+    $entity = OgUi::getEntity();
+    $plugins = OgUi::getGroupAdminPlugins();
     $list = [];
-
-    $route_match = \Drupal::routeMatch();
-    $parameters = $route_match->getParameters();
-    $keys = $parameters->keys();
-
-    $path = explode('/', $route_match->getRouteObject()->getPath());
-    $entity = \Drupal::entityTypeManager()->getStorage($path[1])->load($parameters->get(reset($keys)));
-
     foreach ($plugins->getDefinitions() as $definition) {
+      
       /** @var OgUiAdminRouteInterface $plugin */
       $plugin = $plugins->createInstance($definition['id'])->setGroup($entity);
 

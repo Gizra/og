@@ -12,6 +12,8 @@ use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Url;
+use Drupal\og_ui\OgUi;
+use Drupal\og_ui\OgUiAdminRouteInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -30,7 +32,7 @@ class RouteSubscriber extends RouteSubscriberBase {
   /**
    * Constructs a new RouteSubscriber object.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
+   * @param EntityTypeManager $entity_manager
    *   The entity type manager.
    */
   public function __construct(EntityTypeManager $entity_manager) {
@@ -65,26 +67,37 @@ class RouteSubscriber extends RouteSubscriberBase {
   }
 
   protected function createRoutesFromAdminRoutesPlugins(RouteCollection $collection) {
-//    print_r(Url::fromRoute('entity.node.canonical')->getInternalPath());
     /** @var RouteProvider $route_provider */
     $route_provider = \Drupal::getContainer()->get('router.route_provider');
 
-    $node_path = $route_provider->getRouteByName('entity.node.canonical')->getPath();
+    $plugins = OgUi::getGroupAdminPlugins();
+    foreach ($plugins->getDefinitions() as $definition) {
 
-    $route = new Route($node_path . '/group/people');
+      /** @var OgUiAdminRouteInterface $plugin */
+      $plugin = $plugins->createInstance($definition['id']);
 
-    // tbd.
-    $route
-      ->addDefaults([
-        '_controller' => '\Drupal\og_ui\Controller\OgUiController::ogTasks',
-        '_title' => 'Tasks',
-      ])
-      ->addRequirements([
-        '_custom_access' => '\Drupal\og_ui\Access\OgUiRoutingAccess::GroupTabAccess',
-      ])
-      ->setOption('_admin_route', TRUE);
+      // Iterate over all the parent routes.
+      foreach ($definition['parents_routes'] as $parent_route) {
+        $parent_path = $route_provider->getRouteByName($parent_route)->getPath();
+        $path = $parent_path . '/group/' . $definition['path'];
 
-    $collection->add('foo', $route);
+        // Create a route for each route callback.
+        foreach ($plugin->getRoutes() as $sub_route => $route_info) {
+          $route = new Route($path . '/' . $route_info['sub_path']);
+          $route
+            ->addDefaults([
+              '_controller' => $route_info['controller'],
+              '_title' => $route_info['title'],
+            ])
+            ->addRequirements([
+              '_custom_access' => $definition['access'],
+            ])
+            ->setOption('_admin_route', TRUE);
+
+          $collection->add($parent_route . '.' . $definition['route_id'] . '.' . $sub_route, $route);
+        }
+      }
+    }
   }
 
 }

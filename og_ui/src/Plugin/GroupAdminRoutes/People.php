@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\og_ui\Plugin\GroupAdminRoutes;
+
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\og_ui\OgUiAdminRouteAbstract;
 use Drupal\og_ui\OgUiAdminRouteInterface;
@@ -11,6 +12,8 @@ use Drupal\og_ui\OgUiAdminRouteInterface;
  *   path = "people",
  *   title = @Translation("People"),
  *   description = @Translation("Manage the group's members"),
+ *   access = "\Drupal\og_ui\Controller\PeopleController::access",
+ *   route_id = "people",
  *   parents_routes = {
  *    "entity.node.canonical"
  *   }
@@ -22,6 +25,7 @@ class People extends OgUiAdminRouteAbstract {
    * {@inheritdoc}
    */
   public function access() {
+    return AccessResultAllowed::allowedIf(TRUE);
     return AccessResultAllowed::allowedIf($this->getMembership()->hasPermission('administer group'));
   }
 
@@ -29,41 +33,24 @@ class People extends OgUiAdminRouteAbstract {
    * {@inheritdoc}
    */
   public function getRoutes() {
+
     return [
       OgUiAdminRouteInterface::MAIN => [
-        'callback' => [$this, 'PeopleList'],
-        'sub_path' => '',
+        'controller' => '\Drupal\og_ui\Controller\PeopleController::PeopleList',
+        'sub_path' => 'manage',
+        'title' => 'People',
       ],
       'add' => [
-        'callback' => [$this, 'addPeopleForm'],
+        'controller' => '\Drupal\og_ui\Controller\PeopleController::addPeopleForm',
         'sub_path' => 'add',
+        'title' => 'people',
       ],
       'delete' => [
-        'callback' => [$this, 'deletePeopleForm'],
+        'controller' => '\Drupal\og_ui\Controller\PeopleController::deletePeopleForm',
         'sub_path' => 'delete',
+        'title' => 'delete',
       ],
     ];
-  }
-
-  /**
-   * Display list of people which belong to the group.
-   */
-  public function PeopleList() {
-
-  }
-
-  /**
-   * Add people to the group.
-   */
-  public function addPeopleForm() {
-
-  }
-
-  /**
-   * Delete members from group.
-   */
-  public function deletePeopleForm() {
-
   }
 
 }
