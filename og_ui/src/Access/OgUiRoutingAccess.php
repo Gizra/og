@@ -13,7 +13,6 @@ use Drupal\og\Og;
  * Checks access for displaying configuration translation page.
  */
 class OgUiRoutingAccess implements AccessInterface {
-  
 
   /**
    * A custom access check.

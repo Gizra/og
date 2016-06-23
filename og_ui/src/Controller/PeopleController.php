@@ -16,7 +16,6 @@ use Drupal\views\Views;
 
 class PeopleController extends ControllerBase {
 
-
   public static function access() {
     /** @var OgUiAdminRouteInterface $plugin */
     $plugin = OgUi::getGroupAdminPlugins()->createInstance(
@@ -62,4 +61,3 @@ class PeopleController extends ControllerBase {
   }
 
 }
-
