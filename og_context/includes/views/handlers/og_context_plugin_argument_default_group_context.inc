@@ -32,13 +32,21 @@ class og_context_plugin_argument_default_group_context extends views_plugin_argu
       '#default_value' => $this->options['group_type'],
       '#description' => t('Determine what entity type that group should be of.')
     );
+    $form['check_access'] = array(
+      '#type' => 'select',
+      '#options' => array(t('No'), t('Yes')),
+      '#title' => t('Check access'),
+      '#default_value' => $this->options['check_access'],
+      '#description' => t('Determines if access to the group should be done. Defaults to "Yes".')
+    );
   }
 
   /**
    * Return the group context argument.
    */
   function get_argument() {
-    if ($group = og_context($this->options['group_type'])) {
+    $check_access = (isset($this->options['check_access']) && $this->options['check_access'] == 0) ? FALSE : TRUE;
+    if ($group = og_context($this->options['group_type'], NULL, NULL, $check_access)) {
       return $group['gid'];
     }
     return FALSE;
