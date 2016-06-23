@@ -17,6 +17,7 @@ class og_context_plugin_argument_default_group_context extends views_plugin_argu
   function option_definition() {
     $options = parent::option_definition();
     $options['group_type'] = array('default' => 'node');
+    $options['check_access'] = array('default' => TRUE);
 
     return $options;
   }
@@ -45,8 +46,7 @@ class og_context_plugin_argument_default_group_context extends views_plugin_argu
    * Return the group context argument.
    */
   function get_argument() {
-    $check_access = (isset($this->options['check_access']) && $this->options['check_access'] == 0) ? FALSE : TRUE;
-    if ($group = og_context($this->options['group_type'], NULL, NULL, $check_access)) {
+    if ($group = og_context($this->options['group_type'], NULL, NULL, $this->options['check_access'])) {
       return $group['gid'];
     }
     return FALSE;
