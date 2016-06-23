@@ -38,12 +38,12 @@ class People extends OgUiAdminRouteAbstract {
       OgUiAdminRouteInterface::MAIN => [
         'controller' => '\Drupal\og_ui\Controller\PeopleController::PeopleList',
         'sub_path' => 'manage',
-        'title' => 'People',
+        'title' => \Drupal::translation()->translate('People'),
       ],
       'add' => [
         'controller' => '\Drupal\og_ui\Controller\PeopleController::addPeopleForm',
         'sub_path' => 'add',
-        'title' => 'people',
+        'title' => \Drupal::translation()->translate('Add people'),
       ],
     ];
   }

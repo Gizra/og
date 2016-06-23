@@ -39,18 +39,7 @@ class PeopleController extends ControllerBase {
     $entity = OgUi::getEntity();
     $arguments = [$entity->getEntityTypeId(), $entity->id()];
 
-    $view = Views::getView('group_members')->executeDisplay('default', $arguments);
-
-    // Get the add people.
-    $route_parameters = [
-      OgUi::getEntity()->getEntityTypeId() => OgUi::getEntity()->id()
-    ];
-
-    $route = str_replace('.main', '.add', \Drupal::routeMatch()->getRouteName());
-
-    $view['#prefix'] = Link::createFromRoute($this->t('Add people'), $route, $route_parameters)->toString();
-
-    return $view;
+    return Views::getView('group_members')->executeDisplay('default', $arguments);
   }
 
   /**

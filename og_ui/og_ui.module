@@ -9,12 +9,16 @@ use Drupal\Core\Entity\BundleEntityFormBase;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og_ui\BundleFormAlter;
 use Drupal\og\OgRoleInterface;
+use Drupal\og_ui\OgUi;
+use Drupal\og_ui\OgUiAdminRouteAbstract;
+use Drupal\og_ui\OgUiAdminRouteInterface;
 
 /**
  * Implements hook_form_alter().
@@ -120,4 +124,37 @@ function og_ui_entity_type_alter(array &$entity_types) {
   }
 
   $entity_types['og_membership']->setHandlerClass('views_data', 'Drupal\og_ui\OgMembershipViewsData');
+}
+
+function og_ui_menu_local_actions_alter(&$local_actions) {
+
+  $plugins_info = OgUi::getGroupAdminPlugins();
+
+  foreach ($plugins_info->getDefinitions() as $definition) {
+
+    /** @var OgUiAdminRouteAbstract $plugin */
+    $plugin = $plugins_info->createInstance($definition['id']);
+
+    foreach ($definition['parents_routes'] as $parent_route) {
+
+      foreach ($plugin->getRoutes() as $sub_route => $route) {
+        if ($sub_route == OgUiAdminRouteInterface::MAIN) {
+          continue;
+        }
+
+        $base_route_id = $parent_route . '.' . $definition['route_id'];
+        $route_id = $base_route_id . '.' . $sub_route;
+
+        $local_actions[$route_id] = [
+          'id' => $route_id,
+          'title' => $route['title'],
+          'route_name' => $route_id,
+          'appears_on' => [$base_route_id . '.' . OgUiAdminRouteInterface::MAIN],
+          'class' => '\Drupal\Core\Menu\LocalActionDefault',
+        ];
+      }
+    }
+
+  }
+
 }
