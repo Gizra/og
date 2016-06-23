@@ -3,6 +3,7 @@
 namespace Drupal\og_ui\Plugin\GroupAdminRoutes;
 
 use Drupal\Core\Access\AccessResultAllowed;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og_ui\OgUiAdminRouteAbstract;
 use Drupal\og_ui\OgUiAdminRouteInterface;
 
@@ -38,12 +39,13 @@ class People extends OgUiAdminRouteAbstract {
       OgUiAdminRouteInterface::MAIN => [
         'controller' => '\Drupal\og_ui\Controller\PeopleController::PeopleList',
         'sub_path' => 'manage',
-        'title' => \Drupal::translation()->translate('People'),
+        'title' => 'People',
       ],
       'add' => [
         'controller' => '\Drupal\og_ui\Controller\PeopleController::addPeopleForm',
         'sub_path' => 'add',
-        'title' => \Drupal::translation()->translate('Add people'),
+        'title' => 'Add people',
+        'type' => 'local_action',
       ],
     ];
   }

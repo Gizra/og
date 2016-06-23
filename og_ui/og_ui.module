@@ -126,6 +126,9 @@ function og_ui_entity_type_alter(array &$entity_types) {
   $entity_types['og_membership']->setHandlerClass('views_data', 'Drupal\og_ui\OgMembershipViewsData');
 }
 
+/**
+ * Implements hook_menu_local_actions_alter().
+ */
 function og_ui_menu_local_actions_alter(&$local_actions) {
 
   $plugins_info = OgUi::getGroupAdminPlugins();
@@ -142,6 +145,10 @@ function og_ui_menu_local_actions_alter(&$local_actions) {
           continue;
         }
 
+        if (!empty($route['type']) && $route['type'] != 'local_action') {
+          continue;
+        }
+
         $base_route_id = $parent_route . '.' . $definition['route_id'];
         $route_id = $base_route_id . '.' . $sub_route;
 
@@ -151,6 +158,8 @@ function og_ui_menu_local_actions_alter(&$local_actions) {
           'route_name' => $route_id,
           'appears_on' => [$base_route_id . '.' . OgUiAdminRouteInterface::MAIN],
           'class' => '\Drupal\Core\Menu\LocalActionDefault',
+          'weight' => 100,
+          'options' => [],
         ];
       }
     }
