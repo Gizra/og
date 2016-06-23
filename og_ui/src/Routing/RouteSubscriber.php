@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\Routing\RouteSubscriberBase;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgUiAdminRouteInterface;
@@ -21,6 +22,8 @@ use Symfony\Component\Routing\RouteCollection;
  * Listens to the dynamic route events.
  */
 class RouteSubscriber extends RouteSubscriberBase {
+
+  use StringTranslationTrait;
 
   /**
    * The entity type manager service.
@@ -78,6 +81,16 @@ class RouteSubscriber extends RouteSubscriberBase {
 
       // Iterate over all the parent routes.
       foreach ($definition['parents_routes'] as $parent_route) {
+
+        if (!$route_provider->getRoutesByNames($parent_route)) {
+          $params = [
+            '@router_name' => $parent_route,
+            '@plugin_name' => '',
+          ];
+          \Drupal::logger('og_ui')->alert($this->t('The router @router_name, needed by @plugin_name, does not exists.', $params));
+          continue;
+        }
+
         $parent_path = $route_provider->getRouteByName($parent_route)->getPath();
         $path = $parent_path . '/group/' . $definition['path'];
 
