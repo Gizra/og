@@ -8,8 +8,9 @@
 namespace Drupal\og_ui\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
+use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -29,16 +30,24 @@ class OgUiLocalTask extends DeriverBase implements ContainerDeriverInterface {
   protected $entityManager;
 
   /**
+   * @var RouteProvider
+   */
+  protected $routProvider;
+
+  /**
    * Creates an DevelLocalTask object.
    *
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    *   The entity manager.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
    *   The translation manager.
+   * @param RouteProvider $route_provider
+   *   The route provider services.
    */
-  public function __construct(EntityManagerInterface $entity_manager, TranslationInterface $string_translation) {
+  public function __construct(EntityTypeManagerInterface $entity_manager, TranslationInterface $string_translation, RouteProvider $route_provider) {
     $this->entityManager = $entity_manager;
     $this->stringTranslation = $string_translation;
+    $this->routProvider = $route_provider;
   }
 
   /**
@@ -46,8 +55,9 @@ class OgUiLocalTask extends DeriverBase implements ContainerDeriverInterface {
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
-      $container->get('entity.manager'),
-      $container->get('string_translation')
+      $container->get('entity_type.manager'),
+      $container->get('string_translation'),
+      $container->get('router.route_provider')
     );
   }
 
@@ -58,11 +68,16 @@ class OgUiLocalTask extends DeriverBase implements ContainerDeriverInterface {
     $this->derivatives = array();
 
     foreach ($this->entityManager->getDefinitions() as $entity_type_id => $entity_type) {
+      $route_name = 'entity.' . $entity_type_id . '.og_group_admin_pages';
 
-      $this->derivatives["$entity_type_id.group_admin_pages"] = array(
-        'route_name' => 'entity.' . $entity_type_id . '.og_group_admin_pages',
+      if (!$this->routProvider->getRoutesByNames([$route_name])) {
+        continue;
+      }
+
+      $this->derivatives[$entity_type_id . '.group_admin_pages'] = array(
+        'route_name' => $route_name,
         'title' => $this->t('Group'),
-        'base_route' => "entity.$entity_type_id.canonical",
+        'base_route' => 'entity.'. $entity_type_id . '.canonical',
         'weight' => 100,
       );
     }
