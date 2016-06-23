@@ -82,7 +82,7 @@ class RouteSubscriber extends RouteSubscriberBase {
       // Iterate over all the parent routes.
       foreach ($definition['parents_routes'] as $parent_route) {
 
-        if (!$route_provider->getRoutesByNames($parent_route)) {
+        if (!$route_provider->getRoutesByNames([$parent_route])) {
           $params = [
             '@router_name' => $parent_route,
             '@plugin_name' => '',
