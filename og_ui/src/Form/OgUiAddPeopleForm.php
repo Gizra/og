@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
@@ -79,6 +80,7 @@ class OgUiAddPeopleForm extends FormBase {
         '#title' => $this->t('Username'),
         '#type' => 'entity_autocomplete',
         '#target_type' => 'user',
+        '#required' => TRUE,
       ],
       'actions' => [
         '#type' => 'actions',
@@ -93,6 +95,24 @@ class OgUiAddPeopleForm extends FormBase {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $group = OgUi::getEntity();
+
+    /** @var AccountInterface $account */
+    $account = \Drupal::entityTypeManager()->getStorage('user')->load($form_state->getValue('username'));
+
+    foreach (Og::getUserMemberships($account) as $membership) {
+      if ($membership->getGroup()->getEntityTypeId() == $group->getEntityTypeId() && $membership->getGroup()->id() == $group->id()) {
+        $form_state->setError($form['username'], $this->t('The user is already a member of the group.'));
+        break;
+      }
+    }
+
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     OgMembership::create([
       'type' => OgMembership::TYPE_DEFAULT,
@@ -101,7 +121,7 @@ class OgUiAddPeopleForm extends FormBase {
       'entity_id' => OgUi::getEntity()->id(),
     ])->save();
 
-//    $form_state->setRedirectUrl(Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_url')));
+    $form_state->setRedirectUrl(Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_uri')));;
   }
 
 }

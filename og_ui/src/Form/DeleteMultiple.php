@@ -127,16 +127,17 @@ class DeleteMultiple extends ConfirmFormBase {
       $this->tempStoreFactory->get('og_ui_multiple_delete_confirm')->delete(\Drupal::currentUser()->id());
       $count = count($this->og_uis);
       $this->logger('og_ui')->notice('Deleted @count posts.', ['@count' => $count]);
-      drupal_set_message(\Drupal::translation()->formatPlural($count, 'Deleted 1 og_ui.', 'Deleted @count og_uis.'));
+      drupal_set_message(\Drupal::translation()->formatPlural($count, 'Deleted 1 membership.', 'Deleted @count memberships.'));
     }
-    $form_state->setRedirectUrl(Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_url')));
+
+    $form_state->setRedirectUrl(Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_uri')));
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_url'));
+    return Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_uri'));
   }
 
 }
