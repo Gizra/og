@@ -45,11 +45,6 @@ class People extends OgUiAdminRouteAbstract {
         'sub_path' => 'add',
         'title' => 'people',
       ],
-      'delete' => [
-        'controller' => '\Drupal\og_ui\Controller\PeopleController::deletePeopleForm',
-        'sub_path' => 'delete',
-        'title' => 'delete',
-      ],
     ];
   }
 
