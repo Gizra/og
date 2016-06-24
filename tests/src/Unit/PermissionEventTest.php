@@ -19,13 +19,16 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::getPermission
    *
    * @dataProvider permissionsProvider
    */
-  public function testGetPermission($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testGetPermission($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
 
     // An exception should be thrown when trying to get a permission that
     // doesn't exist.
@@ -53,14 +56,17 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::getPermissions
    * @covers ::setPermissions
    *
    * @dataProvider permissionsProvider
    */
-  public function testGetPermissions($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testGetPermissions($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
     $this->assertEquals($permissions, $event->getPermissions());
@@ -73,13 +79,16 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::setPermission
    *
    * @dataProvider permissionsProvider
    */
-  public function testSetPermission($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testSetPermission($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
 
     // Test that an exception is thrown when setting a nameless permission.
     try {
@@ -113,13 +122,16 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::deletePermission
    *
    * @dataProvider permissionsProvider
    */
-  public function testDeletePermission($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testDeletePermission($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
     foreach ($permissions as $name => $permission) {
@@ -139,13 +151,16 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::hasPermission
    *
    * @dataProvider permissionsProvider
    */
-  public function testHasPermission($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testHasPermission($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
 
     foreach ($permissions as $name => $permission) {
       $this->assertFalse($event->hasPermission($name));
@@ -161,14 +176,17 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
-   * @covers ::getEntityTypeId
+   * @covers ::getGroupEntityTypeId
    *
    * @dataProvider permissionsProvider
    */
-  public function testGetEntityTypeId($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
-    $this->assertEquals($entity_type_id, $event->getEntityTypeId());
+  public function testGetEntityTypeId($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
+    $this->assertEquals($entity_type_id, $event->getGroupEntityTypeId());
   }
 
   /**
@@ -178,14 +196,17 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
-   * @covers ::getBundleId
+   * @covers ::getGroupBundleId
    *
    * @dataProvider permissionsProvider
    */
-  public function testGetBundleId($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
-    $this->assertEquals($bundle_id, $event->getBundleId());
+  public function testGetBundleId($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
+    $this->assertEquals($bundle_id, $event->getGroupBundleId());
   }
 
   /**
@@ -195,42 +216,16 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
-   *
-   * @covers ::filterByDefaultRole
-   *
-   * @dataProvider permissionsProvider
-   */
-  public function testFilterByDefaultRole($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
-    $event->setPermissions($permissions);
-
-    $default_roles = [
-      OgRoleInterface::ANONYMOUS,
-      OgRoleInterface::AUTHENTICATED,
-      OgRoleInterface::ADMINISTRATOR,
-    ];
-    foreach ($default_roles as $default_role) {
-      $expected = array_filter($permissions, function ($permission) use ($default_role) {
-        return !empty($permission['default roles']) && in_array($default_role, $permission['default roles']);
-      });
-      $this->assertEquals($expected, $event->filterByDefaultRole($default_role));
-    }
-  }
-
-  /**
-   * @param array $permissions
-   *   An array of test permissions.
-   * @param string $entity_type_id
-   *   The entity type ID of the group type to which the permissions apply.
-   * @param string $bundle_id
-   *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::offsetGet
    *
    * @dataProvider permissionsProvider
    */
-  public function testOffsetGet($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testOffsetGet($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
     foreach ($permissions as $name => $permission) {
@@ -255,13 +250,16 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::offsetSet
    *
    * @dataProvider permissionsProvider
    */
-  public function testOffsetSet($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testOffsetSet($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
 
     // Test that an exception is thrown when setting a nameless permission.
     try {
@@ -295,13 +293,16 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::offsetUnset
    *
    * @dataProvider permissionsProvider
    */
-  public function testOffsetUnset($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testOffsetUnset($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
     foreach ($permissions as $name => $permission) {
@@ -329,13 +330,16 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::offsetExists
    *
    * @dataProvider permissionsProvider
    */
-  public function testOffsetExists($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testOffsetExists($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
 
     foreach ($permissions as $name => $permission) {
       $this->assertFalse(isset($event[$name]));
@@ -351,13 +355,16 @@ class PermissionEventTest extends UnitTestCase {
    *   The entity type ID of the group type to which the permissions apply.
    * @param string $bundle_id
    *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
    *
    * @covers ::getIterator
    *
    * @dataProvider permissionsProvider
    */
-  public function testIteratorAggregate($permissions, $entity_type_id, $bundle_id) {
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+  public function testIteratorAggregate($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
     foreach ($event as $name => $permission) {
@@ -380,6 +387,8 @@ class PermissionEventTest extends UnitTestCase {
    *   - An array of test permissions, keyed by permission ID.
    *   - The entity type ID of the group type to which these permissions apply.
    *   - The bundle ID of the group type to which these permissions apply.
+   *   - An array of group content bundle IDs to which these permissions apply,
+   *     keyed by group content entity type ID.
    */
   public function permissionsProvider() {
     $permissions = [
@@ -437,10 +446,12 @@ class PermissionEventTest extends UnitTestCase {
       ],
     ];
 
-    // Supply a random entity type ID and bundle ID for each data set.
+    // Supply a random entity type ID, bundle ID and array of group content
+    // bundle IDs for each data set.
     foreach ($permissions as &$item) {
       $item[] = $this->randomMachineName();
       $item[] = $this->randomMachineName();
+      $item[] = [$this->randomMachineName() => [$this->randomMachineName()]];
     }
 
     return $permissions;

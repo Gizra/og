@@ -3,12 +3,11 @@
 namespace Drupal\Tests\og\Kernel;
 
 use Drupal\Core\Entity\Entity;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\Event\PermissionEventInterface;
-use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
 
 /**
  * Tests the implementations of the PermissionEvent in 'og' and 'og_ui'.
@@ -51,21 +50,12 @@ class PermissionEventTest extends KernelTestBase {
 
     $this->eventDispatcher = $this->container->get('event_dispatcher');
 
-    // Create a group entity type.
-    $this->groupBundleId = 'test_group';
+    // Create a group content entity type. The type and name of this bundle are
+    // used to create the group content permissions.
     NodeType::create([
-      'type' => $this->groupBundleId,
-      'name' => $this->randomString(),
+      'type' => 'test_group_content',
+      'name' => 'Test Group Content',
     ])->save();
-    Og::groupManager()->addGroup('node', $this->groupBundleId);
-
-    // Create a group content entity type.
-    $group_content_bundle_id = 'test_group_content';
-    NodeType::create([
-      'type' => $group_content_bundle_id,
-      'name' => $this->randomString(),
-    ])->save();
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $group_content_bundle_id);
   }
 
   /**
@@ -82,22 +72,23 @@ class PermissionEventTest extends KernelTestBase {
    * doesn't have any group content - in this case it should only return the
    * default permissions that are available to all group types.
    *
-   * @param bool $test_group_content_permissions
-   *   TRUE to check the permissions expected for a group type that has group
-   *   content of type 'test_group_content'. FALSE to only check for the
-   *   expected default permissions that are valid for any group type.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs that are associated with the test
+   *   group.
    * @param array $expected_permissions
    *   An array of permission names that are expected to be returned.
+   * @param array $expected_full_permissions
+   *   An array of full permissions that are expected to be returned. This is a
+   *   subset of the permissions. It is not necessary to test the full
+   *   permission data for each entry, testing the data for only a couple of
+   *   permissions is sufficient.
    *
    * @dataProvider permissionEventDataProvider
    */
-  public function testPermissionEventIntegration($test_group_content_permissions, $expected_permissions) {
-    $entity_type_id = $test_group_content_permissions ? 'node' : $this->randomMachineName();
-    $bundle_id = $test_group_content_permissions ? $this->groupBundleId : $this->randomMachineName();
-
+  public function testPermissionEventIntegration(array $group_content_bundle_ids, array $expected_permissions, $expected_full_permissions) {
     // Retrieve the permissions from the listeners.
     /** @var PermissionEvent $permission_event */
-    $event = new PermissionEvent($entity_type_id, $bundle_id);
+    $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), $group_content_bundle_ids);
     $permission_event = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
     $actual_permissions = array_keys($permission_event->getPermissions());
 
@@ -106,6 +97,13 @@ class PermissionEventTest extends KernelTestBase {
     sort($actual_permissions);
 
     $this->assertEquals($expected_permissions, $actual_permissions);
+
+    // When testing the group content bundles, check that the bundle info has
+    // been correctly retrieved from the group content bundle that was created
+    // in the setUp() and used to create the permissions.
+    foreach ($expected_full_permissions as $permission) {
+      $this->assertArraySubset($permission, $permission_event->getPermissions());
+    }
   }
 
   /**
@@ -114,12 +112,18 @@ class PermissionEventTest extends KernelTestBase {
    * @return array
    *   An array of test properties. Each property is an indexed array with the
    *   following items:
-   *   - A boolean indication whether or not to request permissions for a group
-   *     that has group content of type 'test_group_content'. If FALSE only the
-   *     default permissions that are valid for any group type are returned.
-   *   - An array of permission names that are expected to be returned.
+   *   - An array of group content bundle IDs that are associated with the
+   *     test group. Used to check if group content permissions are correctly
+   *     provided.
+   *   - An array of permission names that are expected to be returned. Used to
+   *     check that the correct permissions are returned.
+   *   - An array of full permissions that are expected to be returned. This is
+   *     a subset of the permissions. It is not necessary to test the full
+   *     permission data for each entry, testing the data for only 1 or 2
+   *     permissions is sufficient.
    */
   public function permissionEventDataProvider() {
+    // Test permissions that should be available for both test groups.
     $default_permissions = [
       'add user',
       'administer group',
@@ -132,6 +136,8 @@ class PermissionEventTest extends KernelTestBase {
       'unsubscribe',
       'update group',
     ];
+    // Test permissions that should only be available for the test group that
+    // has group content.
     $group_content_permissions = [
       'create test_group_content node',
       'delete any test_group_content node',
@@ -139,10 +145,71 @@ class PermissionEventTest extends KernelTestBase {
       'update any test_group_content node',
       'update own test_group_content node',
     ];
-    return [
-      [FALSE, $default_permissions],
-      [TRUE, array_merge($default_permissions, $group_content_permissions)],
+    // A full permission that should be available in both test groups. This is
+    // used to test that all properties are correctly applied.
+    $group_level_permission = [
+      'administer group' => [
+        'title' => $this->t('Administer group'),
+        'description' => $this->t('Manage group members and content in the group.'),
+        'default roles' => ['administrator'],
+        'restrict access' => TRUE,
+      ],
     ];
+    // A full permission that should only be available for the test group that
+    // has group content.
+    $group_content_operation_permission = [
+      'create test_group_content node' => [
+        'title' => $this->t('Create %bundle @entity', [
+          '%bundle' => 'Test Group Content',
+          '@entity' => 'content items',
+        ]),
+        'default role' => ['administrator'],
+      ]
+    ];
+    return [
+      // Test retrieving permissions for a group that has no group content types
+      // associated with it.
+      [
+        [],
+        // It should only return the default permissions.
+        $default_permissions,
+        // The list of permissions should only contain the group level
+        // permission ('administer group'). and the group content permission
+        // ('create test_group_content node').
+        [
+          $group_level_permission,
+        ],
+      ],
+      // Test retrieving permissions for a group that has a group content type
+      // associated with it.
+      [
+        [
+          'node' => ['test_group_content'],
+        ],
+        // It should return the default permissions as well as the permissions
+        // to create, delete and update group content.
+        array_merge($default_permissions, $group_content_permissions),
+        // The list of permissions should contain both the group level
+        // permission ('administer group') and the group content permission
+        // ('create test_group_content node').
+        [
+          $group_level_permission,
+          $group_content_operation_permission,
+        ],
+      ],
+    ];
+  }
+
+  /**
+   * Implementation of the global t() function.
+   *
+   * The global t() function is not available in scope of the data provider, so
+   * it is replicated here.
+   *
+   * @see t()
+   */
+  function t($string, array $args = array(), array $options = array()) {
+    return new TranslatableMarkup($string, $args, $options);
   }
 
 }

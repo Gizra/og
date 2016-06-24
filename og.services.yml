@@ -9,13 +9,13 @@ services:
       - { name: 'event_subscriber' }
   og.group.manager:
     class: Drupal\og\GroupManager
-    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
   og.permission_manager:
     class: Drupal\og\PermissionManager
-    arguments: ['@og.group.manager', '@entity_type.manager', '@entity_type.bundle.info']
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher']
   plugin.manager.og.delete_orphans:
     class: Drupal\og\OgDeleteOrphansPluginManager
     parent: default_plugin_manager
