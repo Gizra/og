@@ -121,35 +121,30 @@ class OgEventSubscriber implements EventSubscriberInterface {
           'name' => "create $bundle_id content",
           'title' => $this->t('%type_name: Create new content', $args),
           'operation' => 'create',
-          'default roles' => [OgRoleInterface::ADMINISTRATOR, OgRoleInterface::AUTHENTICATED],
         ],
         [
           'name' => "edit own $bundle_id content",
           'title' => $this->t('%type_name: Edit own content', $args),
           'operation' => 'update',
           'ownership' => 'own',
-          'default roles' => [OgRoleInterface::ADMINISTRATOR, OgRoleInterface::AUTHENTICATED],
         ],
         [
           'name' => "edit any $bundle_id content",
           'title' => $this->t('%type_name: Edit any content', $args),
           'operation' => 'update',
           'ownership' => 'any',
-          'default roles' => [OgRoleInterface::ADMINISTRATOR],
         ],
         [
           'name' => "delete own $bundle_id content",
           'title' => $this->t('%type_name: Delete own content', $args),
           'operation' => 'delete',
           'ownership' => 'own',
-          'default roles' => [OgRoleInterface::ADMINISTRATOR, OgRoleInterface::AUTHENTICATED],
         ],
         [
           'name' => "delete any $bundle_id content",
           'title' => $this->t('%type_name: Delete any content', $args),
           'operation' => 'delete',
           'ownership' => 'any',
-          'default roles' => [OgRoleInterface::ADMINISTRATOR],
         ],
       ];
       foreach ($permission_values as $values) {
