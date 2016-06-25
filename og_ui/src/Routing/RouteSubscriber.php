@@ -60,6 +60,9 @@ class RouteSubscriber extends RouteSubscriberBase {
           ->addRequirements([
             '_custom_access' => '\Drupal\og_ui\Access\OgUiRoutingAccess::GroupTabAccess',
           ])
+          ->setOption('parameters', [
+            $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+          ])
           ->setOption('_admin_route', TRUE);
 
         $collection->add('entity.' . $entity_type_id . '.og_group_admin_pages', $route);

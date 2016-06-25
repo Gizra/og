@@ -21,10 +21,7 @@ class OgUi {
   public static function getEntity() {
     $route_match = \Drupal::routeMatch();
     $parameters = $route_match->getParameters();
-    $keys = $parameters->keys();
-
-    $path = explode('/', $route_match->getRouteObject()->getPath());
-    return \Drupal::entityTypeManager()->getStorage($path[1])->load($parameters->get(reset($keys)));
+    reset($parameters->keys());
   }
 
 }
