@@ -132,9 +132,9 @@ class OgAccessTestBase extends UnitTestCase {
     $group_ids = [$group_type_id => [$this->group->id()]];
     $values[$identifier] = $group_ids;
 
-    // Mock the results of Og::getUserMemberships().
+    // Mock the results of Og::getMemberships().
     $identifier = [
-      'Drupal\og\Og::getUserMemberships',
+      'Drupal\og\Og::getMemberships',
       2,
       OgMembershipInterface::STATE_ACTIVE,
       // The field name.

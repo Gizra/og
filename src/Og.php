@@ -162,7 +162,7 @@ class Og {
     $group_ids = [];
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
-    $memberships = static::getUserMemberships($user, $states, $field_name);
+    $memberships = static::getMemberships($user, $states, $field_name);
     foreach ($memberships as $membership) {
       $group_ids[$membership->getGroupEntityType()][] = $membership->getEntityId();
     }
@@ -191,7 +191,7 @@ class Og {
    *   group entities.
    *
    * @see \Drupal\og\Og::getGroups()
-   * @see \Drupal\og\Og::getUserMemberships()
+   * @see \Drupal\og\Og::getMemberships()
    */
   public static function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     $groups = [];
@@ -216,7 +216,7 @@ class Og {
    * @return \Drupal\og\Entity\OgMembership[]
    *  An array of OgMembership entities, keyed by ID.
    */
-  public static function getUserMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
+  public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     // Get a string identifier of the states, so we can retrieve it from cache.
     sort($states);
     $states_identifier = implode('|', array_unique($states));
@@ -272,7 +272,7 @@ class Og {
    *   group.
    */
   public static function getMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
-    foreach (static::getUserMemberships($user, $states, $field_name) as $membership) {
+    foreach (static::getMemberships($user, $states, $field_name) as $membership) {
       if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getEntityId() === $group->id()) {
         return $membership;
       }
