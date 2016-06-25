@@ -46,7 +46,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
    *
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The OG permission manager.
-   * @param \Drupal\core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The service providing information about bundles.
