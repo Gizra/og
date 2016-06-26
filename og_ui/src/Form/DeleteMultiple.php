@@ -9,6 +9,7 @@ namespace Drupal\og_ui\Form;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
+use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgMembership;
@@ -19,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides a og_ui deletion confirmation form.
  */
-class DeleteMultiple extends ConfirmFormBase {
+class DeleteMultiple extends FormBase {
 
   /**
    * The array of og_uis to delete.
@@ -136,7 +137,7 @@ class DeleteMultiple extends ConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelUrl() {
+  public function _getCancelUrl() {
     return Url::fromUri($this->tempStoreFactory->get('og_ui')->get('people_url'));
   }
 

@@ -8,6 +8,7 @@
 namespace Drupal\og_ui\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\PrivateTempStoreFactory;
@@ -19,8 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @Action(
  *   id = "membership_delete_action",
  *   label = @Translation("Delete selected memberships"),
- *   type = "og_membership",
- *   confirm_form_route_name = "og_ui.multiple_delete_confirm"
+ *   type = "og_membership"
  * )
  */
 class DeleteMembership extends ActionBase implements ContainerFactoryPluginInterface {
@@ -40,6 +40,11 @@ class DeleteMembership extends ActionBase implements ContainerFactoryPluginInter
   protected $currentUser;
 
   /**
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $storage;
+
+  /**
    * Constructs a new DeleteMembership object.
    *
    * @param array $configuration
@@ -52,10 +57,13 @@ class DeleteMembership extends ActionBase implements ContainerFactoryPluginInter
    *   The tempstore factory.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   Current user.
+   * @param EntityTypeManagerInterface $manager
+   *   The entity manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, PrivateTempStoreFactory $temp_store_factory, AccountInterface $current_user) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, PrivateTempStoreFactory $temp_store_factory, AccountInterface $current_user, EntityTypeManagerInterface $manager) {
     $this->currentUser = $current_user;
     $this->tempStore = $temp_store_factory->get('og_membership_multiple_delete_confirm');
+    $this->storage = $manager->getStorage('og_membership');
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -69,7 +77,8 @@ class DeleteMembership extends ActionBase implements ContainerFactoryPluginInter
       $plugin_id,
       $plugin_definition,
       $container->get('user.private_tempstore'),
-      $container->get('current_user')
+      $container->get('current_user'),
+      $container->get('entity_type.manager')
     );
   }
 
@@ -77,7 +86,7 @@ class DeleteMembership extends ActionBase implements ContainerFactoryPluginInter
    * {@inheritdoc}
    */
   public function executeMultiple(array $entities) {
-    $this->tempStore->set($this->currentUser->id(), $entities);
+    $this->storage->delete($entities);
   }
 
   /**
