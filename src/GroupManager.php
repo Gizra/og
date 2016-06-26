@@ -252,7 +252,7 @@ class GroupManager {
     $editable->set('groups', $groups);
     $editable->save();
 
-    // Notify other module we added a new group.
+    // Trigger an event upon the new group creation.
     $event = new GroupCreationEvent($entity_type_id, $bundle_id);
     $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, $event);
 
@@ -468,10 +468,12 @@ class GroupManager {
 
     $this->groupRelationMap = [];
 
+    $user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle') ?: ['user'];
+
     foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
       foreach ($bundles as $group_content_bundle_id => $bundle_info) {
 
-        if ($group_content_bundle_id == 'user') {
+        if (in_array($group_content_bundle_id, $user_bundles)) {
           // User is not a group content per se. Remove it.
           continue;
         }

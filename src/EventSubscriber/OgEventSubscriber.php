@@ -94,7 +94,8 @@ class OgEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Acting upon group creation and attach an og audience field to the user.
+   * Upon group creation, add an OG audience field to the user if it doesn't
+   * exist.
    *
    * @param GroupCreationEventInterface $event
    *   The created group.
@@ -103,8 +104,8 @@ class OgEventSubscriber implements EventSubscriberInterface {
     $entity_type_id = $event->getEntityTypeId();
     $bundle_id = $event->getBundleId();
 
-    // create a group audience field which will reference to groups from the given
-    // entity type ID and attach it to the user.
+    // create a group audience field which will reference to groups from the
+    // given entity type ID and attach it to the user.
     $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user');
 
     foreach ($fields as $field) {
@@ -112,17 +113,19 @@ class OgEventSubscriber implements EventSubscriberInterface {
       if ($field->getFieldStorageDefinition()->getSetting('target_type') == $entity_type_id) {
 
         if (!$field->getSetting('handler_settings')['target_bundles']) {
+          // The field does not reference to any group bundle.
           return;
         }
 
         if (in_array($bundle_id, $field->getSetting('handler_settings')['target_bundles'])) {
+          // The field doe not handle the current bundle.
           return;
         }
       }
     }
 
-    // If we reached here, it means we need to create a field.
-    // Pick an unused name.
+    // If we reached here, it means we need to create a field. Pick an unused
+    // name but don't exceed the maximum characters to a field name.
     $field_name = substr("og_user_$entity_type_id", 0, 32);
     $i = 1;
     while (FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name)) {
@@ -130,11 +133,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       ++$i;
     }
 
-    if (!$user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle')) {
-      $user_bundles = [];
-    }
-
-    $user_bundles[] = 'user';
+    $user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle') ?: ['user'];
 
     $settings = [
       'field_name' => $field_name,

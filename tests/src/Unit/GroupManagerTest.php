@@ -312,7 +312,7 @@ class GroupManagerTest extends UnitTestCase {
   }
 
   /**
-   * Mocked method calls when system under test should attach og audience field
+   * Mocked method calls when system under test should attach OG audience field
    * on the user.
    */
   protected function expectGroupCreation() {
