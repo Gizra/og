@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element\Form;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgMembership;
@@ -88,6 +89,12 @@ class OgUiAddPeopleForm extends FormBase {
           '#type' => 'submit',
           '#value' => $this->t('Submit')
         ],
+        'cancel' => [
+          '#type' => 'link',
+          '#title' => $this->t('Cancel'),
+          '#attributes' => ['class' => ['button']],
+          '#url' => $this->getCancelUrl(),
+        ],
       ],
     ];
   }
@@ -107,7 +114,6 @@ class OgUiAddPeopleForm extends FormBase {
         break;
       }
     }
-
   }
 
   /**
@@ -121,7 +127,16 @@ class OgUiAddPeopleForm extends FormBase {
       'entity_id' => OgUi::getEntity()->id(),
     ])->save();
 
-    $form_state->setRedirectUrl(Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_uri')));;
+    $form_state->setRedirect($this->getCancelUrl());
+  }
+
+  /**
+   * Get the cancel URL.
+   *
+   * @return Url
+   */
+  protected function getCancelUrl() {
+    return Url::fromUri($this->tempStoreFactory->get('og_ui')->get('people_url'));
   }
 
 }

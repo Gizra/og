@@ -63,6 +63,7 @@ class RouteSubscriber extends RouteSubscriberBase {
           ->setOption('parameters', [
             $entity_type_id => ['type' => 'entity:' . $entity_type_id],
           ])
+          ->setOption('entity_type_id', $entity_type_id)
           ->setOption('_admin_route', TRUE);
 
         $collection->add('entity.' . $entity_type_id . '.og_group_admin_pages', $route);
@@ -83,7 +84,7 @@ class RouteSubscriber extends RouteSubscriberBase {
       $plugin = $plugins->createInstance($definition['id']);
 
       // Iterate over all the parent routes.
-      foreach ($definition['parents_routes'] as $parent_route) {
+      foreach ($definition['parents_routes'] as $entity_type_id => $parent_route) {
 
         if (!$route_provider->getRoutesByNames([$parent_route])) {
           $params = [
@@ -109,6 +110,10 @@ class RouteSubscriber extends RouteSubscriberBase {
               '_custom_access' => $definition['access'],
               '_plugin_id' => $definition['id'],
             ])
+            ->setOption('parameters', [
+              $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+            ])
+            ->setOption('entity_type_id', $entity_type_id)
             ->setOption('_admin_route', TRUE);
 
           $collection->add($parent_route . '.' . $definition['route_id'] . '.' . $sub_route, $route);

@@ -16,7 +16,7 @@ use Drupal\og_ui\OgUiAdminRouteInterface;
  *   access = "\Drupal\og_ui\Controller\PeopleController::access",
  *   route_id = "people",
  *   parents_routes = {
- *    "entity.node.canonical"
+ *    "node" = "entity.node.canonical"
  *   }
  * )
  */

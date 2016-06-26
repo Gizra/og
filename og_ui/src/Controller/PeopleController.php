@@ -34,7 +34,7 @@ class PeopleController extends ControllerBase {
     /** @var PrivateTempStoreFactory $session_storage */
     $session_storage = \Drupal::service('user.private_tempstore');
     $temp_storage = $session_storage->get('og_ui');
-    $temp_storage->set('people_url', \Drupal::request()->getRequestUri());
+    $temp_storage->set('people_url', \Drupal::request()->getUri());
 
     $entity = OgUi::getEntity();
     $arguments = [$entity->getEntityTypeId(), $entity->id()];

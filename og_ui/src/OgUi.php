@@ -19,9 +19,11 @@ class OgUi {
    * @return \Drupal\Core\Entity\ContentEntityBase
    */
   public static function getEntity() {
-    $route_match = \Drupal::routeMatch();
-    $parameters = $route_match->getParameters();
-    reset($parameters->keys());
+    $entity_type_id = \Drupal::routeMatch()
+      ->getRouteObject()
+      ->getOption('entity_type_id');
+
+    return \Drupal::routeMatch()->getParameter($entity_type_id);
   }
 
 }

@@ -114,7 +114,7 @@ class DeleteMultiple extends ConfirmFormBase {
     ];
     $form = parent::buildForm($form, $form_state);
 
-    $form['actions']['cancel']['#href'] = $this->getCancelUrl();
+    $form['actions']['cancel']['#url'] = $this->getCancelUrl();
     return $form;
   }
 
@@ -130,14 +130,14 @@ class DeleteMultiple extends ConfirmFormBase {
       drupal_set_message(\Drupal::translation()->formatPlural($count, 'Deleted 1 membership.', 'Deleted @count memberships.'));
     }
 
-    $form_state->setRedirectUrl(Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_uri')));
+    $form_state->setRedirectUrl($this->getCancelUrl());
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return Url::fromUserInput($this->tempStoreFactory->get('og_ui')->get('people_uri'));
+    return Url::fromUri($this->tempStoreFactory->get('og_ui')->get('people_url'));
   }
 
 }
