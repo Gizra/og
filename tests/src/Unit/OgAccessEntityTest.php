@@ -18,7 +18,7 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
 
   /**
    * @coversDefaultmethod ::userAccessEntity
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testAccessByOperation($operation) {
     $group_entity = $this->groupEntity();
@@ -34,7 +34,7 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
 
   /**
    * @coversDefaultmethod ::userAccessEntity
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testEntityNew($operation) {
     $group_entity = $this->groupEntity();
@@ -45,7 +45,7 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
 
   /**
    * @coversDefaultmethod ::userAccessEntity
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testGetEntityGroups($operation) {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);

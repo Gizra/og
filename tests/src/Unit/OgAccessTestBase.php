@@ -216,15 +216,12 @@ class OgAccessTestBase extends UnitTestCase {
   }
 
   /**
-   * Provides operations to use in access tests.
+   * Provides permissions to use in access tests.
    *
    * @return array
-   *   An array of test operations.
-   *
-   * @todo These are not really 'operations' but rather 'permissions', rename
-   *   this?
+   *   An array of test permissions.
    */
-  public function operationProvider() {
+  public function permissionsProvider() {
     return [
       // In the unit tests we don't really care about the permission name - it
       // can be an arbitrary string; except for OgAccessTest::testUserAccessAdminPermission

@@ -23,7 +23,7 @@ class OgAccessHookTest extends OgAccessEntityTestBase {
   /**
    * Tests that an entity which is not a group or group content is ignored.
    *
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testNotContentEntity($operation) {
     $entity = $this->prophesize(EntityInterface::class);
@@ -37,14 +37,14 @@ class OgAccessHookTest extends OgAccessEntityTestBase {
   /**
    * Tests that an administrator with 'administer group' permission has access.
    *
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testGetEntityGroups($operation) {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
     $user_entity_access = og_entity_access($this->groupContentEntity->reveal(), $operation, $this->user->reveal());
 
     // @todo This is strange, 'view' is not part of the operations supplied by
-    //   ::operationProvider(). And why would a group administrator be allowed
+    //   ::permissionsProvider(). And why would a group administrator be allowed
     //   access to all operations, except 'view'? Shouldn't this also return
     //   'allowed'?
     if ($operation == 'view') {

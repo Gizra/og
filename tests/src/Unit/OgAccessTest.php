@@ -17,7 +17,7 @@ class OgAccessTest extends OgAccessTestBase {
 
   /**
    * @coversDefaultmethod ::userAccess
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testUserAccessNotAGroup($operation) {
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(FALSE);
@@ -27,7 +27,7 @@ class OgAccessTest extends OgAccessTestBase {
 
   /**
    * @coversDefaultmethod ::userAccess
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testAccessByOperation($operation) {
     $user_access = $this->ogAccess->userAccess($this->group, $operation, $this->user->reveal());
@@ -41,7 +41,7 @@ class OgAccessTest extends OgAccessTestBase {
 
   /**
    * @coversDefaultmethod ::userAccess
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testUserAccessUser1($operation) {
     $this->user->id()->willReturn(1);
@@ -51,7 +51,7 @@ class OgAccessTest extends OgAccessTestBase {
 
   /**
    * @coversDefaultmethod ::userAccess
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testUserAccessAdminPermission($operation) {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
@@ -61,7 +61,7 @@ class OgAccessTest extends OgAccessTestBase {
 
   /**
    * @coversDefaultmethod ::userAccess
-   * @dataProvider operationProvider
+   * @dataProvider permissionsProvider
    */
   public function testUserAccessOwner($operation) {
     $this->config->get('group_manager_full_access')->willReturn(TRUE);
