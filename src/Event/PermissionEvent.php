@@ -113,10 +113,22 @@ class PermissionEvent extends Event implements PermissionEventInterface {
       throw new \InvalidArgumentException('The permission title is required.');
     }
 
-    // GroupContentOperationPermissions are uniquely identified by entity type,
-    // bundle, operation and ownership. Check if this permission was already
-    // registered under another name, and remove it so the new one replaces it.
     if ($permission instanceof GroupContentOperationPermission) {
+      // GroupContentOperationPermissions are uniquely identified by entity
+      // type, bundle, operation and ownership. Check if these properties are
+      // set.
+      if (empty($permission->getEntityType())) {
+        throw new \InvalidArgumentException('The entity type ID is required.');
+      }
+      if (empty($permission->getBundle())) {
+        throw new \InvalidArgumentException('The bundle ID is required.');
+      }
+      if (empty($permission->getOperation())) {
+        throw new \InvalidArgumentException('The operation is required.');
+      }
+
+      // Check if this permission was already registered under another name, and
+      // remove it so the new one replaces it.
       try {
         $this->deleteGroupContentOperationPermission($permission->getEntityType(), $permission->getBundle(), $permission->getOperation(), $permission->getOwnership());
       }
