@@ -4,20 +4,14 @@ namespace Drupal\og;
 
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\og\Event\PermissionEvent;
+use Drupal\og\Event\PermissionEventInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Manager for OG permissions.
- *
- * @todo Provide an interface.
  */
-class PermissionManager {
-
-  /**
-   * The OG group manager.
-   *
-   * @var \Drupal\og\GroupManager
-   */
-  protected $groupManager;
+class PermissionManager implements PermissionManagerInterface {
 
   /**
    * The entity type manager.
@@ -34,40 +28,37 @@ class PermissionManager {
   protected $entityTypeBundleInfo;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * Constructs a PermissionManager object.
    *
-   * @param \Drupal\og\GroupManager $group_manager
-   *   The OG group manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The service providing information about bundles.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   *   The event dispatcher.
    */
-  public function __construct(GroupManager $group_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
-    $this->groupManager = $group_manager;
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher) {
     $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
-   * Generates the OG permission list for the given group type.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID of the group for which to generate the permissions.
-   * @param string $bundle_id
-   *   The bundle ID of the group for which to generate the permissions.
-   *
-   * @return array
-   *   The list of permissions.
-   *
-   * @todo Provide an alter hook.
+   * {@inheritdoc}
    */
-  public function getPermissionList($entity_type_id, $bundle_id) {
+  public function getEntityOperationPermissions(array $group_content_bundle_ids) {
     $permissions = [];
 
-    foreach ($this->groupManager->getGroupContentBundleIdsByGroupBundle($entity_type_id, $bundle_id) as $group_content_entity_type_id => $group_content_bundle_ids) {
-      foreach ($group_content_bundle_ids as $group_content_bundle_id) {
-        $permissions += $this->generateCrudPermissionList($group_content_entity_type_id, $group_content_bundle_id);
+    foreach ($group_content_bundle_ids as $group_content_entity_type_id => $bundle_ids) {
+      foreach ($bundle_ids as $bundle_id) {
+        $permissions += $this->generateEntityOperationPermissionList($group_content_entity_type_id, $bundle_id);
       }
     }
 
@@ -75,24 +66,10 @@ class PermissionManager {
   }
 
   /**
-   * Helper function to generate default crud permissions for a given bundle.
-   *
-   * @param $group_content_entity_type_id
-   *   The entity type ID for which to generate the permission list.
-   * @param $group_content_bundle_id
-   *   The bundle ID for which to generate the permission list.
-   *
-   * @return array
-   *   An array of permission names and descriptions.
-   *
+   * {@inheritdoc}
    */
-  public function generateCrudPermissionList($group_content_entity_type_id, $group_content_bundle_id) {
+  public function generateEntityOperationPermissionList($group_content_entity_type_id, $group_content_bundle_id) {
     $permissions = [];
-
-    // Check if the bundle is a group content type.
-    if (!Og::isGroupContent($group_content_entity_type_id, $group_content_bundle_id)) {
-      return [];
-    }
 
     $entity_info = $this->entityTypeManager->getDefinition($group_content_entity_type_id);
     $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($group_content_entity_type_id)[$group_content_bundle_id];
@@ -126,6 +103,24 @@ class PermissionManager {
     // Add default permissions.
     foreach ($permissions as $key => $value) {
       $permissions[$key]['default role'] = [OgRoleInterface::ADMINISTRATOR];
+    }
+
+    return $permissions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultPermissions($group_entity_type_id, $group_bundle_id, $role_name = NULL) {
+    // Populate the default permissions.
+    $event = new PermissionEvent($group_entity_type_id, $group_bundle_id, []);
+    $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
+
+    $permissions = $event->getPermissions();
+    if (!empty($role_name)) {
+      $permissions = array_filter($permissions, function ($permission) use ($role_name) {
+        return !empty($permission['default roles']) && in_array($role_name, $permission['default roles']);
+      });
     }
 
     return $permissions;

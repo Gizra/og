@@ -51,4 +51,22 @@ interface OgRoleInterface {
    */
   public function setId($id);
 
+  /**
+   * Returns the role name.
+   *
+   * @return string
+   *   The role name.
+   */
+  public function getName();
+
+  /**
+   * Sets the role name.
+   *
+   * @param string $name
+   *   The role name
+   *
+   * @return $this
+   */
+  public function setName($name);
+
 }

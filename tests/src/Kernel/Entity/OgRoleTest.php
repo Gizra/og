@@ -40,7 +40,7 @@ class OgRoleTest extends KernelTestBase {
   public function testRoleCreate() {
     $og_role = OgRole::create();
     $og_role
-      ->setId('content_editor')
+      ->setName('content_editor')
       ->setLabel('Content editor')
       ->grantPermission('administer group');
 
@@ -66,7 +66,7 @@ class OgRoleTest extends KernelTestBase {
     try {
       $og_role = OgRole::create();
       $og_role
-        ->setId('content_editor')
+        ->setName('content_editor')
         ->setLabel('Content editor')
         ->setGroupType('node')
         ->setGroupBundle('group')
@@ -82,7 +82,7 @@ class OgRoleTest extends KernelTestBase {
     // Create a role assigned to a group type.
     $og_role = OgRole::create();
     $og_role
-      ->setId('content_editor')
+      ->setName('content_editor')
       ->setLabel('Content editor')
       ->setGroupType('entity_test')
       ->setGroupBundle('group')
@@ -95,7 +95,7 @@ class OgRoleTest extends KernelTestBase {
     try {
       $og_role = OgRole::create();
       $og_role
-        ->setId('content_editor')
+        ->setName('content_editor')
         ->setLabel('Content editor')
         ->setGroupType('entity_test')
         ->setGroupBundle('group')
@@ -106,6 +106,40 @@ class OgRoleTest extends KernelTestBase {
     }
     catch (EntityStorageException $e) {
       $this->assertTrue(TRUE, "OG role with the same ID on the same group can not be saved.");
+    }
+
+    // Try to save a role with an ID instead of a name. This is how the Config
+    // system will create a role from data stored in a YAML file.
+    $og_role = OgRole::create([
+      'id' => 'entity_test-group-configurator',
+      'label' => 'Configurator',
+      'group_type' => 'entity_test',
+      'group_bundle' => 'group',
+    ]);
+    $og_role->save();
+
+    $this->assertNotEmpty(OgRole::load('entity_test-group-configurator'));
+
+    // Check that we can retrieve the role name correctly. This was not
+    // explicitly saved but it should be possible to derive this from the ID.
+    $this->assertEquals('configurator', $og_role->getName());
+
+    // When a role is saved with an ID that does not matches the pattern
+    // 'entity type-bundle-role name' then an exception should be thrown.
+    try {
+      $og_role = OgRole::create();
+      $og_role
+        ->setId('entity_test-group-wrong_id')
+        ->setName('content_editor')
+        ->setLabel('Content editor')
+        ->setGroupType('entity_test')
+        ->setGroupBundle('group')
+        ->save();
+
+      $this->fail('OG role with a non-matching ID can be saved.');
+    }
+    catch (ConfigValueException $e) {
+      $this->assertTrue(TRUE, "OG role with a non-matching ID can not be saved.");
     }
   }
 

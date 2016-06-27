@@ -16,7 +16,7 @@ use Drupal\user\Entity\User;
  * @group og
  * @coversDefaultClass \Drupal\og\Og
  */
-class GetUserMembershipsTest extends KernelTestBase {
+class GetMembershipsTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -128,11 +128,11 @@ class GetUserMembershipsTest extends KernelTestBase {
    * @param array $expected
    *   An array containing the expected results to be returned.
    *
-   * @covers ::getUserMemberships
+   * @covers ::getMemberships
    * @dataProvider membershipDataProvider
    */
-  public function testGetUserMemberships($index, array $states, $field_name, array $expected) {
-    $result = Og::getUserMemberships($this->users[$index], $states, $field_name);
+  public function testGetMemberships($index, array $states, $field_name, array $expected) {
+    $result = Og::getMemberships($this->users[$index], $states, $field_name);
 
     // Check that the correct number of results is returned.
     $this->assertEquals(count($expected), count($result));
