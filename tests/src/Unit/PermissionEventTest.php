@@ -3,6 +3,7 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\og\Event\PermissionEvent;
+use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
@@ -14,7 +15,7 @@ use Drupal\Tests\UnitTestCase;
 class PermissionEventTest extends UnitTestCase {
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -28,7 +29,7 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testGetPermission($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testGetPermission(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
 
     // An exception should be thrown when trying to get a permission that
@@ -51,7 +52,44 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\GroupContentOperationPermission[] $permissions
+   *   An array of test permissions.
+   * @param string $entity_type_id
+   *   The entity type ID of the group type to which the permissions apply.
+   * @param string $bundle_id
+   *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
+   *
+   * @covers ::getGroupContentOperationPermission
+   *
+   * @dataProvider groupContentOperationPermissionsProvider
+   */
+  public function testGetGroupContentOperationPermission(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
+
+    // An exception should be thrown if the permission doesn't exist yet.
+    foreach ($permissions as $permission) {
+      try {
+        $event->getGroupContentOperationPermission($permission->getEntityType(), $permission->getBundle(), $permission->getOperation(), $permission->getOwnership());
+        $this->fail('Calling ::getGroupContentOperationPermission() on a non-existing permission throws an exception.');
+      }
+      catch (\InvalidArgumentException $e) {
+        // Expected result.
+      }
+    }
+
+    // Test that the permissions can be retrieved once they are set.
+    $event->setPermissions($permissions);
+
+    foreach ($permissions as $permission) {
+      $this->assertEquals($permission, $event->getGroupContentOperationPermission($permission->getEntityType(), $permission->getBundle(), $permission->getOperation(), $permission->getOwnership()));
+    }
+  }
+
+  /**
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -66,7 +104,7 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testGetPermissions($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testGetPermissions(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
@@ -74,7 +112,7 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -88,26 +126,8 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testSetPermission($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testSetPermission(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
-
-    // Test that an exception is thrown when setting a nameless permission.
-    try {
-      $event->setPermission(new GroupPermission(['title' => 'A permission without a name']));
-      $this->fail('An exception is thrown when a nameless permission is set.');
-    }
-    catch (\InvalidArgumentException $e) {
-      // Expected result.
-    }
-
-    // Test that an exception is thrown when setting permission without a title.
-    try {
-      $event->setPermission(new GroupPermission(['name' => 'an-invalid-permission']));
-      $this->fail('An exception is thrown when a permission without a title is set.');
-    }
-    catch (\InvalidArgumentException $e) {
-      // Expected result.
-    }
 
     foreach ($permissions as $permission) {
       $event->setPermission($permission);
@@ -117,7 +137,31 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
+   *   An array of test permissions.
+   * @param string $entity_type_id
+   *   The entity type ID of the group type to which the permissions apply.
+   * @param string $bundle_id
+   *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
+   *
+   * @covers ::setPermission
+   *
+   * @expectedException \InvalidArgumentException
+   *
+   * @dataProvider invalidPermissionsProvider
+   */
+  public function testSetInvalidPermission(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
+    foreach ($permissions as $permission) {
+      $event->setPermission($permission);
+    }
+  }
+
+  /**
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -131,7 +175,7 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testDeletePermission($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testDeletePermission(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
@@ -146,7 +190,43 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\GroupContentOperationPermission[] $permissions
+   *   An array of test permissions.
+   * @param string $entity_type_id
+   *   The entity type ID of the group type to which the permissions apply.
+   * @param string $bundle_id
+   *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
+   *
+   * @covers ::deleteGroupContentOperationPermission
+   *
+   * @dataProvider groupContentOperationPermissionsProvider
+   */
+  public function testDeleteGroupContentOperationPermission(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
+    $event->setPermissions($permissions);
+
+    foreach ($permissions as $permission) {
+      $name = $permission->getName();
+
+      $permission_entity_type_id = $permission->getEntityType();
+      $permission_bundle_id = $permission->getBundle();
+      $permission_operation = $permission->getOperation();
+      $permission_ownership = $permission->getOwnership();
+
+      // Before we delete the permission, it should still be there.
+      $this->assertTrue($event->hasPermission($name));
+
+      // After we delete the permission, it should be gone.
+      $event->deleteGroupContentOperationPermission($permission_entity_type_id, $permission_bundle_id, $permission_operation, $permission_ownership);
+      $this->assertFalse($event->hasPermission($name));
+    }
+  }
+
+  /**
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -160,7 +240,7 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testHasPermission($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testHasPermission(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
 
     foreach ($permissions as $name => $permission) {
@@ -171,7 +251,37 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\GroupContentOperationPermission[] $permissions
+   *   An array of test permissions.
+   * @param string $entity_type_id
+   *   The entity type ID of the group type to which the permissions apply.
+   * @param string $bundle_id
+   *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
+   *
+   * @covers ::hasGroupContentOperationPermission
+   *
+   * @dataProvider groupContentOperationPermissionsProvider
+   */
+  public function testHasGroupContentOperationPermission(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
+
+    foreach ($permissions as $permission) {
+      $permission_entity_type_id = $permission->getEntityType();
+      $permission_bundle_id = $permission->getBundle();
+      $permission_operation = $permission->getOperation();
+      $permission_ownership = $permission->getOwnership();
+
+      $this->assertFalse($event->hasGroupContentOperationPermission($permission_entity_type_id, $permission_bundle_id, $permission_operation, $permission_ownership));
+      $event->setPermission($permission);
+      $this->assertTrue($event->hasGroupContentOperationPermission($permission_entity_type_id, $permission_bundle_id, $permission_operation, $permission_ownership));
+    }
+  }
+
+  /**
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -185,13 +295,13 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testGetEntityTypeId($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testGetEntityTypeId(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $this->assertEquals($entity_type_id, $event->getGroupEntityTypeId());
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -205,13 +315,33 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testGetBundleId($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testGetBundleId(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $this->assertEquals($bundle_id, $event->getGroupBundleId());
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
+   *   An array of test permissions.
+   * @param string $entity_type_id
+   *   The entity type ID of the group type to which the permissions apply.
+   * @param string $bundle_id
+   *   The bundle ID of the group type to which the permissions apply.
+   * @param array $group_content_bundle_ids
+   *   An array of group content bundle IDs to which the permissions apply,
+   *   keyed by group content entity type ID.
+   *
+   * @covers ::getGroupContentBundleIds
+   *
+   * @dataProvider permissionsProvider
+   */
+  public function testGetGroupContentBundleIds(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+    $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
+    $this->assertEquals($group_content_bundle_ids, $event->getGroupContentBundleIds());
+  }
+
+  /**
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -225,7 +355,7 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testOffsetGet($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testOffsetGet(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
@@ -245,7 +375,7 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -259,26 +389,8 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testOffsetSet($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testOffsetSet(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
-
-    // Test that an exception is thrown when setting a nameless permission.
-    try {
-      $event[] = ['title' => 'A permission without a name'];
-      $this->fail('An exception is thrown when a nameless permission is set through ArrayAccess.');
-    }
-    catch (\InvalidArgumentException $e) {
-      // Expected result.
-    }
-
-    // Test that an exception is thrown when setting permission without a title.
-    try {
-      $event['an-invalid-permission'] = [];
-      $this->fail('An exception is thrown when a permission without a title is set through ArrayAccess.');
-    }
-    catch (\InvalidArgumentException $e) {
-      // Expected result.
-    }
 
     foreach ($permissions as $name => $permission) {
       $this->assertFalse($event->hasPermission($name));
@@ -288,7 +400,68 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
-   * @param array $permissions
+   * Tests setting invalid permissions through ArrayAccess.
+   *
+   * @param string $key
+   *   The key to use when setting the permission through ArrayAccess.
+   * @param mixed $permission
+   *   A test value to set through ArrayAccess.
+   *
+   * @expectedException \InvalidArgumentException
+   *
+   * @dataProvider offsetSetInvalidPermissionProvider
+   */
+  public function testOffsetSetInvalidPermission($key, $permission) {
+    $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), []);
+    $event[$key] = $permission;
+  }
+
+  /**
+   * Data provider for testOffsetSetInvalidPermission().
+   *
+   * @return array
+   *   An array of invalid test data, each set containing:
+   *   - The array key to use when setting the permission though ArrayAccess.
+   *   - The permission to set.
+   */
+  public function offsetSetInvalidPermissionProvider() {
+    return [
+      // Test that an exception is thrown when setting a nameless permission.
+      [
+        '',
+        new GroupPermission([
+          'title' => $this->t('A permission without a machine name.'),
+        ]),
+      ],
+
+      // Test that an exception is thrown when setting permission without a
+      // title.
+      [
+        '',
+         new GroupPermission([
+          'name' => 'a titleless permission',
+        ]),
+      ],
+      // Test that an exception is thrown when the array key doesn't match the
+      // machine name.
+      [
+        'a non-matching key',
+        new GroupPermission([
+          'name' => 'a different key',
+          'title' => $this->t('This permission has a name that differs from the array key that is used to set it.')
+        ]),
+      ],
+      // Test that an exception is thrown when an object is passed which is not
+      // implementing \Drupal\og\PermissionInterface.
+      [
+        'a non-matching key',
+        new \stdClass(),
+      ],
+    ];
+  }
+
+  /**
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -302,7 +475,7 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testOffsetUnset($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testOffsetUnset(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
@@ -312,20 +485,13 @@ class PermissionEventTest extends UnitTestCase {
       $this->assertFalse($event->hasPermission($name));
     }
 
-    // @todo
-    // Test that an exception is thrown when unsetting a non-existing
-    // permission.
-    try {
-      $event['some-non-existing-permission'];
-      $this->fail('An exception is thrown when a non-existing permission is requested through ArrayAccess.');
-    }
-    catch (\InvalidArgumentException $e) {
-      // Expected result.
-    }
+    // Test that it is possible to unset a non-existing permissions. In keeping
+    // with standard PHP practices this should not throw any error.
+    unset($event['some-non-existing-permission']);
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -339,7 +505,7 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testOffsetExists($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testOffsetExists(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
 
     foreach ($permissions as $name => $permission) {
@@ -350,7 +516,7 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
    *   The entity type ID of the group type to which the permissions apply.
@@ -364,7 +530,7 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @dataProvider permissionsProvider
    */
-  public function testIteratorAggregate($permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
+  public function testIteratorAggregate(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     $event->setPermissions($permissions);
 
@@ -378,6 +544,73 @@ class PermissionEventTest extends UnitTestCase {
 
     // Check that the iterator has looped over all permissions correctly.
     $this->assertEmpty($permissions);
+  }
+
+  /**
+   * Tests creation of an invalid operation permission.
+   *
+   * @expectedException \InvalidArgumentException
+   */
+  public function testInvalidGroupContentOperationPermissionCreation() {
+    // An exception should be thrown when a group content operation permission
+    // is created with an invalid ownership type.
+    new GroupContentOperationPermission([
+      'name' => 'invalid permission',
+      'title' => $this->t('This is an invalid permission.'),
+      'entity type' => 'node',
+      'bundle' => 'article',
+      'operation' => 'create',
+      'ownership' => 'an invalid ownership',
+    ]);
+  }
+
+  /**
+   * Tests that it is possible to overwrite an existing operation permission.
+   *
+   * Operation permissions are not identified by their machine name, but by the
+   * unique combination of entity type, bundle, operation and ownership. It
+   * should be possible to change the name, title and other properties.
+   */
+  public function testOverwritingGroupContentOperationPermission() {
+    $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), []);
+
+    $entity_type_id = $this->randomMachineName();
+    $bundle_id = $this->randomMachineName();
+    $operation = $this->randomMachineName();
+    $ownership = 'own';
+
+    $original_permission = new GroupContentOperationPermission([
+      'name' => 'the original permission',
+      'title' => $this->t('This is the original permission.'),
+      'description' => $this->t('This is the original description.'),
+      'entity type' => $entity_type_id,
+      'bundle' => $bundle_id,
+      'operation' => $operation,
+      'ownership' => $ownership,
+      'default roles' => [OgRoleInterface::ADMINISTRATOR],
+      'restrict access' => TRUE,
+    ]);
+
+    $altered_permission = new GroupContentOperationPermission([
+      'name' => 'the altered permission',
+      'title' => $this->t('This is the altered permission.'),
+      'description' => $this->t('This is the altered description.'),
+      'entity type' => $entity_type_id,
+      'bundle' => $bundle_id,
+      'operation' => $operation,
+      'ownership' => $ownership,
+      'default roles' => [OgRoleInterface::AUTHENTICATED],
+      'restrict access' => FALSE,
+    ]);
+
+    // Check that the original permission can be set and retrieved.
+    $event->setPermission($original_permission);
+    $this->assertEquals($original_permission, $event->getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership));
+
+    // Check that the altered permission can be set and retrieved, even though
+    // it does not have the same machine name as the original permission.
+    $event->setPermission($altered_permission);
+    $this->assertEquals($altered_permission, $event->getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership));
   }
 
   /**
@@ -448,6 +681,240 @@ class PermissionEventTest extends UnitTestCase {
             'description' => $this->t('Allow members to unsubscribe themselves from a group, removing their membership.'),
             'roles' => [OgRoleInterface::AUTHENTICATED],
             'default roles' => [OgRoleInterface::AUTHENTICATED],
+          ]),
+        ],
+      ],
+      // A mix of GroupPermissions and GroupContentOperationPermissions.
+      [
+        [
+          'appreciate nature' => new GroupPermission([
+            'name' => 'appreciate nature',
+            'title' => $this->t('Allows the member to go outdoors and appreciate the landscape.'),
+          ]),
+          'create article content' => new GroupContentOperationPermission([
+            'name' => 'create article content',
+            'title' => $this->t('Article: Create new content'),
+            'entity type' => 'node',
+            'bundle' => 'article',
+            'operation' => 'create',
+          ]),
+        ],
+      ],
+    ];
+
+    // Supply a random entity type ID, bundle ID and array of group content
+    // bundle IDs for each data set.
+    foreach ($permissions as &$item) {
+      $item[] = $this->randomMachineName();
+      $item[] = $this->randomMachineName();
+      $item[] = [$this->randomMachineName() => [$this->randomMachineName()]];
+    }
+
+    return $permissions;
+  }
+
+  /**
+   * Data provider to test handling of invalid permissions.
+   *
+   * @return array
+   *   An array of test data arrays, each test data array containing:
+   *   - An array of test permissions, keyed by permission ID.
+   *   - The entity type ID of the group type to which these permissions apply.
+   *   - The bundle ID of the group type to which these permissions apply.
+   *   - An array of group content bundle IDs to which these permissions apply,
+   *     keyed by group content entity type ID.
+   */
+  public function invalidPermissionsProvider() {
+    $permissions = [
+      // A permission without a machine name.
+      [
+        [
+          new GroupPermission([
+            'title' => $this->t('This permission doesn\'t have a title.'),
+          ]),
+        ],
+      ],
+      // A permission without a human readable title.
+      [
+        [
+          new GroupPermission([
+            'name' => 'invalid permission',
+          ]),
+        ],
+      ],
+      // A group content operation permission without a machine name.
+      [
+        [
+          new GroupContentOperationPermission([
+            'title' => $this->t('This is an invalid permission.'),
+            'entity type' => 'node',
+            'bundle' => 'article',
+            'operation' => 'create',
+          ]),
+        ],
+      ],
+      // A group content operation permission without a human readable title.
+      [
+        [
+          new GroupContentOperationPermission([
+            'name' => 'invalid permission',
+            'entity type' => 'node',
+            'bundle' => 'article',
+            'operation' => 'create',
+          ]),
+        ],
+      ],
+      // A group content operation permission without an entity type ID.
+      [
+        [
+          new GroupContentOperationPermission([
+            'name' => 'invalid permission',
+            'title' => $this->t('This is an invalid permission.'),
+            'bundle' => 'article',
+            'operation' => 'create',
+          ]),
+        ],
+      ],
+      // A group content operation permission without a bundle.
+      [
+        [
+          new GroupContentOperationPermission([
+            'name' => 'invalid permission',
+            'title' => $this->t('This is an invalid permission.'),
+            'entity type' => 'node',
+            'operation' => 'create',
+          ]),
+        ],
+      ],
+      // A group content operation permission without an operation.
+      [
+        [
+          new GroupContentOperationPermission([
+            'name' => 'invalid permission',
+            'title' => $this->t('This is an invalid permission.'),
+            'entity type' => 'node',
+            'bundle' => 'article',
+          ]),
+        ],
+      ],
+      // A mix of correct and incorrect permissions.
+      [
+        [
+          'subscribe' => new GroupPermission([
+            'name' => 'subscribe',
+            'title' => $this->t('Subscribe to group'),
+            'description' => $this->t('Allow non-members to request membership to a group (approval required).'),
+            'roles' => [OgRoleInterface::ANONYMOUS],
+            'default roles' => [OgRoleInterface::ANONYMOUS],
+          ]),
+          'unsubscribe' => new GroupPermission([
+            'name' => 'unsubscribe',
+            'title' => $this->t('Unsubscribe from group'),
+            'description' => $this->t('Allow members to unsubscribe themselves from a group, removing their membership.'),
+            'roles' => [OgRoleInterface::AUTHENTICATED],
+            'default roles' => [OgRoleInterface::AUTHENTICATED],
+          ]),
+          new GroupPermission([
+            'name' => 'invalid permission',
+          ]),
+        ],
+      ],
+    ];
+
+    // Supply a random entity type ID, bundle ID and array of group content
+    // bundle IDs for each data set.
+    foreach ($permissions as &$item) {
+      $item[] = $this->randomMachineName();
+      $item[] = $this->randomMachineName();
+      $item[] = [$this->randomMachineName() => [$this->randomMachineName()]];
+    }
+
+    return $permissions;
+  }
+
+  /**
+   * Data provider to test group content operation permissions.
+   *
+   * @return array
+   *   An array of test data arrays, each test data array containing:
+   *   - An array of test permissions, keyed by permission ID.
+   *   - The entity type ID of the group type to which these permissions apply.
+   *   - The bundle ID of the group type to which these permissions apply.
+   *   - An array of group content bundle IDs to which these permissions apply,
+   *     keyed by group content entity type ID.
+   */
+  public function groupContentOperationPermissionsProvider() {
+    $permissions = [
+      // A simple permission with only the required parameters.
+      [
+        [
+          new GroupContentOperationPermission([
+            'name' => 'paint yak wool',
+            'title' => $this->t('Paint yak wool'),
+            'entity type' => 'wool',
+            'bundle' => 'yak fibre',
+            'operation' => 'paint',
+          ]),
+        ],
+      ],
+      // A single permission with restricted access and a default role.
+      [
+        [
+          new GroupContentOperationPermission([
+            'name' => 'shave any wild yak',
+            'title' => $this->t('Shave any wild yaks'),
+            'description' => $this->t('Whether the user has the right to shave wild yaks. This is usually limited to administrators since it is more dangerous than shaving domesticated yaks.'),
+            'entity type' => 'yak',
+            'bundle' => 'bos mutus',
+            'operation' => 'shave',
+            'default roles' => [OgRoleInterface::ADMINISTRATOR],
+            'restrict access' => TRUE,
+          ]),
+        ],
+      ],
+      // A permission with an ownership.
+      [
+        [
+          new GroupContentOperationPermission([
+            'name' => 'shave own domesticated yak',
+            'title' => $this->t('Shave own domesticated yaks'),
+            'description' => $this->t('Whether the user has the right to their own domesticated yaks. This is granted by default to all members since it is expected that everyone knows how to take care of their own yaks.'),
+            'entity type' => 'yak',
+            'bundle' => 'bos grunniens',
+            'operation' => 'shave',
+            'ownership' => 'own',
+            'default roles' => [
+              OgRoleInterface::AUTHENTICATED,
+              OgRoleInterface::ADMINISTRATOR,
+            ],
+          ]),
+        ],
+      ],
+      // Simulate a subscriber providing multiple permissions.
+      [
+        [
+          new GroupContentOperationPermission([
+            'name' => 'spin any yak fibre',
+            'title' => $this->t('Spin any yak fibre'),
+            'entity type' => 'wool',
+            'bundle' => 'yak fibre',
+            'operation' => 'spin',
+            'ownership' => 'any',
+          ]),
+          new GroupContentOperationPermission([
+            'name' => 'weave own yak fibre',
+            'title' => $this->t('Weave own yak fibre'),
+            'entity type' => 'wool',
+            'bundle' => 'yak fibre',
+            'operation' => 'weave',
+            'ownership' => 'own',
+          ]),
+          new GroupContentOperationPermission([
+            'name' => 'dye any yak fibre',
+            'title' => $this->t('Dye any yak fibre'),
+            'entity type' => 'wool',
+            'bundle' => 'yak fibre',
+            'operation' => 'dye',
           ]),
         ],
       ],
