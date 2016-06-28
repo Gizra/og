@@ -168,10 +168,6 @@ class PermissionEventTest extends KernelTestBase {
       'entity type' => 'node',
       'bundle' => 'test_group_content',
       'operation' => 'create',
-      'default roles' => [
-        OgRoleInterface::ADMINISTRATOR,
-        OgRoleInterface::AUTHENTICATED,
-      ],
     ]);
     return [
       // Test retrieving permissions for a group that has no group content types
