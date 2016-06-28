@@ -245,10 +245,15 @@ class OgAccess implements OgAccessInterface {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
       foreach ($groups as $entity_groups) {
         foreach ($entity_groups as $group) {
+          // Check if the operation matches a group content entity operation
+          // such as 'create article content'.
           $operation_access = $this->userAccessGroupContentEntityOperations($operation, $group, $entity, $user);
           if ($operation_access->isAllowed()) {
             return $operation_access->addCacheTags($cache_tags);
           }
+
+          // Check if the operation matches a group level operation such as
+          // 'subscribe without approval'.
           $user_access = $this->userAccess($group, $operation, $user);
           if ($user_access->isAllowed()) {
             return $user_access->addCacheTags($cache_tags);
@@ -303,7 +308,7 @@ class OgAccess implements OgAccessInterface {
       $user = $this->accountProxy->getAccount();
     }
 
-
+    // Check if the user owns the entity which is being operated on.
     $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
 
     $permissions = $this->permissionManager->getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
