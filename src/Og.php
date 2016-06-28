@@ -15,6 +15,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\og\Entity\OgMembership;
 use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 
 /**
@@ -267,9 +268,10 @@ class Og {
    * @param string $field_name
    *   (optional) The field name associated with the group.
    *
-   * @return \Drupal\og\Entity\OgMembership|NULL
-   *   The OgMembership entity, or NULL if the user is not a member of the
-   *   group.
+   * @return \Drupal\og\Entity\OgMembership
+   *   The OgMembership entity. If the user is not a member of the group, an
+   *   OgMembership entity will be returned in which the user has the
+   *   'non-member' role.
    */
   public static function getMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     foreach (static::getMemberships($user, $states, $field_name) as $membership) {
@@ -277,6 +279,20 @@ class Og {
         return $membership;
       }
     }
+
+    // The user is not a member, return an OgMembership entity in which the user
+    // has the 'non-member' role.
+    $role_id = implode('-', [
+      $group->getEntityTypeId(),
+      $group->bundle(),
+      OgRoleInterface::ANONYMOUS,
+    ]);
+    return OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT])
+      ->setUser($user)
+      ->setEntityId($group->id())
+      ->setGroupEntityType($group->getEntityTypeId())
+      ->setState(OgMembershipInterface::STATE_PENDING)
+      ->setRoles([$role_id]);
   }
 
   /**
