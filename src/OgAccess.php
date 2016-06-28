@@ -298,11 +298,6 @@ class OgAccess implements OgAccessInterface {
    * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
    */
   public function userAccessGroupContentEntityOperations($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
-    // Retrieve the permissions and check if our operation is supported.
-    $group_entity_type_id = $group_entity->getEntityTypeId();
-    $group_bundle_id = $group_entity->bundle();
-    $group_content_bundle_ids = [$group_content_entity->getEntityTypeId() => [$group_content_entity->bundle()]];
-
     // Default to the current user.
     if (!isset($user)) {
       $user = $this->accountProxy->getAccount();
@@ -310,6 +305,11 @@ class OgAccess implements OgAccessInterface {
 
     // Check if the user owns the entity which is being operated on.
     $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
+
+    // Retrieve the permissions and check if our operation is supported.
+    $group_entity_type_id = $group_entity->getEntityTypeId();
+    $group_bundle_id = $group_entity->bundle();
+    $group_content_bundle_ids = [$group_content_entity->getEntityTypeId() => [$group_content_entity->bundle()]];
 
     $permissions = $this->permissionManager->getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
 
