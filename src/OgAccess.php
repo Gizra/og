@@ -323,10 +323,12 @@ class OgAccess implements OgAccessInterface {
       $cacheable_metadata->addCacheContexts(['user']);
     }
 
-    $membership = Og::getMembership($user, $group_entity);
-    foreach ($permissions as $permission) {
-      if ($membership->hasPermission($permission->getName())) {
-        return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
+    if ($permissions) {
+      $membership = Og::getMembership($user, $group_entity);
+      foreach ($permissions as $permission) {
+        if ($membership->hasPermission($permission->getName())) {
+          return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
+        }
       }
     }
 
