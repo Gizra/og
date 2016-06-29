@@ -110,7 +110,7 @@ class OgAccess implements OgAccessInterface {
     $config = $this->configFactory->get('og.settings');
     $cacheable_metadata = (new CacheableMetadata)
         ->addCacheableDependency($config);
-    if (!Og::isGroup($group_type_id, $bundle)) {
+    if (!$this->groupManager->isGroup($group_type_id, $bundle)) {
       // Not a group.
       return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
     }
@@ -210,7 +210,7 @@ class OgAccess implements OgAccessInterface {
     $entity_type_id = $entity_type->id();
     $bundle = $entity->bundle();
 
-    if (Og::isGroup($entity_type_id, $bundle)) {
+    if ($this->groupManager->isGroup($entity_type_id, $bundle)) {
       // Entity isn't saved yet.
       if ($entity->isNew()) {
         return $result->addCacheableDependency($entity);
