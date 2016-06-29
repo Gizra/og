@@ -287,7 +287,8 @@ class Og {
       $group->bundle(),
       OgRoleInterface::ANONYMOUS,
     ]);
-    return OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT])
+    $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
+    return $storage->create(['type' => OgMembershipInterface::TYPE_DEFAULT])
       ->setUser($user)
       ->setEntityId($group->id())
       ->setGroupEntityType($group->getEntityTypeId())
