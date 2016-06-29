@@ -315,7 +315,8 @@ class OgAccess implements OgAccessInterface {
       return $permission->getOperation() === $operation && in_array($permission->getOwnership(), $ownerships);
     });
 
-    // @todo Should we make a cache context for OgRole entities?
+    // @todo This doesn't really vary by user but by the user's role inside of
+    //   the group. Shall we make a cache context for OgRole entities?
     $cacheable_metadata = new CacheableMetadata;
     $cacheable_metadata->addCacheableDependency($group_content_entity);
     if ($user->id() == $this->accountProxy->id()) {
