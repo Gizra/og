@@ -126,7 +126,7 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->adminUser->save();
 
 
-    // Define the group content as group.
+    // Declare the test entity as being a group.
     Og::groupManager()->addGroup('entity_test', $this->groupBundle);
 
     // Create a group and associate with user 1.
