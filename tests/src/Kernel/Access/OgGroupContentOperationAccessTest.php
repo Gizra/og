@@ -8,7 +8,6 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
@@ -23,7 +22,14 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'og', 'entity_test'];
+  public static $modules = [
+    'entity_test',
+    'field',
+    'node',
+    'og',
+    'system',
+    'user',
+  ];
 
   /**
    * An array of test users.
@@ -127,13 +133,8 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     ];
 
     foreach ($permission_matrix as $role_name => $permissions) {
-      $this->roles[$role_name] = OgRole::create();
-      $this->roles[$role_name]
-        ->setName($role_name)
-        ->setLabel($this->randomString())
-        ->setGroupType($this->group->getEntityTypeId())
-        ->setGroupBundle($this->groupBundle)
-        ->setIsAdmin($role_name === OgRoleInterface::ADMINISTRATOR);
+      $role_id = "{$this->group->getEntityTypeId()}-{$this->group->bundle()}-$role_name";
+      $this->roles[$role_name] = OgRole::load($role_id);
       foreach ($permissions as $permission) {
         $this->roles[$role_name]->grantPermission($permission);
       }
@@ -168,7 +169,6 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
    */
   public function testAccess($group_content_entity_type_id, $group_content_bundle_id, $expected_access) {
     $og_access = $this->container->get('og.access');
-
   }
 
   /**
