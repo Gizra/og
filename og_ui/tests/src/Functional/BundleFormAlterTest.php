@@ -164,15 +164,4 @@ class BundleFormAlterTest extends BrowserTestBase {
     $this->assertEquals($expected, $setting, $message);
   }
 
-  /**
-   * Temp fix like in https://github.com/amitaibu/og/pull/223
-   *
-   * https://www.drupal.org/node/2751711#comment-11309577
-   *
-   * todo: create a patch against drupal core.
-   */
-  public function assertNoEscaped($raw) {
-    return $this->assertSession()->assertNoEscaped($raw);
-  }
-
 }
