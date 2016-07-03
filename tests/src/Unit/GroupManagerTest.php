@@ -17,6 +17,7 @@ use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
+use Drupal\og\GroupManager;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
