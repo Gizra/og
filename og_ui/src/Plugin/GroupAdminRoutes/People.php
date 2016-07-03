@@ -13,6 +13,7 @@ use Drupal\og_ui\OgUiAdminRouteInterface;
  *   path = "people",
  *   title = @Translation("People"),
  *   description = @Translation("Manage the group's members"),
+ *   permission = "administer group",
  *   access = "\Drupal\og_ui\Controller\PeopleController::access",
  *   route_id = "people",
  *   parents_routes = {
@@ -21,14 +22,6 @@ use Drupal\og_ui\OgUiAdminRouteInterface;
  * )
  */
 class People extends OgUiAdminRouteAbstract {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function access() {
-    return AccessResultAllowed::allowedIf(TRUE);
-//    return AccessResultAllowed::allowedIf($this->getMembership()->hasPermission('administer group'));
-  }
 
   /**
    * {@inheritdoc}

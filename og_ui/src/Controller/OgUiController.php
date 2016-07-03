@@ -129,7 +129,7 @@ class OgUiController extends ControllerBase {
       /** @var OgUiAdminRouteInterface $plugin */
       $plugin = $plugins->createInstance($definition['id'])->setGroup($entity);
 
-      if ($plugin->access()->isForbidden()) {
+      if (!$plugin->access()) {
         // The user does not have permission for the current admin page.
         continue;
       }

@@ -18,13 +18,13 @@ class PeopleController extends ControllerBase {
 
   public static function access() {
     /** @var OgUiAdminRouteInterface $plugin */
-    $plugin = OgUi::getGroupAdminPlugins()->createInstance(
-      \Drupal::routeMatch()->getRouteObject()->getRequirement('_plugin_id')
-    );
+    $plugin_id = \Drupal::routeMatch()
+      ->getRouteObject()
+      ->getRequirement('_plugin_id');
 
-    return $plugin
-      ->setGroup(OgUi::getEntity())
-      ->access();
+    $plugin = OgUi::getGroupAdminPlugins()->createInstance($plugin_id);
+
+    return $plugin->setGroup(OgUi::getEntity())->access();
   }
 
   /**

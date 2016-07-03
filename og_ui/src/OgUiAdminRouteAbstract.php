@@ -3,13 +3,49 @@
 namespace Drupal\og_ui;
 
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgMembership;
-use Drupal\og\Og;
+use Drupal\og\OgAccessInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRouteInterface {
+abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRouteInterface, ContainerFactoryPluginInterface {
+
+  /**
+   * @var OgAccessInterface
+   */
+  protected $ogAccess;
+
+  /**
+   * Constructs a Drupal\Component\Plugin\PluginBase object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param OgAccessInterface $og_access
+   *   The OgAccess service.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, OgAccessInterface $og_access) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->ogAccess = $og_access;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('og.access')
+    );
+  }
 
   /**
    * @var ContentEntityBase
@@ -70,20 +106,10 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
   }
 
   /**
-   * Get the permission
-   *
-   * @return OgMembership
+   * {@inheritdoc}
    */
-  protected function getMembership() {
-    $ids = \Drupal::entityQuery('og_membership')
-      ->condition('entity_id', $this->getGroup()->id())
-      ->condition('entity_type', $this->getGroup()->getEntityTypeid())
-      ->condition('uid', \Drupal::currentUser()->id())
-      ->execute();
-
-    $memberships = \Drupal::entityTypeManager()->getStorage('og_membership')->loadMultiple($ids);
-
-    return reset($memberships);
+  public function access() {
+    return $this->ogAccess->userAccess($this->getGroup(), $this->pluginDefinition['permission']);
   }
 
 }
