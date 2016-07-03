@@ -55,8 +55,6 @@ class PeopleTabTest extends BrowserTestBase {
 
     // Log in as an administrator that can manage blocks and content types.
     $this->adminUser = $this->drupalCreateUser([
-      'administer blocks',
-      'administer content types',
       'bypass node access',
     ]);
 
