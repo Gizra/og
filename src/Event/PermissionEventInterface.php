@@ -101,7 +101,7 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @return string
    *   The entity type ID.
    */
-  public function getEntityTypeId();
+  public function getGroupEntityTypeId();
 
   /**
    * Returns the bundle ID of the group to which the permissions apply.
@@ -109,18 +109,15 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @return string
    *   The bundle ID.
    */
-  public function getBundleId();
+  public function getGroupBundleId();
 
   /**
-   * Returns permissions that are enabled by default for the given role.
-   *
-   * @param string $role_name
-   *   A default role name. One of OgRoleInterface::ANONYMOUS,
-   *   OgRoleInterface::AUTHENTICATED, or OgRoleInterface::ADMINISTRATOR.
+   * Returns the IDs of group content bundles to which the permissions apply.
    *
    * @return array
-   *   An array of permissions that are enabled by default for the given role.
+   *   An array of group content bundle IDs, keyed by group content entity type
+   *   ID.
    */
-  public function filterByDefaultRole($role_name);
+  public function getGroupContentBundleIds();
 
 }
