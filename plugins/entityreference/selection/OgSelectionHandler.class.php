@@ -177,7 +177,7 @@ class OgSelectionHandler extends EntityReference_SelectionHandler_Generic {
    *   Array with group IDs a user (member or non-member) is allowed to
    * create, or empty array.
    */
-  private function getGidsForCreate() {
+  protected function getGidsForCreate() {
     if ($this->instance['entity_type'] != 'node') {
       return array();
     }
