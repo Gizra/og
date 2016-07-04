@@ -13,7 +13,9 @@ before_script:
   - cd ../..
 
   # install drush
-  - pear upgrade
+  - pear upgrade –force Console_Getopt
+  - pear upgrade –force pear
+  - pear upgrade-all
   - pear channel-discover pear.drush.org
   - pear install drush/drush-5.8.0
   - phpenv rehash
