@@ -312,7 +312,7 @@ class OgAccess implements OgAccessInterface {
     // Filter the permissions by operation and ownership.
     $ownerships = $is_owner ? ['any', 'own'] : ['any'];
     $permissions = array_filter($permissions, function (GroupContentOperationPermission $permission) use ($operation, $ownerships) {
-      return $permission->getOperation() === $operation && in_array($permission->getOwnership(), $ownerships);
+      return $permission->getOperation() === $operation && in_array($permission->getOwner(), $ownerships);
     });
 
     // @todo This doesn't really vary by user but by the user's role inside of

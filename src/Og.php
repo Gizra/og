@@ -289,7 +289,7 @@ class Og {
     ]);
     $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
     return $storage->create(['type' => OgMembershipInterface::TYPE_DEFAULT])
-      ->setUser($user)
+      ->setUser($user->id())
       ->setEntityId($group->id())
       ->setGroupEntityType($group->getEntityTypeId())
       ->setState(OgMembershipInterface::STATE_PENDING)
