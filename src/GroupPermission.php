@@ -29,7 +29,7 @@ class GroupPermission extends Permission {
    *   An array of roles to which this permission applies. If empty, the
    *   permission applies to all roles.
    */
-  public function getRoles() {
+  public function getApplicableRoles() {
     return $this->get('roles');
   }
 
@@ -44,7 +44,7 @@ class GroupPermission extends Permission {
    *
    * @return $this
    */
-  public function setRoles(array $roles) {
+  public function setApplicableRoles(array $roles) {
     $this->set('roles' , $roles);
     return $this;
   }
