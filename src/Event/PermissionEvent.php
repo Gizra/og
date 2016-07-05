@@ -79,14 +79,14 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership = 'any') {
+  public function getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner = FALSE) {
     foreach ($this->getPermissions() as $permission) {
       if (
         $permission instanceof GroupContentOperationPermission
         && $permission->getEntityType() === $entity_type_id
         && $permission->getBundle() === $bundle_id
         && $permission->getOperation() === $operation
-        && $permission->getOwnership() === $ownership
+        && $permission->getOwner() === $owner
       ) {
         return $permission;
       }
@@ -130,7 +130,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
       // Check if this permission was already registered under another name, and
       // remove it so the new one replaces it.
       try {
-        $this->deleteGroupContentOperationPermission($permission->getEntityType(), $permission->getBundle(), $permission->getOperation(), $permission->getOwnership());
+        $this->deleteGroupContentOperationPermission($permission->getEntityType(), $permission->getBundle(), $permission->getOperation(), $permission->getOwner());
       }
       catch (\InvalidArgumentException $e) {
         // The permission wasn't set. There is nothing to delete.
@@ -161,8 +161,8 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function deleteGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership = 'any') {
-    $permission = $this->getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership);
+  public function deleteGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner = 'any') {
+    $permission = $this->getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner);
     $this->deletePermission($permission->getName());
   }
 
@@ -176,9 +176,9 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership = 'any') {
+  public function hasGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner = FALSE) {
     try {
-      $this->getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $ownership);
+      $this->getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner);
     }
     catch (\InvalidArgumentException $e) {
       return FALSE;

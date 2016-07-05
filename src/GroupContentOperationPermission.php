@@ -39,10 +39,11 @@ class GroupContentOperationPermission extends Permission {
    * Use this to make the distinction between 'edit any article content' and
    * 'edit own article content'.
    *
-   * @var string
-   *   Either 'any' or 'own'.
+   * @var bool
+   *   FALSE if this permission applies to all entities, TRUE if it only applies
+   *   to the entities owned by the user.
    */
-  protected $ownership = 'any';
+  protected $owner = 'any';
 
   /**
    * Returns the group content entity type ID to which this permission applies.
@@ -114,25 +115,27 @@ class GroupContentOperationPermission extends Permission {
   }
 
   /**
-   * Returns the ownership scope of this permission.
+   * Returns the owner scope of this permission.
    *
-   * @return string
-   *   The ownership scope, either 'any' or 'own'.
+   * @return bool
+   *   FALSE if this permission applies to all entities, TRUE if it only applies
+   *   to the entities owned by the user.
    */
-  public function getOwnership() {
-    return $this->get('ownership');
+  public function getOwner() {
+    return $this->get('owner');
   }
 
   /**
-   * Sets the ownership scope of this permission.
+   * Sets the owner scope of this permission.
    *
-   * @param string $ownership
-   *   The ownership scope, either 'any' or 'own'.
+   * @param bool
+   *   FALSE if this permission applies to all entities, TRUE if it only applies
+   *   to the entities owned by the user.
    *
    * @return $this
    */
-  public function setOwnership($ownership) {
-    $this->set('ownership' , $ownership);
+  public function setOwner($owner) {
+    $this->set('owner' , $owner);
     return $this;
   }
 
@@ -142,8 +145,8 @@ class GroupContentOperationPermission extends Permission {
   protected function validate($property, $value) {
     parent::validate($property, $value);
 
-    if ($property === 'ownership' && !in_array($value, ['any', 'own'])) {
-      throw new \InvalidArgumentException('The ownership should be either "any" or "own".');
+    if ($property === 'owner' && !is_bool($value)) {
+      throw new \InvalidArgumentException('The owner should be a boolean value.');
     }
   }
 
