@@ -126,25 +126,25 @@ class OgEventSubscriber implements EventSubscriberInterface {
           'name' => "edit own $bundle_id content",
           'title' => $this->t('%type_name: Edit own content', $args),
           'operation' => 'update',
-          'ownership' => 'own',
+          'owner' => TRUE,
         ],
         [
           'name' => "edit any $bundle_id content",
           'title' => $this->t('%type_name: Edit any content', $args),
           'operation' => 'update',
-          'ownership' => 'any',
+          'owner' => FALSE,
         ],
         [
           'name' => "delete own $bundle_id content",
           'title' => $this->t('%type_name: Delete own content', $args),
           'operation' => 'delete',
-          'ownership' => 'own',
+          'owner' => TRUE,
         ],
         [
           'name' => "delete any $bundle_id content",
           'title' => $this->t('%type_name: Delete any content', $args),
           'operation' => 'delete',
-          'ownership' => 'any',
+          'owner' => FALSE,
         ],
       ];
       foreach ($permission_values as $values) {
@@ -253,25 +253,25 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'name' => "update own $group_content_bundle_id $group_content_entity_type_id",
         'title' => $this->t('Edit own %bundle @entity', $args),
         'operation' => 'update',
-        'ownership' => 'own',
+        'owner' => TRUE,
       ],
       [
         'name' => "update any $group_content_bundle_id $group_content_entity_type_id",
         'title' => $this->t('Edit any %bundle @entity', $args),
         'operation' => 'update',
-        'ownership' => 'any',
+        'owner' => FALSE,
       ],
       [
         'name' => "delete own $group_content_bundle_id $group_content_entity_type_id",
         'title' => $this->t('Delete own %bundle @entity', $args),
         'operation' => 'delete',
-        'ownership' => 'own',
+        'owner' => TRUE,
       ],
       [
         'name' => "delete any $group_content_bundle_id $group_content_entity_type_id",
         'title' => $this->t('Delete any %bundle @entity', $args),
         'operation' => 'delete',
-        'ownership' => 'any',
+        'owner' => FALSE,
       ],
     ];
 

@@ -72,7 +72,7 @@ class PermissionEventTest extends UnitTestCase {
     // An exception should be thrown if the permission doesn't exist yet.
     foreach ($permissions as $permission) {
       try {
-        $event->getGroupContentOperationPermission($permission->getEntityType(), $permission->getBundle(), $permission->getOperation(), $permission->getOwnership());
+        $event->getGroupContentOperationPermission($permission->getEntityType(), $permission->getBundle(), $permission->getOperation(), $permission->getOwner());
         $this->fail('Calling ::getGroupContentOperationPermission() on a non-existing permission throws an exception.');
       }
       catch (\InvalidArgumentException $e) {
@@ -84,7 +84,7 @@ class PermissionEventTest extends UnitTestCase {
     $event->setPermissions($permissions);
 
     foreach ($permissions as $permission) {
-      $this->assertEquals($permission, $event->getGroupContentOperationPermission($permission->getEntityType(), $permission->getBundle(), $permission->getOperation(), $permission->getOwnership()));
+      $this->assertEquals($permission, $event->getGroupContentOperationPermission($permission->getEntityType(), $permission->getBundle(), $permission->getOperation(), $permission->getOwner()));
     }
   }
 
@@ -214,7 +214,7 @@ class PermissionEventTest extends UnitTestCase {
       $permission_entity_type_id = $permission->getEntityType();
       $permission_bundle_id = $permission->getBundle();
       $permission_operation = $permission->getOperation();
-      $permission_ownership = $permission->getOwnership();
+      $permission_ownership = $permission->getOwner();
 
       // Before we delete the permission, it should still be there.
       $this->assertTrue($event->hasPermission($name));
@@ -272,7 +272,7 @@ class PermissionEventTest extends UnitTestCase {
       $permission_entity_type_id = $permission->getEntityType();
       $permission_bundle_id = $permission->getBundle();
       $permission_operation = $permission->getOperation();
-      $permission_ownership = $permission->getOwnership();
+      $permission_ownership = $permission->getOwner();
 
       $this->assertFalse($event->hasGroupContentOperationPermission($permission_entity_type_id, $permission_bundle_id, $permission_operation, $permission_ownership));
       $event->setPermission($permission);
@@ -553,14 +553,14 @@ class PermissionEventTest extends UnitTestCase {
    */
   public function testInvalidGroupContentOperationPermissionCreation() {
     // An exception should be thrown when a group content operation permission
-    // is created with an invalid ownership type.
+    // is created with an invalid owner type.
     new GroupContentOperationPermission([
       'name' => 'invalid permission',
       'title' => $this->t('This is an invalid permission.'),
       'entity type' => 'node',
       'bundle' => 'article',
       'operation' => 'create',
-      'ownership' => 'an invalid ownership',
+      'owner' => 'an invalid owner',
     ]);
   }
 
@@ -577,7 +577,7 @@ class PermissionEventTest extends UnitTestCase {
     $entity_type_id = $this->randomMachineName();
     $bundle_id = $this->randomMachineName();
     $operation = $this->randomMachineName();
-    $ownership = 'own';
+    $ownership = TRUE;
 
     $original_permission = new GroupContentOperationPermission([
       'name' => 'the original permission',
@@ -586,7 +586,7 @@ class PermissionEventTest extends UnitTestCase {
       'entity type' => $entity_type_id,
       'bundle' => $bundle_id,
       'operation' => $operation,
-      'ownership' => $ownership,
+      'owner' => $ownership,
       'default roles' => [OgRoleInterface::ADMINISTRATOR],
       'restrict access' => TRUE,
     ]);
@@ -598,7 +598,7 @@ class PermissionEventTest extends UnitTestCase {
       'entity type' => $entity_type_id,
       'bundle' => $bundle_id,
       'operation' => $operation,
-      'ownership' => $ownership,
+      'owner' => $ownership,
       'default roles' => [OgRoleInterface::AUTHENTICATED],
       'restrict access' => FALSE,
     ]);
@@ -872,7 +872,7 @@ class PermissionEventTest extends UnitTestCase {
           ]),
         ],
       ],
-      // A permission with an ownership.
+      // A permission with an owner.
       [
         [
           new GroupContentOperationPermission([
@@ -882,7 +882,7 @@ class PermissionEventTest extends UnitTestCase {
             'entity type' => 'yak',
             'bundle' => 'bos grunniens',
             'operation' => 'shave',
-            'ownership' => 'own',
+            'owner' => TRUE,
             'default roles' => [
               OgRoleInterface::AUTHENTICATED,
               OgRoleInterface::ADMINISTRATOR,
@@ -899,7 +899,7 @@ class PermissionEventTest extends UnitTestCase {
             'entity type' => 'wool',
             'bundle' => 'yak fibre',
             'operation' => 'spin',
-            'ownership' => 'any',
+            'owner' => TRUE,
           ]),
           new GroupContentOperationPermission([
             'name' => 'weave own yak fibre',
@@ -907,7 +907,7 @@ class PermissionEventTest extends UnitTestCase {
             'entity type' => 'wool',
             'bundle' => 'yak fibre',
             'operation' => 'weave',
-            'ownership' => 'own',
+            'owner' => TRUE,
           ]),
           new GroupContentOperationPermission([
             'name' => 'dye any yak fibre',

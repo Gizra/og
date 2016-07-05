@@ -253,7 +253,7 @@ class PermissionEventTest extends KernelTestBase {
       'entity type',
       'bundle',
       'operation',
-      'ownership',
+      'owner',
     ]);
   }
 

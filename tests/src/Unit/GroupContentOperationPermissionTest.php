@@ -97,27 +97,27 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
-   * @covers ::getOwnership
+   * @covers ::getOwner
    *
    * @dataProvider groupContentOperationPermissionProvider
    */
   public function testGetOwnership(array $values) {
     $permission = new GroupContentOperationPermission($values);
-    $this->assertEquals($values['ownership'], $permission->getOwnership());
+    $this->assertEquals($values['owner'], $permission->getOwner());
   }
 
   /**
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
-   * @covers ::setOwnership
+   * @covers ::setOwner
    *
    * @dataProvider groupContentOperationPermissionProvider
    */
   public function testSetOwnership(array $values) {
     $permission = new GroupContentOperationPermission();
-    $permission->setOwnership($values['ownership']);
-    $this->assertEquals($values['ownership'], $permission->get('ownership'));
+    $permission->setOwner($values['owner']);
+    $this->assertEquals($values['owner'], $permission->get('owner'));
   }
 
   /**
@@ -323,7 +323,7 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
    */
   public function testSetInvalidOwnershipValue() {
     $permission = new GroupContentOperationPermission();
-    $permission->set('ownership', 'invalid value');
+    $permission->set('owner', 'invalid value');
   }
 
   /**
@@ -343,7 +343,7 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
           'entity type' => 'node',
           'bundle' => 'article',
           'operation' => 'update',
-          'ownership' => 'own',
+          'owner' => TRUE,
         ],
       ],
     ];
