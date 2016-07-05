@@ -12,13 +12,11 @@ before_script:
   # navigate out of module directory to prevent blown stack by recursive module lookup
   - cd ../..
 
-  # install drush
-  - pear upgrade –force Console_Getopt
-  - pear upgrade –force pear
-  - pear upgrade-all
-  - pear channel-discover pear.drush.org
-  - pear install drush/drush-5.8.0
-  - phpenv rehash
+  # install drush with composer.
+  - curl -sS https://getcomposer.org/installer | php
+  - mv composer.phar /usr/local/bin/composer
+  # - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - composer global require drush/drush:7.*
 
   # install php packages required for running a web server from drush on php 5.3
   - sudo apt-get update > /dev/null
