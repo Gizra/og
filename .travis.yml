@@ -17,6 +17,7 @@ before_script:
   - sudo mv composer.phar /usr/local/bin/composer
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - composer global require drush/drush:7.*
+  - drush --help
 
   # install php packages required for running a web server from drush on php 5.3
   - sudo apt-get update > /dev/null
