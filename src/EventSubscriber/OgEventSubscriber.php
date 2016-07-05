@@ -63,6 +63,10 @@ class OgEventSubscriber implements EventSubscriberInterface {
   public static function getSubscribedEvents() {
     return [
       PermissionEventInterface::EVENT_NAME => [
+        // Provide a higher priority for the generic event subscriber so that it
+        // can run first and set default values for all supported entity types,
+        // which can then be overridden by other subscribers that set module
+        // specific permissions.
         ['provideDefaultOgPermissions', 10],
         ['provideDefaultNodePermissions']
       ],
