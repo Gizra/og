@@ -14,8 +14,8 @@ before_script:
 
   # install drush with composer.
   - curl -sS https://getcomposer.org/installer | php
-  - mv composer.phar /usr/local/bin/composer
-  # - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - sudo mv composer.phar /usr/local/bin/composer
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - composer global require drush/drush:7.*
 
   # install php packages required for running a web server from drush on php 5.3
