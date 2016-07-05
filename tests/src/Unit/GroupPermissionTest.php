@@ -16,26 +16,26 @@ class GroupPermissionTest extends UnitTestCase {
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
-   * @covers ::getRoles
+   * @covers ::getApplicableRoles
    *
    * @dataProvider groupPermissionProvider
    */
   public function testGetRoles(array $values) {
     $permission = new GroupPermission($values);
-    $this->assertEquals($values['roles'], $permission->getRoles());
+    $this->assertEquals($values['roles'], $permission->getApplicableRoles());
   }
 
   /**
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
-   * @covers ::setRoles
+   * @covers ::setApplicableRoles
    *
    * @dataProvider groupPermissionProvider
    */
   public function testSetRoles(array $values) {
     $permission = new GroupPermission();
-    $permission->setRoles($values['roles']);
+    $permission->setApplicableRoles($values['roles']);
     $this->assertEquals($values['roles'], $permission->get('roles'));
   }
 
