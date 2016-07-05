@@ -31,6 +31,13 @@ class OgAccess implements OgAccessInterface {
   const ADMINISTER_GROUP_PERMISSION = 'administer group';
 
   /**
+   * Update group permission string.
+   *
+   * @var string
+   */
+  const UPDATE_GROUP_PERMISSION = 'update group';
+
+  /**
    * Static cache that contains cache permissions.
    *
    * @var array

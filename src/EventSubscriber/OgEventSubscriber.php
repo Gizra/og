@@ -9,6 +9,7 @@ use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
+use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -83,13 +84,13 @@ class OgEventSubscriber implements EventSubscriberInterface {
   public function provideDefaultOgPermissions(PermissionEventInterface $event) {
     $event->setPermissions([
       new GroupPermission([
-        'name' => 'update group',
+        'name' => OgAccess::UPDATE_GROUP_PERMISSION,
         'title' => t('Edit group'),
         'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
       ]),
       new GroupPermission([
-        'name' => 'administer group',
+        'name' => OgAccess::ADMINISTER_GROUP_PERMISSION,
         'title' => t('Administer group'),
         'description' => t('Manage group members and content in the group.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
