@@ -310,7 +310,7 @@ class OgAccess implements OgAccessInterface {
     $permissions = $this->permissionManager->getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
 
     // Filter the permissions by operation and ownership.
-    $ownerships = $is_owner ? ['any', 'own'] : ['any'];
+    $ownerships = $is_owner ? [FALSE, TRUE] : [FALSE];
     $permissions = array_filter($permissions, function (GroupContentOperationPermission $permission) use ($operation, $ownerships) {
       return $permission->getOperation() === $operation && in_array($permission->getOwner(), $ownerships);
     });
