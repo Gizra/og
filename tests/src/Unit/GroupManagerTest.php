@@ -15,6 +15,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\og\PermissionManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\PermissionEventInterface;
@@ -75,9 +76,9 @@ class GroupManagerTest extends UnitTestCase {
   protected $stateProphecy;
 
   /**
-   * @var \Drupal\og\Event\DefaultRoleEventInterface|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\PermissionManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
-  protected $defaultRoleEventProphecy;
+  protected $permissionManagerProphecy;
 
   /**
    * {@inheritdoc}
@@ -92,7 +93,7 @@ class GroupManagerTest extends UnitTestCase {
     $this->eventDispatcherProphecy = $this->prophesize(EventDispatcherInterface::class);
     $this->permissionEventProphecy = $this->prophesize(PermissionEventInterface::class);
     $this->stateProphecy = $this->prophesize(StateInterface::class);
-    $this->defaultRoleEventProphecy = $this->prophesize(DefaultRoleEvent::class);
+    $this->permissionManagerProphecy = $this->prophesize(PermissionManagerInterface::class);
   }
 
   /**
@@ -164,6 +165,7 @@ class GroupManagerTest extends UnitTestCase {
 
   /**
    * @covers ::addGroup
+   * @expectedException \InvalidArgumentException
    */
   public function testAddGroupExisting() {
     // It is expected that the group map will be retrieved from config.
@@ -179,13 +181,7 @@ class GroupManagerTest extends UnitTestCase {
     $manager = $this->createGroupManager();
 
     // Add to existing.
-    try {
-      $manager->addGroup('test_entity', 'c');
-      $this->fail('An entity type that was already declared as a group, was redeclared as a group');
-    } catch (\InvalidArgumentException $e) {
-      // Expected result. An exception should be thrown when an entity type is
-      // redeclared as a group.
-    }
+    $manager->addGroup('test_entity', 'c');
   }
 
   /**
@@ -275,7 +271,8 @@ class GroupManagerTest extends UnitTestCase {
       $this->entityTypeManagerProphecy->reveal(),
       $this->entityTypeBundleInfoProphecy->reveal(),
       $this->eventDispatcherProphecy->reveal(),
-      $this->stateProphecy->reveal()
+      $this->stateProphecy->reveal(),
+      $this->permissionManagerProphecy->reveal()
     );
   }
 
@@ -308,10 +305,6 @@ class GroupManagerTest extends UnitTestCase {
     // expected that the list of default roles to populate will be retrieved
     // from the event listener.
     $this->eventDispatcherProphecy->dispatch(DefaultRoleEventInterface::EVENT_NAME, Argument::type(DefaultRoleEvent::class))
-      ->willReturn($this->defaultRoleEventProphecy->reveal())
-      ->shouldBeCalled();
-    $this->defaultRoleEventProphecy->getRoles()
-      ->willReturn([])
       ->shouldBeCalled();
 
     foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED] as $role_name) {
@@ -330,31 +323,69 @@ class GroupManagerTest extends UnitTestCase {
    *   The name of the role being created.
    */
   protected function addNewDefaultRole($entity_type, $bundle, $role_name) {
-    // It is expected that the OG permissions that need to be populated on the
-    // new role will be requested from the PermissionEvent listener.
-    $this->eventDispatcherProphecy->dispatch(PermissionEventInterface::EVENT_NAME, Argument::type('\Drupal\og\Event\PermissionEvent'))
-      ->willReturn($this->permissionEventProphecy->reveal())
-      ->shouldBeCalled();
-    $this->permissionEventProphecy->filterByDefaultRole($role_name)
-      ->willReturn([])
-      ->shouldBeCalled();
+    // The Prophecy mocking framework uses 'promises' for dynamically generating
+    // mocks that return context dependent data. This works by dynamically
+    // setting the expected behaviors in an anonymous function. Make sure the
+    // mocks are available in the local scope so they can be passed to the
+    // anonymous functions.
+    $permission_manager = $this->permissionManagerProphecy;
+    $og_role = $this->prophesize(OgRole::class);
 
     // It is expected that the role will be created with default properties.
-    $properties = [
-      'group_type' => $entity_type,
-      'group_bundle' => $bundle,
-      'role_type' => OgRole::getRoleTypeByName($role_name),
-      'id' => $role_name,
-      'permissions' => [],
-    ];
-    $this->entityStorageProphecy->create($properties + OgRole::getDefaultRoles()[$role_name])
-      ->willReturn($this->ogRoleProphecy->reveal())
+    $this->entityStorageProphecy->create($this->getDefaultRoleProperties($role_name))
+      ->will(function () use ($entity_type, $bundle, $role_name, $og_role, $permission_manager) {
+        // It is expected that the OG permissions that need to be populated on
+        // the new role will be requested. We are not testing permissions here
+        // so we can just return an empty array.
+        $permission_manager->getDefaultPermissions($entity_type, $bundle, $role_name)
+          ->willReturn([])
+          ->shouldBeCalled();
+
+        // For each role that is created it is expected that the role name will
+        // be retrieved, so that the role name can be used to filter the
+        // permissions.
+        $og_role->getName()
+          ->willReturn($role_name)
+          ->shouldBeCalled();
+
+        // The group type, bundle and permissions will have to be set on the new
+        // role.
+        $og_role->setGroupType($entity_type)->shouldBeCalled();
+        $og_role->setGroupBundle($bundle)->shouldBeCalled();
+        return $og_role->reveal();
+      })
       ->shouldBeCalled();
 
     // The role is expected to be saved.
-    $this->ogRoleProphecy->save()
+    $og_role->save()
       ->willReturn(1)
       ->shouldBeCalled();
+  }
+
+  /**
+   * Returns the expected properties of the default role with the given name.
+   *
+   * @param string $role_name
+   *   The name of the default role for which to return the properties.
+   *
+   * @return array
+   *   The default properties.
+   */
+  protected function getDefaultRoleProperties($role_name) {
+    $role_properties = [
+      OgRoleInterface::ANONYMOUS => [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Non-member',
+        'name' => OgRoleInterface::ANONYMOUS,
+      ],
+      OgRoleInterface::AUTHENTICATED => [
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Member',
+        'name' => OgRoleInterface::AUTHENTICATED,
+      ],
+    ];
+
+    return $role_properties[$role_name];
   }
 
   /**

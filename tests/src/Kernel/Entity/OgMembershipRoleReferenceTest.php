@@ -77,7 +77,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $content_editor
       ->setGroupType('node')
       ->setGroupBundle('group')
-      ->setId('content_editor')
+      ->setName('content_editor')
       ->setLabel('Content editor')
       ->grantPermission('administer group');
     $content_editor->save();
@@ -87,7 +87,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $group_member
       ->setGroupType('node')
       ->setGroupBundle('group')
-      ->setId('group_member')
+      ->setName('group_member')
       ->setLabel('Group member');
     $group_member->save();
 

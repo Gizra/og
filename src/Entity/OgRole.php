@@ -149,7 +149,7 @@ class OgRole extends Role implements OgRoleInterface {
    *   OgRoleInterface::ROLE_TYPE_STANDARD.
    */
   public function getRoleType() {
-    return $this->get('role_type');
+    return $this->get('role_type') ?: OgRoleInterface::ROLE_TYPE_STANDARD;
   }
 
   /**
@@ -177,14 +177,53 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
+  public function getName() {
+    // If the name is not set yet, try to derive it from the ID.
+    if (empty($this->name) && !empty($this->id()) && !empty($this->getGroupType()) && !empty($this->getGroupBundle())) {
+      // Check if the ID matches the pattern '{entity type}-{bundle}-{name}'.
+      $pattern = preg_quote("{$this->getGroupType()}-{$this->getGroupBundle()}-");
+      preg_match("/$pattern(.+)/", $this->id(), $matches);
+      if (!empty($matches[1])) {
+        $this->setName($matches[1]);
+      }
+    }
+    return $this->get('name');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setName($name) {
+    $this->name = $name;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save() {
-    if ($this->isNew()) {
+    // The ID of a new OgRole has to consist of the entity type ID, bundle ID
+    // and role name, separated by dashes.
+    if ($this->isNew() && !empty($this->id())) {
+      list($entity_type_id, $bundle_id, $name) = explode('-', $this->id());
+      if ($entity_type_id !== $this->getGroupType() || $bundle_id !== $this->getGroupBundle() || $name !== $this->getName()) {
+        throw new ConfigValueException('The ID should consist of the group entity type ID, group bundle ID and role name, separated by dashes.');
+      }
+    }
+
+    // If a new OgRole is saved and the ID is not set, construct the ID from
+    // the entity type ID, bundle ID and role name.
+    if ($this->isNew() && empty($this->id())) {
       if (empty($this->getGroupType())) {
         throw new ConfigValueException('The group type can not be empty.');
       }
 
       if (empty($this->getGroupBundle())) {
         throw new ConfigValueException('The group bundle can not be empty.');
+      }
+
+      if (empty($this->getName())) {
+        throw new ConfigValueException('The role name can not be empty.');
       }
 
       // When assigning a role to group we need to add a prefix to the ID in
@@ -195,7 +234,7 @@ class OgRole extends Role implements OgRoleInterface {
         $prefix .= $this->getGroupId() . '-';
       }
 
-      $this->id = $prefix . $this->id();
+      $this->id = $prefix . $this->getName();
     }
 
     parent::save();
@@ -231,33 +270,6 @@ class OgRole extends Role implements OgRoleInterface {
       throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
     }
     parent::delete();
-  }
-
-  /**
-   * Returns default properties for the default OG roles.
-   *
-   * These are the two roles that are required by every group: the 'member' and
-   * 'non-member' roles.
-   *
-   * All other default roles are provided by DefaultRoleEvent.
-   *
-   * @return array
-   *   An array of properties, keyed by OG role.
-   *
-   * @see \Drupal\og\Event\DefaultRoleEventInterface
-   * @see \Drupal\og\GroupManager::getDefaultRoles()
-   */
-  public static function getDefaultRoles() {
-    return [
-      self::ANONYMOUS => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-        'label' => 'Non-member',
-      ],
-      self::AUTHENTICATED => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-        'label' => 'Member',
-      ],
-    ];
   }
 
   /**
