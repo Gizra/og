@@ -36,9 +36,4 @@ before_script:
   - drush runserver 127.0.0.1:8080 &
   - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
-script:
-  - ~/.composer/vendor/bin/drush.php test-run "Organic groups" --uri=http://127.0.0.1:8080
-  - ~/.composer/vendor/bin/drush.php test-run "Organic groups access" --uri=http://127.0.0.1:8080
-  - ~/.composer/vendor/bin/drush.php test-run "Organic groups context" --uri=http://127.0.0.1:8080
-  - ~/.composer/vendor/bin/drush.php test-run "Organic groups field access" --uri=http://127.0.0.1:8080
-  - ~/.composer/vendor/bin/drush.php test-run "Organic groups UI" --uri=http://127.0.0.1:8080
+script: ~/.composer/vendor/bin/drush.php test-run "Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI" --uri=http://127.0.0.1:8080
