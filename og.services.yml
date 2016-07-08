@@ -4,7 +4,7 @@ services:
     arguments: ['@config.factory', '@current_user', '@module_handler']
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
-    arguments: ['@og.permission_manager', '@entity_type.manager']
+    arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
     tags:
       - { name: 'event_subscriber' }
   og.group.manager:
@@ -15,7 +15,7 @@ services:
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
   og.permission_manager:
     class: Drupal\og\PermissionManager
-    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher']
+    arguments: ['@event_dispatcher']
   plugin.manager.og.delete_orphans:
     class: Drupal\og\OgDeleteOrphansPluginManager
     parent: default_plugin_manager
