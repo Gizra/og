@@ -8,6 +8,10 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\Event\PermissionEventInterface;
+use Drupal\og\GroupContentOperationPermission;
+use Drupal\og\GroupPermission;
+use Drupal\og\OgRoleInterface;
+use Drupal\og\PermissionInterface;
 
 /**
  * Tests the implementations of the PermissionEvent in 'og' and 'og_ui'.
@@ -77,7 +81,7 @@ class PermissionEventTest extends KernelTestBase {
    *   group.
    * @param array $expected_permissions
    *   An array of permission names that are expected to be returned.
-   * @param array $expected_full_permissions
+   * @param \Drupal\og\PermissionInterface[] $expected_full_permissions
    *   An array of full permissions that are expected to be returned. This is a
    *   subset of the permissions. It is not necessary to test the full
    *   permission data for each entry, testing the data for only a couple of
@@ -85,7 +89,7 @@ class PermissionEventTest extends KernelTestBase {
    *
    * @dataProvider permissionEventDataProvider
    */
-  public function testPermissionEventIntegration(array $group_content_bundle_ids, array $expected_permissions, $expected_full_permissions) {
+  public function testPermissionEventIntegration(array $group_content_bundle_ids, array $expected_permissions, array $expected_full_permissions) {
     // Retrieve the permissions from the listeners.
     /** @var PermissionEvent $permission_event */
     $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), $group_content_bundle_ids);
@@ -102,7 +106,7 @@ class PermissionEventTest extends KernelTestBase {
     // been correctly retrieved from the group content bundle that was created
     // in the setUp() and used to create the permissions.
     foreach ($expected_full_permissions as $permission) {
-      $this->assertArraySubset($permission, $permission_event->getPermissions());
+      $this->assertPermission($permission, $permission_event->getPermission($permission->getName()));
     }
   }
 
@@ -139,33 +143,32 @@ class PermissionEventTest extends KernelTestBase {
     // Test permissions that should only be available for the test group that
     // has group content.
     $group_content_permissions = [
-      'create test_group_content node',
-      'delete any test_group_content node',
-      'delete own test_group_content node',
-      'update any test_group_content node',
-      'update own test_group_content node',
+      'create test_group_content content',
+      'delete any test_group_content content',
+      'delete own test_group_content content',
+      'edit any test_group_content content',
+      'edit own test_group_content content',
     ];
     // A full permission that should be available in both test groups. This is
     // used to test that all properties are correctly applied.
-    $group_level_permission = [
-      'administer group' => [
-        'title' => $this->t('Administer group'),
-        'description' => $this->t('Manage group members and content in the group.'),
-        'default roles' => ['administrator'],
-        'restrict access' => TRUE,
-      ],
-    ];
+    $group_level_permission = new GroupPermission([
+      'name' => 'administer group',
+      'title' => $this->t('Administer group'),
+      'description' => $this->t('Manage group members and content in the group.'),
+      'default roles' => [OgRoleInterface::ADMINISTRATOR],
+      'restrict access' => TRUE,
+    ]);
     // A full permission that should only be available for the test group that
     // has group content.
-    $group_content_operation_permission = [
-      'create test_group_content node' => [
-        'title' => $this->t('Create %bundle @entity', [
-          '%bundle' => 'Test Group Content',
-          '@entity' => 'content items',
-        ]),
-        'default role' => ['administrator'],
-      ]
-    ];
+    $group_content_operation_permission = new GroupContentOperationPermission([
+      'name' => 'create test_group_content content',
+      'title' => $this->t('%bundle: Create new content', [
+        '%bundle' => 'Test Group Content',
+      ]),
+      'entity type' => 'node',
+      'bundle' => 'test_group_content',
+      'operation' => 'create',
+    ]);
     return [
       // Test retrieving permissions for a group that has no group content types
       // associated with it.
@@ -210,6 +213,48 @@ class PermissionEventTest extends KernelTestBase {
    */
   function t($string, array $args = array(), array $options = array()) {
     return new TranslatableMarkup($string, $args, $options);
+  }
+
+  /**
+   * Asserts that the two permissions are identical.
+   *
+   * @param \Drupal\og\PermissionInterface $expected
+   *   The expected permission.
+   * @param \Drupal\og\PermissionInterface $actual
+   *   The actual permission.
+   */
+  protected function assertPermission($expected, $actual) {
+    foreach ($this->getPermissionProperties($expected) as $property) {
+      $this->assertEquals($expected->get($property), $actual->get($property), "The $property property is equal.");
+    }
+  }
+
+  /**
+   * Returns the property names that are used for the given Permission object.
+   *
+   * @param \Drupal\og\PermissionInterface $permission
+   *   The Permission object for which to return the properties.
+   *
+   * @return array
+   *   An array of property names.
+   */
+  protected function getPermissionProperties(PermissionInterface $permission) {
+    $shared_permissions = [
+      'default roles',
+      'description',
+      'name',
+      'restrict access',
+      'title',
+    ];
+    if ($permission instanceof GroupPermission) {
+      return array_merge($shared_permissions, ['roles']);
+    }
+    return array_merge($shared_permissions, [
+      'entity type',
+      'bundle',
+      'operation',
+      'owner',
+    ]);
   }
 
 }
