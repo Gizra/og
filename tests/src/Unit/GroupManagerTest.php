@@ -353,7 +353,7 @@ class GroupManagerTest extends UnitTestCase {
         // It is expected that the OG permissions that need to be populated on
         // the new role will be requested. We are not testing permissions here
         // so we can just return an empty array.
-        $permission_manager->getDefaultPermissions($entity_type, $bundle, $role_name)
+        $permission_manager->getDefaultGroupPermissions($entity_type, $bundle, $role_name)
           ->willReturn([])
           ->shouldBeCalled();
 
