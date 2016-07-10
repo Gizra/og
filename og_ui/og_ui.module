@@ -110,7 +110,7 @@ function og_ui_entity_type_alter(array &$entity_types) {
   // circular reference caused by the fact we in hook_entity_type_alter().
   $config = \Drupal::config(GroupManager::SETTINGS_CONFIG_KEY)->get(GroupManager::GROUPS_CONFIG_KEY);
 
-  $groups = !empty($config) ?: [];
+  $groups = !empty($config) ? $config : [];
   
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   foreach ($entity_types as $entity_type_id => $entity_type) {

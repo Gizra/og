@@ -5,7 +5,7 @@
  * Contains \Drupal\og_ui\Tests\PeopleTabTest.
  */
 
-namespace Drupal\og_ui\Tests;
+namespace Drupal\Tests\og_ui\Tests\Functional;
 
 use Drupal\KernelTests\AssertLegacyTrait;
 use Drupal\og\Entity\OgMembership;
@@ -13,7 +13,7 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\simpletest\AssertContentTrait;
-use Drupal\simpletest\BrowserTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test making a bundle a group and a group content.
@@ -60,11 +60,6 @@ class PeopleTabTest extends BrowserTestBase {
   protected $group;
 
   /**
-   * @var string
-   */
-  protected $baseGroupUrl;
-
-  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -76,6 +71,7 @@ class PeopleTabTest extends BrowserTestBase {
     $this->adminUser = $this->drupalCreateUser([
       'bypass node access',
       'administer group',
+      'access user profiles',
     ]);
 
     // Keep a standard user to verify the access logic.
@@ -86,7 +82,6 @@ class PeopleTabTest extends BrowserTestBase {
     // Set up a group.
     $node_type = $this->drupalCreateContentType();
     $this->group = $this->createNode(['type' => $node_type->id(), 'uid' => $this->adminUser->id()]);
-    $this->baseGroupUrl = 'node/' . $this->group->id() . '/group';;
     Og::groupManager()->addGroup('node', $this->group->bundle());
 
     // Create a role and assign the appropriate permission to access to the
@@ -98,7 +93,6 @@ class PeopleTabTest extends BrowserTestBase {
       ->setLabel($this->randomString())
       ->setGroupType($this->group->getEntityTypeId())
       ->setGroupBundle($this->group->bundle())
-      // Associate an arbitrary permission with the role.
       ->grantPermission('administer group')
       ->save();
 
@@ -116,12 +110,15 @@ class PeopleTabTest extends BrowserTestBase {
    * Verifying the people page exists.
    */
   public function testPeopleTab() {
+
+    $base_url = 'node/' . $this->group->id();
+
     // todo: check tab visibility in the node page.
     // Verify first the tab exits. Can't work form some reason.
-    $this->drupalGet($this->baseUrl);
+    $this->drupalGet($base_url);
     $this->assertSession()->statusCodeEquals(200);
 
-    $this->drupalGet($this->baseGroupUrl . '/people/manage');
+    $this->drupalGet($base_url . '/group/people/manage');
     $this->assertSession()->statusCodeEquals(200);
   }
 

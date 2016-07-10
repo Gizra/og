@@ -89,5 +89,4 @@ class GroupAdminRoutes extends Plugin {
    */
   public $parents_routes;
 
-
 }

@@ -27,9 +27,23 @@ class OgUi {
    * @return \Drupal\Core\Entity\ContentEntityBase
    */
   public static function getEntity() {
-    $entity_type_id = \Drupal::routeMatch()
+    $options = \Drupal::routeMatch()
       ->getRouteObject()
-      ->getOption('entity_type_id');
+      ->getOptions();
+
+    $entity_type_id = '';
+    foreach ($options as $option) {
+      if (!is_array($option)) {
+        continue;
+      }
+
+      $item = reset($option);
+
+      if (strpos($item['type'], 'entity:') === 0) {
+        $entity_type_id = key($option);
+        break;
+      }
+    }
 
     return \Drupal::routeMatch()->getParameter($entity_type_id);
   }
