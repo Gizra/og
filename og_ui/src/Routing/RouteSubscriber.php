@@ -81,7 +81,9 @@ class RouteSubscriber extends RouteSubscriberBase {
     $plugins = OgUi::getGroupAdminPlugins();
     foreach ($plugins as $plugin) {
 
-      $definition = $plugin->getPluginDefinition();
+      $definition = $plugin->getPluginDefinition() + [
+        'access' => '\Drupal\og_ui\OgUiRoutesBase::access',
+      ];
 
       // Iterate over all the parent routes.
       foreach ($definition['parents_routes'] as $entity_type_id => $parent_route) {

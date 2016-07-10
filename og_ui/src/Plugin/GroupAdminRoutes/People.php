@@ -14,7 +14,6 @@ use Drupal\og_ui\OgUiAdminRouteInterface;
  *   title = @Translation("People"),
  *   description = @Translation("Manage the group's members"),
  *   permission = "administer group",
- *   access = "\Drupal\og_ui\Controller\PeopleController::access",
  *   route_id = "people",
  *   parents_routes = {
  *    "node" = "entity.node.canonical"

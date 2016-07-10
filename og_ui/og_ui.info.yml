@@ -7,5 +7,6 @@ core: 8.x
 
 dependencies:
   - og
+  - views
 
 configure: og_ui.admin_index

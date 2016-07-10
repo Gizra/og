@@ -108,15 +108,14 @@ function og_ui_entity_type_save(EntityInterface $entity) {
 function og_ui_entity_type_alter(array &$entity_types) {
   // Not accessing to the config schema through the group manager proxy due to
   // circular reference caused by the fact we in hook_entity_type_alter().
-
   $config = \Drupal::config(GroupManager::SETTINGS_CONFIG_KEY)->get(GroupManager::GROUPS_CONFIG_KEY);
 
-  $config = !empty($config) ?: [];
+  $groups = !empty($config) ?: [];
   
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   foreach ($entity_types as $entity_type_id => $entity_type) {
 
-    if (empty($config[$entity_type_id])) {
+    if (empty($groups[$entity_type_id])) {
       continue;
     }
 
@@ -168,7 +167,5 @@ function og_ui_menu_local_actions_alter(&$local_actions) {
         ];
       }
     }
-
   }
-
 }

@@ -11,21 +11,11 @@ use Drupal\Core\Url;
 use Drupal\og_ui\Form\OgUiAddPeopleForm;
 use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgUiAdminRouteInterface;
+use Drupal\og_ui\OgUiRoutesBase;
 use Drupal\user\PrivateTempStoreFactory;
 use Drupal\views\Views;
 
-class PeopleController extends ControllerBase {
-
-  public static function access() {
-    /** @var OgUiAdminRouteInterface $plugin */
-    $plugin_id = \Drupal::routeMatch()
-      ->getRouteObject()
-      ->getRequirement('_plugin_id');
-
-    $plugin = OgUi::getGroupAdminPlugins()[$plugin_id];
-
-    return $plugin->setGroup(OgUi::getEntity())->access();
-  }
+class PeopleController extends OgUiRoutesBase {
 
   /**
    * Display list of people which belong to the group.
