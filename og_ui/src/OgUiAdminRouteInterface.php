@@ -2,11 +2,12 @@
 
 namespace Drupal\og_ui;
 
+use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\ContentEntityBase;
 use Symfony\Component\HttpFoundation\Request;
 
-interface OgUiAdminRouteInterface {
+interface OgUiAdminRouteInterface extends PluginInspectionInterface{
 
   /**
    * Represent the main route key in the sub array routes.
@@ -35,7 +36,7 @@ interface OgUiAdminRouteInterface {
   /**
    * Check if the current user can access to the plugin routes callback.
    *
-   * @return AccessResultInterface
+   * @return boolean
    */
   public function access();
 

@@ -5,9 +5,11 @@ namespace Drupal\og_ui;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgAccessInterface;
+use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -17,6 +19,21 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
    * @var OgAccessInterface
    */
   protected $ogAccess;
+
+  /**
+   * @var AccountProxyInterface
+   */
+  protected $currentUser;
+
+  /**
+   * @var UserInterface
+   */
+  protected $account;
+
+  /**
+   * @var ContentEntityBase
+   */
+  protected $group;
 
   /**
    * Constructs a Drupal\Component\Plugin\PluginBase object.
@@ -29,10 +46,12 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
    *   The plugin implementation definition.
    * @param OgAccessInterface $og_access
    *   The OgAccess service.
+   * @param AccountProxyInterface $current_user
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, OgAccessInterface $og_access) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, OgAccessInterface $og_access, AccountProxyInterface $current_user) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->ogAccess = $og_access;
+    $this->currentUser = $current_user;
   }
 
   /**
@@ -43,14 +62,37 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('og.access')
+      $container->get('og.access'),
+      $container->get('current_user')
     );
   }
 
   /**
-   * @var ContentEntityBase
+   * Return the current user object.
+   *
+   * @return AccountInterface
    */
-  protected $group;
+  public function getAccount() {
+    if (!$this->account) {
+      $this->account = $this->currentUser->getAccount();
+    }
+
+    return $this->account;
+  }
+
+  /**
+   * Set the user object.
+   *
+   * @param AccountInterface $account
+   *   The user object.
+   *
+   * @return OgUiAdminRouteAbstract
+   */
+  public function setAccount(AccountInterface $account) {
+    $this->account = $account;
+
+    return $this;
+  }
 
   /**
    * @inheritDoc
@@ -109,7 +151,7 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
    * {@inheritdoc}
    */
   public function access() {
-    return $this->ogAccess->userAccess($this->getGroup(), $this->pluginDefinition['permission']);
+    return $this->ogAccess->userAccess($this->getGroup(), $this->pluginDefinition['permission'], $this->getAccount());
   }
 
 }

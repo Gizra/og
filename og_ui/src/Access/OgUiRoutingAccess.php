@@ -8,6 +8,7 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
+use Drupal\og_ui\OgUi;
 
 /**
  * Checks access for displaying configuration translation page.
@@ -24,24 +25,25 @@ class OgUiRoutingAccess implements AccessInterface {
    */
   public function GroupTabAccess(AccountInterface $account) {
 
-    $route_match = \Drupal::routeMatch();
-    $parameters = $route_match->getParameters();
-    $keys = $parameters->keys();
-
-    /** @var ContentEntityBase $entity */
-    $entity = $parameters->get(reset($keys));
-
-    if (!is_object($entity)) {
-      $path = explode('/', $route_match->getRouteObject()->getPath());
-      $entity = \Drupal::entityTypeManager()->getStorage($path[1])->load($entity);
-    }
+    $entity = OgUi::getEntity();
 
     if (!Og::groupManager()->isGroup($entity->getEntityTypeId(), $entity->bundle())) {
       // Not a group. return.
       return AccessResultForbidden::forbidden();
     }
 
+    $plugins = OgUi::getGroupAdminPlugins();
+
+    $found = FALSE;
+    foreach ($plugins as $plugin) {
+      // We need at least one plugin which the user have access to.
+      if (AccessResultAllowed::allowedIf($plugin->setGroup($entity)->access())->mergeCacheMaxAge(0)) {
+        $found = true;
+        continue;
+      }
+    }
+
     // todo: fix. us the access callback.
-    return AccessResultAllowed::allowedIf($account->hasPermission('administer group'))->mergeCacheMaxAge(0);
+    return AccessResultAllowed::allowedIf($found)->mergeCacheMaxAge(0);
   }
 }

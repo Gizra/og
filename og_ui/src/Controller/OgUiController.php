@@ -124,15 +124,16 @@ class OgUiController extends ControllerBase {
     $entity = OgUi::getEntity();
     $plugins = OgUi::getGroupAdminPlugins();
     $list = [];
-    foreach ($plugins->getDefinitions() as $definition) {
+    foreach ($plugins as $plugin) {
       
       /** @var OgUiAdminRouteInterface $plugin */
-      $plugin = $plugins->createInstance($definition['id'])->setGroup($entity);
+      $plugin = $plugin->setGroup($entity);
 
       if (!$plugin->access()) {
         // The user does not have permission for the current admin page.
         continue;
       }
+      $definition = $plugin->getPluginDefinition();
 
       $list[] = [
         'title' => $definition['title'],

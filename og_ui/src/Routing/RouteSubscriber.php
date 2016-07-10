@@ -46,6 +46,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    * {@inheritdoc}
    */
   protected function alterRoutes(RouteCollection $collection) {
+
     foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
 
       if ($og_task = $entity_type->getLinkTemplate('og-group-admin-pages')) {
@@ -78,10 +79,9 @@ class RouteSubscriber extends RouteSubscriberBase {
     $route_provider = \Drupal::getContainer()->get('router.route_provider');
 
     $plugins = OgUi::getGroupAdminPlugins();
-    foreach ($plugins->getDefinitions() as $definition) {
+    foreach ($plugins as $plugin) {
 
-      /** @var OgUiAdminRouteInterface $plugin */
-      $plugin = $plugins->createInstance($definition['id']);
+      $definition = $plugin->getPluginDefinition();
 
       // Iterate over all the parent routes.
       foreach ($definition['parents_routes'] as $entity_type_id => $parent_route) {

@@ -7,10 +7,18 @@ class OgUi {
   /**
    * Get all the admin routes plugins.
    *
-   * @return OgUiAdminRoutesPluginManager
+   * @return OgUiAdminRouteInterface[]
    */
   public static function getGroupAdminPlugins() {
-    return \Drupal::service('plugin.manager.og_ui.group_admin_route');
+    /** @var OgUiAdminRoutesPluginManager $plugins */
+    $plugin_manager = \Drupal::service('plugin.manager.og_ui.group_admin_route');
+
+    $plugins = [];
+    foreach ($plugin_manager->getDefinitions() as $definition) {
+      $plugins[$definition['id']] = $plugin_manager->createInstance($definition['id']);
+    }
+
+    return $plugins;
   }
 
   /**

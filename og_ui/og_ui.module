@@ -131,12 +131,11 @@ function og_ui_entity_type_alter(array &$entity_types) {
  */
 function og_ui_menu_local_actions_alter(&$local_actions) {
 
-  $plugins_info = OgUi::getGroupAdminPlugins();
+  $plugins = OgUi::getGroupAdminPlugins();
 
-  foreach ($plugins_info->getDefinitions() as $definition) {
+  foreach ($plugins as $plugin) {
 
-    /** @var OgUiAdminRouteAbstract $plugin */
-    $plugin = $plugins_info->createInstance($definition['id']);
+    $definition = $plugin->getPluginDefinition();
 
     foreach ($definition['parents_routes'] as $parent_route) {
 

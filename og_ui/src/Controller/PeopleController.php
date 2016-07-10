@@ -22,7 +22,7 @@ class PeopleController extends ControllerBase {
       ->getRouteObject()
       ->getRequirement('_plugin_id');
 
-    $plugin = OgUi::getGroupAdminPlugins()->createInstance($plugin_id);
+    $plugin = OgUi::getGroupAdminPlugins()[$plugin_id];
 
     return $plugin->setGroup(OgUi::getEntity())->access();
   }
