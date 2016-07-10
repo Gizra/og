@@ -41,6 +41,7 @@ class OgUiRoutingAccess implements AccessInterface {
       return AccessResultForbidden::forbidden();
     }
 
+    // todo: fix. us the access callback.
     return AccessResultAllowed::allowedIf($account->hasPermission('administer group'))->mergeCacheMaxAge(0);
   }
 }
