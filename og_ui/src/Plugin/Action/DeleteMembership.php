@@ -11,7 +11,6 @@ use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -24,13 +23,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class DeleteMembership extends ActionBase implements ContainerFactoryPluginInterface {
-
-  /**
-   * The tempstore object.
-   *
-   * @var \Drupal\user\SharedTempStore
-   */
-  protected $tempStore;
 
   /**
    * The current user.
@@ -53,16 +45,13 @@ class DeleteMembership extends ActionBase implements ContainerFactoryPluginInter
    *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
-   *   The tempstore factory.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   Current user.
    * @param EntityTypeManagerInterface $manager
    *   The entity manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, PrivateTempStoreFactory $temp_store_factory, AccountInterface $current_user, EntityTypeManagerInterface $manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, AccountInterface $current_user, EntityTypeManagerInterface $manager) {
     $this->currentUser = $current_user;
-    $this->tempStore = $temp_store_factory->get('og_membership_multiple_delete_confirm');
     $this->storage = $manager->getStorage('og_membership');
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -76,7 +65,6 @@ class DeleteMembership extends ActionBase implements ContainerFactoryPluginInter
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('user.private_tempstore'),
       $container->get('current_user'),
       $container->get('entity_type.manager')
     );

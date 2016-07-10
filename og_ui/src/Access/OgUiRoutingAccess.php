@@ -43,7 +43,7 @@ class OgUiRoutingAccess implements AccessInterface {
       }
     }
 
-    // todo: fix. us the access callback.
     return AccessResultAllowed::allowedIf($found)->mergeCacheMaxAge(0);
   }
+
 }

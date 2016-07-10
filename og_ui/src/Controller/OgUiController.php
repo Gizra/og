@@ -126,7 +126,6 @@ class OgUiController extends ControllerBase {
     $list = [];
     foreach ($plugins as $plugin) {
       
-      /** @var OgUiAdminRouteInterface $plugin */
       $plugin = $plugin->setGroup($entity);
 
       if (!$plugin->access()) {
@@ -142,12 +141,12 @@ class OgUiController extends ControllerBase {
       ];
     }
 
-    $build['roles_table'] = array(
-      '#theme' => 'admin_block_content',
-      '#content' => $list,
-    );
-
-    return $build;
+    return [
+      'roles_table' => [
+        '#theme' => 'admin_block_content',
+        '#content' => $list,
+      ],
+    ];
   }
   
 }
