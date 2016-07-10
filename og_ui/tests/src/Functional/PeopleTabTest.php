@@ -8,6 +8,7 @@
 namespace Drupal\og_ui\Tests;
 
 use Drupal\KernelTests\AssertLegacyTrait;
+use Drupal\og\Og;
 use Drupal\simpletest\AssertContentTrait;
 use Drupal\simpletest\BrowserTestBase;
 
@@ -24,7 +25,7 @@ class PeopleTabTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og_ui', 'user'];
+  public static $modules = ['node', 'og', 'og_ui', 'user'];
 
   /**
    * An administrator user.
@@ -46,6 +47,11 @@ class PeopleTabTest extends BrowserTestBase {
   protected $entityTypeManager;
 
   /**
+   * @var \Drupal\node\Entity\Node
+   */
+  protected $group;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -59,18 +65,21 @@ class PeopleTabTest extends BrowserTestBase {
     ]);
 
     // Keep a standard user to verify the access logic.
-    $this->standardUser = $this->drupalCreateUser([
-      'access content',
-    ]);
+    $this->standardUser = $this->drupalCreateUser(['access content']);
 
     $this->drupalLogin($this->adminUser);
+
+    // Set up a group.
+    $this->group = $this->createNode();
+    Og::groupManager()->addGroup('node', $this->group->bundle());
   }
 
   /**
    * Verifying the people page exists.
    */
   public function testPeopleTab() {
-
+    $this->drupalGet('node/' . $this->group->id());
+    $this->assertText('Group');
   }
 
 }
