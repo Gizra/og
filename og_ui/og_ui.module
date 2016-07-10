@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\og\GroupManager;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og_ui\BundleFormAlter;
@@ -105,14 +106,19 @@ function og_ui_entity_type_save(EntityInterface $entity) {
  * Implements hook_entity_type_alter().
  */
 function og_ui_entity_type_alter(array &$entity_types) {
-//  $group_manager = Og::groupManager();
+  // Not accessing to the config schema through the group manager proxy due to
+  // circular reference caused by the fact we in hook_entity_type_alter().
+
+  $config = \Drupal::config(GroupManager::SETTINGS_CONFIG_KEY)->get(GroupManager::GROUPS_CONFIG_KEY);
+
+  $config = !empty($config) ?: [];
   
   /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   foreach ($entity_types as $entity_type_id => $entity_type) {
 
-//    if (!$group_manager->getGroupsForEntityType($entity_type_id)) {
-//      continue;
-//    }
+    if (empty($config[$entity_type_id])) {
+      continue;
+    }
 
     // Adding the group manager causing for a circular dependency because the
     // group manager the the entity manager as a dependency.
