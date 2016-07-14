@@ -268,10 +268,12 @@ class Og {
    * @param string $field_name
    *   (optional) The field name associated with the group.
    *
-   * @return \Drupal\og\Entity\OgMembership
+   * @return \Drupal\og\Entity\OgMembership|NULL
    *   The OgMembership entity. If the user is not a member of the group, an
    *   OgMembership entity will be returned in which the user has the
    *   'non-member' role.
+   *   NULL will be returned if no membership is available that matches the
+   *   passed in $states.
    */
   public static function getMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     foreach (static::getMemberships($user, $states, $field_name) as $membership) {
@@ -282,18 +284,23 @@ class Og {
 
     // The user is not a member, return an OgMembership entity in which the user
     // has the 'non-member' role.
-    $role_id = implode('-', [
-      $group->getEntityTypeId(),
-      $group->bundle(),
-      OgRoleInterface::ANONYMOUS,
-    ]);
-    $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
-    return $storage->create(['type' => OgMembershipInterface::TYPE_DEFAULT])
-      ->setUser($user->id())
-      ->setEntityId($group->id())
-      ->setGroupEntityType($group->getEntityTypeId())
-      ->setState(OgMembershipInterface::STATE_PENDING)
-      ->setRoles([$role_id]);
+    if (in_array(OgMembershipInterface::STATE_PENDING, $states)) {
+      $role_id = implode('-', [
+        $group->getEntityTypeId(),
+        $group->bundle(),
+        OgRoleInterface::ANONYMOUS,
+      ]);
+      $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
+      return $storage->create(['type' => OgMembershipInterface::TYPE_DEFAULT])
+        ->setUser($user->id())
+        ->setEntityId($group->id())
+        ->setGroupEntityType($group->getEntityTypeId())
+        ->setState(OgMembershipInterface::STATE_PENDING)
+        ->setRoles([$role_id]);
+    }
+
+    // No membership matches the request.
+    return NULL;
   }
 
   /**
