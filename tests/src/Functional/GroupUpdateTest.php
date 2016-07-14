@@ -15,6 +15,7 @@ use Drupal\node\NodeInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItemList;
@@ -82,7 +83,7 @@ class GroupUpdateTest extends BrowserTestBase {
       ->setLabel('Group editor')
       ->setGroupType('node')
       ->setGroupBundle('group')
-      ->grantPermission('update group')
+      ->grantPermission(OgAccess::UPDATE_GROUP_PERMISSION)
       ->save();
 
     // Create dummy users.
@@ -95,6 +96,7 @@ class GroupUpdateTest extends BrowserTestBase {
       'title' => 'My awesome group',
       'type' => 'group',
       'uid' => $this->group_owner->id(),
+      'status' => 1,
     ];
     $this->group = Node::create($values);
     $this->group->save();
