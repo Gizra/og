@@ -7,21 +7,15 @@
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\block_content\Entity\BlockContent;
-use Drupal\block_content\Entity\BlockContentType;
-use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\node\Entity\Node;
-use Drupal\node\NodeInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
-use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
-use Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItemList;
-use Drupal\simpletest\BrowserTestBase;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests the special permission 'update group'.
