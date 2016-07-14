@@ -92,6 +92,7 @@ class GroupUpdateTest extends BrowserTestBase {
 
     // Create a group content owned by the group owner.
     $values = [
+      'title' => 'My awesome group',
       'type' => 'group',
       'uid' => $this->group_owner->id(),
     ];
@@ -111,7 +112,7 @@ class GroupUpdateTest extends BrowserTestBase {
   /**
    * Tests 'update group' special permission.
    */
-  function testFields() {
+  function testUpdateAccess() {
     // The owner should have permissions due to the 'administer group' special
     // permission.
     $this->drupalLogin($this->group_owner);
@@ -127,7 +128,7 @@ class GroupUpdateTest extends BrowserTestBase {
     // A normal user should not be able to edit the group.
     $this->drupalLogin($this->normal_user);
     $this->drupalGet($this->group->toUrl('edit-form'));
-    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->statusCodeNotEquals(200);
   }
 
 }
