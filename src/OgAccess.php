@@ -124,11 +124,10 @@ class OgAccess implements OgAccessInterface {
     }
 
     // Update group special permission. At this point, the operation should have
-    // already been handled by Og. If the operation is edit, it is referring to
-    // the current group, so we have to map it to the special permission.
-    // This map occurs here and not in the userEntityAccess because all checks
-    // should pass through this function.
-    if ($operation == 'edit') {
+    // already been handled by Og. If the operation is simply 'edit'
+    // (or 'update' for content entities), it is referring to the current group,
+    // so we have to map it to the special permission.
+    if (in_array($operation, ['update', 'edit'])) {
       $operation = OgAccess::UPDATE_GROUP_PERMISSION;
     }
 
