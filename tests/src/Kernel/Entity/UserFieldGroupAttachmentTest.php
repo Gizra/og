@@ -26,7 +26,7 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'og', 'entity_test'];
+  public static $modules = ['system', 'user', 'field', 'og', 'entity_test', 'og_test'];
 
   /**
    * @var \Drupal\user\Entity\User
@@ -79,7 +79,7 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
 
     // Get another bundle of the user entity.
     $fields = array_keys(\Drupal::getContainer()->get('entity_field.manager')->getFieldDefinitions('user', 'og_user_bundle'));
-    $this->assertFalse(in_array('og_user_entity_test', $fields));
+    $this->assertTrue(in_array('og_user_entity_test', $fields));
   }
 
 }

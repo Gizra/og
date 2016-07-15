@@ -185,33 +185,35 @@ class OgEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Upon group creation, add an OG audience field to the user if it doesn't
-   * exist.
+   * Upon group creation, add an OG audience field to the user if it missing.
    *
    * @param GroupCreationEventInterface $event
    *   The created group.
    */
-  public function createUserGroupAudienceField(GroupCreationEventInterface $event)
-  {
+  public function createUserGroupAudienceField(GroupCreationEventInterface $event) {
     $entity_type_id = $event->getEntityTypeId();
     $bundle_id = $event->getBundleId();
 
-    // create a group audience field which will reference to groups from the
-    // given entity type ID and attach it to the user.
-    $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', 'user');
+    $user_bundles = array_keys($this->entityTypeBundleInfo->getBundleInfo('user'));
 
-    foreach ($fields as $field) {
+    foreach ($user_bundles as $bundle) {
+      // create a group audience field which will reference to groups from the
+      // given entity type ID and attach it to the user.
+      $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', $bundle);
 
-      if ($field->getFieldStorageDefinition()->getSetting('target_type') == $entity_type_id) {
+      foreach ($fields as $field) {
 
-        if (!$field->getSetting('handler_settings')['target_bundles']) {
-          // The field does not reference to any group bundle.
-          return;
-        }
+        if ($field->getFieldStorageDefinition()->getSetting('target_type') == $entity_type_id) {
 
-        if (in_array($bundle_id, $field->getSetting('handler_settings')['target_bundles'])) {
-          // The field doe not handle the current bundle.
-          return;
+          if (!$field->getSetting('handler_settings')['target_bundles']) {
+            // The field does not reference to any group bundle.
+            return;
+          }
+
+          if (in_array($bundle_id, $field->getSetting('handler_settings')['target_bundles'])) {
+            // The field doe not handle the current bundle.
+            return;
+          }
         }
       }
     }
@@ -224,8 +226,6 @@ class OgEventSubscriber implements EventSubscriberInterface {
       $field_name = substr("og_user_$entity_type_id", 0, 32 - strlen($i)) . $i;
       ++$i;
     }
-
-    $user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle') ?: ['user'];
 
     $settings = [
       'field_name' => $field_name,
