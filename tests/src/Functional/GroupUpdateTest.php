@@ -173,7 +173,7 @@ class GroupUpdateTest extends BrowserTestBase {
     // A normal user should not be able to edit the group.
     $this->drupalLogin($this->normal_user);
     $this->drupalGet($this->{$entity}->toUrl('edit-form'));
-    $this->assertSession()->statusCodeNotEquals(200);
+    $this->assertSession()->statusCodeEquals(403);
   }
 
   /**
