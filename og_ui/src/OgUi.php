@@ -27,6 +27,9 @@ class OgUi {
    * @return \Drupal\Core\Entity\ContentEntityBase
    */
   public static function getEntity() {
+    // Un used for unit testing due to the fact that in unit testing the route
+    // options does not contain the current viewed entity.
+    // todo: find a better solution.
     $options = \Drupal::routeMatch()
       ->getRouteObject()
       ->getOptions();
