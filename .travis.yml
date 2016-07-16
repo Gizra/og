@@ -43,6 +43,7 @@ before_script:
   # Coder.
   - composer global require drupal/coder:dev-8.x-2.x
   - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/
+  - phpenv rehash
 
   # Check if there any bad coding standarts
   - phpcs --standard=Drupal -p --colors --extensions=php,module,inc,install,test,profile,theme,js,css,info $TESTDIR
