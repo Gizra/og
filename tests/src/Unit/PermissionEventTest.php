@@ -516,6 +516,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Check that the iterator has looped over all permissions correctly.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -814,7 +816,7 @@ class PermissionEventTest extends UnitTestCase {
             'roles' => [OgRoleInterface::AUTHENTICATED],
             'default roles' => [OgRoleInterface::AUTHENTICATED],
           ]),
-          new GroupPermission([
+          'permission' => new GroupPermission([
             'name' => 'invalid permission',
           ]),
         ],
@@ -946,4 +948,3 @@ class PermissionEventTest extends UnitTestCase {
   }
 
 }
-
