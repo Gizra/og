@@ -20,21 +20,29 @@ use Drupal\og\OgGroupAudienceHelper;
 class BundleFormAlter {
 
   /**
+   * Entity type definition.
+   *
    * @var \Drupal\Core\Entity\ContentEntityTypeInterface
    */
   protected $definition;
 
   /**
+   * The entity bundle.
+   *
    * @var string
    */
   protected $bundle;
 
   /**
+   * The bundle label.
+   *
    * @var string
    */
   protected $bundleLabel;
 
   /**
+   * The entity type ID.
+   *
    * @var string
    */
   protected $entityTypeId;
@@ -43,6 +51,7 @@ class BundleFormAlter {
    * Construct a BundleFormAlter object.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity object.
    */
   public function __construct(EntityInterface $entity) {
     $this->entity = $entity;

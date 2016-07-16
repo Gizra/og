@@ -43,6 +43,7 @@ function og_ui_entity_update(EntityInterface $entity) {
  * Helper to save group information.
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity object.
  */
 function og_ui_entity_type_save(EntityInterface $entity) {
   if (!$entity instanceof ConfigEntityBundleBase || !isset($entity->og_is_group)) {
