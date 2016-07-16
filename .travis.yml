@@ -35,7 +35,7 @@ before_script:
   - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og
 
   # Install Composer dependencies.
-  - composer self-update && composer install
+  - composer self-update
 
   # Install code sniffer.
   - composer global require squizlabs/php_codesniffer:2.0.*@dev
@@ -50,6 +50,7 @@ before_script:
   # Download Drupal 8 core.
   - travis_retry git clone --branch $DRUPAL_CORE --depth 1 https://git.drupal.org/project/drupal.git
   - cd drupal
+  - composer install
 
   # Reference OG in the Drupal site.
   - ln -s $TESTDIR modules/og
