@@ -50,7 +50,7 @@ class OgGroupAudienceHelper {
 
   /**
    * Return TRUE if a field can be used and has not reached maximum values.
-   *d
+   *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The content entity to check the field cardinality for.
    * @param string $field_name

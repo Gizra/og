@@ -57,7 +57,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
       $bundle->save();
       $this->bundles[] = $bundle->id();
     }
-    for ($i = 0 ; $i < 2; $i++) {
+    for ($i = 0; $i < 2; $i++) {
       $bundle = $this->bundles[$i];
       Og::groupManager()->addGroup('entity_test', $bundle);
       $group = EntityTest::create(['type' => $bundle]);

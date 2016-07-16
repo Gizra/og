@@ -99,7 +99,7 @@ class GroupManager {
    * @var array $groupRelationMap
    *   An associative array representing group and group content relations, in
    *   the following format:
-   *   @code
+   * @code
    *   [
    *     'group_entity_type_id' => [
    *       'group_bundle_id' => [
@@ -109,7 +109,7 @@ class GroupManager {
    *       ],
    *     ],
    *   ]
-   *   @endcode
+   * @endcode
    */
   protected $groupRelationMap = [];
 

@@ -173,7 +173,7 @@ class PermissionEventTest extends KernelTestBase {
       // Test retrieving permissions for a group that has no group content types
       // associated with it.
       [
-        [],
+    [],
         // It should only return the default permissions.
         $default_permissions,
         // The list of permissions should only contain the group level
@@ -186,7 +186,7 @@ class PermissionEventTest extends KernelTestBase {
       // Test retrieving permissions for a group that has a group content type
       // associated with it.
       [
-        [
+    [
           'node' => ['test_group_content'],
         ],
         // It should return the default permissions as well as the permissions

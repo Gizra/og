@@ -64,7 +64,7 @@ class GroupContentOperationPermission extends Permission {
    * @return $this
    */
   public function setEntityType($entity_type) {
-    $this->set('entity type' , $entity_type);
+    $this->set('entity type', $entity_type);
     return $this;
   }
 
@@ -87,7 +87,7 @@ class GroupContentOperationPermission extends Permission {
    * @return $this
    */
   public function setBundle($bundle) {
-    $this->set('bundle' , $bundle);
+    $this->set('bundle', $bundle);
     return $this;
   }
 
@@ -110,7 +110,7 @@ class GroupContentOperationPermission extends Permission {
    * @return $this
    */
   public function setOperation($operation) {
-    $this->set('operation' , $operation);
+    $this->set('operation', $operation);
     return $this;
   }
 
@@ -135,7 +135,7 @@ class GroupContentOperationPermission extends Permission {
    * @return $this
    */
   public function setOwner($owner) {
-    $this->set('owner' , $owner);
+    $this->set('owner', $owner);
     return $this;
   }
 

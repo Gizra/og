@@ -45,7 +45,7 @@ class GroupPermission extends Permission {
    * @return $this
    */
   public function setApplicableRoles(array $roles) {
-    $this->set('roles' , $roles);
+    $this->set('roles', $roles);
     return $this;
   }
 

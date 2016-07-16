@@ -65,7 +65,6 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
     if (!empty($field_storage['entity']) && !in_array($entity_type, $field_storage['entity'])) {
 
-
       $plugin_id = $this->getPluginId();
       $entities = implode(', ', $field_storage['entity']);
 

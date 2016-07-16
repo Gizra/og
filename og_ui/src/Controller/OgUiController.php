@@ -25,7 +25,7 @@ class OgUiController extends ControllerBase {
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
-  
+
   /**
    * The entity type bundle info service.
    *
@@ -48,7 +48,7 @@ class OgUiController extends ControllerBase {
     $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
   }
-  
+
   /**
    * {@inheritdoc}
    */
@@ -59,7 +59,7 @@ class OgUiController extends ControllerBase {
       $container->get('entity_type.bundle.info')
     );
   }
-  
+
   /**
    * Returns the overview of OG roles and permissions.
    *
@@ -113,5 +113,5 @@ class OgUiController extends ControllerBase {
   public function rolesPermissionsOverviewTitleCallback($type) {
     return $this->t('OG @type overview', ['@type' => $type]);
   }
-  
+
 }

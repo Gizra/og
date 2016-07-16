@@ -65,7 +65,6 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [],
     ];
 
-
     return $values;
   }
 

@@ -84,7 +84,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
 
   /**
    * Gets the membership's owner.
-   * 
+   *
    * @return User
    *   The user object.
    */

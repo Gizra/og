@@ -102,7 +102,6 @@ class OgEntityAccessTest extends KernelTestBase {
 
     $this->groupBundle = Unicode::strtolower($this->randomMachineName());
 
-
     // Create users, and make sure user ID 1 isn't used.
     User::create(['name' => $this->randomString()]);
 
@@ -124,7 +123,6 @@ class OgEntityAccessTest extends KernelTestBase {
     // Admin user.
     $this->adminUser = User::create(['name' => $this->randomString()]);
     $this->adminUser->save();
-
 
     // Define the group content as group.
     Og::groupManager()->addGroup('entity_test', $this->groupBundle);
@@ -185,7 +183,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->setGroupBundle($this->groupBundle)
       ->setIsAdmin(TRUE)
       ->save();
-
 
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);

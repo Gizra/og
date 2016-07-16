@@ -39,7 +39,7 @@ interface OgFieldsInterface {
   /**
    * Set the entity type.
    *
-   * @param String $entity_type
+   * @param string $entity_typeThe entity type.
    *   The entity type.
    *
    * @return \Drupal\og\OgFieldBase
@@ -65,7 +65,7 @@ interface OgFieldsInterface {
    * \Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, however the actual field name
    * attached to the bundle can be arbitrary.
    *
-   * @param String $fieldName
+   * @param string $fieldNameThe field name.
    *   The field name.
    *
    * @return \Drupal\og\OgFieldBase

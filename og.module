@@ -977,7 +977,7 @@ function __og_query_og_membership_alter_conditions(&$conditions, $aliases, $base
       continue;
     }
     elseif (strpos($column, 'target_id')) {
-       $column = 'gid';
+      $column = 'gid';
     }
     elseif ($column == 'bundle') {
       // Add the bundle of the base entity type.
@@ -1383,7 +1383,6 @@ function _og_user_access($group_type, $gid, $string, $account = NULL, $skip_alte
     return NULL;
   }
 
-
   if (empty($account)) {
     $account = clone $user;
   }
@@ -1621,10 +1620,10 @@ function _og_get_entity_groups($entity_type = 'user', $entity = NULL, $states = 
  */
 function _og_get_group_type($entity_type, $bundle_name, $type = 'group') {
   if ($type == 'group') {
-    return (bool)field_info_instance($entity_type, OG_GROUP_FIELD, $bundle_name);
+    return (bool) field_info_instance($entity_type, OG_GROUP_FIELD, $bundle_name);
   }
   elseif ($type == 'group content') {
-    return (bool)OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle_name);
+    return (bool) OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type, $bundle_name);
   }
 }
 
@@ -1939,7 +1938,6 @@ function _og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE, $ch
 
   $is_member = og_is_member($group_type, $gid, 'user', $account);
 
-
   $rids = array();
   $group = entity_load_single($group_type, $gid);
   // Get the bundle of the group.
@@ -1964,7 +1962,6 @@ function _og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE, $ch
       ->execute()
       ->fetchAllkeyed();
   }
-
 
   if ($include && !$is_blocked) {
     $role_name = $is_member ? OgRoleInterface::AUTHENTICATED : OgRoleInterface::ANONYMOUS;
@@ -2292,12 +2289,12 @@ function _og_role_revoke($group_type, $gid, $uid, $rid) {
  *   An array of permissions, where the key holds the permission name and the
  *   value is an integer or boolean that determines whether to grant or revoke
  *   the permission:
- *   @code
+ * @code
  *     array(
  *       'edit group' => 0,
  *       'administer group' => 1,
  *     )
- *   @endcode
+ * @endcode
  *   Existing permissions are not changed, unless specified in $permissions.
  *
  * @see og_role_grant_permissions()

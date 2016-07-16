@@ -72,7 +72,6 @@ class FieldCreateTest extends KernelTestBase {
       $this->assertNotNull(FieldConfig::loadByName('node', $bundle, $field_name));
     }
 
-
     // Override the field config.
     $bundle = $this->bundles[1];
     Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $bundle, ['field_config' => ['label' => 'Other groups dummy']]);

@@ -286,9 +286,7 @@ class OgAccess implements OgAccessInterface {
     $user_id = $user->id();
     $type = $pre_alter ? 'pre_alter' : 'post_alter';
 
-    return isset($this->permissionsCache[$entity_type_id][$group_id][$user_id][$type]) ?
-      $this->permissionsCache[$entity_type_id][$group_id][$user_id][$type] :
-      [];
+    return isset($this->permissionsCache[$entity_type_id][$group_id][$user_id][$type]) ? $this->permissionsCache[$entity_type_id][$group_id][$user_id][$type] : [];
   }
 
   /**

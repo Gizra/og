@@ -28,7 +28,6 @@ class OgAccess extends DrupalWebTestCase {
     $roles = array_flip(og_roles('entity_test', 'main'));
     og_role_change_permissions($roles[OgRoleInterface::AUTHENTICATED], array($perm => 1));
 
-
     $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
     og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article', $og_field);
@@ -533,7 +532,6 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     $this->assertNotEqual($id, $og_membership->id, t('OG membership was re-created.'));
     $this->assertEqual('og_ref_2', $og_membership->field_name, t('OG membership is registered under correct field.'));
 
-
     // Exception on field cardinality.
     og_group('entity_test', $entity2->pid, $values);
     try {
@@ -581,7 +579,6 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     catch (OgException $e) {
       $this->pass('Grouping with wrong target bundles does not work.');
     }
-
 
     // Exception as user has no group-audience field.
     $instance = field_info_instance('user', 'og_user_entity_test', 'user');
@@ -767,7 +764,7 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     $values['state'] = OG_STATE_BLOCKED;
     og_group('entity_test', $entity->pid, $values);
     $roles = og_get_user_roles('entity_test', $entity->pid, $user2->uid);
-    $this->assertEqual($roles,  array(), 'Blocked member has no roles.');
+    $this->assertEqual($roles, array(), 'Blocked member has no roles.');
     $this->assertFalse(og_user_access('entity_test', $entity->pid, 'update group', $user2), 'Blocked member has no access.');
   }
 }
@@ -1367,7 +1364,6 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     og_create_field('og_entity_test', 'node', $group_content_type, $og_field);
     og_create_field('og_entity_test', 'user', 'user', $og_field);
 
-
     // Create a non-group audience, entity-refence field.
     $field = array(
       'entity_types' => array('node'),
@@ -1896,7 +1892,6 @@ class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
     $id = key($gids['entity_test']);
     $og_membership = og_membership_load($id);
     $this->assertEqual($og_membership->state, OG_STATE_ACTIVE, 'Memebership status is Active');
-
 
     // Post a node, state should be pending.
     $this->drupalLogin($user3);

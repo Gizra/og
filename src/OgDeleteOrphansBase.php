@@ -73,7 +73,7 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
       foreach ($orphans as $orphan) {
         $this->getQueue()->createItem([
           'type' => $entity_type,
-          'id'=> $orphan,
+          'id' => $orphan,
         ]);
       }
     }

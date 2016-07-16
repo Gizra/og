@@ -107,10 +107,8 @@ class Og {
 
     $form_display_definition = $og_field->getFormDisplayDefinition($settings['form_display']);
 
-
     $form_display->setComponent($plugin_id, $form_display_definition);
     $form_display->save();
-
 
     // Set the view display for the "default" view display.
     $view_display_definition = $og_field->getViewDisplayDefinition($settings['view_display']);
@@ -436,7 +434,6 @@ class Og {
    */
   public static function getGroupContentIds(EntityInterface $entity, array $entity_types = []) {
     $group_content = [];
-
 
     // Retrieve the fields which reference our entity type and bundle.
     $query = \Drupal::entityQuery('field_storage_config')

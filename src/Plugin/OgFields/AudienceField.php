@@ -71,7 +71,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       ],
     ];
 
-
     return $values;
   }
 
