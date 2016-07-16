@@ -34,12 +34,22 @@ before_script:
   # Export database variable for kernel tests.
   - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og
 
+  # Install Composer dependencies.
+  - composer self-update && composer install
+
+  # Install code sniffer.
+  - composer global require squizlabs/php_codesniffer:2.0.*@dev
+
+  # Coder.
+  - composer global require drupal/coder:dev-8.x-2.x
+  - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/
+
+  # Check if there any bad coding standarts
+  - phpcs --standard=Drupal -p --colors --extensions=php,module,inc,install,test,profile,theme,js,css,info $TESTDIR
+
   # Download Drupal 8 core.
   - travis_retry git clone --branch $DRUPAL_CORE --depth 1 https://git.drupal.org/project/drupal.git
   - cd drupal
-
-  # Install Composer dependencies.
-  - composer self-update && composer install
 
   # Reference OG in the Drupal site.
   - ln -s $TESTDIR modules/og
