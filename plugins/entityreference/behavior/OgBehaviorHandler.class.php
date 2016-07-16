@@ -95,10 +95,6 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
    * Create, update or delete OG membership based on field values.
    */
   public function OgMembershipCrud($entity_type, $entity, $field, $instance, $langcode, &$items) {
-    if (!user_access('administer group') && !field_access('edit', $field, $entity_type, $entity)) {
-      // User has no access to field.
-      return;
-    }
     if (!$diff = $this->groupAudiencegetDiff($entity_type, $entity, $field, $instance, $langcode, $items)) {
       return;
     }
