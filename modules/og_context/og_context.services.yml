@@ -1,0 +1,4 @@
+services:
+  plugin.manager.og.context:
+    class: Drupal\og_context\Plugin\OgContextManager
+    parent: default_plugin_manager
