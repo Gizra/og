@@ -1,0 +1,12 @@
+og_context.og_context_config.*:
+  type: config_entity
+  label: 'OG context config config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string

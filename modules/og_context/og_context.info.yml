@@ -4,4 +4,4 @@ description: Get a group from a viewed page.
 core: 8.x
 package: OG
 dependencies:
-  - og
+  - og_ui
