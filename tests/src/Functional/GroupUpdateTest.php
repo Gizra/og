@@ -38,35 +38,35 @@ class GroupUpdateTest extends BrowserTestBase {
    *
    * @var \Drupal\Core\Entity\EntityInterface
    */
-  protected $content_group;
+  protected $contentGroup;
 
   /**
    * Test entity group.
    *
    * @var \Drupal\Core\Entity\EntityInterface
    */
-  protected $entity_group;
+  protected $entityGroup;
 
   /**
    * Test group owner user.
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $group_owner;
+  protected $groupOwner;
 
   /**
    * Test group editor user.
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $group_editor;
+  protected $groupEditor;
 
   /**
    * Test normal user with no connection to the organic group.
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $normal_user;
+  protected $normalUser;
 
   /**
    * {@inheritdoc}
@@ -75,9 +75,9 @@ class GroupUpdateTest extends BrowserTestBase {
     parent::setUp();
 
     // Create dummy users.
-    $this->group_owner = $this->drupalCreateUser();
-    $this->group_editor = $this->drupalCreateUser();
-    $this->normal_user = $this->drupalCreateUser();
+    $this->groupOwner = $this->drupalCreateUser();
+    $this->groupEditor = $this->drupalCreateUser();
+    $this->normalUser = $this->drupalCreateUser();
 
     $this->setUpContentEntity();
     $this->setUpEntityTestEntity();
@@ -103,26 +103,26 @@ class GroupUpdateTest extends BrowserTestBase {
 
     // Create a group content owned by the group owner.
     $values = [
-      'title' => 'My awesome content group',
+      'title' => $this->randomString(),
       'type' => 'content_group',
-      'uid' => $this->group_owner->id(),
+      'uid' => $this->groupOwner->id(),
       'status' => 1,
     ];
-    $this->content_group = Node::create($values);
-    $this->content_group->save();
+    $this->contentGroup = Node::create($values);
+    $this->contentGroup->save();
 
     // Subscribe the editor user to the groups.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->group_editor->id())
-      ->setEntityId($this->content_group->id())
-      ->setGroupEntityType($this->content_group->getEntityTypeId())
+      ->setUser($this->groupEditor->id())
+      ->setEntityId($this->contentGroup->id())
+      ->setGroupEntityType($this->contentGroup->getEntityTypeId())
       ->setRoles([$content_editor_role->id()])
       ->save();
   }
 
   /**
-   * Setup dummy entity_test group entity and appropriate og permissions.
+   * Setup dummy entity_test group entity and appropriate OG permissions.
    */
   public function setUpEntityTestEntity() {
     // Create an entity_test bundle called 'entity_group' and make it
@@ -144,16 +144,16 @@ class GroupUpdateTest extends BrowserTestBase {
     $values = [
       'title' => 'My awesome group',
       'type' => 'entity_group',
-      'uid' => $this->group_owner->id(),
+      'uid' => $this->groupOwner->id(),
     ];
-    $this->entity_group = EntityTest::create($values);
-    $this->entity_group->save();
+    $this->entityGroup = EntityTest::create($values);
+    $this->entityGroup->save();
 
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->group_editor->id())
-      ->setEntityId($this->entity_group->id())
-      ->setGroupEntityType($this->entity_group->getEntityTypeId())
+      ->setUser($this->groupEditor->id())
+      ->setEntityId($this->entityGroup->id())
+      ->setGroupEntityType($this->entityGroup->getEntityTypeId())
       ->setRoles([$entity_editor_role->id()])
       ->save();
   }
@@ -166,12 +166,12 @@ class GroupUpdateTest extends BrowserTestBase {
   public function testUpdateAccess($entity) {
     // The editor should have permissions due to the 'update group' special
     // permission.
-    $this->drupalLogin($this->group_editor);
+    $this->drupalLogin($this->groupEditor);
     $this->drupalGet($this->{$entity}->toUrl('edit-form'));
     $this->assertSession()->statusCodeEquals(200);
 
     // A normal user should not be able to edit the group.
-    $this->drupalLogin($this->normal_user);
+    $this->drupalLogin($this->normalUser);
     $this->drupalGet($this->{$entity}->toUrl('edit-form'));
     $this->assertSession()->statusCodeEquals(403);
   }
@@ -183,8 +183,10 @@ class GroupUpdateTest extends BrowserTestBase {
    */
   public function ogUpdateAccessProvider() {
     return [
-      ['content_group'], // Mapping of operation 'update'.
-      ['entity_group'], // Mapping of operation 'edit'.
+      // Mapping of operation 'update'.
+      ['content_group'],
+      // Mapping of operation 'edit'.
+      ['entity_group'],
     ];
   }
 }
