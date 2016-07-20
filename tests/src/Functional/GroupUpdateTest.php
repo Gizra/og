@@ -184,9 +184,9 @@ class GroupUpdateTest extends BrowserTestBase {
   public function ogUpdateAccessProvider() {
     return [
       // Mapping of operation 'update'.
-      ['content_group'],
+      ['contentGroup'],
       // Mapping of operation 'edit'.
-      ['entity_group'],
+      ['entityGroup'],
     ];
   }
 }
