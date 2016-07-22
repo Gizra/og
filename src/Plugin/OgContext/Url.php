@@ -2,7 +2,8 @@
 
 namespace Drupal\og\Plugin\OgContext;
 
-use Drupal\og\Plugin\OgContextBase;
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\og\OgContextBase;
 
 /**
  * @OgContext(
@@ -12,5 +13,11 @@ use Drupal\og\Plugin\OgContextBase;
  * )
  */
 class Url extends OgContextBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGroup() {
+  }
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\og\Plugin;
+namespace Drupal\og;
 
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -23,7 +23,7 @@ class OgContextManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/OgContext', $namespaces, $module_handler, 'Drupal\og\Plugin\OgContextInterface', 'Drupal\og\Annotation\OgContext');
+    parent::__construct('Plugin/OgContext', $namespaces, $module_handler, 'Drupal\og\OgContextInterface', 'Drupal\og\Annotation\OgContext');
 
     $this->alterInfo('og_context_og_context_info');
     $this->setCacheBackend($cache_backend, 'og_context_og_context_plugins');
