@@ -5,6 +5,7 @@ namespace Drupal\og\Plugin\OgContext;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\og\GroupManager;
+use Drupal\og\Og;
 use Drupal\og\OgContextBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -74,6 +75,14 @@ class Entity extends OgContextBase {
 
       if ($this->groupManger->isGroup($parameter->getEntityTypeId(), $parameter->bundle())) {
         return $parameter;
+      }
+
+      if (!Og::isGroupContent($parameter->getEntityTypeId(), $parameter->bundle())) {
+        continue;
+      }
+
+      foreach (Og::getGroups($parameter) as $groups) {
+        return reset($groups);
       }
     }
   }
