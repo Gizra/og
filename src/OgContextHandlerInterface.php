@@ -2,6 +2,6 @@
 
 namespace Drupal\og;
 
-interface ContextManagerInterface {
+interface OgContextHandlerInterface {
 
 }
