@@ -52,7 +52,7 @@ class OgContextHandler implements OgContextHandlerInterface {
       $og_context_config = \Drupal::entityTypeManager()->getStorage('og_context_negotiation')->loadMultiple();
 
       foreach ($og_context_config as $context) {
-        if ($config['mode'] == OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
+        if ($config['return_mode'] == OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
           $condition = $context->get('status') === FALSE;
         }
         else {
@@ -80,6 +80,33 @@ class OgContextHandler implements OgContextHandlerInterface {
    */
   public function updatePlugin($config = []) {
 
+  }
+
+  public function updateConfigStorage() {
+    $plugins = $this->getPlugins(['return_mode' => OgContextHandlerInterface::RETURN_ALL]);
+
+    // todo user storage injection.
+    $og_context_storage = \Drupal::entityTypeManager()->getStorage('og_context_negotiation');
+    $og_context_config = $og_context_storage->loadMultiple();
+
+    $weight = 0;
+    foreach ($plugins as $plugin) {
+      if (in_array($plugin['id'], array_keys($og_context_config))) {
+        // The negotiation plugin already registered.
+        continue;
+      }
+
+      // Registering a new negotiation plugin.s
+      $og_context_storage->create([
+        'id' => $plugin['id'],
+        'label' => $plugin['label'],
+        'description' => $plugin['description'],
+        'status' => FALSE,
+        'weight' => $weight,
+      ])->save();
+
+      $weight++;
+    }
   }
 
 }
