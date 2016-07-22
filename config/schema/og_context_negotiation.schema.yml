@@ -1,6 +1,6 @@
-og_context.og_context_config.*:
+og.og_context_negotiation.*:
   type: config_entity
-  label: 'OG context config config'
+  label: 'OG context negotiation config'
   mapping:
     id:
       type: string

@@ -1,20 +1,24 @@
 <?php
 
-namespace Drupal\og_context;
+/**
+ * @file
+ * Contains Drupal\og\OgContextNegotiationListBuilder.
+ */
+
+namespace Drupal\og;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Provides a listing of OG context config entities.
+ * Provides a listing of OG context negotiation entities.
  */
-class OgContextConfigListBuilder extends ConfigEntityListBuilder {
-
+class OgContextNegotiationListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['label'] = $this->t('OG context config');
+    $header['label'] = $this->t('OG context negotiation');
     $header['id'] = $this->t('Machine name');
     return $header + parent::buildHeader();
   }
@@ -23,7 +27,7 @@ class OgContextConfigListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row['label'] = $entity->label();
+    $row['label'] = $this->getLabel($entity);
     $row['id'] = $entity->id();
     // You probably want a few more properties here...
     return $row + parent::buildRow($entity);

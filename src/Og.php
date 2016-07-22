@@ -611,6 +611,21 @@ class Og {
   }
 
   /**
+   * Get a instance of an OG context plugin.
+   *
+   * @param $plugin
+   *   The plugin ID.
+   *
+   * @return OgContextBase
+   */
+  static public function ogContextHandler($plugin) {
+    /** @var OgContextManager $service */
+    $service = \Drupal::service('plugin.manager.og.context');
+
+    return $service->createInstance($plugin);
+  }
+
+  /**
    * Invalidate cache.
    *
    * @param $group_ids

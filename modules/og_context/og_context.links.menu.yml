@@ -1,7 +1,0 @@
-# OG context config menu items definition
-entity.og_context_config.collection:
-  title: 'OG context'
-  route_name: entity.og_context_config.collection
-  description: 'Manage order of OG context plugins.'
-  parent: og_ui.admin_index
-  weight: 99

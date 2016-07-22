@@ -22,3 +22,6 @@ services:
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
+  plugin.manager.og.context:
+    class: Drupal\og\Plugin\OgContextManager
+    parent: default_plugin_manager

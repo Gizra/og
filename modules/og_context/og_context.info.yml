@@ -1,7 +1,0 @@
-name: OG context
-type: module
-description: Get a group from a viewed page.
-core: 8.x
-package: OG
-dependencies:
-  - og_ui

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\og_context\Annotation;
+namespace Drupal\og\Annotation;
 
 use Drupal\Component\Annotation\Plugin;
 
@@ -13,7 +13,6 @@ use Drupal\Component\Annotation\Plugin;
  * @Annotation
  */
 class OgContext extends Plugin {
-
 
   /**
    * The plugin ID.

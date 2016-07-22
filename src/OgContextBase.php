@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\og_context\Plugin;
+namespace Drupal\og\Plugin;
 
 use Drupal\Component\Plugin\PluginBase;
 

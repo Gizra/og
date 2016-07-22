@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\og_context\Plugin\OgContext;
+namespace Drupal\og\Plugin\OgContext;
 
-use Drupal\og_context\Plugin\OgContextBase;
+use Drupal\og\Plugin\OgContextBase;
 
 /**
  * @OgContext(
