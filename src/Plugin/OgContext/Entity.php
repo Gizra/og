@@ -81,9 +81,7 @@ class Entity extends OgContextBase {
         continue;
       }
 
-      foreach (Og::getGroups($parameter) as $groups) {
-        return reset($groups);
-      }
+      return Og::getGroups($parameter);
     }
   }
 }
