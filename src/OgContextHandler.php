@@ -3,6 +3,7 @@
 namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\og\Entity\OgContextNegotiation;
 
 class OgContextHandler implements OgContextHandlerInterface {
 
@@ -34,23 +35,51 @@ class OgContextHandler implements OgContextHandlerInterface {
   }
 
   /**
-   * Get a list of an OG context plugins.
-   *
-   * @return array
+   * {@inheritdoc}
    */
-  public function getPlugins() {
-    return $this->pluginManager->getDefinitions();
+  public function getPlugins($config = []) {
+    $config += [
+      // sort the plugins by the weight defined in negotiation schema.
+      'sort_by_weight' => TRUE,
+      'return_mode' => OgContextHandlerInterface::RETURN_ONLY_ACTIVE,
+    ];
+
+    $plugins = $this->pluginManager->getDefinitions();
+
+    if ($config['return_mode'] != OgContextHandlerInterface::RETURN_ALL) {
+
+      /** @var OgContextNegotiation[] $og_context_config */
+      $og_context_config = \Drupal::entityTypeManager()->getStorage('og_context_negotiation')->loadMultiple();
+
+      foreach ($og_context_config as $context) {
+        if ($config['mode'] == OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
+          $condition = $context->get('status') === FALSE;
+        }
+        else {
+          $condition = !in_array($context->id(), array_keys($plugins));
+        }
+
+        if ($condition) {
+          unset($plugins[$context->id()]);
+        }
+      }
+    }
+
+    return $plugins;
   }
 
   /**
-   * Create an instance of an OG context plugin.
-   *
-   * @param $plugin_id
-   *
-   * @return OgContextBase
+   * {@inheritdoc}
    */
   public function getPlugin($plugin_id) {
     return $this->pluginManager->createInstance($plugin_id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function updatePlugin($config = []) {
+
   }
 
 }

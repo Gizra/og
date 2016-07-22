@@ -2,13 +2,12 @@
 
 namespace Drupal\og\Plugin\OgContext;
 
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\og\OgContextBase;
 
 /**
  * @OgContext(
  *  id = "entity",
- *  title = "Entity",
+ *  label = "Entity",
  *  description = @Translation("Get the group from the current entity, by checking if it is a group or a group content entity.")
  * )
  */

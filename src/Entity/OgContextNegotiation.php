@@ -17,12 +17,7 @@ use Drupal\og\OgContextNegotiationInterface;
  *   id = "og_context_negotiation",
  *   label = @Translation("OG context negotiation"),
  *   handlers = {
- *     "list_builder" = "Drupal\og\OgContextNegotiationListBuilder",
- *     "form" = {
- *       "add" = "Drupal\og\Form\OgContextNegotiationForm",
- *       "edit" = "Drupal\og\Form\OgContextNegotiationForm",
- *       "delete" = "Drupal\og\Form\OgContextNegotiationDeleteForm"
- *     }
+ *     "list_builder" = "Drupal\og\OgContextNegotiationListBuilder"
  *   },
  *   config_prefix = "og_context_negotiation",
  *   admin_permission = "administer site configuration",
@@ -32,14 +27,12 @@ use Drupal\og\OgContextNegotiationInterface;
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "/admin/structure/og_context_negotiation/{og_context_negotiation}",
- *     "edit-form" = "/admin/structure/og_context_negotiation/{og_context_negotiation}/edit",
- *     "delete-form" = "/admin/structure/og_context_negotiation/{og_context_negotiation}/delete",
  *     "collection" = "/admin/structure/visibility_group"
  *   }
  * )
  */
 class OgContextNegotiation extends ConfigEntityBase implements OgContextNegotiationInterface {
+
   /**
    * The OG context negotiation ID.
    *
@@ -53,5 +46,26 @@ class OgContextNegotiation extends ConfigEntityBase implements OgContextNegotiat
    * @var string
    */
   protected $label;
+
+  /**
+   * The status of the entity.
+   *
+   * @var boolean
+   */
+  protected $status;
+
+  /**
+   * The description of the plugin.
+   *
+   * @var string
+   */
+  protected $description;
+
+  /**
+   * The weight of the plugin.
+   *
+   * @var integer
+   */
+  protected $weight;
 
 }

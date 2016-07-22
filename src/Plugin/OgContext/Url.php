@@ -2,13 +2,12 @@
 
 namespace Drupal\og\Plugin\OgContext;
 
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\og\OgContextBase;
 
 /**
  * @OgContext(
  *  id = "url",
- *  type = "URL",
+ *  label = "URL",
  *  description = @Translation("Get the group from the given URL.")
  * )
  */

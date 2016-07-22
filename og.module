@@ -13,6 +13,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
+use Drupal\og\OgContextHandlerInterface;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
@@ -195,6 +196,34 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
 
   // Otherwise, ignore or deny based on whether strict entity access is set.
   return $required ? AccessResult::forbiddenIf($node_access_strict) : AccessResult::neutral();
+}
+
+/**
+ * Implements hook_cache_flush().
+ */
+function og_cache_flush() {
+  $plugins = Og::contextHandler()->getPlugins(['return_mode' => OgContextHandlerInterface::RETURN_ALL]);
+  $og_context_storage = \Drupal::entityTypeManager()->getStorage('og_context_negotiation');
+  $og_context_config = $og_context_storage->loadMultiple();
+
+  $weight = 0;
+  foreach ($plugins as $plugin) {
+    if (in_array($plugin['id'], array_keys($og_context_config))) {
+      // The negotiation plugin already registered.
+      continue;
+    }
+
+    // Registering a new negotiation plugin.s
+    $og_context_storage->create([
+      'id' => $plugin['id'],
+      'label' => $plugin['label'],
+      'description' => $plugin['description'],
+      'status' => FALSE,
+      'weight' => $weight,
+    ])->save();
+
+    $weight++;
+  }
 }
 
 /**

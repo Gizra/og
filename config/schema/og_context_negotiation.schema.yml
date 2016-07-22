@@ -8,5 +8,12 @@ og.og_context_negotiation.*:
     label:
       type: label
       label: 'Label'
-    uuid:
+    description:
       type: string
+      label: 'Description'
+    status:
+      type: boolean
+      label: 'Status'
+    weight:
+      type: integer
+      label: 'Weight'
