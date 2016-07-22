@@ -3,6 +3,7 @@
 namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Entity\OgContextNegotiation;
 
 class OgContextHandler implements OgContextHandlerInterface {
@@ -22,16 +23,26 @@ class OgContextHandler implements OgContextHandlerInterface {
   protected $pluginManager;
 
   /**
+   * The entity manager.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $storage;
+
+  /**
    * Constructs an OgManager service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
    * @param \Drupal\og\OgContextManager $context_manager
    *   The OG context manager.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
+   *   The entity type manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, OgContextManager $context_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, OgContextManager $context_manager, EntityTypeManagerInterface $entity_manager) {
     $this->configFactory = $config_factory;
     $this->pluginManager = $context_manager;
+    $this->storage = $entity_manager->getStorage('og_context_negotiation');
   }
 
   /**
@@ -39,7 +50,6 @@ class OgContextHandler implements OgContextHandlerInterface {
    */
   public function getPlugins($config = []) {
     $config += [
-      // sort the plugins by the weight defined in negotiation schema.
       'sort_by_weight' => TRUE,
       'return_mode' => OgContextHandlerInterface::RETURN_ONLY_ACTIVE,
     ];
@@ -49,7 +59,7 @@ class OgContextHandler implements OgContextHandlerInterface {
     if ($config['return_mode'] != OgContextHandlerInterface::RETURN_ALL) {
 
       /** @var OgContextNegotiation[] $og_context_config */
-      $og_context_config = \Drupal::entityTypeManager()->getStorage('og_context_negotiation')->loadMultiple();
+      $og_context_config = $this->storage->loadMultiple();
 
       foreach ($og_context_config as $context) {
         if ($config['return_mode'] == OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
@@ -65,6 +75,14 @@ class OgContextHandler implements OgContextHandlerInterface {
       }
     }
 
+    if ($config['sort_by_weight']) {
+      $og_context_config = $this->storage->loadMultiple();
+
+      uasort($plugins, function($a, $b) use($og_context_config) {
+        return $og_context_config[$a['id']]->get('weight') > $og_context_config[$b['id']]->get('weight') ? 1 : -1;
+      });
+    }
+
     return $plugins;
   }
 
@@ -78,15 +96,24 @@ class OgContextHandler implements OgContextHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function updatePlugin($config = []) {
+  public function updatePlugin($plugin_id, $config = []) {
+    /** @var OgContextNegotiation $contex */
+    $context = $this->storage->load($plugin_id);
 
+    foreach ($config as $key => $value) {
+      $context->set($key, $value);
+    }
+
+    $context->save();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function updateConfigStorage() {
     $plugins = $this->getPlugins(['return_mode' => OgContextHandlerInterface::RETURN_ALL]);
 
-    // todo user storage injection.
-    $og_context_storage = \Drupal::entityTypeManager()->getStorage('og_context_negotiation');
+    $og_context_storage = $this->storage;
     $og_context_config = $og_context_storage->loadMultiple();
 
     $weight = 0;

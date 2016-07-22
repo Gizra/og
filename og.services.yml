@@ -18,7 +18,7 @@ services:
     arguments: ['@event_dispatcher']
   og.context_handler:
     class: Drupal\og\OgContextHandler
-    arguments: ['@config.factory', '@plugin.manager.og.context']
+    arguments: ['@config.factory', '@plugin.manager.og.context', '@entity_type.manager']
   plugin.manager.og.delete_orphans:
     class: Drupal\og\OgDeleteOrphansPluginManager
     parent: default_plugin_manager

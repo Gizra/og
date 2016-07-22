@@ -40,11 +40,19 @@ interface OgContextHandlerInterface {
   /**
    * Update plugin settings.
    *
+   * @param $plugin_id
+   *   The plugin ID.
    * @param array $config
    *   The plugins settings.
-   *
-   * @return boolean
+   * @return bool
    */
-  public function updatePlugin($config = []);
+  public function updatePlugin($plugin_id, $config = []);
+
+  /**
+   * Iterate over the plugins and register a new plugin.
+   *
+   * Will be invoked when installing OG and clearing the cache.
+   */
+  public function updateConfigStorage();
 
 }
