@@ -2,6 +2,8 @@
 
 namespace Drupal\og;
 
+use Drupal\Core\Entity\ContentEntityBase;
+
 interface OgContextHandlerInterface {
 
   /**
@@ -19,6 +21,13 @@ interface OgContextHandlerInterface {
    * Return all the plugins without considering the negotiation schema.
    */
   const RETURN_ALL = 3;
+
+  /**
+   * Get the current viewed group.
+   *
+   * @return NULL|ContentEntityBase
+   */
+  public function getGroup();
 
   /**
    * Get a list of an OG context plugins.

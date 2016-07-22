@@ -48,6 +48,21 @@ class OgContextHandler implements OgContextHandlerInterface {
   /**
    * {@inheritdoc}
    */
+  public function getGroup() {
+    $plugins = $this->getPlugins();
+
+    foreach ($plugins as $plugin) {
+      if ($group = $this->getPlugin($plugin['id'])->getGroup()) {
+        return $group;
+      }
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getPlugins($config = []) {
     $config += [
       'sort_by_weight' => TRUE,

@@ -3,6 +3,7 @@
 namespace Drupal\og\Plugin\OgContext;
 
 use Drupal\og\OgContextBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @OgContext(
