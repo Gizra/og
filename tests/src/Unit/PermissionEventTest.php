@@ -15,6 +15,8 @@ use Drupal\Tests\UnitTestCase;
 class PermissionEventTest extends UnitTestCase {
 
   /**
+   * Tests getting a single group permission.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -53,6 +55,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting a single group content permission.
+   *
    * @param \Drupal\og\GroupContentOperationPermission[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -90,6 +94,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting group permissions.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -113,6 +119,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting group permissions.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -138,6 +146,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting an invalid permission.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -162,6 +172,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests deleting a permission.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -191,6 +203,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests deleting a group content permission.
+   *
    * @param \Drupal\og\GroupContentOperationPermission[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -227,6 +241,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests checking if permission exists.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -252,6 +268,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests checking if group content permission exists.
+   *
    * @param \Drupal\og\GroupContentOperationPermission[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -282,6 +300,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting a group entity type ID.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -302,6 +322,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting a group bundle ID.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -342,6 +364,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetGet".
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -376,6 +400,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetSet".
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -462,6 +488,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetUnset".
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -492,6 +520,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetExists".
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -733,7 +763,7 @@ class PermissionEventTest extends UnitTestCase {
       [
         [
           new GroupPermission([
-            'title' => $this->t('This permission doesn\'t have a title.'),
+            'title' => $this->t('This permission does not have a title.'),
           ]),
         ],
       ],
