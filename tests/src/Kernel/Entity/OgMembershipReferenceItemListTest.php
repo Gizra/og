@@ -66,7 +66,15 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     }
     $this->fieldName = strtolower($this->randomMachineName());
 
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', 'user', ['field_name' => $this->fieldName]);
+    $settings = [
+      'field_name' => $this->fieldName,
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => 'entity_test',
+        ],
+      ],
+    ];
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', 'user', $settings);
   }
 
   /**
@@ -93,7 +101,9 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $member_in_single_group = User::create([
       'type' => $this->bundles[2],
       'name' => $this->randomString(),
-      $this->fieldName => [['target_id' => $this->groups[0]->id()]],
+      $this->fieldName => [
+        ['target_id' => $this->groups[0]->id()],
+      ],
     ]);
 
     // Assert group membership is found before save.
