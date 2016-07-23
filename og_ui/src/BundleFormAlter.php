@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\og_ui\BundleFormAlter.
+ */
+
 namespace Drupal\og_ui;
 
 use Drupal\Component\Utility\Unicode;
@@ -56,7 +61,9 @@ class BundleFormAlter {
    * This is a helper for og_ui_form_alter().
    *
    * @param array $form
+   *   The form variable.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state object.
    */
   public function formAlter(array &$form, FormStateInterface $form_state) {
     $this->prepare($form, $form_state);
@@ -75,7 +82,9 @@ class BundleFormAlter {
    * Prepares object properties and adds the og details element.
    *
    * @param array $form
-   * @param $form_state
+   *   The form variable.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state object.
    */
   protected function prepare(array &$form, FormStateInterface $form_state) {
     // Example: article.
