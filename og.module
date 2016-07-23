@@ -35,9 +35,8 @@ function og_entity_insert(EntityInterface $entity) {
     // Subscribe the group manager.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($entity->getOwnerId())
-      ->setEntityId($entity->id())
-      ->setGroupEntityType($entity->getEntityTypeId())
+      ->setUser($entity->getOwner())
+      ->setGroup($entity)
       ->setFieldName($membership->getFieldName())
       ->save();
   }

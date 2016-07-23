@@ -194,18 +194,24 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
    *
    * @param int|string $group_id
    *   The group ID to create a membership for.
+   *
+   * @return \Drupal\og\OgMembershipInterface
    */
   protected function createOgMembership($group_id) {
     /** @var \Drupal\Core\Entity\EntityInterface $parent */
     $parent_entity = $this->getEntity();
+
+    $entity_type = $this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type');
+    $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
+    $entity = $storage->load($group_id);
+
     /** @var OgMembershipInterface $membership */
     $membership = Og::membershipStorage()->create(Og::membershipDefault());
 
     $membership
       ->setFieldName($this->getName())
       ->setUser($parent_entity->id())
-      ->setGroupEntityType($this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
-      ->setEntityId($group_id)
+      ->setGroup($entity)
       ->save();
 
     return $membership;

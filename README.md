@@ -71,9 +71,8 @@ Creating such a relation is done for example in the following way:
 ```php
  $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
  $membership
-   ->setUser(2)
-   ->setEntityId(1)
-   ->setGroupEntityType('node')
+   ->setUser($user)
+   ->setGroup($entity)
    ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
    ->save();
 ```
