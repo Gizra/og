@@ -141,6 +141,20 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
+  public function getGroupEntityType() {
+    return $this->get('entity_type')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGroupId() {
+    return $this->get('entity_id')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getGroup() {
     $entity_type = $this->get('entity_type')->value;
     $entity_id = $this->get('entity_id')->value;

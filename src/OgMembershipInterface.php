@@ -135,6 +135,22 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function getGroup();
 
   /**
+   * Gets the group entity type.
+   *
+   * @return string
+   *   The entity type.
+   */
+   public function getGroupEntityType();
+
+  /**
+   * Gets the group entity ID.
+   *
+   * @return string
+   *   The entity identifier.
+   */
+   public function getGroupId();
+
+  /**
    * Sets the membership state.
    *
    * @param bool $state

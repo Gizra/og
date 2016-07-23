@@ -148,7 +148,7 @@ class GetMembershipsTest extends KernelTestBase {
     foreach ($expected as $expected_group) {
       $expected_id = $this->groups[$expected_group]->id();
       foreach ($result as $membership) {
-        if ($membership->getEntityId() === $expected_id) {
+        if ($membership->getGroupId() === $expected_id) {
           // Test successful: the expected result was found.
           continue 2;
         }
