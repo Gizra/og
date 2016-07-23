@@ -3,7 +3,7 @@
 namespace Drupal\og;
 
 /**
- *
+ * The OG fields related interface.
  */
 interface OgFieldsInterface {
 

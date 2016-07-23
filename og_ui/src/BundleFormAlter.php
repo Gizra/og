@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\BundleFormAlter.
- */
-
 namespace Drupal\og_ui;
 
 use Drupal\Component\Utility\Unicode;
