@@ -85,7 +85,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
       return $this->container->get('entity.query')->get('og_membership')
         ->condition('field_name', $this->fieldName)
         ->condition('uid', $id)
-        ->condition('entity_type', 'user')
+        ->condition('entity_type', 'entity_test')
         ->condition('state', OgMembershipInterface::STATE_ACTIVE)
         ->execute();
     };
@@ -98,6 +98,8 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 0);
     $this->assertSame($run_query($entity->id()), []);
+
+    // Add a user with membership in a single group.
     $member_in_single_group = User::create([
       'type' => $this->bundles[2],
       'name' => $this->randomString(),
@@ -111,6 +113,8 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $member_in_single_group->save();
     $this->assertSame(count($member_in_single_group->{$this->fieldName}), 1);
     $this->assertSame(count($run_query($member_in_single_group->id())), 1);
+
+    // Add a user with membership in multiple groups.
     $member_in_two_groups = User::create([
       'name' => $this->randomString(),
       'type' => $this->bundles[2],
@@ -123,6 +127,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $member_in_two_groups->save();
     $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
     $this->assertSame(count($run_query($member_in_two_groups->id())), 2);
+
     // Test re-save.
     $member_in_two_groups->save();
     $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);

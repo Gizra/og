@@ -8,6 +8,7 @@
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgMembershipInterface;
@@ -198,20 +199,21 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
    * @return \Drupal\og\OgMembershipInterface
    */
   protected function createOgMembership($group_id) {
-    /** @var \Drupal\Core\Entity\EntityInterface $parent */
-    $parent_entity = $this->getEntity();
+    // The host of the field is always a user.
+    /** @var AccountInterface $user */
+    $user = $this->getEntity();
 
     $entity_type = $this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type');
     $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
-    $entity = $storage->load($group_id);
+    $group = $storage->load($group_id);
 
     /** @var OgMembershipInterface $membership */
     $membership = Og::membershipStorage()->create(Og::membershipDefault());
 
     $membership
       ->setFieldName($this->getName())
-      ->setUser($parent_entity)
-      ->setGroup($entity)
+      ->setUser($user)
+      ->setGroup($group)
       ->save();
 
     return $membership;
