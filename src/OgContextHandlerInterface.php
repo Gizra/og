@@ -33,6 +33,23 @@ interface OgContextHandlerInterface {
    * Get a list of an OG context plugins.
    *
    * @param array $config
+   *   Array of settings:
+   *    sort_by_weight - Determine if the plugins will be order by the weight of
+   *    corresponding OG context negotiation entity entry.
+   *
+   *    return_mode - Determine which plugins will be returned:
+   *      OgContextHandlerInterface::RETURN_ALL - will return all the plugins.
+   *      Including plugins which don't have a corresponding OG context
+   *      negotiation entity entry.
+   *
+   *     OgContextHandlerInterface::RETURN_ONLY_ACTIVE - will return only
+   *      plugins which their corresponding OG context negotiation entity entry
+   *      status is set to true.
+   *
+   *      OgContextHandlerInterface::RETURN_ONLY_IN_STORAGE - will return only
+   *      plugins with a corresponding OG context negotiation entity entry no
+   *      matter what is the status.
+   *
    * @return array
    */
   public function getPlugins($config = []);
@@ -41,6 +58,7 @@ interface OgContextHandlerInterface {
    * Create an instance of an OG context plugin.
    *
    * @param $plugin_id
+   *   The plugin ID.
    *
    * @return OgContextBase
    */
@@ -53,6 +71,7 @@ interface OgContextHandlerInterface {
    *   The plugin ID.
    * @param array $config
    *   The plugins settings.
+   *
    * @return bool
    */
   public function updatePlugin($plugin_id, $config = []);

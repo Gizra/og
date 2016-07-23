@@ -16,18 +16,12 @@ use Drupal\og\OgContextNegotiationInterface;
  * @ConfigEntityType(
  *   id = "og_context_negotiation",
  *   label = @Translation("OG context negotiation"),
- *   handlers = {
- *     "list_builder" = "Drupal\og\OgContextNegotiationListBuilder"
- *   },
  *   config_prefix = "og_context_negotiation",
  *   admin_permission = "administer site configuration",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
  *     "uuid" = "uuid"
- *   },
- *   links = {
- *     "collection" = "/admin/structure/visibility_group"
  *   }
  * )
  */
