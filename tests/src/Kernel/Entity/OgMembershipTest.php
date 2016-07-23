@@ -100,30 +100,17 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
-   * Tests exceptions are thrown when trying to save a membership with no, or
-   * anonymous user.
+   * Tests exceptions are thrown when trying to save a membership with no user.
    *
-   * @covers ::getUser
-   * @dataProvider providerTestGetSetUserException
+   * @covers ::preSave
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testGetSetUserException($user_value) {
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($user_value)
       ->setGroup($this->group)
       ->save();
-  }
-
-  /**
-   * Data provider for testGetSetUserException.
-   */
-  public function providerTestGetSetUserException() {
-    return [
-      [NULL],
-      [0]
-    ];
   }
 
 }
