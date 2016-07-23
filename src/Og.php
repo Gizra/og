@@ -155,7 +155,7 @@ class Og {
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
     $memberships = static::getMemberships($user, $states, $field_name);
     foreach ($memberships as $membership) {
-      $group_ids[$membership->getGroupEntityType()][] = $membership->getEntityId();
+      $group_ids[$membership->getGroupEntityType()][] = $membership->getGroupId();
     }
 
     return $group_ids;
@@ -264,7 +264,7 @@ class Og {
    */
   public static function getMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     foreach (static::getMemberships($user, $states, $field_name) as $membership) {
-      if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getEntityId() === $group->id()) {
+      if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getGroupId() === $group->id()) {
         return $membership;
       }
     }

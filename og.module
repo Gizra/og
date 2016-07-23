@@ -25,22 +25,29 @@ define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
 
 /**
  * Implements hook_entity_insert().
+ *
+ * Subscribe the group manager.
  */
 function og_entity_insert(EntityInterface $entity) {
   if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+    // Not a group entity.
     return;
   }
 
-  if ($entity instanceof EntityOwnerInterface) {
-    // Subscribe the group manager.
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
-    $membership
-      ->setUser($entity->getOwnerId())
-      ->setEntityId($entity->id())
-      ->setGroupEntityType($entity->getEntityTypeId())
-      ->setFieldName($membership->getFieldName())
-      ->save();
+  if (!$entity instanceof EntityOwnerInterface) {
+    return;
   }
+
+  if (!$entity->getOwner()) {
+    // User is anonymous, se we cannot set a membership for them.
+    return;
+  }
+
+  $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+  $membership
+    ->setUser($entity->getOwner())
+    ->setGroup($entity)
+    ->save();
 }
 
 /**
