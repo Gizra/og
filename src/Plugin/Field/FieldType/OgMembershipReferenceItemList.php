@@ -8,6 +8,7 @@
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgMembershipInterface;
@@ -75,7 +76,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     // todo: move to API function.
     $membership_ids = \Drupal::entityQuery('og_membership')
       ->condition('uid', $this->getEntity()->id())
-      ->condition('entity_type', $this->getFieldDefinition()->getTargetEntityTypeId())
+      ->condition('entity_type', $this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
       ->condition('field_name', $this->getFieldDefinition()->getName())
       ->execute();
 
@@ -83,7 +84,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $memberships = OgMembership::loadMultiple($membership_ids);
 
     $target_group_ids = array_map(function(OgMembership $membership) {
-      return $membership->getEntityId();
+      return $membership->getGroupId();
     }, $memberships);
 
     $deprecated_membership_ids = array_diff($target_group_ids, $group_ids);
@@ -144,7 +145,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $return = [];
     foreach ($memberships as $membership) {
-      $return[] = ['target_id' => $membership->getEntityid()];
+      $return[] = ['target_id' => $membership->getGroupId()];
     }
 
     return $return;
@@ -175,7 +176,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $memberships = OgMembership::loadMultiple($membership_ids);
 
     $group_ids = array_map(function (OgMembership $membership) {
-      return $membership->getEntityId();
+      return $membership->getGroupId();
     }, $memberships);
 
     $groups = \Drupal::entityTypeManager()->getStorage($group_type)->loadMultiple($group_ids);
@@ -194,18 +195,25 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
    *
    * @param int|string $group_id
    *   The group ID to create a membership for.
+   *
+   * @return \Drupal\og\OgMembershipInterface
    */
   protected function createOgMembership($group_id) {
-    /** @var \Drupal\Core\Entity\EntityInterface $parent */
-    $parent_entity = $this->getEntity();
+    // The host of the field is always a user.
+    /** @var AccountInterface $user */
+    $user = $this->getEntity();
+
+    $entity_type = $this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type');
+    $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
+    $group = $storage->load($group_id);
+
     /** @var OgMembershipInterface $membership */
     $membership = Og::membershipStorage()->create(Og::membershipDefault());
 
     $membership
       ->setFieldName($this->getName())
-      ->setUser($parent_entity->id())
-      ->setGroupEntityType($this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
-      ->setEntityId($group_id)
+      ->setUser($user)
+      ->setGroup($group)
       ->save();
 
     return $membership;
