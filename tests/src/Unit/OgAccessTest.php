@@ -11,6 +11,8 @@ use Drupal\og\OgAccess;
 class OgAccessTest extends OgAccessTestBase {
 
   /**
+   * Tests access for a non-group related entity.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
@@ -21,6 +23,8 @@ class OgAccessTest extends OgAccessTestBase {
   }
 
   /**
+   * Tests access to entity.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
@@ -35,6 +39,8 @@ class OgAccessTest extends OgAccessTestBase {
   }
 
   /**
+   * Tests access by the super user, which is user ID 1.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
@@ -45,6 +51,8 @@ class OgAccessTest extends OgAccessTestBase {
   }
 
   /**
+   * Tests access by a group administrator.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
@@ -55,6 +63,8 @@ class OgAccessTest extends OgAccessTestBase {
   }
 
   /**
+   * Tests access by the owner of the entity.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
