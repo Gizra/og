@@ -9,8 +9,10 @@ use Drupal\og\Og;
 use Drupal\user\Entity\User;
 
 /**
- * Tests that a group reference field attached to the user entity upon group
- * type creation.
+ * Tests that an OG audience field is properly attached to users.
+ *
+ * Upon group type creation, a new OG audience field should be added to users'
+ * bundles, in case they do not already exist.
  *
  * @group og
  */
@@ -19,14 +21,25 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'og', 'entity_test', 'og_test'];
+  public static $modules = [
+    'system',
+    'user',
+    'field',
+    'entity_test',
+    'og',
+    'og_test',
+  ];
 
   /**
+   * The user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user;
 
   /**
+   * The entity test that will be used as a group.
+   * 
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group;

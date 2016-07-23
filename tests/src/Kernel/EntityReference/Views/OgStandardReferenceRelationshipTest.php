@@ -36,7 +36,14 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['user', 'field', 'entity_test', 'views', 'og_standard_reference_test_views', 'og'];
+  public static $modules = [
+    'user',
+    'field',
+    'entity_test',
+    'views',
+    'og_standard_reference_test_views',
+    'og',
+  ];
 
   /**
    * The entity_test entities used by the test.
@@ -104,7 +111,9 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEqual($views_data['reverse__entity_test__field_test_data']['relationship']['field field'], 'field_test_data_target_id');
     $this->assertEqual($views_data['reverse__entity_test__field_test_data']['relationship']['field_name'], 'field_test_data');
     $this->assertEqual($views_data['reverse__entity_test__field_test_data']['relationship']['entity_type'], 'entity_test');
-    $this->assertEqual($views_data['reverse__entity_test__field_test_data']['relationship']['join_extra'][0], ['field' => 'deleted', 'value' => 0, 'numeric' => TRUE]);
+
+    $values = ['field' => 'deleted', 'value' => 0, 'numeric' => TRUE];
+    $this->assertEqual($views_data['reverse__entity_test__field_test_data']['relationship']['join_extra'][0], $values);
 
     // Check an actual test view.
     $view = Views::getView('test_og_standard_reference_entity_test_view');
@@ -185,7 +194,9 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEqual($views_data['reverse__entity_test_mul__field_data_test']['relationship']['field field'], 'field_data_test_target_id');
     $this->assertEqual($views_data['reverse__entity_test_mul__field_data_test']['relationship']['field_name'], 'field_data_test');
     $this->assertEqual($views_data['reverse__entity_test_mul__field_data_test']['relationship']['entity_type'], 'entity_test_mul');
-    $this->assertEqual($views_data['reverse__entity_test_mul__field_data_test']['relationship']['join_extra'][0], ['field' => 'deleted', 'value' => 0, 'numeric' => TRUE]);
+
+    $values = ['field' => 'deleted', 'value' => 0, 'numeric' => TRUE];
+    $this->assertEqual($views_data['reverse__entity_test_mul__field_data_test']['relationship']['join_extra'][0], $values);
 
     // Check an actual test view.
     $view = Views::getView('test_og_standard_reference_entity_test_mul_view');

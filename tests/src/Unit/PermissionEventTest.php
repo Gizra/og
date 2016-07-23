@@ -9,7 +9,7 @@ use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * Tests premission events.
+ * Tests permission events.
  *
  * @group og
  * @coversDefaultClass \Drupal\og\Event\PermissionEvent

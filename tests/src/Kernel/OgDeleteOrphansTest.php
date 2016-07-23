@@ -20,7 +20,14 @@ class OgDeleteOrphansTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'entity_reference', 'node', 'og'];
+  public static $modules = [
+    'system',
+    'user',
+    'field',
+    'entity_reference',
+    'node',
+    'og',
+  ];
 
   /**
    * The plugin manager for OgDeleteOrphans plugins.
@@ -50,8 +57,9 @@ class OgDeleteOrphansTest extends KernelTestBase {
     $this->installSchema('node', 'node_access');
     $this->installSchema('system', ['queue', 'sequences']);
 
-    /** @var \Drupal\og\OgDeleteOrphansPluginManager ogDeleteOrphansPluginManager */
-    $this->ogDeleteOrphansPluginManager = \Drupal::service('plugin.manager.og.delete_orphans');
+    /** @var \Drupal\og\OgDeleteOrphansPluginManager $plugin_manager */
+    $plugin_manager = \Drupal::service('plugin.manager.og.delete_orphans');
+    $this->ogDeleteOrphansPluginManager = $plugin_manager;
 
     // Create a group entity type.
     $group_bundle = Unicode::strtolower($this->randomMachineName());
@@ -167,7 +175,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
    *
    * @dataProvider ogDeleteOrphansPluginProvider
    */
-  function testDisabled($plugin_id, $run_cron, $asynchronous, $queue_id) {
+  public function testDisabled($plugin_id, $run_cron, $asynchronous, $queue_id) {
     // Disable deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')

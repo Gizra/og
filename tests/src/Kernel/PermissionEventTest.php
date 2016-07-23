@@ -210,7 +210,7 @@ class PermissionEventTest extends KernelTestBase {
    *
    * @see t()
    */
-  function t($string, array $args = array(), array $options = array()) {
+  public function t($string, array $args = array(), array $options = array()) {
     return new TranslatableMarkup($string, $args, $options);
   }
 
@@ -222,7 +222,7 @@ class PermissionEventTest extends KernelTestBase {
    * @param \Drupal\og\PermissionInterface $actual
    *   The actual permission.
    */
-  protected function assertPermission($expected, $actual) {
+  protected function assertPermission(PermissionInterface $expected, PermissionInterface $actual) {
     foreach ($this->getPermissionProperties($expected) as $property) {
       $this->assertEquals($expected->get($property), $actual->get($property), "The $property property is equal.");
     }
