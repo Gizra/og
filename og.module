@@ -42,7 +42,6 @@ function og_entity_insert(EntityInterface $entity) {
   $membership
     ->setUser($entity->getOwner())
     ->setGroup($entity)
-    ->setFieldName($membership->getFieldName())
     ->save();
 }
 
