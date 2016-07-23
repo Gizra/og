@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Unit\GroupManagerTest.
- */
-
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Config\Config;
@@ -137,7 +132,7 @@ class GroupManagerTest extends UnitTestCase {
   }
 
   /**
-   * Data provider for testIsGroup
+   * Data provider for testIsGroup.
    *
    * @return array
    */

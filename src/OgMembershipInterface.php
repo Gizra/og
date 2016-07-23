@@ -1,19 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgMembershipInterface.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\og\Entity\OgRole;
-use Drupal\user\Entity\User;
 
 /**
  * Provides an interface for OG memberships.
+ *
  * @todo Provide some actual helpful documentation.
  */
 interface OgMembershipInterface extends ContentEntityInterface {
@@ -66,7 +59,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Sets the membership creation timestamp.
    *
    * @param int $timestamp
-   *   The membership creation timestamp
+   *   The membership creation timestamp.
    *
    * @return OgMembershipInterface
    */

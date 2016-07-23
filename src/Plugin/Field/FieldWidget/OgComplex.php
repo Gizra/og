@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\Field\FieldWidget\OgComplex.
- */
-
 namespace Drupal\og\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Html;
@@ -67,7 +62,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * Handles generic features for multiple fields:
    * - number of widgets
    * - AHAH-'add more' button
-   * - table display and drag-n-drop value reordering
+   * - table display and drag-n-drop value reordering.
    */
   protected function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
     $field_name = $this->fieldDefinition->getName();
@@ -77,7 +72,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
     $user_groups = Og::getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
-    $user_group_ids = array_map(function($group) {
+    $user_group_ids = array_map(function ($group) {
       return $group->id();
     }, $user_groups_target_type);
 
@@ -233,7 +228,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $user_groups = Og::getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
-    $user_group_ids = array_map(function($group) {
+    $user_group_ids = array_map(function ($group) {
       return $group->id();
     }, $user_groups_target_type);
 
@@ -276,8 +271,9 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * @param $delta
    *   The delta of the new element. Need to be the last delta in order to be
    *   added in the end of the list.
-   * @param EntityInterface|NULL $entity
+   * @param EntityInterface|null $entity
    *   The entity object.
+   *
    * @return array
    *   A single entity reference input.
    */

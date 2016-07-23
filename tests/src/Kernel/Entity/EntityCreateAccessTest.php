@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\EntityCreateAccessTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;

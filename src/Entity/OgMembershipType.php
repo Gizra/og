@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\og\Entity\OgMembershipType.
- */
-
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
@@ -34,4 +29,5 @@ class OgMembershipType extends ConfigEntityBase implements ConfigEntityInterface
   public function id() {
     return $this->type;
   }
+
 }

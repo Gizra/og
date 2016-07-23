@@ -8,9 +8,9 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
+
 /**
  * Test permission inside a group.
  *

@@ -8,8 +8,10 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
 use Drupal\og\GroupManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Response;
 
+/**
+ *
+ */
 class OgUiController extends ControllerBase {
 
   /**

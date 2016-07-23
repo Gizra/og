@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\Entity\FieldAccessTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Session\AnonymousUserSession;

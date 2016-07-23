@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\og\Kernel\Entity\OgMembershipRoleReference.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;

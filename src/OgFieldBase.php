@@ -1,14 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgFieldBase.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Plugin\PluginBase;
 
+/**
+ *
+ */
 abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
   /**
@@ -27,7 +25,6 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
   /**
    * The field name.
-   *
    *
    * @var string
    */
@@ -48,7 +45,6 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   public function getBundle() {
     return $this->bundle;
   }
-
 
   /**
    * {@inheritdoc}

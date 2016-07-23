@@ -38,7 +38,8 @@ class PermissionEventTest extends UnitTestCase {
       try {
         $event->getPermission($name);
         $this->fail('Calling ::getPermission() on a non-existing permission throws an exception.');
-      } catch (\InvalidArgumentException $e) {
+      }
+      catch (\InvalidArgumentException $e) {
         // Expected result.
       }
     }
@@ -429,7 +430,7 @@ class PermissionEventTest extends UnitTestCase {
       // Test that an exception is thrown when setting a nameless permission.
       [
         '',
-    new GroupPermission([
+        new GroupPermission([
           'title' => $this->t('A permission without a machine name.'),
         ]),
       ],
@@ -438,7 +439,7 @@ class PermissionEventTest extends UnitTestCase {
       // title.
       [
         '',
-    new GroupPermission([
+        new GroupPermission([
           'name' => 'a titleless permission',
         ]),
       ],
@@ -446,9 +447,9 @@ class PermissionEventTest extends UnitTestCase {
       // machine name.
       [
         'a non-matching key',
-    new GroupPermission([
+        new GroupPermission([
           'name' => 'a different key',
-          'title' => $this->t('This permission has a name that differs from the array key that is used to set it.')
+          'title' => $this->t('This permission has a name that differs from the array key that is used to set it.'),
         ]),
       ],
       // Test that an exception is thrown when an object is passed which is not
@@ -731,7 +732,7 @@ class PermissionEventTest extends UnitTestCase {
       // A permission without a machine name.
       [
         [
-    new GroupPermission([
+          new GroupPermission([
             'title' => $this->t('This permission doesn\'t have a title.'),
           ]),
         ],
@@ -739,7 +740,7 @@ class PermissionEventTest extends UnitTestCase {
       // A permission without a human readable title.
       [
         [
-    new GroupPermission([
+          new GroupPermission([
             'name' => 'invalid permission',
           ]),
         ],
@@ -747,7 +748,7 @@ class PermissionEventTest extends UnitTestCase {
       // A group content operation permission without a machine name.
       [
         [
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'title' => $this->t('This is an invalid permission.'),
             'entity type' => 'node',
             'bundle' => 'article',
@@ -758,7 +759,7 @@ class PermissionEventTest extends UnitTestCase {
       // A group content operation permission without a human readable title.
       [
         [
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'invalid permission',
             'entity type' => 'node',
             'bundle' => 'article',
@@ -769,7 +770,7 @@ class PermissionEventTest extends UnitTestCase {
       // A group content operation permission without an entity type ID.
       [
         [
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'invalid permission',
             'title' => $this->t('This is an invalid permission.'),
             'bundle' => 'article',
@@ -780,7 +781,7 @@ class PermissionEventTest extends UnitTestCase {
       // A group content operation permission without a bundle.
       [
         [
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'invalid permission',
             'title' => $this->t('This is an invalid permission.'),
             'entity type' => 'node',
@@ -791,7 +792,7 @@ class PermissionEventTest extends UnitTestCase {
       // A group content operation permission without an operation.
       [
         [
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'invalid permission',
             'title' => $this->t('This is an invalid permission.'),
             'entity type' => 'node',
@@ -850,7 +851,7 @@ class PermissionEventTest extends UnitTestCase {
       // A simple permission with only the required parameters.
       [
         [
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'paint yak wool',
             'title' => $this->t('Paint yak wool'),
             'entity type' => 'wool',
@@ -862,7 +863,7 @@ class PermissionEventTest extends UnitTestCase {
       // A single permission with restricted access and a default role.
       [
         [
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'shave any wild yak',
             'title' => $this->t('Shave any wild yaks'),
             'description' => $this->t('Whether the user has the right to shave wild yaks. This is usually limited to administrators since it is more dangerous than shaving domesticated yaks.'),
@@ -877,7 +878,7 @@ class PermissionEventTest extends UnitTestCase {
       // A permission with an owner.
       [
         [
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'shave own domesticated yak',
             'title' => $this->t('Shave own domesticated yaks'),
             'description' => $this->t('Whether the user has the right to their own domesticated yaks. This is granted by default to all members since it is expected that everyone knows how to take care of their own yaks.'),
@@ -895,7 +896,7 @@ class PermissionEventTest extends UnitTestCase {
       // Simulate a subscriber providing multiple permissions.
       [
         [
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'spin any yak fibre',
             'title' => $this->t('Spin any yak fibre'),
             'entity type' => 'wool',
@@ -903,7 +904,7 @@ class PermissionEventTest extends UnitTestCase {
             'operation' => 'spin',
             'owner' => TRUE,
           ]),
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'weave own yak fibre',
             'title' => $this->t('Weave own yak fibre'),
             'entity type' => 'wool',
@@ -911,7 +912,7 @@ class PermissionEventTest extends UnitTestCase {
             'operation' => 'weave',
             'owner' => TRUE,
           ]),
-    new GroupContentOperationPermission([
+          new GroupContentOperationPermission([
             'name' => 'dye any yak fibre',
             'title' => $this->t('Dye any yak fibre'),
             'entity type' => 'wool',

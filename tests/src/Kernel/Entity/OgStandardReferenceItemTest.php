@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Entity\OgStandardReferenceItemTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
@@ -69,7 +64,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
    * Testing referencing of non-user entity to groups.
    */
   public function testStandardReference() {
-    $groups_query = function($gid) {
+    $groups_query = function ($gid) {
       return $this->container->get('entity.query')->get('entity_test')
         ->condition($this->fieldName, $gid)
         ->execute();

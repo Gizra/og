@@ -2,6 +2,9 @@
 
 namespace Drupal\og\Event;
 
+/**
+ *
+ */
 interface GroupCreationEventInterface {
 
   /**

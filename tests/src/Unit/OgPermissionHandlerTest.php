@@ -154,7 +154,7 @@ class OgPermissionHandlerTest extends UnitTestCase {
    * Checks that the permissions are like expected.
    *
    * @param array $actual_permissions
-   *   The actual permissions
+   *   The actual permissions.
    */
   protected function assertPermissions(array $actual_permissions) {
     $this->assertCount(2, $actual_permissions);
@@ -171,7 +171,9 @@ class OgPermissionHandlerTest extends UnitTestCase {
   }
 
 }
-
+/**
+ *
+ */
 class TestPermissionHandler extends OgPermissionHandler {
 
   /**
@@ -181,10 +183,16 @@ class TestPermissionHandler extends OgPermissionHandler {
    */
   protected $systemModuleData;
 
+  /**
+   *
+   */
   protected function systemRebuildModuleData() {
     return $this->systemModuleData;
   }
 
+  /**
+   *
+   */
   public function setSystemRebuildModuleData(array $extensions) {
     $this->systemModuleData = $extensions;
   }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Entity\OgMembershipReferenceItemTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgGroupAudienceHelper.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -12,7 +7,6 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * OG audience field helper methods.
@@ -46,7 +40,6 @@ class OgGroupAudienceHelper {
   public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
     return in_array($field_definition->getType(), [OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE, OgGroupAudienceHelper::USER_TO_GROUP_REFERENCE_FIELD_TYPE]);
   }
-
 
   /**
    * Return TRUE if a field can be used and has not reached maximum values.
@@ -122,7 +115,7 @@ class OgGroupAudienceHelper {
       }
 
       if (!static::checkFieldCardinality($entity, $field_name)) {
-        // The field cardinality has reached its maximum
+        // The field cardinality has reached its maximum.
         continue;
       }
 

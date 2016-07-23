@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Core\Entity\Entity;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
@@ -187,8 +186,8 @@ class PermissionEventTest extends KernelTestBase {
       // associated with it.
       [
     [
-          'node' => ['test_group_content'],
-        ],
+      'node' => ['test_group_content'],
+    ],
         // It should return the default permissions as well as the permissions
         // to create, delete and update group content.
         array_merge($default_permissions, $group_content_permissions),

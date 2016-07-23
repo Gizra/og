@@ -235,7 +235,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups['node'] = Node::create([
       'title' => $this->randomString(),
       'type' => $bundle,
-      'uid' => $this->groupAdmin->id()
+      'uid' => $this->groupAdmin->id(),
     ]);
     $groups['node']->save();
 

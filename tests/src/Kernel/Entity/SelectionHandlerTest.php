@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\og\Kernel\Entity\SelectionHandlerTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -146,7 +140,6 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
     // Check the other groups.
-
     $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'admin']]);
 
     $this->setCurrentAccount($this->user1);

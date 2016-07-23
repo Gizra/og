@@ -1,12 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgFieldsInterface.
- */
-
 namespace Drupal\og;
 
+/**
+ *
+ */
 interface OgFieldsInterface {
 
   /**
@@ -27,7 +25,6 @@ interface OgFieldsInterface {
    */
   public function getBundle();
 
-
   /**
    * Get the entity type name.
    *
@@ -39,10 +36,12 @@ interface OgFieldsInterface {
   /**
    * Set the entity type.
    *
-   * @param string $entity_typeThe entity type.
+   * @param string $entity_typeThe
+   *   entity type.
    *   The entity type.
    *
    * @return \Drupal\og\OgFieldBase
+   *
    * @throws \Exception
    *   Throw error if the field storage config definition explicitly defines to
    *   which entities the field can be attached to.
@@ -65,7 +64,8 @@ interface OgFieldsInterface {
    * \Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, however the actual field name
    * attached to the bundle can be arbitrary.
    *
-   * @param string $fieldNameThe field name.
+   * @param string $fieldNameThe
+   *   field name.
    *   The field name.
    *
    * @return \Drupal\og\OgFieldBase
@@ -108,7 +108,6 @@ interface OgFieldsInterface {
    */
   public function getFormDisplayDefinition(array $values = []);
 
-
   /**
    * Get the field's view modes definition.
    *
@@ -120,4 +119,5 @@ interface OgFieldsInterface {
    *   FieldConfig::create().
    */
   public function getViewDisplayDefinition(array $values = []);
+
 }

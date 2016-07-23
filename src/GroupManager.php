@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\GroupManager.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;

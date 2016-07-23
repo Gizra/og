@@ -3,7 +3,6 @@
 namespace Drupal\Tests\og\Kernel;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Entity\Entity;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;

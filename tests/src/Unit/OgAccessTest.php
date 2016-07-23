@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Unit\OgAccessTest.
- */
-
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\og\OgAccess;

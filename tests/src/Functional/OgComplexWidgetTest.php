@@ -1,20 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Functional\OgComplexWidgetTest.
- */
-
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
-use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\node\Entity\Node;
-use Drupal\node\NodeInterface;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItemList;
 use Drupal\simpletest\BrowserTestBase;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;

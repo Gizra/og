@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\og\Kernel\Entity\FieldCreateTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
@@ -110,4 +105,5 @@ class FieldCreateTest extends KernelTestBase {
     catch (\Exception $e) {
     }
   }
+
 }

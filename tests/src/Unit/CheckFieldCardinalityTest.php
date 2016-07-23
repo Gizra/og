@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Unit\CheckFieldCardinalityTest.
- */
-
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\ContentEntityInterface;

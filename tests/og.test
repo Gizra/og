@@ -1,9 +1,19 @@
 <?php
 
+/**
+ * @file
+ */
+
 use Drupal\og\OgGroupAudienceHelper;
 
+/**
+ *
+ */
 class OgAccess extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG entity access',
@@ -12,6 +22,9 @@ class OgAccess extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og', 'entity_feature');
   }
@@ -22,7 +35,6 @@ class OgAccess extends DrupalWebTestCase {
   function testOgAccessEntity() {
     $perm = 'administer group';
     // Change permissions to authenticated member.
-
     // Add OG group fields.
     og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', 'main');
     $roles = array_flip(og_roles('entity_test', 'main'));
@@ -106,6 +118,7 @@ class OgAccess extends DrupalWebTestCase {
     unset($node->nid);
     $this->assertNull(og_user_access_entity($perm, 'node', NULL, $user1), t('Entity is not saved to database, so return value is NULL.'));
   }
+
 }
 
 /**
@@ -113,6 +126,9 @@ class OgAccess extends DrupalWebTestCase {
  */
 class OgNodeAccess extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG node access',
@@ -121,6 +137,9 @@ class OgNodeAccess extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og');
 
@@ -138,7 +157,7 @@ class OgNodeAccess extends DrupalWebTestCase {
     $settings = array(
       'type' => 'page',
       OG_GROUP_FIELD . '[und][0][value]' => 1,
-      'uid' => $this->group_manager->uid
+      'uid' => $this->group_manager->uid,
     );
     $this->group1 = $this->drupalCreateNode($settings);
     $this->group2 = $this->drupalCreateNode($settings);
@@ -310,10 +329,10 @@ class OgNodeAccess extends DrupalWebTestCase {
     );
     og_role_change_permissions($og_roles[OgRoleInterface::AUTHENTICATED], $permissions);
 
-    // Login and try to edit this node
+    // Login and try to edit this node.
     $this->drupalLogin($this->editor_user);
 
-    $this->drupalGet('node/'. $this->group_content->nid .'/edit');
+    $this->drupalGet('node/' . $this->group_content->nid . '/edit');
     $name = 'og_group_ref[und][0][default][]';
     $xpath = $this->buildXPathQuery('//select[@name=:name]', array(':name' => $name));
     $fields = $this->xpath($xpath);
@@ -327,13 +346,13 @@ class OgNodeAccess extends DrupalWebTestCase {
     );
     og_role_change_permissions($og_roles[OgRoleInterface::AUTHENTICATED], $permissions);
 
-    $this->drupalGet('node/'. $this->group_content->nid .'/edit');
+    $this->drupalGet('node/' . $this->group_content->nid . '/edit');
     $xpath = $this->buildXPathQuery('//select[@name=:name]', array(':name' => $name));
     $fields = $this->xpath($xpath);
     $this->assertFalse(!empty($fields[0]->option[2]), 'User cannot assign group-content to a new group.');
 
     // Test for retaining groups on node save.
-    $this->drupalPost('node/'. $this->group_content->nid .'/edit', array(), t('Save'));
+    $this->drupalPost('node/' . $this->group_content->nid . '/edit', array(), t('Save'));
 
     $entity_groups = og_get_entity_groups('node', $this->group_content->nid);
     $this->assertFalse(in_array($this->group2->nid, $entity_groups['node']), 'Content retains original groups after saving node form.');
@@ -346,6 +365,9 @@ class OgNodeAccess extends DrupalWebTestCase {
  */
 class OgMetaData extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG metadata',
@@ -354,6 +376,9 @@ class OgMetaData extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og', 'entity_feature');
   }
@@ -431,6 +456,7 @@ class OgMetaData extends DrupalWebTestCase {
     $this->assertEqual(count($og_memberships), 1, t('Found 2 OG membership in second group-audience field.', array('@state' => $value)));
     $this->assertEqual($og_memberships[0]->field_name, 'og_ref_2', t('OG membership has correct group-audience field.'));
   }
+
 }
 
 
@@ -440,6 +466,9 @@ class OgMetaData extends DrupalWebTestCase {
  */
 class OgGroupAndUngroup extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG group and ungroup',
@@ -448,6 +477,9 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og', 'entity_feature');
 
@@ -648,17 +680,27 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     $user_roles = og_get_user_roles('entity_test', $entity1->pid, $user1->uid, FALSE);
     $this->assertEqual($og_roles, $user_roles, t('Group manager was granted default role.'));
   }
-}
 
+}
+/**
+ *
+ */
 class OgPermissionsTestCase extends DrupalWebTestCase {
+
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG permissions',
       'description' => 'Verify that permissions can be added and removed via API.',
-      'group' => 'Organic groups'
+      'group' => 'Organic groups',
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og', 'entity_feature');
     // Add OG group field to the entity_test's "main" bundle.
@@ -669,7 +711,6 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     $og_field['field']['settings']['target_type'] = 'entity_test';
     og_create_field(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article', $og_field);
   }
-
 
   /**
    * Verify proper permission changes by og_role_change_permissions().
@@ -767,21 +808,30 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     $this->assertEqual($roles, array(), 'Blocked member has no roles.');
     $this->assertFalse(og_user_access('entity_test', $entity->pid, 'update group', $user2), 'Blocked member has no access.');
   }
-}
 
+}
+/**
+ *
+ */
 class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
+
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG default access field',
       'description' => 'Test groups with default access field.',
-      'group' => 'Organic groups'
+      'group' => 'Organic groups',
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og', 'entity_feature');
   }
-
 
   /**
    * Test groups with default access field enabled or disabled.
@@ -851,6 +901,7 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
     $user_roles = og_get_user_roles('entity_test', $entity->pid, $user1->uid, FALSE);
     $this->assertFalse(array_search(OgRoleInterface::ADMINISTRATOR, $user_roles), t('"admin" role not maintained from overriden group.'));
   }
+
 }
 
 /**
@@ -863,6 +914,10 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
  * remove it.
  */
 class OgMigrate7000TestCase extends UpgradePathTestCase {
+
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name'  => 'OG migrate - 7000',
@@ -873,6 +928,9 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
     );
   }
 
+  /**
+   *
+   */
   public function setUp() {
     // Path to the database dump.
     $this->databaseDumpFiles = array(
@@ -991,7 +1049,7 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
       $roles[$rid] = TRUE;
 
       if ($value['admin']) {
-        // OgRoleInterface::ADMINISTRATOR
+        // OgRoleInterface::ADMINISTRATOR.
         $rid = array_search(OgRoleInterface::ADMINISTRATOR, $og_roles);
         $roles[$rid] = TRUE;
       }
@@ -1017,6 +1075,7 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
       $this->assertTrue($node->og_description[LANGUAGE_NONE][0]['value'], t('Description fields has correct data.'));
     }
   }
+
 }
 
 
@@ -1025,6 +1084,9 @@ class OgMigrate7000TestCase extends UpgradePathTestCase {
  */
 class OgComplexWidgetTestCase extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG reference widget',
@@ -1033,6 +1095,9 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og');
 
@@ -1186,6 +1251,7 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
     $this->assertOptionSelected('edit-og-group-ref-und-0-default', $group1->nid);
     $this->assertOptionSelected('edit-another-field-und-0-default', $group2->nid);
   }
+
 }
 
 /**
@@ -1193,6 +1259,9 @@ class OgComplexWidgetTestCase extends DrupalWebTestCase {
  */
 class OgRoleRevoke extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG roles revoke',
@@ -1201,11 +1270,17 @@ class OgRoleRevoke extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og', 'entity_feature');
   }
 
-  function testOgRoleRevoke()  {
+  /**
+   *
+   */
+  function testOgRoleRevoke() {
     // Create a user.
     $user1 = $this->drupalCreateUser();
 
@@ -1231,7 +1306,7 @@ class OgRoleRevoke extends DrupalWebTestCase {
     $role2 = og_role_create('role2', 'entity_test', 0, 'main');
     og_role_save($role2);
 
-    // Grant 'role1' to user1 at entity1 and 'role2' to user1 at entity2
+    // Grant 'role1' to user1 at entity1 and 'role2' to user1 at entity2.
     og_role_grant('entity_test', $entity1->pid, $user1->uid, $role1->rid);
     og_role_grant('entity_test', $entity2->pid, $user1->uid, $role2->rid);
 
@@ -1248,6 +1323,7 @@ class OgRoleRevoke extends DrupalWebTestCase {
     $result = db_query('SELECT * FROM {og_users_roles} WHERE uid = :uid', array(':uid' => $uid));
     $this->assertFalse($result->rowCount(), t('User is removed, so all roles of this user were revoked'));
   }
+
 }
 
 /**
@@ -1255,6 +1331,9 @@ class OgRoleRevoke extends DrupalWebTestCase {
  */
 class OgMigrate7200TestCase extends UpdatePathTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG migrate 7.x-2.x',
@@ -1264,6 +1343,9 @@ class OgMigrate7200TestCase extends UpdatePathTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     // Path to the database dump files.
     $this->databaseDumpFiles = array(
@@ -1277,10 +1359,13 @@ class OgMigrate7200TestCase extends UpdatePathTestCase {
     // resulting from OG no longer defining hook_field_info().
     // Deleting using field_delete_instance() didn't work.
     db_delete('field_config_instance')
-      ->condition('field_name', 'group_audience')
-      ->execute();
+        ->condition('field_name', 'group_audience')
+        ->execute();
   }
 
+  /**
+   *
+   */
   function testUpgrade() {
     $this->assertTrue($this->performUpgrade(), t('The upgrade was completed successfully.'));
 
@@ -1325,6 +1410,7 @@ class OgMigrate7200TestCase extends UpdatePathTestCase {
     $og_membership = entity_load_single('og_membership', 1);
     $this->assertTrue($og_membership->field_name, 'Field name was registered in the OG membership.');
   }
+
 }
 
 /**
@@ -1332,6 +1418,9 @@ class OgMigrate7200TestCase extends UpdatePathTestCase {
  */
 class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG audience fields query',
@@ -1340,6 +1429,9 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og', 'entity_feature');
 
@@ -1441,7 +1533,7 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Test the following query scenarios:
+   * Test the following query scenarios:.
    *
    * - Single group audience.
    * - Multiple group audience.
@@ -1453,7 +1545,7 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
    * - Non-node entity without revision table and without bundles (e.g. user).
    * - Count query.
    */
-  function testEntityFieldQuery()  {
+  function testEntityFieldQuery() {
     $group1 = $this->group1;
     $group2 = $this->group2;
     $node = $this->node;
@@ -1555,6 +1647,7 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
 
     $this->assertEqual($result, 1, 'Count query is correct.');
   }
+
 }
 
 
@@ -1563,6 +1656,9 @@ class OgEntityFieldQueryTestCase extends DrupalWebTestCase {
  */
 class OgEntityFieldQueryFieldConditionTestCase extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG field condition query',
@@ -1571,6 +1667,9 @@ class OgEntityFieldQueryFieldConditionTestCase extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og', 'entity_feature');
 
@@ -1663,7 +1762,7 @@ class OgEntityFieldQueryFieldConditionTestCase extends DrupalWebTestCase {
     // the same as the group content nodes.
     foreach (range(1, 5) as $i) {
       $entity_test = entity_create('entity_test', array(
-        // Weirdly, 'name' is the bundle key.
+      // Weirdly, 'name' is the bundle key.
         'name' => 'main',
         'uid' => $user1->uid,
       ));
@@ -1679,6 +1778,9 @@ class OgEntityFieldQueryFieldConditionTestCase extends DrupalWebTestCase {
     $this->group2 = $group2;
   }
 
+  /**
+   *
+   */
   function testEntityFieldQueryFieldConditions() {
     // Query for all nodes with a field value of 'red'.
     $query = new EntityFieldQuery();
@@ -1730,6 +1832,9 @@ class OgEntityFieldQueryFieldConditionTestCase extends DrupalWebTestCase {
  */
 class OgAudienceFieldAutoCreateTestCase extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG audience fields auto-create',
@@ -1738,6 +1843,9 @@ class OgAudienceFieldAutoCreateTestCase extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og');
   }
@@ -1745,7 +1853,7 @@ class OgAudienceFieldAutoCreateTestCase extends DrupalWebTestCase {
   /**
    * Test auto-attaching group-audience fields to the user entity.
    */
-  function testAutoAttach()  {
+  function testAutoAttach() {
     $type1 = $this->drupalCreateContentType();
     $type2 = $this->drupalCreateContentType();
 
@@ -1763,11 +1871,16 @@ class OgAudienceFieldAutoCreateTestCase extends DrupalWebTestCase {
     og_create_field(OG_GROUP_FIELD, 'node', $type2->type);
     $this->assertTrue(field_info_instance('user', 'og_user_node1', 'user'), 'Alternative field was added to the user entity.');
   }
+
 }
+/**
+ *
+ */
+class OgBehaviorHandlerTestCase extends DrupalWebTestCase {
 
-
-class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
-
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG widget behavior',
@@ -1776,6 +1889,9 @@ class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og_test', 'entity_feature');
 
@@ -1902,6 +2018,7 @@ class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
     $og_membership = og_membership_load($id);
     $this->assertEqual($og_membership->state, OG_STATE_PENDING, 'Memebership status is Active');
   }
+
 }
 
 /**
@@ -1912,6 +2029,9 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
   public $group_type;
   public $node_type;
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG orphan delete',
@@ -1920,6 +2040,9 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og_test');
 
@@ -1974,6 +2097,7 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
 
     $this->assertEqual($gid, $second_group->nid, 'The group content moved to another group.');
   }
+
 }
 
 /**
@@ -1985,6 +2109,9 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
   public $user;
   public $adminUser;
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG non members publishing',
@@ -1994,6 +2121,9 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp('og_test', 'entityreference_prepopulate');
 
@@ -2004,7 +2134,7 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
     $this->adminUser = $this->drupalCreateUser(array('bypass node access', 'administer group'));
 
     // Create a group content type.
-    $this->drupalCreateContentType(array( 'name' => 'Group', 'type' => 'group'));
+    $this->drupalCreateContentType(array('name' => 'Group', 'type' => 'group'));
     og_create_field(OG_GROUP_FIELD, 'node', 'group');
 
     // Create the group.
@@ -2066,11 +2196,11 @@ class OgNonMembersPublishingContentTestCase extends DrupalWebTestCase {
     $this->drupalpost('node/' . $nid . '/edit', array(), t('Save'));
     $this->assertText($this->group->title, 'The node is still referenced to the group.');
   }
+
 }
 
 /**
- * Verify that users only with OG permissions can post only inside a group
- *
+ * Verify that users only with OG permissions can post only inside a group.
  */
 class OgUserCanPublishGroupContentTypeOnlyInGroup extends DrupalWebTestCase {
   public $group;
@@ -2078,6 +2208,9 @@ class OgUserCanPublishGroupContentTypeOnlyInGroup extends DrupalWebTestCase {
   public $group_user;
   public $group_content;
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'User can publish group content only inside group',
@@ -2086,6 +2219,9 @@ class OgUserCanPublishGroupContentTypeOnlyInGroup extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   public function setUp() {
     parent::setUp('og');
 
@@ -2198,6 +2334,7 @@ class OgUserCanPublishGroupContentTypeOnlyInGroup extends DrupalWebTestCase {
     $this->drupalPost('node/' . reset($result['node'])->nid . '/edit', $edit, t('Save'));
     $this->assertText($this->group_content->type . " " . $node_title . " has been updated.", "The user can edit content outside a group.");
   }
+
 }
 
 /**
@@ -2213,6 +2350,9 @@ class OgAutoCompleteAccessibleGroupsValidation extends DrupalWebTestCase {
   var $group_owner;
   var $group_member;
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'Auto complete for non accessible groups',
@@ -2221,12 +2361,15 @@ class OgAutoCompleteAccessibleGroupsValidation extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og');
 
     // Create group content.
-    $this->drupalCreateContentType(array( 'name' => 'Group content', 'type' => 'group_content'));
-    $this->drupalCreateContentType(array( 'name' => 'Group', 'type' => 'group'));
+    $this->drupalCreateContentType(array('name' => 'Group content', 'type' => 'group_content'));
+    $this->drupalCreateContentType(array('name' => 'Group', 'type' => 'group'));
 
     $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['instance']['settings']['behaviors']['og_widget']['default']['widget_type'] = 'entityreference_autocomplete';
@@ -2288,6 +2431,7 @@ class OgAutoCompleteAccessibleGroupsValidation extends DrupalWebTestCase {
     $this->drupalPost('node/add/group_content', array('title' => 'New group content 4', 'og_group_ref[und][0][default][0][target_id]' => $this->group_node_1->title . '(' . $this->group_node_1->nid . ')'), 'Save');
     $this->assertText('Group content New group content 4 has been created.', 'The group content created successfully');
   }
+
 }
 
 /**
@@ -2295,6 +2439,9 @@ class OgAutoCompleteAccessibleGroupsValidation extends DrupalWebTestCase {
  */
 class OgSelectAccessibleGroupsValidation extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'Select widget for non accessible groups',
@@ -2303,12 +2450,15 @@ class OgSelectAccessibleGroupsValidation extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og');
 
     // Create group content.
-    $this->drupalCreateContentType(array( 'name' => 'Group content', 'type' => 'group_content'));
-    $this->drupalCreateContentType(array( 'name' => 'Group', 'type' => 'group'));
+    $this->drupalCreateContentType(array('name' => 'Group content', 'type' => 'group_content'));
+    $this->drupalCreateContentType(array('name' => 'Group', 'type' => 'group'));
 
     $og_field = og_fields_info(OgGroupAudienceHelper::DEFAULT_FIELD);
     $og_field['instance']['settings']['behaviors']['og_widget']['default']['widget_type'] = 'options_select';
@@ -2363,6 +2513,7 @@ class OgSelectAccessibleGroupsValidation extends DrupalWebTestCase {
     $this->drupalPost('node/add/group_content', array('title' => 'New group content 4', 'og_group_ref[und][0][default][]' => array($this->group_node_1->nid)), 'Save');
     $this->assertText('Group content New group content 4 has been created.', 'The group content created successfully');
   }
+
 }
 
 /**
@@ -2370,6 +2521,9 @@ class OgSelectAccessibleGroupsValidation extends DrupalWebTestCase {
  */
 class OgAudienceFieldAccessOverrideTestCase extends DrupalWebTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'OG audience field access settings',
@@ -2378,6 +2532,9 @@ class OgAudienceFieldAccessOverrideTestCase extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *
+   */
   function setUp() {
     parent::setUp('og');
   }
@@ -2385,7 +2542,7 @@ class OgAudienceFieldAccessOverrideTestCase extends DrupalWebTestCase {
   /**
    * Test auto-attaching group-audience fields to the user entity.
    */
-  function testAutoAttach()  {
+  function testAutoAttach() {
     $type1 = $this->drupalCreateContentType();
     og_create_field(OG_GROUP_FIELD, 'node', $type1->type);
     $this->assertTrue(field_info_instance('user', 'og_user_node', 'user'), 'Field was added to the user entity.');

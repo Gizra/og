@@ -5,18 +5,17 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
+use Drupal\user\UserInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
-use Drupal\og\OgRoleInterface;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -63,7 +62,7 @@ function og_entity_predelete(EntityInterface $entity) {
     // @see https://github.com/amitaibu/og/issues/175
     // og_delete_user_roles_by_group($entity_type, $entity);
   }
-  if ($entity instanceof \Drupal\user\UserInterface) {
+  if ($entity instanceof UserInterface) {
     // @todo Delete memberships when deleting users.
     // @see https://github.com/amitaibu/og/issues/176
   }

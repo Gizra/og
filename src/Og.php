@@ -1,22 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Og.
- */
-
 namespace Drupal\og;
 
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\Display\EntityDisplayInterface;
-use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
-use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 
 /**
  * A static helper class for OG.
@@ -213,7 +205,7 @@ class Og {
    *   (optional) The field name associated with the group.
    *
    * @return \Drupal\og\Entity\OgMembership[]
-   *  An array of OgMembership entities, keyed by ID.
+   *   An array of OgMembership entities, keyed by ID.
    */
   public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     // Get a string identifier of the states, so we can retrieve it from cache.
@@ -587,7 +579,6 @@ class Og {
     return static::groupManager()->removeGroup($entity_type_id, $bundle_id);
   }
 
-
   /**
    * Returns the group manager instance.
    *
@@ -666,6 +657,7 @@ class Og {
    *   The plugin ID, which is also the default field name.
    *
    * @throws \Exception
+   *
    * @return OgFieldBase|bool
    *   An array with the field storage config and field config definitions, or
    *   FALSE if none found.
@@ -689,6 +681,7 @@ class Og {
    *   Overriding the default options of the selection handler.
    *
    * @return OgSelection
+   *
    * @throws \Exception
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {

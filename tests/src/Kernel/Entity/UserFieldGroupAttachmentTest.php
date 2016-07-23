@@ -1,17 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\Entity\UserFieldGroupAttachmentTest
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\entity_test\Entity\EntityTest;
-use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Component\Utility\Unicode;
-use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
 
@@ -53,7 +46,7 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
     $group_bundle = Unicode::strtolower($this->randomMachineName());
 
     // Create users.
-    $this->user= User::create(['name' => $this->randomString()]);
+    $this->user = User::create(['name' => $this->randomString()]);
     $this->user->save();
 
     // Define the group content as group.

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\BundleFormAlter.
- */
-
 namespace Drupal\og_ui;
 
 use Drupal\Component\Utility\Unicode;
@@ -210,6 +205,5 @@ class BundleFormAlter {
       $form_state->setValue('og_target_bundles', NULL);
     }
   }
-
 
 }

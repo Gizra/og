@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgMembershipViewsData.
- */
-
 namespace Drupal\og;
 
 use Drupal\views\EntityViewsData;

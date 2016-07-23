@@ -173,7 +173,7 @@ function hook_og_fields_info() {
 }
 
 /**
- * TODO
+ * TODO.
  */
 function hook_og_fields_info_alter(&$fields_info) {
 
@@ -214,8 +214,6 @@ function hook_og_user_access_alter(&$perm, $context) {
     $perm['foo'] = TRUE;
   }
 }
-
-
 
 /**
  * Acts on OG membership types being loaded from the database.
@@ -311,7 +309,7 @@ function hook_og_membership_type_delete(OgMembershipType $og_membership) {
  */
 function hook_default_og_membership_type() {
   $defaults['main'] = entity_create('og_membership_type', array(
-    // �
+    // �.
   ));
   return $defaults;
 }
@@ -327,7 +325,6 @@ function hook_default_og_membership_type() {
 function hook_default_og_membership_type_alter(array &$defaults) {
   $defaults['main']->name = 'custom name';
 }
-
 
 /**
  * Acts on OG memberships being loaded from the database.
@@ -412,7 +409,6 @@ function hook_og_membership_delete(OgMembership $og_membership) {
     ->condition('pid', entity_id('og_membership', $og_membership))
     ->execute();
 }
-
 
 /**
  * @} End of "addtogroup hooks".

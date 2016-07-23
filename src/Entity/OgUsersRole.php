@@ -1,17 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\og\Entity\OgUsersRole.
- */
-
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\user\Entity\User;
 
 /**
  * @ContentEntityType(
@@ -157,4 +151,5 @@ class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
 
     return $fields;
   }
+
 }

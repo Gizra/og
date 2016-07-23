@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItemList.
- */
-
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList;
@@ -82,7 +77,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
     $memberships = OgMembership::loadMultiple($membership_ids);
 
-    $target_group_ids = array_map(function(OgMembership $membership) {
+    $target_group_ids = array_map(function (OgMembership $membership) {
       return $membership->getEntityId();
     }, $memberships);
 
@@ -123,7 +118,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     }
 
     // Entities should be populated from populateGroupsFromMembershipEntities().
-    return array_filter(array_map(function($item) {
+    return array_filter(array_map(function ($item) {
       return $item->entity;
     }, $this->list));
   }

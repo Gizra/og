@@ -72,10 +72,10 @@ class OgEventSubscriber implements EventSubscriberInterface {
         // which can then be overridden by other subscribers that set module
         // specific permissions.
         ['provideDefaultOgPermissions', 10],
-        ['provideDefaultNodePermissions']
+        ['provideDefaultNodePermissions'],
       ],
       DefaultRoleEventInterface::EVENT_NAME => [['provideDefaultRoles']],
-      GroupCreationEventInterface::EVENT_NAME => [['createUserGroupAudienceField']]
+      GroupCreationEventInterface::EVENT_NAME => [['createUserGroupAudienceField']],
     ];
   }
 
@@ -87,13 +87,13 @@ class OgEventSubscriber implements EventSubscriberInterface {
    */
   public function provideDefaultOgPermissions(PermissionEventInterface $event) {
     $event->setPermissions([
-    new GroupPermission([
+      new GroupPermission([
         'name' => 'update group',
         'title' => t('Edit group'),
         'description' => t('Edit the group. Note: This permission controls only node entity type groups.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
       ]),
-    new GroupPermission([
+      new GroupPermission([
         'name' => 'administer group',
         'title' => t('Administer group'),
         'description' => t('Manage group members and content in the group.'),
@@ -197,7 +197,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
     $user_bundles = array_keys($this->entityTypeBundleInfo->getBundleInfo('user'));
 
     foreach ($user_bundles as $bundle) {
-      // create a group audience field which will reference to groups from the
+      // Create a group audience field which will reference to groups from the
       // given entity type ID and attach it to the user.
       $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', $bundle);
 
@@ -314,7 +314,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       '@entity' => $entity_info->getPluralLabel(),
     ];
     // @todo This needs to support all entity operations for the given entity
-    //    type, not just the standard CRUD operations.
+    //   type, not just the standard CRUD operations.
     // @see https://github.com/amitaibu/og/issues/222
     $operations = [
       [

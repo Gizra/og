@@ -484,8 +484,8 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @param \Drupal\og\Entity\OgRole $actual
    *   The actual OgRole entity to check.
    *
-   * Note that we are not specifying the OgRoleInterface type because of a PHP 5
-   * class inheritance limitation.
+   *   Note that we are not specifying the OgRoleInterface type because of a PHP 5
+   *   class inheritance limitation.
    */
   protected function assertRoleEquals(OgRole $expected, OgRole $actual) {
     foreach (['name', 'label', 'role_type', 'is_admin'] as $property) {

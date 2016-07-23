@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\og\Entity\OgMembership.
- */
-
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
@@ -12,7 +7,6 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\og\Exception\OgException;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
@@ -57,7 +51,6 @@ use Drupal\og\OgMembershipInterface;
  * Having this field separation is what allows having multiple OG audience
  * fields attached to the user, where each group they are associated with may be
  * a result of different membership types.
- *
  *
  * @ContentEntityType(
  *   id = "og_membership",

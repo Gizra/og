@@ -1,16 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\EntityReference\Views\OgStandardReferenceRelationshipTest.
- */
-
 namespace Drupal\Tests\og\Kernel\EntityReference\Views;
 
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
