@@ -8,10 +8,12 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Exception\OgException;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
@@ -40,9 +42,8 @@ use Drupal\og\OgMembershipInterface;
  * @code:
  *  $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
  *  $membership
- *    ->setUser(2)
- *    ->setEntityId(1)
- *    ->setGroupEntityType('node')
+ *    ->setUser($user)
+ *    ->setGroup($group)
  *    ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
  *    ->save();
  * @endcode
@@ -99,8 +100,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setUser($etid) {
-    $this->set('uid', $etid);
+  public function setUser(AccountInterface $user) {
+    $this->set('uid', $user->id());
     return $this;
   }
 
@@ -126,35 +127,24 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     return $this->get('field_name')->value;
   }
 
+
   /**
    * {@inheritdoc}
    */
-  public function setEntityId($gid) {
-    $this->set('entity_id', $gid);
+  public function setGroup(EntityInterface $group) {
+    $this->set('entity_type', $group->getEntityTypeId());
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getEntityId() {
-    return $this->get('entity_id')->value;
+  public function getGroup() {
+    $entity_type = $this->get('entity_type')->value;
+    $entity_id = $this->get('entity_id')->value;
+    return \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function setGroupEntityType($groupType) {
-    $this->set('entity_type', $groupType);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getGroupEntityType() {
-    return $this->get('entity_type')->value;
-  }
 
   /**
    * {@inheritdoc}
@@ -181,7 +171,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setRoles($role_ids) {
+  public function setRoles(array $roles = array()) {
+    $role_ids = array_map(function (OgRole $role) {
+      return $role->id();
+    }, $roles);
+
     $this->set('roles', $role_ids);
 
     return $this;
@@ -327,13 +321,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     \Drupal::service('og.access')->reset();
 
     return $result;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getGroup() {
-    return \Drupal::entityTypeManager()->getStorage($this->getGroupEntityType())->load($this->getEntityId());
   }
 
 }
