@@ -50,7 +50,8 @@ before_script:
   - phpenv rehash
 
   # Check if there any bad coding standarts
-  - phpcs --standard=Drupal -p --extensions=php,module,install,js,css,info $TESTDIR
+  - phpcs --standard=Drupal -p --colors . $TESTDIR
+
 
   # Download Drupal 8 core.
   - travis_retry git clone --branch $DRUPAL_CORE --depth 1 https://git.drupal.org/project/drupal.git
