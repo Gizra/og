@@ -5,7 +5,7 @@ namespace Drupal\og\Event;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- *
+ * The group creation event.
  */
 class GroupCreationEvent extends Event implements GroupCreationEventInterface {
 

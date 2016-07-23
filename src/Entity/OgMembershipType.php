@@ -24,7 +24,8 @@ class OgMembershipType extends ConfigEntityBase implements ConfigEntityInterface
   /**
    * Return the ID of the entity.
    *
-   * @return int|null|string
+   * @return string|null
+   *   The type of the entity.
    */
   public function id() {
     return $this->type;

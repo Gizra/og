@@ -21,34 +21,6 @@ use Drupal\Core\Field\BaseFieldDefinition;
 class OgUsersRole extends ContentEntityBase implements ContentEntityInterface {
 
   /**
-   * @var User
-   *
-   * The user object.
-   */
-  protected $uid;
-
-  /**
-   * @var OgRole
-   *
-   * The role entity.
-   */
-  protected $rid;
-
-  /**
-   * @var Integer
-   *
-   * The group id.
-   */
-  protected $gid;
-
-  /**
-   * @var String
-   *
-   * The group type.
-   */
-  protected $groupType;
-
-  /**
    * @param mixed $gid
    *
    * @return $this
