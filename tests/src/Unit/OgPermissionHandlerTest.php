@@ -164,15 +164,22 @@ class OgPermissionHandlerTest extends UnitTestCase {
     $this->assertEquals([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED], $actual_permissions['access_module_a']['roles']);
     $this->assertEquals('single_description', $actual_permissions['access_module_a']['title']);
 
-    $this->assertEquals([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR], $actual_permissions['access module b']['default roles']);
+    $expected_roles = [
+      OgRoleInterface::ANONYMOUS,
+      OgRoleInterface::AUTHENTICATED,
+      OgRoleInterface::ADMINISTRATOR,
+    ];
+
+    $this->assertEquals($expected_roles, $actual_permissions['access module b']['default roles']);
     $this->assertEquals('module_b', $actual_permissions['access module b']['provider']);
-    $this->assertEquals([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR], $actual_permissions['access module b']['roles']);
+
+    $this->assertEquals($expected_roles, $actual_permissions['access module b']['roles']);
     $this->assertEquals('Access B', $actual_permissions['access module b']['title']);
   }
 
 }
 /**
- *
+ * Implements an OG permission handler in tests.
  */
 class TestPermissionHandler extends OgPermissionHandler {
 
@@ -184,14 +191,14 @@ class TestPermissionHandler extends OgPermissionHandler {
   protected $systemModuleData;
 
   /**
-   *
+   * Get the system module data.
    */
   protected function systemRebuildModuleData() {
     return $this->systemModuleData;
   }
 
   /**
-   *
+   * Set the system module data.
    */
   public function setSystemRebuildModuleData(array $extensions) {
     $this->systemModuleData = $extensions;
