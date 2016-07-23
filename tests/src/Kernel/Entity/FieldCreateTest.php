@@ -19,10 +19,20 @@ class FieldCreateTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['user', 'field', 'node', 'og', 'og_test', 'options', 'system'];
+  public static $modules = [
+    'user',
+    'field',
+    'node',
+    'options',
+    'system',
+    'og',
+    'og_test',
+  ];
 
   /**
-   * @var Array
+   * The group related bundles.
+   *
+   * @var array
    *   Array with the bundle IDs.
    */
   protected $bundles;

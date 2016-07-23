@@ -20,29 +20,45 @@ class GetUserGroupsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'og', 'entity_test'];
+  public static $modules = [
+    'system',
+    'user',
+    'field',
+    'og',
+    'entity_test',
+  ];
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user1;
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user2;
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user3;
 
   /**
+   * A group entity.
+   *
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group1;
 
   /**
+   * A group entity.
+   *
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group2;
@@ -217,12 +233,16 @@ class GetUserGroupsTest extends KernelTestBase {
    * @todo This is a temp function, which will be later replaced by Og::group().
    *
    * @param \Drupal\user\Entity\User $user
+   *   The user object to create membership for.
    * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The entity to create the membership for.
    * @param int $state
+   *   The state of the membership.
    *
    * @return \Drupal\og\OgMembershipInterface
+   *   The saved OG membership entity.
    */
-  protected function createMembership($user, $group, $state = OgMembershipInterface::STATE_ACTIVE) {
+  protected function createMembership(User $user, EntityInterface $group, $state = OgMembershipInterface::STATE_ACTIVE) {
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership->setUser($user)
       ->setGroup($group)
@@ -238,9 +258,11 @@ class GetUserGroupsTest extends KernelTestBase {
    * Assumes entity_type is used.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group_to_check
+   *   The group entity to check.
    * @param array $results
+   *   Array keyed by the entity type, and with the group entities as values.
    */
-  protected function assertGroupExistsInResults($group_to_check, array $results) {
+  protected function assertGroupExistsInResults(EntityInterface $group_to_check, array $results) {
     $found = FALSE;
     foreach ($results['entity_test'] as $group) {
       if ($group->id() == $group_to_check->id()) {

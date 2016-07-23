@@ -22,18 +22,22 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
   public static $modules = ['og', 'node', 'user', 'system'];
 
   /**
-   * @var string
-   *
    * The machine name of the group node type.
+   *
+   * @var string
    */
   protected $groupBundle;
 
   /**
+   * The group entity, of type node.
+   *
    * @var Node
    */
   protected $group;
 
   /**
+   * The user object.
+   *
    * @var User
    */
   protected $user;
