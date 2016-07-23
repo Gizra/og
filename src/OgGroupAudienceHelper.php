@@ -42,7 +42,7 @@ class OgGroupAudienceHelper {
   }
 
   /**
-   * Return TRUE if a field can be used and has not reached maximum values.
+   * Determine if a field can be used and has not reached maximum values.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The content entity to check the field cardinality for.
@@ -50,6 +50,7 @@ class OgGroupAudienceHelper {
    *   The field name to check the cardinality of.
    *
    * @return bool
+   *   Returns TRUE if the OG audience field can be used.
    *
    * @throws \Drupal\Core\Field\FieldException
    */
@@ -89,7 +90,7 @@ class OgGroupAudienceHelper {
    *   (optional) Set this to FALSE to not check if the current user has access
    *   to the field. Defaults to TRUE.
    *
-   * @return string|NULL
+   * @return string|null
    *   The name of the group audience field, or NULL if no matching field was
    *   found.
    */

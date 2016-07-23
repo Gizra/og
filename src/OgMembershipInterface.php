@@ -21,8 +21,9 @@ interface OgMembershipInterface extends ContentEntityInterface {
   const STATE_ACTIVE = 1;
 
   /**
-   * Define pending group content states. The user is subscribed to the group
-   * but isn't an active member yet.
+   * Define pending group content states.
+   *
+   * The user is subscribed to the group but isn't an active member yet.
    *
    * When a user has this membership state they are considered to be of
    * "non-member" role.
@@ -157,7 +158,11 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the membership state.
    *
-   * @return bool
+   * @return int
+   *   The state of the membership. It may be of the following values:
+   *   - STATE_ACTIVE
+   *   - STATE_PENDING
+   *   - STATE_BLOCKED
    */
   public function getState();
 
@@ -213,7 +218,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Checks if the user has a permission inside the group.
    *
-   * @param $permission
+   * @param string $permission
    *   The name of the permission.
    *
    * @return bool

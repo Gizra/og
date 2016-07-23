@@ -5,7 +5,7 @@ namespace Drupal\og;
 use Drupal\Core\Plugin\PluginBase;
 
 /**
- *
+ * OG related fields base plugin.
  */
 abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 

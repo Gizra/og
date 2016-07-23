@@ -128,7 +128,7 @@ class GroupContentOperationPermission extends Permission {
   /**
    * Sets the owner scope of this permission.
    *
-   * @param bool
+   * @param bool $owner
    *   FALSE if this permission applies to all entities, TRUE if it only applies
    *   to the entities owned by the user.
    *

@@ -35,7 +35,7 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
   /**
    * Constructs an OgDeleteOrphansBase object.
    *
-   * @var array $configuration
+   * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
    *   The plugin ID for the plugin instance.
