@@ -219,7 +219,8 @@ class GroupManagerTest extends UnitTestCase {
 
     $this->expectDefaultRoleCreation('test_entity_new', 'a');
 
-    $this->expectGroupCreation();
+    $this->eventDispatcherProphecy->dispatch(GroupCreationEventInterface::EVENT_NAME, Argument::type(GroupCreationEvent::class))
+      ->shouldBeCalled();
 
     // Add a new entity type.
     $manager->addGroup('test_entity_new', 'a');
@@ -317,15 +318,6 @@ class GroupManagerTest extends UnitTestCase {
     foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED] as $role_name) {
       $this->addNewDefaultRole($entity_type, $bundle, $role_name);
     }
-  }
-
-  /**
-   * Mocked method calls when system under test should attach OG audience field
-   * on the user.
-   */
-  protected function expectGroupCreation() {
-    $this->eventDispatcherProphecy->dispatch(GroupCreationEventInterface::EVENT_NAME, Argument::type(GroupCreationEvent::class))
-      ->shouldBeCalled();
   }
 
   /**
