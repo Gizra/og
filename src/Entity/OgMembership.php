@@ -100,17 +100,18 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setUser(AccountInterface $user) {
-    $this->set('uid', $user->id());
-    return $this;
+  public function getUser() {
+    return $this->get('uid')->entity;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getUser() {
-    return $this->get('uid')->entity;
+  public function setUser(AccountInterface $user) {
+    $this->set('uid', $user->id());
+    return $this;
   }
+
 
   /**
    * {@inheritdoc}
@@ -133,6 +134,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function setGroup(EntityInterface $group) {
     $this->set('entity_type', $group->getEntityTypeId());
+    $this->set('entity_id', $group->id());
     return $this;
   }
 
@@ -176,7 +178,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       return $role->id();
     }, $roles);
 
-    $this->set('roles', $role_ids);
+    $this->set('roles', array_unique($role_ids));
 
     return $this;
   }
@@ -184,22 +186,29 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function addRole($role_id) {
-    $rids = $this->getRolesIds();
-    $rids[] = $role_id;
+  public function addRole(OgRole $role) {
+    $roles = $this->getRoles();
+    $roles[] = $role;
 
-    return $this->setRoles(array_unique($rids));
+    return $this->setRoles($roles);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function revokeRole($role_id) {
-    $rids = $this->getRolesIds();
-    $key = array_search($role_id, $rids);
-    unset($rids[$key]);
+  public function revokeRole(OgRole $role) {
+    $roles = $this->getRoles();
 
-    return $this->setRoles(array_unique($rids));
+    foreach ($roles as $key => $existing_role) {
+      if ($existing_role->id() == $role->id()) {
+        unset($roles[$key]);
+
+        // We can stop iterating.
+        break;
+      }
+    }
+
+    return $this->setRoles($roles);
   }
 
   /**
