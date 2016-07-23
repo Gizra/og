@@ -111,6 +111,8 @@ class GroupManager {
   protected $groupRelationMap = [];
 
   /**
+   * The module handler.
+   *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
@@ -144,9 +146,12 @@ class GroupManager {
    * Determines whether an entity type ID and bundle ID are group enabled.
    *
    * @param string $entity_type_id
+   *   The entity type name.
    * @param string $bundle
+   *   The bundle name.
    *
    * @return bool
+   *   TRUE if a bundle is a group.
    */
   public function isGroup($entity_type_id, $bundle) {
     $group_map = $this->getGroupMap();
@@ -154,9 +159,13 @@ class GroupManager {
   }
 
   /**
-   * @param $entity_type_id
+   * Returns the group of an entity type.
    *
-   * @return array
+   * @param string $entity_type_id
+   *   The entity type name.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   Array of groups, or an empty array if none found
    */
   public function getGroupsForEntityType($entity_type_id) {
     $group_map = $this->getGroupMap();

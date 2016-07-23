@@ -3,7 +3,7 @@
 namespace Drupal\og\Event;
 
 /**
- *
+ * The group creation event interface.
  */
 interface GroupCreationEventInterface {
 

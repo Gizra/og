@@ -88,8 +88,8 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function setFieldName($fieldName) {
-    $this->fieldName = $fieldName;
+  public function setFieldName($field_name) {
+    $this->fieldName = $field_name;
 
     return $this;
   }

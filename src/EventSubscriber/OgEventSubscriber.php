@@ -294,9 +294,9 @@ class OgEventSubscriber implements EventSubscriberInterface {
   /**
    * Helper method to generate entity operation permissions for a given bundle.
    *
-   * @param $group_content_entity_type_id
+   * @param string $group_content_entity_type_id
    *   The entity type ID for which to generate the permission list.
-   * @param $group_content_bundle_id
+   * @param string $group_content_bundle_id
    *   The bundle ID for which to generate the permission list.
    *
    * @return array
