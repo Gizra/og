@@ -5,12 +5,16 @@ namespace Drupal\Tests\og\Unit;
 use Drupal\og\OgAccess;
 
 /**
+ * OG Access entity tests.
+ *
  * @group og
  * @coversDefaultClass \Drupal\og\OgAccess
  */
 class OgAccessEntityTest extends OgAccessEntityTestBase {
 
   /**
+   * Tests access to an entity by different operations.
+   * 
    * @coversDefaultmethod ::userAccessEntity
    * @dataProvider permissionsProvider
    */
@@ -27,6 +31,8 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
   }
 
   /**
+   * Tests access to an un-saved entity.
+   *
    * @coversDefaultmethod ::userAccessEntity
    * @dataProvider permissionsProvider
    */
@@ -38,6 +44,8 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
   }
 
   /**
+   * Tests getting a user's group entities.
+   *
    * @coversDefaultmethod ::userAccessEntity
    * @dataProvider permissionsProvider
    */

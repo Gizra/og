@@ -14,7 +14,7 @@ use Drupal\og\OgGroupAudienceHelper;
 use Prophecy\Argument;
 
 /**
- *
+ * OG access entity base class.
  */
 class OgAccessEntityTestBase extends OgAccessTestBase {
 
