@@ -7,12 +7,16 @@ use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
+ * Tests \Drupal\og\GroupContentOperationPermission.
+ *
  * @group og
  * @coversDefaultClass \Drupal\og\GroupContentOperationPermission
  */
 class GroupContentOperationPermissionTest extends UnitTestCase {
 
   /**
+   * Tests getting the entity type for the group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -26,6 +30,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the entity type for the group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -40,6 +46,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the bundle from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -53,6 +61,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the bundle for a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -67,6 +77,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the operation from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -80,6 +92,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the operation from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -94,6 +108,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the ownership property from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -107,6 +123,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the ownership property for a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -121,6 +139,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting a property from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -136,6 +156,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting a property for a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -152,6 +174,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the name property from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -165,6 +189,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the name property for a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -179,6 +205,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the title property from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -192,6 +220,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the title property for a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -206,6 +236,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the description property from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -219,6 +251,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the description property for a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -233,6 +267,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the default roles from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -246,6 +282,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the default roles for a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -260,6 +298,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the restrict access property from a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -273,6 +313,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the restrict access property for a group content permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -287,6 +329,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting an invalid property from a group content permission.
+   *
    * @covers ::get
    *
    * @expectedException \InvalidArgumentException
@@ -297,6 +341,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting an invalid property for a group content permission.
+   *
    * @covers ::set
    *
    * @expectedException \InvalidArgumentException
@@ -307,6 +353,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting an invalid restrict access for a group content permission.
+   *
    * @covers ::set
    *
    * @expectedException \InvalidArgumentException
@@ -317,6 +365,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting an invalid ownership property for a group content permission.
+   *
    * @covers ::set
    *
    * @expectedException \InvalidArgumentException
@@ -327,6 +377,8 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Data provider; Array with group content permissions.
+   *
    * @return array
    *   An array of test data, each data set consisting of an associative array
    *   of permission values, keyed by property name.
