@@ -15,11 +15,13 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\og\Event\GroupCreationEvent;
+use Drupal\og\Event\GroupCreationEventInterface;
+use Drupal\og\GroupManager;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\PermissionEventInterface;
-use Drupal\og\GroupManager;
 use Drupal\og\OgRoleInterface;
 use Prophecy\Argument;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -182,6 +184,9 @@ class GroupManagerTest extends UnitTestCase {
 
     // Add to existing.
     $manager->addGroup('test_entity', 'c');
+
+    $this->assertSame(['a', 'b', 'c'], $manager->getGroupsForEntityType('test_entity'));
+    $this->assertTrue($manager->isGroup('test_entity', 'c'));
   }
 
   /**
@@ -213,6 +218,9 @@ class GroupManagerTest extends UnitTestCase {
     $manager = $this->createGroupManager();
 
     $this->expectDefaultRoleCreation('test_entity_new', 'a');
+
+    $this->eventDispatcherProphecy->dispatch(GroupCreationEventInterface::EVENT_NAME, Argument::type(GroupCreationEvent::class))
+      ->shouldBeCalled();
 
     // Add a new entity type.
     $manager->addGroup('test_entity_new', 'a');

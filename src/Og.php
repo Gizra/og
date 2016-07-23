@@ -15,6 +15,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\FieldStorageConfigInterface;
 use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 
 /**
@@ -448,8 +449,7 @@ class Og {
     }
 
     /** @var \Drupal\field\FieldStorageConfigInterface[] $fields */
-    $fields = array_filter(FieldStorageConfig::loadMultiple($query->execute()), function ($field) use ($entity) {
-      /** @var \Drupal\field\FieldStorageConfigInterface $field */
+    $fields = array_filter(FieldStorageConfig::loadMultiple($query->execute()), function (FieldStorageConfigInterface $field) use ($entity) {
       $type_matches = $field->getSetting('target_type') === $entity->getEntityTypeId();
       // If the list of target bundles is empty, it targets all bundles.
       $bundle_matches = empty($field->getSetting('target_bundles')) || in_array($entity->bundle(), $field->getSetting('target_bundles'));
