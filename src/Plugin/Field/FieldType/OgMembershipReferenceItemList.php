@@ -201,9 +201,6 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     /** @var \Drupal\Core\Entity\EntityInterface $parent */
     $parent_entity = $this->getEntity();
 
-    kint($parent_entity->getEntityTypeId());
-    kint($parent_entity->id());
-
     $entity_type = $this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type');
     $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
     $entity = $storage->load($group_id);
