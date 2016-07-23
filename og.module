@@ -38,6 +38,11 @@ function og_entity_insert(EntityInterface $entity) {
     return;
   }
 
+  if (!$entity->getOwner()) {
+    // User is anonymous, se we cannot set a membership for them.
+    return;
+  }
+
   $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
   $membership
     ->setUser($entity->getOwner())
