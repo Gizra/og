@@ -19,7 +19,7 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['entity_test', 'og', 'system', 'user'];
+  public static $modules = ['entity_test', 'og', 'system', 'user', 'field'];
 
   /**
    * The Symfony event dispatcher.

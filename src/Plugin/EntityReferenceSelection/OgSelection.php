@@ -9,6 +9,7 @@ namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
+use Drupal\Core\Session\AccountProxy;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
 

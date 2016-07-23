@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * @file
  * Hooks provided by the Organic groups module.
@@ -20,7 +19,6 @@
 function hook_og_permission_alter(&$perms) {
 
 }
-
 
 /**
  * Set a default role that will be used as a global role.
