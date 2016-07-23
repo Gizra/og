@@ -14,7 +14,7 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
 
   /**
    * Tests access to an entity by different operations.
-   * 
+   *
    * @coversDefaultmethod ::userAccessEntity
    * @dataProvider permissionsProvider
    */

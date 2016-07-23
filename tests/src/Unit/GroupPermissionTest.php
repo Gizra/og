@@ -7,12 +7,16 @@ use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
+ * Group permissions tests.
+ *
  * @group og
  * @coversDefaultClass \Drupal\og\GroupPermission
  */
 class GroupPermissionTest extends UnitTestCase {
 
   /**
+   * Tests getting roles.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -26,6 +30,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting roles.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -40,6 +46,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting a property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -55,6 +63,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting a property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -71,6 +81,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the name property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -84,6 +96,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the name property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -98,6 +112,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the title property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -111,6 +127,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the title property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -125,6 +143,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the description property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -138,6 +158,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the description property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -152,6 +174,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the default roles assigned to a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -165,6 +189,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the default roles assigned to a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -179,6 +205,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting the restrict access property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -192,6 +220,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting the restrict access property of a permission.
+   *
    * @param array $values
    *   Associative array of test values, keyed by property name.
    *
@@ -206,6 +236,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting an invalid property of a permission.
+   *
    * @covers ::get
    *
    * @expectedException \InvalidArgumentException
@@ -216,6 +248,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting an invalid property for a permission.
+   *
    * @covers ::set
    *
    * @expectedException \InvalidArgumentException
@@ -226,6 +260,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting an invalid restrict access value for  a permission.
+   *
    * @covers ::set
    *
    * @expectedException \InvalidArgumentException
@@ -236,6 +272,8 @@ class GroupPermissionTest extends UnitTestCase {
   }
 
   /**
+   * Data provider; Return permissions.
+   *
    * @return array
    *   An array of test data, each data set consisting of an associative array
    *   of permission values, keyed by property name.
