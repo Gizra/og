@@ -101,8 +101,7 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
-   * Tests exceptions are thrown when trying to save a membership with no, or
-   * anonymous user.
+   * Tests saving a membership with no user.
    *
    * @covers ::getUser
    * @dataProvider providerTestGetSetUserException

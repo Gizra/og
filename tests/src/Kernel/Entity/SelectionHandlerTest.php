@@ -28,29 +28,40 @@ class SelectionHandlerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'entity_reference', 'node', 'og'];
+  public static $modules = [
+    'system',
+    'user',
+    'field',
+    'entity_reference',
+    'node',
+    'og',
+  ];
 
   /**
+   * A user object.
+   *
    * @var User
    */
   protected $user1;
 
   /**
+   * A user object.
+   *
    * @var User
    */
   protected $user2;
 
   /**
-   * @var string
-   *
    * The machine name of the group node type.
+   *
+   * @var string
    */
   protected $groupBundle;
 
   /**
-   * @var string
-   *
    * The machine name of the group content node type.
+   *
+   * @var string
    */
   protected $groupContentBundle;
 
@@ -154,12 +165,13 @@ class SelectionHandlerTest extends KernelTestBase {
   /**
    * Creating groups for a given user.
    *
-   * @param $amount
+   * @param int $amount
    *   The number of groups to create.
    * @param User $user
    *   The user object which owns the groups.
    *
    * @return ContentEntityBase[]
+   *   An array of group entities.
    */
   protected function createGroups($amount, User $user) {
     $groups = [];
@@ -182,6 +194,7 @@ class SelectionHandlerTest extends KernelTestBase {
    * Sets the current account.
    *
    * @param \Drupal\Core\Session\AccountInterface $account
+   *   The account to switch to.
    */
   protected function setCurrentAccount(AccountInterface $account) {
     $this->container->get('account_switcher')->switchTo($account);

@@ -39,7 +39,7 @@ class UserFieldGroupAttachmentTest extends KernelTestBase {
 
   /**
    * The entity test that will be used as a group.
-   * 
+   *
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group;
