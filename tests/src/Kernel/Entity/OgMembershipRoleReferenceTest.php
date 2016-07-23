@@ -104,14 +104,14 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership has the content editor role.');
 
     // Adding another role to the membership.
-    $membership->addRole($group_member->id());
+    $membership->addRole($group_member);
     $roles_ids = $membership->getRolesIds();
 
     $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership has the content editor role.');
     $this->assertTrue(in_array($group_member->id(), $roles_ids), 'The membership has the group member role.');
 
     // Remove a role.
-    $membership->revokeRole($content_editor->id());
+    $membership->revokeRole($content_editor);
 
     $roles_ids = $membership->getRolesIds();
     $this->assertFalse(in_array($content_editor->id(), $roles_ids), 'The membership does not have the content editor role after is has been revoked.');
@@ -119,7 +119,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
 
     // Check if the role has permission from the membership.
     $this->assertFalse($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
-    $membership->addRole($content_editor->id());
+    $membership->addRole($content_editor);
     $this->assertTrue($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
   }
 
