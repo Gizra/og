@@ -19,6 +19,8 @@ use Drupal\og\OgGroupAudienceHelper;
 class CheckFieldCardinalityTest extends UnitTestCase {
 
   /**
+   * Tests checking field cardinality for a non-existing field.
+   *
    * @covers ::checkFieldCardinality
    *
    * @expectedException \Drupal\Core\Field\FieldException
@@ -39,6 +41,8 @@ class CheckFieldCardinalityTest extends UnitTestCase {
   }
 
   /**
+   * Tests checking field cardinality for a non OG-audience field.
+   *
    * @covers ::checkFieldCardinality
    *
    * @expectedException \Drupal\Core\Field\FieldException
@@ -64,6 +68,8 @@ class CheckFieldCardinalityTest extends UnitTestCase {
   }
 
   /**
+   * Tests checking field cardinality for an OG audience field.
+   *
    * @covers ::checkFieldCardinality
    *
    * @dataProvider providerTestFieldCardinality
