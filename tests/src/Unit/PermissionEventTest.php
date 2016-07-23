@@ -9,6 +9,8 @@ use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
+ * Tests premission events.
+ *
  * @group og
  * @coversDefaultClass \Drupal\og\Event\PermissionEvent
  */
@@ -344,6 +346,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting group content bundle IDs.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id

@@ -5,6 +5,8 @@ namespace Drupal\Tests\og\Unit;
 use Drupal\og\OgAccess;
 
 /**
+ * Tests access.
+ *
  * @group og
  * @coversDefaultClass \Drupal\og\OgAccess
  */
@@ -16,7 +18,7 @@ class OgAccessTest extends OgAccessTestBase {
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
-  public function testUserAccessNotAGroup($operation) {
+  public function testUserAccessNotGroup($operation) {
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(FALSE);
     $user_access = $this->ogAccess->userAccess($this->group, $operation);
     $this->assertTrue($user_access->isNeutral());
