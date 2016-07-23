@@ -27,7 +27,13 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['field', 'node', 'og', 'system', 'user'];
+  public static $modules = [
+    'field',
+    'node',
+    'og',
+    'system',
+    'user',
+  ];
 
   /**
    * The group type.
@@ -46,7 +52,7 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -76,7 +82,7 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * Tests that users that can only view cannot access the entity creation form.
    */
-  function testViewPermissionDoesNotGrantCreateAccess() {
+  public function testViewPermissionDoesNotGrantCreateAccess() {
     // Create test user.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();

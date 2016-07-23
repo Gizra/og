@@ -29,7 +29,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create a "group" bundle on the Custom Block entity type and turn it into
@@ -56,9 +56,16 @@ class OgComplexWidgetTest extends BrowserTestBase {
    *
    * @dataProvider ogComplexFieldsProvider
    */
-  function testFields($field, $field_name) {
-    $admin_user = $this->drupalCreateUser(['administer group', 'access content', 'create post content']);
-    $group_owner = $this->drupalCreateUser(['access content', 'create post content']);
+  public function testFields($field, $field_name) {
+    $admin_user = $this->drupalCreateUser([
+      'administer group',
+      'access content',
+      'create post content',
+    ]);
+    $group_owner = $this->drupalCreateUser([
+      'access content',
+      'create post content',
+    ]);
 
     // Create a group content type owned by the group owner.
     $values = [
@@ -104,6 +111,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
    * Data provider for ::testFields()
    *
    * @return array
+   *   Array with the field human readable name, and the field's HTML name.
    */
   public function ogComplexFieldsProvider() {
     return [
