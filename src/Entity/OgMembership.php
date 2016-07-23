@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- */
-
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Exception\OgException;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
@@ -104,7 +99,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     return $this;
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -119,7 +113,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function getFieldName() {
     return $this->get('field_name')->value;
   }
-
 
   /**
    * {@inheritdoc}
@@ -152,7 +145,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $entity_id = $this->get('entity_id')->value;
     return \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
   }
-
 
   /**
    * {@inheritdoc}

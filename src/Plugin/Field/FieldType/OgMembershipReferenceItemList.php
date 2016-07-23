@@ -191,6 +191,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
    *   The group ID to create a membership for.
    *
    * @return \Drupal\og\OgMembershipInterface
+   *   The saved OG membership entity.
    */
   protected function createOgMembership($group_id) {
     // The host of the field is always a user.

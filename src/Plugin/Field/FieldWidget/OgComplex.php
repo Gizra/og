@@ -184,8 +184,13 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   /**
    * Adding the other groups widget to the form.
    *
-   * @param $elements
-   *   The widget array.
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   The existing items to add to the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   A renderable element with the "other groups".
    */
   protected function otherGroupsWidget(FieldItemListInterface $items, FormStateInterface $form_state) {
     if ($this->fieldDefinition->getTargetEntityTypeId() == 'user') {
@@ -268,7 +273,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   /**
    * Generating other groups auto complete element.
    *
-   * @param $delta
+   * @param int $delta
    *   The delta of the new element. Need to be the last delta in order to be
    *   added in the end of the list.
    * @param EntityInterface|null $entity
@@ -334,6 +339,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * Determines if the current user has group admin permission.
    *
    * @return bool
+   *   TRUE if the user is a group admin.
    */
   protected function isGroupAdmin() {
     // @todo Inject current user service as a dependency.
