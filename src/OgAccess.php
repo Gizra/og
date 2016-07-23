@@ -129,12 +129,12 @@ class OgAccess implements OgAccessInterface {
       if ($membership = Og::getMembership($user, $group)) {
         foreach ($membership->getRoles() as $role) {
           // Check for the is_admin flag.
+          /** @var \Drupal\og\Entity\OgRole $role */
           if ($role->isAdmin()) {
             $user_is_group_admin = TRUE;
             break;
           }
 
-          /** @var $role RoleInterface */
           $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
@@ -240,11 +240,10 @@ class OgAccess implements OgAccessInterface {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user object.
    * @param bool $pre_alter
-   *   $type
    *   Determines if the type of permissions is pre-alter or post-alter.
    * @param array $permissions
    *   Array of permissions to set.
-   * @param bool @is_admin
+   * @param bool $is_admin
    *   Whether or not the user is a group administrator.
    * @param \Drupal\Core\Cache\RefinableCacheableDependencyInterface $cacheable_metadata
    *   A cacheable metadata object.
@@ -270,7 +269,6 @@ class OgAccess implements OgAccessInterface {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user object.
    * @param bool $pre_alter
-   *   $type
    *   Determines if the type of permissions is pre-alter or post-alter.
    *
    * @return array

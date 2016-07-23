@@ -6,6 +6,17 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**
+ * The membership type entity.
+ *
+ * A membership type is the bundle of the OG membership. There is a single
+ * "default" bundle that comes out of the box, but others can be created. The
+ * use case for membership types, is for example creating a "premium"
+ * membership.
+ *
+ * By having a different membership type, also different fields can be attached,
+ * so in our "premium" membership, we could add a date field, to indicate when
+ * the subscription should be ended.
+ *
  * @ConfigEntityType(
  *   id = "og_membership_type",
  *   label = @Translation("OG membership type"),

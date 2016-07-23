@@ -27,7 +27,7 @@ class Og {
    *
    * @param string $plugin_id
    *   The OG field plugin ID, which is also the default field name.
-   * @param $entity_type
+   * @param string $entity_type
    *   The entity type.
    * @param string $bundle
    *   The bundle name.
@@ -36,7 +36,8 @@ class Og {
    *   config and field config.
    *   Allowed values:
    *   - field_storage_config: Array with values to override the field storage
-   *     config definitions. Values should comply with FieldStorageConfig::create()
+   *     config definitions. Values should comply with
+   *     FieldStorageConfig::create().
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
    *   - form_display: Array with values to override the form display
@@ -258,7 +259,7 @@ class Og {
    * @param string $field_name
    *   (optional) The field name associated with the group.
    *
-   * @return \Drupal\og\Entity\OgMembership|NULL
+   * @return \Drupal\og\Entity\OgMembership|null
    *   The OgMembership entity, or NULL if the user is not a member of the
    *   group.
    */
@@ -583,6 +584,7 @@ class Og {
    * Returns the group manager instance.
    *
    * @return \Drupal\og\GroupManager
+   *   Returns the group manager.
    */
   public static function groupManager() {
     // @todo store static reference for this?
@@ -592,7 +594,8 @@ class Og {
   /**
    * Return the og permission handler instance.
    *
-   * @return \Drupal\og\OgPermissionHandler;
+   * @return \Drupal\og\OgPermissionHandler
+   *   Returns the OG permissions handler.
    */
   public static function permissionHandler() {
     return \Drupal::service('og.permissions');
@@ -601,10 +604,10 @@ class Og {
   /**
    * Invalidate cache.
    *
-   * @param $group_ids
+   * @param array $group_ids
    *   Array with group IDs that their cache should be invalidated.
    */
-  public static function invalidateCache($group_ids = array()) {
+  public static function invalidateCache(array $group_ids = array()) {
     // @todo We should not be using drupal_static() review and remove.
     // Reset static cache.
     $caches = array(
@@ -638,6 +641,7 @@ class Og {
    * Gets the storage manage for the OG membership entity.
    *
    * @return \Drupal\Core\Entity\EntityStorageInterface
+   *   Returns the OG membership storage.
    */
   public static function membershipStorage() {
     return \Drupal::entityTypeManager()->getStorage('og_membership');
@@ -681,6 +685,7 @@ class Og {
    *   Overriding the default options of the selection handler.
    *
    * @return OgSelection
+   *   Returns the OG selection handler.
    *
    * @throws \Exception
    */
