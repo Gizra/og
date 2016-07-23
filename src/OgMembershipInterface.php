@@ -6,8 +6,6 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgRole;
-use Drupal\user\Entity\User;
-
 
 /**
  * Provides an interface for OG memberships.
@@ -82,15 +80,9 @@ interface OgMembershipInterface extends ContentEntityInterface {
 
   /**
    * Gets the membership's owner.
-<<<<<<< HEAD
    *
-   * @return User
-   *   The user object.
-=======
-   * 
    * @return \Drupal\Core\Session\AccountInterface $user
    *   The user object referenced by the membership.
->>>>>>> 8.x-1.x
    */
   public function getUser();
 
@@ -115,7 +107,6 @@ interface OgMembershipInterface extends ContentEntityInterface {
    *   The group reference field name.
    */
   public function getFieldName();
-
 
   /**
    * Sets the group associated with the membership.
@@ -142,7 +133,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * @return string
    *   The entity type.
    */
-   public function getGroupEntityType();
+  public function getGroupEntityType();
 
   /**
    * Gets the group entity ID.
@@ -150,7 +141,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * @return string
    *   The entity identifier.
    */
-   public function getGroupId();
+  public function getGroupId();
 
   /**
    * Sets the membership state.
@@ -219,7 +210,6 @@ interface OgMembershipInterface extends ContentEntityInterface {
    */
   public function getRoles();
 
-
   /**
    * Checks if the user has a permission inside the group.
    *
@@ -230,6 +220,5 @@ interface OgMembershipInterface extends ContentEntityInterface {
    *   TRUE if the user has permission.
    */
   public function hasPermission($permission);
-
 
 }
