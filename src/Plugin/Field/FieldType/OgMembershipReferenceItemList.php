@@ -3,7 +3,6 @@
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgMembershipInterface;
@@ -78,7 +77,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
     $memberships = OgMembership::loadMultiple($membership_ids);
 
-    $target_group_ids = array_map(function(OgMembership $membership) {
+    $target_group_ids = array_map(function (OgMembership $membership) {
       return $membership->getGroupId();
     }, $memberships);
 
