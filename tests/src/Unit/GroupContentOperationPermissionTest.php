@@ -7,7 +7,7 @@ use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * Tests \Drupal\og\GroupContentOperationPermission.
+ * Tests group content permissions.
  *
  * @group og
  * @coversDefaultClass \Drupal\og\GroupContentOperationPermission

@@ -10,7 +10,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
- * Tests the OgGroupAudienceHelper::checkFieldCardinality method.
+ * Tests checking field cardinality.
  *
  * @group og
  *

@@ -10,6 +10,8 @@ use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
+ * Tests default role events.
+ *
  * @group og
  * @coversDefaultClass \Drupal\og\Event\DefaultRoleEvent
  */
@@ -42,6 +44,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting OG roles from the default role event.
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -60,6 +64,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting OG roles from the default role event.
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -82,6 +88,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests adding an OG role to the default role event.
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -109,6 +117,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests adding OG roles to the default role event.
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -130,6 +140,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting OG roles for the default role event.
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -152,6 +164,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests deleting OG roles from the default role event.
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -172,6 +186,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests checking OG roles exist in a default role event.
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -190,6 +206,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "testOffsetGet".
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -208,6 +226,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetSet".
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -226,6 +246,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "testOffsetUnset".
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -246,6 +268,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "testOffsetExists".
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -264,6 +288,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "testIteratorAggregate".
+   *
    * @param array $roles
    *   An array of test default roles.
    *
@@ -286,6 +312,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests adding an invalid OG role to the default role event.
+   *
    * @param array $invalid_roles
    *   An array of invalid test default roles.
    *
@@ -310,6 +338,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests adding invalid OG roles to the default role event.
+   *
    * @param array $invalid_roles
    *   An array of invalid test default roles.
    *
@@ -326,6 +356,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting an invalid OG role for the default role event.
+   *
    * @param array $invalid_roles
    *   An array of invalid test default roles.
    *
@@ -343,6 +375,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting invalid OG roles for the default role event.
+   *
    * @param array $invalid_roles
    *   An array of invalid test default roles.
    *
@@ -358,6 +392,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetSet".
+   *
    * @param array $invalid_roles
    *   An array of invalid test default roles.
    *
@@ -484,8 +520,8 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @param \Drupal\og\Entity\OgRole $actual
    *   The actual OgRole entity to check.
    *
-   *   Note that we are not specifying the OgRoleInterface type because of a PHP 5
-   *   class inheritance limitation.
+   *   Note that we are not specifying the OgRoleInterface type because of a PHP
+   *   5 class inheritance limitation.
    */
   protected function assertRoleEquals(OgRole $expected, OgRole $actual) {
     foreach (['name', 'label', 'role_type', 'is_admin'] as $property) {
