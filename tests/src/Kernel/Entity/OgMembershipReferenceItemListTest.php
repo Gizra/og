@@ -128,7 +128,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
     $this->assertSame(count($run_query($member_in_two_groups->id())), 2);
 
-    // Test re-save.
+    // Test re-save has not changed the references.
     $member_in_two_groups->save();
     $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
     $this->assertSame(count($run_query($member_in_two_groups->id())), 2);

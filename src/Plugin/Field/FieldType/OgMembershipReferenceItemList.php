@@ -76,7 +76,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     // todo: move to API function.
     $membership_ids = \Drupal::entityQuery('og_membership')
       ->condition('uid', $this->getEntity()->id())
-      ->condition('entity_type', $this->getFieldDefinition()->getTargetEntityTypeId())
+      ->condition('entity_type', $this->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
       ->condition('field_name', $this->getFieldDefinition()->getName())
       ->execute();
 
