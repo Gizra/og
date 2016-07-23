@@ -81,4 +81,3 @@ function og_schema() {
 function og_install() {
   \Drupal\og\Og::contextHandler()->updateConfigStorage();
 }
-
