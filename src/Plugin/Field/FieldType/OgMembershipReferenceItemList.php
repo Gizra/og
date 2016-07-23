@@ -210,7 +210,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
 
     $membership
       ->setFieldName($this->getName())
-      ->setUser($parent_entity->id())
+      ->setUser($parent_entity)
       ->setGroup($entity)
       ->save();
 
