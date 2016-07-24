@@ -63,22 +63,18 @@ class OgContextHandler implements OgContextHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getPlugins($config = []) {
-    $config += [
-      'sort_by_weight' => TRUE,
-      'return_mode' => OgContextHandlerInterface::RETURN_ONLY_ACTIVE,
-    ];
+  public function getPlugins($return_mode = OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
+
+    /** @var OgContextNegotiation[] $og_context_config */
+    $og_context_config = $this->storage->loadMultiple();
 
     $plugins = $this->pluginManager->getDefinitions();
 
-    if ($config['return_mode'] != OgContextHandlerInterface::RETURN_ALL) {
-
-      /** @var OgContextNegotiation[] $og_context_config */
-      $og_context_config = $this->storage->loadMultiple();
+    if ($return_mode != OgContextHandlerInterface::RETURN_ALL) {
 
       foreach ($og_context_config as $context) {
-        if ($config['return_mode'] == OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
-          $condition = $context->get('status') === FALSE;
+        if ($return_mode == OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
+          $condition = $context->get('status') == FALSE;
         }
         else {
           $condition = !in_array($context->id(), array_keys($plugins));
@@ -90,9 +86,7 @@ class OgContextHandler implements OgContextHandlerInterface {
       }
     }
 
-    if ($config['sort_by_weight']) {
-      $og_context_config = $this->storage->loadMultiple();
-
+    if (!empty($og_context_config)) {
       uasort($plugins, function($a, $b) use($og_context_config) {
         return $og_context_config[$a['id']]->get('weight') > $og_context_config[$b['id']]->get('weight') ? 1 : -1;
       });
