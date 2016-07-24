@@ -10,7 +10,7 @@ namespace Drupal\og;
 use Drupal\Core\Entity\ContentEntityBase;
 
 /**
- * Interface OgContextHandlerInterface
+ * Interface OgContextHandlerInterface.
  *
  * @package Drupal\og
  */
