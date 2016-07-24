@@ -15,6 +15,7 @@ use Drupal\og\OgContextBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
+ * Get the group from the given viewed entity.
  * @OgContext(
  *  id = "entity",
  *  label = "Entity",

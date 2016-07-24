@@ -12,6 +12,8 @@ use Drupal\og\OgContextBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
+ * Get the group from the current logged in user.
+ *
  * @OgContext(
  *  id = "current_user",
  *  label = "Current user",

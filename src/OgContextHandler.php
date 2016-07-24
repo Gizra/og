@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Entity\OgContextNegotiation;
 
 /**
- * Class OgContextHandler
+ * Class OgContextHandler.
  *
  * @package Drupal\og
  */

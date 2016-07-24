@@ -33,7 +33,7 @@ class OgContextTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->installConfig(['og']);

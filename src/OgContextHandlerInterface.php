@@ -11,6 +11,7 @@ use Drupal\Core\Entity\ContentEntityBase;
 
 /**
  * Interface OgContextHandlerInterface
+ *
  * @package Drupal\og
  */
 interface OgContextHandlerInterface {
