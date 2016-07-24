@@ -162,9 +162,7 @@ class OgEntityAccessTest extends KernelTestBase {
     ]);
     $this->group2->save();
 
-    /** @var OgRole $og_role */
-    $og_role = OgRole::create();
-    $this->ogRoleWithPermission = $og_role;
+    $this->ogRoleWithPermission = OgRole::create();
     $this->ogRoleWithPermission
       ->setName($this->randomMachineName())
       ->setLabel($this->randomString())
@@ -184,9 +182,7 @@ class OgEntityAccessTest extends KernelTestBase {
       ->grantPermission('some_perm_2')
       ->save();
 
-    /** @var OgRole $og_role */
-    $og_role = OgRole::create();
-    $this->ogRoleWithoutPermission = $og_role;
+    $this->ogRoleWithoutPermission = OgRole::create();
     $this->ogRoleWithoutPermission
       ->setName($this->randomMachineName())
       ->setLabel($this->randomString())
