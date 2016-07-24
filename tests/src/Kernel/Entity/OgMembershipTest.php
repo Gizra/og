@@ -56,7 +56,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    // Create a bundle and add as a group
+    // Create a bundle and add as a group.
     $group = EntityTest::create([
       'type' => Unicode::strtolower($this->randomMachineName()),
       'name' => $this->randomString(),

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\Entity\FieldAccessTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Session\AnonymousUserSession;
@@ -26,26 +21,38 @@ class FieldAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'entity_test', 'og'];
+  public static $modules = [
+    'system',
+    'user',
+    'field',
+    'entity_test',
+    'og',
+  ];
 
   /**
-   * @var string
-   *
    * The machine name of the group node type.
+   *
+   * @var string
    */
   protected $groupBundle;
 
   /**
+   * The admin user.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $adminUser;
 
   /**
+   * The regular authenticated user.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $authenticatedUser;
 
   /**
+   * The entity access control handler.
+   *
    * @var \Drupal\Core\Entity\EntityAccessControlHandlerInterface
    */
   protected $userAccessControlHandler;
@@ -106,8 +113,6 @@ class FieldAccessTest extends KernelTestBase {
    * Test anonymous users.
    *
    * @dataProvider providerTestAnonymousUserAccess
-   *
-   * @param string $operation
    */
   public function testAnonymousUserAccess($operation) {
     $this->assertTrue($this->userAccessControlHandler->fieldAccess($operation, $this->fieldDefinition, new AnonymousUserSession()));
@@ -117,6 +122,7 @@ class FieldAccessTest extends KernelTestBase {
    * Data provider for testAnonymousUserAccess.
    *
    * @return array
+   *   Array with the operation names.
    */
   public function providerTestAnonymousUserAccess() {
     return [
@@ -130,10 +136,6 @@ class FieldAccessTest extends KernelTestBase {
    * Test authenticated users.
    *
    * @dataProvider providerTestAuthenticatedUserAccess
-   *
-   * @param string $operation
-   * @param bool $admin_account
-   * @param bool $expected
    */
   public function testAuthenticatedUserAccess($operation, $admin_account, $expected) {
     $account = $admin_account ? $this->adminUser : $this->authenticatedUser;
@@ -144,6 +146,8 @@ class FieldAccessTest extends KernelTestBase {
    * Data provider for testAuthenticatedUserAccess.
    *
    * @return array
+   *   Array with the operation, a boolean indicating if it is an admin user,
+   *   and a boolean indicating the expected result.
    */
   public function providerTestAuthenticatedUserAccess() {
     return [
@@ -162,10 +166,6 @@ class FieldAccessTest extends KernelTestBase {
    * Test authenticated users.
    *
    * @dataProvider providerTestAuthenticatedUserAccessWithAccessBypass
-   *
-   * @param string $operation
-   * @param bool $admin_account
-   * @param bool $expected
    */
   public function testAuthenticatedUserAccessWithAccessBypass($operation, $admin_account, $expected) {
     $account = $admin_account ? $this->adminUser : $this->authenticatedUser;
@@ -178,6 +178,8 @@ class FieldAccessTest extends KernelTestBase {
    * Data provider for testAuthenticatedUserAccessWithAccessBypass.
    *
    * @return array
+   *   Array with the operation, a boolean indicating if it is an admin user,
+   *   and a boolean indicating the expected result.
    */
   public function providerTestAuthenticatedUserAccessWithAccessBypass() {
     return [

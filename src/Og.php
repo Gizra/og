@@ -1,22 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Og.
- */
-
 namespace Drupal\og;
 
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\Display\EntityDisplayInterface;
-use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
-use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 
 /**
  * A static helper class for OG.
@@ -35,7 +27,7 @@ class Og {
    *
    * @param string $plugin_id
    *   The OG field plugin ID, which is also the default field name.
-   * @param $entity_type
+   * @param string $entity_type
    *   The entity type.
    * @param string $bundle
    *   The bundle name.
@@ -44,7 +36,8 @@ class Og {
    *   config and field config.
    *   Allowed values:
    *   - field_storage_config: Array with values to override the field storage
-   *     config definitions. Values should comply with FieldStorageConfig::create()
+   *     config definitions. Values should comply with
+   *     FieldStorageConfig::create().
    *   - field_config: Array with values to override the field config
    *     definitions. Values should comply with FieldConfig::create()
    *   - form_display: Array with values to override the form display
@@ -108,10 +101,8 @@ class Og {
 
     $form_display_definition = $og_field->getFormDisplayDefinition($settings['form_display']);
 
-
     $form_display->setComponent($plugin_id, $form_display_definition);
     $form_display->save();
-
 
     // Set the view display for the "default" view display.
     $view_display_definition = $og_field->getViewDisplayDefinition($settings['view_display']);
@@ -215,7 +206,7 @@ class Og {
    *   (optional) The field name associated with the group.
    *
    * @return \Drupal\og\Entity\OgMembership[]
-   *  An array of OgMembership entities, keyed by ID.
+   *   An array of OgMembership entities, keyed by ID.
    */
   public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
     // Get a string identifier of the states, so we can retrieve it from cache.
@@ -268,7 +259,7 @@ class Og {
    * @param string $field_name
    *   (optional) The field name associated with the group.
    *
-   * @return \Drupal\og\Entity\OgMembership|NULL
+   * @return \Drupal\og\Entity\OgMembership|null
    *   The OgMembership entity, or NULL if the user is not a member of the
    *   group.
    */
@@ -438,7 +429,6 @@ class Og {
   public static function getGroupContentIds(EntityInterface $entity, array $entity_types = []) {
     $group_content = [];
 
-
     // Retrieve the fields which reference our entity type and bundle.
     $query = \Drupal::entityQuery('field_storage_config')
       ->condition('type', OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE);
@@ -590,11 +580,11 @@ class Og {
     return static::groupManager()->removeGroup($entity_type_id, $bundle_id);
   }
 
-
   /**
    * Returns the group manager instance.
    *
    * @return \Drupal\og\GroupManager
+   *   Returns the group manager.
    */
   public static function groupManager() {
     // @todo store static reference for this?
@@ -604,7 +594,8 @@ class Og {
   /**
    * Return the og permission handler instance.
    *
-   * @return \Drupal\og\OgPermissionHandler;
+   * @return \Drupal\og\OgPermissionHandler
+   *   Returns the OG permissions handler.
    */
   public static function permissionHandler() {
     return \Drupal::service('og.permissions');
@@ -613,10 +604,10 @@ class Og {
   /**
    * Invalidate cache.
    *
-   * @param $group_ids
+   * @param array $group_ids
    *   Array with group IDs that their cache should be invalidated.
    */
-  public static function invalidateCache($group_ids = array()) {
+  public static function invalidateCache(array $group_ids = array()) {
     // @todo We should not be using drupal_static() review and remove.
     // Reset static cache.
     $caches = array(
@@ -650,6 +641,7 @@ class Og {
    * Gets the storage manage for the OG membership entity.
    *
    * @return \Drupal\Core\Entity\EntityStorageInterface
+   *   Returns the OG membership storage.
    */
   public static function membershipStorage() {
     return \Drupal::entityTypeManager()->getStorage('og_membership');
@@ -669,6 +661,7 @@ class Og {
    *   The plugin ID, which is also the default field name.
    *
    * @throws \Exception
+   *
    * @return OgFieldBase|bool
    *   An array with the field storage config and field config definitions, or
    *   FALSE if none found.
@@ -692,6 +685,8 @@ class Og {
    *   Overriding the default options of the selection handler.
    *
    * @return OgSelection
+   *   Returns the OG selection handler.
+   *
    * @throws \Exception
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {

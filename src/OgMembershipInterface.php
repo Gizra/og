@@ -1,17 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgMembershipInterface.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgRole;
-use Drupal\user\Entity\User;
 
 /**
  * Provides an interface for OG memberships.
@@ -27,8 +21,9 @@ interface OgMembershipInterface extends ContentEntityInterface {
   const STATE_ACTIVE = 1;
 
   /**
-   * Define pending group content states. The user is subscribed to the group
-   * but isn't an active member yet.
+   * Define pending group content states.
+   *
+   * The user is subscribed to the group but isn't an active member yet.
    *
    * When a user has this membership state they are considered to be of
    * "non-member" role.
@@ -66,7 +61,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Sets the membership creation timestamp.
    *
    * @param int $timestamp
-   *   The membership creation timestamp
+   *   The membership creation timestamp.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
@@ -86,7 +81,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
 
   /**
    * Gets the membership's owner.
-   * 
+   *
    * @return \Drupal\Core\Session\AccountInterface $user
    *   The user object referenced by the membership.
    */
@@ -114,7 +109,6 @@ interface OgMembershipInterface extends ContentEntityInterface {
    */
   public function getFieldName();
 
-
   /**
    * Sets the group associated with the membership.
    *
@@ -140,7 +134,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * @return string
    *   The entity type.
    */
-   public function getGroupEntityType();
+  public function getGroupEntityType();
 
   /**
    * Gets the group entity ID.
@@ -148,7 +142,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * @return string
    *   The entity identifier.
    */
-   public function getGroupId();
+  public function getGroupId();
 
   /**
    * Sets the membership state.
@@ -164,7 +158,11 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the membership state.
    *
-   * @return bool
+   * @return int
+   *   The state of the membership. It may be of the following values:
+   *   - STATE_ACTIVE
+   *   - STATE_PENDING
+   *   - STATE_BLOCKED
    */
   public function getState();
 
@@ -217,17 +215,15 @@ interface OgMembershipInterface extends ContentEntityInterface {
    */
   public function getRoles();
 
-
   /**
    * Checks if the user has a permission inside the group.
    *
-   * @param $permission
+   * @param string $permission
    *   The name of the permission.
    *
    * @return bool
    *   TRUE if the user has permission.
    */
   public function hasPermission($permission);
-
 
 }

@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\og\Kernel\Field\AudienceFieldFormatterTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Field;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\OgGroupAudienceHelper;
-
 
 /**
  * Test that formatters for entity reference can be applied to audience fields.
@@ -22,7 +16,6 @@ class AudienceFieldFormatterTest extends KernelTestBase {
    * {@inheritdoc}
    */
   public static $modules = ['field', 'og'];
-
 
   /**
    * Testing og_field_formatter_info_alter().

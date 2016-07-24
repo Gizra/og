@@ -8,9 +8,9 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
+
 /**
  * Test permission inside a group.
  *
@@ -21,34 +21,52 @@ class OgEntityAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'og', 'entity_test'];
+  public static $modules = [
+    'system',
+    'user',
+    'field',
+    'og',
+    'entity_test',
+  ];
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user1;
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user2;
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user3;
 
   /**
+   * An admin user.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $adminUser;
 
   /**
+   * A group entity.
+   *
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group1;
 
   /**
+   * A group entity.
+   *
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group2;
@@ -102,7 +120,6 @@ class OgEntityAccessTest extends KernelTestBase {
 
     $this->groupBundle = Unicode::strtolower($this->randomMachineName());
 
-
     // Create users, and make sure user ID 1 isn't used.
     User::create(['name' => $this->randomString()]);
 
@@ -125,7 +142,6 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->adminUser = User::create(['name' => $this->randomString()]);
     $this->adminUser->save();
 
-
     // Define the group content as group.
     Og::groupManager()->addGroup('entity_test', $this->groupBundle);
 
@@ -146,7 +162,6 @@ class OgEntityAccessTest extends KernelTestBase {
     ]);
     $this->group2->save();
 
-    /** @var OgRole ogRoleWithPermission */
     $this->ogRoleWithPermission = OgRole::create();
     $this->ogRoleWithPermission
       ->setName($this->randomMachineName())
@@ -167,7 +182,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->grantPermission('some_perm_2')
       ->save();
 
-    /** @var OgRole ogRoleWithoutPermission */
     $this->ogRoleWithoutPermission = OgRole::create();
     $this->ogRoleWithoutPermission
       ->setName($this->randomMachineName())
@@ -185,7 +199,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->setGroupBundle($this->groupBundle)
       ->setIsAdmin(TRUE)
       ->save();
-
 
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);

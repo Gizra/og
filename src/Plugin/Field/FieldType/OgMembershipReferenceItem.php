@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItem.
- */
-
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 
 /**
  * Class OgMembershipReferenceItem.
