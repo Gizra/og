@@ -189,9 +189,6 @@ class GetMembershipsTest extends KernelTestBase {
         OgMembershipInterface::STATE_PENDING,
       ], NULL, [],
       ],
-      // Filter by a non-existing field name. This should not return any
-      // matches.
-      [0, [], 'non_existing_field_name', []],
 
       // The second user is a pending member of the second group.
       // Query default values. The group should be returned.

@@ -202,13 +202,11 @@ class Og {
    *   The user to get groups for.
    * @param array $states
    *   (optional) Array with the state to return. Defaults to active.
-   * @param string $field_name
-   *   (optional) The field name associated with the group.
    *
    * @return \Drupal\og\Entity\OgMembership[]
    *   An array of OgMembership entities, keyed by ID.
    */
-  public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE], $field_name = NULL) {
+  public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     // Get a string identifier of the states, so we can retrieve it from cache.
     sort($states);
     $states_identifier = implode('|', array_unique($states));
@@ -217,7 +215,6 @@ class Og {
       __METHOD__,
       $user->id(),
       $states_identifier,
-      $field_name,
     ];
     $identifier = implode(':', $identifier);
 
@@ -231,10 +228,6 @@ class Og {
 
     if ($states) {
       $query->condition('state', $states, 'IN');
-    }
-
-    if ($field_name) {
-      $query->condition('field_name', $field_name);
     }
 
     $results = $query->execute();
