@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Event\PermissionEvent;
@@ -206,14 +206,12 @@ class PermissionEventTest extends KernelTestBase {
    * Implementation of the global t() function.
    *
    * The global t() function is not available in scope of the data provider, so
-   * it is replicated here.
+   * it is mocked here as a simple string replacement.
    *
    * @see t()
    */
   public function t($string, array $args = array(), array $options = array()) {
-    // Pass a dummy string, to satisfy coder which doesn't allow us to pass
-    // a variable to TranslatableMarkup.
-    return new TranslatableMarkup('dummyString', $args, $options);
+    return SafeMarkup::format($string, $args);
   }
 
   /**

@@ -218,6 +218,7 @@ class TestTranslationManager implements TranslationInterface {
     // Pass a dummy string, to satisfy coder which doesn't allow us to pass
     // a variable to TranslatableMarkup.
     return new TranslatableMarkup('dummyString', $args, $options, $this);
+
   }
 
   /**
