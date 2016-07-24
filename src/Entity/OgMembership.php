@@ -277,11 +277,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Create'))
       ->setDescription(t('The Unix timestamp when the group content was created.'));
 
-    $fields['field_name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Field name'))
-      ->setDescription(t("The name of the field holding the group ID, the OG membership is associated with."))
-      ->setDefaultValue(OgGroupAudienceHelper::DEFAULT_FIELD);
-
     $fields['language'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language'))
       ->setDescription(t('The {languages}.language of this membership.'));
