@@ -175,7 +175,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Sets the group's roles for the current user group membership.
    *
    * @param \Drupal\og\Entity\OgRole[] $roles
-   *   List of OG roles ids.
+   *   The array of OG roles to set.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
