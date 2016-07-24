@@ -647,15 +647,6 @@ class Og {
   }
 
   /**
-   * Gets the storage manage for the OG membership entity.
-   *
-   * @return \Drupal\Core\Entity\EntityStorageInterface
-   */
-  public static function membershipStorage() {
-    return \Drupal::entityTypeManager()->getStorage('og_membership');
-  }
-
-  /**
    * Get an OG field base definition.
    *
    * @param string $plugin_id
