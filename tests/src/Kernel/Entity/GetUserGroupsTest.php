@@ -234,7 +234,7 @@ class GetUserGroupsTest extends KernelTestBase {
    *
    * @param \Drupal\user\Entity\User $user
    *   The user object to create membership for.
-   * @param \Drupal\Core\Entity\EntityInterface $group
+   * @param \Drupal\entity_test\Entity\EntityTest $group
    *   The entity to create the membership for.
    * @param int $state
    *   The state of the membership.
@@ -242,7 +242,7 @@ class GetUserGroupsTest extends KernelTestBase {
    * @return \Drupal\og\OgMembershipInterface
    *   The saved OG membership entity.
    */
-  protected function createMembership(User $user, EntityInterface $group, $state = OgMembershipInterface::STATE_ACTIVE) {
+  protected function createMembership(User $user, EntityTest $group, $state = OgMembershipInterface::STATE_ACTIVE) {
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership->setUser($user)
       ->setGroup($group)
@@ -257,12 +257,12 @@ class GetUserGroupsTest extends KernelTestBase {
    *
    * Assumes entity_type is used.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $group_to_check
+   * @param \Drupal\entity_test\Entity\EntityTest $group_to_check
    *   The group entity to check.
    * @param array $results
    *   Array keyed by the entity type, and with the group entities as values.
    */
-  protected function assertGroupExistsInResults(EntityInterface $group_to_check, array $results) {
+  protected function assertGroupExistsInResults(EntityTest $group_to_check, array $results) {
     $found = FALSE;
     foreach ($results['entity_test'] as $group) {
       if ($group->id() == $group_to_check->id()) {
