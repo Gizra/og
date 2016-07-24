@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\og\Entity\OgMembership.
- */
-
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
@@ -14,7 +9,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Exception\OgException;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
@@ -39,7 +33,7 @@ use Drupal\og\OgMembershipInterface;
  *
  * Creating such a relation is done for example in the following way:
  *
- * @code:
+ * @code
  *  $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
  *  $membership
  *    ->setUser($user)
@@ -58,7 +52,6 @@ use Drupal\og\OgMembershipInterface;
  * Having this field separation is what allows having multiple OG audience
  * fields attached to the user, where each group they are associated with may be
  * a result of different membership types.
- *
  *
  * @ContentEntityType(
  *   id = "og_membership",
@@ -112,7 +105,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     return $this;
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -127,7 +119,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function getFieldName() {
     return $this->get('field_name')->value;
   }
-
 
   /**
    * {@inheritdoc}
@@ -160,7 +151,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $entity_id = $this->get('entity_id')->value;
     return \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
   }
-
 
   /**
    * {@inheritdoc}
@@ -254,7 +244,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = array();
+    $fields = [];
 
     $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('ID'))
