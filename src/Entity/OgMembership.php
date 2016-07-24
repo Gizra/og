@@ -177,19 +177,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setRoles(array $roles = array()) {
-    $role_ids = array_map(function (OgRole $role) {
-      return $role->id();
-    }, $roles);
-
-    $this->set('roles', array_unique($role_ids));
-
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function addRole(OgRole $role) {
     $roles = $this->getRoles();
     $roles[] = $role;
@@ -220,6 +207,19 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function getRoles() {
     return $this->get('roles')->referencedEntities();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setRoles(array $roles = array()) {
+    $role_ids = array_map(function (OgRole $role) {
+      return $role->id();
+    }, $roles);
+
+    $this->set('roles', array_unique($role_ids));
+
+    return $this;
   }
 
   /**
