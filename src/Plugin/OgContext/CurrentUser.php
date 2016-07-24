@@ -2,6 +2,11 @@
 
 namespace Drupal\og\Plugin\OgContext;
 
+/**
+ * @file
+ * Contains \Drupal\og\Plugin\OgContext\CurrentUser.
+ */
+
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\og\OgContextBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -32,6 +37,7 @@ class CurrentUser extends OgContextBase {
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   *   The current user service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, AccountProxyInterface $current_user) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);

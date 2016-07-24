@@ -605,6 +605,7 @@ class Og {
    * Return the og context handler instance.
    *
    * @return OgContextHandler
+   *   The OG context handler.
    */
   public static function contextHandler() {
     return \Drupal::service('og.context_handler');

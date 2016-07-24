@@ -2,6 +2,11 @@
 
 namespace Drupal\og\Plugin\OgContext;
 
+/**
+ * @file
+ * Contains \Drupal\og\Plugin\OgContext\Entity.
+ */
+
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\og\GroupManager;
@@ -44,6 +49,7 @@ class Entity extends OgContextBase {
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match service.
    * @param \Drupal\og\GroupManager $group_manager
+   *   The group manager service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, GroupManager $group_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -84,4 +90,5 @@ class Entity extends OgContextBase {
       return Og::getGroups($parameter);
     }
   }
+
 }

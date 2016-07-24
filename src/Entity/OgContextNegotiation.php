@@ -1,11 +1,11 @@
 <?php
 
+namespace Drupal\og\Entity;
+
 /**
  * @file
- * Contains Drupal\og\Entity\OgContextNegotiation.
+ * Contains \Drupal\og\Entity\OgContextNegotiation.
  */
-
-namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\og\OgContextNegotiationInterface;

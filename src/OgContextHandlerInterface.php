@@ -2,8 +2,17 @@
 
 namespace Drupal\og;
 
+/**
+ * @file
+ * Contains \Drupal\og\OgContextHandlerInterface.
+ */
+
 use Drupal\Core\Entity\ContentEntityBase;
 
+/**
+ * Interface OgContextHandlerInterface
+ * @package Drupal\og
+ */
 interface OgContextHandlerInterface {
 
   /**
@@ -12,8 +21,7 @@ interface OgContextHandlerInterface {
   const RETURN_ONLY_ACTIVE = 1;
 
   /**
-   * Return only plugins which stored in he negotiation schema with a status of
-   * enabled/disabled.
+   * Return only plugins which stored in the negotiation schema.
    */
   const RETURN_ONLY_IN_STORAGE = 2;
 
@@ -25,7 +33,8 @@ interface OgContextHandlerInterface {
   /**
    * Get the current viewed group.
    *
-   * @return NULL|ContentEntityBase
+   * @return ContentEntityBase
+   *   Return the group(s) object(s) which match the log of of the plugin.
    */
   public function getGroup();
 
@@ -46,29 +55,33 @@ interface OgContextHandlerInterface {
    *    OgContextHandlerInterface::RETURN_ONLY_IN_STORAGE - will return only
    *      plugins with a corresponding OG context negotiation entity entry no
    *      matter what is the status.
+   *
    * @return array
+   *   List of OG context plugins.
    */
   public function getPlugins($return_mode);
 
   /**
    * Create an instance of an OG context plugin.
    *
-   * @param $plugin_id
+   * @param string $plugin_id
    *   The plugin ID.
    *
    * @return OgContextBase
+   *   An OG context plugins instance.
    */
   public function getPlugin($plugin_id);
 
   /**
    * Update plugin settings.
    *
-   * @param $plugin_id
+   * @param string $plugin_id
    *   The plugin ID.
    * @param array $config
    *   The plugins settings.
    *
    * @return bool
+   *   True or false of the update has succeeded.
    */
   public function updatePlugin($plugin_id, $config = []);
 

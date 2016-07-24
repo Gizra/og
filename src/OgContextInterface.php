@@ -2,8 +2,12 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Plugin\PluginInspectionInterface;
+/**
+ * @file
+ * Contains \Drupal\og\OgContextInterface.
+ */
 
+use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Entity\ContentEntityBase;
 
 /**
@@ -14,7 +18,8 @@ interface OgContextInterface extends PluginInspectionInterface {
   /**
    * Return the current group. If no group will be found return Null.
    *
-   * @return NULL|ContentEntityBase
+   * @return ContentEntityBase
+   *   Return the best matching group.
    */
   public function getGroup();
 

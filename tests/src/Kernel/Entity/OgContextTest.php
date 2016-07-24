@@ -1,22 +1,17 @@
 <?php
 
+namespace Drupal\Tests\og\Kernel\Entity;
+
 /**
  * @file
  * Contains \Drupal\Tests\og\Kernel\OgContextTest.
  */
 
-namespace Drupal\Tests\og\Kernel\Entity;
-
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\node\Entity\Node;
-use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgContextHandlerInterface;
-use Drupal\og\OgGroupAudienceHelper;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
-use Drupal\user\Entity\Role;
-use Drupal\user\Entity\User;
 
 /**
  * Test OG context plugins.
@@ -47,10 +42,9 @@ class OgContextTest extends KernelTestBase {
   }
 
   /**
-   * Test that OgContext handler will return the list according to the passed
-   * argument.
+   * Test that OgContext handler will return a list according to a given logic.
    */
-  function testOgContextPluginsList() {
+  public function testOgContextPluginsList() {
     $plugins = Og::contextHandler()->getPlugins(OgContextHandlerInterface::RETURN_ALL);
 
     // Check we got the plugins we know that exists.
@@ -85,8 +79,8 @@ class OgContextTest extends KernelTestBase {
     $this->assertArrayHasKey('entity', $plugins);
     $this->assertArrayHasKey('current_user', $plugins);
 
-    $get_plugins_location = function($plugins) {
-      return[
+    $get_plugins_location = function ($plugins) {
+      return [
         array_search('entity', $plugins),
         array_search('current_user', $plugins),
       ];

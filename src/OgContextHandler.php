@@ -2,10 +2,20 @@
 
 namespace Drupal\og;
 
+/**
+ * @file
+ * Contains \Drupal\og\OgContextHandler.
+ */
+
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Entity\OgContextNegotiation;
 
+/**
+ * Class OgContextHandler
+ *
+ * @package Drupal\og
+ */
 class OgContextHandler implements OgContextHandlerInterface {
 
   /**
@@ -87,7 +97,7 @@ class OgContextHandler implements OgContextHandlerInterface {
     }
 
     if (!empty($og_context_config)) {
-      uasort($plugins, function($a, $b) use($og_context_config) {
+      uasort($plugins, function ($a, $b) use ($og_context_config) {
         return $og_context_config[$a['id']]->get('weight') > $og_context_config[$b['id']]->get('weight') ? 1 : -1;
       });
     }
@@ -132,7 +142,7 @@ class OgContextHandler implements OgContextHandlerInterface {
         continue;
       }
 
-      // Registering a new negotiation plugin.s
+      // Registering a new negotiation plugin.
       $og_context_storage->create([
         'id' => $plugin['id'],
         'label' => $plugin['label'],
