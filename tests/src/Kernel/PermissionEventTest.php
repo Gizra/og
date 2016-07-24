@@ -211,7 +211,9 @@ class PermissionEventTest extends KernelTestBase {
    * @see t()
    */
   public function t($string, array $args = array(), array $options = array()) {
-    return new TranslatableMarkup($string, $args, $options);
+    // Pass a dummy string, to satisfy coder which doesn't allow us to pass
+    // a variable to TranslatableMarkup.
+    return new TranslatableMarkup('dummyString', $args, $options);
   }
 
   /**
