@@ -656,13 +656,6 @@ class Og {
   }
 
   /**
-   * Gets the default constructor parameters for OG membership.
-   */
-  public static function membershipDefault() {
-    return ['type' => OgMembershipInterface::TYPE_DEFAULT];
-  }
-
-  /**
    * Get an OG field base definition.
    *
    * @param string $plugin_id

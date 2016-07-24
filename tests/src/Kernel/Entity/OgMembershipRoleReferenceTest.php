@@ -92,7 +92,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $group_member->save();
 
     /** @var OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->user)
       ->setGroup($this->group)

@@ -208,7 +208,7 @@ class OgMembershipReferenceItemList extends EntityReferenceFieldItemList {
     $group = $storage->load($group_id);
 
     /** @var OgMembershipInterface $membership */
-    $membership = Og::membershipStorage()->create(Og::membershipDefault());
+    $membership = Og::membershipStorage()->create();
 
     $membership
       ->setFieldName($this->getName())

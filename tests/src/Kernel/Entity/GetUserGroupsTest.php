@@ -229,7 +229,7 @@ class GetUserGroupsTest extends KernelTestBase {
    * @return \Drupal\og\OgMembershipInterface
    */
   protected function createMembership($user, $group, $state = OgMembershipInterface::STATE_ACTIVE) {
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership->setUser($user)
       ->setGroup($group)
       ->setState($state)

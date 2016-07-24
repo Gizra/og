@@ -43,7 +43,7 @@ function og_entity_insert(EntityInterface $entity) {
     return;
   }
 
-  $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+  $membership = OgMembership::create();
   $membership
     ->setUser($entity->getOwner())
     ->setGroup($entity)

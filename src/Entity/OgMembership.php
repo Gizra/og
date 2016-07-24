@@ -270,7 +270,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $fields['type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Type'))
       ->setDescription(t('The bundle of the membership'))
-      ->setSetting('target_type', 'og_membership_type');
+      ->setSetting('target_type', 'og_membership_type')
+      ->setDefaultValue(self::TYPE_DEFAULT);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Member User ID'))

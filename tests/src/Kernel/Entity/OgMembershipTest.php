@@ -82,7 +82,7 @@ class OgMembershipTest extends KernelTestBase {
    * @covers ::setUser
    */
   public function testGetSetUser() {
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->user)
       ->setGroup($this->group)
@@ -107,7 +107,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testGetSetUserException() {
     /** @var OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setGroup($this->group)
       ->save();
