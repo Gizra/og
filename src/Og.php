@@ -431,7 +431,7 @@ class Og {
 
     // Retrieve the fields which reference our entity type and bundle.
     $query = \Drupal::entityQuery('field_storage_config')
-      ->condition('type', OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE);
+      ->condition('type', OgGroupAudienceHelper::GROUP_REFERENCE);
 
     // Optionally filter group content entity types.
     if ($entity_types) {

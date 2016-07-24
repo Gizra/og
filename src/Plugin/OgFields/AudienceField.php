@@ -31,7 +31,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [
         'target_type' => $this->getEntityType(),
       ],
-      'type' => OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE,
+      'type' => OgGroupAudienceHelper::GROUP_REFERENCE,
     ];
 
     return parent::getFieldStorageBaseDefinition($values);

@@ -216,6 +216,6 @@ function og_field_formatter_info_alter(array &$info) {
       continue;
     }
 
-    $info[$key]['field_types'][] = OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE;
+    $info[$key]['field_types'][] = OgGroupAudienceHelper::GROUP_REFERENCE;
   }
 }

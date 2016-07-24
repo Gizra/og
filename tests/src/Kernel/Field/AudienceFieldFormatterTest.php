@@ -30,7 +30,7 @@ class AudienceFieldFormatterTest extends KernelTestBase {
       'entity_reference_label',
     ];
 
-    $actual = array_keys($formatter_manager->getOptions(OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE));
+    $actual = array_keys($formatter_manager->getOptions(OgGroupAudienceHelper::GROUP_REFERENCE));
     sort($actual);
     $this->assertEquals($expected, $actual);
   }

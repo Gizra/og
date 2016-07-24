@@ -18,7 +18,7 @@ class OgGroupAudienceHelper {
   /**
    * The name of the field type that references non-user entities to groups.
    */
-  const NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE = 'og_standard_reference';
+  const GROUP_REFERENCE = 'og_standard_reference';
 
   /**
    * Return TRUE if field is a group audience type.
@@ -30,7 +30,7 @@ class OgGroupAudienceHelper {
    *   TRUE if the field is a group audience type, FALSE otherwise.
    */
   public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
-    return $field_definition->getType() == OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE;
+    return $field_definition->getType() == OgGroupAudienceHelper::GROUP_REFERENCE;
   }
 
   /**
