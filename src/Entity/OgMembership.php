@@ -78,6 +78,15 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
+  public static function create(array $values = []) {
+    // Use the default membership type by default.
+    $values += ['type' => OgMembershipInterface::TYPE_DEFAULT];
+    return parent::create($values);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCreatedTime() {
     return $this->get('created')->value;
   }
@@ -260,8 +269,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $fields['type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Type'))
       ->setDescription(t('The bundle of the membership'))
-      ->setSetting('target_type', 'og_membership_type')
-      ->setDefaultValue(self::TYPE_DEFAULT);
+      ->setSetting('target_type', 'og_membership_type');
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Member User ID'))
