@@ -3,6 +3,7 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
