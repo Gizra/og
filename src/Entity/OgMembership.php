@@ -106,20 +106,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     return $this;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function setFieldName($fieldName) {
-    $this->set('field_name', $fieldName);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getFieldName() {
-    return $this->get('field_name')->value;
-  }
 
   /**
    * {@inheritdoc}
@@ -307,11 +293,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage) {
-
-    if (!$this->getFieldName()) {
-      $this->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD);
-    }
-
     // Check the value directly rather than using the entity, if there is one.
     // This will watch actual empty values and '0'.
     if (!$this->get('uid')->target_id) {

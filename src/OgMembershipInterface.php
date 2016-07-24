@@ -88,28 +88,6 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function getUser();
 
   /**
-   * Sets the membership field name.
-   *
-   * A user can have two group reference fields. The field name property helps
-   * us to know to which field the membership belongs.
-   *
-   * @param string $fieldName
-   *   The group reference field name.
-   *
-   * @return \Drupal\og\OgMembershipInterface
-   *   The updated OG Membership object.
-   */
-  public function setFieldName($fieldName);
-
-  /**
-   * Gets the membership field name.
-   *
-   * @return string
-   *   The group reference field name.
-   */
-  public function getFieldName();
-
-  /**
    * Sets the group associated with the membership.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
