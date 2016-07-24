@@ -2,11 +2,8 @@
 
 namespace Drupal\og;
 
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldException;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * OG audience field helper methods.

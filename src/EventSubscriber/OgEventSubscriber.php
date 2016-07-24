@@ -4,13 +4,9 @@ namespace Drupal\og\EventSubscriber;
 
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og\Event\DefaultRoleEventInterface;
-use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
-use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
 use Drupal\og\OgRoleInterface;
