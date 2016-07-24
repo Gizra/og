@@ -115,7 +115,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
    */
   public function ogComplexFieldsProvider() {
     return [
-      ['Groups audience', 'og_group_ref[0][target_id]'],
+      ['Groups audience', 'og_audience[0][target_id]'],
       ['Other groups', 'other_groups[0][target_id]'],
     ];
   }

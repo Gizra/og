@@ -137,7 +137,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     $entity_field_manager = $this->container->get('entity_field.manager');
     $entity_field_manager->clearCachedFieldDefinitions();
     $field_definitions = $entity_field_manager->getFieldDefinitions('node', 'class');
-    $settings = $field_definitions['og_group_ref']->getSetting('handler_settings');
+    $settings = $field_definitions['og_audience']->getSetting('handler_settings');
     $this->assertEquals($expected, $settings['target_bundles'], $message);
   }
 
@@ -154,7 +154,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     $entity_field_manager = $this->container->get('entity_field.manager');
     $entity_field_manager->clearCachedFieldDefinitions();
     $field_definitions = $entity_field_manager->getFieldStorageDefinitions('node');
-    $setting = $field_definitions['og_group_ref']->getSetting('target_type');
+    $setting = $field_definitions['og_audience']->getSetting('target_type');
     $this->assertEquals($expected, $setting, $message);
   }
 
