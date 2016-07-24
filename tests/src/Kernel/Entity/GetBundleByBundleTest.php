@@ -117,6 +117,7 @@ class GetBundleByBundleTest extends KernelTestBase {
               'type' => $group_content_bundle_id,
             ])->save();
             break;
+
           case 'block_content':
             BlockContentType::create(['id' => $group_content_bundle_id])->save();
             break;

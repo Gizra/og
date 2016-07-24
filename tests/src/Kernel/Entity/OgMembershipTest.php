@@ -56,7 +56,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    // Create a bundle and add as a group
+    // Create a bundle and add as a group.
     $group = EntityTest::create([
       'type' => Unicode::strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
@@ -84,9 +84,8 @@ class OgMembershipTest extends KernelTestBase {
   public function testGetSetUser() {
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->user->id())
-      ->setEntityId($this->group->id())
-      ->setGroupEntityType($this->group->getEntityTypeId())
+      ->setUser($this->user)
+      ->setGroup($this->group)
       ->save();
 
     // Check the user is returned.
@@ -101,31 +100,17 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
-   * Tests exceptions are thrown when trying to save a membership with no, or
-   * anonymous user.
+   * Tests exceptions are thrown when trying to save a membership with no user.
    *
-   * @covers ::getUser
-   * @dataProvider providerTestGetSetUserException
+   * @covers ::preSave
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-  public function testGetSetUserException($user_value) {
+  public function testGetSetUserException() {
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($user_value)
-      ->setEntityId($this->group->id())
-      ->setGroupEntityType($this->group->getEntityTypeId())
+      ->setGroup($this->group)
       ->save();
-  }
-
-  /**
-   * Data provider for testGetSetUserException.
-   */
-  public function providerTestGetSetUserException() {
-    return [
-      [NULL],
-      [0]
-    ];
   }
 
 }

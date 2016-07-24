@@ -1,17 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\OgFields\AudienceField.
- */
-
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\OgMembershipInterface;
 
 /**
  * Determine to which groups this group content is assigned to.
@@ -71,7 +65,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       ],
     ];
 
-
     return $values;
   }
 
@@ -84,9 +77,10 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'type' => 'entity_reference_label',
       'settings' => [
         'link' => TRUE,
-      ]
+      ],
     ];
 
     return $values;
   }
+
 }

@@ -6,6 +6,8 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\OgAccess;
 
 /**
+ * Tests hook implementation of OG related access.
+ *
  * @group og
  */
 class OgAccessHookTest extends OgAccessEntityTestBase {

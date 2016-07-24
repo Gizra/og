@@ -1,20 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Functional\OgComplexWidgetTest.
- */
-
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
-use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\node\Entity\Node;
-use Drupal\node\NodeInterface;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\Plugin\Field\FieldType\OgMembershipReferenceItemList;
 use Drupal\simpletest\BrowserTestBase;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
@@ -37,7 +29,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create a "group" bundle on the Custom Block entity type and turn it into
@@ -64,9 +56,16 @@ class OgComplexWidgetTest extends BrowserTestBase {
    *
    * @dataProvider ogComplexFieldsProvider
    */
-  function testFields($field, $field_name) {
-    $admin_user = $this->drupalCreateUser(['administer group', 'access content', 'create post content']);
-    $group_owner = $this->drupalCreateUser(['access content', 'create post content']);
+  public function testFields($field, $field_name) {
+    $admin_user = $this->drupalCreateUser([
+      'administer group',
+      'access content',
+      'create post content',
+    ]);
+    $group_owner = $this->drupalCreateUser([
+      'access content',
+      'create post content',
+    ]);
 
     // Create a group content type owned by the group owner.
     $values = [
@@ -112,6 +111,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
    * Data provider for ::testFields()
    *
    * @return array
+   *   Array with the field human readable name, and the field's HTML name.
    */
   public function ogComplexFieldsProvider() {
     return [

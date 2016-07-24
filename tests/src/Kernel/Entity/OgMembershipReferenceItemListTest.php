@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Entity\OgMembershipReferenceItemTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
@@ -57,7 +52,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
       $bundle->save();
       $this->bundles[] = $bundle->id();
     }
-    for ($i = 0 ; $i < 2; $i++) {
+    for ($i = 0; $i < 2; $i++) {
       $bundle = $this->bundles[$i];
       Og::groupManager()->addGroup('entity_test', $bundle);
       $group = EntityTest::create(['type' => $bundle]);
@@ -66,7 +61,15 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     }
     $this->fieldName = strtolower($this->randomMachineName());
 
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', 'user', ['field_name' => $this->fieldName]);
+    $settings = [
+      'field_name' => $this->fieldName,
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => 'entity_test',
+        ],
+      ],
+    ];
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', 'user', $settings);
   }
 
   /**
@@ -77,7 +80,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
       return $this->container->get('entity.query')->get('og_membership')
         ->condition('field_name', $this->fieldName)
         ->condition('uid', $id)
-        ->condition('entity_type', 'user')
+        ->condition('entity_type', 'entity_test')
         ->condition('state', OgMembershipInterface::STATE_ACTIVE)
         ->execute();
     };
@@ -90,17 +93,23 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 0);
     $this->assertSame($run_query($entity->id()), []);
-    $member_in_single_grpup = User::create([
+
+    // Add a user with membership in a single group.
+    $member_in_single_group = User::create([
       'type' => $this->bundles[2],
       'name' => $this->randomString(),
-      $this->fieldName => [['target_id' => $this->groups[0]->id()]],
+      $this->fieldName => [
+        ['target_id' => $this->groups[0]->id()],
+      ],
     ]);
 
     // Assert group membership is found before save.
-    $this->assertSame(count($member_in_single_grpup->{$this->fieldName}), 1);
-    $member_in_single_grpup->save();
-    $this->assertSame(count($member_in_single_grpup->{$this->fieldName}), 1);
-    $this->assertSame(count($run_query($member_in_single_grpup->id())), 1);
+    $this->assertSame(count($member_in_single_group->{$this->fieldName}), 1);
+    $member_in_single_group->save();
+    $this->assertSame(count($member_in_single_group->{$this->fieldName}), 1);
+    $this->assertSame(count($run_query($member_in_single_group->id())), 1);
+
+    // Add a user with membership in multiple groups.
     $member_in_two_groups = User::create([
       'name' => $this->randomString(),
       'type' => $this->bundles[2],
@@ -113,7 +122,8 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $member_in_two_groups->save();
     $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
     $this->assertSame(count($run_query($member_in_two_groups->id())), 2);
-    // Test re-save.
+
+    // Test re-save has not changed the references.
     $member_in_two_groups->save();
     $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
     $this->assertSame(count($run_query($member_in_two_groups->id())), 2);

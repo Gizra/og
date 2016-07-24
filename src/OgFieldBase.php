@@ -1,14 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgFieldBase.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Plugin\PluginBase;
 
+/**
+ * OG related fields base plugin.
+ */
 abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
   /**
@@ -27,7 +25,6 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
 
   /**
    * The field name.
-   *
    *
    * @var string
    */
@@ -49,7 +46,6 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
     return $this->bundle;
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -64,7 +60,6 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
     $field_storage = $this->getFieldStorageBaseDefinition();
 
     if (!empty($field_storage['entity']) && !in_array($entity_type, $field_storage['entity'])) {
-
 
       $plugin_id = $this->getPluginId();
       $entities = implode(', ', $field_storage['entity']);
@@ -93,8 +88,8 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function setFieldName($fieldName) {
-    $this->fieldName = $fieldName;
+  public function setFieldName($field_name) {
+    $this->fieldName = $field_name;
 
     return $this;
   }
