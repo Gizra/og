@@ -9,7 +9,6 @@ namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\og\Entity\OgContextNegotiation;
 
 /**
  * Class OgContextHandler.

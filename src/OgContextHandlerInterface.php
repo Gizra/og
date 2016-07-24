@@ -7,8 +7,6 @@ namespace Drupal\og;
  * Contains \Drupal\og\OgContextHandlerInterface.
  */
 
-use Drupal\Core\Entity\ContentEntityBase;
-
 /**
  * Interface OgContextHandlerInterface.
  *

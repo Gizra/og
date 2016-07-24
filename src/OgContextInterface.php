@@ -8,7 +8,6 @@ namespace Drupal\og;
  */
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
-use Drupal\Core\Entity\ContentEntityBase;
 
 /**
  * Defines an interface for OG context plugins.
