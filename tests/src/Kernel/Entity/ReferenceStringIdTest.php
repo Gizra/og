@@ -7,8 +7,6 @@ use Drupal\entity_test\Entity\EntityTestStringId;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\Entity\OgMembership;
-use Drupal\user\Entity\User;
 
 /**
  * Checks that groups with string IDs can be referenced.
