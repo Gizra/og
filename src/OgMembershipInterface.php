@@ -147,8 +147,11 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Sets the membership state.
    *
-   * @param bool $state
-   *   TRUE or FALSE.
+   * @param int $state
+   *   The state of the membership. It may be of the following constants:
+   *   - OgMembershipInterface::STATE_ACTIVE
+   *   - OgMembershipInterface::STATE_PENDING
+   *   - OgMembershipInterface::STATE_BLOCKED
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
@@ -159,7 +162,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Gets the membership state.
    *
    * @return int
-   *   The state of the membership. It may be of the following values:
+   *   The state of the membership. It may be of the following constants:
    *   - OgMembershipInterface::STATE_ACTIVE
    *   - OgMembershipInterface::STATE_PENDING
    *   - OgMembershipInterface::STATE_BLOCKED
