@@ -114,10 +114,9 @@ class GroupUpdateTest extends BrowserTestBase {
     // Subscribe the editor user to the groups.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->groupEditor->id())
-      ->setEntityId($this->contentGroup->id())
-      ->setGroupEntityType($this->contentGroup->getEntityTypeId())
-      ->setRoles([$content_editor_role->id()])
+      ->setUser($this->groupEditor)
+      ->setGroup($this->contentGroup)
+      ->setRoles([$content_editor_role])
       ->save();
   }
 
@@ -142,7 +141,7 @@ class GroupUpdateTest extends BrowserTestBase {
 
     // Create an entity_test entity owned by the group owner.
     $values = [
-      'title' => 'My awesome group',
+      'title' => $this->randomString(),
       'type' => 'entity_group',
       'uid' => $this->groupOwner->id(),
     ];
@@ -151,10 +150,9 @@ class GroupUpdateTest extends BrowserTestBase {
 
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->groupEditor->id())
-      ->setEntityId($this->entityGroup->id())
-      ->setGroupEntityType($this->entityGroup->getEntityTypeId())
-      ->setRoles([$entity_editor_role->id()])
+      ->setUser($this->groupEditor)
+      ->setGroup($this->entityGroup)
+      ->setRoles([$entity_editor_role])
       ->save();
   }
 

@@ -254,10 +254,9 @@ class OgEntityAccessTest extends KernelTestBase {
     // Check the special permission 'update group'
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->user4->id())
-      ->setEntityId($this->group1->id())
-      ->setGroupEntityType($this->group1->getEntityTypeId())
-      ->addRole($this->ogRoleWithUpdatePermission->id())
+      ->setUser($this->user4)
+      ->setGroup($this->group1)
+      ->addRole($this->ogRoleWithUpdatePermission)
       ->save();
 
     /** @var OgMembership $membership */
