@@ -66,7 +66,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->group = $group;
 
     // Add that as a group.
-    Og::groupManager()->addGroup('entity_test', $group->id());
+    Og::groupManager()->addGroup('entity_test', $group->bundle());
 
     // Create test user.
     $user = User::create(['name' => $this->randomString()]);
@@ -105,12 +105,49 @@ class OgMembershipTest extends KernelTestBase {
    * @covers ::preSave
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-  public function testGetSetUserException() {
-    /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+  public function testSetNoUserException() {
+    /** @var OgMembershipInterface $membership */
     $membership
       ->setGroup($this->group)
       ->save();
   }
+
+  /**
+   * Tests exceptions are thrown when trying to save a membership with no group.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testSetNoGroupException() {
+    /** @var OgMembershipInterface $membership */
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->user)
+      ->save();
+  }
+
+  /**
+   * Tests saving a membership with a non group entity.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testSetNonValidGroupException() {
+    $non_group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+
+    $non_group->save();
+    /** @var OgMembershipInterface $membership */
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->user)
+      ->setGroup($non_group)
+      ->save();
+  }
+
+
 
 }
