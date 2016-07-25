@@ -51,13 +51,15 @@ class OgEntityAccessTest extends KernelTestBase {
   protected $user3;
 
   /**
-   * An admin user.
+   * An user object.
    *
    * @var \Drupal\user\Entity\User
    */
   protected $user4;
 
   /**
+   * An admin user.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $adminUser;
@@ -207,7 +209,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->grantPermission(OgAccess::UPDATE_GROUP_PERMISSION)
       ->save();
 
-    /** @var OgRole ogRoleWithoutPermission */
     $this->ogRoleWithoutPermission = OgRole::create();
     $this->ogRoleWithoutPermission
       ->setName($this->randomMachineName())
@@ -251,7 +252,7 @@ class OgEntityAccessTest extends KernelTestBase {
       ->addRole($this->ogRoleWithoutPermission)
       ->save();
 
-    // Check the special permission 'update group'
+    // Check the special permission 'update group'.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setUser($this->user4)

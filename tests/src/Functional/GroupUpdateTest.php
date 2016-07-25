@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Functional\GroupUpdateTest.
- */
-
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\entity_test\Entity\EntityTest;
@@ -178,6 +173,7 @@ class GroupUpdateTest extends BrowserTestBase {
    * Data provider for ::testUpdateAccess()
    *
    * @return array
+   *    The names of the variables that will be tested.
    */
   public function ogUpdateAccessProvider() {
     return [
@@ -187,4 +183,5 @@ class GroupUpdateTest extends BrowserTestBase {
       ['entityGroup'],
     ];
   }
+
 }
