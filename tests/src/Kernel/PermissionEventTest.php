@@ -2,8 +2,7 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Core\Entity\Entity;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Event\PermissionEvent;
@@ -173,7 +172,7 @@ class PermissionEventTest extends KernelTestBase {
       // Test retrieving permissions for a group that has no group content types
       // associated with it.
       [
-        [],
+    [],
         // It should only return the default permissions.
         $default_permissions,
         // The list of permissions should only contain the group level
@@ -186,9 +185,9 @@ class PermissionEventTest extends KernelTestBase {
       // Test retrieving permissions for a group that has a group content type
       // associated with it.
       [
-        [
-          'node' => ['test_group_content'],
-        ],
+    [
+      'node' => ['test_group_content'],
+    ],
         // It should return the default permissions as well as the permissions
         // to create, delete and update group content.
         array_merge($default_permissions, $group_content_permissions),
@@ -207,12 +206,12 @@ class PermissionEventTest extends KernelTestBase {
    * Implementation of the global t() function.
    *
    * The global t() function is not available in scope of the data provider, so
-   * it is replicated here.
+   * it is mocked here as a simple string replacement.
    *
    * @see t()
    */
-  function t($string, array $args = array(), array $options = array()) {
-    return new TranslatableMarkup($string, $args, $options);
+  public function t($string, array $args = array(), array $options = array()) {
+    return SafeMarkup::format($string, $args);
   }
 
   /**
@@ -223,7 +222,7 @@ class PermissionEventTest extends KernelTestBase {
    * @param \Drupal\og\PermissionInterface $actual
    *   The actual permission.
    */
-  protected function assertPermission($expected, $actual) {
+  protected function assertPermission(PermissionInterface $expected, PermissionInterface $actual) {
     foreach ($this->getPermissionProperties($expected) as $property) {
       $this->assertEquals($expected->get($property), $actual->get($property), "The $property property is equal.");
     }

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Integration with the Views module.
+ */
+
 use Drupal\field\FieldStorageConfigInterface;
 
 /**
@@ -25,7 +30,6 @@ function og_views_data_alter(array &$data) {
  */
 function og_field_views_data(FieldStorageConfigInterface $field_storage) {
   $data = views_field_default_views_data($field_storage);
-
   // This is the same as entity reference integration as the OG standard
   // reference item is no different really.
   switch ($field_storage->getType()) {
@@ -34,7 +38,6 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
       $entity_type_id = $field_storage->getTargetEntityTypeId();
       /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
       $table_mapping = $entity_manager->getStorage($entity_type_id)->getTableMapping();
-
       foreach ($data as $table_name => $table_data) {
         // Add a relationship to the target entity type.
         $target_entity_type_id = $field_storage->getSetting('target_type');
@@ -43,7 +46,6 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
         $entity_type = $entity_manager->getDefinition($entity_type_id);
         $target_base_table = $target_entity_type->getDataTable() ?: $target_entity_type->getBaseTable();
         $field_name = $field_storage->getName();
-
         // Provide a relationship for the entity type with the entity reference
         // field.
         $args = [
@@ -61,9 +63,8 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
           'base field' => $target_entity_type->getKey('id'),
           'relationship field' => $field_name . '_target_id',
         );
-
-        // Provide a reverse relationship for the entity type that is referenced by
-        // the field.
+        // Provide a reverse relationship for the entity type that is referenced
+        // by the field.
         $args['@entity'] = $entity_type->getLabel();
         $args['@label'] = $target_entity_type->getLowercaseLabel();
         $pseudo_field_name = 'reverse__' . $entity_type_id . '__' . $field_name;
@@ -90,6 +91,5 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
       }
       break;
   }
-
   return $data;
 }

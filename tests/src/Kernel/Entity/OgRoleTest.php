@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\og\Kernel\Entity\OgRoleTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Config\ConfigValueException;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\OgFields\AccessField.
- */
-
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -65,14 +60,13 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [],
     ];
 
-
     return $values;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getViewDisplayDefinition(array $values = [])  {
+  public function getViewDisplayDefinition(array $values = []) {
     $values += [
       'type' => 'list_default',
       'label' => 'above',
@@ -80,4 +74,5 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
 
     return $values;
   }
+
 }

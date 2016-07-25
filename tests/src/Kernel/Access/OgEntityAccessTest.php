@@ -8,9 +8,9 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
+
 /**
  * Test permission inside a group.
  *
@@ -21,24 +21,38 @@ class OgEntityAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'og', 'entity_test'];
+  public static $modules = [
+    'system',
+    'user',
+    'field',
+    'og',
+    'entity_test',
+  ];
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user1;
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user2;
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user3;
 
   /**
+   * An admin user.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user4;
@@ -49,11 +63,15 @@ class OgEntityAccessTest extends KernelTestBase {
   protected $adminUser;
 
   /**
+   * A group entity.
+   *
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group1;
 
   /**
+   * A group entity.
+   *
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group2;
@@ -114,7 +132,6 @@ class OgEntityAccessTest extends KernelTestBase {
 
     $this->groupBundle = Unicode::strtolower($this->randomMachineName());
 
-
     // Create users, and make sure user ID 1 isn't used.
     User::create(['name' => $this->randomString()]);
 
@@ -141,7 +158,6 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->adminUser = User::create(['name' => $this->randomString()]);
     $this->adminUser->save();
 
-
     // Define the group content as group.
     Og::groupManager()->addGroup('entity_test', $this->groupBundle);
 
@@ -162,7 +178,6 @@ class OgEntityAccessTest extends KernelTestBase {
     ]);
     $this->group2->save();
 
-    /** @var OgRole ogRoleWithPermission */
     $this->ogRoleWithPermission = OgRole::create();
     $this->ogRoleWithPermission
       ->setName($this->randomMachineName())
@@ -211,33 +226,29 @@ class OgEntityAccessTest extends KernelTestBase {
       ->setIsAdmin(TRUE)
       ->save();
 
-
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->user1->id())
-      ->setEntityId($this->group1->id())
-      ->setGroupEntityType($this->group1->getEntityTypeId())
-      ->addRole($this->ogRoleWithPermission->id())
+      ->setUser($this->user1)
+      ->setGroup($this->group1)
+      ->addRole($this->ogRoleWithPermission)
       ->save();
 
     // Also create a membership to the other group. From this we can verify that
     // permissions are not bled between groups.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->user1->id())
-      ->setEntityId($this->group2->id())
-      ->setGroupEntityType($this->group2->getEntityTypeId())
-      ->addRole($this->ogRoleWithPermission2->id())
+      ->setUser($this->user1)
+      ->setGroup($this->group2)
+      ->addRole($this->ogRoleWithPermission2)
       ->save();
 
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->user2->id())
-      ->setEntityId($this->group1->id())
-      ->setGroupEntityType($this->group1->getEntityTypeId())
-      ->addRole($this->ogRoleWithoutPermission->id())
+      ->setUser($this->user2)
+      ->setGroup($this->group1)
+      ->addRole($this->ogRoleWithoutPermission)
       ->save();
 
     // Check the special permission 'update group'
@@ -252,10 +263,9 @@ class OgEntityAccessTest extends KernelTestBase {
     /** @var OgMembership $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->adminUser->id())
-      ->setEntityId($this->group1->id())
-      ->setGroupEntityType($this->group1->getEntityTypeId())
-      ->addRole($this->ogAdminRole->id())
+      ->setUser($this->adminUser)
+      ->setGroup($this->group1)
+      ->addRole($this->ogAdminRole)
       ->save();
   }
 
@@ -290,10 +300,9 @@ class OgEntityAccessTest extends KernelTestBase {
     // Add membership to user 3.
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($this->user3->id())
-      ->setEntityId($this->group1->id())
-      ->setGroupEntityType($this->group1->getEntityTypeId())
-      ->addRole($this->ogRoleWithPermission->id())
+      ->setUser($this->user3)
+      ->setGroup($this->group1)
+      ->addRole($this->ogRoleWithPermission)
       ->save();
 
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());

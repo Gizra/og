@@ -85,7 +85,7 @@ abstract class Permission implements PermissionInterface {
    * {@inheritdoc}
    */
   public function setName($name) {
-    $this->set('name' , $name);
+    $this->set('name', $name);
     return $this;
   }
 
@@ -100,7 +100,7 @@ abstract class Permission implements PermissionInterface {
    * {@inheritdoc}
    */
   public function setTitle($title) {
-    $this->set('title' , $title);
+    $this->set('title', $title);
     return $this;
   }
 
@@ -115,7 +115,7 @@ abstract class Permission implements PermissionInterface {
    * {@inheritdoc}
    */
   public function setDescription($description) {
-    $this->set('description' , $description);
+    $this->set('description', $description);
     return $this;
   }
 
@@ -130,7 +130,7 @@ abstract class Permission implements PermissionInterface {
    * {@inheritdoc}
    */
   public function setDefaultRoles(array $default_roles) {
-    $this->set('default roles' , $default_roles);
+    $this->set('default roles', $default_roles);
     return $this;
   }
 
@@ -145,7 +145,7 @@ abstract class Permission implements PermissionInterface {
    * {@inheritdoc}
    */
   public function setRestrictAccess($access) {
-    $this->set('restrict access' , $access);
+    $this->set('restrict access', $access);
     return $this;
   }
 

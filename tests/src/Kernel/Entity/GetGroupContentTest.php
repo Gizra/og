@@ -58,8 +58,9 @@ class GetGroupContentTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface entityTypeManager */
-    $this->entityTypeManager = $this->container->get('entity_type.manager');
+    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager */
+    $entity_type_manager = $this->container->get('entity_type.manager');
+    $this->entityTypeManager = $entity_type_manager;
 
     // Create group admin user.
     $this->groupAdmin = User::create(['name' => $this->randomString()]);
@@ -126,7 +127,7 @@ class GetGroupContentTest extends KernelTestBase {
           'field_config' => [
             'settings' => [
               'handler_settings' => [
-                'target_bundles' => [$groups[$target_group_type]->bundle()  => $groups[$target_group_type]->bundle()],
+                'target_bundles' => [$groups[$target_group_type]->bundle() => $groups[$target_group_type]->bundle()],
               ],
             ],
           ],
@@ -235,7 +236,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups['node'] = Node::create([
       'title' => $this->randomString(),
       'type' => $bundle,
-      'uid' => $this->groupAdmin->id()
+      'uid' => $this->groupAdmin->id(),
     ]);
     $groups['node']->save();
 

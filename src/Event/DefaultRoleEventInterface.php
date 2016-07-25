@@ -20,7 +20,7 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
   /**
    * Returns a single default role.
    *
-   * @param $name
+   * @param string $name
    *   The name of the role to return.
    *
    * @return \Drupal\og\Entity\OgRole

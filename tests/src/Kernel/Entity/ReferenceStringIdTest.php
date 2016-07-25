@@ -3,7 +3,6 @@
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\entity_test\Entity\EntityTestStringId;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
