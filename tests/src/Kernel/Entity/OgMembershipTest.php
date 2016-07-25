@@ -105,9 +105,9 @@ class OgMembershipTest extends KernelTestBase {
    * @covers ::preSave
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
   public function testSetNoUserException() {
     /** @var OgMembershipInterface $membership */
+    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setGroup($this->group)
       ->save();
@@ -147,7 +147,5 @@ class OgMembershipTest extends KernelTestBase {
       ->setGroup($non_group)
       ->save();
   }
-
-
 
 }
