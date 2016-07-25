@@ -62,7 +62,6 @@ class OgMembershipTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface entityTypeManager */
     $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     // Create a bundle and add as a group.
