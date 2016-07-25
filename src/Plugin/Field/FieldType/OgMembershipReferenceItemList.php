@@ -3,7 +3,6 @@
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\EntityReferenceFieldItemList;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgMembershipInterface;
 

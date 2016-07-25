@@ -151,7 +151,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    *   The state of the membership. It may be of the following constants:
    *   - OgMembershipInterface::STATE_ACTIVE
    *   - OgMembershipInterface::STATE_PENDING
-   *   - OgMembershipInterface::STATE_BLOCKED
+   *   - OgMembershipInterface::STATE_BLOCKED.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
