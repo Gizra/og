@@ -4,9 +4,13 @@ namespace Drupal\og\EventSubscriber;
 
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
 use Drupal\og\OgRoleInterface;
@@ -68,9 +72,10 @@ class OgEventSubscriber implements EventSubscriberInterface {
         // which can then be overridden by other subscribers that set module
         // specific permissions.
         ['provideDefaultOgPermissions', 10],
-        ['provideDefaultNodePermissions']
+        ['provideDefaultNodePermissions'],
       ],
       DefaultRoleEventInterface::EVENT_NAME => [['provideDefaultRoles']],
+      GroupCreationEventInterface::EVENT_NAME => [['createUserGroupAudienceField']],
     ];
   }
 
@@ -180,6 +185,70 @@ class OgEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
+   * Upon group creation, add an OG audience field to the user if it missing.
+   *
+   * @param GroupCreationEventInterface $event
+   *   The created group.
+   */
+  public function createUserGroupAudienceField(GroupCreationEventInterface $event) {
+    $entity_type_id = $event->getEntityTypeId();
+    $bundle_id = $event->getBundleId();
+
+    $user_bundles = array_keys($this->entityTypeBundleInfo->getBundleInfo('user'));
+
+    foreach ($user_bundles as $bundle) {
+      // Create a group audience field which will reference to groups from the
+      // given entity type ID and attach it to the user.
+      $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', $bundle);
+
+      foreach ($fields as $field) {
+
+        if ($field->getFieldStorageDefinition()->getSetting('target_type') == $entity_type_id) {
+
+          if (!$field->getSetting('handler_settings')['target_bundles']) {
+            // The field does not reference to any group bundle.
+            return;
+          }
+
+          if (in_array($bundle_id, $field->getSetting('handler_settings')['target_bundles'])) {
+            // The field doe not handle the current bundle.
+            return;
+          }
+        }
+      }
+    }
+
+    // If we reached here, it means we need to create a field. Pick an unused
+    // name but don't exceed the maximum characters to a field name.
+    $field_name = substr("og_user_$entity_type_id", 0, 32);
+    $i = 1;
+    while (FieldConfig::loadByName($entity_type_id, $bundle_id, $field_name)) {
+      $field_name = substr("og_user_$entity_type_id", 0, 32 - strlen($i)) . $i;
+      ++$i;
+    }
+
+    $settings = [
+      'field_name' => $field_name,
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => $entity_type_id,
+        ],
+      ],
+      'field_config' => [
+        'settings' => [
+          'handler_settings' => [
+            'target_bundles' => [$bundle_id => $bundle_id],
+          ],
+        ],
+      ],
+    ];
+
+    foreach ($user_bundles as $user_bundle) {
+      Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', $user_bundle, $settings);
+    }
+  }
+
+  /**
    * Returns a list of generic entity operation permissions for group content.
    *
    * This returns generic group content entity operation permissions for the
@@ -225,9 +294,9 @@ class OgEventSubscriber implements EventSubscriberInterface {
   /**
    * Helper method to generate entity operation permissions for a given bundle.
    *
-   * @param $group_content_entity_type_id
+   * @param string $group_content_entity_type_id
    *   The entity type ID for which to generate the permission list.
-   * @param $group_content_bundle_id
+   * @param string $group_content_bundle_id
    *   The bundle ID for which to generate the permission list.
    *
    * @return array
@@ -245,7 +314,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       '@entity' => $entity_info->getPluralLabel(),
     ];
     // @todo This needs to support all entity operations for the given entity
-    //    type, not just the standard CRUD operations.
+    //   type, not just the standard CRUD operations.
     // @see https://github.com/amitaibu/og/issues/222
     $operations = [
       [

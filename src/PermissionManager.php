@@ -50,7 +50,8 @@ class PermissionManager implements PermissionManagerInterface {
       }
 
       // Optionally filter on role name.
-      return empty($role_name) || (!empty($permission->getDefaultRoles()) && in_array($role_name, $permission->getDefaultRoles()));
+      $default_roles = $permission->getDefaultRoles();
+      return empty($role_name) || (!empty($default_roles) && in_array($role_name, $permission->getDefaultRoles()));
     });
 
     return $permissions;
@@ -69,7 +70,8 @@ class PermissionManager implements PermissionManagerInterface {
       }
 
       // Optionally filter on role name.
-      return empty($role_name) || (!empty($permission->getDefaultRoles()) && in_array($role_name, $permission->getDefaultRoles()));
+      $default_roles = $permission->getDefaultRoles();
+      return empty($role_name) || (!empty($default_roles) && in_array($role_name, $permission->getDefaultRoles()));
     });
 
     return $permissions;

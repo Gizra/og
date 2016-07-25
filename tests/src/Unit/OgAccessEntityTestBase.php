@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Unit\OgAccessEntityTestBase.
- */
-
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -18,6 +13,9 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgGroupAudienceHelper;
 use Prophecy\Argument;
 
+/**
+ * OG access entity base class.
+ */
 class OgAccessEntityTestBase extends OgAccessTestBase {
 
   /**

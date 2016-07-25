@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgAccess.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Access\AccessResult;
@@ -16,7 +11,6 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\user\EntityOwnerInterface;
-use Drupal\user\RoleInterface;
 
 /**
  * The service that determines if users have access to groups and group content.
@@ -138,7 +132,7 @@ class OgAccess implements OgAccessInterface {
       }
     }
 
-    // Group manager has all privileges (if variable is TRUE) and they are
+    // Group manager has all privileges (if variable is TRUE) and they are.
     if ($config->get('group_manager_full_access') && $user->isAuthenticated() && $group instanceof EntityOwnerInterface) {
       $cacheable_metadata->addCacheableDependency($group);
       if ($group->getOwnerId() == $user->id()) {
@@ -157,12 +151,12 @@ class OgAccess implements OgAccessInterface {
       if ($membership = Og::getMembership($user, $group)) {
         foreach ($membership->getRoles() as $role) {
           // Check for the is_admin flag.
+          /** @var \Drupal\og\Entity\OgRole $role */
           if ($role->isAdmin()) {
             $user_is_group_admin = TRUE;
             break;
           }
 
-          /** @var $role RoleInterface */
           $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
@@ -345,11 +339,11 @@ class OgAccess implements OgAccessInterface {
    *   The entity object.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user object.
-   * @param bool $pre_alter $type
+   * @param bool $pre_alter
    *   Determines if the type of permissions is pre-alter or post-alter.
    * @param array $permissions
    *   Array of permissions to set.
-   * @param bool @is_admin
+   * @param bool $is_admin
    *   Whether or not the user is a group administrator.
    * @param \Drupal\Core\Cache\RefinableCacheableDependencyInterface $cacheable_metadata
    *   A cacheable metadata object.
@@ -374,7 +368,7 @@ class OgAccess implements OgAccessInterface {
    *   The entity object.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user object.
-   * @param bool $pre_alter $type
+   * @param bool $pre_alter
    *   Determines if the type of permissions is pre-alter or post-alter.
    *
    * @return array
@@ -386,9 +380,7 @@ class OgAccess implements OgAccessInterface {
     $user_id = $user->id();
     $type = $pre_alter ? 'pre_alter' : 'post_alter';
 
-    return isset($this->permissionsCache[$entity_type_id][$group_id][$user_id][$type]) ?
-      $this->permissionsCache[$entity_type_id][$group_id][$user_id][$type] :
-      [];
+    return isset($this->permissionsCache[$entity_type_id][$group_id][$user_id][$type]) ? $this->permissionsCache[$entity_type_id][$group_id][$user_id][$type] : [];
   }
 
   /**

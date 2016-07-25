@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\Validation\Constraint\ValidOgMembershipReferenceConstraint.
- */
-
 namespace Drupal\og\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;

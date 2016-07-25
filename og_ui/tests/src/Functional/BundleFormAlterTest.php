@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\Tests\BundleFormAlterTest.
- */
-
 namespace Drupal\og_ui\Tests;
 
-use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\AssertLegacyTrait;
 use Drupal\node\Entity\NodeType;
@@ -133,7 +127,7 @@ class BundleFormAlterTest extends BrowserTestBase {
   /**
    * Checks whether the target bundles in the group content are as expected.
    *
-   * @param array|NULL $expected
+   * @param array|null $expected
    *   The expected value for the target bundles.
    * @param string $message
    *   The message to display with the assertion.

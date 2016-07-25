@@ -9,12 +9,16 @@ use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
+ * Tests permission events.
+ *
  * @group og
  * @coversDefaultClass \Drupal\og\Event\PermissionEvent
  */
 class PermissionEventTest extends UnitTestCase {
 
   /**
+   * Tests getting a single group permission.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -38,7 +42,8 @@ class PermissionEventTest extends UnitTestCase {
       try {
         $event->getPermission($name);
         $this->fail('Calling ::getPermission() on a non-existing permission throws an exception.');
-      } catch (\InvalidArgumentException $e) {
+      }
+      catch (\InvalidArgumentException $e) {
         // Expected result.
       }
     }
@@ -52,6 +57,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting a single group content permission.
+   *
    * @param \Drupal\og\GroupContentOperationPermission[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -89,6 +96,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting group permissions.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -112,6 +121,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting group permissions.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -137,6 +148,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests setting an invalid permission.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -161,6 +174,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests deleting a permission.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -190,6 +205,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests deleting a group content permission.
+   *
    * @param \Drupal\og\GroupContentOperationPermission[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -226,6 +243,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests checking if permission exists.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -251,6 +270,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests checking if group content permission exists.
+   *
    * @param \Drupal\og\GroupContentOperationPermission[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -281,6 +302,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting a group entity type ID.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -301,6 +324,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting a group bundle ID.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -321,6 +346,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests getting group content bundle IDs.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -341,6 +368,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetGet".
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -375,6 +404,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetSet".
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -438,7 +469,7 @@ class PermissionEventTest extends UnitTestCase {
       // title.
       [
         '',
-         new GroupPermission([
+        new GroupPermission([
           'name' => 'a titleless permission',
         ]),
       ],
@@ -448,7 +479,7 @@ class PermissionEventTest extends UnitTestCase {
         'a non-matching key',
         new GroupPermission([
           'name' => 'a different key',
-          'title' => $this->t('This permission has a name that differs from the array key that is used to set it.')
+          'title' => $this->t('This permission has a name that differs from the array key that is used to set it.'),
         ]),
       ],
       // Test that an exception is thrown when an object is passed which is not
@@ -461,6 +492,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetUnset".
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -491,6 +524,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Tests "offsetExists".
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -516,6 +551,8 @@ class PermissionEventTest extends UnitTestCase {
   }
 
   /**
+   * Check that the iterator has looped over all permissions correctly.
+   *
    * @param \Drupal\og\PermissionInterface[] $permissions
    *   An array of test permissions.
    * @param string $entity_type_id
@@ -730,7 +767,7 @@ class PermissionEventTest extends UnitTestCase {
       [
         [
           new GroupPermission([
-            'title' => $this->t('This permission doesn\'t have a title.'),
+            'title' => $this->t('This permission does not have a title.'),
           ]),
         ],
       ],
@@ -814,7 +851,7 @@ class PermissionEventTest extends UnitTestCase {
             'roles' => [OgRoleInterface::AUTHENTICATED],
             'default roles' => [OgRoleInterface::AUTHENTICATED],
           ]),
-          new GroupPermission([
+          'permission' => new GroupPermission([
             'name' => 'invalid permission',
           ]),
         ],
@@ -946,4 +983,3 @@ class PermissionEventTest extends UnitTestCase {
   }
 
 }
-

@@ -64,7 +64,7 @@ class GroupContentOperationPermission extends Permission {
    * @return $this
    */
   public function setEntityType($entity_type) {
-    $this->set('entity type' , $entity_type);
+    $this->set('entity type', $entity_type);
     return $this;
   }
 
@@ -87,7 +87,7 @@ class GroupContentOperationPermission extends Permission {
    * @return $this
    */
   public function setBundle($bundle) {
-    $this->set('bundle' , $bundle);
+    $this->set('bundle', $bundle);
     return $this;
   }
 
@@ -110,7 +110,7 @@ class GroupContentOperationPermission extends Permission {
    * @return $this
    */
   public function setOperation($operation) {
-    $this->set('operation' , $operation);
+    $this->set('operation', $operation);
     return $this;
   }
 
@@ -128,14 +128,14 @@ class GroupContentOperationPermission extends Permission {
   /**
    * Sets the owner scope of this permission.
    *
-   * @param bool
+   * @param bool $owner
    *   FALSE if this permission applies to all entities, TRUE if it only applies
    *   to the entities owned by the user.
    *
    * @return $this
    */
   public function setOwner($owner) {
-    $this->set('owner' , $owner);
+    $this->set('owner', $owner);
     return $this;
   }
 

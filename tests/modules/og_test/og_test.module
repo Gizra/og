@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * og_test.module
+ */
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function og_test_entity_bundle_info_alter(&$bundles) {
+  $bundles['user']['og_user_bundle'] = [
+    'label' => t('OG user bundle'),
+  ];
+}
