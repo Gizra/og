@@ -65,7 +65,7 @@ class OgMembershipTest extends KernelTestBase {
     /** @var \Drupal\Core\Entity\EntityTypeManagerInterface entityTypeManager */
     $this->entityTypeManager = $this->container->get('entity_type.manager');
 
-    // Create a bundle and add as a group
+    // Create a bundle and add as a group.
     $group = EntityTest::create([
       'type' => Unicode::strtolower($this->randomMachineName()),
       'name' => $this->randomString(),

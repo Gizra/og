@@ -158,8 +158,11 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the membership state.
    *
-   * @return bool
-   *   The membership state. Either TRUE or FALSE.
+   * @return int
+   *   The state of the membership. It may be of the following values:
+   *   - OgMembershipInterface::STATE_ACTIVE
+   *   - OgMembershipInterface::STATE_PENDING
+   *   - OgMembershipInterface::STATE_BLOCKED
    */
   public function getState();
 

@@ -72,10 +72,10 @@ class OgEventSubscriber implements EventSubscriberInterface {
         // which can then be overridden by other subscribers that set module
         // specific permissions.
         ['provideDefaultOgPermissions', 10],
-        ['provideDefaultNodePermissions']
+        ['provideDefaultNodePermissions'],
       ],
       DefaultRoleEventInterface::EVENT_NAME => [['provideDefaultRoles']],
-      GroupCreationEventInterface::EVENT_NAME => [['createUserGroupAudienceField']]
+      GroupCreationEventInterface::EVENT_NAME => [['createUserGroupAudienceField']],
     ];
   }
 
@@ -197,7 +197,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
     $user_bundles = array_keys($this->entityTypeBundleInfo->getBundleInfo('user'));
 
     foreach ($user_bundles as $bundle) {
-      // create a group audience field which will reference to groups from the
+      // Create a group audience field which will reference to groups from the
       // given entity type ID and attach it to the user.
       $fields = OgGroupAudienceHelper::getAllGroupAudienceFields('user', $bundle);
 
@@ -294,9 +294,9 @@ class OgEventSubscriber implements EventSubscriberInterface {
   /**
    * Helper method to generate entity operation permissions for a given bundle.
    *
-   * @param $group_content_entity_type_id
+   * @param string $group_content_entity_type_id
    *   The entity type ID for which to generate the permission list.
-   * @param $group_content_bundle_id
+   * @param string $group_content_bundle_id
    *   The bundle ID for which to generate the permission list.
    *
    * @return array
@@ -314,7 +314,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       '@entity' => $entity_info->getPluralLabel(),
     ];
     // @todo This needs to support all entity operations for the given entity
-    //    type, not just the standard CRUD operations.
+    //   type, not just the standard CRUD operations.
     // @see https://github.com/amitaibu/og/issues/222
     $operations = [
       [

@@ -1,9 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\og\OgRoleInterface.
- */
 namespace Drupal\og;
 
 /**
@@ -63,7 +59,7 @@ interface OgRoleInterface {
    * Sets the role name.
    *
    * @param string $name
-   *   The role name
+   *   The role name.
    *
    * @return $this
    */

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgGroupAudienceHelper.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -12,7 +7,6 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * OG audience field helper methods.
@@ -47,16 +41,16 @@ class OgGroupAudienceHelper {
     return in_array($field_definition->getType(), [OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE, OgGroupAudienceHelper::USER_TO_GROUP_REFERENCE_FIELD_TYPE]);
   }
 
-
   /**
-   * Return TRUE if a field can be used and has not reached maximum values.
-   *d
+   * Determine if a field can be used and has not reached maximum values.
+   *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The content entity to check the field cardinality for.
    * @param string $field_name
    *   The field name to check the cardinality of.
    *
    * @return bool
+   *   Returns TRUE if the OG audience field can be used.
    *
    * @throws \Drupal\Core\Field\FieldException
    */
@@ -96,7 +90,7 @@ class OgGroupAudienceHelper {
    *   (optional) Set this to FALSE to not check if the current user has access
    *   to the field. Defaults to TRUE.
    *
-   * @return string|NULL
+   * @return string|null
    *   The name of the group audience field, or NULL if no matching field was
    *   found.
    */
@@ -122,7 +116,7 @@ class OgGroupAudienceHelper {
       }
 
       if (!static::checkFieldCardinality($entity, $field_name)) {
-        // The field cardinality has reached its maximum
+        // The field cardinality has reached its maximum.
         continue;
       }
 

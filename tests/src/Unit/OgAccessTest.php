@@ -1,31 +1,32 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Unit\OgAccessTest.
- */
-
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\og\OgAccess;
 
 /**
+ * Tests access.
+ *
  * @group og
  * @coversDefaultClass \Drupal\og\OgAccess
  */
 class OgAccessTest extends OgAccessTestBase {
 
   /**
+   * Tests access for a non-group related entity.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
-  public function testUserAccessNotAGroup($operation) {
+  public function testUserAccessNotGroup($operation) {
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(FALSE);
     $user_access = $this->ogAccess->userAccess($this->group, $operation);
     $this->assertTrue($user_access->isNeutral());
   }
 
   /**
+   * Tests access to entity.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
@@ -40,6 +41,8 @@ class OgAccessTest extends OgAccessTestBase {
   }
 
   /**
+   * Tests access by the super user, which is user ID 1.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
@@ -50,6 +53,8 @@ class OgAccessTest extends OgAccessTestBase {
   }
 
   /**
+   * Tests access by a group administrator.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */
@@ -60,6 +65,8 @@ class OgAccessTest extends OgAccessTestBase {
   }
 
   /**
+   * Tests access by the owner of the entity.
+   *
    * @coversDefaultmethod ::userAccess
    * @dataProvider permissionsProvider
    */

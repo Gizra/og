@@ -53,7 +53,7 @@ class OgUiEventSubscriber implements EventSubscriberInterface {
       new GroupPermission([
         'name' => 'approve and deny subscription',
         'title' => t('Approve and deny subscription'),
-        'description' => t('Users may allow or deny another user\'s subscription request.'),
+        'description' => t("Users may allow or deny another user's subscription request."),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
       ]),
       new GroupPermission([

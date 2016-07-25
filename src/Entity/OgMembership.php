@@ -34,10 +34,10 @@ use Drupal\og\OgMembershipInterface;
  * Creating such a relation is done for example in the following way:
  *
  * @code
- *  $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
+ *  $membership = OgMembership::create();
  *  $membership
  *    ->setUser($user)
- *    ->setGroup($group)
+ *    ->setGroup($entity)
  *    ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
  *    ->save();
  * @endcode

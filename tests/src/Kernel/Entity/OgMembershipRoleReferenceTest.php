@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\og\Kernel\Entity\OgMembershipRoleReference.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -27,18 +22,22 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
   public static $modules = ['og', 'node', 'user', 'system'];
 
   /**
-   * @var string
-   *
    * The machine name of the group node type.
+   *
+   * @var string
    */
   protected $groupBundle;
 
   /**
+   * The group entity, of type node.
+   *
    * @var Node
    */
   protected $group;
 
   /**
+   * The user object.
+   *
    * @var User
    */
   protected $user;

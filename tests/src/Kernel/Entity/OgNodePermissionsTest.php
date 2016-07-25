@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\Entity\OgNodePermissionsTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
@@ -14,6 +9,8 @@ use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
+ * Test OG permissions for node entities.
+ *
  * @group og
  */
 class OgNodePermissionsTest extends KernelTestBase {
@@ -21,10 +18,16 @@ class OgNodePermissionsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'field', 'og', 'system', 'user'];
+  public static $modules = [
+    'node',
+    'field',
+    'og',
+    'system',
+    'user',
+  ];
 
   /**
-   * Testing group content node permissions.
+   * Tests group content node permissions.
    */
   public function testGetPermissions() {
     // Create a node group content.

@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Core\Entity\Entity;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
