@@ -26,7 +26,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     'node',
     'user',
     'system',
-    'field'
+    'field',
   ];
 
   /**
