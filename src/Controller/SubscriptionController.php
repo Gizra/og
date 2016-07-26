@@ -1,11 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\Controller\SubscriptionController.
- */
-
-namespace Drupal\og_ui\Controller;
+namespace Drupal\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;

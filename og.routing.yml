@@ -1,0 +1,18 @@
+# Routes for Organic groups.
+
+og_ui.subscribe:
+  path: 'group/{entity_type_id}/{entity_id}/subscribe/{field_name}'
+  defaults:
+    _controller: '\Drupal\og\Controller\SubscriptionController::subscribe'
+    _title: 'Join Group'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+
+og_ui.unsubscribe:
+  path: 'group/{entity_type_id}/{entity_id}/unsubscribe'
+  defaults:
+    _controller: '\Drupal\og\Controller\SubscriptionController::unsubscribe'
+    _title: 'Leave Group'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _og_user_access_group: 'unsubscribe'

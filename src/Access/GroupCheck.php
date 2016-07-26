@@ -1,11 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\Access\GroupCheck.
- */
-
-namespace Drupal\og_ui\Access;
+namespace Drupal\og\Access;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -28,26 +23,41 @@ class GroupCheck implements AccessInterface {
   protected $entityTypeManager;
 
   /**
+   * The OG access service.
+   *
+   * @var \Drupal\og\OgAccess
+   */
+  protected $ogAccess;
+
+  /**
    * Constructs a GroupCheck object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager service.
+   * @param \Drupal\og\OgAccess $og_access
+   *   The OG access service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, OgAccess $og_access) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->ogAccess = $og_access;
   }
 
   /**
    * Checks access.
    *
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   The currently logged in account.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The currently logged in user.
    * @param \Symfony\Component\Routing\Route $route
    *   The route to check against.
+   * @param string $entity_type_id
+   *   The entity type.
+   * @param string $entity_id
+   *   The entity ID.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(AccountInterface $account, Route $route, $entity_type_id, $entity_id) {
+  public function access(AccountInterface $user, Route $route, $entity_type_id, $entity_id) {
     // No access if the entity type doesn't exist.
     if (!$this->entityTypeManager->getDefinition($entity_type_id, FALSE)) {
       return AccessResult::forbidden();
@@ -67,9 +77,9 @@ class GroupCheck implements AccessInterface {
 //      return AccessResult::forbidden();
 //    }
 
-    $permission = $permission = $route->getRequirement('_og_ui_user_access_group');
+    $permission = $permission = $route->getRequirement('_og_user_access_group');
 
-    return OgAccess::userAccess($group, $permission);
+    return $this->ogAccess->userAccess($group, $permission, $user);
   }
 
 }
