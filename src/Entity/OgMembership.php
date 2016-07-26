@@ -325,7 +325,10 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       throw new \LogicException('Membership cannot be set for an empty or an unsaved group.');
     }
 
-    $group = $this->getGroup();
+    if (!$group = $this->getGroup()) {
+      throw new \LogicException('A group entity is required for creating a membership.');
+    }
+
     $entity_type_id = $group->getEntityTypeId();
     $bundle = $group->bundle();
     if (!Og::isGroup($entity_type_id, $bundle)) {
