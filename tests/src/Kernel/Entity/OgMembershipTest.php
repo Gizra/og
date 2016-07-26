@@ -7,7 +7,6 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
-use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 
@@ -45,6 +44,13 @@ class OgMembershipTest extends KernelTestBase {
   protected $user;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -55,6 +61,8 @@ class OgMembershipTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
+
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     // Create a bundle and add as a group.
     $group = EntityTest::create([
@@ -82,7 +90,7 @@ class OgMembershipTest extends KernelTestBase {
    * @covers ::setUser
    */
   public function testGetSetUser() {
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->user)
       ->setGroup($this->group)
@@ -93,7 +101,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
 
     // And after re-loading.
-    $membership = Og::membershipStorage()->loadUnchanged($membership->id());
+    $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
 
     $this->assertInstanceOf(UserInterface::class, $membership->getUser());
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
@@ -107,7 +115,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testGetSetUserException() {
     /** @var OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setGroup($this->group)
       ->save();
