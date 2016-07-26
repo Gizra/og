@@ -60,13 +60,17 @@ class OgContextHandler implements OgContextHandlerInterface {
   public function getGroup() {
     $plugins = $this->getPlugins();
 
+    $groups = [];
+
     foreach ($plugins as $plugin) {
       if ($group = $this->getPlugin($plugin['id'])->getGroup()) {
-        return $group;
+        $groups = array_merge($groups, $group);
       }
     }
 
-    return NULL;
+    // Return the first group for now. handle in a follow up PR to find the best
+    // matching group.
+    return reset($groups);
   }
 
   /**
