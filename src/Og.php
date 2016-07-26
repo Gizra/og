@@ -509,16 +509,16 @@ class Og {
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to test the membership for.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user entity.
    *
    * @return bool
    *   True if the membership is blocked.
    *
    * @see \Drupal\og\Og::isMember
    */
-  public static function isMemberBlocked(EntityInterface $group, EntityInterface $entity) {
-    return static::isMember($group, $entity, [OgMembershipInterface::STATE_BLOCKED]);
+  public static function isMemberBlocked(EntityInterface $group, AccountInterface $user) {
+    return static::isMember($group, $user, [OgMembershipInterface::STATE_BLOCKED]);
   }
 
   /**

@@ -8,6 +8,7 @@ use Drupal\Core\Url;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -21,6 +22,31 @@ use Drupal\og\OgAccess;
 class SubscriptionController extends ControllerBase {
 
   /**
+   * OG access service.
+   *
+   * @var \Drupal\og\OgAccess
+   */
+  protected $ogAccess;
+
+
+  /**
+   * Constructs a SubscriptionController object.
+   *
+   */
+  public function __construct(OgAccess $og_access) {
+    $this->ogAccess = $og_access;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('og.access')
+    );
+  }
+
+  /**
    * Subscribe a user to group.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -32,12 +58,11 @@ class SubscriptionController extends ControllerBase {
    */
   public function subscribe(Request $request, $entity_type_id, $entity_id, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
     $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
-    $entity_access = $this->entityTypeManager()->getAccessControlHandler($entity_type_id);
     $group = $entity_storage->load($entity_id);
 
-    $account = User::load($this->currentUser()->id());
+    $user = User::load($this->currentUser()->id());
 
-    if ($account->isAnonymous()) {
+    if ($user->isAnonymous()) {
       // Anonymous user can't request membership.
       $destination = $this->getDestinationArray();
 
@@ -60,23 +85,23 @@ class SubscriptionController extends ControllerBase {
 
     $redirect = FALSE;
     $message = '';
-    $params = ['@user' => $account->getDisplayName()];
+    $params = ['@user' => $user->getDisplayName()];
 
     // Show the group name only if user has access to it.
-    $params['@group'] = $group->access('view', $account) ?  $group->label() : $this->t('Private group');
+    $params['@group'] = $group->access('view', $user) ?  $group->label() : $this->t('Private group');
 
-    if (Og::isMemberBlocked($group, $account)) {
+    if (Og::isMemberBlocked($group, $user)) {
       // User is blocked, access denied.
       throw new AccessDeniedHttpException();
     }
 
-    if (Og::isMemberPending($group, $account)) {
+    if (Og::isMemberPending($group, $user)) {
       // User is pending, return them back.
       $message = $this->t('@user already has a pending membership for the  the group @group.', $params);
       $redirect = TRUE;
     }
 
-    if (Og::isMember($group, $account)) {
+    if (Og::isMember($group, $user)) {
       // User is already a member, return them back.
       $message = $this->t('You are already a member of the group @group.', $params);
       $redirect = TRUE;
@@ -87,11 +112,9 @@ class SubscriptionController extends ControllerBase {
       return new RedirectResponse($group->toUrl()->setAbsolute(TRUE)->toString());
     }
 
-    if (OgAccess::userAccess($group, 'subscribe', $account) || OgAccess::userAccess($group, 'subscribe without approval', $account)) {
+    if ($this->ogAccess->userAccess($group, 'subscribe', $user) || $this->ogAccess->userAccess($group, 'subscribe without approval', $user)) {
       // Show the user a subscription confirmation.
-      // @todo Use buildForm() create our own form state object and attach
-      // field_name etc..?
-      return $this->formBuilder()->getForm('\Drupal\og_ui\Form\GroupSubscribeConfirmForm', $group, $account, $field_name);
+      return $this->formBuilder()->getForm('\Drupal\og\Form\GroupSubscribeConfirmForm', $group, $user);
     }
 
     throw new AccessDeniedHttpException();
@@ -102,26 +125,31 @@ class SubscriptionController extends ControllerBase {
    * @param string|int $entity_id
    */
   public function unsubscribe($entity_type_id, $entity_id) {
-    // @todo We don't need to re-validate the entity type and entity group here,
-    // as it's already been done in the access check?
     $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
     $group = $entity_storage->load($entity_id);
 
-    $account = $this->currentUser();
+    $user = $this->currentUser();
 
-    // Check the user isn't the manager of the group.
-    if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() !== $account->id())) {
-      if (Og::isMember($group, $account, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])) {
-        // Show the user a subscription confirmation.
-        return $this->formBuilder()->getForm('\Drupal\og_ui\Form\GroupUnsubscribeConfirmForm', $group);
-      }
-
+    if (Og::isMemberBlocked($group, $user)) {
+      // User is a blocked member.
       throw new AccessDeniedHttpException();
     }
 
-    drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $group->label())));
+    if ($group instanceof EntityOwnerInterface && $group->getOwnerId() !== $user->id()) {
+      // The user is the manager of the group.
+      drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $group->label())));
 
-    return new RedirectResponse($group->toUrl()->setAbsolute(TRUE)->toString());
+      return new RedirectResponse($group->toUrl()
+        ->setAbsolute(TRUE)
+        ->toString());
+    }
+
+    // Show the user a un-subscription confirmation.
+    return $this
+      ->formBuilder()
+      ->getForm('\Drupal\og_ui\Form\GroupUnsubscribeConfirmForm', $group);
+
+
   }
 
 }
