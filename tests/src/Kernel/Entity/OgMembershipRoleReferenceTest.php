@@ -4,8 +4,10 @@ namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Og;
 use Drupal\user\Entity\User;
 
 /**
@@ -19,13 +21,6 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
    * {@inheritdoc}
    */
   public static $modules = ['og', 'node', 'user', 'system'];
-
-  /**
-   * The machine name of the group node type.
-   *
-   * @var string
-   */
-  protected $groupBundle;
 
   /**
    * The group entity, of type node.
@@ -54,7 +49,14 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installSchema('system', 'sequences');
 
-    $this->groupBundle = $this->randomMachineName();
+    // Create a "group" node type and turn it into a group type.
+    $group_bundle = $this->randomMachineName();
+    NodeType::create([
+      'type' => $group_bundle,
+      'name' => $this->randomString(),
+    ])->save();
+
+    Og::groupManager()->addGroup('node', $group_bundle);
 
     $this->user = User::create(['name' => $this->randomString()]);
     $this->user->save();
@@ -62,8 +64,9 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->group = Node::create([
       'title' => $this->randomString(),
       'uid' => $this->user->id(),
-      'type' => $this->groupBundle,
+      'type' => $group_bundle,
     ]);
+    $this->group->save();
   }
 
   /**

@@ -320,7 +320,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       throw new \LogicException('OG membership can not be created for an empty or anonymous user.');
     }
 
-    if (!$this->get('entity_id')) {
+    if (!$this->get('entity_id')->value) {
       // Group was not set.
       throw new \LogicException('Membership cannot be set for an empty or an unsaved group.');
     }
