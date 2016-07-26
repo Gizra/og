@@ -135,7 +135,7 @@ class SubscriptionController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    if ($group instanceof EntityOwnerInterface && $group->getOwnerId() !== $user->id()) {
+    if ($group instanceof EntityOwnerInterface && $group->getOwnerId() == $user->id()) {
       // The user is the manager of the group.
       drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $group->label())));
 
