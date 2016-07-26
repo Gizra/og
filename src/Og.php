@@ -509,8 +509,8 @@ class Og {
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   The user entity.
+   * @param \Drupal\Core\Entity\EntityInterface $user
+   *   The entity to test the membership for.
    *
    * @return bool
    *   True if the membership is blocked.

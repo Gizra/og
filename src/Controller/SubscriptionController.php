@@ -19,6 +19,7 @@ use Drupal\og\OgAccess;
  */
 class SubscriptionController extends ControllerBase {
 
+
   /**
    * OG access service.
    *
@@ -133,7 +134,7 @@ class SubscriptionController extends ControllerBase {
 
     if ($group instanceof EntityOwnerInterface && $group->getOwnerId() == $user->id()) {
       // The user is the manager of the group.
-      drupal_set_message(t('As the manager of %group, you can not leave the group.', array('%group' => $group->label())));
+      drupal_set_message($this->t('As the manager of %group, you can not leave the group.', array('%group' => $group->label())));
 
       return new RedirectResponse($group->toUrl()
         ->setAbsolute(TRUE)
