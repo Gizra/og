@@ -243,7 +243,7 @@ class GetUserGroupsTest extends KernelTestBase {
    *   The saved OG membership entity.
    */
   protected function createMembership(User $user, EntityTest $group, $state = OgMembershipInterface::STATE_ACTIVE) {
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership->setUser($user)
       ->setGroup($group)
       ->setState($state)

@@ -104,7 +104,7 @@ class GetMembershipsTest extends KernelTestBase {
       foreach ($statuses as $group_key => $status) {
         $group = $this->groups[$group_key];
         if ($status) {
-          $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+          $membership = OgMembership::create();
           $membership
             ->setUser($user)
             ->setGroup($group)

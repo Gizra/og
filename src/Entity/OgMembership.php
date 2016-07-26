@@ -32,9 +32,8 @@ use Drupal\og\OgMembershipInterface;
  *
  * Creating such a relation is done for example in the following way:
  *
- * @code:
- *  $values = ['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT];
- *  $membership = OgMembership::create($values);
+ * @code
+ *  $membership = OgMembership::create();
  *  $membership
  *    ->setUser($user)
  *    ->setGroup($entity)
@@ -162,19 +161,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setRoles(array $roles = array()) {
-    $role_ids = array_map(function (OgRole $role) {
-      return $role->id();
-    }, $roles);
-
-    $this->set('roles', array_unique($role_ids));
-
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function addRole(OgRole $role) {
     $roles = $this->getRoles();
     $roles[] = $role;
@@ -210,6 +196,19 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
+  public function setRoles(array $roles = array()) {
+    $role_ids = array_map(function (OgRole $role) {
+      return $role->id();
+    }, $roles);
+
+    $this->set('roles', array_unique($role_ids));
+
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getRolesIds() {
     return array_map(function (OgRole $role) {
       return $role->id();
@@ -229,7 +228,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = array();
+    $fields = [];
 
     $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('ID'))
@@ -309,6 +308,15 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     \Drupal::service('og.access')->reset();
 
     return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(array $values = []) {
+    // Use the default membership type by default.
+    $values += ['type' => OgMembershipInterface::TYPE_DEFAULT];
+    return parent::create($values);
   }
 
 }
