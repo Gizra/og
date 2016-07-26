@@ -1,11 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\Form\GroupUnsubscribeConfirmForm.
- */
-
-namespace Drupal\og_ui\Form;
+namespace Drupal\og\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -20,7 +15,7 @@ class GroupUnsubscribeConfirmForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'og_ui_unsubscribe_confirm_form';
+    return 'og_unsubscribe_confirm_form';
   }
 
   /**

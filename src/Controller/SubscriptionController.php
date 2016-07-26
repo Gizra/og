@@ -21,35 +21,21 @@ use Drupal\og\OgAccess;
 class SubscriptionController extends ControllerBase {
 
   /**
+   * Subscribe a user to group.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
    * @param string $entity_type_id
    * @param string|int $entity_id
-   * @param NULL|string $field_name
+   * @param string|null $membership_type
    *
    * @return mixed
    */
-  public function subscribe(Request $request, $entity_type_id, $entity_id, $field_name) {
-    // @todo We don't need to re-validate the entity type and entity group here,
-    // as it's already been done in the access check?
+  public function subscribe(Request $request, $entity_type_id, $entity_id, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
     $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
     $entity_access = $this->entityTypeManager()->getAccessControlHandler($entity_type_id);
     $group = $entity_storage->load($entity_id);
 
     $account = User::load($this->currentUser()->id());
-
-    if (empty($field_name)) {
-      $field_name = og_get_best_group_audience_field('user', $account, $entity_type_id, $group->bundle());
-      if (empty($field_name)) {
-        throw new NotFoundHttpException();
-      }
-    }
-
-    // @todo Requires FieldableEntityInterface/ContentEntityInterface
-    $field = $group->getFieldDefinition($field_name);
-
-    if (empty($instance) || !$entity_access->fieldAccess('view', $field, $account)) {
-      // Field name given is incorrect, or user doesn't have access to the field.
-      throw new NotFoundHttpException();
-    }
 
     if ($account->isAnonymous()) {
       // Anonymous user can't request membership.
@@ -60,11 +46,13 @@ class SubscriptionController extends ControllerBase {
       // @todo I think this is correct? Other options are visitors or require
       // approval both of which apply to the else instead of here.
       if ($this->config('user.settings')->get('register') === USER_REGISTER_ADMINISTRATORS_ONLY) {
-        drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a>. After you have successfully done so, you will need to request membership again.', [':login' => $user_login_url]));
+        $params = [':login' => $user_login_url];
+        drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a>. After you have successfully done so, you will need to request membership again.', $params));
       }
       else {
         $user_register_url = Url::fromRoute('user.register', [], $destination)->toString();
-        drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a> or <a href=":register">register</a> a new account. After you have successfully done so, you will need to request membership again.', [':register' => $user_register_url, ':login' => $user_login_url]));
+        $params = [':register' => $user_register_url, ':login' => $user_login_url];
+        drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a> or <a href=":register">register</a> a new account. After you have successfully done so, you will need to request membership again.', $params));
       }
 
       return new RedirectResponse(Url::fromRoute('user.page')->setAbsolute(TRUE)->toString());
@@ -72,9 +60,7 @@ class SubscriptionController extends ControllerBase {
 
     $redirect = FALSE;
     $message = '';
-    $params = [
-      '@user' => $account->getDisplayName(),
-    ];
+    $params = ['@user' => $account->getDisplayName()];
 
     // Show the group name only if user has access to it.
     $params['@group'] = $group->access('view', $account) ?  $group->label() : $this->t('Private group');
@@ -94,24 +80,6 @@ class SubscriptionController extends ControllerBase {
       // User is already a member, return them back.
       $message = $this->t('You are already a member of the group @group.', $params);
       $redirect = TRUE;
-    }
-
-    $cardinality = $field->getStorageDefinition()->getCardinality();
-
-    if (!$message && ($cardinality != FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)) {
-      // Check if user is already registered as active or pending in the maximum
-      // allowed values.
-      if ($cardinality === 1) {
-        $count = $account->get($field_name)->value ? 1 : 0;
-      }
-      else {
-        $count = $account->get($field_name)->count();
-      }
-
-      if ($count >= $cardinality) {
-        $message = $this->t('You cannot register to this group, as you have reached your maximum allowed subscriptions.');
-        $redirect = TRUE;
-      }
     }
 
     if ($redirect) {

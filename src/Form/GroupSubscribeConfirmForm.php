@@ -1,11 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\Form\GroupSubscribeConfirmForm.
- */
-
-namespace Drupal\og_ui\Form;
+namespace Drupal\og\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -21,7 +16,7 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'og_ui_subscribe_confirm_form';
+    return 'og_subscribe_confirm_form';
   }
 
   /**
@@ -98,7 +93,7 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $og_membership = $form_state['og_membership'];
-    field_attach_submit('og_membership', $og_membership, $form, $form_state);
+//    field_attach_submit('og_membership', $og_membership, $form, $form_state);
 
     $og_membership->save();
 
