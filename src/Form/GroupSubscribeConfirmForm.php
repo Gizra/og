@@ -60,19 +60,18 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
       }
     }
 
-//    // Add group membership form.
-//    $og_membership = og_membership_create($group_type, $gid, 'user', $account->uid, $field_name, array('state' => $state));
-//    $form_state['og_membership'] = $og_membership;
-//    field_attach_form('og_membership', $og_membership, $form, $form_state);
-//
-//    if ($state == OG_STATE_ACTIVE && !empty($form[OG_MEMBERSHIP_REQUEST_FIELD])) {
-//      // Hide the user request field.
-//      $form[OG_MEMBERSHIP_REQUEST_FIELD]['#access'] = FALSE;
-//    }
-//    $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
-//    $form['gid'] = array('#type' => 'value', '#value' => $gid);
-//    $form['field_name'] = array('#type' => 'value', '#value' => $field_name);
-
+    // // Add group membership form.
+    //    $og_membership = og_membership_create($group_type, $gid, 'user', $account->uid, $field_name, array('state' => $state));
+    //    $form_state['og_membership'] = $og_membership;
+    //    field_attach_form('og_membership', $og_membership, $form, $form_state);
+    //
+    //    if ($state == OG_STATE_ACTIVE && !empty($form[OG_MEMBERSHIP_REQUEST_FIELD])) {
+    //      // Hide the user request field.
+    //      $form[OG_MEMBERSHIP_REQUEST_FIELD]['#access'] = FALSE;
+    //    }
+    //    $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
+    //    $form['gid'] = array('#type' => 'value', '#value' => $gid);
+    //    $form['field_name'] = array('#type' => 'value', '#value' => $field_name);.
     return parent::buildForm($form, $form_state);
   }
 
@@ -87,14 +86,12 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
     field_attach_form_validate('og_membership', $og_membership, $form, $form_state);
   }
 
-
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $og_membership = $form_state['og_membership'];
-//    field_attach_submit('og_membership', $og_membership, $form, $form_state);
-
+    // field_attach_submit('og_membership', $og_membership, $form, $form_state);.
     $og_membership->save();
 
     if ($this->entity->access('view')) {
@@ -108,4 +105,3 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
   }
 
 }
-

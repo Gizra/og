@@ -3,7 +3,6 @@
 namespace Drupal\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Url;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
@@ -12,7 +11,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
 
@@ -28,10 +26,8 @@ class SubscriptionController extends ControllerBase {
    */
   protected $ogAccess;
 
-
   /**
    * Constructs a SubscriptionController object.
-   *
    */
   public function __construct(OgAccess $og_access) {
     $this->ogAccess = $og_access;
@@ -88,7 +84,7 @@ class SubscriptionController extends ControllerBase {
     $params = ['@user' => $user->getDisplayName()];
 
     // Show the group name only if user has access to it.
-    $params['@group'] = $group->access('view', $user) ?  $group->label() : $this->t('Private group');
+    $params['@group'] = $group->access('view', $user) ? $group->label() : $this->t('Private group');
 
     if (Og::isMemberBlocked($group, $user)) {
       // User is blocked, access denied.
@@ -148,7 +144,6 @@ class SubscriptionController extends ControllerBase {
     return $this
       ->formBuilder()
       ->getForm('\Drupal\og_ui\Form\GroupUnsubscribeConfirmForm', $group);
-
 
   }
 

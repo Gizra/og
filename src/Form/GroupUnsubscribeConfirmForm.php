@@ -44,8 +44,7 @@ class GroupUnsubscribeConfirmForm extends EntityConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // @todo This needs to be converted to D8.
-    //og_ungroup($this->entity);
-
+    // og_ungroup($this->entity);
     if ($this->entity->access('view')) {
       $form_state->setRedirectUrl($this->entity->toUrl());
     }
