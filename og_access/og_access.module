@@ -80,7 +80,7 @@ function og_access_node_access_records($node) {
 
   // Verify that a group content with visibility field can't create when there
   // isn't an OG access field attached to the group entity.
-  if (!empty($wrapper->{OG_CONTENT_ACCESS_FIELD}) && $wrapper->{OG_CONTENT_ACCESS_FIELD}->value() == OG_CONTENT_ACCESS_DEFAULT) {
+  if (!empty($wrapper->{OG_CONTENT_ACCESS_FIELD}) && $wrapper->{OG_CONTENT_ACCESS_FIELD}->value() === OG_CONTENT_ACCESS_DEFAULT) {
     _og_access_verify_access_field_existence($node);
   }
 

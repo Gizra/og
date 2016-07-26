@@ -374,6 +374,9 @@ class OgAccessUseGroupDefaultsTestCase extends DrupalWebTestCase {
     og_create_field(OG_AUDIENCE_FIELD, 'node', $this->group_content_type);
     og_create_field(OG_CONTENT_ACCESS_FIELD, 'node', $this->group_content_type);
 
+    // Create a legacy content type that doesn't have a relation with OG at first.
+    $this->legacy_content_type = $this->drupalCreateContentType()->type;
+
     // Create a group node.
     $settings = array();
     $settings['type'] = $this->group_type;
@@ -405,6 +408,31 @@ class OgAccessUseGroupDefaultsTestCase extends DrupalWebTestCase {
     $node = $this->drupalCreateNode($settings);
 
     $this->assertTrue($node, 'A group content has been created successfully.');
+  }
+
+  /**
+   * Verifies a node_rebuild_access() for a legacy content type after
+   * an addition of the OG_CONTENT_ACCESS_FIELD field.
+   */
+  function testLegacyContent() {
+    // Creates a node as an example of legacy content.
+    $settings = array();
+    $settings['type'] = $this->legacy_content_type;
+    $settings['uid'] = 1;
+    $this->drupalCreateNode($settings);
+
+    // Adds to a legacy content type an OG access field.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $this->legacy_content_type);
+    og_create_field(OG_CONTENT_ACCESS_FIELD, 'node', $this->legacy_content_type);
+
+    try {
+      node_access_rebuild();
+      $this->pass("A node access rebuild is successful for a legacy content type after an addition of the OG_CONTENT_ACCESS_FIELD field.");
+
+    }
+    catch (OgException $e) {
+      $this->fail("A node access rebuild is failed for a legacy content type after an addition of the OG_CONTENT_ACCESS_FIELD field.");
+    }
   }
 }
 
