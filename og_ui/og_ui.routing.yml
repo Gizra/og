@@ -16,23 +16,6 @@ og_ui.settings:
   requirements:
     _permission: 'administer group'
 
-og_ui.subscribe:
-  path: 'group/{entity_type_id}/{entity_id}/subscribe/{field_name}'
-  defaults:
-    _controller: '\Drupal\og_ui\Controller\SubscriptionController::subscribe'
-    _title: 'Join Group'
-    field_name: null
-  requirements:
-    _user_is_logged_in: 'TRUE'
-
-og_ui.unsubscribe:
-  path: 'group/{entity_type_id}/{entity_id}/unsubscribe'
-  defaults:
-    _controller: '\Drupal\og_ui\Controller\SubscriptionController::unsubscribe'
-    _title: 'Leave Group'
-  requirements:
-    _og_ui_user_access_group: 'unsubscribe'
-
 og_ui.roles_permissions_overview:
   path: 'admin/config/group/{type}'
   defaults:
