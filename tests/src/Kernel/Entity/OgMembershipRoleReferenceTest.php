@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -20,7 +21,13 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['og', 'node', 'user', 'system'];
+  public static $modules = [
+    'og',
+    'node',
+    'user',
+    'system',
+    'field'
+  ];
 
   /**
    * The group entity, of type node.
@@ -50,7 +57,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->installSchema('system', 'sequences');
 
     // Create a "group" node type and turn it into a group type.
-    $group_bundle = $this->randomMachineName();
+    $group_bundle = Unicode::strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $group_bundle,
       'name' => $this->randomString(),
