@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Controller;
+namespace Drupal\og\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
