@@ -25,8 +25,25 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
    */
   public static $modules = ['entity_test', 'user', 'field', 'og', 'system'];
 
+  /**
+   * Array with the bundle IDs.
+   *
+   * @var array
+   */
   protected $bundles;
+
+  /**
+   * The field name used as group audience.
+   *
+   * @var string
+   */
   protected $fieldName;
+
+  /**
+   * List of group entities.
+   *
+   * @var \Drupal\entity_test\Entity\EntityTest[]
+   */
   protected $groups;
 
   /**
@@ -136,25 +153,28 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $reload = function (EntityInterface &$entity) {
       $entity = \Drupal::entityTypeManager()->getStorage('user')->loadUnchanged($entity->id());
     };
-    $entity = User::create([
+    $user = User::create([
       'type' => $this->bundles[2],
       'name' => $this->randomString(),
     ]);
     // Assert no membership for a group membership with no references.
-    $this->assertSame(count($entity->{$this->fieldName}), 0);
-    $entity->save();
-    $this->assertSame(count($entity->{$this->fieldName}), 0);
+    $this->assertSame(count($user->{$this->fieldName}), 0);
+    $user->save();
+    $this->assertSame(count($user->{$this->fieldName}), 0);
+
+    /** @var EntityTest $group */
+    $group = $this->groups[0];
     $membership = OgMembership::create([
       'type' => $this->bundles[0],
       'field_name' => $this->fieldName,
-      'uid' => $entity->id(),
-      'entity_type' => 'user',
-      'entity_id' => $this->groups[0]->id(),
+      'uid' => $user->id(),
+      'entity_type' => $group->getEntityTypeId(),
+      'entity_id' => $group->id(),
     ]);
     $membership->save();
-    $reload($entity);
+    $reload($user);
     // Assert membership is picked up after a load from database.
-    $this->assertSame(count($entity->{$this->fieldName}->getValue()), 1);
+    $this->assertSame(count($user->{$this->fieldName}->getValue()), 1);
   }
 
 }
