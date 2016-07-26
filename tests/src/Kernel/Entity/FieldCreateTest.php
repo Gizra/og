@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\og\Kernel\Entity\FieldCreateTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
@@ -24,10 +19,20 @@ class FieldCreateTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['user', 'field', 'entity_reference', 'node', 'og', 'og_test', 'options', 'system'];
+  public static $modules = [
+    'user',
+    'field',
+    'node',
+    'options',
+    'system',
+    'og',
+    'og_test',
+  ];
 
   /**
-   * @var Array
+   * The group related bundles.
+   *
+   * @var array
    *   Array with the bundle IDs.
    */
   protected $bundles;
@@ -72,7 +77,6 @@ class FieldCreateTest extends KernelTestBase {
       $this->assertNotNull(FieldConfig::loadByName('node', $bundle, $field_name));
     }
 
-
     // Override the field config.
     $bundle = $this->bundles[1];
     Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $bundle, ['field_config' => ['label' => 'Other groups dummy']]);
@@ -111,4 +115,5 @@ class FieldCreateTest extends KernelTestBase {
     catch (\Exception $e) {
     }
   }
+
 }

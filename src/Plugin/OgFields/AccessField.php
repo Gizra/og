@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\OgFields\AccessField.
- */
-
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -25,8 +20,8 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
-    $values = [
+  public function getFieldStorageBaseDefinition(array $values = []) {
+    $values += [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings' => [
         'allowed_values' => [
@@ -38,14 +33,14 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
       'type' => 'list_integer',
     ];
 
-    return parent::getFieldStorageConfigBaseDefinition($values);
+    return parent::getFieldStorageBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFieldConfigBaseDefinition(array $values = array()) {
-    $values = [
+  public function getFieldBaseDefinition(array $values = []) {
+    $values += [
       'default_value' => [0 => ['value' => 0]],
       'description' => $this->t('Determine if group should use default roles and permissions.'),
       'display_label' => TRUE,
@@ -53,32 +48,31 @@ class AccessField extends OgFieldBase implements OgFieldsInterface {
       'required' => TRUE,
     ];
 
-    return parent::getFieldConfigBaseDefinition($values);
+    return parent::getFieldBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function widgetDefinition() {
-    return [
+  public function getFormDisplayDefinition(array $values = []) {
+    $values += [
       'type' => 'options_select',
       'settings' => [],
     ];
+
+    return $values;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition()  {
-    return [
-      'default' => [
-        'type' => 'list_default',
-        'label' => 'above',
-      ],
-      'teaser' => [
-        'type' => 'list_default',
-        'label' => 'above',
-      ],
+  public function getViewDisplayDefinition(array $values = []) {
+    $values += [
+      'type' => 'list_default',
+      'label' => 'above',
     ];
+
+    return $values;
   }
+
 }

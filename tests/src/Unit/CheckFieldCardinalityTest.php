@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Unit\CheckFieldCardinalityTest.
- */
-
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -15,7 +10,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\og\OgGroupAudienceHelper;
 
 /**
- * Tests the OgGroupAudienceHelper::checkFieldCardinality method.
+ * Tests checking field cardinality.
  *
  * @group og
  *
@@ -24,6 +19,8 @@ use Drupal\og\OgGroupAudienceHelper;
 class CheckFieldCardinalityTest extends UnitTestCase {
 
   /**
+   * Tests checking field cardinality for a non-existing field.
+   *
    * @covers ::checkFieldCardinality
    *
    * @expectedException \Drupal\Core\Field\FieldException
@@ -44,6 +41,8 @@ class CheckFieldCardinalityTest extends UnitTestCase {
   }
 
   /**
+   * Tests checking field cardinality for a non OG-audience field.
+   *
    * @covers ::checkFieldCardinality
    *
    * @expectedException \Drupal\Core\Field\FieldException
@@ -69,6 +68,8 @@ class CheckFieldCardinalityTest extends UnitTestCase {
   }
 
   /**
+   * Tests checking field cardinality for an OG audience field.
+   *
    * @covers ::checkFieldCardinality
    *
    * @dataProvider providerTestFieldCardinality
@@ -86,7 +87,7 @@ class CheckFieldCardinalityTest extends UnitTestCase {
       ->willReturn($field_storage_definition_prophecy->reveal())
       ->shouldBeCalled();
     $field_definition_prophecy->getType()
-      ->willReturn('og_membership_reference')
+      ->willReturn(OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE)
       ->shouldBeCalled();
 
     $entity_prophecy = $this->prophesize(ContentEntityInterface::class);

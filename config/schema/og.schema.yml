@@ -20,6 +20,28 @@ field.field_settings.og_membership_reference:
       type: boolean
       label: 'Access Override'
 
+field.storage_settings.og_standard_reference:
+  type: mapping
+  label: 'Organic Groups reference field storage settings'
+  mapping:
+    target_type:
+      type: string
+      label: 'Type of entity to reference'
+
+field.field_settings.og_standard_reference:
+  type: mapping
+  label: 'Organic Groups reference field settings'
+  mapping:
+    handler:
+      type: string
+      label: 'Reference method'
+    handler_settings:
+      type: entity_reference_selection.[%parent.handler]
+      label: 'Organic Groups reference selection plugin settings'
+    access_override:
+      type: boolean
+      label: 'Access Override'
+
 og.settings:
   type: config_object
   label: 'Organic Groups settings'
@@ -34,12 +56,12 @@ og.settings:
     node_access_strict:
       type: boolean
       label: 'Strict node access permissions'
-    orphans_delete:
+    delete_orphans:
       type: boolean
       label: 'Delete orphaned group content when a group is deleted'
-    use_queue:
-      type: boolean
-      label: 'Use queue'
+    delete_orphans_plugin_id:
+      type: string
+      label: 'The method to use when deleting orphaned group content'
 
 og.settings.group.*:
   type: sequence
@@ -83,14 +105,34 @@ og.og_role.*:
       type: string
       label: 'Group ID'
     group_type:
-      type: label
+      type: string
       label: 'Group type'
     group_bundle:
-      type: label
+      type: string
       label: 'Group bundle'
+    is_admin:
+      type: boolean
+      label: 'User is group admin'
     permissions:
       type: sequence
       label: 'Permissions'
       sequence:
         type: string
         label: 'Permission'
+    role_type:
+      type: string
+      label: 'Role type'
+
+field.widget.settings.og_complex:
+  type: mapping
+  label: 'OG Group Audience field widget'
+  mapping:
+    match_operator:
+      type: string
+      label: 'Autocomplete matching'
+    size:
+      type: integer
+      label: 'Size of textfield'
+    placeholder:
+      type: label
+      label: 'Placeholder'

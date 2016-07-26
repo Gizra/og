@@ -4,3 +4,8 @@ services:
     arguments: ['@entity_type.manager']
     tags:
       - { name: access_check, applies_to: _og_ui_user_access_group }
+
+  og_ui.event_subscriber:
+    class: Drupal\og_ui\EventSubscriber\OgUiEventSubscriber
+    tags:
+      - { name: 'event_subscriber' }

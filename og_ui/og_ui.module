@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Main functions and hook implementations of the Organic Groups UI module.
@@ -9,6 +10,7 @@ use Drupal\Core\Entity\BundleEntityFormBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og_ui\BundleFormAlter;
@@ -41,6 +43,7 @@ function og_ui_entity_update(EntityInterface $entity) {
  * Helper to save group information.
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity object.
  */
 function og_ui_entity_type_save(EntityInterface $entity) {
   if (!$entity instanceof ConfigEntityBundleBase || !isset($entity->og_is_group)) {
@@ -75,18 +78,20 @@ function og_ui_entity_type_save(EntityInterface $entity) {
   }
 
   // Change the field target type and bundle.
+  if ($field_storage = FieldStorageConfig::loadByName($entity_type_id, OgGroupAudienceHelper::DEFAULT_FIELD)) {
+    $target_type = $field_storage->getSetting('target_type');
+    if (!empty($entity->og_target_type) && $entity->og_target_type !== $target_type) {
+      // @todo It's probably not possible to change the field storage after the
+      //   field has data. We should disable this option in the UI.
+      $field_storage->setSetting('target_type', $entity->og_target_type);
+      $field_storage->save();
+    }
+  }
   if ($field = FieldConfig::loadByName($entity_type_id, $bundle, OgGroupAudienceHelper::DEFAULT_FIELD)) {
     $handler_settings = $field->getSetting('handler_settings');
-    $save = FALSE;
-    foreach (['target_type', 'target_bundles'] as $key) {
-      $entity_key = 'og_' . $key;
-      if (!isset($handler_settings[$key]) || $entity->$entity_key != $handler_settings[$key]) {
-        $handler_settings[$key] = $entity->$entity_key;
-        $field->setSetting('handler_settings', $handler_settings);
-        $save = TRUE;
-      }
-    }
-    if ($save) {
+    if (!isset($handler_settings['target_bundles']) || $entity->og_target_bundles != $handler_settings['target_bundles']) {
+      $handler_settings['target_bundles'] = $entity->og_target_bundles;
+      $field->setSetting('handler_settings', $handler_settings);
       $field->save();
     }
   }

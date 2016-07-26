@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\Field\FieldWidget\OgComplex.
- */
-
 namespace Drupal\og\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Html;
@@ -26,6 +21,7 @@ use Drupal\user\Entity\User;
  *   label = @Translation("OG reference"),
  *   description = @Translation("An autocompletewidget for OG"),
  *   field_types = {
+ *     "og_standard_reference",
  *     "og_membership_reference"
  *   }
  * )
@@ -66,17 +62,17 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * Handles generic features for multiple fields:
    * - number of widgets
    * - AHAH-'add more' button
-   * - table display and drag-n-drop value reordering
+   * - table display and drag-n-drop value reordering.
    */
   protected function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
     $field_name = $this->fieldDefinition->getName();
     $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
     $parents = $form['#parents'];
 
-    $target_type = $this->fieldDefinition->getTargetEntityTypeId();
-    $user_groups = Og::getEntityGroups(User::load(\Drupal::currentUser()->id()));
+    $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
+    $user_groups = Og::getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
-    $user_group_ids = array_map(function($group) {
+    $user_group_ids = array_map(function ($group) {
       return $group->id();
     }, $user_groups_target_type);
 
@@ -188,8 +184,13 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   /**
    * Adding the other groups widget to the form.
    *
-   * @param $elements
-   *   The widget array.
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   The existing items to add to the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   A renderable element with the "other groups".
    */
   protected function otherGroupsWidget(FieldItemListInterface $items, FormStateInterface $form_state) {
     if ($this->fieldDefinition->getTargetEntityTypeId() == 'user') {
@@ -228,11 +229,11 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $delta = 0;
 
-    $target_type = $this->fieldDefinition->getTargetEntityTypeId();
+    $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
 
-    $user_groups = Og::getEntityGroups(User::load(\Drupal::currentUser()->id()));
+    $user_groups = Og::getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
-    $user_group_ids = array_map(function($group) {
+    $user_group_ids = array_map(function ($group) {
       return $group->id();
     }, $user_groups_target_type);
 
@@ -272,11 +273,12 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   /**
    * Generating other groups auto complete element.
    *
-   * @param $delta
+   * @param int $delta
    *   The delta of the new element. Need to be the last delta in order to be
    *   added in the end of the list.
-   * @param EntityInterface|NULL $entity
+   * @param EntityInterface|null $entity
    *   The entity object.
+   *
    * @return array
    *   A single entity reference input.
    */
@@ -285,7 +287,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
       'target_id' => [
         // @todo Allow this to be configurable with a widget setting.
         '#type' => 'entity_autocomplete',
-        '#target_type' => $this->fieldDefinition->getTargetEntityTypeId(),
+        '#target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
         '#selection_handler' => 'og:default',
         '#selection_settings' => [
           'other_groups' => TRUE,
@@ -306,7 +308,10 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * {@inheritdoc}
    */
   public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
-    $parent_values = $values;
+    // Remove empty values. The form fields may be empty.
+    $values = array_filter($values, function ($item) {
+      return !empty($item['target_id']);
+    });
 
     // Get the groups from the other groups widget.
     foreach ($form[$this->fieldDefinition->getName()]['other_groups'] as $key => $value) {
@@ -318,24 +323,23 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
       // be captured in it's own group, with the key 'id'.
       preg_match("|.+\((?<id>[\w.]+)\)|", $value['target_id']['#value'], $matches);
 
-      if (empty($matches['id'])) {
-        continue;
+      if (!empty($matches['id'])) {
+        $values[] = [
+          'target_id' => $matches['id'],
+          '_weight' => $value['_weight']['#value'],
+          '_original_delta' => $value['_weight']['#delta'],
+        ];
       }
-
-      $parent_values[] = [
-        'target_id' => $matches['id'],
-        '_weight' => $value['_weight']['#value'],
-        '_original_delta' => $value['_weight']['#delta'],
-      ];
     }
 
-    return $parent_values;
+    return $values;
   }
 
   /**
    * Determines if the current user has group admin permission.
    *
    * @return bool
+   *   TRUE if the user is a group admin.
    */
   protected function isGroupAdmin() {
     // @todo Inject current user service as a dependency.

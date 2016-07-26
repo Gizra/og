@@ -1,22 +1,16 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Entity\OgMembershipReferenceItemTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\entity_test\Entity\EntityTest;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
+use Drupal\user\Entity\User;
 
 /**
  * Tests OgMembershipReferenceItem and OgMembershipReferenceItemList classes.
@@ -46,6 +40,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
+    $this->installSchema('system', 'sequences');
 
     // Create several bundles.
     for ($i = 0; $i <= 4; $i++) {
@@ -57,7 +52,7 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
       $bundle->save();
       $this->bundles[] = $bundle->id();
     }
-    for ($i = 0 ; $i < 2; $i++) {
+    for ($i = 0; $i < 2; $i++) {
       $bundle = $this->bundles[$i];
       Og::groupManager()->addGroup('entity_test', $bundle);
       $group = EntityTest::create(['type' => $bundle]);
@@ -66,7 +61,15 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     }
     $this->fieldName = strtolower($this->randomMachineName());
 
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $this->bundles[2], ['field_name' => $this->fieldName]);
+    $settings = [
+      'field_name' => $this->fieldName,
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => 'entity_test',
+        ],
+      ],
+    ];
+    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', 'user', $settings);
   }
 
   /**
@@ -76,30 +79,39 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $run_query = function ($id) {
       return $this->container->get('entity.query')->get('og_membership')
         ->condition('field_name', $this->fieldName)
-        ->condition('member_entity_type', 'entity_test')
-        ->condition('member_entity_id', $id)
-        ->condition('group_entity_type', 'entity_test')
+        ->condition('uid', $id)
+        ->condition('entity_type', 'entity_test')
         ->condition('state', OgMembershipInterface::STATE_ACTIVE)
         ->execute();
     };
-    $entity = EntityTest::create([
+    $entity = User::create([
       'type' => $this->bundles[2],
+      'name' => $this->randomString(),
     ]);
     // Assert no membership for a group membership with no references.
     $this->assertSame(count($entity->{$this->fieldName}), 0);
     $entity->save();
     $this->assertSame(count($entity->{$this->fieldName}), 0);
     $this->assertSame($run_query($entity->id()), []);
-    $member_in_single_grpup = EntityTest::create([
+
+    // Add a user with membership in a single group.
+    $member_in_single_group = User::create([
       'type' => $this->bundles[2],
-      $this->fieldName => [['target_id' => $this->groups[0]->id()]],
+      'name' => $this->randomString(),
+      $this->fieldName => [
+        ['target_id' => $this->groups[0]->id()],
+      ],
     ]);
+
     // Assert group membership is found before save.
-    $this->assertSame(count($member_in_single_grpup->{$this->fieldName}), 1);
-    $member_in_single_grpup->save();
-    $this->assertSame(count($member_in_single_grpup->{$this->fieldName}), 1);
-    $this->assertSame(count($run_query($member_in_single_grpup->id())), 1);
-    $member_in_two_groups = EntityTest::create([
+    $this->assertSame(count($member_in_single_group->{$this->fieldName}), 1);
+    $member_in_single_group->save();
+    $this->assertSame(count($member_in_single_group->{$this->fieldName}), 1);
+    $this->assertSame(count($run_query($member_in_single_group->id())), 1);
+
+    // Add a user with membership in multiple groups.
+    $member_in_two_groups = User::create([
+      'name' => $this->randomString(),
       'type' => $this->bundles[2],
       $this->fieldName => [
         ['target_id' => $this->groups[0]->id()],
@@ -110,7 +122,8 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $member_in_two_groups->save();
     $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
     $this->assertSame(count($run_query($member_in_two_groups->id())), 2);
-    // Test re-save.
+
+    // Test re-save has not changed the references.
     $member_in_two_groups->save();
     $this->assertSame(count($member_in_two_groups->{$this->fieldName}), 2);
     $this->assertSame(count($run_query($member_in_two_groups->id())), 2);
@@ -121,10 +134,11 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
    */
   public function testMembershipLoad() {
     $reload = function (EntityInterface &$entity) {
-      $entity = \Drupal::entityTypeManager()->getStorage('entity_test')->loadUnchanged($entity->id());
+      $entity = \Drupal::entityTypeManager()->getStorage('user')->loadUnchanged($entity->id());
     };
-    $entity = EntityTest::create([
+    $entity = User::create([
       'type' => $this->bundles[2],
+      'name' => $this->randomString(),
     ]);
     // Assert no membership for a group membership with no references.
     $this->assertSame(count($entity->{$this->fieldName}), 0);
@@ -133,15 +147,14 @@ class OgMembershipReferenceItemListTest extends KernelTestBase {
     $membership = OgMembership::create([
       'type' => $this->bundles[0],
       'field_name' => $this->fieldName,
-      'member_entity_type' => 'entity_test',
-      'member_entity_id' => $entity->id(),
-      'group_entity_type' => 'entity_test',
-      'group_entity_id' => $this->groups[0]->id(),
+      'uid' => $entity->id(),
+      'entity_type' => 'user',
+      'entity_id' => $this->groups[0]->id(),
     ]);
     $membership->save();
     $reload($entity);
     // Assert membership is picked up after a load from database.
-    $this->assertSame(count($entity->{$this->fieldName}), 1);
+    $this->assertSame(count($entity->{$this->fieldName}->getValue()), 1);
   }
 
 }
