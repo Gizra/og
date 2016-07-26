@@ -6,11 +6,35 @@ use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a confirmation form for subscribing form a group.
  */
 class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
+
+  /**
+   * OG access service.
+   *
+   * @var \Drupal\og\OgAccess
+   */
+  protected $ogAccess;
+
+  /**
+   * Constructs a SubscriptionController object.
+   */
+  public function __construct(OgAccess $og_access) {
+    $this->ogAccess = $og_access;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('og.access')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -45,7 +69,7 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Indicate the OG membership state (active or pending).
-    $state = OgAccess::userAccess($this->entity, 'subscribe without approval') ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
+    $state = $this->ogAccess->userAccess($this->user, 'subscribe without approval') ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
 
     if ($this->entity->access('view')) {
       $label = $this->entity->label();
@@ -82,8 +106,8 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
     parent::validateForm($form, $form_state);
 
     // @see entity_form_field_validate().
-    $og_membership = $form_state['og_membership'];
-    field_attach_form_validate('og_membership', $og_membership, $form, $form_state);
+//    $og_membership = $form_state['og_membership'];
+//    field_attach_form_validate('og_membership', $og_membership, $form, $form_state);
   }
 
   /**
