@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -70,7 +71,14 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    // TODO: Implement getCancelUrl() method.
+    $membership = $this->entity;
+
+    /** @var EntityInterface $group */
+    $group = $membership->getGroup();
+
+    // User doesn't have access to the group entity, so redirect to front page,
+    // otherwise back to the group entity.
+    return $group->access('view') ? $group->toUrl() : new Url('<front>');
   }
 
   /**
