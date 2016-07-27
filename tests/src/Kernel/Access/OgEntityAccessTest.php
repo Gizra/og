@@ -229,7 +229,7 @@ class OgEntityAccessTest extends KernelTestBase {
       ->save();
 
     /** @var OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->user1)
       ->setGroup($this->group1)
@@ -238,7 +238,7 @@ class OgEntityAccessTest extends KernelTestBase {
 
     // Also create a membership to the other group. From this we can verify that
     // permissions are not bled between groups.
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->user1)
       ->setGroup($this->group2)
@@ -246,7 +246,7 @@ class OgEntityAccessTest extends KernelTestBase {
       ->save();
 
     /** @var OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->user2)
       ->setGroup($this->group1)
@@ -254,7 +254,7 @@ class OgEntityAccessTest extends KernelTestBase {
       ->save();
 
     // Check the special permission 'update group'.
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->user4)
       ->setGroup($this->group1)
@@ -262,7 +262,7 @@ class OgEntityAccessTest extends KernelTestBase {
       ->save();
 
     /** @var OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->adminUser)
       ->setGroup($this->group1)
@@ -299,7 +299,7 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->assertTrue($og_access->userAccess($this->group1, $this->randomMachineName(), $this->adminUser)->isAllowed());
 
     // Add membership to user 3.
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->user3)
       ->setGroup($this->group1)
