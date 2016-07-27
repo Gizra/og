@@ -9,6 +9,8 @@ og.subscribe:
   requirements:
     # Only authenticated users can subscribe to group, but we do allow anonymous
     # users to reach this route. They will be redirect to login page.
+
+    # TODO: Check also that the entity type and entity ID are valid.
     _permission: 'access content'
 
 

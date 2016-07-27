@@ -107,7 +107,7 @@ class SubscriptionController extends ControllerBase {
 
     if ($redirect) {
       drupal_set_message($message, 'warning');
-//      return new RedirectResponse($group->toUrl()->setAbsolute(TRUE)->toString());
+      return new RedirectResponse($group->toUrl()->setAbsolute(TRUE)->toString());
     }
 
     if (!$this->ogAccess->userAccess($group, 'subscribe', $user) && !$this->ogAccess->userAccess($group, 'subscribe without approval', $user)) {
