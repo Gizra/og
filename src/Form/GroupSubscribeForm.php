@@ -57,14 +57,18 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
 
     $label = $group->access('view') ? $group->label() : $this->t('Private group');
 
-    return $this->t('Are you sure you want to join the group %label?', ['%label' => $label]);
+    $message = $this->isStateActive()
+      ? $this->t('Are you sure you want to join the group %label?', ['%label' => $label])
+      : $this->t('Are you sure you want to request subscription the group %label?', ['%label' => $label]);
+
+    return $message;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return $this->getState() === OgMembershipInterface::STATE_ACTIVE ? $this->t('Join') : $this->t('Request membership');
+    return $this->isStateActive() ? $this->t('Join') : $this->t('Request membership');
   }
 
   /**
@@ -83,13 +87,13 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $state = $this->getState();
+    $state = $this->isStateActive() ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
     $this->entity->setState($state);
 
     return parent::buildForm($form, $form_state);
   }
 
-  protected function getState() {
+  protected function isStateActive() {
     /** @var OgMembershipInterface $membership */
     $membership = $this->entity;
 
@@ -104,7 +108,7 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
       $state = $this->config('og_ui.settings')->get('deny_subscribe_without_approval') ? OgMembershipInterface::STATE_PENDING : OgMembershipInterface::STATE_ACTIVE;
     }
 
-    return $state;
+    return $state === OgMembershipInterface::STATE_ACTIVE;
   }
 
   /**
