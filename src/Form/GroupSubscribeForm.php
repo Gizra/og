@@ -71,10 +71,8 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    $membership = $this->entity;
-
     /** @var EntityInterface $group */
-    $group = $membership->getGroup();
+    $group = $this->entity->getGroup();
 
     // User doesn't have access to the group entity, so redirect to front page,
     // otherwise back to the group entity.
