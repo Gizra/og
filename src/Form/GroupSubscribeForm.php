@@ -2,6 +2,8 @@
 
 namespace Drupal\og\Form;
 
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -12,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides a form for subscribing to a group.
  */
-class GroupSubscribeForm extends EntityConfirmFormBase {
+class GroupSubscribeForm extends ContentEntityForm {
 
   /**
    * OG access service.
@@ -82,7 +84,7 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
 
-    $state = $this->ogAccess($group, 'subscribe without approval') ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
+    $state = $this->ogAccess->userAccess($group, 'subscribe without approval') ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
 
     if (!$group->access('view') && $membership->getState() === OgMembershipInterface::STATE_ACTIVE) {
       // Determine if a user can subscribe to a private group, when OG-access
@@ -98,18 +100,10 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
     /** @var OgMembershipInterface $membership */
     $membership = $this->entity;
-    $membership->save();
 
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
