@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Form;
 
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Entity\EntityInterface;
@@ -14,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides a form for subscribing to a group.
  */
-class GroupSubscribeForm extends ContentEntityForm {
+class GroupSubscribeForm extends EntityConfirmFormBase {
 
   /**
    * OG access service.
@@ -95,6 +94,14 @@ class GroupSubscribeForm extends ContentEntityForm {
     $this->entity->setState($state);
 
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo: We will need to change this when we have configurable fields.
+   */
+  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
   }
 
   /**
