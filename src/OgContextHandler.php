@@ -133,7 +133,7 @@ class OgContextHandler implements OgContextHandlerInterface {
    * {@inheritdoc}
    */
   public function updateConfigStorage() {
-    $plugins = $this->getPlugins(['return_mode' => OgContextHandlerInterface::RETURN_ALL]);
+    $plugins = $this->getPlugins(OgContextHandlerInterface::RETURN_ALL);
 
     $og_context_storage = $this->storage;
     $og_context_config = $og_context_storage->loadMultiple();

@@ -10,8 +10,6 @@ namespace Drupal\Tests\og\Kernel\Entity;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgContextHandlerInterface;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
 
 /**
  * Test OG context plugins.
@@ -21,9 +19,6 @@ use Drupal\simpletest\NodeCreationTrait;
  * @group og
  */
 class OgContextTest extends KernelTestBase {
-
-  use ContentTypeCreationTrait;
-  use NodeCreationTrait;
 
   /**
    * {@inheritdoc}
