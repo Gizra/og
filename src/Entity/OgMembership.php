@@ -66,10 +66,13 @@ use Drupal\og\OgMembershipInterface;
  *     "bundle" = "type",
  *   },
  *   bundle_keys = {
- *     "bundle" = "type"
+ *     "bundle" = "type",
  *   },
  *   handlers = {
  *     "views_data" = "Drupal\og\OgMembershipViewsData",
+ *     "form" = {
+ *       "default" = "Drupal\og\Form\GroupSubscribeForm",
+ *     },
  *   }
  * )
  */

@@ -2,16 +2,16 @@
 
 namespace Drupal\og\Form;
 
-use Drupal\Core\Entity\EntityConfirmFormBase;
+use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a confirmation form for subscribing form a group.
+ * Provides a form for subscribing to a group.
  */
-class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
+class GroupSubscribeForm extends ContentEntityForm {
 
   /**
    * OG access service.
@@ -69,7 +69,12 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Indicate the OG membership state (active or pending).
-    $state = $this->ogAccess->userAccess($this->user, 'subscribe without approval') ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
+    /** @var OgMembershipInterface $membership */
+    $membership = $this->entity;
+    $user = $membership->getUser();
+    $group = $membership->getGroup();
+
+    $state = $this->ogAccess->userAccess($group, 'subscribe without approval', $user) ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
 
     if ($this->entity->access('view')) {
       $label = $this->entity->label();
@@ -84,18 +89,6 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
       }
     }
 
-    // // Add group membership form.
-    //    $og_membership = og_membership_create($group_type, $gid, 'user', $account->uid, $field_name, array('state' => $state));
-    //    $form_state['og_membership'] = $og_membership;
-    //    field_attach_form('og_membership', $og_membership, $form, $form_state);
-    //
-    //    if ($state == OG_STATE_ACTIVE && !empty($form[OG_MEMBERSHIP_REQUEST_FIELD])) {
-    //      // Hide the user request field.
-    //      $form[OG_MEMBERSHIP_REQUEST_FIELD]['#access'] = FALSE;
-    //    }
-    //    $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
-    //    $form['gid'] = array('#type' => 'value', '#value' => $gid);
-    //    $form['field_name'] = array('#type' => 'value', '#value' => $field_name);.
     return parent::buildForm($form, $form_state);
   }
 
@@ -104,19 +97,14 @@ class GroupSubscribeConfirmForm extends EntityConfirmFormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
-
-    // @see entity_form_field_validate().
-//    $og_membership = $form_state['og_membership'];
-//    field_attach_form_validate('og_membership', $og_membership, $form, $form_state);
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $og_membership = $form_state['og_membership'];
-    // field_attach_submit('og_membership', $og_membership, $form, $form_state);.
-    $og_membership->save();
+    $membership = $this->entity;
+    $membership->save();
 
     if ($this->entity->access('view')) {
       $form_state->setRedirectUrl($this->entity->toUrl());

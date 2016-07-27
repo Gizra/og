@@ -4,6 +4,7 @@ namespace Drupal\og\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
+use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
@@ -53,7 +54,7 @@ class SubscriptionController extends ControllerBase {
    *
    * @return mixed
    */
-  public function subscribe(Request $request, $entity_type_id, $entity_id, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
+  public function subscribe(Request $request, $entity_type_id, $entity_id, $membership_type) {
     $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
     $group = $entity_storage->load($entity_id);
 
@@ -106,15 +107,23 @@ class SubscriptionController extends ControllerBase {
 
     if ($redirect) {
       drupal_set_message($message, 'warning');
-      return new RedirectResponse($group->toUrl()->setAbsolute(TRUE)->toString());
+//      return new RedirectResponse($group->toUrl()->setAbsolute(TRUE)->toString());
     }
 
-    if ($this->ogAccess->userAccess($group, 'subscribe', $user) || $this->ogAccess->userAccess($group, 'subscribe without approval', $user)) {
-      // Show the user a subscription confirmation.
-      return $this->formBuilder()->getForm('\Drupal\og\Form\GroupSubscribeConfirmForm', $group, $user);
+    if (!$this->ogAccess->userAccess($group, 'subscribe', $user) && !$this->ogAccess->userAccess($group, 'subscribe without approval', $user)) {
+      throw new AccessDeniedHttpException();
     }
 
-    throw new AccessDeniedHttpException();
+    $membership = OgMembership::create(['type' => $membership_type]);
+    $membership
+      ->setUser($user)
+      ->setGroup($group);
+
+    $form = $this->entityFormBuilder()->getForm($membership);
+
+    return $form;
+
+
   }
 
   /**

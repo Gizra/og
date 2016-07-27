@@ -5,7 +5,7 @@ og.subscribe:
   defaults:
     _controller: '\Drupal\og\Controller\SubscriptionController::subscribe'
     _title: 'Join Group'
-    membership_type: null
+    membership_type: default
   requirements:
     # Only authenticated users can subscribe to group, but we do allow anonymous
     # users to reach this route. They will be redirect to login page.
