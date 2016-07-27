@@ -111,6 +111,7 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
     parent::submitForm($form, $form_state);
     /** @var OgMembershipInterface $membership */
     $membership = $this->entity;
+    $membership->save();
 
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
