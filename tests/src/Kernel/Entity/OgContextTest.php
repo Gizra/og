@@ -28,7 +28,7 @@ class OgContextTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['og', 'system'];
+  public static $modules = ['og', 'system', 'og_test'];
 
   /**
    * {@inheritdoc}
@@ -48,14 +48,14 @@ class OgContextTest extends KernelTestBase {
     $plugins = Og::contextHandler()->getPlugins(OgContextHandlerInterface::RETURN_ALL);
 
     // Check we got the plugins we know that exists.
-    if (empty($plugins['current_user']) || empty($plugins['entity'])) {
+    if (empty($plugins['user_group_reference']) || empty($plugins['entity'])) {
       $this->fail('The expected plugins, Current user and Entity, was not found in the plugins list');
     }
 
     // Get all the plugins in the storage which have a matching storage.
     $plugins = Og::contextHandler()->getPlugins(OgContextHandlerInterface::RETURN_ONLY_IN_STORAGE);
 
-    if (empty($plugins['current_user']) || empty($plugins['entity'])) {
+    if (empty($plugins['user_group_reference']) || empty($plugins['entity'])) {
       $this->fail('The expected plugins, Current user and Entity, was not found in the plugins list');
     }
 
@@ -69,34 +69,34 @@ class OgContextTest extends KernelTestBase {
 
     $plugins = Og::contextHandler()->getPlugins(OgContextHandlerInterface::RETURN_ONLY_ACTIVE);
     $this->assertArrayHasKey('entity', $plugins);
-    $this->assertArrayNotHasKey('current_user', $plugins);
+    $this->assertArrayNotHasKey('user_group_reference', $plugins);
 
     // Enable the second plugin and change the weight.
     Og::contextHandler()->updatePlugin('entity', ['weight' => 1]);
-    Og::contextHandler()->updatePlugin('current_user', ['weight' => 0, 'status' => 1]);
+    Og::contextHandler()->updatePlugin('user_group_reference', ['weight' => 0, 'status' => 1]);
 
     $plugins = Og::contextHandler()->getPlugins(OgContextHandlerInterface::RETURN_ONLY_ACTIVE);
     $this->assertArrayHasKey('entity', $plugins);
-    $this->assertArrayHasKey('current_user', $plugins);
+    $this->assertArrayHasKey('user_group_reference', $plugins);
 
     $get_plugins_location = function ($plugins) {
       return [
         array_search('entity', $plugins),
-        array_search('current_user', $plugins),
+        array_search('user_group_reference', $plugins),
       ];
     };
 
-    list($entity_position, $current_user_position) = $get_plugins_location(array_keys($plugins));
+    list($entity_position, $user_group_reference_position) = $get_plugins_location(array_keys($plugins));
 
-    $this->assertTrue($entity_position > $current_user_position);
+    $this->assertTrue($entity_position > $user_group_reference_position);
 
     // Change the weight.
     Og::contextHandler()->updatePlugin('entity', ['weight' => -1]);
 
     $plugins = Og::contextHandler()->getPlugins(OgContextHandlerInterface::RETURN_ONLY_ACTIVE);
 
-    list($entity_position, $current_user_position) = $get_plugins_location(array_keys($plugins));
-    $this->assertTrue($current_user_position > $entity_position);
+    list($entity_position, $user_group_reference_position) = $get_plugins_location(array_keys($plugins));
+    $this->assertTrue($user_group_reference_position > $entity_position);
   }
 
 }
