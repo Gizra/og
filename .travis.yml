@@ -36,4 +36,8 @@ before_script:
   - drush runserver 127.0.0.1:8080 &
   - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
-script: ~/.composer/vendor/bin/drush.php test-run "Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI" --uri=http://127.0.0.1:8080
+# script: ~/.composer/vendor/bin/drush.php test-run "Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI" --uri=http://127.0.0.1:8080
+script:
+  - cd $TRAVIS_BUILD_DIR/../drupal
+  - php ./scripts/run-tests.sh --php $(which php) --concurrency 4 --verbose --color --uri=http://127.0.0.1:8080 og 2>&1 | tee /tmp/simpletest-result.txt
+  - exit 0
