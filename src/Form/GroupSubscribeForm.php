@@ -82,17 +82,26 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
 
+    $state = $this->ogAccess($group, 'subscribe without approval') ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
+
     if (!$group->access('view') && $membership->getState() === OgMembershipInterface::STATE_ACTIVE) {
       // Determine if a user can subscribe to a private group, when OG-access
       // module is enabled, and the group is set to private.
       $state = $this->config('og_ui.settings')->get('deny_subscribe_without_approval') ? OgMembershipInterface::STATE_PENDING : OgMembershipInterface::STATE_ACTIVE;
-      $this->entity->setState($state);
     }
+
+    $this->entity->setState($state);
 
     return parent::buildForm($form, $form_state);
   }
 
-  
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+  }
+
   /**
    * {@inheritdoc}
    */
