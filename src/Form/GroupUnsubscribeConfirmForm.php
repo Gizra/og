@@ -29,28 +29,35 @@ class GroupUnsubscribeConfirmForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return $this->t('Remove');
+    return $this->t('Unsubscribe');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    // TODO: Implement getCancelUrl() method.
+    /** @var EntityInterface $group */
+    $group = $this->entity->getGroup();
+
+    // User doesn't have access to the group entity, so redirect to front page,
+    // otherwise back to the group entity.
+    return $group->access('view') ? $group->toUrl() : new Url('<front>');
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // @todo This needs to be converted to D8.
-    // og_ungroup($this->entity);
-    if ($this->entity->access('view')) {
-      $form_state->setRedirectUrl($this->entity->toUrl());
-    }
-    else {
-      $form_state->setRedirectUrl(Url::fromRoute('<front>'));
-    }
+    parent::submitForm($form, $form_state);
+    /** @var OgMembershipInterface $membership */
+    $membership = $this->entity;
+    /** @var EntityInterface $group */
+    $group = $membership->getGroup();
+
+    $membership->delete();
+
+    $redirect = $group->access('view') ? $group->toUrl() : Url::fromRoute('<front>');
+    $form_state->setRedirectUrl($redirect);
   }
 
 }

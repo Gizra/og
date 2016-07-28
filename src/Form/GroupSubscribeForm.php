@@ -144,7 +144,7 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
 
     // User doesn't have access to the group entity, so redirect to front page,
     // otherwise back to the group entity.
-    $redirect = $group->access('view') ? $group->toUrl() : new Url('<front>');
+    $redirect = $group->access('view') ? $group->toUrl() : Url::fromRoute('<front>');
     $form_state->setRedirectUrl($redirect);
 
   }
