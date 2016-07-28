@@ -7,9 +7,9 @@ dependencies:
 id: og_membership.og_membership_request
 field_name: og_membership_request
 entity_type: og_membership
-type: text
+type: string_long
 settings:
-  max_length: 255
+  case_sensitive: false
 module: text
 locked: false
 cardinality: 1

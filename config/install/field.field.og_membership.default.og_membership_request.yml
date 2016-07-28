@@ -11,7 +11,7 @@ field_name: og_membership_request
 entity_type: og_membership
 bundle: default
 label: 'Request membership'
-description: ''
+description: 'Explain the motivation for your request to join this group.'
 required: false
 translatable: true
 default_value: {  }
