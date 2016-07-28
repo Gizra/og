@@ -145,7 +145,7 @@ class SubscriptionController extends ControllerBase {
 
     $user = $this->currentUser();
 
-    if (!$membership = Og::getMembership($user, $group)) {
+    if (!$membership = Og::getMembership($group, $user)) {
       // User is not a member.
       throw new AccessDeniedHttpException();
     }
@@ -163,8 +163,8 @@ class SubscriptionController extends ControllerBase {
         ->setAbsolute()
         ->toString());
     }
-
     $form = $this->entityFormBuilder()->getForm($membership, 'unsubscribe');
+
     return $form;
 
   }

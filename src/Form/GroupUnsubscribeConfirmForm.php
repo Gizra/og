@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Form;
 
+use Drupal\Core\Entity\ContentEntityDeleteForm;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -9,7 +10,7 @@ use Drupal\Core\Url;
 /**
  * Provides a confirmation form for unsubscribing form a group.
  */
-class GroupUnsubscribeConfirmForm extends EntityConfirmFormBase {
+class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
 
   /**
    * {@inheritdoc}
@@ -48,16 +49,16 @@ class GroupUnsubscribeConfirmForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    parent::submitForm($form, $form_state);
     /** @var OgMembershipInterface $membership */
-    $membership = $this->entity;
+    $membership = $this->getEntity();
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
 
-    $membership->delete();
-
     $redirect = $group->access('view') ? $group->toUrl() : Url::fromRoute('<front>');
     $form_state->setRedirectUrl($redirect);
+
+    $membership->delete();
+    drupal_set_message($this->t('You have unsubscribed from the group'));
   }
 
 }
