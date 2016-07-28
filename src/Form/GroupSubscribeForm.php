@@ -82,7 +82,10 @@ class GroupSubscribeForm extends ContentEntityForm {
   }
 
   /**
+   * Return the URL to redirect on cancel.
    *
+   * @return \Drupal\Core\Url
+   *   The URL object to redirect to.
    */
   public function getCancelUrl() {
     /** @var EntityInterface $group */
