@@ -3,7 +3,6 @@
 namespace Drupal\og\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\og\OgAccess;

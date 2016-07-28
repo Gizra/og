@@ -80,7 +80,6 @@ class GroupCheck implements AccessInterface {
 
     return AccessResult::forbidden();
 
-
   }
 
 }

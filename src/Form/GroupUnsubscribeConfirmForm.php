@@ -3,7 +3,6 @@
 namespace Drupal\og\Form;
 
 use Drupal\Core\Entity\ContentEntityDeleteForm;
-use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
@@ -23,7 +22,12 @@ class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to unsubscribe from the group %title?', ['%title' => $this->entity->label()]);
+    /** @var OgMembershipInterface $membership */
+    $membership = $this->getEntity();
+    /** @var EntityInterface $group */
+    $group = $membership->getGroup();
+
+    return $this->t('Are you sure you want to unsubscribe from the group %label?', ['%label' => $group->label()]);
   }
 
   /**
