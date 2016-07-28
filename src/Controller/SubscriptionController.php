@@ -126,7 +126,6 @@ class SubscriptionController extends ControllerBase {
 
     return $form;
 
-
   }
 
   /**

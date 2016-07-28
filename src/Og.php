@@ -496,7 +496,7 @@ class Og {
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param \Drupal\Core\Entity\EntityInterface $user
+   * @param \Drupal\Core\Session\AccountInterface $user
    *   The entity to test the membership for.
    *
    * @return bool
