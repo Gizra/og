@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Form;
 
-use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -93,6 +92,12 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
     return parent::buildForm($form, $form_state);
   }
 
+  /**
+   * Determine if the membership state should be active.
+   *
+   * @return bool
+   *   True if the state is active.
+   */
   protected function isStateActive() {
     /** @var OgMembershipInterface $membership */
     $membership = $this->entity;
@@ -103,9 +108,12 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
     $state = $this->ogAccess->userAccess($group, 'subscribe without approval') ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
 
     if (!$group->access('view') && $membership->getState() === OgMembershipInterface::STATE_ACTIVE) {
-      // Determine if a user can subscribe to a private group, when OG-access
-      // module is enabled, and the group is set to private.
-      $state = $this->config('og_ui.settings')->get('deny_subscribe_without_approval') ? OgMembershipInterface::STATE_PENDING : OgMembershipInterface::STATE_ACTIVE;
+      // Determine with which state a user can subscribe to a group they don't
+      // have access to.
+      // By default, for security reasons, if the group is private, then the
+      // state would be pending, regardless if the "subscribe without approval"
+      // is enabled.
+      $state = $this->config('og.settings')->get('deny_subscribe_without_approval') ? OgMembershipInterface::STATE_PENDING : OgMembershipInterface::STATE_ACTIVE;
     }
 
     return $state === OgMembershipInterface::STATE_ACTIVE;
@@ -132,13 +140,11 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
     $group = $membership->getGroup();
 
     $message = $membership->getState() === OgMembershipInterface::STATE_ACTIVE ? $this->t('Your are now subscribed to the group.') : $this->t('Your subscription request was sent.');
+    drupal_set_message($message);
 
     // User doesn't have access to the group entity, so redirect to front page,
     // otherwise back to the group entity.
-    $redirect = $group->access('view') ? $group->toUrl() : '<front>';
-
-
-    drupal_set_message($message);
+    $redirect = $group->access('view') ? $group->toUrl() : new Url('<front>');
     $form_state->setRedirectUrl($redirect);
 
   }
