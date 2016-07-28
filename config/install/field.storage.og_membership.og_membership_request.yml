@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+    - text
+id: og_membership.og_membership_request
+field_name: og_membership_request
+entity_type: og_membership
+type: text
+settings:
+  max_length: 255
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
