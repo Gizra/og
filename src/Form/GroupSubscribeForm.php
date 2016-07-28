@@ -87,7 +87,10 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $state = $this->isStateActive() ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
-    $this->entity->setState($state);
+
+    /** @var OgMembershipInterface $membership */
+    $membership = $this->entity;
+    $membership->setState($state);
 
     return parent::buildForm($form, $form_state);
   }

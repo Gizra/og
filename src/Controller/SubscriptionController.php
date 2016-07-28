@@ -155,7 +155,9 @@ class SubscriptionController extends ControllerBase {
       // The user is the manager of the group.
       drupal_set_message($this->t('As the manager of %group, you can not leave the group.', array('%group' => $group->label())));
 
-      return new RedirectResponse($group->toUrl());
+      return new RedirectResponse($group->toUrl()
+        ->setAbsolute()
+        ->toString());
     }
 
     // Show the user a un-subscription confirmation.
