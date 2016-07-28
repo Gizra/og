@@ -5,7 +5,6 @@ namespace Drupal\og\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgMembership;
-use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -48,11 +47,17 @@ class SubscriptionController extends ControllerBase {
    * Subscribe a user to group.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
    * @param string $entity_type_id
+   *   The entity type of the group entity.
    * @param string|int $entity_id
+   *   The entity ID of the group entity.
    * @param string|null $membership_type
+   *   The membership type to be used for creating the membership.
    *
    * @return mixed
+   *   Redirect user or show access denied if they are not allowed to subscribe,
+   *   otherwise provide a subscribe confirmation form.
    */
   public function subscribe(Request $request, $entity_type_id, $entity_id, $membership_type) {
     $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
@@ -66,8 +71,6 @@ class SubscriptionController extends ControllerBase {
 
       $user_login_url = Url::fromRoute('user.login', [], $destination)->toString();
 
-      // @todo I think this is correct? Other options are visitors or require
-      // approval both of which apply to the else instead of here.
       if ($this->config('user.settings')->get('register') === USER_REGISTER_ADMINISTRATORS_ONLY) {
         $params = [':login' => $user_login_url];
         drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a>. After you have successfully done so, you will need to request membership again.', $params));
@@ -127,8 +130,16 @@ class SubscriptionController extends ControllerBase {
   }
 
   /**
+   * Unsubscribe a user from group.
+   *
    * @param string $entity_type_id
+   *   The entity type of the group entity.
    * @param string|int $entity_id
+   *   The entity ID of the group entity.
+   *
+   * @return mixed
+   *   Redirect user or show access denied if they are not allowed to subscribe,
+   *   otherwise provide an un-subscribe confirmation form.
    */
   public function unsubscribe($entity_type_id, $entity_id) {
     $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
@@ -145,15 +156,13 @@ class SubscriptionController extends ControllerBase {
       // The user is the manager of the group.
       drupal_set_message($this->t('As the manager of %group, you can not leave the group.', array('%group' => $group->label())));
 
-      return new RedirectResponse($group->toUrl()
-        ->setAbsolute(TRUE)
-        ->toString());
+      return new RedirectResponse($group->toUrl());
     }
 
     // Show the user a un-subscription confirmation.
     return $this
       ->formBuilder()
-      ->getForm('\Drupal\og_ui\Form\GroupUnsubscribeConfirmForm', $group);
+      ->getForm('\Drupal\og\Form\GroupUnsubscribeConfirmForm', $group);
 
   }
 
