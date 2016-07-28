@@ -12,8 +12,8 @@ bundle: default
 mode: default
 content:
   og_membership_request:
-    label: hidden
-    type: text_default
+    label: above
+    type: basic_string
     weight: 0
     settings: {  }
     third_party_settings: {  }
