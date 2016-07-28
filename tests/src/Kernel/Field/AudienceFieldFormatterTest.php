@@ -30,11 +30,9 @@ class AudienceFieldFormatterTest extends KernelTestBase {
       'entity_reference_label',
     ];
 
-    foreach ([OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE, OgGroupAudienceHelper::USER_TO_GROUP_REFERENCE_FIELD_TYPE] as $field_type) {
-      $actual = array_keys($formatter_manager->getOptions($field_type));
-      sort($actual);
-      $this->assertEquals($expected, $actual);
-    }
+    $actual = array_keys($formatter_manager->getOptions(OgGroupAudienceHelper::GROUP_REFERENCE));
+    sort($actual);
+    $this->assertEquals($expected, $actual);
   }
 
 }

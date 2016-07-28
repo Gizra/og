@@ -10,7 +10,6 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 
 /**
@@ -106,21 +105,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function setUser(AccountInterface $user) {
     $this->set('uid', $user->id());
     return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setFieldName($fieldName) {
-    $this->set('field_name', $fieldName);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getFieldName() {
-    return $this->get('field_name')->value;
   }
 
   /**
@@ -293,11 +277,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Create'))
       ->setDescription(t('The Unix timestamp when the group content was created.'));
 
-    $fields['field_name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Field name'))
-      ->setDescription(t("The name of the field holding the group ID, the OG membership is associated with."))
-      ->setDefaultValue(OgGroupAudienceHelper::DEFAULT_FIELD);
-
     $fields['language'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language'))
       ->setDescription(t('The {languages}.language of this membership.'));
@@ -309,11 +288,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage) {
-
-    if (!$this->getFieldName()) {
-      $this->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD);
-    }
-
     // Check the value directly rather than using the entity, if there is one.
     // This will watch actual empty values and '0'.
     if (!$this->get('uid')->target_id) {

@@ -122,16 +122,14 @@ class GetMembershipsTest extends KernelTestBase {
    *   The array index in the $this->users array of the user to test.
    * @param array $states
    *   Array with the states to retrieve.
-   * @param string $field_name
-   *   The field name associated with the group.
    * @param array $expected
    *   An array containing the expected results to be returned.
    *
    * @covers ::getMemberships
    * @dataProvider membershipDataProvider
    */
-  public function testGetMemberships($index, array $states, $field_name, array $expected) {
-    $result = Og::getMemberships($this->users[$index], $states, $field_name);
+  public function testGetMemberships($index, array $states, array $expected) {
+    $result = Og::getMemberships($this->users[$index], $states);
 
     // Check that the correct number of results is returned.
     $this->assertEquals(count($expected), count($result));
@@ -166,93 +164,89 @@ class GetMembershipsTest extends KernelTestBase {
    *   - The key of the user in the $this->users array for which to retrieve
    *     memberships.
    *   - An array of membership states to filter on.
-   *   - The field name to filter on.
    *   - An array containing the expected results to be returned.
    */
   public function membershipDataProvider() {
     return [
       // The first user is an active member of the first group.
       // Query default values. The group should be returned.
-      [0, [], NULL, [0]],
+      [0, [], [0]],
       // Filter by active state.
-      [0, [OgMembershipInterface::STATE_ACTIVE], NULL, [0]],
+      [0, [OgMembershipInterface::STATE_ACTIVE], [0]],
       // Filter by active + pending state.
       [0, [
         OgMembershipInterface::STATE_ACTIVE,
         OgMembershipInterface::STATE_PENDING,
-      ], NULL, [0],
+      ], [0],
       ],
       // Filter by blocked + pending state. Since the user is active this should
       // not return any matches.
       [0, [
         OgMembershipInterface::STATE_BLOCKED,
         OgMembershipInterface::STATE_PENDING,
-      ], NULL, [],
+      ], [],
       ],
-      // Filter by a non-existing field name. This should not return any
-      // matches.
-      [0, [], 'non_existing_field_name', []],
 
       // The second user is a pending member of the second group.
       // Query default values. The group should be returned.
-      [1, [], NULL, [1]],
+      [1, [], [1]],
       // Filter by pending state.
-      [1, [OgMembershipInterface::STATE_PENDING], NULL, [1]],
+      [1, [OgMembershipInterface::STATE_PENDING], [1]],
       // Filter by active state. The user is pending so this should not return
       // any matches.
-      [1, [OgMembershipInterface::STATE_ACTIVE], NULL, []],
+      [1, [OgMembershipInterface::STATE_ACTIVE], []],
 
       // The third user is an active member of both groups.
       // Query default values. Both groups should be returned.
-      [2, [], NULL, [0, 1]],
+      [2, [], [0, 1]],
       // Filter by active state.
-      [2, [OgMembershipInterface::STATE_ACTIVE], NULL, [0, 1]],
+      [2, [OgMembershipInterface::STATE_ACTIVE], [0, 1]],
       // Filter by blocked state. This should not return any matches.
-      [2, [OgMembershipInterface::STATE_BLOCKED], NULL, []],
+      [2, [OgMembershipInterface::STATE_BLOCKED], []],
 
       // The fourth user is a pending member of the first group and blocked in
       // the second group.
       // Query default values. Both groups should be returned.
-      [3, [], NULL, [0, 1]],
+      [3, [], [0, 1]],
       // Filter by active state. No results should be returned.
-      [3, [OgMembershipInterface::STATE_ACTIVE], NULL, []],
+      [3, [OgMembershipInterface::STATE_ACTIVE], []],
       // Filter by pending state.
-      [3, [OgMembershipInterface::STATE_PENDING], NULL, [0]],
+      [3, [OgMembershipInterface::STATE_PENDING], [0]],
       // Filter by blocked state.
-      [3, [OgMembershipInterface::STATE_BLOCKED], NULL, [1]],
+      [3, [OgMembershipInterface::STATE_BLOCKED], [1]],
       // Filter by combinations of states.
       [3, [
         OgMembershipInterface::STATE_ACTIVE,
         OgMembershipInterface::STATE_PENDING,
-      ], NULL, [0],
+      ], [0],
       ],
       [3, [
         OgMembershipInterface::STATE_ACTIVE,
         OgMembershipInterface::STATE_PENDING,
         OgMembershipInterface::STATE_BLOCKED,
-      ], NULL, [0, 1],
+      ], [0, 1],
       ],
       [3, [
         OgMembershipInterface::STATE_ACTIVE,
         OgMembershipInterface::STATE_BLOCKED,
-      ], NULL, [1],
+      ], [1],
       ],
       [3, [
         OgMembershipInterface::STATE_PENDING,
         OgMembershipInterface::STATE_BLOCKED,
-      ], NULL, [0, 1],
+      ], [0, 1],
       ],
 
       // A user which is not subscribed to either of the two groups.
-      [4, [], NULL, []],
-      [4, [OgMembershipInterface::STATE_ACTIVE], NULL, []],
-      [4, [OgMembershipInterface::STATE_BLOCKED], NULL, []],
-      [4, [OgMembershipInterface::STATE_PENDING], NULL, []],
+      [4, [], []],
+      [4, [OgMembershipInterface::STATE_ACTIVE], []],
+      [4, [OgMembershipInterface::STATE_BLOCKED], []],
+      [4, [OgMembershipInterface::STATE_PENDING], []],
       [4, [
         OgMembershipInterface::STATE_ACTIVE,
         OgMembershipInterface::STATE_PENDING,
         OgMembershipInterface::STATE_BLOCKED,
-      ], NULL, [],
+      ], [],
       ],
     ];
   }
