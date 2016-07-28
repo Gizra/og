@@ -9,7 +9,7 @@ entity_type: og_membership
 type: string_long
 settings:
   case_sensitive: false
-module: text
+module: core
 locked: false
 cardinality: 1
 translatable: true
