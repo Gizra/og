@@ -52,7 +52,10 @@ class GroupSubscribeForm extends ContentEntityForm {
   }
 
   /**
-   * Get the question to present the user.
+   * Get the question to present to the user according to the membership state.
+   *
+   * @return string
+   *   The confirmation question.
    */
   public function getQuestion() {
     /** @var OgMembershipInterface $membership */
@@ -70,9 +73,12 @@ class GroupSubscribeForm extends ContentEntityForm {
   }
 
   /**
+   * Get confirmation text, according to the membership state.
    *
+   * @return string
+   *   The text.
    */
-  public function getConfirmText() {
+  protected function getConfirmText() {
     return $this->isStateActive() ? $this->t('Join') : $this->t('Request membership');
   }
 
@@ -90,6 +96,8 @@ class GroupSubscribeForm extends ContentEntityForm {
 
   /**
    * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\EntityConfirmFormBase::buildForm
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $state = $this->isStateActive() ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
@@ -98,7 +106,56 @@ class GroupSubscribeForm extends ContentEntityForm {
     $membership = $this->entity;
     $membership->setState($state);
 
-    return parent::buildForm($form, $form_state);
+    // Add confirmation related elements.
+    $form['#title'] = $this->getQuestion();
+
+    $form['#attributes']['class'][] = 'confirmation';
+    $form['description'] = [
+      '#markup' => $this->t('This action cannot be undone.'),
+    ];
+
+    $form['confirm'] = [
+      '#type' => 'hidden',
+      '#value' => 1,
+    ];
+
+    // By default, render the form using theme_confirm_form().
+    if (!isset($form['#theme'])) {
+      $form['#theme'] = 'confirm_form';
+    }
+
+    $form = parent::buildForm($form, $form_state);
+
+    if ($this->isStateActive() && !empty($form[OgMembershipInterface::REQUEST_FIELD])) {
+      // State is active, so no need to show the request field, as the user
+      // will not need any approval for joining.
+      $form[OgMembershipInterface::REQUEST_FIELD]['#access'] = FALSE;
+    }
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\EntityConfirmFormBase::actions
+   */
+  protected function actions(array $form, FormStateInterface $form_state) {
+    $actions = parent::actions($form, $form_state);
+
+    $actions['submit']['#value'] = $this->getConfirmText();
+    $actions['cancel'] = [
+      '#type' => 'link',
+      '#title' => $this->t('Cancel'),
+      '#attributes' => ['class' => ['button']],
+      '#url' => $this->getCancelUrl(),
+      '#cache' => [
+        'contexts' => [
+          'url.query_args:destination',
+        ],
+      ],
+    ];
+    return $actions;
   }
 
   /**
