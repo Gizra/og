@@ -12,10 +12,10 @@ bundle: default
 mode: default
 content:
   og_membership_request:
-    type: string_textarea
-    weight: 32
+    type: text_textfield
+    weight: 0
     settings:
-      rows: 2
+      size: 60
       placeholder: ''
     third_party_settings: {  }
 hidden: {  }
