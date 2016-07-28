@@ -165,7 +165,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    */
   protected function isStateActive() {
     /** @var OgMembershipInterface $membership */
-    $membership = $this->entity;
+    $membership = $this->getEntity();
 
     /** @var EntityInterface $group */
     $group = $this->entity->getGroup();
@@ -190,7 +190,7 @@ class GroupSubscribeForm extends ContentEntityForm {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
     /** @var OgMembershipInterface $membership */
-    $membership = $this->entity;
+    $membership = $this->getEntity();
 
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
