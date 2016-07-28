@@ -71,9 +71,16 @@ class GroupCheck implements AccessInterface {
       return AccessResult::forbidden();
     }
 
-    $permission = $permission = $route->getRequirement('_og_user_access_group');
+    // Iterate over the permissions.
+    foreach (explode('|', $route->getRequirement('_og_user_access_group')) as $permission) {
+      if ($this->ogAccess->userAccess($group, $permission, $user)) {
+        return AccessResult::allowed();
+      }
+    }
 
-    return $this->ogAccess->userAccess($group, $permission, $user);
+    return AccessResult::forbidden();
+
+
   }
 
 }
