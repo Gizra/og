@@ -123,7 +123,6 @@ class SubscriptionController extends ControllerBase {
       ->setGroup($group);
 
     $form = $this->entityFormBuilder()->getForm($membership);
-
     return $form;
 
   }
@@ -146,6 +145,11 @@ class SubscriptionController extends ControllerBase {
 
     $user = $this->currentUser();
 
+    if (!$membership = Og::getMembership($user, $group)) {
+      // User is not a member.
+      throw new AccessDeniedHttpException();
+    }
+
     if (Og::isMemberBlocked($group, $user)) {
       // User is a blocked member.
       throw new AccessDeniedHttpException();
@@ -160,10 +164,8 @@ class SubscriptionController extends ControllerBase {
         ->toString());
     }
 
-    // Show the user a un-subscription confirmation.
-    return $this
-      ->formBuilder()
-      ->getForm('\Drupal\og\Form\GroupUnsubscribeConfirmForm', $group);
+    $form = $this->entityFormBuilder()->getForm($membership);
+    return $form;
 
   }
 
