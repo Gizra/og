@@ -2,7 +2,7 @@
 
 namespace Drupal\og\Form;
 
-use Drupal\Core\Entity\EntityConfirmFormBase;
+use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -12,8 +12,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a form for subscribing to a group.
+ *
+ * As this form in fact saves the OG membership it is easier to use
+ * Drupal\Core\Entity\ContentEntityForm
+ * However we mimic the functionality of
+ * Drupal\Core\Entity\EntityConfirmFormBase, so it will be presented as a
+ * confirmation page.
  */
-class GroupSubscribeForm extends EntityConfirmFormBase {
+class GroupSubscribeForm extends ContentEntityForm {
 
   /**
    * OG access service.
@@ -46,7 +52,7 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Get the question to present the user.
    */
   public function getQuestion() {
     /** @var OgMembershipInterface $membership */
@@ -64,14 +70,14 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
   }
 
   /**
-   * {@inheritdoc}
+   *
    */
   public function getConfirmText() {
     return $this->isStateActive() ? $this->t('Join') : $this->t('Request membership');
   }
 
   /**
-   * {@inheritdoc}
+   *
    */
   public function getCancelUrl() {
     /** @var EntityInterface $group */
@@ -124,20 +130,11 @@ class GroupSubscribeForm extends EntityConfirmFormBase {
 
   /**
    * {@inheritdoc}
-   *
-   * @todo: We will need to change this when we have configurable fields.
-   */
-  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
-  }
-
-  /**
-   * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
     /** @var OgMembershipInterface $membership */
     $membership = $this->entity;
-    $membership->save();
 
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
