@@ -70,7 +70,8 @@ use Drupal\og\OgMembershipInterface;
  *   handlers = {
  *     "views_data" = "Drupal\og\OgMembershipViewsData",
  *     "form" = {
- *       "default" = "Drupal\og\Form\GroupSubscribeForm",
+ *       "subscribe" = "Drupal\og\Form\GroupSubscribeForm",
+ *       "unsubscribe" = "Drupal\og\Form\GroupUnsubscribeConfirmForm",
  *     },
  *   }
  * )

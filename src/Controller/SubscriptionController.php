@@ -122,7 +122,7 @@ class SubscriptionController extends ControllerBase {
       ->setUser($user)
       ->setGroup($group);
 
-    $form = $this->entityFormBuilder()->getForm($membership);
+    $form = $this->entityFormBuilder()->getForm($membership, 'subscribe');
     return $form;
 
   }
@@ -164,7 +164,7 @@ class SubscriptionController extends ControllerBase {
         ->toString());
     }
 
-    $form = $this->entityFormBuilder()->getForm($membership);
+    $form = $this->entityFormBuilder()->getForm($membership, 'unsubscribe');
     return $form;
 
   }
