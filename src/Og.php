@@ -239,10 +239,10 @@ class Og {
   /**
    * Returns the group membership for a given user and group.
    *
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   The user to get the membership for.
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group to get the membership for.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get the membership for.
    * @param array $states
    *   (optional) Array with the state to return. Defaults to active.
    *
@@ -250,7 +250,7 @@ class Og {
    *   The OgMembership entity, or NULL if the user is not a member of the
    *   group.
    */
-  public static function getMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     foreach (static::getMemberships($user, $states) as $membership) {
       if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getGroupId() === $group->id()) {
         return $membership;
