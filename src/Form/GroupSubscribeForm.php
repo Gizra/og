@@ -77,7 +77,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    * @return string
    *   The text.
    */
-  protected function getConfirmText() {
+  public function getConfirmText() {
     return $this->isStateActive() ? $this->t('Join') : $this->t('Request membership');
   }
 

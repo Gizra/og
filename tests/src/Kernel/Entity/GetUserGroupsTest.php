@@ -78,40 +78,40 @@ class GetUserGroupsTest extends KernelTestBase {
   protected $groupContentBundle;
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
+     * {@inheritdoc}
+     */
+    protected function setUp() {
+      parent::setUp();
 
-    $this->installConfig(['og']);
-    $this->installEntitySchema('og_membership');
-    $this->installEntitySchema('user');
-    $this->installEntitySchema('entity_test');
-    $this->installSchema('system', 'sequences');
+      $this->installConfig(['og']);
+      $this->installEntitySchema('og_membership');
+      $this->installEntitySchema('user');
+      $this->installEntitySchema('entity_test');
+      $this->installSchema('system', 'sequences');
 
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
-    $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
+      $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+      $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
 
-    // Create users.
-    $this->user1 = User::create(['name' => $this->randomString()]);
-    $this->user1->save();
+      // Create users.
+      $this->user1 = User::create(['name' => $this->randomString()]);
+      $this->user1->save();
 
-    $this->user2 = User::create(['name' => $this->randomString()]);
-    $this->user2->save();
+      $this->user2 = User::create(['name' => $this->randomString()]);
+      $this->user2->save();
 
-    $this->user3 = User::create(['name' => $this->randomString()]);
-    $this->user3->save();
+      $this->user3 = User::create(['name' => $this->randomString()]);
+      $this->user3->save();
 
-    // Define the group content as group.
-    Og::groupManager()->addGroup('entity_test', $this->groupBundle);
+      // Define the group content as group.
+      Og::groupManager()->addGroup('entity_test', $this->groupBundle);
 
-    // Create a group and associate with user 1.
-    $this->group1 = EntityTest::create([
-      'type' => $this->groupBundle,
-      'name' => $this->randomString(),
-      'user_id' => $this->user1->id(),
-    ]);
-    $this->group1->save();
+      // Create a group and associate with user 1.
+      $this->group1 = EntityTest::create([
+        'type' => $this->groupBundle,
+        'name' => $this->randomString(),
+        'user_id' => $this->user1->id(),
+      ]);
+      $this->group1->save();
 
     // Create a group and associate with user 2.
     $this->group2 = EntityTest::create([
