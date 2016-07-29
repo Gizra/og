@@ -9,6 +9,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
+use Drupal\og\Entity\OgMembership;
 
 /**
  * A static helper class for OG.

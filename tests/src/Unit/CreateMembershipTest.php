@@ -6,11 +6,12 @@ namespace Drupal\Tests\og\Unit;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
-use Drupal\og\GroupManager;
+use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
 
 /**
  * Tests create membership helper function.
@@ -33,13 +34,6 @@ class CreateMembershipTest extends UnitTestCase {
    * @var \Drupal\Core\Entity\EntityStorageInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $entityStorage;
-
-  /**
-   * The mocked group manager.
-   *
-   * @var \Drupal\og\GroupManager|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $groupManager;
 
   /**
    * A mocked test user.
@@ -70,6 +64,13 @@ class CreateMembershipTest extends UnitTestCase {
   protected $group;
 
   /**
+   * The mocked test OG membership.
+   *
+   * @var \Drupal\og\OgMembershipInterface
+   */
+  protected $membership;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -78,21 +79,21 @@ class CreateMembershipTest extends UnitTestCase {
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
 
-    $this->groupManager = $this->prophesize(GroupManager::class);
-    $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
-
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
-
     $this->entityManager= $this->prophesize(EntityManagerInterface::class);
-    $this->entityManager->getStorage($this->entityTypeId)
+
+    $this->entityManager->getStorage('og_membership')
       ->willReturn($this->entityStorage->reveal());
 
     $this->entityManager->getEntityTypeFromClass('Drupal\og\Entity\OgMembership')
-      ->willReturn($this->entityTypeId);
+      ->willReturn('og_membership');
 
-    $entity = $this->prophesize(EntityInterface::class);
-    $this->entityStorage->create()
-      ->willReturn($entity->reveal());
+    // Create a mocked Og Membership entity.
+    $membership_entity = $this->prophesize(OgMembershipInterface::class);
+
+    $this->entityStorage
+      ->create(Argument::type('array'))
+      ->willReturn($membership_entity->reveal());
 
     // Create a mocked test group.
     $group_entity = $this->prophesize(EntityInterface::class);
@@ -100,16 +101,13 @@ class CreateMembershipTest extends UnitTestCase {
     $group_entity->bundle()->willReturn($this->bundle);
     $group_entity->id()->willReturn($this->randomMachineName());
 
-    $this->group = $group_entity->reveal();
-
-    $group_entity->create()->willReturn($this->group);
+    $this->group = $group_entity;
 
     // Create a mocked test user.
     $this->user = $this->prophesize(AccountInterface::class);
-    $this->user->isAuthenticated()->willReturn(TRUE);
+    $this->user->id()->willReturn(rand(10, 50));
 
     $container = new ContainerBuilder();
-    $container->set('og.group.manager', $this->groupManager->reveal());
     $container->set('entity.manager', $this->entityManager->reveal());
     \Drupal::setContainer($container);
   }
@@ -120,7 +118,7 @@ class CreateMembershipTest extends UnitTestCase {
    * @covers ::createMembership
    */
   public function testNewGroup() {
-    $membership = Og::createMembership($this->group, $this->user->reveal());
+    $membership = Og::createMembership($this->group->reveal(), $this->user->reveal());
 
     $this->assertInstanceOf(OgMembershipInterface::class, $membership);
   }
