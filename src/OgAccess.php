@@ -140,7 +140,7 @@ class OgAccess implements OgAccessInterface {
       $permissions = [];
       $user_is_group_admin = FALSE;
 
-      if ($membership = Og::getMembership($user, $group)) {
+      if ($membership = Og::getMembership($group, $user)) {
         foreach ($membership->getRoles() as $role) {
           // Check for the is_admin flag.
           /** @var \Drupal\og\Entity\OgRole $role */
