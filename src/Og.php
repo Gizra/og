@@ -259,6 +259,29 @@ class Og {
   }
 
   /**
+   * Creates an OG membership.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user object.
+   * @param string $membership_type
+   *   (optional) The membership type. Defaults to OG_MEMBERSHIP_TYPE_DEFAULT.
+   *
+   * @return \Drupal\og\Entity\OgMembership
+   *   The unsaved membership object.
+   */
+  public static function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
+    /** @var OgMembershipInterface $membership */
+    $membership = OgMembership::create(['type' => $membership_type]);
+    $membership
+      ->setUser($user)
+      ->setGroup($group);
+
+    return $membership;
+  }
+
+  /**
    * Returns all group IDs associated with the given group content entity.
    *
    * Do not use this to retrieve group IDs associated with a user entity. Use
