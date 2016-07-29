@@ -129,9 +129,11 @@ class GroupSubscribeFormTest extends KernelTestBase {
 
     $form->setEntity($membership_pending);
     $this->assertEquals('Request membership', $form->getConfirmText());
+    $this->assertFalse($form->isStateActive());
 
     $form->setEntity($membership_active);
     $this->assertEquals('Join', $form->getConfirmText());
+    $this->assertTrue($form->isStateActive());
   }
 
 }

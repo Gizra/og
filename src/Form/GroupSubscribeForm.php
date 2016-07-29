@@ -167,7 +167,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    * @return bool
    *   True if the state is active.
    */
-  protected function isStateActive() {
+  public function isStateActive() {
     /** @var OgMembershipInterface $membership */
     $membership = $this->getEntity();
 
