@@ -37,6 +37,16 @@ use Drupal\user\Entity\Role;
 class OgRole extends Role implements OgRoleInterface {
 
   /**
+   * Gets the ID of the role.
+   *
+   * @return string
+   *   The unique ID for the role.
+   */
+  public function getId() {
+    return $this->get('id');
+  }
+
+  /**
    * Sets the ID of the role.
    *
    * @param string $id
