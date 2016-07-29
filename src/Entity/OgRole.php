@@ -179,7 +179,7 @@ class OgRole extends Role implements OgRoleInterface {
    */
   public function getName() {
     // If the name is not set yet, try to derive it from the ID.
-    if (empty($this->name) && !empty($this->id()) && !empty($this->getGroupType()) && !empty($this->getGroupBundle())) {
+    if (empty($this->name) && $this->id() && $this->getGroupType() && $this->getGroupBundle()) {
       // Check if the ID matches the pattern '{entity type}-{bundle}-{name}'.
       $pattern = preg_quote("{$this->getGroupType()}-{$this->getGroupBundle()}-");
       preg_match("/$pattern(.+)/", $this->id(), $matches);
@@ -204,7 +204,7 @@ class OgRole extends Role implements OgRoleInterface {
   public function save() {
     // The ID of a new OgRole has to consist of the entity type ID, bundle ID
     // and role name, separated by dashes.
-    if ($this->isNew() && !empty($this->id())) {
+    if ($this->isNew() && $this->id()) {
       list($entity_type_id, $bundle_id, $name) = explode('-', $this->id());
       if ($entity_type_id !== $this->getGroupType() || $bundle_id !== $this->getGroupBundle() || $name !== $this->getName()) {
         throw new ConfigValueException('The ID should consist of the group entity type ID, group bundle ID and role name, separated by dashes.');
@@ -213,16 +213,16 @@ class OgRole extends Role implements OgRoleInterface {
 
     // If a new OgRole is saved and the ID is not set, construct the ID from
     // the entity type ID, bundle ID and role name.
-    if ($this->isNew() && empty($this->id())) {
-      if (empty($this->getGroupType())) {
+    if ($this->isNew() && !$this->id()) {
+      if (!$this->getGroupType()) {
         throw new ConfigValueException('The group type can not be empty.');
       }
 
-      if (empty($this->getGroupBundle())) {
+      if (!$this->getGroupBundle()) {
         throw new ConfigValueException('The group bundle can not be empty.');
       }
 
-      if (empty($this->getName())) {
+      if (!$this->getName()) {
         throw new ConfigValueException('The role name can not be empty.');
       }
 
@@ -230,11 +230,11 @@ class OgRole extends Role implements OgRoleInterface {
       // order to prevent duplicate IDs.
       $prefix = $this->getGroupType() . '-' . $this->getGroupBundle() . '-';
 
-      if (!empty($this->getGroupId())) {
+      if ($this->getGroupId()) {
         $prefix .= $this->getGroupId() . '-';
       }
 
-      $this->id = $prefix . $this->getName();
+      $this->setId($prefix . $this->getName());
     }
 
     parent::save();
