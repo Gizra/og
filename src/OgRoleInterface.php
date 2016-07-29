@@ -38,14 +38,6 @@ interface OgRoleInterface {
   const ROLE_TYPE_STANDARD = 'standard';
 
   /**
-   * Gets the ID of the role.
-   *
-   * @return string
-   *   The unique ID for the role.
-   */
-  public function getId();
-
-  /**
    * Sets the ID of the role.
    *
    * @param string $id
