@@ -580,13 +580,13 @@ class Og {
   }
 
   /**
-   * Get a role by the group's bundle and role name
+   * Get a role by the group's bundle and role name.
    *
    * @param string $entity_type_id
    *   The group entity type ID.
    * @param string $bundle
    *   The group bundle name.
-   * @param $role_name
+   * @param string $role_name
    *   The role name.
    *
    * @return \Drupal\og\OgRoleInterface|null
