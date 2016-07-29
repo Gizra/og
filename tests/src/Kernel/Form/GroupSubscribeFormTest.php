@@ -17,6 +17,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Form\GroupSubscribeForm;
 use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -94,29 +95,24 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $entity_type_id = 'og_membership';
     $display = entity_get_form_display($entity_type_id, $entity_type_id, 'default');
 
-    $user1 = User::create(['name' => $this->randomString()]);
-    $user1->save();
+    $user = User::create(['name' => $this->randomString()]);
+    $user->save();
 
-    $user2 = User::create(['name' => $this->randomString()]);
-    $user2->save();
-
-    $membership_active = OgMembership::create();
-    $membership_active
+    $membership_stub = OgMembership::create();
+    $membership_stub
       ->setGroup($this->group1)
-      ->setUser($user1);
+      ->setUser($user);
 
-    $membership_pending = OgMembership::create();
-    $membership_pending
-      ->setGroup($this->group1)
-      ->setUser($user1);
-
-    /** @var GroupSubscribeForm  $form */
+    /** @var GroupSubscribeForm $form */
     $form = \Drupal::entityManager()->getFormObject($entity_type_id, 'subscribe');
-    $form->setEntity($membership_active);
 
+    // Set permissions for group.
+
+    $form->setEntity($membership_stub);
     $actual = $form->getConfirmText();
     $expected = 'Join';
     $this->assertEquals($actual, $expected);
+
 
   }
 }
