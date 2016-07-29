@@ -266,7 +266,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $fields['state'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('State'))
       ->setDescription(t("The state of the group content."))
-      ->setDefaultValue(OgMembershipInterface::STATE_PENDING);
+      ->setDefaultValue(OgMembershipInterface::STATE_ACTIVE);
 
     $fields['roles'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Roles'))
