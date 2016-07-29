@@ -1,23 +1,12 @@
 <?php
 
-namespace Drupal\og\Form;
-
-use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
-use Drupal\og\OgAccess;
-use Drupal\og\OgMembershipInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-
-namespace Drupal\Tests\og\Kernel\Entity;
+namespace Drupal\Tests\og\Kernel\Form;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
-use Drupal\og\Form\GroupSubscribeForm;
 use Drupal\og\Og;
-use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -60,7 +49,6 @@ class GroupSubscribeFormTest extends KernelTestBase {
    */
   protected $groupBundle;
 
-
   /**
    * {@inheritdoc}
    */
@@ -91,7 +79,10 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $this->group1->save();
   }
 
-  function testStates() {
+  /**
+   * Tests subscribe confirmation related text.
+   */
+  public function testSubscribeByState() {
     $entity_type_id = 'og_membership';
     $display = entity_get_form_display($entity_type_id, $entity_type_id, 'default');
 
@@ -107,12 +98,11 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $form = \Drupal::entityManager()->getFormObject($entity_type_id, 'subscribe');
 
     // Set permissions for group.
-
     $form->setEntity($membership_stub);
     $actual = $form->getConfirmText();
     $expected = 'Join';
     $this->assertEquals($actual, $expected);
 
-
   }
+
 }
