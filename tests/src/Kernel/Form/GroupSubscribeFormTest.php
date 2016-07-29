@@ -101,7 +101,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
     /** @var OgRole $role_active */
     $role_active = Og::getRole('entity_test', $this->groupBundle2, OgRoleInterface::ANONYMOUS);
     $role_active
-      ->grantPermission('subscribe')
+      ->grantPermission('subscribe without approval')
       ->save();
   }
 
@@ -128,16 +128,10 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $form = \Drupal::entityManager()->getFormObject($entity_type_id, 'subscribe');
 
     $form->setEntity($membership_pending);
-    $actual = $form->getConfirmText();
-    $expected = 'Request membership';
-    $this->assertEquals($actual, $expected);
+    $this->assertEquals('Request membership', $form->getConfirmText());
 
     $form->setEntity($membership_active);
-    $actual = $form->getConfirmText();
-    $expected = 'Join';
-    $this->assertEquals($actual, $expected);
-
-
+    $this->assertEquals('Join', $form->getConfirmText());
   }
 
 }

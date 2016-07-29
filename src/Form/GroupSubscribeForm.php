@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Form;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -171,9 +172,12 @@ class GroupSubscribeForm extends ContentEntityForm {
     $membership = $this->getEntity();
 
     /** @var EntityInterface $group */
-    $group = $this->entity->getGroup();
+    $group = $membership->getGroup();
+    $user = $membership->getUser();
 
-    $state = $this->ogAccess->userAccess($group, 'subscribe without approval') ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
+    $skip_approval = $this->ogAccess->userAccess($group, 'subscribe without approval', $user)->isAllowed();
+
+    $state = $skip_approval ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
 
     if (!$group->access('view') && $membership->getState() === OgMembershipInterface::STATE_ACTIVE) {
       // Determine with which state a user can subscribe to a group they don't
