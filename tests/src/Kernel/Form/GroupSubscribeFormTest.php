@@ -6,8 +6,6 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
-use Drupal\og\Entity\OgRole;
-use Drupal\og\Form\GroupSubscribeForm;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
