@@ -593,20 +593,7 @@ class Og {
    *   The OG role object, or NULL if a matching role was not found.
    */
   public static function getRole($entity_type_id, $bundle, $role_name) {
-    $result = \Drupal::entityQuery('og_role')
-      ->condition('group_type', $entity_type_id)
-      ->condition('group_bundle', $bundle)
-      ->condition('label', $role_name)
-      // We will have only one matching role.
-      ->range(0, 1)
-      ->execute();
-
-    if (!$result) {
-      return NULL;
-    }
-
-    $id = reset($result);
-    return OgRole::load($id);
+    return OgRole::load($entity_type_id . '-' . $bundle . '-' . $role_name);
   }
 
   /**
