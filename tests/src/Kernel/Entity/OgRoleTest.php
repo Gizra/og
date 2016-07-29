@@ -90,10 +90,9 @@ class OgRoleTest extends KernelTestBase {
     // Confirm role can be re-saved.
     $og_role->save();
 
-    // Confirm role's ID changed.
+    // Confirm a role's ID cannot be changed.
     try {
       $og_role->setId($og_role->id() . 'foo');
-
       $this->fail('Existing OG role ID can change.');
     }
     catch (OgRoleException $e) {
