@@ -6,6 +6,7 @@ use Drupal\Core\Config\ConfigValueException;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Exception\OgRoleException;
 
 /**
  * Test OG role creation.
@@ -85,6 +86,17 @@ class OgRoleTest extends KernelTestBase {
       ->save();
 
     $this->assertEquals('entity_test-group-1-content_editor', $og_role->id());
+
+    // Confirm role can be re-saved.
+    $og_role->save();
+
+    // Confirm a role's ID cannot be changed.
+    try {
+      $og_role->setId($og_role->id() . 'foo');
+      $this->fail('Existing OG role ID can change.');
+    }
+    catch (OgRoleException $e) {
+    }
 
     // Try to create the same role again.
     try {
