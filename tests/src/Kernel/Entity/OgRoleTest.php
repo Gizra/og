@@ -6,6 +6,7 @@ use Drupal\Core\Config\ConfigValueException;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Og;
 
 /**
  * Test OG role creation.
@@ -33,6 +34,7 @@ class OgRoleTest extends KernelTestBase {
    * Testing OG role creation.
    */
   public function testRoleCreate() {
+    /** @var OgRole $og_role */
     $og_role = OgRole::create();
     $og_role
       ->setName('content_editor')
@@ -53,6 +55,9 @@ class OgRoleTest extends KernelTestBase {
       ->save();
 
     $this->assertNotEmpty(OgRole::load('node-group-content_editor'), 'The role was created with the expected ID.');
+
+    $expected = Og::getRole('node', 'group', 'content_editor')->id();
+    $this->assertEquals($expected, $og_role->id());
 
     // Checking creation of the role.
     $this->assertEquals($og_role->getPermissions(), ['administer group']);
