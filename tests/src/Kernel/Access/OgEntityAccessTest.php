@@ -9,7 +9,6 @@ use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
-use Drupal\og\OgAccessInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
 
