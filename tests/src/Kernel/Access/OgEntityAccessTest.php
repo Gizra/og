@@ -9,6 +9,7 @@ use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
 
@@ -272,6 +273,7 @@ class OgEntityAccessTest extends KernelTestBase {
    * Test access to an arbitrary permission.
    */
   public function testAccess() {
+    /** @var OgAccessInterface $og_access */
     $og_access = $this->container->get('og.access');
 
     // A member user.
@@ -295,6 +297,7 @@ class OgEntityAccessTest extends KernelTestBase {
       ->grantPermission('some_perm')
       ->save();
 
+    $og_access->reset();
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
 
     // A member with permission to update the group. The operation edit is
