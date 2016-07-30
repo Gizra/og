@@ -9,6 +9,7 @@ use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -244,7 +245,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->addRole($this->ogRoleWithPermission2)
       ->save();
 
-    /** @var OgMembership $membership */
     $membership = OgMembership::create();
     $membership
       ->setUser($this->user2)
@@ -260,7 +260,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->addRole($this->ogRoleWithUpdatePermission)
       ->save();
 
-    /** @var OgMembership $membership */
     $membership = OgMembership::create();
     $membership
       ->setUser($this->adminUser)
@@ -288,6 +287,15 @@ class OgEntityAccessTest extends KernelTestBase {
 
     // A non-member user.
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isForbidden());
+
+    // Allow the permission to a non-member user.
+    /** @var OgRole $role */
+    $role = Og::getRole('entity_test', $this->groupBundle, OgRoleInterface::ANONYMOUS);
+    $role
+      ->grantPermission('some_perm')
+      ->save();
+
+    $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
 
     // A member with permission to update the group. The operation edit is
     // passed to the userAccess method.
