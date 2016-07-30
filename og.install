@@ -74,4 +74,3 @@ function og_schema() {
 
   return $schema;
 }
-

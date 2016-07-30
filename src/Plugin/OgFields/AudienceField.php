@@ -1,23 +1,17 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\OgFields\AudienceField.
- */
-
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\OgMembershipInterface;
 
 /**
  * Determine to which groups this group content is assigned to.
  *
  * @OgFields(
- *  id = "og_group_ref",
+ *  id = "og_audience",
  *  type = "group",
  *  description = @Translation("Determine to which groups this group content is assigned to."),
  * )
@@ -28,13 +22,16 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFieldStorageBaseDefinition(array $values = array()) {
+    if ($this->getEntityType() == 'user') {
+      throw new \LogicException('OG audience field cannot be added to the User entity type.');
+    }
+
     $values += [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'custom_storage' => $this->getEntityType() == 'user',
       'settings' => [
         'target_type' => $this->getEntityType(),
       ],
-      'type' => $this->getEntityType() == 'user' ? OgGroupAudienceHelper::USER_TO_GROUP_REFERENCE_FIELD_TYPE : OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE,
+      'type' => OgGroupAudienceHelper::GROUP_REFERENCE,
     ];
 
     return parent::getFieldStorageBaseDefinition($values);
@@ -71,7 +68,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       ],
     ];
 
-
     return $values;
   }
 
@@ -84,9 +80,10 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'type' => 'entity_reference_label',
       'settings' => [
         'link' => TRUE,
-      ]
+      ],
     ];
 
     return $values;
   }
+
 }

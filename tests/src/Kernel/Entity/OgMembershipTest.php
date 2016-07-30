@@ -7,7 +7,6 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
-use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 
@@ -45,6 +44,13 @@ class OgMembershipTest extends KernelTestBase {
   protected $user;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -56,7 +62,9 @@ class OgMembershipTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    // Create a bundle and add as a group
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
+
+    // Create a bundle and add as a group.
     $group = EntityTest::create([
       'type' => Unicode::strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
@@ -82,11 +90,10 @@ class OgMembershipTest extends KernelTestBase {
    * @covers ::setUser
    */
   public function testGetSetUser() {
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
-      ->setUser($this->user->id())
-      ->setEntityId($this->group->id())
-      ->setGroupEntityType($this->group->getEntityTypeId())
+      ->setUser($this->user)
+      ->setGroup($this->group)
       ->save();
 
     // Check the user is returned.
@@ -94,38 +101,24 @@ class OgMembershipTest extends KernelTestBase {
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
 
     // And after re-loading.
-    $membership = Og::membershipStorage()->loadUnchanged($membership->id());
+    $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
 
     $this->assertInstanceOf(UserInterface::class, $membership->getUser());
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
   }
 
   /**
-   * Tests exceptions are thrown when trying to save a membership with no, or
-   * anonymous user.
+   * Tests exceptions are thrown when trying to save a membership with no user.
    *
-   * @covers ::getUser
-   * @dataProvider providerTestGetSetUserException
+   * @covers ::preSave
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-  public function testGetSetUserException($user_value) {
+  public function testGetSetUserException() {
     /** @var OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
-      ->setUser($user_value)
-      ->setEntityId($this->group->id())
-      ->setGroupEntityType($this->group->getEntityTypeId())
+      ->setGroup($this->group)
       ->save();
-  }
-
-  /**
-   * Data provider for testGetSetUserException.
-   */
-  public function providerTestGetSetUserException() {
-    return [
-      [NULL],
-      [0]
-    ];
   }
 
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Unit\OgAccessEntityTestBase.
- */
-
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -15,10 +10,12 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\og\OgAccessInterface;
 use Drupal\og\OgGroupAudienceHelper;
 use Prophecy\Argument;
 
+/**
+ * OG access entity base class.
+ */
 class OgAccessEntityTestBase extends OgAccessTestBase {
 
   /**
@@ -58,7 +55,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     // Mock retrieval of field definitions.
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
-    $field_definition->getType()->willReturn(OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE);
+    $field_definition->getType()->willReturn(OgGroupAudienceHelper::GROUP_REFERENCE);
     $field_definition->getFieldStorageDefinition()
       ->willReturn($this->prophesize(FieldStorageDefinitionInterface::class)->reveal());
     $field_definition->getSetting('handler_settings')->willReturn([]);
