@@ -297,7 +297,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->grantPermission('some_perm')
       ->save();
 
-    $og_access->reset();
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
 
     // A member with permission to update the group. The operation edit is
