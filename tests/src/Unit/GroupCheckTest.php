@@ -7,7 +7,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Access\GroupCheck;
 use Drupal\og\GroupManager;
-use Drupal\og\OgAccess;
 use Drupal\og\OgAccessInterface;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Routing\Route;
@@ -26,6 +25,13 @@ class GroupCheckTest extends UnitTestCase {
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $entityTypeManager;
+
+  /**
+   * The entity type prophecy used in the test.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityType;
 
   /**
    * The entity storage prophecy used in the test.
@@ -77,6 +83,13 @@ class GroupCheckTest extends UnitTestCase {
   protected $group;
 
   /**
+   * The mocked entity ID.
+   *
+   * @var int
+   */
+  protected $entityId;
+
+  /**
    * The mocked group manager.
    *
    * @var \Drupal\og\GroupManager|\Prophecy\Prophecy\ObjectProphecy
@@ -88,6 +101,7 @@ class GroupCheckTest extends UnitTestCase {
    */
   public function setUp() {
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+    $this->entityType = $this->prophesize(EntityTypeInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
     $this->ogAccess = $this->prophesize(OgAccessInterface::class);
     $this->route = $this->prophesize(Route::class);
@@ -108,6 +122,31 @@ class GroupCheckTest extends UnitTestCase {
     $this
       ->entityTypeManager
       ->getDefinition($this->entityTypeId, FALSE)
+      ->willReturn(NULL);
+
+    $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
+    $result = $group_check->access($this->user->reveal(), $this->route->reveal(), $this->entityTypeId, $this->entityId);
+    $this->assertTrue($result->isForbidden());
+  }
+
+  /**
+   * Tests a non-existing group.
+   *
+   * @covers ::access
+   */
+  public function testNoGroup() {
+    $this
+      ->entityTypeManager
+      ->getDefinition($this->entityTypeId, FALSE)
+      ->willReturn($this->entityType);
+
+    $this
+      ->entityTypeManager
+      ->getStorage($this->entityTypeId)
+      ->willReturn($this->entityStorage);
+
+    $this->entityStorage
+      ->load($this->entityId)
       ->willReturn(NULL);
 
     $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
