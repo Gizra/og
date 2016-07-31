@@ -8,6 +8,7 @@ use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
+use Drupal\og\OgAccessInterface;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -34,10 +35,10 @@ class GroupCheck implements AccessInterface {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager service.
-   * @param \Drupal\og\OgAccess $og_access
+   * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, OgAccess $og_access) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, OgAccessInterface $og_access) {
     $this->entityTypeManager = $entity_type_manager;
     $this->ogAccess = $og_access;
   }
