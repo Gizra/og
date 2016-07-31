@@ -178,7 +178,7 @@ class GroupSubscribeForm extends ContentEntityForm {
 
     $state = $skip_approval ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
 
-    if (!$group->access('view') && $state === OgMembershipInterface::STATE_ACTIVE) {
+    if (!$group->access('view', $user) && $state === OgMembershipInterface::STATE_ACTIVE) {
       // Determine with which state a user can subscribe to a group they don't
       // have access to.
       // By default, for security reasons, if the group is private, then the
