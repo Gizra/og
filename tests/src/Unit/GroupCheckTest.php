@@ -247,7 +247,6 @@ class GroupCheckTest extends UnitTestCase {
         ->willReturn($this->accessResult);
     }
 
-
     $this
       ->accessResult
       ->isAllowed()
@@ -264,6 +263,8 @@ class GroupCheckTest extends UnitTestCase {
    * Provides test data to test permissions.
    *
    * @return array
+   *   Array with the permission names, and the expected access result as
+   *   boolean.
    */
   public function permissionsProvider() {
     return [
