@@ -71,16 +71,17 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installSchema('system', 'sequences');
 
+    // Create bundles.
     $groupBundle1 = Unicode::strtolower($this->randomMachineName());
     $groupBundle2 = Unicode::strtolower($this->randomMachineName());
     $groupBundle3 = Unicode::strtolower($this->randomMachineName());
 
-    // Define the entity as group.
+    // Define the entities as groups.
     Og::groupManager()->addGroup('node', $groupBundle1);
     Og::groupManager()->addGroup('node', $groupBundle2);
     Og::groupManager()->addGroup('node', $groupBundle3);
 
-    // Create users.
+    // Create node author user.
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
 
@@ -137,7 +138,6 @@ class GroupSubscribeFormTest extends KernelTestBase {
    */
   public function testIsStateActive() {
     $user = $this->createUser(['access content']);
-    $user->save();
 
     /** @var GroupSubscribeForm $form */
     $form = \Drupal::entityManager()->getFormObject('og_membership', 'subscribe');
