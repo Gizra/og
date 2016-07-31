@@ -205,11 +205,12 @@ class GroupCheckTest extends UnitTestCase {
   }
 
   /**
-   * Tests an accessible route.
+   * Tests an in-accessible and accessible routes.
    *
    * @covers ::access
+   * @dataProvider permissionsProvider
    */
-  public function testAccessibleRoute() {
+  public function testPermissions($permissions, $expected) {
     $this
       ->entityTypeManager
       ->getDefinition($this->entityTypeId, FALSE)
@@ -236,26 +237,41 @@ class GroupCheckTest extends UnitTestCase {
     $this
       ->route
       ->getRequirement('_og_user_access_group')
-      ->willReturn('foo|bar');
+      ->willReturn($permissions);
 
-    $this
-      ->ogAccess
-      ->userAccess($this->group->reveal(), 'foo', $this->user->reveal())
-      ->willReturn($this->accessResult);
+    foreach (explode('|', $permissions) as $permission) {
+      // Check explicitly that only the permissions we passed were used.
+      $this
+        ->ogAccess
+        ->userAccess($this->group->reveal(), $permission, $this->user->reveal())
+        ->willReturn($this->accessResult);
+    }
 
-    $this
-      ->ogAccess
-      ->userAccess($this->group->reveal(), 'bar', $this->user->reveal())
-      ->willReturn($this->accessResult);
 
     $this
       ->accessResult
       ->isAllowed()
-      ->willReturn(TRUE);
+      ->willReturn($expected);
 
     $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
     $result = $group_check->access($this->user->reveal(), $this->route->reveal(), $this->entityTypeId, $this->entityId);
-    $this->assertTrue($result->isAllowed());
+
+    $actual = $expected ? $result->isAllowed() : $result->isForbidden();
+    $this->assertTrue($actual);
+  }
+
+  /**
+   * Provides test data to test permissions.
+   *
+   * @return array
+   */
+  public function permissionsProvider() {
+    return [
+      ['foo', FALSE],
+      ['foo', TRUE],
+      ['foo|bar', FALSE],
+      ['foo|bar', TRUE],
+    ];
   }
 
 }
