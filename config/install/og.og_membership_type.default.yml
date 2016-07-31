@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {}
+type: default
+name: 'Default'
+description: 'Default OG membership type'
