@@ -163,18 +163,24 @@ class GroupSubscribeFormTest extends KernelTestBase {
     // Confirm user has access to the group node.
     $this->assertTrue($this->group2->access('view', $user));
 
+    // Active membership to a group without access, should result with pending
+    // membership by default.
     $membership = OgMembership::create();
     $membership
       ->setGroup($this->group3)
       ->setUser($user);
+
+    // Confirm user doesn't have access to the unpublished group node.
+    $this->assertFalse($this->group3->access('view', $user));
 
     // Even though the state is active, it should result with pending, as user
     // doesn't have access to the group.
     $form->setEntity($membership);
     $this->assertFalse($form->isStateActive());
 
-    // Confirm user doesn't have access to the unpublished group node.
-    $this->assertFalse($this->group3->access('view', $user));
+    // Change the default settings, and assert state remains active.
+    $this->config('og.settings')->set('deny_subscribe_without_approval', FALSE)->save();
+    $this->assertTrue($form->isStateActive());
   }
 
   /**
