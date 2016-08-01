@@ -96,16 +96,18 @@ class CreateMembershipTest extends UnitTestCase {
       ->willReturn($membership_entity->reveal());
 
     // Create a mocked test group.
-    $group_entity = $this->prophesize(EntityInterface::class);
-    $group_entity->getEntityTypeId()->willReturn($this->entityTypeId);
-    $group_entity->bundle()->willReturn($this->bundle);
-    $group_entity->id()->willReturn($this->randomMachineName());
-
-    $this->group = $group_entity;
+    $this->group = $this->prophesize(EntityInterface::class);
 
     // Create a mocked test user.
     $this->user = $this->prophesize(AccountInterface::class);
-    $this->user->id()->willReturn(rand(10, 50));
+
+    $membership_entity
+      ->setUser($this->user)
+      ->willReturn($membership_entity->reveal());
+
+    $membership_entity
+      ->setGroup($this->group)
+      ->willReturn($membership_entity->reveal());
 
     $container = new ContainerBuilder();
     $container->set('entity.manager', $this->entityManager->reveal());
@@ -119,7 +121,6 @@ class CreateMembershipTest extends UnitTestCase {
    */
   public function testNewGroup() {
     $membership = Og::createMembership($this->group->reveal(), $this->user->reveal());
-
     $this->assertInstanceOf(OgMembershipInterface::class, $membership);
   }
 
