@@ -19,7 +19,7 @@ class OgRoleTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['og'];
+  public static $modules = ['field', 'og'];
 
   /**
    * {@inheritdoc}
