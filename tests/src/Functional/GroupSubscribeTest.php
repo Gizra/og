@@ -2,12 +2,14 @@
 
 namespace Drupal\Tests\og\Functional;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\user\Entity\User;
 
 /**
  * Tests subscribe to group.
