@@ -9,6 +9,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
+use Drupal\og\Entity\OgRole;
 
 /**
  * A static helper class for OG.
@@ -239,10 +240,10 @@ class Og {
   /**
    * Returns the group membership for a given user and group.
    *
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   The user to get the membership for.
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group to get the membership for.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get the membership for.
    * @param array $states
    *   (optional) Array with the state to return. Defaults to active.
    *
@@ -250,7 +251,7 @@ class Og {
    *   The OgMembership entity, or NULL if the user is not a member of the
    *   group.
    */
-  public static function getMembership(AccountInterface $user, EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     foreach (static::getMemberships($user, $states) as $membership) {
       if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getGroupId() === $group->id()) {
         return $membership;
@@ -576,6 +577,23 @@ class Og {
   public static function groupManager() {
     // @todo store static reference for this?
     return \Drupal::service('og.group.manager');
+  }
+
+  /**
+   * Get a role by the group's bundle and role name.
+   *
+   * @param string $entity_type_id
+   *   The group entity type ID.
+   * @param string $bundle
+   *   The group bundle name.
+   * @param string $role_name
+   *   The role name.
+   *
+   * @return \Drupal\og\OgRoleInterface|null
+   *   The OG role object, or NULL if a matching role was not found.
+   */
+  public static function getRole($entity_type_id, $bundle, $role_name) {
+    return OgRole::load($entity_type_id . '-' . $bundle . '-' . $role_name);
   }
 
   /**

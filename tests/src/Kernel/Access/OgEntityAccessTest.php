@@ -8,6 +8,8 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -50,6 +52,13 @@ class OgEntityAccessTest extends KernelTestBase {
   protected $user3;
 
   /**
+   * An user object.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $user4;
+
+  /**
    * An admin user.
    *
    * @var \Drupal\user\Entity\User
@@ -90,6 +99,13 @@ class OgEntityAccessTest extends KernelTestBase {
    * @var OgRole
    */
   protected $ogRoleWithPermission2;
+
+  /**
+   * The OG role that has the special permission 'update group'.
+   *
+   * @var OgRole
+   */
+  protected $ogRoleWithUpdatePermission;
 
   /**
    * The OG role that doesn't have the permission we check for.
@@ -137,6 +153,10 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->user3 = User::create(['name' => $this->randomString()]);
     $this->user3->save();
 
+    // A group member the special permission 'update group'.
+    $this->user4 = User::create(['name' => $this->randomString()]);
+    $this->user4->save();
+
     // Admin user.
     $this->adminUser = User::create(['name' => $this->randomString()]);
     $this->adminUser->save();
@@ -181,6 +201,15 @@ class OgEntityAccessTest extends KernelTestBase {
       ->grantPermission('some_perm_2')
       ->save();
 
+    $this->ogRoleWithUpdatePermission = OgRole::create();
+    $this->ogRoleWithUpdatePermission
+      ->setName($this->randomMachineName())
+      ->setLabel($this->randomString())
+      ->setGroupType($this->group1->getEntityTypeId())
+      ->setGroupBundle($this->groupBundle)
+      ->grantPermission(OgAccess::UPDATE_GROUP_PERMISSION)
+      ->save();
+
     $this->ogRoleWithoutPermission = OgRole::create();
     $this->ogRoleWithoutPermission
       ->setName($this->randomMachineName())
@@ -216,7 +245,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->addRole($this->ogRoleWithPermission2)
       ->save();
 
-    /** @var OgMembership $membership */
     $membership = OgMembership::create();
     $membership
       ->setUser($this->user2)
@@ -224,7 +252,14 @@ class OgEntityAccessTest extends KernelTestBase {
       ->addRole($this->ogRoleWithoutPermission)
       ->save();
 
-    /** @var OgMembership $membership */
+    // Check the special permission 'update group'.
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->user4)
+      ->setGroup($this->group1)
+      ->addRole($this->ogRoleWithUpdatePermission)
+      ->save();
+
     $membership = OgMembership::create();
     $membership
       ->setUser($this->adminUser)
@@ -237,6 +272,7 @@ class OgEntityAccessTest extends KernelTestBase {
    * Test access to an arbitrary permission.
    */
   public function testAccess() {
+    /** @var OgAccessInterface $og_access */
     $og_access = $this->container->get('og.access');
 
     // A member user.
@@ -252,6 +288,19 @@ class OgEntityAccessTest extends KernelTestBase {
 
     // A non-member user.
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isForbidden());
+
+    // Allow the permission to a non-member user.
+    /** @var OgRole $role */
+    $role = Og::getRole('entity_test', $this->groupBundle, OgRoleInterface::ANONYMOUS);
+    $role
+      ->grantPermission('some_perm')
+      ->save();
+
+    $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
+
+    // A member with permission to update the group. The operation edit is
+    // passed to the userAccess method.
+    $this->assertTrue($og_access->userAccess($this->group1, 'edit', $this->user4)->isAllowed());
 
     // Group admin user should have access regardless.
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->adminUser)->isAllowed());

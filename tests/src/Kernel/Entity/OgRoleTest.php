@@ -6,6 +6,8 @@ use Drupal\Core\Config\ConfigValueException;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Exception\OgRoleException;
+use Drupal\og\Og;
 
 /**
  * Test OG role creation.
@@ -17,7 +19,7 @@ class OgRoleTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['og'];
+  public static $modules = ['field', 'og'];
 
   /**
    * {@inheritdoc}
@@ -33,6 +35,7 @@ class OgRoleTest extends KernelTestBase {
    * Testing OG role creation.
    */
   public function testRoleCreate() {
+    /** @var OgRole $og_role */
     $og_role = OgRole::create();
     $og_role
       ->setName('content_editor')
@@ -53,6 +56,9 @@ class OgRoleTest extends KernelTestBase {
       ->save();
 
     $this->assertNotEmpty(OgRole::load('node-group-content_editor'), 'The role was created with the expected ID.');
+
+    $expected = Og::getRole('node', 'group', 'content_editor')->id();
+    $this->assertEquals($expected, $og_role->id());
 
     // Checking creation of the role.
     $this->assertEquals($og_role->getPermissions(), ['administer group']);
@@ -85,6 +91,17 @@ class OgRoleTest extends KernelTestBase {
       ->save();
 
     $this->assertEquals('entity_test-group-1-content_editor', $og_role->id());
+
+    // Confirm role can be re-saved.
+    $og_role->save();
+
+    // Confirm a role's ID cannot be changed.
+    try {
+      $og_role->setId($og_role->id() . 'foo');
+      $this->fail('Existing OG role ID can change.');
+    }
+    catch (OgRoleException $e) {
+    }
 
     // Try to create the same role again.
     try {
