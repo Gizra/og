@@ -50,7 +50,7 @@ class AccessTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create a number of test users.
