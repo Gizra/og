@@ -3,17 +3,11 @@
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\Core\Url;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
-use Drupal\og\Entity\OgMembership;
-use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
-use Drupal\og\OgMembershipInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
 use Drupal\Tests\BrowserTestBase;
-use Symfony\Component\CssSelector\Node\NodeInterface;
 
 /**
  * Tests subscribe to group.
@@ -131,6 +125,7 @@ class GroupSubscribeTest extends BrowserTestBase {
    * Data provider for ::testSubscribeAccess()
    *
    * @return array
+   *   Array with the ID, and the expected HTTP code.
    */
   public function subscribeAccessProvider() {
     return [
@@ -139,6 +134,5 @@ class GroupSubscribeTest extends BrowserTestBase {
       [$this->group3->id(), 403],
     ];
   }
-
 
 }
