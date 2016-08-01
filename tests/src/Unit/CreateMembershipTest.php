@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Unit;
 
-
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -80,7 +79,7 @@ class CreateMembershipTest extends UnitTestCase {
     $this->bundle = $this->randomMachineName();
 
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
-    $this->entityManager= $this->prophesize(EntityManagerInterface::class);
+    $this->entityManager = $this->prophesize(EntityManagerInterface::class);
 
     $this->entityManager->getStorage('og_membership')
       ->willReturn($this->entityStorage->reveal());
@@ -123,6 +122,5 @@ class CreateMembershipTest extends UnitTestCase {
     $membership = Og::createMembership($this->group->reveal(), $this->user->reveal());
     $this->assertInstanceOf(OgMembershipInterface::class, $membership);
   }
-
 
 }
