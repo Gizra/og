@@ -111,9 +111,11 @@ class GroupSubscribeTest extends BrowserTestBase {
   /**
    * Tests 'update group' special permission.
    *
-   * @dataProvider subscribeAccessProvider
+   * @todo: use dataProvider subscribeAccessProvider
    */
-  public function testSubscribeAccess($entity_id, $code) {
+  public function testSubscribeAccess() {
+    $entity_id = $this->group1->id();
+    $code = 200;
     $this->drupalLogin($this->normalUser);
     $options = array(
       'entity_type' => 'node',
