@@ -42,7 +42,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * The default group membership type that is the bundle of group membership.
    */
-  const TYPE_DEFAULT = 'og_membership_type_default';
+  const TYPE_DEFAULT = 'default';
 
   /**
    * The name of the user's request field in the default group membership type.

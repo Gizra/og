@@ -152,6 +152,12 @@ class OgAccess implements OgAccessInterface {
           $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
+      else {
+        // User is a non-member.
+        /** @var \Drupal\og\Entity\OgRole $role */
+        $role = Og::getRole($group_type_id, $bundle, OgRoleInterface::ANONYMOUS);
+        $permissions = $role->getPermissions();
+      }
 
       $permissions = array_unique($permissions);
 
