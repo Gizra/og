@@ -45,6 +45,13 @@ class OgMembershipTest extends KernelTestBase {
   protected $user;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -56,6 +63,8 @@ class OgMembershipTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
+
     // Create a bundle and add as a group.
     $group = EntityTest::create([
       'type' => Unicode::strtolower($this->randomMachineName()),
@@ -66,7 +75,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->group = $group;
 
     // Add that as a group.
-    Og::groupManager()->addGroup('entity_test', $group->id());
+    Og::groupManager()->addGroup('entity_test', $group->bundle());
 
     // Create test user.
     $user = User::create(['name' => $this->randomString()]);
@@ -82,7 +91,7 @@ class OgMembershipTest extends KernelTestBase {
    * @covers ::setUser
    */
   public function testGetSetUser() {
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
       ->setUser($this->user)
       ->setGroup($this->group)
@@ -93,7 +102,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
 
     // And after re-loading.
-    $membership = Og::membershipStorage()->loadUnchanged($membership->id());
+    $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
 
     $this->assertInstanceOf(UserInterface::class, $membership->getUser());
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
@@ -105,11 +114,46 @@ class OgMembershipTest extends KernelTestBase {
    * @covers ::preSave
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-  public function testGetSetUserException() {
-    /** @var OgMembership $membership */
+  public function testSetNoUserException() {
+    /** @var OgMembershipInterface $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setGroup($this->group)
+      ->save();
+  }
+
+  /**
+   * Tests exceptions are thrown when trying to save a membership with no group.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testSetNoGroupException() {
+    /** @var OgMembershipInterface $membership */
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->user)
+      ->save();
+  }
+
+  /**
+   * Tests saving a membership with a non group entity.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testSetNonValidGroupException() {
+    $non_group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+
+    $non_group->save();
+    /** @var OgMembershipInterface $membership */
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->user)
+      ->setGroup($non_group)
       ->save();
   }
 

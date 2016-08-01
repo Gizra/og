@@ -25,6 +25,13 @@ class OgAccess implements OgAccessInterface {
   const ADMINISTER_GROUP_PERMISSION = 'administer group';
 
   /**
+   * Update group permission string.
+   *
+   * @var string
+   */
+  const UPDATE_GROUP_PERMISSION = 'update group';
+
+  /**
    * Static cache that contains cache permissions.
    *
    * @var array
@@ -132,7 +139,14 @@ class OgAccess implements OgAccessInterface {
       }
     }
 
-    // Group manager has all privileges (if variable is TRUE) and they are.
+    // Update group special permission. At this point, the operation should have
+    // already been handled by Og. If the operation is simply 'edit'
+    // (or 'update' for content entities), it is referring to the current group,
+    // so we have to map it to the special permission.
+    if (in_array($operation, ['update', 'edit'])) {
+      $operation = OgAccess::UPDATE_GROUP_PERMISSION;
+    }
+
     if ($config->get('group_manager_full_access') && $user->isAuthenticated() && $group instanceof EntityOwnerInterface) {
       $cacheable_metadata->addCacheableDependency($group);
       if ($group->getOwnerId() == $user->id()) {
@@ -148,7 +162,7 @@ class OgAccess implements OgAccessInterface {
       $permissions = [];
       $user_is_group_admin = FALSE;
 
-      if ($membership = Og::getMembership($user, $group)) {
+      if ($membership = Og::getMembership($group, $user)) {
         foreach ($membership->getRoles() as $role) {
           // Check for the is_admin flag.
           /** @var \Drupal\og\Entity\OgRole $role */
@@ -159,6 +173,12 @@ class OgAccess implements OgAccessInterface {
 
           $permissions = array_merge($permissions, $role->getPermissions());
         }
+      }
+      else {
+        // User is a non-member.
+        /** @var \Drupal\og\Entity\OgRole $role */
+        $role = Og::getRole($group_type_id, $bundle, OgRoleInterface::ANONYMOUS);
+        $permissions = $role->getPermissions();
       }
 
       $permissions = array_unique($permissions);

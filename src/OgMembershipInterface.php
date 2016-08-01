@@ -42,7 +42,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * The default group membership type that is the bundle of group membership.
    */
-  const TYPE_DEFAULT = 'og_membership_type_default';
+  const TYPE_DEFAULT = 'default';
 
   /**
    * The name of the user's request field in the default group membership type.
@@ -88,28 +88,6 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function getUser();
 
   /**
-   * Sets the membership field name.
-   *
-   * A user can have two group reference fields. The field name property helps
-   * us to know to which field the membership belongs.
-   *
-   * @param string $fieldName
-   *   The group reference field name.
-   *
-   * @return \Drupal\og\OgMembershipInterface
-   *   The updated OG Membership object.
-   */
-  public function setFieldName($fieldName);
-
-  /**
-   * Gets the membership field name.
-   *
-   * @return string
-   *   The group reference field name.
-   */
-  public function getFieldName();
-
-  /**
    * Sets the group associated with the membership.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
@@ -148,9 +126,10 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Sets the membership state.
    *
    * @param int $state
-   *   One of OgMembershipInterface::STATE_ACTIVE,
-   *   OgMembershipInterface::STATE_PENDING, or
-   *   OgMembershipInterface::STATE_BLOCKED.
+   *   The state of the membership. It may be of the following constants:
+   *   - OgMembershipInterface::STATE_ACTIVE
+   *   - OgMembershipInterface::STATE_PENDING
+   *   - OgMembershipInterface::STATE_BLOCKED.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
@@ -161,10 +140,10 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Gets the membership state.
    *
    * @return int
-   *   The state of the membership. It may be of the following values:
-   *   - STATE_ACTIVE
-   *   - STATE_PENDING
-   *   - STATE_BLOCKED
+   *   The state of the membership. It may be of the following constants:
+   *   - OgMembershipInterface::STATE_ACTIVE
+   *   - OgMembershipInterface::STATE_PENDING
+   *   - OgMembershipInterface::STATE_BLOCKED
    */
   public function getState();
 
@@ -179,18 +158,18 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Sets the group's roles for the current user group membership.
    *
-   * @param OgRole[] $roles
-   *   List of OG roles ids.
+   * @param \Drupal\og\Entity\OgRole[] $roles
+   *   The array of OG roles to set.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function setRoles(array $roles = array());
+  public function setRoles(array $roles = []);
 
   /**
    * Adds a role to the user membership.
    *
-   * @param OgRole $role
+   * @param \Drupal\og\Entity\OgRole $role
    *   The OG role.
    *
    * @return \Drupal\og\OgMembershipInterface
@@ -201,7 +180,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Revokes a role from the OG membership.
    *
-   * @param OgRole $role
+   * @param \Drupal\og\Entity\OgRole $role
    *   The OG role.
    *
    * @return \Drupal\og\OgMembershipInterface
@@ -212,7 +191,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets all the referenced OG roles.
    *
-   * @return OgRole[]
+   * @return \Drupal\og\Entity\OgRole[]
    *   List of OG roles the user own for the current membership instance.
    */
   public function getRoles();
