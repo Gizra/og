@@ -41,7 +41,18 @@ class GroupSubscribeTest extends BrowserTestBase {
    */
   protected $group3;
 
+  /**
+   * A group bundle name.
+   *
+   * @var string
+   */
   protected $groupBundle;
+
+  /**
+   * A non-group bundle name.
+   *
+   * @var string
+   */
   protected $nonGroupBundle;
 
   /**
@@ -67,7 +78,7 @@ class GroupSubscribeTest extends BrowserTestBase {
     // Create node author user.
     $user = $this->createUser();
 
-    // Create group.
+    // Create groups.
     $this->group1 = Node::create([
       'type' => $this->groupBundle,
       'title' => $this->randomString(),
