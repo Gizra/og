@@ -3,14 +3,10 @@
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\user\Entity\User;
 
 /**
  * Tests subscribe to group.
@@ -119,7 +115,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       ],
       $this->group2->id() => ['code' => 403],
 
-      // Entity is un-accesible to the user, but we still allow to subscribe to
+      // Entity is un-accessible to the user, but we still allow to subscribe to
       // it. Since it's "private" the default membership will be pending,
       // even though the permission is "subscribe without approval".
       $this->group3->id() => [
@@ -137,7 +133,7 @@ class GroupSubscribeTest extends BrowserTestBase {
         continue;
       }
 
-      // Assert request membership field
+      // Assert request membership field.
       if ($options['skip_approval']) {
         $this->assertSession()->elementNotExists('xpath', '//*[@id="edit-og-membership-request-0-value"]');
       }
