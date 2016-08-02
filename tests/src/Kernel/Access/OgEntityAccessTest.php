@@ -5,7 +5,6 @@ namespace Drupal\Tests\og\Kernel\Access;
 use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
@@ -229,41 +228,31 @@ class OgEntityAccessTest extends KernelTestBase {
       ->save();
 
     /** @var OgMembership $membership */
-    $membership = OgMembership::create();
+    $membership = Og::createMembership($this->group1, $this->user1);
     $membership
-      ->setUser($this->user1)
-      ->setGroup($this->group1)
       ->addRole($this->ogRoleWithPermission)
       ->save();
 
     // Also create a membership to the other group. From this we can verify that
     // permissions are not bled between groups.
-    $membership = OgMembership::create();
+    $membership = Og::createMembership($this->group2, $this->user1);
     $membership
-      ->setUser($this->user1)
-      ->setGroup($this->group2)
       ->addRole($this->ogRoleWithPermission2)
       ->save();
 
-    $membership = OgMembership::create();
+    $membership = Og::createMembership($this->group1, $this->user2);
     $membership
-      ->setUser($this->user2)
-      ->setGroup($this->group1)
       ->addRole($this->ogRoleWithoutPermission)
       ->save();
 
     // Check the special permission 'update group'.
-    $membership = OgMembership::create();
+    $membership = Og::createMembership($this->group1, $this->user4);
     $membership
-      ->setUser($this->user4)
-      ->setGroup($this->group1)
       ->addRole($this->ogRoleWithUpdatePermission)
       ->save();
 
-    $membership = OgMembership::create();
+    $membership = Og::createMembership($this->group1, $this->adminUser);
     $membership
-      ->setUser($this->adminUser)
-      ->setGroup($this->group1)
       ->addRole($this->ogAdminRole)
       ->save();
   }
@@ -307,10 +296,8 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->assertTrue($og_access->userAccess($this->group1, $this->randomMachineName(), $this->adminUser)->isAllowed());
 
     // Add membership to user 3.
-    $membership = OgMembership::create();
+    $membership = Og::createMembership($this->group1, $this->user3);
     $membership
-      ->setUser($this->user3)
-      ->setGroup($this->group1)
       ->addRole($this->ogRoleWithPermission)
       ->save();
 
