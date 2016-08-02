@@ -118,11 +118,7 @@ class SubscriptionController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    $membership = OgMembership::create(['type' => $membership_type->id()]);
-    $membership
-      ->setUser($user)
-      ->setGroup($group);
-
+    $membership = Og::createMembership($group, $user, $membership_type->id());
     $form = $this->entityFormBuilder()->getForm($membership, 'subscribe');
     return $form;
 
