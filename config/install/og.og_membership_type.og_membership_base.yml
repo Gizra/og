@@ -1,6 +1,0 @@
-langcode: en
-status: true
-dependencies: {}
-type: og_membership_type
-name: 'OG membership type'
-description: 'Basic OG membership type'

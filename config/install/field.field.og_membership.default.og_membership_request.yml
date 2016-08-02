@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.og_membership.og_membership_request
+    - og.og_membership_type.default
+id: og_membership.default.og_membership_request
+field_name: og_membership_request
+entity_type: og_membership
+bundle: default
+label: 'Request membership'
+description: 'Explain the motivation for your request to join this group.'
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

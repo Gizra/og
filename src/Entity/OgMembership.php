@@ -33,12 +33,8 @@ use Drupal\og\OgMembershipInterface;
  * Creating such a relation is done for example in the following way:
  *
  * @code
- *  $membership = OgMembership::create();
- *  $membership
- *    ->setUser($user)
- *    ->setGroup($entity)
- *    ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
- *    ->save();
+ *  $membership = Og::createMembership($entity, $user);
+ *  $membership->save();
  * @endcode
  *
  * Notice how the relation of the user to the group also includes the OG
@@ -292,6 +288,22 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned in an
       // EntityStorageException anyway.
       throw new \LogicException('OG membership can not be created for an empty or anonymous user.');
+    }
+
+    if (!$this->get('entity_id')->value) {
+      // Group was not set.
+      throw new \LogicException('Membership cannot be set for an empty or an unsaved group.');
+    }
+
+    if (!$group = $this->getGroup()) {
+      throw new \LogicException('A group entity is required for creating a membership.');
+    }
+
+    $entity_type_id = $group->getEntityTypeId();
+    $bundle = $group->bundle();
+    if (!Og::isGroup($entity_type_id, $bundle)) {
+      // Group is not valid.
+      throw new \LogicException(sprintf('Entity type %s with ID %s is not an OG group.', $entity_type_id, $group->id()));
     }
 
     parent::preSave($storage);

@@ -5,7 +5,6 @@ namespace Drupal\Tests\og\Kernel\Entity;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Component\Utility\Unicode;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
@@ -243,9 +242,8 @@ class GetUserGroupsTest extends KernelTestBase {
    *   The saved OG membership entity.
    */
   protected function createMembership(User $user, EntityTest $group, $state = OgMembershipInterface::STATE_ACTIVE) {
-    $membership = OgMembership::create();
-    $membership->setUser($user)
-      ->setGroup($group)
+    $membership = Og::createMembership($group, $user);
+    $membership
       ->setState($state)
       ->save();
 
