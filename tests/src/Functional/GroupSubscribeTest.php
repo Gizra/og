@@ -3,7 +3,6 @@
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
@@ -183,7 +182,7 @@ class GroupSubscribeTest extends BrowserTestBase {
     ];
 
     foreach ($scenarios as $scenario) {
-      /** @var EntityInterface $entity */
+      /** @var \Drupal\Core\Entity\EntityInterface $entity */
       $entity = $scenario['entity'];
       $entity_type_id = $entity->getEntityTypeId();
       $entity_id = $entity->id();
