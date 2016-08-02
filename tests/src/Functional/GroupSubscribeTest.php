@@ -99,16 +99,14 @@ class GroupSubscribeTest extends BrowserTestBase {
     /** @var OgRole $role */
     $role = Og::getRole('node', $this->groupBundle, OgRoleInterface::ANONYMOUS);
     $role
-      ->grantPermission('subscribe')
+      ->grantPermission('subscribe without approval')
       ->save();
 
     $this->normalUser = $this->drupalCreateUser();
   }
 
   /**
-   * Tests 'update group' special permission.
-   *
-   * @todo : dataProvider subscribeAccessProvider
+   * Tests access to subscribe page.
    */
   public function testSubscribeAccess() {
     $entity_type_id = $this->group1->getEntityTypeId();
@@ -116,8 +114,8 @@ class GroupSubscribeTest extends BrowserTestBase {
 
     $scenarios = [
       $this->group1->id() => 200,
-      [$this->group2->id() => 403],
-      [$this->group3->id() => 403],
+      $this->group2->id() => 403,
+      $this->group3->id() => 403,
     ];
 
     foreach ($scenarios as $entity_id => $code) {
