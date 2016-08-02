@@ -6,7 +6,6 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\user\Entity\User;
@@ -107,10 +106,8 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $group_member->save();
 
     /** @var OgMembership $membership */
-    $membership = OgMembership::create();
+    $membership = Og::createMembership($this->group, $this->user);
     $membership
-      ->setUser($this->user)
-      ->setGroup($this->group)
       // Assign only the content editor role for now.
       ->setRoles([$content_editor])
       ->save();

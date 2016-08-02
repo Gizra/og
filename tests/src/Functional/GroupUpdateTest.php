@@ -4,11 +4,9 @@ namespace Drupal\Tests\og\Functional;
 
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
-use Drupal\og\OgMembershipInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
 use Drupal\Tests\BrowserTestBase;
@@ -107,10 +105,8 @@ class GroupUpdateTest extends BrowserTestBase {
     $this->contentGroup->save();
 
     // Subscribe the editor user to the groups.
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = Og::createMembership($this->contentGroup, $this->groupEditor);
     $membership
-      ->setUser($this->groupEditor)
-      ->setGroup($this->contentGroup)
       ->setRoles([$content_editor_role])
       ->save();
   }
@@ -143,10 +139,8 @@ class GroupUpdateTest extends BrowserTestBase {
     $this->entityGroup = EntityTest::create($values);
     $this->entityGroup->save();
 
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = Og::createMembership($this->entityGroup, $this->groupEditor);
     $membership
-      ->setUser($this->groupEditor)
-      ->setGroup($this->entityGroup)
       ->setRoles([$entity_editor_role])
       ->save();
   }

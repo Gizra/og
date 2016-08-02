@@ -5,7 +5,6 @@ namespace Drupal\Tests\og\Kernel\Entity;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
@@ -104,10 +103,8 @@ class GetMembershipsTest extends KernelTestBase {
       foreach ($statuses as $group_key => $status) {
         $group = $this->groups[$group_key];
         if ($status) {
-          $membership = OgMembership::create();
+          $membership = Og::createMembership($group, $user);
           $membership
-            ->setUser($user)
-            ->setGroup($group)
             ->setState($status)
             ->save();
         }
