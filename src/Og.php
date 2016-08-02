@@ -249,14 +249,12 @@ class Og {
    * @param array $states
    *   (optional) Array with the state to return. Defaults to active.
    *
-   * @codingStandardsIgnoreStart
-   * @return \Drupal\og\Entity\OgMembership|NULL
+   * @return \Drupal\og\Entity\OgMembership|null
    *   The OgMembership entity. If the user is not a member of the group, an
    *   OgMembership entity will be returned in which the user has the
    *   'non-member' role.
    *   NULL will be returned if no membership is available that matches the
    *   passed in $states.
-   * @codingStandardsIgnoreEnd
    */
   public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     foreach (static::getMemberships($user, $states) as $membership) {
