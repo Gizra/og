@@ -91,11 +91,8 @@ class OgMembershipTest extends KernelTestBase {
    * @covers ::setUser
    */
   public function testGetSetUser() {
-    $membership = OgMembership::create();
-    $membership
-      ->setUser($this->user)
-      ->setGroup($this->group)
-      ->save();
+    $membership = Og::createMembership($this->group, $this->user);
+    $membership->save();
 
     // Check the user is returned.
     $this->assertInstanceOf(UserInterface::class, $membership->getUser());
@@ -150,11 +147,8 @@ class OgMembershipTest extends KernelTestBase {
 
     $non_group->save();
     /** @var OgMembershipInterface $membership */
-    $membership = OgMembership::create();
-    $membership
-      ->setUser($this->user)
-      ->setGroup($non_group)
-      ->save();
+    $membership = Og::createMembership($non_group, $this->user);
+    $membership->save();
   }
 
 }

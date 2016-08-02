@@ -9,6 +9,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
+use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 
 /**
@@ -257,6 +258,29 @@ class Og {
         return $membership;
       }
     }
+  }
+
+  /**
+   * Creates an OG membership.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user object.
+   * @param string $membership_type
+   *   (optional) The membership type. Defaults to OG_MEMBERSHIP_TYPE_DEFAULT.
+   *
+   * @return \Drupal\og\Entity\OgMembership
+   *   The unsaved membership object.
+   */
+  public static function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
+    /** @var OgMembershipInterface $membership */
+    $membership = OgMembership::create(['type' => $membership_type]);
+    $membership
+      ->setUser($user)
+      ->setGroup($group);
+
+    return $membership;
   }
 
   /**
