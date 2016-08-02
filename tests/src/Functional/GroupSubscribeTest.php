@@ -112,6 +112,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       $this->group1->id() => [
         'code' => 200,
         'skip_approval' => TRUE,
+        'label' => $this->group1->label(),
       ],
       $this->group2->id() => ['code' => 403],
 
@@ -121,6 +122,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       $this->group3->id() => [
         'code' => 200,
         'skip_approval' => FALSE,
+        'label' => $this->group1->label(),
       ],
     ];
 
@@ -135,9 +137,12 @@ class GroupSubscribeTest extends BrowserTestBase {
 
       // Assert request membership field.
       if ($options['skip_approval']) {
+        $this->assertSession()->pageTextContains($options['label']);
         $this->assertSession()->elementNotExists('xpath', '//*[@id="edit-og-membership-request-0-value"]');
       }
       else {
+        // Group's title shouldn't appear anywhere.
+        $this->assertSession()->responseNotContains($options['label']);
         $this->assertSession()->elementExists('xpath', '//*[@id="edit-og-membership-request-0-value"]');
       }
     }
