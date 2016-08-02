@@ -11,7 +11,6 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
-use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 
 /**
  * A static helper class for OG.
@@ -703,7 +702,7 @@ class Og {
    * @param array $options
    *   Overriding the default options of the selection handler.
    *
-   * @return OgSelection
+   * @return \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
    *   Returns the OG selection handler.
    *
    * @throws \Exception
