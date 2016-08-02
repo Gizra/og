@@ -87,7 +87,7 @@ class OgAccess implements OgAccessInterface {
    *   The service that contains the current active user.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
-   * @param \Drupal\og\GroupManager
+   * @param \Drupal\og\GroupManager $group_manager
    *   The group manager.
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The permission manager.
@@ -331,7 +331,7 @@ class OgAccess implements OgAccessInterface {
 
     // @todo This doesn't really vary by user but by the user's role inside of
     //   the group. Shall we make a cache context for OgRole entities?
-    $cacheable_metadata = new CacheableMetadata;
+    $cacheable_metadata = new CacheableMetadata();
     $cacheable_metadata->addCacheableDependency($group_content_entity);
     if ($user->id() == $this->accountProxy->id()) {
       $cacheable_metadata->addCacheContexts(['user']);
