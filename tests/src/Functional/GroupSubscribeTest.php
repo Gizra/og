@@ -160,7 +160,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       $this->group2->id() => [
         'code' => 200,
         'skip_approval' => FALSE,
-        'label' => $this->group1->label(),
+        'label' => $this->group2->label(),
         'private' => FALSE,
       ],
 
@@ -170,7 +170,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       $this->group3->id() => [
         'code' => 200,
         'skip_approval' => FALSE,
-        'label' => $this->group1->label(),
+        'label' => $this->group3->label(),
         'private' => TRUE,
       ],
 
@@ -204,7 +204,6 @@ class GroupSubscribeTest extends BrowserTestBase {
       else {
         $this->assertSession()->pageTextContains($options['label']);
       }
-
 
     }
   }
