@@ -4,7 +4,6 @@ namespace Drupal\og\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\OgMembershipTypeInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
