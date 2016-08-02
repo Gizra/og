@@ -110,20 +110,20 @@ class GroupSubscribeTest extends BrowserTestBase {
     ]);
     $this->group2->save();
 
-    // Create non-group.
-    $this->group3 = Node::create([
-      'type' => $this->nonGroupBundle,
-      'title' => $this->randomString(),
-      'uid' => $user->id(),
-    ]);
-    $this->group3->save();
-
     // Create an unpublished node.
-    $this->group4 = Node::create([
+    $this->group3 = Node::create([
       'type' => $this->groupBundle1,
       'title' => $this->randomString(),
       'uid' => $user->id(),
       'status' => NODE_NOT_PUBLISHED,
+    ]);
+    $this->group3->save();
+
+    // Create non-group.
+    $this->group4 = Node::create([
+      'type' => $this->nonGroupBundle,
+      'title' => $this->randomString(),
+      'uid' => $user->id(),
     ]);
     $this->group4->save();
 
@@ -163,18 +163,20 @@ class GroupSubscribeTest extends BrowserTestBase {
         'label' => $this->group1->label(),
         'private' => FALSE,
       ],
-      // A non-group entity.
-      $this->group3->id() => ['code' => 403],
 
       // Entity is un-accessible to the user, but we still allow to subscribe to
       // it. Since it's "private" the default membership will be pending,
       // even though the permission is "subscribe without approval".
-      $this->group4->id() => [
+      $this->group3->id() => [
         'code' => 200,
         'skip_approval' => FALSE,
         'label' => $this->group1->label(),
         'private' => TRUE,
       ],
+
+      // A non-group entity.
+      $this->group4->id() => ['code' => 403],
+
     ];
 
     foreach ($scenarios as $entity_id => $options) {
