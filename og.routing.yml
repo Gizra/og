@@ -10,6 +10,11 @@ og.subscribe:
     # Only authenticated users can subscribe to group, but we do allow anonymous
     # users to reach this route. They will be redirect to login page.
     _og_user_access_group: 'subscribe|subscribe without approval'
+  options:
+    parameters:
+      membership_type:
+        type: entity:og_membership_type
+
 
 
 og.unsubscribe:

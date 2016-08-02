@@ -5,6 +5,7 @@ namespace Drupal\og\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\OgMembershipTypeInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -52,14 +53,14 @@ class SubscriptionController extends ControllerBase {
    *   The entity type of the group entity.
    * @param string|int $entity_id
    *   The entity ID of the group entity.
-   * @param string|null $membership_type
+   * @param \Drupal\og\OgMembershipTypeInterface $membership_type
    *   The membership type to be used for creating the membership.
    *
    * @return mixed
    *   Redirect user or show access denied if they are not allowed to subscribe,
    *   otherwise provide a subscribe confirmation form.
    */
-  public function subscribe(Request $request, $entity_type_id, $entity_id, $membership_type) {
+  public function subscribe(Request $request, $entity_type_id, $entity_id, OgMembershipTypeInterface $membership_type) {
     $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
     $group = $entity_storage->load($entity_id);
 
@@ -117,7 +118,7 @@ class SubscriptionController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    $membership = OgMembership::create(['type' => $membership_type]);
+    $membership = OgMembership::create(['type' => $membership_type->id()]);
     $membership
       ->setUser($user)
       ->setGroup($group);
