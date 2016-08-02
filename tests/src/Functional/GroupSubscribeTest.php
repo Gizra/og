@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
+use Drupal\og\OgRoleInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
 use Drupal\Tests\BrowserTestBase;
@@ -17,9 +18,6 @@ use Drupal\user\Entity\User;
  * @group og
  */
 class GroupSubscribeTest extends BrowserTestBase {
-
-  use ContentTypeCreationTrait;
-  use NodeCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -71,8 +69,7 @@ class GroupSubscribeTest extends BrowserTestBase {
     Og::groupManager()->addGroup('node', $this->groupBundle);
 
     // Create node author user.
-    $user = User::create(['name' => $this->randomString()]);
-    $user->save();
+    $user = $this->createUser();
 
     // Create group.
     $this->group1 = Node::create([
@@ -99,42 +96,35 @@ class GroupSubscribeTest extends BrowserTestBase {
     ]);
     $this->group3->save();
 
-    $this->normalUser = User::create(['name' => $this->randomString()]);
-    $this->normalUser->save();
+    /** @var OgRole $role */
+    $role = Og::getRole('node', $this->groupBundle, OgRoleInterface::ANONYMOUS);
+    $role
+      ->grantPermission('subscribe')
+      ->save();
 
+    $this->normalUser = $this->drupalCreateUser();
   }
 
   /**
    * Tests 'update group' special permission.
    *
-   * @todo: use dataProvider subscribeAccessProvider
+   * @todo : dataProvider subscribeAccessProvider
    */
   public function testSubscribeAccess() {
-    $entity_id = $this->group1->id();
-    $code = 200;
+    $entity_type_id = $this->group1->getEntityTypeId();
     $this->drupalLogin($this->normalUser);
-    $options = array(
-      'entity_type' => 'node',
-      'entity_id' => $entity_id,
-    );
 
-    $path = Url::fromRoute('og.subscribe', $options)->toString();
-    $this->drupalGet($path);
-    $this->assertSession()->statusCodeEquals($code);
-  }
-
-  /**
-   * Data provider for ::testSubscribeAccess()
-   *
-   * @return array
-   *   Array with the ID, and the expected HTTP code.
-   */
-  public function subscribeAccessProvider() {
-    return [
-      [$this->group1->id(), 200],
-      [$this->group2->id(), 403],
-      [$this->group3->id(), 403],
+    $scenarios = [
+      $this->group1->id() => 200,
+      [$this->group2->id() => 403],
+      [$this->group3->id() => 403],
     ];
+
+    foreach ($scenarios as $entity_id => $code) {
+      $path = "group/$entity_type_id/$entity_id/subscribe";
+      $this->drupalGet($path);
+      $this->assertSession()->statusCodeEquals($code);
+    }
   }
 
 }
