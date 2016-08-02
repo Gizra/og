@@ -341,7 +341,7 @@ class OgAccess implements OgAccessInterface {
       // Non-members might also have certain permissions within a group. Request
       // both memberships of members (represented by STATE_ACTIVE) and
       // non-members (STATE_PENDING).
-      $membership = Og::getMembership($user, $group_entity, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING]);
+      $membership = Og::getMembership($group_entity, $user, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING]);
       foreach ($permissions as $permission) {
         if ($membership->hasPermission($permission->getName())) {
           return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
