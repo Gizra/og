@@ -3,6 +3,7 @@
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
@@ -145,51 +146,58 @@ class GroupSubscribeTest extends BrowserTestBase {
    * Tests access to subscribe page.
    */
   public function testSubscribeAccess() {
-    $entity_type_id = $this->group1->getEntityTypeId();
     $this->drupalLogin($this->normalUser);
 
     $scenarios = [
       // Group with active membership.
-      $this->group1->id() => [
+      [
+        'entity' => $this->group1,
         'code' => 200,
         'skip_approval' => TRUE,
-        'label' => $this->group1->label(),
         'private' => FALSE,
       ],
       // Group with pending membership.
-      $this->group2->id() => [
+      [
+        'entity' => $this->group2,
         'code' => 200,
         'skip_approval' => FALSE,
-        'label' => $this->group2->label(),
         'private' => FALSE,
       ],
 
       // Entity is un-accessible to the user, but we still allow to subscribe to
       // it. Since it's "private" the default membership will be pending,
       // even though the permission is "subscribe without approval".
-      $this->group3->id() => [
+      [
+        'entity' => $this->group3,
         'code' => 200,
         'skip_approval' => FALSE,
-        'label' => $this->group3->label(),
         'private' => TRUE,
       ],
 
       // A non-group entity.
-      $this->group4->id() => ['code' => 403],
+      [
+        'entity' => $this->group4,
+        'code' => 403,
+      ],
 
     ];
 
-    foreach ($scenarios as $entity_id => $options) {
+    foreach ($scenarios as $scenario) {
+      /** @var EntityInterface $entity */
+      $entity = $scenario['entity'];
+      $entity_type_id = $entity->getEntityTypeId();
+      $entity_id = $entity->id();
+
       $path = "group/$entity_type_id/$entity_id/subscribe";
       $this->drupalGet($path);
-      $this->assertSession()->statusCodeEquals($options['code']);
+      $this->assertSession()->statusCodeEquals($scenario['code']);
 
-      if ($options['code'] != 200) {
+      if ($scenario['code'] != 200) {
         continue;
       }
 
       // Assert request membership field.
-      if ($options['skip_approval']) {
+      if ($scenario['skip_approval']) {
         $this->assertSession()->elementNotExists('xpath', '//*[@id="edit-og-membership-request-0-value"]');
       }
       else {
@@ -197,12 +205,12 @@ class GroupSubscribeTest extends BrowserTestBase {
       }
 
       // Assert title appears only for accessible groups.
-      if ($options['private']) {
+      if ($scenario['private']) {
         // Group's title shouldn't appear anywhere.
-        $this->assertSession()->responseNotContains($options['label']);
+        $this->assertSession()->responseNotContains($entity->label());
       }
       else {
-        $this->assertSession()->pageTextContains($options['label']);
+        $this->assertSession()->pageTextContains($entity->label());
       }
 
     }
