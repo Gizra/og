@@ -113,15 +113,37 @@ class GroupSubscribeTest extends BrowserTestBase {
     $this->drupalLogin($this->normalUser);
 
     $scenarios = [
-      $this->group1->id() => 200,
-      $this->group2->id() => 403,
-      $this->group3->id() => 403,
+      $this->group1->id() => [
+        'code' => 200,
+        'skip_approval' => TRUE,
+      ],
+      $this->group2->id() => ['code' => 403],
+
+      // Entity is un-accesible to the user, but we still allow to subscribe to
+      // it. Since it's "private" the default membership will be pending,
+      // even though the permission is "subscribe without approval".
+      $this->group3->id() => [
+        'code' => 200,
+        'skip_approval' => FALSE,
+      ],
     ];
 
-    foreach ($scenarios as $entity_id => $code) {
+    foreach ($scenarios as $entity_id => $options) {
       $path = "group/$entity_type_id/$entity_id/subscribe";
       $this->drupalGet($path);
-      $this->assertSession()->statusCodeEquals($code);
+      $this->assertSession()->statusCodeEquals($options['code']);
+
+      if ($options['code'] != 200) {
+        continue;
+      }
+
+      // Assert request membership field
+      if ($options['skip_approval']) {
+        $this->assertSession()->elementNotExists('xpath', '//*[@id="edit-og-membership-request-0-value"]');
+      }
+      else {
+        $this->assertSession()->elementExists('xpath', '//*[@id="edit-og-membership-request-0-value"]');
+      }
     }
   }
 
