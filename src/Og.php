@@ -9,6 +9,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
+use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Plugin\EntityReferenceSelection\OgSelection;
 
@@ -270,13 +271,19 @@ class Og {
         $group->bundle(),
         OgRoleInterface::ANONYMOUS,
       ]);
-      $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
-      return $storage->create(['type' => OgMembershipInterface::TYPE_DEFAULT])
-        ->setUser($user->id())
-        ->setEntityId($group->id())
-        ->setGroupEntityType($group->getEntityTypeId())
+
+      $role = new OgRole([
+        'id' => $role_id,
+        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
+        'label' => 'Non-member',
+        'name' => OgRoleInterface::ANONYMOUS,
+      ]);
+
+      return OgMembership::create()
+        ->setUser($user)
+        ->setGroup($group)
         ->setState(OgMembershipInterface::STATE_PENDING)
-        ->setRoles([$role_id]);
+        ->setRoles([$role]);
     }
 
     // No membership matches the request.

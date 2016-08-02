@@ -37,6 +37,16 @@ use Drupal\user\Entity\Role;
 class OgRole extends Role implements OgRoleInterface {
 
   /**
+   * Constructs an OgRole object.
+   *
+   * @param array $values
+   *   An array of values to set, keyed by property name.
+   */
+  public function __construct(array $values) {
+    parent::__construct($values, 'og_role');
+  }
+
+  /**
    * Sets the ID of the role.
    *
    * @param string $id
