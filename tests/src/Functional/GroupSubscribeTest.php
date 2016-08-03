@@ -4,7 +4,9 @@ namespace Drupal\Tests\og\Functional;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
+use Drupal\og\Entity\OgMembershipType;
 use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
 
@@ -63,6 +65,13 @@ class GroupSubscribeTest extends BrowserTestBase {
   protected $groupBundle2;
 
   /**
+   * A membership type bundle name.
+   *
+   * @var string
+   */
+  protected $membershipTypeBundle;
+
+  /**
    * A non-group bundle name.
    *
    * @var string
@@ -85,8 +94,8 @@ class GroupSubscribeTest extends BrowserTestBase {
     // Create bundles.
     $this->groupBundle1 = Unicode::strtolower($this->randomMachineName());
     $this->groupBundle2 = Unicode::strtolower($this->randomMachineName());
-
     $this->nonGroupBundle = Unicode::strtolower($this->randomMachineName());
+    $this->membershipTypeBundle = Unicode::strtolower($this->randomMachineName());
 
     // Define the entities as groups.
     Og::groupManager()->addGroup('node', $this->groupBundle1);
@@ -138,6 +147,14 @@ class GroupSubscribeTest extends BrowserTestBase {
       ->grantPermission('subscribe')
       ->save();
 
+    // Create a new membership type.
+    $membership_type = OgMembershipType::create([
+      'type' => $this->membershipTypeBundle,
+      'name' => $this->randomString(),
+    ]
+    );
+    $membership_type->save();
+
     $this->normalUser = $this->drupalCreateUser();
   }
 
@@ -152,9 +169,25 @@ class GroupSubscribeTest extends BrowserTestBase {
       // Group with active membership.
       [
         'entity' => $this->group1,
+        // Don't set the membership type. "Default" will be used.
+        'membership_type' => '',
         'code' => 200,
         'skip_approval' => TRUE,
         'private' => FALSE,
+      ],
+      [
+        'entity' => $this->group1,
+        // Explicitly set the membership type.
+        'membership_type' => OgMembershipInterface::TYPE_DEFAULT,
+        'code' => 200,
+        'skip_approval' => TRUE,
+        'private' => FALSE,
+      ],
+      [
+        'entity' => $this->group1,
+        // Set invalid membership type.
+        'membership_type' => $this->randomString(),
+        'code' => 404,
       ],
       // Group with pending membership.
       [
@@ -189,6 +222,12 @@ class GroupSubscribeTest extends BrowserTestBase {
       $entity_id = $entity->id();
 
       $path = "group/$entity_type_id/$entity_id/subscribe";
+
+      if (!empty($scenario['membership_type'])) {
+        // Add the membership type.
+        $path .= '/' . $scenario['membership_type'];
+      }
+
       $this->drupalGet($path);
       $this->assertSession()->statusCodeEquals($scenario['code']);
 
