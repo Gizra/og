@@ -142,6 +142,11 @@ class GroupSubscribeTest extends BrowserTestBase {
       ->grantPermission('subscribe without approval')
       ->save();
 
+    $role = Og::getRole('node', $this->groupBundle1, OgRoleInterface::AUTHENTICATED);
+    $role
+      ->grantPermission('unsubscribe')
+      ->save();
+
     $role = Og::getRole('node', $this->groupBundle2, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe')
@@ -265,7 +270,7 @@ class GroupSubscribeTest extends BrowserTestBase {
 
     $scenarios = [
       $this->group1->id() => 200,
-//      $this->group2->id() => 403,
+      $this->group2->id() => 403,
     ];
 
     foreach ($scenarios as $entity_id => $code) {
