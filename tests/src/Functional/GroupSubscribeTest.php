@@ -147,6 +147,7 @@ class GroupSubscribeTest extends BrowserTestBase {
   public function testSubscribeAccess() {
     $this->drupalLogin($this->normalUser);
 
+    // We don't use a provider function, as it makes the test run much slower.
     $scenarios = [
       // Group with active membership.
       [
