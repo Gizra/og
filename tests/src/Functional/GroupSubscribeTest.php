@@ -142,22 +142,11 @@ class GroupSubscribeTest extends BrowserTestBase {
       ->grantPermission('subscribe without approval')
       ->save();
 
-    $role = Og::getRole('node', $this->groupBundle1, OgRoleInterface::AUTHENTICATED);
-    $role
-      ->grantPermission('unsubscribe')
-      ->save();
-
-    $role = Og::getRole('node', $this->groupBundle2, OgRoleInterface::ANONYMOUS);
-    $role
-      ->grantPermission('subscribe')
-      ->save();
-
     // Create a new membership type.
     $membership_type = OgMembershipType::create([
       'type' => $this->membershipTypeBundle,
       'name' => $this->randomString(),
-    ]
-    );
+    ]);
     $membership_type->save();
 
     $this->normalUser = $this->drupalCreateUser();
