@@ -11,7 +11,7 @@ use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests subscribe to group.
+ * Tests subscribe and un-subscribe to groups.
  *
  * @group og
  */
@@ -251,7 +251,28 @@ class GroupSubscribeTest extends BrowserTestBase {
       else {
         $this->assertSession()->pageTextContains($entity->label());
       }
+    }
+  }
 
+  /**
+   * Tests access to un-subscribe page.
+   */
+  public function testUnSubscribeAccess() {
+    $this->drupalLogin($this->normalUser);
+
+    $membership = Og::createMembership($this->group1, $this->normalUser);
+    $membership->save();
+
+    $scenarios = [
+      $this->group1->id() => 200,
+      $this->group2->id() => 403,
+    ];
+
+    foreach ($scenarios as $entity_id => $code) {
+      $path = "group/node/$entity_id/unsubscribe";
+
+      $this->drupalGet($path);
+      $this->assertSession()->statusCodeEquals($code);
     }
   }
 
