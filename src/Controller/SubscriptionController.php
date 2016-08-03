@@ -98,7 +98,7 @@ class SubscriptionController extends ControllerBase {
 
     if (Og::isMemberPending($group, $user)) {
       // User is pending, return them back.
-      $message = $this->t('@user already has a pending membership for the  the group @group.', $params);
+      $message = $this->t('You already have a pending membership for the the group @group.', $params);
       $redirect = TRUE;
     }
 

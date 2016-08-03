@@ -8,8 +8,9 @@ og.subscribe:
     membership_type: default
   requirements:
     # Only authenticated users can subscribe to group, but we do allow anonymous
-    # users to reach this route. They will be redirect to login page.
-    _og_user_access_group: 'subscribe|subscribe without approval'
+    # users to reach this route. They will be redirect to login page or be given
+    # the correct page by the controller.
+    _access: 'TRUE'
   options:
     parameters:
       membership_type:
