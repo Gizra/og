@@ -196,7 +196,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setRoles(array $roles = array()) {
+  public function setRoles(array $roles = []) {
     $role_ids = array_map(function (OgRole $role) {
       return $role->id();
     }, $roles);
