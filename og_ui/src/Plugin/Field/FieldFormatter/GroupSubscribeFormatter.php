@@ -17,6 +17,7 @@ use Drupal\Core\Routing\RedirectDestinationTrait;
 use Drupal\Core\Url;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
@@ -43,19 +44,17 @@ class GroupSubscribeFormatter extends FormatterBase {
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
 
-    $entity = $items->getEntity();
-    $entity_type_id = $entity->getEntityTypeId();
-    $bundle_id = $entity->bundle();
+    $group = $items->getEntity();
+    $entity_type_id = $group->getEntityTypeId();
 
-    $account = User::load(\Drupal::currentUser()->id());
-    $field_name = $this->getSetting('field_name');
+    $user = User::load(\Drupal::currentUser()->id());
 
     // Entity is not a group.
-    if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+    if (!Og::isGroup($group->getEntityTypeId(), $group->bundle())) {
       return [];
     }
 
-    if (($entity instanceof EntityOwnerInterface) && ($entity->getOwnerId() == $account->id())) {
+    if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $user->id())) {
       // User is the group manager.
       $elements[0] = [
         '#type' => 'html_tag',
@@ -70,84 +69,43 @@ class GroupSubscribeFormatter extends FormatterBase {
       return $elements;
     }
 
-    if (Og::isMember($entity, $account, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
-      if (OgAccess::userAccess($entity, 'unsubscribe', $account)) {
+    /** @var OgAccessInterface $og_access */
+    $og_access = \Drupal::service('og.access');
+
+    if (Og::isMember($group, $user, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
+      if ($og_access->userAccess($group, 'unsubscribe', $user)) {
         $link['title'] = $this->t('Unsubscribe from group');
-        $link['url'] = Url::fromRoute('og_ui.unsubscribe', ['entity_type_id' => $entity_type_id, 'entity_id' => $entity->id()]);
+        $link['url'] = Url::fromRoute('og.unsubscribe', ['entity_type_id' => $entity_type_id, 'entity_id' => $group->id()]);
         $link['class'] = ['unsubscribe'];
       }
     }
     else {
-      if (Og::isMember($entity, $account, [OG_STATE_BLOCKED])) {
+      if (Og::isMemberBlocked($group, $user)) {
         // If user is blocked, they should not be able to apply for
         // membership.
         return [];
       }
 
-      // Check if user can subscribe to the field.
-      if (empty($field_name) && ($audience_field_name = OgGroupAudienceHelper::getMatchingField($account, $entity_type_id, $bundle_id))) {
-        $field_name = $audience_field_name;
-      }
-
-      if (empty($field_name)) {
-        return [];
-      }
-
-      // Check if entity is referencable.
-      if ($this->getSetting('target_type') !== $entity->getEntityTypeId()) {
-        // Group type doesn't match.
-        return [];
-      }
-
-      // Check handler bundles, if any.
-      $handler_settings = $this->getSetting('handler_settings');
-
-      if (!empty($handler_settings['target_bundles']) && !in_array($bundle_id, $handler_settings['target_bundles'])) {
-        // Bundles don't match.
-        return [];
-      }
-
-      if (!OgGroupAudienceHelper::checkFieldCardinality($account, $field_name)) {
-        $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
-
-        $elements[0] = [
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#attributes' => [
-            'title' => $this->formatPlural($cardinality, 'You are already registered to another group', 'You are already registered to @count groups'),
-            'class' => ['group', 'other'],
-          ],
-          '#value' => $this->formatPlural($cardinality, 'You are already registered to another group', 'You are already registered to @count groups'),
-        ];
-
-        return $elements;
-      }
-
       // If hte user is authenticated, set up the subscribe link.
-      if ($account->isAuthenticated()) {
+      if ($user->isAuthenticated()) {
         $parameters = [
-          'entity_type_id' => $entity->getEntityTypeId(),
-          'entity_id' => $entity->id(),
+          'entity_type_id' => $group->getEntityTypeId(),
+          'entity_id' => $group->id(),
         ];
 
-        // Add the field name as an additional query parameter.
-        if (!empty($field_name)) {
-          $parameters['field_name'] = $field_name;
-        }
-
-        $url = Url::fromRoute('og_ui.subscribe', $parameters);
+        $url = Url::fromRoute('og.subscribe', $parameters);
       }
-      // Otherwise, link to user login and redirect back to here.
       else {
+        // User is anonymous, link to user login and redirect back to here.
         $url = Url::fromRoute('user.login', [], ['query' => $this->getDestinationArray()]);
       }
 
-      if (OgAccess::userAccess($entity, 'subscribe without approval', $account)) {
+      if ($og_access->userAccess($group, 'subscribe without approval', $user)) {
         $link['title'] = $this->t('Subscribe to group');
         $link['class'] = ['subscribe'];
         $link['url'] = $url;
       }
-      elseif (OgAccess::userAccess($entity, 'subscribe')) {
+      elseif ($og_access->userAccess($group, 'subscribe')) {
         $link['title'] = $this->t('Request group membership');
         $link['class'] = ['subscribe', 'request'];
         $link['url'] = $url;
@@ -185,71 +143,6 @@ class GroupSubscribeFormatter extends FormatterBase {
     }
 
     return $elements;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function defaultSettings() {
-    $options = parent::defaultSettings();
-
-    $options['field_name'] = 0;
-
-    return $options;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function settingsForm(array $form, FormStateInterface $form_state) {
-    $form = parent::settingsForm($form, $form_state);
-
-    $form['field_name'] = [
-      '#title' => $this->t('Field name'),
-      '#description' => $this->t('Select the field that should register the user subscription.'),
-      '#type' => 'select',
-      '#options' => $this->getAudienceFieldOptions(),
-      '#default_value' => $this->getSetting('field_name'),
-    ];
-
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function settingsSummary() {
-    $summary = parent::settingsSummary();
-    $options = $this->getAudienceFieldOptions();
-
-    $field_name = $this->getSetting('field_name');
-
-    $summary[] = $this->t('Field: %label', array('%label' => $options[$field_name]));
-
-    return $summary;
-  }
-
-  /**
-   * Returns audience field options.
-   *
-   * @return array
-   *   An array of audience field options.
-   */
-  protected function getAudienceFieldOptions() {
-    $options = [0 => $this->t('Automatic (best matching)')];
-
-    foreach (Og::getAllGroupAudienceFields('user', 'user') as $field_name => $field_definition) {
-      $options[$field_name] = $field_definition->getLabel();
-    }
-
-    return $options;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function checkAccess(EntityInterface $entity) {
-    return AccessResult::allowed();
   }
 
 }
