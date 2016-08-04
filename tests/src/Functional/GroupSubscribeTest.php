@@ -214,6 +214,7 @@ class GroupSubscribeTest extends BrowserTestBase {
 
       // A non existing entity ID.
       [
+        'entity_type_id' => 'node',
         'entity_id' => rand(1000, 2000),
         'code' => 403,
       ],
