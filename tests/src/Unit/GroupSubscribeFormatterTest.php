@@ -162,14 +162,18 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   }
 
   /**
-   * Tests creating membership for an un-saved group.
+   * Tests formatter on a non-group.
+   *
+   * This verifies an edge case, where the formatter was somehow added to a
+   * non-group entity.
    *
    * @covers ::viewElements
    */
   public function testNonGroup() {
     // $plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings)
-    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', '', []);
-    $result = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
+    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
+    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
+    $this->assertArrayEquals([], $elements);
   }
 
 }
