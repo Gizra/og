@@ -310,9 +310,7 @@ class OgAccess implements OgAccessInterface {
    */
   public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
     // Default to the current user.
-    if (!isset($user)) {
-      $user = $this->accountProxy->getAccount();
-    }
+    $user = $user ?: $this->accountProxy->getAccount();
 
     // Check if the user owns the entity which is being operated on.
     $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
