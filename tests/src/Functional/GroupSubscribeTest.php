@@ -206,14 +206,30 @@ class GroupSubscribeTest extends BrowserTestBase {
         'entity' => $this->group4,
         'code' => 403,
       ],
+      // A non existing entity type.
+      [
+        'entity_type_id' => $this->randomString(),
+        'code' => 403,
+      ],
 
+      // A non existing entity ID.
+      [
+        'entity_id' => rand(1000, 2000),
+        'code' => 403,
+      ],
     ];
 
     foreach ($scenarios as $scenario) {
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
-      $entity = $scenario['entity'];
-      $entity_type_id = $entity->getEntityTypeId();
-      $entity_id = $entity->id();
+      if (!empty($scenario['entity'])) {
+        $entity = $scenario['entity'];
+        $entity_type_id = $entity->getEntityTypeId();
+        $entity_id = $entity->id();
+      }
+      else {
+        $entity_type_id = $scenario['entity_type_id'];
+        $entity_id = $scenario['entity_id'];
+      }
 
       $path = "group/$entity_type_id/$entity_id/subscribe";
 
