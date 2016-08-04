@@ -16,7 +16,7 @@ use Drupal\Core\TypedData\DataDefinition;
  * @FieldType(
  *   id = "og_group",
  *   label = @Translation("OG Group"),
- *   description = @Translation("OG Group"),
+ *   description = @Translation("allow non-groups members, members, and group managers to join, request or leave a group"),
  *   category = @Translation("OG"),
  *   no_ui = TRUE,
  *   default_formatter = "og_group_subscribe",
