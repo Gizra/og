@@ -43,11 +43,8 @@ function og_entity_insert(EntityInterface $entity) {
     return;
   }
 
-  $membership = OgMembership::create();
-  $membership
-    ->setUser($entity->getOwner())
-    ->setGroup($entity)
-    ->save();
+  $membership = Og::createMembership($entity, $entity->getOwner());
+  $membership->save();
 }
 
 /**

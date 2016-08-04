@@ -33,12 +33,8 @@ use Drupal\og\OgMembershipInterface;
  * Creating such a relation is done for example in the following way:
  *
  * @code
- *  $membership = OgMembership::create();
- *  $membership
- *    ->setUser($user)
- *    ->setGroup($entity)
- *    ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
- *    ->save();
+ *  $membership = Og::createMembership($entity, $user);
+ *  $membership->save();
  * @endcode
  *
  * Notice how the relation of the user to the group also includes the OG

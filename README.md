@@ -69,12 +69,8 @@ connecting two non-user entities.
 Creating such a relation is done for example in the following way:
 
 ```php
- $membership = OgMembership::create(['type' => \Drupal\og\OgMembershipInterface::TYPE_DEFAULT]);
- $membership
-   ->setUser($user)
-   ->setGroup($entity)
-   ->setFieldName(OgGroupAudienceHelper::DEFAULT_FIELD)
-   ->save();
+ $membership = Og::createMembership($entity, $user);
+ $membership->save();
 ```
 
 Notice how the relation of the user to the group also includes the OG
