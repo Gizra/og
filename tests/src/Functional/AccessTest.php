@@ -103,12 +103,11 @@ class AccessTest extends BrowserTestBase {
 
     // Subscribe the member to the group.
     /** @var \Drupal\og\Entity\OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = OgMembership::create();
     $membership
-      ->setUser($this->users['member']->id())
-      ->setEntityId($this->group->id())
-      ->setGroupEntityType($this->group->getEntityTypeId())
-      ->addRole($role->id())
+      ->setUser($this->users['member'])
+      ->setGroup($this->group)
+      ->addRole($role)
       ->save();
 
     // Create two group content items, one owned by the group owner, and one by

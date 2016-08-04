@@ -170,12 +170,11 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       // membership will not exist in the database.
       if ($role_name !== OgRoleInterface::ANONYMOUS) {
         /** @var OgMembership $membership */
-        $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+        $membership = OgMembership::create();
         $membership
-          ->setUser($this->users[$role_name]->id())
-          ->setEntityId($this->group->id())
-          ->setGroupEntityType($this->group->getEntityTypeId())
-          ->addRole($this->roles[$role_name]->id())
+          ->setUser($this->users[$role_name])
+          ->setGroup($this->group)
+          ->addRole($this->roles[$role_name])
           ->setState(OgMembershipInterface::STATE_ACTIVE)
           ->save();
       }
