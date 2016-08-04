@@ -1,3 +1,4 @@
-form .child-item {
+form fieldset.child-item,
+.form-item-og-orphans-delete-method .description {
   margin-left: 1.5em; /* LTR */
 }

@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.og_membership.default.og_membership_request
+    - og.og_membership_type.default
+  module:
+    - text
+id: og_membership.default.default
+targetEntityType: og_membership
+bundle: default
+mode: default
+content:
+  og_membership_request:
+    label: above
+    type: basic_string
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

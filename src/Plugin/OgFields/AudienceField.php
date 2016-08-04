@@ -1,23 +1,17 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\OgFields\AudienceField.
- */
-
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\OgMembershipInterface;
 
 /**
  * Determine to which groups this group content is assigned to.
  *
  * @OgFields(
- *  id = "og_group_ref",
+ *  id = "og_audience",
  *  type = "group",
  *  description = @Translation("Determine to which groups this group content is assigned to."),
  * )
@@ -27,70 +21,69 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageConfigBaseDefinition(array $values = array()) {
-    $values = [
+  public function getFieldStorageBaseDefinition(array $values = array()) {
+    if ($this->getEntityType() == 'user') {
+      throw new \LogicException('OG audience field cannot be added to the User entity type.');
+    }
+
+    $values += [
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'custom_storage' => TRUE,
       'settings' => [
-        'handler' => 'og',
-        'handler_settings' => [
-          'target_bundles' => [],
-          'membership_type' => OgMembershipInterface::TYPE_DEFAULT,
-        ],
         'target_type' => $this->getEntityType(),
       ],
-      'type' => 'og_membership_reference',
+      'type' => OgGroupAudienceHelper::GROUP_REFERENCE,
     ];
 
-    return parent::getFieldStorageConfigBaseDefinition($values);
+    return parent::getFieldStorageBaseDefinition($values);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFieldConfigBaseDefinition(array $values = array()) {
-    $values = [
+  public function getFieldBaseDefinition(array $values = array()) {
+    $values += [
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
       'label' => $this->t('Groups audience'),
+      'settings' => [
+        'handler' => 'og',
+        'handler_settings' => [],
+      ],
     ];
 
-    return parent::getFieldConfigBaseDefinition($values);
+    return parent::getFieldBaseDefinition($values);
 
   }
 
   /**
    * {@inheritdoc}
    */
-  public function widgetDefinition(array $widget = []) {
-    // Keep this until og_complex widget is back.
-    return [
+  public function getFormDisplayDefinition(array $values = []) {
+    $values += [
       'type' => 'og_complex',
       'settings' => [
         'match_operator' => 'CONTAINS',
+        'size' => 60,
+        'placeholder' => '',
       ],
     ];
+
+    return $values;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function viewModesDefinition(array $view_mode = []) {
-    return [
-      'default' => [
-        'label' => 'above',
-        'type' => 'entity_reference_label',
-        'settings' => [
-          'link' => TRUE,
-        ]
-      ],
-      'teaser' => [
-        'label' => 'above',
-        'type' => 'entity_reference_label',
-        'settings' => [
-          'link' => TRUE,
-        ],
+  public function getViewDisplayDefinition(array $values = []) {
+    $values += [
+      'label' => 'above',
+      'type' => 'entity_reference_label',
+      'settings' => [
+        'link' => TRUE,
       ],
     ];
+
+    return $values;
   }
+
 }
