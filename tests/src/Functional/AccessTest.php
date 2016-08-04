@@ -9,7 +9,6 @@ use Drupal\node\Entity\Node;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\OgMembershipInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 
 /**
