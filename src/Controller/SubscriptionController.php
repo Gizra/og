@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Controller;
 
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\og\OgMembershipTypeInterface;
@@ -60,8 +61,23 @@ class SubscriptionController extends ControllerBase {
    *   otherwise provide a subscribe confirmation form.
    */
   public function subscribe(Request $request, $entity_type_id, $entity_id, OgMembershipTypeInterface $membership_type) {
-    $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
-    $group = $entity_storage->load($entity_id);
+    try {
+      $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
+    }
+    catch (PluginNotFoundException $e) {
+      // Not a valid entity type.
+      throw new AccessDeniedHttpException();
+    }
+
+    if (!$group = $entity_storage->load($entity_id)) {
+      // Not a valid entity.
+      throw new AccessDeniedHttpException();
+    }
+
+    if (!Og::isGroup($entity_type_id, $group->bundle())) {
+      // Not a valid group.
+      throw new AccessDeniedHttpException();
+    }
 
     $user = User::load($this->currentUser()->id());
 
