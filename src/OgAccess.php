@@ -257,7 +257,7 @@ class OgAccess implements OgAccessInterface {
         foreach ($entity_groups as $group) {
           // Check if the operation matches a group content entity operation
           // such as 'create article content'.
-          $operation_access = $this->userAccessGroupContentEntityOperations($operation, $group, $entity, $user);
+          $operation_access = $this->userAccessGroupContentEntityOperation($operation, $group, $entity, $user);
           if ($operation_access->isAllowed()) {
             return $operation_access->addCacheTags($cache_tags);
           }
@@ -307,7 +307,7 @@ class OgAccess implements OgAccessInterface {
    *
    * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
    */
-  public function userAccessGroupContentEntityOperations($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
+  public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
     // Default to the current user.
     if (!isset($user)) {
       $user = $this->accountProxy->getAccount();
