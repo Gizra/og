@@ -54,7 +54,7 @@ class AccessTest extends BrowserTestBase {
     parent::setUp();
 
     // Create a number of test users.
-    $users = [
+    $membership_types = [
       // The group owner.
       'owner' => ['access content'],
       // A site administrator with the right to administer all groups.
@@ -64,8 +64,8 @@ class AccessTest extends BrowserTestBase {
       // A user that is not a member of the group.
       'non-member' => ['access content'],
     ];
-    foreach ($users as $user => $permissions) {
-      $this->users[$user] = $this->drupalCreateUser($permissions, $user);
+    foreach ($membership_types as $membership_type => $permissions) {
+      $this->users[$membership_type] = $this->drupalCreateUser($permissions, $membership_type);
     }
 
     // Create a "group" bundle on the Custom Block entity type and turn it into
@@ -113,14 +113,14 @@ class AccessTest extends BrowserTestBase {
 
     // Create two group content items, one owned by the group owner, and one by
     // the member.
-    foreach (['owner', 'member'] as $user) {
-      $this->groupContent[$user] = Node::create([
+    foreach (['owner', 'member'] as $membership_type) {
+      $this->groupContent[$membership_type] = Node::create([
         'title' => $this->randomString(),
         'type' => 'group_content',
-        'uid' => $this->users[$user]->id(),
+        'uid' => $this->users[$membership_type]->id(),
         OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
       ]);
-      $this->groupContent[$user]->save();
+      $this->groupContent[$membership_type]->save();
     }
   }
 
