@@ -179,11 +179,11 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
  */
 function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
   if (!Og::isGroup($entity_type->id(), $bundle)) {
+    // Not a group type.
     return NULL;
   }
 
   $fields = [];
-
   $fields['og_group'] = BaseFieldDefinition::create('og_group')
     ->setLabel(t('OG Group'))
     ->setComputed(TRUE)
@@ -193,6 +193,23 @@ function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, 
 
   return $fields;
 }
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ *
+ * Set the default field formatter of fields of type OG group.
+ */
+function og_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  if (!isset($fields['og_group'])) {
+    // No OG group fields.
+    return;
+  }
+
+  $fields['og_group']->setDisplayOptions('view', [
+    'type' => 'og_ui_group_subscribe',
+  ])->setDisplayConfigurable('view', TRUE);
+}
+
 
 /**
  * Implements hook_field_formatter_info_alter().

@@ -97,16 +97,3 @@ function og_ui_entity_type_save(EntityInterface $entity) {
     }
   }
 }
-
-/**
- * Implements hook_entity_bundle_field_info_alter().
- *
- * Set the default field formatter of fields of type OG group.
- */
-function og_ui_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
-  if (isset($fields['og_group'])) {
-    $fields['og_group']->setDisplayOptions('view', [
-      'type' => 'og_ui_group_subscribe',
-    ])->setDisplayConfigurable('view', TRUE);
-  }
-}
