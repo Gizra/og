@@ -120,21 +120,21 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
 
     // Create 3 test roles with associated permissions. We will simulate a
     // project that has two group content types:
-    // - 'newsletter_subscription': Any registered user can create entities of
-    //   this type, even if they are not a member of the group.
+    // - 'newsletter': Any registered user can create entities of this type,
+    //   even if they are not a member of the group.
     // - 'article': These can only be created by group members. Normal members
     //   can edit and delete their own articles, while admins can edit and
     //   delete any article.
     $permission_matrix = [
       OgRoleInterface::ANONYMOUS => [
-        'create newsletter_subscription comment',
-        'update own newsletter_subscription comment',
-        'delete own newsletter_subscription comment',
+        'create newsletter comment',
+        'update own newsletter comment',
+        'delete own newsletter comment',
       ],
       OgRoleInterface::AUTHENTICATED => [
-        'create newsletter_subscription comment',
-        'update own newsletter_subscription comment',
-        'delete own newsletter_subscription comment',
+        'create newsletter comment',
+        'update own newsletter comment',
+        'delete own newsletter comment',
         'create article content',
         'edit own article content',
         'delete own article content',
@@ -143,9 +143,9 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       // delete their own group content. Having the 'any' permission should be
       // sufficient to also be able to edit their own content.
       OgRoleInterface::ADMINISTRATOR => [
-        'create newsletter_subscription comment',
-        'update any newsletter_subscription comment',
-        'delete any newsletter_subscription comment',
+        'create newsletter comment',
+        'update any newsletter comment',
+        'delete any newsletter comment',
         'create article content',
         'edit any article content',
         'delete any article content',
@@ -181,14 +181,14 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       }
     }
 
-    // Create a 'newsletter_subscription' group content type. We are using the
-    // Comment entity for this to verify that this functionality works for all
-    // entity types. We cannot use the 'entity_test' entity for this since it
-    // has no support for bundles. Let's imagine that we have a use case where
-    // the user can leave a comment with the text 'subscribe' in order to
-    // subscribe to the newsletter.
+    // Create a 'newsletter' group content type. We are using the Comment entity
+    // for this to verify that this functionality works for all entity types. We
+    // cannot use the 'entity_test' entity for this since it has no support for
+    // bundles. Let's imagine that we have a use case where the user can leave a
+    // comment with the text 'subscribe' in order to subscribe to the
+    // newsletter.
     CommentType::create([
-      'id' => 'newsletter_subscription',
+      'id' => 'newsletter',
       'label' => 'Newsletter subscription',
       'target_entity_type_id' => 'entity_test',
     ])->save();
@@ -199,7 +199,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'comment', 'newsletter_subscription', $settings);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'comment', 'newsletter', $settings);
 
     // Create an 'article' group content type.
     NodeType::create([
@@ -209,7 +209,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article', $settings);
 
     // Create a group content entity owned by each test user, for both the
-    // 'newsletter_subscription' and 'article' bundles.
+    // 'newsletter' and 'article' bundles.
     $user_ids = [
       'uid1',
       'group_owner',
@@ -217,7 +217,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       OgRoleInterface::AUTHENTICATED,
       OgRoleInterface::ADMINISTRATOR,
     ];
-    foreach (['newsletter_subscription', 'article'] as $bundle_id) {
+    foreach (['newsletter', 'article'] as $bundle_id) {
       foreach ($user_ids as $user_id) {
         $entity_type = $bundle_id === 'article' ? 'node' : 'comment';
 
@@ -281,8 +281,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
    *   - A string representing the group content entity type ID upon which the
    *     operation is performed. Can be either 'node' or 'comment'.
    *   - A string representing the group content bundle ID upon which the
-   *     operation is performed. Can be either 'newsletter_subscription' or
-   *     'article'.
+   *     operation is performed. Can be either 'newsletter' or 'article'.
    *   - An array mapping the different users and the possible operations, and
    *     whether or not the user is expected to be granted access to this
    *     operation, depending on whether they own the content or not.
@@ -291,7 +290,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     return [
       [
         'comment',
-        'newsletter_subscription',
+        'newsletter',
         [
           // The super user and the administrator have the right to create,
           // update and delete any newsletter subscription.
