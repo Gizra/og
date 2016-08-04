@@ -209,6 +209,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       // A non existing entity type.
       [
         'entity_type_id' => $this->randomString(),
+        'entity_id' => 1,
         'code' => 403,
       ],
 
