@@ -19,7 +19,7 @@ use Drupal\Core\TypedData\DataDefinition;
  *   description = @Translation("OG Group"),
  *   category = @Translation("OG"),
  *   no_ui = TRUE,
- *   default_formatter = "og_ui_group_subscribe",
+ *   default_formatter = "og_group_subscribe",
  * )
  */
 class OgGroupItem extends FieldItemBase {

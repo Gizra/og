@@ -15,7 +15,7 @@ use Drupal\user\EntityOwnerInterface;
  * Plugin implementation for the OG subscribe formatter.
  *
  * @FieldFormatter(
- *   id = "og_ui_group_subscribe",
+ *   id = "og_group_subscribe",
  *   label = @Translation("OG Group subscribe"),
  *   description = @Translation("Display OG Group subscribe and un-subscribe links."),
  *   field_types = {
