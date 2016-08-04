@@ -19,6 +19,7 @@ use Drupal\og\Og;
 use Drupal\og\OgAccess;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 
@@ -28,7 +29,7 @@ use Drupal\user\EntityOwnerInterface;
  * @FieldFormatter(
  *   id = "og_ui_group_subscribe",
  *   label = @Translation("OG Group subscribe"),
- *   description = @Translation("Display OG Group subscribe links."),
+ *   description = @Translation("Display OG Group subscribe and un-subscribe links."),
  *   field_types = {
  *     "og_group"
  *   }
@@ -47,13 +48,12 @@ class GroupSubscribeFormatter extends FormatterBase {
     $group = $items->getEntity();
     $entity_type_id = $group->getEntityTypeId();
 
-    $user = User::load(\Drupal::currentUser()->id());
-
-    // Entity is not a group.
-    if (!Og::isGroup($group->getEntityTypeId(), $group->bundle())) {
+    if (!Og::isGroup($entity_type_id, $group->bundle())) {
+      // Entity is not a group.
       return [];
     }
 
+    $user = User::load(\Drupal::currentUser()->id());
     if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $user->id())) {
       // User is the group manager.
       $elements[0] = [
@@ -66,13 +66,15 @@ class GroupSubscribeFormatter extends FormatterBase {
         '#value' => $this->t('You are the group manager'),
       ];
 
+      $this->addCacheToElement($elements);
       return $elements;
     }
 
     /** @var OgAccessInterface $og_access */
     $og_access = \Drupal::service('og.access');
 
-    if (Og::isMember($group, $user, [OG_STATE_ACTIVE, OG_STATE_PENDING])) {
+
+    if (Og::isMember($group, $user, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])) {
       if ($og_access->userAccess($group, 'unsubscribe', $user)) {
         $link['title'] = $this->t('Unsubscribe from group');
         $link['url'] = Url::fromRoute('og.unsubscribe', ['entity_type_id' => $entity_type_id, 'entity_id' => $group->id()]);
@@ -142,7 +144,18 @@ class GroupSubscribeFormatter extends FormatterBase {
       ];
     }
 
+
+    $this->addCacheToElement($elements);
     return $elements;
   }
 
+  /**
+   * Adds the correct cache context to the render array.
+   *
+   * @param [] $elements
+   *   A renderable array.
+   */
+  protected function addCacheToElement(&$elements) {
+    $elements['#cache']['max-age'] = 0;
+  }
 }
