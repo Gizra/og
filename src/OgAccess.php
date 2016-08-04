@@ -315,7 +315,7 @@ class OgAccess implements OgAccessInterface {
     // Check if the user owns the entity which is being operated on.
     $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
 
-    // Retrieve the permissions and check if our operation is supported.
+    // Retrieve the group content entity operation permissions.
     $group_entity_type_id = $group_entity->getEntityTypeId();
     $group_bundle_id = $group_entity->bundle();
     $group_content_bundle_ids = [$group_content_entity->getEntityTypeId() => [$group_content_entity->bundle()]];
@@ -323,6 +323,11 @@ class OgAccess implements OgAccessInterface {
     $permissions = $this->permissionManager->getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
 
     // Filter the permissions by operation and ownership.
+    // If the user does not own the group content, only the non-owner permission
+    // is relevant (for example 'edit any article node'). However when the user
+    // _is_ the owner, then both permissions are relevant: an owner will have
+    // access if they either have the 'edit any article node' or the 'edit own
+    // article node' permission.
     $ownerships = $is_owner ? [FALSE, TRUE] : [FALSE];
     $permissions = array_filter($permissions, function (GroupContentOperationPermission $permission) use ($operation, $ownerships) {
       return $permission->getOperation() === $operation && in_array($permission->getOwner(), $ownerships);
