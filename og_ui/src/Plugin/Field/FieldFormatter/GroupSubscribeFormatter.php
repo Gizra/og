@@ -1,24 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\Plugin\Field\FieldFormatter\GroupSubscribeFormatter.
- */
-
 namespace Drupal\og_ui\Plugin\Field\FieldFormatter;
 
-
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RedirectDestinationTrait;
 use Drupal\Core\Url;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
-use Drupal\og\OgAccessInterface;
-use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
@@ -72,7 +60,6 @@ class GroupSubscribeFormatter extends FormatterBase {
 
     /** @var OgAccessInterface $og_access */
     $og_access = \Drupal::service('og.access');
-
 
     if (Og::isMember($group, $user, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])) {
       if ($og_access->userAccess($group, 'unsubscribe', $user)) {
@@ -144,7 +131,6 @@ class GroupSubscribeFormatter extends FormatterBase {
       ];
     }
 
-
     $this->addCacheToElement($elements);
     return $elements;
   }
@@ -158,4 +144,5 @@ class GroupSubscribeFormatter extends FormatterBase {
   protected function addCacheToElement(&$elements) {
     $elements['#cache']['max-age'] = 0;
   }
+
 }

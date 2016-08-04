@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgGroupItem.
- */
-
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;

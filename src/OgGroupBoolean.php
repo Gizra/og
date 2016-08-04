@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgGroupBoolean.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\TypedData\Plugin\DataType\BooleanData;
