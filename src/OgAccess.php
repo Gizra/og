@@ -334,7 +334,8 @@ class OgAccess implements OgAccessInterface {
     });
 
     // @todo This doesn't really vary by user but by the user's role inside of
-    //   the group. Shall we make a cache context for OgRole entities?
+    //   the group. We should create a cache context for OgRole entities.
+    // @see https://github.com/amitaibu/og/issues/219
     $cacheable_metadata = new CacheableMetadata();
     $cacheable_metadata->addCacheableDependency($group_content_entity);
     if ($user->id() == $this->accountProxy->id()) {
