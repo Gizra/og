@@ -300,7 +300,8 @@ class OgAccess implements OgAccessInterface {
    *   The group content entity for which access to the entity operation is
    *   requested.
    * @param \Drupal\Core\Session\AccountInterface $user
-   *   The user for which to check access.
+   *   Optional user for which to check access. If omitted, the currently logged
+   *   in user will be used.
    *
    * @return \Drupal\Core\Access\AccessResult
    *   The access result object.
