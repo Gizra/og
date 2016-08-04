@@ -180,7 +180,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       [
         'entity' => $this->group1,
         // Set invalid membership type.
-        'membership_type' => $this->randomString(),
+        'membership_type' => Unicode::strtolower($this->randomMachineName()),
         'code' => 404,
       ],
       // Group with pending membership.
@@ -208,7 +208,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       ],
       // A non existing entity type.
       [
-        'entity_type_id' => $this->randomString(),
+        'entity_type_id' => Unicode::strtolower($this->randomMachineName()),
         'entity_id' => 1,
         'code' => 403,
       ],
