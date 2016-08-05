@@ -280,7 +280,7 @@ class OgEntityAccessTest extends KernelTestBase {
 
     // Allow the permission to a non-member user.
     /** @var OgRole $role */
-    $role = Og::getRole('entity_test', $this->groupBundle, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::loadByGroupAndName($this->group1, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('some_perm')
       ->save();

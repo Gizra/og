@@ -3,6 +3,7 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\Exception\OgRoleException;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
@@ -206,6 +207,14 @@ class OgRole extends Role implements OgRoleInterface {
   public function setName($name) {
     $this->name = $name;
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function loadByGroupAndName(EntityInterface $group, $name) {
+    $role_id = "{$group->getEntityTypeId()}-{$group->bundle()}-$name";
+    return self::load($role_id);
   }
 
   /**

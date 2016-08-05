@@ -153,8 +153,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     ];
 
     foreach ($permission_matrix as $role_name => $permissions) {
-      $role_id = "{$this->group->getEntityTypeId()}-{$this->group->bundle()}-$role_name";
-      $this->roles[$role_name] = OgRole::load($role_id);
+      $this->roles[$role_name] = OgRole::loadByGroupAndName($this->group, $role_name);
       foreach ($permissions as $permission) {
         $this->roles[$role_name]->grantPermission($permission);
       }

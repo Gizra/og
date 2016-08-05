@@ -179,7 +179,7 @@ class OgAccess implements OgAccessInterface {
       else {
         // User is a non-member.
         /** @var \Drupal\og\Entity\OgRole $role */
-        $role = Og::getRole($group_type_id, $bundle, OgRoleInterface::ANONYMOUS);
+        $role = OgRole::loadByGroupAndName($group, OgRoleInterface::ANONYMOUS);
         $permissions = $role->getPermissions();
       }
 
