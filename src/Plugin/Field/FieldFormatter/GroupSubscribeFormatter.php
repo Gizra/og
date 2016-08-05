@@ -33,13 +33,13 @@ class GroupSubscribeFormatter extends FormatterBase {
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
 
+    // We cannot use the field cache, as the formatter changes according to the
+    // user. Furthermore, this is not an expensive check, so we remove the cache
+    // entirely.
+    $elements['#cache']['max-age'] = 0;
+
     $group = $items->getEntity();
     $entity_type_id = $group->getEntityTypeId();
-
-    if (!Og::isGroup($entity_type_id, $group->bundle())) {
-      // Entity is not a group.
-      return [];
-    }
 
     $user = User::load(\Drupal::currentUser()->id());
     if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $user->id())) {
@@ -54,7 +54,6 @@ class GroupSubscribeFormatter extends FormatterBase {
         '#value' => $this->t('You are the group manager'),
       ];
 
-      $this->addCacheToElement($elements);
       return $elements;
     }
 
@@ -131,18 +130,6 @@ class GroupSubscribeFormatter extends FormatterBase {
       ];
     }
 
-    $this->addCacheToElement($elements);
     return $elements;
   }
-
-  /**
-   * Adds the correct cache context to the render array.
-   *
-   * @param [] $elements
-   *   A renderable array.
-   */
-  protected function addCacheToElement(&$elements) {
-    $elements['#cache']['max-age'] = 0;
-  }
-
 }

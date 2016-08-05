@@ -10,6 +10,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\og\GroupManager;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
@@ -110,7 +111,8 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->bundle = $this->randomMachineName();
     $this->fieldDefinitionInterface = $this->prophesize(FieldDefinitionInterface::class);
     $this->fieldItemList = $this->prophesize(FieldItemListInterface::class);
-    $this->group = $this->prophesize(EntityInterface::class);
+    // We use EntityTest as it implements EntityOwnerInterface.
+    $this->group = $this->prophesize(EntityTest::class);
     $this->groupManager = $this->prophesize(GroupManager::class);
     $this->user = $this->prophesize(AccountInterface::class);
     $this->userId = rand(10, 50);
@@ -132,60 +134,12 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
 
 
     $container = new ContainerBuilder();
-    $container->set('og.group.manager', $this->groupManager->reveal());
     $container->set('current_user', $this->accountProxy->reveal());
+    $container->set('entity.manager', $this->entityManager->reveal());
+    $container->set('og.group.manager', $this->groupManager->reveal());
+    $container->set('string_translation', $this->getStringTranslationStub());
+
     \Drupal::setContainer($container);
-
-//    $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
-//    $this->entityManager = $this->prophesize(EntityManagerInterface::class);
-//
-//    $this->entityManager->getStorage('og_membership')
-//      ->willReturn($this->entityStorage->reveal());
-//
-//    $this->entityManager->getEntityTypeFromClass('Drupal\og\Entity\OgMembership')
-//      ->willReturn('og_membership');
-//
-//    // Create a mocked Og Membership entity.
-//    $membership_entity = $this->prophesize(OgMembershipInterface::class);
-//
-//    $this->entityStorage
-//      ->create(Argument::type('array'))
-//      ->willReturn($membership_entity->reveal());
-//
-//    // Create a mocked test group.
-//    $this->group = $this->prophesize(EntityInterface::class);
-//
-//    // Create a mocked test user.
-//    $this->user = $this->prophesize(AccountInterface::class);
-//
-//    $membership_entity
-//      ->setUser($this->user)
-//      ->willReturn($membership_entity->reveal());
-//
-//    $membership_entity
-//      ->setGroup($this->group)
-//      ->willReturn($membership_entity->reveal());
-//
-//    $container = new ContainerBuilder();
-//    $container->set('entity.manager', $this->entityManager->reveal());
-//    \Drupal::setContainer($container);
-  }
-
-  /**
-   * Tests formatter on a non-group.
-   *
-   * This verifies an edge case, where the formatter was somehow added to a
-   * non-group entity.
-   *
-   * @covers ::viewElements
-   */
-  public function testNonGroup() {
-    $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(FALSE);
-
-    // $plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings)
-    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
-    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
-    $this->assertArrayEquals([], $elements);
   }
 
   public function testGroupOwner() {
@@ -217,7 +171,9 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
 
     $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
     $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
-    $this->assertArrayEquals([], $elements);
+
+    $this->assertEquals('You are the group manager', $elements[0]['#value']);
+
   }
 
 }
