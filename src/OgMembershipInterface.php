@@ -18,7 +18,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * When a user has this membership state they are considered to be of
    * "member" role.
    */
-  const STATE_ACTIVE = 1;
+  const STATE_ACTIVE = 'active';
 
   /**
    * Define pending group content states.
@@ -28,7 +28,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * When a user has this membership state they are considered to be of
    * "non-member" role.
    */
-  const STATE_PENDING = 2;
+  const STATE_PENDING = 'pending';
 
   /**
    * Define blocked group content states. The user is rejected from the group.
@@ -37,7 +37,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * group related action. This state, however, does not prevent user to
    * access a group or group content node.
    */
-  const STATE_BLOCKED = 3;
+  const STATE_BLOCKED = 'blocked';
 
   /**
    * The default group membership type that is the bundle of group membership.
