@@ -127,19 +127,6 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->bundle()
       ->willReturn($this->bundle);
 
-    $container = new ContainerBuilder();
-    $container->set('current_user', $this->accountProxy->reveal());
-    $container->set('entity.manager', $this->entityManager->reveal());
-    $container->set('og.group.manager', $this->groupManager->reveal());
-    $container->set('string_translation', $this->getStringTranslationStub());
-
-    \Drupal::setContainer($container);
-  }
-
-  /**
-   * Tests the formatter for a group owner.
-   */
-  public function testGroupOwner() {
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
     $this->entityManager->getStorage('user')
       ->willReturn($this->entityStorage->reveal());
@@ -161,16 +148,38 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->id()
       ->willReturn($this->userId);
 
-    $this
-      ->group
-      ->getOwnerId()
-      ->willReturn($this->userId);
+    $container = new ContainerBuilder();
+    $container->set('current_user', $this->accountProxy->reveal());
+    $container->set('entity.manager', $this->entityManager->reveal());
+    $container->set('og.group.manager', $this->groupManager->reveal());
+    $container->set('string_translation', $this->getStringTranslationStub());
+
+    \Drupal::setContainer($container);
+  }
+
+  /**
+   * Tests the formatter for a group owner.
+   */
+  public function testGroupOwner() {
+    // Return the same ID as the user.
+    $this->group->getOwnerId()->willReturn($this->userId);
 
     $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
     $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
 
     $this->assertEquals('You are the group manager', $elements[0]['#value']);
+  }
 
+  /**
+   * Tests the formatter for an "active" group member.
+   */
+  public function testGroupMemberActive() {
+    $this->group->getOwnerId()->willReturn(rand(100, 200));
+
+    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
+    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
+
+    $this->assertEquals('You are the group manager', $elements[0]['#value']);
   }
 
 }

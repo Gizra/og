@@ -57,7 +57,7 @@ class GroupSubscribeFormatter extends FormatterBase {
       return $elements;
     }
 
-    /** @var OgAccessInterface $og_access */
+    /** @var \Drupal\og\OgAccessInterface $og_access */
     $og_access = \Drupal::service('og.access');
 
     if (Og::isMember($group, $user, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])) {
