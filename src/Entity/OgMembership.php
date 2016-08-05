@@ -215,6 +215,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function hasPermission($permission) {
+    // Blocked users do not have any permissions.
+    if ($this->getState() === OgMembershipInterface::STATE_BLOCKED) {
+      return FALSE;
+    }
+
     return array_filter($this->getRoles(), function (OgRole $role) use ($permission) {
       return $role->hasPermission($permission);
     });
