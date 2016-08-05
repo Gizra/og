@@ -227,7 +227,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       OgRoleInterface::ANONYMOUS,
       OgRoleInterface::AUTHENTICATED,
       OgRoleInterface::ADMINISTRATOR,
-      'blocked'
+      'blocked',
     ];
     foreach (['newsletter', 'article'] as $bundle_id) {
       foreach ($user_ids as $user_id) {
