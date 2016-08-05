@@ -180,6 +180,18 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       }
     }
 
+    // Create a 'blocked' user. This user is identical to the normal
+    // 'authenticated' member, except that she has the 'blocked' state.
+    $this->users['blocked'] = User::create(['name' => $this->randomString()]);
+    $this->users['blocked']->save();
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->users['blocked'])
+      ->setGroup($this->group)
+      ->addRole($this->roles[OgRoleInterface::AUTHENTICATED])
+      ->setState(OgMembershipInterface::STATE_BLOCKED)
+      ->save();
+
     // Create a 'newsletter' group content type. We are using the Comment entity
     // for this to verify that this functionality works for all entity types. We
     // cannot use the 'entity_test' entity for this since it has no support for
@@ -215,6 +227,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       OgRoleInterface::ANONYMOUS,
       OgRoleInterface::AUTHENTICATED,
       OgRoleInterface::ADMINISTRATOR,
+      'blocked'
     ];
     foreach (['newsletter', 'article'] as $bundle_id) {
       foreach ($user_ids as $user_id) {
@@ -316,6 +329,13 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
             'update' => ['own' => TRUE, 'any' => FALSE],
             'delete' => ['own' => TRUE, 'any' => FALSE],
           ],
+          // Blocked users cannot do anything, not even update or delete their
+          // own content.
+          'blocked' => [
+            'create' => ['any' => FALSE],
+            'update' => ['own' => FALSE, 'any' => FALSE],
+            'delete' => ['own' => FALSE, 'any' => FALSE],
+          ],
         ],
       ],
       [
@@ -346,6 +366,13 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
             'create' => ['any' => TRUE],
             'update' => ['own' => TRUE, 'any' => FALSE],
             'delete' => ['own' => TRUE, 'any' => FALSE],
+          ],
+          // Blocked users cannot do anything, not even update or delete their
+          // own content.
+          'blocked' => [
+            'create' => ['any' => FALSE],
+            'update' => ['own' => FALSE, 'any' => FALSE],
+            'delete' => ['own' => FALSE, 'any' => FALSE],
           ],
         ],
       ],

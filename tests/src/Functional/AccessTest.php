@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\og\Functional;
 
+use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
@@ -62,6 +63,8 @@ class AccessTest extends BrowserTestBase {
       'member' => ['access content'],
       // A user that is not a member of the group.
       'non-member' => ['access content'],
+      // A blocked user.
+      'blocked' => ['access content'],
     ];
     foreach ($membership_types as $membership_type => $permissions) {
       $this->users[$membership_type] = $this->drupalCreateUser($permissions, $membership_type);
@@ -100,18 +103,22 @@ class AccessTest extends BrowserTestBase {
     $role->grantPermission('edit own group_content content');
     $role->save();
 
-    // Subscribe the member to the group.
-    /** @var \Drupal\og\Entity\OgMembership $membership */
-    $membership = OgMembership::create();
-    $membership
-      ->setUser($this->users['member'])
-      ->setGroup($this->group)
-      ->addRole($role)
-      ->save();
+    // Subscribe the normal member and the blocked member to the group.
+    foreach (['member', 'blocked'] as $membership_type) {
+      $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
+      /** @var \Drupal\og\Entity\OgMembership $membership */
+      $membership = OgMembership::create();
+      $membership
+        ->setUser($this->users[$membership_type])
+        ->setGroup($this->group)
+        ->addRole($role)
+        ->setState($state)
+        ->save();
+    }
 
-    // Create two group content items, one owned by the group owner, and one by
-    // the member.
-    foreach (['owner', 'member'] as $membership_type) {
+    // Create three group content items, one owned by the group owner, one by
+    // the member, and one by the blocked user.
+    foreach (['owner', 'member', 'blocked'] as $membership_type) {
       $this->groupContent[$membership_type] = Node::create([
         'title' => $this->randomString(),
         'type' => 'group_content',
@@ -132,11 +139,13 @@ class AccessTest extends BrowserTestBase {
     $test_matrix = [
       // The administrator should have the right to edit both group content
       // items.
-      'group-admin' => ['owner' => TRUE, 'member' => TRUE],
+      'group-admin' => ['owner' => TRUE, 'member' => TRUE, 'blocked' => TRUE],
       // The member should only have the right to edit their own group content.
-      'member' => ['owner' => FALSE, 'member' => TRUE],
+      'member' => ['owner' => FALSE, 'member' => TRUE, 'blocked' => FALSE],
       // The non-member cannot edit any group content.
-      'non-member' => ['owner' => FALSE, 'member' => FALSE],
+      'non-member' => ['owner' => FALSE, 'member' => FALSE, 'blocked' => FALSE],
+      // The blocked member cannot edit any group content, not even their own.
+      'blocked' => ['owner' => FALSE, 'member' => FALSE, 'blocked' => FALSE],
     ];
     foreach ($test_matrix as $user => $expected_results) {
       $this->drupalLogin($this->users[$user]);
