@@ -132,7 +132,7 @@ class OgAccessHookTest extends KernelTestBase {
     // Create a group content type.
     $type = NodeType::create([
       'type' => 'group_content',
-      'name' => $this->randomString()
+      'name' => $this->randomString(),
     ]);
     $type->save();
     $settings = [
