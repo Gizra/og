@@ -3,7 +3,6 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -12,12 +11,8 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\og\GroupManager;
-use Drupal\og\Og;
-use Drupal\og\OgMembershipInterface;
 use Drupal\og\Plugin\Field\FieldFormatter\GroupSubscribeFormatter;
 use Drupal\Tests\UnitTestCase;
-use Drupal\user\EntityOwnerInterface;
-use Prophecy\Argument;
 
 /**
  * Tests the OG group formatter.
@@ -132,7 +127,6 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->bundle()
       ->willReturn($this->bundle);
 
-
     $container = new ContainerBuilder();
     $container->set('current_user', $this->accountProxy->reveal());
     $container->set('entity.manager', $this->entityManager->reveal());
@@ -142,6 +136,9 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     \Drupal::setContainer($container);
   }
 
+  /**
+   * Tests the formatter for a group owner.
+   */
   public function testGroupOwner() {
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
     $this->entityManager->getStorage('user')

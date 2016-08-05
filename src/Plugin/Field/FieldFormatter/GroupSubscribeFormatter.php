@@ -132,4 +132,5 @@ class GroupSubscribeFormatter extends FormatterBase {
 
     return $elements;
   }
+
 }
