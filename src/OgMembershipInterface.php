@@ -34,8 +34,8 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Define blocked group content states. The user is rejected from the group.
    *
    * When a user has this membership state they are denied access to any
-   * group related action. This state, however, does not prevent user to
-   * access a group or group content node.
+   * group related action. This state, however, does not prevent the user from
+   * accessing a group or group content.
    */
   const STATE_BLOCKED = 'blocked';
 
