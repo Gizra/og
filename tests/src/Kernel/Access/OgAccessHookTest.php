@@ -11,7 +11,6 @@ use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
-use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -21,8 +20,6 @@ use Drupal\user\Entity\User;
  * @group og
  */
 class OgAccessHookTest extends KernelTestBase {
-
-  use ContentTypeCreationTrait;
 
   /**
    * {@inheritdoc}
