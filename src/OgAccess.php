@@ -227,11 +227,6 @@ class OgAccess implements OgAccessInterface {
     $bundle = $entity->bundle();
 
     if ($this->groupManager->isGroup($entity_type_id, $bundle)) {
-      // Entity isn't saved yet.
-      if ($entity->isNew()) {
-        return $result->addCacheableDependency($entity);
-      }
-
       $user_access = $this->userAccess($entity, $operation, $user);
       if ($user_access->isAllowed()) {
         return $user_access;
