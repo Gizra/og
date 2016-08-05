@@ -249,40 +249,14 @@ class Og {
    *   (optional) Array with the state to return. Defaults to active.
    *
    * @return \Drupal\og\Entity\OgMembership|null
-   *   The OgMembership entity. If the user is not a member of the group, an
-   *   OgMembership entity will be returned in which the user has the
-   *   'non-member' role.
-   *   NULL will be returned if no membership is available that matches the
-   *   passed in $states.
+   *   The OgMembership entity. NULL will be returned if no membership is
+   *   available that matches the passed in $states.
    */
   public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     foreach (static::getMemberships($user, $states) as $membership) {
       if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getGroupId() === $group->id()) {
         return $membership;
       }
-    }
-
-    // The user is not a member, return an OgMembership entity in which the user
-    // has the 'non-member' role.
-    if (in_array(OgMembershipInterface::STATE_PENDING, $states)) {
-      $role_id = implode('-', [
-        $group->getEntityTypeId(),
-        $group->bundle(),
-        OgRoleInterface::ANONYMOUS,
-      ]);
-
-      $role = new OgRole([
-        'id' => $role_id,
-        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-        'label' => 'Non-member',
-        'name' => OgRoleInterface::ANONYMOUS,
-      ]);
-
-      return OgMembership::create()
-        ->setUser($user)
-        ->setGroup($group)
-        ->setState(OgMembershipInterface::STATE_PENDING)
-        ->setRoles([$role]);
     }
 
     // No membership matches the request.
