@@ -43,7 +43,7 @@ class GroupContentOperationPermission extends Permission {
    *   FALSE if this permission applies to all entities, TRUE if it only applies
    *   to the entities owned by the user.
    */
-  protected $owner = 'any';
+  protected $owner = FALSE;
 
   /**
    * Returns the group content entity type ID to which this permission applies.

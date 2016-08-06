@@ -7,6 +7,7 @@ use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -14,6 +15,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
 use Prophecy\Argument;
 
@@ -35,6 +37,13 @@ class OgAccessTestBase extends UnitTestCase {
    * @var \Drupal\user\UserInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $user;
+
+  /**
+   * The ID of the test group.
+   *
+   * @var string
+   */
+  protected $groupId;
 
   /**
    * The entity type ID of the test group.
@@ -65,6 +74,13 @@ class OgAccessTestBase extends UnitTestCase {
   protected $groupManager;
 
   /**
+   * The mocked permission manager.
+   *
+   * @var \Drupal\og\PermissionManager|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $permissionManager;
+
+  /**
    * The OgAccess class, this is the system under test.
    *
    * @var \Drupal\og\OgAccessInterface
@@ -75,6 +91,7 @@ class OgAccessTestBase extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
+    $this->groupId = $this->randomMachineName();
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
 
@@ -126,9 +143,10 @@ class OgAccessTestBase extends UnitTestCase {
     // Mock all dependencies for the system under test.
     $account_proxy = $this->prophesize(AccountProxyInterface::class);
     $module_handler = $this->prophesize(ModuleHandlerInterface::class);
+    $this->permissionManager = $this->prophesize(PermissionManager::class);
 
     // Instantiate the system under test.
-    $this->ogAccess = new OgAccess($config_factory->reveal(), $account_proxy->reveal(), $module_handler->reveal());
+    $this->ogAccess = new OgAccess($config_factory->reveal(), $account_proxy->reveal(), $module_handler->reveal(), $this->groupManager->reveal(), $this->permissionManager->reveal());
 
     // Set the Og::cache property values, to skip calculations.
     $values = [];
@@ -192,15 +210,19 @@ class OgAccessTestBase extends UnitTestCase {
    *   The test group.
    */
   protected function groupEntity($is_owner = FALSE) {
+    $entity_type = $this->prophesize(EntityTypeInterface::class);
+    $entity_type->id()->willReturn($this->entityTypeId);
+
     $group_entity = $this->prophesize(EntityInterface::class);
     if ($is_owner) {
       $group_entity->willImplement(EntityOwnerInterface::class);
       // Our test user is hardcoded to have UID 2.
       $group_entity->getOwnerId()->willReturn(2);
     }
+    $group_entity->getEntityType()->willReturn($entity_type);
     $group_entity->getEntityTypeId()->willReturn($this->entityTypeId);
     $group_entity->bundle()->willReturn($this->bundle);
-    $group_entity->id()->willReturn($this->randomMachineName());
+    $group_entity->id()->willReturn($this->groupId);
 
     return $this->addCache($group_entity);
   }

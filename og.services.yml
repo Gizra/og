@@ -1,14 +1,12 @@
 services:
-  og.access:
-    class: Drupal\og\OgAccess
-    arguments: ['@config.factory', '@current_user', '@module_handler']
-
   access_check.og.user_access_group:
     class: Drupal\og\Access\GroupCheck
     arguments: ['@entity_type.manager', '@og.access']
     tags:
       - { name: access_check, applies_to: _og_user_access_group }
-
+  og.access:
+    class: Drupal\og\OgAccess
+    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group.manager', '@og.permission_manager']
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']

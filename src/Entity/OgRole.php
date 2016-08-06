@@ -3,6 +3,7 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\Exception\OgRoleException;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
@@ -35,6 +36,16 @@ use Drupal\user\Entity\Role;
  * )
  */
 class OgRole extends Role implements OgRoleInterface {
+
+  /**
+   * Constructs an OgRole object.
+   *
+   * @param array $values
+   *   An array of values to set, keyed by property name.
+   */
+  public function __construct(array $values) {
+    parent::__construct($values, 'og_role');
+  }
 
   /**
    * Sets the ID of the role.
@@ -201,12 +212,20 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
+  public static function loadByGroupAndName(EntityInterface $group, $name) {
+    $role_id = "{$group->getEntityTypeId()}-{$group->bundle()}-$name";
+    return self::load($role_id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save() {
     // The ID of a new OgRole has to consist of the entity type ID, bundle ID
     // and role name, separated by dashes.
     if ($this->isNew() && $this->id()) {
-      list($entity_type_id, $bundle_id, $name) = explode('-', $this->id());
-      if ($entity_type_id !== $this->getGroupType() || $bundle_id !== $this->getGroupBundle() || $name !== $this->getName()) {
+      $pattern = preg_quote("{$this->getGroupType()}-{$this->getGroupBundle()}-{$this->getName()}");
+      if (!preg_match("/$pattern/", $this->id())) {
         throw new ConfigValueException('The ID should consist of the group entity type ID, group bundle ID and role name, separated by dashes.');
       }
     }
@@ -257,6 +276,7 @@ class OgRole extends Role implements OgRoleInterface {
       'group_type',
       'group_bundle',
     ]);
+
     if (!$is_locked_property || $this->isNew()) {
       return parent::set($property_name, $value);
     }
