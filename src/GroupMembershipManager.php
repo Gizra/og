@@ -58,8 +58,8 @@ class GroupMembershipManager implements GroupMembershipManagerInterface {
     $identifier = implode(':', $identifier);
 
     // Return cached result if it exists.
-    if (isset($this->$cache[$identifier])) {
-      return $this->$cache[$identifier];
+    if (isset($this->cache[$identifier])) {
+      return $this->cache[$identifier];
     }
 
     $query = \Drupal::entityQuery('og_membership')
@@ -72,11 +72,11 @@ class GroupMembershipManager implements GroupMembershipManagerInterface {
     $results = $query->execute();
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
-    $this->$cache[$identifier] = \Drupal::entityTypeManager()
+    $this->cache[$identifier] = \Drupal::entityTypeManager()
       ->getStorage('og_membership')
       ->loadMultiple($results);
 
-    return $this->$cache[$identifier];
+    return $this->cache[$identifier];
   }
 
   /**
@@ -124,9 +124,9 @@ class GroupMembershipManager implements GroupMembershipManagerInterface {
 
     $identifier = implode(':', $identifier);
 
-    if (isset($this->$cache[$identifier])) {
+    if (isset($this->cache[$identifier])) {
       // Return cached values.
-      return $this->$cache[$identifier];
+      return $this->cache[$identifier];
     }
 
     $group_ids = [];
@@ -164,7 +164,7 @@ class GroupMembershipManager implements GroupMembershipManagerInterface {
       $group_ids = NestedArray::mergeDeep($group_ids, [$target_type => $query->execute()]);
     }
 
-    $this->$cache[$identifier] = $group_ids;
+    $this->cache[$identifier] = $group_ids;
 
     return $group_ids;
   }
