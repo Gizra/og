@@ -4,7 +4,7 @@ namespace Drupal\og;
 
 /**
  * @file
- * Contains Drupal\og\OgContextNegotiationInterface.
+ * Contains Drupal\og\GroupResolverNegotiationInterface.
  */
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
@@ -12,6 +12,6 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 /**
  * Provides an interface for defining OG context negotiation entities.
  */
-interface OgContextNegotiationInterface extends ConfigEntityInterface {
+interface GroupResolverNegotiationInterface extends ConfigEntityInterface {
 
 }

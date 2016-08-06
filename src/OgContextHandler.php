@@ -9,6 +9,7 @@ namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\og\Entity\GroupResolverNegotiation;
 
 /**
  * Class OgContextHandler.
@@ -51,7 +52,7 @@ class OgContextHandler implements OgContextHandlerInterface {
   public function __construct(ConfigFactoryInterface $config_factory, GroupResolverManager $context_manager, EntityTypeManagerInterface $entity_manager) {
     $this->configFactory = $config_factory;
     $this->pluginManager = $context_manager;
-    $this->storage = $entity_manager->getStorage('og_context_negotiation');
+    $this->storage = $entity_manager->getStorage('group_resolver_negotiation');
   }
 
   /**
@@ -78,14 +79,14 @@ class OgContextHandler implements OgContextHandlerInterface {
    */
   public function getPlugins($return_mode = OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
 
-    /** @var OgContextNegotiation[] $og_context_config */
-    $og_context_config = $this->storage->loadMultiple();
+    /** @var GroupResolverNegotiation[] $group_resolver_config */
+    $group_resolver_config = $this->storage->loadMultiple();
 
     $plugins = $this->pluginManager->getDefinitions();
 
     if ($return_mode != OgContextHandlerInterface::RETURN_ALL) {
 
-      foreach ($og_context_config as $context) {
+      foreach ($group_resolver_config as $context) {
         if ($return_mode == OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
           $condition = $context->get('status') == FALSE;
         }
@@ -99,9 +100,9 @@ class OgContextHandler implements OgContextHandlerInterface {
       }
     }
 
-    if (!empty($og_context_config)) {
-      uasort($plugins, function ($a, $b) use ($og_context_config) {
-        return $og_context_config[$a['id']]->get('weight') > $og_context_config[$b['id']]->get('weight') ? 1 : -1;
+    if (!empty($group_resolver_config)) {
+      uasort($plugins, function ($a, $b) use ($group_resolver_config) {
+        return $group_resolver_config[$a['id']]->get('weight') > $group_resolver_config[$b['id']]->get('weight') ? 1 : -1;
       });
     }
 
@@ -135,18 +136,18 @@ class OgContextHandler implements OgContextHandlerInterface {
   public function updateConfigStorage() {
     $plugins = $this->getPlugins(OgContextHandlerInterface::RETURN_ALL);
 
-    $og_context_storage = $this->storage;
-    $og_context_config = $og_context_storage->loadMultiple();
+    $group_resolver_storage = $this->storage;
+    $group_resolver_config = $group_resolver_storage->loadMultiple();
 
     $weight = 0;
     foreach ($plugins as $plugin) {
-      if (in_array($plugin['id'], array_keys($og_context_config))) {
+      if (in_array($plugin['id'], array_keys($group_resolver_config))) {
         // The negotiation plugin already registered.
         continue;
       }
 
       // Registering a new negotiation plugin.
-      $og_context_storage->create([
+      $group_resolver_storage->create([
         'id' => $plugin['id'],
         'label' => $plugin['label'],
         'description' => $plugin['description'],

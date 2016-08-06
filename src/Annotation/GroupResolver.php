@@ -7,7 +7,7 @@ use Drupal\Component\Annotation\Plugin;
 /**
  * Defines a OG context item annotation object.
  *
- * @see \Drupal\og_context\Plugin\OgContextManager
+ * @see \Drupal\og\Plugin\OgContextManager
  * @see plugin_api
  *
  * @Annotation

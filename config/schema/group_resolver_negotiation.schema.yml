@@ -1,4 +1,4 @@
-og.og_context_negotiation.*:
+og.group_resolver_negotiation.*:
   type: config_entity
   label: 'OG context negotiation config'
   mapping:

@@ -8,15 +8,15 @@ namespace Drupal\og\Entity;
  */
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\og\OgContextNegotiationInterface;
+use Drupal\og\GroupResolverNegotiationInterface;
 
 /**
  * Defines the OG context negotiation entity.
  *
  * @ConfigEntityType(
- *   id = "og_context_negotiation",
- *   label = @Translation("OG context negotiation"),
- *   config_prefix = "og_context_negotiation",
+ *   id = "group_resolver_negotiation",
+ *   label = @Translation("OG group resolver negotiation"),
+ *   config_prefix = "group_resolver_negotiation",
  *   admin_permission = "administer site configuration",
  *   entity_keys = {
  *     "id" = "id",
@@ -25,17 +25,17 @@ use Drupal\og\OgContextNegotiationInterface;
  *   }
  * )
  */
-class OgContextNegotiation extends ConfigEntityBase implements OgContextNegotiationInterface {
+class GroupResolverNegotiation extends ConfigEntityBase implements GroupResolverNegotiationInterface {
 
   /**
-   * The OG context negotiation ID.
+   * The OG group resolver negotiation ID.
    *
    * @var string
    */
   protected $id;
 
   /**
-   * The OG context negotiation label.
+   * The OG group resolver negotiation label.
    *
    * @var string
    */
