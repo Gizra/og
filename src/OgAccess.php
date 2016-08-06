@@ -10,7 +10,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\user\EntityOwnerInterface;
 
@@ -179,7 +178,7 @@ class OgAccess implements OgAccessInterface {
             // Check for the is_admin flag.
             /** @var \Drupal\og\Entity\OgRole $role */
             if ($role->isAdmin()) {
-              $user_is_group_admin = true;
+              $user_is_group_admin = TRUE;
               break;
             }
 
