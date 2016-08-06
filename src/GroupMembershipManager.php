@@ -1,6 +1,9 @@
 <?php
 
 namespace Drupal\og;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Entity\OgMembership;
 
 /**
  * Group membership manager.
