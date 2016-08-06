@@ -268,7 +268,7 @@ class GroupManager {
     $event = new GroupCreationEvent($entity_type_id, $bundle_id);
     $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, $event);
 
-    $this->createPerBundleRoles($entity_type_id, $bundle_id);
+    \Drupal::service('og.role_manager')->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
   }
 
@@ -294,116 +294,9 @@ class GroupManager {
       $editable->save();
 
       // Remove all roles associated with this group type.
-      $this->removeRoles($entity_type_id, $bundle_id);
+      \Drupal::service('og.role_manager')->removeRoles($entity_type_id, $bundle_id);
 
       $this->resetGroupMap();
-    }
-  }
-
-  /**
-   * Creates the roles for the given group type, based on the default roles.
-   *
-   * This is intended to be called after a new group type has been created.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID of the group for which to create default roles.
-   * @param string $bundle_id
-   *   The bundle ID of the group for which to create default roles.
-   *
-   * @todo: Would a dedicated RoleManager service be a better place for this?
-   */
-  protected function createPerBundleRoles($entity_type_id, $bundle_id) {
-    foreach ($this->getDefaultRoles() as $role) {
-      $role->setGroupType($entity_type_id);
-      $role->setGroupBundle($bundle_id);
-
-      // Populate the default roles with a set of default permissions.
-      $permissions = $this->permissionManager->getDefaultGroupPermissions($entity_type_id, $bundle_id, $role->getName());
-      foreach (array_keys($permissions) as $permission) {
-        $role->grantPermission($permission);
-      }
-
-      $role->save();
-    }
-  }
-
-  /**
-   * Returns the default roles.
-   *
-   * @return \Drupal\og\Entity\OgRole[]
-   *   An associative array of (unsaved) OgRole entities, keyed by role name.
-   *   These are populated with the basic properties: name, label, role_type and
-   *   is_admin.
-   *
-   * @todo: Would a dedicated RoleManager service be a better place for this?
-   */
-  public function getDefaultRoles() {
-    // Provide the required default roles: 'member' and 'non-member'.
-    $roles = $this->getRequiredDefaultRoles();
-
-    $event = new DefaultRoleEvent();
-    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
-
-    // Use the array union operator '+=' to ensure the default roles cannot be
-    // altered by event subscribers.
-    $roles += $event->getRoles();
-
-    return $roles;
-  }
-
-  /**
-   * Returns the roles which every group type requires.
-   *
-   * This provides the 'member' and 'non-member' roles. These are hard coded
-   * because they are strictly required and should not be altered.
-   *
-   * @return \Drupal\og\Entity\OgRole[]
-   *   An associative array of (unsaved) required OgRole entities, keyed by role
-   *   name. These are populated with the basic properties: name, label and
-   *   role_type.
-   *
-   * @todo: Would a dedicated RoleManager service be a better place for this?
-   */
-  protected function getRequiredDefaultRoles() {
-    $roles = [];
-
-    $role_properties = [
-      [
-        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-        'label' => 'Non-member',
-        'name' => OgRoleInterface::ANONYMOUS,
-      ],
-      [
-        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-        'label' => 'Member',
-        'name' => OgRoleInterface::AUTHENTICATED,
-      ],
-    ];
-
-    foreach ($role_properties as $properties) {
-      $roles[$properties['name']] = $this->ogRoleStorage->create($properties);
-    }
-
-    return $roles;
-  }
-
-  /**
-   * Deletes the roles associated with a group type.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID of the group for which to delete the roles.
-   * @param string $bundle_id
-   *   The bundle ID of the group for which to delete the roles.
-   *
-   * @todo: Would a dedicated RoleManager service be a better place for this?
-   */
-  protected function removeRoles($entity_type_id, $bundle_id) {
-    $properties = [
-      'group_type' => $entity_type_id,
-      'group_bundle' => $bundle_id,
-    ];
-    foreach ($this->ogRoleStorage->loadByProperties($properties) as $role) {
-      $role->delete();
     }
   }
 
