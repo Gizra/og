@@ -7,7 +7,6 @@ use Drupal\Core\Entity\EntityStorageException;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Exception\OgRoleException;
-use Drupal\og\Og;
 
 /**
  * Test OG role creation.
@@ -22,6 +21,13 @@ class OgRoleTest extends KernelTestBase {
   public static $modules = ['field', 'og'];
 
   /**
+   * The entity storage handler for OgRole entities.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $roleStorage;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -29,6 +35,8 @@ class OgRoleTest extends KernelTestBase {
 
     // Installing needed schema.
     $this->installConfig(['og']);
+
+    $this->roleStorage = $this->container->get('entity_type.manager')->getStorage('og_role');
   }
 
   /**
@@ -55,10 +63,10 @@ class OgRoleTest extends KernelTestBase {
       ->setGroupBundle('group')
       ->save();
 
-    $this->assertNotEmpty(OgRole::load('node-group-content_editor'), 'The role was created with the expected ID.');
-
-    $expected = Og::getRole('node', 'group', 'content_editor')->id();
-    $this->assertEquals($expected, $og_role->id());
+    /** @var \Drupal\og\Entity\OgRole $saved_role */
+    $saved_role = $this->roleStorage->loadUnchanged('node-group-content_editor');
+    $this->assertNotEmpty($saved_role, 'The role was created with the expected ID.');
+    $this->assertEquals($og_role->id(), $saved_role->id());
 
     // Checking creation of the role.
     $this->assertEquals($og_role->getPermissions(), ['administer group']);
@@ -130,7 +138,7 @@ class OgRoleTest extends KernelTestBase {
     ]);
     $og_role->save();
 
-    $this->assertNotEmpty(OgRole::load('entity_test-group-configurator'));
+    $this->assertNotEmpty($this->roleStorage->loadUnchanged('entity_test-group-configurator'));
 
     // Check that we can retrieve the role name correctly. This was not
     // explicitly saved but it should be possible to derive this from the ID.

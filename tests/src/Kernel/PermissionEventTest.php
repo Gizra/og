@@ -26,7 +26,6 @@ class PermissionEventTest extends KernelTestBase {
     'field',
     'node',
     'og',
-    'og_ui',
     'system',
     'user',
   ];

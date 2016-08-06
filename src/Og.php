@@ -249,8 +249,8 @@ class Og {
    *   (optional) Array with the state to return. Defaults to active.
    *
    * @return \Drupal\og\Entity\OgMembership|null
-   *   The OgMembership entity, or NULL if the user is not a member of the
-   *   group.
+   *   The OgMembership entity. NULL will be returned if no membership is
+   *   available that matches the passed in $states.
    */
   public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     foreach (static::getMemberships($user, $states) as $membership) {
@@ -258,6 +258,9 @@ class Og {
         return $membership;
       }
     }
+
+    // No membership matches the request.
+    return NULL;
   }
 
   /**
@@ -521,7 +524,7 @@ class Og {
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param \Drupal\Core\Entity\EntityInterface $entity
+   * @param \Drupal\Core\Session\AccountInterface $user
    *   The entity to test the membership for.
    *
    * @return bool
@@ -529,8 +532,8 @@ class Og {
    *
    * @see \Drupal\og\Og::isMember
    */
-  public static function isMemberBlocked(EntityInterface $group, EntityInterface $entity) {
-    return static::isMember($group, $entity, [OgMembershipInterface::STATE_BLOCKED]);
+  public static function isMemberBlocked(EntityInterface $group, AccountInterface $user) {
+    return static::isMember($group, $user, [OgMembershipInterface::STATE_BLOCKED]);
   }
 
   /**
@@ -696,7 +699,7 @@ class Og {
    * @param array $options
    *   Overriding the default options of the selection handler.
    *
-   * @return OgSelection
+   * @return \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
    *   Returns the OG selection handler.
    *
    * @throws \Exception

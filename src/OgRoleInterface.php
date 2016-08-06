@@ -2,6 +2,8 @@
 
 namespace Drupal\og;
 
+use Drupal\Core\Entity\EntityInterface;
+
 /**
  * Provides an interface defining an OG user role entity.
  *
@@ -64,5 +66,18 @@ interface OgRoleInterface {
    * @return $this
    */
   public function setName($name);
+
+  /**
+   * Returns the role represented by the given group and role name.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group for which to return the role.
+   * @param string $name
+   *   The role name for which to return the role.
+   *
+   * @return \Drupal\og\OgRoleInterface
+   *   The role.
+   */
+  public static function loadByGroupAndName(EntityInterface $group, $name);
 
 }

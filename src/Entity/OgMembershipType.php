@@ -3,7 +3,7 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\og\OgMembershipTypeInterface;
 
 /**
  * The membership type entity.
@@ -28,7 +28,7 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  *   }
  * )
  */
-class OgMembershipType extends ConfigEntityBase implements ConfigEntityInterface {
+class OgMembershipType extends ConfigEntityBase implements OgMembershipTypeInterface {
 
   protected $type;
 
