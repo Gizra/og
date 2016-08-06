@@ -9,7 +9,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\og\GroupMembershipManagerInterface;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
 use Drupal\user\Entity\User;
@@ -71,10 +70,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $parents = $form['#parents'];
 
     $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
-
-    /** @var \Drupal\og\GroupMembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-    $user_groups = $membership_manager->getUserGroups(User::load(\Drupal::currentUser()->id()));
+    $user_groups = Og::getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
     $user_group_ids = array_map(function ($group) {
       return $group->id();
@@ -235,9 +231,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
 
-    /** @var \Drupal\og\GroupMembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-    $user_groups = $membership_manager->getUserGroups(User::load(\Drupal::currentUser()->id()));
+    $user_groups = Og::getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
     $user_group_ids = array_map(function ($group) {
       return $group->id();

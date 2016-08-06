@@ -100,7 +100,7 @@ interface GroupMembershipManagerInterface {
    * Returns all group IDs associated with the given group content entity.
    *
    * Do not use this to retrieve group IDs associated with a user entity. Use
-   * GroupMembershipManager::getUserGroups() instead.
+   * Og::getUserGroups() instead.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group content entity for which to return the associated groups.
@@ -116,7 +116,7 @@ interface GroupMembershipManagerInterface {
    * @throws \InvalidArgumentException
    *   Thrown when a user entity is passed in.
    *
-   * @see \Drupal\og\GroupMembershipInterface::getUserGroups()
+   * @see \Drupal\og\Og::getUserGroups()
    */
   public function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL);
 
@@ -124,7 +124,7 @@ interface GroupMembershipManagerInterface {
    * Returns all groups that are associated with the given group content entity.
    *
    * Do not use this to retrieve group memberships for a user entity. Use
-   * GroupMembershipInterface::getUserGroups() instead.
+   * Og::getUserGroups() instead.
    *
    * The reason there are separate method for group content and user entities is
    * because the storage is handled differently. For group content the relation
@@ -142,7 +142,7 @@ interface GroupMembershipManagerInterface {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    *
-   * @see \Drupal\og\GroupMembershipInterface::getUserGroups()
+   * @see \Drupal\og\Og::getUserGroups()
    */
   public function getGroups(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL);
 

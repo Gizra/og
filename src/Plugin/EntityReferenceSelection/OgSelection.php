@@ -3,7 +3,6 @@
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
-use Drupal\og\GroupMembershipManagerInterface;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
 
@@ -117,9 +116,7 @@ class OgSelection extends DefaultSelection {
    */
   protected function getUserGroups() {
     $user = User::load($this->currentUser->id());
-    /** @var \Drupal\og\GroupMembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-    $other_groups = $membership_manager->getUserGroups($user);
+    $other_groups = Og::getUserGroups($user);
     return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 
