@@ -266,7 +266,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
    *
    * @dataProvider accessProvider
    */
-  public function testAccess($group_content_entity_type_id, $group_content_bundle_id, $expected_access_matrix) {
+  public function testAccess($group_content_bundle_id, $expected_access_matrix) {
     /** @var \Drupal\og\OgAccessInterface $og_access */
     $og_access = $this->container->get('og.access');
 
@@ -289,8 +289,6 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
    *
    * @return array
    *   And array of test data sets. Each set consisting of:
-   *   - A string representing the group content entity type ID upon which the
-   *     operation is performed. Can be either 'node' or 'comment'.
    *   - A string representing the group content bundle ID upon which the
    *     operation is performed. Can be either 'newsletter' or 'article'.
    *   - An array mapping the different users and the possible operations, and
@@ -300,7 +298,6 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
   public function accessProvider() {
     return [
       [
-        'comment',
         'newsletter',
         [
           // The super user and the administrator have the right to create,
@@ -338,7 +335,6 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
         ],
       ],
       [
-        'node',
         'article',
         [
           // The super user and the administrator have the right to create,
