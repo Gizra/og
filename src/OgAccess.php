@@ -80,6 +80,13 @@ class OgAccess implements OgAccessInterface {
   protected $permissionManager;
 
   /**
+   * The group membership manager.
+   *
+   * @var \Drupal\og\GroupMembershipManagerInterface
+   */
+  protected $membershipManager;
+
+  /**
    * Constructs an OgManager service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -92,13 +99,16 @@ class OgAccess implements OgAccessInterface {
    *   The group manager.
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The permission manager.
+   * @param \Drupal\og\GroupMembershipManagerInterface $membership_manager
+   *   The group membership manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupManager $group_manager, PermissionManagerInterface $permission_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupManager $group_manager, PermissionManagerInterface $permission_manager, GroupMembershipManagerInterface $membership_manager) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;
     $this->groupManager = $group_manager;
     $this->permissionManager = $permission_manager;
+    $this->membershipManager = $membership_manager;
   }
 
   /**
@@ -256,7 +266,7 @@ class OgAccess implements OgAccessInterface {
     $cache_tags = $entity_type->getListCacheTags();
 
     // The entity might be a user or a non-user entity.
-    $groups = $entity->getEntityTypeId() == 'user' ? Og::getUserGroups($entity) : Og::getGroups($entity);
+    $groups = $entity->getEntityTypeId() == 'user' ? $this->membershipManager->getUserGroups($entity) : $this->membershipManager->getGroups($entity);
 
     if ($is_group_content && $groups) {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);

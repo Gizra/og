@@ -6,10 +6,9 @@ services:
       - { name: access_check, applies_to: _og_user_access_group }
   og.access:
     class: Drupal\og\OgAccess
-    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group.manager', '@og.permission_manager']
-  og.membership_mamanger:
+    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group.manager', '@og.permission_manager', '@og.membership_manager']
+  og.membership_manager:
     class: Drupal\og\GroupMembershipManager
-    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group.manager', '@og.permission_manager']
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
