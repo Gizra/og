@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\og\GroupMembershipManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
@@ -83,9 +84,16 @@ class OgAccessTestBase extends UnitTestCase {
   /**
    * The OgAccess class, this is the system under test.
    *
-   * @var \Drupal\og\OgAccessInterface
+   * @var \Drupal\og\OgAccessInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $ogAccess;
+
+  /**
+   * The group membership manager service.
+   *
+   * @var \Drupal\og\GroupMembershipManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $membershipManager;
 
   /**
    * {@inheritdoc}
@@ -97,6 +105,8 @@ class OgAccessTestBase extends UnitTestCase {
 
     $this->groupManager = $this->prophesize(GroupManager::class);
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
+
+    $this->membershipManager = $this->prophesize(GroupMembershipManagerInterface::class);
 
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens(Argument::any())->willReturn(TRUE);
@@ -146,7 +156,14 @@ class OgAccessTestBase extends UnitTestCase {
     $this->permissionManager = $this->prophesize(PermissionManager::class);
 
     // Instantiate the system under test.
-    $this->ogAccess = new OgAccess($config_factory->reveal(), $account_proxy->reveal(), $module_handler->reveal(), $this->groupManager->reveal(), $this->permissionManager->reveal());
+    $this->ogAccess = new OgAccess(
+      $config_factory->reveal(),
+      $account_proxy->reveal(),
+      $module_handler->reveal(),
+      $this->groupManager->reveal(),
+      $this->permissionManager->reveal(),
+      $this->membershipManager->reveal()
+    );
 
     // Set the Og::cache property values, to skip calculations.
     $values = [];
