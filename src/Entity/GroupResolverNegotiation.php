@@ -4,14 +4,14 @@ namespace Drupal\og\Entity;
 
 /**
  * @file
- * Contains \Drupal\og\Entity\OgContextNegotiation.
+ * Contains \Drupal\og\Entity\GroupResolverNegotiation.
  */
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\og\GroupResolverNegotiationInterface;
 
 /**
- * Defines the OG context negotiation entity.
+ * Defines the OG group resolver negotiation entity.
  *
  * @ConfigEntityType(
  *   id = "group_resolver_negotiation",

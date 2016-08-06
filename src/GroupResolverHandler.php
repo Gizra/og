@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Entity\GroupResolverNegotiation;
 
 /**
- * Class OgContextHandler.
+ * Class GroupResolverHandler.
  *
  * @package Drupal\og
  */
@@ -26,7 +26,7 @@ class GroupResolverHandler implements GroupResolverHandlerInterface {
   protected $configFactory;
 
   /**
-   * The OG context manager.
+   * The OG group resolver manager.
    *
    * @var \Drupal\og\GroupResolverManager
    */
@@ -40,7 +40,7 @@ class GroupResolverHandler implements GroupResolverHandlerInterface {
   protected $storage;
 
   /**
-   * Constructs an OgManager service.
+   * Constructs an group resolver service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.

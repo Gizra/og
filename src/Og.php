@@ -607,7 +607,7 @@ class Og {
    * @return GroupResolverHandler
    *   The OG context handler.
    */
-  public static function contextHandler() {
+  public static function groupResolverHandler() {
     return \Drupal::service('og.group_resolver');
   }
 

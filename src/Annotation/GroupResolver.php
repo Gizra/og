@@ -5,9 +5,9 @@ namespace Drupal\og\Annotation;
 use Drupal\Component\Annotation\Plugin;
 
 /**
- * Defines a OG context item annotation object.
+ * Defines a OG group resolver item annotation object.
  *
- * @see \Drupal\og\Plugin\OgContextManager
+ * @see \Drupal\og\Plugin\GroupResolverManager
  * @see plugin_api
  *
  * @Annotation

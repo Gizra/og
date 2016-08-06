@@ -33,14 +33,14 @@ class OgContextTest extends KernelTestBase {
 
     $this->installConfig(['og']);
 
-    Og::contextHandler()->updateConfigStorage();
+    Og::groupResolverHandler()->updateConfigStorage();
   }
 
   /**
    * Test that OgContext handler will return a list according to a given logic.
    */
   public function testOgContextPluginsList() {
-    $plugins = Og::contextHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ALL);
+    $plugins = Og::groupResolverHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ALL);
 
     // Check we got the plugins we know that exists.
     if (empty($plugins['user_group_reference']) || empty($plugins['entity'])) {
@@ -48,29 +48,29 @@ class OgContextTest extends KernelTestBase {
     }
 
     // Get all the plugins in the storage which have a matching storage.
-    $plugins = Og::contextHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_IN_STORAGE);
+    $plugins = Og::groupResolverHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_IN_STORAGE);
 
     if (empty($plugins['user_group_reference']) || empty($plugins['entity'])) {
       $this->fail('The expected plugins, Current user and Entity, was not found in the plugins list');
     }
 
     // Get all active plugins.
-    $plugins = Og::contextHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE);
+    $plugins = Og::groupResolverHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE);
 
     $this->assertEmpty($plugins);
 
     // Enable a plugin.
-    Og::contextHandler()->updatePlugin('entity', ['status' => 1]);
+    Og::groupResolverHandler()->updatePlugin('entity', ['status' => 1]);
 
-    $plugins = Og::contextHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE);
+    $plugins = Og::groupResolverHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE);
     $this->assertArrayHasKey('entity', $plugins);
     $this->assertArrayNotHasKey('user_group_reference', $plugins);
 
     // Enable the second plugin and change the weight.
-    Og::contextHandler()->updatePlugin('entity', ['weight' => 1]);
-    Og::contextHandler()->updatePlugin('user_group_reference', ['weight' => 0, 'status' => 1]);
+    Og::groupResolverHandler()->updatePlugin('entity', ['weight' => 1]);
+    Og::groupResolverHandler()->updatePlugin('user_group_reference', ['weight' => 0, 'status' => 1]);
 
-    $plugins = Og::contextHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE);
+    $plugins = Og::groupResolverHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE);
     $this->assertArrayHasKey('entity', $plugins);
     $this->assertArrayHasKey('user_group_reference', $plugins);
 
@@ -86,9 +86,9 @@ class OgContextTest extends KernelTestBase {
     $this->assertTrue($entity_position > $user_group_reference_position);
 
     // Change the weight.
-    Og::contextHandler()->updatePlugin('entity', ['weight' => -1]);
+    Og::groupResolverHandler()->updatePlugin('entity', ['weight' => -1]);
 
-    $plugins = Og::contextHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE);
+    $plugins = Og::groupResolverHandler()->getPlugins(GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE);
 
     list($entity_position, $user_group_reference_position) = $get_plugins_location(array_keys($plugins));
     $this->assertTrue($user_group_reference_position > $entity_position);

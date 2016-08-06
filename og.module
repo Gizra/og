@@ -208,7 +208,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
  * Implements hook_cache_flush().
  */
 function og_cache_flush() {
-  Og::contextHandler()->updateConfigStorage();
+  Og::groupResolverHandler()->updateConfigStorage();
 }
 
 /**

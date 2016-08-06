@@ -7,7 +7,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 
 /**
- * Provides the OG context plugin manager.
+ * Provides the OG group resolver plugin manager.
  */
 class GroupResolverManager extends DefaultPluginManager {
 

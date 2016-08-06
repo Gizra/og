@@ -10,7 +10,7 @@ namespace Drupal\og;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**
- * Provides an interface for defining OG context negotiation entities.
+ * Provides an interface for defining OG group resolver negotiation entities.
  */
 interface GroupResolverNegotiationInterface extends ConfigEntityInterface {
 

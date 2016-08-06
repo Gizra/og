@@ -79,5 +79,5 @@ function og_schema() {
  * Implements hook_install().
  */
 function og_install() {
-  \Drupal\og\Og::contextHandler()->updateConfigStorage();
+  \Drupal\og\Og::groupResolverHandler()->updateConfigStorage();
 }
