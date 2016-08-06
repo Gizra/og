@@ -7,8 +7,6 @@ use Drupal\entity_test\Entity\EntityTestStringId;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\Entity\OgMembership;
-use Drupal\user\Entity\User;
 
 /**
  * Checks that groups with string IDs can be referenced.
@@ -84,12 +82,6 @@ class ReferenceStringIdTest extends KernelTestBase {
     Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test_string_id', $this->bundles[1], [
       'field_name' => $this->fieldName,
     ]);
-
-    // Add a group audience field to the User entity, so that we can test if
-    // users can become members of the test group.
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'user', 'user', [
-      'field_name' => $this->fieldName,
-    ]);
   }
 
   /**
@@ -110,23 +102,6 @@ class ReferenceStringIdTest extends KernelTestBase {
       ->condition($this->fieldName, $this->group->id())
       ->execute();
     $this->assertEquals([$entity->id()], array_keys($references), 'The correct group is referenced.');
-
-    // Create a user and make it a member of the group.
-    $user = User::create(['name' => $this->randomString()]);
-    $user->save();
-    $membership = OgMembership::create([
-      'uid' => $user->id(),
-      'type' => 'user',
-      'entity_type' => 'entity_test_string_id',
-      'entity_id' => $this->group->id(),
-      'field_name' => $this->fieldName,
-    ]);
-    $membership->save();
-
-    // Reload the user and check that its group audience field correctly
-    // references the entity.
-    $user = \Drupal::entityTypeManager()->getStorage('user')->loadUnchanged($user->id());
-    $this->assertEquals($this->group->id(), $user->{$this->fieldName}->getValue()[0]['target_id']);
   }
 
 }

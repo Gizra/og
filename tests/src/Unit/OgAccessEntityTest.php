@@ -31,19 +31,6 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
   }
 
   /**
-   * Tests access to an un-saved entity.
-   *
-   * @coversDefaultmethod ::userAccessEntity
-   * @dataProvider permissionsProvider
-   */
-  public function testEntityNew($operation) {
-    $group_entity = $this->groupEntity();
-    $group_entity->isNew()->willReturn(TRUE);
-    $user_access = $this->ogAccess->userAccessEntity($operation, $group_entity->reveal(), $this->user->reveal());
-    $this->assertTrue($user_access->isNeutral());
-  }
-
-  /**
    * Tests getting a user's group entities.
    *
    * @coversDefaultmethod ::userAccessEntity

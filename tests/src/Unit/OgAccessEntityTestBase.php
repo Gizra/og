@@ -49,13 +49,21 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $this->groupContentEntity->isNew()->willReturn(FALSE);
     $this->groupContentEntity->getEntityType()->willReturn($entity_type->reveal());
     $this->groupContentEntity->getEntityTypeId()->willReturn($entity_type_id);
+    $this->addCache($this->groupContentEntity);
+
+    // It is expected that a list of entity operation permissions is retrieved
+    // from the permission manager so that the passed in permission can be
+    // checked against this list. Our permissions are not in the list, so it is
+    // of no importance what we return here, an empty array is sufficient.
+    $this->permissionManager->getDefaultEntityOperationPermissions($this->entityTypeId, $this->bundle, [$entity_type_id => [$bundle]])
+      ->willReturn([]);
 
     // The group manager is expected to declare that this is not a group.
     $this->groupManager->isGroup($entity_type_id, $bundle)->willReturn(FALSE);
 
     // Mock retrieval of field definitions.
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
-    $field_definition->getType()->willReturn(OgGroupAudienceHelper::NON_USER_TO_GROUP_REFERENCE_FIELD_TYPE);
+    $field_definition->getType()->willReturn(OgGroupAudienceHelper::GROUP_REFERENCE);
     $field_definition->getFieldStorageDefinition()
       ->willReturn($this->prophesize(FieldStorageDefinitionInterface::class)->reveal());
     $field_definition->getSetting('handler_settings')->willReturn([]);
