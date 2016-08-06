@@ -16,7 +16,7 @@ use Drupal\og\Entity\GroupResolverNegotiation;
  *
  * @package Drupal\og
  */
-class OgContextHandler implements OgContextHandlerInterface {
+class GroupResolverHandler implements OgContextHandlerInterface {
 
   /**
    * The config factory.

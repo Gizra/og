@@ -12,7 +12,7 @@ namespace Drupal\og;
  *
  * @package Drupal\og
  */
-interface OgContextHandlerInterface {
+interface GroupResolverHandlerInterface {
 
   /**
    * Return only plugins which active in the negotiation schema.
