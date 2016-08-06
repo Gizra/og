@@ -9,8 +9,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\og\GroupMembershipManagerInterface;
-use Drupal\og\Og;
 use Drupal\og\OgAccess;
 use Drupal\user\Entity\User;
 

@@ -3,7 +3,6 @@
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
-use Drupal\og\GroupMembershipManagerInterface;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
 

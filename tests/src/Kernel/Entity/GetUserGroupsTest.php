@@ -127,7 +127,7 @@ class GetUserGroupsTest extends KernelTestBase {
   public function testOwnerGroupsOnly() {
     /** @var \Drupal\og\GroupMembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    
+
     $actual = $membership_manager->getUserGroups($this->user1);
 
     $this->assertCount(1, $actual['entity_test']);
