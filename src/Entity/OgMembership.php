@@ -11,6 +11,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
 
 /**
  * The membership entity that connects a group and a user.
@@ -61,10 +62,14 @@ use Drupal\og\OgMembershipInterface;
  *     "bundle" = "type",
  *   },
  *   bundle_keys = {
- *     "bundle" = "type"
+ *     "bundle" = "type",
  *   },
  *   handlers = {
  *     "views_data" = "Drupal\og\OgMembershipViewsData",
+ *     "form" = {
+ *       "subscribe" = "Drupal\og\Form\GroupSubscribeForm",
+ *       "unsubscribe" = "Drupal\og\Form\GroupUnsubscribeConfirmForm",
+ *     },
  *   }
  * )
  */
@@ -186,7 +191,10 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getRoles() {
-    return $this->get('roles')->referencedEntities();
+    // Add the member role.
+    $roles[] = Og::getRole($this->getGroupEntityType(), $this->getGroup()->bundle(), OgRoleInterface::AUTHENTICATED);
+    $roles = array_merge($roles, $this->get('roles')->referencedEntities());
+    return $roles;
   }
 
   /**
