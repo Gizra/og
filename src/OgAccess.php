@@ -124,6 +124,9 @@ class OgAccess implements OgAccessInterface {
 
     // From this point on, every result also depends on the user so check
     // whether it is the current. See https://www.drupal.org/node/2628870
+    // @todo This doesn't really vary by user but by the user's roles inside of
+    //   the group. We should create a cache context for OgRole entities.
+    // @see https://github.com/amitaibu/og/issues/219
     if ($user->id() == $this->accountProxy->id()) {
       $cacheable_metadata->addCacheContexts(['user']);
     }
