@@ -118,6 +118,13 @@ class GroupManager {
   protected $moduleHandler;
 
   /**
+   * The OG role manager.
+   *
+   * @var \Drupal\og\OgRoleManagerInterface
+   */
+  protected $ogRoleManager;
+
+  /**
    * Constructs an GroupManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -132,14 +139,17 @@ class GroupManager {
    *   The state service.
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The OG permission manager.
+   * @param \Drupal\og\OgRoleManagerInterface $og_role_manager
+   *   The OG role manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->state = $state;
     $this->permissionManager = $permission_manager;
+    $this->ogRoleManager = $og_role_manager;
   }
 
   /**
@@ -268,7 +278,7 @@ class GroupManager {
     $event = new GroupCreationEvent($entity_type_id, $bundle_id);
     $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, $event);
 
-    \Drupal::service('og.role_manager')->createPerBundleRoles($entity_type_id, $bundle_id);
+    $this->ogRoleManager->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
   }
 
@@ -294,7 +304,7 @@ class GroupManager {
       $editable->save();
 
       // Remove all roles associated with this group type.
-      \Drupal::service('og.role_manager')->removeRoles($entity_type_id, $bundle_id);
+      $this->ogRoleManager->removeRoles($entity_type_id, $bundle_id);
 
       $this->resetGroupMap();
     }
