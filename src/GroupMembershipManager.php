@@ -2,9 +2,9 @@
 
 namespace Drupal\og;
 
-use \Drupal\og\GroupMembershipManagerInterface;
-
-
+/**
+ * Group membership manager.
+ */
 class GroupMembershipManager implements GroupMembershipManagerInterface {
 
   /**
@@ -13,7 +13,6 @@ class GroupMembershipManager implements GroupMembershipManagerInterface {
    * @var []
    */
   protected $cache;
-
 
   /**
    * {@inheritdoc}
@@ -264,6 +263,5 @@ class GroupMembershipManager implements GroupMembershipManagerInterface {
   public function reset() {
     $this->cache = [];
   }
-
 
 }

@@ -8,8 +8,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\field\FieldStorageConfigInterface;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 
 /**

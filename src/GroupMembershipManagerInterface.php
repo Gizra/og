@@ -2,7 +2,9 @@
 
 namespace Drupal\og;
 
-
+/**
+ * Group membership manager interface.
+ */
 interface GroupMembershipManagerInterface {
 
   /**
