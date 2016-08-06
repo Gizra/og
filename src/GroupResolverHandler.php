@@ -9,7 +9,6 @@ namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\og\Entity\GroupResolverNegotiation;
 
 /**
  * Class GroupResolverHandler.
@@ -79,7 +78,7 @@ class GroupResolverHandler implements GroupResolverHandlerInterface {
    */
   public function getPlugins($return_mode = GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE) {
 
-    /** @var GroupResolverNegotiation[] $group_resolver_config */
+    /** @var \Drupal\og\Entity\GroupResolverNegotiation[] $group_resolver_config */
     $group_resolver_config = $this->storage->loadMultiple();
 
     $plugins = $this->pluginManager->getDefinitions();
