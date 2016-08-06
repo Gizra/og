@@ -25,7 +25,7 @@ interface GroupMembershipManagerInterface {
    *
    * @see \Drupal\og\Og::getGroupIds()
    */
-  public static function getUserGroupIds(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function getUserGroupIds(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Returns all groups associated with the given user.
@@ -48,7 +48,7 @@ interface GroupMembershipManagerInterface {
    * @see \Drupal\og\Og::getGroups()
    * @see \Drupal\og\Og::getMemberships()
    */
-  public static function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Returns the group memberships a user is associated with.
@@ -61,7 +61,7 @@ interface GroupMembershipManagerInterface {
    * @return \Drupal\og\Entity\OgMembership[]
    *   An array of OgMembership entities, keyed by ID.
    */
-  public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Returns the group membership for a given user and group.
@@ -77,7 +77,7 @@ interface GroupMembershipManagerInterface {
    *   The OgMembership entity. NULL will be returned if no membership is
    *   available that matches the passed in $states.
    */
-  public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Creates an OG membership.
@@ -92,7 +92,7 @@ interface GroupMembershipManagerInterface {
    * @return \Drupal\og\Entity\OgMembership
    *   The unsaved membership object.
    */
-  public static function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT);
+  public function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT);
 
   /**
    * Returns all group IDs associated with the given group content entity.
@@ -116,7 +116,7 @@ interface GroupMembershipManagerInterface {
    *
    * @see \Drupal\og\Og::getUserGroups()
    */
-  public static function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL);
+  public function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL);
 
   /**
    * Returns all groups that are associated with the given group content entity.
@@ -142,7 +142,7 @@ interface GroupMembershipManagerInterface {
    *
    * @see \Drupal\og\Og::getUserGroups()
    */
-  public static function getGroups(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL);
+  public function getGroups(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL);
 
   /**
    * Returns the number of groups associated with a given group content entity.
@@ -160,7 +160,7 @@ interface GroupMembershipManagerInterface {
    * @return int
    *   The number of associated groups.
    */
-  public static function getGroupCount(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL);
+  public function getGroupCount(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL);
 
   /**
    * Returns all the group content IDs associated with a given group entity.
@@ -179,7 +179,7 @@ interface GroupMembershipManagerInterface {
    *   An associative array, keyed by group content entity type, each item an
    *   array of group content entity IDs.
    */
-  public static function getGroupContentIds(EntityInterface $entity, array $entity_types = []);
+  public function getGroupContentIds(EntityInterface $entity, array $entity_types = []);
 
   /**
    * Returns whether a user belongs to a group.
@@ -196,7 +196,7 @@ interface GroupMembershipManagerInterface {
    *   TRUE if the entity (e.g. the user or node) belongs to a group with
    *   a certain state.
    */
-  public static function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Returns whether a user belongs to a group with a pending status.
@@ -211,7 +211,7 @@ interface GroupMembershipManagerInterface {
    *
    * @see \Drupal\og\Og::isMember
    */
-  public static function isMemberPending(EntityInterface $group, AccountInterface $user);
+  public function isMemberPending(EntityInterface $group, AccountInterface $user);
 
   /**
    * Returns whether an entity belongs to a group with a blocked status.
@@ -226,7 +226,7 @@ interface GroupMembershipManagerInterface {
    *
    * @see \Drupal\og\Og::isMember
    */
-  public static function isMemberBlocked(EntityInterface $group, AccountInterface $user);
+  public function isMemberBlocked(EntityInterface $group, AccountInterface $user);
 
 
 }
