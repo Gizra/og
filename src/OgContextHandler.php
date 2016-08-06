@@ -27,7 +27,7 @@ class OgContextHandler implements OgContextHandlerInterface {
   /**
    * The OG context manager.
    *
-   * @var \Drupal\og\OgContextManager
+   * @var \Drupal\og\GroupResolverManager
    */
   protected $pluginManager;
 
@@ -43,12 +43,12 @@ class OgContextHandler implements OgContextHandlerInterface {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
-   * @param \Drupal\og\OgContextManager $context_manager
+   * @param \Drupal\og\GroupResolverManager $context_manager
    *   The OG context manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    *   The entity type manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, OgContextManager $context_manager, EntityTypeManagerInterface $entity_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, GroupResolverManager $context_manager, EntityTypeManagerInterface $entity_manager) {
     $this->configFactory = $config_factory;
     $this->pluginManager = $context_manager;
     $this->storage = $entity_manager->getStorage('og_context_negotiation');

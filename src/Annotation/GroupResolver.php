@@ -12,7 +12,7 @@ use Drupal\Component\Annotation\Plugin;
  *
  * @Annotation
  */
-class OgContext extends Plugin {
+class GroupResolver extends Plugin {
 
   /**
    * The plugin ID.

@@ -1,10 +1,10 @@
 <?php
 
-namespace Drupal\og\Plugin\OgContext;
+namespace Drupal\og\Plugin\GroupResolver;
 
 /**
  * @file
- * Contains \Drupal\og\Plugin\OgContext\Entity.
+ * Contains \Drupal\og\Plugin\GroupResolver\Entity.
  */
 
 use Drupal\Core\Entity\ContentEntityBase;
@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Get the group from the given viewed entity.
  *
- * @OgContext(
+ * @GroupResolver(
  *  id = "entity",
  *  label = "Entity",
  *  description = @Translation("Get the group from the current entity, by checking if it is a group or a group content entity.")

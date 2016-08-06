@@ -26,5 +26,5 @@ services:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
   plugin.manager.og.context:
-    class: Drupal\og\OgContextManager
+    class: Drupal\og\GroupResolverManager
     parent: default_plugin_manager
