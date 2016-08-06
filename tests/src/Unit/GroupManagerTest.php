@@ -14,6 +14,7 @@ use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\GroupManager;
 use Drupal\og\PermissionManagerInterface;
+use Drupal\og\OgRoleManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\PermissionEventInterface;
@@ -100,6 +101,13 @@ class GroupManagerTest extends UnitTestCase {
   protected $permissionManager;
 
   /**
+   * The OG role manager prophecy used in the test.
+   *
+   * @var \Drupal\og\OgRoleManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $ogRoleManager;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -113,6 +121,7 @@ class GroupManagerTest extends UnitTestCase {
     $this->permissionEvent = $this->prophesize(PermissionEventInterface::class);
     $this->state = $this->prophesize(StateInterface::class);
     $this->permissionManager = $this->prophesize(PermissionManagerInterface::class);
+    $this->ogRoleManager = $this->prophesize(OgRoleManagerInterface::class);
   }
 
   /**
@@ -314,7 +323,8 @@ class GroupManagerTest extends UnitTestCase {
       $this->entityTypeBundleInfo->reveal(),
       $this->eventDispatcher->reveal(),
       $this->state->reveal(),
-      $this->permissionManager->reveal()
+      $this->permissionManager->reveal(),
+      $this->ogRoleManager->reveal()
     );
   }
 
