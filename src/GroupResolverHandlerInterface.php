@@ -4,7 +4,7 @@ namespace Drupal\og;
 
 /**
  * @file
- * Contains \Drupal\og\OgContextHandlerInterface.
+ * Contains \Drupal\og\GroupResolverHandlerInterface.
  */
 
 /**

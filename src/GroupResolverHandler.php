@@ -4,7 +4,7 @@ namespace Drupal\og;
 
 /**
  * @file
- * Contains \Drupal\og\OgContextHandler.
+ * Contains \Drupal\og\GroupResolverHandler.
  */
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -16,7 +16,7 @@ use Drupal\og\Entity\GroupResolverNegotiation;
  *
  * @package Drupal\og
  */
-class GroupResolverHandler implements OgContextHandlerInterface {
+class GroupResolverHandler implements GroupResolverHandlerInterface {
 
   /**
    * The config factory.
@@ -77,17 +77,17 @@ class GroupResolverHandler implements OgContextHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getPlugins($return_mode = OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
+  public function getPlugins($return_mode = GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE) {
 
     /** @var GroupResolverNegotiation[] $group_resolver_config */
     $group_resolver_config = $this->storage->loadMultiple();
 
     $plugins = $this->pluginManager->getDefinitions();
 
-    if ($return_mode != OgContextHandlerInterface::RETURN_ALL) {
+    if ($return_mode != GroupResolverHandlerInterface::RETURN_ALL) {
 
       foreach ($group_resolver_config as $context) {
-        if ($return_mode == OgContextHandlerInterface::RETURN_ONLY_ACTIVE) {
+        if ($return_mode == GroupResolverHandlerInterface::RETURN_ONLY_ACTIVE) {
           $condition = $context->get('status') == FALSE;
         }
         else {
@@ -120,7 +120,7 @@ class GroupResolverHandler implements OgContextHandlerInterface {
    * {@inheritdoc}
    */
   public function updatePlugin($plugin_id, $config = []) {
-    /** @var OgContextNegotiation $contex */
+    /** @var GroupResolverNegotiation $contex */
     $context = $this->storage->load($plugin_id);
 
     foreach ($config as $key => $value) {
@@ -134,7 +134,7 @@ class GroupResolverHandler implements OgContextHandlerInterface {
    * {@inheritdoc}
    */
   public function updateConfigStorage() {
-    $plugins = $this->getPlugins(OgContextHandlerInterface::RETURN_ALL);
+    $plugins = $this->getPlugins(GroupResolverHandlerInterface::RETURN_ALL);
 
     $group_resolver_storage = $this->storage;
     $group_resolver_config = $group_resolver_storage->loadMultiple();
