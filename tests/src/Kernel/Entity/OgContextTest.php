@@ -23,7 +23,7 @@ class OgContextTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['og', 'system', 'og_test'];
+  public static $modules = ['og', 'system', 'og_test', 'field'];
 
   /**
    * {@inheritdoc}
