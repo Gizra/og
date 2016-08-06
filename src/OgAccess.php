@@ -330,31 +330,22 @@ class OgAccess implements OgAccessInterface {
       return $permission->getOperation() === $operation && in_array($permission->getOwner(), $ownerships);
     });
 
-    // @todo This doesn't really vary by user but by the user's role inside of
+    if ($permissions) {
+      foreach ($permissions as $permission) {
+        $user_access = $this->userAccess($group_entity, $permission->getName(), $user);
+        if ($user_access->isAllowed()) {
+          return $user_access;
+        }
+      }
+    }
+
+    // @todo This doesn't really vary by user but by the user's roles inside of
     //   the group. We should create a cache context for OgRole entities.
     // @see https://github.com/amitaibu/og/issues/219
     $cacheable_metadata = new CacheableMetadata();
     $cacheable_metadata->addCacheableDependency($group_content_entity);
     if ($user->id() == $this->accountProxy->id()) {
       $cacheable_metadata->addCacheContexts(['user']);
-    }
-
-    if ($permissions) {
-      // Request the user's membership. If the user is not a member, construct a
-      // 'non-member membership' in which the user has the 'anonymous' role. We
-      // can then use this to retrieve the permissions that the user has within
-      // the group, regardless if they are a member or not.
-      $states = [
-        OgMembershipInterface::STATE_ACTIVE,
-        OgMembershipInterface::STATE_PENDING,
-        OgMembershipInterface::STATE_BLOCKED,
-      ];
-      $membership = Og::getMembership($group_entity, $user, $states) ?: $this->getNonMemberMembership($group_entity, $user);
-      foreach ($permissions as $permission) {
-        if ($membership->hasPermission($permission->getName())) {
-          return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
-        }
-      }
     }
 
     return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
@@ -416,35 +407,6 @@ class OgAccess implements OgAccessInterface {
    */
   public function reset() {
     $this->permissionsCache = [];
-  }
-
-  /**
-   * Returns a group membership in which the user is not a member.
-   *
-   * This is intended to be used to retrieve the permissions a non-member has in
-   * the given group. Note that this membership is created on the fly and is not
-   * saved.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $group
-   *   The group to get the membership for.
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   The user to get the membership for.
-   *
-   * @return \Drupal\og\Entity\OgMembership
-   *   The OgMembership entity.
-   */
-  protected static function getNonMemberMembership(EntityInterface $group, AccountInterface $user) {
-    $role_id = implode('-', [
-      $group->getEntityTypeId(),
-      $group->bundle(),
-      OgRoleInterface::ANONYMOUS,
-    ]);
-
-    return OgMembership::create()
-      ->setUser($user)
-      ->setGroup($group)
-      ->setState(OgMembershipInterface::STATE_PENDING)
-      ->setRoles([new OgRole(['id' => $role_id])]);
   }
 
 }
