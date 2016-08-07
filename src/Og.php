@@ -129,6 +129,23 @@ class Og {
   }
 
   /**
+   * Returns the group memberships a user is associated with.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get groups for.
+   * @param array $states
+   *   (optional) Array with the state to return. Defaults to active.
+   *
+   * @return \Drupal\og\Entity\OgMembership[]
+   *   An array of OgMembership entities, keyed by ID.
+   */
+  public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    /** @var \Drupal\og\GroupMembershipManagerInterface $group_membership_manager */
+    $group_membership_manager = \Drupal::service('og.membership_manager');
+    return $group_membership_manager->getMemberships($user, $states);
+  }
+
+  /**
    * Returns the group membership for a given user and group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
