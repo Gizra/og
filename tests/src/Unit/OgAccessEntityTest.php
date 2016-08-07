@@ -31,12 +31,12 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
   }
 
   /**
-   * Tests getting a user's group entities.
+   * Tests access to an entity by different operations, by an admin member.
    *
    * @coversDefaultmethod ::userAccessEntity
    * @dataProvider permissionsProvider
    */
-  public function testGetEntityGroups($operation) {
+  public function testAccessByOperationAdmin($operation) {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
     $user_entity_access = $this->ogAccess->userAccessEntity($operation, $this->groupContentEntity->reveal(), $this->user->reveal());
     $this->assertTrue($user_entity_access->isAllowed());
