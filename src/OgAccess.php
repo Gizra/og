@@ -181,6 +181,7 @@ class OgAccess implements OgAccessInterface {
         OgMembershipInterface::STATE_PENDING,
         OgMembershipInterface::STATE_BLOCKED,
       ];
+
       if ($membership = Og::getMembership($group, $user, $states)) {
         // Blocked users don't have any permissions.
         if ($membership->getState() !== OgMembershipInterface::STATE_BLOCKED) {

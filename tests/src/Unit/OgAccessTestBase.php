@@ -136,15 +136,6 @@ class OgAccessTestBase extends UnitTestCase {
     $this->user->id()->willReturn(2);
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(FALSE);
 
-    $container = new ContainerBuilder();
-    $container->set('og.group.manager', $this->groupManager->reveal());
-    $container->set('cache_contexts_manager', $cache_contexts_manager->reveal());
-    $container->set('config.factory', $config_factory->reveal());
-    $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
-    // This is for caching purposes only.
-    $container->set('current_user', $this->user->reveal());
-    \Drupal::setContainer($container);
-
     $this->group = $this->groupEntity()->reveal();
     $group_type_id = $this->group->getEntityTypeId();
 
@@ -165,55 +156,16 @@ class OgAccessTestBase extends UnitTestCase {
       $this->membershipManager->reveal()
     );
 
-    // Set the Og::cache property values, to skip calculations.
-    $values = [];
+    $container = new ContainerBuilder();
+    $container->set('cache_contexts_manager', $cache_contexts_manager->reveal());
+    $container->set('config.factory', $config_factory->reveal());
+    $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
+    $container->set('og.group.manager', $this->groupManager->reveal());
+    $container->set('og.membership_manager', $this->membershipManager->reveal());
 
-    $r = new \ReflectionClass('Drupal\og\Og');
-    $reflection_property = $r->getProperty('cache');
-    $reflection_property->setAccessible(TRUE);
-
-    // Mock the results of Og::getGroupIds().
-    $identifier = [
-      'Drupal\og\Og::getGroupIds',
-      $entity_id,
-      NULL,
-      NULL,
-    ];
-
-    $identifier = implode(':', $identifier);
-
-    $group_ids = [$group_type_id => [$this->group->id()]];
-    $values[$identifier] = $group_ids;
-
-    // Mock the results of Og::getMemberships().
-    $identifier = [
-      'Drupal\og\Og::getMemberships',
-      2,
-      OgMembershipInterface::STATE_ACTIVE,
-      // The field name.
-      NULL,
-    ];
-    $identifier = implode(':', $identifier);
-
-    // The cache is supposed to be holding the OG memberships, however it is not
-    // used in the tests, so we just set an empty array.
-    $values[$identifier] = [];
-
-    $reflection_property->setValue($values);
-
-    // Set the allowed permissions cache. This simulates that the access results
-    // have been retrieved from the database in an earlier pass. This saves us
-    // from having to mock all the database interaction.
-    $r = new \ReflectionClass('Drupal\og\OgAccess');
-    $reflection_property = $r->getProperty('permissionsCache');
-    $reflection_property->setAccessible(TRUE);
-
-    $values = [];
-    foreach (['pre_alter', 'post_alter'] as $key) {
-      $values[$group_type_id][$this->group->id()][2][$key] = ['permissions' => ['update group'], 'is_admin' => FALSE];
-    }
-
-    $reflection_property->setValue($this->ogAccess, $values);
+    // This is for caching purposes only.
+    $container->set('current_user', $this->user->reveal());
+    \Drupal::setContainer($container);
   }
 
   /**
