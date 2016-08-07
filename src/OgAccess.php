@@ -241,6 +241,7 @@ class OgAccess implements OgAccessInterface {
    * {@inheritdoc}
    */
   public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL) {
+    print_r('**********');
     $result = AccessResult::neutral();
 
     $entity_type = $entity->getEntityType();
