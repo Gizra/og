@@ -84,7 +84,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $container->set('entity_type.manager', $entity_type_manager->reveal());
     $container->set('entity_field.manager', $entity_field_manager->reveal());
 
-    // Mock the results of Og::getGroups().
+    // Mock the results of GroupMembershipManager::getGroups().
     $storage->loadMultiple(Argument::type('array'))->willReturn([$this->group]);
   }
 

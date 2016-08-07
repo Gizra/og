@@ -90,8 +90,11 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
    *   IDs to delete.
    */
   protected function query(EntityInterface $entity) {
+    /** @var \Drupal\og\GroupMembershipManagerInterface $group_membership_manager */
+    $group_membership_manager = \Drupal::service('og.membership_manager');
+
     // Register orphaned group content.
-    $orphans = Og::getGroupContentIds($entity);
+    $orphans = $group_membership_manager->getGroupContentIds($entity);
 
     // Register orphaned user memberships.
     $membership_ids = \Drupal::entityQuery('og_membership')
@@ -118,7 +121,10 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
     $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id);
     // Only delete content that is fully orphaned, i.e. it is no longer
     // associated with any groups.
-    $group_count = Og::getGroupCount($entity);
+    /** @var \Drupal\og\GroupMembershipManagerInterface $group_membership_manager */
+    $group_membership_manager = \Drupal::service('og.membership_manager');
+
+    $group_count = $group_membership_manager->getGroupCount($entity);
     if ($group_count == 0) {
       $entity->delete();
     }

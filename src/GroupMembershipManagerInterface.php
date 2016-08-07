@@ -50,8 +50,8 @@ interface GroupMembershipManagerInterface {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    *
-   * @see \Drupal\og\Og::getGroups()
-   * @see \Drupal\og\Og::getMemberships()
+   * @see \Drupal\og\GroupMembershipManager::getGroups()
+   * @see \Drupal\og\GroupMembershipManager::getMemberships()
    */
   public function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
