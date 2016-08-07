@@ -5,6 +5,7 @@ namespace Drupal\og;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Entity\OgMembership;
 
 /**
