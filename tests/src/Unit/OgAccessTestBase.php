@@ -15,7 +15,6 @@ use Drupal\og\GroupMembershipManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
-use Drupal\og\OgMembershipInterface;
 use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
 use Prophecy\Argument;
