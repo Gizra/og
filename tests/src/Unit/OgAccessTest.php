@@ -3,7 +3,6 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\og\OgAccess;
-use Drupal\og\OgMembershipInterface;
 
 /**
  * Tests access.
